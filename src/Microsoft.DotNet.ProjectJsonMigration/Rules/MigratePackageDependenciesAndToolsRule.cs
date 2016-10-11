@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             {
                 MigrationTrace.Instance.WriteLine($"Migrating framework {targetFramework.FrameworkName.GetShortFolderName()}");
                 
-                MigrateImports(migrationRuleInputs.CommonItemGroup, targetFramework);
+                MigrateImports(migrationRuleInputs.CommonPropertyGroup, targetFramework);
 
                 MigrateDependencies(
                     project,
@@ -70,17 +70,21 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     migrationRuleInputs.ProjectXproj); 
             }
 
-            // Tools
             MigrateTools(project, migrationRuleInputs.OutputMSBuildProject);
         }
 
-        private void MigrateImports(ProjectItemGroupElement commonItemGroup, TargetFrameworkInformation targetFramework)
+        private void MigrateImports(ProjectPropertyGroupElement commonPropertyGroup, TargetFrameworkInformation targetFramework)
         {
             var transform = ImportsTransformation.Transform(targetFramework);
+
             if (transform != null)
             {
                 transform.Condition = targetFramework.FrameworkName.GetMSBuildCondition();
-                _transformApplicator.Execute(transform, commonItemGroup);
+                _transformApplicator.Execute(transform, commonPropertyGroup);
+            }
+            else
+            {
+                MigrationTrace.Instance.WriteLine($"{nameof(MigratePackageDependenciesAndToolsRule)}: imports transform null for {targetFramework.FrameworkName.GetShortFolderName()}");
             }
         }
 
@@ -244,10 +248,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             dep => true)
             .WithMetadata("Version", r => r.LibraryRange.VersionRange.OriginalString);
 
-        private AddItemTransform<TargetFrameworkInformation> ImportsTransformation => new AddItemTransform<TargetFrameworkInformation>(
+        private AddPropertyTransform<TargetFrameworkInformation> ImportsTransformation => new AddPropertyTransform<TargetFrameworkInformation>(
             "PackageTargetFallback",
             t => $"$(PackageTargetFallback);{string.Join(";", t.Imports)}",
-            t => "",
             t => t.Imports.OrEmptyIfNull().Any());
 
         private class PackageDependencyInfo

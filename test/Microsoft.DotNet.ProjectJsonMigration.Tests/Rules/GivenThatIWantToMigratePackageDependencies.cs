@@ -162,6 +162,44 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             EmitsToolReferences(mockProj, Tuple.Create("APackage", "1.0.0-preview"), Tuple.Create("BPackage", "1.0.0"));            
         }
 
+        [Fact]
+        public void It_migrates_imports_per_framework()
+        {
+            var importPropertyName = "PackageTargetFallback";
+
+            var mockProj = RunPackageDependenciesRuleOnPj(@"                
+                {
+                    ""frameworks"": {
+                        ""netcoreapp1.0"" : {
+                            ""imports"": [""netstandard1.3"", ""net451""]
+                        },
+                        ""netstandard1.3"" : {
+                            ""imports"": [""net451""]
+                        },
+                        ""net451"" : {
+                            ""imports"": ""netstandard1.3""
+                        }
+                    }                    
+                }");
+
+            var imports = mockProj.Properties.Where(p => p.Name == importPropertyName);
+            imports.Should().HaveCount(3);
+
+            var netcoreappImport = imports.First(p => p.Condition.Contains("netcoreapp1.0"));
+            var netstandardImport = imports.First(p => p.Condition.Contains("netstandard1.3"));
+            var net451Import = imports.First(p => p.Condition.Contains("net451"));
+
+            netcoreappImport.Should().NotBe(netstandardImport);
+
+            netcoreappImport.Condition.Should().Be(" '$(TargetFramework)' == 'netcoreapp1.0' ");
+            netstandardImport.Condition.Should().Be(" '$(TargetFramework)' == 'netstandard1.3' ");
+            net451Import.Condition.Should().Be(" '$(TargetFramework)' == 'net451' ");
+
+            netcoreappImport.Value.Split(';').Should().BeEquivalentTo($"$({importPropertyName})", "netstandard1.3", "net451");
+            netstandardImport.Value.Split(';').Should().BeEquivalentTo($"$({importPropertyName})", "net451");
+            net451Import.Value.Split(';').Should().BeEquivalentTo($"$({importPropertyName})", "netstandard1.3");
+        }
+
         private void EmitsPackageReferences(ProjectRootElement mockProj, params Tuple<string, string, string>[] packageSpecs)
         {
             foreach (var packageSpec in packageSpecs)
