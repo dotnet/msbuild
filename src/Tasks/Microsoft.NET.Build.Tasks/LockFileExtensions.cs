@@ -18,7 +18,28 @@ namespace Microsoft.NET.Build.Tasks
             NuGetFramework framework, 
             string runtime)
         {
+            if (lockFile == null)
+            {
+                throw new ArgumentNullException(nameof(lockFile));
+            }
+            if (framework == null)
+            {
+                throw new ArgumentNullException(nameof(framework));
+            }
+
             LockFileTarget lockFileTarget = lockFile.GetTarget(framework, runtime);
+
+            if (lockFileTarget == null)
+            {
+                string frameworkString = framework.DotNetFrameworkName;
+                string targetMoniker = string.IsNullOrEmpty(runtime) ?
+                    frameworkString :
+                    $"{frameworkString}/{runtime}";
+
+                throw new ReportUserErrorException($"Assets file '{lockFile.Path}' doesn't have a target for '{targetMoniker}'." +
+                    $" Ensure you have restored this project for TargetFramework='{framework.GetShortFolderName()}'" +
+                    $" and RuntimeIdentifier='{runtime}'.");
+            }
 
             return new ProjectContext(projectPath, lockFile, lockFileTarget);
         }

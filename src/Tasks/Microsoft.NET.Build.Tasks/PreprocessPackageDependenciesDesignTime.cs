@@ -19,7 +19,7 @@ namespace Microsoft.NET.Build.Tasks
     /// 
     /// TODO: Add support for diagnostics, related issue https://github.com/dotnet/sdk/issues/26
     /// </summary>
-    public class PreprocessPackageDependenciesDesignTime : Task
+    public class PreprocessPackageDependenciesDesignTime : TaskBase
     {
         public const string DependenciesMetadata = "Dependencies";
         public const string CompileTimeAssemblyMetadata = "CompileTimeAssembly";
@@ -55,7 +55,7 @@ namespace Microsoft.NET.Build.Tasks
         private Dictionary<string, ItemMetadata> DependenciesWorld { get; set; }
                     = new Dictionary<string, ItemMetadata>(StringComparer.OrdinalIgnoreCase);
 
-        public override bool Execute()
+        protected override void ExecuteCore()
         {
             PopulateTargets();
 
@@ -91,8 +91,6 @@ namespace Microsoft.NET.Build.Tasks
 
                 return newTaskItem;
             }).ToArray();
-
-            return true;
         }
 
         /// <summary>

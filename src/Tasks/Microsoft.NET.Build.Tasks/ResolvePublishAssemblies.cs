@@ -14,7 +14,7 @@ namespace Microsoft.NET.Build.Tasks
     /// <summary>
     /// Resolves the assemblies to be published for a .NET app.
     /// </summary>
-    public class ResolvePublishAssemblies : Task
+    public class ResolvePublishAssemblies : TaskBase
     {
         private readonly List<ITaskItem> _assembliesToPublish = new List<ITaskItem>();
 
@@ -40,7 +40,7 @@ namespace Microsoft.NET.Build.Tasks
             get { return _assembliesToPublish.ToArray(); }
         }
 
-        public override bool Execute()
+        protected override void ExecuteCore()
         {
             LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(AssetsFilePath);
             NuGetFramework framework = TargetFramework == null ? null : NuGetFramework.Parse(TargetFramework);
@@ -61,8 +61,6 @@ namespace Microsoft.NET.Build.Tasks
 
                 _assembliesToPublish.Add(item);
             }
-
-            return true;
         }
     }
 }

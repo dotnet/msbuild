@@ -7,12 +7,12 @@ using Newtonsoft.Json;
 using NuGet.Frameworks;
 using System.Linq;
 
-namespace Microsoft.DotNet.Core.Build.Tasks
+namespace Microsoft.NET.Build.Tasks
 {
     /// <summary>
     /// Gets the "nearest" framework
     /// </summary>
-    public class GetNearestTargetFramework : Task
+    public class GetNearestTargetFramework : TaskBase
     {
         /// <summary>
         /// The target framework of the referring project (in short form or full TFM)
@@ -33,13 +33,13 @@ namespace Microsoft.DotNet.Core.Build.Tasks
         [Output]
         public string NearestTargetFramework { get; private set; }
 
-        public override bool Execute()
+        protected override void ExecuteCore()
         {
             if (PossibleTargetFrameworks.Length < 1)
             {
                 // TODO: localize: https://github.com/dotnet/sdk/issues/33
                 Log.LogError("At least one possible target framework must be specified.");
-                return false;
+                return;
             }
 
             var referringNuGetFramework = ParseFramework(ReferringTargetFramework);
@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
 
             if (Log.HasLoggedErrors)
             {
-                return false;
+                return;
             }
 
             var nearestNuGetFramework = new FrameworkReducer().GetNearest(referringNuGetFramework, possibleNuGetFrameworks);
@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Core.Build.Tasks
             {
                 // TODO: localize: https://github.com/dotnet/sdk/issues/33
                 Log.LogError($"Project has no no target framework compatible with '{ReferringTargetFramework}'");
-                return false;
+                return;
             }
 
             // Note that there can be more than one spelling of the same target framework (e.g. net45 and net4.5) and 
@@ -67,7 +67,6 @@ namespace Microsoft.DotNet.Core.Build.Tasks
             // in a condition that compares against $(TargetFramework).
             int indexOfNearestFramework = possibleNuGetFrameworks.IndexOf(nearestNuGetFramework);
             NearestTargetFramework = PossibleTargetFrameworks[indexOfNearestFramework];
-            return !Log.HasLoggedErrors;
         }
 
         private NuGetFramework ParseFramework(string name)

@@ -17,7 +17,7 @@ namespace Microsoft.NET.Build.Tasks
     /// <summary>
     /// Generates Satellite Assemblies
     /// </summary>
-    public class GenerateSatelliteAssemblies : Task
+    public class GenerateSatelliteAssemblies : TaskBase
     {
         [Required]
         public ITaskItem[] EmbedResources { get; set; }
@@ -32,7 +32,7 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public string AssemblyInfoFile { get; set; }
 
-        public override bool Execute()
+        protected override void ExecuteCore()
         {
             var resourceDescriptions = new List<ResourceDescription>();
 
@@ -71,8 +71,6 @@ namespace Microsoft.NET.Build.Tasks
                     }
                 }
             }
-
-            return !Log.HasLoggedErrors;
         }
     }
 }

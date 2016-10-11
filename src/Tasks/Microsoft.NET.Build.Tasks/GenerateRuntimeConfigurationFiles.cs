@@ -18,7 +18,7 @@ namespace Microsoft.NET.Build.Tasks
     /// Generates the $(project).runtimeconfig.json and optionally $(project).runtimeconfig.dev.json files
     /// for a project.
     /// </summary>
-    public class GenerateRuntimeConfigurationFiles : Task
+    public class GenerateRuntimeConfigurationFiles : TaskBase
     {
         [Required]
         public string AssetsFilePath { get; set; }
@@ -36,7 +36,7 @@ namespace Microsoft.NET.Build.Tasks
 
         private bool IsPortable => string.IsNullOrEmpty(RuntimeIdentifier);
 
-        public override bool Execute()
+        protected override void ExecuteCore()
         {
             LockFile = new LockFileCache(BuildEngine4).GetLockFile(AssetsFilePath);
 
@@ -46,8 +46,6 @@ namespace Microsoft.NET.Build.Tasks
             {
                 WriteDevRuntimeConfig();
             }
-
-            return true;
         }
 
         private void WriteRuntimeConfig()
