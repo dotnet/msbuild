@@ -47,5 +47,6 @@ namespace Microsoft.DotNet.Cli.Utils
             "libcoreclr.dylib"
         };
 
+        public static readonly string MSBUILD_EXE_PATH = "MSBUILD_EXE_PATH";
     }
 }

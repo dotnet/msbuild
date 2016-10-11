@@ -3,10 +3,7 @@
   "dependencies": {
     "xunit": "2.2.0-beta3-build3330",
     "dotnet-test-xunit": "1.0.0-rc2-350904-49",
-    "Microsoft.NETCore.Platforms": "1.0.1",
-    "Microsoft.DotNet.Tools.Tests.Utilities": {
-      "target": "project"
-    }
+    "Microsoft.NETCore.Platforms": "1.0.1"
   },
   "frameworks": {
     "net46": {

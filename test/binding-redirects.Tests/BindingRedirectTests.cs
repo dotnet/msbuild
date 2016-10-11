@@ -8,7 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using FluentAssertions;
-using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 
 namespace Microsoft.DotNet.Tests

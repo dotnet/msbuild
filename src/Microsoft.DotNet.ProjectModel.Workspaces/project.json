@@ -14,7 +14,7 @@
     "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000933"
   },
   "frameworks": {
-    "netstandard1.3": {
+    "netstandard1.5": {
       "imports": [
         "portable-net45+wp80+win8+wpa81+dnxcore50",
         "portable-net45+win8"

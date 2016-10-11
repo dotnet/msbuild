@@ -4,12 +4,18 @@
 using System.Collections.Generic;
 using NuGet.ProjectModel;
 
-namespace Microsoft.DotNet.Cli.CommandResolution
+namespace Microsoft.DotNet.Cli.Utils
 {
     internal interface IProject
     {
         LockFile GetLockFile();
 
         IEnumerable<SingleProjectInfo> GetTools();
+
+        string DepsJsonPath { get; }
+
+        string RuntimeConfigJsonPath { get; }
+
+        Dictionary<string, string> EnvironmentVariables { get; }
     }
 }

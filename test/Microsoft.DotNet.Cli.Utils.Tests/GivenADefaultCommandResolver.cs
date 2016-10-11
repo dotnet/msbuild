@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
             var resolvers = defaultCommandResolver.OrderedCommandResolvers;
 
-            resolvers.Should().HaveCount(6);
+            resolvers.Should().HaveCount(7);
 
             resolvers.Select(r => r.GetType())
                 .Should()
@@ -25,6 +25,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                     new []{
                         typeof(MuxerCommandResolver),
                         typeof(RootedCommandResolver),
+                        typeof(ProjectToolsCommandResolver),
                         typeof(AppBaseDllCommandResolver),
                         typeof(AppBaseCommandResolver),
                         typeof(PathCommandResolver),

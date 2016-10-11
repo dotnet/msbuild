@@ -93,6 +93,11 @@ namespace Microsoft.DotNet.Cli.Utils
             return GetCommandPathFromRootPath(rootPath, commandName, extensionsArr);
         }
 
+        public string GetEnvironmentVariable(string name)
+        {
+            return Environment.GetEnvironmentVariable(name);
+        }
+
         public bool GetEnvironmentVariableAsBool(string name, bool defaultValue)
         {
             var str = Environment.GetEnvironmentVariable(name);

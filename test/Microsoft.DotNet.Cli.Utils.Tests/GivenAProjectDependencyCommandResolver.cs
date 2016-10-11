@@ -8,6 +8,7 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using NuGet.Frameworks;
 using Xunit;
@@ -17,7 +18,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
     public class GivenAProjectDependenciesCommandResolver : TestBase
     {
 
-        private const string TestProjectName = "AppWithDirectDep";
+        private const string ProjectJsonTestProjectName = "AppWithDirectDep";
 
         [Fact]
         public void It_returns_null_when_CommandName_is_null()
@@ -62,7 +63,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         {
             var projectDependenciesCommandResolver = SetupProjectDependenciesCommandResolver();
 
-            var testInstance = TestAssetsManager.CreateTestInstance(TestProjectName)
+            var testInstance = TestAssetsManager.CreateTestInstance(ProjectJsonTestProjectName)
                 .WithLockFiles();
 
             var commandResolverArguments = new CommandResolverArguments()
@@ -84,7 +85,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         {
             var projectDependenciesCommandResolver = SetupProjectDependenciesCommandResolver();
 
-            var testInstance = TestAssetsManager.CreateTestInstance(TestProjectName)
+            var testInstance = TestAssetsManager.CreateTestInstance(ProjectJsonTestProjectName)
                 .WithLockFiles();
 
             var commandResolverArguments = new CommandResolverArguments()
@@ -106,7 +107,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         {
             var projectDependenciesCommandResolver = SetupProjectDependenciesCommandResolver();
 
-            var testInstance = TestAssetsManager.CreateTestInstance(TestProjectName)
+            var testInstance = TestAssetsManager.CreateTestInstance(ProjectJsonTestProjectName)
                 .WithLockFiles();
 
             var commandResolverArguments = new CommandResolverArguments()
@@ -128,7 +129,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         {
             var projectDependenciesCommandResolver = SetupProjectDependenciesCommandResolver();
 
-            var testInstance = TestAssetsManager.CreateTestInstance(TestProjectName)
+            var testInstance = TestAssetsManager.CreateTestInstance(ProjectJsonTestProjectName)
                 .WithBuildArtifacts()
                 .WithLockFiles();
 
@@ -157,7 +158,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         {
             var projectDependenciesCommandResolver = SetupProjectDependenciesCommandResolver();
 
-            var testInstance = TestAssetsManager.CreateTestInstance(TestProjectName)
+            var testInstance = TestAssetsManager.CreateTestInstance(ProjectJsonTestProjectName)
                 .WithBuildArtifacts()
                 .WithLockFiles();
 
@@ -181,7 +182,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         {
             var projectDependenciesCommandResolver = SetupProjectDependenciesCommandResolver();
 
-            var testInstance = TestAssetsManager.CreateTestInstance(TestProjectName)
+            var testInstance = TestAssetsManager.CreateTestInstance(ProjectJsonTestProjectName)
                 .WithBuildArtifacts()
                 .WithLockFiles();
 
@@ -205,7 +206,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         {
             var projectDependenciesCommandResolver = SetupProjectDependenciesCommandResolver();
 
-            var testInstance = TestAssetsManager.CreateTestInstance(TestProjectName)
+            var testInstance = TestAssetsManager.CreateTestInstance(ProjectJsonTestProjectName)
                 .WithLockFiles();
 
             var outputDir = Path.Combine(testInstance.Path, "outdir");
@@ -245,7 +246,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         {
             var projectDependenciesCommandResolver = SetupProjectDependenciesCommandResolver();
 
-            var testInstance = TestAssetsManager.CreateTestInstance(TestProjectName)
+            var testInstance = TestAssetsManager.CreateTestInstance(ProjectJsonTestProjectName)
                 .WithLockFiles();
 
             var buildBasePath = Path.Combine(testInstance.Path, "basedir");
@@ -285,7 +286,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         {
             var projectDependenciesCommandResolver = SetupProjectDependenciesCommandResolver();
 
-            var testInstance = TestAssetsManager.CreateTestInstance(TestProjectName)
+            var testInstance = TestAssetsManager.CreateTestInstance(ProjectJsonTestProjectName)
                 .WithBuildArtifacts()
                 .WithLockFiles();
 

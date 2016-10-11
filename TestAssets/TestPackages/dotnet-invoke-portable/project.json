@@ -1,0 +1,22 @@
+{
+  "version": "1.0.0-rc-*",
+  "buildOptions": {
+    "emitEntryPoint": true
+  },
+  "dependencies": {
+    "Microsoft.DotNet.Cli.Utils": {
+      "target": "project"
+    },
+    "NuGet.Frameworks": "3.6.0-rc-1954"
+  },
+  "frameworks": {
+    "netcoreapp1.0": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "type": "platform",
+          "version": "1.0.1"
+        }
+      }
+    }
+  }
+}

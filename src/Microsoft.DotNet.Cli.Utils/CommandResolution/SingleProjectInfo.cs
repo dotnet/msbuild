@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.DotNet.Cli.CommandResolution
+namespace Microsoft.DotNet.Cli.Utils
 {
     internal class SingleProjectInfo
     {

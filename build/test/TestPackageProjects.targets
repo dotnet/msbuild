@@ -142,6 +142,15 @@
         <Clean>True</Clean>
         <Frameworks>netcoreapp1.0</Frameworks>
       </BaseTestPackageProject>
+      <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-invoke-portable">
+        <Name>dotnet-invoke-portable</Name>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionPrefix>1.0.0-rc-</VersionPrefix>
+        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>True</Clean>
+        <Frameworks>netcoreapp1.0</Frameworks>
+      </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/ToolWithOutputName">
         <Name>dotnet-tool-with-output-name</Name>
         <NuPkgName>ToolWithOutputName</NuPkgName>
@@ -159,7 +168,7 @@
         <VersionPrefix>1.0.0-preview3-</VersionPrefix>
         <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
         <Clean>False</Clean>
-        <Frameworks>netstandard1.3</Frameworks>
+        <Frameworks>netstandard1.5</Frameworks>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="src/Microsoft.DotNet.ProjectModel">
         <Name>Microsoft.DotNet.ProjectModel</Name>
@@ -186,7 +195,7 @@
         <VersionPrefix>1.0.0-preview3-</VersionPrefix>
         <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
         <Clean>False</Clean>
-        <Frameworks>netstandard1.3</Frameworks>
+        <Frameworks>netstandard1.5</Frameworks>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="src/Microsoft.DotNet.InternalAbstractions">
         <Name>Microsoft.DotNet.InternalAbstractions</Name>
@@ -213,7 +222,7 @@
         <VersionPrefix>1.0.0-preview3-</VersionPrefix>
         <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
         <Clean>False</Clean>
-        <Frameworks>netstandard1.3</Frameworks>
+        <Frameworks>netstandard1.5</Frameworks>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="src/Microsoft.DotNet.Files">
         <Name>Microsoft.DotNet.Files</Name>
@@ -222,7 +231,7 @@
         <VersionPrefix>1.0.0-preview3-</VersionPrefix>
         <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
         <Clean>False</Clean>
-        <Frameworks>netstandard1.3</Frameworks>
+        <Frameworks>netstandard1.5</Frameworks>
       </BaseTestPackageProject>
 
       <TestPackageProjectFrameworksExcludes Condition=" '$(IsDesktopAvailable)' != 'True' " Include="net45" />

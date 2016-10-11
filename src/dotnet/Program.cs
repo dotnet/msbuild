@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Microsoft.DotNet.Cli.CommandResolution;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.PlatformAbstractions;
@@ -193,9 +192,7 @@ namespace Microsoft.DotNet.Cli
             }
             else
             {
-                var projectToolsCommandResolver = new ProjectToolsCommandResolverPolicy();
                 CommandResult result = Command.Create(
-                        projectToolsCommandResolver,
                         "dotnet-" + command,
                         appArgs,
                         FrameworkConstants.CommonFrameworks.NetStandardApp15)

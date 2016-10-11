@@ -83,5 +83,36 @@ namespace Microsoft.DotNet.Tests.EndToEnd
                 .And
                 .HaveStdOutContaining("Hello Portable World!");;
         }
+
+        [Fact]
+        public void ItCanRunAToolThatInvokesADependencyToolInACSProj()
+        {
+            var repoDirectoriesProvider = new RepoDirectoriesProvider();
+            var testAppName = "MSBuildTestAppWithToolInDependencies";
+            var testInstance = TestAssetsManager
+                .CreateTestInstance(testAppName);
+
+            var testProjectDirectory = testInstance.TestRoot;
+
+            new Restore3Command()
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute($"-s {repoDirectoriesProvider.TestPackages}")
+                .Should()
+                .Pass();
+
+            new Build3Command()
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute()
+                .Should()
+                .Pass();
+
+            new DotnetCommand()
+                .WithWorkingDirectory(testProjectDirectory)
+                .ExecuteWithCapturedOutput("invoke-portable")
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello Portable World!");;
+        }
     }
 }

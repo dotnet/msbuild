@@ -13,5 +13,7 @@ namespace Microsoft.DotNet.Cli.Utils
         string GetCommandPathFromRootPath(string rootPath, string commandName, IEnumerable<string> extensions);
 
         bool GetEnvironmentVariableAsBool(string name, bool defaultValue);
+
+        string GetEnvironmentVariable(string name);
     }
 }

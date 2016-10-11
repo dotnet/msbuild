@@ -12,7 +12,7 @@ using NuGet.Packaging;
 using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
 
-namespace Microsoft.DotNet.Cli.CommandResolution
+namespace Microsoft.DotNet.Cli.Utils
 {
     internal class DepsJsonBuilder
     {

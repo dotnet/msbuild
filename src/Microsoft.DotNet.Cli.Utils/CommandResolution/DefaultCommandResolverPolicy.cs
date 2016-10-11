@@ -42,13 +42,15 @@ namespace Microsoft.DotNet.Cli.Utils
 
             compositeCommandResolver.AddCommandResolver(new MuxerCommandResolver());
             compositeCommandResolver.AddCommandResolver(new RootedCommandResolver());
+            compositeCommandResolver.AddCommandResolver(
+                new ProjectToolsCommandResolver(packagedCommandSpecFactory, environment));
             compositeCommandResolver.AddCommandResolver(new AppBaseDllCommandResolver());
             compositeCommandResolver.AddCommandResolver(
                 new AppBaseCommandResolver(environment, platformCommandSpecFactory));
             compositeCommandResolver.AddCommandResolver(
                 new PathCommandResolver(environment, platformCommandSpecFactory));
             compositeCommandResolver.AddCommandResolver(
-                new PublishedPathCommandResolver(environment, publishedPathCommandSpecFactory));            
+                new PublishedPathCommandResolver(environment, publishedPathCommandSpecFactory));
 
             return compositeCommandResolver;
         }

@@ -2,20 +2,30 @@
   "version": "1.0.0-preview3-*",
   "buildOptions": {
     "keyFile": "../../tools/Key.snk",
-    "warningsAsErrors": true
+    "warningsAsErrors": true,
+    "compile": {
+      "include": [
+        "**/*.cs",
+        "../../src/dotnet/DotnetFiles.cs"
+      ]
+    }
   },
   "dependencies": {
     "Microsoft.DotNet.ProjectModel": {
       "target": "project"
     },
     "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000933",
+
     "NuGet.Versioning": "3.6.0-rc-1984",
     "NuGet.Packaging": "3.6.0-rc-1984",
     "NuGet.Frameworks": "3.6.0-rc-1984",
-    "NuGet.ProjectModel": "3.6.0-rc-1984"
+    "NuGet.ProjectModel": "3.6.0-rc-1984",
+    
+    "Microsoft.Build": "15.1.316-preview5",
+    "Microsoft.Build.Utilities.Core": "15.1.316-preview5"
   },
   "frameworks": {
-    "netstandard1.3": {
+    "netstandard1.5": {
       "imports": [
         "portable-net45+wp80+win8+wpa81+dnxcore50"
       ],

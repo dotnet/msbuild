@@ -4,7 +4,6 @@
 using System.IO;
 using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.TestFramework;
-using Microsoft.DotNet.Tools.Test.Utilities;
 
 namespace Microsoft.DotNet.Tests
 {
