@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Tests
         {
             get
             {
-                var rid = RuntimeEnvironmentRidExtensions.GetLegacyRestoreRuntimeIdentifier();
+                var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
                 var projectOutputPath = $"AppWithDirectDepDesktopAndPortable\\bin\\Debug\\net451\\{rid}\\dotnet-desktop-and-portable.exe";
                 return new[]
                 {
@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Tests
         {
             get
             {
-                var rid = RuntimeEnvironmentRidExtensions.GetLegacyRestoreRuntimeIdentifier();
+                var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
                 var projectOutputPath = $"LibraryWithDirectDependencyDesktopAndPortable\\bin\\Debug\\net451\\dotnet-desktop-and-portable.exe";
                 return new[]
                 {

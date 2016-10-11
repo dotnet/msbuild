@@ -224,15 +224,6 @@
         <Clean>False</Clean>
         <Frameworks>netstandard1.3</Frameworks>
       </BaseTestPackageProject>
-      <BaseTestPackageProject Include="src/dotnet-compile-fsc">
-        <Name>dotnet-compile-fsc</Name>
-        <IsTool>True</IsTool>
-        <IsApplicable>True</IsApplicable>
-        <VersionPrefix>1.0.0-preview3-</VersionPrefix>
-        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
-        <Clean>True</Clean>
-        <Frameworks>netcoreapp1.0</Frameworks>
-      </BaseTestPackageProject>
 
       <TestPackageProjectFrameworksExcludes Condition=" '$(IsDesktopAvailable)' != 'True' " Include="net45" />
       <TestPackageProjectFrameworksExcludes Condition=" '$(IsDesktopAvailable)' != 'True' " Include="net451" />

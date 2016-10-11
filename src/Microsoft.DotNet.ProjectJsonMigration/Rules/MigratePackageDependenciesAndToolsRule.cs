@@ -43,7 +43,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     new PackageDependencyInfo
                     {
                         Name = ConstantPackageNames.CSdkPackageName,
-                        Version = migrationSettings.SdkPackageVersion
+                        Version = migrationSettings.SdkPackageVersion,
+                        PrivateAssets = "All"
                     }), migrationRuleInputs.CommonItemGroup);
             
             // Migrate Direct Deps first
@@ -128,7 +129,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             itemGroup.Condition = condition;
 
             foreach (var packageDependency in packageDependencies)
-            {    
+            {
                 MigrationTrace.Instance.WriteLine(packageDependency.Name);
                 AddItemTransform<ProjectLibraryDependency> transform;
 
@@ -139,9 +140,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 else
                 {
                     transform = PackageDependencyTransform();
-                    if (packageDependency.Type == LibraryDependencyType.Build)
+                    if (packageDependency.Type.Equals(LibraryDependencyType.Build))
                     {
-                        transform = transform.WithMetadata("PrivateAssets", "all");
+                        transform = transform.WithMetadata("PrivateAssets", "All");
                     }
                     else if (packageDependency.SuppressParent != LibraryIncludeFlagUtils.DefaultSuppressParent)
                     {
@@ -162,9 +163,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
         private string ReadLibraryIncludeFlags(LibraryIncludeFlags includeFlags)
         {
-            if ((includeFlags & LibraryIncludeFlags.All) == LibraryIncludeFlags.All)
+            if ((includeFlags ^ LibraryIncludeFlags.All) == 0)
             {
                 return "All";
+            }
+
+            if ((includeFlags ^ LibraryIncludeFlags.None) == 0)
+            {
+                return "None";
             }
 
             var flagString = "";
@@ -228,7 +234,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             dep => dep.Name,
             dep => "",
             dep => true)
-            .WithMetadata("Version", r => r.Version);
+            .WithMetadata("Version", r => r.Version)
+            .WithMetadata("PrivateAssets", r => r.PrivateAssets, r => !string.IsNullOrEmpty(r.PrivateAssets));
 
         private AddItemTransform<ProjectLibraryDependency> ToolTransform => new AddItemTransform<ProjectLibraryDependency>(
             "DotNetCliToolReference",
@@ -247,6 +254,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         {
             public string Name {get; set;}
             public string Version {get; set;}
+            public string PrivateAssets {get; set;}
         }
     }
 }

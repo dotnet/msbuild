@@ -5,6 +5,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 {
     public class ConstantPackageNames
     {
-        public const string CSdkPackageName = "Microsoft.NETCore.Sdk";
+        public const string CSdkPackageName = "Microsoft.NET.Sdk";
     }
 }

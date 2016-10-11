@@ -26,6 +26,12 @@
         <SdkInstallerNupkgFile>$(InstallerOutputDirectory)/VS.Redist.Common.Net.Core.SDK.$(Architecture).$(NugetVersion).nupkg</SdkInstallerNupkgFile>
       </PropertyGroup>
 
+      <!-- Generate SDK MSI Inputs -->
+      <ItemGroup>
+        <GenerateSdkMsiInputs Include="$(SdkLayoutOutputDirectory)/**/*;
+                                       $(SdkGenerateMsiPowershellScript)" />
+      </ItemGroup>
+
       <!-- Consumed By Publish -->
       <ItemGroup>
         <GeneratedInstallers Include="$(SdkInstallerFile);$(CombinedFrameworkSdkHostInstallerFile)" />
@@ -75,8 +81,7 @@
     <Target Name="GenerateSdkMsi"
             DependsOnTargets="Init;Layout;AcquireWix;MsiTargetsSetupInputOutputs"
             Condition=" '$(OS)' == 'Windows_NT'"
-            Inputs="$(SdkLayoutOutputDirectory);
-                    $(SdkGenerateMsiPowershellScript)"
+            Inputs="@(GenerateSdkMsiInputs)"
             Outputs="$(SdkInstallerFile)">
 
       <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateMsiPowershellScript)

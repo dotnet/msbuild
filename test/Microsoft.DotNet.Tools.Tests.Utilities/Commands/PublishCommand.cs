@@ -72,7 +72,9 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
             if (!portable)
             {
-                var runtime = string.IsNullOrEmpty(_runtime) ? RuntimeEnvironmentRidExtensions.GetLegacyRestoreRuntimeIdentifier() : _runtime;
+                var runtime = string.IsNullOrEmpty(_runtime) ? 
+                    DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier() : 
+                    _runtime;
                 return Path.Combine(config, framework, runtime, PublishSubfolderName);
             }
             else

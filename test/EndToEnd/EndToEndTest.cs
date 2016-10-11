@@ -196,7 +196,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             TestProject = Path.Combine(TestDirectory, "project.json");
             OutputDirectory = Path.Combine(TestDirectory, s_outputdirName);
 
-            Rid = RuntimeEnvironmentRidExtensions.GetLegacyRestoreRuntimeIdentifier();
+            Rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
         }
 
         private static void SetupStaticTestProject()
