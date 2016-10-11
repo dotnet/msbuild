@@ -69,6 +69,7 @@ namespace Microsoft.DotNet.Tools.Migrate
 #else
                 Reporter.Error.WriteLine(ex.Message);
 #endif
+                Reporter.Error.WriteLine("Migration failed.");
                 return 1;
             }
         }
