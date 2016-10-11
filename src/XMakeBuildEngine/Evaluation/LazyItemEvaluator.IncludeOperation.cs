@@ -154,7 +154,7 @@ namespace Microsoft.Build.Evaluation
             {
                 foreach (var item in items)
                 {
-                    listBuilder.Add(new ItemData(item, _elementOrder, _conditionResult));
+                    listBuilder.Add(new ItemData(item, _itemElement, _elementOrder, _conditionResult));
                 }
             }
         }

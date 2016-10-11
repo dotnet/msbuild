@@ -847,6 +847,9 @@ namespace Microsoft.Build.Evaluation
                         _data.AddItemIgnoringCondition(itemData.Item);
                     }
                 }
+
+                // lazy evaluator can be collected now, the rest of evaluation does not need it anymore
+                lazyEvaluator = null;
             }
 
 #if (!STANDALONEBUILD)

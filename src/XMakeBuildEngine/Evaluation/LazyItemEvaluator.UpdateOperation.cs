@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.Build.Construction;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -19,14 +20,26 @@ namespace Microsoft.Build.Evaluation
                 _metadata = builder.Metadata.ToImmutable();
             }
 
-            protected override ICollection<I> SelectItems(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            public override void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
-                return SelectItemsMatchingItemSpec(listBuilder, _itemElement.UpdateLocation);
-            }
+                var matchedItems = ImmutableList.CreateBuilder<I>();
 
-            protected override void MutateItems(ICollection<I> items)
-            {
-                DecorateItemsWithMetadata(items, _metadata);
+                for (int i = 0; i < listBuilder.Count; i++)
+                {
+                    var itemData = listBuilder[i];
+
+                    if (_itemSpec.MatchesItem(itemData.Item))
+                    {
+                        // item lists should be deep immutable, so clone and replace items before mutating them
+                        // otherwise, with GetItems caching enabled, future operations would mutate the state of past operations
+                        var clonedItemData = listBuilder[i].Clone(_itemFactory, _itemElement);
+                        listBuilder[i] = clonedItemData;
+
+                        matchedItems.Add(clonedItemData.Item);
+                    }
+                }
+
+                DecorateItemsWithMetadata(matchedItems, _metadata);
             }
         }
     }
