@@ -55,17 +55,13 @@ namespace Microsoft.NET.Publish.Tests
                 "NoneCopyOutputAlways.txt",
                 "NoneCopyOutputPreserveNewest.txt",
                 "CopyToOutputFromProjectReference.txt",
+                "da/TestApp.resources.dll",
+                "da/TestLibrary.resources.dll",
+                "de/TestApp.resources.dll",
+                "de/TestLibrary.resources.dll",
+                "fr/TestApp.resources.dll",
+                "fr/TestLibrary.resources.dll",
             });
-
-            var cultures = new List<string>() { "da", "de", "fr" };
-
-            foreach (var culture in cultures)
-            {
-                var cultureDir = new DirectoryInfo(Path.Combine(publishDirectory.FullName, culture));
-                cultureDir.Should().Exist();
-                cultureDir.Should().HaveFile("TestApp.resources.dll");
-                cultureDir.Should().HaveFile("TestLibrary.resources.dll");
-            }
 
             // Ensure Newtonsoft.Json doesn't get excluded from the deps.json file.
             // TestLibrary has a hard dependency on Newtonsoft.Json.
