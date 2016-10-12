@@ -34,4 +34,18 @@ Copyright (c) .NET Foundation. All rights reserved.
     </GetNearestTargetFramework>
   </Target>
 
+  <!--
+  ============================================================
+                              Publish
+
+   This is the Publish target for cross-targeting.
+   Currently it is unsupported to publish for multiple target frameworks
+   because users can specify the $(PublishDir), and publish would put
+   multiple published applications in a single directory.
+  ============================================================
+   -->
+  <Target Name="Publish">
+    <Error Text="The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, please specify the framework for the published application." />
+  </Target>
+  
 </Project>
