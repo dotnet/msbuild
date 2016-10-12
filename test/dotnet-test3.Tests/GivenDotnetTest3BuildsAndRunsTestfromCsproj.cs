@@ -9,7 +9,7 @@ using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Cli.Test3.Tests
 {
-    public class Test3Tests : TestBase
+    public class GivenDotnetTest3BuildsAndRunsTestfromCsproj : TestBase
     {
         [Fact]
         public void TestsFromAGivenProjectShouldRunWithExpectedOutput()

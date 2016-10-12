@@ -32,57 +32,53 @@ namespace Microsoft.DotNet.Tools.Test3
                 multipleValues: false);
 
             var settingOption = cmd.Option(
-                "--settings <SettingsFile>",
-                "Settings to use when running tests." + Environment.NewLine,
+                "-s|--settings <SettingsFile>",
+                "Settings to use when running tests.",
                 CommandOptionType.SingleValue);
 
             var listTestsOption = cmd.Option(
                 "-lt|--listTests",
-                @"Lists discovered tests" + Environment.NewLine,
+                @"Lists discovered tests",
                 CommandOptionType.NoValue);
 
             var testCaseFilterOption = cmd.Option(
-                "--testCaseFilter <Expression>",
+                "-tcf|--testCaseFilter <Expression>",
                 @"Run tests that match the given expression.
-                                      <Expression> is of the format <property>Operator<value>[|&<Expression>]
-                                      where Operator is one of =, != or ~  (Operator ~ has 'contains'
-                                      semantics and is applicable for string properties like DisplayName).
-                                      Parenthesis () can be used to group sub-expressions.
-                                      Examples: --testCaseFilter:""Priority = 1""
-                                      --testCaseFilter:""(FullyQualifiedName~Nightly | Name = MyTestMethod)""" + Environment.NewLine,
+                                        Examples:
+                                        --testCaseFilter:""Priority = 1""
+                                        --testCaseFilter: ""(FullyQualifiedName~Nightly | Name = MyTestMethod)""",
                 CommandOptionType.SingleValue);
 
             var testAdapterPathOption = cmd.Option(
-                "--testAdapterPath",
-                @"This makes vstest.console.exe process use custom test adapters
-                                      from a given path (if any) in the test run.
-                                      Example  --testAdapterPath:<pathToCustomAdapters>" + Environment.NewLine,
+                "-tap|--testAdapterPath",
+                @"Use custom adapters from the given path in the test run.
+                                        Example: --testAdapterPath:<pathToCustomAdapters>",
                 CommandOptionType.SingleValue);
 
             var loggerOption = cmd.Option(
-                "--logger <LoggerUri/FriendlyName>",
-                @"Specify a logger for test results.  For example, to log results into a
-                                      Visual Studio Test Results File(TRX) use --logger:trx" + Environment.NewLine,
+                "-l|--logger <LoggerUri/FriendlyName>",
+                @"Specify a logger for test results. 
+                                        Example: --logger:trx",
                 CommandOptionType.SingleValue);
 
             var configurationOption = cmd.Option(
                 "-c|--Configuration <Configuration>",
-                @"Configuration under which to build, i.e. Debug/Release" + Environment.NewLine,
+                @"Configuration under which to build, i.e. Debug/Release",
                 CommandOptionType.SingleValue);
 
             var frameworkOption = cmd.Option(
-                "--framework <FrameworkVersion>",
-                @"Looks for test binaries for a specific framework" + Environment.NewLine,
+                "-f|--framework <FrameworkVersion>",
+                @"Looks for test binaries for a specific framework",
                 CommandOptionType.SingleValue);
 
             var outputOption = cmd.Option(
                 "-o|--output <OotputDir>",
-                @"Directory in which to find the binaries to be run" + Environment.NewLine,
+                @"Directory in which to find the binaries to be run",
                 CommandOptionType.SingleValue);
 
             var noBuildtOption = cmd.Option(
                "--noBuild",
-               @"Do not build project before testing." + Environment.NewLine,
+               @"Do not build project before testing.",
                CommandOptionType.NoValue);
 
             cmd.OnExecute(() =>
