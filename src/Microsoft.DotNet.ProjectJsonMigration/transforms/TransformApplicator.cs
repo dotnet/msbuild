@@ -28,6 +28,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
                 }
                 else if (typeof(T) == typeof(ProjectPropertyElement))
                 {
+                    MigrationTrace.Instance.WriteLine(
+                        $"{nameof(TransformApplicator)}: Adding Property to project {(element as ProjectPropertyElement).Name}");
                     var property = destinationElement.ContainingProject.CreatePropertyElement("___TEMP___");
                     property.CopyFrom(element);
 

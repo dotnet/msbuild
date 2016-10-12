@@ -38,9 +38,6 @@
                              Include="test$(PathSeparator)TestingAbstractions$(PathSeparator)Microsoft.Extensions.Testing.Abstractions.Tests$(PathSeparator)project.json;
                                       test$(PathSeparator)TestingAbstractions$(PathSeparator)Microsoft.Extensions.Testing.Abstractions.UnitTests$(PathSeparator)project.json;" />
 
-      <PreTestProjectsToExclude Condition=" 'https://github.com/dotnet/cli/issues/3558' != 'fixed' "
-                             Include="test$(PathSeparator)dotnet-compile-fsc.Tests$(PathSeparator)project.json" />
-
       <PreTestProjectsToExclude Condition=" 'https://github.com/dotnet/cli/issues/3216' != 'fixed' "
                              Include="test$(PathSeparator)Kestrel.Tests$(PathSeparator)project.json" />
 
@@ -86,7 +83,7 @@
       </TestProjects>
 
       <TestProjects Condition=" '%(RelativeDir)' == 'test\binding-redirects.Tests\' ">
-        <Framework>net451</Framework>
+        <Framework>net46</Framework>
       </TestProjects>
       <TestProjects Condition=" '%(RelativeDir)' == 'test\Installer\Microsoft.DotNet.Cli.Msi.Tests\' ">
         <Framework>net46</Framework>

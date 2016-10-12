@@ -15,20 +15,7 @@
     "System.Reflection.Metadata": "1.4.1-beta-24410-02"
   },
   "frameworks": {
-    "net451": {
-      "frameworkAssemblies": {
-        "System.Runtime": {
-          "type": "build"
-        },
-        "System.Collections": {
-          "type": "build"
-        },
-        "System.IO": {
-          "type": "build"
-        }
-      }
-    },
-    "netstandard1.6": {
+    "netstandard1.3": {
       "imports": [
         "portable-net45+wp80+win8+wpa81+dnxcore50",
         "dotnet5.4"
@@ -36,7 +23,6 @@
       "dependencies": {
         "Microsoft.CSharp": "4.0.1",
         "System.Dynamic.Runtime": "4.0.11",
-        "System.Runtime.Loader": "4.0.0",
         "System.Runtime.Serialization.Primitives": "4.1.1",
         "System.Security.Cryptography.Algorithms": "4.2.0",
         "System.Threading.Thread": "4.0.0",

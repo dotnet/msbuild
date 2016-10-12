@@ -19,6 +19,7 @@ namespace Microsoft.DotNet.Tools.Build3
             app.FullName = ".NET Builder";
             app.Description = "Builder for the .NET Platform. Delegates to the MSBuild 'Build' target in the project file.";
             app.AllowArgumentSeparator = true;
+            app.ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText;
             app.HelpOption("-h|--help");
 
             CommandArgument projectArgument = app.Argument("<PROJECT>",

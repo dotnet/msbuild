@@ -18,7 +18,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
     {
         private string _projectFilePath;
         private string _netCoreAppOutputPath;
-        private string _net451OutputPath;
+        private string _net46OutputPath;
 
         private void Setup([CallerMemberName] string callingMethod = "")
         {
@@ -44,8 +44,8 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
             if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Windows)
             {
                 var rid = RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers().First();
-                _net451OutputPath = Path.Combine(testInstance.TestRoot, "bin", "Debug", "net451", rid);
-                result = buildCommand.Execute($"-f net451 -r {rid} -o {_net451OutputPath}");
+                _net46OutputPath = Path.Combine(testInstance.TestRoot, "bin", "Debug", "net46", rid);
+                result = buildCommand.Execute($"-f net46 -r {rid} -o {_net46OutputPath}");
                 result.Should().Pass();
             }
         }
@@ -70,7 +70,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         }
 
         [WindowsOnlyFact(Skip="https://github.com/xunit/xunit/issues/934")]
-        public void It_discovers_tests_for_the_ProjectWithTestsWithNet451()
+        public void It_discovers_tests_for_the_ProjectWithTestsWithNet46()
         {
             Setup();
 
@@ -80,7 +80,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
                 var rid = RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers().First();
 
                 var testCommand = new DotnetTestCommand();
-                var result = testCommand.Execute($"{_projectFilePath} -f net451 -r {rid} -o {_net451OutputPath} --port {adapter.Port} --no-build");
+                var result = testCommand.Execute($"{_projectFilePath} -f net46 -r {rid} -o {_net46OutputPath} --port {adapter.Port} --no-build");
                 result.Should().Pass();
 
                 adapter.Messages["TestSession.Connected"].Count.Should().Be(1);
@@ -111,7 +111,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         }
 
         [WindowsOnlyFact(Skip="https://github.com/xunit/xunit/issues/934")]
-        public void It_runs_tests_for_net451()
+        public void It_runs_tests_for_net46()
         {
             Setup();
 
@@ -121,7 +121,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
 
                 var testCommand = new DotnetTestCommand();
                 var rid = RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers().First();
-                var result = testCommand.Execute($"{_projectFilePath} -f net451 -r {rid} -o {_net451OutputPath} --port {adapter.Port} --no-build");
+                var result = testCommand.Execute($"{_projectFilePath} -f net46 -r {rid} -o {_net46OutputPath} --port {adapter.Port} --no-build");
                 result.Should().Pass();
 
                 adapter.Messages["TestSession.Connected"].Count.Should().Be(1);

@@ -45,6 +45,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
         public List<CommandLineApplication> Commands { get; private set; }
         public bool HandleResponseFiles { get; set; }
         public bool AllowArgumentSeparator { get; set; }
+        public string ArgumentSeparatorHelpText { get; set; }
 
         public CommandLineApplication Command(string name, Action<CommandLineApplication> configuration,
             bool throwOnUnexpectedArg = true)
@@ -361,6 +362,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
             var optionsBuilder = new StringBuilder();
             var commandsBuilder = new StringBuilder();
             var argumentsBuilder = new StringBuilder();
+            var argumentSeparatorBuilder = new StringBuilder();
 
             if (target.Arguments.Any())
             {
@@ -417,6 +419,13 @@ namespace Microsoft.DotNet.Cli.CommandLine
             if (target.AllowArgumentSeparator)
             {
                 headerBuilder.Append(" [[--] <arg>...]]");
+                if (!string.IsNullOrEmpty(target.ArgumentSeparatorHelpText))
+                {
+                    argumentSeparatorBuilder.AppendLine();
+                    argumentSeparatorBuilder.AppendLine("Args:");
+                    argumentSeparatorBuilder.AppendLine($"  {target.ArgumentSeparatorHelpText}");
+                    argumentSeparatorBuilder.AppendLine();
+                }
             }
 
             headerBuilder.AppendLine();
@@ -425,7 +434,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
             nameAndVersion.AppendLine(GetFullNameAndVersion());
             nameAndVersion.AppendLine();
 
-            Console.Write("{0}{1}{2}{3}{4}", nameAndVersion, headerBuilder, argumentsBuilder, optionsBuilder, commandsBuilder);
+            Console.Write("{0}{1}{2}{3}{4}{5}", nameAndVersion, headerBuilder, argumentsBuilder, optionsBuilder, commandsBuilder, argumentSeparatorBuilder);
         }
 
         public void ShowVersion()

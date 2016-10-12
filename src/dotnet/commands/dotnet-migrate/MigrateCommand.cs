@@ -195,21 +195,24 @@ namespace Microsoft.DotNet.Tools.Migrate
             else if (projectArg.EndsWith(GlobalSettings.FileName, StringComparison.OrdinalIgnoreCase))
             {
                 projects =  GetProjectsFromGlobalJson(projectArg);
+                if (!projects.Any())
+                {
+                    throw new Exception("Unable to find any projects in global.json");
+                }
             }
             else if (Directory.Exists(projectArg))
             {
                 projects = Directory.EnumerateFiles(projectArg, Project.FileName, SearchOption.AllDirectories);
+                if (!projects.Any())
+                {
+                    throw new Exception($"No project.json file found in '{projectArg}'");
+                }
             }
             else
             {
                 throw new Exception($"Invalid project argument - '{projectArg}' is not a project.json or a global.json file and a directory named '{projectArg}' doesn't exist.");
             }
-
-            if (!projects.Any())
-            {
-                throw new Exception($"Invalid project argument - Unable to find any projects in global.json or directory '{projectArg}'");
-            }
-
+            
             foreach(var project in projects)
             {
                 yield return GetProjectJsonPath(project);

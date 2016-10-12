@@ -3,14 +3,24 @@
   "buildOptions": {
     "emitEntryPoint": true,
     "keyFile": "../../tools/Key.snk",
+    "compile": {
+      "include": [
+        "**/*.cs",
+        "../../src/dotnet/DotnetFiles.cs"
+      ]
+    },
     "copyToOutput": {
       "include": [
         "../../TestAssets/TestProjects/OutputStandardOutputAndError/*",
         "../../TestAssets/TestProjects/TestAppWithArgs/*",
         "../../TestAssets/TestProjects/AppWithDirectAndToolDependency/**/*",
         "../../TestAssets/TestProjects/AppWithDirectDependency/**/*",
-        "../../TestAssets/TestProjects/AppWithToolDependency/**/*"
-      ]
+        "../../TestAssets/TestProjects/AppWithToolDependency/**/*",
+        "../../artifacts/*/stage2/sdk/*/.version"
+      ],
+      "mappings": {
+        ".version": "../../artifacts/*/stage2/sdk/*/.version"
+      }
     }
   },
   "dependencies": {

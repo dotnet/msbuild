@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
@@ -83,7 +84,7 @@ namespace Microsoft.DotNet.Tools.Run
                 .EnsureValid(Project)
                 .FrameworkOnlyContexts;
 
-            var rids = DotnetRuntimeIdentifiers.InferCurrentRuntimeIdentifiers();
+            var rids = DotnetRuntimeIdentifiers.InferCurrentRuntimeIdentifiers(DotnetFiles.VersionFileObject);
 
             ProjectContext frameworkContext;
             if (Framework == null)

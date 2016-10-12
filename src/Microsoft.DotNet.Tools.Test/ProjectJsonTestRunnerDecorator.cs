@@ -3,9 +3,10 @@
 
 using System;
 using System.IO;
+using System.Linq;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
-using System.Linq;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Tools.Test
@@ -27,7 +28,7 @@ namespace Microsoft.DotNet.Tools.Test
             var projectPath = GetProjectPath(dotnetTestParams.ProjectOrAssemblyPath);
             var runtimeIdentifiers = !string.IsNullOrEmpty(dotnetTestParams.Runtime)
                 ? new[] {dotnetTestParams.Runtime}
-                : DotnetRuntimeIdentifiers.InferCurrentRuntimeIdentifiers();
+                : DotnetRuntimeIdentifiers.InferCurrentRuntimeIdentifiers(DotnetFiles.VersionFileObject);
             var exitCode = 0;
 
             // Create a workspace

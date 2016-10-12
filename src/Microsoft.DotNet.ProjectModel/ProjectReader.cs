@@ -544,13 +544,13 @@ namespace Microsoft.DotNet.ProjectModel
                 return Enumerable.Empty<string>();
             }
 
-            if (prop.Type == JTokenType.Array)
+            if (prop.Value.Type == JTokenType.Array)
             {
-                return prop.Value<IEnumerable<string>>();
+                return (prop.Value as JArray).Select(i => i.Value<string>());
             }
-            else if (prop.Type == JTokenType.String)
+            else if (prop.Value.Type == JTokenType.String)
             {
-                return new [] { prop.Value<string>() };
+                return new [] { prop.Value.ToString() };
             }
 
             return null;
@@ -885,7 +885,7 @@ namespace Microsoft.DotNet.ProjectModel
             }
             else
             {
-                values = token.Value<string[]>();
+                values = token.Values<string>();
             }
             result = values
                 .SelectMany(value => value.Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries));
