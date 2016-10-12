@@ -41,7 +41,7 @@ namespace Microsoft.NET.Build.Tests
                 "netstandard1.5/NetStandardAndNetCoreApp.dll",
                 "netstandard1.5/NetStandardAndNetCoreApp.pdb",
                 "netstandard1.5/NetStandardAndNetCoreApp.deps.json"
-            }, SearchOption.AllDirectories);
+            });
         }
 
         [Fact]
@@ -72,7 +72,7 @@ namespace Microsoft.NET.Build.Tests
                 "netstandard1.5/DesktopAndNetStandard.dll",
                 "netstandard1.5/DesktopAndNetStandard.pdb",
                 "netstandard1.5/DesktopAndNetStandard.deps.json"
-            }, SearchOption.AllDirectories);
+            });
         }
     }
 }
