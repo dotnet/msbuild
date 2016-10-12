@@ -11,6 +11,21 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+  <!--
+    TODO: https://github.com/dotnet/sdk/issues/261
+
+    We shouldn't need to define OutputPath here, and instead get it from sharing props betweeen
+    cross-targeting and inner builds, but we're blocked from importing props in cross-targeting
+    builds by https://github.com/NuGet/Home/issues/3532. We can't just import props here either
+    as it would overwrite user-defined values with defaults.
+   -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath Condition="'$(OutputPath)' == ''">bin\Debug\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath Condition="'$(OutputPath)' == ''">bin\Release\</OutputPath>
+  </PropertyGroup>
+
   <Import Project="..\build\netstandard1.0\Microsoft.NET.Sdk.Common.targets"/>
 
   <UsingTask TaskName="GetNearestTargetFramework" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
