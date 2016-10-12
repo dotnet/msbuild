@@ -112,7 +112,10 @@
         <TFM>netstandard1.3</TFM>
       </CopyLocalAssembly>
       <CopyLocalAssembly>
-        <FullFilePath>$(NuGet_Packages)\%(CopyLocalAssembly.Identity)\%(CopyLocalAssembly.Version)\lib\%(CopyLocalAssembly.TFM)\%(CopyLocalAssembly.Identity).dll</FullFilePath>
+        <PackageRelativePath>$([System.String]::Copy('%(Identity)\%(Version)').ToLowerInvariant())</PackageRelativePath>
+      </CopyLocalAssembly>
+      <CopyLocalAssembly>
+        <FullFilePath>$(NuGet_Packages)\%(CopyLocalAssembly.PackageRelativePath)\lib\%(CopyLocalAssembly.TFM)\%(CopyLocalAssembly.Identity).dll</FullFilePath>
       </CopyLocalAssembly>
     </ItemGroup>
     <Copy SourceFiles="%(CopyLocalAssembly.FullFilePath)" DestinationFolder="$(OutDir)" />
