@@ -50,6 +50,13 @@ namespace Microsoft.Build.Internal
                         break;
 
                     default:
+                        if (child.NodeType == XmlNodeType.Text && String.IsNullOrWhiteSpace(child.InnerText))
+                        {
+                            // If the text is greather than 4k and only contains whitespace, the XML reader will assume it's a text node
+                            // instead of ignoring it.  Our call to String.IsNullOrWhiteSpace() can be a little slow if the text is
+                            // large but this should be extremely rare.
+                            break;
+                        }
                         if (throwForInvalidNodeTypes)
                         {
                             ThrowProjectInvalidChildElement(child.Name, element.Name, element.Location);
