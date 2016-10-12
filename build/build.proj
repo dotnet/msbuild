@@ -41,8 +41,9 @@
       <ProjectToRestore3 Include="test\Microsoft.NET.Publish.Tests\Microsoft.NET.Publish.Tests.csproj" />
     </ItemGroup>
 
-    <!-- work around https://github.com/dotnet/sdk/issues/203 by passing in /p:SkipInvalidConfigurations=true -->
-    <Exec Command="$(DotNetTool) restore3 %(ProjectToRestore3.Identity) /v:minimal /p:SkipInvalidConfigurations=true"
+    <!-- work around https://github.com/dotnet/sdk/issues/203 by passing in /p:SkipInvalidConfigurations=true;_InvalidConfigurationWarning=false -->
+    <Exec Command="$(DotNetTool) restore3 %(ProjectToRestore3.Identity) /v:minimal /p:SkipInvalidConfigurations=true;_InvalidConfigurationWarning=false"
+          Condition="'$(BuildTemplates)' != 'true'"
           WorkingDirectory="$(RepositoryRootDirectory)"
           />
   </Target>
