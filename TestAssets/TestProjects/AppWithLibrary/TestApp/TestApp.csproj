@@ -8,7 +8,7 @@
     <AssemblyTitle>Test AssemblyTitle</AssemblyTitle>
     <Copyright>Copyright (c) Test Authors</Copyright>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>netcoreapp1.0</TargetFrameworks>
+    <TargetFramework>netcoreapp1.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="**\*.cs" />

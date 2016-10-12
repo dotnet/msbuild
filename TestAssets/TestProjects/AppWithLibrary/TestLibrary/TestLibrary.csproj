@@ -5,7 +5,7 @@
     <Version>42.43.44.45-alpha</Version>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <OutputType>Library</OutputType>
-    <TargetFrameworks>netstandard1.5</TargetFrameworks>
+    <TargetFramework>netstandard1.5</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="**\*.cs" />
