@@ -112,7 +112,7 @@ namespace Microsoft.Build.UnitTests.Construction
             }
             catch (InvalidProjectFileException ex)
             {
-                Assert.Equal(1, ex.ColumnNumber);
+                Assert.Equal(70012, ex.ColumnNumber);
                 Assert.Equal(2, ex.LineNumber);
             }
             finally
@@ -147,8 +147,8 @@ namespace Microsoft.Build.UnitTests.Construction
             }
             catch (InvalidProjectFileException ex)
             {
-                Assert.Equal(1, ex.ColumnNumber);
-                Assert.Equal(2, ex.LineNumber);
+                Assert.Equal(70002, ex.LineNumber);
+                Assert.Equal(2, ex.ColumnNumber);
             }
             finally
             {
