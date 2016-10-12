@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.Tests
 {
     public class TestSetupFixture : TestBase
     {
-        private const string Framework = "net451";
+        private const string Framework = "net46";
         private const string Config = "Debug";
         private const string AppWithConfig = "AppWithRedirectsAndConfig";
         private const string AppWithoutConfig = "AppWithRedirectsNoConfig";

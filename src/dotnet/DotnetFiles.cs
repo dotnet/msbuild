@@ -4,11 +4,12 @@
 using System;
 using System.IO;
 using System.Reflection;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.PlatformAbstractions;
 
-namespace Microsoft.DotNet.Cli.Utils
+namespace Microsoft.DotNet.Cli
 {
-    public static class DotnetFiles
+    internal static class DotnetFiles
     {
         private static string SdkRootFolder => Path.Combine(typeof(DotnetFiles).GetTypeInfo().Assembly.Location, "..");
 
@@ -24,9 +25,6 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             get { return s_versionFileObject.Value; }
         }
-
-        public static string NuGetPackagesArchive =>
-            Path.GetFullPath(Path.Combine(SdkRootFolder, "nuGetPackagesArchive.lzma"));
 
         /// <summary>
         /// Reads the version file and adds runtime specific information

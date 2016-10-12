@@ -8,7 +8,7 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     internal static class DotnetRuntimeIdentifiers
     {
-        public static IEnumerable<string> InferCurrentRuntimeIdentifiers()
+        public static IEnumerable<string> InferCurrentRuntimeIdentifiers(DotnetVersionFile versionFile)
         {
             IEnumerable<string> fallbackIdentifiers = null;
 
@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Cli.Utils
             FrameworkDependencyFile fxDepsFile = new FrameworkDependencyFile();
             if (!fxDepsFile.SupportsCurrentRuntime())
             {
-                string buildRid = DotnetFiles.VersionFileObject.BuildRid;
+                string buildRid = versionFile.BuildRid;
                 if (!string.IsNullOrEmpty(buildRid))
                 {
                     fallbackIdentifiers = new string[] { buildRid };

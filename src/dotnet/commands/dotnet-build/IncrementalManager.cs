@@ -5,8 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Compiler.Common;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Compiler;
 
 namespace Microsoft.DotNet.Tools.Build

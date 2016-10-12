@@ -9,9 +9,12 @@
     }
   },
   "frameworks": {
-    "net451": {
+    "net46": {
       "frameworkAssemblies": {
         "System.Configuration": ""
+      },
+      "dependencies": {
+        "System.Console": "4.0.0"
       }
     }
   },

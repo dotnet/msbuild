@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Files;
@@ -414,7 +415,7 @@ namespace Microsoft.DotNet.Tools.Publish
                 contexts.Where(c => Equals(c.TargetFramework, framework));
 
             var rids = string.IsNullOrEmpty(runtime) ?
-                DotnetRuntimeIdentifiers.InferCurrentRuntimeIdentifiers() :
+                DotnetRuntimeIdentifiers.InferCurrentRuntimeIdentifiers(DotnetFiles.VersionFileObject) :
                 new[] { runtime };
 
             return contexts.Select(c => Workspace.GetRuntimeContext(c, rids));

@@ -175,7 +175,7 @@
     <Message Text="%(NoAutoBuildDesktopTestAssetProjects.FullPath)" />
 
     <DotNetBuild  Configuration="$(Configuration)"
-                  Framework="net451"
+                  Framework="net46"
                   ProjectPath="%(BuildableDesktopTestAssetProjects.FullPath)"
                   ToolPath="$(DotnetUnderTest)"
                   WorkingDirectory="%(BuildableDesktopTestAssetProjects.RelativeDir)" />

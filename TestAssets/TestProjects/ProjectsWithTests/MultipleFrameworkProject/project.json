@@ -20,7 +20,11 @@
         "System.Runtime.Serialization.Primitives": "4.1.1"
       }
     },
-    "net451": {}
+    "net46": {
+      "dependencies": {
+        "System.IO.FileSystem": "4.0.1"
+      }
+    }
   },
   "testRunner": "xunit"
 }

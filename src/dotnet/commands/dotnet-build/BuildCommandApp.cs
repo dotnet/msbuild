@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.InternalAbstractions;
@@ -131,7 +132,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             var rids = new List<string>();
             if (string.IsNullOrEmpty(RuntimeValue))
             {
-                return DotnetRuntimeIdentifiers.InferCurrentRuntimeIdentifiers();
+                return DotnetRuntimeIdentifiers.InferCurrentRuntimeIdentifiers(DotnetFiles.VersionFileObject);
             }
             else
             {

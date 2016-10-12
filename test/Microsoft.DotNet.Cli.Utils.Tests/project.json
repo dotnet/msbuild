@@ -3,6 +3,12 @@
   "buildOptions": {
     "emitEntryPoint": true,
     "keyFile": "../../tools/Key.snk",
+    "compile": {
+      "include": [
+        "**/*.cs",
+        "../../src/dotnet/DotnetFiles.cs"
+      ]
+    },
     "copyToOutput": {
       "include": [
         "../../TestAssets/TestProjects/OutputStandardOutputAndError/*",

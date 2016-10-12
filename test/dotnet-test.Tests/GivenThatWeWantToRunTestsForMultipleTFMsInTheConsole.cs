@@ -17,7 +17,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
     {
         private readonly string _projectFilePath;
         private readonly string _defaultNetCoreAppOutputPath;
-        private readonly string _defaultNet451OutputPath;
+        private readonly string _defaultNet46OutputPath;
 
         public GivenThatWeWantToRunTestsForMultipleTFMsInTheConsole()
         {
@@ -36,7 +36,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
             new RestoreCommand() { WorkingDirectory = testInstance.TestRoot }.Execute().Should().Pass();
 
             _defaultNetCoreAppOutputPath = Path.Combine(testInstance.TestRoot, "bin", "Debug", "netcoreapp1.0");
-            _defaultNet451OutputPath = Path.Combine(testInstance.TestRoot, "bin", "Debug", "net451", RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers().First());
+            _defaultNet46OutputPath = Path.Combine(testInstance.TestRoot, "bin", "Debug", "net46", RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers().First());
         }
 
         [WindowsOnlyFact]
@@ -46,18 +46,18 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
             var result = testCommand
                 .ExecuteWithCapturedOutput($"{_projectFilePath}");
             result.Should().Pass();
-            result.StdOut.Should().Contain("Skipped for NET451");
+            result.StdOut.Should().Contain("Skipped for NET46");
             result.StdOut.Should().Contain("Skipped for NETCOREAPP1.0");
         }
 
         [WindowsOnlyFact]
-        public void It_builds_and_runs_tests_for_net451()
+        public void It_builds_and_runs_tests_for_net46()
         {
             var testCommand = new DotnetTestCommand();
             var result = testCommand
-                .ExecuteWithCapturedOutput($"{_projectFilePath} -f net451");
+                .ExecuteWithCapturedOutput($"{_projectFilePath} -f net46");
             result.Should().Pass();
-            result.StdOut.Should().Contain($"Skipped for NET451");
+            result.StdOut.Should().Contain($"Skipped for NET46");
             result.StdOut.Should().NotContain($"Skipped for NETCOREAPP1.0");
         }
 
@@ -69,7 +69,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
                 .ExecuteWithCapturedOutput($"{_projectFilePath} -f netcoreapp1.0");
             result.Should().Pass();
             result.StdOut.Should().Contain($"Skipped for NETCOREAPP1.0");
-            result.StdOut.Should().NotContain($"Skipped for NET451");
+            result.StdOut.Should().NotContain($"Skipped for NET46");
         }
 
         [Fact]
@@ -103,15 +103,15 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
         }
 
         [WindowsOnlyFact]
-        public void It_skips_build_when_the_no_build_flag_is_passed_for_net451()
+        public void It_skips_build_when_the_no_build_flag_is_passed_for_net46()
         {
             var rid = RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers().First();
             var buildCommand = new BuildCommand(_projectFilePath);
-            var result = buildCommand.Execute($"-f net451 -r {rid} -o {_defaultNet451OutputPath}");
+            var result = buildCommand.Execute($"-f net46 -r {rid} -o {_defaultNet46OutputPath}");
             result.Should().Pass();
 
             var testCommand = new DotnetTestCommand();
-            result = testCommand.Execute($"{_projectFilePath} -f net451 -r {rid} -o {_defaultNet451OutputPath} --no-build");
+            result = testCommand.Execute($"{_projectFilePath} -f net46 -r {rid} -o {_defaultNet46OutputPath} --no-build");
             result.Should().Pass();
         }
 
@@ -142,7 +142,7 @@ namespace Microsoft.Dotnet.Tools.Test.Tests
                 .ExecuteWithCapturedOutput($"{_projectFilePath}");
 
             result.Should().Fail();
-            result.StdOut.Should().Contain("Failing in NET451");
+            result.StdOut.Should().Contain("Failing in NET46");
             result.StdOut.Should().Contain("Failing in NETCOREAPP1.0");
         }
 

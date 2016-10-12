@@ -8,14 +8,14 @@ namespace FakeTests
 {
     public class GivenThatIWantSomeFakeTests
     {
-#if NET451
+#if NET46
         [Fact]
-        public void NET451_succeeds()
+        public void NET46_succeeds()
         {
             Assert.True(true);
         }
 
-        [Fact(Skip="Skipped for NET451")]
+        [Fact(Skip="Skipped for NET46")]
         public void SkippedTest()
         {
 
@@ -45,8 +45,8 @@ namespace FakeTests
         {
             var shouldFail = string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DOTNET_TEST_SHOULD_FAIL"));
 
-#if NET451
-            Assert.True(shouldFail, "Failing in NET451");
+#if NET46
+            Assert.True(shouldFail, "Failing in NET46");
 #else
             Assert.True(shouldFail, "Failing in NETCOREAPP1.0");
 #endif

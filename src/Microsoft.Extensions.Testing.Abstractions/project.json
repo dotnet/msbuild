@@ -16,8 +16,7 @@
     "System.Reflection.Metadata": "1.4.1-beta-24426-02"
   },
   "frameworks": {
-    "net451": {},
-    "netstandard1.6": {
+    "netstandard1.3": {
       "imports": [
         "portable-net45+wp80+win8+wpa81+dnxcore50",
         "portable-net45+win8"

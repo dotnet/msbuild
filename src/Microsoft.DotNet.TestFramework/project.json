@@ -10,12 +10,11 @@
     }
   },
   "frameworks": {
-    "netstandard1.6": {
+    "netstandard1.3": {
       "imports": [
         "portable-net45+wp80+win8+wpa81+dnxcore50"
       ]
-    },
-    "net451": {}
+    }
   },
   "packOptions": {
     "projectUrl": "",

@@ -159,7 +159,7 @@
         <VersionPrefix>1.0.0-preview3-</VersionPrefix>
         <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
         <Clean>False</Clean>
-        <Frameworks>net451;netstandard1.6</Frameworks>
+        <Frameworks>netstandard1.3</Frameworks>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="src/Microsoft.DotNet.ProjectModel">
         <Name>Microsoft.DotNet.ProjectModel</Name>
@@ -168,7 +168,7 @@
         <VersionPrefix>1.0.0-rc4-</VersionPrefix>
         <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
         <Clean>False</Clean>
-        <Frameworks>net451;netstandard1.6</Frameworks>
+        <Frameworks>netstandard1.3</Frameworks>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="src/Microsoft.DotNet.ProjectModel.Loader">
         <Name>Microsoft.DotNet.ProjectModel.Loader</Name>
@@ -186,7 +186,7 @@
         <VersionPrefix>1.0.0-preview3-</VersionPrefix>
         <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
         <Clean>False</Clean>
-        <Frameworks>netstandard1.6</Frameworks>
+        <Frameworks>netstandard1.3</Frameworks>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="src/Microsoft.DotNet.InternalAbstractions">
         <Name>Microsoft.DotNet.InternalAbstractions</Name>
@@ -195,7 +195,7 @@
         <VersionPrefix>1.0.1-beta-</VersionPrefix>
         <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
         <Clean>False</Clean>
-        <Frameworks>net451;netstandard1.3</Frameworks>
+        <Frameworks>netstandard1.3</Frameworks>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="src/Microsoft.Extensions.Testing.Abstractions">
         <Name>Microsoft.Extensions.Testing.Abstractions</Name>
@@ -204,7 +204,7 @@
         <VersionPrefix>1.0.0-preview3-</VersionPrefix>
         <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
         <Clean>False</Clean>
-        <Frameworks>net451;netstandard1.6</Frameworks>
+        <Frameworks>netstandard1.3</Frameworks>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="src/Microsoft.DotNet.Compiler.Common">
         <Name>Microsoft.DotNet.Compiler.Common</Name>
@@ -213,7 +213,7 @@
         <VersionPrefix>1.0.0-preview3-</VersionPrefix>
         <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
         <Clean>False</Clean>
-        <Frameworks>netstandard1.6</Frameworks>
+        <Frameworks>netstandard1.3</Frameworks>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="src/Microsoft.DotNet.Files">
         <Name>Microsoft.DotNet.Files</Name>
@@ -222,7 +222,7 @@
         <VersionPrefix>1.0.0-preview3-</VersionPrefix>
         <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
         <Clean>False</Clean>
-        <Frameworks>netstandard1.6</Frameworks>
+        <Frameworks>netstandard1.3</Frameworks>
       </BaseTestPackageProject>
 
       <TestPackageProjectFrameworksExcludes Condition=" '$(IsDesktopAvailable)' != 'True' " Include="net45" />
