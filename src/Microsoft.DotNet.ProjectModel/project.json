@@ -8,10 +8,10 @@
     "Microsoft.Extensions.DependencyModel": "1.0.1-beta-000933",
     "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000933",
     "Newtonsoft.Json": "9.0.1",
-    "NuGet.Configuration": "3.6.0-rc-1954",
-    "NuGet.Packaging": "3.6.0-rc-1954",
-    "NuGet.RuntimeModel": "3.6.0-rc-1954",
-    "NuGet.ProjectModel": "3.6.0-rc-1954",
+    "NuGet.Configuration": "3.6.0-rc-1979",
+    "NuGet.Packaging": "3.6.0-rc-1979",
+    "NuGet.RuntimeModel": "3.6.0-rc-1979",
+    "NuGet.ProjectModel": "3.6.0-rc-1979",
     "System.Reflection.Metadata": "1.4.1-beta-24410-02"
   },
   "frameworks": {
