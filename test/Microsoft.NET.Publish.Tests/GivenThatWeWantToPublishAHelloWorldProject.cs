@@ -59,7 +59,7 @@ namespace Microsoft.NET.Publish.Tests
             var rid = RuntimeEnvironment.GetRuntimeIdentifier();
 
             var helloWorldAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld")
+                .CopyTestAsset("HelloWorld", "SelfContained")
                 .WithSource()
                 .Restore(relativePath: "", args: $"/p:RuntimeIdentifiers={rid}");
 
