@@ -1,4 +1,4 @@
-ASP.NET Publish targets
+ASP.NET Web Sdk targets
 ======================
 
-ASP.NET publish targets contains the tasks and targets required to publish DotNet Applications.
+ASP.NET Web Sdk targets contains the tasks, targets and packages required to build and publish Web Applications.

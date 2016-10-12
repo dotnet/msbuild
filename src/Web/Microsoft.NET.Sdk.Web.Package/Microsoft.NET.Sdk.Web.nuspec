@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>Microsoft.NET.Sdk.Web</id>
+    <summary>The metapackage bringing dependencies for .NET Core Web projects.</summary>
+    <description>
+      The metapackage bringing dependencies for .NET Core Web projects.
+    </description>
+    <language>en-US</language>
+    <version>$WebSdkVersion$</version>
+    <authors>Microsoft Corporation</authors>
+    <owners>Microsoft</owners>
+    <licenseUrl>http://www.microsoft.com/web/webpi/eula/net_library_eula_enu.htm</licenseUrl>
+    <projectUrl>http://github.com/dotnet</projectUrl>
+    <dependencies>
+      <dependency id="Microsoft.NET.Sdk.Web.ProjectSystem" version="$CoreSdkVersion$" />
+      <dependency id="Microsoft.NET.Sdk.Publish" version="$WebSdkVersion$" />
+    </dependencies>
+  </metadata>
+</package>

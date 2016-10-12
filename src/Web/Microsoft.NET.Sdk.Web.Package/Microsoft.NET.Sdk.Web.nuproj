@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <WebSdkRootDir>..\..\..\</WebSdkRootDir>
+    <WebSourceDir>$(WebSdkRootDir)src\</WebSourceDir>
+    <NuSpecFile>$(MSBuildProjectName).nuspec</NuSpecFile>
+    <OutputPath>$(WebSdkRootDir)bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>$(WebSdkRootDir)obj\$(Configuration)\</IntermediateOutputPath>
+    <NuSpecProperties>CoreSdkVersion=$(CoreSdkVersion);WebSdkVersion=$(WebSdkVersion)</NuSpecProperties>
+  </PropertyGroup>
+  <Import Project="$(WebSdkRootDir)tools\NuGet\NuGetProj.targets"/>
+</Project>
