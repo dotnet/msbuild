@@ -21,7 +21,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
                     itemName,
                     includeContext => FormatGlobPatternsForMsbuild(includeContext.IncludeFiles, includeContext.SourceBasePath),
                     includeContext => FormatGlobPatternsForMsbuild(includeContext.ExcludeFiles, includeContext.SourceBasePath),
-                    includeContext => includeContext != null && includeContext.IncludeFiles.Count > 0);
+                    includeContext => includeContext != null 
+                        && includeContext.IncludeFiles != null 
+                        && includeContext.IncludeFiles.Count > 0);
 
         private Func<string, AddItemTransform<IncludeContext>> IncludeExcludeTransformGetter => 
             (itemName) => new AddItemTransform<IncludeContext>(
@@ -132,6 +134,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
 
         private string FormatGlobPatternsForMsbuild(IEnumerable<string> patterns, string projectDirectory)
         {
+            if (patterns == null)
+            {
+                return string.Empty;
+            }
+
             List<string> mutatedPatterns = new List<string>(patterns.Count());
 
             foreach (var pattern in patterns)

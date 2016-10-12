@@ -10,6 +10,7 @@ using Xunit;
 using FluentAssertions;
 using Microsoft.DotNet.ProjectJsonMigration.Rules;
 using Microsoft.DotNet.ProjectModel.Files;
+using System.Collections.Generic;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 {
@@ -382,16 +383,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             string itemName)
         {
             var testDirectory = Temp.CreateDirectory().Path;
-
-            Directory.CreateDirectory(Path.Combine(testDirectory, "root"));
-            Directory.CreateDirectory(Path.Combine(testDirectory, "src"));
-            File.WriteAllText(Path.Combine(testDirectory, "root", "file1.txt"), "content");
-            File.WriteAllText(Path.Combine(testDirectory, "root", "file2.txt"), "content");
-            File.WriteAllText(Path.Combine(testDirectory, "root", "file3.txt"), "content");
-            File.WriteAllText(Path.Combine(testDirectory, "src", "file1.cs"), "content");
-            File.WriteAllText(Path.Combine(testDirectory, "src", "file2.cs"), "content");
-            File.WriteAllText(Path.Combine(testDirectory, "src", "file3.cs"), "content");
-            File.WriteAllText(Path.Combine(testDirectory, "rootfile.cs"), "content");
+            WriteExtraFiles(testDirectory);
 
             var pj = @"
                 {
@@ -410,19 +402,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             mockProj.Items.Count(i => i.ItemType.Equals(itemName, StringComparison.Ordinal)).Should().Be(2);
 
-            var defaultIncludePatterns = group == "compile" ? ProjectFilesCollection.DefaultCompileBuiltInPatterns
-                                       : group == "embed"   ? ProjectFilesCollection.DefaultResourcesBuiltInPatterns
-                                       : Enumerable.Empty<string>();
-
-            var defaultExcludePatterns = group == "copyToOutput" ? ProjectFilesCollection.DefaultPublishExcludePatterns
-                                       : ProjectFilesCollection.DefaultBuiltInExcludePatterns;
+            var defaultIncludePatterns = GetDefaultIncludePatterns(group);
+            var defaultExcludePatterns = GetDefaultExcludePatterns(group);
 
             foreach (var item in mockProj.Items.Where(i => i.ItemType.Equals(itemName, StringComparison.Ordinal)))
             {
-                if (item.ItemType == "Content")
-                {
-                    item.Metadata.Count(m => m.Name == "CopyToOutputDirectory").Should().Be(1);
-                }
+                VerifyContentMetadata(item);
 
                 if (item.Include.Contains(@"src\file1.cs"))
                 {
@@ -455,6 +440,96 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                     }
                 }
             }
+        }
+
+        [Theory]
+        [InlineData("compile", "Compile")]
+        [InlineData("embed", "EmbeddedResource")]
+        [InlineData("copyToOutput", "Content")]
+        private void Migrating_group_include_only_Populates_appropriate_ProjectItemElement(
+            string group,
+            string itemName)
+        {
+            var testDirectory = Temp.CreateDirectory().Path;
+            WriteExtraFiles(testDirectory);
+
+            var pj = @"
+                {
+                    ""buildOptions"": {
+                        ""<group>"": [""root"", ""src"", ""rootfile.cs""]
+                    }
+                }".Replace("<group>", group);
+
+            var mockProj = RunBuildOptionsRuleOnPj(pj,
+                testDirectory: testDirectory);
+
+            Console.WriteLine(mockProj.RawXml);
+
+            mockProj.Items.Count(i => i.ItemType.Equals(itemName, StringComparison.Ordinal)).Should().Be(1);
+
+            var defaultIncludePatterns = GetDefaultIncludePatterns(group);
+            var defaultExcludePatterns = GetDefaultExcludePatterns(group);
+
+            foreach (var item in mockProj.Items.Where(i => i.ItemType.Equals(itemName, StringComparison.Ordinal)))
+            {
+                VerifyContentMetadata(item);
+
+                if (defaultIncludePatterns.Any())
+                {
+                    item.Include.Should()
+                        .Be(@"root\**\*;src\**\*;rootfile.cs;" + string.Join(";", defaultIncludePatterns).Replace("/", "\\"));
+                }
+                else
+                {
+                    item.Include.Should()
+                        .Be(@"root\**\*;src\**\*;rootfile.cs");
+                }
+
+                if (defaultExcludePatterns.Any())
+                {
+                    item.Exclude.Should()
+                        .Be(string.Join(";", defaultExcludePatterns).Replace("/", "\\"));
+                }
+                else
+                {
+                    item.Exclude.Should()
+                        .Be(string.Empty);
+                }
+            }
+        }
+
+        private static IEnumerable<string> GetDefaultExcludePatterns(string group)
+        {
+            return group == "copyToOutput" ? ProjectFilesCollection.DefaultPublishExcludePatterns
+                                       : ProjectFilesCollection.DefaultBuiltInExcludePatterns;
+        }
+
+        private static IEnumerable<string> GetDefaultIncludePatterns(string group)
+        {
+            return group == "compile" ? ProjectFilesCollection.DefaultCompileBuiltInPatterns
+                                       : group == "embed" ? ProjectFilesCollection.DefaultResourcesBuiltInPatterns
+                                       : Enumerable.Empty<string>();
+        }
+
+        private static void VerifyContentMetadata(ProjectItemElement item)
+        {
+            if (item.ItemType == "Content")
+            {
+                item.Metadata.Count(m => m.Name == "CopyToOutputDirectory").Should().Be(1);
+            }
+        }
+
+        private void WriteExtraFiles(string directory)
+        {
+            Directory.CreateDirectory(Path.Combine(directory, "root"));
+            Directory.CreateDirectory(Path.Combine(directory, "src"));
+            File.WriteAllText(Path.Combine(directory, "root", "file1.txt"), "content");
+            File.WriteAllText(Path.Combine(directory, "root", "file2.txt"), "content");
+            File.WriteAllText(Path.Combine(directory, "root", "file3.txt"), "content");
+            File.WriteAllText(Path.Combine(directory, "src", "file1.cs"), "content");
+            File.WriteAllText(Path.Combine(directory, "src", "file2.cs"), "content");
+            File.WriteAllText(Path.Combine(directory, "src", "file3.cs"), "content");
+            File.WriteAllText(Path.Combine(directory, "rootfile.cs"), "content");
         }
 
         private ProjectRootElement RunBuildOptionsRuleOnPj(string s, string testDirectory = null)
