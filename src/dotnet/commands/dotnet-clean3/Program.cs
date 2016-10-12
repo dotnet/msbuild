@@ -19,7 +19,8 @@ namespace Microsoft.DotNet.Tools.Clean3
                 Name = "dotnet clean3",
                 FullName = ".NET Clean Command",
                 Description = "Command to clean previously generated build outputs.",
-                AllowArgumentSeparator = true
+                AllowArgumentSeparator = true,
+                ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText
             };
             app.HelpOption("-h|--help");
 

@@ -19,6 +19,7 @@ namespace Microsoft.DotNet.Tools.Run
             app.Description = "Command used to run .NET apps";
             app.HandleResponseFiles = true;
             app.AllowArgumentSeparator = true;
+            app.ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText;
             app.HelpOption("-h|--help");
 
             CommandOption configuration = app.Option(

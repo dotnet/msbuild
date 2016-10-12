@@ -17,6 +17,7 @@ namespace Microsoft.DotNet.Tools.Publish3
             app.FullName = ".NET Publisher";
             app.Description = "Publisher for the .NET Platform";
             app.AllowArgumentSeparator = true;
+            app.ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText;
             app.HelpOption("-h|--help");
 
             CommandArgument projectArgument = app.Argument("<PROJECT>",
