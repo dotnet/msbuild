@@ -18,7 +18,9 @@ namespace Microsoft.DotNet.Tools.Restore3
             {
                 Name = "restore3",
                 FullName = "restore3",
-                Description = "restore for msbuild"
+                Description = "restore for msbuild",
+                AllowArgumentSeparator = true,
+                ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText
             };
 
             cmd.HelpOption("-h|--help");

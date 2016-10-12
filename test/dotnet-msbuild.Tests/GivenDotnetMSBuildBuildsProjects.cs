@@ -41,5 +41,39 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 .And
                 .HaveStdOutContaining("You want me to say 'GreatScott'");
         }
+
+        [Theory]
+        // https://github.com/dotnet/cli/issues/4293
+        [InlineData("build", false)]
+        [InlineData("pack", false)]
+        [InlineData("publish", false)]
+        [InlineData("restore", false)]
+        [InlineData("run", false)]
+        [InlineData("build3", true)]
+        [InlineData("clean3", true)]
+        [InlineData("pack3", true)]
+        [InlineData("publish3", true)]
+        [InlineData("restore3", true)]
+        [InlineData("run3", true)]
+        public void ItMSBuildHelpText(string commandName, bool isMSBuildCommand)
+        {
+            const string MSBuildHelpText = "  Any extra options that should be passed to MSBuild. See 'dotnet msbuild -h' for available options.";
+
+            var projectDirectory = TestAssetsManager.CreateTestDirectory("ItContainsMSBuildHelpText");
+            var result = new TestCommand("dotnet")
+                .WithWorkingDirectory(projectDirectory.Path)
+                .ExecuteWithCapturedOutput($"{commandName} --help");
+            
+            result.ExitCode.Should().Be(0);
+            if (isMSBuildCommand)
+            {
+                result.StdOut.Should().Contain(MSBuildHelpText);
+            }
+            else
+            {
+                result.StdOut.Should().NotContain(MSBuildHelpText);
+            }
+        }
+
     }
 }

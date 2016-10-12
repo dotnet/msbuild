@@ -18,7 +18,9 @@ namespace Microsoft.DotNet.Tools.Pack3
             {
                 Name = "pack3",
                 FullName = "pack3",
-                Description = "pack for msbuild"
+                Description = "pack for msbuild",
+                AllowArgumentSeparator = true,
+                ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText
             };
 
             cmd.HelpOption("-h|--help");
