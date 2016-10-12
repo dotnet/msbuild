@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectJsonMigration;
 using Microsoft.DotNet.Internal.ProjectModel;
@@ -49,7 +50,9 @@ namespace Microsoft.DotNet.Tools.Migrate
             var projectsToMigrate = GetProjectsToMigrate(_projectArg);
 
             var msBuildTemplate = _templateFile != null ?
-                ProjectRootElement.TryOpen(_templateFile) : _temporaryDotnetNewProject.MSBuildProject;
+                ProjectRootElement.Open(_templateFile,
+                    ProjectCollection.GlobalProjectCollection,
+                    preserveFormatting: true) : _temporaryDotnetNewProject.MSBuildProject;
             
             var sdkVersion = _sdkVersion ?? _temporaryDotnetNewProject.MSBuildProject.GetSdkVersion();
 
@@ -188,7 +191,7 @@ namespace Microsoft.DotNet.Tools.Migrate
         {
             IEnumerable<string> projects = null;
 
-            if (projectArg.EndsWith(Project.FileName, StringComparison.OrdinalIgnoreCase))
+            if (projectArg.EndsWith(ProjectModel.Project.FileName, StringComparison.OrdinalIgnoreCase))
             {
                 projects = Enumerable.Repeat(projectArg, 1);
             }
@@ -202,7 +205,7 @@ namespace Microsoft.DotNet.Tools.Migrate
             }
             else if (Directory.Exists(projectArg))
             {
-                projects = Directory.EnumerateFiles(projectArg, Project.FileName, SearchOption.AllDirectories);
+                projects = Directory.EnumerateFiles(projectArg, ProjectModel.Project.FileName, SearchOption.AllDirectories);
                 if (!projects.Any())
                 {
                     throw new Exception($"No project.json file found in '{projectArg}'");

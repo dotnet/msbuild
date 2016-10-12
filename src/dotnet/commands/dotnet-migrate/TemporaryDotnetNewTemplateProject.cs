@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.DotNet.ProjectJsonMigration;
+using Microsoft.Build.Evaluation;
 
 namespace Microsoft.DotNet.Tools.Migrate
 {
@@ -52,7 +53,9 @@ namespace Microsoft.DotNet.Tools.Migrate
             var templateProjPath = Path.Combine(temporaryDotnetNewMSBuildDirectory,
                 c_temporaryDotnetNewMSBuildProjectName + ".csproj");
 
-            return ProjectRootElement.Open(templateProjPath);
+            return ProjectRootElement.Open(templateProjPath,
+                ProjectCollection.GlobalProjectCollection,
+                preserveFormatting: true);
         }
 
         private void RunCommand(string commandToExecute, IEnumerable<string> args, string workingDirectory)

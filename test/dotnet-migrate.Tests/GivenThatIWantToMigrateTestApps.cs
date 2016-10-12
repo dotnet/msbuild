@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Migration.Tests
         [InlineData("TestAppWithRuntimeOptions")]
         [InlineData("TestAppWithContents")]
         [InlineData("AppWithAssemblyInfo")]
-        public void It_migrates_apps(string projectName)
+        public void It_migrates_apps_and_puts_newline_at_end_of_file(string projectName)
         {
             var projectDirectory = TestAssetsManager.CreateTestInstance(projectName, identifier: projectName)
                                                     .WithLockFiles()
@@ -41,6 +41,11 @@ namespace Microsoft.DotNet.Migration.Tests
             outputsIdentical.Should().BeTrue();
 
             VerifyAllMSBuildOutputsRunnable(projectDirectory);
+
+            var outputCsProj = Path.Combine(projectDirectory, projectName + ".csproj");
+            var csproj = File.ReadAllText(outputCsProj);
+            Console.WriteLine(csproj);
+            csproj.EndsWith(Environment.NewLine).Should().Be(true);
         }
 
         [Fact]
