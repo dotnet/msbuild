@@ -192,12 +192,7 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
 
         private static string FormatLibraryRange(ProjectLibraryDependency range)
         {
-            if (range.LibraryRange.VersionRange == null)
-            {
-                return range.Name;
-            }
-
-            return range.Name + " " + VersionUtility.RenderVersion(range.LibraryRange.VersionRange);
+            return range.LibraryRange.ToLockFileDependencyGroupString();
         }
 
         private void AddDiagnostics(List<DiagnosticMessage> messages,
