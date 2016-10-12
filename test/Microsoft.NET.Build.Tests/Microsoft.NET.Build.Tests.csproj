@@ -10,8 +10,8 @@
     <RootNamespace>Microsoft.NET.Build.Tests</RootNamespace>
     <AssemblyName>Microsoft.NET.Build.Tests</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
-    <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
-    <TargetFrameworkVersion>v1.6</TargetFrameworkVersion>
+    <TargetFramework>netstandard1.6</TargetFramework>
+    <PackageTargetFallback>dotnet5.4;portable-net451+win8</PackageTargetFallback>
     <OutDir>$(OutDir)Tests\</OutDir>
     <GenerateDependencyFile>false</GenerateDependencyFile>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -23,9 +23,26 @@
     <DebugEngines>{2E36F1D4-B23C-435D-AB41-18E608940038}</DebugEngines>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Sdk">
+      <Version>$(SdkStage0Version)</Version>
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.DotNet.Cli.Utils">
+      <Version>$(DotNetCliUtilsVersion)</Version>
+    </PackageReference>
+    <PackageReference Include="FluentAssertions">
+      <Version>$(FluentAssertionsVersion)</Version>
+    </PackageReference>
+    <PackageReference Include="System.Diagnostics.FileVersionInfo">
+      <Version>4.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="xunit">
+      <Version>$(xunitVersion)</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="**\*.cs" Exclude="$(GlobalExclude)" />
     <EmbeddedResource Include="**\*.resx" Exclude="$(GlobalExclude)" />
-    <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj">
@@ -38,7 +55,7 @@
   <Target Name="AfterBuild">
     <ItemGroup>
       <CopyLocalAssembly Include="Microsoft.DotNet.Cli.Utils">
-        <Version>1.0.0-preview2-003121</Version>
+        <Version>$(DotNetCliUtilsVersion)</Version>
         <TFM>netstandard1.6</TFM>
       </CopyLocalAssembly>
       <CopyLocalAssembly Include="Microsoft.DotNet.ProjectModel">
@@ -50,7 +67,10 @@
         <TFM>netstandard1.3</TFM>
       </CopyLocalAssembly>
       <CopyLocalAssembly>
-        <FullFilePath>$(NuGet_Packages)\%(CopyLocalAssembly.Identity)\%(CopyLocalAssembly.Version)\lib\%(CopyLocalAssembly.TFM)\%(CopyLocalAssembly.Identity).dll</FullFilePath>
+        <PackageRelativePath>$([System.String]::Copy('%(Identity)\%(Version)').ToLowerInvariant())</PackageRelativePath>
+      </CopyLocalAssembly>
+      <CopyLocalAssembly>
+        <FullFilePath>$(NuGet_Packages)\%(CopyLocalAssembly.PackageRelativePath)\lib\%(CopyLocalAssembly.TFM)\%(CopyLocalAssembly.Identity).dll</FullFilePath>
       </CopyLocalAssembly>
     </ItemGroup>
     <Copy SourceFiles="%(CopyLocalAssembly.FullFilePath)" DestinationFolder="$(OutDir)" />

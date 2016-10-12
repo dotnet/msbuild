@@ -4,7 +4,7 @@
   <PropertyGroup>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <OutputType>Library</OutputType>
-    <TargetFrameworks>netstandard1.5</TargetFrameworks>
+    <TargetFramework>netstandard1.5</TargetFramework>
     <ProjectGuid>{BB691360-49BC-46EB-8BA9-6A69A54CD4B0}</ProjectGuid>
   </PropertyGroup>
   <ItemGroup>

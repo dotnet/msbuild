@@ -31,8 +31,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Restore();
 
             var publishCommand = new PublishCommand(Stage0MSBuild, helloWorldAsset.TestRoot);
-            // Temporarily pass in the TFM to publish until https://github.com/dotnet/sdk/issues/175 is addressed
-            var publishResult = publishCommand.Execute("/p:TargetFramework=netcoreapp1.0");
+            var publishResult = publishCommand.Execute();
 
             publishResult.Should().Pass();
 
@@ -65,8 +64,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Restore(relativePath: "", args: $"/p:RuntimeIdentifiers={rid}");
 
             var publishCommand = new PublishCommand(Stage0MSBuild, helloWorldAsset.TestRoot);
-            // Temporarily pass in the TFM to publish until https://github.com/dotnet/sdk/issues/175 is addressed
-            var publishResult = publishCommand.Execute("/p:TargetFramework=netcoreapp1.0", $"/p:RuntimeIdentifier={rid}");
+            var publishResult = publishCommand.Execute($"/p:RuntimeIdentifier={rid}");
 
             publishResult.Should().Pass();
 

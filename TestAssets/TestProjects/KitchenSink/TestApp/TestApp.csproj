@@ -3,7 +3,7 @@
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>netcoreapp1.0</TargetFrameworks>
+    <TargetFramework>netcoreapp1.0</TargetFramework>
     <ProjectGuid>{C91F7F4C-47ED-4D1C-8990-B2E886B0FAD9}</ProjectGuid>
   </PropertyGroup>
   <ItemGroup>
