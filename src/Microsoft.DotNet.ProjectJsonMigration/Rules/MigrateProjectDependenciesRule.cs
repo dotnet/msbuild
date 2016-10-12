@@ -32,8 +32,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             var migratedXProjDependencyPaths = MigrateXProjProjectDependencies(migrationRuleInputs);
             var migratedXProjDependencyNames = new HashSet<string>(migratedXProjDependencyPaths.Select(p => Path.GetFileNameWithoutExtension(
                                                                                                                  PathUtility.GetPathWithDirectorySeparator(p))));
-
-            AddPropertyTransformsToCommonPropertyGroup(migrationRuleInputs.CommonPropertyGroup);
             MigrateProjectJsonProjectDependencies(
                 migrationRuleInputs.ProjectContexts, 
                 migratedXProjDependencyNames, 
@@ -105,7 +103,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         {
             if (targetFramework != null)
             {
-                itemGroup.Condition = $" '$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)' == '{targetFramework.DotNetFrameworkName}' ";
+                itemGroup.Condition = targetFramework.GetMSBuildCondition();
             }
 
             foreach (var projectDependencyTransformResult in projectDependencyTransformResults)
@@ -113,30 +111,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 _transformApplicator.Execute(projectDependencyTransformResult, itemGroup);
             }
         }
-
-        private void AddPropertyTransformsToCommonPropertyGroup(ProjectPropertyGroupElement commonPropertyGroup)
-        {
-            var propertyTransformResults = new[]
-            {
-                AutoUnifyTransform.Transform(true),
-                DesignTimeAutoUnifyTransform.Transform(true)
-            };
-
-            foreach (var propertyTransformResult in propertyTransformResults)
-            {
-                _transformApplicator.Execute(propertyTransformResult, commonPropertyGroup);
-            }
-        }
-
-        private AddPropertyTransform<bool> AutoUnifyTransform => new AddPropertyTransform<bool>(
-            "AutoUnify",
-            "true",
-            b => true);
-
-        private AddPropertyTransform<bool> DesignTimeAutoUnifyTransform => new AddPropertyTransform<bool>(
-            "DesignTimeAutoUnify",
-            "true",
-            b => true);
 
         private AddItemTransform<ProjectDependency> ProjectDependencyTransform => new AddItemTransform<ProjectDependency>(
             "ProjectReference",

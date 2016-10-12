@@ -76,7 +76,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
         private AddPropertyTransform<CommonCompilerOptions> LanguageVersionTransform =>
             new AddPropertyTransform<CommonCompilerOptions>("LangVersion",
-                compilerOptions => compilerOptions.LanguageVersion,
+                compilerOptions => FormatLanguageVersion(compilerOptions.LanguageVersion),
                 compilerOptions => !string.IsNullOrEmpty(compilerOptions.LanguageVersion));
 
         private AddPropertyTransform<CommonCompilerOptions> DelaySignTransform =>
@@ -354,6 +354,16 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     new JObject(),
                     null,
                     ProjectFilesCollection.DefaultPublishExcludePatterns);
+        }
+
+        private string FormatLanguageVersion(string langVersion)
+        {
+            if (langVersion.StartsWith("csharp", StringComparison.OrdinalIgnoreCase))
+            {
+                return langVersion.Substring("csharp".Length);
+            }
+
+            return langVersion;
         }
     }
 }

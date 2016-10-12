@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             mockProj.Properties.First(p => p.Name == "OutputType")
                 .Parent.Condition.Should()
-                .Contain("'$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)' == '.NETCoreApp,Version=v1.0'");
+                .Contain("'$(TargetFramework)' == 'netcoreapp1.0'");
         }
 
         [Fact]

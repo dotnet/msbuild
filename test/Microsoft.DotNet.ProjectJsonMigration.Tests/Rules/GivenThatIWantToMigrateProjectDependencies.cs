@@ -16,33 +16,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 {
     public class GivenThatIWantToMigrateProjectDependencies : TestBase
     {
-        // Workaround For P2P dependencies
-        // ISSUE: https://github.com/dotnet/sdk/issues/73
-        [Fact]
-        public void If_a_project_dependency_is_present_DesignTimeAutoUnify_and_AutoUnify_are_present()
-        {
-            var solutionDirectory =
-                TestAssetsManager.CreateTestInstance("TestAppWithLibrary", callingMethod: "p").Path;
-
-            var appDirectory = Path.Combine(solutionDirectory, "TestApp");
-            var libDirectory = Path.Combine(solutionDirectory, "TestLibrary");
-
-            var projectContext = ProjectContext.Create(appDirectory, FrameworkConstants.CommonFrameworks.NetCoreApp10);
-            var mockProj = ProjectRootElement.Create();
-            var testSettings = new MigrationSettings(appDirectory, appDirectory, "1.0.0", mockProj);
-            var testInputs = new MigrationRuleInputs(new[] {projectContext}, mockProj, mockProj.AddItemGroup(),
-                mockProj.AddPropertyGroup());
-            new MigrateProjectDependenciesRule().Apply(testSettings, testInputs);
-
-            var autoUnify = mockProj.Properties.Where(p => p.Name == "AutoUnify");
-            autoUnify.Count().Should().Be(1);
-            autoUnify.First().Value.Should().Be("true");
-
-            var designTimeAutoUnify = mockProj.Properties.Where(p => p.Name == "DesignTimeAutoUnify");
-            designTimeAutoUnify.Count().Should().Be(1);
-            designTimeAutoUnify.First().Value.Should().Be("true");
-        }
-
         [Fact]
         public void Project_dependencies_are_migrated_to_ProjectReference()
         {

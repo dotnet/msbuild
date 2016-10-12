@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             MigrationRuleInputs migrationRuleInputs)
         {
             var buildOptions = project.GetRawCompilerOptions(framework);
-            var configurationCondition = $" '$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)' == '{framework.DotNetFrameworkName}' ";
+            var configurationCondition = framework.GetMSBuildCondition();
 
             MigrateConfiguration(buildOptions, configurationCondition, migrationSettings, migrationRuleInputs);
         }

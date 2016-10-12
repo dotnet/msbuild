@@ -240,6 +240,20 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
+        public void Migrating_languageVersion_removes_csharp_in_LangVersion()
+        {
+            var mockProj = RunBuildOptionsRuleOnPj(@"
+                {
+                    ""buildOptions"": {
+                        ""languageVersion"": ""csharp5""
+                    }
+                }");
+
+            mockProj.Properties.Count(p => p.Name == "LangVersion").Should().Be(1);
+            mockProj.Properties.First(p => p.Name == "LangVersion").Value.Should().Be("5");
+        }
+
+        [Fact]
         public void Migrating_keyFile_populates_AssemblyOriginatorKeyFile_and_SignAssembly()
         {
             var mockProj = RunBuildOptionsRuleOnPj(@"
