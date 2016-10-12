@@ -10,17 +10,33 @@
     <RootNamespace>Microsoft.NET.TestFramework</RootNamespace>
     <AssemblyName>Microsoft.NET.TestFramework</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
-    <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
-    <TargetFrameworkVersion>v1.6</TargetFrameworkVersion>
+    <TargetFramework>netstandard1.6</TargetFramework>
+    <PackageTargetFallback>dotnet5.4;portable-net451+win8</PackageTargetFallback>
     <OutDir>$(OutDir)Tests\</OutDir>
     <GenerateDependencyFile>false</GenerateDependencyFile>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <NonShipping>true</NonShipping>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Sdk">
+      <Version>$(SdkStage0Version)</Version>
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.DotNet.Cli.Utils">
+      <Version>$(DotNetCliUtilsVersion)</Version>
+    </PackageReference>
+    <PackageReference Include="FluentAssertions">
+      <Version>$(FluentAssertionsVersion)</Version>
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>$(NewtonsoftJsonVersion)</Version>
+    </PackageReference>
+  </ItemGroup>
+
   <ItemGroup>
     <Compile Include="**\*.cs" Exclude="$(GlobalExclude)" />
     <EmbeddedResource Include="**\*.resx" Exclude="$(GlobalExclude)" />
-    <None Include="project.json" />
   </ItemGroup>
 
   <Target Name="GenerateVersionFile"

@@ -10,12 +10,12 @@
     <RootNamespace>Microsoft.NET.Build.Tasks</RootNamespace>
     <AssemblyName>Microsoft.NET.Build.Tasks</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
-    <TargetFrameworks>netstandard1.3</TargetFrameworks>
+    <TargetFramework>netstandard1.3</TargetFramework>
     <GenerateDependencyFile>false</GenerateDependencyFile>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.Sdk">
+    <PackageReference Include="Microsoft.NET.Sdk">
       <Version>$(SdkStage0Version)</Version>
     </PackageReference>
     <PackageReference Include="NuGet.ProjectModel">
