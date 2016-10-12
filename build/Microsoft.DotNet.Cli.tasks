@@ -2,7 +2,10 @@
 <Project ToolsVersion="14.0" DefaultTargets="Test" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <UsingTask TaskName="AddMetadataIsPE" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="ChangeEntryPointLibraryName" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="CheckIfAllBuildsHavePublished" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="ChMod" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="CopyBlobsToLatest" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="CreateAzureContainer" AssemblyFile="$(CLIBuildDll)"/>
   <UsingTask TaskName="Crossgen" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="DotNetBuild" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="DotNetNew" AssemblyFile="$(CLIBuildDll)" />
@@ -11,8 +14,8 @@
   <UsingTask TaskName="DotNetRestore" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="DotNetTest" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="DownloadFile" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="FinalizeBuild" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="GenerateBuildVersionInfo" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="GenerateChecksums" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="GenerateGuidFromName" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="GetCommitHash" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="GetCurrentRuntimeInformation" AssemblyFile="$(CLIBuildDll)" />
@@ -23,7 +26,7 @@
   <UsingTask TaskName="SetEnvVar" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="TarGzFileCreateFromDirectory" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="TarGzFileExtractToDirectory" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="CreateAzureContainer" AssemblyFile="$(CLIBuildDll)"/>
+  <UsingTask TaskName="UpdateVersionsRepo" AssemblyFile="$(CLIBuildDll)"/>
   <UsingTask TaskName="UploadToAzure" AssemblyFile="$(CLIBuildDll)"/>
   <UsingTask TaskName="ZipFileCreateFromDirectory" AssemblyFile="$(CLIBuildDll)"/>
   <UsingTask TaskName="ZipFileExtractToDirectory" AssemblyFile="$(CLIBuildDll)"/>

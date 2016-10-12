@@ -13,28 +13,47 @@
     <!-- add relative blob path metadata -->
     <ItemGroup>
       <ForPublishing>
-        <RelativeBlobPath>$([System.String]::Copy('%(RecursiveDir)%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath> 
+        <RelativeBlobPath>$([System.String]::Copy('%(RecursiveDir)%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
       </ForPublishing>
     </ItemGroup>
     <Error Condition="'@(ForPublishing)' == ''" Text="No items were found matching pattern '$(PublishPattern)'." />
   </Target>
 
-  <!-- publishes items to blob storage in Azure -->
-  <Target Name="UploadToAzure" DependsOnTargets="GatherItemsForPattern">
-    <Error Condition="'$(ContainerName)' == ''" Text="Missing property ContainerName." />
-    <Error Condition="'$(CloudDropAccountName)' == ''" Text="Missing property CloudDropAccountName." />
-    <Error Condition="'$(CloudDropAccessToken)' == ''" Text="Missing property CloudDropAccessToken." />
+  <!-- publishes artifacts to blob storage in Azure -->
+  <Target Name="UploadArtifactsToAzure" DependsOnTargets="GatherItemsForPattern">
+    <Error Condition="'$(ArtifactContainerName)' == ''" Text="Missing property ArtifactContainerName." />
+    <Error Condition="'$(ArtifactCloudDropAccountName)' == ''" Text="Missing property ArtifactCloudDropAccountName." />
+    <Error Condition="'$(ArtifactCloudDropAccessToken)' == ''" Text="Missing property ArtifactCloudDropAccessToken." />
     <!-- create the container if it doesn't exist -->
     <CreateAzureContainer
-      AccountKey="$(CloudDropAccessToken)"
-      AccountName="$(CloudDropAccountName)"
-      ContainerName="$(ContainerName)" />
+      AccountKey="$(ArtifactCloudDropAccessToken)"
+      AccountName="$(ArtifactCloudDropAccountName)"
+      ContainerName="$(ArtifactContainerName)" />
     <!-- now upload the items -->
     <UploadToAzure
-      AccountKey="$(CloudDropAccessToken)"
-      AccountName="$(CloudDropAccountName)"
-      ContainerName="$(ContainerName)"
+      AccountKey="$(ArtifactCloudDropAccessToken)"
+      AccountName="$(ArtifactCloudDropAccountName)"
+      ContainerName="$(ArtifactContainerName)"
       Items="@(ForPublishing)"
+      Overwrite="$(OverwriteOnPublish)" />
+  </Target>
+
+  <!-- publishes checksums for the artifacts to blob storage in Azure -->
+  <Target Name="UploadChecksumsToAzure" DependsOnTargets="GenerateChecksums">
+    <Error Condition="'$(ChecksumContainerName)' == ''" Text="Missing property ChecksumContainerName." />
+    <Error Condition="'$(ChecksumCloudDropAccountName)' == ''" Text="Missing property ChecksumCloudDropAccountName." />
+    <Error Condition="'$(ChecksumCloudDropAccessToken)' == ''" Text="Missing property ChecksumCloudDropAccessToken." />
+    <!-- create the container if it doesn't exist -->
+    <CreateAzureContainer
+      AccountKey="$(ChecksumCloudDropAccessToken)"
+      AccountName="$(ChecksumCloudDropAccountName)"
+      ContainerName="$(ChecksumContainerName)" />
+    <!-- now upload the items -->
+    <UploadToAzure
+      AccountKey="$(ChecksumCloudDropAccessToken)"
+      AccountName="$(ChecksumCloudDropAccountName)"
+      ContainerName="$(ChecksumContainerName)"
+      Items="@(ArtifactsForGeneratingChecksums->'%(DestinationPath)')"
       Overwrite="$(OverwriteOnPublish)" />
   </Target>
 

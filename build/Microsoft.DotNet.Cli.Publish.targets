@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildThisFileDirectory)/publish/FinishBuild.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/PublishContent.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/Microsoft.DotNet.Cli.Badge.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)/publish/Microsoft.DotNet.Cli.Checksum.targets" />
 
   <!-- PUBLISH_TO_AZURE_BLOB env variable set by CI -->
   <Target Name="Publish"
@@ -16,26 +18,22 @@
           DependsOnTargets="SetupAzureBlobInformation;
                             GenerateVersionBadge;
                             GatherItemsForPattern;
-                            UploadToAzure;
+                            GenerateChecksums;
+                            UploadArtifactsToAzure;
+                            UploadChecksumsToAzure;
                             PublishDebFilesToDebianRepo;
                             PublishCliVersionBadge" />
-
-  <Target Name="FinishBuild">
-    <FinalizeBuild AccountName="$(CloudDropAccountName)"
-                   AccountKey="$(CloudDropAccessToken)"
-                   NugetVersion="$(NugetVersion)"
-                   Channel="$(Channel)"
-                   CommitHash="$(CommitHash)"
-                   BranchName="$(BranchName)" />
-  </Target>
 
   <Target Name="SetupAzureBlobInformation">
     <PropertyGroup>
       <Product>Sdk</Product>
-      <ContainerName>$(STORAGE_CONTAINER)</ContainerName>
-      <CloudDropAccessToken>$(STORAGE_KEY)</CloudDropAccessToken>
-      <CloudDropAccountName>$(STORAGE_ACCOUNT)</CloudDropAccountName>
-      <DotnetBlobRootUrl>https://$(CloudDropAccountName).blob.core.windows.net/$(ContainerName)</DotnetBlobRootUrl>
+      <ArtifactContainerName>$(ARTIFACT_STORAGE_CONTAINER)</ArtifactContainerName>
+      <ArtifactCloudDropAccessToken>$(ARTIFACT_STORAGE_KEY)</ArtifactCloudDropAccessToken>
+      <ArtifactCloudDropAccountName>$(ARTIFACT_STORAGE_ACCOUNT)</ArtifactCloudDropAccountName>
+      <DotnetBlobRootUrl>https://$(ArtifactCloudDropAccountName).blob.core.windows.net/$(ArtifactContainerName)</DotnetBlobRootUrl>
+      <ChecksumContainerName>$(CHECKSUM_STORAGE_CONTAINER)</ChecksumContainerName>
+      <ChecksumCloudDropAccessToken>$(CHECKSUM_STORAGE_KEY)</ChecksumCloudDropAccessToken>
+      <ChecksumCloudDropAccountName>$(CHECKSUM_STORAGE_ACCOUNT)</ChecksumCloudDropAccountName>
     </PropertyGroup>
   </Target>
 
@@ -94,16 +92,16 @@
     </ItemGroup>
 
     <UploadToAzure
-      AccountKey="$(CloudDropAccessToken)"
-      AccountName="$(CloudDropAccountName)"
-      ContainerName="$(ContainerName)"
+      AccountKey="$(ArtifactCloudDropAccessToken)"
+      AccountName="$(ArtifactCloudDropAccountName)"
+      ContainerName="$(ArtifactContainerName)"
       Items="@(CliVersionBadgeToUpload)"
       Overwrite="$(OverwriteOnPublish)" />
 
     <SetBlobPropertiesBasedOnFileType
-      AccountKey="$(CloudDropAccessToken)"
-      AccountName="$(CloudDropAccountName)"
-      ContainerName="$(ContainerName)"
+      AccountKey="$(ArtifactCloudDropAccessToken)"
+      AccountName="$(ArtifactCloudDropAccountName)"
+      ContainerName="$(ArtifactContainerName)"
       Items="@(CliVersionBadgeToUpload)" />
   </Target>
 </Project>
