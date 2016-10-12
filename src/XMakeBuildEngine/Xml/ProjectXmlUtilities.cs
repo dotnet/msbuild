@@ -48,6 +48,13 @@ namespace Microsoft.Build.Internal
                         VerifyThrowProjectValidNamespace(childElement);
                         children.Add(childElement);
                         break;
+                    case XmlNodeType.Text:
+                        // Whitespace is read as a #text element so if the node is purely whitespace, just ignore it.
+                        if (!String.IsNullOrWhiteSpace(child.InnerText) && throwForInvalidNodeTypes)
+                        {
+                            ThrowProjectInvalidChildElement(child.Name, element.Name, element.Location);
+                        }
+                        break;
 
                     default:
                         if (throwForInvalidNodeTypes)
