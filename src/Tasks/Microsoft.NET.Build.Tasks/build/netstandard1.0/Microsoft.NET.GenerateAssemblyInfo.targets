@@ -18,6 +18,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     <GeneratedAssemblyInfoFile  Condition="'$(GeneratedAssemblyInfoFile)' ==''">$(IntermediateOutputPath)$(MSBuildProjectName).AssemblyInfo$(DefaultLanguageSourceExtension)</GeneratedAssemblyInfoFile>
     <GenerateAssemblyInfo Condition="'$(GenerateAssemblyInfo)' == ''">true</GenerateAssemblyInfo>
   </PropertyGroup>
@@ -32,12 +33,12 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="GenerateAssemblyInfo"
           BeforeTargets="CoreCompile"
           DependsOnTargets="PrepareForBuild;GetAssemblyVersion;CoreGenerateAssemblyInfo"
-          Condition="'$(GenerateAssemblyInfo)' == 'true'"
-          Inputs="$(MSBuildAllProjects)"
-          Outputs="$(GeneratedAssemblyInfoFile)" />
+          Condition="'$(GenerateAssemblyInfo)' == 'true'" />
 
   <Target Name="CoreGenerateAssemblyInfo"
-          Condition="'$(Language)'=='VB' or '$(Language)'=='C#'">
+          Condition="'$(Language)'=='VB' or '$(Language)'=='C#'"
+          Inputs="$(MSBuildAllProjects)"
+          Outputs="$(GeneratedAssemblyInfoFile)">
     <ItemGroup>
       <AssemblyAttribute Include="System.Reflection.AssemblyCompanyAttribute" Condition="'$(Authors)' != ''">
         <_Parameter1>$(Authors)</_Parameter1>
