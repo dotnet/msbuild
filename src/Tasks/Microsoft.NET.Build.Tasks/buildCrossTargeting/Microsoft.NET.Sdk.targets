@@ -44,7 +44,9 @@ Copyright (c) .NET Foundation. All rights reserved.
   ============================================================
    -->
   <Target Name="GetTargetFrameworkProperties" Returns="TargetFramework=$(NearestTargetFramework)">
-    <GetNearestTargetFramework ReferringTargetFramework="$(ReferringTargetFramework)" PossibleTargetFrameworks="$(TargetFrameworks)">
+    <GetNearestTargetFramework ReferringTargetFramework="$(ReferringTargetFramework)" 
+                               PossibleTargetFrameworks="$(TargetFrameworks)"
+                               ProjectFilePath="$(MSBuildProjectFullPath)">
       <Output PropertyName="NearestTargetFramework" TaskParameter="NearestTargetFramework" />
     </GetNearestTargetFramework>
   </Target>
