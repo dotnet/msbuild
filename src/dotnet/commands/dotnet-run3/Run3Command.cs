@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.Build.Execution;
+using Microsoft.Build.Evaluation;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.MSBuild;
 
@@ -15,6 +15,7 @@ namespace Microsoft.DotNet.Tools.Run
     {
         public string Configuration { get; set; }
         public string Framework { get; set; }
+        public bool NoBuild { get; set; }
         public string Project { get; set; }
         public IReadOnlyList<string> Args { get; set; }
 
@@ -28,7 +29,10 @@ namespace Microsoft.DotNet.Tools.Run
         {
             Initialize();
 
-            EnsureProjectIsBuilt();
+            if (!NoBuild)
+            {
+                EnsureProjectIsBuilt();
+            }
 
             ICommand runCommand = GetRunCommand();
 
@@ -80,21 +84,16 @@ namespace Microsoft.DotNet.Tools.Run
                 globalProperties.Add("TargetFramework", Framework);
             }
 
-            ProjectInstance projectInstance = new ProjectInstance(Project, globalProperties, null);
+            Project project = new Project(Project, globalProperties, null);
 
-            string runProgram = projectInstance.GetPropertyValue("RunCommand");
+            string runProgram = project.GetPropertyValue("RunCommand");
             if (string.IsNullOrEmpty(runProgram))
             {
-                string outputType = projectInstance.GetPropertyValue("OutputType");
-
-                throw new GracefulException(string.Join(Environment.NewLine,
-                    "Unable to run your project.",
-                    "Please ensure you have a runnable project type and ensure 'dotnet run' supports this project.",
-                    $"The current OutputType is '{outputType}'."));
+                ThrowUnableToRunError(project);
             }
 
-            string runArguments = projectInstance.GetPropertyValue("RunArguments");
-            string runWorkingDirectory = projectInstance.GetPropertyValue("RunWorkingDirectory");
+            string runArguments = project.GetPropertyValue("RunArguments");
+            string runWorkingDirectory = project.GetPropertyValue("RunWorkingDirectory");
 
             string fullArguments = runArguments;
             if (_args.Any())
@@ -106,6 +105,30 @@ namespace Microsoft.DotNet.Tools.Run
 
             return Command.Create(commandSpec)
                 .WorkingDirectory(runWorkingDirectory);
+        }
+
+        private void ThrowUnableToRunError(Project project)
+        {
+            string unableToRunYourProjectMessage = "Unable to run your project.";
+
+            string targetFrameworks = project.GetPropertyValue("TargetFrameworks");
+            if (!string.IsNullOrEmpty(targetFrameworks))
+            {
+                string targetFramework = project.GetPropertyValue("TargetFramework");
+                if (string.IsNullOrEmpty(targetFramework))
+                {
+                    throw new GracefulException(string.Join(Environment.NewLine,
+                        unableToRunYourProjectMessage,
+                        "Your project targets multiple frameworks. Please specify which framework to run using '--framework'."));
+                }
+            }
+
+            string outputType = project.GetPropertyValue("OutputType");
+
+            throw new GracefulException(string.Join(Environment.NewLine,
+                unableToRunYourProjectMessage,
+                "Please ensure you have a runnable project type and ensure 'dotnet run' supports this project.",
+                $"The current OutputType is '{outputType}'."));
         }
 
         private void Initialize()
