@@ -27,6 +27,12 @@ namespace Microsoft.NET.Build.Tasks
         public string[] PossibleTargetFrameworks { get; set; }
 
         /// <summary>
+        /// The full path to the project with the given possible target frameworks. 
+        /// </summary>
+        [Required]
+        public string ProjectFilePath { get; set; }
+
+        /// <summary>
         /// The entry in <see cref="PossibleTargetFrameworks"/> that is "nearest" to <see cref="ReferringTargetFramework" />.
         /// If none of the possible frameworks are compatible with the referring framework.
         /// </summary>
@@ -54,7 +60,7 @@ namespace Microsoft.NET.Build.Tasks
             if (nearestNuGetFramework == null)
             {
                 // TODO: localize: https://github.com/dotnet/sdk/issues/33
-                Log.LogError($"Project has no no target framework compatible with '{ReferringTargetFramework}'");
+                Log.LogError($"Project '{ProjectFilePath}' has no target framework compatible with '{ReferringTargetFramework}'.");
                 return;
             }
 
