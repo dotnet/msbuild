@@ -33,9 +33,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="GenerateAssemblyInfo"
           BeforeTargets="CoreCompile"
           DependsOnTargets="PrepareForBuild;GetAssemblyVersion;CoreGenerateAssemblyInfo"
-          Condition="'$(GenerateAssemblyInfo)' == 'true'"
-          Inputs="$(MSBuildAllProjects)"
-          Outputs="$(GeneratedAssemblyInfoFile)" />
+          Condition="'$(GenerateAssemblyInfo)' == 'true'" />
 
   <Target Name="CoreGenerateAssemblyInfo"
           Condition="'$(Language)'=='VB' or '$(Language)'=='C#'"
