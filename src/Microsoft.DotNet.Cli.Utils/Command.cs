@@ -31,7 +31,10 @@ namespace Microsoft.DotNet.Cli.Utils
 
             foreach(var environmentVariable in commandSpec.EnvironmentVariables)
             {
-                psi.Environment.Add(environmentVariable);
+                if (!psi.Environment.ContainsKey(environmentVariable.Key))
+                {
+                    psi.Environment.Add(environmentVariable.Key, environmentVariable.Value);
+                }
             }
 
             _process = new Process

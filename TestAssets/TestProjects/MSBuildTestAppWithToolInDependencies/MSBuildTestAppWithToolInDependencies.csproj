@@ -27,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <DotNetCliToolReference Include="dotnet-dependency-tool-invoker">
+    <DotNetCliToolReference Include="dotnet-invoke-portable">
       <Version>1.0.0-rc-*</Version>
     </DotNetCliToolReference>
   </ItemGroup>
