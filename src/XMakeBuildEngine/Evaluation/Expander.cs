@@ -714,7 +714,7 @@ namespace Microsoft.Build.Evaluation
                     // if there are no item vectors in the string
                     // run a simpler Regex to find item metadata references
                     MetadataMatchEvaluator matchEvaluator = new MetadataMatchEvaluator(metadata, options);
-                    result = RegularExpressions.ItemMetadataPattern.Replace(expression, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
+                    result = RegularExpressions.ItemMetadataPattern.Value.Replace(expression, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
                 }
                 else
                 {
@@ -746,7 +746,7 @@ namespace Microsoft.Build.Evaluation
                                 // Extract the part of the expression that appears before the item vector expression
                                 // e.g. the ABC in ABC@(foo->'%(FullPath)')
                                 string subExpressionToReplaceIn = expression.Substring(start, itemVectorExpressions[n].Index - start);
-                                string replacementResult = RegularExpressions.NonTransformItemMetadataPattern.Replace(subExpressionToReplaceIn, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
+                                string replacementResult = RegularExpressions.NonTransformItemMetadataPattern.Value.Replace(subExpressionToReplaceIn, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
 
                                 // Append the metadata replacement
                                 finalResultBuilder.Append(replacementResult);
@@ -754,7 +754,7 @@ namespace Microsoft.Build.Evaluation
                                 // Expand any metadata that appears in the item vector expression's separator
                                 if (itemVectorExpressions[n].Separator != null)
                                 {
-                                    vectorExpression = RegularExpressions.NonTransformItemMetadataPattern.Replace(itemVectorExpressions[n].Value, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata), -1, itemVectorExpressions[n].SeparatorStart);
+                                    vectorExpression = RegularExpressions.NonTransformItemMetadataPattern.Value.Replace(itemVectorExpressions[n].Value, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata), -1, itemVectorExpressions[n].SeparatorStart);
                                 }
 
                                 // Append the item vector expression as is
@@ -771,7 +771,7 @@ namespace Microsoft.Build.Evaluation
                         if (start < expression.Length)
                         {
                             string subExpressionToReplaceIn = expression.Substring(start);
-                            string replacementResult = RegularExpressions.NonTransformItemMetadataPattern.Replace(subExpressionToReplaceIn, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
+                            string replacementResult = RegularExpressions.NonTransformItemMetadataPattern.Value.Replace(subExpressionToReplaceIn, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
 
                             finalResultBuilder.Append(replacementResult);
                         }
@@ -2253,7 +2253,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             matchEvaluator = new MetadataMatchEvaluator(item.Item1, item.Item2, elementLocation);
 
-                            include = RegularExpressions.ItemMetadataPattern.Replace(arguments[0], matchEvaluator.GetMetadataValueFromMatch);
+                            include = RegularExpressions.ItemMetadataPattern.Value.Replace(arguments[0], matchEvaluator.GetMetadataValueFromMatch);
                         }
 
                         // Include may be empty. Historically we have created items with empty include
@@ -2591,7 +2591,9 @@ namespace Microsoft.Build.Evaluation
             /// Regular expression used to match item metadata references embedded in strings.
             /// For example, %(Compile.DependsOn) or %(DependsOn).
             /// </summary> 
-            internal static readonly Regex ItemMetadataPattern = new Regex(ItemMetadataSpecification, RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture);
+            internal static readonly Lazy<Regex> ItemMetadataPattern = new Lazy<Regex>(
+                () => new Regex(ItemMetadataSpecification,
+                    RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Compiled));
 
             /// <summary>
             /// Name of the group matching the "name" of a metadatum.
@@ -2612,12 +2614,16 @@ namespace Microsoft.Build.Evaluation
             /// regular expression used to match item metadata references outside of item vector transforms
             /// </summary>
             /// <remarks>PERF WARNING: this Regex is complex and tends to run slowly</remarks>
-            internal static readonly Regex NonTransformItemMetadataPattern =
-                new Regex
+            internal static readonly Lazy<Regex> NonTransformItemMetadataPattern = new Lazy<Regex>(
+                () => new Regex
                     (
-                    @"((?<=" + ItemVectorWithTransformLHS + @")" + ItemMetadataSpecification + @"(?!" + ItemVectorWithTransformRHS + @")) | ((?<!" + ItemVectorWithTransformLHS + @")" + ItemMetadataSpecification + @"(?=" + ItemVectorWithTransformRHS + @")) | ((?<!" + ItemVectorWithTransformLHS + @")" + ItemMetadataSpecification + @"(?!" + ItemVectorWithTransformRHS + @"))",
-                    RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture
-                    );
+                    @"((?<=" + ItemVectorWithTransformLHS + @")" + ItemMetadataSpecification + @"(?!" +
+                    ItemVectorWithTransformRHS + @")) | ((?<!" + ItemVectorWithTransformLHS + @")" +
+                    ItemMetadataSpecification + @"(?=" + ItemVectorWithTransformRHS + @")) | ((?<!" +
+                    ItemVectorWithTransformLHS + @")" + ItemMetadataSpecification + @"(?!" +
+                    ItemVectorWithTransformRHS + @"))",
+                    RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Compiled
+                    ));
 
             /// <summary>
             /// Complete description of an item metadata reference, including the optional qualifying item type.

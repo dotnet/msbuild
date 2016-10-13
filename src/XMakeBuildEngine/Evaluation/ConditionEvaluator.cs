@@ -20,7 +20,8 @@ namespace Microsoft.Build.Evaluation
 
     internal static class ConditionEvaluator
     {
-        private readonly static Regex s_singlePropertyRegex = new Regex(@"^\$\(([^\$\(\)]*)\)$");
+        private static readonly Lazy<Regex> s_singlePropertyRegex = new Lazy<Regex>(
+            () => new Regex(@"^\$\(([^\$\(\)]*)\)$", RegexOptions.Compiled));
 
         /// <summary>
         /// Update our table which keeps track of all the properties that are referenced
@@ -64,7 +65,7 @@ namespace Microsoft.Build.Evaluation
                     bool lastPiece = pieceSeparator < 0;
                     int pieceEnd = lastPiece ? leftValue.Length : pieceSeparator;
 
-                    Match singlePropertyMatch = s_singlePropertyRegex.Match(leftValue, pieceStart, pieceEnd - pieceStart);
+                    Match singlePropertyMatch = s_singlePropertyRegex.Value.Match(leftValue, pieceStart, pieceEnd - pieceStart);
 
                     if (singlePropertyMatch.Success)
                     {
