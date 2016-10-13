@@ -7,6 +7,6 @@
   "runtimes": {
     "win": {},
     "win-x86": {},
-    "win-x64": {},
+    "win-x64": {}
   }
 }
