@@ -20,7 +20,7 @@
     "System.Runtime.Serialization.Primitives": "4.1.1",
     "System.Xml.XmlSerializer": "4.0.11",
     "WindowsAzure.Storage": "6.2.2-preview",
-    "NuGet.CommandLine.XPlat": "3.6.0-rc-1979",
+    "NuGet.CommandLine.XPlat": "3.6.0-rc-1984",
     "Microsoft.Build.Utilities.Core": "0.1.0-preview-00043-160929",
     "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000933"
   },
