@@ -11,7 +11,6 @@ namespace Microsoft.NET.Build.Tasks
 {
     public class ProjectContext
     {
-        private readonly string _projectPath;
         private readonly LockFile _lockFile;
         private readonly LockFileTarget _lockFileTarget;
 
@@ -20,9 +19,8 @@ namespace Microsoft.NET.Build.Tasks
         public LockFile LockFile => _lockFile;
         public LockFileTarget LockFileTarget => _lockFileTarget;
 
-        public ProjectContext(string projectPath, LockFile lockFile, LockFileTarget lockFileTarget)
+        public ProjectContext(LockFile lockFile, LockFileTarget lockFileTarget)
         {
-            _projectPath = projectPath;
             _lockFile = lockFile;
             _lockFileTarget = lockFileTarget;
 
@@ -77,8 +75,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public IEnumerable<string> GetTopLevelDependencies()
         {
-            Dictionary<string, LockFileLibrary> libraryLookup =
-                LockFile.Libraries.ToDictionary(l => l.Name, StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, LockFileTargetLibrary> libraryLookup =
+                LockFileTarget.Libraries.ToDictionary(l => l.Name, StringComparer.OrdinalIgnoreCase);
 
             return LockFile
                 .ProjectFileDependencyGroups
@@ -87,22 +85,10 @@ namespace Microsoft.NET.Build.Tasks
                 .SelectMany(g => g.Dependencies)
                 .Select(projectFileDependency =>
                 {
-                    string libraryName = null;
-                    int pathSeparatorIndex = projectFileDependency.IndexOfAny(new[] { '/', '\\' });
-                    if (pathSeparatorIndex != -1)
-                    {
-                        // if projectFileDependency contains a path separator, then it isn't a valid
-                        // library name.  Check to see if it is an MSBuild project
-                        libraryName = FindMSBuildProjectLibraryName(projectFileDependency);
-                    }
-
-                    if (string.IsNullOrEmpty(libraryName))
-                    {
-                        int separatorIndex = projectFileDependency.IndexOf(' ');
-                        libraryName = separatorIndex > 0 ?
-                            projectFileDependency.Substring(0, separatorIndex) :
-                            projectFileDependency;
-                    }
+                    int separatorIndex = projectFileDependency.IndexOf(' ');
+                    string libraryName = separatorIndex > 0 ?
+                        projectFileDependency.Substring(0, separatorIndex) :
+                        projectFileDependency;
 
                     if (!string.IsNullOrEmpty(libraryName) && libraryLookup.ContainsKey(libraryName))
                     {
@@ -113,26 +99,6 @@ namespace Microsoft.NET.Build.Tasks
                 })
                 .Where(libraryName => libraryName != null)
                 .ToArray();
-        }
-
-        private string FindMSBuildProjectLibraryName(string projectPath)
-        {
-            foreach (var library in LockFile.Libraries)
-            {
-                if (!string.IsNullOrEmpty(library.MSBuildProject))
-                {
-                    string fullDependencyProjectPath = Path.GetFullPath(Path.Combine(
-                        Path.GetDirectoryName(_projectPath),
-                        library.MSBuildProject));
-
-                    if (fullDependencyProjectPath == projectPath)
-                    {
-                        return library.Name;
-                    }
-                }
-            }
-
-            return null;
         }
 
         public HashSet<string> GetPrivateAssetsExclusionList(

@@ -43,11 +43,12 @@ namespace Microsoft.NET.Build.Tasks
         protected override void ExecuteCore()
         {
             LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(AssetsFilePath);
-            NuGetFramework framework = TargetFramework == null ? null : NuGetFramework.Parse(TargetFramework);
             NuGetPathContext nugetPathContext = NuGetPathContext.Create(Path.GetDirectoryName(ProjectPath));
             IEnumerable<string> privateAssetsPackageIds = PackageReferenceConverter.GetPackageIds(PrivateAssetsPackageReferences);
 
-            ProjectContext projectContext = lockFile.CreateProjectContext(ProjectPath, framework, RuntimeIdentifier);
+            ProjectContext projectContext = lockFile.CreateProjectContext(
+                NuGetUtils.ParseFrameworkName(TargetFramework),
+                RuntimeIdentifier);
 
             IEnumerable<ResolvedFile> resolvedAssemblies = 
                 new PublishAssembliesResolver(new NuGetPackageResolver(nugetPathContext))

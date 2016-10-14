@@ -57,7 +57,7 @@ namespace Microsoft.NET.Build.Tasks
                     mainProject,
                     compilationOptions,
                     lockFile,
-                    TargetFramework == null ? null : NuGetFramework.Parse(TargetFramework),
+                    NuGetUtils.ParseFrameworkName(TargetFramework),
                     RuntimeIdentifier);
 
             var writer = new DependencyContextWriter();

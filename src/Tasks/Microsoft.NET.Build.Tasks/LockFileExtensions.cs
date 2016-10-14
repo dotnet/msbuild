@@ -14,7 +14,6 @@ namespace Microsoft.NET.Build.Tasks
     {
         public static ProjectContext CreateProjectContext(
             this LockFile lockFile, 
-            string projectPath, 
             NuGetFramework framework, 
             string runtime)
         {
@@ -41,7 +40,7 @@ namespace Microsoft.NET.Build.Tasks
                     $" and RuntimeIdentifier='{runtime}'.");
             }
 
-            return new ProjectContext(projectPath, lockFile, lockFileTarget);
+            return new ProjectContext(lockFile, lockFileTarget);
         }
 
         public static bool IsPortable(this LockFileTarget lockFileTarget)

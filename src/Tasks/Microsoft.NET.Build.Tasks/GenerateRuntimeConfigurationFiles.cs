@@ -10,6 +10,7 @@ using Microsoft.Build.Utilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
+using NuGet.Frameworks;
 using NuGet.ProjectModel;
 
 namespace Microsoft.NET.Build.Tasks
@@ -24,6 +25,9 @@ namespace Microsoft.NET.Build.Tasks
         public string AssetsFilePath { get; set; }
 
         [Required]
+        public string TargetFramework { get; set; }
+
+        [Required]
         public string RuntimeConfigPath { get; set; }
 
         public string RuntimeConfigDevPath { get; set; }
@@ -32,49 +36,43 @@ namespace Microsoft.NET.Build.Tasks
 
         public string UserRuntimeConfig { get; set; }
 
-        private LockFile LockFile { get; set; }
-
-        private bool IsPortable => string.IsNullOrEmpty(RuntimeIdentifier);
-
         protected override void ExecuteCore()
         {
-            LockFile = new LockFileCache(BuildEngine4).GetLockFile(AssetsFilePath);
+            LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(AssetsFilePath);
+            ProjectContext projectContext = lockFile.CreateProjectContext(
+                NuGetUtils.ParseFrameworkName(TargetFramework),
+                RuntimeIdentifier);
 
-            WriteRuntimeConfig();
+            WriteRuntimeConfig(projectContext);
 
             if (!string.IsNullOrEmpty(RuntimeConfigDevPath))
             {
-                WriteDevRuntimeConfig();
+                WriteDevRuntimeConfig(projectContext);
             }
         }
 
-        private void WriteRuntimeConfig()
+        private void WriteRuntimeConfig(ProjectContext projectContext)
         {
             RuntimeConfig config = new RuntimeConfig();
             config.RuntimeOptions = new RuntimeOptions();
 
-            AddFramework(config.RuntimeOptions);
+            AddFramework(config.RuntimeOptions, projectContext);
             AddUserRuntimeOptions(config.RuntimeOptions);
 
             WriteToJsonFile(RuntimeConfigPath, config);
         }
 
-        private void AddFramework(RuntimeOptions runtimeOptions)
+        private void AddFramework(RuntimeOptions runtimeOptions, ProjectContext projectContext)
         {
-            if (IsPortable)
+            if (projectContext.IsPortable)
             {
-                // TODO: https://github.com/dotnet/sdk/issues/17 get this from the lock file
-                var packageName = "Microsoft.NETCore.App";
+                var platformLibrary = projectContext.LockFileTarget.GetPlatformLibrary();
 
-                var redistExport = LockFile
-                    .Libraries
-                    .FirstOrDefault(e => e.Name.Equals(packageName, StringComparison.OrdinalIgnoreCase));
-
-                if (redistExport != null)
+                if (platformLibrary != null)
                 {
                     RuntimeConfigFramework framework = new RuntimeConfigFramework();
-                    framework.Name = redistExport.Name;
-                    framework.Version = redistExport.Version.ToNormalizedString();
+                    framework.Name = platformLibrary.Name;
+                    framework.Version = platformLibrary.Version.ToNormalizedString();
 
                     runtimeOptions.Framework = framework;
                 }
@@ -97,19 +95,19 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
-        private void WriteDevRuntimeConfig()
+        private void WriteDevRuntimeConfig(ProjectContext projectContext)
         {
             RuntimeConfig devConfig = new RuntimeConfig();
             devConfig.RuntimeOptions = new RuntimeOptions();
 
-            AddAdditionalProbingPaths(devConfig.RuntimeOptions);
+            AddAdditionalProbingPaths(devConfig.RuntimeOptions, projectContext);
 
             WriteToJsonFile(RuntimeConfigDevPath, devConfig);
         }
 
-        private void AddAdditionalProbingPaths(RuntimeOptions runtimeOptions)
+        private void AddAdditionalProbingPaths(RuntimeOptions runtimeOptions, ProjectContext projectContext)
         {
-            foreach (var packageFolder in LockFile.PackageFolders)
+            foreach (var packageFolder in projectContext.LockFile.PackageFolders)
             {
                 if (runtimeOptions.AdditionalProbingPaths == null)
                 {

@@ -69,6 +69,7 @@ namespace Microsoft.NET.Build.Tests
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "net45/DesktopAndNetStandard.dll",
                 "net45/DesktopAndNetStandard.pdb",
+                "net45/Newtonsoft.Json.dll",
                 "netstandard1.5/DesktopAndNetStandard.dll",
                 "netstandard1.5/DesktopAndNetStandard.pdb",
                 "netstandard1.5/DesktopAndNetStandard.deps.json"

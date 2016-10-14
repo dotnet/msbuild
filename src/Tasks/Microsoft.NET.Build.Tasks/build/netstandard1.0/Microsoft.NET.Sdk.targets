@@ -99,6 +99,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           Outputs="$(_ProjectRuntimeConfigFilePath);$(_ProjectRuntimeConfigDevFilePath)">
 
     <GenerateRuntimeConfigurationFiles AssetsFilePath="$(ProjectAssetsFile)"
+                                       TargetFramework="$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)"
                                        RuntimeConfigPath="$(_ProjectRuntimeConfigFilePath)"
                                        RuntimeConfigDevPath="$(_ProjectRuntimeConfigDevFilePath)"
                                        RuntimeIdentifier="$(RuntimeIdentifier)"
