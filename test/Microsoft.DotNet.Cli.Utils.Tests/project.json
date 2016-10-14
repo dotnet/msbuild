@@ -30,10 +30,10 @@
     },
     "System.Diagnostics.TraceSource": "4.0.0",
     "System.Runtime.Serialization.Primitives": "4.1.1",
-    "NuGet.Versioning": "3.6.0-rc-1979",
-    "NuGet.Packaging": "3.6.0-rc-1979",
-    "NuGet.Frameworks": "3.6.0-rc-1979",
-    "NuGet.ProjectModel": "3.6.0-rc-1979",
+    "NuGet.Versioning": "3.6.0-rc-1984",
+    "NuGet.Packaging": "3.6.0-rc-1984",
+    "NuGet.Frameworks": "3.6.0-rc-1984",
+    "NuGet.ProjectModel": "3.6.0-rc-1984",
     "Microsoft.DotNet.ProjectModel": {
       "target": "project"
     },

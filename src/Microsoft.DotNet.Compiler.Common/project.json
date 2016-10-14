@@ -14,7 +14,7 @@
     "Microsoft.DotNet.Files": {
       "target": "project"
     },
-    "NuGet.ProjectModel": "3.6.0-rc-1979"
+    "NuGet.ProjectModel": "3.6.0-rc-1984"
   },
   "frameworks": {
     "netstandard1.3": {
