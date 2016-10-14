@@ -64,46 +64,46 @@
     <None Include="buildCrossTargeting\Microsoft.NET.Sdk.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="build\netstandard1.0\Microsoft.NET.DisableStandardFrameworkResolution.targets">
+    <None Include="build\Microsoft.NET.DisableStandardFrameworkResolution.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="build\netstandard1.0\Microsoft.NET.PreserveCompilationContext.targets">
+    <None Include="build\Microsoft.NET.PreserveCompilationContext.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="build\netstandard1.0\Microsoft.NET.GenerateAssemblyInfo.targets">
+    <None Include="build\Microsoft.NET.GenerateAssemblyInfo.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="build\netstandard1.0\Microsoft.NET.Sdk.VisualBasic.props">
+    <None Include="build\Microsoft.NET.Sdk.VisualBasic.props">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="build\netstandard1.0\Microsoft.NET.Sdk.CSharp.props">
+    <None Include="build\Microsoft.NET.Sdk.CSharp.props">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="build\netstandard1.0\Microsoft.NET.Sdk.VisualBasic.targets">
+    <None Include="build\Microsoft.NET.Sdk.VisualBasic.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="build\netstandard1.0\Microsoft.NET.Sdk.BeforeCommon.targets">
+    <None Include="build\Microsoft.NET.Sdk.BeforeCommon.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="build\netstandard1.0\Microsoft.NET.Sdk.Common.targets">
+    <None Include="build\Microsoft.NET.Sdk.Common.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="build\netstandard1.0\Microsoft.NET.Sdk.CSharp.targets">
+    <None Include="build\Microsoft.NET.Sdk.CSharp.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="build\netstandard1.0\Microsoft.NET.Sdk.targets">
+    <None Include="build\Microsoft.NET.Sdk.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="build\netstandard1.0\Microsoft.NET.Sdk.props">
+    <None Include="build\Microsoft.NET.Sdk.props">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="build\netstandard1.0\Microsoft.NET.Publish.targets">
+    <None Include="build\Microsoft.NET.Publish.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="build\netstandard1.0\Microsoft.NET.TargetFrameworkInference.targets">
+    <None Include="build\Microsoft.NET.TargetFrameworkInference.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="build\netstandard1.0\Microsoft.PackageDependencyResolution.targets">
+    <None Include="build\Microsoft.PackageDependencyResolution.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <Compile Include="DependencyContextBuilder.cs" />
