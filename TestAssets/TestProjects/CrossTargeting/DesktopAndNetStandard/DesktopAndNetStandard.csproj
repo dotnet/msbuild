@@ -5,7 +5,7 @@
     <OutputType>Library</OutputType>
     <TargetFrameworks>net45;net40;net40-client;netstandard1.5</TargetFrameworks>
   </PropertyGroup>
-  <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
+  <PropertyGroup Condition="'$(TargetFramework)' != 'netstandard1.5'">
     <DefineConstants>$(DefineConstants);DESKTOP</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net40-client'">
@@ -18,7 +18,7 @@
     <Compile Include="**\*.cs" />
     <EmbeddedResource Include="**\*.resx" />
   </ItemGroup>
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
+  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard1.5'">
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>  
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.5'">
