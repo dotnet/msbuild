@@ -41,11 +41,11 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup>
-    <_ProjectDepsFileName>$(AssemblyName).deps.json</_ProjectDepsFileName>
-    <_ProjectDepsFilePath>$(TargetDir)$(_ProjectDepsFileName)</_ProjectDepsFilePath>
-    <_ProjectRuntimeConfigFileName>$(AssemblyName).runtimeconfig.json</_ProjectRuntimeConfigFileName>
-    <_ProjectRuntimeConfigFilePath>$(TargetDir)$(_ProjectRuntimeConfigFileName)</_ProjectRuntimeConfigFilePath>
-    <_ProjectRuntimeConfigDevFilePath>$(TargetDir)$(AssemblyName).runtimeconfig.dev.json</_ProjectRuntimeConfigDevFilePath>
+    <ProjectDepsFileName Condition="'$(ProjectDepsFileName)' == ''">$(AssemblyName).deps.json</ProjectDepsFileName>
+    <ProjectDepsFilePath Condition="'$(ProjectDepsFilePath)' == ''">$(TargetDir)$(ProjectDepsFileName)</ProjectDepsFilePath>
+    <ProjectRuntimeConfigFileName Condition="'$(ProjectRuntimeConfigFileName)' == ''">$(AssemblyName).runtimeconfig.json</ProjectRuntimeConfigFileName>
+    <ProjectRuntimeConfigFilePath Condition="'$(ProjectRuntimeConfigFilePath)' == ''">$(TargetDir)$(ProjectRuntimeConfigFileName)</ProjectRuntimeConfigFilePath>
+    <ProjectRuntimeConfigDevFilePath Condition="'$(ProjectRuntimeConfigDevFilePath)' == ''">$(TargetDir)$(AssemblyName).runtimeconfig.dev.json</ProjectRuntimeConfigDevFilePath>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -67,7 +67,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="GenerateBuildDependencyFile"
           Condition=" '$(GenerateDependencyFile)' == 'true'"
           Inputs="$(ProjectAssetsFile)"
-          Outputs="$(_ProjectDepsFilePath)">
+          Outputs="$(ProjectDepsFilePath)">
 
     <!-- 
     Explicitly not passing any PrivateAssets information during 'Build', since these dependencies
@@ -75,7 +75,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
     <GenerateDepsFile ProjectPath="$(MSBuildProjectFullPath)"
                       AssetsFilePath="$(ProjectAssetsFile)"
-                      DepsFilePath="$(_ProjectDepsFilePath)"
+                      DepsFilePath="$(ProjectDepsFilePath)"
                       TargetFramework="$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)"
                       AssemblyName="$(AssemblyName)"
                       AssemblyVersion="$(Version)"
@@ -96,11 +96,11 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="GenerateBuildRuntimeConfigurationFiles"
           Condition=" '$(GenerateRuntimeConfigurationFiles)' == 'true'"
           Inputs="$(ProjectAssetsFile);$(UserRuntimeConfig)"
-          Outputs="$(_ProjectRuntimeConfigFilePath);$(_ProjectRuntimeConfigDevFilePath)">
+          Outputs="$(ProjectRuntimeConfigFilePath);$(ProjectRuntimeConfigDevFilePath)">
 
     <GenerateRuntimeConfigurationFiles AssetsFilePath="$(ProjectAssetsFile)"
-                                       RuntimeConfigPath="$(_ProjectRuntimeConfigFilePath)"
-                                       RuntimeConfigDevPath="$(_ProjectRuntimeConfigDevFilePath)"
+                                       RuntimeConfigPath="$(ProjectRuntimeConfigFilePath)"
+                                       RuntimeConfigDevPath="$(ProjectRuntimeConfigDevFilePath)"
                                        RuntimeIdentifier="$(RuntimeIdentifier)"
                                        UserRuntimeConfig="$(UserRuntimeConfig)" />
 
