@@ -7,11 +7,8 @@ In order to build .NET Command Line Interface, you need the following installed 
 
 ### For Windows
 
-1. Visual Studio 2015 with Web Development Tools
-  * Beta8 is available here and should work: http://www.microsoft.com/en-us/download/details.aspx?id=49442
-    * Install `WebToolsExtensionsVS14.msi` and `DotNetVersionManager-x64.msi`
-2. CMake (available from https://cmake.org/) on the PATH.
-3. git (available from http://www.git-scm.com/) on the PATH.
+1. CMake (available from https://cmake.org/) on the PATH.
+2. git (available from http://www.git-scm.com/) on the PATH.
 
 ### For Linux
 
@@ -30,61 +27,49 @@ In order to build .NET Command Line Interface, you need the following installed 
 
 ## Building/Running
 
-1. Run `build.cmd` or `build.sh` from the root depending on your OS. If you don't want to execute tests, run `build.cmd -Targets Prepare,Compile` or `./build.sh --targets Prepare,Compile`.
-2. Use `artifacts/{os}-{arch}/stage2/dotnet` to try out the `dotnet` command. You can also add `artifacts/{os}-{arch}/stage2` to the PATH if you want to run `dotnet` from anywhere.
+1. Run `build.cmd` or `build.sh` from the root depending on your OS. If you don't want to execute tests, run `build.cmd /t:Compile` or `./build.sh /t:Compile`.
+2. Use `artifacts/{RID}/stage2/dotnet` to try out the `dotnet` command. You can also add `artifacts/{os}-{arch}/stage2` to the PATH if you want to use the build output when invoking `dotnet` from the current console.
 
 ## A simple test
+Using the `dotnet` built in the previous step:
 
-1. `cd TestAssets\TestProjects\TestSimpleIncrementalApp`
-2. `dotnet restore`
-3. `dotnet run`
+1. `cd {new directory}`
+2. `dotnet new`
+3. `dotnet restore3`
+4. `dotnet run3`
 
 ## Running tests
 
-All the CLI tests are located under `test`. In order to run them, after doing a restore on the CLI repo just do the following:
-
-1. Navigate to a test project, for instance: `cd test\dotnet-test.UnitTests`
-2. `dotnet test`
-
-For unit test projects (they have UnitTests at the name), that's all that you need to do, as they take a dependency on the product code directly, which gets rebuilt by dotnet when you run the tests.
-
-For E2E and functional tests, they all depend on the binaries located under `artifacts\rid\stage2`. So, after changing the code, you will need to re-build the product code and copy the new bits to the folder above. For instance, imagine you changed something in dotnet itself, you would have to do the following:
-
-1. `cd src\dotnet\`
-2. `dotnet build`
-3. `cp bin\debug\netstandardapp1.5\dotnet.dll artifacts\rid\stage2`
-4. `cd ..\..\test\dotnet.Tests`
-5. `dotnet test`
+1. To run all tests invoke `build.cmd` or `build.sh` which will build the product and run the tests.
+2. To run a specific test, cd into that test's directory and execute `dotnet test`. If using this approach, make sure to add `artifacts/{RID}/stage2` to your `PATH` and set the `NUGET_PACKAGES` environment variable to point to the repo's `.nuget/packages` directory.
 
 ##Adding a Command
 
-The dotnet CLI considers any executable on the path named `dotnet-{commandName}` to be a command it can call out to. `dotnet publish`, for example, is added to the path as an executable called `dotnet-publish`. To add a new command we must create the executable and then add it to the distribution packages for installation.
+The dotnet CLI supports several models for adding new commands:
 
-0. Create an issue on https://github.com/dotnet/cli and get consensus on the need for and behaviour of the command.
-1. Add a new project for the command. 
-2. Add the project to Microsoft.DotNet.Cli.sln
-3. Create a Readme.md for the command.
-4. Add the project to the build scripts.
-5. Add the project to the packaging scripts.
+0. In the CLI itself via `dotnet.dll`
+1. Through a `tool` NuGet package
+2. Through MSBuild tasks & targets in a NuGet package
+3. Via the user's `PATH`
 
-#### Add a new command project
-Start by copying an existing command, like /src/dotnet-new.  
-Update the Name property in project.json as well, and use the `dotnet-{command}` syntax here.
-Make sure to use the System.CommandLine parser so behaviour is consistent across commands.
+### Commands in dotnet.dll
+Developers are generally encouraged to avoid adding commands to `dotnet.dll` or the CLI installer directly. This is appropriate for very general commands such as restore, build, publish, test, and clean, but is generally too broad of a distribution mechanism for new commands. Please create an issue and engage the team if you feel there is a missing core command that you would like to add.
 
-#### Add a Readme.md
-Each command's project root should contain a manpage-style Readme.md that describes the usage of the command. See other commands for reference.
+### Tools NuGet packages
+Many existing extensions, including those for ASP.NET Web applications, extend the CLI using Tools NuGet packages. For an example of a working packaged command look at `TestAssets/TestPackages/dotnet-hello/v1/`.
 
-#### Add project to build scripts
-1. Add the project to `/scripts/build/build-stage.ps1`
-  - Add the project name to the `$Projects` list
-2. Add the project to `/scripts/build/build-stage.sh`
-  - Add the project name to the `PROJECTS` list
-3. run *build* from the root directory and make sure your project is producing binaries in /artifacts/
+### MSBuild tasks & targets
+NuGet allows adding tasks and targets to a project through a NuGet package. This mechanism, in fact, is how all .NET Core projects pull in the .NET SDK. Extending the CLI through this model has several advantages:
 
-#### Add command to packages
-- Update the `symlinks` property of `packaging/debian/debian_config.json` to include the new command
-- Update the `$Projects` property in `packaging/osx/scripts/postinstall`
+1. Targets have access to the MSBuild Project Context, allowing them to reason about the files and properties being used to build a particular project.
+2. Targets are not CLI-specific, making them easy to share across command-line and IDE environments
 
-#### Things to Know
+Commands added as targets can be invoked once the target project adds a reference to the containing NuGet package and restores. 
+Targets are invoked by calling `dotnet msbuild /t:{TargetName}`
+
+### Commands on the PATH
+The dotnet CLI considers any executable on the path named `dotnet-{commandName}` to be a command it can call out to. 
+
+## Things to Know
 - Any added commands are usually invoked through `dotnet {command}`. As a result of this, stdout and stderr are redirected through the driver (`dotnet`) and buffered by line. As a result of this, child commands should use Console.WriteLine in any cases where they expect output to be written immediately. Any uses of Console.Write should be followed by Console.WriteLine to ensure the output is written.
+- CLI is currently based on .NET Core 1.0 which does not support OS X Sierra. If you are developing the CLI on Sierra then include `/p:SkipInvalidConfigurations=true` in your calls to `build.sh`, this will allow the build to progress sufficiently to validate your work on this platform.
