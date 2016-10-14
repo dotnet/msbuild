@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             var msBuildExePath = _environment.GetEnvironmentVariable(Constants.MSBUILD_EXE_PATH);
             msBuildExePath = string.IsNullOrEmpty(msBuildExePath) ?
-                Path.Combine(AppContext.BaseDirectory, "msbuild.exe") :
+                Path.Combine(AppContext.BaseDirectory, "MSBuild.exe") :
                 msBuildExePath;
 
             Reporter.Verbose.WriteLine($"projetfactory: MSBUILD_EXE_PATH = {msBuildExePath}");
