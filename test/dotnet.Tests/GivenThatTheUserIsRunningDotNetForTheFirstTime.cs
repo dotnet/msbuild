@@ -28,6 +28,7 @@ namespace Microsoft.DotNet.Tests
                 .WithWorkingDirectory(testDirectory.Path);
             command.Environment["NUGET_PACKAGES"] = testNugetCache;
             command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
+            command.Environment["SkipInvalidConfigurations"] = "true";
 
             _firstDotnetNonVerbUseCommandResult = command.ExecuteWithCapturedOutput("--info");
             _firstDotnetVerbUseCommandResult = command.ExecuteWithCapturedOutput("new");

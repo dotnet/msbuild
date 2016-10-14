@@ -15,44 +15,37 @@ namespace Microsoft.DotNet.Tests
 {
     public class GivenThatIWantANewCSLibrary : TestBase
     {
-        
         [Fact]
         public void When_library_created_Then_project_restores()
         {
-            var rootPath = Temp.CreateDirectory().Path;
-            var projectJsonFile = Path.Combine(rootPath, "project.json");
+            var rootPath = TestAssetsManager.CreateTestDirectory().Path;
 
             new TestCommand("dotnet") { WorkingDirectory = rootPath }
                 .Execute("new --type lib")
-                .Should()
-                .Pass();
+                .Should().Pass();
             
             new TestCommand("dotnet") { WorkingDirectory = rootPath }
-                .Execute("restore")
+                .Execute("restore3 /p:SkipInvalidConfigurations=true")
                 .Should().Pass();
             
         }
 
         [Fact]
-        public void When_dotnet_build_is_invoked_Then_project_builds_without_warnings()
+        public void When_dotnet_build_is_invoked_Then_library_builds_without_warnings()
         {
-            var rootPath = Temp.CreateDirectory().Path;
+            var rootPath = TestAssetsManager.CreateTestDirectory().Path;
 
             new TestCommand("dotnet") { WorkingDirectory = rootPath }
                 .Execute("new --type lib");
 
             new TestCommand("dotnet") { WorkingDirectory = rootPath }
-                .Execute("restore");
+                .Execute("restore3 /p:SkipInvalidConfigurations=true");
 
             var buildResult = new TestCommand("dotnet")
                 .WithWorkingDirectory(rootPath)
-                .ExecuteWithCapturedOutput("build")
-                .Should()
-                .Pass()
-                .And
-                .NotHaveStdErr();
+                .ExecuteWithCapturedOutput("build3")
+                .Should().Pass()
+                .And.NotHaveStdErr();
         }
-
-
     }
 }

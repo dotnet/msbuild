@@ -86,8 +86,8 @@ namespace Microsoft.DotNet.Configurer
         private bool RestoreTemporaryProject(string extractedPackagesArchiveDirectory, string workingDirectory)
         {
             return RunCommand(
-                "restore",
-                new[] {"-s", $"{extractedPackagesArchiveDirectory}"},
+                "restore3",
+                new[] {"-s", extractedPackagesArchiveDirectory},
                 workingDirectory);
         }
 

@@ -1,10 +1,8 @@
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
-
+  
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFrameworks>netcoreapp1.0</TargetFrameworks>
-    <OutputPath>bin\$(Configuration)</OutputPath>
+    <TargetFrameworks>netstandard1.4</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,11 +11,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.1</Version>
+    <PackageReference Include="NETStandard.Library">
+      <Version>1.6</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NET.Sdk">
-      <Version>1.0.0-alpha-20161010-1</Version>
+      <Version>1.0.0-alpha-20161012-3</Version>
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
   </ItemGroup>

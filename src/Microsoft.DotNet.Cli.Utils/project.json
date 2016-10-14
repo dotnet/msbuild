@@ -9,10 +9,10 @@
       "target": "project"
     },
     "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000933",
-    "NuGet.Versioning": "3.6.0-rc-1979",
-    "NuGet.Packaging": "3.6.0-rc-1979",
-    "NuGet.Frameworks": "3.6.0-rc-1979",
-    "NuGet.ProjectModel": "3.6.0-rc-1979"
+    "NuGet.Versioning": "3.6.0-rc-1984",
+    "NuGet.Packaging": "3.6.0-rc-1984",
+    "NuGet.Frameworks": "3.6.0-rc-1984",
+    "NuGet.ProjectModel": "3.6.0-rc-1984"
   },
   "frameworks": {
     "netstandard1.3": {

@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Tools.Migrate
             }
             Directory.CreateDirectory(tempDir);
 
-            RunCommand("new", new string[] { "-t", "msbuild" }, tempDir);
+            RunCommand("new", new string[] {}, tempDir);
 
             return tempDir;
         }
