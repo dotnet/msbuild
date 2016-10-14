@@ -142,15 +142,6 @@
         <Clean>True</Clean>
         <Frameworks>netcoreapp1.0</Frameworks>
       </BaseTestPackageProject>
-      <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-invoke-portable">
-        <Name>dotnet-invoke-portable</Name>
-        <IsTool>True</IsTool>
-        <IsApplicable>True</IsApplicable>
-        <VersionPrefix>1.0.0-rc-</VersionPrefix>
-        <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
-        <Clean>True</Clean>
-        <Frameworks>netcoreapp1.0</Frameworks>
-      </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/ToolWithOutputName">
         <Name>dotnet-tool-with-output-name</Name>
         <NuPkgName>ToolWithOutputName</NuPkgName>

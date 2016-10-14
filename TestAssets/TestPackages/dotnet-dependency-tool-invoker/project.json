@@ -22,7 +22,8 @@
     },
     "Microsoft.DotNet.Compiler.Common": {
       "target": "project"
-    }
+    },
+    "NuGet.Frameworks": "3.6.0-rc-1979"
   },
   "frameworks": {
     "netcoreapp1.0": {
