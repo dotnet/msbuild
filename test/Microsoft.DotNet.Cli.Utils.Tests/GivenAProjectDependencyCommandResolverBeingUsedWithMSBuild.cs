@@ -19,6 +19,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
     {
         private TestInstance MSBuildTestProjectInstance;
         private RepoDirectoriesProvider _repoDirectoriesProvider;
+        private string _configuration;
 
         public GivenAProjectDependencyCommandResolverBeingUsedWithMSBuild()
         {
@@ -38,6 +39,8 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 .Should()
                 .Pass();
 
+            _configuration = Environment.GetEnvironmentVariable("Configuration") ?? "Debug";
+
             Environment.SetEnvironmentVariable(
                 Constants.MSBUILD_EXE_PATH,
                 Path.Combine(_repoDirectoriesProvider.Stage2Sdk, "msbuild.exe"));
@@ -54,7 +57,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 CommandName = "dotnet-portable",
                 CommandArguments = null,
                 ProjectDirectory = MSBuildTestProjectInstance.Path,
-                Configuration = "Debug",
+                Configuration = _configuration,
                 Framework = FrameworkConstants.CommonFrameworks.NetCoreApp10
             };
 
@@ -79,7 +82,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 CommandName = "dotnet-portable",
                 CommandArguments = null,
                 ProjectDirectory = MSBuildTestProjectInstance.Path,
-                Configuration = "Debug",
+                Configuration = _configuration,
                 Framework = FrameworkConstants.CommonFrameworks.NetCoreApp10
             };
 
@@ -99,7 +102,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 CommandName = "nonexistent-command",
                 CommandArguments = null,
                 ProjectDirectory = MSBuildTestProjectInstance.Path,
-                Configuration = "Debug",
+                Configuration = _configuration,
                 Framework = FrameworkConstants.CommonFrameworks.NetCoreApp10
             };
 
@@ -122,7 +125,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 CommandName = "dotnet-portable",
                 CommandArguments = null,
                 ProjectDirectory = testInstance.Path,
-                Configuration = "Debug",
+                Configuration = _configuration,
                 Framework = FrameworkConstants.CommonFrameworks.NetCoreApp10,
                 OutputPath = outputDir
             };
