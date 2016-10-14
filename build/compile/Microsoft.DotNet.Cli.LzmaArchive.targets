@@ -15,8 +15,10 @@
 
       <DotNetNew ToolPath="$(Stage2Directory)"
                  WorkingDirectory="$(NuGetPackagesArchiveProject)" />
-      <DotNetRestore ToolPath="$(Stage2Directory)"
+
+      <DotNetRestore3 ToolPath="$(Stage2Directory)"
                      Packages="$(NuGetPackagesArchiveFolder)"
+                     SkipInvalidConfigurations="True"
                      WorkingDirectory="$(NuGetPackagesArchiveProject)" />
 
       <Delete Files="$(IntermediateArchive);$(IntermediateArchive).zip" />

@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             SetupCommandMock(_dotnetRestoreCommandMock);
             commandFactoryMock
                 .Setup(c => c.Create(
-                    "restore",
+                    "restore3",
                     It.IsAny<IEnumerable<string>>(),
                     null,
                     Constants.DefaultConfiguration))
@@ -150,7 +150,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         {
             _commandFactoryMock.Verify(
                 c => c.Create(
-                    "restore",
+                    "restore3",
                     new [] {"-s", $"{PACKAGES_ARCHIVE_PATH}"},
                     null,
                     Constants.DefaultConfiguration),
@@ -174,7 +174,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
 
             commandFactoryMock.Verify(
                 c => c.Create(
-                    "restore",
+                    "restore3",
                     It.IsAny<IEnumerable<string>>(),
                     It.IsAny<NuGetFramework>(),
                     It.IsAny<string>()),
