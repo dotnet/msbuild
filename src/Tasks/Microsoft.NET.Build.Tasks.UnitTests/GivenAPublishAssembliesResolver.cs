@@ -22,7 +22,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         {
             LockFile lockFile = TestLockFiles.GetLockFile(projectName);
             ProjectContext projectContext = lockFile.CreateProjectContext(
-                "/usr/Path",
                 FrameworkConstants.CommonFrameworks.NetCoreApp10,
                 runtime);
 

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Newtonsoft.Json.Linq;
 
 namespace TestLibrary
 {
@@ -10,6 +11,7 @@ namespace TestLibrary
         public static void SayHi()
         {
             Console.WriteLine("Hello there!");
+            Console.WriteLine(typeof(JObject));
         }
 
 #if NETCOREAPP

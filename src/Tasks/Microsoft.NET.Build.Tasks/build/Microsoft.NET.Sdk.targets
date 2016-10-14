@@ -76,7 +76,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateDepsFile ProjectPath="$(MSBuildProjectFullPath)"
                       AssetsFilePath="$(ProjectAssetsFile)"
                       DepsFilePath="$(ProjectDepsFilePath)"
-                      TargetFramework="$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)"
+                      TargetFramework="$(TargetFrameworkMoniker)"
                       AssemblyName="$(AssemblyName)"
                       AssemblyVersion="$(Version)"
                       AssemblySatelliteAssemblies="@(IntermediateSatelliteAssembliesWithTargetPath)"
@@ -99,6 +99,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           Outputs="$(ProjectRuntimeConfigFilePath);$(ProjectRuntimeConfigDevFilePath)">
 
     <GenerateRuntimeConfigurationFiles AssetsFilePath="$(ProjectAssetsFile)"
+                                       TargetFramework="$(TargetFrameworkMoniker)"
                                        RuntimeConfigPath="$(ProjectRuntimeConfigFilePath)"
                                        RuntimeConfigDevPath="$(ProjectRuntimeConfigDevFilePath)"
                                        RuntimeIdentifier="$(RuntimeIdentifier)"
