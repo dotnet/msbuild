@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using NuGet.Frameworks;
 using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
 
@@ -30,6 +31,11 @@ namespace Microsoft.NET.Build.Tasks
                 case "F#": return "fs";
                 default: return projectLanguage?.ToLowerInvariant();
             }
+        }
+
+        public static NuGetFramework ParseFrameworkName(string frameworkName)
+        {
+            return frameworkName == null ? null : NuGetFramework.Parse(frameworkName);
         }
     }
 }

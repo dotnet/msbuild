@@ -40,7 +40,7 @@ namespace Microsoft.NET.Build.Tasks
         {
             bool includeCompilationLibraries = compilationOptions != null;
 
-            ProjectContext projectContext = lockFile.CreateProjectContext(mainProjectInfo.ProjectPath, framework, runtime);
+            ProjectContext projectContext = lockFile.CreateProjectContext(framework, runtime);
             IEnumerable<LockFileTargetLibrary> runtimeExports = projectContext.GetRuntimeLibraries(_privateAssetPackageIds);
             IEnumerable<LockFileTargetLibrary> compilationExports =
                 includeCompilationLibraries ?
@@ -53,7 +53,7 @@ namespace Microsoft.NET.Build.Tasks
                 .Select(library => new Dependency(library.Name, library.Version.ToString()))
                 .ToDictionary(dependency => dependency.Name, StringComparer.OrdinalIgnoreCase);
 
-            var libraryLookup = lockFile.Libraries.ToDictionary(l => l.Name, StringComparer.OrdinalIgnoreCase);
+            var libraryLookup = new LockFileLookup(lockFile);
 
             var runtimeSignature = GenerateRuntimeSignature(runtimeExports);
 
@@ -177,7 +177,7 @@ namespace Microsoft.NET.Build.Tasks
 
         private IEnumerable<Library> GetLibraries(
             IEnumerable<LockFileTargetLibrary> exports,
-            IDictionary<string, LockFileLibrary> libraryLookup,
+            LockFileLookup libraryLookup,
             IDictionary<string, Dependency> dependencyLookup,
             bool runtime)
         {
@@ -186,7 +186,7 @@ namespace Microsoft.NET.Build.Tasks
 
         private Library GetLibrary(
             LockFileTargetLibrary export,
-            IDictionary<string, LockFileLibrary> libraryLookup,
+            LockFileLookup libraryLookup,
             IDictionary<string, Dependency> dependencyLookup,
             bool runtime)
         {
@@ -210,7 +210,7 @@ namespace Microsoft.NET.Build.Tasks
             string path = null;
             string hashPath = null;
             LockFileLibrary library;
-            if (libraryLookup.TryGetValue(export.Name, out library))
+            if (libraryLookup.TryGetLibrary(export, out library))
             {
                 if (!string.IsNullOrEmpty(library.Sha512))
                 {

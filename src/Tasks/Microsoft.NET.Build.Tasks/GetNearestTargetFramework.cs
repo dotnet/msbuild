@@ -77,7 +77,7 @@ namespace Microsoft.NET.Build.Tasks
 
         private NuGetFramework ParseFramework(string name)
         {
-            var framework = NuGetFramework.Parse(name);
+            var framework = NuGetUtils.ParseFrameworkName(name);
 
             if (framework == null)
             {
