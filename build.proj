@@ -39,7 +39,7 @@
 
   <ItemGroup>
     <DotnetCliBuildFrameworkInputs Include="build_projects/**/*.cs" Exclude="build_projects/**/obj/**/*.cs" />
-    <DotnetCliBuildFrameworkInputs Include="build_projects/**/project.json;build_projects/**/project.lock.json" />
+    <DotnetCliBuildFrameworkInputs Include="build_projects/**/*.csproj" />
   </ItemGroup>
 
   <!-- Workaround to "Native image cannot be loaded multiple times" issue
@@ -55,14 +55,20 @@
           DependsOnTargets="MSBuildWorkaroundTarget;
                             RestoreDotnetCliBuildFramework">
 
-    <Exec Command="$(DotnetStage0) publish -o $(DotnetCliBuildDirectory)/bin --framework netcoreapp1.0" WorkingDirectory="$(DotnetCliBuildDirectory)"/>
+    <Exec Command="$(DotnetStage0) publish3 -o $(DotnetCliBuildDirectory)/bin --framework netcoreapp1.0" WorkingDirectory="$(DotnetCliBuildDirectory)"/>
   </Target>
-
+  
+  <ItemGroup>
+    <RestoreDotnetCliBuildFrameworkOutputs Include="$(DotnetCliBuildDirectory)/obj/project.assets.json" />
+    <RestoreDotnetCliBuildFrameworkOutputs Include="$(DotnetCliBuildDirectory)/obj/dotnet-cli-build.csproj.nuget.g.props" />
+    <RestoreDotnetCliBuildFrameworkOutputs Include="$(DotnetCliBuildDirectory)/obj/dotnet-cli-build.csproj.nuget.g.targets" />
+  </ItemGroup>
+  
   <Target Name="RestoreDotnetCliBuildFramework"
-          Inputs="$(DotnetCliBuildDirectory)/project.json"
-          Outputs="$(DotnetCliBuildDirectory)/project.lock.json">
+          Inputs="$(DotnetCliBuildDirectory)/dotnet-cli-build.csproj"
+          Outputs="@(RestoreDotnetCliBuildFrameworkOutputs)">
 
-    <Exec Command="$(DotnetStage0) restore" WorkingDirectory="$(DotnetCliBuildDirectory)"/>
+    <Exec Command="$(DotnetStage0) restore3" WorkingDirectory="$(DotnetCliBuildDirectory)"/>
   </Target>
 
   <Target DependsOnTargets="$(CLITargets)" Name="BuildTheWholeCli"></Target>
