@@ -26,7 +26,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <OutputPath Condition="'$(OutputPath)' == ''">bin\Release\</OutputPath>
   </PropertyGroup>
 
-  <Import Project="..\build\netstandard1.0\Microsoft.NET.Sdk.Common.targets"/>
+  <Import Project="..\build\Microsoft.NET.Sdk.Common.targets"/>
 
   <UsingTask TaskName="GetNearestTargetFramework" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
