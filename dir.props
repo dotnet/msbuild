@@ -400,4 +400,9 @@
     <!-- Output path for helper tasks that we build for our own build process (e.g. localization tasks). Tasks should be imported from this property -->
     <BuildBinDir>$([System.IO.Path]::Combine($(ProjectDir), "build", "bin", $(RelativeOutputPathWithConfig), "Output"))$([System.IO.Path]::DirectorySeparatorChar)</BuildBinDir>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <IBCMergeSubPath>x86/MSBuild</IBCMergeSubPath>
+  </PropertyGroup>
+
 </Project>

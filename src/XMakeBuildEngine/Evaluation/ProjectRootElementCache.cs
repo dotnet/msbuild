@@ -236,12 +236,17 @@ namespace Microsoft.Build.Evaluation
                             // the cache as we get test coverage of the rest of the cache code.
                             XmlDocument document = new XmlDocument();
                             document.PreserveWhitespace = projectRootElement.XmlDocument.PreserveWhitespace;
-							
-                            XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
-                            xmlReaderSettings.DtdProcessing = DtdProcessing.Ignore;
-                            using (XmlReader xr = XmlReader.Create(File.OpenRead(projectRootElement.FullPath), xmlReaderSettings))
+
+                            XmlReaderSettings dtdSettings = new XmlReaderSettings();
+                            dtdSettings.DtdProcessing = DtdProcessing.Ignore;
+#if FEATURE_XMLTEXTREADER
+                            using (var stream = new StreamReader(projectRootElement.FullPath))
+                            using (XmlReader xtr = XmlReader.Create(stream, dtdSettings))
+#else
+                            using (XmlReader xtr = XmlReader.Create(File.OpenRead(projectRootElement.FullPath), dtdSettings))
+#endif
                             {
-                                document.Load(xr);
+                                document.Load(xtr);
                             }
 
                             string diskContent = document.OuterXml;

@@ -2018,18 +2018,21 @@ namespace Microsoft.Build.Construction
             {
                 try
                 {
-#if MSBUILDENABLEVSPROFILING 
+#if MSBUILDENABLEVSPROFILING
                     string beginProjectLoad = String.Format(CultureInfo.CurrentCulture, "Load Project {0} From File - Start", fullPath);
                     DataCollection.CommentMarkProfile(8806, beginProjectLoad);
 #endif
-
 #if FEATURE_XMLTEXTREADER
-                    using (XmlTextReader xtr = new XmlTextReader(fullPath))
+                    XmlReaderSettings dtdSettings = new XmlReaderSettings();
+                    dtdSettings.DtdProcessing = DtdProcessing.Ignore;
+
+                    using (var stream = new StreamReader(fullPath, true))
+                    using (XmlReader xtr = XmlReader.Create(stream, dtdSettings))
                     {
                         // Start the reader so it has an idea of what the encoding is.
-                        xtr.DtdProcessing = DtdProcessing.Ignore;
                         xtr.Read();
-                        _encoding = xtr.Encoding;
+                        var encoding = xtr.GetAttribute("encoding");
+                        _encoding = !string.IsNullOrEmpty(encoding) ? Encoding.GetEncoding(encoding) : stream.CurrentEncoding;
                         document.Load(xtr);
                     }
 #else
