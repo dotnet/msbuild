@@ -60,11 +60,10 @@ namespace Microsoft.DotNet.Tools.Restore3
                     "Treat package source failures as warnings.",
                     CommandOptionType.NoValue);
 
-            // Use a boolean argument instead of a switch to match nuget.exe
-            var recursive = cmd.Option(
-                "--recursive",
-                "Restore all dependency projects.",
-                CommandOptionType.BoolValue);
+            var noDependenciesOption = cmd.Option(
+                "--no-dependencies",
+                "Set this flag to ignore project to project references and only restore the root project",
+                CommandOptionType.NoValue);
 
             cmd.OnExecute(() =>
             {
@@ -103,9 +102,7 @@ namespace Microsoft.DotNet.Tools.Restore3
                     msbuildArgs.Add($"/p:RestoreIgnoreFailedSources=true");
                 }
 
-                // By default restore is recursive, if set to false turn it off.
-                // If the argument is not present use the default behavior.
-                if (recursive.BoolValue == false)
+                if (noDependenciesOption.HasValue())
                 {
                     msbuildArgs.Add($"/p:RestoreRecursive=false");
                 }
