@@ -2,11 +2,13 @@
 <Project DefaultTarget="RunTest" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <!-- workaround for https://github.com/Microsoft/msbuild/issues/885 -->
+  <!-- renaming the property because the original property is a global property and therefore
+       cannot be redefined at runtime. -->
   <PropertyGroup>
-    <CLIBuildDll>$([MSBuild]::Unescape($(CLIBuildDll)))</CLIBuildDll>
+    <CLIBuildDllPath>$([MSBuild]::Unescape($(CLIBuildDll)))</CLIBuildDllPath>
   </PropertyGroup>
 
-  <UsingTask TaskName="DotNetTest" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="DotNetTest" AssemblyFile="$(CLIBuildDllPath)" />
 
   <Target Name="RunTest">
     <DotNetTest WorkingDirectory="$(WorkingDirectory)"
