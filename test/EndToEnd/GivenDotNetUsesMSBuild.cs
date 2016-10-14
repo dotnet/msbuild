@@ -92,7 +92,8 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             var testAppName = "MSBuildTestAppWithToolInDependencies";
             var testInstance = TestAssetsManager
                 .CreateTestInstance(testAppName);
-            var configuration = Environment.GetEnvironmentVariable("Configuration") ?? "Debug";
+
+            var configuration = "Debug";
 
             var testProjectDirectory = testInstance.TestRoot;
 
@@ -104,7 +105,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
 
             new Build3Command()
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute()
+                .Execute($"-c {configuration}")
                 .Should()
                 .Pass();
 

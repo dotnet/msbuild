@@ -26,6 +26,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             MSBuildTestProjectInstance =
                 TestAssetsManager.CreateTestInstance("MSBuildTestAppWithToolInDependencies");
             _repoDirectoriesProvider = new RepoDirectoriesProvider();
+            _configuration = "Debug";
 
             new Restore3Command()
                 .WithWorkingDirectory(MSBuildTestProjectInstance.Path)
@@ -35,11 +36,9 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
             new Build3Command()
                 .WithWorkingDirectory(MSBuildTestProjectInstance.Path)
-                .Execute()
+                .Execute($"-c {_configuration}")
                 .Should()
-                .Pass();
-
-            _configuration = Environment.GetEnvironmentVariable("Configuration") ?? "Debug";
+                .Pass();            
 
             Environment.SetEnvironmentVariable(
                 Constants.MSBUILD_EXE_PATH,
