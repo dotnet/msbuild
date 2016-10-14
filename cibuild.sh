@@ -69,6 +69,8 @@ setMonoDir(){
     fi
 }
 
+# this function is copied from init-tools.sh
+
 get_current_linux_name() {
     # Detect Distro
     if [ "$(cat /etc/*-release | grep -cim1 ubuntu)" -eq 1 ]; then
