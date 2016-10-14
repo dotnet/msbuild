@@ -222,7 +222,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ResolvePublishAssemblies ProjectPath="$(MSBuildProjectFullPath)"
                               AssetsFilePath="$(ProjectAssetsFile)"
-                              TargetFramework="$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)"
+                              TargetFramework="$(TargetFrameworkMoniker)"
                               RuntimeIdentifier="$(RuntimeIdentifier)"
                               PrivateAssetsPackageReferences="@(PrivateAssetsPackageReference)">
 
@@ -432,7 +432,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateDepsFile ProjectPath="$(MSBuildProjectFullPath)"
                       AssetsFilePath="$(ProjectAssetsFile)"
                       DepsFilePath="$(_PublishDepsFilePath)"
-                      TargetFramework="$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)"
+                      TargetFramework="$(TargetFrameworkMoniker)"
                       AssemblyName="$(AssemblyName)"
                       AssemblyVersion="$(Version)"
                       AssemblySatelliteAssemblies="@(IntermediateSatelliteAssembliesWithTargetPath)"
@@ -481,7 +481,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </PropertyGroup>
 
     <GenerateRuntimeConfigurationFiles AssetsFilePath="$(ProjectAssetsFile)"
-                                       TargetFramework="$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)"
+                                       TargetFramework="$(TargetFrameworkMoniker)"
                                        RuntimeConfigPath="$(_PublishRuntimeConfigFilePath)"
                                        RuntimeIdentifier="$(RuntimeIdentifier)"
                                        UserRuntimeConfig="$(UserRuntimeConfig)" />

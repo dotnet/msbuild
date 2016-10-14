@@ -11,13 +11,13 @@ namespace Microsoft.NET.Build.Tasks
 {
     internal class LockFileLookup
     {
-        private readonly Dictionary<PackageCacheKey, LockFileLibrary> _packages;
+        private readonly Dictionary<KeyValuePair<string, NuGetVersion>, LockFileLibrary> _packages;
         private readonly Dictionary<string, LockFileLibrary> _projects;
 
         public LockFileLookup(LockFile lockFile)
         {
-            _packages = new Dictionary<PackageCacheKey, LockFileLibrary>();
-            _projects = new Dictionary<string, LockFileLibrary>();
+            _packages = new Dictionary<KeyValuePair<string, NuGetVersion>, LockFileLibrary>(PackageCacheKeyComparer.Instance);
+            _projects = new Dictionary<string, LockFileLibrary>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var library in lockFile.Libraries)
             {
@@ -25,11 +25,11 @@ namespace Microsoft.NET.Build.Tasks
 
                 if (libraryType == LibraryType.Package)
                 {
-                    _packages[new PackageCacheKey(library.Name, library.Version)] = library;
+                    _packages[new KeyValuePair<string, NuGetVersion>(library.Name, library.Version)] = library;
                 }
                 if (libraryType == LibraryType.Project)
                 {
-                    _projects[library.Name.ToLowerInvariant()] = library;
+                    _projects[library.Name] = library;
                 }
             }
         }
@@ -37,7 +37,7 @@ namespace Microsoft.NET.Build.Tasks
         public LockFileLibrary GetProject(string name)
         {
             LockFileLibrary project;
-            if (_projects.TryGetValue(name.ToLowerInvariant(), out project))
+            if (_projects.TryGetValue(name, out project))
             {
                 return project;
             }
@@ -48,7 +48,7 @@ namespace Microsoft.NET.Build.Tasks
         public LockFileLibrary GetPackage(string id, NuGetVersion version)
         {
             LockFileLibrary package;
-            if (_packages.TryGetValue(new PackageCacheKey(id, version), out package))
+            if (_packages.TryGetValue(new KeyValuePair<string, NuGetVersion>(id, version), out package))
             {
                 return package;
             }
@@ -77,11 +77,30 @@ namespace Microsoft.NET.Build.Tasks
             _projects.Clear();
         }
 
-        private class PackageCacheKey : Tuple<string, NuGetVersion>
+        private class PackageCacheKeyComparer : IEqualityComparer<KeyValuePair<string, NuGetVersion>>
         {
-            public PackageCacheKey(string id, NuGetVersion version)
-                : base(id.ToLowerInvariant(), version)
+            public static readonly PackageCacheKeyComparer Instance = new PackageCacheKeyComparer();
+
+            private PackageCacheKeyComparer()
             {
+            }
+
+            public bool Equals(KeyValuePair<string, NuGetVersion> x, KeyValuePair<string, NuGetVersion> y)
+            {
+                return string.Equals(x.Key, y.Key, StringComparison.OrdinalIgnoreCase) &&
+                    x.Value == y.Value;
+            }
+
+            public int GetHashCode(KeyValuePair<string, NuGetVersion> obj)
+            {
+                var hashCode = 0;
+                if (obj.Key != null)
+                {
+                    hashCode ^= StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Key);
+                }
+
+                hashCode ^= obj.Value?.GetHashCode() ?? 0;
+                return hashCode;
             }
         }
     }
