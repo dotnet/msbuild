@@ -108,7 +108,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
 
             new DotnetCommand()
                 .WithWorkingDirectory(testProjectDirectory)
-                .ExecuteWithCapturedOutput("dependency-tool-invoker -f netcoreapp1.0 portable")
+                .ExecuteWithCapturedOutput("-v dependency-tool-invoker -f netcoreapp1.0 portable")
                 .Should()
                 .Pass()
                 .And

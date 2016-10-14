@@ -78,6 +78,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
             if (project == null)
             {
+                Reporter.Verbose.WriteLine($"projectdependenciescommandresolver: Didn't find a matching project {projectDirectory}.");
                 return null;
             }
 
@@ -130,6 +131,8 @@ namespace Microsoft.DotNet.Cli.Utils
             {
                 throw new InvalidOperationException($"Ambiguous command name: {commandName}");
             }
+
+            Reporter.Verbose.WriteLine($"projectdependenciescommandresolver: tool library found {toolLibraries?.Count() > 0}");
 
             return toolLibraries?.FirstOrDefault();
         }

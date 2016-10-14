@@ -41,6 +41,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             Environment.SetEnvironmentVariable(
                 Constants.MSBUILD_EXE_PATH,
                 Path.Combine(_repoDirectoriesProvider.Stage2Sdk, "msbuild.exe"));
+            Environment.SetEnvironmentVariable("DOTNET_CLI_CONTEXT_VERBOSE", "true");
         }
 
         [Fact]

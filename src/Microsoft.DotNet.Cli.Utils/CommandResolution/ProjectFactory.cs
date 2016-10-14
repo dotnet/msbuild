@@ -38,7 +38,10 @@ namespace Microsoft.DotNet.Cli.Utils
                 Path.Combine(AppContext.BaseDirectory, "msbuild.exe") :
                 msBuildExePath;
 
+            Reporter.Verbose.WriteLine($"projetfactory: MSBUILD_EXE_PATH = {msBuildExePath}");
+
             string msBuildProjectPath = GetMSBuildProjPath(projectDirectory);
+            Reporter.Verbose.WriteLine($"projetfactory: MSBuild project path = {msBuildProjectPath}");
             if(msBuildProjectPath == null)
             {
                 return null;
