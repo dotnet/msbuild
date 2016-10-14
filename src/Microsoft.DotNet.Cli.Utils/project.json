@@ -2,13 +2,7 @@
   "version": "1.0.0-preview3-*",
   "buildOptions": {
     "keyFile": "../../tools/Key.snk",
-    "warningsAsErrors": true,
-    "compile": {
-      "include": [
-        "**/*.cs",
-        "../../src/dotnet/DotnetFiles.cs"
-      ]
-    }
+    "warningsAsErrors": true
   },
   "dependencies": {
     "Microsoft.DotNet.ProjectModel": {
@@ -20,7 +14,7 @@
     "NuGet.Packaging": "3.6.0-rc-1984",
     "NuGet.Frameworks": "3.6.0-rc-1984",
     "NuGet.ProjectModel": "3.6.0-rc-1984",
-    
+
     "Microsoft.Build": "15.1.316-preview5",
     "Microsoft.Build.Utilities.Core": "15.1.316-preview5"
   },

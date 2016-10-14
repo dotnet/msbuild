@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Cli.Utils
                     _projectContext = ProjectContext.Create(
                         _projectDirectory,
                         _framework,
-                        DotnetRuntimeIdentifiers.InferCurrentRuntimeIdentifiers(DotnetFiles.VersionFileObject));
+                        RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers());
                 }
 
                 return _projectContext;
