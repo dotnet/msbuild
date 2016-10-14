@@ -11,15 +11,20 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+  <Import Project="$(VSToolsPath)\TypeScript\Microsoft.TypeScript.targets" 
+          Condition="Exists('$(VSToolsPath)\TypeScript\Microsoft.TypeScript.targets')"/>
+  
   <PropertyGroup>
     <MSBuildWebPath>$(MSBuildExtensionsPath)\Microsoft\VisualStudio\Managed.Web\</MSBuildWebPath>
     <ActualLangName Condition="Exists('$(MSBuildWebPath)$(LangName)')">$(LangName)</ActualLangName>
     <ActualLangName Condition="'$(ActualLangName)' == ''">en-us</ActualLangName>
   </PropertyGroup>
 
-  <!-- Web project capability that enables web features for .NET core project -->
+  <!-- Web project capabilities that enables web features for .NET Core projects -->
   <ItemGroup>
     <ProjectCapability Include="DotNetCoreWeb" />
+    <ProjectCapability Include="AspNetCore" />
+    <ProjectCapability Include="Web" />
   </ItemGroup>
 
   <!-- Web specific properties -->
@@ -131,5 +136,5 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Content Remove="node_modules\**"/>
     <Content Remove="jspm_modules\**"/>
   </ItemGroup>
-
+  
 </Project>

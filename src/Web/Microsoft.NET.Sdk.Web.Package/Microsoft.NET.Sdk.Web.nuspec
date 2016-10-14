@@ -13,7 +13,7 @@
     <licenseUrl>http://www.microsoft.com/web/webpi/eula/net_library_eula_enu.htm</licenseUrl>
     <projectUrl>http://github.com/dotnet</projectUrl>
     <dependencies>
-      <dependency id="Microsoft.NET.Sdk.Web.ProjectSystem" version="$CoreSdkVersion$" />
+      <dependency id="Microsoft.NET.Sdk.Web.ProjectSystem" version="$WebSdkVersion$" />
       <dependency id="Microsoft.NET.Sdk.Publish" version="$WebSdkVersion$" />
     </dependencies>
   </metadata>
