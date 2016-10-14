@@ -189,7 +189,7 @@
   <PropertyGroup>
     <!-- Possible Values: win7 / ubuntu14.04 / osx.10.10 -->
     <RuntimeSystem Condition="'$(TargetPlatformIdentifier)' == 'Windows_NT'">win7</RuntimeSystem>
-    <RuntimeSystem Condition="'$(TargetPlatformIdentifier)' == 'Unix'">ubuntu.14.04</RuntimeSystem>
+    <RuntimeSystem Condition="'$(RuntimeSystem)' == '' and '$(TargetPlatformIdentifier)' == 'Unix'">ubuntu.14.04</RuntimeSystem>
     <RuntimeSystem Condition="'$(TargetPlatformIdentifier)' == 'OSX'">osx.10.10</RuntimeSystem>
 
     <!-- Possible Values: Windows, Ubuntu, OSX, MONO. Append _NetCore if Configuration is net core -->
