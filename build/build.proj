@@ -15,11 +15,9 @@
   <ItemGroup>
     <SolutionFile Include="$(RepositoryRootDirectory)sdk.sln" Condition="'$(BuildTemplates)' != 'true'" />
     <SolutionFile Include="$(RepositoryRootDirectory)sdk-templates.sln" Condition="'$(BuildTemplates)' == 'true'" />
-    <SolutionFile Include="$(RepositoryRootDirectory)sdk-web-templates.sln" Condition="'$(BuildTemplates)' == 'true'" />
 
     <SigningProjectFile Include="$(RepositoryRootDirectory)build\Signing\Microsoft.NET.Signing.proj"/>
     <NuGetProjectFile Include="$(RepositoryRootDirectory)build\Nuget\Microsoft.NET.Nuget.proj" />
-    <WebNuGetProjectFile Include="$(RepositoryRootDirectory)build\Nuget\Microsoft.NET.Web.Nuget.proj" />
 
     <VsManProjectFile Include="$(RepositoryRootDirectory)src\VsixV3\Microsoft.VisualStudio.Templates.VisualBasic.NetCore.vsmanproj" />
     <VsManProjectFile Include="$(RepositoryRootDirectory)src\VsixV3\Microsoft.VisualStudio.Templates.CSharp.NetCore.vsmanproj" />
@@ -87,11 +85,6 @@
              Properties="$(CommonMSBuildGlobalProperties)"
              />
 
-    <MSBuild BuildInParallel="true"
-             Projects="@(WebNuGetProjectFile)"
-             Targets="Build"
-             Properties="$(CommonMSBuildGlobalProperties)"
-             />
   </Target>
 
   <Target Name="RebuildNuGetPackages" DependsOnTargets="SignPackages" Condition="'$(BuildTemplates)' != 'true'">
@@ -102,11 +95,6 @@
              Properties="$(CommonMSBuildGlobalProperties)"
              />
 
-    <MSBuild BuildInParallel="true"
-             Projects="@(WebNuGetProjectFile)"
-             Targets="Rebuild"
-             Properties="$(CommonMSBuildGlobalProperties)"
-             />
   </Target>
 
   <Target Name="BuildModernVsixPackages" DependsOnTargets="SignPackages" Condition="'$(BuildTemplates)' == 'true'">

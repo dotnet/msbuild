@@ -116,14 +116,6 @@
     <Compile Include="ResolvePackageDependencies.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="webbuild\netstandard1.0\Microsoft.NET.Sdk.Web.props">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="webbuild\netstandard1.0\Microsoft.NET.Sdk.Web.targets">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
   <Import Project="..\..\..\build\Targets\Signing.Imports.targets" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
