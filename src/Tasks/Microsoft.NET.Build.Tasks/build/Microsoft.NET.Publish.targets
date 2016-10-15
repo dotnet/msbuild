@@ -426,12 +426,12 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition="'$(GenerateDependencyFile)' == 'true'">
 
     <PropertyGroup>
-      <_PublishDepsFilePath Condition=" '$(_PublishDepsFilePath)' == '' ">$(PublishDir)$(_ProjectDepsFileName)</_PublishDepsFilePath>
+      <PublishDepsFilePath Condition=" '$(PublishDepsFilePath)' == '' ">$(PublishDir)$(ProjectDepsFileName)</PublishDepsFilePath>
     </PropertyGroup>
 
     <GenerateDepsFile ProjectPath="$(MSBuildProjectFullPath)"
                       AssetsFilePath="$(ProjectAssetsFile)"
-                      DepsFilePath="$(_PublishDepsFilePath)"
+                      DepsFilePath="$(PublishDepsFilePath)"
                       TargetFramework="$(TargetFrameworkMoniker)"
                       AssemblyName="$(AssemblyName)"
                       AssemblyVersion="$(Version)"
@@ -477,12 +477,12 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition="'$(GenerateRuntimeConfigurationFiles)' == 'true'">
 
     <PropertyGroup>
-      <_PublishRuntimeConfigFilePath Condition=" '$(_PublishRuntimeConfigFilePath)' == '' ">$(PublishDir)$(_ProjectRuntimeConfigFileName)</_PublishRuntimeConfigFilePath>
+      <PublishRuntimeConfigFilePath Condition=" '$(PublishRuntimeConfigFilePath)' == '' ">$(PublishDir)$(ProjectRuntimeConfigFileName)</PublishRuntimeConfigFilePath>
     </PropertyGroup>
 
     <GenerateRuntimeConfigurationFiles AssetsFilePath="$(ProjectAssetsFile)"
                                        TargetFramework="$(TargetFrameworkMoniker)"
-                                       RuntimeConfigPath="$(_PublishRuntimeConfigFilePath)"
+                                       RuntimeConfigPath="$(PublishRuntimeConfigFilePath)"
                                        RuntimeIdentifier="$(RuntimeIdentifier)"
                                        UserRuntimeConfig="$(UserRuntimeConfig)" />
 
