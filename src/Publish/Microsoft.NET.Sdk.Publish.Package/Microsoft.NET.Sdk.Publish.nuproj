@@ -29,6 +29,10 @@
       <Destination>build\netstandard1.0\CopyTargets</Destination>
     </NuGetContent>
 
+    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\TransformTargets\*.*">
+      <Destination>build\netstandard1.0\TransformTargets</Destination>
+    </NuGetContent>
+
     <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\PublishProfiles\*.*">
       <Destination>build\netstandard1.0\PublishProfiles</Destination>
     </NuGetContent>
