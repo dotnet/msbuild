@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using Microsoft.DotNet.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
@@ -61,7 +62,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             string corehostPackages = null,
             string corehostDummyPackages = null)
         {
-            var currentRid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
+            var currentRid = RuntimeEnvironment.GetRuntimeIdentifier();
 
             _artifacts = artifacts ?? Path.Combine(RepoRoot, "artifacts", currentRid);
             _nugetPackages = nugetPackages ?? Path.Combine(RepoRoot, ".nuget", "packages");
