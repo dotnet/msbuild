@@ -24,7 +24,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <_PublishTasksDir Condition=" '$(_PublishTasksDir)'=='' ">$(MSBuildThisFileDirectory)..\..\tools\$(_PublishTaskFramework)\</_PublishTasksDir>
     <_PublishTaskAssemblyFullPath Condition=" '$(_PublishTaskAssemblyFullPath)'=='' ">$(_PublishTasksDir)\Microsoft.NET$(MSBuildRuntimeType).Sdk.Publish.Tasks.dll</_PublishTaskAssemblyFullPath>
     <_CopyTargetsDir Condition=" '$(_CopyTargetsDir)' == ''">$(MSBuildThisFileDirectory)CopyTargets\</_CopyTargetsDir>
-    <_TransformTargets Condition=" '$(_TransformTargets)' == ''">$(MSBuildThisFileDirectory)TransformTargets\</_TransformTargets>
+    <_TransformTargetsDir Condition=" '$(_TransformTargetsDir)' == ''">$(MSBuildThisFileDirectory)TransformTargets\</_TransformTargetsDir>
     <_ComputeTargetsDir Condition=" '$(_ComputeTargetsDir)'=='' ">$(MSBuildThisFileDirectory)ComputeTargets\</_ComputeTargetsDir>
     <_PublishTargetsDir Condition=" '$(_PublishTargetsDir)'=='' ">$(MSBuildThisFileDirectory)PublishTargets\</_PublishTargetsDir>
     <_PublishProfilesDir Condition=" '$(_PublishProfilesDir)'=='' ">$(MSBuildThisFileDirectory)PublishProfiles\</_PublishProfilesDir>
@@ -105,7 +105,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   ***********************************************************************************************
  -->
 
-  <Import Project="$(_CopyTargetsDir)Microsoft.NET.Sdk.Publish.CopyFiles.targets" Condition="Exists('$(_CopyTargetsDir)Microsoft.NET.Sdk.Publish.TransformFiles.targets')"/>
+  <Import Project="$(_TransformTargetsDir)Microsoft.NET.Sdk.Publish.TransformFiles.targets" Condition="Exists('$(_TransformTargetsDir)Microsoft.NET.Sdk.Publish.TransformFiles.targets')"/>
 
   <!--
   ***********************************************************************************************

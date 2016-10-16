@@ -1,6 +1,6 @@
 ﻿<!--
 ***********************************************************************************************
-Microsoft.NET.Sdk.Publish.ComputeFiles.targets
+Microsoft.NET.Sdk.Publish.TransformFiles.targets
 
 WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
           created a backup copy.  Incorrect changes to this file will make it
