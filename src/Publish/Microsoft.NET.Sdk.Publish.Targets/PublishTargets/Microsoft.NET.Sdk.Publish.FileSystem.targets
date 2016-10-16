@@ -16,7 +16,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   
   <PropertyGroup>
     <_DotNetPublishFiles>
-      $(_DotNetPublishFiles);
       FileSystemPublish;
     </_DotNetPublishFiles>
   </PropertyGroup>
@@ -45,6 +44,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     
   </Target>
 
+  <!--
+  ***********************************************************************************************
+  TARGET : _DeleteDestinationFilesIfSpecified
+  ***********************************************************************************************
+ -->
 
   <Target Name="_DeleteDestinationFilesIfSpecified">
     <PropertyGroup>
@@ -60,6 +64,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Condition="'$(DeleteExistingFiles)' == 'true'" />
   </Target>
 
+  <!--
+  ***********************************************************************************************
+  TARGET : _GatherFilesFromPublishIntermediateOutputPath
+  ***********************************************************************************************
+ -->
   <Target Name="_GatherFilesFromPublishIntermediateOutputPath">
     <ItemGroup>
       <_PublishIntermediateOutputPathFiles Include="$(PublishIntermediateOutputPath)**\*.*" />

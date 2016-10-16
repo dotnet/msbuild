@@ -29,20 +29,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <PropertyGroup>
     <_DotNetPublishFiles>
-      $(_DotNetPublishFiles);
       MSDeployPublish;
     </_DotNetPublishFiles>
   </PropertyGroup>
-
-
-  <PropertyGroup>
-    <_MsDeploySourceManifestPath Condition="'$(_MsDeploySourceManifestPath)' == ''">$(PublishIntermediateTempPath)$(MSBuildProjectName).SourceManifest.xml</_MsDeploySourceManifestPath>
-    <_MSDeployParametersFilePath Condition="'$(_MSDeployParametersFilePath)' == ''">$(PublishIntermediateTempPath)$(MSBuildProjectName).Parameters.xml</_MSDeployParametersFilePath>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <_PublishConfigFiles Include="$(_MsDeploySourceManifestPath);$(_MSDeployParametersFilePath)" />
-  </ItemGroup>
 
   <!--
   ***********************************************************************************************
@@ -195,13 +184,18 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   TARGET : _PrepareForMsDeployPublish
   ***********************************************************************************************
  -->
-  <PropertyGroup>
-    <_PrepareForMsDeployPublishDependsOn>
-      $(_PrepareForMsDeployPublishDependsOn);
-    </_PrepareForMsDeployPublishDependsOn>
-  </PropertyGroup>
 
-  <Target Name="_PrepareForMsDeployPublish" DependsOnTargets="$(_PrepareForMsDeployPublishDependsOn)">
+  <Target Name="_PrepareForMsDeployPublish">
+    
+    <PropertyGroup>
+      <_MsDeploySourceManifestPath Condition="'$(_MsDeploySourceManifestPath)' == ''">$(PublishIntermediateTempPath)$(MSBuildProjectName).SourceManifest.xml</_MsDeploySourceManifestPath>
+      <_MSDeployParametersFilePath Condition="'$(_MSDeployParametersFilePath)' == ''">$(PublishIntermediateTempPath)$(MSBuildProjectName).Parameters.xml</_MSDeployParametersFilePath>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_PublishConfigFiles Include="$(_MsDeploySourceManifestPath);$(_MSDeployParametersFilePath)" />
+    </ItemGroup>
+    
     <MakeDir Directories="$(PublishIntermediateTempPath)" Condition="!Exists('$(PublishIntermediateTempPath)')" ContinueOnError="true"/>
     <Delete Files="@(_PublishConfigFiles)" ContinueOnError="true" />
     <Touch AlwaysCreate="true" Files="@(_PublishConfigFiles)" ContinueOnError="true" />
@@ -212,13 +206,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   TARGET : _CreateManifestFiles
   ***********************************************************************************************
  -->
-  <PropertyGroup>
-    <_CreateManifestFilesDependsOn>
-      $(_CreateManifestFilesDependsOn);
-    </_CreateManifestFilesDependsOn>
-  </PropertyGroup>
 
-  <Target Name="_CreateManifestFiles" DependsOnTargets="$(_CreateManifestFilesDependsOn)">
+  <Target Name="_CreateManifestFiles">
 
     <ItemGroup>
       <MsDeploySourceManifest Remove="@(MsDeploySourceManifest)" />
@@ -238,13 +227,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   TARGET : _CreateParameterFiles
   ***********************************************************************************************
  -->
-  <PropertyGroup>
-    <_CreateParameterFilesDependsOn>
-      $(_CreateParameterFilesDependsOn);
-      </_CreateParameterFilesDependsOn>
-  </PropertyGroup>
 
-  <Target Name="_CreateParameterFiles" DependsOnTargets="$(_CreateParameterFilesDependsOn)">
+  <Target Name="_CreateParameterFiles">
 
     <!--Parameterize the default value of the Path-->
     <RegexEscape Text="$(PublishIntermediateOutputPath)">

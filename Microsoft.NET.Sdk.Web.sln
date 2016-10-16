@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.25803.1
+VisualStudioVersion = 15.0.25804.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.NET.Sdk.Web.ProjectSystem.Package", "src\Web\Microsoft.NET.Sdk.Web.ProjectSystem.Package\Microsoft.NET.Sdk.Web.ProjectSystem.Package.csproj", "{800AAAB3-AE22-483C-90A8-E1056CF39D5A}"
 EndProject
@@ -46,9 +46,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Microsoft.NET.Sdk.Publish.T
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ComputeTargets", "ComputeTargets", "{DC41414F-10D0-472C-8896-865D2820EEB2}"
 	ProjectSection(SolutionItems) = preProject
-		src\Publish\Microsoft.NET.Sdk.Publish.Targets\ComputeTargets\Microsoft.NET.Sdk.Publish.Console.ComputeFiles.targets = src\Publish\Microsoft.NET.Sdk.Publish.Targets\ComputeTargets\Microsoft.NET.Sdk.Publish.Console.ComputeFiles.targets
-		src\Publish\Microsoft.NET.Sdk.Publish.Targets\ComputeTargets\Microsoft.NET.Sdk.Publish.Core.ComputeFiles.targets = src\Publish\Microsoft.NET.Sdk.Publish.Targets\ComputeTargets\Microsoft.NET.Sdk.Publish.Core.ComputeFiles.targets
-		src\Publish\Microsoft.NET.Sdk.Publish.Targets\ComputeTargets\Microsoft.NET.Sdk.Publish.WebApp.ComputeFiles.targets = src\Publish\Microsoft.NET.Sdk.Publish.Targets\ComputeTargets\Microsoft.NET.Sdk.Publish.WebApp.ComputeFiles.targets
+		src\Publish\Microsoft.NET.Sdk.Publish.Targets\ComputeTargets\Microsoft.NET.Sdk.Publish.ComputeFiles.targets = src\Publish\Microsoft.NET.Sdk.Publish.Targets\ComputeTargets\Microsoft.NET.Sdk.Publish.ComputeFiles.targets
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CopyTargets", "CopyTargets", "{0C9266F0-6556-40CB-940A-FC10E60C21AD}"
@@ -74,6 +72,11 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Publish", "Publish", "{E537A967-65B7-46F5-8574-01F8C08F385F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.NET.Sdk.Publish.Tasks.Tests", "test\Publish\Microsoft.NET.Sdk.Publish.Tasks.Tests\Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj", "{66964EC2-712A-451A-AB4F-33F18D8F54F1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TransformTargets", "TransformTargets", "{37FCE9FE-671D-4F3E-B3C1-FE90AC4CF822}"
+	ProjectSection(SolutionItems) = preProject
+		src\Publish\Microsoft.NET.Sdk.Publish.Targets\TransformTargets\Microsoft.NET.Sdk.Publish.TransformFiles.targets = src\Publish\Microsoft.NET.Sdk.Publish.Targets\TransformTargets\Microsoft.NET.Sdk.Publish.TransformFiles.targets
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -152,5 +155,6 @@ Global
 		{96277594-64EC-4B7F-B9C3-1A6A5C74D5A1} = {569AAC15-FF3C-49CE-9CFF-AD1628E48057}
 		{E537A967-65B7-46F5-8574-01F8C08F385F} = {3CA45E5E-50F6-40E7-A0EE-250C5E9E72F0}
 		{66964EC2-712A-451A-AB4F-33F18D8F54F1} = {E537A967-65B7-46F5-8574-01F8C08F385F}
+		{37FCE9FE-671D-4F3E-B3C1-FE90AC4CF822} = {569AAC15-FF3C-49CE-9CFF-AD1628E48057}
 	EndGlobalSection
 EndGlobal

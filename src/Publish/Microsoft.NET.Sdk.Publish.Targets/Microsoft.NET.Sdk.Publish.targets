@@ -18,12 +18,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   
   <PropertyGroup>
     <!-- We want to force this property to be true, hence not adding a condition check -->
-    <SupportsPublishOnBuild>true</SupportsPublishOnBuild>
+    <SupportsDeployOnBuild>true</SupportsDeployOnBuild>
     <_PublishTaskFramework Condition=" '$(MSBuildRuntimeType)' == 'Core'">netcoreapp1.0</_PublishTaskFramework>
     <_PublishTaskFramework Condition=" '$(_PublishTaskFramework)' == ''">net46</_PublishTaskFramework>
     <_PublishTasksDir Condition=" '$(_PublishTasksDir)'=='' ">$(MSBuildThisFileDirectory)..\..\tools\$(_PublishTaskFramework)\</_PublishTasksDir>
     <_PublishTaskAssemblyFullPath Condition=" '$(_PublishTaskAssemblyFullPath)'=='' ">$(_PublishTasksDir)\Microsoft.NET$(MSBuildRuntimeType).Sdk.Publish.Tasks.dll</_PublishTaskAssemblyFullPath>
     <_CopyTargetsDir Condition=" '$(_CopyTargetsDir)' == ''">$(MSBuildThisFileDirectory)CopyTargets\</_CopyTargetsDir>
+    <_TransformTargetsDir Condition=" '$(_TransformTargetsDir)' == ''">$(MSBuildThisFileDirectory)TransformTargets\</_TransformTargetsDir>
     <_ComputeTargetsDir Condition=" '$(_ComputeTargetsDir)'=='' ">$(MSBuildThisFileDirectory)ComputeTargets\</_ComputeTargetsDir>
     <_PublishTargetsDir Condition=" '$(_PublishTargetsDir)'=='' ">$(MSBuildThisFileDirectory)PublishTargets\</_PublishTargetsDir>
     <_PublishProfilesDir Condition=" '$(_PublishProfilesDir)'=='' ">$(MSBuildThisFileDirectory)PublishProfiles\</_PublishProfilesDir>
@@ -55,17 +56,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!--
   ***********************************************************************************************
-  Set the publish properties based on PublishProfile properties
+  Set the properties based on PublishProfile properties
   ***********************************************************************************************
  -->
 
   <PropertyGroup>
-    <!--  Properties for identifying the project types -->
-    <_PublishProjectType Condition="'$(_PublishProjectType)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' ">Core</_PublishProjectType>
-    <_PublishProjectType Condition="'$(_PublishProjectType)' == '' and '$(OutputType)' =='Exe' ">Console</_PublishProjectType>
-    <_PublishProjectType Condition="'$(_PublishProjectType)' == '' and '$(OutputType)' == 'Library'">WebApp</_PublishProjectType>
-    <_PublishProjectType Condition="'$(_PublishProjectType)' == '' ">WebSite</_PublishProjectType>
-
     <!-- Properties for identifying the Publish Protocol -->
     <PublishProtocol Condition="'$(PublishProtocol)' == ''">$(WebPublishMethod)</PublishProtocol>
     <!-- For backward compat -->
@@ -93,7 +88,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   ***********************************************************************************************
  -->
 
-  <Import Project="$(_ComputeTargetsDir)Microsoft.NET.Sdk.Publish.$(_PublishProjectType).ComputeFiles.targets" Condition="Exists('$(_ComputeTargetsDir)Microsoft.NET.Sdk.Publish.$(_PublishProjectType).ComputeFiles.targets')" />
+  <Import Project="$(_ComputeTargetsDir)Microsoft.NET.Sdk.Publish.ComputeFiles.targets" Condition="Exists('$(_ComputeTargetsDir)Microsoft.NET.Sdk.Publish.ComputeFiles.targets')" />
 
   <!--
   ***********************************************************************************************
@@ -102,6 +97,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
  -->
   
   <Import Project="$(_CopyTargetsDir)Microsoft.NET.Sdk.Publish.CopyFiles.targets" Condition="Exists('$(_CopyTargetsDir)Microsoft.NET.Sdk.Publish.CopyFiles.targets')"/>
+
+
+  <!--
+  ***********************************************************************************************
+  Import the transform target
+  ***********************************************************************************************
+ -->
+
+  <Import Project="$(_TransformTargetsDir)Microsoft.NET.Sdk.Publish.TransformFiles.targets" Condition="Exists('$(_TransformTargetsDir)Microsoft.NET.Sdk.Publish.TransformFiles.targets')"/>
 
   <!--
   ***********************************************************************************************
@@ -128,13 +132,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="DotNetPublish" 
           DependsOnTargets="$(DotNetPublishDependsOn)" 
           AfterTargets="Build" 
-          Condition=" '$(PublishOnBuild)' == 'true' " />
+          Condition=" '$(DeployOnBuild)' == 'true' " />
 
 
   <PropertyGroup>
     <CorePublishDependsOn>
       $(_DotNetPublishComputeFiles);
       $(_DotNetPublishCopyFiles);
+      $(_DotNetPublishTransformFiles);
       $(_DotNetPublishFiles);
     </CorePublishDependsOn>
   </PropertyGroup>
