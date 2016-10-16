@@ -1,0 +1,34 @@
+﻿<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.BeforePublish.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your web deploy projects from the command-line or the IDE.
+
+This file defines the steps in the standard package/publish process for collecting only files to run the web appliation.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <BeforePublishDependsOn>
+      $(BeforePublishDependsOn);
+    </BeforePublishDependsOn>
+  </PropertyGroup>
+
+  <Target Name="BeforePublish" 
+          DependsOnTargets="$(BeforePublishDependsOn)">
+
+    <!-- Run the restore for the specific RID for standalone applications -->
+    <PropertyGroup>
+      <_IsManagedProject Condition="%(ProjectCapability.Identity) == 'Managed'">true</_IsManagedProject>
+    </PropertyGroup>
+    
+    <Exec Condition="'$(_IsManagedProject)' == 'true' And '$(RuntimeIdentifier)' != ''"
+          Command="dotnet restore3 $(MSBuildProjectFile) /p:RuntimeIdentifier=$(RuntimeIdentifier);TargetFramework=$(PublishFramework)"
+          WorkingDirectory="$(MSBuildProjectDirectory)" />
+  </Target>
+</Project>
