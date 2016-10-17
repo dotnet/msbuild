@@ -59,7 +59,6 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
             var appPath = Path.Combine(".", appName).Replace("/", "\\");
             RemoveLauncherArgs(aspNetCoreElement);
 
-            // Temporary fix to rename the extension from .dll to .exe for standalone apps.
             if (!isPortable)
             {
                 appPath = Path.ChangeExtension(appPath, ".exe");

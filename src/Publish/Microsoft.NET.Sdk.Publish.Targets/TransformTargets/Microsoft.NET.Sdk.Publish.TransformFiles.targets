@@ -22,13 +22,25 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </PropertyGroup>
 
   <Target Name="_WebConfigTransform">
+
     <PropertyGroup>
       <_IsManagedProject Condition="%(ProjectCapability.Identity) == 'Managed'">true</_IsManagedProject>
       <_IsAspNetCoreProject Condition="%(ProjectCapability.Identity) == 'AspNetCore'">true</_IsAspNetCoreProject>
-      <_IsPortable Condition=" '$(_IsPortable)' == '' And '$(RuntimeIdentifier)' != '' ">false</_IsPortable>
-      <_IsPortable Condition=" '$(_IsPortable)' == '' ">true</_IsPortable>      
+      
+      <_IsPortable Condition=" '$(_IsPortable)' == '' 
+                   And '$(_IsManagedProject)' == 'true' 
+                   And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' 
+                   And '$(RuntimeIdentifier)' != '' ">false</_IsPortable>
+      
+      <_IsPortable Condition=" '$(_IsPortable)' == '' 
+                   And '$(_IsManagedProject)' == 'true' 
+                   And '$(TargetFrameworkIdentifier)' == '.NETFramework' ">false</_IsPortable>
+      
+      <_IsPortable Condition=" '$(_IsPortable)' == ''">true</_IsPortable>
+      
       <_TransformWebConfigForAzure Condition=" '$(WEBSITE_SITE_NAME)' != '' Or '$(DOTNET_CONFIGURE_AZURE)' == 'true' Or '$(DOTNET_CONFIGURE_AZURE)' == '1'">true</_TransformWebConfigForAzure>
     </PropertyGroup>
+    
 
     <TransformWebConfig
         Condition="'$(_IsManagedProject)' == 'true' And '$(_IsAspNetCoreProject)' == 'true'"
