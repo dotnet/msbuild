@@ -17,6 +17,10 @@
       <Destination>tools\netcoreapp1.0</Destination>
     </NuGetContent>
 
+    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\BeforePublishTargets\*.*">
+      <Destination>build\netstandard1.0\BeforePublishTargets</Destination>
+    </NuGetContent>
+    
     <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\ComputeTargets\*.*">
       <Destination>build\netstandard1.0\ComputeTargets</Destination>
     </NuGetContent>

@@ -19,7 +19,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       _DetermineProjectType;
       _ManagedProjectComputeFiles;
       _WebAppComputeFiles;
-      _ConsoleComputeFiles;
+      _ConsoleAppComputeFiles;
     </_DotNetPublishComputeFiles>
   </PropertyGroup>
 
@@ -63,20 +63,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   
   <Target Name="_PrepareForManagedProjectSystemPublish">   
     <PropertyGroup>
-      <PublishDir>$([System.IO.Path]::GetTempPath())\PublishTemp\</PublishDir>
+      <PublishTempGuid>$([System.Guid]::NewGuid())</PublishTempGuid>
+      <PublishDir>$([System.IO.Path]::GetTempPath())PublishTemp\$(PublishTempGuid)\</PublishDir>
       <TargetFramework>$(PublishFramework)</TargetFramework>
-      <RuntimeIdentifier>$(PublishRuntime)</RuntimeIdentifier>
       <Configuration>$(PublishConfiguration)</Configuration>
     </PropertyGroup>
     
-    <!-- Remove all the files from the temp directory first-->
-    <ItemGroup>
-      <_PublishDirTempFiles Include="$(PublishDir)**\*.*" />
-    </ItemGroup>
-
-    <Delete Files="@(_PublishDirTempFiles)" />
     <MakeDir Directories="$(PublishDir)" Condition="!Exists('$(PublishDir)')"/>
-    
   </Target>
   
 
@@ -127,7 +120,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <!-- Target _PrepareForWebAppPublish                               -->
   <!--***************************************************************-->
 
-  <Target Name="PrepareForWebAppPublish">
+  <Target Name="_PrepareForWebAppPublish">
   <PropertyGroup>
     <_ComputeFilesFromOutDirPrefix Condition="'$(_ComputeFilesFromOutDirPrefix)' == ''">bin\</_ComputeFilesFromOutDirPrefix>
     <_ComputeFilesFromContentPrefix Condition="'$(_ComputeFilesFromContentPrefix)' == ''"></_ComputeFilesFromContentPrefix>
@@ -140,26 +133,26 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <!--***************************************************************-->
 
   <PropertyGroup>
-    <_ConsoleComputeFilesDependsOn>
-      $(_ConsoleComputeFilesDependsOn);
-      _PrepareForConsolePublish
+    <_ConsoleAppComputeFilesDependsOn>
+      $(_ConsoleAppComputeFilesDependsOn);
+      _PrepareForConsoleAppPublish
       _ComputeFilesFromOutDir;
       _ComputeFilesFromContent;
-    </_ConsoleComputeFilesDependsOn>
+    </_ConsoleAppComputeFilesDependsOn>
   </PropertyGroup>
 
-  <Target Name="_ConsoleComputeFiles"
+  <Target Name="_ConsoleAppComputeFiles"
           Condition="'$(_PublishProjectType)' == 'Console'"
-          DependsOnTargets="$(_ConsoleComputeFilesDependsOn)">
+          DependsOnTargets="$(_ConsoleAppComputeFilesDependsOn)">
   </Target>
 
 
 
   <!--***************************************************************-->
-  <!-- Target _PrepareForConsolePublish                              -->
+  <!-- Target _PrepareForConsoleAppPublish                              -->
   <!--***************************************************************-->
 
-  <Target Name="PrepareForConsolePublish">
+  <Target Name="_PrepareForConsoleAppPublish">
     <PropertyGroup>
       <WebJobType Condition="'$(WebJobType)' == ''">Continuous</WebJobType>
       <WebJobName Condition="'$(WebJobName)' == ''">$(AssemblyName)</WebJobName>

@@ -23,6 +23,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <_PublishTaskFramework Condition=" '$(_PublishTaskFramework)' == ''">net46</_PublishTaskFramework>
     <_PublishTasksDir Condition=" '$(_PublishTasksDir)'=='' ">$(MSBuildThisFileDirectory)..\..\tools\$(_PublishTaskFramework)\</_PublishTasksDir>
     <_PublishTaskAssemblyFullPath Condition=" '$(_PublishTaskAssemblyFullPath)'=='' ">$(_PublishTasksDir)\Microsoft.NET$(MSBuildRuntimeType).Sdk.Publish.Tasks.dll</_PublishTaskAssemblyFullPath>
+    <_BeforePublishTargetsDir Condition=" '$(_BeforePublishTargetsDir)' == ''">$(MSBuildThisFileDirectory)BeforePublishTargets\</_BeforePublishTargetsDir>
     <_CopyTargetsDir Condition=" '$(_CopyTargetsDir)' == ''">$(MSBuildThisFileDirectory)CopyTargets\</_CopyTargetsDir>
     <_TransformTargetsDir Condition=" '$(_TransformTargetsDir)' == ''">$(MSBuildThisFileDirectory)TransformTargets\</_TransformTargetsDir>
     <_ComputeTargetsDir Condition=" '$(_ComputeTargetsDir)'=='' ">$(MSBuildThisFileDirectory)ComputeTargets\</_ComputeTargetsDir>
@@ -69,19 +70,30 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- Properties setting the publish intermediate paths -->
     <PublishConfiguration Condition ="'$(PublishConfiguration)' == ''">$(LastUsedBuildConfiguration)</PublishConfiguration>
     <PublishConfiguration Condition="'$(PublishConfiguration)' == ''">$(Configuration)</PublishConfiguration>
-    <_PublishConfigurationPath Condition="'$(_PublishConfigurationPath)' == ''">$(PublishConfiguration)\</_PublishConfigurationPath>
+    <_PublishConfigurationPath Condition="'$(_PublishConfigurationPath)' == '' And '$(PublishConfiguration)' != ''">$(PublishConfiguration)\</_PublishConfigurationPath>
 
-    <PublishFramework Condition="'$(PublishFramework)' == '' And '$(_PublishProjectType)' == 'Core' ">$(TargetFramework)</PublishFramework>
-    <PublishFramework Condition="'$(PublishFramework)' == '' And '$(_PublishProjectType)' == 'Core' ">netcoreapp1.0</PublishFramework>
-    <_PublishFrameworkPath Condition="'$(_PublishFrameworkPath)' == '' And '$(_PublishProjectType)' == 'Core' ">$(PublishFramework)\</_PublishFrameworkPath>
+    <PublishFramework Condition="'$(PublishFramework)' == ''">$(TargetFramework)</PublishFramework>
+    <PublishFramework Condition="'$(PublishFramework)' == ''">$(TargetFrameworks)</PublishFramework>
+    <_PublishFrameworkPath Condition="'$(_PublishFrameworkPath)' == '' And '$(PublishFramework)' != ''">$(PublishFramework)\</_PublishFrameworkPath>
+
+    <_RuntimeIdentifierPath Condition="'$(_RuntimeIdentifierPath)' == '' And '$(RuntimeIdentifier)' != '' ">$(RuntimeIdentifier)\</_RuntimeIdentifierPath>
 
     <BaseIntermediateOutputPath Condition="'$([System.IO.Path]::IsPathRooted($(BaseIntermediateOutputPath)))' == 'False'">$(MSBuildProjectDirectory)\$(BaseIntermediateOutputPath)</BaseIntermediateOutputPath>
     <BaseIntermediateOutputPath Condition="!HasTrailingSlash('$(BaseIntermediateOutputPath)')">$(BaseIntermediateOutputPath)\</BaseIntermediateOutputPath>
 
-    <PublishIntermediateTempPath Condition="'$(PublishIntermediateTempPath)' == ''">$([System.IO.Path]::GetFullPath($(BaseIntermediateOutputPath)$(_PublishConfigurationPath)$(_PublishFrameworkPath)PublishTemp\))</PublishIntermediateTempPath>
+    <PublishIntermediateTempPath Condition="'$(PublishIntermediateTempPath)' == ''">$([System.IO.Path]::GetFullPath($(BaseIntermediateOutputPath)$(_PublishConfigurationPath)$(_PublishFrameworkPath)$(_RuntimeIdentifierPath)PublishTemp\))</PublishIntermediateTempPath>
     <PublishIntermediateOutputPath Condition="'$(PublishIntermediateOutputPath)' == ''">$(PublishIntermediateTempPath)PublishOutput\</PublishIntermediateOutputPath>
   </PropertyGroup>
- 
+
+  <!--
+  ***********************************************************************************************
+  Import the BeforePublish target
+  ***********************************************************************************************
+ -->
+
+  <Import Project="$(_BeforePublishTargetsDir)Microsoft.NET.Sdk.BeforePublish.targets" Condition="Exists('$(_BeforePublishTargetsDir)Microsoft.NET.Sdk.BeforePublish.targets')" />
+
+  
   <!--
   ***********************************************************************************************
   Import the Compute target
