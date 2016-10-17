@@ -99,7 +99,7 @@ namespace Microsoft.DotNet.Cli.Run3.Tests
 
             new Restore3Command()
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute()
+                .Execute("/p:SkipInvalidConfigurations=true")
                 .Should()
                 .Pass();
 
