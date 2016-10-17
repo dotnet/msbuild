@@ -239,12 +239,9 @@ namespace Microsoft.Build.Evaluation
 
                             XmlReaderSettings dtdSettings = new XmlReaderSettings();
                             dtdSettings.DtdProcessing = DtdProcessing.Ignore;
-#if FEATURE_XMLTEXTREADER
-                            using (var stream = new StreamReader(projectRootElement.FullPath))
+
+                            using (var stream = new FileStream(projectRootElement.FullPath, FileMode.Open, FileAccess.Read, FileShare.Read))
                             using (XmlReader xtr = XmlReader.Create(stream, dtdSettings))
-#else
-                            using (XmlReader xtr = XmlReader.Create(File.OpenRead(projectRootElement.FullPath), dtdSettings))
-#endif
                             {
                                 document.Load(xtr);
                             }
