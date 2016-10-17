@@ -7,8 +7,6 @@
     <ProjectGuid>{EC640B7E-332E-40A2-BB6E-5B7EC788F315}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Microsoft.NET.Build.Tests</RootNamespace>
-    <AssemblyName>Microsoft.NET.Build.Tests</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetFramework>netstandard1.6</TargetFramework>
     <PackageTargetFallback>dotnet5.4;portable-net451+win8</PackageTargetFallback>
@@ -52,27 +50,4 @@
   </ItemGroup>
   <Import Project="..\..\build\Targets\Signing.Imports.targets" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="AfterBuild">
-    <ItemGroup>
-      <CopyLocalAssembly Include="Microsoft.DotNet.Cli.Utils">
-        <Version>$(DotNetCliUtilsVersion)</Version>
-        <TFM>netstandard1.6</TFM>
-      </CopyLocalAssembly>
-      <CopyLocalAssembly Include="Microsoft.DotNet.ProjectModel">
-        <Version>1.0.0-rc3-003121</Version>
-        <TFM>netstandard1.6</TFM>
-      </CopyLocalAssembly>
-      <CopyLocalAssembly Include="Microsoft.DotNet.InternalAbstractions">
-        <Version>1.0.0</Version>
-        <TFM>netstandard1.3</TFM>
-      </CopyLocalAssembly>
-      <CopyLocalAssembly>
-        <PackageRelativePath>$([System.String]::Copy('%(Identity)\%(Version)').ToLowerInvariant())</PackageRelativePath>
-      </CopyLocalAssembly>
-      <CopyLocalAssembly>
-        <FullFilePath>$(NuGet_Packages)\%(CopyLocalAssembly.PackageRelativePath)\lib\%(CopyLocalAssembly.TFM)\%(CopyLocalAssembly.Identity).dll</FullFilePath>
-      </CopyLocalAssembly>
-    </ItemGroup>
-    <Copy SourceFiles="%(CopyLocalAssembly.FullFilePath)" DestinationFolder="$(OutDir)" />
-  </Target>
 </Project>

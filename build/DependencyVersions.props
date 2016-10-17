@@ -8,7 +8,7 @@
     
     <MsBuildPackagesVersion>0.1.0-preview-00028-160627</MsBuildPackagesVersion>
     <CoreSetupVersion>1.0.1-beta-000933</CoreSetupVersion>
-    <NuGetVersion>3.6.0-rc-1979</NuGetVersion>
+    <NuGetVersion>3.6.0-rc-1984</NuGetVersion>
     <RoslynVersion>2.0.0-beta6-60922-08</RoslynVersion>
   </PropertyGroup>
 

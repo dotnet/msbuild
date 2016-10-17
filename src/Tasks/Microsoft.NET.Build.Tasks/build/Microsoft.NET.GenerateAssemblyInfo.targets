@@ -40,8 +40,8 @@ Copyright (c) .NET Foundation. All rights reserved.
           Inputs="$(MSBuildAllProjects)"
           Outputs="$(GeneratedAssemblyInfoFile)">
     <ItemGroup>
-      <AssemblyAttribute Include="System.Reflection.AssemblyCompanyAttribute" Condition="'$(Authors)' != ''">
-        <_Parameter1>$(Authors)</_Parameter1>
+      <AssemblyAttribute Include="System.Reflection.AssemblyCompanyAttribute" Condition="'$(Company)' != ''">
+        <_Parameter1>$(Company)</_Parameter1>
       </AssemblyAttribute>
       <AssemblyAttribute Include="System.Reflection.AssemblyConfigurationAttribute" Condition="'$(Configuration)' != ''">
         <_Parameter1>$(Configuration)</_Parameter1>

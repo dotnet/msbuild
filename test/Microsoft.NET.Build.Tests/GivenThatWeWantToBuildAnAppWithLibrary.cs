@@ -71,7 +71,7 @@ namespace Microsoft.NET.Build.Tests
             }
 
             var libInfo = FileVersionInfo.GetVersionInfo(Path.Combine(outputDirectory.FullName, "TestLibrary.dll"));
-            libInfo.CompanyName.Trim().Should().BeEmpty();
+            libInfo.CompanyName.Trim().Should().Be("TestLibrary");
             libInfo.FileVersion.Should().Be("42.43.44.45");
             libInfo.FileDescription.Should().Be("TestLibrary");
             libInfo.LegalCopyright.Trim().Should().BeEmpty();
