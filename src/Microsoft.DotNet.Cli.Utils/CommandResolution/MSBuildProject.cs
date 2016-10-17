@@ -77,10 +77,10 @@ namespace Microsoft.DotNet.Cli.Utils
                 globalProperties.Add("Configuration", configuration);
             }
 
-            _project = ProjectCollection.GlobalProjectCollection.LoadedProjects.FirstOrDefault(p =>
-                p.FullPath == msBuildProjectPath);
-
-            _project = _project ?? new Project(msBuildProjectPath, globalProperties, null);
+            _project = ProjectCollection.GlobalProjectCollection.LoadProject(
+                msBuildProjectPath,
+                globalProperties,
+                null);
 
             _msBuildExePath = msBuildExePath;
         }

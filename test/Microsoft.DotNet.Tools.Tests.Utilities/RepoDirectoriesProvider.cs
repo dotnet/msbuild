@@ -12,8 +12,6 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         private string _artifacts;
         private string _builtDotnet;
         private string _nugetPackages;
-        private string _corehostPackages;
-        private string _corehostDummyPackages;
         private string _stage2Sdk;
         private string _testPackages;
 
@@ -50,8 +48,6 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         public string Artifacts => _artifacts;
         public string BuiltDotnet => _builtDotnet;
         public string NugetPackages => _nugetPackages;
-        public string CorehostPackages => _corehostPackages;
-        public string CorehostDummyPackages => _corehostDummyPackages;
         public string Stage2Sdk => _stage2Sdk;
         public string TestPackages => _testPackages;
 
@@ -66,8 +62,6 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
             _artifacts = artifacts ?? Path.Combine(RepoRoot, "artifacts", currentRid);
             _nugetPackages = nugetPackages ?? Path.Combine(RepoRoot, ".nuget", "packages");
-            _corehostPackages = corehostPackages ?? Path.Combine(_artifacts, "corehost");
-            _corehostDummyPackages = corehostDummyPackages ?? Path.Combine(_artifacts, "corehostdummypackages");
             _builtDotnet = builtDotnet ?? Path.Combine(_artifacts, "intermediate", "sharedFrameworkPublish");
             _stage2Sdk = Directory.EnumerateDirectories(Path.Combine(_artifacts, "stage2", "sdk")).First();
             _testPackages = Path.Combine(_artifacts, "tests", "packages");
