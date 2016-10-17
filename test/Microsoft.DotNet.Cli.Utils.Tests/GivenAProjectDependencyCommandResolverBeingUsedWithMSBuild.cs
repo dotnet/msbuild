@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         }
 
         [Fact]
-        public void It_returns_a_CommandSpec_with_Dotnet_as_FileName_and_CommandName_in_Args_when_CommandName_exists_in_MSBuild_ProjectDependencies()
+        public void ItReturnsACommandSpecWithDotnetAsFileNameAndCommandNameInArgsWhenCommandNameExistsInMSBuildProjectDependencies()
         {
             var projectDependenciesCommandResolver = SetupProjectDependenciesCommandResolver();
 
@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         }
 
         [Fact]
-        public void It_passes_depsfile_arg_to_host_when_returning_a_CommandSpec_for_MSBuild_project()
+        public void ItPassesDepsfileArgToHostWhenReturningACommandSpecForMSBuildProject()
         {
             var projectDependenciesCommandResolver = SetupProjectDependenciesCommandResolver();
 
@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         }
 
         [Fact]
-        public void It_returns_null_when_CommandName_does_not_exist_in_ProjectDependencies_for_MSBuild_project()
+        public void ItReturnsNullWhenCommandNameDoesNotExistInProjectDependenciesForMSBuildProject()
         {
             var projectDependenciesCommandResolver = SetupProjectDependenciesCommandResolver();
 
@@ -111,13 +111,13 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         }
 
         [Fact]
-        public void It_sets_depsfile_in_output_path_in_commandspec_for_MSBuild_project()
+        public void ItSetsDepsfileToOutputInCommandspecForMSBuild()
         {
             var projectDependenciesCommandResolver = SetupProjectDependenciesCommandResolver();
 
             var testInstance = TestAssetsManager.CreateTestInstance("MSBuildTestAppWithToolInDependencies");
 
-            var outputDir = Path.Combine(testInstance.Path, "outdir");
+            var outputDir = Path.Combine(testInstance.Path, "out");
 
             var commandResolverArguments = new CommandResolverArguments()
             {
@@ -137,7 +137,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
             new Build3Command()
                 .WithWorkingDirectory(testInstance.Path)
-                .Execute($"-o {outputDir}")
+                .Execute($"-c {_configuration} -o {outputDir}")
                 .Should()
                 .Pass();
 
