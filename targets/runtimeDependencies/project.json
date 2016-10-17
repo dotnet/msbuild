@@ -3,7 +3,8 @@
     "win7-x86": {},
     "win7-x64": {},
     "osx.10.10-x64": {},
-    "ubuntu.14.04-x64": {}
+    "ubuntu.14.04-x64": {},
+    "ubuntu.16.04-x64": {}
   },
   "dependencies": {
     "xunit": "2.1.0",
@@ -57,10 +58,10 @@
         "Newtonsoft.Json": "9.0.1",
         "xunit.console.netcore": "1.0.3-prerelease-00524-01",
 
-        "System.Net.Http": "4.1.0-rc3-24109-00",
-        "System.Text.RegularExpressions": "4.1.0-rc3-24109-00",
-        "System.Linq": "4.1.0-rc3-24109-00",
-        "System.Linq.Expressions": "4.1.0-rc3-24109-00"
+        "System.Net.Http": "4.1.0",
+        "System.Text.RegularExpressions": "4.1.0",
+        "System.Linq": "4.1.0",
+        "System.Linq.Expressions": "4.1.0"
       },
       "imports": [
         "portable-net451+win81",
