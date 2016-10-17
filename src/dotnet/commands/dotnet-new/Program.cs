@@ -136,7 +136,7 @@ namespace Microsoft.DotNet.Tools.New
                                Templates = new[] 
                                { 
                                    new { Name = "Console", isMsBuild = true }, 
-                                   new { Name = "Web", isMsBuild = false }, 
+                                   new { Name = "Web", isMsBuild = true }, 
                                    new { Name = "Lib", isMsBuild = true },
                                    new { Name = "xunittest", isMsBuild = false },
                                    new { Name = "nunittest", isMsBuild = false } 
