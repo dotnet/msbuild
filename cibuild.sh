@@ -74,6 +74,10 @@ setMonoDir(){
 get_current_linux_name() {
     # Detect Distro
     if [ "$(cat /etc/*-release | grep -cim1 ubuntu)" -eq 1 ]; then
+        if [ "$(cat /etc/*-release | grep -cim1 14.04)" -eq 1 ]; then
+            echo "ubuntu.14.04"
+            return 0
+        fi
         if [ "$(cat /etc/*-release | grep -cim1 16.04)" -eq 1 ]; then
             echo "ubuntu.16.04"
             return 0
