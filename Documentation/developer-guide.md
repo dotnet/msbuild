@@ -73,4 +73,3 @@ The dotnet CLI considers any executable on the path named `dotnet-{commandName}`
 
 ## Things to Know
 - Any added commands are usually invoked through `dotnet {command}`. As a result of this, stdout and stderr are redirected through the driver (`dotnet`) and buffered by line. As a result of this, child commands should use Console.WriteLine in any cases where they expect output to be written immediately. Any uses of Console.Write should be followed by Console.WriteLine to ensure the output is written.
-- CLI is currently based on .NET Core 1.0 which does not support OS X Sierra. If you are developing the CLI on Sierra then include `/p:SkipInvalidConfigurations=true` in your calls to `build.sh`, this will allow the build to progress sufficiently to validate your work on this platform.
