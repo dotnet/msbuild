@@ -6,7 +6,7 @@ def project = GithubProject
 
 // Generate the builds for branches: xplat, master and PRs (which aren't branch specific)
 ['*/master', '*/xplat', 'pr'].each { branch ->
-    ['Windows_NT', 'OSX', 'Ubuntu'].each {osName ->
+    ['Windows_NT', 'OSX', 'Ubuntu14.04', 'Ubuntu16.04'].each {osName ->
         def runtimes = ['CoreCLR']
 
         if (osName == 'Windows_NT') {
