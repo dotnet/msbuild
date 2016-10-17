@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Cli.Utils;
+using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Tools.DependencyInvoker
 {
@@ -36,32 +37,73 @@ namespace Microsoft.DotNet.Tools.DependencyInvoker
                     dotnetParams.Config,
                     dotnetParams.Output,
                     dotnetParams.BuildBasePath,
-                    projectContexts.First().ProjectDirectory);
-                    
+                    dotnetParams.ProjectPath);
+
+            var result = 0;
+            if(projectContexts.Any())
+            {
+                result = InvokeDependencyToolForProjectJson(projectContexts, commandFactory, dotnetParams);
+            }
+            else
+            {
+                result = InvokeDependencyToolForMSBuild(commandFactory, dotnetParams);
+            }
+
+            return result;
+        }
+
+        private static int InvokeDependencyToolForMSBuild(
+            ProjectDependenciesCommandFactory commandFactory,
+            DotnetBaseParams dotnetParams)
+        {
+            Console.WriteLine($"Invoking '{dotnetParams.Command}' for '{dotnetParams.Framework.GetShortFolderName()}'.");
+
+            return InvokeDependencyTool(commandFactory, dotnetParams, dotnetParams.Framework);
+        }
+
+        private static int InvokeDependencyToolForProjectJson(
+            IEnumerable<ProjectContext> projectContexts,
+            ProjectDependenciesCommandFactory commandFactory,
+            DotnetBaseParams dotnetParams)
+        {
             foreach (var projectContext in projectContexts)
             {
                 Console.WriteLine($"Invoking '{dotnetParams.Command}' for '{projectContext.TargetFramework}'.");
 
-                try
+                if (InvokeDependencyTool(commandFactory, dotnetParams, projectContext.TargetFramework) != 0)
                 {
-                    var exitCode = commandFactory.Create(
-                            $"dotnet-{dotnetParams.Command}",
-                            dotnetParams.RemainingArguments,
-                            projectContext.TargetFramework,
-                            dotnetParams.Config)
-                        .ForwardStdErr()
-                        .ForwardStdOut()
-                        .Execute()
-                        .ExitCode;
-                    
-                    Console.WriteLine($"Command returned {exitCode}");
-                }
-                catch (CommandUnknownException)
-                {
-                    Console.WriteLine($"Command not found");
                     return 1;
                 }
             }
+
+            return 0;
+        }
+
+        private static int InvokeDependencyTool(
+            ProjectDependenciesCommandFactory commandFactory,
+            DotnetBaseParams dotnetParams,
+            NuGetFramework framework)
+        {
+            try
+            {
+                var exitCode = commandFactory.Create(
+                        $"dotnet-{dotnetParams.Command}",
+                        dotnetParams.RemainingArguments,
+                        framework,
+                        dotnetParams.Config)
+                    .ForwardStdErr()
+                    .ForwardStdOut()
+                    .Execute()
+                    .ExitCode;
+
+                Console.WriteLine($"Command returned {exitCode}");
+            }
+            catch (CommandUnknownException)
+            {
+                Console.WriteLine($"Command not found");
+                return 1;
+            }
+
             return 0;
         }
 
@@ -76,7 +118,7 @@ namespace Microsoft.DotNet.Tools.DependencyInvoker
 
             if (!File.Exists(projectPath))
             {
-                throw new InvalidOperationException($"{projectPath} does not exist.");
+                return Enumerable.Empty<ProjectContext>();
             }
 
             return ProjectContext.CreateContextForEachFramework(projectPath);

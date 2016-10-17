@@ -39,7 +39,7 @@
       <Version>6.2.2-preview</Version>
     </PackageReference>
     <PackageReference Include="NuGet.CommandLine.XPlat">
-      <Version>3.6.0-rc-1979</Version>
+      <Version>3.6.0-rc-1984</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Build.Utilities.Core">
       <Version>0.1.0-preview-00043-160929</Version>

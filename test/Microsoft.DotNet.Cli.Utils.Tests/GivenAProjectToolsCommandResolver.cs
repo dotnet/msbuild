@@ -4,7 +4,6 @@
 using System.IO;
 using System.Linq;
 using FluentAssertions;
-using Microsoft.DotNet.Cli.CommandResolution;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.TestFramework;
@@ -236,7 +235,7 @@ namespace Microsoft.DotNet.Tests
         {
             packagedCommandSpecFactory = packagedCommandSpecFactory ?? new PackagedCommandSpecFactory();
 
-            var projectToolsCommandResolver = new ProjectToolsCommandResolver(packagedCommandSpecFactory);
+            var projectToolsCommandResolver = new ProjectToolsCommandResolver(packagedCommandSpecFactory, new EnvironmentProvider());
 
             return projectToolsCommandResolver;
         }

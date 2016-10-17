@@ -5,8 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Tools.Common;
 using Microsoft.Extensions.DependencyModel;
@@ -15,7 +13,7 @@ using NuGet.ProjectModel;
 using NuGet.Versioning;
 using FileFormatException = Microsoft.DotNet.ProjectModel.FileFormatException;
 
-namespace Microsoft.DotNet.Cli.CommandResolution
+namespace Microsoft.DotNet.Cli.Utils
 {
     public class ProjectToolsCommandResolver : ICommandResolver
     {
@@ -27,9 +25,14 @@ namespace Microsoft.DotNet.Cli.CommandResolution
         private List<string> _allowedCommandExtensions;
         private IPackagedCommandSpecFactory _packagedCommandSpecFactory;
 
-        public ProjectToolsCommandResolver(IPackagedCommandSpecFactory packagedCommandSpecFactory)
+        private IEnvironmentProvider _environment;
+
+        public ProjectToolsCommandResolver(
+            IPackagedCommandSpecFactory packagedCommandSpecFactory,
+            IEnvironmentProvider environment)
         {
             _packagedCommandSpecFactory = packagedCommandSpecFactory;
+            _environment = environment;
 
             _allowedCommandExtensions = new List<string>()
             {
@@ -45,37 +48,43 @@ namespace Microsoft.DotNet.Cli.CommandResolution
                 return null;
             }
 
-            return ResolveFromProjectTools(
-                commandResolverArguments.CommandName,
-                commandResolverArguments.CommandArguments.OrEmptyIfNull(),
-                commandResolverArguments.ProjectDirectory);
+            return ResolveFromProjectTools(commandResolverArguments);
         }
 
-        private CommandSpec ResolveFromProjectTools(
-            string commandName,
-            IEnumerable<string> args,
-            string projectDirectory)
+        private CommandSpec ResolveFromProjectTools(CommandResolverArguments commandResolverArguments)
         {
-            var projectFactory = new ProjectFactory();
-            var project = projectFactory.GetProject(projectDirectory);
+            var projectFactory = new ProjectFactory(_environment);
+            var project = projectFactory.GetProject(
+                commandResolverArguments.ProjectDirectory,
+                commandResolverArguments.Framework,
+                commandResolverArguments.Configuration,
+                commandResolverArguments.BuildBasePath,
+                commandResolverArguments.OutputPath);
             var tools = project.GetTools();
 
             return ResolveCommandSpecFromAllToolLibraries(
                 tools,
-                commandName,
-                args,
-                project.GetLockFile());
+                commandResolverArguments.CommandName,
+                commandResolverArguments.CommandArguments.OrEmptyIfNull(),
+                project.GetLockFile(),
+                project);
         }
 
         private CommandSpec ResolveCommandSpecFromAllToolLibraries(
             IEnumerable<SingleProjectInfo> toolsLibraries,
             string commandName,
             IEnumerable<string> args,
-            LockFile lockFile)
+            LockFile lockFile,
+            IProject project)
         {
             foreach (var toolLibrary in toolsLibraries)
             {
-                var commandSpec = ResolveCommandSpecFromToolLibrary(toolLibrary, commandName, args, lockFile);
+                var commandSpec = ResolveCommandSpecFromToolLibrary(
+                    toolLibrary,
+                    commandName,
+                    args,
+                    lockFile,
+                    project);
 
                 if (commandSpec != null)
                 {
@@ -90,7 +99,8 @@ namespace Microsoft.DotNet.Cli.CommandResolution
             SingleProjectInfo toolLibraryRange,
             string commandName,
             IEnumerable<string> args,
-            LockFile lockFile)
+            LockFile lockFile,
+            IProject project)
         {
             var nugetPackagesRoot = lockFile.PackageFolders.First().Path;
 
@@ -111,7 +121,7 @@ namespace Microsoft.DotNet.Cli.CommandResolution
 
             var normalizedNugetPackagesRoot = PathUtility.EnsureNoTrailingDirectorySeparator(nugetPackagesRoot);
 
-            return _packagedCommandSpecFactory.CreateCommandSpecFromLibrary(
+            var commandSpec = _packagedCommandSpecFactory.CreateCommandSpecFromLibrary(
                     toolLibrary,
                     commandName,
                     args,
@@ -120,6 +130,10 @@ namespace Microsoft.DotNet.Cli.CommandResolution
                     s_commandResolutionStrategy,
                     depsFilePath,
                     null);
+
+            commandSpec?.AddEnvironmentVariablesFromProject(project);
+
+            return commandSpec;
         }
 
         private LockFile GetToolLockFile(
@@ -155,7 +169,7 @@ namespace Microsoft.DotNet.Cli.CommandResolution
 
             return toolPathCalculator.GetBestLockFilePath(
                 toolLibrary.Name,
-                new VersionRange(new NuGetVersion(toolLibrary.Version)),
+                VersionRange.Parse(toolLibrary.Version),
                 s_toolPackageFramework);
         }
 
@@ -184,7 +198,6 @@ namespace Microsoft.DotNet.Cli.CommandResolution
             }
         }
 
-        // Need to unit test this, so public
         internal void GenerateDepsJsonFile(
             LockFile toolLockFile,
             string depsPath,

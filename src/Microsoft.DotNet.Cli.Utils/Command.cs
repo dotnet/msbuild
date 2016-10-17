@@ -29,6 +29,14 @@ namespace Microsoft.DotNet.Cli.Utils
                 UseShellExecute = false
             };
 
+            foreach(var environmentVariable in commandSpec.EnvironmentVariables)
+            {
+                if (!psi.Environment.ContainsKey(environmentVariable.Key))
+                {
+                    psi.Environment.Add(environmentVariable.Key, environmentVariable.Value);
+                }
+            }
+
             _process = new Process
             {
                 StartInfo = psi

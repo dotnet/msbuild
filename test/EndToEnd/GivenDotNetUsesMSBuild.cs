@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.IO;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
@@ -78,6 +79,40 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             new DotnetCommand()
                 .WithWorkingDirectory(testInstance.TestRoot)
                 .ExecuteWithCapturedOutput("portable")
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello Portable World!");;
+        }
+
+        [Fact]
+        public void ItCanRunAToolThatInvokesADependencyToolInACSProj()
+        {
+            var repoDirectoriesProvider = new RepoDirectoriesProvider();
+            var testAppName = "MSBuildTestAppWithToolInDependencies";
+            var testInstance = TestAssetsManager
+                .CreateTestInstance(testAppName);
+
+            var configuration = "Debug";
+
+            var testProjectDirectory = testInstance.TestRoot;
+
+            new Restore3Command()
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute($"-s {repoDirectoriesProvider.TestPackages}")
+                .Should()
+                .Pass();
+
+            new Build3Command()
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute($"-c {configuration}")
+                .Should()
+                .Pass();
+
+            new DotnetCommand()
+                .WithWorkingDirectory(testProjectDirectory)
+                .ExecuteWithCapturedOutput(
+                    $"-v dependency-tool-invoker -c {configuration} -f netcoreapp1.0 portable")
                 .Should()
                 .Pass()
                 .And

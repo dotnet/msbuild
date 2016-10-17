@@ -22,35 +22,13 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         protected const string DefaultLibraryFramework = "netstandard1.5";
         private TempRoot _temp;
         private static TestAssetsManager s_testsAssetsMgr;
-        private static string s_repoRoot;
+
 
         protected static string RepoRoot
         {
             get
             {
-                if (!string.IsNullOrEmpty(s_repoRoot))
-                {
-                    return s_repoRoot;
-                }
-
-#if NET451
-            string directory = AppDomain.CurrentDomain.BaseDirectory;
-#else
-            string directory = AppContext.BaseDirectory;
-#endif
-
-                while (!Directory.Exists(Path.Combine(directory, ".git")) && directory != null)
-                {
-                    directory = Directory.GetParent(directory).FullName;
-                }
-
-                if (directory == null)
-                {
-                    throw new Exception("Cannot find the git repository root");
-                }
-
-                s_repoRoot = directory;
-                return s_repoRoot;
+                return RepoDirectoriesProvider.RepoRoot;
             }
         }
 

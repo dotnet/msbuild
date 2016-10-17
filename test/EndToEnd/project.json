@@ -1,7 +1,15 @@
 {
   "version": "1.0.0-*",
   "buildOptions": {
-    "emitEntryPoint": true
+    "emitEntryPoint": true,
+    "copyToOutput": {
+      "include": [
+        "../../artifacts/*/stage2/sdk/*/.version"
+      ],
+      "mappings": {
+        ".version": "../../artifacts/*/stage2/sdk/*/.version"
+      }
+    }
   },
   "dependencies": {
     "Microsoft.NETCore.App": {

@@ -46,7 +46,8 @@
     "moq.netcore": "4.4.0-beta8",
     "xunit": "2.2.0-beta3-build3330",
     "dotnet-test-xunit": "1.0.0-rc2-350904-49",
-    "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000933"
+    "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000933",
+    "Microsoft.Build.Runtime": "15.1.316-preview5"
   },
   "frameworks": {
     "netcoreapp1.0": {
