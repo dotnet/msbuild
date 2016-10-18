@@ -812,7 +812,7 @@
       </trans-unit>
       <trans-unit id="ProjectMustBeInMSBuildXmlNamespace">
         <source>MSB4041: The default XML namespace of the project must be the MSBuild XML namespace or no namespace. If the project is authored in the MSBuild 2003 format, please add xmlns="{0}" to the &lt;Project&gt; element. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</source>
-        <target state="updated">MSB4041: Domyślna przestrzeń nazw XML projektu musi być przestrzenią nazw XML programu MSBuild. Jeśli projekt został utworzony w formacie programu MSBuild 2003, dodaj parametr xmlns=„{0}” do elementu &lt;Project&gt;. Jeśli projekt został utworzony w starym formacie 1.0 lub 1.2, przekonwertuj go na format programu MSBuild 2003.</target>
+        <target state="translated">MSB4041: Domyślna przestrzeń nazw XML projektu musi być przestrzenią nazw XML programu MSBuild lub przestrzeń nazw ma nie być używana. Jeśli projekt został utworzony w formacie programu MSBuild 2003, dodaj parametr xmlns=„{0}” do elementu &lt;Project&gt;. Jeśli projekt został utworzony w starym formacie 1.0 lub 1.2, przekonwertuj go na format programu MSBuild 2003.</target>
         <note>{StrBegin="MSB4041: "}UE: This is a Beta 1 message only.
       LOCALIZATION: &lt;Project&gt;, "MSBuild" and "xmlns" should not be localized.</note>
       </trans-unit>
@@ -1919,33 +1919,33 @@ Wykorzystanie:          Średnie wykorzystanie {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="InvalidAttributeExclusive">
         <source>MSB4111: At most one of the include, remove, and update attributes may be specified for an item element.</source>
-        <target state="new">MSB4111: At most one of the include, remove, and update attributes may be specified for an item element.</target>
-        <note></note>
+        <target state="translated">MSB4111: Dla elementu item należy określić co najwyżej atrybut include, remove lub update.</target>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidAttributeDueToDuplication">
         <source>MSB4227: The attribute "{0}" on element &lt;{1}&gt; is invalid because an attribute with that name already exists</source>
-        <target state="new">MSB4227: The attribute "{0}" on element &lt;{1}&gt; is invalid because an attribute with that name already exists</target>
+        <target state="translated">MSB4227: Atrybut „{0}” elementu &lt;{1}&gt; jest nieprawidłowy, ponieważ atrybut o tej nazwie już istnieje.</target>
         <note>{StrBegin="MSB4227: "}</note>
       </trans-unit>
       <trans-unit id="InvalidMetadataAsAttribute">
         <source>MSB4228: The name "{0}" is not valid for metadata expressed as an attribute (on element &lt;{1}&gt;)</source>
-        <target state="new">MSB4228: The name "{0}" is not valid for metadata expressed as an attribute (on element &lt;{1}&gt;)</target>
+        <target state="translated">MSB4228: Nazwa „{0}” jest nieprawidłowa w przypadku metadanych wyrażonych jako atrybut (elementu &lt;{1}&gt;).</target>
         <note>{StrBegin="MSB4228: "}</note>
       </trans-unit>
       <trans-unit id="OM_OneOfAttributeButNotMore">
         <source>The &lt;{0}&gt; element must have either the "{1}" attribute, the "{2}" attribute, or the "{3}" attribute, but not more than one.</source>
-        <target state="new">The &lt;{0}&gt; element must have either the "{1}" attribute, the "{2}" attribute, or the "{3}" attribute, but not more than one.</target>
-        <note></note>
+        <target state="translated">Element &lt;{0}&gt; musi mieć atrybut „{1}”, atrybut „{2}” lub atrybut „{3}”, ale nie więcej niż jeden.</target>
+        <note />
       </trans-unit>
       <trans-unit id="OM_ItemsOutsideTargetMustHaveIncludeOrUpdateOrRemove">
         <source>An item not parented under a Target must have a value for Include or Update or Remove.</source>
-        <target state="new">An item not parented under a Target must have a value for Include or Update or Remove.</target>
+        <target state="translated">Element niebędący elementem nadrzędnym w obszarze atrybutu Target musi mieć wartość atrybutu Include, Update lub Remove.</target>
         <note>LOCALIZATION: Please do not localize "Target", "Include", "Update", and "Remove".</note>
       </trans-unit>
       <trans-unit id="OM_CannotSplitItemElementWhenSplittingIsDisabled">
         <source>The requested operation needs to split the item element at location {0} into individual elements but item element splitting is disabled with {1}.</source>
-        <target state="new">The requested operation needs to split the item element at location {0} into individual elements but item element splitting is disabled with {1}.</target>
-        <note></note>
+        <target state="translated">Żądana operacja musi podzielić element item w lokalizacji {0} na pojedyncze elementy, ale dzielenie elementu item zostało wyłączone przy użyciu opcji {1}.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

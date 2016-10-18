@@ -179,7 +179,7 @@
       </trans-unit>
       <trans-unit id="Copy.RetryingAsFileCopy">
         <source>Could not use a link to copy "{0}" to "{1}". Copying the file instead. {2}</source>
-        <target state="updated">Non è stato possibile usare un collegamento reale per copiare "{0}" in "{1}". Al suo posto verrà copiato il file. {2}</target>
+        <target state="translated">Non è stato possibile usare un collegamento per copiare "{0}" in "{1}". Al suo posto verrà copiato il file. {2}</target>
         <note>LOCALIZATION: {0} and {1} are paths. {2} is an optional localized message.</note>
       </trans-unit>
       <trans-unit id="Copy.NeedsDestination">
@@ -652,7 +652,7 @@
       </trans-unit>
       <trans-unit id="GenerateBootstrapper.NoOutputPath">
         <source>MSB3148: No output path specified in build settings.</source>
-        <target state="translated">MSB3148: non è stato specificato un percorso di outputnelle impostazioni di compilazione.</target>
+        <target state="translated">MSB3148: non è stato specificato un percorso di output nelle impostazioni di compilazione.</target>
         <note>{StrBegin="MSB3148: "}</note>
       </trans-unit>
       <trans-unit id="GenerateBootstrapper.NoResources">
@@ -2841,7 +2841,7 @@
       </trans-unit>
       <trans-unit id="GetInstalledSDKs.NoSDksFound">
         <source>MSB3785: No SDKs were found for TargetPlatform = {0} v{1}. SDKReference items will not be resolved. If your application requires these references there may be compilation errors.</source>
-        <target state="updated">MSB3785: non sono stati trovati SDK. Gli elementi SDKReference non verranno risolti. Se l'applicazione richiede questi riferimenti, potrebbero verificarsi errori di compilazione.</target>
+        <target state="translated">MSB3785: non sono stati trovati SDK per TargetPlatform = {0} v{1}. Gli elementi SDKReference non verranno risolti. Se l'applicazione richiede questi riferimenti, potrebbero verificarsi errori di compilazione.</target>
         <note>{StrBegin="MSB3785: "} "SDKReference" refers to SDKReference items in the project file and should not be localized.</note>
       </trans-unit>
       <trans-unit id="GetInstalledSDKs.CouldNotGetSDKList">
@@ -2966,18 +2966,18 @@
       </trans-unit>
       <trans-unit id="Copy.SymbolicLinkComment">
         <source>Creating symbolic link to copy "{0}" to "{1}".</source>
-        <target state="new">Creating symbolic link to copy "{0}" to "{1}".</target>
+        <target state="translated">Creazione del collegamento simbolico per copiare "{0}" in "{1}".</target>
         <note>LOCALIZATION: {0} and {1} are paths.</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.AssemblyFoldersConfigFileMalformed">
         <source>The AssemblyFolder config file ('{0}') specified in Microsoft.Common.CurrentVersion.targets was invalid. The error was: {1}</source>
-        <target state="new">The AssemblyFolder config file ('{0}') specified in Microsoft.Common.CurrentVersion.targets was invalid. The error was: {1}</target>
-        <note></note>
+        <target state="translated">Il file config AssemblyFolder ('{0}') specificato in Microsoft.Common.CurrentVersion.targets non è valido. Errore: {1}</target>
+        <note />
       </trans-unit>
       <trans-unit id="Copy.ExactlyOneTypeOfLink">
         <source>MSB3891: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</source>
-        <target state="new">MSB3891: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</target>
-        <note></note>
+        <target state="translated">MSB3891: nel file di progetto sono stati specificati sia "{0}" che "{1}". Sceglierne uno.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

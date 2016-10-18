@@ -812,7 +812,7 @@
       </trans-unit>
       <trans-unit id="ProjectMustBeInMSBuildXmlNamespace">
         <source>MSB4041: The default XML namespace of the project must be the MSBuild XML namespace or no namespace. If the project is authored in the MSBuild 2003 format, please add xmlns="{0}" to the &lt;Project&gt; element. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</source>
-        <target state="updated">MSB4041: プロジェクトの既定の XML 名前空間は MSBuild の XML 名前空間でなければなりません。プロジェクトが MSBuild 2003 形式で作成されている場合、xmlns="{0}" を &lt;Project&gt; 要素に追加してください。プロジェクトが古い 1.0 または 1.2 形式で作成されている場合、MSBuild 2003 形式に変換してください。</target>
+        <target state="translated">MSB4041: プロジェクトの既定の XML 名前空間は MSBuild の XML 名前空間であるか、名前空間なしである必要があります。プロジェクトが MSBuild 2003 形式で作成されている場合、xmlns="{0}" を &lt;Project&gt; 要素に追加してください。プロジェクトが古い 1.0 または 1.2 形式で作成されている場合、MSBuild 2003 形式に変換してください。</target>
         <note>{StrBegin="MSB4041: "}UE: This is a Beta 1 message only.
       LOCALIZATION: &lt;Project&gt;, "MSBuild" and "xmlns" should not be localized.</note>
       </trans-unit>
@@ -1919,33 +1919,33 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="InvalidAttributeExclusive">
         <source>MSB4111: At most one of the include, remove, and update attributes may be specified for an item element.</source>
-        <target state="new">MSB4111: At most one of the include, remove, and update attributes may be specified for an item element.</target>
-        <note></note>
+        <target state="translated">MSB4111: 項目要素に対して指定できるのは、Include、Remove、および Update 属性のいずれか 1 つのみです。</target>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidAttributeDueToDuplication">
         <source>MSB4227: The attribute "{0}" on element &lt;{1}&gt; is invalid because an attribute with that name already exists</source>
-        <target state="new">MSB4227: The attribute "{0}" on element &lt;{1}&gt; is invalid because an attribute with that name already exists</target>
+        <target state="translated">MSB4227: 同じ名前の属性が既に存在するため、要素 &lt;{1}&gt; の属性 "{0}" は無効です。</target>
         <note>{StrBegin="MSB4227: "}</note>
       </trans-unit>
       <trans-unit id="InvalidMetadataAsAttribute">
         <source>MSB4228: The name "{0}" is not valid for metadata expressed as an attribute (on element &lt;{1}&gt;)</source>
-        <target state="new">MSB4228: The name "{0}" is not valid for metadata expressed as an attribute (on element &lt;{1}&gt;)</target>
+        <target state="translated">MSB4228: 属性 (要素 &lt;{1}&gt; 上) として表したメタデータの名前 "{0}" は有効ではありません。</target>
         <note>{StrBegin="MSB4228: "}</note>
       </trans-unit>
       <trans-unit id="OM_OneOfAttributeButNotMore">
         <source>The &lt;{0}&gt; element must have either the "{1}" attribute, the "{2}" attribute, or the "{3}" attribute, but not more than one.</source>
-        <target state="new">The &lt;{0}&gt; element must have either the "{1}" attribute, the "{2}" attribute, or the "{3}" attribute, but not more than one.</target>
-        <note></note>
+        <target state="translated">&lt;{0}&gt; 要素には、"{1}" 属性、"{2}" 属性、または "{3}" 属性のいずれか 1 つのみが必要です。</target>
+        <note />
       </trans-unit>
       <trans-unit id="OM_ItemsOutsideTargetMustHaveIncludeOrUpdateOrRemove">
         <source>An item not parented under a Target must have a value for Include or Update or Remove.</source>
-        <target state="new">An item not parented under a Target must have a value for Include or Update or Remove.</target>
+        <target state="translated">Target の下に親のない項目は、Include、Update または Remove の値を持つ必要があります。</target>
         <note>LOCALIZATION: Please do not localize "Target", "Include", "Update", and "Remove".</note>
       </trans-unit>
       <trans-unit id="OM_CannotSplitItemElementWhenSplittingIsDisabled">
         <source>The requested operation needs to split the item element at location {0} into individual elements but item element splitting is disabled with {1}.</source>
-        <target state="new">The requested operation needs to split the item element at location {0} into individual elements but item element splitting is disabled with {1}.</target>
-        <note></note>
+        <target state="translated">要求操作で、場所 {0} の項目要素を個々の要素に分割する必要がありますが、項目要素の分割は {1} で無効になっています。</target>
+        <note />
       </trans-unit>
     </body>
   </file>

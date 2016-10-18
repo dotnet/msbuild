@@ -20,10 +20,12 @@ namespace Microsoft.Build.Shared
     internal static class FileUtilitiesRegex
     {
         // regular expression used to match file-specs beginning with "<drive letter>:" 
-        internal static readonly Regex DrivePattern = new Regex(@"^[A-Za-z]:");
+        internal static readonly Regex DrivePattern = new Regex(@"^[A-Za-z]:", RegexOptions.Compiled);
 
         // regular expression used to match UNC paths beginning with "\\<server>\<share>"
-        internal static readonly Regex UNCPattern = new Regex(String.Format(CultureInfo.InvariantCulture,
-            @"^[\{0}\{1}][\{0}\{1}][^\{0}\{1}]+[\{0}\{1}][^\{0}\{1}]+", Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+        internal static readonly Regex UNCPattern =
+            new Regex(
+                string.Format(CultureInfo.InvariantCulture, @"^[\{0}\{1}][\{0}\{1}][^\{0}\{1}]+[\{0}\{1}][^\{0}\{1}]+",
+                    Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar), RegexOptions.Compiled);
     }
 }

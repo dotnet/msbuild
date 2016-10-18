@@ -812,7 +812,7 @@
       </trans-unit>
       <trans-unit id="ProjectMustBeInMSBuildXmlNamespace">
         <source>MSB4041: The default XML namespace of the project must be the MSBuild XML namespace or no namespace. If the project is authored in the MSBuild 2003 format, please add xmlns="{0}" to the &lt;Project&gt; element. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</source>
-        <target state="updated">MSB4041: 專案的預設 XML 命名空間必須是 MSBuild XML 命名空間。若使用 MSBuild 2003 格式設計專案，請將 xmlns="{0}" 加入 &lt;Project&gt; 項目中。若是使用舊版的 1.0 或 1.2 格式設計專案，請將專案轉換為 MSBuild 2003 格式。</target>
+        <target state="translated">MSB4041: 專案的預設 XML 命名空間必須是 MSBuild XML 命名空間或沒有命名空間。若使用 MSBuild 2003 格式設計專案，請將 xmlns="{0}" 新增至 &lt;Project&gt; 項目。若是使用舊版的 1.0 或 1.2 格式設計專案，請將專案轉換為 MSBuild 2003 格式。</target>
         <note>{StrBegin="MSB4041: "}UE: This is a Beta 1 message only.
       LOCALIZATION: &lt;Project&gt;, "MSBuild" and "xmlns" should not be localized.</note>
       </trans-unit>
@@ -1919,33 +1919,33 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="InvalidAttributeExclusive">
         <source>MSB4111: At most one of the include, remove, and update attributes may be specified for an item element.</source>
-        <target state="new">MSB4111: At most one of the include, remove, and update attributes may be specified for an item element.</target>
-        <note></note>
+        <target state="translated">MSB4111: 最多可為項目元素指定包含、移除及更新屬性其中一個。</target>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidAttributeDueToDuplication">
         <source>MSB4227: The attribute "{0}" on element &lt;{1}&gt; is invalid because an attribute with that name already exists</source>
-        <target state="new">MSB4227: The attribute "{0}" on element &lt;{1}&gt; is invalid because an attribute with that name already exists</target>
+        <target state="translated">MSB4227: 元素 &lt;{1}&gt; 的屬性 "{0}" 無效，因為已存在同名的屬性</target>
         <note>{StrBegin="MSB4227: "}</note>
       </trans-unit>
       <trans-unit id="InvalidMetadataAsAttribute">
         <source>MSB4228: The name "{0}" is not valid for metadata expressed as an attribute (on element &lt;{1}&gt;)</source>
-        <target state="new">MSB4228: The name "{0}" is not valid for metadata expressed as an attribute (on element &lt;{1}&gt;)</target>
+        <target state="translated">MSB4228: 名稱 "{0}" 對表示為屬性的中繼資料 (在元素 &lt;{1}&gt; 上) 而言無效</target>
         <note>{StrBegin="MSB4228: "}</note>
       </trans-unit>
       <trans-unit id="OM_OneOfAttributeButNotMore">
         <source>The &lt;{0}&gt; element must have either the "{1}" attribute, the "{2}" attribute, or the "{3}" attribute, but not more than one.</source>
-        <target state="new">The &lt;{0}&gt; element must have either the "{1}" attribute, the "{2}" attribute, or the "{3}" attribute, but not more than one.</target>
-        <note></note>
+        <target state="translated">&lt;{0}&gt; 元素必須有 "{1}" 屬性、"{2}" 屬性或 "{3}" 屬性，但只能有其中一個。</target>
+        <note />
       </trans-unit>
       <trans-unit id="OM_ItemsOutsideTargetMustHaveIncludeOrUpdateOrRemove">
         <source>An item not parented under a Target must have a value for Include or Update or Remove.</source>
-        <target state="new">An item not parented under a Target must have a value for Include or Update or Remove.</target>
+        <target state="translated">在 Target 之下不是父代的項目都必須有一個 Include 或 Update 或 Remove 的值。</target>
         <note>LOCALIZATION: Please do not localize "Target", "Include", "Update", and "Remove".</note>
       </trans-unit>
       <trans-unit id="OM_CannotSplitItemElementWhenSplittingIsDisabled">
         <source>The requested operation needs to split the item element at location {0} into individual elements but item element splitting is disabled with {1}.</source>
-        <target state="new">The requested operation needs to split the item element at location {0} into individual elements but item element splitting is disabled with {1}.</target>
-        <note></note>
+        <target state="translated">要求的作業需要將位於 {0} 的項目元素分割成個體元素，但 {1} 停用了分割項目元素。</target>
+        <note />
       </trans-unit>
     </body>
   </file>
