@@ -28,6 +28,9 @@ namespace Microsoft.DotNet.Tools.Run
             CommandOption framework = app.Option(
                 "-f|--framework <FRAMEWORK>", "Compile a specific framework",
                 CommandOptionType.SingleValue);
+            CommandOption noBuild = app.Option(
+                "--no-build", "Do not build the project before running.",
+                CommandOptionType.BoolValue);
             CommandOption project = app.Option(
                 "-p|--project", "The path to the project file to run (defaults to the current directory if there is only one project).",
                 CommandOptionType.SingleValue);
@@ -38,6 +41,7 @@ namespace Microsoft.DotNet.Tools.Run
 
                 runCmd.Configuration = configuration.Value();
                 runCmd.Framework = framework.Value();
+                runCmd.NoBuild = noBuild.BoolValue ?? false;
                 runCmd.Project = project.Value();
                 runCmd.Args = app.RemainingArguments;
 

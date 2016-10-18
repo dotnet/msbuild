@@ -174,6 +174,8 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "dotnet-test3.Tests", "test\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dotnet-cli-build", "build_projects\dotnet-cli-build\dotnet-cli-build.csproj", "{8A2FA2D8-0DA1-4814-B5C1-2ECEAA613EB1}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "dotnet-run3.Tests", "test\dotnet-run3.Tests\dotnet-run3.Tests.xproj", "{9229D2A5-E2D1-4BEE-BC89-EFE65042842F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1018,6 +1020,22 @@ Global
 		{8A2FA2D8-0DA1-4814-B5C1-2ECEAA613EB1}.RelWithDebInfo|Any CPU.Build.0 = Release|Any CPU
 		{8A2FA2D8-0DA1-4814-B5C1-2ECEAA613EB1}.RelWithDebInfo|x64.ActiveCfg = Release|Any CPU
 		{8A2FA2D8-0DA1-4814-B5C1-2ECEAA613EB1}.RelWithDebInfo|x64.Build.0 = Release|Any CPU
+		{9229D2A5-E2D1-4BEE-BC89-EFE65042842F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9229D2A5-E2D1-4BEE-BC89-EFE65042842F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9229D2A5-E2D1-4BEE-BC89-EFE65042842F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9229D2A5-E2D1-4BEE-BC89-EFE65042842F}.Debug|x64.Build.0 = Debug|Any CPU
+		{9229D2A5-E2D1-4BEE-BC89-EFE65042842F}.MinSizeRel|Any CPU.ActiveCfg = Debug|Any CPU
+		{9229D2A5-E2D1-4BEE-BC89-EFE65042842F}.MinSizeRel|Any CPU.Build.0 = Debug|Any CPU
+		{9229D2A5-E2D1-4BEE-BC89-EFE65042842F}.MinSizeRel|x64.ActiveCfg = Debug|Any CPU
+		{9229D2A5-E2D1-4BEE-BC89-EFE65042842F}.MinSizeRel|x64.Build.0 = Debug|Any CPU
+		{9229D2A5-E2D1-4BEE-BC89-EFE65042842F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9229D2A5-E2D1-4BEE-BC89-EFE65042842F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9229D2A5-E2D1-4BEE-BC89-EFE65042842F}.Release|x64.ActiveCfg = Release|Any CPU
+		{9229D2A5-E2D1-4BEE-BC89-EFE65042842F}.Release|x64.Build.0 = Release|Any CPU
+		{9229D2A5-E2D1-4BEE-BC89-EFE65042842F}.RelWithDebInfo|Any CPU.ActiveCfg = Release|Any CPU
+		{9229D2A5-E2D1-4BEE-BC89-EFE65042842F}.RelWithDebInfo|Any CPU.Build.0 = Release|Any CPU
+		{9229D2A5-E2D1-4BEE-BC89-EFE65042842F}.RelWithDebInfo|x64.ActiveCfg = Release|Any CPU
+		{9229D2A5-E2D1-4BEE-BC89-EFE65042842F}.RelWithDebInfo|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1083,5 +1101,6 @@ Global
 		{FBE4F1D6-BA4C-46D9-8286-4EE4B032D01E} = {17735A9D-BFD9-4585-A7CB-3208CA6EA8A7}
 		{90236A80-4B84-41D3-A161-AA20709776B1} = {17735A9D-BFD9-4585-A7CB-3208CA6EA8A7}
 		{8A2FA2D8-0DA1-4814-B5C1-2ECEAA613EB1} = {88278B81-7649-45DC-8A6A-D3A645C5AFC3}
+		{9229D2A5-E2D1-4BEE-BC89-EFE65042842F} = {17735A9D-BFD9-4585-A7CB-3208CA6EA8A7}
 	EndGlobalSection
 EndGlobal
