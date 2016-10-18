@@ -53,98 +53,105 @@ namespace Microsoft.Build.Shared
     internal static class CanonicalError
     {
         // Defines the main pattern for matching messages.
-        static private Regex s_originCategoryCodeTextExpression = new Regex
-             (
+        private static readonly Lazy<Regex> s_originCategoryCodeTextExpression = new Lazy<Regex>(
+            () => new Regex
+                (
                 // Beginning of line and any amount of whitespace.
                 @"^\s*"
-                // Match a [optional project number prefix 'ddd>'], single letter + colon + remaining filename, or
-                // string with no colon followed by a colon.
+                    // Match a [optional project number prefix 'ddd>'], single letter + colon + remaining filename, or
+                    // string with no colon followed by a colon.
                 + @"(((?<ORIGIN>(((\d+>)?[a-zA-Z]?:[^:]*)|([^:]*))):)"
-                // Origin may also be empty. In this case there's no trailing colon.
+                    // Origin may also be empty. In this case there's no trailing colon.
                 + "|())"
-                // Match the empty string or a string without a colon that ends with a space
+                    // Match the empty string or a string without a colon that ends with a space
                 + "(?<SUBCATEGORY>(()|([^:]*? )))"
-                // Match 'error' or 'warning'.
+                    // Match 'error' or 'warning'.
                 + @"(?<CATEGORY>(error|warning))"
-                // Match anything starting with a space that's not a colon/space, followed by a colon. 
-                // Error code is optional in which case "error"/"warning" can be followed immediately by a colon.
+                    // Match anything starting with a space that's not a colon/space, followed by a colon. 
+                    // Error code is optional in which case "error"/"warning" can be followed immediately by a colon.
                 + @"( \s*(?<CODE>[^: ]*))?\s*:"
-                // Whatever's left on this line, including colons.
+                    // Whatever's left on this line, including colons.
                 + "(?<TEXT>.*)$",
-                RegexOptions.IgnoreCase
-             );
+                RegexOptions.IgnoreCase | RegexOptions.Compiled
+                ));
 
         // Matches and extracts filename and location from an 'origin' element.
-        static private Regex s_filenameLocationFromOrigin = new Regex
-             (
-                 "^"                                             // Beginning of line
-                 + @"(\d+>)?"                                     // Optional ddd> project number prefix
-                 + "(?<FILENAME>.*)"                              // Match anything.
-                 + @"\("                                          // Find a parenthesis.
-                 + @"(?<LOCATION>[\,,0-9,-]*)"                    // Match any combination of numbers and ',' and '-'
-                 + @"\)\s*"                                       // Find the closing paren then any amount of spaces.
-                 + "$",                                           // End-of-line
-                 RegexOptions.IgnoreCase
-             );
+        private static readonly Lazy<Regex> s_filenameLocationFromOrigin = new Lazy<Regex>(
+            () => new Regex
+                (
+                "^" // Beginning of line
+                + @"(\d+>)?" // Optional ddd> project number prefix
+                + "(?<FILENAME>.*)" // Match anything.
+                + @"\(" // Find a parenthesis.
+                + @"(?<LOCATION>[\,,0-9,-]*)" // Match any combination of numbers and ',' and '-'
+                + @"\)\s*" // Find the closing paren then any amount of spaces.
+                + "$", // End-of-line
+                RegexOptions.IgnoreCase | RegexOptions.Compiled
+                ));
 
         // Matches location that is a simple number.
-        static private Regex s_lineFromLocation = new Regex        // Example: line
-            (
-                "^"                                              // Beginning of line
-                + "(?<LINE>[0-9]*)"                               // Match any number.
-                + "$",                                            // End-of-line
-                RegexOptions.IgnoreCase
-            );
+        private static readonly Lazy<Regex> s_lineFromLocation = new Lazy<Regex>(
+            () => new Regex // Example: line
+                (
+                "^" // Beginning of line
+                + "(?<LINE>[0-9]*)" // Match any number.
+                + "$", // End-of-line
+                RegexOptions.IgnoreCase | RegexOptions.Compiled
+                ));
 
         // Matches location that is a range of lines.
-        static private Regex s_lineLineFromLocation = new Regex    // Example: line-line
-            (
-                "^"                                              // Beginning of line
-                + "(?<LINE>[0-9]*)"                               // Match any number.
-                + "-"                                             // Dash
-                + "(?<ENDLINE>[0-9]*)"                            // Match any number.
-                + "$",                                            // End-of-line
-                RegexOptions.IgnoreCase
-            );
+        private static readonly Lazy<Regex> s_lineLineFromLocation = new Lazy<Regex>(
+            () => new Regex // Example: line-line
+                (
+                "^" // Beginning of line
+                + "(?<LINE>[0-9]*)" // Match any number.
+                + "-" // Dash
+                + "(?<ENDLINE>[0-9]*)" // Match any number.
+                + "$", // End-of-line
+                RegexOptions.IgnoreCase | RegexOptions.Compiled
+                ));
 
         // Matches location that is a line and column
-        static private Regex s_lineColFromLocation = new Regex     // Example: line,col
-            (
-                "^"                                              // Beginning of line
-                + "(?<LINE>[0-9]*)"                               // Match any number.
-                + ","                                             // Comma
-                + "(?<COLUMN>[0-9]*)"                             // Match any number.
-                + "$",                                            // End-of-line
-                RegexOptions.IgnoreCase
-            );
+        private static readonly Lazy<Regex> s_lineColFromLocation = new Lazy<Regex>(
+            () => new Regex // Example: line,col
+                (
+                "^" // Beginning of line
+                + "(?<LINE>[0-9]*)" // Match any number.
+                + "," // Comma
+                + "(?<COLUMN>[0-9]*)" // Match any number.
+                + "$", // End-of-line
+                RegexOptions.IgnoreCase | RegexOptions.Compiled
+                ));
 
         // Matches location that is a line and column-range
-        static private Regex s_lineColColFromLocation = new Regex  // Example: line,col-col
-            (
-                "^"                                              // Beginning of line
-                + "(?<LINE>[0-9]*)"                               // Match any number.
-                + ","                                             // Comma
-                + "(?<COLUMN>[0-9]*)"                             // Match any number.
-                + "-"                                             // Dash
-                + "(?<ENDCOLUMN>[0-9]*)"                          // Match any number.
-                + "$",                                            // End-of-line
-                RegexOptions.IgnoreCase
-            );
+        private static readonly Lazy<Regex> s_lineColColFromLocation = new Lazy<Regex>(
+            () => new Regex // Example: line,col-col
+                (
+                "^" // Beginning of line
+                + "(?<LINE>[0-9]*)" // Match any number.
+                + "," // Comma
+                + "(?<COLUMN>[0-9]*)" // Match any number.
+                + "-" // Dash
+                + "(?<ENDCOLUMN>[0-9]*)" // Match any number.
+                + "$", // End-of-line
+                RegexOptions.IgnoreCase | RegexOptions.Compiled
+                ));
 
         // Matches location that is line,col,line,col
-        static private Regex s_lineColLineColFromLocation = new Regex      // Example: line,col,line,col
-            (
-                "^"                                              // Beginning of line
-                + "(?<LINE>[0-9]*)"                               // Match any number.
-                + ","                                             // Comma
-                + "(?<COLUMN>[0-9]*)"                             // Match any number.
-                + ","                                             // Dash
-                + "(?<ENDLINE>[0-9]*)"                            // Match any number.
-                + ","                                             // Dash
-                + "(?<ENDCOLUMN>[0-9]*)"                          // Match any number.
-                + "$",                                            // End-of-line
-                RegexOptions.IgnoreCase
-            );
+        private static readonly Lazy<Regex> s_lineColLineColFromLocation = new Lazy<Regex>(
+            () => new Regex // Example: line,col,line,col
+                (
+                "^" // Beginning of line
+                + "(?<LINE>[0-9]*)" // Match any number.
+                + "," // Comma
+                + "(?<COLUMN>[0-9]*)" // Match any number.
+                + "," // Dash
+                + "(?<ENDLINE>[0-9]*)" // Match any number.
+                + "," // Dash
+                + "(?<ENDCOLUMN>[0-9]*)" // Match any number.
+                + "$", // End-of-line
+                RegexOptions.IgnoreCase | RegexOptions.Compiled
+                ));
 
         /// <summary>
         /// Represents the parts of a decomposed canonical message.
@@ -306,7 +313,7 @@ namespace Microsoft.Build.Shared
             //  Here's an example from the Japanese version of LINK.EXE:
             //   AssemblyInfo.cpp : fatal error LNK1106: ???????????? ??????????????: 0x6580 ??????????
             //
-            Match match = s_originCategoryCodeTextExpression.Match(message);
+            Match match = s_originCategoryCodeTextExpression.Value.Match(message);
 
             if (!match.Success)
             {
@@ -337,7 +344,7 @@ namespace Microsoft.Build.Shared
 
             // Origin is not a simple file, but it still could be of the form,
             //  foo.cpp(location)
-            match = s_filenameLocationFromOrigin.Match(origin);
+            match = s_filenameLocationFromOrigin.Value.Match(origin);
 
             if (match.Success)
             {
@@ -357,14 +364,14 @@ namespace Microsoft.Build.Shared
                 //      (line,col,line,col)
                 if (location.Length > 0)
                 {
-                    match = s_lineFromLocation.Match(location);
+                    match = s_lineFromLocation.Value.Match(location);
                     if (match.Success)
                     {
                         parsedMessage.line = ConvertToIntWithDefault(match.Groups["LINE"].Value.Trim());
                     }
                     else
                     {
-                        match = s_lineLineFromLocation.Match(location);
+                        match = s_lineLineFromLocation.Value.Match(location);
                         if (match.Success)
                         {
                             parsedMessage.line = ConvertToIntWithDefault(match.Groups["LINE"].Value.Trim());
@@ -372,7 +379,7 @@ namespace Microsoft.Build.Shared
                         }
                         else
                         {
-                            match = s_lineColFromLocation.Match(location);
+                            match = s_lineColFromLocation.Value.Match(location);
                             if (match.Success)
                             {
                                 parsedMessage.line = ConvertToIntWithDefault(match.Groups["LINE"].Value.Trim());
@@ -380,7 +387,7 @@ namespace Microsoft.Build.Shared
                             }
                             else
                             {
-                                match = s_lineColColFromLocation.Match(location);
+                                match = s_lineColColFromLocation.Value.Match(location);
                                 if (match.Success)
                                 {
                                     parsedMessage.line = ConvertToIntWithDefault(match.Groups["LINE"].Value.Trim());
@@ -389,7 +396,7 @@ namespace Microsoft.Build.Shared
                                 }
                                 else
                                 {
-                                    match = s_lineColLineColFromLocation.Match(location);
+                                    match = s_lineColLineColFromLocation.Value.Match(location);
                                     if (match.Success)
                                     {
                                         parsedMessage.line = ConvertToIntWithDefault(match.Groups["LINE"].Value.Trim());

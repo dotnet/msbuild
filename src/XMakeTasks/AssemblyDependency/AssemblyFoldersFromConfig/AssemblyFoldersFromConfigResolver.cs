@@ -21,13 +21,16 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
     internal class AssemblyFoldersFromConfigResolver : Resolver
     {
         /// <summary>
-        /// Regex for breaking up the search path pieces.
+        ///     Regex for breaking up the search path pieces.
         /// </summary>
-        private static readonly Regex s_crackAssemblyFoldersFromConfigSentinel = new Regex
-        (
-            AssemblyResolutionConstants.assemblyFoldersFromConfigSentinel + "(?<ASSEMBLYFOLDERCONFIGFILE>[^,]*),(?<TARGETRUNTIMEVERSION>[^,]*)}",
-            RegexOptions.IgnoreCase
-        );
+        private static readonly Lazy<Regex> s_crackAssemblyFoldersFromConfigSentinel = new Lazy<Regex>(
+            () => new Regex
+                (
+                AssemblyResolutionConstants.assemblyFoldersFromConfigSentinel +
+                "(?<ASSEMBLYFOLDERCONFIGFILE>[^,]*),(?<TARGETRUNTIMEVERSION>[^,]*)}",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled
+                )
+            );
 
         /// <summary>
         /// Whether or not the search path could be cracked.
@@ -95,7 +98,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
             _isInitialized = true;
 
             // Crack the search path just one time.
-            Match match = s_crackAssemblyFoldersFromConfigSentinel.Match(this.searchPathElement);
+            Match match = s_crackAssemblyFoldersFromConfigSentinel.Value.Match(this.searchPathElement);
             _wasMatch = false;
 
             if (match.Success)

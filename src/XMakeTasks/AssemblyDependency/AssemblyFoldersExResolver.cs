@@ -24,11 +24,14 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Regex for breaking up the searchpath pieces.
         /// </summary>
-        private static readonly Regex s_crackAssemblyFoldersExSentinel = new Regex
-        (
-            AssemblyResolutionConstants.assemblyFoldersExSentinel + "(?<REGISTRYKEYROOT>[^,]*),(?<TARGETRUNTIMEVERSION>[^,]*),(?<REGISTRYKEYSUFFIX>[^,]*)([,]*)(?<CONDITIONS>.*)}",
-            RegexOptions.IgnoreCase
-        );
+        private static readonly Lazy<Regex> s_crackAssemblyFoldersExSentinel = new Lazy<Regex>(
+            () => new Regex
+                (
+                AssemblyResolutionConstants.assemblyFoldersExSentinel +
+                "(?<REGISTRYKEYROOT>[^,]*),(?<TARGETRUNTIMEVERSION>[^,]*),(?<REGISTRYKEYSUFFIX>[^,]*)([,]*)(?<CONDITIONS>.*)}",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled
+                )
+            );
 
         /// <summary>
         /// Delegate.
@@ -129,7 +132,7 @@ namespace Microsoft.Build.Tasks
             _isInitialized = true;
 
             // Crack the search path just one time.
-            Match match = s_crackAssemblyFoldersExSentinel.Match(this.searchPathElement);
+            Match match = s_crackAssemblyFoldersExSentinel.Value.Match(this.searchPathElement);
             _wasMatch = false;
 
             if (match.Success)
