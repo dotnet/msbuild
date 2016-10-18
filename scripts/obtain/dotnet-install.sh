@@ -80,6 +80,10 @@ get_current_os_name() {
                     echo "fedora.23"
                     return 0
                     ;;
+                "fedora.24")
+                    echo "fedora.24"
+                    return 0
+                    ;;
                 "opensuse.13.2")
                     echo "opensuse.13.2"
                     return 0
@@ -104,11 +108,15 @@ get_current_os_name() {
                     echo "ubuntu.16.10"
                     return 0
                     ;;
+                "alpine.3.4.3")
+                    echo "alpine"
+                    return 0
+                    ;;
             esac
         fi
     fi
     
-    say_err "OS name could not be detected"
+    say_err "OS name could not be detected: $ID.$VERSION_ID"
     return 1
 }
 
