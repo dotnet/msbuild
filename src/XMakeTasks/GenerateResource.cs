@@ -1379,7 +1379,7 @@ namespace Microsoft.Build.Tasks
                 return NeedToRebuildSourceFile(sourceTime, outputTime);
             }
 
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_BINARY_SERIALIZATION 
             // OK, we have a .resx file
 
             // PERF: Regardless of whether the outputFile exists, if the source file is a .resx 
@@ -1404,6 +1404,7 @@ namespace Microsoft.Build.Tasks
                 // No point logging a duplicate error here as well
                 return true;
             }
+#endif
 
             // if the .resources file is out of date even just with respect to the .resx or 
             // the additional inputs, we don't need to go to the point of checking the linked files. 
@@ -1415,7 +1416,9 @@ namespace Microsoft.Build.Tasks
             // The .resources is up to date with respect to the .resx file -
             // we need to compare timestamps for each linked file inside
             // the .resx file itself
-            if (resxFileInfo.LinkedFiles != null)
+            // without binary serialization, resxFileInfo will be null, so we'll ignore the 
+            // timestamps of any files linked from the resx. That's a rare case so it's okay for now.
+            if (resxFileInfo?.LinkedFiles != null) 
             {
                 foreach (string linkedFilePath in resxFileInfo.LinkedFiles)
                 {
@@ -1437,9 +1440,6 @@ namespace Microsoft.Build.Tasks
             }
 
             return false;
-#else
-            return true;
-#endif
         }
 
         /// <summary>
