@@ -2018,32 +2018,24 @@ namespace Microsoft.Build.Construction
             {
                 try
                 {
-#if MSBUILDENABLEVSPROFILING 
+#if MSBUILDENABLEVSPROFILING
                     string beginProjectLoad = String.Format(CultureInfo.CurrentCulture, "Load Project {0} From File - Start", fullPath);
                     DataCollection.CommentMarkProfile(8806, beginProjectLoad);
 #endif
 
-#if FEATURE_XMLTEXTREADER
-                    using (XmlTextReader xtr = new XmlTextReader(fullPath))
+                    XmlReaderSettings dtdSettings = new XmlReaderSettings();
+                    dtdSettings.DtdProcessing = DtdProcessing.Ignore;
+
+                    using (var stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    using (var stream2 = new StreamReader(stream, Encoding.UTF8, true))
+                    using (XmlReader xtr = XmlReader.Create(stream2, dtdSettings))
                     {
                         // Start the reader so it has an idea of what the encoding is.
-                        xtr.DtdProcessing = DtdProcessing.Ignore;
                         xtr.Read();
-                        _encoding = xtr.Encoding;
+                        var encoding = xtr.GetAttribute("encoding");
+                        _encoding = !string.IsNullOrEmpty(encoding) ? Encoding.GetEncoding(encoding) : stream2.CurrentEncoding;
                         document.Load(xtr);
                     }
-#else
-                    XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
-                    xmlReaderSettings.CloseInput = true; // close the stream when disposing the reader
-                    xmlReaderSettings.DtdProcessing = DtdProcessing.Ignore;
-
-                    var fileStream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, useAsync: false);
-                    using (XmlReader xr = XmlReader.Create(fileStream, xmlReaderSettings))
-                    {
-                        xr.Read();
-                        document.Load(xr);
-                    }
-#endif
 
                     document.FullPath = fullPath;
                     _projectFileLocation = ElementLocation.Create(fullPath);
