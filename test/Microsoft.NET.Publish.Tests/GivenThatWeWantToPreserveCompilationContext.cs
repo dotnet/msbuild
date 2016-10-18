@@ -61,7 +61,17 @@ namespace Microsoft.NET.Publish.Tests
                 {
                     var dependencyContext = new DependencyContextJsonReader().Read(depsJsonFileStream);
 
-                    dependencyContext.CompilationOptions.Defines.Should().BeEquivalentTo(new[] { "DEBUG", "TRACE" });
+                    string[] expectedDefines;
+                    if (targetFramework == "net46")
+                    {
+                        expectedDefines = new[] { "DEBUG", "TRACE", "NET46" };
+                    }
+                    else
+                    {
+                        expectedDefines = new[] { "DEBUG", "TRACE", "NETCOREAPP1_0" };
+                    }
+
+                    dependencyContext.CompilationOptions.Defines.Should().BeEquivalentTo(expectedDefines);
                     dependencyContext.CompilationOptions.LanguageVersion.Should().Be("");
                     dependencyContext.CompilationOptions.Platform.Should().Be("AnyCPU");
                     dependencyContext.CompilationOptions.Optimize.Should().Be(false);
