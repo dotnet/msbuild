@@ -53,6 +53,7 @@
   <ItemGroup>
     <VSTemplate Include="UnitTest.vstemplate">
       <SubType>Designer</SubType>
+      <OutputSubPath>.NET Core</OutputSubPath>
     </VSTemplate>
   </ItemGroup>
   <ItemGroup>
