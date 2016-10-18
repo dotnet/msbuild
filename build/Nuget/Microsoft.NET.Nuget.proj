@@ -50,7 +50,7 @@
   <Target Name="InvalidateNuGetCache">
     <!-- Ensure the sha512 files are deleted, which will invalidate all the cache entries, even if the RemoveDir fails -->
     <Delete Files="$(NuGet_Packages)\%(NuSpec.FileName)\**\*.sha512" />
-    <RemoveDir ContinueOnError="true" Directories="$(NuGet_Packages)\%(NuSpec.FileName)" />
+    <RemoveDir Directories="$(NuGet_Packages)\%(NuSpec.FileName)\$(Version)" />
   </Target>
 
   <Target Name="Clean">

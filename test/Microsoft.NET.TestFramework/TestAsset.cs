@@ -57,7 +57,7 @@ namespace Microsoft.NET.TestFramework
                         .Descendants(XName.Get("PackageReference", "http://schemas.microsoft.com/developer/msbuild/2003"))
                         .FirstOrDefault(pr => pr.Attribute("Include")?.Value == "Microsoft.NET.Sdk")
                         ?.Element(XName.Get("Version", "http://schemas.microsoft.com/developer/msbuild/2003"))
-                        ?.SetValue(_buildVersion);
+                        ?.SetValue('[' +_buildVersion + ']');
 
                     using (var file = File.CreateText(destFile))
                     {
