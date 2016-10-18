@@ -67,7 +67,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     migrationRuleInputs.OutputMSBuildProject,
                     targetFramework.FrameworkName, 
                     targetFramework.Dependencies,
-                    migrationRuleInputs.ProjectXproj); 
+                    migrationRuleInputs.ProjectXproj);
             }
 
             MigrateTools(project, migrationRuleInputs.OutputMSBuildProject);
@@ -125,12 +125,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             ProjectRootElement xproj)
         {
             var projectDependencies = new HashSet<string>(GetAllProjectReferenceNames(project, framework, xproj));
-            var packageDependencies = dependencies.Where(d => !projectDependencies.Contains(d.Name));
+            var packageDependencies = dependencies.Where(d => !projectDependencies.Contains(d.Name)).ToList();
 
             string condition = framework?.GetMSBuildCondition() ?? "";
             var itemGroup = output.ItemGroups.FirstOrDefault(i => i.Condition == condition) 
                 ?? output.AddItemGroup();
             itemGroup.Condition = condition;
+
+            AutoInjectImplicitProjectJsonAssemblyReferences(framework, packageDependencies);
 
             foreach (var packageDependency in packageDependencies)
             {
@@ -162,6 +164,31 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 }
 
                 _transformApplicator.Execute(transform.Transform(packageDependency), itemGroup);
+            }
+        }
+
+        private void AutoInjectImplicitProjectJsonAssemblyReferences(NuGetFramework framework, 
+            IList<ProjectLibraryDependency> packageDependencies)
+        {
+            if (framework?.IsDesktop() ?? false)
+            {
+                InjectAssemblyReferenceIfNotPresent("System", packageDependencies);
+                if (framework.Version >= new Version(4, 0))
+                {
+                    InjectAssemblyReferenceIfNotPresent("Microsoft.CSharp", packageDependencies);
+                }
+            }
+        }
+
+        private void InjectAssemblyReferenceIfNotPresent(string dependencyName, 
+            IList<ProjectLibraryDependency> packageDependencies)
+        {
+            if (!packageDependencies.Any(dep => string.Equals(dep.Name, dependencyName, StringComparison.OrdinalIgnoreCase)))
+            {
+                packageDependencies.Add(new ProjectLibraryDependency
+                {
+                    LibraryRange = new LibraryRange(dependencyName, LibraryDependencyTarget.Reference)
+                });
             }
         }
 

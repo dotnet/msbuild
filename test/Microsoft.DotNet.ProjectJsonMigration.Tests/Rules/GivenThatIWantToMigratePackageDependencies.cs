@@ -200,6 +200,39 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             net451Import.Value.Split(';').Should().BeEquivalentTo($"$({importPropertyName})", "netstandard1.3");
         }
 
+        [Fact]
+        public void It_auto_add_desktop_references_during_migrate()
+        {
+            var mockProj = RunPackageDependenciesRuleOnPj(@"                
+                {
+                    ""frameworks"": {
+                        ""net35"" : {},
+                        ""net4"" : {},
+                        ""net451"" : {}
+                    }
+                }");
+
+            var itemGroup = mockProj.ItemGroups.Where(i => i.Condition == " '$(TargetFramework)' == 'net451' ");
+            itemGroup.Should().HaveCount(1);
+            itemGroup.First().Items.Should().HaveCount(2);
+            var items = itemGroup.First().Items.ToArray();
+            items[0].Include.Should().Be("System");
+            items[1].Include.Should().Be("Microsoft.CSharp");
+
+            itemGroup = mockProj.ItemGroups.Where(i => i.Condition == " '$(TargetFramework)' == 'net40' ");
+            itemGroup.Should().HaveCount(1);
+            itemGroup.First().Items.Should().HaveCount(2);
+            items = itemGroup.First().Items.ToArray();
+            items[0].Include.Should().Be("System");
+            items[1].Include.Should().Be("Microsoft.CSharp");
+
+            itemGroup = mockProj.ItemGroups.Where(i => i.Condition == " '$(TargetFramework)' == 'net35' ");
+            itemGroup.Should().HaveCount(1);
+            itemGroup.First().Items.Should().HaveCount(1);
+            items = itemGroup.First().Items.ToArray();
+            items[0].Include.Should().Be("System");
+        }
+
         private void EmitsPackageReferences(ProjectRootElement mockProj, params Tuple<string, string, string>[] packageSpecs)
         {
             foreach (var packageSpec in packageSpecs)

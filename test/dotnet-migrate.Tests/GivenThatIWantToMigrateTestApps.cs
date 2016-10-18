@@ -1,18 +1,12 @@
 ﻿using Microsoft.Build.Construction;
-using Microsoft.DotNet.ProjectJsonMigration;
-using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
-using NuGet.Frameworks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Xunit;
 using FluentAssertions;
 using System.IO;
-using System.Runtime.InteropServices;
-using Microsoft.DotNet.Tools.Common;
-using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Tools.Migrate;
 using Build3Command = Microsoft.DotNet.Tools.Test.Utilities.Build3Command;
 using BuildCommand = Microsoft.DotNet.Tools.Test.Utilities.BuildCommand;
@@ -295,7 +289,6 @@ namespace Microsoft.DotNet.Migration.Tests
          }
         
         [Theory]
-        // https://github.com/dotnet/cli/issues/4313
         [InlineData(true)]
         [InlineData(false)]
         public void Migration_outputs_error_when_no_projects_found(bool useGlobalJson)
@@ -343,7 +336,42 @@ namespace Microsoft.DotNet.Migration.Tests
             result.StdErr.Should().Contain(errorMessage);
             result.StdErr.Should().Contain("Migration failed.");
         }
-        
+
+        [WindowsOnlyTheory]
+        [InlineData("DesktopTestProjects", "AutoAddDesktopReferencesDuringMigrate", true)]
+        [InlineData("TestProjects", "TestAppSimple", false)]
+        public void It_auto_add_desktop_references_during_migrate(string testGroup, string projectName, bool isDesktopApp)
+        {
+            var testAssetManager = GetTestGroupTestAssetsManager(testGroup);
+            var projectDirectory = testAssetManager.CreateTestInstance(projectName, callingMethod: "i").WithLockFiles().Path;
+            
+            CleanBinObj(projectDirectory);
+            MigrateProject(new string[] { projectDirectory });
+            Restore3(projectDirectory);
+            BuildMSBuild(projectDirectory, projectName);
+            VerifyAutoInjectedDesktopReferences(projectDirectory, projectName, isDesktopApp);
+            VerifyAllMSBuildOutputsRunnable(projectDirectory);
+        }
+
+        private void VerifyAutoInjectedDesktopReferences(string projectDirectory, string projectName, bool shouldBePresent)
+        {
+            if (projectName != null)
+            {
+                projectName = projectName + ".csproj";
+            }
+
+            var root = ProjectRootElement.Open(Path.Combine(projectDirectory, projectName));
+            var autoInjectedReferences = root.Items.Where(i => i.ItemType == "Reference" && (i.Include == "System" || i.Include == "Microsoft.CSharp"));
+            if (shouldBePresent)
+            {
+                autoInjectedReferences.Should().HaveCount(2);
+            }
+            else
+            {
+                autoInjectedReferences.Should().BeEmpty();
+            }
+        }
+
         private void VerifyMigration(IEnumerable<string> expectedProjects, string rootDir)
          {
              var migratedProjects = Directory.EnumerateFiles(rootDir, "project.json", SearchOption.AllDirectories)
