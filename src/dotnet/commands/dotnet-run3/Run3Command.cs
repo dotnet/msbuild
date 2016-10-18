@@ -20,6 +20,7 @@ namespace Microsoft.DotNet.Tools.Run
         public IReadOnlyList<string> Args { get; set; }
 
         private List<string> _args;
+        private bool ShouldBuild => !NoBuild;
 
         public Run3Command()
         {
@@ -29,7 +30,7 @@ namespace Microsoft.DotNet.Tools.Run
         {
             Initialize();
 
-            if (!NoBuild)
+            if (ShouldBuild)
             {
                 EnsureProjectIsBuilt();
             }
