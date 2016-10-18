@@ -6,7 +6,7 @@ def project = GithubProject
 
 // Generate the builds for branches: xplat, master and PRs (which aren't branch specific)
 ['*/master', '*/xplat', 'pr'].each { branch ->
-    ['Windows_NT', 'OSX', 'Ubuntu'].each {osName ->
+    ['Windows_NT', 'OSX', 'Ubuntu14.04', 'Ubuntu16.04'].each {osName ->
         def runtimes = ['CoreCLR']
 
         if (osName == 'Windows_NT') {
@@ -38,9 +38,8 @@ def project = GithubProject
                 case 'Windows_NT':
                     newJob.with{
                         steps{
-                            
                             def windowsScript = "call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" && cibuild.cmd --target ${runtime}"
-                            
+
                             // only Desktop support localized builds 
                             if (runtime == "Desktop") {
                                 windowsScript += " --localized-build"
@@ -61,7 +60,7 @@ def project = GithubProject
                     }
 
                     break;
-                case 'Ubuntu':
+                case { it.startsWith('Ubuntu') }:
                     // Do not run tests on Ubuntu. We don't yet have a green test baseline.
                     newJob.with{
                         steps{

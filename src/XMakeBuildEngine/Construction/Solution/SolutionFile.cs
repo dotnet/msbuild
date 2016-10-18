@@ -31,32 +31,38 @@ namespace Microsoft.Build.Construction
 
         // An example of a project line looks like this:
         //  Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibrary1", "ClassLibrary1\ClassLibrary1.csproj", "{05A5AD00-71B5-4612-AF2F-9EA9121C4111}"
-        private static readonly Regex s_crackProjectLine = new Regex
-        (
-            "^"                                             // Beginning of line
-            + "Project\\(\"(?<PROJECTTYPEGUID>.*)\"\\)"
-            + "\\s*=\\s*"                                    // Any amount of whitespace plus "=" plus any amount of whitespace
-            + "\"(?<PROJECTNAME>.*)\""
-            + "\\s*,\\s*"                                   // Any amount of whitespace plus "," plus any amount of whitespace
-            + "\"(?<RELATIVEPATH>.*)\""
-            + "\\s*,\\s*"                                   // Any amount of whitespace plus "," plus any amount of whitespace
-            + "\"(?<PROJECTGUID>.*)\""
-            + "$"                                           // End-of-line
-        );
+        private static readonly Lazy<Regex> s_crackProjectLine = new Lazy<Regex>(
+            () => new Regex
+                (
+                "^" // Beginning of line
+                + "Project\\(\"(?<PROJECTTYPEGUID>.*)\"\\)"
+                + "\\s*=\\s*" // Any amount of whitespace plus "=" plus any amount of whitespace
+                + "\"(?<PROJECTNAME>.*)\""
+                + "\\s*,\\s*" // Any amount of whitespace plus "," plus any amount of whitespace
+                + "\"(?<RELATIVEPATH>.*)\""
+                + "\\s*,\\s*" // Any amount of whitespace plus "," plus any amount of whitespace
+                + "\"(?<PROJECTGUID>.*)\""
+                + "$", // End-of-line
+                RegexOptions.Compiled
+                )
+            );
 
         // An example of a property line looks like this:
         //      AspNetCompiler.VirtualPath = "/webprecompile"
         // Because website projects now include the target framework moniker as
         // one of their properties, <PROPERTYVALUE> may now have '=' in it. 
 
-        private static readonly Regex s_crackPropertyLine = new Regex
-        (
-            "^"                                             // Beginning of line
-            + "(?<PROPERTYNAME>[^=]*)"
-            + "\\s*=\\s*"                                    // Any amount of whitespace plus "=" plus any amount of whitespace
-            + "(?<PROPERTYVALUE>.*)"
-            + "$"                                           // End-of-line
-        );
+        private static readonly Lazy<Regex> s_crackPropertyLine = new Lazy<Regex>(
+            () => new Regex
+                (
+                "^" // Beginning of line
+                + "(?<PROPERTYNAME>[^=]*)"
+                + "\\s*=\\s*" // Any amount of whitespace plus "=" plus any amount of whitespace
+                + "(?<PROPERTYVALUE>.*)"
+                + "$", // End-of-line
+                RegexOptions.Compiled
+                )
+            );
 
         internal const int slnFileMinUpgradableVersion = 7; // Minimum version for MSBuild to give a nice message
         internal const int slnFileMinVersion = 9; // Minimum version for MSBuild to actually do anything useful
@@ -779,7 +785,7 @@ namespace Microsoft.Build.Construction
                     {
                         // This should be a dependency.  The GUID identifying the parent project should
                         // be both the property name and the property value.
-                        Match match = s_crackPropertyLine.Match(line);
+                        Match match = s_crackPropertyLine.Value.Match(line);
                         ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(match.Success, "SubCategoryForSolutionParsingErrors",
                             new BuildEventFileInfo(FullPath, _currentLineNumber, 0), "SolutionParseProjectDepGuidError", proj.ProjectName);
 
@@ -797,7 +803,7 @@ namespace Microsoft.Build.Construction
                     line = ReadLine();
                     while ((line != null) && (!line.StartsWith("EndProjectSection", StringComparison.Ordinal)))
                     {
-                        Match match = s_crackPropertyLine.Match(line);
+                        Match match = s_crackPropertyLine.Value.Match(line);
                         ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(match.Success, "SubCategoryForSolutionParsingErrors",
                             new BuildEventFileInfo(FullPath, _currentLineNumber, 0), "SolutionParseWebProjectPropertiesError", proj.ProjectName);
 
@@ -1233,7 +1239,7 @@ namespace Microsoft.Build.Construction
             ProjectInSolution proj
         )
         {
-            Match match = s_crackProjectLine.Match(firstLine);
+            Match match = s_crackProjectLine.Value.Match(firstLine);
             ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(match.Success, "SubCategoryForSolutionParsingErrors",
                 new BuildEventFileInfo(FullPath, _currentLineNumber, 0), "SolutionParseProjectError");
 
@@ -1320,7 +1326,7 @@ namespace Microsoft.Build.Construction
                     continue;
                 }
 
-                Match match = s_crackPropertyLine.Match(str);
+                Match match = s_crackPropertyLine.Value.Match(str);
                 ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(match.Success, "SubCategoryForSolutionParsingErrors",
                     new BuildEventFileInfo(FullPath, _currentLineNumber, 0), "SolutionParseNestedProjectError");
 
