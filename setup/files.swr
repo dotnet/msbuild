@@ -104,12 +104,12 @@ folder InstallDir:\MSBuild\15.0\Bin\pl
   file source=$(X86BinPath)pl\Microsoft.Build.Utilities.Core.resources.dll vs.file.ngen=yes
   file source=$(X86BinPath)pl\MSBuild.resources.dll vs.file.ngen=yes
   file source=$(X86BinPath)pl\MSBuildTaskHost.resources.dll vs.file.ngen=yes
-folder InstallDir:\MSBuild\15.0\Bin\pt
-  file source=$(X86BinPath)pt\Microsoft.Build.resources.dll vs.file.ngen=yes
-  file source=$(X86BinPath)pt\Microsoft.Build.Tasks.Core.resources.dll vs.file.ngen=yes
-  file source=$(X86BinPath)pt\Microsoft.Build.Utilities.Core.resources.dll vs.file.ngen=yes
-  file source=$(X86BinPath)pt\MSBuild.resources.dll vs.file.ngen=yes
-  file source=$(X86BinPath)pt\MSBuildTaskHost.resources.dll vs.file.ngen=yes
+folder InstallDir:\MSBuild\15.0\Bin\pt-BR
+  file source=$(X86BinPath)pt-BR\Microsoft.Build.resources.dll vs.file.ngen=yes
+  file source=$(X86BinPath)pt-BR\Microsoft.Build.Tasks.Core.resources.dll vs.file.ngen=yes
+  file source=$(X86BinPath)pt-BR\Microsoft.Build.Utilities.Core.resources.dll vs.file.ngen=yes
+  file source=$(X86BinPath)pt-BR\MSBuild.resources.dll vs.file.ngen=yes
+  file source=$(X86BinPath)pt-BR\MSBuildTaskHost.resources.dll vs.file.ngen=yes
 folder InstallDir:\MSBuild\15.0\Bin\ru
   file source=$(X86BinPath)ru\Microsoft.Build.resources.dll vs.file.ngen=yes
   file source=$(X86BinPath)ru\Microsoft.Build.Tasks.Core.resources.dll vs.file.ngen=yes
@@ -231,12 +231,12 @@ folder InstallDir:\MSBuild\15.0\Bin\amd64\pl
   file source=$(X64BinPath)pl\Microsoft.Build.Utilities.Core.resources.dll vs.file.ngen=yes
   file source=$(X64BinPath)pl\MSBuild.resources.dll vs.file.ngen=yes
   file source=$(X64BinPath)pl\MSBuildTaskHost.resources.dll vs.file.ngen=yes
-folder InstallDir:\MSBuild\15.0\Bin\amd64\pt
-  file source=$(X64BinPath)pt\Microsoft.Build.resources.dll vs.file.ngen=yes
-  file source=$(X64BinPath)pt\Microsoft.Build.Tasks.Core.resources.dll vs.file.ngen=yes
-  file source=$(X64BinPath)pt\Microsoft.Build.Utilities.Core.resources.dll vs.file.ngen=yes
-  file source=$(X64BinPath)pt\MSBuild.resources.dll vs.file.ngen=yes
-  file source=$(X64BinPath)pt\MSBuildTaskHost.resources.dll vs.file.ngen=yes
+folder InstallDir:\MSBuild\15.0\Bin\amd64\pt-BR
+  file source=$(X64BinPath)pt-BR\Microsoft.Build.resources.dll vs.file.ngen=yes
+  file source=$(X64BinPath)pt-BR\Microsoft.Build.Tasks.Core.resources.dll vs.file.ngen=yes
+  file source=$(X64BinPath)pt-BR\Microsoft.Build.Utilities.Core.resources.dll vs.file.ngen=yes
+  file source=$(X64BinPath)pt-BR\MSBuild.resources.dll vs.file.ngen=yes
+  file source=$(X64BinPath)pt-BR\MSBuildTaskHost.resources.dll vs.file.ngen=yes
 folder InstallDir:\MSBuild\15.0\Bin\amd64\ru
   file source=$(X64BinPath)ru\Microsoft.Build.resources.dll vs.file.ngen=yes
   file source=$(X64BinPath)ru\Microsoft.Build.Tasks.Core.resources.dll vs.file.ngen=yes
