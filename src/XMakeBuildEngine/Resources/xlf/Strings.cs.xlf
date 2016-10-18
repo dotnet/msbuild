@@ -812,7 +812,7 @@
       </trans-unit>
       <trans-unit id="ProjectMustBeInMSBuildXmlNamespace">
         <source>MSB4041: The default XML namespace of the project must be the MSBuild XML namespace or no namespace. If the project is authored in the MSBuild 2003 format, please add xmlns="{0}" to the &lt;Project&gt; element. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</source>
-        <target state="updated">MSB4041: Výchozí obor názvů XML projektu musí být oborem názvů XML nástroje MSBuild. Pokud je projekt vytvořen ve formátu MSBuild 2003, přidejte do elementu atribut xmlns="{0}". Jestliže byl projekt vytvořen ve starém formátu 1.0 nebo 1.2, převeďte jej na formát MSBuild 2003.</target>
+        <target state="translated">MSB4041: Výchozí obor názvů XML projektu musí být oborem názvů XML nástroje MSBuild nebo nesmí být žádným oborem názvů. Pokud je projekt vytvořený ve formátu MSBuild 2003, přidejte do elementu atribut xmlns="{0}". Jestliže byl projekt vytvořený ve starém formátu 1.0 nebo 1.2, převeďte ho na formát MSBuild 2003.</target>
         <note>{StrBegin="MSB4041: "}UE: This is a Beta 1 message only.
       LOCALIZATION: &lt;Project&gt;, "MSBuild" and "xmlns" should not be localized.</note>
       </trans-unit>
@@ -1919,33 +1919,33 @@ Využití:          Průměrné využití {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="InvalidAttributeExclusive">
         <source>MSB4111: At most one of the include, remove, and update attributes may be specified for an item element.</source>
-        <target state="new">MSB4111: At most one of the include, remove, and update attributes may be specified for an item element.</target>
-        <note></note>
+        <target state="translated">MSB4111: Pro element položky je možné zadat maximálně jeden z atributů include, remove a update.</target>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidAttributeDueToDuplication">
         <source>MSB4227: The attribute "{0}" on element &lt;{1}&gt; is invalid because an attribute with that name already exists</source>
-        <target state="new">MSB4227: The attribute "{0}" on element &lt;{1}&gt; is invalid because an attribute with that name already exists</target>
+        <target state="translated">MSB4227: Atribut {0} u elementu &lt;{1}&gt; je neplatný, protože atribut s tímto názvem už existuje.</target>
         <note>{StrBegin="MSB4227: "}</note>
       </trans-unit>
       <trans-unit id="InvalidMetadataAsAttribute">
         <source>MSB4228: The name "{0}" is not valid for metadata expressed as an attribute (on element &lt;{1}&gt;)</source>
-        <target state="new">MSB4228: The name "{0}" is not valid for metadata expressed as an attribute (on element &lt;{1}&gt;)</target>
+        <target state="translated">MSB4228: Název {0} není platný pro metadata vyjádřená jako atribut (u elementu &lt;{1}&gt;).</target>
         <note>{StrBegin="MSB4228: "}</note>
       </trans-unit>
       <trans-unit id="OM_OneOfAttributeButNotMore">
         <source>The &lt;{0}&gt; element must have either the "{1}" attribute, the "{2}" attribute, or the "{3}" attribute, but not more than one.</source>
-        <target state="new">The &lt;{0}&gt; element must have either the "{1}" attribute, the "{2}" attribute, or the "{3}" attribute, but not more than one.</target>
-        <note></note>
+        <target state="translated">Element &lt;{0}&gt; musí mít atribut {1}, {2} nebo {3}, ale ne více než jeden.</target>
+        <note />
       </trans-unit>
       <trans-unit id="OM_ItemsOutsideTargetMustHaveIncludeOrUpdateOrRemove">
         <source>An item not parented under a Target must have a value for Include or Update or Remove.</source>
-        <target state="new">An item not parented under a Target must have a value for Include or Update or Remove.</target>
+        <target state="translated">Položka, která není podřízená elementu Target, musí mít hodnotu pro atribut Include, Update nebo Remove.</target>
         <note>LOCALIZATION: Please do not localize "Target", "Include", "Update", and "Remove".</note>
       </trans-unit>
       <trans-unit id="OM_CannotSplitItemElementWhenSplittingIsDisabled">
         <source>The requested operation needs to split the item element at location {0} into individual elements but item element splitting is disabled with {1}.</source>
-        <target state="new">The requested operation needs to split the item element at location {0} into individual elements but item element splitting is disabled with {1}.</target>
-        <note></note>
+        <target state="translated">Požadovaná operace potřebuje rozdělit element položky v umístění {0} na jednotlivé elementy, ale {1} dělení elementů položek zakazuje.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

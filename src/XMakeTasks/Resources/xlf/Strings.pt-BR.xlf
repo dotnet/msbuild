@@ -179,7 +179,7 @@
       </trans-unit>
       <trans-unit id="Copy.RetryingAsFileCopy">
         <source>Could not use a link to copy "{0}" to "{1}". Copying the file instead. {2}</source>
-        <target state="updated">Não foi possível usar um link físico para copiar "{0}" em "{1}". Copiando o arquivo. {2}</target>
+        <target state="translated">Não foi possível usar um link para copiar "{0}" em "{1}". Copiando o arquivo. {2}</target>
         <note>LOCALIZATION: {0} and {1} are paths. {2} is an optional localized message.</note>
       </trans-unit>
       <trans-unit id="Copy.NeedsDestination">
@@ -2841,7 +2841,7 @@
       </trans-unit>
       <trans-unit id="GetInstalledSDKs.NoSDksFound">
         <source>MSB3785: No SDKs were found for TargetPlatform = {0} v{1}. SDKReference items will not be resolved. If your application requires these references there may be compilation errors.</source>
-        <target state="updated">MSB3785: Nenhum SDK encontrado. Itens de SDKReference não serão resolvidos. Se seu aplicativo necessitar dessas referências, poderá haver erros de compilação.</target>
+        <target state="translated">MSB3785: nenhum SDK encontrado para TargetPlatform = {0} v{1}. Itens de SDKReference não serão resolvidos. Se o seu aplicativo necessitar dessas referências, poderá ocorrer erros de compilação.</target>
         <note>{StrBegin="MSB3785: "} "SDKReference" refers to SDKReference items in the project file and should not be localized.</note>
       </trans-unit>
       <trans-unit id="GetInstalledSDKs.CouldNotGetSDKList">
@@ -2966,18 +2966,18 @@
       </trans-unit>
       <trans-unit id="Copy.SymbolicLinkComment">
         <source>Creating symbolic link to copy "{0}" to "{1}".</source>
-        <target state="new">Creating symbolic link to copy "{0}" to "{1}".</target>
+        <target state="translated">Criando link simbólico para copiar "{0}" para "{1}".</target>
         <note>LOCALIZATION: {0} and {1} are paths.</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.AssemblyFoldersConfigFileMalformed">
         <source>The AssemblyFolder config file ('{0}') specified in Microsoft.Common.CurrentVersion.targets was invalid. The error was: {1}</source>
-        <target state="new">The AssemblyFolder config file ('{0}') specified in Microsoft.Common.CurrentVersion.targets was invalid. The error was: {1}</target>
-        <note></note>
+        <target state="translated">O arquivo de configuração AssemblyFolder ('{0}') especificado em Microsoft.Common.CurrentVersion.targets era inválido. O erro era: {1}</target>
+        <note />
       </trans-unit>
       <trans-unit id="Copy.ExactlyOneTypeOfLink">
         <source>MSB3891: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</source>
-        <target state="new">MSB3891: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</target>
-        <note></note>
+        <target state="translated">MSB3891: "{0}" e "{1}" foram especificados no arquivo do projeto. Escolha um ou outro.</target>
+        <note />
       </trans-unit>
     </body>
   </file>
