@@ -218,12 +218,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <UsingTask TaskName="ResolvePublishAssemblies" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <Target Name="RunResolvePublishAssemblies"
-          DependsOnTargets="ComputePrivateAssetsPackageReferences">
+          DependsOnTargets="ComputePrivateAssetsPackageReferences;
+                            _DefaultMicrosoftNETPlatformLibrary">
 
     <ResolvePublishAssemblies ProjectPath="$(MSBuildProjectFullPath)"
                               AssetsFilePath="$(ProjectAssetsFile)"
                               TargetFramework="$(TargetFrameworkMoniker)"
                               RuntimeIdentifier="$(RuntimeIdentifier)"
+                              PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                               PrivateAssetsPackageReferences="@(PrivateAssetsPackageReference)">
 
       <Output TaskParameter="AssembliesToPublish" ItemName="ResolvedAssembliesToPublish" />
@@ -422,7 +424,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <Target Name="GeneratePublishDependencyFile"
-          DependsOnTargets="ComputePrivateAssetsPackageReferences"
+          DependsOnTargets="ComputePrivateAssetsPackageReferences;
+                            _DefaultMicrosoftNETPlatformLibrary"
           Condition="'$(GenerateDependencyFile)' == 'true'">
 
     <PropertyGroup>
@@ -437,6 +440,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       AssemblyVersion="$(Version)"
                       AssemblySatelliteAssemblies="@(IntermediateSatelliteAssembliesWithTargetPath)"
                       RuntimeIdentifier="$(RuntimeIdentifier)"
+                      PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                       CompilerOptions="@(DependencyFileCompilerOptions)"
                       PrivateAssetsPackageReferences="@(PrivateAssetsPackageReference)" />
 
@@ -474,6 +478,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
 
   <Target Name="GeneratePublishRuntimeConfigurationFile"
+          DependsOnTargets="_DefaultMicrosoftNETPlatformLibrary"
           Condition="'$(GenerateRuntimeConfigurationFiles)' == 'true'">
 
     <PropertyGroup>
@@ -484,6 +489,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                        TargetFramework="$(TargetFrameworkMoniker)"
                                        RuntimeConfigPath="$(PublishRuntimeConfigFilePath)"
                                        RuntimeIdentifier="$(RuntimeIdentifier)"
+                                       PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                                        UserRuntimeConfig="$(UserRuntimeConfig)" />
 
   </Target>

@@ -20,7 +20,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             LockFile lockFile = TestLockFiles.GetLockFile("dependencies.withgraphs");
             ProjectContext projectContext = lockFile.CreateProjectContext(
                FrameworkConstants.CommonFrameworks.NetStandard16,
-               null);
+               null,
+               Constants.DefaultPlatformLibrary);
 
             IEnumerable<string> privateAssetPackageIds = new[] { "Microsoft.Extensions.Logging.Abstractions" };
             IDictionary<string, LockFileTargetLibrary> libraryLookup =

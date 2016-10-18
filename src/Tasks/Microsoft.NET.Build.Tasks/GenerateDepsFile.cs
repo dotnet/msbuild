@@ -31,6 +31,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public string RuntimeIdentifier { get; set; }
 
+        public string PlatformLibraryName { get; set; }
+
         [Required]
         public string AssemblyName { get; set; }
 
@@ -50,15 +52,17 @@ namespace Microsoft.NET.Build.Tasks
             CompilationOptions compilationOptions = CompilationOptionsConverter.ConvertFrom(CompilerOptions);
             SingleProjectInfo mainProject = SingleProjectInfo.Create(ProjectPath, AssemblyName, AssemblyVersion, AssemblySatelliteAssemblies);
             IEnumerable<string> privateAssets = PackageReferenceConverter.GetPackageIds(PrivateAssetsPackageReferences);
+            ProjectContext projectContext = lockFile.CreateProjectContext(
+                NuGetUtils.ParseFrameworkName(TargetFramework),
+                RuntimeIdentifier,
+                PlatformLibraryName);
 
             DependencyContext dependencyContext = new DependencyContextBuilder()
                 .WithPrivateAssets(privateAssets)
                 .Build(
                     mainProject,
-                    compilationOptions,
-                    lockFile,
-                    NuGetUtils.ParseFrameworkName(TargetFramework),
-                    RuntimeIdentifier);
+                    projectContext,
+                    compilationOptions);
 
             var writer = new DependencyContextWriter();
             using (var fileStream = File.Create(DepsFilePath))

@@ -65,6 +65,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
 
   <Target Name="GenerateBuildDependencyFile"
+          DependsOnTargets="_DefaultMicrosoftNETPlatformLibrary"
           Condition=" '$(GenerateDependencyFile)' == 'true'"
           Inputs="$(ProjectAssetsFile)"
           Outputs="$(ProjectDepsFilePath)">
@@ -81,6 +82,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       AssemblyVersion="$(Version)"
                       AssemblySatelliteAssemblies="@(IntermediateSatelliteAssembliesWithTargetPath)"
                       RuntimeIdentifier="$(RuntimeIdentifier)"
+                      PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                       CompilerOptions="@(DependencyFileCompilerOptions)" />
 
   </Target>
@@ -94,6 +96,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
 
   <Target Name="GenerateBuildRuntimeConfigurationFiles"
+          DependsOnTargets="_DefaultMicrosoftNETPlatformLibrary"
           Condition=" '$(GenerateRuntimeConfigurationFiles)' == 'true'"
           Inputs="$(ProjectAssetsFile);$(UserRuntimeConfig)"
           Outputs="$(ProjectRuntimeConfigFilePath);$(ProjectRuntimeConfigDevFilePath)">
@@ -103,6 +106,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                        RuntimeConfigPath="$(ProjectRuntimeConfigFilePath)"
                                        RuntimeConfigDevPath="$(ProjectRuntimeConfigDevFilePath)"
                                        RuntimeIdentifier="$(RuntimeIdentifier)"
+                                       PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                                        UserRuntimeConfig="$(UserRuntimeConfig)" />
 
   </Target>
@@ -149,18 +153,17 @@ Copyright (c) .NET Foundation. All rights reserved.
     </When>
   </Choose>
 
+  <!--
+    ============================================================
+                    CoreGenerateSatelliteAssemblies
+    ============================================================
+    -->
   <PropertyGroup>
     <CreateSatelliteAssembliesDependsOn>
       $(CreateSatelliteAssembliesDependsOn);
       CoreGenerateSatelliteAssemblies
     </CreateSatelliteAssembliesDependsOn>
   </PropertyGroup>
-
-  <!--
-    ============================================================
-                    CoreGenerateSatelliteAssemblies
-    ============================================================
--->
 
   <Target Name="CoreGenerateSatelliteAssemblies"
           Inputs="$(MSBuildAllProjects);@(_SatelliteAssemblyResourceInputs);$(IntermediateOutputPath)$(TargetName)$(TargetExt)"
@@ -193,7 +196,24 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="OutputAssembly" ItemName="FileWrites"/>
     </GenerateSatelliteAssemblies>
   </Target>
-  
+
+  <!--
+  ============================================================
+                           _DefaultMicrosoftNETPlatformLibrary
+
+  .NET Core apps can have shared frameworks that are pre-installed on the target machine, thus the app is "portable"
+  to any machine that already has the shared framework installed. In order to enable this, a "platform" library
+  has to be declared. The platform library and its dependencies will be excluded from the runtime assemblies.
+  ============================================================
+  -->
+  <Target Name="_DefaultMicrosoftNETPlatformLibrary">
+    
+    <PropertyGroup Condition="'$(MicrosoftNETPlatformLibrary)' == ''">
+      <MicrosoftNETPlatformLibrary Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">Microsoft.NETCore.App</MicrosoftNETPlatformLibrary>
+    </PropertyGroup>
+    
+  </Target>
+
   <!--
   ============================================================
                                  GetTargetFrameworkProperties

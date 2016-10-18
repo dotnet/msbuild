@@ -13,9 +13,10 @@ namespace Microsoft.NET.Build.Tasks
     public static class LockFileExtensions
     {
         public static ProjectContext CreateProjectContext(
-            this LockFile lockFile, 
-            NuGetFramework framework, 
-            string runtime)
+            this LockFile lockFile,
+            NuGetFramework framework,
+            string runtime,
+            string platformLibraryName)
         {
             if (lockFile == null)
             {
@@ -40,31 +41,26 @@ namespace Microsoft.NET.Build.Tasks
                     $" and RuntimeIdentifier='{runtime}'.");
             }
 
-            return new ProjectContext(lockFile, lockFileTarget);
+            return new ProjectContext(lockFile, lockFileTarget, platformLibraryName);
         }
 
-        public static bool IsPortable(this LockFileTarget lockFileTarget)
+        public static LockFileTargetLibrary GetLibrary(this LockFileTarget lockFileTarget, string libraryName)
         {
-            return string.IsNullOrEmpty(lockFileTarget.RuntimeIdentifier) &&
-                lockFileTarget.GetPlatformLibrary() != null;
-        }
+            if (string.IsNullOrEmpty(libraryName))
+            {
+                return null;
+            }
 
-        public static LockFileTargetLibrary GetPlatformLibrary(this LockFileTarget lockFileTarget)
-        {
-            // TODO: https://github.com/dotnet/sdk/issues/17 get this from the lock file
-            var platformPackageName = "Microsoft.NETCore.App";
-            var platformLibrary = lockFileTarget
+            return lockFileTarget
                 .Libraries
-                .FirstOrDefault(e => e.Name.Equals(platformPackageName, StringComparison.OrdinalIgnoreCase));
-
-            return platformLibrary;
+                .FirstOrDefault(e => e.Name.Equals(libraryName, StringComparison.OrdinalIgnoreCase));
         }
 
         public static HashSet<string> GetPlatformExclusionList(
             this LockFileTarget lockFileTarget,
+            LockFileTargetLibrary platformLibrary,
             IDictionary<string, LockFileTargetLibrary> libraryLookup)
         {
-            var platformLibrary = lockFileTarget.GetPlatformLibrary();
             var exclusionList = new HashSet<string>();
 
             exclusionList.Add(platformLibrary.Name);
