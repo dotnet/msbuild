@@ -30,14 +30,32 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             CleanExistingProperties(csproj);
             CleanExistingPackageReferences(csproj);
 
-            _transformApplicator.Execute(
-                FrameworksTransform.Transform(migrationRuleInputs.ProjectContexts.Select(p => p.TargetFramework)),
-                propertyGroup);
+            if(migrationRuleInputs.ProjectContexts.Count() == 1)
+            {
+                _transformApplicator.Execute(
+                    FrameworkTransform.Transform(
+                        migrationRuleInputs.ProjectContexts.Single().TargetFramework),
+                    propertyGroup);
+            }
+            else
+            {
+                _transformApplicator.Execute(
+                    FrameworksTransform.Transform(
+                        migrationRuleInputs.ProjectContexts.Select(p => p.TargetFramework)),
+                    propertyGroup);
+            }
         }
 
         private void CleanExistingProperties(ProjectRootElement csproj)
         {
-            var existingPropertiesToRemove = new string[] { "TargetFrameworkIdentifier", "TargetFrameworkVersion", "TargetFrameworks" };
+            var existingPropertiesToRemove = new string[] 
+            {
+                "TargetFrameworkIdentifier",
+                "TargetFrameworkVersion",
+                "TargetFrameworks",
+                "TargetFramework"
+            };
+            
             var properties = csproj.Properties.Where(p => existingPropertiesToRemove.Contains(p.Name));
 
             foreach (var property in properties)
@@ -84,8 +102,15 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         }
 
         private AddPropertyTransform<IEnumerable<NuGetFramework>> FrameworksTransform =>
-            new AddPropertyTransform<IEnumerable<NuGetFramework>>("TargetFrameworks",
+            new AddPropertyTransform<IEnumerable<NuGetFramework>>(
+                "TargetFrameworks",
                 frameworks => string.Join(";", frameworks.Select(f => f.GetShortFolderName())),
                 frameworks => true);
+
+        private AddPropertyTransform<NuGetFramework> FrameworkTransform =>
+            new AddPropertyTransform<NuGetFramework>(
+                "TargetFramework",
+                framework => framework.GetShortFolderName(),
+                framework => true);
     }
 }

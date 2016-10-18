@@ -108,7 +108,7 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             return _project
                 .AllEvaluatedProperties
-                .Where(p => p.Name.Equals("ProjectLockFile"))
+                .Where(p => p.Name.Equals("ProjectAssetsFile"))
                 .Select(p => p.EvaluatedValue)
                 .FirstOrDefault(p => File.Exists(p));
         }
