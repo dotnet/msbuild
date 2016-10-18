@@ -27,7 +27,8 @@ In order to build .NET Command Line Interface, you need the following installed 
 
 ## Building/Running
 
-1. Run `build.cmd` or `build.sh` from the root depending on your OS. If you don't want to execute tests, run `build.cmd /t:Compile` or `./build.sh /t:Compile`.
+1. Run `build.cmd` or `build.sh` from the root depending on your OS. If you don't want to execute tests, run `build.cmd /t:Compile` or `./build.sh /t:Compile`. 
+  - To build the CLI in macOS Sierra, you need to set the DOTNET_RUNTIME_ID environment variable by running `export DOTNET_RUNTIME_ID=osx.10.11-x64`.
 2. Use `artifacts/{RID}/stage2/dotnet` to try out the `dotnet` command. You can also add `artifacts/{os}-{arch}/stage2` to the PATH if you want to use the build output when invoking `dotnet` from the current console.
 
 ## A simple test
@@ -72,4 +73,3 @@ The dotnet CLI considers any executable on the path named `dotnet-{commandName}`
 
 ## Things to Know
 - Any added commands are usually invoked through `dotnet {command}`. As a result of this, stdout and stderr are redirected through the driver (`dotnet`) and buffered by line. As a result of this, child commands should use Console.WriteLine in any cases where they expect output to be written immediately. Any uses of Console.Write should be followed by Console.WriteLine to ensure the output is written.
-- CLI is currently based on .NET Core 1.0 which does not support OS X Sierra. If you are developing the CLI on Sierra then include `/p:SkipInvalidConfigurations=true` in your calls to `build.sh`, this will allow the build to progress sufficiently to validate your work on this platform.
