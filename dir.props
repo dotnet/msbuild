@@ -127,12 +127,6 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <Platform Condition="'$(Platform)'==''">x86</Platform>
-    <!-- Only build for specific platforms when PlatformSpecificBuild == true. Otherwise
-         build for AnyCPU. Only MSBuild.exe and MSBuildTaskHost.exe should need this -->
-    <PlatformTarget Condition="'$(PlatformSpecificBuild)'!='true'">AnyCPU</PlatformTarget>
-    <PlatformTarget Condition="'$(PlatformSpecificBuild)'=='true'">$(Platform)</PlatformTarget>
-
     <DefineConstants>$(DefineConstants);TRACE;STANDALONEBUILD</DefineConstants>
     <DefineConstants Condition="$(LocalizedBuild) == 'true'">$(DefineConstants);LOCALIZED_BUILD</DefineConstants>
   </PropertyGroup>
@@ -199,6 +193,16 @@
     <TargetSystem Condition="'$(NetCoreBuild)' == 'true'">$(TargetSystem)_NetCore</TargetSystem>
 
     <RuntimeArchitecture>x64</RuntimeArchitecture>
+
+    <!-- Default Platform is x86 on FullFrameworkBuild. In .NET Core, always use AnyCPU -->
+    <Platform Condition="'$(Platform)' == '' AND '$(FullFrameworkBuild)' == 'true'">x86</Platform>
+    <Platform Condition="'$(Platform)' == '' AND '$(FullFrameworkBuild)' != 'true'">AnyCPU</Platform>
+
+    <!-- Only build for specific platforms when PlatformSpecificBuild == true. Otherwise
+         build for AnyCPU. Only MSBuild.exe and MSBuildTaskHost.exe should need this -->
+    <PlatformTarget Condition="'$(PlatformSpecificBuild)' != 'true'">AnyCPU</PlatformTarget>
+    <PlatformTarget Condition="'$(PlatformSpecificBuild)' == 'true' AND '$(FullFrameworkBuild)' == 'true'">$(Platform)</PlatformTarget>
+    <PlatformTarget Condition="'$(PlatformSpecificBuild)' == 'true' AND '$(FullFrameworkBuild)' != 'true'">AnyCPU</PlatformTarget>
   </PropertyGroup>
 
   <!-- This configuration builds against the full .NET Framework but with the compilation constants to compile against
@@ -241,7 +245,6 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <PlatformTarget>$(RuntimeArchitecture)</PlatformTarget>
     <ImportGetNuGetPackageVersions Condition="'$(OS)' != 'Windows_NT'">false</ImportGetNuGetPackageVersions>
     <NuGetTargetMoniker Condition="'$(NetCoreBuild)' == 'true'">$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)</NuGetTargetMoniker>
     <NuGetTargetMoniker Condition="'$(NetCoreBuild)' != 'true'">.NETFramework,Version=$(TargetFrameworkVersion)</NuGetTargetMoniker>
@@ -368,8 +371,6 @@
 
   <!-- Setup the default output and intermediate paths -->
   <PropertyGroup>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-
     <BaseOutputPath Condition="$(BaseOutputPath) == ''">$(BinDir)</BaseOutputPath>
 
     <RelativeOutputPathWithConfig>$(Configuration)$([System.IO.Path]::DirectorySeparatorChar)</RelativeOutputPathWithConfig>
