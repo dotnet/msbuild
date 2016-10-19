@@ -30,6 +30,8 @@ namespace Microsoft.Build.UnitTests
         private const string MSBuildExeName = "MSBuild.dll";
 #endif
 
+        private const string AutoResponseFileName = "MSBuild.rsp";
+
         [Fact]
         public void GatherCommandLineSwitchesTwoProperties()
         {
@@ -873,7 +875,7 @@ namespace Microsoft.Build.UnitTests
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
             string projectPath = Path.Combine(directory, "my.proj");
-            string rspPath = Path.Combine(directory, "MSBuild.rsp");
+            string rspPath = Path.Combine(directory, AutoResponseFileName);
 
             string currentDirectory = Directory.GetCurrentDirectory();
 
@@ -914,7 +916,7 @@ namespace Microsoft.Build.UnitTests
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
             string projectPath = Path.Combine(directory, "my.proj");
-            string rspPath = Path.Combine(directory, "MSBuild.rsp");
+            string rspPath = Path.Combine(directory, AutoResponseFileName);
 
             try
             {
@@ -987,7 +989,7 @@ namespace Microsoft.Build.UnitTests
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
             string projectPath = Path.Combine(directory, "my.proj");
-            string rspPath = Path.Combine(directory, "MSBuild.rsp");
+            string rspPath = Path.Combine(directory, AutoResponseFileName);
 
             try
             {
@@ -1020,7 +1022,6 @@ namespace Microsoft.Build.UnitTests
         /// but lower precedence than the actual command line and higher than the msbuild.rsp next to msbuild.exe
         /// </summary>
         [Fact]
-        [Trait("Category", "netcore-osx-failing")] // https://github.com/Microsoft/msbuild/issues/1112
         public void ResponseFileInProjectDirectoryWinsOverMainMSBuildRsp()
         {
             string directory = null;
@@ -1031,11 +1032,11 @@ namespace Microsoft.Build.UnitTests
                 directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
                 Directory.CreateDirectory(directory);
                 string projectPath = Path.Combine(directory, "my.proj");
-                string rspPath = Path.Combine(directory, "msbuild.rsp");
+                string rspPath = Path.Combine(directory, AutoResponseFileName);
 
                 exeDirectory = CopyMSBuild();
                 string exePath = Path.Combine(exeDirectory, MSBuildExeName);
-                string mainRspPath = Path.Combine(exeDirectory, "msbuild.rsp");
+                string mainRspPath = Path.Combine(exeDirectory, AutoResponseFileName);
 
                 Directory.CreateDirectory(exeDirectory);
 
@@ -1066,7 +1067,6 @@ namespace Microsoft.Build.UnitTests
         /// but not if it's the same as the msbuild.exe directory
         /// </summary>
         [Fact]
-        [Trait("Category", "netcore-osx-failing")] // https://github.com/Microsoft/msbuild/issues/1112
         public void ProjectDirectoryIsMSBuildExeDirectory()
         {
             string directory = null;
@@ -1075,7 +1075,7 @@ namespace Microsoft.Build.UnitTests
             {
                 directory = CopyMSBuild();
                 string projectPath = Path.Combine(directory, "my.proj");
-                string rspPath = Path.Combine(directory, "msbuild.rsp");
+                string rspPath = Path.Combine(directory, AutoResponseFileName);
                 string exePath = Path.Combine(directory, MSBuildExeName);
 
                 string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
@@ -1105,7 +1105,7 @@ namespace Microsoft.Build.UnitTests
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
             string projectPath = Path.Combine(directory, "my.proj");
-            string rspPath = Path.Combine(directory, "MSBuild.rsp");
+            string rspPath = Path.Combine(directory, AutoResponseFileName);
 
             try
             {
@@ -1141,7 +1141,7 @@ namespace Microsoft.Build.UnitTests
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
             string projectPath = Path.Combine(directory, "my.proj");
-            string rspPath = Path.Combine(directory, "MSBuild.rsp");
+            string rspPath = Path.Combine(directory, AutoResponseFileName);
 
             try
             {
@@ -1871,7 +1871,7 @@ namespace Microsoft.Build.UnitTests
                 // Copy MSBuild.exe & dependent files (they will not be in the GAC so they must exist next to msbuild.exe)
                 var filesToCopy = Directory
                     .EnumerateFiles(source)
-                    .Where(f=> f.EndsWith(".dll") || f.EndsWith(".tasks") || f.EndsWith(".exe") || f.EndsWith(".exe.config"));
+                    .Where(f=> f.EndsWith(".dll") || f.EndsWith(".tasks") || f.EndsWith(".exe") || f.EndsWith(".exe.config") || f.EndsWith(".runtimeconfig.json"));
 
                 var directoriesToCopy = Directory
                     .EnumerateDirectories(source)
