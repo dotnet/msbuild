@@ -33,14 +33,11 @@ namespace Microsoft.NET.Build.Tasks
 
         public DependencyContext Build(
             SingleProjectInfo mainProjectInfo,
-            CompilationOptions compilationOptions,
-            LockFile lockFile,
-            NuGetFramework framework,
-            string runtime)
+            ProjectContext projectContext,
+            CompilationOptions compilationOptions)
         {
             bool includeCompilationLibraries = compilationOptions != null;
 
-            ProjectContext projectContext = lockFile.CreateProjectContext(framework, runtime);
             IEnumerable<LockFileTargetLibrary> runtimeExports = projectContext.GetRuntimeLibraries(_privateAssetPackageIds);
             IEnumerable<LockFileTargetLibrary> compilationExports =
                 includeCompilationLibraries ?
@@ -53,7 +50,7 @@ namespace Microsoft.NET.Build.Tasks
                 .Select(library => new Dependency(library.Name, library.Version.ToString()))
                 .ToDictionary(dependency => dependency.Name, StringComparer.OrdinalIgnoreCase);
 
-            var libraryLookup = new LockFileLookup(lockFile);
+            var libraryLookup = new LockFileLookup(projectContext.LockFile);
 
             var runtimeSignature = GenerateRuntimeSignature(runtimeExports);
 
@@ -81,8 +78,14 @@ namespace Microsoft.NET.Build.Tasks
                 compilationLibraries = Enumerable.Empty<CompilationLibrary>();
             }
 
+            var targetInfo = new TargetInfo(
+                projectContext.LockFileTarget.TargetFramework.DotNetFrameworkName,
+                projectContext.LockFileTarget.RuntimeIdentifier,
+                runtimeSignature,
+                projectContext.IsPortable);
+
             return new DependencyContext(
-                new TargetInfo(framework.DotNetFrameworkName, runtime, runtimeSignature, projectContext.IsPortable),
+                targetInfo,
                 compilationOptions ?? CompilationOptions.Default,
                 compilationLibraries,
                 runtimeLibraries,

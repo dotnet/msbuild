@@ -29,6 +29,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public string RuntimeIdentifier { get; set; }
 
+        public string PlatformLibraryName { get; set; }
+
         public ITaskItem[] PrivateAssetsPackageReferences { get; set; }
 
         /// <summary>
@@ -48,7 +50,8 @@ namespace Microsoft.NET.Build.Tasks
 
             ProjectContext projectContext = lockFile.CreateProjectContext(
                 NuGetUtils.ParseFrameworkName(TargetFramework),
-                RuntimeIdentifier);
+                RuntimeIdentifier,
+                PlatformLibraryName);
 
             IEnumerable<ResolvedFile> resolvedAssemblies = 
                 new PublishAssembliesResolver(new NuGetPackageResolver(nugetPathContext))

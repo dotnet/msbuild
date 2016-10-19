@@ -59,6 +59,7 @@
     <Compile Include="GivenAPublishAssembliesResolver.cs" />
     <Compile Include="GivenADependencyContextBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Constants.cs" />
     <Compile Include="TestLockFiles.cs" />
   </ItemGroup>
   <ItemGroup>
