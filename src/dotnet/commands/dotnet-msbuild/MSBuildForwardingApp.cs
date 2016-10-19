@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
 {
     public class MSBuildForwardingApp
     {
-        private const string s_msbuildExeName = "MSBuild.exe";
+        private const string s_msbuildExeName = "MSBuild.dll";
         private readonly ForwardingApp _forwardingApp;
 
         public MSBuildForwardingApp(IEnumerable<string> argsToForward)
