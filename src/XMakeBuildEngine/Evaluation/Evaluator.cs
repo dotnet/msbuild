@@ -726,7 +726,7 @@ namespace Microsoft.Build.Evaluation
 #if FEATURE_MSBUILD_DEBUGGER
             InitializeForDebugging();
 #endif
-
+            Console.WriteLine("Before pass0");
             // Pass0: load initial properties
             // Follow the order of precedence so that Global properties overwrite Environment properties
             ICollection<P> builtInProperties = AddBuiltInProperties();
@@ -734,6 +734,7 @@ namespace Microsoft.Build.Evaluation
             ICollection<P> toolsetProperties = AddToolsetProperties();
             ICollection<P> subToolsetProperties = AddSubToolsetProperties();
             ICollection<P> globalProperties = AddGlobalProperties();
+            
 
 #if FEATURE_MSBUILD_DEBUGGER
             // Create a state for the root project node to show initial properties
@@ -781,7 +782,9 @@ namespace Microsoft.Build.Evaluation
             string endPass0 = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 0 (Initial properties)", projectFile);
             DataCollection.CommentMarkProfile(8816, endPass0);
 #endif
+            Console.WriteLine("After pass0");
 
+            Console.WriteLine("Before pass1");
             // Pass1: evaluate properties, load imports, and gather everything else
             PerformDepthFirstPass(_projectRootElement);
 
@@ -799,6 +802,9 @@ namespace Microsoft.Build.Evaluation
             string endPass1 = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 1 (Properties and Imports)", projectFile);
             DataCollection.CommentMarkProfile(8817, endPass1);
 #endif
+            Console.WriteLine("After pass1");
+
+            Console.WriteLine("Before pass2");
             // Pass2: evaluate item definitions
             foreach (ProjectItemDefinitionGroupElement itemDefinitionGroupElement in _itemDefinitionGroupElements)
             {
@@ -814,6 +820,9 @@ namespace Microsoft.Build.Evaluation
             LazyItemEvaluator<P, I, M, D> lazyEvaluator = null;
             lazyEvaluator = new LazyItemEvaluator<P, I, M, D>(_data, _itemFactory, _buildEventContext, _loggingService);
 
+            Console.WriteLine("After pass2");
+
+            Console.WriteLine("Before pass3");
             // Pass3: evaluate project items
             foreach (ProjectItemGroupElement itemGroupElement in _itemGroupElements)
             {
@@ -851,6 +860,10 @@ namespace Microsoft.Build.Evaluation
             string endPass3 = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 3 (Items)", projectFile);
             DataCollection.CommentMarkProfile(8819, endPass3);
 #endif
+            Console.WriteLine("After pass3");
+
+            Console.WriteLine("Before pass4");
+
             // Pass4: evaluate using-tasks
             foreach (Pair<string, ProjectUsingTaskElement> entry in _usingTaskElements)
             {
@@ -882,6 +895,9 @@ namespace Microsoft.Build.Evaluation
             DataCollection.CommentMarkProfile(8820, endPass4);
 #endif
 
+            Console.WriteLine("After pass4");
+
+            Console.WriteLine("Before pass5");
             // Pass5: read targets (but don't evaluate them: that happens during build)
             foreach (ProjectTargetElement targetElement in _targetElements)
             {
@@ -921,6 +937,7 @@ namespace Microsoft.Build.Evaluation
                     Trace.WriteLine(line + output + line);
                 }
             }
+            Console.WriteLine("After pass5");
 
             _data.FinishEvaluation();
 

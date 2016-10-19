@@ -581,6 +581,7 @@ namespace Microsoft.Build.UnitTests
             string toolsVersion /* may be null */
             )
         {
+            Console.WriteLine("Creating in-memory project");
             XmlReaderSettings readerSettings = new XmlReaderSettings {DtdProcessing = DtdProcessing.Ignore};
 
             Project project = new Project
@@ -591,15 +592,17 @@ namespace Microsoft.Build.UnitTests
                 projectCollection
                 );
 
-            Guid guid = Guid.NewGuid();
-            project.FullPath = Path.Combine(ObjectModelHelpers.TempProjectDir, "Temporary" + guid.ToString("N") + ".csproj");
+            string guid = Guid.NewGuid().ToString("N");
+            //project.FullPath = Path.Combine(ObjectModelHelpers.TempProjectDir, guid, "Temporary" + guid + ".csproj");
+            project.FullPath = Path.Combine(ObjectModelHelpers.TempProjectDir, "Temporary" + guid + ".csproj");
+            Console.WriteLine("  Re-evaluating project (if necessary)");
             project.ReevaluateIfNecessary();
-
+            Console.WriteLine("  Done re-evaluating project");
             if (logger != null)
             {
                 project.ProjectCollection.RegisterLogger(logger);
             }
-
+            Console.WriteLine("Done creating in-memory project");
             return project;
         }
 

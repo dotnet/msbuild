@@ -380,13 +380,15 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowArgumentNull(xmlReader, "xmlReader");
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, "toolsVersion");
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection, "projectCollection");
-
+            
             _projectCollection = projectCollection;
 
             try
             {
+                Console.WriteLine("Before Create()");
                 _xml = ProjectRootElement.Create(xmlReader, projectCollection,
                     preserveFormatting: false);
+                Console.WriteLine("After Create()");
             }
             catch (InvalidProjectFileException ex)
             {
@@ -2468,8 +2470,9 @@ namespace Microsoft.Build.Evaluation
 
         private void Reevaluate(ILoggingService loggingServiceForEvaluation, ProjectLoadSettings loadSettings)
         {
+            Console.WriteLine("Before Evaluate()");
             Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.Evaluate(_data, _xml, loadSettings, ProjectCollection.MaxNodeCount, ProjectCollection.EnvironmentProperties, loggingServiceForEvaluation, new ProjectItemFactory(this), _projectCollection as IToolsetProvider, _projectCollection.ProjectRootElementCache, s_buildEventContext, null /* no project instance for debugging */);
-
+            Console.WriteLine("After Evaluate()");
             // We have to do this after evaluation, because evaluation might have changed
             // the imports being pulled in.
             int highestXmlVersion = Xml.Version;

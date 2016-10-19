@@ -1524,6 +1524,8 @@ namespace Microsoft.Build.Shared
             var action = GetFileSearchData(projectDirectoryUnescaped, filespecUnescaped, getFileSystemEntries, directoryExists,
                 out stripProjectDirectory, out state);
 
+            Console.WriteLine($"GetFiles() baseDirectory: '{state.BaseDirectory}'");
+
             if (action == SearchAction.ReturnEmptyList)
             {
                 return new string[0];

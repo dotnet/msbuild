@@ -172,6 +172,7 @@ namespace Microsoft.Build.Construction
             this.IsExplicitlyLoaded = isExplicitlyLoaded;
             _projectRootElementCache = projectRootElementCache;
             _directory = NativeMethodsShared.GetCurrentDirectory();
+            Console.WriteLine($"ProjectRootElement:ctor _directory: '{_directory}'");
             IncrementVersion();
 
             XmlDocumentWithLocation document = LoadDocument(xmlReader, preserveFormatting);
@@ -2094,7 +2095,9 @@ namespace Microsoft.Build.Construction
 
             try
             {
+                Console.WriteLine("Before Load()");
                 document.Load(reader);
+                Console.WriteLine("After Load()");
             }
             catch (XmlException ex)
             {

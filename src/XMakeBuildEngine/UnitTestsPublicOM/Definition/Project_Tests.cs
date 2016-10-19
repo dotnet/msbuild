@@ -3320,13 +3320,26 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
         private static void AssertGlobResult(GlobResultList expected, string project)
         {
-            var globs = ObjectModelHelpers.CreateInMemoryProject(project).GetAllGlobs();
+            Console.WriteLine("Getting project");
+            var project1 = ObjectModelHelpers.CreateInMemoryProject(project);
+            Console.WriteLine($"Got {project1.Items.Count} items");
+
+            Console.WriteLine("Getting globs");
+            var globs = project1.GetAllGlobs();
+            Console.WriteLine($"Got {globs.Count} globs");
             AssertGlobResultsEqual(expected, globs);
         }
 
         private static void AssertGlobResult(GlobResultList expected, string project, string itemType)
         {
-            var globs = ObjectModelHelpers.CreateInMemoryProject(project).GetAllGlobs(itemType) ;
+            Console.WriteLine("Getting project");
+            var project1 = ObjectModelHelpers.CreateInMemoryProject(project);
+            Console.WriteLine($"Got {project1.Items.Count} items");
+
+            Console.WriteLine("Getting globs");
+            var globs = project1.GetAllGlobs(itemType);
+            Console.WriteLine($"Got {globs.Count} globs");
+
             AssertGlobResultsEqual(expected, globs);
         }
 
