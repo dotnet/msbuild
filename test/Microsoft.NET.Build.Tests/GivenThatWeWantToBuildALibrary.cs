@@ -11,6 +11,7 @@ using System.Linq;
 using FluentAssertions;
 using System.Xml.Linq;
 using System.Runtime.Versioning;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -66,18 +67,18 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
-        [InlineData(".NETStandard,Version=v1.0", new[] { "NETSTANDARD1_0" })]
-        [InlineData("netstandard1.3", new[] { "NETSTANDARD1_3" })]
-        [InlineData("netstandard1.6", new[] { "NETSTANDARD1_6" })]
-        [InlineData("netstandard20", new[] { "NETSTANDARD2_0" })]
-        [InlineData("net45", new[] { "NET45" })]
-        [InlineData("net461", new[] { "NET461" })]
-        [InlineData("netcoreapp1.0", new[] { "NETCOREAPP1_0" })]
-        [InlineData(".NETPortable,Version=v4.5,Profile=Profile78", new string[] { })]
-        [InlineData(".NETFramework,Version=v4.0,Profile=Client", new string[] { "NET40" })]
-        [InlineData("Xamarin.iOS,Version=v1.0", new string[] { "XAMARINIOS1_0" })]
-        [InlineData("UnknownFramework,Version=v3.14", new string[] { "UNKNOWNFRAMEWORK3_14" })]
-        public void It_implicitly_defines_compilation_constants_for_the_target_framework(string targetFramework, string[] expectedDefines)
+        [InlineData(".NETStandard,Version=v1.0", new[] { "NETSTANDARD1_0" }, false)]
+        [InlineData("netstandard1.3", new[] { "NETSTANDARD1_3" }, false)]
+        [InlineData("netstandard1.6", new[] { "NETSTANDARD1_6" }, false)]
+        [InlineData("netstandard20", new[] { "NETSTANDARD2_0" }, false)]
+        [InlineData("net45", new[] { "NET45" }, true)]
+        [InlineData("net461", new[] { "NET461" }, true)]
+        [InlineData("netcoreapp1.0", new[] { "NETCOREAPP1_0" }, false)]
+        [InlineData(".NETPortable,Version=v4.5,Profile=Profile78", new string[] { }, false)]
+        [InlineData(".NETFramework,Version=v4.0,Profile=Client", new string[] { "NET40" }, false)]
+        [InlineData("Xamarin.iOS,Version=v1.0", new string[] { "XAMARINIOS1_0" }, false)]
+        [InlineData("UnknownFramework,Version=v3.14", new string[] { "UNKNOWNFRAMEWORK3_14" }, false)]
+        public void It_implicitly_defines_compilation_constants_for_the_target_framework(string targetFramework, string[] expectedDefines, bool buildOnlyOnWindows = false)
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibrary", "ImplicitFrameworkConstants", targetFramework)
@@ -123,6 +124,11 @@ namespace Microsoft.NET.Build.Tests
             {
                 shouldCompile = true;
                 targetFrameworkProperties.Single().SetValue(targetFramework);
+            }
+
+            if (buildOnlyOnWindows && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                shouldCompile = false;
             }
 
             using (var file = File.CreateText(buildCommand.FullPathProjectFile))
