@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
             Environment.SetEnvironmentVariable(
                 Constants.MSBUILD_EXE_PATH,
-                Path.Combine(_repoDirectoriesProvider.Stage2Sdk, "MSBuild.exe"));
+                Path.Combine(_repoDirectoriesProvider.Stage2Sdk, "MSBuild.dll"));
         }
 
         [Fact]
