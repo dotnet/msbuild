@@ -214,7 +214,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   ============================================================
   -->
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(OutputType)' == 'Exe'">
     <ProjectCapability Include="CrossPlatformExecutable" />
   </ItemGroup>
 
