@@ -208,6 +208,16 @@ Copyright (c) .NET Foundation. All rights reserved.
   -->
   <Target Name="GetTargetFrameworkProperties" Returns="TargetFramework=$(TargetFramework)" />
 
+  <!--
+  ============================================================
+                                         Project Capabilities
+  ============================================================
+  -->
+
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(OutputType)' == 'Exe'">
+    <ProjectCapability Include="CrossPlatformExecutable" />
+  </ItemGroup>
+
   <Import Project="$(MSBuildThisFileDirecotry)Microsoft.NET.DisableStandardFrameworkResolution.targets" Condition="'$(DisableStandardFrameworkResolution)' == 'true'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.GenerateAssemblyInfo.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Publish.targets" />
