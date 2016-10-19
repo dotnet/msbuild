@@ -53,6 +53,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public Project_Tests()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
+            ObjectModelHelpers.DeleteTempProjectDirectory();
         }
 
         /// <summary>
@@ -3132,8 +3133,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             AssertProvenanceResult(expected, project, "1.foo");
         }
-		
-		[Fact]
+        
+        [Fact]
         public void GetItemProvenanceShouldWorkWithRemoveElements()
         {
             var project =
