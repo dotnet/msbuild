@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Cli.Utils
             {
                 return _project
                     .AllEvaluatedProperties
-                    .FirstOrDefault(p => p.Name.Equals("_ProjectDepsFilePath"))
+                    .FirstOrDefault(p => p.Name.Equals("ProjectDepsFilePath"))
                     .EvaluatedValue;
             }
         }
@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Cli.Utils
             {
                 return _project
                     .AllEvaluatedProperties
-                    .FirstOrDefault(p => p.Name.Equals("_ProjectRuntimeConfigFilePath"))
+                    .FirstOrDefault(p => p.Name.Equals("ProjectRuntimeConfigFilePath"))
                     .EvaluatedValue;
             }
         }
