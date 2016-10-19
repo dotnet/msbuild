@@ -107,6 +107,8 @@ namespace Microsoft.DotNet.Tools.Restore3
                     msbuildArgs.Add($"/p:RestoreRecursive=false");
                 }
 
+                AddWorkaroundForOutputValidationIssue(msbuildArgs);
+
                 // Add in arguments
                 msbuildArgs.AddRange(argRoot.Values);
 
@@ -117,6 +119,11 @@ namespace Microsoft.DotNet.Tools.Restore3
             });
 
             return cmd.Execute(args);
+        }
+
+        private static void AddWorkaroundForOutputValidationIssue(IList<string> msbuildArgs)
+        {
+            msbuildArgs.Add("/p:SkipInvalidConfigurations=true;_InvalidConfigurationWarning=false");
         }
     }
 }
