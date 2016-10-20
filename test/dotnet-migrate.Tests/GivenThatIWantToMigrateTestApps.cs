@@ -123,8 +123,7 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Theory]
-        // TODO: Enable this when X-Targeting is in
-        // [InlineData("TestLibraryWithMultipleFrameworks")]
+        [InlineData("TestLibraryWithMultipleFrameworks")]
         public void It_migrates_projects_with_multiple_TFMs(string projectName)
         {
             var projectDirectory =
@@ -531,12 +530,12 @@ namespace Microsoft.DotNet.Migration.Tests
 
             if (projectName != null)
             {
-                command.Execute($"{projectName}.csproj /p:SkipInvalidConfigurations=true")
+                command.Execute($"{projectName}.csproj /p:SkipInvalidConfigurations=true;_InvalidConfigurationWarning=false")
                     .Should().Pass();
             }
             else
             {
-                command.Execute("/p:SkipInvalidConfigurations=true")
+                command.Execute("/p:SkipInvalidConfigurations=true;_InvalidConfigurationWarning=false")
                     .Should().Pass(); 
             }
         }
