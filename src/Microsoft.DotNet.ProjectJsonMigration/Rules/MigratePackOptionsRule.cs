@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
         private IncludeContextTransform PackFilesTransform =>
             new IncludeContextTransform("Content", transformMappings: true)
-                .WithMetadata("Pack", "True")
+                .WithMetadata("Pack", "true")
                 .WithMappingsToTransform(_mappingsToTransfrom);
 
         private Func<AddItemTransform<IncludeContext>, string, AddItemTransform<IncludeContext>> _mappingsToTransfrom =>

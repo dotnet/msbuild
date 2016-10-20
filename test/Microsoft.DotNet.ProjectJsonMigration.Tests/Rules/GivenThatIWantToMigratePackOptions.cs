@@ -3,6 +3,7 @@
 
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using System.IO;
 using System.Linq;
 using Xunit;
 using FluentAssertions;
@@ -200,7 +201,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var contentItems = mockProj.Items
                 .Where(item => item.ItemType.Equals("Content", StringComparison.Ordinal))
-                .Where(item => item.GetMetadataWithName("Pack").Value == "True");
+                .Where(item => item.GetMetadataWithName("Pack").Value == "true");
 
             contentItems.Count().Should().Be(1);
             contentItems.First().Include.Should().Be(@"path\to\some\file.cs;path\to\some\other\file.cs");
@@ -224,12 +225,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var contentItems = mockProj.Items
                 .Where(item => item.ItemType.Equals("Content", StringComparison.Ordinal))
                 .Where(item =>
-                    item.GetMetadataWithName("Pack").Value == "True" &&
+                    item.GetMetadataWithName("Pack").Value == "true" &&
                     item.GetMetadataWithName("PackagePath") != null);
 
             contentItems.Count().Should().Be(1);
             contentItems.First().Include.Should().Be(@"path\to\some\file.cs");
-            contentItems.First().GetMetadataWithName("PackagePath").Value.Should().Be(@"some/other/path");
+            contentItems.First().GetMetadataWithName("PackagePath").Value.Should().Be(
+                Path.Combine("some", "other", "path"));
         }
 
         [Fact]
@@ -250,12 +252,32 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var contentItems = mockProj.Items
                 .Where(item => item.ItemType.Equals("Content", StringComparison.Ordinal))
                 .Where(item =>
-                    item.GetMetadataWithName("Pack").Value == "True" &&
+                    item.GetMetadataWithName("Pack").Value == "true" &&
                     item.GetMetadataWithName("PackagePath") != null);
 
             contentItems.Count().Should().Be(1);
             contentItems.First().Include.Should().Be(@"path\to\some\file.cs");
             contentItems.First().GetMetadataWithName("PackagePath").Value.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void Migrating_FullPath_Files_preserves_FullPath_in_content_include()
+        {
+            var mockProj = RunPackOptionsRuleOnPj(@"
+                {
+                    ""packOptions"": {
+                        ""files"": {
+                            ""include"": [""c:/path/to/some/file.cs""]
+                        }
+                    }
+                }");
+
+            var contentItems = mockProj.Items
+                .Where(item => item.ItemType.Equals("Content", StringComparison.Ordinal))
+                .Where(item => item.GetMetadataWithName("Pack").Value == "true");
+
+            contentItems.Count().Should().Be(1);
+            contentItems.First().Include.Should().Be(@"c:\path\to\some\file.cs");
         }
 
         private ProjectRootElement RunPackOptionsRuleOnPj(string packOptions, string testDirectory = null)
