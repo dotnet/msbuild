@@ -3,10 +3,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectJsonMigration;
 using Microsoft.DotNet.ProjectJsonMigration.Transforms;
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.ProjectModel.Files;
+using Microsoft.DotNet.Tools.Common;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
@@ -52,6 +56,19 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     packOptions => packOptions.RepositoryUrl,
                     packOptions => !string.IsNullOrEmpty(packOptions.RepositoryUrl));
 
+        private IncludeContextTransform PackFilesTransform =>
+            new IncludeContextTransform("Content", transformMappings: true)
+                .WithMetadata("Pack", "True")
+                .WithMappingsToTransform(_mappingsToTransfrom);
+
+        private Func<AddItemTransform<IncludeContext>, string, AddItemTransform<IncludeContext>> _mappingsToTransfrom =>
+            (addItemTransform, targetPath) =>
+            {
+                var msbuildLinkMetadataValue = ConvertTargetPathToMsbuildMetadata(targetPath);
+
+                return addItemTransform.WithMetadata("PackagePath", msbuildLinkMetadataValue);
+            };
+
         private readonly ITransformApplicator _transformApplicator;
 
         private List<AddPropertyTransform<PackOptions>> _propertyTransforms;
@@ -80,21 +97,52 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
         public void Apply(MigrationSettings migrationSettings, MigrationRuleInputs migrationRuleInputs)
         {
-            var propertyGroup = migrationRuleInputs.CommonPropertyGroup;
-
             var projectContext = migrationRuleInputs.DefaultProjectContext;
             var packOptions = projectContext.ProjectFile.PackOptions;
 
-            if(packOptions.PackInclude != null)
-            {
-                MigrationErrorCodes
-                    .MIGRATE20018("Migrating projects with Files specified in PackOptions is not supported.").Throw();
-            }
+            TransformProperties(packOptions, migrationRuleInputs.CommonPropertyGroup);
 
+            TransformPackFiles(packOptions, migrationRuleInputs.CommonItemGroup);
+        }
+
+        private void TransformProperties(PackOptions packOptions, ProjectPropertyGroupElement propertyGroup)
+        {
             foreach (var propertyTransfrom in _propertyTransforms)
             {
                 _transformApplicator.Execute(propertyTransfrom.Transform(packOptions), propertyGroup, true);
             }
+        }
+
+        private void TransformPackFiles(PackOptions packOptions, ProjectItemGroupElement itemGroup)
+        {
+            var transformResult = PackFilesTransform.Transform(packOptions.PackInclude);
+
+            if (transformResult != null && transformResult.Any())
+            {
+                _transformApplicator.Execute(
+                    transformResult,
+                    itemGroup,
+                    mergeExisting: true);
+            }
+        }
+
+        private string ConvertTargetPathToMsbuildMetadata(string targetPath)
+        {
+            var targetIsDirectory = PathIsDirectory(targetPath);
+
+            if (targetIsDirectory)
+            {
+                return targetPath;
+            }
+
+            return Path.GetDirectoryName(targetPath);
+        }
+
+        private bool PathIsDirectory(string targetPath)
+        {
+            var normalizedTargetPath = PathUtility.GetPathWithDirectorySeparator(targetPath);
+
+            return normalizedTargetPath[normalizedTargetPath.Length - 1] == Path.DirectorySeparatorChar;
         }
     }
 }

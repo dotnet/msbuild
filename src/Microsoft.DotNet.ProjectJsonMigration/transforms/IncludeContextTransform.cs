@@ -59,6 +59,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
         private Func<string, string, AddItemTransform<IncludeContext>> MappingsIncludeExcludeTransformGetter =>
             (itemName, targetPath) => AddMappingToTransform(IncludeExcludeTransformGetter(itemName), targetPath);
 
+        private Func<AddItemTransform<IncludeContext>, string, AddItemTransform<IncludeContext>> _mappingsToTransfrom;
+
         private readonly string _itemName;
         private bool _transformMappings;
         private readonly List<ItemMetadataValue<IncludeContext>> _metadata = new List<ItemMetadataValue<IncludeContext>>();
@@ -70,6 +72,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
         {
             _itemName = itemName;
             _transformMappings = transformMappings;
+
+            _mappingsToTransfrom = (addItemTransform, targetPath) =>
+            {
+                var msbuildLinkMetadataValue = ConvertTargetPathToMsbuildMetadata(targetPath);
+
+                return addItemTransform.WithMetadata("Link", msbuildLinkMetadataValue);
+            };
         }
 
         public IncludeContextTransform WithMetadata(string metadataName, string metadataValue)
@@ -81,6 +90,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
         public IncludeContextTransform WithMetadata(string metadataName, Func<IncludeContext, string> metadataValueFunc)
         {
             _metadata.Add(new ItemMetadataValue<IncludeContext>(metadataName, metadataValueFunc));
+            return this;
+        }
+
+        public IncludeContextTransform WithMappingsToTransform(
+            Func<AddItemTransform<IncludeContext>, string, AddItemTransform<IncludeContext>> mappingsToTransfrom)
+        {
+            _mappingsToTransfrom = mappingsToTransfrom;
             return this;
         }
 
@@ -172,10 +188,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
             AddItemTransform<IncludeContext> addItemTransform, 
             string targetPath)
         {
-            var targetIsFile = MappingsTargetPathIsFile(targetPath);
-            var msbuildLinkMetadataValue = ConvertTargetPathToMsbuildMetadata(targetPath, targetIsFile);
-
-            return addItemTransform.WithMetadata("Link", msbuildLinkMetadataValue);
+            return _mappingsToTransfrom(addItemTransform, targetPath);
         }
 
         private bool PatternIsDirectory(string pattern, string projectDirectory)
@@ -192,8 +205,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
             return Directory.Exists(path);
         }
 
-        private string ConvertTargetPathToMsbuildMetadata(string targetPath, bool targetIsFile)
+        private string ConvertTargetPathToMsbuildMetadata(string targetPath)
         {
+            var targetIsFile = MappingsTargetPathIsFile(targetPath);
+
             if (targetIsFile)
             {
                 return targetPath;
