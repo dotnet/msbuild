@@ -19,8 +19,6 @@ namespace Microsoft.DotNet.Migration.Tests
     public class GivenThatIWantToMigrateTestApps : TestBase
     {
         [Theory]
-        // TODO: Standalone apps [InlineData("TestAppSimple", false)]
-        // https://github.com/dotnet/sdk/issues/73 [InlineData("TestAppWithLibrary/TestApp", false)]
         [InlineData("TestAppWithRuntimeOptions")]
         [InlineData("TestAppWithContents")]
         public void It_migrates_apps(string projectName)
@@ -123,7 +121,7 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Theory]
-        [InlineData("TestLibraryWithMultipleFrameworks")]
+        [InlineData("TestLibraryWithTwoFrameworks")]
         public void It_migrates_projects_with_multiple_TFMs(string projectName)
         {
             var projectDirectory =
