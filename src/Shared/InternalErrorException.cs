@@ -140,9 +140,28 @@ namespace Microsoft.Build.Shared
                 "CONCURRENT", "RESHARPER", "MDHOST", "TE.PROCESSHOST"
             };
 
-            // Check if our current process name is in the list of own test runners
-            return IsProcessInList(Environment.GetCommandLineArgs()[0], testRunners) ||
-                   IsProcessInList(Process.GetCurrentProcess().MainModule.FileName, testRunners);
+            string[] testAssemblies =
+            {
+                "Microsoft.Build.Tasks.UnitTests", "Microsoft.Build.Engine.UnitTests",
+                "Microsoft.Build.Utilities.UnitTests", "Microsoft.Build.CommandLine.UnitTests",
+                "Microsoft.Build.Engine.OM.UnitTests", "Microsoft.Build.Framework.UnitTests"
+            };
+            var processNameCommandLine = Environment.GetCommandLineArgs()[0];
+            var processNameCurrentProcess = Process.GetCurrentProcess().MainModule.FileName;
+
+            // First check if we're running in a known test runner.
+            if (IsProcessInList(processNameCommandLine, testRunners) ||
+                IsProcessInList(processNameCurrentProcess, testRunners))
+            {
+                // If we are, then ensure we're running MSBuild's tests by seeing if any of our assemblies are loaded.
+                foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+                {
+                    if (testAssemblies.Any(item => item.Equals(assembly.GetName().Name, StringComparison.InvariantCultureIgnoreCase)))
+                        return true;
+                }
+            }
+
+            return false;
         }
 
         private static bool IsProcessInList(string processName, string[] processList)
