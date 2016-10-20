@@ -25,6 +25,13 @@ namespace Microsoft.Build.Shared
             "VSTESTHOST", "QTAGENT32", "CONCURRENT", "RESHARPER", "MDHOST", "TE.PROCESSHOST"
         };
 
+        private static readonly string[] s_testAssemblies =
+        {
+            "Microsoft.Build.Tasks.UnitTests", "Microsoft.Build.Engine.UnitTests", "Microsoft.Build.Utilities.UnitTests",
+            "Microsoft.Build.CommandLine.UnitTests", "Microsoft.Build.Engine.OM.UnitTests",
+            "Microsoft.Build.Framework.UnitTests"
+        };
+
         /// <summary>
         /// Name of the Visual Studio (and Blend) process.
         /// </summary>
@@ -74,8 +81,7 @@ namespace Microsoft.Build.Shared
 
 
             // Check if our current process name is in the list of own test runners
-            var runningTests = IsProcessInList(processNameCommandLine, s_testRunners) ||
-                               IsProcessInList(processNameCurrentProcess, s_testRunners);
+            var runningTests = CheckIfRunningTests(processNameCommandLine, processNameCurrentProcess);
 
             // Check to see if we're running inside of Visual Studio
             bool runningInVisualStudio;
@@ -166,6 +172,23 @@ namespace Microsoft.Build.Shared
                    Path.GetFileName(path).Equals("MSBuild.exe", StringComparison.OrdinalIgnoreCase) &&
                    File.Exists(path) &&
                    File.Exists($"{path}.config");
+        }
+
+        private static bool CheckIfRunningTests(string processNameCommandLine, string processNameCurrentProcess)
+        {
+            // First check if we're running in a known test runner.
+            if (IsProcessInList(processNameCommandLine, s_testRunners) ||
+                IsProcessInList(processNameCurrentProcess, s_testRunners))
+            {
+                // If we are, then ensure we're running MSBuild's tests by seeing if any of our assemblies are loaded.
+                foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+                {
+                    if (s_testAssemblies.Any(item => item.Equals(assembly.GetName().Name, StringComparison.InvariantCultureIgnoreCase)))
+                        return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
