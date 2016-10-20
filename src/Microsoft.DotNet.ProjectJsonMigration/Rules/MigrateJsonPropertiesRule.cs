@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     var token = rawProject.GetValue(prop.Key);
                     if (token != null)
                     {
-                        _transformApplicator.Execute(prop.Value.Transform(token), propertyGroup);
+                        _transformApplicator.Execute(prop.Value.Transform(token), propertyGroup, mergeExisting: true);
                     }
                 }
             }

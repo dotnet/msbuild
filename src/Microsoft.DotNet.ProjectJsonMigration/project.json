@@ -2,7 +2,10 @@
   "version": "1.0.0-preview3-*",
   "buildOptions": {
     "warningsAsErrors": true,
-    "keyFile": "../../tools/Key.snk"
+    "keyFile": "../../tools/Key.snk",
+    "embed" :{
+      "include" : "sdkdefaults.json"
+    }
   },
   "dependencies": {
     "Microsoft.DotNet.Compiler.Common": {
@@ -17,7 +20,6 @@
     "Microsoft.Build": "15.1.319-preview5"
   },
   "frameworks": {
-    "netcoreapp1.0": {
-    }
+    "netcoreapp1.0": { }
   }
 }

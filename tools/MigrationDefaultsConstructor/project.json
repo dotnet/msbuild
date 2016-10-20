@@ -1,0 +1,23 @@
+{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "debugType": "portable",
+    "emitEntryPoint": true
+  },
+  "dependencies": {},
+  "frameworks": {
+    "netcoreapp1.0": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "type": "platform",
+          "version": "1.0.1"
+        },
+        "dotnet": {
+          "target": "project"
+        },
+        "Microsoft.Build.Runtime": "15.1.319-preview5"
+      },
+      "imports": ["dnxcore50", "portable-net45+win8"]
+    }
+  }
+}

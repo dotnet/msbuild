@@ -1,0 +1,178 @@
+{
+  "Items": [
+    {
+      "ItemType": "Compile",
+      "Include": "**\\*.cs",
+      "Exclude": "bin\\**;obj\\**",
+      "Remove": null,
+      "Condition": null,
+      "ParentCondition": null
+    },
+    {
+      "ItemType": "EmbeddedResource",
+      "Include": "**\\*.resx",
+      "Exclude": "bin\\**;obj\\**",
+      "Remove": null,
+      "Condition": null,
+      "ParentCondition": null
+    }
+  ],
+  "Properties": [
+    {
+      "Name": "OutputType",
+      "Value": "Library",
+      "Condition": "",
+      "ParentCondition": ""
+    },
+    {
+      "Name": "Configuration",
+      "Value": "Debug",
+      "Condition": null,
+      "ParentCondition": null
+    },
+    {
+      "Name": "Platform",
+      "Value": "AnyCPU",
+      "Condition": "",
+      "ParentCondition": ""
+    },
+    {
+      "Name": "FileAlignment",
+      "Value": "512",
+      "Condition": "",
+      "ParentCondition": ""
+    },
+    {
+      "Name": "PlatformTarget",
+      "Value": "AnyCPU",
+      "Condition": "",
+      "ParentCondition": ""
+    },
+    {
+      "Name": "ErrorReport",
+      "Value": "prompt",
+      "Condition": "",
+      "ParentCondition": ""
+    },
+    {
+      "Name": "AssemblyName",
+      "Value": "$(MSBuildProjectName)",
+      "Condition": "",
+      "ParentCondition": ""
+    },
+    {
+      "Name": "RootNamespace",
+      "Value": "$(MSBuildProjectName)",
+      "Condition": "",
+      "ParentCondition": ""
+    },
+    {
+      "Name": "Deterministic",
+      "Value": "true",
+      "Condition": "",
+      "ParentCondition": ""
+    },
+    {
+      "Name": "WarningLevel",
+      "Value": "4",
+      "Condition": "",
+      "ParentCondition": ""
+    },
+    {
+      "Name": "NoWarn",
+      "Value": "1701;1702;1705",
+      "Condition": "",
+      "ParentCondition": ""
+    },
+    {
+      "Name": "PackageRequireLicenseAcceptance",
+      "Value": "false",
+      "Condition": "",
+      "ParentCondition": ""
+    },
+    {
+      "Name": "DebugSymbols",
+      "Value": "true",
+      "Condition": "",
+      "ParentCondition": " '$(Configuration)' == 'Debug' "
+    },
+    {
+      "Name": "Optimize",
+      "Value": "false",
+      "Condition": "",
+      "ParentCondition": " '$(Configuration)' == 'Debug' "
+    },
+    {
+      "Name": "OutputPath",
+      "Value": "bin\\Debug\\",
+      "Condition": "",
+      "ParentCondition": " '$(Configuration)' == 'Debug' "
+    },
+    {
+      "Name": "Optimize",
+      "Value": "true",
+      "Condition": "",
+      "ParentCondition": " '$(Configuration)' == 'Release' "
+    },
+    {
+      "Name": "OutputPath",
+      "Value": "bin\\Release\\",
+      "Condition": "",
+      "ParentCondition": " '$(Configuration)' == 'Release' "
+    },
+    {
+      "Name": "DefineConstants",
+      "Value": "DEBUG;TRACE",
+      "Condition": "",
+      "ParentCondition": " '$(Configuration)' == 'Debug' "
+    },
+    {
+      "Name": "DefineConstants",
+      "Value": "TRACE",
+      "Condition": "",
+      "ParentCondition": " '$(Configuration)' == 'Release' "
+    },
+    {
+      "Name": "VersionPrefix",
+      "Value": "1.0.0",
+      "Condition": null,
+      "ParentCondition": null
+    },
+    {
+      "Name": "AssemblyTitle",
+      "Value": "$(AssemblyName)",
+      "Condition": null,
+      "ParentCondition": null
+    },
+    {
+      "Name": "Product",
+      "Value": "$(AssemblyName)",
+      "Condition": null,
+      "ParentCondition": null
+    },
+    {
+      "Name": "NeutralLanguage",
+      "Value": "en",
+      "Condition": null,
+      "ParentCondition": null
+    },
+    {
+      "Name": "AutoUnifyAssemblyReferences",
+      "Value": "true",
+      "Condition": null,
+      "ParentCondition": null
+    },
+    {
+      "Name": "DesignTimeAutoUnify",
+      "Value": "true",
+      "Condition": null,
+      "ParentCondition": null
+    },
+    {
+      "Name": "TargetExt",
+      "Value": ".dll",
+      "Condition": null,
+      "ParentCondition": null
+    }
+  ]
+}

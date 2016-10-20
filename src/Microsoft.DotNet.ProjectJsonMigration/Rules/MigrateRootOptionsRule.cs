@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
                 foreach (var transformResult in transformResults)
                 {
-                    _transformApplicator.Execute(transformResult, propertyGroup);
+                    _transformApplicator.Execute(transformResult, propertyGroup, true);
                 }
             }
         }

@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
             foreach (var csprojTransformedReference in csprojTransformedReferences)
             {
-                _transformApplicator.Execute(csprojTransformedReference, migrationRuleInputs.CommonItemGroup);
+                _transformApplicator.Execute(csprojTransformedReference, migrationRuleInputs.CommonItemGroup, true);
             }
 
             return csprojTransformedReferences.SelectMany(r => r.Includes());
@@ -108,10 +108,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
             foreach (var projectDependencyTransformResult in projectDependencyTransformResults)
             {
-                _transformApplicator.Execute(projectDependencyTransformResult, itemGroup);
+                _transformApplicator.Execute(projectDependencyTransformResult, itemGroup, true);
             }
         }
-
+        
         private AddItemTransform<ProjectDependency> ProjectDependencyTransform => new AddItemTransform<ProjectDependency>(
             "ProjectReference",
             dep => 

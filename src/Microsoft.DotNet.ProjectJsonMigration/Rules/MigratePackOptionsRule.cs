@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
             foreach (var propertyTransfrom in _propertyTransforms)
             {
-                _transformApplicator.Execute(propertyTransfrom.Transform(packOptions), propertyGroup);
+                _transformApplicator.Execute(propertyTransfrom.Transform(packOptions), propertyGroup, true);
             }
         }
     }

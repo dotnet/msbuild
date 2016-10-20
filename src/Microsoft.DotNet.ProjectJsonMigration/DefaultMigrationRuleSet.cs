@@ -9,6 +9,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
     {
         private IMigrationRule[] Rules => new IMigrationRule[]
         {
+            new AddDefaultsToProjectRule(),
             new MigrateRootOptionsRule(),
             new MigrateTFMRule(),
             new MigrateBuildOptionsRule(),
@@ -20,6 +21,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             new MigratePackageDependenciesAndToolsRule(),
             new MigrateConfigurationsRule(),
             new MigrateScriptsRule(),
+            new RemoveDefaultsFromProjectRule(),
+            new CleanOutputProjectRule(),
             new SaveOutputProjectRule()
         };
 

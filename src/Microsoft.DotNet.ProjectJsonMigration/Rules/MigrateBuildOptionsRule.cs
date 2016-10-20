@@ -105,11 +105,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 @"$(OutputPath)\$(TargetFramework)\$(AssemblyName).xml",
                 compilerOptions => compilerOptions.GenerateXmlDocumentation != null && compilerOptions.GenerateXmlDocumentation.Value);
 
-        private AddPropertyTransform<CommonCompilerOptions> OutputNameTransform =>
-            new AddPropertyTransform<CommonCompilerOptions>("AssemblyName",
-                compilerOptions => compilerOptions.OutputName,
-                compilerOptions => !string.IsNullOrEmpty(compilerOptions.OutputName));
-
         private IncludeContextTransform CompileFilesTransform =>
             new IncludeContextTransform("Compile", transformMappings: false);
 
@@ -175,7 +170,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 DelaySignTransform,
                 PublicSignTransform,
                 DebugTypeTransform,
-                OutputNameTransform,
                 XmlDocTransform,
                 XmlDocTransformFilePath,
                 PreserveCompilationContextTransform
@@ -242,14 +236,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
                 if (!PropertiesAreEqual(nonConfigurationOutput, configurationOutput))
                 {
-                    transformApplicator.Execute(configurationOutput, propertyGroup);
+                    transformApplicator.Execute(configurationOutput, propertyGroup, mergeExisting: true);
                 }
             }
 
             foreach (var includeContextTransformExecute in _includeContextTransformExecutes)
             {
                 var nonConfigurationOutput = includeContextTransformExecute(compilerOptions, projectDirectory);
-                var configurationOutput = includeContextTransformExecute(configurationCompilerOptions, projectDirectory).ToArray();
+                var configurationOutput = includeContextTransformExecute(configurationCompilerOptions, projectDirectory);
 
                 transformApplicator.Execute(configurationOutput, itemGroup, mergeExisting: true);
             }
@@ -293,7 +287,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         {
             foreach (var transform in _propertyTransforms)
             {
-                transformApplicator.Execute(transform.Transform(compilerOptions), propertyGroup);
+                transformApplicator.Execute(transform.Transform(compilerOptions), propertyGroup, mergeExisting: true);
             }
 
             foreach (var includeContextTransformExecute in _includeContextTransformExecutes)

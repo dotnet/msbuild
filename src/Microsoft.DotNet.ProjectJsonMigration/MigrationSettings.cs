@@ -12,19 +12,22 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         public string OutputDirectory { get; }
         public string SdkPackageVersion { get; }
         public ProjectRootElement MSBuildProjectTemplate { get; }
+        public string SdkDefaultsFilePath { get; }
         
         public MigrationSettings(
             string projectDirectory,
             string outputDirectory,
             string sdkPackageVersion,
             ProjectRootElement msBuildProjectTemplate,
-            string projectXprojFilePath=null)
+            string projectXprojFilePath=null,
+            string sdkDefaultsFilePath=null)
         {
             ProjectDirectory = projectDirectory;
             OutputDirectory = outputDirectory;
             SdkPackageVersion = sdkPackageVersion;
             MSBuildProjectTemplate = msBuildProjectTemplate != null ? msBuildProjectTemplate.DeepClone() : null;
             ProjectXProjFilePath = projectXprojFilePath;
+            SdkDefaultsFilePath = sdkDefaultsFilePath;
         }
     }
 }

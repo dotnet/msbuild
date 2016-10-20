@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             item2.AddMetadata(metadata[1].MetadataName, metadata[1].GetMetadataValue(null));
 
             var transformApplicator = new TransformApplicator();
-            transformApplicator.Execute(new ProjectItemElement[] {item1, item2}, itemGroup, mergeExisting:true);
+            transformApplicator.Execute(new ProjectItemElement[] {item1, item2}.Select(i => i), itemGroup, mergeExisting:true);
 
             itemGroup.Items.Count.Should().Be(1);
 
@@ -63,6 +63,27 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             }
 
             foundMetadata.All(kv => kv.Value).Should().BeTrue();
+        }
+
+        [Fact]
+        public void It_merges_Properties_value_split_by_semicolon_except_variables_when_mergeExisting_is_true()
+        {
+            var mockProj = ProjectRootElement.Create();
+            var existingProperty = mockProj.AddProperty("property1","value1;$(Variable1);$(Variable2);value2");
+
+            var propertyGeneratorProject = ProjectRootElement.Create();
+            var propertyToAdd = propertyGeneratorProject.AddProperty("property1", "$(Variable2);value1;value3;$(Variable3)");
+
+            var transformApplicator = new TransformApplicator();
+
+            transformApplicator.Execute(propertyToAdd, mockProj.AddPropertyGroup(), mergeExisting: true);
+
+            var outputProperties = mockProj.Properties.Where(p => p.Name == "property1");
+            outputProperties.Should().HaveCount(2);
+
+            var mergedPropertyToAdd = outputProperties.Where(p => p.Value.Contains("value3")).First();
+
+            mergedPropertyToAdd.Value.Should().Be("$(Variable2);value3;$(Variable3)");
         }
     }
 }

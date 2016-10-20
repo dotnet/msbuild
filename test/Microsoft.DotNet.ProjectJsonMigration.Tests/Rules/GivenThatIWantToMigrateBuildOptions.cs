@@ -49,15 +49,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Migrating_empty_buildOptions_populates_only_AssemblyName_Compile_and_EmbeddedResource()
+        public void Migrating_empty_buildOptions_populates_only_Compile_and_EmbeddedResource()
         {
             var mockProj = RunBuildOptionsRuleOnPj(@"
                 {
                     ""buildOptions"": { }
                 }");
-
-            mockProj.Properties.Count().Should().Be(1);
-            mockProj.Properties.Any(p => !p.Name.Equals("AssemblyName", StringComparison.Ordinal)).Should().BeFalse();
 
             mockProj.Items.Count().Should().Be(2);
             mockProj.Items.First(i => i.ItemType == "Compile").Include.Should().Be(@"**\*.cs");
@@ -344,20 +341,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             mockProj.Properties.Count(p => p.Name == "DebugType").Should().Be(1);
             mockProj.Properties.First(p => p.Name == "DebugType").Value.Should().Be("foo");
-        }
-
-        [Fact]
-        public void Migrating_outputName_populates_AssemblyName()
-        {
-            var mockProj = RunBuildOptionsRuleOnPj(@"
-                {
-                    ""buildOptions"": {
-                        ""outputName"": ""ARandomName""
-                    }
-                }");
-
-            mockProj.Properties.Count(p => p.Name == "AssemblyName").Should().Be(1);
-            mockProj.Properties.First(p => p.Name == "AssemblyName").Value.Should().Be("ARandomName");
         }
 
         [Fact]

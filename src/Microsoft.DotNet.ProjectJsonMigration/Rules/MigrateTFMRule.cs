@@ -35,14 +35,16 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 _transformApplicator.Execute(
                     FrameworkTransform.Transform(
                         migrationRuleInputs.ProjectContexts.Single().TargetFramework),
-                    propertyGroup);
+                    propertyGroup,
+                    mergeExisting: true);
             }
             else
             {
                 _transformApplicator.Execute(
                     FrameworksTransform.Transform(
                         migrationRuleInputs.ProjectContexts.Select(p => p.TargetFramework)),
-                    propertyGroup);
+                    propertyGroup,
+                    mergeExisting: true);
             }
         }
 

@@ -37,6 +37,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             var tfmDependencyMap = new Dictionary<string, IEnumerable<ProjectLibraryDependency>>();
             var targetFrameworks = project.GetTargetFrameworks();
 
+            var noFrameworkPackageReferenceItemGroup = migrationRuleInputs.OutputMSBuildProject.AddItemGroup();
+
             // Inject Sdk dependency
             _transformApplicator.Execute(
                 PackageDependencyInfoTransform.Transform(
@@ -45,7 +47,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                         Name = ConstantPackageNames.CSdkPackageName,
                         Version = migrationSettings.SdkPackageVersion,
                         PrivateAssets = "All"
-                    }), migrationRuleInputs.CommonItemGroup);
+                    }), noFrameworkPackageReferenceItemGroup, mergeExisting: false);
             
             // Migrate Direct Deps first
             MigrateDependencies(
@@ -53,7 +55,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 migrationRuleInputs.OutputMSBuildProject,
                 null, 
                 project.Dependencies,
-                migrationRuleInputs.ProjectXproj);
+                migrationRuleInputs.ProjectXproj,
+                itemGroup: noFrameworkPackageReferenceItemGroup);
             
             MigrationTrace.Instance.WriteLine($"Migrating {targetFrameworks.Count()} target frameworks");
             foreach (var targetFramework in targetFrameworks)
@@ -80,7 +83,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             if (transform != null)
             {
                 transform.Condition = targetFramework.FrameworkName.GetMSBuildCondition();
-                _transformApplicator.Execute(transform, commonPropertyGroup);
+                _transformApplicator.Execute(transform, commonPropertyGroup, mergeExisting: true);
             }
             else
             {
@@ -113,7 +116,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
             foreach (var tool in project.Tools)
             {
-                _transformApplicator.Execute(ToolTransform.Transform(tool), itemGroup);
+                _transformApplicator.Execute(ToolTransform.Transform(tool), itemGroup, mergeExisting: true);
             }
         }
 
@@ -122,13 +125,15 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             ProjectRootElement output,
             NuGetFramework framework,
             IEnumerable<ProjectLibraryDependency> dependencies, 
-            ProjectRootElement xproj)
+            ProjectRootElement xproj,
+            ProjectItemGroupElement itemGroup=null)
         {
             var projectDependencies = new HashSet<string>(GetAllProjectReferenceNames(project, framework, xproj));
             var packageDependencies = dependencies.Where(d => !projectDependencies.Contains(d.Name)).ToList();
 
             string condition = framework?.GetMSBuildCondition() ?? "";
-            var itemGroup = output.ItemGroups.FirstOrDefault(i => i.Condition == condition) 
+            itemGroup = itemGroup 
+                ?? output.ItemGroups.FirstOrDefault(i => i.Condition == condition) 
                 ?? output.AddItemGroup();
             itemGroup.Condition = condition;
 
@@ -163,7 +168,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     }
                 }
 
-                _transformApplicator.Execute(transform.Transform(packageDependency), itemGroup);
+                _transformApplicator.Execute(transform.Transform(packageDependency), itemGroup, mergeExisting: true);
             }
         }
 
