@@ -232,7 +232,31 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             contentItems.First().GetMetadataWithName("PackagePath").Value.Should().Be(@"some/other/path");
         }
 
-        // add a test where we map the file to the empty folder (package root)
+        [Fact]
+        public void Migrating_Files_with_mappings_to_root_populates_content_PackagePath_metadata_but_leaves_it_empty()
+        {
+            var mockProj = RunPackOptionsRuleOnPj(@"
+                {
+                    ""packOptions"": {
+                        ""files"": {
+                            ""include"": [""path/to/some/file.cs""],
+                            ""mappings"": {
+                                "".file.cs"": ""path/to/some/file.cs""
+                            }
+                        }
+                    }
+                }");
+
+            var contentItems = mockProj.Items
+                .Where(item => item.ItemType.Equals("Content", StringComparison.Ordinal))
+                .Where(item =>
+                    item.GetMetadataWithName("Pack").Value == "True" &&
+                    item.GetMetadataWithName("PackagePath") != null);
+
+            contentItems.Count().Should().Be(1);
+            contentItems.First().Include.Should().Be(@"path\to\some\file.cs");
+            contentItems.First().GetMetadataWithName("PackagePath").Value.Should().BeEmpty();
+        }
 
         private ProjectRootElement RunPackOptionsRuleOnPj(string packOptions, string testDirectory = null)
         {
