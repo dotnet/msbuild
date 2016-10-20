@@ -238,6 +238,7 @@
     <Compile Include="Evaluation\ItemSpec.cs" />
     <Compile Include="Evaluation\ItemsAndMetadataPair.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.IItemOperation.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.UpdateOperation.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.IncludeOperation.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.ItemFactoryWrapper.cs" />

@@ -11,13 +11,14 @@ namespace Microsoft.Build.Evaluation
 {
     internal partial class LazyItemEvaluator<P, I, M, D>
     {
-        abstract class LazyItemOperation
+        private abstract class LazyItemOperation : IItemOperation
         {
+            private readonly string _itemType;
+            private readonly ImmutableDictionary<string, LazyItemList> _referencedItemLists;
+            private readonly LazyItemEvaluator<P, I, M, D> _lazyEvaluator;
+
             protected readonly ProjectItemElement _itemElement;
-            protected readonly string _itemType;
             protected readonly ItemSpec<P, I> _itemSpec;
-            protected readonly ImmutableDictionary<string, LazyItemList> _referencedItemLists;
-            protected readonly LazyItemEvaluator<P, I, M, D> _lazyEvaluator;
             protected readonly EvaluatorData _evaluatorData;
             protected readonly Expander<P, I> _expander;
 
@@ -25,7 +26,7 @@ namespace Microsoft.Build.Evaluation
             //  the items and then removes them
             protected readonly IItemFactory<I, I> _itemFactory;
 
-            public LazyItemOperation(OperationBuilder builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
+            protected LazyItemOperation(OperationBuilder builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
             {
                 _itemElement = builder.ItemElement;
                 _itemType = builder.ItemType;
@@ -39,22 +40,6 @@ namespace Microsoft.Build.Evaluation
                 _expander = new Expander<P, I>(_evaluatorData, _evaluatorData);
 
                 _itemSpec.Expander = _expander;
-            }
-
-            IList<I> GetReferencedItems(string itemType, ImmutableHashSet<string> globsToIgnore)
-            {
-                LazyItemList itemList;
-                if (_referencedItemLists.TryGetValue(itemType, out itemList))
-                {
-                    return itemList.GetItems(globsToIgnore)
-                        .Where(ItemData => ItemData.ConditionResult)
-                        .Select(itemData => itemData.Item)
-                        .ToList();
-                }
-                else
-                {
-                    return ImmutableList<I>.Empty;
-                }
             }
 
             public virtual void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
@@ -75,6 +60,22 @@ namespace Microsoft.Build.Evaluation
             protected virtual void MutateItems(ICollection<I> items) { }
 
             protected virtual void SaveItems(ICollection<I> items, ImmutableList<ItemData>.Builder listBuilder) { }
+
+            private IList<I> GetReferencedItems(string itemType, ImmutableHashSet<string> globsToIgnore)
+            {
+                LazyItemList itemList;
+                if (_referencedItemLists.TryGetValue(itemType, out itemList))
+                {
+                    return itemList.GetItems(globsToIgnore)
+                        .Where(ItemData => ItemData.ConditionResult)
+                        .Select(itemData => itemData.Item)
+                        .ToList();
+                }
+                else
+                {
+                    return ImmutableList<I>.Empty;
+                }
+            }
 
             protected void DecorateItemsWithMetadata(ICollection<I> items, ImmutableList<ProjectMetadataElement> metadata)
             {
@@ -222,11 +223,9 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Collects all the items of this item element's type that match the items (represented as operations)
             /// </summary>
-            protected ICollection<I> SelectItemsMatchingItemSpec(ImmutableList<ItemData>.Builder listBuilder, IElementLocation elementLocation)
+            protected IEnumerable<I> SelectItemsMatchingItemSpec(ImmutableList<ItemData>.Builder listBuilder, IElementLocation elementLocation)
             {
-                return _itemSpec
-                    .FilterItems(listBuilder.Select(itemData => itemData.Item))
-                    .ToImmutableHashSet();
+                return _itemSpec.FilterItems(listBuilder.Select(itemData => itemData.Item));
             }
         }
     }

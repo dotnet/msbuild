@@ -2769,6 +2769,26 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             get
             {
+                // Provenance for an item in the first element with multiple matching updates
+                yield return new object[]
+                {
+                    @"
+                    <A Include=`a;b;a`/>
+                    <A Update=`a;b;c`/>
+                    <A Update=`a*`/>
+                    <A Update=`*a*;a`/>
+                    ",
+                    "a",
+                    0, // first item 'a' from the include
+                    new ProvenanceResultTupleList()
+                    {
+                        Tuple.Create("A", Operation.Include, Provenance.StringLiteral, 2),
+                        Tuple.Create("A", Operation.Update, Provenance.StringLiteral, 1),
+                        Tuple.Create("A", Operation.Update, Provenance.Glob, 1),
+                        Tuple.Create("A", Operation.Update, Provenance.StringLiteral | Provenance.Glob, 2)
+                    }
+                };
+
                 // Provenance for an item in the last element. Nothing matches
                 yield return new object[]
                 {
