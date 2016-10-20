@@ -606,6 +606,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectRootElement project = ProjectRootElement.Create();
             string directory = null;
 
+            string savedCurrentDirectory = Directory.GetCurrentDirectory();
             try
             {
                 Directory.SetCurrentDirectory(Path.GetTempPath()); // should be used for project.DirectoryPath; it must exist
@@ -625,6 +626,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             finally
             {
                 FileUtilities.DeleteWithoutTrailingBackslash(directory, true);
+
+                Directory.SetCurrentDirectory(savedCurrentDirectory);
             }
         }
 
