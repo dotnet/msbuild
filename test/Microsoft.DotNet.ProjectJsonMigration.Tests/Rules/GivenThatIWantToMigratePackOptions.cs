@@ -260,26 +260,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             contentItems.First().GetMetadataWithName("PackagePath").Value.Should().BeEmpty();
         }
 
-        [Fact]
-        public void Migrating_FullPath_Files_preserves_FullPath_in_content_include()
-        {
-            var mockProj = RunPackOptionsRuleOnPj(@"
-                {
-                    ""packOptions"": {
-                        ""files"": {
-                            ""include"": [""c:/path/to/some/file.cs""]
-                        }
-                    }
-                }");
-
-            var contentItems = mockProj.Items
-                .Where(item => item.ItemType.Equals("Content", StringComparison.Ordinal))
-                .Where(item => item.GetMetadataWithName("Pack").Value == "true");
-
-            contentItems.Count().Should().Be(1);
-            contentItems.First().Include.Should().Be(@"c:\path\to\some\file.cs");
-        }
-
         private ProjectRootElement RunPackOptionsRuleOnPj(string packOptions, string testDirectory = null)
         {
             testDirectory = testDirectory ?? Temp.CreateDirectory().Path;
