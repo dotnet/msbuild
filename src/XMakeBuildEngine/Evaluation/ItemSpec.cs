@@ -147,7 +147,17 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public IEnumerable<I> FilterItems(IEnumerable<I> items)
         {
-            return items.Where(i => Fragments.Any(f => f.ItemMatches(i.EvaluatedInclude) > 0));
+            return items.Where(MatchesItem);
+        }
+
+        /// <summary>
+        /// Return true if the given <param name="item"/> matches this itemspec
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public bool MatchesItem(I item)
+        {
+            return Fragments.Any(f => f.MatchCount(item.EvaluatedInclude) > 0);
         }
 
         /// <summary>
@@ -163,7 +173,7 @@ namespace Microsoft.Build.Evaluation
 
             foreach (var fragment in Fragments)
             {
-                var itemMatches = fragment.ItemMatches(itemToMatch);
+                var itemMatches = fragment.MatchCount(itemToMatch);
 
                 if (itemMatches > 0)
                 {
@@ -209,7 +219,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <returns>The number of times the <param name="itemToMatch"></param> appears in this fragment</returns>
-        public virtual int ItemMatches(string itemToMatch)
+        public virtual int MatchCount(string itemToMatch)
         {
             return FileMatcher.Value(itemToMatch) ? 1 : 0;
         }
@@ -250,7 +260,7 @@ namespace Microsoft.Build.Evaluation
             _expander = _containingItemSpec.Expander;
         }
 
-        public override int ItemMatches(string itemToMatch)
+        public override int MatchCount(string itemToMatch)
         {
             // cache referenced items as long as the expander does not change
             // reference equality works for now since the expander cannot mutate its item state (hopefully it stays that way)
@@ -264,7 +274,7 @@ namespace Microsoft.Build.Evaluation
                 _itemValueFragments = itemsFromCapture.Select(i => new ValueFragment(i.Item1, ProjectPath)).ToList();
             }
 
-            return _itemValueFragments.Count(v => v.ItemMatches(itemToMatch) > 0);
+            return _itemValueFragments.Count(v => v.MatchCount(itemToMatch) > 0);
         }
     }
 }
