@@ -64,4 +64,18 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PublishDir Condition="'$(PublishDir)' == ''">$(OutputPath)$(PublishDirName)\</PublishDir>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' and '$(TargetFrameworkIdentifier)' != '.NETPortable'">
+    <_FrameworkIdentifierForImplicitDefine>$(TargetFrameworkIdentifier.Replace('.', '').ToUpperInvariant())</_FrameworkIdentifierForImplicitDefine>
+    <_FrameworkIdentifierForImplicitDefine Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework'">NET</_FrameworkIdentifierForImplicitDefine>
+
+    <_FrameworkVersionForImplicitDefine Condition="$(TargetFrameworkVersion.StartsWith('v'))">$(TargetFrameworkVersion.SubString(1))</_FrameworkVersionForImplicitDefine>
+    <_FrameworkVersionForImplicitDefine Condition="!$(TargetFrameworkVersion.StartsWith('v'))">$(TargetFrameworkVersion)</_FrameworkVersionForImplicitDefine>
+
+    <_FrameworkVersionForImplicitDefine>$(_FrameworkVersionForImplicitDefine.Replace('.', '_'))</_FrameworkVersionForImplicitDefine>
+    
+    <_FrameworkVersionForImplicitDefine Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework'">$(_FrameworkVersionForImplicitDefine.Replace('_', ''))</_FrameworkVersionForImplicitDefine>
+    
+    <DefineConstants>$(DefineConstants);$(_FrameworkIdentifierForImplicitDefine)$(_FrameworkVersionForImplicitDefine)</DefineConstants>
+  </PropertyGroup>
+
 </Project>

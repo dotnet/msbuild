@@ -31,5 +31,11 @@ namespace Microsoft.NET.TestFramework.Commands
             string output = Path.Combine(ProjectRootPath, "bin", "Debug", targetFramework);
             return new DirectoryInfo(output);
         }
+
+        public DirectoryInfo GetBaseIntermediateDirectory()
+        {
+            string output = Path.Combine(ProjectRootPath, "obj");
+            return new DirectoryInfo(output);
+        }
     }
 }
