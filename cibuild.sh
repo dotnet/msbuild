@@ -8,7 +8,9 @@ usage()
     echo "  --scope <scope>                Scope of the build (Compile / Test)"
     echo "  --target <target>              CoreCLR or Mono (default: CoreCLR)"
     echo "  --host <host>                  CoreCLR or Mono (default: CoreCLR)"
-    echo "  --bootstrap-only               Do not rebuild msbuild with local binaries"
+    echo "  --bootstrap-only               Build and bootstrap MSBuild but do not build again with those binaries"
+    echo "  --build-only                   Only build using a downloaded copy of MSBuild but do not bootstrap"
+    echo "                                 or build again with those binaries"
 }
 
 restoreBuildTools(){
@@ -172,6 +174,11 @@ do
         shift 2
         ;;
 
+        --build-only)
+        BUILD_ONLY=true
+        shift 1
+        ;;
+
         --bootstrap-only)
         BOOTSTRAP_ONLY=true
         shift 1
@@ -273,7 +280,7 @@ echo
 echo "** Rebuilding MSBuild with downloaded binaries"
 runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_EXE" "/t:Rebuild $BUILD_MSBUILD_ARGS" "$BOOTSTRAP_BUILD_LOG_PATH"
 
-if [[ $BOOTSTRAP_ONLY = true ]]; then
+if [[ $BUILD_ONLY = true ]]; then
     exit $?
 fi
 
@@ -281,6 +288,10 @@ echo
 echo "** Moving bootstrapped MSBuild to the bootstrap folder"
 MOVE_MSBUILD_ARGS="$BOOTSTRAP_FILE_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURATION /p:OverrideToolHost=$RUNTIME_HOST /verbosity:minimal"
 runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_EXE" "$MOVE_MSBUILD_ARGS" "$MOVE_LOG_PATH"
+
+if [[ $BOOTSTRAP_ONLY = true ]]; then
+    exit $?
+fi
 
 echo
 echo "** Rebuilding MSBuild with locally built binaries"
