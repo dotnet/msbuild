@@ -180,6 +180,7 @@ namespace Microsoft.Build.Evaluation
 #endif
             }
 
+#if DEBUG
             private void CheckInvariant()
             {
                 if (_isReferenced)
@@ -194,6 +195,7 @@ namespace Microsoft.Build.Evaluation
                     Debug.Assert(_cache == null);
                 }
             }
+#endif
 
             public bool TryGetFromCache(ISet<string> globsToIgnore, out ImmutableList<ItemData> items)
             {
