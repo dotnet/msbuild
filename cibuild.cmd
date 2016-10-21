@@ -6,6 +6,7 @@ if "%1"=="" goto doneParsingArguments
 if /i "%1"=="--scope" set SCOPE=%2&& shift && shift && goto parseArguments
 if /i "%1"=="--target" set TARGET=%2&& shift && shift && goto parseArguments
 if /i "%1"=="--host" set HOST=%2&& shift && shift && goto parseArguments
+if /i "%1"=="--build-only" set BUILD_ONLY=true&& shift && goto parseArguments
 if /i "%1"=="--bootstrap-only" set BOOTSTRAP_ONLY=true&& shift && goto parseArguments
 if /i "%1"=="--localized-build" set LOCALIZED_BUILD=true&& shift && goto parseArguments
 if /i "%1"=="--sync-xlf" set SYNC_XLF=true&& shift && goto parseArguments
@@ -84,8 +85,7 @@ if %ERRORLEVEL% NEQ 0 (
     echo Bootstrap build failed with errorlevel %ERRORLEVEL% 1>&2
     goto :error
 )
-echo on
-if "%BOOTSTRAP_ONLY%"=="true" goto :success
+if "%BUILD_ONLY%"=="true" goto :success
 
 :: Move initial build to bootstrap directory
 
@@ -104,6 +104,8 @@ if %ERRORLEVEL% NEQ 0 (
     echo Failed to create bootstrap folder with errorlevel %ERRORLEVEL% 1>&2
     goto :error
 )
+if "%BOOTSTRAP_ONLY%"=="true" goto :success
+
 set MSBUILD_ARGS=
 
 :: Rebuild with bootstrapped msbuild
@@ -146,7 +148,9 @@ echo Options
 echo   --scope ^<scope^>                Scope of the build ^(Compile / Test^)
 echo   --target ^<target^>              CoreCLR or Desktop ^(default: Desktop^)
 echo   --host ^<host^>                  CoreCLR or Desktop ^(default: Desktop^)
-echo   --bootstrap-only                 Do not rebuild msbuild with local binaries
+echo   --build-only                     Only build using a downloaded copy of MSBuild but do not bootstrap
+                                        or build again with those binaries
+echo   --bootstrap-only                 Build and bootstrap MSBuild but do not build again with those binaries
 echo   --localized-build                Do a localized build
 echo   --sync-xlf                       Synchronize xlf files from resx files
 exit /b 1
