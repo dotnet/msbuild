@@ -692,8 +692,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                   <configSections>
                     <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build"" />
                   </configSections>
-                  <msbuildToolsets default=""14.1"">
-                    <toolset toolsVersion=""14.1"">
+                  <msbuildToolsets default=""" + toolsVersionToUse + @""">
+                    <toolset toolsVersion=""" + toolsVersionToUse + @""">
                       <property name=""MSBuildToolsPath"" value="".""/>
                       <property name=""MSBuildBinPath"" value="".""/>
                       <projectImportSearchPaths>
