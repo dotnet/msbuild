@@ -550,8 +550,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       $(ReferencePath);
       {HintPathFromItem};
       {TargetFrameworkDirectory};
-      {Registry:$(FrameworkRegistryBase),$(TargetFrameworkVersion),$(AssemblyFoldersSuffix)$(AssemblyFoldersExConditions)};
       $(AssemblyFoldersConfigFileSearchPath)
+      {Registry:$(FrameworkRegistryBase),$(TargetFrameworkVersion),$(AssemblyFoldersSuffix)$(AssemblyFoldersExConditions)};
       {AssemblyFolders};
       {GAC};
       {RawFileName};
