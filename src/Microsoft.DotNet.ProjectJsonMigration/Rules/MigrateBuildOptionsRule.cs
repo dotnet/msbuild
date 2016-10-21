@@ -26,13 +26,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         private AddPropertyTransform<CommonCompilerOptions>[] KeyFileTransforms
             => new []
             {
-                new AddPropertyTransform<CommonCompilerOptions>("KeyOriginatorFile",
+                new AddPropertyTransform<CommonCompilerOptions>("AssemblyOriginatorKeyFile",
                     compilerOptions => compilerOptions.KeyFile,
                     compilerOptions => !string.IsNullOrEmpty(compilerOptions.KeyFile)),
                 new AddPropertyTransform<CommonCompilerOptions>("SignAssembly",
                     "true",
-                    compilerOptions => !string.IsNullOrEmpty(compilerOptions.KeyFile))
-                    .WithMSBuildCondition(" '$(OS)' == 'Windows_NT' "),
+                    compilerOptions => !string.IsNullOrEmpty(compilerOptions.KeyFile)),
                 new AddPropertyTransform<CommonCompilerOptions>("PublicSign", 
                     "true",
                     compilerOptions => !string.IsNullOrEmpty(compilerOptions.KeyFile) && (compilerOptions.PublicSign == null))
