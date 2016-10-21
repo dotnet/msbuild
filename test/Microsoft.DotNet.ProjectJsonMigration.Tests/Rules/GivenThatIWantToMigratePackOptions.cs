@@ -3,6 +3,7 @@
 
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using System.IO;
 using System.Linq;
 using Xunit;
 using FluentAssertions;
@@ -187,19 +188,76 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Migrating_Files_throws_an_exception_for_now()
+        public void Migrating_Files_without_mappings_populates_content_with_same_path_as_include_and_pack_true()
         {
-            Action action = () => RunPackOptionsRuleOnPj(@"
+            var mockProj = RunPackOptionsRuleOnPj(@"
                 {
                     ""packOptions"": {
                         ""files"": {
-                            ""include"": [""somefile.cs""]
+                            ""include"": [""path/to/some/file.cs"", ""path/to/some/other/file.cs""]
                         }
                     }
                 }");
 
-            action.ShouldThrow<Exception>()
-                .Where(e => e.Message.Contains("Migrating projects with Files specified in PackOptions is not supported."));
+            var contentItems = mockProj.Items
+                .Where(item => item.ItemType.Equals("Content", StringComparison.Ordinal))
+                .Where(item => item.GetMetadataWithName("Pack").Value == "true");
+
+            contentItems.Count().Should().Be(1);
+            contentItems.First().Include.Should().Be(@"path\to\some\file.cs;path\to\some\other\file.cs");
+        }
+
+        [Fact]
+        public void Migrating_Files_with_mappings_populates_content_PackagePath_metadata()
+        {
+            var mockProj = RunPackOptionsRuleOnPj(@"
+                {
+                    ""packOptions"": {
+                        ""files"": {
+                            ""include"": [""path/to/some/file.cs""],
+                            ""mappings"": {
+                                ""some/other/path/file.cs"": ""path/to/some/file.cs""
+                            }
+                        }
+                    }
+                }");
+
+            var contentItems = mockProj.Items
+                .Where(item => item.ItemType.Equals("Content", StringComparison.Ordinal))
+                .Where(item =>
+                    item.GetMetadataWithName("Pack").Value == "true" &&
+                    item.GetMetadataWithName("PackagePath") != null);
+
+            contentItems.Count().Should().Be(1);
+            contentItems.First().Include.Should().Be(@"path\to\some\file.cs");
+            contentItems.First().GetMetadataWithName("PackagePath").Value.Should().Be(
+                Path.Combine("some", "other", "path"));
+        }
+
+        [Fact]
+        public void Migrating_Files_with_mappings_to_root_populates_content_PackagePath_metadata_but_leaves_it_empty()
+        {
+            var mockProj = RunPackOptionsRuleOnPj(@"
+                {
+                    ""packOptions"": {
+                        ""files"": {
+                            ""include"": [""path/to/some/file.cs""],
+                            ""mappings"": {
+                                "".file.cs"": ""path/to/some/file.cs""
+                            }
+                        }
+                    }
+                }");
+
+            var contentItems = mockProj.Items
+                .Where(item => item.ItemType.Equals("Content", StringComparison.Ordinal))
+                .Where(item =>
+                    item.GetMetadataWithName("Pack").Value == "true" &&
+                    item.GetMetadataWithName("PackagePath") != null);
+
+            contentItems.Count().Should().Be(1);
+            contentItems.First().Include.Should().Be(@"path\to\some\file.cs");
+            contentItems.First().GetMetadataWithName("PackagePath").Value.Should().BeEmpty();
         }
 
         private ProjectRootElement RunPackOptionsRuleOnPj(string packOptions, string testDirectory = null)
