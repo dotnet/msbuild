@@ -34,7 +34,32 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var projectReferences = mockProj.Items.Where(item => item.ItemType.Equals("ProjectReference", StringComparison.Ordinal));
             projectReferences.Count().Should().Be(1);
 
-            projectReferences.First().Include.Should().Be(Path.Combine("..", "TestLibrary", "TestLibrary.csproj"));
+            var projectReference = projectReferences.First();
+            projectReference.Include.Should().Be(Path.Combine("..", "TestLibrary", "TestLibrary.csproj"));
+            projectReference.Parent.Condition.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void TFM_specific_Project_dependencies_are_migrated_to_ProjectReference_under_condition_ItemGroup()
+        {
+            var solutionDirectory =
+                TestAssetsManager.CreateTestInstance("TestAppWithLibraryUnderTFM", callingMethod: "p").Path;
+
+            var appDirectory = Path.Combine(solutionDirectory, "TestApp");
+
+            var projectContext = ProjectContext.Create(appDirectory, FrameworkConstants.CommonFrameworks.NetCoreApp10);
+            var mockProj = ProjectRootElement.Create();
+            var testSettings = new MigrationSettings(appDirectory, appDirectory, "1.0.0", mockProj, null);
+            var testInputs = new MigrationRuleInputs(new[] {projectContext}, mockProj, mockProj.AddItemGroup(),
+                mockProj.AddPropertyGroup());
+            new MigrateProjectDependenciesRule().Apply(testSettings, testInputs);
+
+            var projectReferences = mockProj.Items.Where(item => item.ItemType.Equals("ProjectReference", StringComparison.Ordinal));
+            projectReferences.Count().Should().Be(1);
+
+            var projectReference = projectReferences.First();
+            projectReference.Include.Should().Be(Path.Combine("..", "TestLibrary", "TestLibrary.csproj"));
+            projectReference.Parent.Condition.Should().Be(" '$(TargetFramework)' == 'netcoreapp1.0' ");
         }
 
         [Fact]
