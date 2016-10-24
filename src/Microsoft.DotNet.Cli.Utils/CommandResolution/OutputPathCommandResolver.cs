@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 return null;
             }
 
-            var buildOutputPath = project.OutputPath;
+            var buildOutputPath = project.FullOutputPath;
 
             if (!Directory.Exists(buildOutputPath))
             {

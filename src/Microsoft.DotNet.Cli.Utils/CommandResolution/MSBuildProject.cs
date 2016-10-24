@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.Cli.Utils
             }
         }
 
-        public string OutputPath
+        public string FullOutputPath
         {
             get
             {
