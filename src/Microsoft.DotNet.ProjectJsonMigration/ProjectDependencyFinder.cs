@@ -66,7 +66,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 projectFileDependenciesForFramework = project.GetTargetFramework(framework).Dependencies;
             }
      
-            foreach (var projectFileDependency in projectFileDependenciesForFramework)
+            foreach (var projectFileDependency in
+                projectFileDependenciesForFramework.Where(p =>
+                    p.LibraryRange.TypeConstraint == LibraryDependencyTarget.Project))
             {
                 var dependencyName = projectFileDependency.Name;
 
@@ -105,7 +107,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 FindPossibleProjectDependencies(projectContext.ProjectFile.ProjectFilePath);
 
             var projectDependencies = new List<ProjectDependency>();
-            foreach (var projectExport in projectExports)
+            foreach (var projectExport in 
+                projectExports.Where(p => p.Library.Identity.Type == LibraryType.Project))
             {
                 var projectExportName = projectExport.Library.Identity.Name;
                 ProjectDependency projectDependency;
