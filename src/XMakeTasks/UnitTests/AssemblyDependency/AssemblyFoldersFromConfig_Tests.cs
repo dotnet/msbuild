@@ -20,14 +20,14 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
         {
             s_existentFiles.AddRange(new[]
             {
-                @"c:\assemblyfromconfig\folder1\assemblyfromconfig1.dll",
-                @"c:\assemblyfromconfig\folder2\assemblyfromconfig2.dll",
-                @"c:\assemblyfromconfig\folder3_x86\assemblyfromconfig3_x86.dll",
+                Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder1", "assemblyfromconfig1.dll"),
+                Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder2", "assemblyfromconfig2.dll"),
+                Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder3_x86", "assemblyfromconfig3_x86.dll"),
 
-                @"c:\assemblyfromconfig\folder_x86\assemblyfromconfig_common.dll",
-                @"c:\assemblyfromconfig\folder_x64\assemblyfromconfig_common.dll",
-                @"c:\assemblyfromconfig\folder5010x64\v5assembly.dll",
-                @"c:\assemblyfromconfig\folder501000x86\v5assembly.dll"
+                Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder_x86", "assemblyfromconfig_common.dll"),
+                Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder_x64", "assemblyfromconfig_common.dll"),
+                Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder5010x64", "v5assembly.dll"),
+                Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder501000x86", "v5assembly.dll")
             });
         }
         
@@ -51,7 +51,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
                 Execute(t);
 
                 Assert.Equal(1, t.ResolvedFiles.Length);
-                Assert.Equal(@"c:\assemblyfromconfig\folder2\assemblyfromconfig2.dll", t.ResolvedFiles[0].ItemSpec);
+                Assert.Equal(Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder2", "assemblyfromconfig2.dll"), t.ResolvedFiles[0].ItemSpec);
                 AssertNoCase(moniker, t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
             }
             finally
@@ -81,7 +81,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
                 Execute(t);
 
                 Assert.Equal(1, t.ResolvedFiles.Length);
-                Assert.Equal(@"c:\assemblyfromconfig\folder_x86\assemblyfromconfig_common.dll", t.ResolvedFiles[0].ItemSpec);
+                Assert.Equal(Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder_x86", "assemblyfromconfig_common.dll"), t.ResolvedFiles[0].ItemSpec);
                 AssertNoCase(moniker, t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
             }
             finally
@@ -111,7 +111,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
                 Execute(t);
 
                 Assert.Equal(1, t.ResolvedFiles.Length);
-                Assert.Equal(@"c:\assemblyfromconfig\folder501000x86\v5assembly.dll", t.ResolvedFiles[0].ItemSpec);
+                Assert.Equal(Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder501000x86", "v5assembly.dll"), t.ResolvedFiles[0].ItemSpec);
                 AssertNoCase(moniker, t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
 
                 // Try again changing only the processor architecture
@@ -126,7 +126,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
                 Execute(t);
 
                 Assert.Equal(1, t.ResolvedFiles.Length);
-                Assert.Equal(@"c:\assemblyfromconfig\folder5010x64\v5assembly.dll", t.ResolvedFiles[0].ItemSpec);
+                Assert.Equal(Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder5010x64", "v5assembly.dll"), t.ResolvedFiles[0].ItemSpec);
                 AssertNoCase(moniker, t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
             }
             finally
@@ -191,43 +191,43 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
             }
         }
 
-        private const string TestFile = @"
+        private readonly string TestFile = @"
 <AssemblyFoldersConfig>
   <AssemblyFolders>
     <AssemblyFolder>
       <Name>Test Assemblies</Name>
       <FrameworkVersion>v5.0</FrameworkVersion>
-      <Path>c:\assemblyfromconfig\folder1\</Path>
+      <Path>" + Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder1") + @"</Path>
     </AssemblyFolder>
     <AssemblyFolder>
       <Name>Test Assemblies2</Name>
       <FrameworkVersion>v4.5.25000</FrameworkVersion>
-      <Path>c:\assemblyfromconfig\folder2\</Path>
+      <Path>" + Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder2") + @"</Path>
     </AssemblyFolder>
     <AssemblyFolder>
       <FrameworkVersion>v4.0</FrameworkVersion>
-      <Path>c:\assemblyfromconfig\folder3\</Path>
+      <Path>" + Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder3") + @"</Path>
     </AssemblyFolder>
     <AssemblyFolder>
       <Name>Platform Specific</Name>
       <FrameworkVersion>v4.5.25000</FrameworkVersion>
-      <Path>c:\assemblyfromconfig\folder_x64</Path>
+      <Path>" + Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder_x64") + @"</Path>
       <Platform>x64</Platform>
     </AssemblyFolder>
     <AssemblyFolder>
       <FrameworkVersion>v4.5</FrameworkVersion>
-      <Path>c:\assemblyfromconfig\folder_x86</Path>
+      <Path>" + Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder_x86") + @"</Path>
       <Platform>x86</Platform>
     </AssemblyFolder>
 
     <AssemblyFolder>
       <FrameworkVersion>v5.0.1.0</FrameworkVersion>
-      <Path>c:\assemblyfromconfig\folder5010x64\</Path>
+      <Path>" + Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder5010x64") + @"</Path>
       <Platform>x64</Platform>
     </AssemblyFolder>
     <AssemblyFolder>
       <FrameworkVersion>v5.0.100.0</FrameworkVersion>
-      <Path>c:\assemblyfromconfig\folder501000x86\</Path>
+      <Path>" + Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder501000x86") + @"</Path>
       <Platform>x86</Platform>
     </AssemblyFolder>
   </AssemblyFolders>
