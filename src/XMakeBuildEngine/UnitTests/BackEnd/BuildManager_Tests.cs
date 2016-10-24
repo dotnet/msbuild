@@ -3538,6 +3538,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
 #else
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
 #endif
         public void Regress265010()
         {
