@@ -465,6 +465,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
         }
 
+        /// <summary>
+        /// Logs a telemetry event.
+        /// </summary>
+        /// <param name="buildEventContext">The task's build event context</param>
+        /// <param name="eventName">The event name.</param>
+        /// <param name="properties">The list of properties associated with the event.</param>
+        public void LogTelemetry(BuildEventContext buildEventContext, string eventName, IDictionary<string, string> properties)
+        {
+        }
+
         #endregion
     }
 }

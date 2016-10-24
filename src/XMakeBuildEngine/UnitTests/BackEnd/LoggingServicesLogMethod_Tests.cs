@@ -1116,6 +1116,69 @@ namespace Microsoft.Build.UnitTests.Logging
 
         #endregion
 
+        #region LogTelemetry
+
+        /// <summary>
+        /// Verifies an InternalErrorException is thrown when a null event name is passed in
+        /// </summary>
+        [Fact]
+        public void LogTelemetryNullEventName()
+        {
+            InternalErrorException exception = Assert.Throws<InternalErrorException>(() =>
+            {
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogTelemetry(
+                    buildEventContext: null, 
+                    eventName: null, 
+                    properties: new Dictionary<string, string>());;
+            });
+
+            Assert.True(exception.Message.Contains("eventName is null"));
+        }
+
+        [Fact]
+        public void LogTelemetryTest()
+        {
+            IDictionary<string, string> eventProperties = new Dictionary<string, string>
+            {
+                {"Property1", "Value1"},
+                {"Property2", "347EA055D5BD405F9726D7429BB30244"},
+                {"Property3", @"C:\asdf\asdf\asdf"},
+            };
+
+            TestLogTelemetry(buildEventContext: null, eventName: "no context and no properties", properties: null);
+            TestLogTelemetry(buildEventContext: null, eventName: "no context but with properties", properties: eventProperties);
+            TestLogTelemetry(buildEventContext: s_buildEventContext, eventName: "event context but no properties", properties: null);
+            TestLogTelemetry(buildEventContext: s_buildEventContext, eventName: "event context and properties", properties: eventProperties);
+        }
+
+        private void TestLogTelemetry(BuildEventContext buildEventContext, string eventName, IDictionary<string, string> properties)
+        {
+            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+
+            service.LogTelemetry(buildEventContext, eventName, properties);
+
+            TelemetryEventArgs expectedEventArgs = new TelemetryEventArgs
+            {
+                EventName = eventName,
+                BuildEventContext = buildEventContext,
+                Properties = properties == null ? new Dictionary<string, string>() : new Dictionary<string, string>(properties),
+            };
+
+
+            TelemetryEventArgs actualEventArgs = (TelemetryEventArgs)service.ProcessedBuildEvent;
+
+            Assert.True(actualEventArgs.IsEquivalent(expectedEventArgs));
+
+            if (properties != null)
+            {
+                // Ensure the properties were cloned into a new dictionary
+                Assert.False(Object.ReferenceEquals(actualEventArgs.Properties, properties));
+            }
+        }
+
+        #endregion
+
         #region Private methods
 
         /// <summary>

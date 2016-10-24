@@ -40,7 +40,7 @@ namespace Microsoft.Build.CommandLine
 #if CLR2COMPATIBILITY
         IBuildEngine3
 #else
-        IBuildEngine4
+        IBuildEngine5
 #endif
     {
         /// <summary>
@@ -442,6 +442,25 @@ namespace Microsoft.Build.CommandLine
         }
 
         #endregion
+
+        #region IBuildEngine5 Implementation
+
+        /// <summary>
+        /// Logs a telemetry event.
+        /// </summary>
+        /// <param name="eventName">The event name.</param>
+        /// <param name="properties">The list of properties associated with the event.</param>
+        public void LogTelemetry(string eventName, IDictionary<string, string> properties)
+        {
+            SendBuildEvent(new TelemetryEventArgs
+            {
+                EventName = eventName,
+                Properties = properties == null ? new Dictionary<string, string>() : new Dictionary<string, string>(properties),
+            });
+        }
+
+        #endregion
+
 #endif
 
         #region INodePacketFactory Members

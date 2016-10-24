@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <!--
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" Condition="!$(Configuration.EndsWith('MONO'))"/>
@@ -84,6 +84,7 @@
     <Compile Include="ResolveCodeAnalysisRuleSet_Tests.cs" />
     <Compile Include="StreamHelpers.cs" />
     <Compile Include="StreamMappedString_Tests.cs" />
+    <Compile Include="TelemetryTaskTests.cs" />
     <Compile Include="ToolTaskExtension_Tests.cs" />
     <Compile Include="Touch_Tests.cs" />
     <Compile Include="TrustInfo_Tests.cs" />

@@ -1831,6 +1831,11 @@ namespace Microsoft.Build.Evaluation
             private BuildWarningEventHandler _buildWarningEventHandler;
 
             /// <summary>
+            ///  The telemetry event handler.
+            /// </summary>
+            private TelemetryEventHandler _telemetryEventHandler;
+
+            /// <summary>
             /// Constructor.
             /// </summary>
             public ReusableLogger(ILogger originalLogger)
@@ -1910,6 +1915,11 @@ namespace Microsoft.Build.Evaluation
             /// The Any logging event
             /// </summary>
             public event AnyEventHandler AnyEventRaised;
+
+            /// <summary>
+            /// The telemetry sent event.
+            /// </summary>
+            public event TelemetryEventHandler TelemetrySent;
 
 #endregion
 
@@ -2027,6 +2037,7 @@ namespace Microsoft.Build.Evaluation
                 _taskFinishedEventHandler = new TaskFinishedEventHandler(TaskFinishedHandler);
                 _taskStartedEventHandler = new TaskStartedEventHandler(TaskStartedHandler);
                 _buildWarningEventHandler = new BuildWarningEventHandler(WarningRaisedHandler);
+                _telemetryEventHandler = new TelemetryEventHandler(TelemetrySentHandler);
 
                 // Register for the events.
                 eventSource.AnyEventRaised += _anyEventHandler;
@@ -2043,6 +2054,7 @@ namespace Microsoft.Build.Evaluation
                 eventSource.TaskFinished += _taskFinishedEventHandler;
                 eventSource.TaskStarted += _taskStartedEventHandler;
                 eventSource.WarningRaised += _buildWarningEventHandler;
+                eventSource.TelemetrySent += _telemetryEventHandler;
             }
 
             /// <summary>
@@ -2065,6 +2077,7 @@ namespace Microsoft.Build.Evaluation
                 eventSource.TaskFinished -= _taskFinishedEventHandler;
                 eventSource.TaskStarted -= _taskStartedEventHandler;
                 eventSource.WarningRaised -= _buildWarningEventHandler;
+                eventSource.TelemetrySent -= _telemetryEventHandler;
 
                 // Null out the handlers.
                 _anyEventHandler = null;
@@ -2081,6 +2094,7 @@ namespace Microsoft.Build.Evaluation
                 _taskFinishedEventHandler = null;
                 _taskStartedEventHandler = null;
                 _buildWarningEventHandler = null;
+                _telemetryEventHandler = null;
             }
 
             /// <summary>
@@ -2234,6 +2248,17 @@ namespace Microsoft.Build.Evaluation
                 if (AnyEventRaised != null)
                 {
                     AnyEventRaised(sender, e);
+                }
+            }
+
+            /// <summary>
+            /// Handler for telemetry events.
+            /// </summary>
+            private void TelemetrySentHandler(object sender, TelemetryEventArgs e)
+            {
+                if (TelemetrySent != null)
+                {
+                    TelemetrySent(sender, e);
                 }
             }
         }

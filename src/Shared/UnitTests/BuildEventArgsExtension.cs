@@ -8,6 +8,7 @@
 using System;
 using Microsoft.Build.Framework;
 using System.Collections.Generic;
+using System.Linq;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Xunit;
 
@@ -58,13 +59,16 @@ namespace Microsoft.Build.UnitTests
                 return false;
             }
 
-            // Just in case we're matching chk against ret or vice versa, make sure the message still registers as the same
-            string fixedArgsMessage = args.Message.Replace("\r\nThis is an unhandled exception from a task -- PLEASE OPEN A BUG AGAINST THE TASK OWNER.", String.Empty);
-            string fixedOtherMessage = other.Message.Replace("\r\nThis is an unhandled exception from a task -- PLEASE OPEN A BUG AGAINST THE TASK OWNER.", String.Empty);
-
-            if (!String.Equals(fixedArgsMessage, fixedOtherMessage, StringComparison.OrdinalIgnoreCase))
+            if (!String.IsNullOrEmpty(args.Message))
             {
-                return false;
+                // Just in case we're matching chk against ret or vice versa, make sure the message still registers as the same
+                string fixedArgsMessage = args.Message.Replace("\r\nThis is an unhandled exception from a task -- PLEASE OPEN A BUG AGAINST THE TASK OWNER.", String.Empty);
+                string fixedOtherMessage = other.Message.Replace("\r\nThis is an unhandled exception from a task -- PLEASE OPEN A BUG AGAINST THE TASK OWNER.", String.Empty);
+
+                if (!String.Equals(fixedArgsMessage, fixedOtherMessage, StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
             }
 
             if (!String.Equals(args.SenderName, other.SenderName, StringComparison.OrdinalIgnoreCase))
@@ -435,6 +439,23 @@ namespace Microsoft.Build.UnitTests
 
             if (args.Succeeded != other.Succeeded)
             {
+                return false;
+            }
+
+            return ((BuildEventArgs)args).IsEquivalent(other);
+        }
+
+        public static bool IsEquivalent(this TelemetryEventArgs args, TelemetryEventArgs other)
+        {
+            if (!String.Equals(args.EventName, other.EventName))
+            {
+                Console.WriteLine("event names are different");
+                return false;
+            }
+
+            if (!args.Properties.OrderBy(kvp => kvp.Key, StringComparer.Ordinal).SequenceEqual(other.Properties.OrderBy(kvp => kvp.Key, StringComparer.OrdinalIgnoreCase)))
+            {
+                Console.WriteLine("Properties are different");
                 return false;
             }
 

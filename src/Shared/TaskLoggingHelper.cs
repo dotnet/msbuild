@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -1355,6 +1356,20 @@ namespace Microsoft.Build.Utilities
             }
 
             return isError;
+        }
+
+        #endregion
+
+        #region Telemetry logging methods
+
+        /// <summary>
+        /// Logs telemetry with the specified event name and properties.
+        /// </summary>
+        /// <param name="eventName">The event name.</param>
+        /// <param name="properties">The list of properties associated with the event.</param>
+        public void LogTelemetry(string eventName, IDictionary<string, string> properties)
+        {
+            (BuildEngine as IBuildEngine5)?.LogTelemetry(eventName, properties);
         }
 
         #endregion

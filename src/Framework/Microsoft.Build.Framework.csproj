@@ -17,7 +17,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'" />
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-MONO|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-MONO|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-MONO|AnyCPU'" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs">
@@ -60,6 +60,7 @@
     </Compile>
     <Compile Include="IBuildEngine3.cs" />
     <Compile Include="IBuildEngine4.cs" />
+    <Compile Include="IBuildEngine5.cs" />
     <Compile Include="IGeneratedTask.cs" />
     <Compile Include="LazyFormattedBuildEventArgs.cs" />
     <Compile Include="IBuildEngine.cs">
@@ -138,6 +139,7 @@
     <Compile Include="TaskStartedEventArgs.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="TelemetryEventArgs.cs" />
     <None Include="Event args classes.cd" />
     <None Include="project.json" />
     <!-- Win32 RC Files -->

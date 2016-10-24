@@ -75,6 +75,11 @@ namespace Microsoft.Build.Framework
     /// </summary>
     public delegate void AnyEventHandler(object sender, BuildEventArgs e);
 
+    /// <summary>
+    /// Type of handler for TelemetrySent events
+    /// </summary>
+    public delegate void TelemetryEventHandler(object sender, TelemetryEventArgs e);
+
     /// <summary> 
     /// This interface defines the events raised by the build engine.
     /// Loggers use this interface to subscribe to the events they
@@ -151,5 +156,10 @@ namespace Microsoft.Build.Framework
         /// this event is raised to log any build event
         /// </summary>
         event AnyEventHandler AnyEventRaised;
+
+        /// <summary>
+        /// this event is raised to when telemetry is sent.
+        /// </summary>
+        event TelemetryEventHandler TelemetrySent;
     }
 }

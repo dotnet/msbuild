@@ -2412,6 +2412,16 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
+  <xs:element name="Telemetry" substitutionGroup="msb:Task">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="msb:TaskType">
+          <xs:attribute name="EventName" use="required" />
+          <xs:attribute name="Data" />
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
     <xs:element name="TlbImp" substitutionGroup="msb:Task">
         <xs:complexType>
             <xs:complexContent>

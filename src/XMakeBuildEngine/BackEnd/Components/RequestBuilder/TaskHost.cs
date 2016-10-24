@@ -37,7 +37,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        IBuildEngine4
+        IBuildEngine5
     {
         /// <summary>
         /// True if the "secret" environment variable MSBUILDNOINPROCNODE is set. 
@@ -611,6 +611,42 @@ namespace Microsoft.Build.BackEnd
         {
             var objectCache = (IRegisteredTaskObjectCache)_host.GetComponent(BuildComponentType.RegisteredTaskObjectCache);
             return objectCache.UnregisterTaskObject(key, lifetime);
+        }
+
+        #endregion
+
+        #region BuildEngine5 Members
+
+        /// <summary>
+        /// Logs a telemetry event for the current task.
+        /// </summary>
+        /// <param name="eventName">The event name.</param>
+        /// <param name="properties">The list of properties associated with the event.</param>
+        public void LogTelemetry(string eventName, IDictionary<string, string> properties)
+        {
+            lock (_callbackMonitor)
+            {
+                ErrorUtilities.VerifyThrowArgumentNull(eventName, "eventName");
+
+                if (!_activeProxy)
+                {
+                    // The task has been logging on another thread, typically
+                    // because of logging a spawned process's output, and has
+                    // not terminated this logging before it returned. This is common
+                    // enough that we don't want to crash and break the entire build. But
+                    // we don't have any good way to log it any more, as not only has this task
+                    // finished, the whole build might have finished! The task author will
+                    // just have to figure out that their task has a bug by themselves.
+                    if (s_breakOnLogAfterTaskReturns)
+                    {
+                        Trace.Fail(String.Format(CultureInfo.CurrentUICulture, "Task at {0}, after already returning, attempted to log telemetry event '{1}'", _taskLocation.ToString(), eventName));
+                    }
+
+                    return;
+                }
+
+                _taskLoggingContext.LoggingService.LogTelemetry(_taskLoggingContext.BuildEventContext, eventName, properties);
+            }
         }
 
         #endregion
