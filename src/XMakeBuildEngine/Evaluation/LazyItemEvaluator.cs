@@ -9,6 +9,7 @@ using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 
@@ -117,61 +118,196 @@ namespace Microsoft.Build.Evaluation
 
         public struct ItemData
         {
-            private I _item;
-            private int _elementOrder;
-            private bool _conditionResult;
-
-            public ItemData(I item, int elementOrder, bool conditionResult)
+            public ItemData(I item, ProjectItemElement originatingItemElement, int elementOrder, bool conditionResult)
             {
-                _item = item;
-                _elementOrder = elementOrder;
-                _conditionResult = conditionResult;
+                Item = item;
+                OriginatingItemElement = originatingItemElement;
+                ElementOrder = elementOrder;
+                ConditionResult = conditionResult;
             }
 
-            public I Item { get { return _item; } }
-            public int ElementOrder { get { return _elementOrder; } }
-            public bool ConditionResult { get { return _conditionResult; } }
+            public ItemData Clone(IItemFactory<I, I> itemFactory, ProjectItemElement initialItemElementForFactory)
+            {
+                // setting the factory's item element to the original item element that produced the item
+                // otherwise you get weird things like items that appear to have been produced by update elements
+                itemFactory.ItemElement = OriginatingItemElement;
+                var clonedItem = itemFactory.CreateItem(Item, OriginatingItemElement.ContainingProject.FullPath);
+                itemFactory.ItemElement = initialItemElementForFactory;
+
+                return new ItemData(clonedItem, OriginatingItemElement, ElementOrder, ConditionResult);
+            }
+
+            public I Item { get; }
+            public ProjectItemElement OriginatingItemElement { get; }
+            public int ElementOrder { get; }
+            public bool ConditionResult { get; }
         }
 
+        private class MemoizedOperation : IItemOperation
+        {
+            public IItemOperation Operation { get; }
+            private Dictionary<ISet<string>, ImmutableList<ItemData>> _cache;
+
+            private bool _isReferenced;
+#if DEBUG
+            private int _applyCalls;
+#endif
+
+            public MemoizedOperation(IItemOperation operation)
+            {
+                Operation = operation;
+            }
+
+            public void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            {
+#if DEBUG
+                CheckInvariant();
+#endif
+
+                Operation.Apply(listBuilder, globsToIgnore);
+
+                // cache results if somebody is referencing this operation
+                if (_isReferenced)
+                {
+                    AddItemsToCache(globsToIgnore, listBuilder.ToImmutable());
+                }
+#if DEBUG
+                _applyCalls++;
+                CheckInvariant();
+#endif
+            }
+
+            private void CheckInvariant()
+            {
+                if (_isReferenced)
+                {
+                    var cacheCount = _cache?.Count ?? 0;
+                    Debug.Assert(_applyCalls == cacheCount, "Apply should only be called once per globsToIgnore. Otherwise caching is not working");
+                }
+                else
+                {
+                    // non referenced operations should not be cached
+                    // non referenced operations should have as many apply calls as the number of cache keys of the immediate dominator with _isReferenced == true
+                    Debug.Assert(_cache == null);
+                }
+            }
+
+            public bool TryGetFromCache(ISet<string> globsToIgnore, out ImmutableList<ItemData> items)
+            {
+                if (_cache != null)
+                {
+                    return _cache.TryGetValue(globsToIgnore, out items);
+                }
+
+                items = null;
+                return false;
+            }
+
+            /// <summary>
+            /// Somebody is referencing this operation
+            /// </summary>
+            public void MarkAsReferenced()
+            {
+                _isReferenced = true;
+            }
+
+            private void AddItemsToCache(ImmutableHashSet<string> globsToIgnore, ImmutableList<ItemData> items)
+            {
+                if (_cache == null)
+                {
+                    _cache = new Dictionary<ISet<string>, ImmutableList<ItemData>>();
+                }
+
+                _cache[globsToIgnore] = items;
+            }
+
+            private bool IsCached(ISet<string> globsToIgnore)
+            {
+                return _cache != null && _cache.ContainsKey(globsToIgnore);
+            }
+        }
 
         private class LazyItemList
         {
             private readonly LazyItemList _previous;
-            private readonly LazyItemOperation _operation;
+            private readonly MemoizedOperation _memoizedOperation;
 
             public LazyItemList(LazyItemList previous, LazyItemOperation operation)
             {
                 _previous = previous;
-                _operation = operation;
+                _memoizedOperation = new MemoizedOperation(operation);
             }
 
             public ImmutableList<ItemData>.Builder GetItems(ImmutableHashSet<string> globsToIgnore)
             {
-                //  TODO: Check for cached results
+                // Cache results only on the LazyItemOperations whose results are required by an external caller (via GetItems). This means:
+                //   - Callers of GetItems who have announced ahead of time that they would reference an operation (via MarkAsReferenced())
+                // This includes: item references (Include="@(foo)") and metadata conditions (Condition="@(foo->Count()) == 0")
+                // Without ahead of time notifications more computation is done than needed when the results of a future operation are requested 
+                // The future operation is part of another item list referencing this one (making this operation part of the tail).
+                // The future operation will compute this list but since no ahead of time notifications have been made by callers, it won't cache the
+                // intermediary operations that would be requested by those callers.
+                //   - Callers of GetItems that cannot announce ahead of time. This includes item referencing conditions on
+                // Item Groups and Item Elements. However, those conditions are performed eagerly outside of the LazyItemEvaluator, so they will run before
+                // any item referencing operations from inside the LazyItemEvaluator. This 
+                //
+                // If the head of this LazyItemList is uncached, then the tail may contain cached and un-cached nodes.
+                // In this case we have to compute the head plus the part of the tail up to the first cached operation.
+                //
+                // The cache is based on a couple of properties:
+                // - uses immutable lists for structural sharing between multiple cached nodes (multiple include operations won't have duplicated memory for the common items)
+                // - if an operation is cached for a certain set of globsToIgnore, then the entire operation tail can be reused. This is because (i) the structure of LazyItemLists
+                // does not mutate: one can add operations on top, but the base never changes, and (ii) the globsToIgnore passed to the tail is the concatenation between
+                // the globsToIgnore received as an arg, and the globsToIgnore produced by the head (if the head is a Remove operation)
 
-                return GetItemsImplementation(this, globsToIgnore);
+                ImmutableList<ItemData> items;
+                if (_memoizedOperation.TryGetFromCache(globsToIgnore, out items))
+                {
+                    return items.ToBuilder();
+                }
+                else
+                {
+                    // tell the cache that this operation's result is needed by an external caller
+                    // this is required for callers that cannot tell the item list ahead of time that 
+                    // they would be using an operation
+                    MarkAsReferenced();
+
+                    return ComputeItems(this, globsToIgnore);
+                }
+
             }
 
-            static ImmutableList<ItemData>.Builder GetItemsImplementation(LazyItemList lazyItemList, ImmutableHashSet<string> globsToIgnore)
+            private static ImmutableList<ItemData>.Builder ComputeItems(LazyItemList lazyItemList, ImmutableHashSet<string> globsToIgnore)
             {
+                // Stack of operations up to the first one that's cached (exclusive)
                 Stack<LazyItemList> itemListStack = new Stack<LazyItemList>();
 
-                //  Keep a separate stack of lists of globs to ignore that only gets modified for Remove operations
+                ImmutableList<ItemData>.Builder items = null;
+
+                // Keep a separate stack of lists of globs to ignore that only gets modified for Remove operations
                 Stack<ImmutableHashSet<string>> globsToIgnoreStack = null;
 
                 for (var currentList = lazyItemList; currentList != null; currentList = currentList._previous)
                 {
+                    var globsToIgnoreFromFutureOperations = globsToIgnoreStack?.Peek() ?? globsToIgnore;
+
+                    ImmutableList<ItemData> itemsFromCache;
+                    if (currentList._memoizedOperation.TryGetFromCache(globsToIgnoreFromFutureOperations, out itemsFromCache))
+                    {
+                        // the base items on top of which to apply the uncached operations are the items of the first operation that is cached
+                        items = itemsFromCache.ToBuilder();
+                        break;
+                    }
+
                     //  If this is a remove operation, then add any globs that will be removed
                     //  to a list of globs to ignore in previous operations
-                    var removeOperation = currentList._operation as RemoveOperation;
+                    var removeOperation = currentList._memoizedOperation.Operation as RemoveOperation;
                     if (removeOperation != null)
                     {
                         if (globsToIgnoreStack == null)
                         {
                             globsToIgnoreStack = new Stack<ImmutableHashSet<string>>();
                         }
-
-                        var globsToIgnoreFromFutureOperations = globsToIgnoreStack.Count > 0 ? globsToIgnoreStack.Peek() : globsToIgnore;
 
                         var globsToIgnoreForPreviousOperations = removeOperation.GetRemovedGlobs();
                         foreach (var globToRemove in globsToIgnoreFromFutureOperations)
@@ -185,7 +321,11 @@ namespace Microsoft.Build.Evaluation
                     itemListStack.Push(currentList);
                 }
 
-                ImmutableList<ItemData>.Builder items = ImmutableList.CreateBuilder<ItemData>();
+                if (items == null)
+                {
+                    items = ImmutableList.CreateBuilder<ItemData>();
+                }
+
                 ImmutableHashSet<string> currentGlobsToIgnore = globsToIgnoreStack == null ? globsToIgnore : globsToIgnoreStack.Peek();
 
                 //  Walk back down the stack of item lists applying operations
@@ -195,18 +335,22 @@ namespace Microsoft.Build.Evaluation
 
                     //  If this is a remove operation, then it could modify the globs to ignore, so pop the potentially
                     //  modified entry off the stack of globs to ignore
-                    var removeOperation = currentList._operation as RemoveOperation;
+                    var removeOperation = currentList._memoizedOperation.Operation as RemoveOperation;
                     if (removeOperation != null)
                     {
                         globsToIgnoreStack.Pop();
                         currentGlobsToIgnore = globsToIgnoreStack.Count == 0 ? globsToIgnore : globsToIgnoreStack.Peek();
                     }
 
-                    currentList._operation.Apply(items, currentGlobsToIgnore);
-                    //  TODO: Cache result of operation (possibly only if it involved executing globs)
+                    currentList._memoizedOperation.Apply(items, currentGlobsToIgnore);
                 }
 
                 return items;
+            }
+
+            public void MarkAsReferenced()
+            {
+                _memoizedOperation.MarkAsReferenced();
             }
         }
 
@@ -231,6 +375,16 @@ namespace Microsoft.Build.Evaluation
 
             public OperationBuilderWithMetadata(ProjectItemElement itemElement) : base(itemElement)
             {
+            }
+        }
+
+        private void AddReferencedItemList(string itemType, IDictionary<string, LazyItemList> referencedItemLists)
+        {
+            var itemList = GetItemList(itemType);
+            if (itemList != null)
+            {
+                itemList.MarkAsReferenced();
+                referencedItemLists[itemType] = itemList;
             }
         }
 
@@ -362,11 +516,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     foreach (var itemType in itemsAndMetadataFound.Items)
                     {
-                        var itemList = GetItemList(itemType);
-                        if (itemList != null)
-                        {
-                            operationBuilder.ReferencedItemLists[itemType] = itemList;
-                        }
+                        AddReferencedItemList(itemType, operationBuilder.ReferencedItemLists);
                     }
                 }
             }
@@ -404,11 +554,7 @@ namespace Microsoft.Build.Evaluation
         {
             if (match.ItemType != null)
             {
-                var itemList = GetItemList(match.ItemType);
-                if (itemList != null)
-                {
-                    operationBuilder.ReferencedItemLists[match.ItemType] = itemList;
-                }
+                AddReferencedItemList(match.ItemType, operationBuilder.ReferencedItemLists);
             }
             if (match.Captures != null)
             {
