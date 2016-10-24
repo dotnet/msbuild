@@ -140,7 +140,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         <RunArguments Condition="'$(RunArguments)' == '' and '$(StartArguments)' != ''">$(_NetCoreRunArguments) $(StartArguments)</RunArguments>
         <RunArguments Condition="'$(RunArguments)' == ''">$(_NetCoreRunArguments)</RunArguments>
 
-        <RunWorkingDirectory Condition="'$(RunWorkingDirectory)' == ''">$(OutDir)</RunWorkingDirectory>
+        <RunWorkingDirectory Condition="'$(RunWorkingDirectory)' == ''">$(TargetDir)</RunWorkingDirectory>
       </PropertyGroup>
     </When>
     
@@ -148,7 +148,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <PropertyGroup>
         <RunCommand Condition="'$(RunCommand)' == ''">$(TargetPath)</RunCommand>
         <RunArguments Condition="'$(RunArguments)' == ''">$(StartArguments)</RunArguments>
-        <RunWorkingDirectory Condition="'$(RunWorkingDirectory)' == ''">$(OutDir)</RunWorkingDirectory>
+        <RunWorkingDirectory Condition="'$(RunWorkingDirectory)' == ''">$(TargetDir)</RunWorkingDirectory>
       </PropertyGroup>
     </When>
   </Choose>
