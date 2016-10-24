@@ -2219,7 +2219,7 @@ namespace Microsoft.Build.UnitTests
         {
             var isPrivileged = true;
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (NativeMethodsShared.IsWindows)
             {
                 if (!new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null)))
                 {
