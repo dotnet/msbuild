@@ -79,21 +79,46 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             HashSet<string> migratedXProjDependencyNames,
             ProjectRootElement outputMSBuildProject)
         {
+            if(projectContexts.Any())
+            {
+                MigrateProjectJsonProjectDependency(
+                    projectContexts.First().ProjectFile,
+                    null,
+                    migratedXProjDependencyNames,
+                    outputMSBuildProject);
+            }
+
             foreach (var projectContext in projectContexts)
             {
-                var projectDependencies = _projectDependencyFinder.ResolveProjectDependencies(projectContext, migratedXProjDependencyNames);
-
-                var projectDependencyTransformResults = projectDependencies.Select(p => ProjectDependencyTransform.Transform(p));
-                
-                if (projectDependencyTransformResults.Any())
-                {
-                    AddProjectDependenciesToNewItemGroup(
-                        outputMSBuildProject.AddItemGroup(), 
-                        projectDependencyTransformResults, 
-                        projectContext.TargetFramework);
-                }
+                MigrateProjectJsonProjectDependency(
+                    projectContext.ProjectFile,
+                    projectContext.TargetFramework,
+                    migratedXProjDependencyNames,
+                    outputMSBuildProject);
             }
+        }
+
+        private void MigrateProjectJsonProjectDependency(
+            Project project,
+            NuGetFramework framework,
+            HashSet<string> migratedXProjDependencyNames,
+            ProjectRootElement outputMSBuildProject)
+        {
+            var projectDependencies = _projectDependencyFinder.ResolveProjectDependenciesForFramework(
+                    project,
+                    framework,
+                    migratedXProjDependencyNames);
+
+            var projectDependencyTransformResults = 
+                projectDependencies.Select(p => ProjectDependencyTransform.Transform(p));
             
+            if (projectDependencyTransformResults.Any())
+            {
+                AddProjectDependenciesToNewItemGroup(
+                    outputMSBuildProject.AddItemGroup(), 
+                    projectDependencyTransformResults, 
+                    framework);
+            }
         }
 
         private void AddProjectDependenciesToNewItemGroup(
