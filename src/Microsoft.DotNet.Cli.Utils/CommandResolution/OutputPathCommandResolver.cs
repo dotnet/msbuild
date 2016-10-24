@@ -42,19 +42,22 @@ namespace Microsoft.DotNet.Cli.Utils
             string outputPath,
             string buildBasePath)
         {
-            var projectContext = GetProjectContextFromDirectory(
+            var projectFactory = new ProjectFactory(_environment);
+            var project = projectFactory.GetProject(
                 projectDirectory,
-                framework);
+                framework,
+                configuration,
+                buildBasePath,
+                outputPath);
 
-            if (projectContext == null)
+            if (project == null)
             {
                 return null;
             }
 
-            var buildOutputPath =
-                projectContext.GetOutputPaths(configuration, buildBasePath, outputPath).RuntimeFiles.BasePath;
+            var buildOutputPath = project.OutputPath;
 
-            if (! Directory.Exists(buildOutputPath))
+            if (!Directory.Exists(buildOutputPath))
             {
                 Reporter.Verbose.WriteLine($"outputpathresolver: {buildOutputPath} does not exist");
                 return null;
@@ -62,34 +65,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
             return _environment.GetCommandPathFromRootPath(buildOutputPath, commandName);
         }
-
-        private ProjectContext GetProjectContextFromDirectory(string directory, NuGetFramework framework)
-        {
-            if (directory == null || framework == null)
-            {
-                return null;
-            }
-
-            var projectRootPath = directory;
-
-            if (!File.Exists(Path.Combine(projectRootPath, Project.FileName)))
-            {
-                return null;
-            }
-
-            var projectContext = ProjectContext.Create(
-                projectRootPath,
-                framework,
-                RuntimeEnvironmentRidExtensions.GetAllCandidateRuntimeIdentifiers());
-
-            if (projectContext.RuntimeIdentifier == null)
-            {
-                return null;
-            }
-
-            return projectContext;
-        }
-
+        
         internal override CommandResolutionStrategy GetCommandResolutionStrategy()
         {
             return CommandResolutionStrategy.OutputPath;

@@ -39,6 +39,17 @@ namespace Microsoft.DotNet.Cli.Utils
             }
         }
 
+        public string OutputPath
+        {
+            get
+            {
+                return _project
+                    .AllEvaluatedProperties
+                    .FirstOrDefault(p => p.Name.Equals("TargetDir"))
+                    .EvaluatedValue;
+            }
+        }
+
         public Dictionary<string, string> EnvironmentVariables
         {
             get

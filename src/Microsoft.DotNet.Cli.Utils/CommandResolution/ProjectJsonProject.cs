@@ -67,6 +67,15 @@ namespace Microsoft.DotNet.Cli.Utils
             }
         }
 
+        public string OutputPath
+        {
+            get
+            {
+                return
+                    ProjectContext.GetOutputPaths(_configuration, _buildBasePath, _outputPath).RuntimeFiles.BasePath;
+            }
+        }
+
         public Dictionary<string, string> EnvironmentVariables
         {
             get
