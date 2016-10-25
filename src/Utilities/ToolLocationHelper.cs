@@ -1192,7 +1192,8 @@ namespace Microsoft.Build.Utilities
               string targetPlatformIdentifier,
               string targetPlatformMinVersion,
               string targetPlatformVersion,
-              string folderName)
+              string folderName,
+              string diskRoot = null)
         {
             ErrorUtilities.VerifyThrowArgumentLength(sdkIdentifier, "sdkIdentifier");
             ErrorUtilities.VerifyThrowArgumentLength(sdkVersion, "sdkVersion");
@@ -1215,7 +1216,7 @@ namespace Microsoft.Build.Utilities
 
             string sdkContentFolderPath = null;
 
-            TargetPlatformSDK matchingSdk = GetMatchingPlatformSDK(targetPlatformIdentifier, targetPlatformVersion, null, null, null);
+            TargetPlatformSDK matchingSdk = GetMatchingPlatformSDK(targetPlatformIdentifier, targetPlatformVersion, diskRoot, null, null);
             string platformKey = TargetPlatformSDK.GetSdkKey(targetPlatformIdentifier, targetPlatformVersion);
             PlatformManifest manifest;
             if (TryGetPlatformManifest(matchingSdk, platformKey, out manifest))
