@@ -1075,7 +1075,7 @@ namespace Microsoft.Build.Utilities
             TargetPlatformSDK matchingSdk = GetMatchingPlatformSDK(targetPlatformIdentifier, targetPlatformVersion, diskRoots, null, registryRoot);
             string platformKey = TargetPlatformSDK.GetSdkKey(targetPlatformIdentifier, targetPlatformVersion);
             PlatformManifest manifest;
-            if(TryGetPlatformManifest(matchingSdk, platformKey, out manifest))
+            if (TryGetPlatformManifest(matchingSdk, platformKey, out manifest))
             {
                 if (manifest.VersionedContent)
                 {
@@ -1085,7 +1085,7 @@ namespace Microsoft.Build.Utilities
                 {
                     contractWinMDs = GetApiContractReferences(manifest.ApiContracts, matchingSdk.Path);
                 }
-            };
+            }
 
             return contractWinMDs;
         }
