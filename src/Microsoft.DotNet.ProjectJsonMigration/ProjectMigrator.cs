@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             MigrationRuleInputs rootInputs = ComputeMigrationRuleInputs(rootSettings);
             IEnumerable<ProjectDependency> projectDependencies = null;
 
-            var tempMSBuildProjectTemplate = rootSettings.MSBuildProjectTemplate.DeepClone();
+            var tempMSBuildProjectTemplate = rootSettings.CloneMSBuildProjectTemplate();
 
             try
             {
