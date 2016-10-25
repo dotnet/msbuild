@@ -42,21 +42,15 @@ namespace Microsoft.Build.Tasks
                         return false;
                     }
 
-                    try
-                    {
-                        properties.Add(item[0], item[1]);
-                    }
-                    catch (ArgumentException)
-                    {
-                        Log.LogMessageFromResources(MessageImportance.Low, "Telemetry.DuplicateEventProperty", item[0], EventName);
-                        return false;
-                    }
+                    // Last value added wins
+                    //
+                    properties[item[0]] = item[1];
                 }
             }
 
             Log.LogTelemetry(EventName, properties);
 
-            return true;
+            return !Log.HasLoggedErrors;
         }
     }
 }

@@ -153,7 +153,7 @@ namespace Microsoft.Build.Framework
         event BuildStatusEventHandler StatusEventRaised;
 
         /// <summary>
-        /// this event is raised to log any build event
+        /// this event is raised to log any build event.  These events do not include telemetry.  To receive telemetry, you must attach to the <see cref="TelemetrySent"/> event.
         /// </summary>
         event AnyEventHandler AnyEventRaised;
 

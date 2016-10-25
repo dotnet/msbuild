@@ -68,6 +68,9 @@ namespace Microsoft.Build.Tasks.UnitTests
             Assert.True(engine.Log.Contains($"The property \"Property2\" in the telemetry event data property list \"{telemetryTask.EventData}\" is malformed."));
         }
 
+        /// <summary>
+        /// Verifies that when there are duplicate property names specified that the last one wins.
+        /// </summary>
         [Fact]
         public void TelemetryTaskDuplicateEventDataProperty()
         {
@@ -77,13 +80,20 @@ namespace Microsoft.Build.Tasks.UnitTests
             {
                 BuildEngine = engine,
                 EventName = "My event name",
-                EventData = $"Property1=Value1;Property1=Value2",
+                EventData = $"Property1=EE2493A167D24F00996DE7C8E769EAE6;Property1=4ADE3D2622CA400B8B95A039DF540037",
             };
 
             bool retVal = telemetryTask.Execute();
 
-            Assert.False(retVal);
-            Assert.Equal($"The property \"Property1\" is specified multiple times for the telemetry event \"{telemetryTask.EventName}\".  Please remove the duplicate property.", engine.Log.Trim());
+            Assert.True(retVal);
+
+            // Should not contain the first value
+            //
+            Assert.False(engine.Log.Contains("EE2493A167D24F00996DE7C8E769EAE6"));
+            
+            // Should contain the second value
+            //
+            Assert.True(engine.Log.Contains("4ADE3D2622CA400B8B95A039DF540037"));
         }
     }
 }

@@ -8,7 +8,6 @@
 using System;
 using Microsoft.Build.Framework;
 using System.Collections.Generic;
-using System.Linq;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Xunit;
 

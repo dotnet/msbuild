@@ -1170,10 +1170,7 @@ namespace Microsoft.Build.UnitTests.Logging
             TelemetryEventArgs actualEventArgs = (TelemetryEventArgs)service.ProcessedBuildEvent;
 
             Assert.Equal(expectedEventArgs.EventName, actualEventArgs.EventName);
-
-            Assert.True(expectedEventArgs.Properties.OrderBy(kvp => kvp.Key, StringComparer.Ordinal).SequenceEqual(actualEventArgs.Properties.OrderBy(kvp => kvp.Key, StringComparer.OrdinalIgnoreCase)),
-                $"Properties are different: [{String.Join(", ", expectedEventArgs.Properties.OrderBy(kvp => kvp.Key).Select(i => $"{i.Key}={i.Value}"))}] != [{String.Join(", ", actualEventArgs.Properties.OrderBy(kvp => kvp.Key).Select(i => $"{i.Key}={i.Value}"))}]");
-
+            Assert.Equal(expectedEventArgs.Properties.OrderBy(kvp => kvp.Key, StringComparer.Ordinal), actualEventArgs.Properties.OrderBy(kvp => kvp.Key, StringComparer.OrdinalIgnoreCase));
             Assert.Equal(expectedEventArgs.BuildEventContext, actualEventArgs.BuildEventContext);
 
             if (properties != null)
