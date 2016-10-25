@@ -41,6 +41,7 @@ namespace Microsoft.Build.UnitTests
         /// lying around.
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void NoTempFileLeaks()
         {
             using (var alternativeTemp = new Helpers.AlternativeTempPath())
