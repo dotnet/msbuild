@@ -68,7 +68,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- For backward compat -->
     <PublishProtocol Condition="'$(PublishProtocol)' == 'Package'">MSDeployPackage</PublishProtocol>
     <!-- For Docker Support -->
-    <PublishProtocol Condition="'$(PublishProvider)' == 'Docker'">Docker</PublishProtocol>
+    <PublishProtocol Condition="'$(DockerPublish)' == 'true'">Docker</PublishProtocol>
     
     <!-- Properties setting the publish intermediate paths -->
     <PublishConfiguration Condition ="'$(PublishConfiguration)' == ''">$(LastUsedBuildConfiguration)</PublishConfiguration>
