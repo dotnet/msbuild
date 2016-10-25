@@ -958,7 +958,6 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Initialize an in-memory, empty ProjectRootElement instance that can be saved later using the specified <see cref="ProjectCollection"/> and <see cref="NewProjectFileOptions"/>.
         /// </summary>
-        /// <returns></returns>
         public static ProjectRootElement Create(ProjectCollection projectCollection, NewProjectFileOptions projectFileOptions)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection, "projectCollection");
@@ -980,7 +979,6 @@ namespace Microsoft.Build.Construction
         /// Initialize an in-memory, empty ProjectRootElement instance that can be saved later using the specified path and <see cref="NewProjectFileOptions"/>.
         /// Uses the global project collection.
         /// </summary>
-        /// <returns></returns>
         public static ProjectRootElement Create(string path, NewProjectFileOptions newProjectFileOptions)
         {
             return Create(path, ProjectCollection.GlobalProjectCollection, newProjectFileOptions);
@@ -1068,7 +1066,6 @@ namespace Microsoft.Build.Construction
         /// Initialize a ProjectRootElement instance by loading from the specified file path.
         /// Uses the specified project collection and preserves the formatting of the document if specified.
         /// </summary>
-        /// <returns></returns>
         public static ProjectRootElement Open(string path, ProjectCollection projectCollection, bool preserveFormatting)
         {
             ErrorUtilities.VerifyThrowArgumentLength(path, "path");
