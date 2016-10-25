@@ -19,8 +19,21 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-    <GeneratedAssemblyInfoFile  Condition="'$(GeneratedAssemblyInfoFile)' ==''">$(IntermediateOutputPath)$(MSBuildProjectName).AssemblyInfo$(DefaultLanguageSourceExtension)</GeneratedAssemblyInfoFile>
+    <GeneratedAssemblyInfoFile Condition="'$(GeneratedAssemblyInfoFile)' ==''">$(IntermediateOutputPath)$(MSBuildProjectName).AssemblyInfo$(DefaultLanguageSourceExtension)</GeneratedAssemblyInfoFile>
     <GenerateAssemblyInfo Condition="'$(GenerateAssemblyInfo)' == ''">true</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(GenerateAssemblyInfo)' == 'true'">
+    <GenerateAssemblyCompanyAttribute Condition="'$(GenerateAssemblyCompanyAttribute)' == ''">true</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyConfigurationAttribute Condition="'$(GenerateAssemblyConfigurationAttribute)' == ''">true</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCopyrightAttribute Condition="'$(GenerateAssemblyCopyrightAttribute)' == ''">true</GenerateAssemblyCopyrightAttribute>
+    <GenerateAssemblyDescriptionAttribute Condition="'$(GenerateAssemblyDescriptionAttribute)' == ''">true</GenerateAssemblyDescriptionAttribute>
+    <GenerateAssemblyFileVersionAttribute Condition="'$(GenerateAssemblyFileVersionAttribute)' == ''">true</GenerateAssemblyFileVersionAttribute>
+    <GenerateAssemblyInformationalVersionAttribute Condition="'$(GenerateAssemblyInformationalVersionAttribute)' == ''">true</GenerateAssemblyInformationalVersionAttribute>
+    <GenerateAssemblyProductAttribute Condition="'$(GenerateAssemblyProductAttribute)' == ''">true</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyTitleAttribute Condition="'$(GenerateAssemblyTitleAttribute)' == ''">true</GenerateAssemblyTitleAttribute>
+    <GenerateAssemblyVersionAttribute Condition="'$(GenerateAssemblyVersionAttribute)' == ''">true</GenerateAssemblyVersionAttribute>
+    <GenerateNeutralResourcesLanguageAttribute Condition="'$(GenerateNeutralResourcesLanguageAttribute)' == ''">true</GenerateNeutralResourcesLanguageAttribute>
   </PropertyGroup>
 
   <!-- 
@@ -40,34 +53,34 @@ Copyright (c) .NET Foundation. All rights reserved.
           Inputs="$(MSBuildAllProjects)"
           Outputs="$(GeneratedAssemblyInfoFile)">
     <ItemGroup>
-      <AssemblyAttribute Include="System.Reflection.AssemblyCompanyAttribute" Condition="'$(Company)' != ''">
+      <AssemblyAttribute Include="System.Reflection.AssemblyCompanyAttribute" Condition="'$(Company)' != '' and '$(GenerateAssemblyCompanyAttribute)' == 'true'">
         <_Parameter1>$(Company)</_Parameter1>
       </AssemblyAttribute>
-      <AssemblyAttribute Include="System.Reflection.AssemblyConfigurationAttribute" Condition="'$(Configuration)' != ''">
+      <AssemblyAttribute Include="System.Reflection.AssemblyConfigurationAttribute" Condition="'$(Configuration)' != '' and '$(GenerateAssemblyConfigurationAttribute)' == 'true'">
         <_Parameter1>$(Configuration)</_Parameter1>
       </AssemblyAttribute>
-      <AssemblyAttribute Include="System.Reflection.AssemblyCopyrightAttribute" Condition="'$(Copyright)' != ''">
+      <AssemblyAttribute Include="System.Reflection.AssemblyCopyrightAttribute" Condition="'$(Copyright)' != '' and '$(GenerateAssemblyCopyrightAttribute)' == 'true'">
         <_Parameter1>$(Copyright)</_Parameter1>
       </AssemblyAttribute>
-      <AssemblyAttribute Include="System.Reflection.AssemblyDescriptionAttribute" Condition="'$(Description)' != ''">
+      <AssemblyAttribute Include="System.Reflection.AssemblyDescriptionAttribute" Condition="'$(Description)' != '' and '$(GenerateAssemblyDescriptionAttribute)' == 'true'">
         <_Parameter1>$(Description)</_Parameter1>
       </AssemblyAttribute>
-      <AssemblyAttribute Include="System.Reflection.AssemblyFileVersionAttribute" Condition="'$(FileVersion)' != ''">
+      <AssemblyAttribute Include="System.Reflection.AssemblyFileVersionAttribute" Condition="'$(FileVersion)' != '' and '$(GenerateAssemblyFileVersionAttribute)' == 'true'">
         <_Parameter1>$(FileVersion)</_Parameter1>
       </AssemblyAttribute>
-      <AssemblyAttribute Include="System.Reflection.AssemblyInformationalVersionAttribute" Condition="'$(Version)' != ''">
+      <AssemblyAttribute Include="System.Reflection.AssemblyInformationalVersionAttribute" Condition="'$(Version)' != '' and '$(GenerateAssemblyInformationalVersionAttribute)' == 'true'">
         <_Parameter1>$(Version)</_Parameter1>
       </AssemblyAttribute>
-      <AssemblyAttribute Include="System.Reflection.AssemblyProductAttribute" Condition="'$(Product)' != ''">
+      <AssemblyAttribute Include="System.Reflection.AssemblyProductAttribute" Condition="'$(Product)' != '' and '$(GenerateAssemblyProductAttribute)' == 'true'">
         <_Parameter1>$(Product)</_Parameter1>
       </AssemblyAttribute>
-      <AssemblyAttribute Include="System.Reflection.AssemblyTitleAttribute" Condition="'$(AssemblyTitle)' != ''">
+      <AssemblyAttribute Include="System.Reflection.AssemblyTitleAttribute" Condition="'$(AssemblyTitle)' != '' and '$(GenerateAssemblyTitleAttribute)' == 'true'">
         <_Parameter1>$(AssemblyTitle)</_Parameter1>
       </AssemblyAttribute>
-      <AssemblyAttribute Include="System.Reflection.AssemblyVersionAttribute" Condition="'$(AssemblyVersion)' != ''">
+      <AssemblyAttribute Include="System.Reflection.AssemblyVersionAttribute" Condition="'$(AssemblyVersion)' != '' and '$(GenerateAssemblyVersionAttribute)' == 'true'">
         <_Parameter1>$(AssemblyVersion)</_Parameter1>
       </AssemblyAttribute>
-      <AssemblyAttribute Include="System.Resources.NeutralResourcesLanguage" Condition="'$(NeutralLanguage)' != ''">
+      <AssemblyAttribute Include="System.Resources.NeutralResourcesLanguageAttribute" Condition="'$(NeutralLanguage)' != '' and '$(GenerateNeutralResourcesLanguageAttribute)'">
         <_Parameter1>$(NeutralLanguage)</_Parameter1>
       </AssemblyAttribute>
     </ItemGroup>

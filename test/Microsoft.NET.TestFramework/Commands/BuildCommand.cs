@@ -26,9 +26,9 @@ namespace Microsoft.NET.TestFramework.Commands
             return command.Execute();
         }
 
-        public DirectoryInfo GetOutputDirectory(string targetFramework)
+        public DirectoryInfo GetOutputDirectory(string targetFramework, string configuration = "Debug")
         {
-            string output = Path.Combine(ProjectRootPath, "bin", "Debug", targetFramework);
+            string output = Path.Combine(ProjectRootPath, "bin", configuration, targetFramework);
             return new DirectoryInfo(output);
         }
     }
