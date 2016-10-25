@@ -108,7 +108,7 @@ namespace Microsoft.Build.UnitTests
             string sdkRootPath = ToolLocationHelper.GetPlatformSDKLocation("Windows", "8.1");
 
             string returnValue = ToolLocationHelper.GetSDKContentFolderPath("Windows", "8.1", null, null, null, null);
-            Assert.Equal(returnValue, sdkRootPath);
+            Assert.Equal(sdkRootPath, returnValue);
         }
 
         [Fact]
@@ -123,10 +123,10 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetSDKRootLocation()
         {
-            string expectedValue = ToolLocationHelper.GetPlatformSDKLocation("UAP", "10.0.10586.0");
+            string expectedValue = ToolLocationHelper.GetPlatformSDKLocation("UAP", "10.0.14944.0");
 
             string versionedSDKValue = ToolLocationHelper.GetSDKContentFolderPath("Windows", "10.0", "UAP", "10.0.14944.0", "10.0.14944.0", null);
-            Assert.Equal(versionedSDKValue, expectedValue);
+            Assert.Equal(expectedValue, versionedSDKValue);
 
             string unversionedSDKValue = ToolLocationHelper.GetSDKContentFolderPath("Windows", "10.0", "UAP", "10.0.10586.0", "10.0.10586.0", null);
             Assert.Equal(expectedValue, unversionedSDKValue);
@@ -145,10 +145,65 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetVersionedSDKUnionMetadataLocation()
         {
-            string sdkRootPath = ToolLocationHelper.GetPlatformSDKLocation("UAP", "10.0.10586.0");
+            string sdkRootPath = ToolLocationHelper.GetPlatformSDKLocation("Windows", "10.0");
 
-            string returnValue = ToolLocationHelper.GetSDKContentFolderPath("Windows", "10.0", "UAP", "10.0.14944.0", "10.0.14944.0", "UnionMetadata");
-            Assert.Equal(Path.Combine(sdkRootPath, "UnionMetadata", "10.0.14944.0"), returnValue);
+            // Create manifest file
+            string platformFolder = Path.Combine(sdkRootPath, @"Platforms\UAP\10.0.14944.0");
+            string platformFilePath = Path.Combine(platformFolder, "Platform.xml");
+
+            bool useTempPlatformFile = false;
+            try
+            {
+                if(!File.Exists(platformFilePath))
+                {
+                    if (!Directory.Exists(platformFolder))
+                    {
+                        Directory.CreateDirectory(platformFolder);
+                    }
+
+                    string platformFileContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<ApplicationPlatform name=""UAP"" friendlyName=""Windows 10 Anniversary Edition Insider Preview"" version=""10.0.14944.0"">
+   <MinimumVisualStudioVersion>14.0.22213.01</MinimumVisualStudioVersion>
+   <VersionedContent>true</VersionedContent>
+   <ContainedApiContracts>
+      <ApiContract name=""Windows.ApplicationModel.Calls.CallsVoipContract"" version=""1.0.0.0"" />
+      <ApiContract name=""Windows.ApplicationModel.SocialInfo.SocialInfoContract"" version=""1.0.0.0""/>
+      <ApiContract name=""Windows.Devices.DevicesLowLevelContract"" version=""3.0.0.0"" />
+      <ApiContract name=""Windows.Devices.Printers.PrintersContract"" version=""1.0.0.0"" />  
+      <ApiContract name=""Windows.Foundation.FoundationContract"" version=""2.0.0.0"" />  
+      <ApiContract name=""Windows.Foundation.UniversalApiContract"" version=""4.0.0.0"" />  
+      <ApiContract name=""Windows.Graphics.Printing3D.Printing3DContract"" version=""3.0.0.0"" />   
+      <ApiContract name=""Windows.Networking.Connectivity.WwanContract"" version=""1.0.0.0"" />  
+      <ApiContract name=""Windows.Services.Store.StoreContract"" version=""1.0.0.0"" />  
+      <ApiContract name=""Windows.Services.TargetedContent.TargetedContentContract"" version=""1.0.0.0"" /> 
+      <ApiContract name=""Windows.System.Profile.ProfileHardwareTokenContract"" version=""1.0.0.0"" /> 
+      <ApiContract name=""Windows.System.Profile.ProfileSharedModeContract"" version=""1.0.0.0"" />
+      <ApiContract name=""Windows.UI.ViewManagement.ViewManagementViewScalingContract"" version=""1.0.0.0"" /> 
+   </ContainedApiContracts>  
+</ApplicationPlatform>";
+
+                    File.WriteAllText(platformFilePath, platformFileContent);
+
+                    ToolLocationHelper.ClearSDKStaticCache();
+                    useTempPlatformFile = true;
+                }
+
+                // Get and verify return value
+                string returnValue = ToolLocationHelper.GetSDKContentFolderPath("Windows", "10.0", "UAP", "10.0.14944.0", "10.0.14944.0", "UnionMetadata");
+                Assert.Equal(Path.Combine(sdkRootPath, "UnionMetadata", "10.0.14944.0"), returnValue);
+            }
+            finally
+            {
+                if(useTempPlatformFile)
+                {
+                    ToolLocationHelper.ClearSDKStaticCache();
+
+                    if (File.Exists(platformFilePath))
+                    {
+                        FileUtilities.DeleteNoThrow(platformFilePath);
+                    }
+                }
+            }
         }
 
         [Fact]
