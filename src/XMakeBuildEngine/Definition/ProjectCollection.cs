@@ -1919,7 +1919,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// The telemetry sent event.
             /// </summary>
-            public event TelemetryEventHandler TelemetrySent;
+            public event TelemetryEventHandler TelemetryLogged;
 
 #endregion
 
@@ -2037,7 +2037,7 @@ namespace Microsoft.Build.Evaluation
                 _taskFinishedEventHandler = new TaskFinishedEventHandler(TaskFinishedHandler);
                 _taskStartedEventHandler = new TaskStartedEventHandler(TaskStartedHandler);
                 _buildWarningEventHandler = new BuildWarningEventHandler(WarningRaisedHandler);
-                _telemetryEventHandler = new TelemetryEventHandler(TelemetrySentHandler);
+                _telemetryEventHandler = new TelemetryEventHandler(TelemetryLoggedHandler);
 
                 // Register for the events.
                 eventSource.AnyEventRaised += _anyEventHandler;
@@ -2054,7 +2054,7 @@ namespace Microsoft.Build.Evaluation
                 eventSource.TaskFinished += _taskFinishedEventHandler;
                 eventSource.TaskStarted += _taskStartedEventHandler;
                 eventSource.WarningRaised += _buildWarningEventHandler;
-                eventSource.TelemetrySent += _telemetryEventHandler;
+                eventSource.TelemetryLogged += _telemetryEventHandler;
             }
 
             /// <summary>
@@ -2077,7 +2077,7 @@ namespace Microsoft.Build.Evaluation
                 eventSource.TaskFinished -= _taskFinishedEventHandler;
                 eventSource.TaskStarted -= _taskStartedEventHandler;
                 eventSource.WarningRaised -= _buildWarningEventHandler;
-                eventSource.TelemetrySent -= _telemetryEventHandler;
+                eventSource.TelemetryLogged -= _telemetryEventHandler;
 
                 // Null out the handlers.
                 _anyEventHandler = null;
@@ -2254,11 +2254,11 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Handler for telemetry events.
             /// </summary>
-            private void TelemetrySentHandler(object sender, TelemetryEventArgs e)
+            private void TelemetryLoggedHandler(object sender, TelemetryEventArgs e)
             {
-                if (TelemetrySent != null)
+                if (TelemetryLogged != null)
                 {
-                    TelemetrySent(sender, e);
+                    TelemetryLogged(sender, e);
                 }
             }
         }

@@ -76,7 +76,7 @@ namespace Microsoft.Build.Framework
     public delegate void AnyEventHandler(object sender, BuildEventArgs e);
 
     /// <summary>
-    /// Type of handler for TelemetrySent events
+    /// Type of handler for TelemetryLogged events
     /// </summary>
     public delegate void TelemetryEventHandler(object sender, TelemetryEventArgs e);
 
@@ -153,13 +153,13 @@ namespace Microsoft.Build.Framework
         event BuildStatusEventHandler StatusEventRaised;
 
         /// <summary>
-        /// this event is raised to log any build event.  These events do not include telemetry.  To receive telemetry, you must attach to the <see cref="TelemetrySent"/> event.
+        /// this event is raised to log any build event.  These events do not include telemetry.  To receive telemetry, you must attach to the <see cref="TelemetryLogged"/> event.
         /// </summary>
         event AnyEventHandler AnyEventRaised;
 
         /// <summary>
-        /// this event is raised to when telemetry is sent.
+        /// this event is raised to when telemetry is logged.
         /// </summary>
-        event TelemetryEventHandler TelemetrySent;
+        event TelemetryEventHandler TelemetryLogged;
     }
 }

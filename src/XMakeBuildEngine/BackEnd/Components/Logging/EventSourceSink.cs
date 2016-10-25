@@ -98,7 +98,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// This event is raised to log telemetry.
         /// </summary>
-        public event TelemetryEventHandler TelemetrySent;
+        public event TelemetryEventHandler TelemetryLogged;
         #endregion
 
         #region Properties
@@ -249,7 +249,7 @@ namespace Microsoft.Build.BackEnd.Logging
             CustomEventRaised = null;
             StatusEventRaised = null;
             AnyEventRaised = null;
-            TelemetrySent = null;
+            TelemetryLogged = null;
         }
 
         #endregion
@@ -858,11 +858,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private void RaiseTelemetryEvent(object sender, TelemetryEventArgs buildEvent)
         {
-            if (TelemetrySent != null)
+            if (TelemetryLogged != null)
             {
                 try
                 {
-                    TelemetrySent(sender, buildEvent);
+                    TelemetryLogged(sender, buildEvent);
                 }
                 catch (LoggerException)
                 {

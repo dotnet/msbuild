@@ -649,6 +649,6 @@ namespace Microsoft.Build.BuildEngine
         /// This event is not used in OrcasEngine
         /// </summary>
         [Obsolete("This event is not available for the older engine.")]
-        public event TelemetryEventHandler TelemetrySent;
+        public event TelemetryEventHandler TelemetryLogged;
     }
 }

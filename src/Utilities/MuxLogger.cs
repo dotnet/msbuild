@@ -446,7 +446,7 @@ namespace Microsoft.Build.Utilities
             /// <summary>
             /// Handle telemetry events.
             /// </summary>
-            private TelemetryEventHandler _telemetrySentEventHandler;
+            private TelemetryEventHandler _telemetryEventHandler;
 
             #endregion
 
@@ -544,7 +544,7 @@ namespace Microsoft.Build.Utilities
             /// <summary>
             /// This event is raised when telemetry is sent.
             /// </summary>
-            public event TelemetryEventHandler TelemetrySent;
+            public event TelemetryEventHandler TelemetryLogged;
 
             #endregion
 
@@ -1258,11 +1258,11 @@ namespace Microsoft.Build.Utilities
             {
                 lock (_syncLock)
                 {
-                    if (TelemetrySent != null)
+                    if (TelemetryLogged != null)
                     {
                         try
                         {
-                            TelemetrySent(sender, buildEvent);
+                            TelemetryLogged(sender, buildEvent);
                         }
                         catch (LoggerException)
                         {
@@ -1303,7 +1303,7 @@ namespace Microsoft.Build.Utilities
                 _taskFinishedEventHandler = new TaskFinishedEventHandler(RaiseTaskFinishedEvent);
                 _taskStartedEventHandler = new TaskStartedEventHandler(RaiseTaskStartedEvent);
                 _buildWarningEventHandler = new BuildWarningEventHandler(RaiseWarningEvent);
-                _telemetrySentEventHandler = new TelemetryEventHandler(RaiseTelemetryEvent);
+                _telemetryEventHandler = new TelemetryEventHandler(RaiseTelemetryEvent);
 
                 _eventSourceForBuild.AnyEventRaised += _anyEventHandler;
                 _eventSourceForBuild.BuildFinished += _buildFinishedEventHandler;
@@ -1319,7 +1319,7 @@ namespace Microsoft.Build.Utilities
                 _eventSourceForBuild.TaskFinished += _taskFinishedEventHandler;
                 _eventSourceForBuild.TaskStarted += _taskStartedEventHandler;
                 _eventSourceForBuild.WarningRaised += _buildWarningEventHandler;
-                _eventSourceForBuild.TelemetrySent += _telemetrySentEventHandler;
+                _eventSourceForBuild.TelemetryLogged += _telemetryEventHandler;
             }
 
             /// <summary>
@@ -1341,7 +1341,7 @@ namespace Microsoft.Build.Utilities
                 _eventSourceForBuild.TaskFinished -= _taskFinishedEventHandler;
                 _eventSourceForBuild.TaskStarted -= _taskStartedEventHandler;
                 _eventSourceForBuild.WarningRaised -= _buildWarningEventHandler;
-                _eventSourceForBuild.TelemetrySent -= _telemetrySentEventHandler;
+                _eventSourceForBuild.TelemetryLogged -= _telemetryEventHandler;
 
                 MessageRaised = null;
                 ErrorRaised = null;
@@ -1357,7 +1357,7 @@ namespace Microsoft.Build.Utilities
                 CustomEventRaised = null;
                 StatusEventRaised = null;
                 AnyEventRaised = null;
-                TelemetrySent = null;
+                TelemetryLogged = null;
             }
             #endregion
         }

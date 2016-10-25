@@ -88,7 +88,7 @@ namespace Microsoft.Build.BackEnd.Logging
             eventSource.AnyEventRaised += new AnyEventHandler(EventSource_AnyEventRaised);
 
             // Telemetry events aren't part of "all" so they need to be forwarded separately
-            eventSource.TelemetrySent += EventSource_AnyEventRaised;
+            eventSource.TelemetryLogged += EventSource_AnyEventRaised;
         }
 
         /// <summary>
