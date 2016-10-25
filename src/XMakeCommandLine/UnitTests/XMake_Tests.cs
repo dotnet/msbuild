@@ -592,8 +592,9 @@ namespace Microsoft.Build.UnitTests
                 Environment.SetEnvironmentVariable("MSBuildOldOM", "");
 
                 startDirectory = CopyMSBuild();
-                var newPathToMSBuildExe = Path.Combine(startDirectory, "msbuild.exe");
-                var pathToConfigFile = Path.Combine(startDirectory, "msbuild.exe.config");
+                var msbuildExeName = Path.GetFileName(RunnerUtilities.PathToCurrentlyRunningMsBuildExe);
+                var newPathToMSBuildExe = Path.Combine(startDirectory, msbuildExeName);
+                var pathToConfigFile = Path.Combine(startDirectory, msbuildExeName + ".config");
 
                 string configContent = @"<?xml version =""1.0""?>
                                             <configuration>
