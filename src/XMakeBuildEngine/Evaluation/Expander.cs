@@ -1718,7 +1718,7 @@ namespace Microsoft.Build.Evaluation
             /// 
             /// Returns true if ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and so it broke out early.
             /// </summary>
-            /// 
+            /// <param name="isTransformExpression"></param>
             /// <param name="itemsFromCapture">
             /// List of items.
             /// 
@@ -1728,6 +1728,12 @@ namespace Microsoft.Build.Evaluation
             /// Item1 differs from Item2's string when it is coming from a transform
             /// 
             /// </param>
+            /// <param name="expander"></param>
+            /// <param name="expressionCapture"></param>
+            /// <param name="evaluatedItems"></param>
+            /// <param name="elementLocation"></param>
+            /// <param name="options"></param>
+            /// <param name="includeNullEntries"></param>
             internal static bool ExpandExpressionCapture<S>(
                 Expander<P, I> expander,
                 ExpressionShredder.ItemExpressionCapture expressionCapture,

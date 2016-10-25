@@ -297,7 +297,12 @@ namespace Microsoft.Build.Evaluation
         /// Properties that should be associated with the Toolset.
         /// May be null, in which case an empty property group will be used.
         /// </param>
-        /// <param name="importSearchPathsTable">Map of parameter name to <see cref="PropertyWithFallbackPaths"/> for use during Import.</param>
+        /// <param name="environmentProperties">A <see cref="PropertyDictionary{ProjectPropertyInstance}"/> containing the environment properties.</param>
+        /// <param name="globalProperties">A <see cref="PropertyDictionary{ProjectPropertyInstance}"/> containing the global properties.</param>
+        /// <param name="subToolsets">A list of <see cref="SubToolset"/> to use.</param>
+        /// <param name="msbuildOverrideTasksPath">The override tasks path.</param>
+        /// <param name="defaultOverrideToolsVersion">ToolsVersion to use as the default ToolsVersion for this version of MSBuild.</param>
+        /// <param name="importSearchPathsTable">Map of parameter name to property search paths for use during Import.</param>
         internal Toolset(string toolsVersion, string toolsPath, PropertyDictionary<ProjectPropertyInstance> buildProperties, PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, IDictionary<string, SubToolset> subToolsets, string msbuildOverrideTasksPath, string defaultOverrideToolsVersion, Dictionary<string, ProjectImportPathMatch> importSearchPathsTable = null)
             : this(toolsVersion, toolsPath, environmentProperties, globalProperties, msbuildOverrideTasksPath, defaultOverrideToolsVersion)
         {
