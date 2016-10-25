@@ -26,7 +26,7 @@ namespace Microsoft.Build.UnitTests
      * is somewhat of a no-no for task assemblies.
      * 
      **************************************************************************/
-    sealed internal class MockEngine : IBuildEngine4
+    sealed internal class MockEngine : IBuildEngine5
     {
         private bool _isRunningMultipleNodes;
         private int _messages = 0;
@@ -128,6 +128,26 @@ namespace Microsoft.Build.UnitTests
             _log += eventArgs.Message;
             _log += "\n";
             ++_messages;
+        }
+
+        public void LogTelemetry(string eventName, IDictionary<string, string> properties)
+        {
+            if (_logToConsole)
+            {
+                Console.WriteLine($"Received telemetry event '{eventName}'");
+            }
+            _log += $"Received telemetry event '{eventName}'{Environment.NewLine}";
+            if (properties != null)
+            {
+                foreach (string key in properties.Keys)
+                {
+                    if (_logToConsole)
+                    {
+                        Console.WriteLine($"  Property '{key}' = '{properties[key]}'{Environment.NewLine}");
+                    }
+                    _log += $"  Property '{key}' = '{properties[key]}'{Environment.NewLine}";
+                }
+            }
         }
 
         public bool ContinueOnError

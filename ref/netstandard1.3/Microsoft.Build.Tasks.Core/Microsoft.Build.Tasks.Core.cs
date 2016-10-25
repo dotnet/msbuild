@@ -564,6 +564,14 @@ namespace Microsoft.Build.Tasks
         public System.Resources.ResourceManager TaskSharedResources { get { throw null; } set { } }
         public override string FormatResourceString(string resourceName, params object[] args) { throw null; }
     }
+    public sealed partial class Telemetry : Microsoft.Build.Tasks.TaskExtension
+    {
+        public Telemetry() { }
+        public string EventData { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        [Microsoft.Build.Framework.RequiredAttribute]
+        public string EventName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public override bool Execute() { throw null; }
+    }
     public abstract partial class ToolTaskExtension : Microsoft.Build.Utilities.ToolTask
     {
         internal ToolTaskExtension() { }

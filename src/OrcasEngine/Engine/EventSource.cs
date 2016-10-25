@@ -644,5 +644,11 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <owner> t-jeffv, sumedhk </owner>
         public event AnyEventHandler AnyEventRaised;
+
+        /// <summary>
+        /// This event is not used in OrcasEngine
+        /// </summary>
+        [Obsolete("This event is not available for the older engine.")]
+        public event TelemetryEventHandler TelemetryLogged;
     }
 }

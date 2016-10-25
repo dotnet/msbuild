@@ -442,6 +442,12 @@ namespace Microsoft.Build.Utilities
             /// Handle warning events
             /// </summary>
             private BuildWarningEventHandler _buildWarningEventHandler = null;
+
+            /// <summary>
+            /// Handle telemetry events.
+            /// </summary>
+            private TelemetryEventHandler _telemetryEventHandler;
+
             #endregion
 
             /// <summary>
@@ -534,6 +540,11 @@ namespace Microsoft.Build.Utilities
             /// occurred.  It is raised on every event.
             /// </summary>
             public event AnyEventHandler AnyEventRaised;
+
+            /// <summary>
+            /// This event is raised when telemetry is sent.
+            /// </summary>
+            public event TelemetryEventHandler TelemetryLogged;
 
             #endregion
 
@@ -1239,6 +1250,37 @@ namespace Microsoft.Build.Utilities
                     }
                 }
             }
+
+            /// <summary>
+            /// Raises a telemetry event to all registered loggers.
+            /// </summary>
+            internal void RaiseTelemetryEvent(object sender, TelemetryEventArgs buildEvent)
+            {
+                lock (_syncLock)
+                {
+                    if (TelemetryLogged != null)
+                    {
+                        try
+                        {
+                            TelemetryLogged(sender, buildEvent);
+                        }
+                        catch (LoggerException)
+                        {
+                            // if a logger has failed politely, abort immediately
+                            // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
+                            // if a fellow logger is throwing in an event handler.
+                            this.UnregisterAllEventHandlers();
+                            throw;
+                        }
+                        catch (Exception)
+                        {
+                            // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
+                            // if a fellow logger is throwing in an event handler.
+                            this.UnregisterAllEventHandlers();
+                        }
+                    }
+                }
+            }
             #endregion
 
             #region private methods
@@ -1261,6 +1303,7 @@ namespace Microsoft.Build.Utilities
                 _taskFinishedEventHandler = new TaskFinishedEventHandler(RaiseTaskFinishedEvent);
                 _taskStartedEventHandler = new TaskStartedEventHandler(RaiseTaskStartedEvent);
                 _buildWarningEventHandler = new BuildWarningEventHandler(RaiseWarningEvent);
+                _telemetryEventHandler = new TelemetryEventHandler(RaiseTelemetryEvent);
 
                 _eventSourceForBuild.AnyEventRaised += _anyEventHandler;
                 _eventSourceForBuild.BuildFinished += _buildFinishedEventHandler;
@@ -1276,6 +1319,7 @@ namespace Microsoft.Build.Utilities
                 _eventSourceForBuild.TaskFinished += _taskFinishedEventHandler;
                 _eventSourceForBuild.TaskStarted += _taskStartedEventHandler;
                 _eventSourceForBuild.WarningRaised += _buildWarningEventHandler;
+                _eventSourceForBuild.TelemetryLogged += _telemetryEventHandler;
             }
 
             /// <summary>
@@ -1297,6 +1341,7 @@ namespace Microsoft.Build.Utilities
                 _eventSourceForBuild.TaskFinished -= _taskFinishedEventHandler;
                 _eventSourceForBuild.TaskStarted -= _taskStartedEventHandler;
                 _eventSourceForBuild.WarningRaised -= _buildWarningEventHandler;
+                _eventSourceForBuild.TelemetryLogged -= _telemetryEventHandler;
 
                 MessageRaised = null;
                 ErrorRaised = null;
@@ -1312,6 +1357,7 @@ namespace Microsoft.Build.Utilities
                 CustomEventRaised = null;
                 StatusEventRaised = null;
                 AnyEventRaised = null;
+                TelemetryLogged = null;
             }
             #endregion
         }

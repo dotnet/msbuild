@@ -94,7 +94,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// occurred.  It is raised on every event.
         /// </summary>
         public event AnyEventHandler AnyEventRaised;
-
+        
+        /// <summary>
+        /// This event is raised to log telemetry.
+        /// </summary>
+        public event TelemetryEventHandler TelemetryLogged;
         #endregion
 
         #region Properties
@@ -205,6 +209,10 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 this.RaiseErrorEvent(null, (BuildErrorEventArgs)buildEvent);
             }
+            else if (buildEvent is TelemetryEventArgs)
+            {
+                this.RaiseTelemetryEvent(null, (TelemetryEventArgs) buildEvent);
+            }
             else
             {
                 ErrorUtilities.VerifyThrow(false, "Unknown event args type.");
@@ -241,6 +249,7 @@ namespace Microsoft.Build.BackEnd.Logging
             CustomEventRaised = null;
             StatusEventRaised = null;
             AnyEventRaised = null;
+            TelemetryLogged = null;
         }
 
         #endregion
@@ -833,6 +842,41 @@ namespace Microsoft.Build.BackEnd.Logging
                     // catch(Exception) block and not rethrowing it, there's the possibility that this exception could 
                     // just get silently eaten.  So better to have duplicates than to not log the problem at all. :) 
                     ExceptionHandling.DumpExceptionToFile(exception);
+
+                    if (ExceptionHandling.IsCriticalException(exception))
+                    {
+                        throw;
+                    }
+
+                    InternalLoggerException.Throw(exception, buildEvent, "FatalErrorWhileLogging", false);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Raises the a telemetry event to all registered loggers.
+        /// </summary>
+        private void RaiseTelemetryEvent(object sender, TelemetryEventArgs buildEvent)
+        {
+            if (TelemetryLogged != null)
+            {
+                try
+                {
+                    TelemetryLogged(sender, buildEvent);
+                }
+                catch (LoggerException)
+                {
+                    // if a logger has failed politely, abort immediately
+                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
+                    // if a fellow logger is throwing in an event handler.
+                    this.UnregisterAllEventHandlers();
+                    throw;
+                }
+                catch (Exception exception)
+                {
+                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
+                    // if a fellow logger is throwing in an event handler.
+                    this.UnregisterAllEventHandlers();
 
                     if (ExceptionHandling.IsCriticalException(exception))
                     {

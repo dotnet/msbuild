@@ -401,6 +401,16 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="success">True of the task finished successfully, false otherwise.</param>
         void LogTaskFinished(BuildEventContext taskBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, bool success);
         #endregion
+
+        #region Log telemetry
+        /// <summary>
+        /// Logs telemetry.
+        /// </summary>
+        /// <param name="buildEventContext">The event context of the task which sent the telemetry.</param>
+        /// <param name="eventName">The event name.</param>
+        /// <param name="properties">The list of properties associated with the event.</param>
+        void LogTelemetry(BuildEventContext buildEventContext, string eventName, IDictionary<string, string> properties);
+        #endregion
     }
 
     /// <summary>

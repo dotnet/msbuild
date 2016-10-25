@@ -152,6 +152,7 @@
     <UsingTask TaskName="Microsoft.Build.Tasks.ResolveNonMSBuildProjectOutput"        AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
     <UsingTask TaskName="Microsoft.Build.Tasks.SGen"                                  AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
     <UsingTask TaskName="Microsoft.Build.Tasks.SignFile"                              AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.Telemetry"                             AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
     <UsingTask TaskName="Microsoft.Build.Tasks.Touch"                                 AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
 
     <UsingTask TaskName="Microsoft.Build.Tasks.UnregisterAssembly"                    AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="('$(MSBuildAssemblyVersion)' != '') and '$(DisableOutOfProcTaskHost)' != ''" />

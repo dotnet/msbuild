@@ -2606,7 +2606,16 @@
   <data name="Copy.ExactlyOneTypeOfLink">
     <value>MSB3891: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</value>    
   </data>
-  
+
+  <!--
+        MSB3901 - MSB3910   Task: Telemetry
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="Telemetry.IllegalEventDataString">
+    <value>The property "{0}" in the telemetry event data property list "{1}" is malformed.  Please only pass in a semicolon-delimited list of constant string values separated by "=", e.g., "Property1=Value1;Property2=Value2".</value>
+  </data>
+
+
   <!--
         The tasks message bucket is: MSB3001 - MSB3999
 
@@ -2684,6 +2693,7 @@
             MSB3871 - MSB3880   Targets: Code sharing
             MSB3881 - MSB3890   Task: Compiler
             MSB3891 - MSB3900   Overflow: Copy
+            MSB3901 - MSB3910   Task: Telemetry
 
             MSB4000 - MSB4200   Portable targets & tasks (vsproject\flavors\portable\msbuild)
             MSB9000 - MSB9900   MSBuild targets files (C++)
