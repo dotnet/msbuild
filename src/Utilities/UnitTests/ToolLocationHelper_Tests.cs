@@ -108,7 +108,7 @@ namespace Microsoft.Build.UnitTests
             string sdkRootPath = ToolLocationHelper.GetPlatformSDKLocation("Windows", "8.1");
 
             string returnValue = ToolLocationHelper.GetSDKContentFolderPath("Windows", "8.1", null, null, null, null);
-            Assert.True(string.Equals(returnValue, sdkRootPath));
+            Assert.Equal(returnValue, sdkRootPath);
         }
 
         [Fact]
@@ -117,7 +117,7 @@ namespace Microsoft.Build.UnitTests
             string sdkRootPath = ToolLocationHelper.GetPlatformSDKLocation("Windows", "8.1");
 
             string returnValue = ToolLocationHelper.GetSDKContentFolderPath("Windows", "8.1", null, null, null, @"DesignTime\CommonConfiguration\Neutral");
-            Assert.True(string.Equals(returnValue, Path.Combine(sdkRootPath, @"DesignTime\CommonConfiguration\Neutral")));
+            Assert.Equal(returnValue, Path.Combine(sdkRootPath, @"DesignTime\CommonConfiguration\Neutral"));
         }
 
         [Fact]
@@ -126,10 +126,10 @@ namespace Microsoft.Build.UnitTests
             string expectedValue = ToolLocationHelper.GetPlatformSDKLocation("Windows", "10.0");
 
             string versionedSDKValue = ToolLocationHelper.GetSDKContentFolderPath("Windows", "10.0", "UAP", "10.0.14944.0", "10.0.14944.0", null);
-            Assert.True(string.Equals(versionedSDKValue, expectedValue));
+            Assert.Equal(versionedSDKValue, expectedValue);
 
             string unversionedSDKValue = ToolLocationHelper.GetSDKContentFolderPath("Windows", "10.0", "UAP", "10.0.10586.0", "10.0.10586.0", null);
-            Assert.True(string.Equals(unversionedSDKValue, expectedValue));
+            Assert.Equal(unversionedSDKValue, expectedValue);
         }
 
         [Fact]
@@ -139,7 +139,7 @@ namespace Microsoft.Build.UnitTests
 
             string returnValue = ToolLocationHelper.GetSDKContentFolderPath("Windows", "10.0", "UAP", "10.0.10586.0", "10.0.10586.0", "UnionMetadata");
             Assert.False(returnValue.Contains("10.0.10586.0"));
-            Assert.True(string.Equals(returnValue, Path.Combine(sdkRootPath, "UnionMetadata")));
+            Assert.Equal(returnValue, Path.Combine(sdkRootPath, "UnionMetadata"));
         }
 
         [Fact]
@@ -148,7 +148,7 @@ namespace Microsoft.Build.UnitTests
             string sdkRootPath = ToolLocationHelper.GetPlatformSDKLocation("Windows", "10.0");
 
             string returnValue = ToolLocationHelper.GetSDKContentFolderPath("Windows", "10.0", "UAP", "10.0.14944.0", "10.0.14944.0", "UnionMetadata");
-            Assert.True(string.Equals(returnValue, Path.Combine(sdkRootPath, "UnionMetadata", "10.0.14944.0")));
+            Assert.Equal(returnValue, Path.Combine(sdkRootPath, "UnionMetadata", "10.0.14944.0"));
         }
 
         [Fact]

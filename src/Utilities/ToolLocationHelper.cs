@@ -1072,47 +1072,19 @@ namespace Microsoft.Build.Utilities
 
             string[] contractWinMDs = new string[0];
 
-            try
+            TargetPlatformSDK matchingSdk = GetMatchingPlatformSDK(targetPlatformIdentifier, targetPlatformVersion, diskRoots, null, registryRoot);
+            string platformKey = TargetPlatformSDK.GetSdkKey(targetPlatformIdentifier, targetPlatformVersion);
+            GetValueUsingMatchingSDKManifest(matchingSdk, platformKey, (manifest) =>
             {
-                // TODO: Add caching so that we only have to read all this stuff in once. 
-                TargetPlatformSDK matchingSdk = GetMatchingPlatformSDK(targetPlatformIdentifier, targetPlatformVersion, diskRoots, null, registryRoot);
-                string platformManifestLocation = null;
-
-                if (matchingSdk != null)
+                if (manifest.VersionedContent)
                 {
-                    string platformKey = TargetPlatformSDK.GetSdkKey(targetPlatformIdentifier, targetPlatformVersion);
-
-                    if (!matchingSdk.Platforms.TryGetValue(platformKey, out platformManifestLocation))
-                    {
-                        ErrorUtilities.DebugTraceMessage("GetTargetPlatformReferencesFromManifest", "Target platform location '{0}' did not exist or did not contain Platform.xml", platformManifestLocation);
-                    }
+                    contractWinMDs = GetApiContractReferences(manifest.ApiContracts, matchingSdk.Path, manifest.PlatformVersion);
                 }
                 else
                 {
-                    ErrorUtilities.DebugTraceMessage("GetTargetPlatformReferencesFromManifest", "Could not find root SDK for SDKI = '{0}', SDKV = '{1}'", sdkIdentifier, sdkVersion);
+                    contractWinMDs = GetApiContractReferences(manifest.ApiContracts, matchingSdk.Path);
                 }
-
-                if (!String.IsNullOrEmpty(platformManifestLocation))
-                {
-                    PlatformManifest manifest = new PlatformManifest(platformManifestLocation);
-
-                    if (!manifest.ReadError)
-                    {
-                        if (manifest.VersionedContent)
-                        {
-                            contractWinMDs = GetApiContractReferences(manifest.ApiContracts, matchingSdk.Path, manifest.PlatformVersion);
-                        }
-                        else
-                        {
-                            contractWinMDs = GetApiContractReferences(manifest.ApiContracts, matchingSdk.Path);
-                        }
-                    }
-                }
-            }
-            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-            {
-                ErrorUtilities.DebugTraceMessage("GetTargetPlatformReferences", "Encountered exception trying to gather the platform references: {0}", e.Message);
-            }
+            });
 
             return contractWinMDs;
         }
@@ -1166,6 +1138,40 @@ namespace Microsoft.Build.Utilities
             return contractWinMDs.ToArray();
         }
 
+        private static void GetValueUsingMatchingSDKManifest(TargetPlatformSDK matchingSdk, string platformKey, Action<PlatformManifest> action)
+        {
+            try
+            {
+                string platformManifestLocation = null;
+
+                if (matchingSdk != null)
+                {
+                    if (!matchingSdk.Platforms.TryGetValue(platformKey, out platformManifestLocation))
+                    {
+                        ErrorUtilities.DebugTraceMessage("GetValueUsingMatchingSDKManifest", "Target platform location '{0}' did not exist or did not contain Platform.xml", platformManifestLocation);
+                    }
+                }
+                else
+                {
+                    ErrorUtilities.DebugTraceMessage("GetValueUsingMatchingSDKManifest", "Could not find root SDK for SDKI = '{0}', SDKV = '{1}'", matchingSdk.TargetPlatformIdentifier, matchingSdk.TargetPlatformVersion);
+                }
+
+                if (!String.IsNullOrEmpty(platformManifestLocation))
+                {
+                    PlatformManifest manifest = new PlatformManifest(platformManifestLocation);
+
+                    if (!manifest.ReadError)
+                    {
+                        action(manifest);
+                    }
+                }
+            }
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+            {
+                ErrorUtilities.DebugTraceMessage("GetValueUsingMatchingSDKManifest", "Encountered exception trying to check if SDK is versioned: {0}", e.Message);
+            }
+        }
+
         /// <summary>
         /// Return the versioned/unversioned SDK content folder path
         /// </summary>
@@ -1188,7 +1194,7 @@ namespace Microsoft.Build.Utilities
             ErrorUtilities.VerifyThrowArgumentLength(sdkVersion, "sdkVersion");
 
             // Avoid exception in Path.Combine
-            if(folderName == null)
+            if (folderName == null)
             {
                 folderName = string.Empty;
             }
@@ -1204,46 +1210,21 @@ namespace Microsoft.Build.Utilities
             ErrorUtilities.VerifyThrowArgumentLength(targetPlatformVersion, "targetPlatformVersion");
 
             string sdkContentFolderPath = null;
-            try
+
+            TargetPlatformSDK matchingSdk = GetMatchingPlatformSDK(targetPlatformIdentifier, targetPlatformVersion, null, null, null);
+
+            string platformKey = TargetPlatformSDK.GetSdkKey(targetPlatformIdentifier, targetPlatformVersion);
+            GetValueUsingMatchingSDKManifest(matchingSdk, platformKey, (manifest) =>
             {
-                TargetPlatformSDK matchingSdk = GetMatchingPlatformSDK(targetPlatformIdentifier, targetPlatformVersion, null, null, null);
-                string platformManifestLocation = null;
-
-                if (matchingSdk != null)
+                if (manifest.VersionedContent)
                 {
-                    string platformKey = TargetPlatformSDK.GetSdkKey(targetPlatformIdentifier, targetPlatformVersion);
-
-                    if (!matchingSdk.Platforms.TryGetValue(platformKey, out platformManifestLocation))
-                    {
-                        ErrorUtilities.DebugTraceMessage("GetTargetPlatformReferencesFromManifest", "Target platform location '{0}' did not exist or did not contain Platform.xml", platformManifestLocation);
-                    }
+                    sdkContentFolderPath = Path.Combine(matchingSdk.Path, folderName, targetPlatformVersion);
                 }
                 else
                 {
-                    ErrorUtilities.DebugTraceMessage("GetTargetPlatformReferencesFromManifest", "Could not find root SDK for SDKI = '{0}', SDKV = '{1}'", sdkIdentifier, sdkVersion);
+                    sdkContentFolderPath = Path.Combine(matchingSdk.Path, folderName);
                 }
-
-                if (!String.IsNullOrEmpty(platformManifestLocation))
-                {
-                    PlatformManifest manifest = new PlatformManifest(platformManifestLocation);
-
-                    if (!manifest.ReadError)
-                    {
-                        if (manifest.VersionedContent)
-                        {
-                            sdkContentFolderPath = Path.Combine(matchingSdk.Path, folderName, targetPlatformVersion);
-                        }
-                        else
-                        {
-                            sdkContentFolderPath = Path.Combine(matchingSdk.Path, folderName);
-                        }
-                    }
-                }
-            }
-            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-            {
-                ErrorUtilities.DebugTraceMessage("GetSDKContentFolderPath", "Encountered exception trying to gather the SDK content foler path: {0}", e.Message);
-            }
+            });
 
             return sdkContentFolderPath;
         }
