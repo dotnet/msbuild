@@ -151,9 +151,9 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Return true if the given <param name="item"/> matches this itemspec
+        /// Return true if the given <paramref name="item"/> matches this itemspec
         /// </summary>
-        /// <param name="item"></param>
+        /// <param name="item">The item to attempt to find a match for.</param>
         /// <returns></returns>
         public bool MatchesItem(I item)
         {
@@ -161,10 +161,11 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Return the fragments that match against the given <param name="itemToMatch"/>
+        /// Return the fragments that match against the given <paramref name="itemToMatch"/>
         /// </summary>
+        /// <param name="itemToMatch">The item to match.</param>
         /// <param name="matches">
-        /// Total number of matches. Some fragments match more than once (item expression may contain multiple instances of <param name="itemToMatch"/>)
+        /// Total number of matches. Some fragments match more than once (item expression may contain multiple instances of <paramref name="itemToMatch"/>)
         /// </param>
         public IEnumerable<ItemFragment> FragmentsMatchingItem(string itemToMatch, out int matches)
         {
