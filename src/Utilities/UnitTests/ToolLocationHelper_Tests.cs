@@ -147,19 +147,19 @@ namespace Microsoft.Build.UnitTests
         {
             // Create manifest file
             string platformRootFolder = Path.Combine(Path.GetTempPath(), @"MockSDK");
-            string sdkRooFolder = Path.Combine(platformRootFolder, @"Windows Kits\10");
-            string platformFolder = Path.Combine(sdkRooFolder, @"Platforms\UAP\10.0.14944.0");
+            string sdkRootFolder = Path.Combine(platformRootFolder, @"Windows Kits\10");
+            string platformFolder = Path.Combine(sdkRootFolder, @"Platforms\UAP\10.0.14944.0");
             string platformFilePath = Path.Combine(platformFolder, "Platform.xml");
-            string sdkManifestFilePath = Path.Combine(sdkRooFolder, "SDKManifest.xml");
+            string sdkManifestFilePath = Path.Combine(sdkRootFolder, "SDKManifest.xml");
 
             bool useTempPlatformFile = false;
             try
             {
                 if (!File.Exists(platformFilePath))
                 {
-                    if (!Directory.Exists(sdkRooFolder))
+                    if (!Directory.Exists(sdkRootFolder))
                     {
-                        Directory.CreateDirectory(sdkRooFolder);
+                        Directory.CreateDirectory(sdkRootFolder);
                     }
 
                     if (!Directory.Exists(platformFolder))
@@ -191,7 +191,7 @@ namespace Microsoft.Build.UnitTests
 
                 // Get and verify return value
                 string returnValue = ToolLocationHelper.GetSDKContentFolderPath("Windows", "10.0", "UAP", "10.0.14944.0", "10.0.14944.0", "UnionMetadata", platformRootFolder);
-                Assert.Equal(Path.Combine(sdkRooFolder, "UnionMetadata", "10.0.14944.0"), returnValue);
+                Assert.Equal(Path.Combine(sdkRootFolder, "UnionMetadata", "10.0.14944.0"), returnValue);
             }
             finally
             {
