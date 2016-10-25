@@ -103,6 +103,106 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void GetWinBlueSDKLocation()
+        {
+            string sdkRootPath = ToolLocationHelper.GetPlatformSDKLocation("Windows", "8.1");
+
+            string returnValue = ToolLocationHelper.GetSDKContentFolderPath("Windows", "8.1", null, null, null, null);
+            Assert.Equal(sdkRootPath, returnValue);
+        }
+
+        [Fact]
+        public void GetWinBlueContentFolderPath()
+        {
+            string sdkRootPath = ToolLocationHelper.GetPlatformSDKLocation("Windows", "8.1");
+
+            string returnValue = ToolLocationHelper.GetSDKContentFolderPath("Windows", "8.1", null, null, null, @"DesignTime\CommonConfiguration\Neutral");
+            Assert.Equal(Path.Combine(sdkRootPath, @"DesignTime\CommonConfiguration\Neutral"), returnValue);
+        }
+
+        [Fact]
+        public void GetSDKRootLocation()
+        {
+            string expectedValue = ToolLocationHelper.GetPlatformSDKLocation("Windows", "10.0");
+
+            string versionedSDKValue = ToolLocationHelper.GetSDKContentFolderPath("Windows", "10.0", "UAP", "10.0.14944.0", "10.0.14944.0", null);
+            Assert.Equal(expectedValue, versionedSDKValue);
+
+            string unversionedSDKValue = ToolLocationHelper.GetSDKContentFolderPath("Windows", "10.0", "UAP", "10.0.10586.0", "10.0.10586.0", null);
+            Assert.Equal(expectedValue, unversionedSDKValue);
+        }
+
+        [Fact]
+        public void GetUnversionedSDKUnionMetadataLocation()
+        {
+            string sdkRootPath = ToolLocationHelper.GetPlatformSDKLocation("Windows", "10.0");
+
+            string returnValue = ToolLocationHelper.GetSDKContentFolderPath("Windows", "10.0", "UAP", "10.0.10586.0", "10.0.10586.0", "UnionMetadata");
+            Assert.False(returnValue.Contains("10.0.10586.0"));
+            Assert.Equal(Path.Combine(sdkRootPath, "UnionMetadata"), returnValue);
+        }
+
+        [Fact]
+        public void GetVersionedSDKUnionMetadataLocation()
+        {
+            // Create manifest file
+            string platformRootFolder = Path.Combine(Path.GetTempPath(), @"MockSDK");
+            string sdkRootFolder = Path.Combine(platformRootFolder, @"Windows Kits\10");
+            string platformFolder = Path.Combine(sdkRootFolder, @"Platforms\UAP\10.0.14944.0");
+            string platformFilePath = Path.Combine(platformFolder, "Platform.xml");
+            string sdkManifestFilePath = Path.Combine(sdkRootFolder, "SDKManifest.xml");
+
+            bool useTempPlatformFile = false;
+            try
+            {
+                if (!File.Exists(platformFilePath))
+                {
+                    if (!Directory.Exists(sdkRootFolder))
+                    {
+                        Directory.CreateDirectory(sdkRootFolder);
+                    }
+
+                    if (!Directory.Exists(platformFolder))
+                    {
+                        Directory.CreateDirectory(platformFolder);
+                    }
+
+                    string sdkManifestFileContent = @"<?xml version=""1.0"" encoding=""utf-8"" ?>
+<FileList 
+  TargetPlatform=""UAP""
+  TargetPlatformMinVersion=""10.0.0.0""
+  TargetPlatformVersion=""10.0.14944.0""
+  DisplayName = ""Microsoft Mock SDK for UAP 10.0.14944.0""
+  AppliesTo = ""WindowsAppContainer + (Managed | Javascript | Native)""
+  MinVSVersion = ""14.0""
+  SupportsMultipleVersions=""Error""
+  SupportedArchitectures=""x86;x64;ARM;ARM64"">
+</FileList>";
+                    string platformFileContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<ApplicationPlatform name=""UAP"" friendlyName=""Windows 10 Anniversary Edition Insider Preview"" version=""10.0.14944.0"">
+   <VersionedContent>true</VersionedContent>
+</ApplicationPlatform>";
+
+                    File.WriteAllText(platformFilePath, platformFileContent);
+                    File.WriteAllText(sdkManifestFilePath, sdkManifestFileContent);
+
+                    useTempPlatformFile = true;
+                }
+
+                // Get and verify return value
+                string returnValue = ToolLocationHelper.GetSDKContentFolderPath("Windows", "10.0", "UAP", "10.0.14944.0", "10.0.14944.0", "UnionMetadata", platformRootFolder);
+                Assert.Equal(Path.Combine(sdkRootFolder, "UnionMetadata", "10.0.14944.0"), returnValue);
+            }
+            finally
+            {
+                if (useTempPlatformFile)
+                {
+                    FileUtilities.DeleteDirectoryNoThrow(platformRootFolder, true);
+                }
+            }
+        }
+
+        [Fact]
         public void GatherExtensionSDKsInvalidVersionDirectory()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
