@@ -829,7 +829,15 @@ namespace Microsoft.Build.UnitTests
             Assert.True(File.Exists(_pathToArbitraryBogusFile));
 
             bool successfulExit;
-            string output = RunnerUtilities.ExecMSBuild('"' + RunnerUtilities.PathToCurrentlyRunningMsBuildExe + '"', msbuildParameters, out successfulExit);
+            string pathToMSBuildExe = RunnerUtilities.PathToCurrentlyRunningMsBuildExe;
+            // This @pathToMSBuildExe is used directly with Process, so don't quote it on
+            // Unix
+            if (NativeMethodsShared.IsWindows)
+            {
+                pathToMSBuildExe = "\"" + pathToMSBuildExe + "\"";
+            }
+
+            string output = RunnerUtilities.ExecMSBuild(pathToMSBuildExe, msbuildParameters, out successfulExit);
             Assert.False(successfulExit);
 
             Assert.Contains(RunnerUtilities.PathToCurrentlyRunningMsBuildExe + (NativeMethodsShared.IsWindows ? " /v:diag " : " -v:diag ") + _pathToArbitraryBogusFile, output, StringComparison.OrdinalIgnoreCase);
