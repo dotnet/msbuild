@@ -1153,7 +1153,7 @@ namespace Microsoft.Build.Utilities
                 }
                 else
                 {
-                    ErrorUtilities.DebugTraceMessage("GetValueUsingMatchingSDKManifest", "Could not find root SDK for SDKI = '{0}', SDKV = '{1}'", matchingSdk.TargetPlatformIdentifier, matchingSdk.TargetPlatformVersion);
+                    ErrorUtilities.DebugTraceMessage("GetValueUsingMatchingSDKManifest", "Could not find root SDK for '{0}'", platformKey);
                 }
 
                 if (!String.IsNullOrEmpty(platformManifestLocation))
@@ -1212,7 +1212,6 @@ namespace Microsoft.Build.Utilities
             string sdkContentFolderPath = null;
 
             TargetPlatformSDK matchingSdk = GetMatchingPlatformSDK(targetPlatformIdentifier, targetPlatformVersion, null, null, null);
-
             string platformKey = TargetPlatformSDK.GetSdkKey(targetPlatformIdentifier, targetPlatformVersion);
             GetValueUsingMatchingSDKManifest(matchingSdk, platformKey, (manifest) =>
             {
