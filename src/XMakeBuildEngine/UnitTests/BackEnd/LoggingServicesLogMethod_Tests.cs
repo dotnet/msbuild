@@ -18,6 +18,7 @@ using Microsoft.Build.Execution;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 
 using MockHost = Microsoft.Build.UnitTests.BackEnd.MockHost;
@@ -1168,7 +1169,12 @@ namespace Microsoft.Build.UnitTests.Logging
 
             TelemetryEventArgs actualEventArgs = (TelemetryEventArgs)service.ProcessedBuildEvent;
 
-            Assert.True(actualEventArgs.IsEquivalent(expectedEventArgs));
+            Assert.Equal(expectedEventArgs.EventName, actualEventArgs.EventName);
+
+            Assert.True(expectedEventArgs.Properties.OrderBy(kvp => kvp.Key, StringComparer.Ordinal).SequenceEqual(actualEventArgs.Properties.OrderBy(kvp => kvp.Key, StringComparer.OrdinalIgnoreCase)),
+                $"Properties are different: [{String.Join(", ", expectedEventArgs.Properties.OrderBy(kvp => kvp.Key).Select(i => $"{i.Key}={i.Value}"))}] != [{String.Join(", ", actualEventArgs.Properties.OrderBy(kvp => kvp.Key).Select(i => $"{i.Key}={i.Value}"))}]");
+
+            Assert.Equal(expectedEventArgs.BuildEventContext, actualEventArgs.BuildEventContext);
 
             if (properties != null)
             {

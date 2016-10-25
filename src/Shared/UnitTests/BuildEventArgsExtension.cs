@@ -444,22 +444,5 @@ namespace Microsoft.Build.UnitTests
 
             return ((BuildEventArgs)args).IsEquivalent(other);
         }
-
-        public static bool IsEquivalent(this TelemetryEventArgs args, TelemetryEventArgs other)
-        {
-            if (!String.Equals(args.EventName, other.EventName))
-            {
-                Console.WriteLine("event names are different");
-                return false;
-            }
-
-            if (!args.Properties.OrderBy(kvp => kvp.Key, StringComparer.Ordinal).SequenceEqual(other.Properties.OrderBy(kvp => kvp.Key, StringComparer.OrdinalIgnoreCase)))
-            {
-                Console.WriteLine("Properties are different");
-                return false;
-            }
-
-            return ((BuildEventArgs)args).IsEquivalent(other);
-        }
     }
 }
