@@ -19,8 +19,8 @@
       <Version>$$buildversion$$</Version>
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
-  <PackageReference Include="Microsoft.TestPlatform.TestHost">
-      <Version>15.0.0-preview-20161012-02</Version>
+  <PackageReference Include="Microsoft.NET.Test.Sdk">
+      <Version>15.0.0-preview-20161024-02</Version>
     </PackageReference>
   <PackageReference Include="MSTest.TestAdapter">
       <Version>1.1.3-preview</Version>
