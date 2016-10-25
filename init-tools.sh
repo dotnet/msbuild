@@ -114,7 +114,7 @@ if [ ! -e $__INIT_TOOLS_DONE_MARKER ]; then
         echo "Restoring BuildTools version $__BUILD_TOOLS_PACKAGE_VERSION..."
         echo "Running: $__DOTNET_CMD restore \"$__PROJECT_JSON_FILE\" --no-cache --packages $__PACKAGES_DIR --source $__BUILDTOOLS_SOURCE $__INIT_TOOLS_RESTORE_ARGS" >> $__init_tools_log
         $__DOTNET_CMD restore "$__PROJECT_JSON_FILE" --no-cache --packages $__PACKAGES_DIR --source $__BUILDTOOLS_SOURCE $__INIT_TOOLS_RESTORE_ARGS >> $__init_tools_log
-        if [ ! -e "$__BUILD_TOOLS_PATH/init-tools.sh" ]; then echo "ERROR: Could not restore build tools correctly. See '$__init_tools_log' for more details."1>&2; fi
+        if [ ! -e "$__BUILD_TOOLS_PATH/init-tools.sh" ]; then echo "ERROR: Could not restore build tools correctly. See '$__init_tools_log' for more details."1>&2; cat $__init_tools_log; fi
     fi
 
     echo "Initializing BuildTools..."
