@@ -596,6 +596,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -2133,6 +2135,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -3456,6 +3460,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1245")]
 #else
         [Fact]
 #endif
