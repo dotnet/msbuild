@@ -59,14 +59,34 @@ if (!(Test-Path $env:DOTNET_INSTALL_DIR))
     mkdir $env:DOTNET_INSTALL_DIR | Out-Null
 }
 
-& "$RepoRoot\init-tools.ps1" -Architecture $Architecture
-if($LASTEXITCODE -ne 0) { throw "Failed to install Init Tools" }
+# Disable first run since we want to control all package sources
+$env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+
+# set the base tools directory
+$toolsLocalPath = Join-Path $PSScriptRoot "build_tools"
+$bootStrapperPath = Join-Path $toolsLocalPath "bootstrap.ps1"
+# if the boot-strapper script doesn't exist then download it
+if ((Test-Path $bootStrapperPath) -eq 0)
+{
+    if ((Test-Path $toolsLocalPath) -eq 0)
+    {
+        mkdir $toolsLocalPath | Out-Null
+    }
+
+    # download boot-strapper script
+    Invoke-WebRequest "https://raw.githubusercontent.com/dotnet/buildtools/master/bootstrap/bootstrap.ps1" -OutFile $bootStrapperPath
+}
+
+# now execute it
+& $bootStrapperPath -RepositoryRoot (Get-Location) -ToolsLocalPath $toolsLocalPath -CliLocalPath $env:DOTNET_INSTALL_DIR | Out-File (Join-Path (Get-Location) "bootstrap.log")
+if ($LastExitCode -ne 0)
+{
+    Write-Output "Boot-strapping failed with exit code $LastExitCode, see bootstrap.log for more information."
+    exit $LastExitCode
+}
 
 # Put the stage0 on the path
 $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
-
-# Disable first run since we want to control all package sources
-$env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
 if ($NoBuild)
 {
