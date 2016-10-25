@@ -153,6 +153,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     </When>
   </Choose>
 
+  <PropertyGroup>
+    <!-- Ensure $(RunWorkingDirectory) is a full path -->
+    <RunWorkingDirectory Condition="'$(RunWorkingDirectory)' != '' and '$([System.IO.Path]::IsPathRooted($(RunWorkingDirectory)))' != 'true'">$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/$(RunWorkingDirectory)'))</RunWorkingDirectory>
+  </PropertyGroup>
+
   <!--
     ============================================================
                     CoreGenerateSatelliteAssemblies
