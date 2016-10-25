@@ -143,11 +143,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       AfterPublish;
     </DotNetPublishDependsOn>
   </PropertyGroup>
-  
-  <Target Name="DotNetPublish" 
-          DependsOnTargets="$(DotNetPublishDependsOn)" 
-          AfterTargets="Build" 
-          Condition=" '$(DeployOnBuild)' == 'true' " />
+
+  <Target Name="DotNetPublish"
+          DependsOnTargets="$(DotNetPublishDependsOn)"
+          AfterTargets="Build"
+          Condition=" '$(DeployOnBuild)' == 'true' " >
+  </Target>
 
 
   <PropertyGroup>
@@ -162,4 +163,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="CorePublish" 
           DependsOnTargets="$(CorePublishDependsOn)"/>
 
+
+  <!-- Temporary work-around to disable docker targets during publishing -->
+  <Target Name="SuppressDockerTargetsDuringPublish"
+          BeforeTargets="Build"
+          Condition=" '$(DeployOnBuild)' == 'true'">
+    <PropertyGroup>
+      <SuppressDockerTargets>true</SuppressDockerTargets>
+    </PropertyGroup>
+  </Target>
+  
 </Project>
