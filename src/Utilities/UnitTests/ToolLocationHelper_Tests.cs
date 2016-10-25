@@ -740,6 +740,7 @@ namespace Microsoft.Build.UnitTests
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/722")]
 #else
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
 #endif
         public void TestGetPathToBuildToolsFile_32Bit()
         {
