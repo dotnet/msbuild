@@ -2534,7 +2534,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             ObjectModelHelpers.BuildTempProjectFileExpectSuccess("lib1.csproj");
 
-            string p2pReference = Path.Combine(ObjectModelHelpers.TempProjectDir, @"bin\debug\lib1.dll");
+            string p2pReference = Path.Combine(ObjectModelHelpers.TempProjectDir, "bin", "debug", "lib1.dll");
             Assert.True(File.Exists(p2pReference)); // "lib1.dll doesn't exist."
 
             // -------------------------------------------------------------------------------
