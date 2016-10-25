@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.25702.0
+VisualStudioVersion = 15.0.25821.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.NET.Sdk.Web.ProjectSystem.Package", "src\Web\Microsoft.NET.Sdk.Web.ProjectSystem.Package\Microsoft.NET.Sdk.Web.ProjectSystem.Package.csproj", "{800AAAB3-AE22-483C-90A8-E1056CF39D5A}"
 EndProject
@@ -61,6 +61,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PublishProfiles", "PublishP
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PublishTargets", "PublishTargets", "{96277594-64EC-4B7F-B9C3-1A6A5C74D5A1}"
 	ProjectSection(SolutionItems) = preProject
+		src\Publish\Microsoft.NET.Sdk.Publish.Targets\PublishTargets\Microsoft.NET.Sdk.Publish.Docker.targets = src\Publish\Microsoft.NET.Sdk.Publish.Targets\PublishTargets\Microsoft.NET.Sdk.Publish.Docker.targets
 		src\Publish\Microsoft.NET.Sdk.Publish.Targets\PublishTargets\Microsoft.NET.Sdk.Publish.FileSystem.targets = src\Publish\Microsoft.NET.Sdk.Publish.Targets\PublishTargets\Microsoft.NET.Sdk.Publish.FileSystem.targets
 		src\Publish\Microsoft.NET.Sdk.Publish.Targets\PublishTargets\Microsoft.NET.Sdk.Publish.Kudu.targets = src\Publish\Microsoft.NET.Sdk.Publish.Targets\PublishTargets\Microsoft.NET.Sdk.Publish.Kudu.targets
 		src\Publish\Microsoft.NET.Sdk.Publish.Targets\PublishTargets\Microsoft.NET.Sdk.Publish.MSDeploy.targets = src\Publish\Microsoft.NET.Sdk.Publish.Targets\PublishTargets\Microsoft.NET.Sdk.Publish.MSDeploy.targets
