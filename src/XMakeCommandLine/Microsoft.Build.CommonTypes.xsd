@@ -2417,7 +2417,7 @@ elementFormDefault="qualified">
       <xs:complexContent>
         <xs:extension base="msb:TaskType">
           <xs:attribute name="EventName" use="required" />
-          <xs:attribute name="Data" />
+          <xs:attribute name="EventData" />
         </xs:extension>
       </xs:complexContent>
     </xs:complexType>

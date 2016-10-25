@@ -1,21 +1,30 @@
 ﻿using Microsoft.Build.Framework;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace Microsoft.Build.Tasks
 {
+    /// <summary>
+    /// Task that logs telemetry.
+    /// </summary>
     public sealed class Telemetry : TaskExtension
     {
+        /// <summary>
+        /// Gets or sets a semi-colon delimited list of equal-sign separated key/value pairs.  An example would be &quot;Property1=Value1;Property2=Value2&quot;.
+        /// </summary>
+        public string EventData { get; set; }
+
+        /// <summary>
+        /// Gets or sets the event name.
+        /// </summary>
         [Required]
         public string EventName { get; set; }
 
-        public string EventData { get; set; }
-
+        /// <summary>
+        /// Main task method
+        /// </summary>
         public override bool Execute()
         {
-            // TODO: Error checking
-
             IDictionary<string, string> properties = new Dictionary<string, string>();
 
             if (!String.IsNullOrEmpty(EventData))
@@ -24,7 +33,21 @@ namespace Microsoft.Build.Tasks
                 {
                     var item = pair.Split(new[] {'='}, 2, StringSplitOptions.RemoveEmptyEntries);
 
-                    properties.Add(item[0], item[1]);
+                    if (item.Length != 2)
+                    {
+                        Log.LogMessageFromResources(MessageImportance.Low, "Telemetry.IllegalEventDataString", pair, EventData);
+                        return false;
+                    }
+
+                    try
+                    {
+                        properties.Add(item[0], item[1]);
+                    }
+                    catch (ArgumentException)
+                    {
+                        Log.LogMessageFromResources(MessageImportance.Low, "Telemetry.DuplicateEventProperty", item[0], EventName);
+                        return false;
+                    }
                 }
             }
 
