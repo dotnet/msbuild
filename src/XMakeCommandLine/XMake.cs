@@ -1343,9 +1343,14 @@ namespace Microsoft.Build.CommandLine
             s_exeName = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
 #endif
 
-            if (!s_exeName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+#if (RUNTIME_TYPE_NETCORE || MONO) && !FEATURE_RUN_EXE_IN_TESTS
+            var msbuildExtn = ".dll";
+#else
+            var msbuildExtn = ".exe";
+#endif
+            if (!s_exeName.EndsWith(msbuildExtn, StringComparison.OrdinalIgnoreCase))
             {
-                s_exeName += ".exe";
+                s_exeName += msbuildExtn;
             }
 
             // discard the first piece, because that's the path to the executable -- the rest are args
