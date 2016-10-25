@@ -7,6 +7,7 @@ using FluentAssertions;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Cli.Utils;
 using System.IO;
+using System;
 
 namespace Microsoft.DotNet.Cli.Test3.Tests
 {
@@ -53,7 +54,8 @@ namespace Microsoft.DotNet.Cli.Test3.Tests
                 .Should()
                 .Pass();
 
-            string expectedError = Path.Combine(testProjectDirectory, @"bin\Debug\netcoreapp1.0\VSTestDotNetCoreProject.dll");
+            string configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
+            string expectedError = Path.Combine(testProjectDirectory, "bin", configuration, @"netcoreapp1.0\VSTestDotNetCoreProject.dll");
             expectedError = "The test source file " + "\""+ expectedError + "\"" + " provided was not found.";
 
             // Call test3
