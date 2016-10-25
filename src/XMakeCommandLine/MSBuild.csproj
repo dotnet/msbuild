@@ -26,6 +26,9 @@
     <AppConfig Condition="'$(Platform)' == 'x64'">app.amd64.config</AppConfig>
     <ApplicationIcon>MSBuild.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(MonoBuild)' == 'true'">
+    <TargetExt>.dll</TargetExt>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
     <StartAction Condition="'$(StartAction)'==''">Program</StartAction>
   </PropertyGroup>
