@@ -8,7 +8,6 @@
     <TargetFrameworkVersion>v1.0</TargetFrameworkVersion>
     <NoStdLib>true</NoStdLib>
     <NoWarn>$(NoWarn);1701</NoWarn>
-    <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -25,6 +24,7 @@
          two files should be generated from a single source. -->
     <AppConfig Condition="'$(Platform)' == 'x64'">app.amd64.config</AppConfig>
     <ApplicationIcon>MSBuild.ico</ApplicationIcon>
+    <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
     <StartAction Condition="'$(StartAction)'==''">Program</StartAction>
