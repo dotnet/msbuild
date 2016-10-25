@@ -98,6 +98,7 @@ namespace Microsoft.Build.UnitTests
 #else
         [Fact]
 #endif
+        [Trait("Category", "mono-osx-failing")]
         public void Regress249540()
         {
             // Special character is 'Ä' in UTF8: 0xC3 84
