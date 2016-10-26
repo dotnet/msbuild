@@ -1343,7 +1343,8 @@ namespace Microsoft.Build.Evaluation
                 else
                 {
                     // This is a message, not a warning, because that enables people to speculatively extend the build of a project
-                    _loggingService.LogComment(_buildEventContext, MessageImportance.Normal, "TargetDoesNotExistBeforeTargetMessage", unescapedBeforeTarget, targetElement.BeforeTargetsLocation.LocationString);
+                    // It's low importance as it's addressed to build authors
+                    _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "TargetDoesNotExistBeforeTargetMessage", unescapedBeforeTarget, targetElement.BeforeTargetsLocation.LocationString);
                 }
             }
 
@@ -1365,7 +1366,8 @@ namespace Microsoft.Build.Evaluation
                 else
                 {
                     // This is a message, not a warning, because that enables people to speculatively extend the build of a project
-                    _loggingService.LogComment(_buildEventContext, MessageImportance.Normal, "TargetDoesNotExistAfterTargetMessage", unescapedAfterTarget, targetElement.AfterTargetsLocation.LocationString);
+                    // It's low importance as it's addressed to build authors
+                    _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "TargetDoesNotExistAfterTargetMessage", unescapedAfterTarget, targetElement.AfterTargetsLocation.LocationString);
                 }
             }
         }
