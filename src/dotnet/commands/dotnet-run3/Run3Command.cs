@@ -46,6 +46,8 @@ namespace Microsoft.DotNet.Tools.Run
         {
             List<string> buildArgs = new List<string>();
 
+            buildArgs.Add(Project);
+
             buildArgs.Add("/nologo");
             buildArgs.Add("/verbosity:quiet");
 
