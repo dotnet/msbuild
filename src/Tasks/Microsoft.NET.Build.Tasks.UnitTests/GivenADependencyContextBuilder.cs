@@ -43,10 +43,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 runtime,
                 Constants.DefaultPlatformLibrary);
 
-            DependencyContext dependencyContext = new DependencyContextBuilder().Build(
-                mainProject,
-                projectContext,
-                compilationOptions);
+            DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext)
+                .WithCompilationOptions(compilationOptions)
+                .Build();
 
             JObject result = Save(dependencyContext);
             JObject baseline = ReadJson($"{baselineFileName}.deps.json");

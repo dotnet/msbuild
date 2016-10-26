@@ -42,6 +42,12 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public ITaskItem[] AssemblySatelliteAssemblies { get; set; }
 
+        [Required]
+        public ITaskItem[] ProjectReferencePaths { get; set; }
+
+        [Required]
+        public ITaskItem[] ProjectReferenceSatellitePaths { get; set; }
+
         public ITaskItem CompilerOptions { get; set; }
 
         public ITaskItem[] PrivateAssetsPackageReferences { get; set; }
@@ -50,19 +56,24 @@ namespace Microsoft.NET.Build.Tasks
         {
             LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(AssetsFilePath);
             CompilationOptions compilationOptions = CompilationOptionsConverter.ConvertFrom(CompilerOptions);
+
             SingleProjectInfo mainProject = SingleProjectInfo.Create(ProjectPath, AssemblyName, AssemblyVersion, AssemblySatelliteAssemblies);
+            Dictionary<string, SingleProjectInfo> referenceProjects = SingleProjectInfo.CreateFromProjectReferences(
+                ProjectReferencePaths,
+                ProjectReferenceSatellitePaths);
+
             IEnumerable<string> privateAssets = PackageReferenceConverter.GetPackageIds(PrivateAssetsPackageReferences);
+
             ProjectContext projectContext = lockFile.CreateProjectContext(
                 NuGetUtils.ParseFrameworkName(TargetFramework),
                 RuntimeIdentifier,
                 PlatformLibraryName);
 
-            DependencyContext dependencyContext = new DependencyContextBuilder()
+            DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext)
+                .WithReferenceProjectInfos(referenceProjects)
                 .WithPrivateAssets(privateAssets)
-                .Build(
-                    mainProject,
-                    projectContext,
-                    compilationOptions);
+                .WithCompilationOptions(compilationOptions)
+                .Build();
 
             var writer = new DependencyContextWriter();
             using (var fileStream = File.Create(DepsFilePath))
