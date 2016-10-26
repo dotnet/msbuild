@@ -1,6 +1,7 @@
 ﻿using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectJsonMigration;
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using NuGet.Frameworks;
 using System;
@@ -37,6 +38,27 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var projectReference = projectReferences.First();
             projectReference.Include.Should().Be(Path.Combine("..", "TestLibrary", "TestLibrary.csproj"));
             projectReference.Parent.Condition.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void It_does_not_migrate_a_dependency_with_target_package_that_has_a_matching_project_as_a_ProjectReference()
+        {
+            var testAssetsManager = GetTestGroupTestAssetsManager("NonRestoredTestProjects");
+            var solutionDirectory =
+                testAssetsManager.CreateTestInstance("AppWithProjectDependencyAsTarget", callingMethod: "p").Path;
+
+            var appDirectory = Path.Combine(solutionDirectory, "TestApp");
+
+            var projectContext = ProjectContext.Create(appDirectory, FrameworkConstants.CommonFrameworks.NetCoreApp10);
+            var mockProj = ProjectRootElement.Create();
+            var testSettings = new MigrationSettings(appDirectory, appDirectory, "1.0.0", mockProj, null);
+            var testInputs = new MigrationRuleInputs(new[] {projectContext}, mockProj, mockProj.AddItemGroup(),
+                mockProj.AddPropertyGroup());
+            new MigrateProjectDependenciesRule().Apply(testSettings, testInputs);
+
+            var projectReferences = mockProj.Items.Where(
+                item => item.ItemType.Equals("ProjectReference", StringComparison.Ordinal));
+            projectReferences.Should().BeEmpty();
         }
 
         [Fact]
