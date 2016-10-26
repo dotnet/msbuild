@@ -32,7 +32,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup>
     <!-- Ensure $(ProjectAssetsFile) is a full path -->
-    <ProjectAssetsFile Condition="'$([System.IO.Path]::IsPathRooted($(ProjectAssetsFile)))' != 'true'">$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/$(ProjectAssetsFile)'))</ProjectAssetsFile>
+    <ProjectAssetsFile Condition="'$([System.IO.Path]::IsPathRooted($(ProjectAssetsFile)))' != 'true'">$([System.IO.Path]::GetFullPath($([System.IO.Path]::Combine('$(MSBuildProjectDirectory)', '$(ProjectAssetsFile)'))))</ProjectAssetsFile>
   </PropertyGroup>
 
   <PropertyGroup>
