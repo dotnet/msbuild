@@ -699,50 +699,47 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Round trip from resx to resources to resx with the same blobs
         /// </summary>
+#if FEATURE_RESX_RESOURCE_READER
         [Fact]
+#else
+        [Fact(Skip = "ResGen.exe not supported on.NET Core MSBuild")]
+#endif
         public void ResX2ResX()
         {
-            try
-            {
-                string resourcesFile = Utilities.CreateBasicResourcesFile(true);
+            string resourcesFile = Utilities.CreateBasicResourcesFile(true);
 
-                // Step 1: create a resx file directly from the resources, to get a framework generated resx
-                GenerateResource t = Utilities.CreateTask();
-                t.Sources = new ITaskItem[] { new TaskItem(resourcesFile) };
-                t.OutputResources = new ITaskItem[] { new TaskItem(Path.ChangeExtension(resourcesFile, ".resx")) };
-                Utilities.ExecuteTask(t);
-                Assert.Equal(Path.GetExtension(t.FilesWritten[0].ItemSpec), ".resx");
+            // Step 1: create a resx file directly from the resources, to get a framework generated resx
+            GenerateResource t = Utilities.CreateTask();
+            t.Sources = new ITaskItem[] { new TaskItem(resourcesFile) };
+            t.OutputResources = new ITaskItem[] { new TaskItem(Path.ChangeExtension(resourcesFile, ".resx")) };
+            Utilities.ExecuteTask(t);
+            Assert.Equal(Path.GetExtension(t.FilesWritten[0].ItemSpec), ".resx");
 
-                // Step 2a: create a resources file from the resx
-                GenerateResource t2a = Utilities.CreateTask();
-                t2a.Sources = new ITaskItem[] { new TaskItem(t.FilesWritten[0].ItemSpec) };
-                t2a.OutputResources = new ITaskItem[] { new TaskItem(Path.ChangeExtension(t.FilesWritten[0].ItemSpec, ".resources")) };
-                Utilities.ExecuteTask(t2a);
-                Assert.Equal(Path.GetExtension(t2a.FilesWritten[0].ItemSpec), ".resources");
+            // Step 2a: create a resources file from the resx
+            GenerateResource t2a = Utilities.CreateTask();
+            t2a.Sources = new ITaskItem[] { new TaskItem(t.FilesWritten[0].ItemSpec) };
+            t2a.OutputResources = new ITaskItem[] { new TaskItem(Path.ChangeExtension(t.FilesWritten[0].ItemSpec, ".resources")) };
+            Utilities.ExecuteTask(t2a);
+            Assert.Equal(Path.GetExtension(t2a.FilesWritten[0].ItemSpec), ".resources");
 
-                // Step 2b: create a resx from the resources
-                GenerateResource t2b = Utilities.CreateTask();
-                t2b.Sources = new ITaskItem[] { new TaskItem(t2a.FilesWritten[0].ItemSpec) };
-                t2b.OutputResources = new ITaskItem[] { new TaskItem(Utilities.GetTempFileName(".resx")) };
-                File.Delete(t2b.OutputResources[0].ItemSpec);
-                Utilities.ExecuteTask(t2b);
-                Assert.Equal(Path.GetExtension(t2b.FilesWritten[0].ItemSpec), ".resx");
+            // Step 2b: create a resx from the resources
+            GenerateResource t2b = Utilities.CreateTask();
+            t2b.Sources = new ITaskItem[] { new TaskItem(t2a.FilesWritten[0].ItemSpec) };
+            t2b.OutputResources = new ITaskItem[] { new TaskItem(Utilities.GetTempFileName(".resx")) };
+            File.Delete(t2b.OutputResources[0].ItemSpec);
+            Utilities.ExecuteTask(t2b);
+            Assert.Equal(Path.GetExtension(t2b.FilesWritten[0].ItemSpec), ".resx");
 
-                // make sure the output resx files from each fork are the same
-                Assert.Equal(Utilities.ReadFileContent(t.OutputResources[0].ItemSpec),
-                                       Utilities.ReadFileContent(t2b.OutputResources[0].ItemSpec));
+            // make sure the output resx files from each fork are the same
+            Assert.Equal(Utilities.ReadFileContent(t.OutputResources[0].ItemSpec),
+                         Utilities.ReadFileContent(t2b.OutputResources[0].ItemSpec));
 
-                // Done, so clean up.
-                File.Delete(resourcesFile);
-                File.Delete(t.OutputResources[0].ItemSpec);
-                File.Delete(t2a.OutputResources[0].ItemSpec);
-                foreach (ITaskItem item in t2b.FilesWritten)
-                    File.Delete(item.ItemSpec);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
+            // Done, so clean up.
+            File.Delete(resourcesFile);
+            File.Delete(t.OutputResources[0].ItemSpec);
+            File.Delete(t2a.OutputResources[0].ItemSpec);
+            foreach (ITaskItem item in t2b.FilesWritten)
+                File.Delete(item.ItemSpec);
         }
 
         /// <summary>
