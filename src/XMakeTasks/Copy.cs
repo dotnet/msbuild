@@ -424,14 +424,14 @@ namespace Microsoft.Build.Tasks
                     foreach (var item in sameDestinationFiles)
                     {
                         string logSource = "";
-                        var lastItem = item.Last();
+                        var sameItemsList = item.ToList();
 
-                        foreach (var subitem in item)
+                        for (int i = 0; i < sameItemsList.Count(); i++)
                         {
-                            var originalPath = subitem.GetMetadata("CopiedFrom");
+                            var originalPath = sameItemsList[i].GetMetadata("CopiedFrom");
                             logSource += '"' + originalPath;
 
-                            logSource += !subitem.Equals(lastItem) ? "\"," : "\"";
+                            logSource += i != sameItemsList.Count - 1 ? "\"," : "\"";
                         }
 
                         string logDestination = '"' + item.Key + '"';
