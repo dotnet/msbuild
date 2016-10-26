@@ -13,15 +13,9 @@ possible and can triage effectively.
 The below steps are something that we believe is not a huge increase in process, 
 but would help us react much faster to any issues that are filed. 
 
-1. Check if the [known issues](known-issues.md) cover the issue you are running 
+1. Check if the [known issues](https://github.com/dotnet/core/blob/master/cli/known-issues.md) cover the issue you are running 
 into. We are collecting issues that are known and that have workarounds, so it 
 could be that you can get unblocked pretty easily. 
-
-2. Add a label to determine which type of issue it is. If it is a defect, use 
-the "bug" label, if it is a suggestion for a feature, use the "enhancement" 
-label. This helps the team get to defects more effectively. 
-
-3. Unless you are sure in which milestone the issue falls into, leave it blank.
 
 4. /cc the person that the issue should be assigned to (or @blackdwarf) so that person 
 would get notified. In this way the correct person can immediately jump on the 

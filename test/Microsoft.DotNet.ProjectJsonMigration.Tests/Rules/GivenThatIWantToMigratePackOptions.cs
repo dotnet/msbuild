@@ -260,6 +260,40 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             contentItems.First().GetMetadataWithName("PackagePath").Value.Should().BeEmpty();
         }
 
+        [Fact]
+        public void Migrating_same_file_with_multiple_mappings_string_joins_the_mappings_in_PackagePath()
+        {
+            var mockProj = RunPackOptionsRuleOnPj(@"
+                {
+                    ""packOptions"": {
+                        ""files"": {
+                            ""include"": [""path/to/some/file.cs""],
+                            ""mappings"": {
+                                ""other/path/file.cs"": ""path/to/some/file.cs"",
+                                ""different/path/file1.cs"": ""path/to/some/file.cs""
+                            }
+                        }
+                    }
+                }");
+
+            var expectedPackagePath = string.Join(
+                ";", 
+                new [] {                    
+                    Path.Combine("different", "path"),
+                    Path.Combine("other", "path")
+                });
+
+            var contentItems = mockProj.Items
+                .Where(item => item.ItemType.Equals("Content", StringComparison.Ordinal))
+                .Where(item =>
+                    item.GetMetadataWithName("Pack").Value == "true" &&
+                    item.GetMetadataWithName("PackagePath") != null);
+
+            contentItems.Count().Should().Be(1);
+            contentItems.First().Include.Should().Be(@"path\to\some\file.cs");
+            contentItems.First().GetMetadataWithName("PackagePath").Value.Should().Be(expectedPackagePath);
+        }
+
         private ProjectRootElement RunPackOptionsRuleOnPj(string packOptions, string testDirectory = null)
         {
             testDirectory = testDirectory ?? Temp.CreateDirectory().Path;

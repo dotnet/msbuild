@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.IO;
 using FluentAssertions;
 using Microsoft.DotNet.ProjectModel;
@@ -14,6 +15,16 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
     public class GivenAProjectDependenciesCommandFactory : TestBase
     {
         private static readonly NuGetFramework s_desktopTestFramework = FrameworkConstants.CommonFrameworks.Net451;
+
+        private RepoDirectoriesProvider _repoDirectoriesProvider;
+
+        public GivenAProjectDependenciesCommandFactory()
+        {
+            _repoDirectoriesProvider = new RepoDirectoriesProvider();
+            Environment.SetEnvironmentVariable(
+                Constants.MSBUILD_EXE_PATH,
+                Path.Combine(_repoDirectoriesProvider.Stage2Sdk, "MSBuild.dll"));
+        }
 
         [WindowsOnlyFact]
         public void It_resolves_desktop_apps_defaulting_to_Debug_Configuration()
@@ -32,6 +43,40 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                     .Pass();
 
             var context = ProjectContext.Create(testInstance.TestRoot, s_desktopTestFramework);
+
+            var factory = new ProjectDependenciesCommandFactory(
+                s_desktopTestFramework,
+                null,
+                null,
+                null,
+                testInstance.TestRoot);
+
+            var command = factory.Create("dotnet-desktop-and-portable", null);
+
+            command.CommandName.Should().Contain(Path.Combine(testInstance.TestRoot, "bin", configuration));
+            Path.GetFileName(command.CommandName).Should().Be("dotnet-desktop-and-portable.exe");
+        }
+
+        [WindowsOnlyFact]
+        public void It_resolves_desktop_apps_with_MSBuild_defaulting_to_Debug_Configuration()
+        {
+            var configuration = "Debug";
+
+            var testAssetManager = new TestAssetsManager(Path.Combine(RepoRoot, "TestAssets", "TestProjects"));
+            var testInstance = testAssetManager.CreateTestInstance("MSBuildAppWithMultipleFrameworksAndTools", "i")
+                .WithLockFiles();
+
+            var projectFile = Path.Combine(testInstance.TestRoot, "MSBuildAppWithMultipleFrameworksAndTools.csproj");
+
+            new Restore3Command()
+                .ExecuteWithCapturedOutput($"{projectFile} -s {_repoDirectoriesProvider.TestPackages}")
+                .Should()
+                .Pass();
+
+            new Build3Command()
+                .Execute($"{projectFile} --configuration {configuration}")
+                .Should()
+                .Pass();
 
             var factory = new ProjectDependenciesCommandFactory(
                 s_desktopTestFramework,
