@@ -32,8 +32,9 @@ To get started on **Visual Studio 2015**:
   - _Universal Windows App Development Tools_
     - _Tools and Windows SDK 10.0.10240_
 2. Clone the source code (see above).
-3. Restore NuGet packages: `msbuild /t:BulkRestoreNugetPackages build.proj`
-4. Open src/MSBuild.sln solution in Visual Studio 2015.
+3. Initialize tools the first time: `init-tools.cmd`
+4. Restore NuGet packages: `msbuild /t:BulkRestoreNugetPackages build.proj`
+5. Open src/MSBuild.sln solution in Visual Studio 2015.
 
 ## Building MSBuild in Unix (Mac & Linux)
 MSBuild's xplat branch allows MSBuild to be run on Unix Systems. Set-up instructions can be viewed on the wiki:   [Building Testing and Debugging on .Net Core MSBuild](https://github.com/Microsoft/msbuild/wiki/Building-Testing-and-Debugging-on-.Net-Core-MSBuild)
