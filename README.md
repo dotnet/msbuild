@@ -32,7 +32,7 @@ To get started on **Visual Studio 2015**:
   - _Universal Windows App Development Tools_
     - _Tools and Windows SDK 10.0.10240_
 2. Clone the source code (see above).
-3. Initialize tools the first time: `init-tools.cmd`
+3. (on the `xplat` branch only) Initialize tools the first time: `init-tools.cmd`
 4. Restore NuGet packages: `msbuild /t:BulkRestoreNugetPackages build.proj`
 5. Open src/MSBuild.sln solution in Visual Studio 2015.
 
