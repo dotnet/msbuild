@@ -273,8 +273,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
             mergedItem.UnionExcludes(existingItem.Excludes());
             mergedItem.UnionExcludes(item.Excludes());
 
-            mergedItem.AddMetadata(existingItem.Metadata);
-            mergedItem.AddMetadata(item.Metadata);
+            mergedItem.AddMetadata(MergeMetadata(existingItem.Metadata, item.Metadata));
 
             item.RemoveIncludes(commonIncludes);
             existingItem.RemoveIncludes(commonIncludes);
@@ -287,6 +286,37 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
             };
 
             return mergeResult;
+        }
+
+        private ICollection<ProjectMetadataElement> MergeMetadata(
+            ICollection<ProjectMetadataElement> existingMetadataElements,
+            ICollection<ProjectMetadataElement> newMetadataElements)
+        {
+            var mergedMetadata = new List<ProjectMetadataElement>(existingMetadataElements);
+
+            foreach (var newMetadata in newMetadataElements)
+            {
+                var existingMetadata = mergedMetadata.FirstOrDefault(m =>
+                    m.Name.Equals(newMetadata.Name, StringComparison.OrdinalIgnoreCase));
+                if (existingMetadata == null)
+                {
+                    mergedMetadata.Add(newMetadata);
+                }
+                else
+                {
+                    MergeMetadata(existingMetadata, newMetadata);
+                }
+            }
+
+            return mergedMetadata;
+        }
+
+        public void MergeMetadata(ProjectMetadataElement existingMetadata, ProjectMetadataElement newMetadata)
+        {
+            if (existingMetadata.Value != newMetadata.Value)
+            {
+                existingMetadata.Value = string.Join(";", new [] { existingMetadata.Value, newMetadata.Value });
+            }
         }
 
         private IEnumerable<ProjectItemElement> FindExistingItemsWithSameCondition(
