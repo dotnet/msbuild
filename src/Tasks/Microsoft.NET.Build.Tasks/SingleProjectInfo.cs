@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
 
@@ -30,7 +31,7 @@ namespace Microsoft.NET.Build.Tasks
             _resourceAssemblies = resourceAssemblies;
         }
 
-        public static SingleProjectInfo Create(string projectPath, string name, string version, ITaskItem[] satelliteAssemblies)
+        public static SingleProjectInfo Create(string projectPath, string name, string fileExtension, string version, ITaskItem[] satelliteAssemblies)
         {
             List<ResourceAssemblyInfo> resourceAssemblies = new List<ResourceAssemblyInfo>();
 
@@ -42,14 +43,18 @@ namespace Microsoft.NET.Build.Tasks
                 resourceAssemblies.Add(new ResourceAssemblyInfo(culture, relativePath));
             }
 
-            return new SingleProjectInfo(projectPath, name, version, $"{name}.dll", resourceAssemblies);
+            string outputName = name + fileExtension;
+            return new SingleProjectInfo(projectPath, name, version, outputName, resourceAssemblies);
         }
 
-        public static Dictionary<string, SingleProjectInfo> CreateFromProjectReferences(
-            ITaskItem[] projectReferencePaths,
-            ITaskItem[] projectReferenceSatellitePaths)
+        public static Dictionary<string, SingleProjectInfo> CreateProjectReferenceInfos(
+            IEnumerable<ITaskItem> referencePaths,
+            IEnumerable<ITaskItem> projectReferenceSatellitePaths)
         {
             Dictionary<string, SingleProjectInfo> projectReferences = new Dictionary<string, SingleProjectInfo>();
+
+            IEnumerable<ITaskItem> projectReferencePaths = referencePaths
+                .Where(r => string.Equals(r.GetMetadata("ReferenceSourceTarget"), "ProjectReference", StringComparison.OrdinalIgnoreCase));
 
             foreach (ITaskItem projectReferencePath in projectReferencePaths)
             {

@@ -35,6 +35,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             SingleProjectInfo mainProject = SingleProjectInfo.Create(
                 "/usr/Path",
                 mainProjectName,
+                ".dll",
                 mainProjectVersion,
                 satelliteAssemblies ?? new ITaskItem[] { });
 
