@@ -297,7 +297,14 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
 
                 DateTime time = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
+
                 System.Threading.Thread.Sleep(200);
+                if (NativeMethodsShared.IsOSX)
+                {
+                    // Must be > 1 sec for HFS+ timestamp granularity
+                    System.Threading.Thread.Sleep(1100);
+                }
+
                 File.SetLastWriteTime(resxFile, DateTime.Now);
 
                 Utilities.ExecuteTask(t2);
@@ -407,7 +414,14 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 // Get current write times of outputs
                 DateTime time = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
                 DateTime time2 = File.GetLastWriteTime(t.OutputResources[1].ItemSpec);
+
                 System.Threading.Thread.Sleep(200);
+                if (NativeMethodsShared.IsOSX)
+                {
+                    // Must be > 1 sec on HFS+ timestamp granularity
+                    System.Threading.Thread.Sleep(1000);
+                }
+
                 // Touch one input
                 File.SetLastWriteTime(resxFile, DateTime.Now);
 
@@ -595,6 +609,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 t3.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t3.References = new ITaskItem[] { new TaskItem(systemDll) };
                 t3.StateFile = new TaskItem(t.StateFile);
+
+                if (NativeMethodsShared.IsOSX)
+                {
+                    // Must be > 1 sec for HFS+ timestamp granularity
+                    System.Threading.Thread.Sleep(1100);
+                }
+
                 Utilities.ExecuteTask(t3);
                 Assert.True(DateTime.Compare(File.GetLastWriteTime(t3.OutputResources[0].ItemSpec), time) > 0);
                 resourcesFile = t3.OutputResources[0].ItemSpec;
