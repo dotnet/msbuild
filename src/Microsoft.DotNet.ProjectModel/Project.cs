@@ -71,6 +71,8 @@ namespace Microsoft.DotNet.ProjectModel
 
         public RuntimeOptions RuntimeOptions { get; set; }
 
+        public IList<string> Runtimes { get; set; }
+
         public IDictionary<string, string> Commands { get; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         public IDictionary<string, IEnumerable<string>> Scripts { get; } = new Dictionary<string, IEnumerable<string>>(StringComparer.OrdinalIgnoreCase);

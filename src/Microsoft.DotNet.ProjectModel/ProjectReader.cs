@@ -159,6 +159,7 @@ namespace Microsoft.DotNet.ProjectModel
 
             project.Dependencies = new List<ProjectLibraryDependency>();
             project.Tools = new List<ProjectLibraryDependency>();
+            project.Runtimes = new List<string>();
 
             // Project files
             project.Files = new ProjectFilesCollection(rawProject, project.ProjectDirectory, project.ProjectFilePath);
@@ -223,6 +224,8 @@ namespace Microsoft.DotNet.ProjectModel
                 rawProject,
                 "tools",
                 isGacOrFrameworkReference: false);
+
+            PopulateRuntimes(project.Runtimes, rawProject);
 
             JToken runtimeOptionsToken;
             if (rawProject.TryGetValue("runtimeOptions", out runtimeOptionsToken))
@@ -366,6 +369,21 @@ namespace Microsoft.DotNet.ProjectModel
                         SourceLine = lineInfo.LineNumber,
                         SourceColumn = lineInfo.LinePosition
                     });
+                }
+            }
+        }
+
+        private static void PopulateRuntimes(IList<string> results, JObject settings)
+        {
+            var runtimes = settings.Value<JToken>("runtimes") as JObject;
+            if (runtimes != null)
+            {
+                foreach (var runtime in runtimes)
+                {
+                    if (!string.IsNullOrEmpty(runtime.Key))
+                    {
+                        results.Add(runtime.Key);
+                    }
                 }
             }
         }

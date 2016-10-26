@@ -25,24 +25,20 @@ namespace Microsoft.DotNet.Cli.Publish3.Tests
             new Restore3Command()
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute()
-                .Should()
-                .Pass();
+                .Should().Pass();
 
             new Publish3Command()
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute("--framework netcoreapp1.0")
-                .Should()
-                .Pass();
+                .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
             var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, "netcoreapp1.0", "publish", $"{testAppName}.dll");
 
             new TestCommand("dotnet")
                 .ExecuteWithCapturedOutput(outputDll)
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello World");
         }
 
         [Fact]
@@ -55,23 +51,25 @@ namespace Microsoft.DotNet.Cli.Publish3.Tests
             var testProjectDirectory = testInstance.TestRoot;
             var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
 
+            new Restore3Command()
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute()
+                .Should().Pass();
+
             new Publish3Command()
                 .WithFramework("netcoreapp1.0")
                 .WithRuntime(rid)
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute()
-                .Should()
-                .Pass();
+                .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
             var outputProgram = Path.Combine(testProjectDirectory, "bin", configuration, "netcoreapp1.0", rid, "publish", $"{testAppName}{Constants.ExeSuffix}");
 
             new TestCommand(outputProgram)
                 .ExecuteWithCapturedOutput()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World");
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello World");
         }
     }
 }
