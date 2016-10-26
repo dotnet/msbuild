@@ -1427,6 +1427,21 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
+        /// Verifies that the <see cref="ProjectCollection.Version"/> is correct.
+        /// </summary>
+        /// <remarks>
+        /// This test was written because on OS X and Ubuntu, the version is showing "0.0.0.0"
+        /// while Windows was working just fine.
+        /// </remarks>
+        [Fact]
+        public void ProjectCollectionVersionIsCorrect()
+        {
+            Version expectedVersion = new Version(MSBuildConstants.CurrentAssemblyVersion);
+
+            Assert.Equal(expectedVersion, ProjectCollection.Version);
+        }
+
+        /// <summary>
         /// Create an empty project file and return the path
         /// </summary>
         private static string CreateProjectFile()
