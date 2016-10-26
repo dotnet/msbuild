@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -62,16 +63,44 @@ namespace Microsoft.NET.Publish.Tests
                 "fr/TestLibrary.resources.dll",
             });
 
-            // Ensure Newtonsoft.Json doesn't get excluded from the deps.json file.
-            // TestLibrary has a hard dependency on Newtonsoft.Json.
-            // TestApp has a PrivateAssets=All dependency on Microsoft.Extensions.DependencyModel, which depends on Newtonsoft.Json.
-            // This verifies that P2P references get walked correctly when doing PrivateAssets exclusion.
             using (var depsJsonFileStream = File.OpenRead(Path.Combine(publishDirectory.FullName, "TestApp.deps.json")))
             {
                 var dependencyContext = new DependencyContextJsonReader().Read(depsJsonFileStream);
+
+                // Ensure Newtonsoft.Json doesn't get excluded from the deps.json file.
+                // TestLibrary has a hard dependency on Newtonsoft.Json.
+                // TestApp has a PrivateAssets=All dependency on Microsoft.Extensions.DependencyModel, which depends on Newtonsoft.Json.
+                // This verifies that P2P references get walked correctly when doing PrivateAssets exclusion.
                 dependencyContext
                     .RuntimeLibraries
-                    .FirstOrDefault(l => l.Name == "newtonsoft.json")
+                    .FirstOrDefault(l => string.Equals(l.Name, "newtonsoft.json", StringComparison.OrdinalIgnoreCase))
+                    .Should()
+                    .NotBeNull();
+
+                // Verify P2P references get created correctly in the .deps.json file.
+                var testLibrary = dependencyContext
+                    .RuntimeLibraries
+                    .FirstOrDefault(l => string.Equals(l.Name, "testlibrary", StringComparison.OrdinalIgnoreCase));
+
+                testLibrary.RuntimeAssemblyGroups.Count.Should().Be(1);
+                testLibrary.RuntimeAssemblyGroups[0].Runtime.Should().Be(string.Empty);
+                testLibrary.RuntimeAssemblyGroups[0].AssetPaths.Count.Should().Be(1);
+                testLibrary.RuntimeAssemblyGroups[0].AssetPaths[0].Should().Be("TestLibrary.dll");
+
+                testLibrary.ResourceAssemblies.Count.Should().Be(3);
+                testLibrary
+                    .ResourceAssemblies
+                    .FirstOrDefault(r => r.Locale == "da" && r.Path == "da/TestLibrary.resources.dll")
+                    .Should()
+                    .NotBeNull();
+                testLibrary
+                    .ResourceAssemblies
+                    .FirstOrDefault(r => r.Locale == "de" && r.Path == "de/TestLibrary.resources.dll")
+                    .Should()
+                    .NotBeNull();
+                testLibrary
+                    .ResourceAssemblies
+                    .FirstOrDefault(r => r.Locale == "fr" && r.Path == "fr/TestLibrary.resources.dll")
                     .Should()
                     .NotBeNull();
             }

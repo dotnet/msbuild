@@ -1,7 +1,9 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyModel;
@@ -80,6 +82,14 @@ namespace Microsoft.NET.Publish.Tests
                     dependencyContext.CompilationOptions.DebugType.Should().Be("portable");
 
                     dependencyContext.CompileLibraries.Count.Should().Be(targetFramework == "net46" ? 51 : 116);
+
+                    // Ensure P2P references are specified correctly
+                    var testLibrary = dependencyContext
+                        .CompileLibraries
+                        .FirstOrDefault(l => string.Equals(l.Name, "testlibrary", StringComparison.OrdinalIgnoreCase));
+
+                    testLibrary.Assemblies.Count.Should().Be(1);
+                    testLibrary.Assemblies[0].Should().Be("TestLibrary.dll");
                 }
             }
         }

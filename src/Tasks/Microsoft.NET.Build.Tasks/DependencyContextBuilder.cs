@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -17,12 +18,25 @@ namespace Microsoft.NET.Build.Tasks
     public class DependencyContextBuilder
     {
         private readonly VersionFolderPathResolver _versionFolderPathResolver;
+        private readonly SingleProjectInfo _mainProjectInfo;
+        private readonly ProjectContext _projectContext;
+        private Dictionary<string, SingleProjectInfo> _referenceProjectInfos;
         private IEnumerable<string> _privateAssetPackageIds;
+        private CompilationOptions _compilationOptions;
 
-        public DependencyContextBuilder()
+        public DependencyContextBuilder(SingleProjectInfo mainProjectInfo, ProjectContext projectContext)
         {
+            _mainProjectInfo = mainProjectInfo;
+            _projectContext = projectContext;
+
             // This resolver is only used for building file names, so that base path is not required.
             _versionFolderPathResolver = new VersionFolderPathResolver(path: null);
+        }
+
+        public DependencyContextBuilder WithReferenceProjectInfos(Dictionary<string, SingleProjectInfo> referenceProjectInfos)
+        {
+            _referenceProjectInfos = referenceProjectInfos;
+            return this;
         }
 
         public DependencyContextBuilder WithPrivateAssets(IEnumerable<string> privateAssetPackageIds)
@@ -31,17 +45,20 @@ namespace Microsoft.NET.Build.Tasks
             return this;
         }
 
-        public DependencyContext Build(
-            SingleProjectInfo mainProjectInfo,
-            ProjectContext projectContext,
-            CompilationOptions compilationOptions)
+        public DependencyContextBuilder WithCompilationOptions(CompilationOptions compilationOptions)
         {
-            bool includeCompilationLibraries = compilationOptions != null;
+            _compilationOptions = compilationOptions;
+            return this;
+        }
 
-            IEnumerable<LockFileTargetLibrary> runtimeExports = projectContext.GetRuntimeLibraries(_privateAssetPackageIds);
+        public DependencyContext Build()
+        {
+            bool includeCompilationLibraries = _compilationOptions != null;
+
+            IEnumerable<LockFileTargetLibrary> runtimeExports = _projectContext.GetRuntimeLibraries(_privateAssetPackageIds);
             IEnumerable<LockFileTargetLibrary> compilationExports =
                 includeCompilationLibraries ?
-                    projectContext.GetCompileLibraries(_privateAssetPackageIds) :
+                    _projectContext.GetCompileLibraries(_privateAssetPackageIds) :
                     Enumerable.Empty<LockFileTargetLibrary>();
 
             var dependencyLookup = compilationExports
@@ -50,13 +67,13 @@ namespace Microsoft.NET.Build.Tasks
                 .Select(library => new Dependency(library.Name, library.Version.ToString()))
                 .ToDictionary(dependency => dependency.Name, StringComparer.OrdinalIgnoreCase);
 
-            var libraryLookup = new LockFileLookup(projectContext.LockFile);
+            var libraryLookup = new LockFileLookup(_projectContext.LockFile);
 
             var runtimeSignature = GenerateRuntimeSignature(runtimeExports);
 
             RuntimeLibrary projectRuntimeLibrary = GetProjectRuntimeLibrary(
-                mainProjectInfo,
-                projectContext,
+                _mainProjectInfo,
+                _projectContext,
                 dependencyLookup);
             IEnumerable<RuntimeLibrary> runtimeLibraries =
                 new[] { projectRuntimeLibrary }
@@ -66,8 +83,8 @@ namespace Microsoft.NET.Build.Tasks
             if (includeCompilationLibraries)
             {
                 CompilationLibrary projectCompilationLibrary = GetProjectCompilationLibrary(
-                    mainProjectInfo,
-                    projectContext,
+                    _mainProjectInfo,
+                    _projectContext,
                     dependencyLookup);
                 compilationLibraries =
                     new[] { projectCompilationLibrary }
@@ -79,14 +96,14 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             var targetInfo = new TargetInfo(
-                projectContext.LockFileTarget.TargetFramework.DotNetFrameworkName,
-                projectContext.LockFileTarget.RuntimeIdentifier,
+                _projectContext.LockFileTarget.TargetFramework.DotNetFrameworkName,
+                _projectContext.LockFileTarget.RuntimeIdentifier,
                 runtimeSignature,
-                projectContext.IsPortable);
+                _projectContext.IsPortable);
 
             return new DependencyContext(
                 targetInfo,
-                compilationOptions ?? CompilationOptions.Default,
+                _compilationOptions ?? CompilationOptions.Default,
                 compilationLibraries,
                 runtimeLibraries,
                 new RuntimeFallbacks[] { });
@@ -140,7 +157,7 @@ namespace Microsoft.NET.Build.Tasks
             Dictionary<string, Dependency> dependencyLookup)
         {
 
-            RuntimeAssetGroup[] runtimeAssemblyGroups = new[] { new RuntimeAssetGroup(string.Empty, projectInfo.GetOutputName()) };
+            RuntimeAssetGroup[] runtimeAssemblyGroups = new[] { new RuntimeAssetGroup(string.Empty, projectInfo.OutputName) };
 
             List<Dependency> dependencies = GetProjectDependencies(projectContext, dependencyLookup);
 
@@ -173,7 +190,7 @@ namespace Microsoft.NET.Build.Tasks
                 name: projectInfo.Name,
                 version: projectInfo.Version,
                 hash: string.Empty,
-                assemblies: new[] { projectInfo.GetOutputName() },
+                assemblies: new[] { projectInfo.OutputName },
                 dependencies: dependencies.ToArray(),
                 serviceable: false);
         }
@@ -194,10 +211,11 @@ namespace Microsoft.NET.Build.Tasks
             bool runtime)
         {
             var type = export.Type;
+            bool isPackage = type == "package";
 
             // TEMPORARY: All packages are serviceable in RC2
             // See https://github.com/dotnet/cli/issues/2569
-            var serviceable = export.Type == "package";
+            var serviceable = isPackage;
             var libraryDependencies = new HashSet<Dependency>();
 
             foreach (PackageDependency libraryDependency in export.Dependencies)
@@ -213,15 +231,23 @@ namespace Microsoft.NET.Build.Tasks
             string path = null;
             string hashPath = null;
             LockFileLibrary library;
+            SingleProjectInfo referenceProjectInfo = null;
             if (libraryLookup.TryGetLibrary(export, out library))
             {
-                if (!string.IsNullOrEmpty(library.Sha512))
+                if (isPackage)
                 {
-                    hash = "sha512-" + library.Sha512;
-                    hashPath = _versionFolderPathResolver.GetHashFileName(export.Name, export.Version);
-                }
+                    if (!string.IsNullOrEmpty(library.Sha512))
+                    {
+                        hash = "sha512-" + library.Sha512;
+                        hashPath = _versionFolderPathResolver.GetHashFileName(export.Name, export.Version);
+                    }
 
-                path = library.Path;
+                    path = library.Path;
+                }
+                else if (type == "project")
+                {
+                    referenceProjectInfo = GetProjectInfo(library);
+                }
             }
 
             if (runtime)
@@ -231,9 +257,9 @@ namespace Microsoft.NET.Build.Tasks
                     export.Name,
                     export.Version.ToString(),
                     hash,
-                    CreateRuntimeAssemblyGroups(export),
+                    CreateRuntimeAssemblyGroups(export, referenceProjectInfo),
                     CreateNativeLibraryGroups(export),
-                    export.ResourceAssemblies.FilterPlaceHolderFiles().Select(CreateResourceAssembly),
+                    CreateResourceAssemblyGroups(export, referenceProjectInfo),
                     libraryDependencies,
                     serviceable,
                     path,
@@ -241,13 +267,10 @@ namespace Microsoft.NET.Build.Tasks
             }
             else
             {
-                IEnumerable<string> assemblies = export
-                    .CompileTimeAssemblies
-                    .FilterPlaceHolderFiles()
-                    .Select(libraryAsset => libraryAsset.Path);
+                IEnumerable<string> assemblies = GetCompileTimeAssemblies(export, referenceProjectInfo);
 
                 return new CompilationLibrary(
-                    type.ToString().ToLowerInvariant(),
+                    type.ToLowerInvariant(),
                     export.Name,
                     export.Version.ToString(),
                     hash,
@@ -259,24 +282,32 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
-        private IReadOnlyList<RuntimeAssetGroup> CreateRuntimeAssemblyGroups(LockFileTargetLibrary export)
+        private IReadOnlyList<RuntimeAssetGroup> CreateRuntimeAssemblyGroups(LockFileTargetLibrary targetLibrary, SingleProjectInfo referenceProjectInfo)
         {
-            List<RuntimeAssetGroup> assemblyGroups = new List<RuntimeAssetGroup>();
-
-            assemblyGroups.Add(
-                new RuntimeAssetGroup(
-                    string.Empty,
-                    export.RuntimeAssemblies.FilterPlaceHolderFiles().Select(a => a.Path)));
-
-            foreach (var runtimeTargetsGroup in export.GetRuntimeTargetsGroups("runtime"))
+            if (targetLibrary.Type == "project")
             {
+                EnsureProjectInfo(referenceProjectInfo, targetLibrary.Name);
+                return new[] { new RuntimeAssetGroup(string.Empty, referenceProjectInfo.OutputName) };
+            }
+            else
+            {
+                List<RuntimeAssetGroup> assemblyGroups = new List<RuntimeAssetGroup>();
+
                 assemblyGroups.Add(
                     new RuntimeAssetGroup(
-                        runtimeTargetsGroup.Key,
-                        runtimeTargetsGroup.Select(t => t.Path)));
-            }
+                        string.Empty,
+                        targetLibrary.RuntimeAssemblies.FilterPlaceHolderFiles().Select(a => a.Path)));
 
-            return assemblyGroups;
+                foreach (var runtimeTargetsGroup in targetLibrary.GetRuntimeTargetsGroups("runtime"))
+                {
+                    assemblyGroups.Add(
+                        new RuntimeAssetGroup(
+                            runtimeTargetsGroup.Key,
+                            runtimeTargetsGroup.Select(t => t.Path)));
+                }
+
+                return assemblyGroups;
+            }
         }
 
         private IReadOnlyList<RuntimeAssetGroup> CreateNativeLibraryGroups(LockFileTargetLibrary export)
@@ -299,6 +330,21 @@ namespace Microsoft.NET.Build.Tasks
             return nativeGroups;
         }
 
+        private IEnumerable<ResourceAssembly> CreateResourceAssemblyGroups(LockFileTargetLibrary targetLibrary, SingleProjectInfo referenceProjectInfo)
+        {
+            if (targetLibrary.Type == "project")
+            {
+                EnsureProjectInfo(referenceProjectInfo, targetLibrary.Name);
+                return referenceProjectInfo
+                    .ResourceAssemblies
+                    .Select(r => new ResourceAssembly(r.RelativePath, r.Culture));
+            }
+            else
+            {
+                return targetLibrary.ResourceAssemblies.FilterPlaceHolderFiles().Select(CreateResourceAssembly);
+            }
+        }
+
         private ResourceAssembly CreateResourceAssembly(LockFileItem resourceAssembly)
         {
             string locale;
@@ -308,6 +354,51 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             return new ResourceAssembly(resourceAssembly.Path, locale);
+        }
+
+        private IEnumerable<string> GetCompileTimeAssemblies(LockFileTargetLibrary targetLibrary, SingleProjectInfo referenceProjectInfo)
+        {
+            if (targetLibrary.Type == "project")
+            {
+                EnsureProjectInfo(referenceProjectInfo, targetLibrary.Name);
+                return new[] { referenceProjectInfo.OutputName };
+            }
+            else
+            {
+                return targetLibrary
+                    .CompileTimeAssemblies
+                    .FilterPlaceHolderFiles()
+                    .Select(libraryAsset => libraryAsset.Path);
+            }
+        }
+
+        private static void EnsureProjectInfo(SingleProjectInfo referenceProjectInfo, string libraryName)
+        {
+            if (referenceProjectInfo == null)
+            {
+                throw new Exception($"Could not find valid a SingleProjectInfo for LockFileTargetLibrary '{libraryName}'");
+            }
+        }
+
+        private SingleProjectInfo GetProjectInfo(LockFileLibrary library)
+        {
+            string projectPath = library.MSBuildProject;
+            if (string.IsNullOrEmpty(projectPath))
+            {
+                throw new Exception($"Could not find valid 'MSBuildProject' for project LockFileTargetLibrary '{library.Name}'");
+            }
+
+            string mainProjectDirectory = Path.GetDirectoryName(_mainProjectInfo.ProjectPath);
+            string fullProjectPath = Path.GetFullPath(Path.Combine(mainProjectDirectory, projectPath));
+
+            SingleProjectInfo referenceProjectInfo = null;
+            if (_referenceProjectInfos?.TryGetValue(fullProjectPath, out referenceProjectInfo) != true ||
+                referenceProjectInfo == null)
+            {
+                throw new Exception($"Could not find valid a SingleProjectInfo for project '{fullProjectPath}'");
+            }
+
+            return referenceProjectInfo;
         }
     }
 }

@@ -81,6 +81,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                       AssemblyName="$(AssemblyName)"
                       AssemblyVersion="$(Version)"
                       AssemblySatelliteAssemblies="@(IntermediateSatelliteAssembliesWithTargetPath)"
+                      ProjectReferencePaths="@(ReferencePath->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))"
+                      ProjectReferenceSatellitePaths="@(ReferenceSatellitePaths)"
                       RuntimeIdentifier="$(RuntimeIdentifier)"
                       PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                       CompilerOptions="@(DependencyFileCompilerOptions)" />

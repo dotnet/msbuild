@@ -1,6 +1,8 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.IO;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
 
@@ -11,15 +13,21 @@ namespace Microsoft.NET.Build.Tasks
         public string ProjectPath { get; }
         public string Name { get; }
         public string Version { get; }
+        public string OutputName { get; }
 
-        public IEnumerable<ResourceAssemblyInfo> ResourceAssemblies { get; }
+        private List<ResourceAssemblyInfo> _resourceAssemblies;
+        public IEnumerable<ResourceAssemblyInfo> ResourceAssemblies
+        {
+            get { return _resourceAssemblies; }
+        }
 
-        private SingleProjectInfo(string projectPath, string name, string version, IEnumerable<ResourceAssemblyInfo> resourceAssemblies)
+        private SingleProjectInfo(string projectPath, string name, string version, string outputName, List<ResourceAssemblyInfo> resourceAssemblies)
         {
             ProjectPath = projectPath;
             Name = name;
             Version = version;
-            ResourceAssemblies = resourceAssemblies;
+            OutputName = outputName;
+            _resourceAssemblies = resourceAssemblies;
         }
 
         public static SingleProjectInfo Create(string projectPath, string name, string version, ITaskItem[] satelliteAssemblies)
@@ -34,12 +42,58 @@ namespace Microsoft.NET.Build.Tasks
                 resourceAssemblies.Add(new ResourceAssemblyInfo(culture, relativePath));
             }
 
-            return new SingleProjectInfo(projectPath, name, version, resourceAssemblies);
+            return new SingleProjectInfo(projectPath, name, version, $"{name}.dll", resourceAssemblies);
         }
 
-        public string GetOutputName()
+        public static Dictionary<string, SingleProjectInfo> CreateFromProjectReferences(
+            ITaskItem[] projectReferencePaths,
+            ITaskItem[] projectReferenceSatellitePaths)
         {
-            return $"{Name}.dll";
+            Dictionary<string, SingleProjectInfo> projectReferences = new Dictionary<string, SingleProjectInfo>();
+
+            foreach (ITaskItem projectReferencePath in projectReferencePaths)
+            {
+                string sourceProjectFile = projectReferencePath.GetMetadata("MSBuildSourceProjectFile");
+
+                if (string.IsNullOrEmpty(sourceProjectFile))
+                {
+                    throw new Exception($"Could not find valid 'MSBuildSourceProjectFile' metadata on ReferencePath '{projectReferencePath.ItemSpec}'");
+                }
+
+                string outputName = Path.GetFileName(projectReferencePath.ItemSpec);
+                string name = Path.GetFileNameWithoutExtension(outputName);
+                string version = null; // it isn't possible to know the version from the MSBuild info.
+                                       // The version will be retrieved from the project assets file.
+
+                List<ResourceAssemblyInfo> resourceAssemblies = new List<ResourceAssemblyInfo>();
+
+                projectReferences.Add(
+                    sourceProjectFile,
+                    new SingleProjectInfo(sourceProjectFile, name, version, outputName, resourceAssemblies));
+            }
+
+            foreach (ITaskItem projectReferenceSatellitePath in projectReferenceSatellitePaths)
+            {
+                string sourceProjectFile = projectReferenceSatellitePath.GetMetadata("MSBuildSourceProjectFile");
+
+                if (string.IsNullOrEmpty(sourceProjectFile))
+                {
+                    throw new Exception($"Could not find valid 'MSBuildSourceProjectFile' metadata on ReferenceSatellitePath '{projectReferenceSatellitePath.ItemSpec}'");
+                }
+
+                SingleProjectInfo referenceProjectInfo;
+                if (projectReferences.TryGetValue(sourceProjectFile, out referenceProjectInfo))
+                {
+                    string destinationSubDirectory = projectReferenceSatellitePath.GetMetadata("DestinationSubDirectory");
+
+                    string culture = destinationSubDirectory.Trim('\\', '/');
+                    string relativePath = Path.Combine(destinationSubDirectory, Path.GetFileName(projectReferenceSatellitePath.ItemSpec));
+
+                    referenceProjectInfo._resourceAssemblies.Add(new ResourceAssemblyInfo(culture, relativePath));
+                }
+            }
+
+            return projectReferences;
         }
     }
 }
