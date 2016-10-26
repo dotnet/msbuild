@@ -61,6 +61,7 @@
     <Compile Include="IBuildEngine3.cs" />
     <Compile Include="IBuildEngine4.cs" />
     <Compile Include="IBuildEngine5.cs" />
+    <Compile Include="IEventSource2.cs" />
     <Compile Include="IGeneratedTask.cs" />
     <Compile Include="LazyFormattedBuildEventArgs.cs" />
     <Compile Include="IBuildEngine.cs">

@@ -87,8 +87,11 @@ namespace Microsoft.Build.BackEnd.Logging
             ErrorUtilities.VerifyThrow(eventSource != null, "eventSource is null");
             eventSource.AnyEventRaised += new AnyEventHandler(EventSource_AnyEventRaised);
 
-            // Telemetry events aren't part of "all" so they need to be forwarded separately
-            eventSource.TelemetryLogged += EventSource_AnyEventRaised;
+            if (eventSource is IEventSource2)
+            {
+                // Telemetry events aren't part of "all" so they need to be forwarded separately
+                ((IEventSource2)eventSource).TelemetryLogged += EventSource_AnyEventRaised;
+            }
         }
 
         /// <summary>

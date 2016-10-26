@@ -111,6 +111,17 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
+        /// Retrieves the IBuildEngine5 version of the build engine interface provided by the host.
+        /// </summary>
+        public IBuildEngine5 BuildEngine5
+        {
+            get
+            {
+                return (IBuildEngine5)_buildEngine;
+            }
+        }
+
+        /// <summary>
         /// The build engine sets this property if the host IDE has associated a host object with this particular task.
         /// </summary>
         /// <value>The host object instance (can be null).</value>

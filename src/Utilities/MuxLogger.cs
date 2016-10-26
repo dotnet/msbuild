@@ -325,7 +325,7 @@ namespace Microsoft.Build.Utilities
 #if FEATURE_APPDOMAIN
             MarshalByRefObject,
 #endif
-            IEventSource
+            IEventSource2
         {
             #region Fields
             /// <summary>
@@ -1319,7 +1319,12 @@ namespace Microsoft.Build.Utilities
                 _eventSourceForBuild.TaskFinished += _taskFinishedEventHandler;
                 _eventSourceForBuild.TaskStarted += _taskStartedEventHandler;
                 _eventSourceForBuild.WarningRaised += _buildWarningEventHandler;
-                _eventSourceForBuild.TelemetryLogged += _telemetryEventHandler;
+
+                if (_eventSourceForBuild is IEventSource2)
+                {
+                    ((IEventSource2)_eventSourceForBuild).TelemetryLogged += _telemetryEventHandler;
+                }
+                
             }
 
             /// <summary>
@@ -1341,7 +1346,11 @@ namespace Microsoft.Build.Utilities
                 _eventSourceForBuild.TaskFinished -= _taskFinishedEventHandler;
                 _eventSourceForBuild.TaskStarted -= _taskStartedEventHandler;
                 _eventSourceForBuild.WarningRaised -= _buildWarningEventHandler;
-                _eventSourceForBuild.TelemetryLogged -= _telemetryEventHandler;
+
+                if (_eventSourceForBuild is IEventSource2)
+                {
+                    ((IEventSource2)_eventSourceForBuild).TelemetryLogged -= _telemetryEventHandler;
+                }
 
                 MessageRaised = null;
                 ErrorRaised = null;

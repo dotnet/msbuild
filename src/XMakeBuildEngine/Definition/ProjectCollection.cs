@@ -1743,7 +1743,7 @@ namespace Microsoft.Build.Evaluation
         /// The ReusableLogger wraps a logger and allows it to be used for both design-time and build-time.  It internally swaps
         /// between the design-time and build-time event sources in response to Initialize and Shutdown events.
         /// </summary>
-        internal class ReusableLogger : INodeLogger, IEventSource
+        internal class ReusableLogger : INodeLogger, IEventSource2
         {
             /// <summary>
             /// The logger we are wrapping.
@@ -2054,7 +2054,11 @@ namespace Microsoft.Build.Evaluation
                 eventSource.TaskFinished += _taskFinishedEventHandler;
                 eventSource.TaskStarted += _taskStartedEventHandler;
                 eventSource.WarningRaised += _buildWarningEventHandler;
-                eventSource.TelemetryLogged += _telemetryEventHandler;
+
+                if (eventSource is IEventSource2)
+                {
+                    ((IEventSource2)eventSource).TelemetryLogged += _telemetryEventHandler;
+                }
             }
 
             /// <summary>
@@ -2077,7 +2081,11 @@ namespace Microsoft.Build.Evaluation
                 eventSource.TaskFinished -= _taskFinishedEventHandler;
                 eventSource.TaskStarted -= _taskStartedEventHandler;
                 eventSource.WarningRaised -= _buildWarningEventHandler;
-                eventSource.TelemetryLogged -= _telemetryEventHandler;
+
+                if (eventSource is IEventSource2)
+                {
+                    ((IEventSource2)eventSource).TelemetryLogged -= _telemetryEventHandler;
+                }
 
                 // Null out the handlers.
                 _anyEventHandler = null;
