@@ -38,11 +38,18 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_IsNETCoreOrNETStandard Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">true</_IsNETCoreOrNETStandard>
   </PropertyGroup>
 
+  <!-- Unification / automatic binding redirect logic -->
+  <PropertyGroup>
+    <DesignTimeAutoUnify Condition="'$(DesignTimeAutoUnify)' == ''">true</DesignTimeAutoUnify>
+    <AutoUnifyAssemblyReferences Condition="'$(AutoUnifyAssemblyReferences)' == '' and $(OutputType) == 'Library'">true</AutoUnifyAssemblyReferences>
+    <AutoUnifyAssemblyReferences Condition="'$(AutoUnifyAssemblyReferences)' == '' and '$(_IsNETCoreOrNETStandard)' == 'true'">true</AutoUnifyAssemblyReferences>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(OutputType)' == 'Exe'">
+    <AutoGenerateBindingRedirects Condition="'$(AutoGenerateBindingRedirects)' == ''">true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+
   <!-- Default settings for .NET Core and .NET Standard build logic -->
   <PropertyGroup Condition="'$(_IsNETCoreOrNETStandard)' == 'true'">
-    <AutoUnifyAssemblyReferences Condition="'$(AutoUnifyAssemblyReferences)' == ''">true</AutoUnifyAssemblyReferences>
-    <DesignTimeAutoUnify Condition="'$(DesignTimeAutoUnify)' == ''">true</DesignTimeAutoUnify>
-
     <GenerateDependencyFile Condition=" '$(GenerateDependencyFile)' == '' ">true</GenerateDependencyFile>
 
     <!-- Force .dll extension for .NETCoreApp and .NETStandard projects even if output type is exe. -->
