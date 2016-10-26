@@ -88,12 +88,21 @@ namespace Microsoft.NET.Publish.Tests
                 testLibrary.RuntimeAssemblyGroups[0].AssetPaths[0].Should().Be("TestLibrary.dll");
 
                 testLibrary.ResourceAssemblies.Count.Should().Be(3);
-                testLibrary.ResourceAssemblies[0].Locale.Should().Be("da");
-                testLibrary.ResourceAssemblies[0].Path.Should().Be("da/TestLibrary.resources.dll");
-                testLibrary.ResourceAssemblies[1].Locale.Should().Be("de");
-                testLibrary.ResourceAssemblies[1].Path.Should().Be("de/TestLibrary.resources.dll");
-                testLibrary.ResourceAssemblies[2].Locale.Should().Be("fr");
-                testLibrary.ResourceAssemblies[2].Path.Should().Be("fr/TestLibrary.resources.dll");
+                testLibrary
+                    .ResourceAssemblies
+                    .FirstOrDefault(r => r.Locale == "da" && r.Path == "da/TestLibrary.resources.dll")
+                    .Should()
+                    .NotBeNull();
+                testLibrary
+                    .ResourceAssemblies
+                    .FirstOrDefault(r => r.Locale == "de" && r.Path == "de/TestLibrary.resources.dll")
+                    .Should()
+                    .NotBeNull();
+                testLibrary
+                    .ResourceAssemblies
+                    .FirstOrDefault(r => r.Locale == "fr" && r.Path == "fr/TestLibrary.resources.dll")
+                    .Should()
+                    .NotBeNull();
             }
         }
     }
