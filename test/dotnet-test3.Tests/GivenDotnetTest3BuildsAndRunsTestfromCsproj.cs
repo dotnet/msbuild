@@ -30,7 +30,9 @@ namespace Microsoft.DotNet.Cli.Test3.Tests
                 .Pass();
 
             // Call test3
-            CommandResult result = new Test3Command().WithWorkingDirectory(testProjectDirectory).ExecuteWithCapturedOutput("--framework netcoreapp1.0");
+            CommandResult result = new Test3Command()
+                                       .WithWorkingDirectory(testProjectDirectory)
+                                       .ExecuteWithCapturedOutput("--framework netcoreapp1.0");
 
             // Verify
             result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
@@ -55,14 +57,17 @@ namespace Microsoft.DotNet.Cli.Test3.Tests
                 .Pass();
 
             string configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
-            string expectedError = Path.Combine(testProjectDirectory, "bin", configuration, "netcoreapp1.0", "VSTestDotNetCoreProject.dll");
-            expectedError = "The test source file " + "\""+ expectedError + "\"" + " provided was not found.";
+            string expectedError = Path.Combine(testProjectDirectory, "bin",
+                                   configuration, "netcoreapp1.0", "VSTestDotNetCoreProject.dll");
+            expectedError = "The test source file " + "\"" + expectedError + "\"" + " provided was not found.";
 
             // Call test3
-            CommandResult result = new Test3Command().WithWorkingDirectory(testProjectDirectory).ExecuteWithCapturedOutput("--noBuild");
+            CommandResult result = new Test3Command()
+                                       .WithWorkingDirectory(testProjectDirectory)
+                                       .ExecuteWithCapturedOutput("--noBuild");
 
             // Verify
-            result.StdOut.Should().Contain(expectedError);
+            result.StdOut.Should().Contain(expectedError); 
         }
     }
 }

@@ -32,7 +32,9 @@ namespace Microsoft.DotNet.Cli.Test3.Tests
                     .Pass();
 
                 // Call test3
-                CommandResult result = new Test3Command().WithWorkingDirectory(testProjectDirectory).ExecuteWithCapturedOutput("");
+                CommandResult result = new Test3Command()
+                                           .WithWorkingDirectory(testProjectDirectory)
+                                           .ExecuteWithCapturedOutput("");
 
                 // Verify
                 // for target framework net46
