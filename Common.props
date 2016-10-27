@@ -18,7 +18,6 @@
     <PackagesLayoutToolsDir>$(PackagesLayoutDir)tools\</PackagesLayoutToolsDir>
     <PackagesLayoutToolsNet46Dir>$(PackagesLayoutToolsDir)net46\</PackagesLayoutToolsNet46Dir>
     <PackagesLayoutToolsNetCoreAppDir>$(PackagesLayoutToolsDir)netcoreapp1.0\</PackagesLayoutToolsNetCoreAppDir>
-    <WebPackagesLayoutDir>$(OutDir)WebPackagesLayout\</WebPackagesLayoutDir>
     
     <VersionPrefix Condition="'$(VersionPrefix)' == ''">1.0.0</VersionPrefix>
     <VersionPrereleasePrefix Condition="'$(VersionPrereleasePrefix)' == ''">alpha</VersionPrereleasePrefix>
