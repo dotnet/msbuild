@@ -238,5 +238,25 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             migratedProjectReferenceItem.Include.Should().Be(projectReference);
             migratedProjectReferenceItem.Condition.Should().Be(" '$(Bar)' == 'foo'  and  '$(Foo)' == 'bar' ");
         }
+
+        [Fact]
+        public void It_promotes_P2P_references_up_in_the_dependency_chain()
+        {
+            var solutionDirectory =
+                TestAssetsManager.CreateTestInstance("TestAppDependencyGraph", callingMethod: "p").Path;
+
+            var appDirectory = Path.Combine(solutionDirectory, "ProjectA");
+
+            var projectContext = ProjectContext.Create(appDirectory, FrameworkConstants.CommonFrameworks.NetCoreApp10);
+            var mockProj = ProjectRootElement.Create();
+            var testSettings = new MigrationSettings(appDirectory, appDirectory, "1.0.0", mockProj, null);
+            var testInputs = new MigrationRuleInputs(new[] {projectContext}, mockProj, mockProj.AddItemGroup(),
+                mockProj.AddPropertyGroup());
+            new MigrateProjectDependenciesRule().Apply(testSettings, testInputs);
+
+            var projectReferences = mockProj.Items.Where(
+                item => item.ItemType.Equals("ProjectReference", StringComparison.Ordinal));
+            projectReferences.Count().Should().Be(7);
+        }
     }
 }

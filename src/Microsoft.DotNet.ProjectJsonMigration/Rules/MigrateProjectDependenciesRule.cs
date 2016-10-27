@@ -30,8 +30,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             _projectDirectory = migrationSettings.ProjectDirectory;
 
             var migratedXProjDependencyPaths = MigrateXProjProjectDependencies(migrationRuleInputs);
-            var migratedXProjDependencyNames = new HashSet<string>(migratedXProjDependencyPaths.Select(p => Path.GetFileNameWithoutExtension(
-                                                                                                                 PathUtility.GetPathWithDirectorySeparator(p))));
+            var migratedXProjDependencyNames = new HashSet<string>(
+                migratedXProjDependencyPaths.Select(p =>
+                    Path.GetFileNameWithoutExtension(PathUtility.GetPathWithDirectorySeparator(p))));
             MigrateProjectJsonProjectDependencies(
                 migrationRuleInputs.ProjectContexts, 
                 migratedXProjDependencyNames, 
@@ -104,8 +105,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             HashSet<string> migratedXProjDependencyNames,
             ProjectRootElement outputMSBuildProject)
         {
-            var projectDependencies = _projectDependencyFinder.ResolveProjectDependenciesForFramework(
-                    project,
+            var projectDependencies = _projectDependencyFinder.ResolveAllProjectDependenciesForFramework(
+                    new ProjectDependency(project.Name, project.ProjectFilePath),
                     framework,
                     migratedXProjDependencyNames);
 

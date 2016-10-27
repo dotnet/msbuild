@@ -244,7 +244,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             var migratedXProjDependencyPaths = csprojReferenceItems.SelectMany(p => p.Includes());
             var migratedXProjDependencyNames = new HashSet<string>(migratedXProjDependencyPaths.Select(p => Path.GetFileNameWithoutExtension(
                                                                                                                  PathUtility.GetPathWithDirectorySeparator(p))));
-            var projectDependencies = _projectDependencyFinder.ResolveProjectDependenciesForFramework(
+            var projectDependencies = _projectDependencyFinder.ResolveDirectProjectDependenciesForFramework(
                 project,
                 framework,
                 preResolvedProjects: migratedXProjDependencyNames);

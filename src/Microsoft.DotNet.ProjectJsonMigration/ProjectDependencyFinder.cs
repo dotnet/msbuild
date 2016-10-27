@@ -17,6 +17,19 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 {
     internal class ProjectDependencyFinder
     {
+        public IEnumerable<ProjectDependency> ResolveProjectDependencies(
+            IEnumerable<ProjectContext> projectContexts,
+            IEnumerable<string> preResolvedProjects = null)
+        {
+            foreach (var projectContext in projectContexts)
+            {
+                foreach (var projectDependency in ResolveProjectDependencies(projectContext, preResolvedProjects))
+                {
+                    yield return projectDependency;
+                }
+            }
+        }
+
         public IEnumerable<ProjectDependency> ResolveProjectDependencies(string projectDir, string xprojFile = null)
         {
             var projectContexts = ProjectContext.CreateContextForEachFramework(projectDir);
@@ -31,20 +44,37 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             return ResolveProjectDependencies(projectContexts, ResolveXProjProjectDependencyNames(xproj));
         }
 
-        public IEnumerable<ProjectDependency> ResolveProjectDependencies(
-            IEnumerable<ProjectContext> projectContexts,
-            IEnumerable<string> preResolvedProjects = null)
+        public IEnumerable<ProjectDependency> ResolveAllProjectDependenciesForFramework(
+            ProjectDependency projectToResolve,
+            NuGetFramework framework,
+            IEnumerable<string> preResolvedProjects=null)
         {
-            foreach (var projectContext in projectContexts)
+            var projects = new List<ProjectDependency> { projectToResolve };
+            var allDependencies = new List<ProjectDependency>();
+            while (projects.Count > 0)
             {
-                foreach (var projectDependency in ResolveProjectDependencies(projectContext, preResolvedProjects))
+                var project = projects.First();
+                projects.Remove(project);
+                var projectContext =
+                    ProjectContext.CreateContextForEachFramework(project.ProjectFilePath).FirstOrDefault();
+                if(projectContext == null)
                 {
-                    yield return projectDependency;
+                    continue;
                 }
+
+                var dependencies = ResolveDirectProjectDependenciesForFramework(
+                    projectContext.ProjectFile,
+                    framework,
+                    preResolvedProjects
+                );
+                projects.AddRange(dependencies);
+                allDependencies.AddRange(dependencies);
             }
+
+            return allDependencies;
         }
 
-        public IEnumerable<ProjectDependency> ResolveProjectDependenciesForFramework(
+        public IEnumerable<ProjectDependency> ResolveDirectProjectDependenciesForFramework(
             Project project, 
             NuGetFramework framework, 
             IEnumerable<string> preResolvedProjects=null)
@@ -98,7 +128,37 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             return projectDependencies;
         }
 
-        public IEnumerable<ProjectDependency> ResolveProjectDependencies(ProjectContext projectContext, IEnumerable<string> preResolvedProjects=null)
+        internal IEnumerable<ProjectItemElement> ResolveXProjProjectDependencies(ProjectRootElement xproj)
+        {
+            if (xproj == null)
+            {
+                MigrationTrace.Instance.WriteLine($"{nameof(ProjectDependencyFinder)}: No xproj file given.");
+                return Enumerable.Empty<ProjectItemElement>();
+            }
+
+            return xproj.Items
+                        .Where(i => i.ItemType == "ProjectReference")
+                        .Where(p => p.Includes().Any(
+                                    include => string.Equals(Path.GetExtension(include), ".csproj", StringComparison.OrdinalIgnoreCase)));
+        }
+
+        internal string FindXprojFile(string projectDirectory)
+        {
+            var allXprojFiles = Directory.EnumerateFiles(projectDirectory, "*.xproj", SearchOption.TopDirectoryOnly);
+
+            if (allXprojFiles.Count() > 1)
+            {
+                MigrationErrorCodes
+                    .MIGRATE1017($"Multiple xproj files found in {projectDirectory}, please specify which to use")
+                    .Throw();
+            }
+
+            return allXprojFiles.FirstOrDefault();
+        }
+
+        private IEnumerable<ProjectDependency> ResolveProjectDependencies(
+            ProjectContext projectContext,
+            IEnumerable<string> preResolvedProjects=null)
         {
             preResolvedProjects = preResolvedProjects ?? new HashSet<string>();
 
@@ -142,34 +202,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             var xprojDependencies = ResolveXProjProjectDependencies(xproj).SelectMany(r => r.Includes());
             return new HashSet<string>(xprojDependencies.Select(p => Path.GetFileNameWithoutExtension(
                                                                           PathUtility.GetPathWithDirectorySeparator(p))));
-        }
-
-        internal IEnumerable<ProjectItemElement> ResolveXProjProjectDependencies(ProjectRootElement xproj)
-        {
-            if (xproj == null)
-            {
-                MigrationTrace.Instance.WriteLine($"{nameof(ProjectDependencyFinder)}: No xproj file given.");
-                return Enumerable.Empty<ProjectItemElement>();
-            }
-
-            return xproj.Items
-                        .Where(i => i.ItemType == "ProjectReference")
-                        .Where(p => p.Includes().Any(
-                                    include => string.Equals(Path.GetExtension(include), ".csproj", StringComparison.OrdinalIgnoreCase)));
-        }
-
-        internal string FindXprojFile(string projectDirectory)
-        {
-            var allXprojFiles = Directory.EnumerateFiles(projectDirectory, "*.xproj", SearchOption.TopDirectoryOnly);
-
-            if (allXprojFiles.Count() > 1)
-            {
-                MigrationErrorCodes
-                    .MIGRATE1017($"Multiple xproj files found in {projectDirectory}, please specify which to use")
-                    .Throw();
-            }
-
-            return allXprojFiles.FirstOrDefault();
         }
 
         private Dictionary<string, ProjectDependency> FindPossibleProjectDependencies(string projectJsonFilePath)
