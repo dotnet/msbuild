@@ -33,6 +33,7 @@
 
   <!-- Respect the traits set up by PlatformSpecific attribute. -->
   <PropertyGroup>
+    <XunitOptions>-notrait category=performance</XunitOptions>
     <XunitOptions Condition="'$(OS)'=='Windows_NT'">$(XunitOptions) -notrait category=nonwindowstests</XunitOptions>
     <XunitOptions Condition="'$(OS)'=='Unix'">$(XunitOptions) -notrait category=nonlinuxtests</XunitOptions>
     <XunitOptions Condition="'$(OS)'=='Unix' and '$(NetCoreBuild)'=='true'">-notrait category=nonlinuxtests -notrait category=netcore-linux-failing</XunitOptions>
