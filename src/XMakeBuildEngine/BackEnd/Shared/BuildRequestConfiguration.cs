@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Text;
 using Microsoft.Build.Construction;
@@ -18,6 +19,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Evaluation;
@@ -140,6 +142,8 @@ namespace Microsoft.Build.BackEnd
 
         #endregion
 
+        internal IReadOnlyCollection<string> TargetNames { get; }
+
         /// <summary>
         /// Initializes a configuration from a BuildRequestData structure.  Used by the BuildManager.
         /// Figures out the correct tools version to use, falling back to the provided default if necessary.
@@ -172,6 +176,7 @@ namespace Microsoft.Build.BackEnd
             _explicitToolsVersionSpecified = data.ExplicitToolsVersionSpecified;
             _toolsVersion = ResolveToolsVersion(data, defaultToolsVersion, getToolset);
             _globalProperties = data.GlobalPropertiesDictionary;
+            TargetNames = new List<string>(data.TargetNames);
 
             // The following information only exists when the request is populated with an existing project.
             if (data.ProjectInstance != null)
@@ -237,6 +242,7 @@ namespace Microsoft.Build.BackEnd
             _globalProperties = other._globalProperties;
             this.IsCacheable = other.IsCacheable;
             _configId = configId;
+            TargetNames = other.TargetNames;
         }
 
         /// <summary>
