@@ -57,6 +57,7 @@
       <Link>ITaskItem2.cs</Link>
     </Compile>
     <Compile Include="..\..\Shared\AssemblyUtilities.cs" />
+    <Compile Include="..\..\Shared\BufferedReadStream.cs" />
     <Compile Include="..\..\Shared\CollectionHelpers.cs" />
     <Compile Include="..\..\Shared\CopyOnWriteDictionary.cs">
       <Link>CopyOnWriteDictionary.cs</Link>
