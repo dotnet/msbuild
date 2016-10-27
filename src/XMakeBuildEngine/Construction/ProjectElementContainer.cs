@@ -231,7 +231,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Appends the provided element as the last child.
+        /// Inserts the provided element as the last child.
         /// Throws if the parent is not itself parented.
         /// Throws if the node to add is already parented.
         /// Throws if the node to add was created from a different project than this node.
@@ -250,7 +250,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Appends the provided element as the last child.
+        /// Inserts the provided element as the first child.
         /// Throws if the parent is not itself parented.
         /// Throws if the node to add is already parented.
         /// Throws if the node to add was created from a different project than this node.
@@ -457,6 +457,7 @@ namespace Microsoft.Build.Construction
         {
             if (child.ExpressedAsAttribute)
             {
+                // todo children represented as attributes need to be placed in order too
                 //  Assume that the name of the child has already been validated to conform with rules in XmlUtilities.VerifyThrowArgumentValidElementName
 
                 //  Make sure we're not trying to add multiple attributes with the same name
@@ -473,36 +474,44 @@ namespace Microsoft.Build.Construction
                 //
                 //  Also, if PreserveWhitespace is true, then the elements we add won't automatically get indented, so
                 //  we try to match the surrounding formatting.
-                if (child.PreviousSibling != null)
+
+                // Siblings, in either direction in the linked list, may be represented either as attributes or as elements.
+                // Therefore, we need to traverse both directions to find the first sibling of the same type as the one being added.
+                // If none is found, then the node being added is inserted as the only node of its kind
+
+                ProjectElement referenceSibling;
+                Predicate<ProjectElement> siblingIsSameAsChild = _ => _.ExpressedAsAttribute == false;
+
+                if (TrySearchLeftSiblings(child.PreviousSibling, siblingIsSameAsChild, out referenceSibling))
                 {
                     //  Add after previous sibling
-                    XmlElement.InsertAfter(child.XmlElement, child.PreviousSibling.XmlElement);
+                    XmlElement.InsertAfter(child.XmlElement, referenceSibling.XmlElement);
                     if (XmlDocument.PreserveWhitespace)
                     {
                         //  Try to match the surrounding formatting by checking the whitespace that precedes the node we inserted
                         //  after, and inserting the same whitespace between the previous node and the one we added
-                        if (child.PreviousSibling.XmlElement.PreviousSibling != null &&
-                            child.PreviousSibling.XmlElement.PreviousSibling.NodeType == XmlNodeType.Whitespace)
+                        if (referenceSibling.XmlElement.PreviousSibling != null &&
+                            referenceSibling.XmlElement.PreviousSibling.NodeType == XmlNodeType.Whitespace)
                         {
-                            var newWhitespaceNode = XmlDocument.CreateWhitespace(child.PreviousSibling.XmlElement.PreviousSibling.Value);
-                            XmlElement.InsertAfter(newWhitespaceNode, child.PreviousSibling.XmlElement);
+                            var newWhitespaceNode = XmlDocument.CreateWhitespace(referenceSibling.XmlElement.PreviousSibling.Value);
+                            XmlElement.InsertAfter(newWhitespaceNode, referenceSibling.XmlElement);
                         }
                     }
                 }
-                else if (child.NextSibling != null)
+                else if (TrySearchRightSiblings(child.NextSibling, siblingIsSameAsChild, out referenceSibling))
                 {
                     //  Add as first child
-                    XmlElement.InsertBefore(child.XmlElement, child.NextSibling.XmlElement);
+                    XmlElement.InsertBefore(child.XmlElement, referenceSibling.XmlElement);
 
                     if (XmlDocument.PreserveWhitespace)
                     {
-                        //  Try to match the surrounding formatting by by checking the whitespace that precedes where we inserted
+                        //  Try to match the surrounding formatting by checking the whitespace that precedes where we inserted
                         //  the new node, and inserting the same whitespace between the node we added and the one after it.
                         if (child.XmlElement.PreviousSibling != null &&
                             child.XmlElement.PreviousSibling.NodeType == XmlNodeType.Whitespace)
                         {
                             var newWhitespaceNode = XmlDocument.CreateWhitespace(child.XmlElement.PreviousSibling.Value);
-                            XmlElement.InsertBefore(newWhitespaceNode, child.NextSibling.XmlElement);
+                            XmlElement.InsertBefore(newWhitespaceNode, referenceSibling.XmlElement);
                         }
                     }
                 }
@@ -666,6 +675,40 @@ namespace Microsoft.Build.Construction
 
                 child = child.NextSibling;
             }
+        }
+
+        private static bool TrySearchLeftSiblings(ProjectElement initialElement, Predicate<ProjectElement> siblingIsAcceptable, out ProjectElement referenceSibling)
+        {
+            return TrySearchSiblings(initialElement, siblingIsAcceptable, s => s.PreviousSibling, out referenceSibling);
+        }
+
+        private static bool TrySearchRightSiblings(ProjectElement initialElement, Predicate<ProjectElement> siblingIsAcceptable, out ProjectElement referenceSibling)
+        {
+            return TrySearchSiblings(initialElement, siblingIsAcceptable, s => s.NextSibling, out referenceSibling);
+        }
+
+        private static bool TrySearchSiblings(
+            ProjectElement initialElement,
+            Predicate<ProjectElement> siblingIsAcceptable,
+            Func<ProjectElement, ProjectElement> nextSibling,
+            out ProjectElement referenceSibling)
+        {
+            if (initialElement == null)
+            {
+                referenceSibling = null;
+                return false;
+            }
+
+            var sibling = initialElement;
+
+            while (sibling != null && !siblingIsAcceptable(sibling))
+            {
+                sibling = nextSibling(sibling);
+            }
+
+            referenceSibling = sibling;
+
+            return referenceSibling != null;
         }
 
         /// <summary>

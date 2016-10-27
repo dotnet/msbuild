@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -784,6 +785,332 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     <i Remove=""i"" />
   </ItemGroup>
 </Project>");
+
+            Helpers.VerifyAssertProjectContent(expected, project);
+        }
+
+        public delegate void AddMetadata(ProjectItemElement element);
+
+        public static IEnumerable<object[]> InsertMetadataElemenetAfterSiblingsTestData
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new AddMetadata((e) => { e.AddMetadata("a", "value_a", true); }), // operations on an ProjectItemElement
+                    0, // insert metadata after the 1st metadata
+                    @"<i Include=`a` a=`value_a`>
+                        <m>v</m>
+                      </i>" // expected item
+                };
+
+                yield return new object[]
+                {
+                    new AddMetadata((e) =>
+                    {
+                        e.AddMetadata("a", "value_a", false);
+                    }),
+                    0,
+                    @"<i Include=`a`>
+                        <a>value_a</a>
+                        <m>v</m>
+                      </i>"
+                };
+
+                yield return new object[]
+                {
+                    new AddMetadata((e) =>
+                    {
+                        e.AddMetadata("a", "value_a", true);
+                        e.AddMetadata("b", "value_b", true);
+                    }),
+                    0,
+                    @"<i Include=`a` a=`value_a` b=`value_b`>
+                        <m>v</m>
+                      </i>"
+                };
+
+                yield return new object[]
+                {
+                    new AddMetadata((e) =>
+                    {
+                        e.AddMetadata("a", "value_a", true);
+                        e.AddMetadata("b", "value_b", true);
+                        e.AddMetadata("c", "value_c", false);
+                        e.AddMetadata("d", "value_d", true);
+                        e.AddMetadata("e", "value_e", false);
+                    }),
+                    1,
+                    @"<i Include=`a` a=`value_a` b=`value_b` d=`value_d`>
+                        <m>v</m>
+                        <c>value_c</c>
+                        <e>value_e</e>
+                      </i>"
+                };
+
+                yield return new object[]
+                {
+                    new AddMetadata((e) =>
+                    {
+                        e.AddMetadata("a", "value_a", false);
+                        e.AddMetadata("b", "value_b", true);
+                        e.AddMetadata("c", "value_c", true);
+                    }),
+                    0,
+                    @"<i Include=`a` b=`value_b` c=`value_c`>
+                        <a>value_a</a>
+                        <m>v</m>
+                      </i>"
+                };
+
+                yield return new object[]
+                {
+                    new AddMetadata((e) =>
+                    {
+                        e.AddMetadata("a", "value_a", false);
+                        e.AddMetadata("b", "value_b", true);
+                        e.AddMetadata("c", "value_c", true);
+                    }),
+                    1,
+                    @"<i Include=`a` b=`value_b` c=`value_c`>
+                        <a>value_a</a>
+                        <m>v</m>
+                      </i>"
+                };
+
+                yield return new object[]
+                {
+                    new AddMetadata((e) =>
+                    {
+                        e.AddMetadata("a", "value_a", false);
+                        e.AddMetadata("b", "value_b", true);
+                        e.AddMetadata("c", "value_c", true);
+                    }),
+                    2,
+                    @"<i Include=`a` b=`value_b` c=`value_c`>
+                        <a>value_a</a>
+                        <m>v</m>
+                      </i>"
+                };
+
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(InsertMetadataElemenetAfterSiblingsTestData))]
+        public void InsertMetadataElementAfterSiblings(AddMetadata addMetadata, int position, string expectedItem)
+        {
+            Action<ProjectItemElement, ProjectMetadataElement, ProjectMetadataElement> act = (i, c, r) => { i.InsertAfterChild(c, r); };
+
+            AssertMetadataConstruction(addMetadata, position, expectedItem, act);
+        }
+
+        public static IEnumerable<object[]> InsertMetadataElemenetBeforeSiblingsTestData
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new AddMetadata((e) => { e.AddMetadata("a", "value_a", true); }), // operations on an ProjectItemElement
+                    0, // insert metadata before the 1st metadata
+                    @"<i Include=`a` a=`value_a`>
+                        <m>v</m>
+                      </i>" // expected item
+                };
+
+                yield return new object[]
+                {
+                    new AddMetadata((e) =>
+                    {
+                        e.AddMetadata("a", "value_a", true);
+                        e.AddMetadata("b", "value_b", true);
+                        e.AddMetadata("c", "value_c", false);
+                        e.AddMetadata("d", "value_d", true);
+                        e.AddMetadata("e", "value_e", false);
+                    }),
+                    0,
+                    @"<i Include=`a` a=`value_a` b=`value_b` d=`value_d`>
+                        <m>v</m>
+                        <c>value_c</c>
+                        <e>value_e</e>
+                      </i>"
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(InsertMetadataElemenetBeforeSiblingsTestData))]
+        public void InsertMetadataElementBeforeSiblings(AddMetadata addMetadata, int position, string expectedItem)
+        {
+            Action<ProjectItemElement, ProjectMetadataElement, ProjectMetadataElement> act = (i, c, r) => { i.InsertBeforeChild(c, r);};
+
+            AssertMetadataConstruction(addMetadata, position, expectedItem, act);
+        }
+
+        public static IEnumerable<object[]> InsertMetadataAttributeAfterSiblingsTestData
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new AddMetadata((e) =>
+                    {
+                        e.AddMetadata("a", "value_a", true);
+                        e.AddMetadata("b", "value_b", true);
+                    }), // operations on an ProjectItemElement
+                    0, // insert metadata after the 1st metadata
+                    @"<i Include=`a` a=`value_a` m=`v` b=`value_b` \>" // expected item
+                };
+
+                yield return new object[]
+                {
+                    new AddMetadata((e) =>
+                    {
+                        e.AddMetadata("a", "value_a", true);
+                        e.AddMetadata("b", "value_b", true);
+                    }),
+                    1,
+                    @"<i Include=`a` a=`value_a` b=`value_b` m=`v` \>"
+                };
+
+                yield return new object[]
+                {
+                    new AddMetadata((e) =>
+                    {
+                        e.AddMetadata("a", "value_a", true);
+                        e.AddMetadata("b", "value_b", false);
+                        e.AddMetadata("c", "value_c", false);
+                    }),
+                    2,
+                    @"<i Include=`a` a=`value_a` m=`v`>
+                        <b>value_b</b>
+                        <c>value_c</c>
+                      </i>"
+                };
+
+                yield return new object[]
+                {
+                    new AddMetadata((e) =>
+                    {
+                        e.AddMetadata("a", "value_a", false);
+                        e.AddMetadata("b", "value_b", false);
+                    }),
+                    1,
+                    @"<i Include=`a` m=`v`>
+                        <a>value_a</a>
+                        <b>value_b</b>
+                      </i>"
+                };
+
+                yield return new object[]
+                {
+                    new AddMetadata((e) =>
+                    {
+                        e.AddMetadata("a", "value_a", false);
+                        e.AddMetadata("b", "value_b", false);
+                        e.AddMetadata("c", "value_c", true);
+                    }),
+                    1,
+                    @"<i Include=`a` m=`v` c=`value_c`>
+                        <a>value_a</a>
+                        <b>value_b</b>
+                      </i>"
+                };
+
+            }
+        }
+
+        [Theory(Skip= "https://github.com/Microsoft/msbuild/issues/1253")]
+        [MemberData(nameof(InsertMetadataAttributeAfterSiblingsTestData))]
+        public void InsertMetadataAttributeAfterSiblings(AddMetadata addMetadata, int position, string expectedItem)
+        {
+            Action<ProjectItemElement, ProjectMetadataElement, ProjectMetadataElement> act = (i, c, r) =>
+            {
+                c.ExpressedAsAttribute = true;
+                i.InsertAfterChild(c, r);
+            };
+
+            AssertMetadataConstruction(addMetadata, position, expectedItem, act);
+        }
+
+        public static IEnumerable<object[]> InsertMetadataAttributeBeforeSiblingsTestData
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new AddMetadata((e) => { e.AddMetadata("a", "value_a", false); }), // operations on an ProjectItemElement
+                    0, // insert metadata before the 1st metadata
+                    @"<i Include=`a` m=`v`>
+                        <a>value_a</a>
+                      </i>" // expected item
+                };
+
+                yield return new object[]
+                {
+                    new AddMetadata((e) =>
+                    {
+                        e.AddMetadata("a", "value_a", false);
+                        e.AddMetadata("b", "value_b", false);
+                        e.AddMetadata("c", "value_c", true);
+                        e.AddMetadata("d", "value_d", false);
+                        e.AddMetadata("e", "value_e", true);
+                    }),
+                    0,
+                    @"<i Include=`a` m=`v` c=`value_c` e=`value_e`>
+                        <a>value_a</a>
+                        <b>value_b</b>
+                        <d>value_d</d>
+                      </i>"
+                };
+
+                yield return new object[]
+                {
+                    new AddMetadata((e) =>
+                    {
+                        e.AddMetadata("a", "value_a", false);
+                        e.AddMetadata("b", "value_b", false);
+                        e.AddMetadata("c", "value_c", true);
+                        e.AddMetadata("d", "value_d", false);
+                        e.AddMetadata("e", "value_e", true);
+                    }),
+                    3,
+                    @"<i Include=`a` c=`value_c` m=`v` e=`value_e`>
+                        <a>value_a</a>
+                        <b>value_b</b>
+                        <d>value_d</d>
+                      </i>"
+                };
+            }
+        }
+
+        [Theory(Skip= "https://github.com/Microsoft/msbuild/issues/1253")]
+        [MemberData(nameof(InsertMetadataAttributeBeforeSiblingsTestData))]
+        public void InsertMetadataAttributeBeforeSiblings(AddMetadata addMetadata, int position, string expectedItem)
+        {
+            Action<ProjectItemElement, ProjectMetadataElement, ProjectMetadataElement> act = (i, c, r) =>
+            {
+                c.ExpressedAsAttribute = true;
+                i.InsertBeforeChild(c, r);
+            };
+
+            AssertMetadataConstruction(addMetadata, position, expectedItem, act);
+        }
+
+        private static void AssertMetadataConstruction(AddMetadata addMetadata, int position, string expectedItem, Action<ProjectItemElement, ProjectMetadataElement, ProjectMetadataElement> actOnTestData)
+        {
+            var project = ProjectRootElement.Create();
+            var itemGroup = project.AddItemGroup();
+            var item = itemGroup.AddItem("i", "a");
+
+            addMetadata(item);
+
+            var referenceSibling = item.Metadata.ElementAt(position);
+            var m = project.CreateMetadataElement("m", "v");
+
+            actOnTestData(item, m, referenceSibling);
+
+            var expected = ComposeExpectedProjectString(expectedItem);
 
             Helpers.VerifyAssertProjectContent(expected, project);
         }
@@ -2811,6 +3138,41 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             element.Value = "m2";
         }
 
+        [Fact]
+        // Exposed https://github.com/Microsoft/msbuild/issues/1210
+        public void AddMetadataAsAttributeAndAsElement()
+        {
+            var project = ProjectRootElement.Create();
+            var itemGroup = project.AddItemGroup();
+
+            var item = itemGroup.AddItem("i1", "i");
+            item.AddMetadata("A", "value_a", expressAsAttribute: true);
+            item.AddMetadata("B", "value_b", expressAsAttribute: true);
+
+            item = itemGroup.AddItem("i2", "i");
+            item.AddMetadata("A", "value_a", expressAsAttribute: false);
+            item.AddMetadata("B", "value_b", expressAsAttribute: true);
+
+            item = itemGroup.AddItem("i3", "i");
+            item.AddMetadata("A", "value_a", expressAsAttribute: true);
+            item.AddMetadata("B", "value_b", expressAsAttribute: false);
+
+            string expected = ObjectModelHelpers.CleanupFileContents(
+@"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+  <ItemGroup>
+    <i1 Include=""i"" A=""value_a"" B=""value_b"" />
+    <i2 Include=""i"" B=""value_b"">
+      <A>value_a</A>
+    </i2>
+    <i3 Include=""i"" A=""value_a"">
+      <B>value_b</B>
+    </i3>
+  </ItemGroup>
+</Project>");
+
+            Helpers.VerifyAssertProjectContent(expected, project);
+        }
+
         /// <summary>
         /// Legally modify a child whose parent is not parented (should not throw)
         /// </summary>
@@ -2820,6 +3182,55 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             var element = ProjectRootElement.Create().AddTarget("t").AddPropertyGroup().AddProperty("p", "v1");
             element.Parent.Parent.RemoveAllChildren();
             element.Value = "v2";
+        }
+
+        private static string ComposeExpectedProjectString(string expectedItem)
+        {
+            var expected =
+@"<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+  <ItemGroup>
+{0}
+  </ItemGroup>
+</Project>";
+            expectedItem = AdjustSpacesForItem(expectedItem);
+
+            expected = ObjectModelHelpers.CleanupFileContents(string.Format(expected, expectedItem));
+
+            return expected;
+        }
+
+        private static string AdjustSpacesForItem(string expectedItem)
+        {
+            Assert.False(string.IsNullOrEmpty(expectedItem));
+
+            var itemSpace = "    ";
+            var metadataSpace = itemSpace + "  ";
+
+            var splits = expectedItem.Split('\n');
+            splits = splits.Select(s => s.Trim()).ToArray();
+
+            Assert.True(splits.Length >= 1);
+
+            var sb = new StringBuilder();
+
+            if (splits.Length == 1)
+            {
+                splits[0] = itemSpace + expectedItem;
+            }
+            else
+            {
+                sb.AppendLine(itemSpace + splits[0]);
+
+                for (var i = 1; i < splits.Length - 1; i++)
+                {
+                    sb.AppendLine(metadataSpace + splits[i]);
+                }
+
+                sb.Append(itemSpace + splits[splits.Length -1]);
+            }
+
+            expectedItem = sb.ToString();
+            return expectedItem;
         }
     }
 }
