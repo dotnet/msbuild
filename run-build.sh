@@ -143,7 +143,7 @@ if [ ! -f $bootStrapperPath ]; then
     chmod u+x $bootStrapperPath
 fi
 
-$bootStrapperPath --repositoryRoot "$REPOROOT" --toolsLocalPath "$toolsLocalPath" --cliInstallPath $DOTNET_INSTALL_DIR > bootstrap.log
+$bootStrapperPath --repositoryRoot "$REPOROOT" --toolsLocalPath "$toolsLocalPath" --cliInstallPath $DOTNET_INSTALL_DIR --architecture $ARCHITECTURE > bootstrap.log
 
 if [ $? != 0 ]; then
     echo "run-build: Error: Boot-strapping failed with exit code $?, see bootstrap.log for more information." >&2
