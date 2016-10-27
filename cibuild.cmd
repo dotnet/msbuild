@@ -149,7 +149,7 @@ echo   --scope ^<scope^>                Scope of the build ^(Compile / Test^)
 echo   --target ^<target^>              CoreCLR or Desktop ^(default: Desktop^)
 echo   --host ^<host^>                  CoreCLR or Desktop ^(default: Desktop^)
 echo   --build-only                     Only build using a downloaded copy of MSBuild but do not bootstrap
-                                        or build again with those binaries
+echo                                    or build again with those binaries
 echo   --bootstrap-only                 Build and bootstrap MSBuild but do not build again with those binaries
 echo   --localized-build                Do a localized build
 echo   --sync-xlf                       Synchronize xlf files from resx files
