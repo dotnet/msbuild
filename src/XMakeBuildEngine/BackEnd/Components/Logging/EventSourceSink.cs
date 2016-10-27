@@ -19,7 +19,7 @@ namespace Microsoft.Build.BackEnd.Logging
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        IEventSource, IBuildEventSink
+        IEventSource2, IBuildEventSink
     {
         #region Events
 
