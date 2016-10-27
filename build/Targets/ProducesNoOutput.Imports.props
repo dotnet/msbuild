@@ -22,5 +22,7 @@
   <Target Name="CoreCompile" />                               <!-- Prevent Csc from being called -->
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />   <!-- Don't generate TFM attribute -->
   <Target Name="RuntimeImplementationProjectOutputGroup" />   <!-- Group always attempts resolve runtime, regardless of <CopyNuGetImplementations>-->
+  <Target Name="GetReferenceAssemblyPaths" />                 <!-- Don't go looking for framewoek reference assemblies-->
+  <Target Name="GetFrameworkPaths"  />                        <!-- ^ -->
 
 </Project>
