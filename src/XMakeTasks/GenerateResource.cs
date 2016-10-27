@@ -1438,7 +1438,16 @@ namespace Microsoft.Build.Tasks
 
             return false;
 #else
-            return true;
+#if FEATURE_RESX_RESOURCE_READER
+            Compile error: if we get Resx reading before binary serialization
+            it might be interesting to get caching working some other way.
+#endif
+            // On .NET Core, we don't have binary serialization to maintain
+            // the cache, but conveniently .NET Core assemblies (the only
+            // supported target of .NET Core MSBuild) cannot use linked
+            // resources. So the only relevant comparison is input/output.
+            // See https://github.com/Microsoft/msbuild/issues/1197
+            return NeedToRebuildSourceFile(sourceTime, outputTime);
 #endif
         }
 
