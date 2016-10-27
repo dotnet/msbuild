@@ -1504,14 +1504,19 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     ======================================================================================
   -->
-  <Target Name="_GetProjectReferenceTargetFrameworkProperties" Outputs="%(_MSBuildProjectReferenceExistent.Identity)">
+  <Target Name="_GetProjectReferenceTargetFrameworkProperties"
+          Outputs="%(_MSBuildProjectReferenceExistent.Identity)">
+    <!-- As a mitigation for https://github.com/Microsoft/msbuild/issues/1276
+       .vcxproj is treated specially to avoid the cost of double-evaluating
+       for easily-identifiable-as-not-cross-targeting C++ projects. -->
     <MSBuild
         Projects="%(_MSBuildProjectReferenceExistent.Identity)"
         Targets="GetTargetFrameworkProperties"
         BuildInParallel="$(BuildInParallel)"
         Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); ReferringTargetFramework=$(TargetFrameworkMoniker)"
         ContinueOnError="!$(BuildingProject)"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework">
+        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework"
+        Condition="'%(_MSBuildProjectReferenceExistent.Extension)' != '.vcxproj'">
 
       <Output TaskParameter="TargetOutputs" PropertyName="_ProjectReferenceTargetFrameworkProperties" />
     </MSBuild>
