@@ -320,6 +320,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <Import Project="$(VisualBasicCoreTargetsPath)" />
 
+    <!-- Import design time targets for Roslyn Project System. These are only available if Visual Studio is installed. -->
+    <!-- Import design time targets before the common targets, which import targets from Nuget. -->
+    <PropertyGroup>
+       <VisualBasicDesignTimeTargetsPath Condition="'$(VisualBasicDesignTimeTargetsPath)'==''">$(MSBuildExtensionsPath)\Microsoft\VisualStudio\Managed\Microsoft.VisualBasic.DesignTime.targets</VisualBasicDesignTimeTargetsPath>
+    </PropertyGroup>
+    <Import Project="$(VisualBasicDesignTimeTargetsPath)" Condition="'$(VisualBasicDesignTimeTargetsPath)' != '' and Exists('$(VisualBasicDesignTimeTargetsPath)')" />
+
     <Import Project="Microsoft.Common.targets" />
     <Import Project="$(MSBuildToolsPath)\Microsoft.ServiceModel.targets" Condition="('$(TargetFrameworkVersion)' != 'v2.0' and '$(TargetFrameworkVersion)' != 'v3.0' and '$(TargetFrameworkVersion)' != 'v3.5') and Exists('$(MSBuildToolsPath)\Microsoft.ServiceModel.targets')"/>
 
@@ -363,12 +370,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       -->
         <_ExplicitReference Include="$(FrameworkPathOverride)\System.dll" />
     </ItemGroup>
-
-    <!-- Import design time targets for Roslyn Project System. These are only available if Visual Studio is installed. -->
-    <PropertyGroup>
-       <VisualBasicDesignTimeTargetsPath Condition="'$(VisualBasicDesignTimeTargetsPath)'==''">$(MSBuildExtensionsPath)\Microsoft\VisualStudio\Managed\Microsoft.VisualBasic.DesignTime.targets</VisualBasicDesignTimeTargetsPath>
-    </PropertyGroup>
-    <Import Project="$(VisualBasicDesignTimeTargetsPath)" Condition="'$(VisualBasicDesignTimeTargetsPath)' != '' and Exists('$(VisualBasicDesignTimeTargetsPath)')" />
 
     <Import Project="$(CustomAfterMicrosoftVisualBasicTargets)" Condition="'$(CustomAfterMicrosoftVisualBasicTargets)' != '' and Exists('$(CustomAfterMicrosoftVisualBasicTargets)')" />
 
