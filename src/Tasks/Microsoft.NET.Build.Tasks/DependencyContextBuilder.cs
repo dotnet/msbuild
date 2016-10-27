@@ -20,9 +20,11 @@ namespace Microsoft.NET.Build.Tasks
         private readonly VersionFolderPathResolver _versionFolderPathResolver;
         private readonly SingleProjectInfo _mainProjectInfo;
         private readonly ProjectContext _projectContext;
+        private IEnumerable<ReferenceInfo> _frameworkReferences;
         private Dictionary<string, SingleProjectInfo> _referenceProjectInfos;
         private IEnumerable<string> _privateAssetPackageIds;
         private CompilationOptions _compilationOptions;
+        private string _referenceAssembliesPath;
 
         public DependencyContextBuilder(SingleProjectInfo mainProjectInfo, ProjectContext projectContext)
         {
@@ -31,6 +33,14 @@ namespace Microsoft.NET.Build.Tasks
 
             // This resolver is only used for building file names, so that base path is not required.
             _versionFolderPathResolver = new VersionFolderPathResolver(path: null);
+        }
+
+        public DependencyContextBuilder WithFrameworkReferences(IEnumerable<ReferenceInfo> frameworkReferences)
+        {
+            // note: Framework libraries only export compile-time stuff
+            // since they assume the runtime library is present already
+            _frameworkReferences = frameworkReferences;
+            return this;
         }
 
         public DependencyContextBuilder WithReferenceProjectInfos(Dictionary<string, SingleProjectInfo> referenceProjectInfos)
@@ -48,6 +58,12 @@ namespace Microsoft.NET.Build.Tasks
         public DependencyContextBuilder WithCompilationOptions(CompilationOptions compilationOptions)
         {
             _compilationOptions = compilationOptions;
+            return this;
+        }
+
+        public DependencyContextBuilder WithReferenceAssembliesPath(string referenceAssembliesPath)
+        {
+            _referenceAssembliesPath = EnsureTrailingSlash(referenceAssembliesPath);
             return this;
         }
 
@@ -88,6 +104,7 @@ namespace Microsoft.NET.Build.Tasks
                     dependencyLookup);
                 compilationLibraries =
                     new[] { projectCompilationLibrary }
+                    .Concat(GetFrameworkLibraries())
                     .Concat(GetLibraries(compilationExports, libraryLookup, dependencyLookup, runtime: false).Cast<CompilationLibrary>());
             }
             else
@@ -372,6 +389,34 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
+        private IEnumerable<CompilationLibrary> GetFrameworkLibraries()
+        {
+            return _frameworkReferences
+                ?.Select(r => new CompilationLibrary(
+                    type: "referenceassembly",
+                    name: r.Name,
+                    version: r.Version,
+                    hash: string.Empty,
+                    assemblies: new[] { ResolveFrameworkReferencePath(r.FullPath) },
+                    dependencies: Enumerable.Empty<Dependency>(),
+                    serviceable: false))
+                ??
+                Enumerable.Empty<CompilationLibrary>();
+        }
+
+        private string ResolveFrameworkReferencePath(string fullPath)
+        {
+            // If resolved path is under ReferenceAssembliesPath store it as a relative to it
+            // if not, save only assembly name and try to find it somehow later
+            if (!string.IsNullOrEmpty(_referenceAssembliesPath) &&
+                fullPath?.StartsWith(_referenceAssembliesPath) == true)
+            {
+                return fullPath.Substring(_referenceAssembliesPath.Length);
+            }
+
+            return Path.GetFileName(fullPath);
+        }
+
         private static void EnsureProjectInfo(SingleProjectInfo referenceProjectInfo, string libraryName)
         {
             if (referenceProjectInfo == null)
@@ -399,6 +444,27 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             return referenceProjectInfo;
+        }
+
+        private static string EnsureTrailingSlash(string path)
+        {
+            return EnsureTrailingCharacter(path, Path.DirectorySeparatorChar);
+        }
+
+        private static string EnsureTrailingCharacter(string path, char trailingCharacter)
+        {
+            if (path == null)
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+
+            // if the path is empty, we want to return the original string instead of a single trailing character.
+            if (path.Length == 0 || path[path.Length - 1] == trailingCharacter)
+            {
+                return path;
+            }
+
+            return path + trailingCharacter;
         }
     }
 }

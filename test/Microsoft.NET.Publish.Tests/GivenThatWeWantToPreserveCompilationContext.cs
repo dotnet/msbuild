@@ -81,7 +81,7 @@ namespace Microsoft.NET.Publish.Tests
                     dependencyContext.CompilationOptions.EmitEntryPoint.Should().Be(true);
                     dependencyContext.CompilationOptions.DebugType.Should().Be("portable");
 
-                    dependencyContext.CompileLibraries.Count.Should().Be(targetFramework == "net46" ? 51 : 116);
+                    dependencyContext.CompileLibraries.Count.Should().Be(targetFramework == "net46" ? 53 : 116);
 
                     // Ensure P2P references are specified correctly
                     var testLibrary = dependencyContext
@@ -90,6 +90,22 @@ namespace Microsoft.NET.Publish.Tests
 
                     testLibrary.Assemblies.Count.Should().Be(1);
                     testLibrary.Assemblies[0].Should().Be("TestLibrary.dll");
+
+                    // Ensure framework references are specified correctly
+                    if (targetFramework == "net46")
+                    {
+                        var mscorlibLibrary = dependencyContext
+                            .CompileLibraries
+                            .FirstOrDefault(l => string.Equals(l.Name, "mscorlib", StringComparison.OrdinalIgnoreCase));
+                        mscorlibLibrary.Assemblies.Count.Should().Be(1);
+                        mscorlibLibrary.Assemblies[0].Should().Be(".NETFramework/v4.6/mscorlib.dll");
+
+                        var systemCoreLibrary = dependencyContext
+                            .CompileLibraries
+                            .FirstOrDefault(l => string.Equals(l.Name, "system.core", StringComparison.OrdinalIgnoreCase));
+                        systemCoreLibrary.Assemblies.Count.Should().Be(1);
+                        systemCoreLibrary.Assemblies[0].Should().Be(".NETFramework/v4.6/System.Core.dll");
+                    }
                 }
             }
         }

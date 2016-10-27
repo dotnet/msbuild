@@ -37,13 +37,16 @@ namespace Microsoft.NET.Build.Tasks
         public string AssemblyName { get; set; }
 
         [Required]
+        public string AssemblyExtension { get; set; }
+
+        [Required]
         public string AssemblyVersion { get; set; }
 
         [Required]
         public ITaskItem[] AssemblySatelliteAssemblies { get; set; }
 
         [Required]
-        public ITaskItem[] ProjectReferencePaths { get; set; }
+        public ITaskItem[] ReferencePaths { get; set; }
 
         [Required]
         public ITaskItem[] ProjectReferenceSatellitePaths { get; set; }
@@ -57,9 +60,18 @@ namespace Microsoft.NET.Build.Tasks
             LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(AssetsFilePath);
             CompilationOptions compilationOptions = CompilationOptionsConverter.ConvertFrom(CompilerOptions);
 
-            SingleProjectInfo mainProject = SingleProjectInfo.Create(ProjectPath, AssemblyName, AssemblyVersion, AssemblySatelliteAssemblies);
-            Dictionary<string, SingleProjectInfo> referenceProjects = SingleProjectInfo.CreateFromProjectReferences(
-                ProjectReferencePaths,
+            SingleProjectInfo mainProject = SingleProjectInfo.Create(
+                ProjectPath,
+                AssemblyName,
+                AssemblyExtension,
+                AssemblyVersion,
+                AssemblySatelliteAssemblies);
+
+            IEnumerable<ReferenceInfo> frameworkReferences =
+                ReferenceInfo.CreateFrameworkReferenceInfos(ReferencePaths);
+
+            Dictionary<string, SingleProjectInfo> referenceProjects = SingleProjectInfo.CreateProjectReferenceInfos(
+                ReferencePaths,
                 ProjectReferenceSatellitePaths);
 
             IEnumerable<string> privateAssets = PackageReferenceConverter.GetPackageIds(PrivateAssetsPackageReferences);
@@ -70,9 +82,11 @@ namespace Microsoft.NET.Build.Tasks
                 PlatformLibraryName);
 
             DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext)
+                .WithFrameworkReferences(frameworkReferences)
                 .WithReferenceProjectInfos(referenceProjects)
                 .WithPrivateAssets(privateAssets)
                 .WithCompilationOptions(compilationOptions)
+                .WithReferenceAssembliesPath(FrameworkReferenceResolver.GetDefaultReferenceAssembliesPath())
                 .Build();
 
             var writer = new DependencyContextWriter();
