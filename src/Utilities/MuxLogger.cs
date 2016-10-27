@@ -1325,7 +1325,6 @@ namespace Microsoft.Build.Utilities
                 {
                     eventSource2.TelemetryLogged += _telemetryEventHandler;
                 }
-                
             }
 
             /// <summary>
