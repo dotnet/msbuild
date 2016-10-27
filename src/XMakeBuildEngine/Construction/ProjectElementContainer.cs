@@ -521,36 +521,42 @@ namespace Microsoft.Build.Construction
 
                     if (XmlDocument.PreserveWhitespace)
                     {
-                        //  Try to match the surrounding formatting and add one indentation level
+                        //  If the empty parent has whitespace in it, delete it
                         if (XmlElement.FirstChild.NodeType == XmlNodeType.Whitespace)
                         {
-                            //  This container had a whitespace node, which should generally be a newline and the indent
-                            //  before the closing tag.  So we add the default indentation to it so the child will now be indented
-                            //  further, and then create a new whitespace node after the child so the closing tag will be on
-                            //  a new line with the same indentation.
-                            //  If the whitespace we end up copying isn't actually (newline + indentation) like we expect, then it
-                            //  should still be OK to copy it, as we'll still be trying to match the surrounding formatting.
-                            string whitespace = XmlElement.FirstChild.Value;
-                            XmlElement.FirstChild.Value = whitespace + DEFAULT_INDENT;
-                            var newWhitespaceNode = XmlDocument.CreateWhitespace(whitespace);
-                            XmlElement.InsertAfter(newWhitespaceNode, child.XmlElement);
+                            XmlElement.RemoveChild(XmlElement.FirstChild);
                         }
-                        else if (XmlElement.PreviousSibling != null &&
-                                 XmlElement.PreviousSibling.NodeType == XmlNodeType.Whitespace)
-                        {
-                            //  This container didn't have any whitespace in it.  This probably means it didn't have separate open
-                            //  and close tags.  So add a whitespace node before the new child with additional indentation over the
-                            //  container's indentation, and add a whitespace node with the same level of indentation as the container
-                            //  after the new child so the closing tag will be indented properly.
-                            string parentWhitespace = XmlElement.PreviousSibling.Value;
-                            var indentedWhitespaceNode = XmlDocument.CreateWhitespace(parentWhitespace + DEFAULT_INDENT);
-                            XmlElement.InsertBefore(indentedWhitespaceNode, child.XmlElement);
-                            var unindentedWhitespaceNode = XmlDocument.CreateWhitespace(parentWhitespace);
-                            XmlElement.InsertAfter(unindentedWhitespaceNode, child.XmlElement);
-                        }
+
+                        var parentIndentation = GetElementIndentation(XmlElement);
+
+                        var leadingWhitespaceNode = XmlDocument.CreateWhitespace("\n" + parentIndentation + DEFAULT_INDENT);
+                        var trailingWhiteSpaceNode = XmlDocument.CreateWhitespace("\n" + parentIndentation);
+
+                        XmlElement.InsertBefore(leadingWhitespaceNode, child.XmlElement);
+                        XmlElement.InsertAfter(trailingWhiteSpaceNode, child.XmlElement);
                     }
                 }
             }
+        }
+
+        private string GetElementIndentation(XmlElementWithLocation xmlElement)
+        {
+            if (xmlElement.PreviousSibling?.NodeType != XmlNodeType.Whitespace)
+            {
+                return string.Empty;
+            }
+
+            var leadingWhiteSpace = xmlElement.PreviousSibling.Value;
+
+            var lastIndexOfNewLine = leadingWhiteSpace.LastIndexOf("\n", StringComparison.Ordinal);
+
+            if (lastIndexOfNewLine == -1)
+            {
+                return string.Empty;
+            }
+
+            // the last newline is not included in the indentation, only what comes after it
+            return leadingWhiteSpace.Substring(lastIndexOfNewLine + 1);
         }
 
         internal void RemoveFromXml(ProjectElement child)
