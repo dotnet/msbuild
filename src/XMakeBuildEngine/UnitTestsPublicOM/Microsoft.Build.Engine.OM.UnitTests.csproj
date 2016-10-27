@@ -91,6 +91,7 @@
     <Compile Include="Construction\ProjectItemDefinitionElement_Tests.cs" />
     <Compile Include="Construction\ProjectItemGroupElement_tests.cs" />
     <Compile Include="Construction\ProjectItemElement_Tests.cs" />
+    <Compile Include="Construction\WhiteSpacePreservation_Tests.cs" />
     <Compile Include="Construction\ProjectMetadataElement_Tests.cs" />
     <Compile Include="Construction\ProjectOnErrorElement_Tests.cs" />
     <Compile Include="Construction\ProjectOutputElement_Tests.cs" />
