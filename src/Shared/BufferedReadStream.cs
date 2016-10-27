@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //-----------------------------------------------------------------------
 // </copyright>
-// <summary>Base class for the implementation of a node endpoint for out-of-proc nodes.</summary>
 //-----------------------------------------------------------------------
 
 using System;
@@ -17,7 +16,9 @@ namespace Microsoft.Build.BackEnd
         Stream _innerStream;
         byte[] _buffer;
 
-        int _remainingBufferSize;
+        //  The number of bytes in the buffer that have been read from the underlying stream but not read by consumers of this stream
+        int _currentlyBufferedByteCount;
+
         int _currentIndexInBuffer;
 
         public BufferedReadStream(Stream innerStream)
@@ -25,7 +26,7 @@ namespace Microsoft.Build.BackEnd
             _innerStream = innerStream;
             _buffer = new byte[BUFFER_SIZE];
 
-            _remainingBufferSize = 0;
+            _currentlyBufferedByteCount = 0;
         }
 
         public override bool CanRead { get { return _innerStream.CanRead; } }
@@ -38,8 +39,8 @@ namespace Microsoft.Build.BackEnd
 
         public override long Position
         {
-            get { return _innerStream.Position; }
-            set { _innerStream.Position = value; }
+            get { throw new NotSupportedException(); }
+            set { throw new NotSupportedException(); }
         }
 
         public override void Flush()
@@ -49,11 +50,11 @@ namespace Microsoft.Build.BackEnd
 
         public override int ReadByte()
         {
-            if (_remainingBufferSize > 0)
+            if (_currentlyBufferedByteCount > 0)
             {
                 int ret = _buffer[_currentIndexInBuffer];
                 _currentIndexInBuffer++;
-                _remainingBufferSize--;
+                _currentlyBufferedByteCount--;
                 return ret;
             }
             else
@@ -69,39 +70,39 @@ namespace Microsoft.Build.BackEnd
             {
                 //  Trying to read more data than the buffer can hold
                 int alreadyCopied = 0;
-                if (_remainingBufferSize > 0)
+                if (_currentlyBufferedByteCount > 0)
                 {
-                    Array.Copy(_buffer, _currentIndexInBuffer, buffer, offset, _remainingBufferSize);
-                    alreadyCopied = _remainingBufferSize;
+                    Array.Copy(_buffer, _currentIndexInBuffer, buffer, offset, _currentlyBufferedByteCount);
+                    alreadyCopied = _currentlyBufferedByteCount;
                     _currentIndexInBuffer = 0;
-                    _remainingBufferSize = 0;
+                    _currentlyBufferedByteCount = 0;
                 }
                 int innerReadCount = _innerStream.Read(buffer, offset + alreadyCopied, count - alreadyCopied);
                 return innerReadCount + alreadyCopied;
             }
-            else if (count <= _remainingBufferSize)
+            else if (count <= _currentlyBufferedByteCount)
             {
                 //  Enough data buffered to satisfy read request
                 Array.Copy(_buffer, _currentIndexInBuffer, buffer, offset, count);
                 _currentIndexInBuffer += count;
-                _remainingBufferSize -= count;
+                _currentlyBufferedByteCount -= count;
                 return count;
             }
             else
             {
                 //  Need to read more data
                 int alreadyCopied = 0;
-                if (_remainingBufferSize > 0)
+                if (_currentlyBufferedByteCount > 0)
                 {
-                    Array.Copy(_buffer, _currentIndexInBuffer, buffer, offset, _remainingBufferSize);
-                    alreadyCopied = _remainingBufferSize;
+                    Array.Copy(_buffer, _currentIndexInBuffer, buffer, offset, _currentlyBufferedByteCount);
+                    alreadyCopied = _currentlyBufferedByteCount;
                     _currentIndexInBuffer = 0;
-                    _remainingBufferSize = 0;
+                    _currentlyBufferedByteCount = 0;
                 }
 
                 int innerReadCount = _innerStream.Read(_buffer, 0, BUFFER_SIZE);
                 _currentIndexInBuffer = 0;
-                _remainingBufferSize = innerReadCount;
+                _currentlyBufferedByteCount = innerReadCount;
 
                 int remainingCopyCount;
 
@@ -116,7 +117,7 @@ namespace Microsoft.Build.BackEnd
 
                 Array.Copy(_buffer, 0, buffer, offset + alreadyCopied, remainingCopyCount);
                 _currentIndexInBuffer += remainingCopyCount;
-                _remainingBufferSize -= remainingCopyCount;
+                _currentlyBufferedByteCount -= remainingCopyCount;
 
                 return alreadyCopied + remainingCopyCount;
             }
@@ -124,12 +125,12 @@ namespace Microsoft.Build.BackEnd
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public override void SetLength(long value)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public override void Write(byte[] buffer, int offset, int count)
