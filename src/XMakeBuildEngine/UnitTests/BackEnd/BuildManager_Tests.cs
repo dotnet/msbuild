@@ -1122,7 +1122,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
-    <Exec Command='" + Helpers.SleepCommand(1) + @"'/>
+    <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(1)) + @"'/>
 	<Message Text='[success 1]'/>
  </Target>
 </Project>
@@ -1229,7 +1229,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
-    <Exec Command='" + Helpers.SleepCommandInMilliseconds(500) + @"'/>
+    <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromMilliseconds(500)) + @"'/>
 	<Message Text='[success 1]'/>
  </Target>
 </Project>
@@ -1355,7 +1355,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
-	<Exec Command='" + Helpers.SleepCommand(20) + @"'/>
+	<Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(20)) + @"'/>
     <Message Text='[fail]'/>
  </Target>
 </Project>
@@ -1375,7 +1375,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
-	<Exec Command='" + Helpers.SleepCommand(20) + @"'/>
+	<Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(20)) + @"'/>
     <Message Text='[fail]'/>
  </Target>
 </Project>
@@ -1397,7 +1397,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
-	<Exec Command='" + Helpers.SleepCommand(60) + @"'/>
+	<Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(60)) + @"'/>
     <Message Text='[fail]'/>
  </Target>
 </Project>
@@ -1430,7 +1430,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='2.0'>
  <Target Name='test'>
-	<Exec Command='" + Helpers.SleepCommand(5) + @"'/>
+	<Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(5)) + @"'/>
     <Message Text='[fail]'/>
  </Target>
 </Project>
@@ -1451,6 +1451,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
+#if FEATURE_TASKHOST
         /// <summary>
         /// A canceled build which waits for the task to get started before canceling.  Because it is a 2.0 task, we should
         /// wait until the task finishes normally (cancellation not supported.)
@@ -1464,7 +1465,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <UsingTask TaskName='Microsoft.Build.Tasks.Exec' AssemblyName='Microsoft.Build.Tasks.v3.5, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a' TaskFactory='TaskHostFactory' />
  <Target Name='test'>
-	<Exec Command='" + Helpers.SleepCommand(10) + @"'/>
+	<Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(10)) + @"'/>
     <Message Text='[fail]'/>
  </Target>
 </Project>
@@ -1487,6 +1488,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 _logger.AssertLogDoesntContain("MSB4217");
             }
         }
+#endif
 
         /// <summary>
         /// A canceled build which waits for the task to get started before canceling.  Because it is a 12.. task, we should
@@ -1499,7 +1501,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
-	<Exec Command='" + Helpers.SleepCommand(10) + @"'/>
+	<Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(10)) + @"'/>
     <Message Text='[fail]'/>
  </Target>
 </Project>
@@ -1519,6 +1521,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogDoesntContain("[fail]");
         }
 
+#if FEATURE_TASKHOST
         /// <summary>
         /// A canceled build which waits for the task to get started before canceling.  Because it is a 12.0 task, we should
         /// cancel the task and exit out after a short period wherein we wait for the task to exit cleanly. 
@@ -1530,7 +1533,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <UsingTask TaskName='Microsoft.Build.Tasks.Exec' AssemblyName='Microsoft.Build.Tasks.Core, Version=msbuildassemblyversion, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a' TaskFactory='TaskHostFactory' />
  <Target Name='test'>
-	<Exec Command='" + Helpers.SleepCommand(10) + @"'/>
+	<Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(10)) + @"'/>
     <Message Text='[fail]'/>
  </Target>
 </Project>
@@ -1552,6 +1555,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Task host should not have exited prematurely
             _logger.AssertLogDoesntContain("MSB4217");
         }
+#endif
 
         /// <summary>
         /// This test verifies that builds of the same project instance in sequence are permitted.
@@ -1593,7 +1597,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='target1'>
-    <Exec Command='" + Helpers.SleepCommand(3) + @"'/>
+    <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(3)) + @"'/>
     <Message Text='text'/>
  </Target>
  <Target Name='target2'>
@@ -1634,7 +1638,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='target1'>
-    <Exec Command='" + Helpers.SleepCommand(3) + @"'/>
+    <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(3)) + @"'/>
     <Message Text='text'/>
  </Target>
  <Target Name='target2'>
@@ -2619,7 +2623,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
   </Target>
 
   <Target Name='BuildSlower'>
-    <Exec Command='" + Helpers.SleepCommandInMilliseconds(500) + @"' />
+    <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromMilliseconds(500)) + @"' />
   </Target>
 </Project>
 ";
@@ -2726,7 +2730,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
   </Target>
 
   <Target Name=`Sleep`>
-    <Exec Command=`" + Helpers.SleepCommandInMilliseconds(500) + @"` />
+    <Exec Command=`" + Helpers.GetSleepCommand(TimeSpan.FromMilliseconds(500)) + @"` />
   </Target>
 </Project>
 ";
@@ -2850,7 +2854,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
   </Target>
 
   <Target Name=`Sleep`>
-    <Exec Command=`" + Helpers.SleepCommandInMilliseconds(500) + @"` />
+    <Exec Command=`" + Helpers.GetSleepCommand(TimeSpan.FromMilliseconds(500)) + @"` />
   </Target>
 </Project>
 ";
@@ -2974,7 +2978,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
   </Target>
 
   <Target Name=`Sleep`>
-    <Exec Command=`" + Helpers.SleepCommandInMilliseconds(500) + @"` />
+    <Exec Command=`" + Helpers.GetSleepCommand(TimeSpan.FromMilliseconds(500)) + @"` />
   </Target>
 </Project>
 ";
@@ -3085,7 +3089,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
   </Target>
 
   <Target Name=`Sleep`>
-    <Exec Command=`" + Helpers.SleepCommandInMilliseconds(500) + @"` />
+    <Exec Command=`" + Helpers.GetSleepCommand(TimeSpan.FromMilliseconds(500)) + @"` />
   </Target>
 </Project>
 ";
@@ -3229,7 +3233,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 string projectContent = @"<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
     <Target Name=`Build`>
         <!-- Wait 200 ms -->
-        <Exec Command=`" + Helpers.SleepCommandInMilliseconds(200) + @"` />
+        <Exec Command=`" + Helpers.GetSleepCommand(TimeSpan.FromMilliseconds(200)) + @"` />
     </Target>
 
 </Project>
@@ -3307,12 +3311,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 string projectContent1 = @"<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
     <Target Name=`CopyRunEnvironmentFiles`>
         <!-- Wait 100 ms -->
-        <Exec Command=`" + Helpers.SleepCommandInMilliseconds(100) + @"` />
+        <Exec Command=`" + Helpers.GetSleepCommand(TimeSpan.FromMilliseconds(100)) + @"` />
     </Target>
 
     <Target Name=`MyConsoleTarget`>
         <!-- Wait 100 ms -->
-        <Exec Command=`" + Helpers.SleepCommandInMilliseconds(100) + @"` />
+        <Exec Command=`" + Helpers.GetSleepCommand(TimeSpan.FromMilliseconds(100)) + @"` />
     </Target>
 
 </Project>
@@ -3411,12 +3415,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 string projectContent1 = @"<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
     <Target Name=`CopyRunEnvironmentFiles`>
         <!-- Wait 100 ms -->
-        <Exec Command=`" + Helpers.SleepCommandInMilliseconds(100) + @"` />
+        <Exec Command=`" + Helpers.GetSleepCommand(TimeSpan.FromMilliseconds(100)) + @"` />
     </Target>
 
     <Target Name=`MyConsoleTarget`>
         <!-- Wait 100 ms -->
-        <Exec Command=`" + Helpers.SleepCommandInMilliseconds(100) + @"` />
+        <Exec Command=`" + Helpers.GetSleepCommand(TimeSpan.FromMilliseconds(100)) + @"` />
     </Target>
 
 </Project>
