@@ -1,0 +1,50 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.RuntimeIdentifierInference.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved. 
+***********************************************************************************************
+-->
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" InitialTargets="CheckRuntimeIdentifier">
+
+  <!-- Determine PlatformTarget (if not already set) from runtime identifier. -->
+  <Choose>
+    <When Condition="'$(PlatformTarget)' != '' or '$(RuntimeIdentifier)' == ''" />
+
+    <When Condition="$(RuntimeIdentifier.EndsWith('-x86')) or $(RuntimeIdentifier.Contains('-x86-'))">
+      <PropertyGroup>
+        <PlatformTarget>x86</PlatformTarget>
+      </PropertyGroup>
+    </When>
+
+    <When Condition="$(RuntimeIdentifier.EndsWith('-x64')) or $(RuntimeIdentifier.Contains('-x64-'))">
+      <PropertyGroup>
+        <PlatformTarget>x64</PlatformTarget>
+      </PropertyGroup>
+    </When>
+
+    <When Condition="$(RuntimeIdentifier.EndsWith('-arm')) or $(RuntimeIdentifier.Contains('-arm-'))">
+      <PropertyGroup>
+        <PlatformTarget>arm</PlatformTarget>
+      </PropertyGroup>
+    </When>
+
+    <!-- NOTE: PlatformTarget=arm64 is not currently supported and therefore no inference of that here. -->
+    <Otherwise>
+      <PropertyGroup>
+        <PlatformTarget>AnyCPU</PlatformTarget>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+
+  <Target Name="CheckRuntimeIdentifier">
+    <Error Condition="'$(RuntimeIdentifier)' == '' and 
+                      '$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(OutputType)' == 'Exe'"
+           Text="RuntimeIdentifier must be set for .NETFramework executables. Consider RuntimeIdentifier=win7-x86 or RuntimeIdentifier=win7-x64." />
+  </Target>
+
+</Project>

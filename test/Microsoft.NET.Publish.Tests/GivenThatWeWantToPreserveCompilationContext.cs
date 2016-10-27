@@ -45,7 +45,7 @@ namespace Microsoft.NET.Publish.Tests
                     .Should()
                     .Pass();
 
-                var publishDirectory = publishCommand.GetOutputDirectory(targetFramework);
+                var publishDirectory = publishCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: "win7-x86");
 
                 publishDirectory.Should().HaveFiles(new[] {
                     targetFramework == "net46" ? "TestApp.exe" : "TestApp.dll",
@@ -75,13 +75,13 @@ namespace Microsoft.NET.Publish.Tests
 
                     dependencyContext.CompilationOptions.Defines.Should().BeEquivalentTo(expectedDefines);
                     dependencyContext.CompilationOptions.LanguageVersion.Should().Be("");
-                    dependencyContext.CompilationOptions.Platform.Should().Be("AnyCPU");
+                    dependencyContext.CompilationOptions.Platform.Should().Be("x86");
                     dependencyContext.CompilationOptions.Optimize.Should().Be(false);
                     dependencyContext.CompilationOptions.KeyFile.Should().Be("");
                     dependencyContext.CompilationOptions.EmitEntryPoint.Should().Be(true);
                     dependencyContext.CompilationOptions.DebugType.Should().Be("portable");
 
-                    dependencyContext.CompileLibraries.Count.Should().Be(targetFramework == "net46" ? 53 : 116);
+                    dependencyContext.CompileLibraries.Count.Should().Be(targetFramework == "net46" ? 53 : 149);
 
                     // Ensure P2P references are specified correctly
                     var testLibrary = dependencyContext

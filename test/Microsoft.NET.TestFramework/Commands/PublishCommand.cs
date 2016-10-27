@@ -29,9 +29,9 @@ namespace Microsoft.NET.TestFramework.Commands
             return command.Execute();
         }
 
-        public DirectoryInfo GetOutputDirectory(string targetFramework = "netcoreapp1.0", bool selfContained = false)
+        public DirectoryInfo GetOutputDirectory(string targetFramework = "netcoreapp1.0", string configuration = "Debug", string runtimeIdentifier = "", bool selfContained = false)
         {
-            string output = Path.Combine(ProjectRootPath, "bin", BuildRelativeOutputPath(targetFramework, selfContained));
+            string output = Path.Combine(ProjectRootPath, "bin", BuildRelativeOutputPath(targetFramework, configuration, runtimeIdentifier, selfContained));
             return new DirectoryInfo(output);
         }
 
@@ -40,11 +40,14 @@ namespace Microsoft.NET.TestFramework.Commands
             return Path.Combine(GetOutputDirectory().FullName, $"{appName}.dll");
         }
 
-        private string BuildRelativeOutputPath(string targetFramework, bool selfContained)
+        private string BuildRelativeOutputPath(string targetFramework, string configuration, string runtimeIdentifier, bool selfContained)
         {
-            return selfContained ?
-                Path.Combine("Debug", targetFramework, RuntimeEnvironment.GetRuntimeIdentifier(), PublishSubfolderName) :
-                Path.Combine("Debug", targetFramework, PublishSubfolderName);
+            if (runtimeIdentifier.Length == 0 && selfContained)
+            {
+                runtimeIdentifier = RuntimeEnvironment.GetRuntimeIdentifier();
+            }
+			
+            return Path.Combine(configuration, targetFramework, runtimeIdentifier, PublishSubfolderName);
         }
     }
 }

@@ -33,6 +33,12 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Condition="'$(TargetFramework)' != ''"
         Project="$(MSBuildThisFileDirectory)Microsoft.NET.TargetFrameworkInference.targets" />
 
+  <!--
+    Use RuntimeIdentifier to determine PlatformTarget.
+    Also, enforce that RuntimeIdentifier always be specified for .NETFramework executables.
+  -->
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.RuntimeIdentifierInference.targets" />
+
   <PropertyGroup Condition="'$(_IsNETCoreOrNETStandard)' == ''">
     <_IsNETCoreOrNETStandard Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">true</_IsNETCoreOrNETStandard>
     <_IsNETCoreOrNETStandard Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">true</_IsNETCoreOrNETStandard>

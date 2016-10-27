@@ -71,6 +71,9 @@
     <None Include="buildCrossTargeting\Microsoft.NET.Sdk.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="build\Microsoft.NET.RuntimeIdentifierInference.targets">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="build\Microsoft.NET.DisableStandardFrameworkResolution.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
