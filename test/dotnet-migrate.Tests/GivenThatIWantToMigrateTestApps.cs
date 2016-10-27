@@ -21,6 +21,7 @@ namespace Microsoft.DotNet.Migration.Tests
         [Theory]
         [InlineData("TestAppWithRuntimeOptions")]
         [InlineData("TestAppWithContents")]
+        [InlineData("AppWithAssemblyInfo")]
         public void It_migrates_apps(string projectName)
         {
             var projectDirectory = TestAssetsManager.CreateTestInstance(projectName, callingMethod: "i")

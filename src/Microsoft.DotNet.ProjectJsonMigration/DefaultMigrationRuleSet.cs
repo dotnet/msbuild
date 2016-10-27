@@ -22,6 +22,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             new MigratePackageDependenciesAndToolsRule(),
             new MigrateConfigurationsRule(),
             new MigrateScriptsRule(),
+            new MigrateAssemblyInfoRule(),
             new RemoveDefaultsFromProjectRule(),
             new CleanOutputProjectRule(),
             new SaveOutputProjectRule()
