@@ -1,5 +1,6 @@
 @if not defined _echo echo off
-setlocal
+setlocal ENABLEDELAYEDEXPANSION ENABLEEXTENSIONS
+SET _originalScript=%~f0
 
 :parseArguments
 if "%1"=="" goto doneParsingArguments
@@ -34,6 +35,13 @@ if /i "%TARGET%"=="CoreCLR" (
     set BUILD_CONFIGURATION=Debug-NetCore
 ) else if /i "%TARGET%"=="Desktop" (
     set BUILD_CONFIGURATION=Debug
+) else if /i "%TARGET%"=="All" (
+    SET _originalArguments=%*
+    CALL "!_originalScript!" !_originalArguments:All=Desktop!
+    IF ERRORLEVEL 1 GOTO :error
+    CALL "!_originalScript!" !_originalArguments:All=CoreCLR!
+    IF ERRORLEVEL 1 GOTO :error
+    EXIT /B 0
 ) else (
     echo Unsupported target detected: %TARGET%. Aborting.
     goto :error
@@ -146,10 +154,10 @@ exit /b 0
 :usage
 echo Options
 echo   --scope ^<scope^>                Scope of the build ^(Compile / Test^)
-echo   --target ^<target^>              CoreCLR or Desktop ^(default: Desktop^)
+echo   --target ^<target^>              CoreCLR, Desktop, or All ^(default: Desktop^)
 echo   --host ^<host^>                  CoreCLR or Desktop ^(default: Desktop^)
 echo   --build-only                     Only build using a downloaded copy of MSBuild but do not bootstrap
-                                        or build again with those binaries
+echo                                    or build again with those binaries
 echo   --bootstrap-only                 Build and bootstrap MSBuild but do not build again with those binaries
 echo   --localized-build                Do a localized build
 echo   --sync-xlf                       Synchronize xlf files from resx files
