@@ -11,13 +11,13 @@
     <RepositoryRootDirectory>$(MSBuildThisFileDirectory)</RepositoryRootDirectory>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
 
-    <OutDir Condition="'$(OutDir)' == ''">$([System.IO.Path]::GetFullPath('$(RepositoryRootDirectory)bin\$(Configuration)'))\</OutDir>
+    <OutputPath>$([System.IO.Path]::GetFullPath('$(RepositoryRootDirectory)bin\$(Configuration)'))\</OutputPath>
+    <OutDir>$(OutputPath)</OutDir>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' == ''">$([System.IO.Path]::GetFullPath('$(RepositoryRootDirectory)bin\obj\$(MSBuildProjectName)'))\</BaseIntermediateOutputPath>
-    <PackagesLayoutDir>$(OutDir)\PackagesLayout\</PackagesLayoutDir>
+    <PackagesLayoutDir>$(OutDir)PackagesLayout\</PackagesLayoutDir>
     <PackagesLayoutToolsDir>$(PackagesLayoutDir)tools\</PackagesLayoutToolsDir>
     <PackagesLayoutToolsNet46Dir>$(PackagesLayoutToolsDir)net46\</PackagesLayoutToolsNet46Dir>
     <PackagesLayoutToolsNetCoreAppDir>$(PackagesLayoutToolsDir)netcoreapp1.0\</PackagesLayoutToolsNetCoreAppDir>
-    <WebPackagesLayoutDir>$(OutDir)\WebPackagesLayout\</WebPackagesLayoutDir>
     
     <VersionPrefix Condition="'$(VersionPrefix)' == ''">1.0.0</VersionPrefix>
     <VersionPrereleasePrefix Condition="'$(VersionPrereleasePrefix)' == ''">alpha</VersionPrereleasePrefix>
@@ -45,6 +45,7 @@
     <DotNetTool>$(DotNet_Install_Dir)\dotnet</DotNetTool>
 
     <NuGet_Packages Condition=" '$(NuGet_Packages)' == ''">$(RepositoryRootDirectory)packages\</NuGet_Packages>
+    <NuGetPackageRoot Condition=" '$(NuGetPackageRoot)' == ''">$(NuGet_Packages)</NuGetPackageRoot>
   </PropertyGroup>
 
   <PropertyGroup>
