@@ -1445,32 +1445,15 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Command you can pass to Exec to sleep for rough number of milliseconds.
-        /// @for /l %i in (1,1,X) do "@dir %windir% > nul"
-        /// sleeps for X/100 seconds, roughly
-        /// This works around not having sleep.exe on the path.
+        /// Gets a command that can be used by an Exec task to sleep for the specified amount of time.
         /// </summary>
-        internal static string SleepCommandInMilliseconds(int milliseconds)
+        /// <param name="timeSpan">A <see cref="TimeSpan"/> representing the amount of time to sleep.</param>
+        internal static string GetSleepCommand(TimeSpan timeSpan)
         {
             return
-                string.Format(
-                    NativeMethodsShared.IsWindows
-                        ? @"@for /l %25%25i in (1,1,{0}) do @dir %25windir%25 > nul"
-                        : "for i in {{1..{0}}}; do ls /bin > /dev/null; done",
-                    milliseconds / 10);
-        }
-
-        /// <summary>
-        /// Command you can pass to Exec to sleep for rough number of seconds.
-        /// @for /l %i in (1,1,X) do "@dir %windir% > nul"
-        /// sleeps for X/100 seconds, roughly
-        /// This works around not having sleep.exe on the path.
-        /// </summary>
-        /// <param name="seconds"></param>
-        /// <returns></returns>
-        internal static string SleepCommand(int seconds)
-        {
-            return SleepCommandInMilliseconds(seconds * 1000);
+                NativeMethodsShared.IsWindows
+                ? $"@powershell -command &quot;Start-Sleep -Milliseconds {(int)timeSpan.TotalMilliseconds}&quot; &gt;nul"
+                : $"sleep {timeSpan.TotalSeconds}";
         }
 
         /// <summary>
