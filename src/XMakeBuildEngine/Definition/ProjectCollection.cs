@@ -2055,9 +2055,10 @@ namespace Microsoft.Build.Evaluation
                 eventSource.TaskStarted += _taskStartedEventHandler;
                 eventSource.WarningRaised += _buildWarningEventHandler;
 
-                if (eventSource is IEventSource2)
+                IEventSource2 eventSource2 = eventSource as IEventSource2;
+                if (eventSource2 != null)
                 {
-                    ((IEventSource2)eventSource).TelemetryLogged += _telemetryEventHandler;
+                    eventSource2.TelemetryLogged += _telemetryEventHandler;
                 }
             }
 
@@ -2082,9 +2083,10 @@ namespace Microsoft.Build.Evaluation
                 eventSource.TaskStarted -= _taskStartedEventHandler;
                 eventSource.WarningRaised -= _buildWarningEventHandler;
 
-                if (eventSource is IEventSource2)
+                IEventSource2 eventSource2 = eventSource as IEventSource2;
+                if (eventSource2 != null)
                 {
-                    ((IEventSource2)eventSource).TelemetryLogged -= _telemetryEventHandler;
+                    eventSource2.TelemetryLogged -= _telemetryEventHandler;
                 }
 
                 // Null out the handlers.

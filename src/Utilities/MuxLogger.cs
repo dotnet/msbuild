@@ -1320,9 +1320,10 @@ namespace Microsoft.Build.Utilities
                 _eventSourceForBuild.TaskStarted += _taskStartedEventHandler;
                 _eventSourceForBuild.WarningRaised += _buildWarningEventHandler;
 
-                if (_eventSourceForBuild is IEventSource2)
+                IEventSource2 eventSource2 = _eventSourceForBuild as IEventSource2;
+                if (eventSource2 != null)
                 {
-                    ((IEventSource2)_eventSourceForBuild).TelemetryLogged += _telemetryEventHandler;
+                    eventSource2.TelemetryLogged += _telemetryEventHandler;
                 }
                 
             }
@@ -1347,9 +1348,10 @@ namespace Microsoft.Build.Utilities
                 _eventSourceForBuild.TaskStarted -= _taskStartedEventHandler;
                 _eventSourceForBuild.WarningRaised -= _buildWarningEventHandler;
 
-                if (_eventSourceForBuild is IEventSource2)
+                IEventSource2 eventSource2 = _eventSourceForBuild as IEventSource2;
+                if (eventSource2 != null)
                 {
-                    ((IEventSource2)_eventSourceForBuild).TelemetryLogged -= _telemetryEventHandler;
+                    eventSource2.TelemetryLogged -= _telemetryEventHandler;
                 }
 
                 MessageRaised = null;
