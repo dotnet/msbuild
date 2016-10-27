@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         protected override string Args
         {
-            get { return $"{GetVerbosity()} {GetFallbackSource()} {GetPackages()}"; }
+            get { return $"{GetVerbosity()} {GetFallbackSource()} {GetPackages()} {GetDisableParallel()}"; }
         }
 
         public string FallbackSource { get; set; }
@@ -49,6 +49,11 @@ namespace Microsoft.DotNet.Cli.Build
             }
 
             return null;
+        }
+
+        private string GetDisableParallel()
+        {
+            return "--disable-parallel";
         }
     }
 }
