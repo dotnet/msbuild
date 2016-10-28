@@ -19,37 +19,32 @@ namespace Microsoft.DotNet.Tools.Run
             app.Description = "Command used to run .NET apps";
             app.HandleResponseFiles = true;
             app.AllowArgumentSeparator = true;
+            app.ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText;
             app.HelpOption("-h|--help");
 
-            CommandOption framework = app.Option("-f|--framework", "Compile a specific framework", CommandOptionType.SingleValue);
-            CommandOption configuration = app.Option("-c|--configuration", "Configuration under which to build", CommandOptionType.SingleValue);
-            CommandOption project = app.Option("-p|--project", "The path to the project to run (defaults to the current directory). Can be a path to a project.json or a project directory", CommandOptionType.SingleValue);
+            CommandOption configuration = app.Option(
+                "-c|--configuration", "Configuration under which to build",
+                CommandOptionType.SingleValue);
+            CommandOption framework = app.Option(
+                "-f|--framework <FRAMEWORK>", "Compile a specific framework",
+                CommandOptionType.SingleValue);
+            CommandOption project = app.Option(
+                "-p|--project", "The path to the project file to run (defaults to the current directory if there is only one project).",
+                CommandOptionType.SingleValue);
 
             app.OnExecute(() =>
             {
                 RunCommand runCmd = new RunCommand();
 
-                runCmd.Framework = framework.Value();
                 runCmd.Configuration = configuration.Value();
+                runCmd.Framework = framework.Value();
                 runCmd.Project = project.Value();
                 runCmd.Args = app.RemainingArguments;
 
                 return runCmd.Start();
             });
 
-            try
-            {
-                return app.Execute(args);
-            }
-            catch (Exception ex)
-            {
-#if DEBUG
-                Reporter.Error.WriteLine(ex.ToString());
-#else
-                Reporter.Error.WriteLine(ex.Message);
-#endif
-                return 1;
-            }
+            return app.Execute(args);
         }
     }
 }

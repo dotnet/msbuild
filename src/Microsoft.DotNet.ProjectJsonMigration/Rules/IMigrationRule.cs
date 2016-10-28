@@ -3,7 +3,7 @@
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
-    public interface IMigrationRule
+    internal interface IMigrationRule
     {
         void Apply(MigrationSettings migrationSettings, MigrationRuleInputs migrationRuleInputs);
     }

@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectJsonMigration.Rules;
-using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.Internal.ProjectModel;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 {
-    public class TemporaryProjectFileRuleRunner
+    internal class TemporaryProjectFileRuleRunner
     {
         public static ProjectRootElement RunRules(IEnumerable<IMigrationRule> rules, string projectJson,
             string testDirectory, ProjectRootElement xproj=null)

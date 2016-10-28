@@ -8,13 +8,7 @@
     }
   },
   "dependencies": {
-    "Microsoft.DotNet.Compiler.Common": {
-      "target": "project"
-    },
     "Microsoft.DotNet.Cli.Utils": {
-      "target": "project"
-    },
-    "Microsoft.DotNet.ProjectModel": {
       "target": "project"
     },
     "Microsoft.Build": "15.1.319-preview5",

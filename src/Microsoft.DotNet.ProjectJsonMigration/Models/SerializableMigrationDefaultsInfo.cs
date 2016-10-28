@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Models
 {
-    public class SerializableMigrationDefaultsInfo
+    internal class SerializableMigrationDefaultsInfo
     {
         public IEnumerable<DefaultProjectItemInfo> Items { get; set; }
         public IEnumerable<DefaultProjectPropertyInfo> Properties { get; set; }

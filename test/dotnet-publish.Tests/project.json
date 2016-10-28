@@ -16,16 +16,11 @@
       "version": "1.0.1"
     },
     "System.Runtime.Serialization.Primitives": "4.1.1",
-    "Microsoft.DotNet.TestFramework": {
-      "target": "project"
-    },
     "Microsoft.DotNet.Tools.Tests.Utilities": {
       "target": "project"
     },
     "xunit": "2.2.0-beta3-build3330",
-    "xunit.netcore.extensions": "1.0.0-prerelease-00206",
-    "dotnet-test-xunit": "1.0.0-rc2-350904-49",
-    "System.Runtime.InteropServices.RuntimeInformation": "4.0.0"
+    "dotnet-test-xunit": "1.0.0-rc2-350904-49"
   },
   "frameworks": {
     "netcoreapp1.0": {

@@ -7,7 +7,7 @@ using Microsoft.DotNet.ProjectJsonMigration.Transforms;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
-    public class MigrateRuntimesRule : IMigrationRule
+    internal class MigrateRuntimesRule : IMigrationRule
     {
         AddPropertyTransform<IList<string>> RuntimeIdentifiersTransform =>
             new AddPropertyTransform<IList<string>>(

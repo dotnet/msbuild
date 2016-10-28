@@ -41,7 +41,7 @@
         <Inputs>@(CompileStageInputs)</Inputs>
         <StageDirectory>$(Stage2Directory)</StageDirectory>
         <StageSymbolsDirectory>$(Stage2SymbolsDirectory)</StageSymbolsDirectory>
-        <DotnetDir>$(Stage1Directory)</DotnetDir>
+        <DotnetDir>$(Stage0Directory)</DotnetDir>
       </Stage>
     </ItemGroup>
   </Target>

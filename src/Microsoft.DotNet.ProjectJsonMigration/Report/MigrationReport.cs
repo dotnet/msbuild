@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 {
     /// Any changes to this need to be reflected in roslyn-project-system
     /// TODO add link
-    public class MigrationReport
+    internal class MigrationReport
     {
         public List<ProjectMigrationReport> ProjectMigrationReports { get; }
 

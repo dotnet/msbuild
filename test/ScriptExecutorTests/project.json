@@ -5,9 +5,6 @@
       "type": "platform",
       "version": "1.0.1"
     },
-    "Microsoft.DotNet.ProjectModel": {
-      "target": "project"
-    },
     "Microsoft.DotNet.Cli.Utils": {
       "target": "project"
     },

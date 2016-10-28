@@ -8,7 +8,7 @@ using Microsoft.DotNet.ProjectJsonMigration.Models;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
 {
-    public class AddItemTransform<T> : ConditionalTransform<T, ProjectItemElement>
+    internal class AddItemTransform<T> : ConditionalTransform<T, ProjectItemElement>
     {
         private readonly ProjectRootElement _itemObjectGenerator = ProjectRootElement.Create();
 

@@ -15,6 +15,8 @@ namespace Microsoft.DotNet.Cli.Utils
     {
         private Project _project;
 
+        private string _projectRoot;
+
         private string _msBuildExePath;
 
         public string DepsJsonPath
@@ -50,6 +52,14 @@ namespace Microsoft.DotNet.Cli.Utils
             }
         }
 
+        public string ProjectRoot
+        {
+            get
+            {
+                return _projectRoot;
+            }
+        }
+
         public Dictionary<string, string> EnvironmentVariables
         {
             get
@@ -68,6 +78,8 @@ namespace Microsoft.DotNet.Cli.Utils
             string outputPath,
             string msBuildExePath)
         {
+            _projectRoot = msBuildExePath;
+
             var globalProperties = new Dictionary<string, string>()
             {
                { "MSBuildExtensionsPath", Path.GetDirectoryName(msBuildExePath) }

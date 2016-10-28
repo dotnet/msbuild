@@ -7,13 +7,13 @@ using System.IO;
 using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectJsonMigration.Transforms;
-using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.Internal.ProjectModel;
 using Microsoft.DotNet.Tools.Common;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
-    public class MigrateProjectDependenciesRule : IMigrationRule
+    internal class MigrateProjectDependenciesRule : IMigrationRule
     {
         private readonly ITransformApplicator _transformApplicator;
         private readonly  ProjectDependencyFinder _projectDependencyFinder;

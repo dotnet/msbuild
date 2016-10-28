@@ -22,6 +22,7 @@ namespace Microsoft.DotNet.Tests
                     .ExecuteWithCapturedOutput("--version");
 
             result.Should().Pass();
+            
             Regex.IsMatch(result.StdOut.Trim(), @"[0-9]{1}\.[0-9]{1}\.[0-9]{1}-[a-zA-Z0-9]+-[0-9]{6}$").Should()
                 .BeTrue($"Unexpected dotnet sdk version - {result.StdOut}");
 

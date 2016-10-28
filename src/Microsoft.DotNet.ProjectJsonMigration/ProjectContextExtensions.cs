@@ -5,12 +5,12 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.Construction;
 using System.Linq;
-using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.Internal.ProjectModel;
 using System.IO;
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
-    public static class ProjectContextExtensions
+    internal static class ProjectContextExtensions
     {
         public static string GetProjectName(this ProjectContext projectContext)
         {

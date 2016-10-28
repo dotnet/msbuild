@@ -6,7 +6,7 @@ using Microsoft.Build.Construction;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
 {
-    public class AddPropertyTransform<T> : ConditionalTransform<T, ProjectPropertyElement>
+    internal class AddPropertyTransform<T> : ConditionalTransform<T, ProjectPropertyElement>
     {
         public string PropertyName { get; }
 

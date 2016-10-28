@@ -7,11 +7,11 @@ using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.Cli.Utils.CommandParsing;
 using Microsoft.DotNet.ProjectJsonMigration.Transforms;
-using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.Internal.ProjectModel;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
-    public class MigrateScriptsRule : IMigrationRule
+    internal class MigrateScriptsRule : IMigrationRule
     {
         private readonly ITransformApplicator _transformApplicator;
 

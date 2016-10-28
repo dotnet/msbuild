@@ -8,14 +8,14 @@ using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectJsonMigration.Transforms;
-using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.Internal.ProjectModel;
 using Microsoft.DotNet.Tools.Common;
 using NuGet.Frameworks;
 using NuGet.LibraryModel;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
-    public class MigratePackageDependenciesAndToolsRule : IMigrationRule
+    internal class MigratePackageDependenciesAndToolsRule : IMigrationRule
     {
         private readonly ITransformApplicator _transformApplicator;
         private readonly  ProjectDependencyFinder _projectDependencyFinder;

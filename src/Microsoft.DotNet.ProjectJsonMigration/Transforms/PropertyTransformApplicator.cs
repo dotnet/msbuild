@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
 {
-    public class PropertyTransformApplicator : ITransformApplicator
+    internal class PropertyTransformApplicator : ITransformApplicator
     {
         private readonly ProjectRootElement _projectElementGenerator = ProjectRootElement.Create();
 

@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
 {
-    public class TransformApplicator : ITransformApplicator
+    internal class TransformApplicator : ITransformApplicator
     {
         private readonly ITransformApplicator _propertyTransformApplicator;
 

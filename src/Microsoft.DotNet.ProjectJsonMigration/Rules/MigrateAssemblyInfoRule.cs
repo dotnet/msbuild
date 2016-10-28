@@ -10,14 +10,14 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.DotNet.ProjectJsonMigration;
 using Microsoft.DotNet.ProjectJsonMigration.Transforms;
-using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.ProjectModel.Files;
+using Microsoft.DotNet.Internal.ProjectModel;
+using Microsoft.DotNet.Internal.ProjectModel.Files;
 using Microsoft.DotNet.Tools.Common;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
-    public class MigrateAssemblyInfoRule : IMigrationRule
+    internal class MigrateAssemblyInfoRule : IMigrationRule
     {
         private static IReadOnlyDictionary<string, IReadOnlyList<string>> Suppresses { get; } = new Dictionary<string, IReadOnlyList<string>>
         {

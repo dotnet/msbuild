@@ -5,7 +5,7 @@ using System;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Models
 {
-    public class ItemMetadataValue<T>
+    internal class ItemMetadataValue<T>
     {
         public string MetadataName { get; }
 

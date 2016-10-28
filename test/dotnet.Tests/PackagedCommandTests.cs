@@ -11,19 +11,25 @@ using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.DotNet.InternalAbstractions;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Tests
 {
     public class PackagedCommandTests : TestBase
     {
-        private readonly TestAssetsManager _desktopTestAssetsManager = GetTestGroupTestAssetsManager("DesktopTestProjects");
+        private readonly ITestOutputHelper _output;
+
+        public PackagedCommandTests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
 
         public static IEnumerable<object[]> DependencyToolArguments
         {
             get
             {
                 var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
-                var projectOutputPath = $"AppWithDirectDepDesktopAndPortable\\bin\\Debug\\net451\\{rid}\\dotnet-desktop-and-portable.exe";
+                var projectOutputPath = $"AppWithProjTool2Fx\\bin\\Debug\\net451\\{rid}\\dotnet-desktop-and-portable.exe";
                 return new[]
                 {
                     new object[] { "CoreFX", ".NETCoreApp,Version=v1.0", "lib\\netcoreapp1.0\\dotnet-desktop-and-portable.dll", true },
@@ -37,7 +43,9 @@ namespace Microsoft.DotNet.Tests
             get
             {
                 var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
-                var projectOutputPath = $"LibraryWithDirectDependencyDesktopAndPortable\\bin\\Debug\\net451\\dotnet-desktop-and-portable.exe";
+
+                var projectOutputPath = $"LibWithProjTool2Fx\\bin\\Debug\\net451\\dotnet-desktop-and-portable.exe";
+
                 return new[]
                 {
                     new object[] { "CoreFX", ".NETStandard,Version=v1.6", "lib\\netstandard1.6\\dotnet-desktop-and-portable.dll", true },
@@ -51,74 +59,75 @@ namespace Microsoft.DotNet.Tests
         [InlineData("AppWithToolDependency")]
         public void TestProjectToolIsAvailableThroughDriver(string appName)
         {
-            var testInstance = TestAssetsManager
-                .CreateTestInstance(appName, identifier: appName)
-                .WithLockFiles();
+            var testInstance = TestAssets.Get(appName)
+                .CreateInstance(appName, identifier: appName)
+                .WithSourceFiles()
+                .WithRestoreFiles();
 
-            var appDirectory = testInstance.Path;
-
-            new BuildCommand(Path.Combine(appDirectory, "project.json"))
+            new BuildCommand()
+                .WithProjectDirectory(testInstance.Root)
                 .Execute()
-                .Should()
-                .Pass();
+                .Should().Pass();
 
-            CommandResult result = new PortableCommand { WorkingDirectory = appDirectory }
-                .ExecuteWithCapturedOutput();
-
-            result.Should().HaveStdOutContaining("Hello Portable World!" + Environment.NewLine);
-            result.Should().NotHaveStdErr();
-            result.Should().Pass();
+            new PortableCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .ExecuteWithCapturedOutput()
+                .Should().HaveStdOutContaining("Hello Portable World!" + Environment.NewLine)
+                     .And.NotHaveStdErr()
+                     .And.Pass();
         }
 
         [Fact]
         public void CanInvokeToolWhosePackageNameIsDifferentFromDllName()
         {
-            var testInstance = TestAssetsManager
-                .CreateTestInstance("AppWithDepOnToolWithOutputName")
-                .WithLockFiles();
+            var testInstance = TestAssets.Get("AppWithDepOnToolWithOutputName")
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithRestoreFiles();
 
-            var appDirectory = testInstance.Path;
-
-            new BuildCommand(Path.Combine(appDirectory, "project.json"))
+            new BuildCommand()
+                .WithProjectDirectory(testInstance.Root)
                 .Execute()
-                .Should()
-                .Pass();
+                .Should().Pass();
 
-            CommandResult result = new GenericCommand("tool-with-output-name") { WorkingDirectory = appDirectory }
-                .ExecuteWithCapturedOutput();
-
-            result.Should().HaveStdOutContaining("Tool with output name!");
-            result.Should().NotHaveStdErr();
-            result.Should().Pass();
+            new GenericCommand("tool-with-output-name")
+                .WithWorkingDirectory(testInstance.Root)
+                .ExecuteWithCapturedOutput()
+                .Should().HaveStdOutContaining("Tool with output name!")
+                     .And.NotHaveStdErr()
+                     .And.Pass();
         }
 
         [Fact]
         public void CanInvokeToolFromDirectDependenciesIfPackageNameDifferentFromToolName()
         {
-            var testInstance = TestAssetsManager
-                .CreateTestInstance("AppWithDirectDepWithOutputName")
-                .WithBuildArtifacts()
-                .WithLockFiles();
-
-            var appDirectory = testInstance.Path;
+            var testInstance = TestAssets.Get("AppWithDirectDepWithOutputName")
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithRestoreFiles();
+            
             const string framework = ".NETCoreApp,Version=v1.0";
 
-            new BuildCommand(Path.Combine(appDirectory, "project.json"))
+            new BuildCommand()
+                .WithProjectDirectory(testInstance.Root)
+                .WithConfiguration("Debug")
+                .WithWriteLine(_output.WriteLine)
                 .Execute()
-                .Should()
-                .Pass();
+                .Should().Pass();
 
-            CommandResult result = new DependencyToolInvokerCommand { WorkingDirectory = appDirectory }
-                    .ExecuteWithCapturedOutput("tool-with-output-name", framework, string.Empty);
-
-            result.Should().HaveStdOutContaining("Tool with output name!");
-            result.Should().NotHaveStdErr();
-            result.Should().Pass();
+            new DependencyToolInvokerCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .WithEnvironmentVariable(CommandContext.Variables.Verbose, "true")
+                .WithWriteLine(_output.WriteLine)
+                .ExecuteWithCapturedOutput($"tool-with-output-name", framework, "")
+                .Should().HaveStdOutContaining("Tool with output name!")
+                     .And.NotHaveStdErr()
+                     .And.Pass();
         }
 
         // need conditional theories so we can skip on non-Windows
-        [Theory]
-        [MemberData("DependencyToolArguments")]
+        //[Theory(Skip="https://github.com/dotnet/cli/issues/4514")]
+        //[MemberData("DependencyToolArguments")]
         public void TestFrameworkSpecificDependencyToolsCanBeInvoked(string identifier, string framework, string expectedDependencyToolPath, bool windowsOnly)
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && windowsOnly)
@@ -126,26 +135,25 @@ namespace Microsoft.DotNet.Tests
                 return;
             }
 
-            var testInstance = _desktopTestAssetsManager
-                .CreateTestInstance("AppWithDirectDepDesktopAndPortable", identifier: identifier)
-                .WithBuildArtifacts()
-                .WithLockFiles();
+            var testInstance = TestAssets.Get(TestAssetKinds.DesktopTestProjects, "AppWithProjTool2Fx")
+                .CreateInstance(identifier: identifier)
+                .WithSourceFiles()
+                .WithRestoreFiles();
 
-            var appDirectory = testInstance.Path;
-
-            new BuildCommand(Path.Combine(appDirectory, "project.json"))
+            new BuildCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .WithConfiguration("Debug")
                 .Execute()
-                .Should()
-                .Pass();
+                .Should().Pass();
 
-            CommandResult result = new DependencyToolInvokerCommand { WorkingDirectory = appDirectory }
-                    .ExecuteWithCapturedOutput("desktop-and-portable", framework, identifier);
-
-            result.Should().HaveStdOutContaining(framework);
-            result.Should().HaveStdOutContaining(identifier);
-            result.Should().HaveStdOutContaining(expectedDependencyToolPath);
-            result.Should().NotHaveStdErr();
-            result.Should().Pass();
+            new DependencyToolInvokerCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .ExecuteWithCapturedOutput($"desktop-and-portable {framework} {identifier}")
+                .Should().HaveStdOutContaining(framework)
+                    .And.HaveStdOutContaining(identifier)
+                    .And.HaveStdOutContaining(expectedDependencyToolPath)
+                    .And.NotHaveStdErr()
+                    .And.Pass();
         }
 
         [Theory]
@@ -156,66 +164,61 @@ namespace Microsoft.DotNet.Tests
             {
                 return;
             }
-            
-            var testInstance = _desktopTestAssetsManager
-                .CreateTestInstance("LibraryWithDirectDependencyDesktopAndPortable", identifier: identifier)
-                .WithLockFiles();
 
-            var appDirectory = testInstance.Path;
+            var testInstance = TestAssets.Get(TestAssetKinds.DesktopTestProjects, "LibWithProjTool2Fx")
+                .CreateInstance(identifier: identifier)
+                .WithSourceFiles()
+                .WithRestoreFiles();
 
-            new BuildCommand(Path.Combine(appDirectory, "project.json"))
+            new BuildCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .WithConfiguration("Debug")
                 .Execute()
-                .Should()
-                .Pass();
+                .Should().Pass();
 
-            CommandResult result = new DependencyToolInvokerCommand { WorkingDirectory = appDirectory }
-                    .ExecuteWithCapturedOutput("desktop-and-portable", framework, identifier);
-
-            result.Should().HaveStdOutContaining("Command not found");
-            result.Should().Fail();
+            new DependencyToolInvokerCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .ExecuteWithCapturedOutput($"desktop-and-portable {framework} {identifier}")
+                .Should().Fail();
         }
 
         [Fact]
         public void ToolsCanAccessDependencyContextProperly()
         {
-            var testInstance = TestAssetsManager.CreateTestInstance("DependencyContextFromTool").WithLockFiles();
+            var testInstance = TestAssets.Get("DependencyContextFromTool")
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithRestoreFiles();
 
-            var appDirectory = testInstance.Path;
-
-            CommandResult result = new DependencyContextTestCommand() { WorkingDirectory = appDirectory }
-                .Execute(Path.Combine(appDirectory, "project.json"));
-
-            result.Should().Pass();
+            new DependencyContextTestCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .Execute("")
+                .Should().Pass();
         }
 
         [Fact]
         public void TestProjectDependencyIsNotAvailableThroughDriver()
         {
-            var testInstance = TestAssetsManager
-                .CreateTestInstance("AppWithDirectDep")
-                .WithLockFiles();
+            var testInstance = TestAssets.Get("AppWithDirectDep")
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithRestoreFiles();
 
-            var appDirectory = testInstance.Path;
-
-            new BuildCommand(Path.Combine(appDirectory, "project.json"))
+            new BuildCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .WithFramework(NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NetCoreApp10)
                 .Execute()
-                .Should()
-                .Pass();
+                .Should().Pass();
 
             var currentDirectory = Directory.GetCurrentDirectory();
-            Directory.SetCurrentDirectory(appDirectory);
 
-            try
-            {
-                CommandResult result = new HelloCommand().ExecuteWithCapturedOutput();
+            CommandResult result = new HelloCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .ExecuteWithCapturedOutput();
 
-                result.StdErr.Should().Contain("No executable found matching command");
-                result.Should().Fail();
-            }
-            finally
-            {
-                Directory.SetCurrentDirectory(currentDirectory);
-            }
+            result.StdErr.Should().Contain("No executable found matching command");
+            
+            result.Should().Fail();        
         }
 
         class HelloCommand : TestCommand

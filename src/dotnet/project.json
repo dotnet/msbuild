@@ -33,25 +33,13 @@
     "System.Text.Encoding.CodePages": "4.0.1",
     "System.Diagnostics.FileVersionInfo": "4.0.0",
     "Microsoft.ApplicationInsights": "2.0.0",
-    "Microsoft.DotNet.ProjectModel": {
-      "target": "project"
-    },
-    "Microsoft.DotNet.Compiler.Common": {
-      "target": "project"
-    },
     "Microsoft.DotNet.Cli.Utils": {
-      "target": "project"
-    },
-    "Microsoft.Extensions.Testing.Abstractions": {
       "target": "project"
     },
     "Microsoft.DotNet.Configurer": {
       "target": "project"
     },
     "Microsoft.DotNet.ProjectJsonMigration": {
-      "target": "project"
-    },
-    "Microsoft.DotNet.Tools.Test": {
       "target": "project"
     },
     "Microsoft.NETCore.App": {
@@ -70,7 +58,7 @@
     },
 
     "Microsoft.Build": "15.1.319-preview5",
-
+    "Microsoft.CodeAnalysis.CSharp": "2.0.0-beta6-60922-08",
     "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000933"
   },
   "frameworks": {

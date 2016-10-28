@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using Microsoft.DotNet.InternalAbstractions;
 
 namespace Microsoft.DotNet.Cli.Utils
 {

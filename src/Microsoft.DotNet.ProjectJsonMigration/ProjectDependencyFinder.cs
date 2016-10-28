@@ -4,8 +4,8 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Construction;
-using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.ProjectModel.Graph;
+using Microsoft.DotNet.Internal.ProjectModel;
+using Microsoft.DotNet.Internal.ProjectModel.Graph;
 using System.Linq;
 using System.IO;
 using Newtonsoft.Json.Linq;

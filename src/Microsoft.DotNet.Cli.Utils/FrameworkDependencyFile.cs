@@ -4,6 +4,7 @@
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.PlatformAbstractions;
+
 using Microsoft.Extensions.DependencyModel;
 
 namespace Microsoft.DotNet.Cli.Utils

@@ -6,7 +6,7 @@ using Microsoft.Build.Construction;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
 {
-    public interface ITransformApplicator
+    internal interface ITransformApplicator
     {
         void Execute<T, U>(
             T element,

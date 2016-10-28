@@ -5,7 +5,7 @@ using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
-    public static class MigrationNuGetFrameworkExtensions
+    internal static class MigrationNuGetFrameworkExtensions
     {
         public static string GetMSBuildCondition(this NuGetFramework framework)
         {

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using Microsoft.DotNet.ProjectModel;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Cli.Utils
@@ -48,25 +47,6 @@ namespace Microsoft.DotNet.Cli.Utils
             var defaultCommandResolver = commandResolverPolicy.CreateCommandResolver();
 
             return defaultCommandResolver.Resolve(commandResolverArgs);
-        }
-
-        public static CommandSpec TryResolveScriptCommandSpec(
-            string commandName,
-            IEnumerable<string> args,
-            Project project,
-            string[] inferredExtensionList)
-        {
-            var commandResolverArgs = new CommandResolverArguments
-            {
-                CommandName = commandName,
-                CommandArguments = args,
-                ProjectDirectory = project.ProjectDirectory,
-                InferredExtensions = inferredExtensionList
-            };
-
-            var scriptCommandResolver = ScriptCommandResolverPolicy.Create();
-
-            return scriptCommandResolver.Resolve(commandResolverArgs);
         }
     }
 }

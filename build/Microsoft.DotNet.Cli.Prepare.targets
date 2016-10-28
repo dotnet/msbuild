@@ -188,6 +188,7 @@
           Outputs="@(RestorePackagesInput->'%(RelativeDir)/project.lock.json')">
 
     <CallTarget Targets="CleanSrcToolsLockFiles" />
+    
     <DotNetRestore WorkingDirectory="$(RepoRoot)/src" ToolPath="$(DotNetPath)" />
     <DotNetRestore WorkingDirectory="$(RepoRoot)/tools" ToolPath="$(DotNetPath)" />
 

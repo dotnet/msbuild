@@ -49,7 +49,7 @@
         ReplacementStrings="@(DebianConfigTokenValues -> '%(ReplacementString)')" />
 
       <!-- Build SDK Deb package -->
-      <DotNetDebTool ToolPath="$(Stage2Directory)"
+      <DotNetDebTool ToolPath="$(Stage0Directory)"
                      InputDirectory="$(LayoutDirectory)"
                      OutputDirectory="$(DotNetDebToolOutputDirectory)"
                      PackageName="$(SdkDebianPackageName)"
@@ -94,7 +94,7 @@
       <!-- Run E2E -->
       <DotNetTest WorkingDirectory="$(EndToEndTestDirectory)"
                   EnvironmentVariables="@(TestSdkDebTaskEnvironmentVariables)"
-                  ToolPath="$(DebianInstalledDirectory)"
+                  ToolPath="$(Stage0Directory)"
                   Xml="$(DebianTestResultsXmlFile)" />
 
       <!-- Clean up Packages -->
@@ -135,9 +135,9 @@
   <Target Name="PrepareDotnetDebTool"
           DependsOnTargets="WriteDotnetDebToolProjectJson;">
 
-    <DotNetRestore  FallbackSource="$(DotnetDebToolPackageSource)"
-                    ToolPath="$(Stage2Directory)"
-                    WorkingDirectory="$(DotnetDebToolDir)" />
+    <DotNetRestoreProjectJson  FallbackSource="$(DotnetDebToolPackageSource)"
+                               ToolPath="$(Stage2Directory)"
+                               WorkingDirectory="$(DotnetDebToolDir)" />
   </Target>
 
   <Target Name="WriteDotnetDebToolProjectJson"

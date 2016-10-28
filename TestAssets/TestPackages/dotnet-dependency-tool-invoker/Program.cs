@@ -2,7 +2,6 @@
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Cli.Utils;
 using NuGet.Frameworks;
 
@@ -24,13 +23,7 @@ namespace Microsoft.DotNet.Tools.DependencyInvoker
                 
                 return 1;
             }
-            
-            var projectContexts = 
-                CreateProjectContexts(dotnetParams.ProjectPath)
-                    .Where(p => dotnetParams.Framework == null ||
-                                dotnetParams.Framework.GetShortFolderName()
-                                .Equals(p.TargetFramework.GetShortFolderName()));
-            
+
             var commandFactory =
                 new ProjectDependenciesCommandFactory(
                     dotnetParams.Framework,
@@ -39,15 +32,7 @@ namespace Microsoft.DotNet.Tools.DependencyInvoker
                     dotnetParams.BuildBasePath,
                     dotnetParams.ProjectPath);
 
-            var result = 0;
-            if(projectContexts.Any())
-            {
-                result = InvokeDependencyToolForProjectJson(projectContexts, commandFactory, dotnetParams);
-            }
-            else
-            {
-                result = InvokeDependencyToolForMSBuild(commandFactory, dotnetParams);
-            }
+            var result = InvokeDependencyToolForMSBuild(commandFactory, dotnetParams);
 
             return result;
         }
@@ -59,24 +44,6 @@ namespace Microsoft.DotNet.Tools.DependencyInvoker
             Console.WriteLine($"Invoking '{dotnetParams.Command}' for '{dotnetParams.Framework.GetShortFolderName()}'.");
 
             return InvokeDependencyTool(commandFactory, dotnetParams, dotnetParams.Framework);
-        }
-
-        private static int InvokeDependencyToolForProjectJson(
-            IEnumerable<ProjectContext> projectContexts,
-            ProjectDependenciesCommandFactory commandFactory,
-            DotnetBaseParams dotnetParams)
-        {
-            foreach (var projectContext in projectContexts)
-            {
-                Console.WriteLine($"Invoking '{dotnetParams.Command}' for '{projectContext.TargetFramework}'.");
-
-                if (InvokeDependencyTool(commandFactory, dotnetParams, projectContext.TargetFramework) != 0)
-                {
-                    return 1;
-                }
-            }
-
-            return 0;
         }
 
         private static int InvokeDependencyTool(
@@ -105,23 +72,6 @@ namespace Microsoft.DotNet.Tools.DependencyInvoker
             }
 
             return 0;
-        }
-
-        private static IEnumerable<ProjectContext> CreateProjectContexts(string projectPath = null)
-        {
-            projectPath = projectPath ?? Directory.GetCurrentDirectory();
-
-            if (!projectPath.EndsWith(Project.FileName))
-            {
-                projectPath = Path.Combine(projectPath, Project.FileName);
-            }
-
-            if (!File.Exists(projectPath))
-            {
-                return Enumerable.Empty<ProjectContext>();
-            }
-
-            return ProjectContext.CreateContextForEachFramework(projectPath);
         }
     }
 }

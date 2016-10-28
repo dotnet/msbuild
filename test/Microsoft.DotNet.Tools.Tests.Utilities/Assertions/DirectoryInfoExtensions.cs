@@ -20,5 +20,20 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         {
             return new DirectoryInfo(Path.Combine(dir.FullName, name));
         }
+
+        public static bool Contains(this DirectoryInfo subject, FileSystemInfo target)
+        {
+            return target.FullName.StartsWith(subject.FullName);
+        }
+
+        public static DirectoryInfo GetDirectory(this DirectoryInfo subject, params string [] directoryNames)
+        {
+            return new DirectoryInfo(Path.Combine(subject.FullName, Path.Combine(directoryNames)));
+        }
+
+        public static FileInfo GetFile(this DirectoryInfo subject, string fileName)
+        {
+            return new FileInfo(Path.Combine(subject.FullName, fileName));
+        }
     }
 }

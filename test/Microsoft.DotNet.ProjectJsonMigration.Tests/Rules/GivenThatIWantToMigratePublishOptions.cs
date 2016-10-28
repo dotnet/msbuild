@@ -2,8 +2,8 @@
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Construction;
-using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.ProjectModel.Files;
+using Microsoft.DotNet.Internal.ProjectModel;
+using Microsoft.DotNet.Internal.ProjectModel.Files;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using NuGet.Frameworks;

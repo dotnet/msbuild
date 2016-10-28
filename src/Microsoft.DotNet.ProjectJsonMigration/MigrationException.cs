@@ -5,7 +5,7 @@ using System;
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
-    public class MigrationException : Exception 
+    internal class MigrationException : Exception 
     { 
         public MigrationError Error { get; }
         public MigrationException(MigrationError error, string message) : base(message) 

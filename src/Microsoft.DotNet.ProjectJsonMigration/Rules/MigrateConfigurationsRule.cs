@@ -5,11 +5,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Construction;
 using NuGet.Frameworks;
-using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.Internal.ProjectModel;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
-    public class MigrateConfigurationsRule : IMigrationRule
+    internal class MigrateConfigurationsRule : IMigrationRule
     {
         public void Apply(MigrationSettings migrationSettings, MigrationRuleInputs migrationRuleInputs)
         {

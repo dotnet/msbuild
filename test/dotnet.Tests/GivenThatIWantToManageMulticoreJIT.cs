@@ -36,11 +36,10 @@ namespace Microsoft.DotNet.Tests
 
             var optimizationProfileFilePath = GetOptimizationProfileFilePath(testDirectory.Path);
 
-            File.Exists(optimizationProfileFilePath)
-                .Should().BeTrue("Because dotnet CLI creates it after each run");
-
-            File.GetLastWriteTimeUtc(optimizationProfileFilePath)
-                .Should().BeOnOrAfter(testStartTime, "Because dotnet CLI was executed after that time");
+            new FileInfo(optimizationProfileFilePath)
+                .Should().Exist("Because dotnet CLI creates it after each run")
+                     .And.HaveLastWriteTimeUtc()
+                         .Which.Should().BeOnOrAfter(testStartTime, "Because dotnet CLI was executed after that time");
         }
 
         [Fact]
@@ -114,9 +113,8 @@ namespace Microsoft.DotNet.Tests
 
         private static string GetDotnetVersion()
         {
-            return Command.Create("dotnet", new[] { "--version" })
-                .CaptureStdOut()
-                .Execute()
+            return new TestCommand("dotnet")
+                .ExecuteWithCapturedOutput("--version" )
                 .StdOut
                 .Trim();
         }

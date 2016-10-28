@@ -5,7 +5,7 @@ using Microsoft.Build.Construction;
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
-    public class MigrationSettings
+    internal class MigrationSettings
     {
         public string ProjectXProjFilePath { get; }
         public string ProjectDirectory { get; }

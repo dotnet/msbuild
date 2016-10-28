@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Exceptions;
-using Microsoft.DotNet.ProjectModel;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Cli.Utils
@@ -27,13 +26,13 @@ namespace Microsoft.DotNet.Cli.Utils
             string buildBasePath,
             string outputPath)
         {
-            return GetMSBuildProj(projectDirectory, framework, configuration, outputPath) ??
-                GetProjectJsonProject(projectDirectory, framework, configuration, buildBasePath, outputPath);
+            return GetMSBuildProj(projectDirectory, framework, configuration, outputPath);
         }
 
         private IProject GetMSBuildProj(string projectDirectory, NuGetFramework framework, string configuration, string outputPath)
         {
             var msBuildExePath = _environment.GetEnvironmentVariable(Constants.MSBUILD_EXE_PATH);
+
             msBuildExePath = string.IsNullOrEmpty(msBuildExePath) ?
                 Path.Combine(AppContext.BaseDirectory, "MSBuild.dll") :
                 msBuildExePath;
@@ -41,7 +40,9 @@ namespace Microsoft.DotNet.Cli.Utils
             Reporter.Verbose.WriteLine($"projetfactory: MSBUILD_EXE_PATH = {msBuildExePath}");
 
             string msBuildProjectPath = GetMSBuildProjPath(projectDirectory);
+
             Reporter.Verbose.WriteLine($"projetfactory: MSBuild project path = {msBuildProjectPath}");
+            
             if(msBuildProjectPath == null)
             {
                 return null;
@@ -54,23 +55,9 @@ namespace Microsoft.DotNet.Cli.Utils
             catch (InvalidProjectFileException ex)
             {
                 Reporter.Verbose.WriteLine(ex.ToString().Red());
+                
                 return null;
             }
-        }
-
-        private IProject GetProjectJsonProject(
-            string projectDirectory,
-            NuGetFramework framework,
-            string configuration,
-            string buildBasePath,
-            string outputPath)
-        {
-            if (!File.Exists(Path.Combine(projectDirectory, Project.FileName)))
-            {
-                return null;
-            }
-
-            return new ProjectJsonProject(projectDirectory, framework, configuration, buildBasePath, outputPath);
         }
 
         private string GetMSBuildProjPath(string projectDirectory)

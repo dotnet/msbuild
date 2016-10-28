@@ -3,12 +3,12 @@
 
 using System.Collections.Generic;
 using Microsoft.Build.Construction;
-using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.Internal.ProjectModel;
 using System.Linq;
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
-    public class MigrationRuleInputs
+    internal class MigrationRuleInputs
     {
         public ProjectRootElement ProjectXproj { get; }
 

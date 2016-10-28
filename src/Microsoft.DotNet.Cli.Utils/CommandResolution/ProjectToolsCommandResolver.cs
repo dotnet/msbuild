@@ -5,13 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Tools.Common;
 using Microsoft.Extensions.DependencyModel;
+using NuGet.Configuration;
 using NuGet.Frameworks;
 using NuGet.ProjectModel;
 using NuGet.Versioning;
-using FileFormatException = Microsoft.DotNet.ProjectModel.FileFormatException;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -45,6 +44,8 @@ namespace Microsoft.DotNet.Cli.Utils
             if (commandResolverArguments.CommandName == null
                 || commandResolverArguments.ProjectDirectory == null)
             {
+                Reporter.Verbose.WriteLine($"projecttoolscommandresolver: Invalid CommandResolverArguments");
+
                 return null;
             }
 
@@ -54,12 +55,21 @@ namespace Microsoft.DotNet.Cli.Utils
         private CommandSpec ResolveFromProjectTools(CommandResolverArguments commandResolverArguments)
         {
             var projectFactory = new ProjectFactory(_environment);
+
             var project = projectFactory.GetProject(
                 commandResolverArguments.ProjectDirectory,
                 commandResolverArguments.Framework,
                 commandResolverArguments.Configuration,
                 commandResolverArguments.BuildBasePath,
                 commandResolverArguments.OutputPath);
+
+            if (project == null)
+            {
+                Reporter.Verbose.WriteLine($"projecttoolscommandresolver: ProjectFactory did not find Project.");
+
+                return null;
+            }
+            
             var tools = project.GetTools();
 
             return ResolveCommandSpecFromAllToolLibraries(
@@ -77,6 +87,8 @@ namespace Microsoft.DotNet.Cli.Utils
             LockFile lockFile,
             IProject project)
         {
+            Reporter.Verbose.WriteLine($"projecttoolscommandresolver: resolving commandspec from {toolsLibraries.Count()} Tool Libraries.");
+
             foreach (var toolLibrary in toolsLibraries)
             {
                 var commandSpec = ResolveCommandSpecFromToolLibrary(
@@ -92,6 +104,8 @@ namespace Microsoft.DotNet.Cli.Utils
                 }
             }
 
+            Reporter.Verbose.WriteLine($"projecttoolscommandresolver: failed to resolve commandspec from library.");
+
             return null;
         }
 
@@ -102,9 +116,17 @@ namespace Microsoft.DotNet.Cli.Utils
             LockFile lockFile,
             IProject project)
         {
-            var nugetPackagesRoot = lockFile.PackageFolders.First().Path;
+            Reporter.Verbose.WriteLine($"projecttoolscommandresolver: Attempting to resolve command spec from tool {toolLibraryRange.Name}");
+
+            var nuGetPathContext = NuGetPathContext.Create(project.ProjectRoot);
+
+            var nugetPackagesRoot = nuGetPathContext.UserPackageFolder;
+
+            Reporter.Verbose.WriteLine($"projecttoolscommandresolver: nuget packages root:\n{nugetPackagesRoot}"); 
 
             var toolLockFile = GetToolLockFile(toolLibraryRange, nugetPackagesRoot);
+
+            Reporter.Verbose.WriteLine($"projecttoolscommandresolver: found tool lockfile at : {toolLockFile.Path}");
 
             var toolLibrary = toolLockFile.Targets
                 .FirstOrDefault(
@@ -113,13 +135,18 @@ namespace Microsoft.DotNet.Cli.Utils
 
             if (toolLibrary == null)
             {
+                Reporter.Verbose.WriteLine($"projecttoolscommandresolver: library not found in lock file.");  
+
                 return null;
             }
 
             var depsFileRoot = Path.GetDirectoryName(toolLockFile.Path);
+
             var depsFilePath = GetToolDepsFilePath(toolLibraryRange, toolLockFile, depsFileRoot);
 
             var normalizedNugetPackagesRoot = PathUtility.EnsureNoTrailingDirectorySeparator(nugetPackagesRoot);
+
+            Reporter.Verbose.WriteLine($"projecttoolscommandresolver: attempting to create commandspec");
 
             var commandSpec = _packagedCommandSpecFactory.CreateCommandSpecFromLibrary(
                     toolLibrary,
@@ -130,6 +157,11 @@ namespace Microsoft.DotNet.Cli.Utils
                     s_commandResolutionStrategy,
                     depsFilePath,
                     null);
+
+            if (commandSpec == null)
+            {
+                Reporter.Verbose.WriteLine($"projecttoolscommandresolver: commandSpec is null.");
+            }
 
             commandSpec?.AddEnvironmentVariablesFromProject(project);
 
@@ -181,6 +213,8 @@ namespace Microsoft.DotNet.Cli.Utils
             var depsJsonPath = Path.Combine(
                 depsPathRoot,
                 toolLibrary.Name + FileNameSuffixes.DepsJson);
+
+            Reporter.Verbose.WriteLine($"projecttoolscommandresolver: expect deps.json at: {depsJsonPath}");
 
             EnsureToolJsonDepsFileExists(toolLockFile, depsJsonPath, toolLibrary);
 

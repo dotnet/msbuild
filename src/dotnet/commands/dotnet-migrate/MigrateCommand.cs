@@ -9,7 +9,7 @@ using System.Text;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectJsonMigration;
-using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.Internal.ProjectModel;
 
 namespace Microsoft.DotNet.Tools.Migrate
 {

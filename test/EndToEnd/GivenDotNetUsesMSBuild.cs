@@ -24,37 +24,31 @@ namespace Microsoft.DotNet.Tests.EndToEnd
                 new NewCommand()
                     .WithWorkingDirectory(projectDirectory)
                     .Execute("")
-                    .Should()
-                    .Pass();
+                    .Should().Pass();
 
-                new Restore3Command()
+                new RestoreCommand()
                     .WithWorkingDirectory(projectDirectory)
                     .Execute("/p:SkipInvalidConfigurations=true")
-                    .Should()
-                    .Pass();
+                    .Should().Pass();
 
-                new Build3Command()
+                new BuildCommand()
                     .WithWorkingDirectory(projectDirectory)
                     .Execute()
-                    .Should()
-                    .Pass();
+                    .Should().Pass();
 
-                new Run3Command()
+                new RunCommand()
                     .WithWorkingDirectory(projectDirectory)
                     .ExecuteWithCapturedOutput()
-                    .Should()
-                    .Pass()
-                    .And
-                    .HaveStdOutContaining("Hello World!");
+                    .Should().Pass()
+                         .And.HaveStdOutContaining("Hello World!");
 
                 var binDirectory = new DirectoryInfo(projectDirectory).Sub("bin");
                 binDirectory.Should().HaveFilesMatching("*.dll", SearchOption.AllDirectories);
 
-                new Clean3Command()
+                new CleanCommand()
                     .WithWorkingDirectory(projectDirectory)
                     .Execute()
-                    .Should()
-                    .Pass();
+                    .Should().Pass();
 
                 binDirectory.Should().NotHaveFilesMatching("*.dll", SearchOption.AllDirectories);
             }
@@ -63,20 +57,15 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         [Fact]
         public void ItCanRunToolsInACSProj()
         {
-            var testAppName = "MSBuildTestApp";
-            var testInstance = TestAssetsManager
-                .CreateTestInstance(testAppName);
-
-            var testProjectDirectory = testInstance.TestRoot;
-
-            new Restore3Command()
-                .WithWorkingDirectory(testProjectDirectory)
-                .Execute()
-                .Should()
-                .Pass();
+            var testInstance = TestAssets.Get("MSBuildTestApp")
+                                         .CreateInstance()
+                                         .WithSourceFiles()
+                                         .WithRestoreFiles();
+         
+            var testProjectDirectory = testInstance.Root;
 
             new DotnetCommand()
-                .WithWorkingDirectory(testInstance.TestRoot)
+                .WithWorkingDirectory(testInstance.Root)
                 .ExecuteWithCapturedOutput("portable")
                 .Should()
                 .Pass()
@@ -88,23 +77,19 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         public void ItCanRunAToolThatInvokesADependencyToolInACSProj()
         {
             var repoDirectoriesProvider = new RepoDirectoriesProvider();
-            var testAppName = "MSBuildTestAppWithToolInDependencies";
-            var testInstance = TestAssetsManager
-                .CreateTestInstance(testAppName);
+
+            var testInstance = TestAssets.Get("TestAppWithProjDepTool")
+                                         .CreateInstance()
+                                         .WithSourceFiles()
+                                         .WithRestoreFiles();
 
             var configuration = "Debug";
 
-            var testProjectDirectory = testInstance.TestRoot;
+            var testProjectDirectory = testInstance.Root;
 
-            new Restore3Command()
+            new BuildCommand()
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute($"-s {repoDirectoriesProvider.TestPackages}")
-                .Should()
-                .Pass();
-
-            new Build3Command()
-                .WithWorkingDirectory(testProjectDirectory)
-                .Execute($"-c {configuration}")
+                .Execute($"-c {configuration} ")
                 .Should()
                 .Pass();
 
@@ -112,10 +97,8 @@ namespace Microsoft.DotNet.Tests.EndToEnd
                 .WithWorkingDirectory(testProjectDirectory)
                 .ExecuteWithCapturedOutput(
                     $"-v dependency-tool-invoker -c {configuration} -f netcoreapp1.0 portable")
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello Portable World!");;
+                .Should().Pass()
+                     .And.HaveStdOutContaining("Hello Portable World!");;
         }
     }
 }

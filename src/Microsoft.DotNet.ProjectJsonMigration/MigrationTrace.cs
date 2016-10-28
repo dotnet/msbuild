@@ -5,7 +5,7 @@ using System;
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
-    public class MigrationTrace
+    internal class MigrationTrace
     {
         public static MigrationTrace Instance { get; set; }
 

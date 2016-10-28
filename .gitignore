@@ -6,6 +6,9 @@
 # Multicore JIT Optimization profiles
 **/optimizationdata/dotnet
 
+# Test Asset Manager files
+.tam/
+
 # NuGet keeps dropping
 Library/
 

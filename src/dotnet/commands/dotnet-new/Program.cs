@@ -137,21 +137,11 @@ namespace Microsoft.DotNet.Tools.New
                                { 
                                    new { Name = "Console", isMsBuild = true }, 
                                    new { Name = "Web", isMsBuild = true }, 
-                                   new { Name = "Lib", isMsBuild = true },
-                                   new { Name = "xunittest", isMsBuild = false },
-                                   new { Name = "nunittest", isMsBuild = false } 
+                                   new { Name = "Lib", isMsBuild = true }
                                }
             };
 
-            var fsharp = new { Name = "F#", Alias = new[] { "f#", "fs", "fsharp" }, TemplatePrefix = "FSharp", 
-                               Templates = new[] 
-                               { 
-                                   new { Name = "Console", isMsBuild = false },
-                                   new { Name = "Lib", isMsBuild = false } 
-                               }
-            };
-
-            var languages = new[] { csharp, fsharp };
+            var languages = new[] { csharp };
 
             string langValuesString = string.Join(", ", languages.Select(l => l.Name));
             var typeValues = 
@@ -168,7 +158,7 @@ namespace Microsoft.DotNet.Tools.New
             {
                 string languageValue = lang.Value() ?? csharp.Name;
 
-                var language = new[] { csharp, fsharp }
+                var language = new[] { csharp }
                     .FirstOrDefault(l => l.Alias.Contains(languageValue, StringComparer.OrdinalIgnoreCase));
 
                 if (language == null)
