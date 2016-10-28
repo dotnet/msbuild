@@ -50,6 +50,26 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
+        public void It_migrates_web_projects_to_have_web_sdk_PrivateAssets()
+        {
+            var mockProj = RunPackageDependenciesRuleOnPj(@"
+                {
+                    ""dependencies"": {
+                        ""Microsoft.AspNetCore.Mvc"" : {
+                            ""version"": ""1.0.0""
+                        }
+                    }
+                }");
+
+
+            var packageRef = mockProj.Items.First(i => i.Include == "Microsoft.NET.Sdk.Web" && i.ItemType == "PackageReference");
+
+            var privateAssetsMetadata = packageRef.GetMetadataWithName("PrivateAssets");
+            privateAssetsMetadata.Value.Should().NotBeNull();
+            privateAssetsMetadata.Value.Should().Be("All");
+        }
+
+        [Fact]
         public void It_migrates_suppress_parent_array_to_PrivateAssets()
         {
             var mockProj = RunPackageDependenciesRuleOnPj(@"                

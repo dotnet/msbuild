@@ -39,6 +39,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
             var noFrameworkPackageReferenceItemGroup = migrationRuleInputs.OutputMSBuildProject.AddItemGroup();
 
+            AddProjectTypeSpecificDependencies(migrationSettings, noFrameworkPackageReferenceItemGroup);
+
             // Inject Sdk dependency
             _transformApplicator.Execute(
                 PackageDependencyInfoTransform.Transform(
@@ -74,6 +76,27 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             }
 
             MigrateTools(project, migrationRuleInputs.OutputMSBuildProject);
+        }
+
+        private void AddProjectTypeSpecificDependencies(MigrationSettings migrationSettings, ProjectItemGroupElement noFrameworkPackageReferenceItemGroup)
+        {
+            string type;
+            if (ProjectTypeDetector.TryDetectProjectType(migrationSettings.ProjectDirectory, out type))
+            {
+                switch (type)
+                {
+                    case "web":
+                        _transformApplicator.Execute(
+                            PackageDependencyInfoTransform.Transform(
+                                new PackageDependencyInfo
+                                {
+                                    Name = ConstantPackageNames.CWebSdkPackageName,
+                                    Version = ConstantPackageVersions.WebSdkPackageVersion,
+                                    PrivateAssets = "All"
+                                }), noFrameworkPackageReferenceItemGroup, mergeExisting: false);
+                        break;
+                }
+            }
         }
 
         private void MigrateImports(ProjectPropertyGroupElement commonPropertyGroup, TargetFrameworkInformation targetFramework)
