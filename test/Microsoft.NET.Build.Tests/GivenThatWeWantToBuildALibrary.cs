@@ -86,11 +86,12 @@ namespace Microsoft.NET.Build.Tests
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, libraryProjectDirectory);
+            var getValuesCommand = new GetValuesCommand(Stage0MSBuild, libraryProjectDirectory,
+                targetFramework, "DefineConstants");
 
             //  Update target framework in project
             var ns = XNamespace.Get("http://schemas.microsoft.com/developer/msbuild/2003");
-            var project = XDocument.Load(buildCommand.FullPathProjectFile);
+            var project = XDocument.Load(getValuesCommand.FullPathProjectFile);
 
             var targetFrameworkProperties = project.Root
                 .Elements(ns + "PropertyGroup")
@@ -99,12 +100,10 @@ namespace Microsoft.NET.Build.Tests
 
             targetFrameworkProperties.Count.Should().Be(1);
 
-            bool shouldCompile;
-
             if (targetFramework.Contains(",Version="))
             {
                 //  We use the full TFM for frameworks we don't have built-in support for targeting, so we don't want to run the Compile target
-                shouldCompile = false;
+                getValuesCommand.ShouldCompile = false;
 
                 var frameworkName = new FrameworkName(targetFramework);
 
@@ -122,61 +121,28 @@ namespace Microsoft.NET.Build.Tests
             }
             else
             {
-                shouldCompile = true;
+                getValuesCommand.ShouldCompile = true;
                 targetFrameworkProperties.Single().SetValue(targetFramework);
             }
 
             if (buildOnlyOnWindows && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                shouldCompile = false;
+                getValuesCommand.ShouldCompile = false;
             }
 
-            using (var file = File.CreateText(buildCommand.FullPathProjectFile))
+            using (var file = File.CreateText(getValuesCommand.FullPathProjectFile))
             {
                 project.Save(file);
             }
 
             testAsset.Restore(relativePath: "TestLibrary");
 
-            //  Override build target to write out DefineConstants value to a file in the output directory
-            Directory.CreateDirectory(buildCommand.GetBaseIntermediateDirectory().FullName);
-            string injectTargetPath = Path.Combine(
-                buildCommand.GetBaseIntermediateDirectory().FullName,
-                Path.GetFileName(buildCommand.ProjectFile) + ".WriteDefinedConstants.g.targets");
-
-            string injectTargetContents =
-@"<Project ToolsVersion=`14.0` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
-  <Target Name=`Build` " + (shouldCompile ? "DependsOnTargets=`Compile`" : "") + @">
-    <WriteLinesToFile
-      File=`$(OutputPath)\DefinedConstants.txt`
-      Lines=`$(DefineConstants)`
-      Overwrite=`true`
-      Encoding=`Unicode`
-      />
-  </Target>
-</Project>";
-            injectTargetContents = injectTargetContents.Replace('`', '"');
-
-            File.WriteAllText(injectTargetPath, injectTargetContents);
-
-            //  Build project
-            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);
-            outputDirectory.Create();
-
-            buildCommand
+            getValuesCommand
                 .Execute()
                 .Should()
                 .Pass();
 
-            //  Verify expected DefineConstants
-            outputDirectory.Should().OnlyHaveFiles(new[] {
-                "DefinedConstants.txt",
-            });
-
-            var definedConstants = File.ReadAllLines(Path.Combine(outputDirectory.FullName, "DefinedConstants.txt"))
-                .Select(line => line.Trim())
-                .Where(line => !string.IsNullOrEmpty(line))
-                .ToList();
+            var definedConstants = getValuesCommand.GetValues();
 
             definedConstants.Should().BeEquivalentTo(new[] { "DEBUG", "TRACE" }.Concat(expectedDefines).ToArray());
         }
