@@ -49,7 +49,7 @@ namespace Microsoft.NET.Build.Tasks
         public ITaskItem[] ReferencePaths { get; set; }
 
         [Required]
-        public ITaskItem[] ProjectReferenceSatellitePaths { get; set; }
+        public ITaskItem[] ReferenceSatellitePaths { get; set; }
 
         public ITaskItem CompilerOptions { get; set; }
 
@@ -72,7 +72,7 @@ namespace Microsoft.NET.Build.Tasks
 
             Dictionary<string, SingleProjectInfo> referenceProjects = SingleProjectInfo.CreateProjectReferenceInfos(
                 ReferencePaths,
-                ProjectReferenceSatellitePaths);
+                ReferenceSatellitePaths);
 
             IEnumerable<string> privateAssets = PackageReferenceConverter.GetPackageIds(PrivateAssetsPackageReferences);
 
