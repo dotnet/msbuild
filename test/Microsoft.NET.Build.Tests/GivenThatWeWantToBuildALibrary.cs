@@ -12,6 +12,8 @@ using FluentAssertions;
 using System.Xml.Linq;
 using System.Runtime.Versioning;
 using System.Runtime.InteropServices;
+using System.Collections.Generic;
+using System;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -64,6 +66,94 @@ namespace Microsoft.NET.Build.Tests
                 .Execute()
                 .Should()
                 .Pass();
+        }
+
+        [Fact]
+        public void It_ignores_excluded_folders()
+        {
+            Action<GetValuesCommand> setup = getValuesCommand =>
+            {
+                foreach (string folder in new[] { "bin", "obj", "packages" })
+                {
+                    WriteFile(Path.Combine(getValuesCommand.ProjectRootPath, folder, "source.cs"),
+                        "!InvalidCSharp!");
+                }
+
+                WriteFile(Path.Combine(getValuesCommand.ProjectRootPath, "Code", "Class1.cs"),
+                    "public class Class1 {}");
+            };
+
+            var compileItems = GetItemsFromTestLibrary("Compile", setup);
+
+            compileItems = compileItems.Where(i =>
+                    !i.EndsWith("AssemblyAttributes.cs", System.StringComparison.OrdinalIgnoreCase) &&
+                    !i.EndsWith("AssemblyInfo.cs"))
+                .ToList();
+
+            compileItems.Should().BeEquivalentTo("Helper.cs", @"Code\Class1.cs");
+        }
+
+        [Fact]
+        public void It_allows_excluded_folders_to_be_overridden()
+        {
+            Action<GetValuesCommand> setup = getValuesCommand =>
+            {
+                foreach (string folder in new[] { "bin", "obj", "packages" })
+                {
+                    WriteFile(Path.Combine(getValuesCommand.ProjectRootPath, folder, "source.cs"),
+                        $"public class ClassFrom_{folder} {{}}");
+                }
+
+                WriteFile(Path.Combine(getValuesCommand.ProjectRootPath, "Code", "Class1.cs"),
+                    "public class Class1 {}");
+            };
+
+            var compileItems = GetItemsFromTestLibrary("Compile", setup, "/p:DisableDefaultRemoves=true");
+
+            compileItems = compileItems.Where(i =>
+                    !i.EndsWith("AssemblyAttributes.cs", System.StringComparison.OrdinalIgnoreCase) &&
+                    !i.EndsWith("AssemblyInfo.cs"))
+                .ToList();
+
+            compileItems.Should().BeEquivalentTo(
+                "Helper.cs",
+                @"Code\Class1.cs",
+                @"bin\source.cs",
+                @"obj\source.cs",
+                @"packages\source.cs");
+        }
+
+        private List<string> GetItemsFromTestLibrary(string itemType, Action<GetValuesCommand> setup, params string[] msbuildArgs)
+        {
+            string targetFramework = "netstandard1.5";
+
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("AppWithLibrary")
+                .WithSource()
+                .Restore(relativePath: "TestLibrary");
+
+            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
+
+            var getValuesCommand = new GetValuesCommand(Stage0MSBuild, libraryProjectDirectory,
+                targetFramework, itemType, GetValuesCommand.ValueType.Item);
+
+            setup(getValuesCommand);
+
+            getValuesCommand
+                .Execute(msbuildArgs)
+                .Should()
+                .Pass();
+
+            var itemValues = getValuesCommand.GetValues();
+
+            return itemValues;
+        }
+
+        private void WriteFile(string path, string contents)
+        {
+            string folder = Path.GetDirectoryName(path);
+            Directory.CreateDirectory(folder);
+            File.WriteAllText(path, contents);
         }
 
         [Theory]
