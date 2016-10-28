@@ -14,7 +14,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
 
-<Project DefaultTargets="Build" InitialTargets="_CheckForInvalidConfigurationAndPlatform" TreatAsLocalProperty="OutDir" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" TreatAsLocalProperty="OutDir" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="'$(MicrosoftCommonPropsHasBeenImported)' != 'true' and Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
 
@@ -715,12 +715,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
                                         _CheckForInvalidConfigurationAndPlatform
 
-    This target checks for errors in statically defined properties.  It always
-    gets executed before any other target.
+    This target checks for errors in statically defined properties.  By setting BeforeTargets, we
+    try to ensure that the target runs before any build related targets.  The only time this won't
+    run is if the user specifies a BeforeTargets of the first target in any of the DependsOn targets.
+    In this case, they'll want to set DependsOn to this target.
     ============================================================
     -->
   <Target
-      Name="_CheckForInvalidConfigurationAndPlatform">
+      Name="_CheckForInvalidConfigurationAndPlatform"
+      BeforeTargets="$(BuildDependsOn);$(RebuildDependsOn);$(CleanDependsOn)">
 
     <PropertyGroup>
       <_InvalidConfigurationMessageText>The OutputPath property is not set for project '$(MSBuildProjectFile)'.  Please check to make sure that you have specified a valid combination of Configuration and Platform for this project.  Configuration='$(_OriginalConfiguration)'  Platform='$(_OriginalPlatform)'.</_InvalidConfigurationMessageText>
