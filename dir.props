@@ -46,7 +46,7 @@
     <BootstrapDestination>$(BinDir)Bootstrap\</BootstrapDestination>
 
     <!-- Package version / directories -->
-    <BuildToolsVersion>1.0.26-prerelease-00826-05</BuildToolsVersion>
+    <BuildToolsVersion>1.0.27-prerelease-00927-05</BuildToolsVersion>
     <CompilerToolsVersion>2.0.0-beta3</CompilerToolsVersion>
     <XunitVersion>2.1.0</XunitVersion>
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
