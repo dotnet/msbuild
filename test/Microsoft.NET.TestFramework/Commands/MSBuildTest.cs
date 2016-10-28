@@ -19,7 +19,7 @@ namespace Microsoft.NET.TestFramework.Commands
             DotNetHostPath = dotNetHostPath;
         }
 
-        public Command CreateCommandForTarget(string target, params string[] args)
+        public ICommand CreateCommandForTarget(string target, params string[] args)
         {
             var newArgs = args.ToList();
             newArgs.Insert(0, $"/t:{target}");
@@ -27,12 +27,17 @@ namespace Microsoft.NET.TestFramework.Commands
             return CreateCommand(newArgs.ToArray());
         }
 
-        private Command CreateCommand(params string[] args)
+        private ICommand CreateCommand(params string[] args)
         {
             var newArgs = args.ToList();
             newArgs.Insert(0, $"msbuild");
 
-            return Command.Create(DotNetHostPath, newArgs);
+            ICommand command = Command.Create(DotNetHostPath, newArgs);
+
+            //  Set NUGET_PACKAGES environment variable to match value from build.ps1
+            command = command.EnvironmentVariable("NUGET_PACKAGES", RepoInfo.PackagesPath);
+
+            return command;
         }
     }
 }
