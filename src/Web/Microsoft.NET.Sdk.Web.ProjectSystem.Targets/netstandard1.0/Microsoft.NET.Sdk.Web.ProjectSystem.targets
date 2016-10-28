@@ -88,6 +88,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </Content>
     <Content Include="**\*.coffee" Exclude="wwwroot\**\*.coffee"/>
     <Content Include="**\*.iced" Exclude="wwwroot\**\*.iced"/>
+    <None Include=".bowerrc"/>
 
     <!-- Markup -->
     <Content Include="**\*.htm" Exclude="wwwroot\**\*.htm">
