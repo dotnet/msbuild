@@ -11,6 +11,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectJsonMigration;
 using Microsoft.DotNet.Internal.ProjectModel;
+using ProjectModel = Microsoft.DotNet.Internal.ProjectModel.Project;
 
 namespace Microsoft.DotNet.Tools.Migrate
 {
@@ -193,7 +194,7 @@ namespace Microsoft.DotNet.Tools.Migrate
         {
             IEnumerable<string> projects = null;
 
-            if (projectArg.EndsWith(ProjectModel.Project.FileName, StringComparison.OrdinalIgnoreCase))
+            if (projectArg.EndsWith(ProjectModel.FileName, StringComparison.OrdinalIgnoreCase))
             {
                 projects = Enumerable.Repeat(projectArg, 1);
             }
@@ -207,7 +208,8 @@ namespace Microsoft.DotNet.Tools.Migrate
             }
             else if (Directory.Exists(projectArg))
             {
-                projects = Directory.EnumerateFiles(projectArg, ProjectModel.Project.FileName, SearchOption.AllDirectories);
+                projects =
+                    Directory.EnumerateFiles(projectArg, ProjectModel.FileName, SearchOption.AllDirectories);
                 if (!projects.Any())
                 {
                     throw new Exception($"No project.json file found in '{projectArg}'");
