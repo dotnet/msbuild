@@ -715,10 +715,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
                                         _CheckForInvalidConfigurationAndPlatform
 
-    This target checks for errors in statically defined properties.  By setting BeforeTargets, we
-    try to ensure that the target runs before any build related targets.  The only time this won't
-    run is if the user specifies a BeforeTargets of the first target in any of the DependsOn targets.
-    In this case, they'll want to set DependsOn to this target.
+    This target checks for errors in statically defined properties.  By setting BeforeTargets, we try
+    to ensure that the target runs before any build related targets.  
+    If your target requires this check and is running as a BeforeTargets of one of the first targets
+    of $(BuildDependsOn), $(RebuildDependsOn), or $(CleanDependsOn) you will need to set your DependsOn
+    to this target.
     ============================================================
     -->
   <Target
