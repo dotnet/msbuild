@@ -375,6 +375,21 @@ namespace Microsoft.DotNet.Migration.Tests
             VerifyAllMSBuildOutputsRunnable(projectDirectory);
         }
 
+        [Fact]
+        public void It_builds_a_migrated_app_with_a_indirect_dependency()
+        {
+            const string projectName = "ProjectA";
+            var solutionDirectory =
+                TestAssetsManager.CreateTestInstance("TestAppDependencyGraph", callingMethod: "p").Path;
+            var projectDirectory = Path.Combine(solutionDirectory, projectName);
+
+            MigrateProject(new string[] { projectDirectory });
+            Restore(projectDirectory);
+            BuildMSBuild(projectDirectory, projectName);
+
+            VerifyAllMSBuildOutputsRunnable(projectDirectory);
+        }
+
         private void VerifyAutoInjectedDesktopReferences(string projectDirectory, string projectName, bool shouldBePresent)
         {
             if (projectName != null)

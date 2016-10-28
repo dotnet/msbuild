@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using TestLibrary;
 
 namespace TestApp
 {
@@ -11,6 +12,7 @@ namespace TestApp
         public static int Main(string[] args)
         {
             Console.WriteLine("This string came from ProjectA");
+            Console.WriteLine($"{ProjectD.GetMessage()}");
             return 0;
         }
     }

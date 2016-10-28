@@ -3,14 +3,23 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
-    <TargetFrameworkVersion>v1.5</TargetFrameworkVersion>
+    <TargetFramework>netstandard1.5</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="**\*.cs" Exclude="$(GlobalExclude)" />
     <EmbeddedResource Include="**\*.resx" Exclude="$(GlobalExclude)" />
     <None Include="project.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Sdk">
+      <Version>1.0.0-alpha-20161026-2</Version>
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="NETStandard.Library">
+      <Version>1.6.0</Version>
+    </PackageReference>
   </ItemGroup>
 
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
