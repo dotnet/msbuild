@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
-    public class ProjectMigrationReport
+    internal class ProjectMigrationReport
     {
         public string ProjectDirectory { get; }
 

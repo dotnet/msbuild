@@ -5,7 +5,7 @@ using System.Linq;
 using FluentAssertions;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectJsonMigration.Rules;
-using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.Internal.ProjectModel;
 using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using NuGet.Frameworks;
@@ -18,8 +18,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [Fact]
         public void It_copies_ProjectDirectory_contents_to_OutputDirectory_when_the_directories_are_different()
         {
-            var testProjectDirectory = TestAssetsManager.CreateTestInstance("TestAppSimple", callingMethod: "z")
+            var testProjectDirectory = TestAssetsManager
+                .CreateTestInstance("PJTestAppSimple", callingMethod: "z")
                 .Path;
+
             var outputDirectory = Temp.CreateDirectory().Path;
 
             var projectDirectoryRelativeFilePaths = EnumerateFilesWithRelativePath(testProjectDirectory);

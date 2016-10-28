@@ -5,7 +5,7 @@ using System;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
 {
-    public abstract class ConditionalTransform<T, U> : ITransform<T, U>
+    internal abstract class ConditionalTransform<T, U> : ITransform<T, U>
     {
         private Func<T, bool> _condition;
 

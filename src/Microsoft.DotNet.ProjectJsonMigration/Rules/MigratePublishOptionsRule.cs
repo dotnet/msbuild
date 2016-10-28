@@ -6,7 +6,7 @@ using Microsoft.DotNet.ProjectJsonMigration.Transforms;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
-    public class MigratePublishOptionsRule : IMigrationRule
+    internal class MigratePublishOptionsRule : IMigrationRule
     {
         private readonly ITransformApplicator _transformApplicator;
 

@@ -5,9 +5,7 @@
     "warningsAsErrors": true
   },
   "dependencies": {
-    "Microsoft.DotNet.ProjectModel": {
-      "target": "project"
-    },
+    "Microsoft.Extensions.DependencyModel": "1.0.1-beta-000933",
     "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000933",
 
     "NuGet.Versioning": "3.6.0-rc-1984",

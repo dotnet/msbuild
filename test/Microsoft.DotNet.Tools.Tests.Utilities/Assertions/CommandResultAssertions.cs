@@ -55,8 +55,10 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         public AndConstraint<CommandResultAssertions> HaveStdOutContaining(string pattern)
         {
-            Execute.Assertion.ForCondition(_commandResult.StdOut.Contains(pattern))
+            Execute.Assertion
+                .ForCondition(_commandResult.StdOut.Contains(pattern))
                 .FailWith(AppendDiagnosticsTo($"The command output did not contain expected result: {pattern}{Environment.NewLine}"));
+                
             return new AndConstraint<CommandResultAssertions>(this);
         }
 
@@ -121,6 +123,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return s + $"{Environment.NewLine}" +
                        $"File Name: {_commandResult.StartInfo.FileName}{Environment.NewLine}" +
                        $"Arguments: {_commandResult.StartInfo.Arguments}{Environment.NewLine}" +
+                       $"WorkingDir:: {_commandResult.StartInfo.WorkingDirectory}{Environment.NewLine}" +
                        $"Exit Code: {_commandResult.ExitCode}{Environment.NewLine}" +
                        $"StdOut:{Environment.NewLine}{_commandResult.StdOut}{Environment.NewLine}" +
                        $"StdErr:{Environment.NewLine}{_commandResult.StdErr}{Environment.NewLine}"; ;

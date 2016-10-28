@@ -16,7 +16,7 @@
       <DotNetNew ToolPath="$(Stage2Directory)"
                  WorkingDirectory="$(NuGetPackagesArchiveProject)" />
 
-      <DotNetRestore3 ToolPath="$(Stage2Directory)"
+      <DotNetRestore ToolPath="$(Stage2Directory)"
                      Packages="$(NuGetPackagesArchiveFolder)"
                      SkipInvalidConfigurations="True"
                      WorkingDirectory="$(NuGetPackagesArchiveProject)" />
@@ -25,7 +25,7 @@
 
       <Message Text="Publishing Archiver" />
 
-      <DotNetPublish ToolPath="$(Stage2Directory)"
+      <DotNetPublish ToolPath="$(Stage0Directory)"
                      WorkingDirectory="$(RepoRoot)/tools/Archiver"
                      Output="$(ToolsOutputDirectory)"
                      Configuration="$(Configuration)" />

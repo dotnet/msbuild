@@ -8,7 +8,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.TestFramework;
-using Microsoft.DotNet.ProjectModel;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
@@ -22,6 +21,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         protected const string DefaultLibraryFramework = "netstandard1.5";
         private TempRoot _temp;
         private static TestAssetsManager s_testsAssetsMgr;
+        private static TestAssets s_testAssets;
 
 
         protected static string RepoRoot
@@ -42,6 +42,21 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 }
 
                 return s_testsAssetsMgr;
+            }
+        }
+
+        protected static TestAssets TestAssets
+        {
+            get
+            {
+                if (s_testAssets == null)
+                {
+                    var assetsRoot = Path.Combine(RepoRoot, "TestAssets");
+
+                    s_testAssets = new TestAssets(new DirectoryInfo(assetsRoot)); 
+                }
+
+                return s_testAssets;
             }
         }
 

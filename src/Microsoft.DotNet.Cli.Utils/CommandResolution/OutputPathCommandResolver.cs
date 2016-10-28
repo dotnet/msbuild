@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using Microsoft.DotNet.InternalAbstractions;
-using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.Cli.Utils;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Cli.Utils
@@ -43,6 +42,7 @@ namespace Microsoft.DotNet.Cli.Utils
             string buildBasePath)
         {
             var projectFactory = new ProjectFactory(_environment);
+			
             var project = projectFactory.GetProject(
                 projectDirectory,
                 framework,

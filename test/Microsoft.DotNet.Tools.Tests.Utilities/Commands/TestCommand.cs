@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.DotNet.Cli.Utils;
@@ -23,6 +23,8 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         public Dictionary<string, string> Environment { get; } = new Dictionary<string, string>();
 
+        private List<Action<string>> _writeLines = new List<Action<string>>();
+
         public TestCommand(string command)
         {
             _command = command;
@@ -33,24 +35,20 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 #endif 
         }
 
-        public TestCommand WithWorkingDirectory(string workingDirectory)
-        {
-            WorkingDirectory = workingDirectory;
-            return this;
-        }
-
         public virtual CommandResult Execute(string args = "")
         {
             var commandPath = _command;
             ResolveCommand(ref commandPath, ref args);
 
-            Console.WriteLine($"Executing - {commandPath} {args}");
+            Console.WriteLine($"Executing - {commandPath} {args} - {WorkingDirectoryInfo()}");
 
             var stdOut = new StreamForwarder();
             var stdErr = new StreamForwarder();
 
-            stdOut.ForwardTo(writeLine: Reporter.Output.WriteLine);
-            stdErr.ForwardTo(writeLine: Reporter.Output.WriteLine);
+            AddWriteLine(Reporter.Output.WriteLine);
+
+            stdOut.ForwardTo(writeLine: WriteLine);
+            stdErr.ForwardTo(writeLine: WriteLine);
 
             return RunProcess(commandPath, args, stdOut, stdErr);
         }
@@ -60,13 +58,15 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             var commandPath = _command;
             ResolveCommand(ref commandPath, ref args);
 
-            Console.WriteLine($"Executing - {commandPath} {args}");
+            Console.WriteLine($"Executing - {commandPath} {args} - {WorkingDirectoryInfo()}");
 
             var stdOut = new StreamForwarder();
             var stdErr = new StreamForwarder();
 
-            stdOut.ForwardTo(writeLine: Reporter.Output.WriteLine);
-            stdErr.ForwardTo(writeLine: Reporter.Output.WriteLine);
+            AddWriteLine(Reporter.Output.WriteLine);
+
+            stdOut.ForwardTo(writeLine: WriteLine);
+            stdErr.ForwardTo(writeLine: WriteLine);
 
             return RunProcessAsync(commandPath, args, stdOut, stdErr);
         }
@@ -78,10 +78,13 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             var commandPath = Env.GetCommandPath(command, ".exe", ".cmd", "") ??
                 Env.GetCommandPathFromRootPath(_baseDirectory, command, ".exe", ".cmd", "");
 
-            Console.WriteLine($"Executing (Captured Output) - {commandPath} {args}");
+            Console.WriteLine($"Executing (Captured Output) - {commandPath} {args} - {WorkingDirectoryInfo()}");
 
             var stdOut = new StreamForwarder();
             var stdErr = new StreamForwarder();
+
+            stdOut.ForwardTo(writeLine: WriteLine);
+            stdErr.ForwardTo(writeLine: WriteLine);
 
             stdOut.Capture();
             stdErr.Capture();
@@ -97,6 +100,11 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             }
 
             CurrentProcess.KillTree();
+        }
+
+        public void AddWriteLine(Action<string> writeLine)
+        {
+            _writeLines.Add(writeLine);
         }
 
         private void ResolveCommand(ref string executable, ref string args)
@@ -193,12 +201,23 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             process.Start();
             return process;
         }
-        
-        public TestCommand WithEnvironmentVariable(string name, string value)
+
+        private void WriteLine(string line)
         {
-            Environment.Add(name, value);
-            
-            return this;
+            foreach (var writeLine in _writeLines)
+            {
+                writeLine(line);
+            }
+        }
+
+        private string WorkingDirectoryInfo()
+        {
+            if (WorkingDirectory == null)
+            { 
+                return "";
+            }
+
+            return $" in pwd {WorkingDirectory}";
         }
     }
 }

@@ -25,6 +25,11 @@ namespace Microsoft.DotNet.Cli.Utils
         public static bool ShouldPassAnsiCodesThrough()
         {
             return _ansiPassThru.Value;
-        }        
+        }
+
+        public static void SetVerbose(bool value)
+        {
+            _verbose = new Lazy<bool>(() => value);
+        }
     }
 }

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Models
 {
-    public class DefaultProjectItemInfo
+    internal class DefaultProjectItemInfo
     {
         public string ItemType {get; set;}
         public string Include {get; set;}

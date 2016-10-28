@@ -75,8 +75,15 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             }
         }
 
+        public PackCommand WithConfiguration(string configuration)
+        {
+            _configuration = configuration;
+
+            return this;
+        }
+
         public PackCommand(
-            string projectPath,
+            string projectPath = "",
             string output = "",
             string buildBasePath = "",
             string tempOutput="", 

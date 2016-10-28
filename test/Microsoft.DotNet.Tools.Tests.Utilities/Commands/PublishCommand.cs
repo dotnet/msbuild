@@ -1,52 +1,43 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.InternalAbstractions;
-using Microsoft.DotNet.ProjectModel;
+using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
     public sealed class PublishCommand : TestCommand
     {
-        private const string PublishSubfolderName = "publish";
+        private string _framework;
+        private string _output;
+        private string _runtime;
 
-        private readonly Project _project;
-        private readonly string _path;
-        private readonly string _framework;
-        private readonly string _runtime;
-        private readonly string _config;
-        private readonly bool _noBuild;
-        private readonly string _output;
-        private readonly string _buidBasePathDirectory;
-
-        public PublishCommand(string projectPath,
-            string framework = "",
-            string runtime = "",
-            string output = "",
-            string config = "",
-            bool noBuild = false,
-            string buildBasePath = "")
+        public PublishCommand()
             : base("dotnet")
         {
-            _path = projectPath;
-            _project = ProjectReader.GetProject(projectPath);
-            _framework = framework;
-            _runtime = runtime;
-            _output = output;
-            _config = config;
-            _noBuild = noBuild;
-            _buidBasePathDirectory = buildBasePath;
         }
 
-        public override Task<CommandResult> ExecuteAsync(string args = "")
+        public PublishCommand WithFramework(string framework)
         {
-            args = $"publish {BuildArgs()} {args}";
-            return base.ExecuteAsync(args);
+            _framework = framework;
+            return this;
+        }
+
+        public PublishCommand WithFramework(NuGetFramework framework)
+        {
+            return WithFramework(framework.GetShortFolderName());
+        }
+
+        public PublishCommand WithOutput(string output)
+        {
+            _output = output;
+            return this;
+        }
+
+        public PublishCommand WithRuntime(string runtime)
+        {
+            _runtime = runtime;
+            return this;
         }
 
         public override CommandResult Execute(string args = "")
@@ -61,68 +52,18 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return base.ExecuteWithCapturedOutput(args);
         }
 
-        public string ProjectName => _project.Name;
-
-        private string BuildRelativeOutputPath(bool portable)
-        {
-            // lets try to build an approximate output path
-            string config = string.IsNullOrEmpty(_config) ? "Debug" : _config;
-            string framework = string.IsNullOrEmpty(_framework) ?
-                _project.GetTargetFrameworks().First().FrameworkName.GetShortFolderName() : _framework;
-
-            if (!portable)
-            {
-                var runtime = string.IsNullOrEmpty(_runtime) ? 
-                    DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier() : 
-                    _runtime;
-                return Path.Combine(config, framework, runtime, PublishSubfolderName);
-            }
-            else
-            {
-                return Path.Combine(config, framework, PublishSubfolderName);
-            }
-        }
-
-        public DirectoryInfo GetOutputDirectory(bool portable = false)
-        {
-            if (!string.IsNullOrEmpty(_output))
-            {
-                return new DirectoryInfo(_output);
-            }
-
-            string output = Path.Combine(_project.ProjectDirectory, "bin", BuildRelativeOutputPath(portable));
-            return new DirectoryInfo(output);
-        }
-
-        public string GetPortableOutputName()
-        {
-            return $"{_project.Name}.dll";
-        }
-
-        public string GetOutputExecutable()
-        {
-            return _project.Name + GetExecutableExtension();
-        }
-
-        public string GetExecutableExtension()
-        {
-#if NET451
-            return ".exe";
-#else
-            return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : "";
-#endif
-        }
-
         private string BuildArgs()
         {
-            return $"{_path} {FrameworkOption} {RuntimeOption} {OutputOption} {ConfigOption} {NoBuildFlag} {BuildBasePathOption}";
+            return string.Join(" ", 
+                FrameworkOption,
+                OutputOption,
+                RuntimeOption);
         }
 
         private string FrameworkOption => string.IsNullOrEmpty(_framework) ? "" : $"-f {_framework}";
+
+        private string OutputOption => string.IsNullOrEmpty(_output) ? "" : $"-o {_output}";
+
         private string RuntimeOption => string.IsNullOrEmpty(_runtime) ? "" : $"-r {_runtime}";
-        private string OutputOption => string.IsNullOrEmpty(_output) ? "" : $"-o \"{_output}\"";
-        private string ConfigOption => string.IsNullOrEmpty(_config) ? "" : $"-c {_output}";
-        private string NoBuildFlag => _noBuild ? "--no-build" : "";
-        private string BuildBasePathOption => string.IsNullOrEmpty(_buidBasePathDirectory) ? "" : $"-b {_buidBasePathDirectory}";
     }
 }

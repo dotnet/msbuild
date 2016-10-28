@@ -8,13 +8,13 @@ using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectJsonMigration;
 using Microsoft.DotNet.ProjectJsonMigration.Transforms;
-using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.ProjectModel.Files;
+using Microsoft.DotNet.Internal.ProjectModel;
+using Microsoft.DotNet.Internal.ProjectModel.Files;
 using Microsoft.DotNet.Tools.Common;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
-    public class MigratePackOptionsRule : IMigrationRule
+    internal class MigratePackOptionsRule : IMigrationRule
     {
         private AddPropertyTransform<PackOptions> TagsTransform => new AddPropertyTransform<PackOptions>(
                     "PackageTags", 

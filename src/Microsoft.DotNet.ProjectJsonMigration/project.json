@@ -8,16 +8,11 @@
     }
   },
   "dependencies": {
-    "Microsoft.DotNet.Compiler.Common": {
-      "target": "project"
-    },
     "Microsoft.DotNet.Cli.Utils": {
       "target": "project"
     },
-    "Microsoft.DotNet.ProjectModel": {
-      "target": "project"
-    },
-    "Microsoft.Build": "15.1.319-preview5"
+    "Microsoft.Build": "15.1.319-preview5",
+    "Microsoft.CodeAnalysis.CSharp": "2.0.0-beta6-60922-08"
   },
   "frameworks": {
     "netcoreapp1.0": { }

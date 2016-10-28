@@ -5,7 +5,7 @@ using System;
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
-    public static partial class MigrationErrorCodes
+    internal static partial class MigrationErrorCodes
     {
         public static Func<string, MigrationError> MIGRATE1011
             => (message) => new MigrationError(nameof(MIGRATE1011), "Deprecated Project", message);

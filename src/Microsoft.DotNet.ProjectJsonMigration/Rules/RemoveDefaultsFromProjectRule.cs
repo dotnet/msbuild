@@ -13,7 +13,7 @@ using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
-    public class RemoveDefaultsFromProjectRule : IMigrationRule
+    internal class RemoveDefaultsFromProjectRule : IMigrationRule
     {
         public void Apply(MigrationSettings migrationSettings, MigrationRuleInputs migrationRuleInputs)
         {

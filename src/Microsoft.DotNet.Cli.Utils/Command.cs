@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using Microsoft.DotNet.ProjectModel;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Cli.Utils
@@ -15,7 +14,9 @@ namespace Microsoft.DotNet.Cli.Utils
     public class Command : ICommand
     {
         private readonly Process _process;
+
         private StreamForwarder _stdOut;
+        
         private StreamForwarder _stdErr;
 
         private bool _running = false;
@@ -114,39 +115,20 @@ namespace Microsoft.DotNet.Cli.Utils
             return new Command(commandSpec);
         }
 
-        public static Command CreateForScript(
-            string commandName,
-            IEnumerable<string> args,
-            Project project,
-            string[] inferredExtensionList)
-        {
-            var commandSpec = CommandResolver.TryResolveScriptCommandSpec(commandName,
-                args,
-                project,
-                inferredExtensionList);
-
-            if (commandSpec == null)
-            {
-                throw new CommandUnknownException(commandName);
-            }
-
-            var command = new Command(commandSpec);
-
-            return command;
-        }
-
         public CommandResult Execute()
         {
 
             Reporter.Verbose.WriteLine($"Running {_process.StartInfo.FileName} {_process.StartInfo.Arguments}");
 
             ThrowIfRunning();
+
             _running = true;
 
             _process.EnableRaisingEvents = true;
 
 #if DEBUG
             var sw = Stopwatch.StartNew();
+            
             Reporter.Verbose.WriteLine($"> {FormatProcessInfo(_process.StartInfo)}".White());
 #endif
             using (PerfTrace.Current.CaptureTiming($"{Path.GetFileNameWithoutExtension(_process.StartInfo.FileName)} {_process.StartInfo.Arguments}"))

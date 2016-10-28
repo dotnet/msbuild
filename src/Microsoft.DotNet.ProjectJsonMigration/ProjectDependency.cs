@@ -3,7 +3,7 @@
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
-    public class ProjectDependency
+    internal class ProjectDependency
     {
         public string Name { get; }
         public string ProjectFilePath { get; }

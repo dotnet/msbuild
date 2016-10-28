@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.Tests.Performance
                 TestInstanceSetup();
 
                 // Setup the build command.
-                var buildCommand = new Build3Command();
+                var buildCommand = new BuildCommand();
                 using (iter.StartMeasurement())
                 {
                     // Execute the build command.
@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.Tests.Performance
             newCommand.WorkingDirectory = RestoredTestProjectDirectory;
             newCommand.Execute().Should().Pass();
 
-            var restoreCommand = new Restore3Command();
+            var restoreCommand = new RestoreCommand();
             restoreCommand.WorkingDirectory = RestoredTestProjectDirectory;
             restoreCommand.Execute("/p:SkipInvalidConfigurations=true")
                 .Should().Pass();

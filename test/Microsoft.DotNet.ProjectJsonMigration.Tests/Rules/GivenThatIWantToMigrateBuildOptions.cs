@@ -1,6 +1,6 @@
 ﻿using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectJsonMigration;
-using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.Internal.ProjectModel;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using NuGet.Frameworks;
 using System;
@@ -9,7 +9,7 @@ using System.Linq;
 using Xunit;
 using FluentAssertions;
 using Microsoft.DotNet.ProjectJsonMigration.Rules;
-using Microsoft.DotNet.ProjectModel.Files;
+using Microsoft.DotNet.Internal.ProjectModel.Files;
 using System.Collections.Generic;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Tests

@@ -3,7 +3,7 @@
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
-    public class MigrationError
+    internal class MigrationError
     {
         public string ErrorCode { get; }
 

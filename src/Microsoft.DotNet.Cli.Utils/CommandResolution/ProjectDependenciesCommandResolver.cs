@@ -2,9 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.InternalAbstractions;
-using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Tools.Common;
 using NuGet.Frameworks;
 using NuGet.ProjectModel;
@@ -39,11 +36,15 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public CommandSpec Resolve(CommandResolverArguments commandResolverArguments)
         {
+            Reporter.Verbose.WriteLine($"projectdependenciescommandresolver: attempting to resolve {commandResolverArguments.CommandName}");
+
             if (commandResolverArguments.Framework == null
                 || commandResolverArguments.ProjectDirectory == null
                 || commandResolverArguments.Configuration == null
                 || commandResolverArguments.CommandName == null)
             {
+                Reporter.Verbose.WriteLine($"projectdependenciescommandresolver: invalid commandResolverArguments");
+
                 return null;
             }
 

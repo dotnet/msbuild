@@ -6,7 +6,7 @@ using  System.Collections.Generic;
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
-    public class ProjectDependencyComparer : IEqualityComparer<ProjectDependency>
+    internal class ProjectDependencyComparer : IEqualityComparer<ProjectDependency>
     {
         public bool Equals(ProjectDependency one, ProjectDependency two)
         {

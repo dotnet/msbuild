@@ -9,7 +9,7 @@ using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using FluentAssertions;
 
-namespace Microsoft.DotNet.Tests
+namespace Microsoft.DotNet.New.Tests
 {
     public class GivenThatIWantANewCSApp : TestBase
     {
@@ -26,11 +26,11 @@ namespace Microsoft.DotNet.Tests
             AddProjectDependency(projectFile, "Newtonsoft.Json", "7.0.1");
 
             new TestCommand("dotnet") { WorkingDirectory = rootPath }
-                .Execute("restore3 /p:SkipInvalidConfigurations=true")
+                .Execute("restore /p:SkipInvalidConfigurations=true")
                 .Should().Pass();
 
             new TestCommand("dotnet") { WorkingDirectory = rootPath }
-                .Execute("run3")
+                .Execute("run")
                 .Should().Pass();
         }
         
@@ -43,10 +43,10 @@ namespace Microsoft.DotNet.Tests
                 .Execute("new");
 
             new TestCommand("dotnet") { WorkingDirectory = rootPath }
-                .Execute("restore3 /p:SkipInvalidConfigurations=true");
+                .Execute("restore /p:SkipInvalidConfigurations=true");
 
             var buildResult = new TestCommand("dotnet") { WorkingDirectory = rootPath }
-                .ExecuteWithCapturedOutput("build3");
+                .ExecuteWithCapturedOutput("build");
             
             buildResult.Should().Pass()
                        .And.NotHaveStdErr();

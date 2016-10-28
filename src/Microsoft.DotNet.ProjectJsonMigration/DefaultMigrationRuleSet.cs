@@ -5,7 +5,7 @@ using Microsoft.DotNet.ProjectJsonMigration.Rules;
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
-    public class DefaultMigrationRuleSet : IMigrationRule
+    internal class DefaultMigrationRuleSet : IMigrationRule
     {
         private IMigrationRule[] Rules => new IMigrationRule[]
         {
@@ -16,11 +16,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             new MigrateJsonPropertiesRule(),
             new MigratePackOptionsRule(),
             new MigrateRuntimeOptionsRule(),
+            new MigrateRuntimesRule(),
             new MigratePublishOptionsRule(),
             new MigrateProjectDependenciesRule(),
             new MigratePackageDependenciesAndToolsRule(),
             new MigrateConfigurationsRule(),
             new MigrateScriptsRule(),
+            new MigrateAssemblyInfoRule(),
             new RemoveDefaultsFromProjectRule(),
             new CleanOutputProjectRule(),
             new SaveOutputProjectRule()

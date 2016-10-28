@@ -6,7 +6,7 @@ using Microsoft.Build.Construction;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
-    public class SaveOutputProjectRule : IMigrationRule
+    internal class SaveOutputProjectRule : IMigrationRule
     {
         public void Apply(MigrationSettings migrationSettings, MigrationRuleInputs migrationRuleInputs)
         {

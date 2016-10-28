@@ -15,37 +15,9 @@
         <ProjectName>Microsoft.DotNet.Cli.Utils</ProjectName>
         <Version>$(SdkNugetVersion)</Version>
       </ProjectsToPack>
-      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.Compiler.Common">
-        <ProjectName>Microsoft.DotNet.Compiler.Common</ProjectName>
-        <Version>$(SdkNugetVersion)</Version>
-      </ProjectsToPack>
-      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.Files">
-        <ProjectName>Microsoft.DotNet.Files</ProjectName>
-        <Version>$(SdkNugetVersion)</Version>
-      </ProjectsToPack>
       <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.InternalAbstractions">
         <ProjectName>Microsoft.DotNet.InternalAbstractions</ProjectName>
         <Version>$(DependencyModelAndInternalAbstractionsNugetVersion)</Version>
-      </ProjectsToPack>
-      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.ProjectModel">
-        <ProjectName>Microsoft.DotNet.ProjectModel</ProjectName>
-        <Version>$(ProjectModelNugetVersion)</Version>
-      </ProjectsToPack>
-      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.ProjectModel.Loader">
-        <ProjectName>Microsoft.DotNet.ProjectModel.Loader</ProjectName>
-        <Version>$(SdkNugetVersion)</Version>
-      </ProjectsToPack>
-      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.ProjectModel.Workspaces">
-        <ProjectName>Microsoft.DotNet.ProjectModel.Workspaces</ProjectName>
-        <Version>$(SdkNugetVersion)</Version>
-      </ProjectsToPack>
-      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.Extensions.Testing.Abstractions">
-        <ProjectName>Microsoft.Extensions.Testing.Abstractions</ProjectName>
-        <Version>$(SdkNugetVersion)</Version>
-      </ProjectsToPack>
-      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.Tools.Test">
-        <ProjectName>Microsoft.DotNet.Tools.Test</ProjectName>
-        <Version>$(SdkNugetVersion)</Version>
       </ProjectsToPack>
       <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.ProjectJsonMigration">
         <ProjectName>Microsoft.DotNet.ProjectJsonMigration</ProjectName>
@@ -71,7 +43,7 @@
                 NoBuild="True"
                 Output="$(NupkgOutputDirectory)"
                 ProjectPath="%(ProjectsToPack.Identity)"
-                ToolPath="$(Stage2Directory)"
+                ToolPath="$(Stage0Directory)"
                 VersionSuffix="$(NupkgVersionSuffix)"
                 Configuration="$(Configuration)" />
   </Target>
@@ -82,7 +54,7 @@
             Condition=" '$(OS)' == 'Windows_NT' ">
         <MakeDir Directories="$(PackagingBuildBasePath)" />
 
-        <DotNetBuild ToolPath="$(Stage2Directory)"
+        <DotNetBuild ToolPath="$(Stage0Directory)"
                      BuildBasePath="$(PackagingBuildBasePath)"
                      Configuration="$(Configuration)"
                      ProjectPath="%(ProjectsToPack.Identity)" />

@@ -11,7 +11,7 @@ using FluentAssertions;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 
-namespace Microsoft.DotNet.Tests
+namespace Microsoft.DotNet.BindingRedirects.Tests
 {
     public class GivenAnAppWithRedirectsAndExecutableDependency : TestBase, IClassFixture<TestSetupFixture>
     {
@@ -134,13 +134,19 @@ namespace Microsoft.DotNet.Tests
         private IEnumerable<XElement> GetRedirects(string exePath)
         {
             var configFile = exePath + ".config";
+
             File.Exists(configFile).Should().BeTrue($"Config file not found - {configFile}");
+
             var config = ConfigurationManager.OpenExeConfiguration(exePath);
+
             var runtimeSectionXml = config.Sections["runtime"].SectionInformation.GetRawXml();
+
             var runtimeSectionElement = XElement.Parse(runtimeSectionXml);
+
             var redirects = runtimeSectionElement.Elements()
                                 .Where(e => e.Name.LocalName == "assemblyBinding").Elements()
                                 .Where(e => e.Name.LocalName == "dependentAssembly");
+
             return redirects;
         }
 
@@ -165,7 +171,7 @@ namespace Microsoft.DotNet.Tests
             }
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/cli/issues/4514")]
         public void Build_Generates_Redirects_For_App_Without_Config()
         {
             var redirects = GetRedirects(_appWithoutConfigBuildOutput);
@@ -176,7 +182,7 @@ namespace Microsoft.DotNet.Tests
             commandResult.Should().Pass();
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/cli/issues/4514")]
         public void Publish_Generates_Redirects_For_App_Without_Config()
         {
             var redirects = GetRedirects(_appWithoutConfigPublishOutput);
@@ -187,7 +193,7 @@ namespace Microsoft.DotNet.Tests
             commandResult.Should().Pass();
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/cli/issues/4514")]
         public void Build_Generates_Redirects_For_Executable_Dependency()
         {
             var redirects = GetRedirects(_executableDependencyBuildOutput);
@@ -209,7 +215,7 @@ namespace Microsoft.DotNet.Tests
             commandResult.Should().Pass();
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/cli/issues/4514")]
         public void Build_Generates_Redirects_For_App_With_Config()
         {
             var redirects = GetRedirects(_appWithConfigBuildOutput);
@@ -221,7 +227,7 @@ namespace Microsoft.DotNet.Tests
             commandResult.Should().Pass();
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/cli/issues/4514")]
         public void Publish_Generates_Redirects_For_App_With_Config()
         {
             var redirects = GetRedirects(_appWithConfigPublishOutput);
@@ -233,7 +239,7 @@ namespace Microsoft.DotNet.Tests
             commandResult.Should().Pass();
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/cli/issues/4514")]
         public void Tool_Command_Runs_Executable_Dependency_For_App_With_Config()
         {
             var commandResult = new DependencyToolInvokerCommand { WorkingDirectory = _appWithConfigProjectRoot }
@@ -241,7 +247,7 @@ namespace Microsoft.DotNet.Tests
             commandResult.Should().Pass();
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/cli/issues/4514")]
         public void Tool_Command_Runs_Executable_Dependency_For_App_Without_Config()
         {
             var appDirectory = Path.GetDirectoryName(_appWithoutConfigProjectRoot);

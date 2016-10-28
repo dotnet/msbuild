@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
-    public static class MSBuildExtensions
+    internal static class MSBuildExtensions
     {
         public static IEnumerable<string> GetEncompassedIncludes(this ProjectItemElement item, 
             ProjectItemElement otherItem)

@@ -3,7 +3,7 @@
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
 {
-    public interface ITransform<T, U>
+    internal interface ITransform<T, U>
     {
         U Transform(T source);
     }

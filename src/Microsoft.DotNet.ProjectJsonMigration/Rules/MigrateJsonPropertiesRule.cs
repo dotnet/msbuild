@@ -10,7 +10,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
-    public class MigrateJsonPropertiesRule : IMigrationRule
+    internal class MigrateJsonPropertiesRule : IMigrationRule
     {
         private Dictionary<string, ConditionalTransform<JToken, ProjectPropertyElement>> _propertyMappings
             = new Dictionary<string, ConditionalTransform<JToken, ProjectPropertyElement>>

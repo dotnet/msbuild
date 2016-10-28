@@ -5,12 +5,13 @@ using System.IO;
 using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using NuGet.Frameworks;
 
-namespace Microsoft.DotNet.Tests
+namespace Microsoft.DotNet.BindingRedirects.Tests
 {
     public class TestSetupFixture : TestBase
     {
-        private const string Framework = "net46";
+        private readonly NuGetFramework Framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.Net46;
         private const string Config = "Debug";
         private const string AppWithConfig = "AppWithRedirectsAndConfig";
         private const string AppWithoutConfig = "AppWithRedirectsNoConfig";
@@ -35,7 +36,7 @@ namespace Microsoft.DotNet.Tests
 
         public TestSetupFixture()
         {
-            _buildRelativePath = Path.Combine("bin", Config, Framework, _Runtime);
+            _buildRelativePath = Path.Combine("bin", Config, Framework.GetShortFolderName(), _Runtime);
             var testAssetsMgr = new TestAssetsManager(_desktopProjectsRoot);
             _testInstance = testAssetsMgr.CreateTestInstance("BindingRedirectSample")
                                          .WithLockFiles();
@@ -55,11 +56,20 @@ namespace Microsoft.DotNet.Tests
             buildDir = Path.Combine(projectDir, _buildRelativePath);
             publishDir = Path.Combine(projectDir, "publish");
 
-            var buildCommand = new BuildCommand(projectDir, framework: Framework, runtime: _Runtime);
-            buildCommand.Execute().Should().Pass();
+            var buildCommand = new BuildCommand()
+                .WithWorkingDirectory(projectDir)
+                .WithFramework(Framework)
+                .WithRuntime(_Runtime)
+                .Execute()
+                .Should().Pass();
 
-            var publishCommand = new PublishCommand(projectDir, output: publishDir, framework: Framework, runtime: _Runtime);
-            publishCommand.Execute().Should().Pass();
+            new PublishCommand()
+                .WithWorkingDirectory(projectDir)
+                .WithOutput(publishDir)
+                .WithFramework(Framework)
+                .WithRuntime(_Runtime)
+                .Execute()
+                .Should().Pass();
         }
     }
 }

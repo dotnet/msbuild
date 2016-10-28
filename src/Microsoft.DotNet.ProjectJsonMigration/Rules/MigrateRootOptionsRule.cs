@@ -3,11 +3,11 @@
 
 using System.Linq;
 using Microsoft.DotNet.ProjectJsonMigration.Transforms;
-using Project = Microsoft.DotNet.ProjectModel.Project;
+using Project = Microsoft.DotNet.Internal.ProjectModel.Project;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
-    public class MigrateRootOptionsRule : IMigrationRule
+    internal class MigrateRootOptionsRule : IMigrationRule
     {
         private readonly ITransformApplicator _transformApplicator;
         private readonly AddPropertyTransform<Project>[] _transforms;

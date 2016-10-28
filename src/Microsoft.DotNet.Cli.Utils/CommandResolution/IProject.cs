@@ -14,6 +14,8 @@ namespace Microsoft.DotNet.Cli.Utils
 
         string DepsJsonPath { get; }
 
+        string ProjectRoot { get; }
+
         string RuntimeConfigJsonPath { get; }
 
         string FullOutputPath { get; }

@@ -3,7 +3,7 @@
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
-    public class ConstantPackageNames
+    internal class ConstantPackageNames
     {
         public const string CSdkPackageName = "Microsoft.NET.Sdk";
     }

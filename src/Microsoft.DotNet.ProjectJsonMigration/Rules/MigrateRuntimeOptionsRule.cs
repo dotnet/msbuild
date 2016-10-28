@@ -5,7 +5,7 @@ using System.IO;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
-    public class MigrateRuntimeOptionsRule : IMigrationRule
+    internal class MigrateRuntimeOptionsRule : IMigrationRule
     {
         private static readonly string s_runtimeOptionsFileName = "runtimeconfig.template.json";
 

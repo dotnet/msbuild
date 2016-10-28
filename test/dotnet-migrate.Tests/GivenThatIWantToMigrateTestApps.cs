@@ -8,10 +8,8 @@ using Xunit;
 using FluentAssertions;
 using System.IO;
 using Microsoft.DotNet.Tools.Migrate;
-using Build3Command = Microsoft.DotNet.Tools.Test.Utilities.Build3Command;
 using BuildCommand = Microsoft.DotNet.Tools.Test.Utilities.BuildCommand;
 using System.Runtime.Loader;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.Migration.Tests
@@ -21,9 +19,10 @@ namespace Microsoft.DotNet.Migration.Tests
         [Theory]
         [InlineData("TestAppWithRuntimeOptions")]
         [InlineData("TestAppWithContents")]
+        [InlineData("AppWithAssemblyInfo")]
         public void It_migrates_apps(string projectName)
         {
-            var projectDirectory = TestAssetsManager.CreateTestInstance(projectName, callingMethod: "i")
+            var projectDirectory = TestAssetsManager.CreateTestInstance(projectName, identifier: projectName)
                                                     .WithLockFiles()
                                                     .Path;
 
@@ -47,7 +46,7 @@ namespace Microsoft.DotNet.Migration.Tests
         [Fact]
         public void It_migrates_signed_apps()
         {
-            var projectDirectory = TestAssetsManager.CreateTestInstance("TestAppWithSigning", callingMethod: "i").WithLockFiles().Path;
+            var projectDirectory = TestAssetsManager.CreateTestInstance("TestAppWithSigning").WithLockFiles().Path;
 
             CleanBinObj(projectDirectory);
 
@@ -126,7 +125,7 @@ namespace Microsoft.DotNet.Migration.Tests
         public void It_migrates_projects_with_multiple_TFMs(string projectName)
         {
             var projectDirectory =
-                TestAssetsManager.CreateTestInstance(projectName, callingMethod: "i").WithLockFiles().Path;
+                TestAssetsManager.CreateTestInstance(projectName, identifier: projectName).WithLockFiles().Path;
 
             var outputComparisonData = BuildProjectJsonMigrateBuildMSBuild(projectDirectory, projectName);
 
@@ -144,11 +143,11 @@ namespace Microsoft.DotNet.Migration.Tests
         [Theory]
         [InlineData("TestAppWithLibrary/TestLibrary")]
         [InlineData("TestLibraryWithAnalyzer")]
-        [InlineData("TestLibraryWithConfiguration")]
+        [InlineData("PJTestLibraryWithConfiguration")]
         public void It_migrates_a_library(string projectName)
         {
             var projectDirectory =
-                TestAssetsManager.CreateTestInstance(projectName, callingMethod: "i").WithLockFiles().Path;
+                TestAssetsManager.CreateTestInstance(projectName, identifier: projectName).WithLockFiles().Path;
 
             var outputComparisonData = BuildProjectJsonMigrateBuildMSBuild(projectDirectory, Path.GetFileNameWithoutExtension(projectName));
 
@@ -294,6 +293,7 @@ namespace Microsoft.DotNet.Migration.Tests
             }
 
             outputsIdentical.Should().BeTrue();
+            
             VerifyAllMSBuildOutputsRunnable(projectDirectory);
          }
         
@@ -346,17 +346,30 @@ namespace Microsoft.DotNet.Migration.Tests
             result.StdErr.Should().Contain("Migration failed.");
         }
 
+        [Fact]
+        public void It_migrates_and_publishes_projects_with_runtimes()
+        {
+            var projectName = "PJTestAppSimple";
+            var projectDirectory = TestAssetsManager.CreateTestInstance(projectName, callingMethod: "i")
+                                                    .WithLockFiles()
+                                                    .Path;
+
+            CleanBinObj(projectDirectory);
+            BuildProjectJsonMigrateBuildMSBuild(projectDirectory, projectName);
+            PublishMSBuild(projectDirectory, projectName, "win7-x64");
+        }
+
         [WindowsOnlyTheory]
         [InlineData("DesktopTestProjects", "AutoAddDesktopReferencesDuringMigrate", true)]
-        [InlineData("TestProjects", "TestAppSimple", false)]
+        [InlineData("TestProjects", "PJTestAppSimple", false)]
         public void It_auto_add_desktop_references_during_migrate(string testGroup, string projectName, bool isDesktopApp)
         {
             var testAssetManager = GetTestGroupTestAssetsManager(testGroup);
-            var projectDirectory = testAssetManager.CreateTestInstance(projectName, callingMethod: "i").WithLockFiles().Path;
+            var projectDirectory = testAssetManager.CreateTestInstance(projectName).WithLockFiles().Path;
             
             CleanBinObj(projectDirectory);
             MigrateProject(new string[] { projectDirectory });
-            Restore3(projectDirectory);
+            Restore(projectDirectory);
             BuildMSBuild(projectDirectory, projectName);
             VerifyAutoInjectedDesktopReferences(projectDirectory, projectName, isDesktopApp);
             VerifyAllMSBuildOutputsRunnable(projectDirectory);
@@ -395,7 +408,7 @@ namespace Microsoft.DotNet.Migration.Tests
         {
             File.Copy("NuGet.tempaspnetpatch.config", Path.Combine(projectDirectory, "NuGet.Config"));
             
-            Restore(projectDirectory);
+            RestoreProjectJson(projectDirectory);
 
             var outputComparisonData =
                 BuildProjectJsonMigrateBuildMSBuild(projectDirectory, Path.GetFileNameWithoutExtension(projectDirectory));
@@ -465,7 +478,7 @@ namespace Microsoft.DotNet.Migration.Tests
 
             foreach(var dir in restoreDirectories)
             {
-                Restore3(dir);
+                Restore(dir);
             }
 
             BuildMSBuild(projectDirectory, projectName);
@@ -498,10 +511,12 @@ namespace Microsoft.DotNet.Migration.Tests
 
         private void BuildProjectJson(string projectDirectory)
         {
-            var projectFile = Path.Combine(projectDirectory, "project.json");
+            Console.WriteLine(projectDirectory);
+            var projectFile = "\"" + Path.Combine(projectDirectory, "project.json") + "\"";
 
-            var result = new BuildCommand(projectPath: projectFile)
-                .ExecuteWithCapturedOutput();
+            var result = new BuildPJCommand()
+                .WithCapturedOutput()
+                .Execute(projectFile);
 
             result.Should().Pass();
         }
@@ -514,17 +529,17 @@ namespace Microsoft.DotNet.Migration.Tests
             result.Should().Be(0);
         }
 
-        private void Restore(string projectDirectory)
+        private void RestoreProjectJson(string projectDirectory)
         {
             new TestCommand("dotnet")
                 .WithWorkingDirectory(projectDirectory)
-                .Execute("restore")
+                .Execute("restore-projectjson")
                 .Should().Pass();
         }
 
-        private void Restore3(string projectDirectory, string projectName=null)
+        private void Restore(string projectDirectory, string projectName=null)
         {
-            var command = new Restore3Command()
+            var command = new RestoreCommand()
                 .WithWorkingDirectory(projectDirectory);
 
             if (projectName != null)
@@ -548,12 +563,31 @@ namespace Microsoft.DotNet.Migration.Tests
 
             DeleteXproj(projectDirectory);
 
-            var result = new Build3Command()
+            var result = new BuildCommand()
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"{projectName} /p:Configuration={configuration}");
 
             result
                 .Should().Pass();
+
+            return result.StdOut;
+        }
+
+        private string PublishMSBuild(string projectDirectory, string projectName, string runtime, string configuration = "Debug")
+        {
+            if (projectName != null)
+            {
+                projectName = projectName + ".csproj";
+            }
+
+            DeleteXproj(projectDirectory);
+
+            var result = new PublishCommand()
+                .WithRuntime(runtime)
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput($"{projectName} /p:Configuration={configuration}");
+
+            result.Should().Pass();
 
             return result.StdOut;
         }

@@ -13,7 +13,7 @@ using System.Collections.Generic;
 namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
     // TODO: Support Multi-TFM
-    public class MigrateTFMRule : IMigrationRule
+    internal class MigrateTFMRule : IMigrationRule
     {
         private readonly ITransformApplicator _transformApplicator;
 

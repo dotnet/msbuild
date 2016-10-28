@@ -6,13 +6,13 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectJsonMigration.Transforms;
-using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.ProjectModel.Files;
+using Microsoft.DotNet.Internal.ProjectModel;
+using Microsoft.DotNet.Internal.ProjectModel.Files;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
-    public class MigrateBuildOptionsRule : IMigrationRule
+    internal class MigrateBuildOptionsRule : IMigrationRule
     {
         private AddPropertyTransform<CommonCompilerOptions>[] EmitEntryPointTransforms
             => new []

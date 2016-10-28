@@ -1,7 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.DotNet.ProjectModel.Files;
+using Microsoft.DotNet.Internal.ProjectModel.Files;
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -13,7 +13,7 @@ using Microsoft.DotNet.Tools.Common;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
 {
-    public class IncludeContextTransform : ConditionalTransform<IncludeContext, IEnumerable<ProjectItemElement>>
+    internal class IncludeContextTransform : ConditionalTransform<IncludeContext, IEnumerable<ProjectItemElement>>
     {
         private Func<string, AddItemTransform<IncludeContext>> IncludeFilesExcludeFilesTransformGetter => 
             (itemName) =>

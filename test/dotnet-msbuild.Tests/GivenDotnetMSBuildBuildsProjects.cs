@@ -43,19 +43,13 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         }
 
         [Theory]
-        // https://github.com/dotnet/cli/issues/4293
-        [InlineData("build", false)]
-        [InlineData("pack", false)]
-        [InlineData("publish", false)]
-        [InlineData("restore", false)]
-        [InlineData("run", false)]
-        [InlineData("build3", true)]
-        [InlineData("clean3", true)]
-        [InlineData("pack3", true)]
-        [InlineData("publish3", true)]
-        [InlineData("restore3", true)]
-        [InlineData("run3", true)]
-        public void ItMSBuildHelpText(string commandName, bool isMSBuildCommand)
+        [InlineData("build", true)]
+        [InlineData("clean", true)]
+        [InlineData("pack", true)]
+        [InlineData("publish", true)]
+        [InlineData("restore", true)]
+        [InlineData("run", true)]
+        public void When_help_is_invoked_Then_MSBuild_extra_options_text_is_included_in_output(string commandName, bool isMSBuildCommand)
         {
             const string MSBuildHelpText = "  Any extra options that should be passed to MSBuild. See 'dotnet msbuild -h' for available options.";
 

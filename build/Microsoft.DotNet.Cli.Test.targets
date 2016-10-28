@@ -39,7 +39,7 @@
           EnvironmentVariables=$(RunTestEnvironmentVariables);
           TestProjectName=%(TestProjects.OutputName);
           TestResultXmlDir=$(TestResultXmlDir);
-          ToolPath=$(Stage2Directory);
+          ToolPath=$(Stage0Directory);
           WorkingDirectory=%(TestProjects.ProjectDir)
         </Properties>
       </ProjectsToTest>
@@ -55,7 +55,7 @@
           DependsOnTargets="Init">
     <PropertyGroup>
       <TestPackageBuildVersionSuffix>$(CommitCount)</TestPackageBuildVersionSuffix>
-      <TestOutputDir>$(BaseOutputDirectory)/tests/</TestOutputDir>
+      <TestOutputDir>$(RepoRoot)/artifacts/testpackages/</TestOutputDir>
       <TestPackagesBuildDir>$(TestOutputDir)/packagesBuild/</TestPackagesBuildDir>
       <TestPackagesDir>$(TestOutputDir)/packages/</TestPackagesDir>
       <TestArtifactsDir>$(TestOutputDir)/artifacts/</TestArtifactsDir>
@@ -72,7 +72,7 @@
           Outputs="%(TestProjects.BuildOutput)">
     <DotNetBuild  Configuration="$(Configuration)"
                   Framework="%(TestProjects.Framework)"
-                  ToolPath="$(DotnetUnderTest)"
+                  ToolPath="$(Stage0Directory)"
                   WorkingDirectory="%(TestProjects.RelativeDir)" />
   </Target>
 
@@ -84,9 +84,9 @@
           Outputs="@(RestoreTestsInputs->'%(RelativeDir)project.lock.json')">
     <CallTarget Targets="CleanTestProjectsLockFiles"/>
 
-    <DotNetRestore  FallbackSource="$(TestPackagesDir)"
-                    ToolPath="$(DotnetUnderTest)"
-                    WorkingDirectory="$(TestDirectory)" />
+    <DotNetRestoreProjectJson  FallbackSource="$(TestPackagesDir)"
+                               ToolPath="$(DotnetUnderTest)"
+                               WorkingDirectory="$(TestDirectory)" />
   </Target>
 
   <Target Name="CleanTestProjectsBinObjProjectJson"
@@ -126,7 +126,7 @@
 
     <DotNetBuild  Framework="netcoreapp1.0"
                   ProjectPath="$(RepoRoot)%(TestAssetProjects.ProjectPath)"
-                  ToolPath="$(DotnetUnderTest)"
+                  ToolPath="$(Stage0Directory)"
                   WorkingDirectory="%(TestAssetProjects.RelativeDir)" />
   </Target>
 
@@ -136,9 +136,9 @@
           Inputs="@(RestoreTestAssetProjectsInputs)"
           Outputs="@(RestoreTestAssetProjectsInputs->'%(RelativeDir)/project.lock.json')">
 
-    <DotNetRestore  FallbackSource="$(TestPackagesDir)"
-                    ToolPath="$(DotnetUnderTest)"
-                    WorkingDirectory="$(RepoRoot)TestAssets/TestProjects/" />
+    <DotNetRestoreProjectJson  FallbackSource="$(TestPackagesDir)"
+                               ToolPath="$(DotnetUnderTest)"
+                               WorkingDirectory="$(RepoRoot)TestAssets/TestProjects/" />
   </Target>
 
   <Target Name="SetupRestoreTestAssetProjectsInputs" >
@@ -177,7 +177,7 @@
     <DotNetBuild  Configuration="$(Configuration)"
                   Framework="net46"
                   ProjectPath="%(BuildableDesktopTestAssetProjects.FullPath)"
-                  ToolPath="$(DotnetUnderTest)"
+                  ToolPath="$(Stage0Directory)"
                   WorkingDirectory="%(BuildableDesktopTestAssetProjects.RelativeDir)" />
   </Target>
 
@@ -188,9 +188,9 @@
           Inputs="@(RestoreDesktopTestAssetProjectsInputs)"
           Outputs="@(RestoreDesktopTestAssetProjectsInputs->'%(RelativeDir)/project.lock.json')">
 
-    <DotNetRestore  FallbackSource="$(TestPackagesDir)"
-                    ToolPath="$(DotnetUnderTest)"
-                    WorkingDirectory="$(RepoRoot)TestAssets\DesktopTestProjects\" />
+    <DotNetRestoreProjectJson  FallbackSource="$(TestPackagesDir)"
+                               ToolPath="$(DotnetUnderTest)"
+                               WorkingDirectory="$(RepoRoot)TestAssets\DesktopTestProjects\" />
   </Target>
 
   <Target Name="SetupRestoreDesktopTestAssetProjectsInputs">
@@ -209,7 +209,7 @@
                 NoBuild="True"
                 Output="$(TestPackagesDir)"
                 ProjectPath="%(TestPackageProject.FullPath)"
-                ToolPath="$(DotnetUnderTest)"
+                ToolPath="$(Stage0Directory)"
                 VersionSuffix="%(TestPackageProject.VersionSuffix)" />
   </Target>
 
@@ -222,7 +222,7 @@
     <DotNetBuild  BuildBasePath="$(TestPackagesBuildDir)"
                   Framework="%(TestPackageProject.Framework)"
                   ProjectPath="%(TestPackageProject.FullPath)"
-                  ToolPath="$(DotnetUnderTest)"
+                  ToolPath="$(Stage0Directory)"
                   WorkingDirectory="%(BuildableTestAssetProjects.RelativeDir)" />
   </Target>
 
@@ -232,8 +232,8 @@
           Inputs="@(RestoreTestAssetPackageProjectsInputs)"
           Outputs="@(RestoreTestAssetPackageProjectsInputs->'%(RelativeDir)/project.lock.json')">
 
-    <DotNetRestore  ToolPath="$(DotnetUnderTest)"
-                    WorkingDirectory="$(RepoRoot)/TestAssets/TestPackages/" />
+    <DotNetRestoreProjectJson  ToolPath="$(DotnetUnderTest)"
+                               WorkingDirectory="$(RepoRoot)/TestAssets/TestPackages/" />
   </Target>
 
   <Target Name="SetupRestoreTestAssetPackageProjectsInputs"

@@ -4,8 +4,8 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Construction;
-using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.ProjectModel.Graph;
+using Microsoft.DotNet.Internal.ProjectModel;
+using Microsoft.DotNet.Internal.ProjectModel.Graph;
 using Microsoft.DotNet.Cli;
 using System.Linq;
 using System.IO;
@@ -14,7 +14,7 @@ using Microsoft.DotNet.Tools.Common;
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
-    public class ProjectMigrator
+    internal class ProjectMigrator
     {
         private readonly IMigrationRule _ruleSet;
         private readonly ProjectDependencyFinder _projectDependencyFinder = new ProjectDependencyFinder();

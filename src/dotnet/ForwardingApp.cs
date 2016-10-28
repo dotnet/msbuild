@@ -4,7 +4,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.ProjectModel;
 
 namespace Microsoft.DotNet.Cli
 {

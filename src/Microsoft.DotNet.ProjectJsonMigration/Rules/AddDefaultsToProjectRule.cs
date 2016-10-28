@@ -13,7 +13,7 @@ using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
-    public class AddDefaultsToProjectRule : IMigrationRule
+    internal class AddDefaultsToProjectRule : IMigrationRule
     {
         internal const string c_DefaultsProjectElementContainerLabel = "MigrationDefaultsTempContainer";
         internal const string c_SdkDefaultsJsonFileName = "sdkdefaults.json";
