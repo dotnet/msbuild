@@ -385,6 +385,9 @@
     <IntermediateOutputPath>$([System.IO.Path]::Combine($(BaseIntermediateOutputPath)$(MSBuildProjectName),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</IntermediateOutputPath>
     <IntermediateOutputPath Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(BaseIntermediateOutputPath)$(MSBuildProjectName),$(Platform),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</IntermediateOutputPath>
 
+    <!-- BuildTools uses this path to write some files -->
+    <ObjDir>$(IntermediateOutputPath)</ObjDir>
+
     <!-- The TestPath seems to be used by Microsoft.DotNet.BuildTools targets. It does not seem to affect the MSBuild build in any way -->
     <TestPath>$(TestWorkingDir)$([System.IO.Path]::Combine($(MSBuildProjectName),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</TestPath>
     <TestPath Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(TestWorkingDir)$(MSBuildProjectName),$(Platform),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</TestPath>
