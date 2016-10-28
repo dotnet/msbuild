@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net46;netcoreapp1.0</TargetFrameworks>
+    <TargetFrameworks>net46</TargetFrameworks>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(TargetFramework)' == 'net46'">
@@ -33,7 +33,7 @@
       <Version>1.1.4-preview</Version>
     </PackageReference>
 	<PackageReference Include="Microsoft.TestPlatform.TestHost">
-      <Version>15.0.0-preview-20161025-02</Version>
+      <Version>15.0.0-preview-20161028-03</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft.CSharp.targets" />
