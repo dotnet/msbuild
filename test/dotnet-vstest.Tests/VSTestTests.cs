@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
 {
     public class VSTestTests : TestBase
     {
-        //[Fact]
+        [Fact(Skip="https://github.com/dotnet/cli/issues/4526")]
         public void TestsFromAGivenContainerShouldRunWithExpectedOutput()
         {
             // Copy DotNetCoreTestProject project in output directory of project dotnet-vstest.Tests
