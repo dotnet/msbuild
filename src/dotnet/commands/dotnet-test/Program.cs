@@ -76,6 +76,12 @@ namespace Microsoft.DotNet.Tools.Test
                 @"Directory in which to find the binaries to be run",
                 CommandOptionType.SingleValue);
 
+            var diagOption = cmd.Option(
+                "-d|--diag <PathToLogFile>",
+                @"Enable verbose logs for test platform.
+                                        Logs are written to the provided file.",
+                CommandOptionType.SingleValue);
+
             var noBuildtOption = cmd.Option(
                "--noBuild",
                @"Do not build project before testing.",
@@ -129,6 +135,11 @@ namespace Microsoft.DotNet.Tools.Test
                 if (outputOption.HasValue())
                 {
                     msbuildArgs.Add($"/p:OutputPath={outputOption.Value()}");
+                }
+
+                if (diagOption.HasValue())
+                {
+                    msbuildArgs.Add($"/p:VSTestDiag={diagOption.Value()}");
                 }
 
                 if (noBuildtOption.HasValue())

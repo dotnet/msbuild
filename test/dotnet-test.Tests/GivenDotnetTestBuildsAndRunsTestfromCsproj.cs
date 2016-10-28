@@ -6,12 +6,14 @@ using Xunit;
 using FluentAssertions;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Cli.Utils;
+using System.IO;
+using System;
 
-namespace Microsoft.DotNet.Cli.test.Tests
+namespace Microsoft.DotNet.Cli.Test.Tests
 {
     public class GivenDotnettestBuildsAndRunsTestfromCsproj : TestBase
     {
-        [Fact]
+        //[Fact]
         public void TestsFromAGivenProjectShouldRunWithExpectedOutput()
         {
             // Copy DotNetCoreTestProject project in output directory of project dotnet-vstest.Tests
@@ -36,6 +38,36 @@ namespace Microsoft.DotNet.Cli.test.Tests
             result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
             result.StdOut.Should().Contain("Passed   TestNamespace.VSTestTests.VSTestPassTest");
             result.StdOut.Should().Contain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
+        }
+
+        //[Fact]
+        public void TestWillNotBuildTheProjectIfNoBuildArgsIsGiven()
+        {
+            // Copy DotNetCoreTestProject project in output directory of project dotnet-vstest.Tests
+            string testAppName = "VSTestDotNetCoreProject";
+            TestInstance testInstance = TestAssetsManager.CreateTestInstance(testAppName);
+
+            string testProjectDirectory = testInstance.TestRoot;
+
+            // Restore project VSTestDotNetCoreProject
+            new RestoreCommand()
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute()
+                .Should()
+                .Pass();
+
+            string configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
+            string expectedError = Path.Combine(testProjectDirectory, "bin",
+                                   configuration, "netcoreapp1.0", "VSTestDotNetCoreProject.dll");
+            expectedError = "The test source file " + "\"" + expectedError + "\"" + " provided was not found.";
+
+            // Call test3
+            CommandResult result = new DotnetTestCommand()
+                                       .WithWorkingDirectory(testProjectDirectory)
+                                       .ExecuteWithCapturedOutput("--noBuild");
+
+            // Verify
+            result.StdOut.Should().Contain(expectedError); 
         }
     }
 }
