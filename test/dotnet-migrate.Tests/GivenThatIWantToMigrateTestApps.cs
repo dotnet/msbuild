@@ -384,7 +384,7 @@ namespace Microsoft.DotNet.Migration.Tests
             var projectDirectory = Path.Combine(solutionDirectory, projectName);
 
             MigrateProject(new string[] { projectDirectory });
-            Restore3(projectDirectory);
+            Restore(projectDirectory);
             BuildMSBuild(projectDirectory, projectName);
 
             VerifyAllMSBuildOutputsRunnable(projectDirectory);
