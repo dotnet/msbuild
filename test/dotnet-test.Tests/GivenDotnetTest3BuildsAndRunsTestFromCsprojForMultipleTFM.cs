@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
     public class GivenDotnetTest3BuildsAndRunsTestFromCsprojForMultipleTFM : TestBase
     {
         // project targeting net46 will not run in non windows machine.
-        [WindowsOnlyFact]
+        [WindowsOnlyFact(Skip="https://github.com/dotnet/cli/issues/4526")]
         public void TestsFromAGivenProjectShouldRunWithExpectedOutputForMultiTFM()
         {
             // Copy DotNetCoreTestProject project in output directory of project dotnet-vstest.Tests
