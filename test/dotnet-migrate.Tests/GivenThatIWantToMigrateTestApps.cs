@@ -44,8 +44,7 @@ namespace Microsoft.DotNet.Migration.Tests
 
             var outputCsProj = Path.Combine(projectDirectory, projectName + ".csproj");
             var csproj = File.ReadAllText(outputCsProj);
-            Console.WriteLine(csproj);
-            csproj.EndsWith(Environment.NewLine).Should().Be(true);
+            csproj.EndsWith("\n").Should().Be(true);
         }
 
         [Fact]
