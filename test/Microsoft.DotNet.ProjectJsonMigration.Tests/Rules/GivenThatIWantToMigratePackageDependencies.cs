@@ -54,6 +54,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         {
             var mockProj = RunPackageDependenciesRuleOnPj(@"
                 {
+                    ""buildOptions"": {
+                        ""emitEntryPoint"": true
+                    },
                     ""dependencies"": {
                         ""Microsoft.AspNetCore.Mvc"" : {
                             ""version"": ""1.0.0""
