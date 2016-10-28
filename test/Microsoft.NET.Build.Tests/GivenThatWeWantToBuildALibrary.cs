@@ -90,7 +90,15 @@ namespace Microsoft.NET.Build.Tests
                     !i.EndsWith("AssemblyInfo.cs"))
                 .ToList();
 
-            compileItems.Should().BeEquivalentTo("Helper.cs", @"Code\Class1.cs");
+            var expectedItems = new[]
+            {
+                "Helper.cs",
+                @"Code\Class1.cs"
+            }
+            .Select(item => item.Replace('\\', Path.DirectorySeparatorChar))
+            .ToArray();
+
+            compileItems.Should().BeEquivalentTo(expectedItems);
         }
 
         [Fact]
@@ -115,12 +123,19 @@ namespace Microsoft.NET.Build.Tests
                     !i.EndsWith("AssemblyInfo.cs"))
                 .ToList();
 
-            compileItems.Should().BeEquivalentTo(
+            var expectedItems = new[]
+            {
                 "Helper.cs",
                 @"Code\Class1.cs",
                 @"bin\source.cs",
                 @"obj\source.cs",
-                @"packages\source.cs");
+                @"packages\source.cs"
+            }
+            .Select(item => item.Replace('\\', Path.DirectorySeparatorChar))
+            .ToArray();
+
+
+            compileItems.Should().BeEquivalentTo(expectedItems);
         }
 
         private List<string> GetItemsFromTestLibrary(string itemType, Action<GetValuesCommand> setup, params string[] msbuildArgs)
