@@ -441,7 +441,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       AssemblyVersion="$(Version)"
                       AssemblySatelliteAssemblies="@(IntermediateSatelliteAssembliesWithTargetPath)"
                       ReferencePaths="@(ReferencePath)"
-                      ProjectReferenceSatellitePaths="@(ReferenceSatellitePaths)"
+                      ReferenceSatellitePaths="@(ReferenceSatellitePaths)"
                       RuntimeIdentifier="$(RuntimeIdentifier)"
                       PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                       CompilerOptions="@(DependencyFileCompilerOptions)"

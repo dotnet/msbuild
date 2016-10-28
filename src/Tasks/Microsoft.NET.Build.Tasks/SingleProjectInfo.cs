@@ -49,7 +49,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public static Dictionary<string, SingleProjectInfo> CreateProjectReferenceInfos(
             IEnumerable<ITaskItem> referencePaths,
-            IEnumerable<ITaskItem> projectReferenceSatellitePaths)
+            IEnumerable<ITaskItem> referenceSatellitePaths)
         {
             Dictionary<string, SingleProjectInfo> projectReferences = new Dictionary<string, SingleProjectInfo>();
 
@@ -76,6 +76,9 @@ namespace Microsoft.NET.Build.Tasks
                     sourceProjectFile,
                     new SingleProjectInfo(sourceProjectFile, name, version, outputName, resourceAssemblies));
             }
+
+            IEnumerable<ITaskItem> projectReferenceSatellitePaths = referenceSatellitePaths
+                .Where(r => string.Equals(r.GetMetadata("ReferenceSourceTarget"), "ProjectReference", StringComparison.OrdinalIgnoreCase));
 
             foreach (ITaskItem projectReferenceSatellitePath in projectReferenceSatellitePaths)
             {
