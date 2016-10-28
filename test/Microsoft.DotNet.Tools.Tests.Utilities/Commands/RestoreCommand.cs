@@ -14,13 +14,13 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         public override CommandResult Execute(string args = "")
         {
-            args = $"restore {args}";
+            args = $"restore {args} --disable-parallel";
             return base.Execute(args);
         }
 
         public override CommandResult ExecuteWithCapturedOutput(string args = "")
         {
-            args = $"restore {args}";
+            args = $"restore {args} --disable-parallel";
             return base.ExecuteWithCapturedOutput(args);
         }
     }
