@@ -36,6 +36,10 @@ RUN dnf install -y libicu-devel \
         lttng-ust-devel && \
     dnf clean all
 
+# Upgrade NSS, used for SSL, to avoid NuGet restore timeouts.
+RUN dnf upgrade -y nss
+RUN dnf clean all
+
 # Setup User to match Host User, and give superuser permissions
 ARG USER_ID=0
 RUN useradd -m code_executor -u ${USER_ID} -g wheel
