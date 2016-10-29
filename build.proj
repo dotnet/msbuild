@@ -68,7 +68,11 @@
           Inputs="$(DotnetCliBuildDirectory)/dotnet-cli-build.csproj"
           Outputs="@(RestoreDotnetCliBuildFrameworkOutputs)">
 
-    <Exec Command="$(DotnetStage0) restore3" WorkingDirectory="$(DotnetCliBuildDirectory)"/>
+    <PropertyGroup>
+      <ExtraRestoreArgs Condition="'$(OS)' != 'Windows_NT'">$(ExtraRestoreArgs) --disable-parallel</ExtraRestoreArgs>
+    </PropertyGroup>
+
+    <Exec Command="$(DotnetStage0) restore3 $(ExtraRestoreArgs)" WorkingDirectory="$(DotnetCliBuildDirectory)"/>
   </Target>
 
   <Target DependsOnTargets="$(CLITargets)" Name="BuildTheWholeCli"></Target>
