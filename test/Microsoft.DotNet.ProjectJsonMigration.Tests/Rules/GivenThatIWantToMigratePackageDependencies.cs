@@ -61,15 +61,17 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                         ""Microsoft.AspNetCore.Mvc"" : {
                             ""version"": ""1.0.0""
                         }
+                    },
+                    ""frameworks"": {
+                        ""netcoreapp1.0"": {}
                     }
                 }");
 
+            var packageRef = mockProj.Items.FirstOrDefault(i =>
+                i.Include == "Microsoft.NET.Sdk.Web" && i.ItemType == "PackageReference");
 
-            var packageRef = mockProj.Items.First(i => i.Include == "Microsoft.NET.Sdk.Web" && i.ItemType == "PackageReference");
-
-            var privateAssetsMetadata = packageRef.GetMetadataWithName("PrivateAssets");
-            privateAssetsMetadata.Value.Should().NotBeNull();
-            privateAssetsMetadata.Value.Should().Be("All");
+            packageRef.Should().NotBeNull();
+            packageRef.GetMetadataWithName("PrivateAssets").Value.Should().NotBeNull().And.Be("All");
         }
 
         [Fact]

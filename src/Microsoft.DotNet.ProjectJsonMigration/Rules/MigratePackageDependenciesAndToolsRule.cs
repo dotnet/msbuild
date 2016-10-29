@@ -39,8 +39,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
             var noFrameworkPackageReferenceItemGroup = migrationRuleInputs.OutputMSBuildProject.AddItemGroup();
 
-            AddProjectTypeSpecificDependencies(migrationSettings, noFrameworkPackageReferenceItemGroup);
-
             // Inject Sdk dependency
             _transformApplicator.Execute(
                 PackageDependencyInfoTransform.Transform(
@@ -50,6 +48,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                         Version = migrationSettings.SdkPackageVersion,
                         PrivateAssets = "All"
                     }), noFrameworkPackageReferenceItemGroup, mergeExisting: false);
+
+            AddProjectTypeSpecificDependencies(migrationRuleInputs, noFrameworkPackageReferenceItemGroup);
             
             // Migrate Direct Deps first
             MigrateDependencies(
@@ -78,24 +78,24 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             MigrateTools(project, migrationRuleInputs.OutputMSBuildProject);
         }
 
-        private void AddProjectTypeSpecificDependencies(MigrationSettings migrationSettings, ProjectItemGroupElement noFrameworkPackageReferenceItemGroup)
+        private void AddProjectTypeSpecificDependencies(
+            MigrationRuleInputs migrationRuleInputs,
+            ProjectItemGroupElement noFrameworkPackageReferenceItemGroup)
         {
-            string type;
-            if (ProjectTypeDetector.TryDetectProjectType(migrationSettings.ProjectDirectory, out type))
+            var type = ProjectTypeDetector.TryDetectProjectType(
+                migrationRuleInputs.DefaultProjectContext.ProjectFile);
+            switch (type)
             {
-                switch (type)
-                {
-                    case "web":
-                        _transformApplicator.Execute(
-                            PackageDependencyInfoTransform.Transform(
-                                new PackageDependencyInfo
-                                {
-                                    Name = ConstantPackageNames.CWebSdkPackageName,
-                                    Version = ConstantPackageVersions.WebSdkPackageVersion,
-                                    PrivateAssets = "All"
-                                }), noFrameworkPackageReferenceItemGroup, mergeExisting: false);
-                        break;
-                }
+                case "web":
+                    _transformApplicator.Execute(
+                        PackageDependencyInfoTransform.Transform(
+                            new PackageDependencyInfo
+                            {
+                                Name = ConstantPackageNames.CWebSdkPackageName,
+                                Version = ConstantPackageVersions.WebSdkPackageVersion,
+                                PrivateAssets = "All"
+                            }), noFrameworkPackageReferenceItemGroup, mergeExisting: false);
+                    break;
             }
         }
 

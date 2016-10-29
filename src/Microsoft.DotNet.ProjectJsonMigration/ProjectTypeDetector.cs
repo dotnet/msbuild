@@ -2,59 +2,66 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license info
 
 using System;
-using System.IO;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.DotNet.Internal.ProjectModel;
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
-    public static class ProjectTypeDetector
+    internal static class ProjectTypeDetector
     {
-        public static bool TryDetectProjectType(string projectDirectory, out string projectType)
+        public static string TryDetectProjectType(Project project)
         {
-            string projectJsonFile = Path.Combine(projectDirectory, "project.json");
-            if (!File.Exists(projectJsonFile))
+            string projectType = null;
+            if (IsWebProject(project))
             {
-                projectType = null;
+                projectType = "web";
+            }
+
+            return projectType;
+        }
+
+        private static bool IsWebProject(Project project)
+        {
+            if(project.IsTestProject)
+            {
                 return false;
             }
 
-            if (IsWebProject(projectJsonFile))
+            var isExecutable = project.GetCompilerOptions(null, "Debug").EmitEntryPoint.GetValueOrDefault();
+            if (isExecutable
+                && HasAnyPackageContainingName(project, ".AspNetCore."))
             {
-                projectType = "web";
                 return true;
             }
 
-            projectType = null;
             return false;
         }
 
-        private static bool IsWebProject(string projectJsonFile)
+        private static bool HasAnyPackageContainingName(Project project, string nameSegment)
         {
-            Project project;
-            if (ProjectReader.TryGetProject(projectJsonFile, out project))
+            var containsPackageName = HasAnyPackageContainingName(
+                new ReadOnlyCollection<ProjectLibraryDependency>(project.Dependencies),
+                nameSegment);
+            foreach (var tf in project.GetTargetFrameworks())
             {
-                if(project.IsTestProject)
+                if(containsPackageName)
                 {
-                    return false;
+                    break;
                 }
 
-                foreach (var tf in project.GetTargetFrameworks())
-                {
-                    if (tf.CompilerOptions.EmitEntryPoint.GetValueOrDefault()
-                        && HasAnyPackageContainingName(tf, ".AspNetCore."))
-                    {
-                        return true;
-                    }
-                }
+                containsPackageName = HasAnyPackageContainingName(tf.Dependencies, nameSegment);
             }
 
-            return false;
+            return containsPackageName;
         }
 
-        private static bool HasAnyPackageContainingName(TargetFrameworkInformation tf, string nameSegment)
+        private static bool HasAnyPackageContainingName(
+            IReadOnlyList<ProjectLibraryDependency> dependencies,
+            string nameSegment)
         {
-            return tf.Dependencies.Any(x => x.Name.IndexOf(nameSegment, StringComparison.OrdinalIgnoreCase) > -1);
+            return dependencies.Any(x => x.Name.IndexOf(nameSegment, StringComparison.OrdinalIgnoreCase) > -1);
         }
     }
 }
