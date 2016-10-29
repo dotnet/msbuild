@@ -11,118 +11,24 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 {
     public class GivenThatIWantToMigrateAspNetTools : PackageDependenciesTestBase
     {
-        [Fact]
-        public void It_migrates_MicrosoftEntityFrameworkCoreTools_to_AspNetToolsVersion()
+        [Theory]
+        [InlineData("Microsoft.EntityFrameworkCore.Tools", "Microsoft.EntityFrameworkCore.Tools", ConstantPackageVersions.AspNetToolsVersion)]
+        [InlineData("Microsoft.AspNetCore.Razor.Tools", "Microsoft.AspNetCore.Razor.Design", ConstantPackageVersions.AspNetToolsVersion)]
+        [InlineData("Microsoft.AspNetCore.Razor.Design", "Microsoft.AspNetCore.Razor.Design", ConstantPackageVersions.AspNetToolsVersion)]
+        [InlineData("Microsoft.VisualStudio.Web.CodeGenerators.Mvc", "Microsoft.VisualStudio.Web.CodGeneration.Design", ConstantPackageVersions.AspNetToolsVersion)]
+        public void It_migrates_project_dependencies_to_a_new_name_and_version(
+            string sourceToolName,
+            string targetToolName,
+            string targetVersion)
         {
-            var mockProj = RunPackageDependenciesRuleOnPj(@"
-                {
-                    ""dependencies"": {
-                        ""Microsoft.EntityFrameworkCore.Tools"" : {
-                            ""version"": ""1.0.0-preview2-final"",
-                            ""type"": ""build""
-                        }
-                    }
-                }");
-
-            var packageRef = mockProj.Items.First(i => i.Include == "Microsoft.EntityFrameworkCore.Tools" && i.ItemType == "PackageReference");
+            const string anyVersion = "1.0.0-preview2-final";
+            var mockProj = RunPackageDependenciesRuleOnPj("{ \"dependencies\": { \"" + sourceToolName + "\" : { \"version\": \"" + anyVersion + "\", \"type\": \"build\" } } }");
+            
+            var packageRef = mockProj.Items.First(i => i.Include == targetToolName && i.ItemType == "PackageReference");
 
             packageRef.GetMetadataWithName("Version").Value.Should().Be(ConstantPackageVersions.AspNetToolsVersion);
 
-            var privateAssetsMetadata = packageRef.GetMetadataWithName("PrivateAssets");
-            privateAssetsMetadata.Value.Should().NotBeNull();
-            privateAssetsMetadata.Value.Should().Be("All");
-        }
-
-        [Fact]
-        public void It_migrates_MicrosoftEntityFrameworkCoreToolsDotNet_tool_to_AspNetToolsVersion()
-        {
-            var mockProj = RunPackageDependenciesRuleOnPj(@"
-                {
-                    ""tools"": {
-                        ""Microsoft.EntityFrameworkCore.Tools"": ""1.0.0-preview2-final""
-                    }
-                }");
-
-            EmitsToolReferences(mockProj, Tuple.Create("Microsoft.EntityFrameworkCore.Tools.DotNet", ConstantPackageVersions.AspNetToolsVersion));
-        }
-
-        [Fact]
-        public void It_migrates_MicrosoftAspNetCoreRazorTools_to_AspNetToolsVersion()
-        {
-            var mockProj = RunPackageDependenciesRuleOnPj(@"
-                {
-                    ""dependencies"": {
-                        ""Microsoft.AspNetCore.Razor.Tools"" : {
-                            ""version"": ""1.0.0-preview2-final"",
-                            ""type"": ""build""
-                        }
-                    }
-                }");
-
-            var packageRef = mockProj.Items.First(i => i.Include == "Microsoft.AspNetCore.Razor.Design" && i.ItemType == "PackageReference");
-
-            packageRef.GetMetadataWithName("Version").Value.Should().Be(ConstantPackageVersions.AspNetToolsVersion);
-
-            var privateAssetsMetadata = packageRef.GetMetadataWithName("PrivateAssets");
-            privateAssetsMetadata.Value.Should().NotBeNull();
-            privateAssetsMetadata.Value.Should().Be("All");
-        }
-
-        [Fact]
-        public void It_migrates_MicrosoftAspNetCoreRazorDesign_to_AspNetToolsVersion()
-        {
-            var mockProj = RunPackageDependenciesRuleOnPj(@"
-                {
-                    ""dependencies"": {
-                        ""Microsoft.AspNetCore.Razor.Design"" : {
-                            ""version"": ""1.0.0-preview2-final"",
-                            ""type"": ""build""
-                        }
-                    }
-                }");
-
-            var packageRef = mockProj.Items.First(i => i.Include == "Microsoft.AspNetCore.Razor.Design" && i.ItemType == "PackageReference");
-
-            packageRef.GetMetadataWithName("Version").Value.Should().Be(ConstantPackageVersions.AspNetToolsVersion);
-
-            var privateAssetsMetadata = packageRef.GetMetadataWithName("PrivateAssets");
-            privateAssetsMetadata.Value.Should().NotBeNull();
-            privateAssetsMetadata.Value.Should().Be("All");
-        }
-
-        [Fact]
-        public void It_migrates_MicrosoftAspNetCoreRazorTools_tool_to_AspNetToolsVersion()
-        {
-            var mockProj = RunPackageDependenciesRuleOnPj(@"
-                {
-                    ""tools"": {
-                        ""Microsoft.AspNetCore.Razor.Tools"": ""1.0.0-preview2-final""
-                    }
-                }");
-
-            EmitsToolReferences(mockProj, Tuple.Create("Microsoft.AspNetCore.Razor.Tools", ConstantPackageVersions.AspNetToolsVersion));
-        }
-
-        [Fact]
-        public void It_migrates_MicrosoftVisualStudioWebCodeGeneratorsMvc_to_AspNetToolsVersion()
-        {
-            var mockProj = RunPackageDependenciesRuleOnPj(@"
-                {
-                    ""dependencies"": {
-                        ""Microsoft.VisualStudio.Web.CodeGenerators.Mvc"" : {
-                            ""version"": ""1.0.0-preview2-final"",
-                            ""type"": ""build""
-                        }
-                    }
-                }");
-
-            var packageRef = mockProj.Items.First(i => i.Include == "Microsoft.VisualStudio.Web.CodGeneration.Design" && i.ItemType == "PackageReference");
-
-            packageRef.GetMetadataWithName("Version").Value.Should().Be(ConstantPackageVersions.AspNetToolsVersion);
-
-            var privateAssetsMetadata = packageRef.GetMetadataWithName("PrivateAssets");
-            privateAssetsMetadata.Value.Should().NotBeNull();
-            privateAssetsMetadata.Value.Should().Be("All");
+            packageRef.GetMetadataWithName("PrivateAssets").Value.Should().NotBeNull().And.Be("All");
         }
 
         [Fact]
@@ -141,43 +47,21 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var packageRef = mockProj.Items.Where(i => i.Include != "Microsoft.NET.Sdk" && i.ItemType == "PackageReference").Should().BeEmpty();
         }
 
-        [Fact]
-        public void It_migrates_MicrosoftVisualStudioWebCodeGenerationTools_tool_to_AspNetToolsVersion()
+        [Theory]
+        [InlineData("Microsoft.EntityFrameworkCore.Tools", "Microsoft.EntityFrameworkCore.Tools.DotNet", ConstantPackageVersions.AspNetToolsVersion)]
+        [InlineData("Microsoft.AspNetCore.Razor.Tools", "Microsoft.AspNetCore.Razor.Tools", ConstantPackageVersions.AspNetToolsVersion)]
+        [InlineData("Microsoft.VisualStudio.Web.CodeGeneration.Tools", "Microsoft.VisualStudio.Web.CodeGeneration.Tools", ConstantPackageVersions.AspNetToolsVersion)]
+        [InlineData("Microsoft.DotNet.Watcher.Tools", "Microsoft.DotNet.Watcher.Tools", ConstantPackageVersions.AspNetToolsVersion)]
+        [InlineData("Microsoft.Extensions.SecretManager.Tools", "Microsoft.Extensions.SecretManager.Tools", ConstantPackageVersions.AspNetToolsVersion)]
+        public void It_migrates_asp_project_tools_to_a_new_name_and_version(
+            string sourceToolName,
+            string targetToolName,
+            string targetVersion)
         {
-            var mockProj = RunPackageDependenciesRuleOnPj(@"
-                {
-                    ""tools"": {
-                        ""Microsoft.VisualStudio.Web.CodeGeneration.Tools"": ""1.0.0-preview2-final""
-                    }
-                }");
-
-            EmitsToolReferences(mockProj, Tuple.Create("Microsoft.VisualStudio.Web.CodGeneration.Tools", ConstantPackageVersions.AspNetToolsVersion));
-        }
-
-        [Fact]
-        public void It_migrates_MicrosoftDotNetWatcherTools_tool_to_AspNetToolsVersion()
-        {
-            var mockProj = RunPackageDependenciesRuleOnPj(@"
-                {
-                    ""tools"": {
-                        ""Microsoft.DotNet.Watcher.Tools"": ""1.0.0-preview2-final""
-                    }
-                }");
-
-            EmitsToolReferences(mockProj, Tuple.Create("Microsoft.DotNet.Watcher.Tools", ConstantPackageVersions.AspNetToolsVersion));
-        }
-
-        [Fact]
-        public void It_migrates_MicrosoftExtensionsSecretManagerTools_tool_to_AspNetToolsVersion()
-        {
-            var mockProj = RunPackageDependenciesRuleOnPj(@"
-                {
-                    ""tools"": {
-                        ""Microsoft.Extensions.SecretManager.Tools"": ""1.0.0-preview2-final""
-                    }
-                }");
-
-            EmitsToolReferences(mockProj, Tuple.Create("Microsoft.Extensions.SecretManager.Tools", ConstantPackageVersions.AspNetToolsVersion));
+            const string anyVersion = "1.0.0-preview2-final";
+            var mockProj = RunPackageDependenciesRuleOnPj("{ \"tools\": { \"" + sourceToolName + "\": \"" + anyVersion + "\" } }");
+            
+            EmitsToolReferences(mockProj, Tuple.Create(targetToolName, targetVersion));
         }
 
         [Fact]

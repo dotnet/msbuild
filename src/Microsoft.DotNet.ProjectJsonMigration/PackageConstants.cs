@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         public static readonly IDictionary<string, string> AspProjectToolsPackages = new Dictionary<string, string> {
             {"Microsoft.EntityFrameworkCore.Tools", "Microsoft.EntityFrameworkCore.Tools.DotNet"},
             {"Microsoft.AspNetCore.Razor.Tools", "Microsoft.AspNetCore.Razor.Tools"},
-            {"Microsoft.VisualStudio.Web.CodeGeneration.Tools", "Microsoft.VisualStudio.Web.CodGeneration.Tools"},
+            {"Microsoft.VisualStudio.Web.CodeGeneration.Tools", "Microsoft.VisualStudio.Web.CodeGeneration.Tools"},
             {"Microsoft.DotNet.Watcher.Tools", "Microsoft.DotNet.Watcher.Tools"},
             {"Microsoft.Extensions.SecretManager.Tools", "Microsoft.Extensions.SecretManager.Tools"},
             {"Microsoft.AspNetCore.Server.IISIntegration.Tools", ""}
