@@ -8,10 +8,10 @@
     "Microsoft.Extensions.DependencyModel": "1.0.1-beta-000933",
     "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000933",
 
-    "NuGet.Versioning": "3.6.0-rc-1984",
-    "NuGet.Packaging": "3.6.0-rc-1984",
-    "NuGet.Frameworks": "3.6.0-rc-1984",
-    "NuGet.ProjectModel": "3.6.0-rc-1984",
+    "NuGet.Versioning": "4.0.0-rc-2037",
+    "NuGet.Packaging": "4.0.0-rc-2037",
+    "NuGet.Frameworks": "4.0.0-rc-2037",
+    "NuGet.ProjectModel": "4.0.0-rc-2037",
 
     "Microsoft.Build": "15.1.319-preview5",
     "Microsoft.Build.Utilities.Core": "15.1.319-preview5"

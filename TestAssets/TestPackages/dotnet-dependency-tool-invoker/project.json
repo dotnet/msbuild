@@ -17,7 +17,7 @@
     "Microsoft.DotNet.Cli.Utils": {
       "target": "project"
     },
-    "NuGet.Frameworks": "3.6.0-rc-1984"
+    "NuGet.Frameworks": "4.0.0-rc-2037"
   },
   "frameworks": {
     "netcoreapp1.0": {
