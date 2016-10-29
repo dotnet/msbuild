@@ -104,6 +104,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 @"$(OutputPath)\$(TargetFramework)\$(AssemblyName).xml",
                 compilerOptions => compilerOptions.GenerateXmlDocumentation != null && compilerOptions.GenerateXmlDocumentation.Value);
 
+        private AddPropertyTransform<CommonCompilerOptions> AssemblyNameTransform =>
+            new AddPropertyTransform<CommonCompilerOptions>("AssemblyName",
+                compilerOptions => compilerOptions.OutputName,
+                compilerOptions => compilerOptions.OutputName != null);
+
         private IncludeContextTransform CompileFilesTransform =>
             new IncludeContextTransform("Compile", transformMappings: false);
 
@@ -171,7 +176,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 DebugTypeTransform,
                 XmlDocTransform,
                 XmlDocTransformFilePath,
-                PreserveCompilationContextTransform
+                PreserveCompilationContextTransform,
+                AssemblyNameTransform
             };
 
             _propertyTransforms.AddRange(EmitEntryPointTransforms);
