@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Migration.Tests
         [InlineData("TestAppWithRuntimeOptions")]
         [InlineData("TestAppWithContents")]
         [InlineData("AppWithAssemblyInfo")]
-        public void It_migrates_apps_and_puts_newline_at_end_of_file(string projectName)
+        public void It_migrates_apps(string projectName)
         {
             var projectDirectory = TestAssetsManager.CreateTestInstance(projectName, identifier: projectName)
                                                     .WithLockFiles()
