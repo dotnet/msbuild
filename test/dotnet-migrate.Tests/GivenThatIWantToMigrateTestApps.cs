@@ -41,6 +41,10 @@ namespace Microsoft.DotNet.Migration.Tests
             outputsIdentical.Should().BeTrue();
 
             VerifyAllMSBuildOutputsRunnable(projectDirectory);
+
+            var outputCsProj = Path.Combine(projectDirectory, projectName + ".csproj");
+            var csproj = File.ReadAllText(outputCsProj);
+            csproj.EndsWith("\n").Should().Be(true);
         }
 
         [Fact]

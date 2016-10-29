@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.DotNet.ProjectJsonMigration;
+using Microsoft.Build.Evaluation;
 
 namespace Microsoft.DotNet.Tools.Migrate
 {
@@ -15,12 +16,18 @@ namespace Microsoft.DotNet.Tools.Migrate
 
         public ProjectRootElement MSBuildProject { get; }
 
+        public string MSBuildProjectPath
+        {
+            get
+            {
+                return Path.Combine(_projectDirectory, c_temporaryDotnetNewMSBuildProjectName + ".csproj");
+            }
+        }
+
         public TemporaryDotnetNewTemplateProject()
         {
             _projectDirectory = CreateDotnetNewMSBuild(c_temporaryDotnetNewMSBuildProjectName);
-            MSBuildProject = GetMSBuildProject(_projectDirectory);
-
-            Clean();
+            MSBuildProject = GetMSBuildProject();
         }
 
         public void Clean()
@@ -47,12 +54,12 @@ namespace Microsoft.DotNet.Tools.Migrate
             return tempDir;
         }
 
-        private ProjectRootElement GetMSBuildProject(string temporaryDotnetNewMSBuildDirectory)
+        private ProjectRootElement GetMSBuildProject()
         {
-            var templateProjPath = Path.Combine(temporaryDotnetNewMSBuildDirectory,
-                c_temporaryDotnetNewMSBuildProjectName + ".csproj");
-
-            return ProjectRootElement.Open(templateProjPath);
+            return ProjectRootElement.Open(
+                MSBuildProjectPath,
+                ProjectCollection.GlobalProjectCollection,
+                preserveFormatting: true);
         }
 
         private void RunCommand(string commandToExecute, IEnumerable<string> args, string workingDirectory)
