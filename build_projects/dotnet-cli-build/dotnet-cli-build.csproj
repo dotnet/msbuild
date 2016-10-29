@@ -43,7 +43,7 @@
       <Version>1.0.1-beta-000933</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NET.Sdk">
-      <Version>1.0.0-alpha-20161026-2</Version>
+      <Version>1.0.0-alpha-20161029-1</Version>
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
   </ItemGroup>
@@ -51,8 +51,5 @@
     <Compile Include="**\*.cs" />
     <Compile Include="..\Microsoft.DotNet.Cli.Build.Framework\**\*.cs;..\shared-build-targets-utils\**\*.cs;" />
   </ItemGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
-    <DefineConstants>$(DefineConstants);NETCOREAPP1_0</DefineConstants>
-  </PropertyGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
