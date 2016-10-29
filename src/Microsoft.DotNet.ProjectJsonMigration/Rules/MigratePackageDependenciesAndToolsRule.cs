@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
             // Inject Sdk dependency
             _transformApplicator.Execute(
-                PackageDependencyInfoTransform.Transform(
+                SdkPackageDependencyTransform.Transform(
                     new PackageDependencyInfo
                     {
                         Name = PackageConstants.SdkPackageName,
@@ -146,7 +146,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
             foreach (var tool in project.Tools)
             {
-                _transformApplicator.Execute(ToolTransform.Transform(tool), itemGroup, mergeExisting: true);
+                _transformApplicator.Execute(
+                    ToolTransform().Transform(ToPackageDependencyInfo(
+                        tool,
+                        ConstantPackageNames.AspProjectToolsPackages)),
+                    itemGroup,
+                    mergeExisting: true);
             }
         }
 
@@ -172,7 +177,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             foreach (var packageDependency in packageDependencies)
             {
                 MigrationTrace.Instance.WriteLine(packageDependency.Name);
-                AddItemTransform<ProjectLibraryDependency> transform;
+                AddItemTransform<PackageDependencyInfo> transform;
 
                 if (packageDependency.LibraryRange.TypeConstraint == LibraryDependencyTarget.Reference)
                 {
@@ -180,7 +185,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 }
                 else
                 {
-                    transform = PackageDependencyTransform();
+                    transform = PackageDependencyInfoTransform();
                     if (packageDependency.Type.Equals(LibraryDependencyType.Build))
                     {
                         transform = transform.WithMetadata("PrivateAssets", "All");
@@ -199,10 +204,37 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 }
 
                 _transformApplicator.Execute(
-                    transform.Transform(packageDependency),
+                    transform.Transform(ToPackageDependencyInfo(
+                        packageDependency,
+                        ConstantPackageNames.AspProjectDependencyToolsPackages)),
                     itemGroup,
                     mergeExisting: true);
             }
+        }
+
+        private PackageDependencyInfo ToPackageDependencyInfo(
+            ProjectLibraryDependency dependency,
+            IDictionary<string, string> toolsDictionary)
+        {
+            var name = dependency.Name;
+            var version = dependency.LibraryRange?.VersionRange?.OriginalString;
+
+            if (toolsDictionary.ContainsKey(name))
+            {
+                name = toolsDictionary[name];
+                version = ConstantPackageVersions.AspNetToolsVersion;
+
+                if(string.IsNullOrEmpty(name))
+                {
+                    return null;
+                }
+            }
+
+            return new PackageDependencyInfo
+            {
+                Name = name,
+                Version = version
+            };
         }
 
         private void AutoInjectImplicitProjectJsonAssemblyReferences(NuGetFramework framework, 
@@ -290,37 +322,32 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             return projectDependencies.Select(p => p.Name).Concat(migratedXProjDependencyNames);
         }
 
-         private AddItemTransform<ProjectLibraryDependency> FrameworkDependencyTransform => 
-            new AddItemTransform<ProjectLibraryDependency>(
+        private AddItemTransform<PackageDependencyInfo> FrameworkDependencyTransform =>
+            new AddItemTransform<PackageDependencyInfo>(
                 "Reference",
                 dep => dep.Name,
                 dep => "",
                 dep => true);
 
-        private Func<AddItemTransform<ProjectLibraryDependency>> PackageDependencyTransform => 
-            () => new AddItemTransform<ProjectLibraryDependency>(
+        private Func<AddItemTransform<PackageDependencyInfo>> PackageDependencyInfoTransform => 
+            () => new AddItemTransform<PackageDependencyInfo>(
                 "PackageReference",
                 dep => dep.Name,
                 dep => "",
-                dep => true)
-                .WithMetadata("Version", r => r.LibraryRange.VersionRange.OriginalString);
+                dep => dep != null)
+                .WithMetadata("Version", r => r.Version);
 
-        private AddItemTransform<PackageDependencyInfo> PackageDependencyInfoTransform => 
-            new AddItemTransform<PackageDependencyInfo>(
-                "PackageReference",
-                dep => dep.Name,
-                dep => "",
-                dep => true)
-                .WithMetadata("Version", r => r.Version)
+        private AddItemTransform<PackageDependencyInfo> SdkPackageDependencyTransform => 
+            PackageDependencyInfoTransform()
                 .WithMetadata("PrivateAssets", r => r.PrivateAssets, r => !string.IsNullOrEmpty(r.PrivateAssets));
 
-        private AddItemTransform<ProjectLibraryDependency> ToolTransform => 
-            new AddItemTransform<ProjectLibraryDependency>(
+        private Func<AddItemTransform<PackageDependencyInfo>> ToolTransform => 
+            () => new AddItemTransform<PackageDependencyInfo>(
                 "DotNetCliToolReference",
                 dep => dep.Name,
                 dep => "",
-                dep => true)
-                .WithMetadata("Version", r => r.LibraryRange.VersionRange.OriginalString);
+                dep => dep != null)
+                .WithMetadata("Version", r => r.Version);
 
         private AddPropertyTransform<TargetFrameworkInformation> ImportsTransformation => 
             new AddPropertyTransform<TargetFrameworkInformation>(
