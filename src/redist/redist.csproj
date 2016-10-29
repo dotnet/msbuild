@@ -1,0 +1,61 @@
+﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
+  <PropertyGroup>
+    <VersionPrefix>1.0.0-preview3</VersionPrefix>
+    <TargetFramework>netcoreapp1.0</TargetFramework>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">$(PackageTargetFallback);dnxcore50;netstandardapp1.5;portable-net45+win8;portable-net45+wp80+win8+wpa81+dnxcore50</PackageTargetFallback>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="RunCsc.sh;RunCsc.cmd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Sdk">
+      <Version>1.0.0-alpha-20161026-2</Version>
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NETCore.App">
+      <Version>1.0.1</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Build.Runtime">
+      <Version>15.1.319-preview5</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.Build.Tasks">
+      <Version>2.0.0-beta6-60922-08</Version>
+    </PackageReference>
+    <PackageReference Include="System.Runtime.Serialization.Xml">
+      <Version>4.1.1</Version>
+    </PackageReference>
+    <PackageReference Include="NuGet.Build.Tasks">
+      <Version>4.0.0-rc-2037</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.TestPlatform.CLI">
+      <Version>15.0.0-preview-20161005-01</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.TestPlatform.Build">
+      <Version>15.0.0-preview-20161005-01</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
+    <ProjectReference Include="..\dotnet\dotnet.csproj" />
+    <ProjectReference Include="..\Microsoft.DotNet.Archive\Microsoft.DotNet.Archive.csproj" />
+    <ProjectReference Include="..\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />
+    <ProjectReference Include="..\Microsoft.DotNet.Configurer\Microsoft.DotNet.Configurer.csproj" />
+    <ProjectReference Include="..\Microsoft.DotNet.InternalAbstractions\Microsoft.DotNet.InternalAbstractions.csproj" />
+    <ProjectReference Include="..\Microsoft.DotNet.ProjectJsonMigration\Microsoft.DotNet.ProjectJsonMigration.csproj" />
+    <ProjectReference Include="..\Microsoft.DotNet.TestFramework\Microsoft.DotNet.TestFramework.csproj" />
+    <ProjectReference Include="..\tool_csc\tool_csc.csproj" />
+    <ProjectReference Include="..\tool_msbuild\tool_msbuild.csproj" />
+    <ProjectReference Include="..\tool_nuget\tool_nuget.csproj" />
+  </ItemGroup>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
+    <DefineConstants>$(DefineConstants);NETCOREAPP1_0</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
+  </PropertyGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

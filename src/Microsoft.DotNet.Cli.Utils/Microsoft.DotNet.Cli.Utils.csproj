@@ -1,0 +1,65 @@
+﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
+  <PropertyGroup>
+    <VersionPrefix>1.0.0-preview3</VersionPrefix>
+    <TargetFrameworks>netstandard1.5;net46</TargetFrameworks>
+    <WarningsAsErrors>true</WarningsAsErrors>
+    <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netstandard1.5' ">$(PackageTargetFallback);portable-net45+wp80+win8+wpa81+dnxcore50</PackageTargetFallback>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="**\*.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Sdk">
+      <Version>1.0.0-alpha-20161026-2</Version>
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.DependencyModel">
+      <Version>1.0.1-beta-000933</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions">
+      <Version>1.0.1-beta-000933</Version>
+    </PackageReference>
+    <PackageReference Include="NuGet.Versioning">
+      <Version>4.0.0-rc-2037</Version>
+    </PackageReference>
+    <PackageReference Include="NuGet.Packaging">
+      <Version>4.0.0-rc-2037</Version>
+    </PackageReference>
+    <PackageReference Include="NuGet.Frameworks">
+      <Version>4.0.0-rc-2037</Version>
+    </PackageReference>
+    <PackageReference Include="NuGet.ProjectModel">
+      <Version>4.0.0-rc-2037</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Build">
+      <Version>15.1.319-preview5</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Build.Utilities.Core">
+      <Version>15.1.319-preview5</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
+    <PackageReference Include="System.Diagnostics.Process">
+      <Version>4.1.0</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
+    <Reference Include="System" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
+    <DefineConstants>$(DefineConstants);NETSTANDARD1_5</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net46' ">
+    <DefineConstants>$(DefineConstants);NET46</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
+  </PropertyGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

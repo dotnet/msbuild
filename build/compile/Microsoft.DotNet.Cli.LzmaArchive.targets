@@ -25,10 +25,11 @@
 
       <Message Text="Publishing Archiver" />
 
-      <DotNetPublish ToolPath="$(Stage0Directory)"
-                     WorkingDirectory="$(RepoRoot)/tools/Archiver"
-                     Output="$(ToolsOutputDirectory)"
-                     Configuration="$(Configuration)" />
+      <DotNetPublishMsbuildLegacy ToolPath="$(Stage0Directory)"
+                                  WorkingDirectory="$(RepoRoot)/tools/Archiver"
+                                  Output="$(ToolsOutputDirectory)"
+                                  Configuration="$(Configuration)"
+                                  Runtime="$(CoreCLRRid)" />
 
       <Exec Command="$(ArchiverExe) -a $(IntermediateArchive) $(NuGetPackagesArchiveFolder)" />
 
