@@ -12,6 +12,8 @@ using BuildCommand = Microsoft.DotNet.Tools.Test.Utilities.BuildCommand;
 using System.Runtime.Loader;
 using Newtonsoft.Json.Linq;
 
+using MigrateCommand = Microsoft.DotNet.Tools.Migrate.MigrateCommand;
+
 namespace Microsoft.DotNet.Migration.Tests
 {
     public class GivenThatIWantToMigrateTestApps : TestBase
@@ -354,9 +356,10 @@ namespace Microsoft.DotNet.Migration.Tests
         public void It_migrates_and_publishes_projects_with_runtimes()
         {
             var projectName = "PJTestAppSimple";
-            var projectDirectory = TestAssetsManager.CreateTestInstance(projectName, callingMethod: "i")
-                                                    .WithLockFiles()
-                                                    .Path;
+            var projectDirectory = TestAssetsManager
+                .CreateTestInstance(projectName)
+                .WithLockFiles()
+                .Path;
 
             CleanBinObj(projectDirectory);
             BuildProjectJsonMigrateBuildMSBuild(projectDirectory, projectName);
@@ -440,7 +443,7 @@ namespace Microsoft.DotNet.Migration.Tests
 
         private void VerifyMigration(IEnumerable<string> expectedProjects, string rootDir)
          {
-             var migratedProjects = Directory.EnumerateFiles(rootDir, "project.json", SearchOption.AllDirectories)
+             var migratedProjects = Directory.EnumerateFiles(rootDir, "*.csproj", SearchOption.AllDirectories)
                                              .Where(s => Directory.EnumerateFiles(Path.GetDirectoryName(s), "*.csproj").Count() == 1)
                                              .Where(s => Path.GetFileName(Path.GetDirectoryName(s)).Contains("Project"))
                                              .Select(s => Path.GetFileName(Path.GetDirectoryName(s)));
