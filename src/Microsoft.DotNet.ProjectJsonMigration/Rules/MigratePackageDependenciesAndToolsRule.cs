@@ -136,6 +136,21 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                             mergeExisting: false);
                     }
                     break;
+                case ProjectType.Library:
+                    if (!project.HasDependency(
+                        (dep) => dep.Name.Trim().ToLower() == PackageConstants.NetStandardPackageName.ToLower()))
+                    {
+                        _transformApplicator.Execute(
+                            PackageDependencyInfoTransform().Transform(
+                                new PackageDependencyInfo
+                                {
+                                    Name = PackageConstants.NetStandardPackageName,
+                                    Version = PackageConstants.NetStandardPackageVersion
+                                }),
+                            noFrameworkPackageReferenceItemGroup,
+                            mergeExisting: true);
+                    }
+                    break;
                 default:
                     break;
             }
