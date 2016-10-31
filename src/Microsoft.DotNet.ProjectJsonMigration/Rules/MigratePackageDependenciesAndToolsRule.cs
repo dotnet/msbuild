@@ -44,10 +44,15 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 PackageDependencyInfoTransform.Transform(
                     new PackageDependencyInfo
                     {
-                        Name = ConstantPackageNames.CSdkPackageName,
+                        Name = PackageConstants.SdkPackageName,
                         Version = migrationSettings.SdkPackageVersion,
                         PrivateAssets = "All"
                     }), noFrameworkPackageReferenceItemGroup, mergeExisting: false);
+
+            AddProjectTypeSpecificDependencies(
+                migrationRuleInputs,
+                migrationSettings,
+                noFrameworkPackageReferenceItemGroup);
             
             // Migrate Direct Deps first
             MigrateDependencies(
@@ -76,7 +81,32 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             MigrateTools(project, migrationRuleInputs.OutputMSBuildProject);
         }
 
-        private void MigrateImports(ProjectPropertyGroupElement commonPropertyGroup, TargetFrameworkInformation targetFramework)
+        private void AddProjectTypeSpecificDependencies(
+            MigrationRuleInputs migrationRuleInputs,
+            MigrationSettings migrationSettings,
+            ProjectItemGroupElement noFrameworkPackageReferenceItemGroup)
+        {
+            var type = migrationRuleInputs.DefaultProjectContext.ProjectFile.GetProjectType();
+            switch (type)
+            {
+                case ProjectType.Web:
+                    _transformApplicator.Execute(
+                        PackageDependencyInfoTransform.Transform(
+                            new PackageDependencyInfo
+                            {
+                                Name = PackageConstants.WebSdkPackageName,
+                                Version = migrationSettings.SdkPackageVersion,
+                                PrivateAssets = "All"
+                            }), noFrameworkPackageReferenceItemGroup, mergeExisting: false);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void MigrateImports(
+            ProjectPropertyGroupElement commonPropertyGroup,
+            TargetFrameworkInformation targetFramework)
         {
             var transform = ImportsTransformation.Transform(targetFramework);
 
@@ -168,7 +198,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     }
                 }
 
-                _transformApplicator.Execute(transform.Transform(packageDependency), itemGroup, mergeExisting: true);
+                _transformApplicator.Execute(
+                    transform.Transform(packageDependency),
+                    itemGroup,
+                    mergeExisting: true);
             }
         }
 
@@ -188,7 +221,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         private void InjectAssemblyReferenceIfNotPresent(string dependencyName, 
             IList<ProjectLibraryDependency> packageDependencies)
         {
-            if (!packageDependencies.Any(dep => string.Equals(dep.Name, dependencyName, StringComparison.OrdinalIgnoreCase)))
+            if (!packageDependencies.Any(dep => 
+                string.Equals(dep.Name, dependencyName, StringComparison.OrdinalIgnoreCase)))
             {
                 packageDependencies.Add(new ProjectLibraryDependency
                 {
@@ -238,12 +272,16 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             return flagString;
         }
 
-        private IEnumerable<string> GetAllProjectReferenceNames(Project project, NuGetFramework framework, ProjectRootElement xproj)
+        private IEnumerable<string> GetAllProjectReferenceNames(
+            Project project,
+            NuGetFramework framework,
+            ProjectRootElement xproj)
         {
             var csprojReferenceItems = _projectDependencyFinder.ResolveXProjProjectDependencies(xproj);
             var migratedXProjDependencyPaths = csprojReferenceItems.SelectMany(p => p.Includes());
-            var migratedXProjDependencyNames = new HashSet<string>(migratedXProjDependencyPaths.Select(p => Path.GetFileNameWithoutExtension(
-                                                                                                                 PathUtility.GetPathWithDirectorySeparator(p))));
+            var migratedXProjDependencyNames = 
+                new HashSet<string>(migratedXProjDependencyPaths.Select(p => 
+                    Path.GetFileNameWithoutExtension(PathUtility.GetPathWithDirectorySeparator(p))));
             var projectDependencies = _projectDependencyFinder.ResolveDirectProjectDependenciesForFramework(
                 project,
                 framework,
@@ -252,38 +290,43 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             return projectDependencies.Select(p => p.Name).Concat(migratedXProjDependencyNames);
         }
 
-         private AddItemTransform<ProjectLibraryDependency> FrameworkDependencyTransform => new AddItemTransform<ProjectLibraryDependency>(
-            "Reference",
-            dep => dep.Name,
-            dep => "",
-            dep => true);
+         private AddItemTransform<ProjectLibraryDependency> FrameworkDependencyTransform => 
+            new AddItemTransform<ProjectLibraryDependency>(
+                "Reference",
+                dep => dep.Name,
+                dep => "",
+                dep => true);
 
-        private Func<AddItemTransform<ProjectLibraryDependency>> PackageDependencyTransform => () => new AddItemTransform<ProjectLibraryDependency>(
-            "PackageReference",
-            dep => dep.Name,
-            dep => "",
-            dep => true)
-            .WithMetadata("Version", r => r.LibraryRange.VersionRange.OriginalString);
+        private Func<AddItemTransform<ProjectLibraryDependency>> PackageDependencyTransform => 
+            () => new AddItemTransform<ProjectLibraryDependency>(
+                "PackageReference",
+                dep => dep.Name,
+                dep => "",
+                dep => true)
+                .WithMetadata("Version", r => r.LibraryRange.VersionRange.OriginalString);
 
-        private AddItemTransform<PackageDependencyInfo> PackageDependencyInfoTransform => new AddItemTransform<PackageDependencyInfo>(
-            "PackageReference",
-            dep => dep.Name,
-            dep => "",
-            dep => true)
-            .WithMetadata("Version", r => r.Version)
-            .WithMetadata("PrivateAssets", r => r.PrivateAssets, r => !string.IsNullOrEmpty(r.PrivateAssets));
+        private AddItemTransform<PackageDependencyInfo> PackageDependencyInfoTransform => 
+            new AddItemTransform<PackageDependencyInfo>(
+                "PackageReference",
+                dep => dep.Name,
+                dep => "",
+                dep => true)
+                .WithMetadata("Version", r => r.Version)
+                .WithMetadata("PrivateAssets", r => r.PrivateAssets, r => !string.IsNullOrEmpty(r.PrivateAssets));
 
-        private AddItemTransform<ProjectLibraryDependency> ToolTransform => new AddItemTransform<ProjectLibraryDependency>(
-            "DotNetCliToolReference",
-            dep => dep.Name,
-            dep => "",
-            dep => true)
-            .WithMetadata("Version", r => r.LibraryRange.VersionRange.OriginalString);
+        private AddItemTransform<ProjectLibraryDependency> ToolTransform => 
+            new AddItemTransform<ProjectLibraryDependency>(
+                "DotNetCliToolReference",
+                dep => dep.Name,
+                dep => "",
+                dep => true)
+                .WithMetadata("Version", r => r.LibraryRange.VersionRange.OriginalString);
 
-        private AddPropertyTransform<TargetFrameworkInformation> ImportsTransformation => new AddPropertyTransform<TargetFrameworkInformation>(
-            "PackageTargetFallback",
-            t => $"$(PackageTargetFallback);{string.Join(";", t.Imports)}",
-            t => t.Imports.OrEmptyIfNull().Any());
+        private AddPropertyTransform<TargetFrameworkInformation> ImportsTransformation => 
+            new AddPropertyTransform<TargetFrameworkInformation>(
+                "PackageTargetFallback",
+                t => $"$(PackageTargetFallback);{string.Join(";", t.Imports)}",
+                t => t.Imports.OrEmptyIfNull().Any());
 
         private class PackageDependencyInfo
         {
