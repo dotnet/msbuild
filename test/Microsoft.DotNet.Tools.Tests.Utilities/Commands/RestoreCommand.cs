@@ -7,21 +7,40 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 {
     public sealed class RestoreCommand : TestCommand
     {
+        private string _runtime;
+
         public RestoreCommand()
             : base("dotnet")
         {
         }
 
+        public RestoreCommand WithRuntime(string runtime)
+        {
+            _runtime = runtime;
+
+            return this;
+        }
+
         public override CommandResult Execute(string args = "")
         {
-            args = $"restore {args} --disable-parallel";
+            args = $"restore {GetRuntime()} {args} --disable-parallel";
             return base.Execute(args);
         }
 
         public override CommandResult ExecuteWithCapturedOutput(string args = "")
         {
-            args = $"restore {args} --disable-parallel";
+            args = $"restore {GetRuntime()} {args} --disable-parallel";
             return base.ExecuteWithCapturedOutput(args);
+        }
+
+        private string GetRuntime()
+        {
+            if (_runtime == null)
+            {
+                return null;
+            }
+
+            return $"/p:RuntimeIdentifier={_runtime}";
         }
     }
 }

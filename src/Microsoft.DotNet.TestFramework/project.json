@@ -2,7 +2,12 @@
   "version": "1.0.0-preview3-*",
   "description": "Microsoft.DotNet.TestFramework Class Library",
   "buildOptions": {
-    "keyFile": "../../tools/Key.snk"
+    "keyFile": "../../tools/Key.snk",
+    "embed": {
+      "include": [
+        "NuGet.template.config"
+      ]
+    }
   },
   "dependencies": {
     "Microsoft.DotNet.Cli.Utils": {

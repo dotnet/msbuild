@@ -28,6 +28,9 @@ namespace Microsoft.DotNet.Tools.Build
 
             CommandOption outputOption = app.Option("-o|--output <OUTPUT_DIR>", "Directory in which to place outputs", CommandOptionType.SingleValue);
             CommandOption frameworkOption = app.Option("-f|--framework <FRAMEWORK>", "Compile a specific framework", CommandOptionType.SingleValue);
+            CommandOption runtimeOption = app.Option(
+                "-r|--runtime <RUNTIME_IDENTIFIER>", "Target runtime to build for. The default is to build a portable application.",
+                CommandOptionType.SingleValue);
             CommandOption configurationOption = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
             CommandOption versionSuffixOption = app.Option("--version-suffix <VERSION_SUFFIX>", "Defines the value for the $(VersionSuffix) property in the project", CommandOptionType.SingleValue);
 
@@ -60,6 +63,11 @@ namespace Microsoft.DotNet.Tools.Build
                 if (frameworkOption.HasValue())
                 {
                     msbuildArgs.Add($"/p:TargetFramework={frameworkOption.Value()}");
+                }
+
+                if (runtimeOption.HasValue())
+                {
+                    msbuildArgs.Add($"/p:RuntimeIdentifier={runtimeOption.Value()}");
                 }
 
                 if (configurationOption.HasValue())
