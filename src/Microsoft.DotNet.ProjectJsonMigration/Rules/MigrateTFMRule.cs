@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         {
             var packageRefs = outputMSBuildProject
                 .Items
-                .Where(i => i.ItemType == "PackageReference" && i.Include != ConstantPackageNames.CSdkPackageName)
+                .Where(i => i.ItemType == "PackageReference" && i.Include != PackageConstants.SdkPackageName)
                 .ToList();
 
             foreach (var packageRef in packageRefs)

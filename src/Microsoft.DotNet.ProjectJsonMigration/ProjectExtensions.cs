@@ -9,20 +9,20 @@ using Microsoft.DotNet.Internal.ProjectModel;
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
-    internal static class ProjectTypeDetector
+    internal static class ProjectExtensions
     {
-        public static string TryDetectProjectType(Project project)
+        public static ProjectType GetProjectType(this Project project)
         {
-            string projectType = null;
-            if (IsWebProject(project))
+            var projectType = ProjectType.Console;
+            if (project.IsWebProject())
             {
-                projectType = "web";
+                projectType = ProjectType.Web;
             }
 
             return projectType;
         }
 
-        private static bool IsWebProject(Project project)
+        private static bool IsWebProject(this Project project)
         {
             if(project.IsTestProject)
             {
@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
             var isExecutable = project.GetCompilerOptions(null, "Debug").EmitEntryPoint.GetValueOrDefault();
             if (isExecutable
-                && HasAnyPackageContainingName(project, ".AspNetCore."))
+                && project.HasAnyPackageContainingName(".AspNetCore."))
             {
                 return true;
             }
@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             return false;
         }
 
-        private static bool HasAnyPackageContainingName(Project project, string nameSegment)
+        private static bool HasAnyPackageContainingName(this Project project, string nameSegment)
         {
             var containsPackageName = HasAnyPackageContainingName(
                 new ReadOnlyCollection<ProjectLibraryDependency>(project.Dependencies),
