@@ -423,19 +423,6 @@ namespace Microsoft.DotNet.Migration.Tests
                 .Count().Should().Be(1);
         }
 
-        [Theory]
-        [InlineData("LibraryWithoutNetStandardLibRef")]
-        [InlineData("LibraryWithNetStandardLibRef")]
-        public void It_migrates_and_builds_library(string projectName)
-        {
-            var projectDirectory = TestAssetsManager.CreateTestInstance(projectName,
-                callingMethod: $"{nameof(It_migrates_and_builds_library)}-projectName").Path;
-
-            MigrateProject(projectDirectory);
-            Restore(projectDirectory, projectName);
-            BuildMSBuild(projectDirectory, projectName);
-        }
-
         private void VerifyAutoInjectedDesktopReferences(string projectDirectory, string projectName, bool shouldBePresent)
         {
             if (projectName != null)

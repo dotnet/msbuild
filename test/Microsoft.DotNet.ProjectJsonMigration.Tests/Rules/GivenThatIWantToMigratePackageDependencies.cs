@@ -347,36 +347,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                       i.GetMetadataWithName("Version").Value == "2.2.0-beta4-build1188"));
         }
 
-        [Theory]
-        [InlineData(@"
-            {
-              ""frameworks"": {
-                ""netstandard1.3"": {
-                    ""dependencies"": {
-                        ""System.AppContext"": ""4.1.0"",
-                        ""NETStandard.Library"": ""1.5.0""
-                    }
-                }
-              }
-            }")]
-        [InlineData(@"
-            {
-              ""frameworks"": {
-                ""netstandard1.3"": {
-                    ""dependencies"": {
-                        ""System.AppContext"": ""4.1.0""
-                    }
-                }
-              }
-            }")]
-        public void It_migrates_library_and_does_not_double_netstandard_ref(string pjContent)
-        {
-            var mockProj = RunPackageDependenciesRuleOnPj(pjContent);
-
-            mockProj.Items.Should().ContainSingle(
-                i => (i.Include == "NETStandard.Library" && i.ItemType == "PackageReference"));
-        }
-
         private void EmitsPackageReferences(ProjectRootElement mockProj, params Tuple<string, string, string>[] packageSpecs)
         {
             foreach (var packageSpec in packageSpecs)

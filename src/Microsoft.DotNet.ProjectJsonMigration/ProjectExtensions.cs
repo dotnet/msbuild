@@ -13,59 +13,59 @@ namespace Microsoft.DotNet.ProjectJsonMigration
     {
         public static ProjectType GetProjectType(this Project project)
         {
-            ProjectType projectType = ProjectType.Library;
-            if (project.IsTestProject)
+            var projectType = ProjectType.Console;
+            if (project.IsWebProject())
+            {
+                projectType = ProjectType.Web;
+            }
+            else if (project.IsTestProject)
             {
                 projectType = ProjectType.Test;
-            }
-            else if (project.HasEntryPoint())
-            {
-                if (project.HasDependency(ContainingName(".AspNetCore.")))
-                {
-                    projectType = ProjectType.Web;
-                }
-                else
-                {
-                    projectType = ProjectType.Console;
-                }
             }
 
             return projectType;
         }
 
-        private static bool HasEntryPoint(this Project project)
+        private static bool IsWebProject(this Project project)
         {
-            return project.GetCompilerOptions(null, "Debug").EmitEntryPoint.GetValueOrDefault();
-        }
-
-        private static Func<ProjectLibraryDependency, bool> ContainingName(string nameSegment)
-        {
-            return x => x.Name.IndexOf(nameSegment, StringComparison.OrdinalIgnoreCase) > -1;
-        }
-
-        public static bool HasDependency(this Project project, Func<ProjectLibraryDependency, bool> pred)
-        {
-            if (HasAnyDependency(project.Dependencies, pred))
+            if(project.IsTestProject)
             {
-                return true;
+                return false;
             }
 
-            foreach (var tf in project.GetTargetFrameworks())
+            var isExecutable = project.GetCompilerOptions(null, "Debug").EmitEntryPoint.GetValueOrDefault();
+            if (isExecutable
+                && project.HasAnyPackageContainingName(".AspNetCore."))
             {
-                if(HasAnyDependency(tf.Dependencies, pred))
-                {
-                    return true;
-                }
+                return true;
             }
 
             return false;
         }
 
-        private static bool HasAnyDependency(
-            IEnumerable<ProjectLibraryDependency> dependencies,
-            Func<ProjectLibraryDependency, bool> pred)
+        private static bool HasAnyPackageContainingName(this Project project, string nameSegment)
         {
-            return dependencies.Any(pred);
+            var containsPackageName = HasAnyPackageContainingName(
+                new ReadOnlyCollection<ProjectLibraryDependency>(project.Dependencies),
+                nameSegment);
+            foreach (var tf in project.GetTargetFrameworks())
+            {
+                if(containsPackageName)
+                {
+                    break;
+                }
+
+                containsPackageName = HasAnyPackageContainingName(tf.Dependencies, nameSegment);
+            }
+
+            return containsPackageName;
+        }
+
+        private static bool HasAnyPackageContainingName(
+            IReadOnlyList<ProjectLibraryDependency> dependencies,
+            string nameSegment)
+        {
+            return dependencies.Any(x => x.Name.IndexOf(nameSegment, StringComparison.OrdinalIgnoreCase) > -1);
         }
     }
 }
