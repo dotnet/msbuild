@@ -27,7 +27,7 @@
 
     <Message Text="Restoring packages for %(SolutionFile.Filename)" Importance="high" />
 
-    <Exec Command="$(DotNetTool) restore src test --legacy-packages-directory --verbosity Minimal"
+    <Exec Command="$(DotNetTool) nuget restore src test --legacy-packages-directory --verbosity Minimal"
           WorkingDirectory="$(RepositoryRootDirectory)"
           />
 
@@ -41,7 +41,7 @@
     </ItemGroup>
 
     <!-- work around https://github.com/dotnet/sdk/issues/203 by passing in /p:SkipInvalidConfigurations=true /p:_InvalidConfigurationWarning=false -->
-    <Exec Command="$(DotNetTool) restore3 %(ProjectToRestore3.Identity) /v:minimal /p:SkipInvalidConfigurations=true /p:_InvalidConfigurationWarning=false"
+    <Exec Command="$(DotNetTool) restore %(ProjectToRestore3.Identity) /v:minimal /p:SkipInvalidConfigurations=true /p:_InvalidConfigurationWarning=false"
           Condition="'$(BuildTemplates)' != 'true'"
           WorkingDirectory="$(RepositoryRootDirectory)"
           />
