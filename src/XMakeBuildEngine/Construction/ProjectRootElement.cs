@@ -2059,7 +2059,7 @@ namespace Microsoft.Build.Construction
 
                     if (xmlException != null)
                     {
-                        fileInfo = new BuildEventFileInfo(xmlException);
+                        fileInfo = new BuildEventFileInfo(fullPath, xmlException);
                     }
                     else
                     {
