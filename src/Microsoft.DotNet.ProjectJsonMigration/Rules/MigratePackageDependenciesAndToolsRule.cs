@@ -91,13 +91,15 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             {
                 case ProjectType.Web:
                     _transformApplicator.Execute(
-                        PackageDependencyInfoTransform.Transform(
+                        SdkPackageDependencyTransform.Transform(
                             new PackageDependencyInfo
                             {
                                 Name = PackageConstants.WebSdkPackageName,
                                 Version = migrationSettings.SdkPackageVersion,
                                 PrivateAssets = "All"
-                            }), noFrameworkPackageReferenceItemGroup, mergeExisting: false);
+                            }),
+                        noFrameworkPackageReferenceItemGroup,
+                        mergeExisting: false);
                     break;
                 default:
                     break;
@@ -149,7 +151,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 _transformApplicator.Execute(
                     ToolTransform().Transform(ToPackageDependencyInfo(
                         tool,
-                        ConstantPackageNames.AspProjectToolsPackages)),
+                        PackageConstants.AspProjectToolsPackages)),
                     itemGroup,
                     mergeExisting: true);
             }
@@ -206,7 +208,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 _transformApplicator.Execute(
                     transform.Transform(ToPackageDependencyInfo(
                         packageDependency,
-                        ConstantPackageNames.AspProjectDependencyToolsPackages)),
+                        PackageConstants.AspProjectDependencyToolsPackages)),
                     itemGroup,
                     mergeExisting: true);
             }
