@@ -71,10 +71,20 @@
             The local provider where the library was found.
             </summary>
         </member>
-        <member name="M:NuGet.DependencyResolver.RemoteDependencyWalker.GetRootPathForParentProject(NuGet.DependencyResolver.GraphEdge{NuGet.DependencyResolver.RemoteResolveResult})">
+        <member name="M:NuGet.DependencyResolver.RemoteDependencyWalker.GetRootPathForEdge(NuGet.DependencyResolver.GraphEdge{NuGet.DependencyResolver.RemoteResolveResult})">
             <summary>
             Returns root directory of the parent project.
             This will be null if the reference is from a non-project type.
+            </summary>
+        </member>
+        <member name="M:NuGet.DependencyResolver.RemoteDependencyWalker.AllowXProjResolution(NuGet.DependencyResolver.GraphEdge{NuGet.DependencyResolver.RemoteResolveResult})">
+            <summary>
+            True if legacy Xproj resolution is allowed. This will be removed soon!
+            </summary>
+        </member>
+        <member name="M:NuGet.DependencyResolver.RemoteDependencyWalker.GetNearestParentProject(NuGet.DependencyResolver.GraphEdge{NuGet.DependencyResolver.RemoteResolveResult})">
+            <summary>
+            Walk the graph up to the nearest parent project or null if this is the root.
             </summary>
         </member>
         <member name="P:NuGet.DependencyResolver.RemoteWalkContext.FindLibraryEntryCache">

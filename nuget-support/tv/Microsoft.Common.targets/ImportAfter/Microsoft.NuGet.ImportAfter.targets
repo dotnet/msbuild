@@ -10,11 +10,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <NuGetTargets Condition="'$(NuGetTargets)'==''">$(MSBuildExtensionsPath)\Microsoft.NuGet.targets</NuGetTargets>
-  </PropertyGroup>
-  <Import Condition="Exists('$(NuGetTargets)')" Project="$(NuGetTargets)" />
-
   <!-- Import NuGet.targets for Restore -->
   <PropertyGroup>
     <NuGetRestoreTargets Condition="'$(NuGetRestoreTargets)'==''">$(MSBuildExtensionsPath)\NuGet.targets</NuGetRestoreTargets>

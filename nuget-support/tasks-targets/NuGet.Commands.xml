@@ -14,27 +14,27 @@
             Command Runner used to run the business logic for nuget locals command
             </summary>
         </member>
-        <member name="M:NuGet.Commands.LocalsCommandRunner.ExecuteCommand">
+        <member name="M:NuGet.Commands.LocalsCommandRunner.ExecuteCommand(NuGet.Commands.LocalsArgs)">
             <summary>
             Executes the logic for nuget locals command.
             </summary>
             <returns></returns>
         </member>
-        <member name="M:NuGet.Commands.LocalsCommandRunner.ListLocalResource(NuGet.Commands.LocalsCommandRunner.LocalResourceName)">
+        <member name="M:NuGet.Commands.LocalsCommandRunner.ListLocalResource(NuGet.Commands.LocalsCommandRunner.LocalResourceName,NuGet.Commands.LocalsArgs)">
             <summary>
             Lists out the cache location(s) path.
             </summary>
             <param name="localResourceName">Cache resource to be listed</param>
             <throws>Thorws <code>ArgumentException</code> if the specified resource name does not match a known cache type.</throws>
         </member>
-        <member name="M:NuGet.Commands.LocalsCommandRunner.PrintLocalResourcePath(System.String,System.String)">
+        <member name="M:NuGet.Commands.LocalsCommandRunner.PrintLocalResourcePath(System.String,System.String,NuGet.Commands.LocalsArgs)">
             <summary>
             Prints the specified local resource path.
             </summary>
             <param name="resourceName"> Specified resource name</param>
             <param name="path"> Path for the specified resource</param>
         </member>
-        <member name="M:NuGet.Commands.LocalsCommandRunner.ClearLocalResource(NuGet.Commands.LocalsCommandRunner.LocalResourceName)">
+        <member name="M:NuGet.Commands.LocalsCommandRunner.ClearLocalResource(NuGet.Commands.LocalsCommandRunner.LocalResourceName,NuGet.Commands.LocalsArgs)">
             <summary>
             Clears the specified cache location(s).
             </summary>
@@ -42,19 +42,19 @@
             <throws>Thorws <code>ArgumentException</code> if the specified resource name does not match a known cache type.</throws>
             <returns><code>True</code> if the operation was successful; otherwise <code>false</code>.</returns>
         </member>
-        <member name="M:NuGet.Commands.LocalsCommandRunner.ClearNuGetGlobalPackagesFolder">
+        <member name="M:NuGet.Commands.LocalsCommandRunner.ClearNuGetGlobalPackagesFolder(NuGet.Commands.LocalsArgs)">
             <summary>
             Clears the global NuGet packages cache.
             </summary>
             <returns><code>True</code> if the operation was successful; otherwise <code>false</code>.</returns>
         </member>
-        <member name="M:NuGet.Commands.LocalsCommandRunner.ClearNuGetHttpCache">
+        <member name="M:NuGet.Commands.LocalsCommandRunner.ClearNuGetHttpCache(NuGet.Commands.LocalsArgs)">
             <summary>
             Clears the NuGet v3 HTTP cache.
             </summary>
             <returns><code>True</code> if the operation was successful; otherwise <code>false</code>.</returns>
         </member>
-        <member name="M:NuGet.Commands.LocalsCommandRunner.ClearNuGetTempFolder">
+        <member name="M:NuGet.Commands.LocalsCommandRunner.ClearNuGetTempFolder(NuGet.Commands.LocalsArgs)">
             <summary>
             Clears the temp folder cache.
             </summary>
@@ -67,7 +67,7 @@
             <param name="localResourceName">specified resource name</param>
             <returns>Returns <code>LocalResourceName</code> indicating the local resource name specified.</returns>
         </member>
-        <member name="M:NuGet.Commands.LocalsCommandRunner.ClearCacheDirectory(System.String)">
+        <member name="M:NuGet.Commands.LocalsCommandRunner.ClearCacheDirectory(System.String,NuGet.Commands.LocalsArgs)">
             <summary>
             Recursively deletes the specified directory tree.
             </summary>
@@ -160,6 +160,11 @@
                Looks up a localized string similar to Error occurred when processing file &apos;{0}&apos;: {1}.
             </summary>
         </member>
+        <member name="P:NuGet.Commands.Strings.Error_UnableToLocateBuildOutput">
+            <summary>
+               Looks up a localized string similar to No build found in {0}. Use the -Build option or build the project..
+            </summary>
+        </member>
         <member name="P:NuGet.Commands.Strings.Error_UnableToLocateRestoreTarget">
             <summary>
                Looks up a localized string similar to The folder &apos;{0}&apos; does not contain a project to restore..
@@ -233,6 +238,11 @@
         <member name="P:NuGet.Commands.Strings.LocalsCommand_ClearingNuGetHttpCache">
             <summary>
                Looks up a localized string similar to Clearing NuGet HTTP cache: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Strings.LocalsCommand_ClearingNuGetTempCache">
+            <summary>
+               Looks up a localized string similar to Clearing NuGet Temp cache: {0}.
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.LocalsCommand_FailedToDeletePath">
@@ -733,6 +743,26 @@
             Fale if it is an OPC file or empty directory
             </summary>
         </member>
+        <member name="P:NuGet.Commands.MSBuildRestoreImportGroup.Position">
+            <summary>
+            Optional position arguement used when ordering groups in the output file.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.MSBuildRestoreImportGroup.Conditions">
+            <summary>
+            Conditions applied to the item group. These will be AND'd together.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.MSBuildRestoreImportGroup.Imports">
+            <summary>
+            Project paths to import.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.MSBuildRestoreImportGroup.Condition">
+            <summary>
+            Combined conditions
+            </summary>
+        </member>
         <member name="F:NuGet.Commands.MSBuildRestoreResult.MacroCandidates">
             <summary>
             The macros that we may use in MSBuild to replace path roots.
@@ -756,6 +786,11 @@
         <member name="P:NuGet.Commands.MSBuildRestoreResult.Targets">
             <summary>
             Gets a list of MSBuild targets files provided by packages during this restore
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.MSBuildRestoreResult.HasChanges(System.Xml.Linq.XDocument,System.String,NuGet.Common.ILogger)">
+            <summary>
+            Check if the file has changes compared to the original on disk.
             </summary>
         </member>
         <member name="T:NuGet.Commands.RestoreCommandProviders">
@@ -892,6 +927,11 @@
             The existing lock file. This is null if no lock file was provided on the <see cref="T:NuGet.Commands.RestoreRequest"/>.
             </summary>
         </member>
+        <member name="P:NuGet.Commands.RestoreResult.ElapsedTime">
+            <summary>
+            Restore time
+            </summary>
+        </member>
         <member name="M:NuGet.Commands.RestoreResult.GetAllInstalled">
             <summary>
             Calculates the complete set of all packages installed by this operation
@@ -929,7 +969,27 @@
         </member>
         <member name="T:NuGet.Commands.RestoreRunner">
             <summary>
-            Shared code to run the "restore" command from the command line projects
+            Shared code to run the "restore" command for dotnet restore, nuget.exe, and VS.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.RestoreRunner.Run(NuGet.Commands.RestoreArgs)">
+            <summary>
+            Create requests, execute requests, and commit restore results.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.RestoreRunner.Run(System.Collections.Generic.IEnumerable{NuGet.Commands.RestoreSummaryRequest},NuGet.Commands.RestoreArgs)">
+            <summary>
+            Execute and commit restore requests.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.RestoreRunner.RunWithoutCommit(System.Collections.Generic.IEnumerable{NuGet.Commands.RestoreSummaryRequest},NuGet.Commands.RestoreArgs)">
+            <summary>
+            Execute and commit restore requests.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.RestoreRunner.GetRequests(NuGet.Commands.RestoreArgs)">
+            <summary>
+            Create restore requests but do not execute them.
             </summary>
         </member>
         <member name="T:NuGet.Commands.RestoreSummaryRequest">
@@ -1032,6 +1092,17 @@
             Get property or null if empty.
             </summary>
         </member>
+        <member name="P:NuGet.Commands.RestoreArgs.SourceRepositories">
+            <summary>
+            Sources to use for restore. Overrides Sources
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.RestoreArgs.Sources">
+            <summary>
+            Sources to use for restore. This is not used if SourceRepositories contains the 
+            already built SourceRepository objects.
+            </summary>
+        </member>
         <member name="M:NuGet.Commands.RestoreArgs.GetEffectiveSources(NuGet.Configuration.ISettings)">
             <summary>
             Uses either Sources or Settings, and then adds Fallback sources.
@@ -1047,7 +1118,7 @@
             Check if NUGET_XPROJ_WRITE_TARGETS is true.
             </summary>
         </member>
-        <member name="M:NuGet.Commands.BuildAssetsUtils.GetMSBuildAssets(NuGet.DependencyResolver.RemoteWalkContext,NuGet.Commands.RestoreTargetGraph,NuGet.ProjectModel.PackageSpec,System.Collections.Generic.Dictionary{NuGet.Commands.RestoreTargetGraph,System.Collections.Generic.Dictionary{System.String,NuGet.LibraryModel.LibraryIncludeFlags}})">
+        <member name="M:NuGet.Commands.BuildAssetsUtils.GetMSBuildAssets(NuGet.DependencyResolver.RemoteWalkContext,NuGet.Commands.RestoreTargetGraph,NuGet.ProjectModel.PackageSpec,System.Collections.Generic.Dictionary{NuGet.Commands.RestoreTargetGraph,System.Collections.Generic.Dictionary{System.String,NuGet.LibraryModel.LibraryIncludeFlags}},NuGet.ContentModel.PatternSet)">
             <summary>
             Find all included msbuild assets for a graph.
             </summary>
@@ -1127,21 +1198,19 @@
             Helpers for dealing with dg files and processing msbuild related inputs.
             </summary>
         </member>
-        <member name="M:NuGet.Commands.MSBuildRestoreUtility.AddMSBuildProjectReference(NuGet.ProjectModel.PackageSpec,NuGet.ProjectModel.ProjectRestoreReference,NuGet.LibraryModel.LibraryDependency)">
-            <summary>
-            Adds a dependency to a package spec. This handles scenarios
-            where the reference already exists.
-            </summary>
-        </member>
-        <member name="M:NuGet.Commands.MSBuildRestoreUtility.AddMSBuildProjectReference(NuGet.ProjectModel.PackageSpec,NuGet.ProjectModel.ProjectRestoreReference,NuGet.LibraryModel.LibraryDependency,System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework})">
-            <summary>
-            Adds a dependency to a package spec. This handles scenarios
-            where the reference already exists.
-            </summary>
-        </member>
         <member name="M:NuGet.Commands.MSBuildRestoreUtility.GetDependencySpec(System.Collections.Generic.IEnumerable{NuGet.Commands.IMSBuildItem})">
             <summary>
             Convert MSBuild items to a DependencyGraphSpec.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.MSBuildRestoreUtility.ApplyIncludeFlags(NuGet.LibraryModel.LibraryDependency,System.String,System.String,System.String)">
+            <summary>
+            Insert asset flags into dependency, based on ;-delimited string args
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.MSBuildRestoreUtility.ApplyIncludeFlags(NuGet.ProjectModel.ProjectRestoreReference,System.String,System.String,System.String)">
+            <summary>
+            Insert asset flags into project dependency, based on ;-delimited string args
             </summary>
         </member>
         <member name="M:NuGet.Commands.MSBuildRestoreUtility.GetPackageSpec(System.Collections.Generic.IEnumerable{NuGet.Commands.IMSBuildItem})">
@@ -1173,6 +1242,30 @@
         <member name="M:NuGet.Commands.SpecValidationUtility.ValidateDependencySpec(NuGet.ProjectModel.DependencyGraphSpec)">
             <summary>
             Validate a dg file. This will throw a RestoreSpecException if there are errors.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.ToolRestoreUtility.GetSpec(System.String,System.String,NuGet.Versioning.VersionRange,NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            Build a package spec in memory to execute the tool restore as if it were
+            its own project. For now, we always restore for a null runtime and a single
+            constant framework.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.ToolRestoreUtility.GetSubSetRequests(System.Collections.Generic.IEnumerable{NuGet.Commands.RestoreSummaryRequest})">
+            <summary>
+            Only one output can win per packages folder/version range. Between colliding requests take
+            the intersection of the inputs used.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:NuGet.Commands.ToolRestoreUtility.GetToolIdOrNullFromSpec(NuGet.ProjectModel.PackageSpec)">
+            <summary>
+            Returns the name of the single dependency in the spec or null.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.ToolRestoreUtility.GetToolDependencyOrNullFromSpec(NuGet.ProjectModel.PackageSpec)">
+            <summary>
+            Returns the name of the single dependency in the spec or null.
             </summary>
         </member>
         <member name="T:NuGet.Commands.Rules.AnalysisResources">

@@ -4,47 +4,78 @@
         <name>NuGet.Build.Tasks</name>
     </assembly>
     <members>
-        <member name="P:NuGet.Build.Tasks.GetPackageReferences.ProjectUniqueName">
+        <member name="M:NuGet.Build.Tasks.BuildTasksUtility.AddAllProjectsForRestore(NuGet.ProjectModel.DependencyGraphSpec)">
+            <summary>
+            Add all restorable projects to the restore list.
+            This is the behavior for --recursive
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreDotnetCliToolsTask.ProjectPath">
             <summary>
             Full path to the msbuild project.
             </summary>
         </member>
-        <member name="P:NuGet.Build.Tasks.GetPackageReferences.TargetFrameworks">
-            <summary>
-            Target frameworks to apply this for. If empty this applies to all.
-            </summary>
-        </member>
-        <member name="P:NuGet.Build.Tasks.GetPackageReferences.RestoreGraphItems">
+        <member name="P:NuGet.Build.Tasks.GetRestoreDotnetCliToolsTask.RestoreGraphItems">
             <summary>
             Output items
             </summary>
         </member>
-        <member name="P:NuGet.Build.Tasks.GetProjectJsonPathTask.ProjectPath">
+        <member name="P:NuGet.Build.Tasks.GetRestoreDotnetCliToolsTask.ToolFramework">
+            <summary>
+            Tool runtime framework where this will be executed.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreDotnetCliToolsTask.RestoreSources">
+            <summary>
+            NuGet sources, ; delimited
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreDotnetCliToolsTask.RestoreFallbackFolders">
+            <summary>
+            NuGet fallback folders
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreDotnetCliToolsTask.RestorePackagesPath">
+            <summary>
+            User packages folder
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestorePackageReferencesTask.ProjectUniqueName">
             <summary>
             Full path to the msbuild project.
             </summary>
         </member>
-        <member name="P:NuGet.Build.Tasks.GetProjectJsonPathTask.ProjectJsonPath">
+        <member name="P:NuGet.Build.Tasks.GetRestorePackageReferencesTask.TargetFrameworks">
+            <summary>
+            Target frameworks to apply this for. If empty this applies to all.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestorePackageReferencesTask.RestoreGraphItems">
+            <summary>
+            Output items
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreProjectJsonPathTask.ProjectPath">
+            <summary>
+            Full path to the msbuild project.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreProjectJsonPathTask.ProjectJsonPath">
             <summary>
             Output path to project.json if it exists.
             </summary>
         </member>
-        <member name="P:NuGet.Build.Tasks.GetProjectReferences.ProjectUniqueName">
+        <member name="P:NuGet.Build.Tasks.GetRestoreProjectReferencesTask.ProjectUniqueName">
             <summary>
             Full path to the msbuild project.
             </summary>
         </member>
-        <member name="P:NuGet.Build.Tasks.GetProjectReferences.TargetFrameworks">
+        <member name="P:NuGet.Build.Tasks.GetRestoreProjectReferencesTask.TargetFrameworks">
             <summary>
             Target frameworks to apply this for. If empty this applies to all.
             </summary>
         </member>
-        <member name="P:NuGet.Build.Tasks.GetProjectReferences.RestoreGraphItems">
-            <summary>
-            Output items
-            </summary>
-        </member>
-        <member name="P:NuGet.Build.Tasks.GetTargetFrameworkItems.TargetFrameworksOutput">
+        <member name="P:NuGet.Build.Tasks.GetRestoreProjectReferencesTask.RestoreGraphItems">
             <summary>
             Output items
             </summary>
@@ -104,6 +135,11 @@
             Ignore errors from package sources
             </summary>
         </member>
+        <member name="P:NuGet.Build.Tasks.RestoreTask.RestoreRecursive">
+            <summary>
+            Restore all projects.
+            </summary>
+        </member>
         <member name="M:NuGet.Build.Tasks.RestoreTask.GetNullForEmpty(System.String)">
             <summary>
             Convert empty strings to null
@@ -117,6 +153,11 @@
         <member name="P:NuGet.Build.Tasks.WriteRestoreGraphTask.RestoreGraphItems">
             <summary>
             DG file entries
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.WriteRestoreGraphTask.RestoreRecursive">
+            <summary>
+            Restore all projects.
             </summary>
         </member>
         <member name="M:NuGet.Build.Tasks.WriteRestoreGraphTask.GetNullForEmpty(System.String)">

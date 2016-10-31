@@ -264,7 +264,7 @@
             Package dependencies grouped to a target framework.
             </summary>
         </member>
-        <member name="M:NuGet.Packaging.PackageDependencyGroup.#ctor(NuGet.Frameworks.NuGetFramework,System.Collections.Generic.ISet{NuGet.Packaging.Core.PackageDependency})">
+        <member name="M:NuGet.Packaging.PackageDependencyGroup.#ctor(NuGet.Frameworks.NuGetFramework,System.Collections.Generic.IEnumerable{NuGet.Packaging.Core.PackageDependency})">
             <summary>
             Dependency group
             </summary>

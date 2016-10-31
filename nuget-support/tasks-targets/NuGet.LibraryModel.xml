@@ -49,6 +49,11 @@
             Convert library flags to a friendly string.
             </summary>
         </member>
+        <member name="M:NuGet.LibraryModel.LibraryIncludeFlagUtils.GetFlags(System.String,NuGet.LibraryModel.LibraryIncludeFlags)">
+            <summary>
+            Convert set of flag strings into a LibraryIncludeFlags.
+            </summary>
+        </member>
         <member name="M:NuGet.LibraryModel.LibraryRange.TypeConstraintAllows(NuGet.LibraryModel.LibraryDependencyTarget)">
             <summary>
             True if the type constraint allows the flag.

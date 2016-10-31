@@ -4,28 +4,22 @@
         <name>NuGet.Common</name>
     </assembly>
     <members>
-        <member name="T:NuGet.Common.ActivityCorrelationContext">
+        <member name="T:NuGet.Common.ActivityCorrelationId">
             <summary>
-            Ambient context contains properties pertaining to a current activity.
-            Single activity engages multiple method calls at different layers.
-            Sometimes it's necessary to identify separate calls belonging to the same activity if shared state is needed.
+            Ambient correlation ID used to associate information pertaining to a current activity. A single activity
+            engages multiple method calls at different layers. Sometimes it's necessary to identify separate calls
+            belonging to the same activity if shared state is needed.
             </summary>
         </member>
-        <member name="P:NuGet.Common.ActivityCorrelationContext.CorrelationId">
+        <member name="P:NuGet.Common.ActivityCorrelationId.Current">
             <summary>
-            Represents activity unique ID.
+            Returns current activity correlation ID or a default if not set previously.
             </summary>
         </member>
-        <member name="P:NuGet.Common.ActivityCorrelationContext.Current">
+        <member name="M:NuGet.Common.ActivityCorrelationId.StartNew">
             <summary>
-            Returns ambient context value or global instance if not set earlier.
+            Starts a new activity activity correlation ID by updating ambient context value.
             </summary>
-        </member>
-        <member name="M:NuGet.Common.ActivityCorrelationContext.StartNew">
-            <summary>
-            Instantiates activity context instance with new identifier. Updates ambient context value.
-            </summary>
-            <returns>New instance</returns>
         </member>
         <member name="T:NuGet.Common.AsyncLazy`1">
             <summary>
@@ -230,9 +224,40 @@
             File operation helpers.
             </summary>
         </member>
+        <member name="M:NuGet.Common.FileUtility.GetTempFilePath(System.String)">
+            <summary>
+            Get the full path to a new temp file
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.FileUtility.DeleteWithLock(System.String)">
+            <summary>
+            Lock around the output path.
+            Delete the existing file with retries.
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.FileUtility.ReplaceWithLock(System.Action{System.String},System.String)">
+            <summary>
+            Lock around the output path.
+            Delete the existing file with retries.
+            Move a file with retries.
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.FileUtility.Replace(System.Action{System.String},System.String)">
+            <summary>
+            Delete the existing file with retries.
+            Move a file with retries.
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.FileUtility.Replace(System.String,System.String)">
+            <summary>
+            Delete the existing file with retries.
+            Move a file with retries.
+            </summary>
+        </member>
         <member name="M:NuGet.Common.FileUtility.Move(System.String,System.String)">
             <summary>
             Move a file with retries.
+            This will not overwrite
             </summary>
         </member>
         <member name="M:NuGet.Common.FileUtility.Delete(System.String)">

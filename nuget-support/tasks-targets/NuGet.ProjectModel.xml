@@ -24,21 +24,17 @@
             Retrieve the full project closure including the root project itself.
             </summary>
         </member>
+        <member name="M:NuGet.ProjectModel.DependencyGraphSpec.SortPackagesByDependencyOrder(System.Collections.Generic.IEnumerable{NuGet.ProjectModel.PackageSpec})">
+            <summary>
+            Order dependencies by children first.
+            </summary>
+        </member>
         <member name="T:NuGet.ProjectModel.ExternalProjectReference">
             <summary>
             Represents a reference to a project produced by an external build system, such as msbuild.
             </summary>
         </member>
         <member name="M:NuGet.ProjectModel.ExternalProjectReference.#ctor(System.String,NuGet.ProjectModel.PackageSpec,System.String,System.Collections.Generic.IEnumerable{System.String})">
-            <summary>
-            Represents a reference to a project produced by an external build system, such as msbuild.
-            </summary>
-            <param name="uniqueName">unique project name or full path</param>
-            <param name="packageSpec">project.json package spec.</param>
-            <param name="msbuildProjectPath">project file if one exists</param>
-            <param name="projectReferences">unique names of the referenced projects</param>
-        </member>
-        <member name="M:NuGet.ProjectModel.ExternalProjectReference.#ctor(System.String,NuGet.ProjectModel.PackageSpec,System.String,System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.IReadOnlyDictionary{System.String,System.Collections.Generic.List{System.String}})">
             <summary>
             Represents a reference to a project produced by an external build system, such as msbuild.
             </summary>
@@ -56,23 +52,9 @@
             <param name="msbuildProjectPath">project file if one exists</param>
             <param name="projectReferences">unique names of the referenced projects</param>
         </member>
-        <member name="M:NuGet.ProjectModel.ExternalProjectReference.#ctor(System.String,System.String,System.String,System.String,System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.IReadOnlyDictionary{System.String,System.Collections.Generic.List{System.String}})">
-            <summary>
-            Represents a reference to a project produced by an external build system, such as msbuild.
-            </summary>
-            <param name="uniqueName">unique project name or full path</param>
-            <param name="packageSpecPath">project.json file path or null if none exists</param>
-            <param name="msbuildProjectPath">project file if one exists</param>
-            <param name="projectReferences">unique names of the referenced projects</param>
-        </member>
         <member name="P:NuGet.ProjectModel.ExternalProjectReference.UniqueName">
             <summary>
             Unique name of the external project
-            </summary>
-        </member>
-        <member name="P:NuGet.ProjectModel.ExternalProjectReference.Properties">
-            <summary>
-            Additional properties from MSBuild
             </summary>
         </member>
         <member name="P:NuGet.ProjectModel.ExternalProjectReference.PackageSpec">
@@ -90,7 +72,7 @@
             Path to msbuild project file. Ex: xproj, csproj
             </summary>
         </member>
-        <member name="P:NuGet.ProjectModel.ExternalProjectReference.PackageSpecPath">
+        <member name="P:NuGet.ProjectModel.ExternalProjectReference.ProjectJsonPath">
             <summary>
             Path to project.json
             </summary>
@@ -155,6 +137,36 @@
             Gets a list of all properties found in the package spec, including
             those not recognized by the parser.
             </summary>
+        </member>
+        <member name="M:NuGet.ProjectModel.PackageSpec.Clone">
+            <summary>
+            Clone a PackageSpec and underlying JObject.
+            </summary>
+        </member>
+        <member name="M:NuGet.ProjectModel.PackageSpecExtensions.GetTargetFramework(NuGet.ProjectModel.PackageSpec,NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            Get the nearest framework available in the project.
+            </summary>
+        </member>
+        <member name="M:NuGet.ProjectModel.PackageSpecExtensions.GetRestoreMetadataFramework(NuGet.ProjectModel.PackageSpec,NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            Get restore metadata framework. This is based on the project's target frameworks, then an 
+            exact match is found under restore metadata.
+            </summary>
+        </member>
+        <member name="M:NuGet.ProjectModel.PackageSpecOperations.GetDependencyLists(NuGet.ProjectModel.PackageSpec,System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework},System.Boolean)">
+            <summary>
+            Get the list of dependencies in the package spec. Unless null is provided, the
+            <paramref name="frameworksToConsider"/> set can be used to get the dependency lists for only for the
+            provided target frameworks. If null is provided, all framework dependency lists are returned.
+            </summary>
+            <param name="spec">The package spec.</param>
+            <param name="includeGenericDependencies">
+            Whether or not the generic dependency list should be returned (dependencies that apply to all target
+            frameworks.
+            </param>
+            <param name="frameworksToConsider">The frameworks to consider.</param>
+            <returns>The sequence of dependency lists.</returns>
         </member>
         <member name="T:NuGet.ProjectModel.PackageSpecReferenceDependencyProvider">
             <summary>
@@ -267,14 +279,37 @@
             Fallback folders.
             </summary>
         </member>
-        <member name="P:NuGet.ProjectModel.ProjectRestoreMetadata.ProjectReferences">
+        <member name="P:NuGet.ProjectModel.ProjectRestoreMetadata.TargetFrameworks">
             <summary>
-            Project reference metadata. This will be added to the non-msbuild dependency reference in the package spec.
+            Framework specific metadata, this may be a subset of the project's frameworks.
+            Operations to determine the nearest framework should be done against the project's frameworks, 
+            and then matched directly to this section.
             </summary>
         </member>
         <member name="P:NuGet.ProjectModel.ProjectRestoreMetadata.OriginalTargetFrameworks">
             <summary>
             Original target frameworks strings. These are used to match msbuild conditionals to $(TargetFramework)
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.ProjectRestoreMetadata.CrossTargeting">
+            <summary>
+            True if $(TargetFrameworks) is used and the build is using Cross Targeting.
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.ProjectRestoreMetadataFrameworkInfo.FrameworkName">
+            <summary>
+            Target framework
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.ProjectRestoreMetadataFrameworkInfo.OriginalFrameworkName">
+            <summary>
+            The original string before parsing the framework name. In some cases, it is important to keep this around
+            because MSBuild framework conditions require the framework name to be the original string (non-normalized).
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.ProjectRestoreMetadataFrameworkInfo.ProjectReferences">
+            <summary>
+            Project references
             </summary>
         </member>
         <member name="P:NuGet.ProjectModel.ProjectRestoreReference.ProjectUniqueName">
@@ -300,6 +335,21 @@
         <member name="F:NuGet.ProjectModel.RestoreOutputType.NETCore">
             <summary>
             MSBuild style, project.assets.json is generated in the RestoreOutputPath folder
+            </summary>
+        </member>
+        <member name="F:NuGet.ProjectModel.RestoreOutputType.DotnetCliTool">
+            <summary>
+            Tool
+            </summary>
+        </member>
+        <member name="F:NuGet.ProjectModel.RestoreOutputType.Standalone">
+            <summary>
+            Non-MSBuild project with no project dependencies.
+            </summary>
+        </member>
+        <member name="F:NuGet.ProjectModel.RestoreOutputType.PackagesConfig">
+            <summary>
+            Packages.config project
             </summary>
         </member>
         <member name="T:NuGet.ProjectModel.Strings">

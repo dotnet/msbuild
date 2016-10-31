@@ -1128,11 +1128,6 @@
                Looks up a localized string similar to File not found: &apos;{0}&apos;..
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.SemVerSpecialVersionTooLong">
-            <summary>
-               Looks up a localized string similar to The special version part cannot exceed 20 characters..
-            </summary>
-        </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.UnknownSchemaVersion">
             <summary>
                Looks up a localized string similar to Unknown schema version &apos;{0}&apos;..

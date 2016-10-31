@@ -1,6 +1,6 @@
 <!--
 ***********************************************************************************************
-Microsoft.NuGet.ImportBefore.props
+Microsoft.NuGet.ImportAfter.targets
 
 WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
           created a backup copy.  Incorrect changes to this file will make it
@@ -10,8 +10,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Import NuGet.targets for Restore -->
   <PropertyGroup>
-    <NuGetProps Condition="'$(NuGetProps)'==''">$(MSBuildExtensionsPath)\Microsoft.NuGet.props</NuGetProps>
+    <NuGetRestoreTargets Condition="'$(NuGetRestoreTargets)'==''">$(MSBuildExtensionsPath)\NuGet.targets</NuGetRestoreTargets>
   </PropertyGroup>
-  <Import Condition="Exists('$(NuGetProps)')" Project="$(NuGetProps)" />
+  <Import Condition="Exists('$(NuGetRestoreTargets)')" Project="$(NuGetRestoreTargets)" />
 </Project>
