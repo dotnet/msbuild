@@ -7,5 +7,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration
     {
         public const string SdkPackageName = "Microsoft.NET.Sdk";
         public const string WebSdkPackageName = "Microsoft.NET.Sdk.Web";
+        public const string TestSdkPackageName = "Microsoft.NET.Test.Sdk";
+        public const string TestSdkPackageVersion = "15.0.0-preview-20161024-02";
+        public const string XUnitPackageName = "xunit";
+        public const string XUnitPackageVersion = "2.2.0-beta3-build3402";
+        public const string XUnitRunnerPackageName = "xunit.runner.visualstudio";
+        public const string XUnitRunnerPackageVersion = "2.2.0-beta4-build1188";
     }
 }

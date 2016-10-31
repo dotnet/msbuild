@@ -99,6 +99,31 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                                 PrivateAssets = "All"
                             }), noFrameworkPackageReferenceItemGroup, mergeExisting: false);
                     break;
+                case ProjectType.Test:
+                    _transformApplicator.Execute(
+                        PackageDependencyInfoTransform.Transform(
+                            new PackageDependencyInfo
+                            {
+                                Name = PackageConstants.TestSdkPackageName,
+                                Version = PackageConstants.TestSdkPackageVersion
+                            }), noFrameworkPackageReferenceItemGroup, mergeExisting: false);
+
+                    _transformApplicator.Execute(
+                        PackageDependencyInfoTransform.Transform(
+                            new PackageDependencyInfo
+                            {
+                                Name = PackageConstants.XUnitPackageName,
+                                Version = PackageConstants.XUnitPackageVersion
+                            }), noFrameworkPackageReferenceItemGroup, mergeExisting: false);
+
+                    _transformApplicator.Execute(
+                        PackageDependencyInfoTransform.Transform(
+                            new PackageDependencyInfo
+                            {
+                                Name = PackageConstants.XUnitRunnerPackageName,
+                                Version = PackageConstants.XUnitRunnerPackageVersion
+                            }), noFrameworkPackageReferenceItemGroup, mergeExisting: false);
+                    break;
                 default:
                     break;
             }

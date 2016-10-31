@@ -258,6 +258,28 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             items[0].Include.Should().Be("System");
         }
 
+        [Fact]
+        public void It_migrates_test_projects_to_have_test_sdk_and_xunit_packagedependencies()
+        {
+            var mockProj = RunPackageDependenciesRuleOnPj(@"
+                {
+                    ""buildOptions"": {
+                        ""emitEntryPoint"": true
+                    },
+                    ""frameworks"": {
+                        ""netcoreapp1.0"": {}
+                    },
+                    ""testRunner"": ""xunit""
+                }");
+
+            var items = mockProj.Items
+                    .Where(i => (i.Include == "Microsoft.NET.Test.Sdk" && i.ItemType == "PackageReference") ||
+                                (i.Include == "xunit" && i.ItemType == "PackageReference") ||
+                                (i.Include == "xunit.runner.visualstudio" && i.ItemType == "PackageReference"));
+
+            items.Should().HaveCount(3);
+        }
+
         private void EmitsPackageReferences(ProjectRootElement mockProj, params Tuple<string, string, string>[] packageSpecs)
         {
             foreach (var packageSpec in packageSpecs)
