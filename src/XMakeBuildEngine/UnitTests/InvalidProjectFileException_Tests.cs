@@ -82,5 +82,36 @@ namespace Microsoft.Build.UnitTests
                 File.Delete(file);
             }
         }
+
+        /// <summary>
+        /// Regression test for https://github.com/Microsoft/msbuild/issues/1286
+        /// </summary>
+        [Fact]
+        public void LogErrorShouldHavePathAndLocation()
+        {
+            string file = Path.GetTempPath() + Guid.NewGuid().ToString("N");
+
+            try
+            {
+                File.WriteAllText(file, ObjectModelHelpers.CleanupFileContents(@"
+                    <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                        <Target Name=[invalid] />
+                    </Project>"));
+
+                var _ = ObjectModelHelpers.BuildTempProjectFileExpectFailure(file);
+
+                Assert.True(false, "Loading an invalid project should have thrown an InvalidProjectFileException.");
+            }
+            catch (InvalidProjectFileException e)
+            {
+                Assert.Equal(3, e.LineNumber);
+                Assert.Equal(38, e.ColumnNumber);
+                Assert.Equal(file, e.ProjectFile); // https://github.com/Microsoft/msbuild/issues/1286
+            }
+            finally
+            {
+                File.Delete(file);
+            }
+        }
     }
 }
