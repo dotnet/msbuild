@@ -13,8 +13,8 @@
     "NuGet.Frameworks": "4.0.0-rc-2037",
     "NuGet.ProjectModel": "4.0.0-rc-2037",
 
-    "Microsoft.Build": "15.1.0-preview-000366-00",
-    "Microsoft.Build.Utilities.Core": "15.1.0-preview-000366-00"
+    "Microsoft.Build": "15.1.0-preview-000370-00",
+    "Microsoft.Build.Utilities.Core": "15.1.0-preview-000370-00"
   },
   "frameworks": {
     "netstandard1.5": {

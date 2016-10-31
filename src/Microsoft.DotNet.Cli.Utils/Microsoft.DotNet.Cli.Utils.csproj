@@ -36,10 +36,10 @@
       <Version>4.0.0-rc-2037</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Build">
-      <Version>15.1.319-preview5</Version>
+      <Version>15.1.0-preview-000370-00</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Build.Utilities.Core">
-      <Version>15.1.319-preview5</Version>
+      <Version>15.1.0-preview-000370-00</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">

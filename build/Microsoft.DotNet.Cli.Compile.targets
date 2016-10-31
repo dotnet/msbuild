@@ -97,7 +97,7 @@
 
     <!-- Workaround for https://github.com/dotnet/sdk/issues/115 -->
     <ItemGroup>
-      <HackFilesToCopy Include="$(NuGetPackagesDir)\microsoft.build.runtime\15.1.319-preview5\contentFiles\any\netcoreapp1.0\**;$(NuGetPackagesDir)\microsoft.codeanalysis.build.tasks\2.0.0-beta6-60922-08\contentFiles\any\any\**;" />
+      <HackFilesToCopy Include="$(NuGetPackagesDir)\microsoft.build.runtime\15.1.0-preview-000370-00\contentFiles\any\netcoreapp1.0\**;$(NuGetPackagesDir)\microsoft.codeanalysis.build.tasks\2.0.0-beta6-60922-08\contentFiles\any\any\**;" />
     </ItemGroup>
     <Copy SourceFiles="@(HackFilesToCopy)"
           DestinationFiles="@(HackFilesToCopy->'$(SdkOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />

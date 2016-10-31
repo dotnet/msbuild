@@ -15,7 +15,7 @@
       <Version>1.0.1</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Build.Runtime">
-      <Version>15.1.319-preview5</Version>
+      <Version>15.1.0-preview-000370-00</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>

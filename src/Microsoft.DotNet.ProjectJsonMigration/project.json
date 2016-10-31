@@ -11,7 +11,7 @@
     "Microsoft.DotNet.Cli.Utils": {
       "target": "project"
     },
-    "Microsoft.Build": "15.1.0-preview-000366-00",
+    "Microsoft.Build": "15.1.0-preview-000370-00",
     "Microsoft.CodeAnalysis.CSharp": "2.0.0-beta6-60922-08"
   },
   "frameworks": {
