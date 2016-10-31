@@ -8,6 +8,7 @@ using System.Xml.Linq;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
+using System.Collections.Generic;
 
 namespace Microsoft.NET.TestFramework
 {
@@ -15,6 +16,8 @@ namespace Microsoft.NET.TestFramework
     {
         private readonly string _testAssetRoot;
         private readonly string _buildVersion;
+
+        private List<string> _projectFiles = new List<string>();
 
         public string TestRoot => Path;
 
@@ -63,6 +66,8 @@ namespace Microsoft.NET.TestFramework
                     {
                         project.Save(file);
                     }
+
+                    _projectFiles.Add(destFile);
                 }
                 else
                 {
@@ -71,6 +76,23 @@ namespace Microsoft.NET.TestFramework
             }
 
             return this;
+        }
+
+        public TestAsset WithProjectChanges(Action<XDocument> xmlAction)
+        {
+            foreach (var projectFile in _projectFiles)
+            {
+                var project = XDocument.Load(projectFile);
+
+                xmlAction(project);
+
+                using (var file = File.CreateText(projectFile))
+                {
+                    project.Save(file);
+                }
+            }
+            return this;
+            
         }
 
         public TestAsset Restore(string relativePath = "", params string[] args)

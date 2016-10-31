@@ -195,62 +195,61 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("UnknownFramework,Version=v3.14", new string[] { "UNKNOWNFRAMEWORK3_14" }, false)]
         public void It_implicitly_defines_compilation_constants_for_the_target_framework(string targetFramework, string[] expectedDefines, bool buildOnlyOnWindows)
         {
+            bool shouldCompile = true;
+
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibrary", "ImplicitFrameworkConstants", targetFramework)
-                .WithSource();
+                .WithSource()
+                .WithProjectChanges(project =>
+                {
+                    //  Update target framework in project
+                    var ns = XNamespace.Get("http://schemas.microsoft.com/developer/msbuild/2003");
+                    var targetFrameworkProperties = project.Root
+                        .Elements(ns + "PropertyGroup")
+                        .Elements(ns + "TargetFramework")
+                        .ToList();
+
+                    targetFrameworkProperties.Count.Should().Be(1);
+
+                    if (targetFramework.Contains(",Version="))
+                    {
+                        //  We use the full TFM for frameworks we don't have built-in support for targeting, so we don't want to run the Compile target
+                        shouldCompile = false;
+
+                        var frameworkName = new FrameworkName(targetFramework);
+
+                        var targetFrameworkProperty = targetFrameworkProperties.Single();
+                        targetFrameworkProperty.AddBeforeSelf(new XElement(ns + "TargetFrameworkIdentifier", frameworkName.Identifier));
+                        targetFrameworkProperty.AddBeforeSelf(new XElement(ns + "TargetFrameworkVersion", "v" + frameworkName.Version.ToString()));
+                        if (!string.IsNullOrEmpty(frameworkName.Profile))
+                        {
+                            targetFrameworkProperty.AddBeforeSelf(new XElement(ns + "TargetFrameworkProfile", frameworkName.Profile));
+                        }
+
+                        //  For the NuGet restore task to work with package references, it needs the TargetFramework property to be set.
+                        //  Otherwise we would just remove the property.
+                        targetFrameworkProperty.SetValue(targetFramework);
+                    }
+                    else
+                    {
+                        shouldCompile = true;
+                        targetFrameworkProperties.Single().SetValue(targetFramework);
+                    }
+                })
+                .Restore(relativePath: "TestLibrary");
+
+            if (buildOnlyOnWindows && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                shouldCompile = false;
+            }
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
             var getValuesCommand = new GetValuesCommand(Stage0MSBuild, libraryProjectDirectory,
-                targetFramework, "DefineConstants");
-
-            //  Update target framework in project
-            var ns = XNamespace.Get("http://schemas.microsoft.com/developer/msbuild/2003");
-            var project = XDocument.Load(getValuesCommand.FullPathProjectFile);
-
-            var targetFrameworkProperties = project.Root
-                .Elements(ns + "PropertyGroup")
-                .Elements(ns + "TargetFramework")
-                .ToList();
-
-            targetFrameworkProperties.Count.Should().Be(1);
-
-            if (targetFramework.Contains(",Version="))
+                targetFramework, "DefineConstants")
             {
-                //  We use the full TFM for frameworks we don't have built-in support for targeting, so we don't want to run the Compile target
-                getValuesCommand.ShouldCompile = false;
-
-                var frameworkName = new FrameworkName(targetFramework);
-
-                var targetFrameworkProperty = targetFrameworkProperties.Single();
-                targetFrameworkProperty.AddBeforeSelf(new XElement(ns + "TargetFrameworkIdentifier", frameworkName.Identifier));
-                targetFrameworkProperty.AddBeforeSelf(new XElement(ns + "TargetFrameworkVersion", "v" + frameworkName.Version.ToString()));
-                if (!string.IsNullOrEmpty(frameworkName.Profile))
-                {
-                    targetFrameworkProperty.AddBeforeSelf(new XElement(ns + "TargetFrameworkProfile", frameworkName.Profile));
-                }
-
-                //  For the NuGet restore task to work with package references, it needs the TargetFramework property to be set.
-                //  Otherwise we would just remove the property.
-                targetFrameworkProperty.SetValue(targetFramework);
-            }
-            else
-            {
-                getValuesCommand.ShouldCompile = true;
-                targetFrameworkProperties.Single().SetValue(targetFramework);
-            }
-
-            if (buildOnlyOnWindows && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                getValuesCommand.ShouldCompile = false;
-            }
-
-            using (var file = File.CreateText(getValuesCommand.FullPathProjectFile))
-            {
-                project.Save(file);
-            }
-
-            testAsset.Restore(relativePath: "TestLibrary");
+                ShouldCompile = shouldCompile
+            };
 
             getValuesCommand
                 .Execute()
