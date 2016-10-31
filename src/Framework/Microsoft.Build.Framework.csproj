@@ -7,6 +7,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Microsoft.Build.Framework</RootNamespace>
     <AssemblyName>Microsoft.Build.Framework</AssemblyName>
+    <DoNotLocalizeProject>true</DoNotLocalizeProject>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
