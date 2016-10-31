@@ -14,6 +14,9 @@ TestAssets/buildVersion.txt
 # dotnet cli install directory
 .dotnet_cli
 
+# nuget install directory
+.nuget
+
 # Build results
 [Bb]inaries/
 [Dd]ebug/
