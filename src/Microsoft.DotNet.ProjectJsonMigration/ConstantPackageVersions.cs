@@ -2,6 +2,6 @@
 {
     internal class ConstantPackageVersions
     {
-        public const string WebSdkPackageVersion = "1.0.0-alpha-20161027-4-91";
+        public const string WebSdkPackageVersion = "1.0.0-alpha-20161026-2";
     }
 }
