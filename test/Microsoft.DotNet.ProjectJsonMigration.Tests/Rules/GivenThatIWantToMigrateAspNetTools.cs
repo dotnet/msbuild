@@ -44,7 +44,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                     }
                 }");
 
-            var packageRef = mockProj.Items.Where(i => i.Include != "Microsoft.NET.Sdk" && i.ItemType == "PackageReference").Should().BeEmpty();
+            var packageRef = mockProj.Items.Where(i =>
+                i.Include != "Microsoft.NET.Sdk" &&
+                i.Include != "NETStandard.Library" &&
+                i.ItemType == "PackageReference").Should().BeEmpty();
         }
 
         [Theory]
