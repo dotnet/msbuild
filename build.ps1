@@ -66,8 +66,25 @@ $msbuildSummaryLog = Join-Path -path $logPath -childPath "templates.log"
 $msbuildWarningLog = Join-Path -path $logPath -childPath "templates.wrn"
 $msbuildFailureLog = Join-Path -path $logPath -childPath "templates.err"
 
+# TODO: https://github.com/dotnet/sdk/issues/342: convert Templates\* from project.json to PackageReference 
+# In the meantime, use Windows nuget.exe v3.4.4 to restore packages for the templates solution.
+$nugetDir = "$RepoRoot\.nuget"
+if (!(Test-Path $nugetDir))
+{
+    mkdir $nugetDir
+}
+
+$nuget = "$nugetDir\nuget.exe"
+if (!(Test-Path $nuget))
+{
+    Invoke-WebRequest "https://dist.nuget.org/win-x86-commandline/v3.4.4/NuGet.exe" -OutFile $nuget
+}
+
+& $nuget restore $RepoRoot\sdk-templates.sln
+if($LASTEXITCODE -ne 0) { throw "Failed to restore nuget packages for templates" }
+
 msbuild $commonBuildArgs /nr:false /p:BuildTemplates=true /flp1:Summary`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildSummaryLog /flp2:WarningsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildWarningLog /flp3:ErrorsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildFailureLog
-if($LASTEXITCODE -ne 0) { throw "Failed to build" }
+if($LASTEXITCODE -ne 0) { throw "Failed to build templates" }
 
 # NET Core Build 
 $msbuildSummaryLog = Join-Path -path $logPath -childPath "sdk.log"

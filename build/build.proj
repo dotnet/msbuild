@@ -21,27 +21,28 @@
 
     <VsManProjectFile Include="$(RepositoryRootDirectory)src\VsixV3\Microsoft.VisualStudio.Templates.VisualBasic.NetCore.vsmanproj" />
     <VsManProjectFile Include="$(RepositoryRootDirectory)src\VsixV3\Microsoft.VisualStudio.Templates.CSharp.NetCore.vsmanproj" />
-  </ItemGroup>
 
+    <!-- TODO: https://github.com/dotnet/sdk/issues/342: convert Dependencies\* from project.json to PackageReference-->
+    <DirectoryToNugetRestore Include="$(RepositoryRootDirectory)src\Dependencies" />
+
+    <ProjectToDotnetRestore Include="$(RepositoryRootDirectory)src\Tasks\Microsoft.NET.Build.Tasks\Microsoft.NET.Build.Tasks.csproj" />
+    <ProjectToDotnetRestore Include="$(RepositoryRootDirectory)src\Tasks\Microsoft.NET.Build.Tasks.UnitTests\Microsoft.NET.Build.Tasks.UnitTests.csproj" />
+    <ProjectToDotnetRestore Include="$(RepositoryRootDirectory)test\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
+    <ProjectToDotnetRestore Include="$(RepositoryRootDirectory)test\Microsoft.NET.Build.Tests\Microsoft.NET.Build.Tests.csproj" />
+    <ProjectToDotnetRestore Include="$(RepositoryRootDirectory)test\Microsoft.NET.Pack.Tests\Microsoft.NET.Pack.Tests.csproj" />
+    <ProjectToDotnetRestore Include="$(RepositoryRootDirectory)test\Microsoft.NET.Publish.Tests\Microsoft.NET.Publish.Tests.csproj" />
+  </ItemGroup>
   <Target Name="RestorePackages">
 
-    <Message Text="Restoring packages for %(SolutionFile.Filename)" Importance="high" />
+    <Message Text="Restoring nuget packages" Importance="high" />
 
-    <Exec Command="$(DotNetTool) nuget restore src test --legacy-packages-directory --verbosity Minimal"
+    <Exec Command="$(DotNetTool) nuget restore %(DirectoryToNugetRestore.Identity) --legacy-packages-directory --verbosity Minimal"
           WorkingDirectory="$(RepositoryRootDirectory)"
           />
 
-    <ItemGroup>
-      <ProjectToRestore3 Include="src\Tasks\Microsoft.NET.Build.Tasks\Microsoft.NET.Build.Tasks.csproj" />
-      <ProjectToRestore3 Include="src\Tasks\Microsoft.NET.Build.Tasks.UnitTests\Microsoft.NET.Build.Tasks.UnitTests.csproj" />
-      <ProjectToRestore3 Include="test\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
-      <ProjectToRestore3 Include="test\Microsoft.NET.Build.Tests\Microsoft.NET.Build.Tests.csproj" />
-      <ProjectToRestore3 Include="test\Microsoft.NET.Pack.Tests\Microsoft.NET.Pack.Tests.csproj" />
-      <ProjectToRestore3 Include="test\Microsoft.NET.Publish.Tests\Microsoft.NET.Publish.Tests.csproj" />
-    </ItemGroup>
 
     <!-- work around https://github.com/dotnet/sdk/issues/203 by passing in /p:SkipInvalidConfigurations=true /p:_InvalidConfigurationWarning=false -->
-    <Exec Command="$(DotNetTool) restore %(ProjectToRestore3.Identity) /v:minimal /p:SkipInvalidConfigurations=true /p:_InvalidConfigurationWarning=false"
+    <Exec Command="$(DotNetTool) restore %(ProjectToDotnetRestore.Identity) /v:minimal /p:SkipInvalidConfigurations=true /p:_InvalidConfigurationWarning=false"
           Condition="'$(BuildTemplates)' != 'true'"
           WorkingDirectory="$(RepositoryRootDirectory)"
           />
