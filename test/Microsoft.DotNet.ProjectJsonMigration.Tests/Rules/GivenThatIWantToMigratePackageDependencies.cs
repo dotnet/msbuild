@@ -259,6 +259,28 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
+        public void It_migrates_test_projects_to_have_test_sdk()
+        {
+            var mockProj = RunPackageDependenciesRuleOnPj(@"
+                {
+                    ""buildOptions"": {
+                        ""emitEntryPoint"": true
+                    },
+                    ""frameworks"": {
+                        ""netcoreapp1.0"": {}
+                    },
+                    ""testRunner"": ""mstest""
+                }");
+
+            var items = mockProj.Items
+                    .Where(i => (i.Include == "Microsoft.NET.Test.Sdk" && i.ItemType == "PackageReference") ||
+                                (i.Include == "xunit" && i.ItemType == "PackageReference") ||
+                                (i.Include == "xunit.runner.visualstudio" && i.ItemType == "PackageReference"));
+
+            items.Should().HaveCount(1);
+        }
+
+        [Fact]
         public void It_migrates_test_projects_to_have_test_sdk_and_xunit_packagedependencies()
         {
             var mockProj = RunPackageDependenciesRuleOnPj(@"

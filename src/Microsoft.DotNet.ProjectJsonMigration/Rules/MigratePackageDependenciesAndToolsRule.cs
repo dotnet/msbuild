@@ -86,7 +86,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             MigrationSettings migrationSettings,
             ProjectItemGroupElement noFrameworkPackageReferenceItemGroup)
         {
-            var type = migrationRuleInputs.DefaultProjectContext.ProjectFile.GetProjectType();
+            var project = migrationRuleInputs.DefaultProjectContext.ProjectFile;
+            var type = project.GetProjectType();
             switch (type)
             {
                 case ProjectType.Web:
@@ -108,21 +109,24 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                                 Version = PackageConstants.TestSdkPackageVersion
                             }), noFrameworkPackageReferenceItemGroup, mergeExisting: false);
 
-                    _transformApplicator.Execute(
-                        PackageDependencyInfoTransform.Transform(
-                            new PackageDependencyInfo
-                            {
-                                Name = PackageConstants.XUnitPackageName,
-                                Version = PackageConstants.XUnitPackageVersion
-                            }), noFrameworkPackageReferenceItemGroup, mergeExisting: false);
+                    if (project.TestRunner.Equals("xunit", StringComparison.OrdinalIgnoreCase))
+                    {
+                        _transformApplicator.Execute(
+                            PackageDependencyInfoTransform.Transform(
+                                new PackageDependencyInfo
+                                {
+                                    Name = PackageConstants.XUnitPackageName,
+                                    Version = PackageConstants.XUnitPackageVersion
+                                }), noFrameworkPackageReferenceItemGroup, mergeExisting: false);
 
-                    _transformApplicator.Execute(
-                        PackageDependencyInfoTransform.Transform(
-                            new PackageDependencyInfo
-                            {
-                                Name = PackageConstants.XUnitRunnerPackageName,
-                                Version = PackageConstants.XUnitRunnerPackageVersion
-                            }), noFrameworkPackageReferenceItemGroup, mergeExisting: false);
+                        _transformApplicator.Execute(
+                            PackageDependencyInfoTransform.Transform(
+                                new PackageDependencyInfo
+                                {
+                                    Name = PackageConstants.XUnitRunnerPackageName,
+                                    Version = PackageConstants.XUnitRunnerPackageVersion
+                                }), noFrameworkPackageReferenceItemGroup, mergeExisting: false);
+                    }
                     break;
                 default:
                     break;
