@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.TestFramework
         public TestAssetInstance WithNuGetConfig(string nugetCache)
         {
             var thisAssembly = typeof(TestAssetInstance).GetTypeInfo().Assembly;
-            var newNuGetConfigPath = Path.Combine(Root.FullName, "NuGet.config");
+            var newNuGetConfig = Root.GetFile("Nuget.config");
 
             using (var resource = thisAssembly.GetManifestResourceStream("NuGet.template.config"))
             {
@@ -80,10 +80,11 @@ namespace Microsoft.DotNet.TestFramework
                 var content = streamReader.ReadToEnd();
                 content = content.Replace("$fullpath$", nugetCache);
                 
-                using (var newNuGetConfig = new FileStream(newNuGetConfigPath, FileMode.Create, FileAccess.Write))
+                using (var newNuGetConfigStream =
+                    new FileStream(newNuGetConfig.FullName, FileMode.Create, FileAccess.Write))
                 {
                     var contentBytes = new UTF8Encoding(true).GetBytes(content);
-                    newNuGetConfig.Write(contentBytes, 0, contentBytes.Length);
+                    newNuGetConfigStream.Write(contentBytes, 0, contentBytes.Length);
                 }
             }
 
