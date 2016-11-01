@@ -75,9 +75,9 @@ namespace Microsoft.NET.TestFramework.Assertions
             return new AndConstraint<DirectoryInfoAssertions>(new DirectoryInfoAssertions(dir));
         }
 
-        public AndConstraint<DirectoryInfoAssertions> OnlyHaveFiles(IEnumerable<string> expectedFiles)
+        public AndConstraint<DirectoryInfoAssertions> OnlyHaveFiles(IEnumerable<string> expectedFiles, SearchOption searchOption = SearchOption.AllDirectories)
         {
-            var actualFiles = _dirInfo.EnumerateFiles("*", SearchOption.AllDirectories)
+            var actualFiles = _dirInfo.EnumerateFiles("*", searchOption)
                               .Select(f => f.FullName.Substring(_dirInfo.FullName.Length + 1) // make relative to _dirInfo
                               .Replace("\\", "/")); // normalize separator
 

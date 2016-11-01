@@ -65,6 +65,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PublishDir Condition="'$(PublishDir)' == ''">$(OutputPath)$(PublishDirName)\</PublishDir>
   </PropertyGroup>
 
+  <!-- Add conditional compilation symbols for the target framework (for example NET461, NETSTANDARD2_0, NETCOREAPP1_0) -->
   <PropertyGroup Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' and '$(TargetFrameworkIdentifier)' != '.NETPortable'">
     <_FrameworkIdentifierForImplicitDefine>$(TargetFrameworkIdentifier.Replace('.', '').ToUpperInvariant())</_FrameworkIdentifierForImplicitDefine>
     <_FrameworkIdentifierForImplicitDefine Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework'">NET</_FrameworkIdentifierForImplicitDefine>
@@ -78,5 +79,21 @@ Copyright (c) .NET Foundation. All rights reserved.
     
     <DefineConstants>$(DefineConstants);$(_FrameworkIdentifierForImplicitDefine)$(_FrameworkVersionForImplicitDefine)</DefineConstants>
   </PropertyGroup>
+
+  <!-- Handle XML documentation file settings -->
+  <PropertyGroup Condition="'$(GenerateDocumentationFile)' == 'true' and '$(DocumentationFile)' == ''">
+    <DocumentationFile>$(IntermediateOutputPath)\$(AssemblyName).xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(GenerateDocumentationFile)' == 'false' and '$(DocumentationFile)' != ''">
+    <_InvalidDocumentationFileSettingsError>GenerateDocumentationFile is false but DocumentationFile is '$(DocumentationFile)', which is an invalid combination.  Either set GenerateDocumentationFile to true (or leave it unset), or leave DocumentationFile unset.</_InvalidDocumentationFileSettingsError>
+  </PropertyGroup>
+  <Target Name="_CheckForInvalidDocumentationFileSettings" BeforeTargets="_CheckForInvalidConfigurationAndPlatform">
+    <Error Condition="'$(_InvalidDocumentationFileSettingsError)' != ''" Text="$(_InvalidDocumentationFileSettingsError)" />
+  </Target>
+
+  <!-- Add a project capability so that the project properties in the IDE can show the option to generate an XML documentation file without specifying the filename -->
+  <ItemGroup>
+    <ProjectCapability Include="GenerateDocumentationFile" />
+  </ItemGroup>
 
 </Project>

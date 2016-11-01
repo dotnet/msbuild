@@ -181,6 +181,124 @@ namespace Microsoft.NET.Build.Tests
             File.WriteAllText(path, contents);
         }
 
+        [Fact]
+        public void It_creates_a_documentation_file()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("AppWithLibrary")
+                .WithSource()
+                .WithProjectChanges(project =>
+                {
+                    var ns = XNamespace.Get("http://schemas.microsoft.com/developer/msbuild/2003");
+                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").FirstOrDefault();
+                    propertyGroup.Should().NotBeNull();
+
+                    propertyGroup.Add(new XElement(ns + "GenerateDocumentationFile", "true"));
+                })
+                .Restore(relativePath: "TestLibrary");
+
+            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
+
+            var buildCommand = new BuildCommand(Stage0MSBuild, libraryProjectDirectory);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory("netstandard1.5");
+
+            outputDirectory.Should().OnlyHaveFiles(new[] {
+                "TestLibrary.dll",
+                "TestLibrary.pdb",
+                "TestLibrary.deps.json",
+                "TestLibrary.xml"
+            });
+
+            new DirectoryInfo(libraryProjectDirectory).Should().OnlyHaveFiles(new[]
+            {
+                "Helper.cs",
+                "TestLibrary.csproj"
+            }, SearchOption.TopDirectoryOnly);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_allows_us_to_override_the_documentation_file_name(bool setGenerateDocumentationFileProperty)
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("AppWithLibrary")
+                .WithSource()
+                .WithProjectChanges(project =>
+                {
+                    var ns = XNamespace.Get("http://schemas.microsoft.com/developer/msbuild/2003");
+                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").FirstOrDefault();
+                    propertyGroup.Should().NotBeNull();
+
+                    if (setGenerateDocumentationFileProperty)
+                    {
+                        propertyGroup.Add(new XElement(ns + "GenerateDocumentationFile", "true"));
+                    }
+                    propertyGroup.Add(new XElement(ns + "DocumentationFile", "TestLibraryDocumentation.xml"));
+                })
+                .Restore(relativePath: "TestLibrary");
+
+            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
+
+            var buildCommand = new BuildCommand(Stage0MSBuild, libraryProjectDirectory);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory("netstandard1.5");
+
+            outputDirectory.Should().OnlyHaveFiles(new[] {
+                "TestLibrary.dll",
+                "TestLibrary.pdb",
+                "TestLibrary.deps.json",
+                "TestLibraryDocumentation.xml"
+            });
+
+            //  Due to the way the DocumentationFile works, if you specify an unrooted filename, then the documentation file will be generated in that
+            //  location relative to the project folder, and then copied to the output folder.
+            new DirectoryInfo(libraryProjectDirectory).Should().OnlyHaveFiles(new[]
+            {
+                "Helper.cs",
+                "TestLibrary.csproj",
+                "TestLibraryDocumentation.xml"
+            }, SearchOption.TopDirectoryOnly);
+        }
+
+        [Fact]
+        public void Invalid_documentation_settings_result_in_an_error()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("AppWithLibrary")
+                .WithSource()
+                .WithProjectChanges(project =>
+                {
+                    var ns = XNamespace.Get("http://schemas.microsoft.com/developer/msbuild/2003");
+                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").FirstOrDefault();
+                    propertyGroup.Should().NotBeNull();
+
+                    propertyGroup.Add(new XElement(ns + "GenerateDocumentationFile", "false"));
+                    propertyGroup.Add(new XElement(ns + "DocumentationFile", "TestLibraryDocumentation.xml"));
+                })
+                .Restore(relativePath: "TestLibrary");
+
+            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
+
+            var buildCommand = new BuildCommand(Stage0MSBuild, libraryProjectDirectory);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Fail();
+        }
+
         [Theory]
         [InlineData(".NETStandard,Version=v1.0", new[] { "NETSTANDARD1_0" }, false)]
         [InlineData("netstandard1.3", new[] { "NETSTANDARD1_3" }, false)]
