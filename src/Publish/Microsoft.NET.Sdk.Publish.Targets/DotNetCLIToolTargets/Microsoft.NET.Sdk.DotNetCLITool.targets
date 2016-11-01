@@ -1,0 +1,89 @@
+﻿<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.DotNetCLITool.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your web deploy projects from the command-line or the IDE.
+
+This file defines the steps in the standard package/publish process for collecting only files to run the web appliation.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!--
+  ***********************************************************************************************
+  TARGET : DotNet CLI Publish Command : Pre-Publish
+  ***********************************************************************************************
+ -->
+
+  <PropertyGroup>
+    <DotNetCLIPrePublishDependsOn>
+      ManagedProjectSystemPrePublish;
+    </DotNetCLIPrePublishDependsOn>
+  </PropertyGroup>
+
+  <Target Name ="DotNetCLIPrePublish"
+          DependsOnTargets="$(DotNetCLIPrePublishDependsOn)"
+          BeforeTargets="Publish"
+          Condition="'$(DeployOnBuild)' != 'true'">
+    <PropertyGroup>
+      <_IsManagedProject Condition="%(ProjectCapability.Identity) == 'Managed'">true</_IsManagedProject>
+      <_IsAspNetCoreProject Condition="%(ProjectCapability.Identity) == 'AspNetCore'">true</_IsAspNetCoreProject>
+    </PropertyGroup>
+  </Target>
+
+    <PropertyGroup>
+      <ManagedProjectSystemPrePublishDependsOn>
+        BeforePublish;
+      </ManagedProjectSystemPrePublishDependsOn>
+    </PropertyGroup>
+
+    <Target Name="ManagedProjectSystemPrePublish"
+            Condition="'$(_IsManagedProject)' == 'true' And '$(_IsAspNetCoreProject)' == 'true'"
+            DependsOnTargets="$(ManagedProjectSystemPrePublishDependsOn)">
+    </Target>
+
+    <!--
+  ***********************************************************************************************
+  TARGET : DotNet CLI Publish Command: Post-Publish
+  ***********************************************************************************************
+ -->
+  <PropertyGroup>
+    <DotNetCLIPostPublishDependsOn>
+      ManagedProjectSystemPostPublish;
+    </DotNetCLIPostPublishDependsOn>
+  </PropertyGroup>
+
+  <Target Name ="DotNetCLIPostPublish"
+          DependsOnTargets="$(DotNetCLIPostPublishDependsOn)"
+          AfterTargets="Publish"
+          Condition="'$(DeployOnBuild)' != 'true'">
+    <PropertyGroup>
+      <_IsManagedProject Condition="%(ProjectCapability.Identity) == 'Managed'">true</_IsManagedProject>
+      <_IsAspNetCoreProject Condition="%(ProjectCapability.Identity) == 'AspNetCore'">true</_IsAspNetCoreProject>
+    </PropertyGroup>
+  </Target>
+
+
+  <PropertyGroup>
+    <ManagedProjectSystemPostPublishDependsOn>
+      _InitPublishIntermediateOutputPath;
+      $(_DotNetPublishTransformFiles);
+    </ManagedProjectSystemPostPublishDependsOn>
+  </PropertyGroup>
+
+  <Target Name="ManagedProjectSystemPostPublish"
+          Condition="'$(_IsManagedProject)' == 'true' And '$(_IsAspNetCoreProject)' == 'true'"
+          DependsOnTargets="$(ManagedProjectSystemPostPublishDependsOn)">
+  </Target>
+
+  <Target Name="_InitPublishIntermediateOutputPath">
+    <PropertyGroup>
+      <PublishIntermediateOutputPath>$(PublishDir)</PublishIntermediateOutputPath>
+    </PropertyGroup>
+  </Target>
+  
+</Project>

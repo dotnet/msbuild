@@ -84,6 +84,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BeforePublishTargets", "Bef
 		src\Publish\Microsoft.NET.Sdk.Publish.Targets\BeforePublishTargets\Microsoft.NET.Sdk.BeforePublish.targets = src\Publish\Microsoft.NET.Sdk.Publish.Targets\BeforePublishTargets\Microsoft.NET.Sdk.BeforePublish.targets
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DotNetCLIToolTargets", "DotNetCLIToolTargets", "{81FA4A9E-2FA0-4146-AF24-E51F5CA83A74}"
+	ProjectSection(SolutionItems) = preProject
+		src\Publish\Microsoft.NET.Sdk.Publish.Targets\DotNetCLIToolTargets\Microsoft.NET.Sdk.DotNetCLITool.targets = src\Publish\Microsoft.NET.Sdk.Publish.Targets\DotNetCLIToolTargets\Microsoft.NET.Sdk.DotNetCLITool.targets
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -163,5 +168,6 @@ Global
 		{66964EC2-712A-451A-AB4F-33F18D8F54F1} = {E537A967-65B7-46F5-8574-01F8C08F385F}
 		{37FCE9FE-671D-4F3E-B3C1-FE90AC4CF822} = {569AAC15-FF3C-49CE-9CFF-AD1628E48057}
 		{F89FF685-C6FD-4B21-A57A-E0BB45AFF1E6} = {569AAC15-FF3C-49CE-9CFF-AD1628E48057}
+		{81FA4A9E-2FA0-4146-AF24-E51F5CA83A74} = {569AAC15-FF3C-49CE-9CFF-AD1628E48057}
 	EndGlobalSection
 EndGlobal

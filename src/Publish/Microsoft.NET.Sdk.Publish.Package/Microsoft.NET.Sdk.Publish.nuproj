@@ -41,6 +41,10 @@
       <Destination>build\netstandard1.0\PublishProfiles</Destination>
     </NuGetContent>
 
+    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\DotNetCLIToolTargets\*.*">
+      <Destination>build\netstandard1.0\DotNetCLIToolTargets</Destination>
+    </NuGetContent>
+
     <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\Microsoft.NET.Sdk.Publish.targets">
       <Destination>build\netstandard1.0</Destination>
     </NuGetContent>
