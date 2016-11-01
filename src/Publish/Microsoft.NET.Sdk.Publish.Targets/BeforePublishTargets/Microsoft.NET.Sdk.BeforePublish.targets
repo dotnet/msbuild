@@ -22,16 +22,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="BeforePublish" 
           DependsOnTargets="$(BeforePublishDependsOn)">
 
-    <!-- Run the restore for the specific RID for standalone applications -->
-    <!--<PropertyGroup>
+    <PropertyGroup>
       <_IsManagedProject Condition="%(ProjectCapability.Identity) == 'Managed'">true</_IsManagedProject>
-    </PropertyGroup>-->
+    </PropertyGroup>
     
-    <!-- Running the restore from CLI is not supported because necessary props and taregts will not be imported. 
-         Temporary fix is to add the RuntimeIdentier to the csproj. -->
-    
-    <!--<Exec Condition="'$(_IsManagedProject)' == 'true' And '$(RuntimeIdentifier)' != ''"
-          Command="dotnet restore3 $(MSBuildProjectFile) /p:RuntimeIdentifier=$(RuntimeIdentifier);TargetFramework=$(PublishFramework)"
-          WorkingDirectory="$(MSBuildProjectDirectory)" />-->
   </Target>
 </Project>

@@ -30,6 +30,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <_ComputeTargetsDir Condition=" '$(_ComputeTargetsDir)'=='' ">$(MSBuildThisFileDirectory)ComputeTargets\</_ComputeTargetsDir>
     <_PublishTargetsDir Condition=" '$(_PublishTargetsDir)'=='' ">$(MSBuildThisFileDirectory)PublishTargets\</_PublishTargetsDir>
     <_PublishProfilesDir Condition=" '$(_PublishProfilesDir)'=='' ">$(MSBuildThisFileDirectory)PublishProfiles\</_PublishProfilesDir>
+    <_DotNetCLIToolTargetsDir Condition=" '$(_DotNetCLIToolTargetsDir)'=='' ">$(MSBuildThisFileDirectory)DotNetCLIToolTargets\</_DotNetCLIToolTargetsDir>
   </PropertyGroup>
 
   <!-- Extension points for BeforePublish and AfterPublish-->
@@ -129,7 +130,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
  -->
   
   <Import Project="$(_PublishTargetsDir)Microsoft.NET.Sdk.Publish.$(PublishProtocol).targets" Condition="Exists('$(_PublishTargetsDir)Microsoft.NET.Sdk.Publish.$(PublishProtocol).targets')"/>
-  
+
+  <!--
+  ***********************************************************************************************
+  Import the DotNetCLITool target
+  ***********************************************************************************************
+ -->
+
+  <Import Project="$(_DotNetCLIToolTargetsDir)Microsoft.NET.Sdk.DotNetCLITool.targets" Condition="Exists('$(_DotNetCLIToolTargetsDir)Microsoft.NET.Sdk.DotNetCLITool.targets')"/>
+
   <!--
   ***********************************************************************************************
   TARGET : DotNetPublish
