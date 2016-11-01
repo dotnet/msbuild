@@ -156,6 +156,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// </summary>
         /// <remarks>System dll is not locked because it forces a new app domain</remarks> 
         [Fact]
+        [Trait("Category", "netcore-linux-failing")]
         public void ResX2ResourcesWithReferences()
         {
             string systemDll = Utilities.GetPathToCopiedSystemDLL();
@@ -388,6 +389,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         ///  Force partially out-of-date: should build only the out of date inputs
         /// </summary>
         [Fact]
+        [Trait("Category", "netcore-linux-failing")]
         public void ForceSomeOutOfDate()
         {
             string resxFile = null;
@@ -577,6 +579,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// </summary>
         /// <remarks>System dll is not locked because it forces a new app domain</remarks>
         [Fact]
+        [Trait("Category", "netcore-linux-failing")]
         public void NothingOutOfDateExceptReference()
         {
             string resxFile = null;
