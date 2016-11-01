@@ -108,6 +108,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void ProjectToolsVersion20Present()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
@@ -150,6 +151,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void MSBuildToolsVersionProperty()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)

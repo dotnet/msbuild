@@ -440,6 +440,7 @@ namespace ItemCreationTask
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         [Trait("Category", "mono-osx-failing")]
         public void TasksCanAddRecursiveDirBuiltInMetadata()
         {

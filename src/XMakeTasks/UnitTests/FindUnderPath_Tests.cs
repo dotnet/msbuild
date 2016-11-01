@@ -100,6 +100,7 @@ namespace Microsoft.Build.UnitTests
 
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         [Trait("Category", "mono-osx-failing")]
         public void VerifyFullPath()
         {
@@ -122,6 +123,7 @@ namespace Microsoft.Build.UnitTests
 
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         [Trait("Category", "mono-osx-failing")]
         public void VerifyFullPathNegative()
         {

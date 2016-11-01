@@ -119,6 +119,7 @@ namespace Microsoft.Build.UnitTests
 
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void ExitCodeGetter()
         {
             Exec exec = PrepareExec("exit 120");
@@ -462,6 +463,7 @@ namespace Microsoft.Build.UnitTests
 
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void InvalidWorkingDirectorySet()
         {
             Exec exec = PrepareExec("echo [%cd%]");

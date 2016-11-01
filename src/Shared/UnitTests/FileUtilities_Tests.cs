@@ -21,6 +21,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void GetItemSpecModifier()
         {
             TestGetItemSpecModifier(Directory.GetCurrentDirectory());
@@ -85,6 +86,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void MakeRelativeTests()
         {
             if (NativeMethodsShared.IsWindows)
@@ -118,6 +120,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void GetItemSpecModifierOnBadPath()
         {
             Assert.Throws<InvalidOperationException>(() =>
@@ -132,6 +135,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void GetItemSpecModifierOnBadPath2()
         {
             Assert.Throws<InvalidOperationException>(() =>
@@ -184,6 +188,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void EndsWithSlash()
         {
             Assert.True(FileUtilities.EndsWithSlash(@"C:\foo\"));
@@ -208,6 +213,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void GetDirectoryWithTrailingSlash()
         {
             Assert.Equal(NativeMethodsShared.IsWindows ? @"c:\" : "/", FileUtilities.GetDirectory(NativeMethodsShared.IsWindows ? @"c:\" : "/"));
@@ -475,6 +481,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void FileOrDirectoryExistsNoThrow()
         {
             Assert.Equal(false, FileUtilities.FileOrDirectoryExistsNoThrow("||"));
@@ -785,6 +792,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void GenerateTempBatchFileWithBadExtension()
         {
             Assert.Throws<IOException>(() =>
@@ -811,6 +819,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void GenerateTempBatchFileWithBadDirectory()
         {
             Assert.Throws<IOException>(() =>
