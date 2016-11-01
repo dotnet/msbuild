@@ -50,16 +50,22 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DesignTimeAssemblySearchPaths>$(AssemblySearchPaths)</DesignTimeAssemblySearchPaths>
   </PropertyGroup>
 
-  <!-- Temporary hacks to work around bugs -->
+  <!-- Temporary workarounds -->
   <PropertyGroup>
-    <!-- Temp Hack: https://github.com/dotnet/roslyn/issues/12167 -->
+    <!-- Workaround: https://github.com/dotnet/roslyn/issues/12167 -->
     <NoLogo>true</NoLogo>
 
-    <!-- Temp Hack: https://github.com/Microsoft/msbuild/issues/720 -->
+    <!-- Workaround: https://github.com/Microsoft/msbuild/issues/720 -->
     <OverrideToolHost Condition=" '$(DotnetHostPath)' != '' and '$(OverrideToolHost)' == ''">$(DotnetHostPath)</OverrideToolHost>
 
-    <!-- Temp Hack: https://github.com/Microsoft/msbuild/issues/1045: This is the only before common targets hook available to us, but using it is hijacking a hook that should belong to the user. -->
+    <!-- Workaround: https://github.com/Microsoft/msbuild/issues/1045: This is the only before common targets hook available to us, but using it is hijacking a hook that should belong to the user. -->
     <CustomBeforeMicrosoftCommonTargets>$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.BeforeCommon.targets</CustomBeforeMicrosoftCommonTargets>
+  </PropertyGroup>
+
+  <!-- Workaround: https://github.com/Microsoft/msbuild/issues/1293 -->
+  <PropertyGroup Condition="'$(MSBuildRuntimeType)' == 'Core'"> 
+    <GenerateResourceMSBuildArchitecture>CurrentArchitecture</GenerateResourceMSBuildArchitecture>
+    <GenerateResourceMSBuildRuntime>CurrentRuntime</GenerateResourceMSBuildRuntime>
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.CSharp.props" Condition="'$(MSBuildProjectExtension)' == '.csproj'" />
