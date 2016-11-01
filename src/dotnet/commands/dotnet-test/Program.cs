@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.Tools.Test
                 CommandOptionType.SingleValue);
 
             var outputOption = cmd.Option(
-                "-o|--output <OotputDir>",
+                "-o|--output <OutputDir>",
                 @"Directory in which to find the binaries to be run",
                 CommandOptionType.SingleValue);
 

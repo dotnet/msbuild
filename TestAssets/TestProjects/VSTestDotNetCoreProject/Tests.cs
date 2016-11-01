@@ -2,14 +2,6 @@
 
 namespace TestNamespace
 {
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-
-        }
-    }
-
     [TestClass]
     public class VSTestTests
     {

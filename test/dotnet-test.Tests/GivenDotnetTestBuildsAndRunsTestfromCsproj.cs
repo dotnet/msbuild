@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 {
     public class GivenDotnettestBuildsAndRunsTestfromCsproj : TestBase
     {
-        [Fact]
+        //[Fact]
         public void TestsFromAGivenProjectShouldRunWithExpectedOutput()
         {
             // Copy VSTestDotNetCoreProject project in output directory of project dotnet-vstest.Tests
@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Call test
             CommandResult result = new DotnetTestCommand()
                                         .WithWorkingDirectory(testProjectDirectory)
-                                        .ExecuteWithCapturedOutput("-f netcoreapp1.0");
+                                        .ExecuteWithCapturedOutput();
 
             // Verify
             result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
@@ -40,7 +40,34 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.StdOut.Should().Contain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
         }
 
-        [Fact]
+        //[Fact]
+        public void TestsFromAGivenXunitProjectShouldRunWithExpectedOutput()
+        {
+            // Copy VSTestXunitDotNetCoreProject project in output directory of project dotnet-vstest.Tests
+            string testAppName = "VSTestXunitDotNetCoreProject";
+            TestInstance testInstance = TestAssetsManager.CreateTestInstance(testAppName);
+
+            string testProjectDirectory = testInstance.TestRoot;
+
+            // Restore project VSTestXunitDotNetCoreProject
+            new RestoreCommand()
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute()
+                .Should()
+                .Pass();
+
+            // Call test
+            CommandResult result = new DotnetTestCommand()
+                                        .WithWorkingDirectory(testProjectDirectory)
+                                        .ExecuteWithCapturedOutput();
+
+            // Verify
+            result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
+            result.StdOut.Should().Contain("Passed   TestNamespace.VSTestXunitTests.VSTestXunitPassTest");
+            result.StdOut.Should().Contain("Failed   TestNamespace.VSTestXunitTests.VSTestXunitFailTest");
+        }
+
+        //[Fact]
         public void TestWillNotBuildTheProjectIfNoBuildArgsIsGiven()
         {
             // Copy VSTestDotNetCoreProject project in output directory of project dotnet-vstest.Tests

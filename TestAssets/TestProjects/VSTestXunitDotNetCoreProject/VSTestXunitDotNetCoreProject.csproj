@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Compile Include="**\*.cs" />
+    <EmbeddedResource Include="**\*.resx" />
   </ItemGroup>
 
   <ItemGroup>
@@ -18,15 +19,16 @@
       <Version>1.0.0-alpha-20161026-2</Version>
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
-	<PackageReference Include="MSTest.TestFramework">
-      <Version>1.0.5-preview</Version>
-    </PackageReference>
-	<PackageReference Include="MSTest.TestAdapter">
-      <Version>1.1.4-preview</Version>
-    </PackageReference>
-	<PackageReference Include="Microsoft.NET.Test.Sdk">
+    <PackageReference Include="Microsoft.NET.Test.Sdk">
       <Version>15.0.0-preview-20161024-02</Version>
     </PackageReference>
+    <PackageReference Include="xunit">
+      <Version>2.2.0-beta3-build3402</Version>
+    </PackageReference>
+    <PackageReference Include="xunit.runner.visualstudio">
+      <Version>2.2.0-beta4-build1188</Version>
+    </PackageReference>
   </ItemGroup>
-  <Import Project="$(MSBuildExtensionsPath)\Microsoft.CSharp.targets" />
+
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
