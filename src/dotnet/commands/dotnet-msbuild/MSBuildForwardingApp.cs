@@ -33,9 +33,16 @@ namespace Microsoft.DotNet.Tools.MSBuild
         {
             if (Telemetry.CurrentSessionId != null)
             {
-                Type loggerType = typeof(MSBuildLogger);
-                
-                argsToForward = argsToForward.Concat(new[] {$"\"/Logger:{loggerType.FullName},{loggerType.GetTypeInfo().Assembly.Location};{Telemetry.CurrentSessionId}\""});
+                try
+                {
+                    Type loggerType = typeof(MSBuildLogger);
+
+                    argsToForward = argsToForward.Concat(new[] { $"\"/Logger:{loggerType.FullName},{loggerType.GetTypeInfo().Assembly.Location}\"" });
+                }
+                catch (Exception)
+                {
+                    // Exceptions during telemetry shouldn't cause anything else to fail
+                }
             }
 
             _forwardingApp = new ForwardingApp(
