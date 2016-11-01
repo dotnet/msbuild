@@ -15,32 +15,26 @@ namespace Microsoft.DotNet.Cli.Build.Tests
         public void It_builds_a_runnable_output()
         {
             var testAppName = "MSBuildTestApp";
-            var testInstance = TestAssetsManager
-                .CreateTestInstance(testAppName);
-
-            var testProjectDirectory = testInstance.TestRoot;
-
-            new RestoreCommand()
-                .WithWorkingDirectory(testProjectDirectory)
-                .Execute("/p:SkipInvalidConfigurations=true")
-                .Should()
-                .Pass();
+            var testInstance = TestAssets.Get(testAppName)
+                .CreateInstance(testAppName)
+                .WithSourceFiles()
+                .WithRestoreFiles();
 
             new BuildCommand()
-                .WithWorkingDirectory(testProjectDirectory)
+                .WithWorkingDirectory(testInstance.Root)
                 .Execute()
-                .Should()
-                .Pass();
+                .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
-            var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, "netcoreapp1.0", $"{testAppName}.dll");
+
+            var outputDll = testInstance.Root.GetDirectory("bin", configuration, "netcoreapp1.0")
+                .GetFile($"{testAppName}.dll");
+
             var outputRunCommand = new TestCommand("dotnet");
 
-            outputRunCommand.ExecuteWithCapturedOutput(outputDll)
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World");
+            outputRunCommand.ExecuteWithCapturedOutput(outputDll.FullName)
+                .Should().Pass()
+                     .And.HaveStdOutContaining("Hello World");
         }
     }
 }

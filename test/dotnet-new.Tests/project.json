@@ -11,7 +11,7 @@
     "dotnet": {
       "target": "project"
     },
-    "Microsoft.Build": "15.1.0-preview-000366-00",
+    "Microsoft.Build": "15.1.0-preview-000370-00",
     "xunit": "2.2.0-beta3-build3330",
     "dotnet-test-xunit": "1.0.0-rc2-350904-49"
   },

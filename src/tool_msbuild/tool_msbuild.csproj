@@ -14,7 +14,7 @@
       <Version>1.0.1</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Build.Runtime">
-      <Version>15.1.319-preview5</Version>
+      <Version>15.1.0-preview-000370-00</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Net.Compilers.netcore">
       <Version>2.0.0-beta6-60922-08</Version>

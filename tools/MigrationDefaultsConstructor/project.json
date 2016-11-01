@@ -15,7 +15,7 @@
         "dotnet": {
           "target": "project"
         },
-        "Microsoft.Build.Runtime": "15.1.0-preview-000366-00"
+        "Microsoft.Build.Runtime": "15.1.0-preview-000370-00"
       },
       "imports": ["dnxcore50", "portable-net45+win8"]
     }

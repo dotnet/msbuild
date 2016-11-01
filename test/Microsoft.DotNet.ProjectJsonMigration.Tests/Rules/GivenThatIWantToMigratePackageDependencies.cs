@@ -12,7 +12,7 @@ using System;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 {
-    public class GivenThatIWantToMigratePackageDependencies : TestBase
+    public class GivenThatIWantToMigratePackageDependencies : PackageDependenciesTestBase
     {
         [Fact]
         public void It_migrates_basic_PackageReference()

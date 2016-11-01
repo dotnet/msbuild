@@ -15,6 +15,7 @@ namespace Microsoft.DotNet.Cli
 {
     public class Telemetry : ITelemetry
     {
+        internal static string CurrentSessionId = null;
         private TelemetryClient _client = null;
 
         private Dictionary<string, string> _commonProperties = null;
@@ -34,7 +35,9 @@ namespace Microsoft.DotNet.Cli
 
         public Telemetry () : this(null) { }
 
-        public Telemetry(INuGetCacheSentinel sentinel)
+        public Telemetry(INuGetCacheSentinel sentinel) : this(sentinel, null) { }
+
+        public Telemetry(INuGetCacheSentinel sentinel, string sessionId)
         {
             Enabled = !Env.GetEnvironmentVariableAsBool(TelemetryOptout) && PermissionExists(sentinel);
 
@@ -42,6 +45,9 @@ namespace Microsoft.DotNet.Cli
             {
                 return;
             }
+
+            // Store the session ID in a static field so that it can be reused
+            CurrentSessionId = sessionId ?? Guid.NewGuid().ToString();
 
             //initialize in task to offload to parallel thread
             _trackEventTask = Task.Factory.StartNew(() => InitializeTelemetry());
@@ -76,7 +82,7 @@ namespace Microsoft.DotNet.Cli
             {
                 _client = new TelemetryClient();
                 _client.InstrumentationKey = InstrumentationKey;
-                _client.Context.Session.Id = Guid.NewGuid().ToString();
+                _client.Context.Session.Id = CurrentSessionId;
 
                 _client.Context.Device.OperatingSystem = RuntimeEnvironment.OperatingSystem;
 

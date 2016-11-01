@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.Tests
         public void TestProjectToolIsAvailableThroughDriver(string appName)
         {
             var testInstance = TestAssets.Get(appName)
-                .CreateInstance(appName, identifier: appName)
+                .CreateInstance()
                 .WithSourceFiles()
                 .WithRestoreFiles();
 
