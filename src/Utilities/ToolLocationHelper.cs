@@ -1189,6 +1189,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="targetPlatformMinVersion">The min version of the targeted platform</param>
         /// <param name="targetPlatformVersion">The version of the targeted platform</param> 
         /// <param name="folderName">The content folder name under SDK path</param>
+        /// <param name="diskRoot">An optional disk root to search.  A value should only be passed from a unit test.</param>
         /// <returns>The SDK content folder path</returns>
         public static string GetSDKContentFolderPath(
               string sdkIdentifier,
