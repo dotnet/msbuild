@@ -14,10 +14,10 @@ namespace Microsoft.DotNet.Cli.Test.Tests
     public class GivenDotnetTest3BuildsAndRunsTestFromCsprojForMultipleTFM : TestBase
     {
         // project targeting net46 will not run in non windows machine.
-        [WindowsOnlyFact(Skip="https://github.com/dotnet/cli/issues/4526")]
+        [WindowsOnlyFact]
         public void TestsFromAGivenProjectShouldRunWithExpectedOutputForMultiTFM()
         {
-            // Copy DotNetCoreTestProject project in output directory of project dotnet-vstest.Tests
+            // Copy VSTestDesktopAndNetCoreApp project in output directory of project dotnet-test.Tests
             string testAppName = "VSTestDesktopAndNetCoreApp";
             TestInstance testInstance = TestAssetsManager.CreateTestInstance(testAppName);
 
@@ -30,18 +30,23 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                 .Should()
                 .Pass();
 
-            // Call test3
+            // Call test
             CommandResult result = new DotnetTestCommand()
                                        .WithWorkingDirectory(testProjectDirectory)
                                        .ExecuteWithCapturedOutput("--diag LogFile.txt");
 
 
-            // Verify
-            // for target framework net46
+            
             try
             {
+                // Verify
+                // for target framework net46
                 result.StdOut.Should().Contain("Total tests: 3. Passed: 2. Failed: 1. Skipped: 0.");
                 result.StdOut.Should().Contain("Passed   TestNamespace.VSTestTests.VSTestPassTestDesktop");
+
+                // for target framework netcoreapp1.0
+                result.StdOut.Should().Contain("Total tests: 3. Passed: 1. Failed: 2. Skipped: 0.");
+                result.StdOut.Should().Contain("Failed   TestNamespace.VSTestTests.VSTestFailTestNetCoreApp");
             }
             catch
             {
@@ -54,10 +59,6 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                 System.Console.WriteLine(logfile2.Length>0 ? File.ReadAllText(logfile2[0]):"No log file found");
                 System.Console.WriteLine("**************************************************************************************************");
             }
-
-            // for target framework netcoreapp1.0
-            //result.StdOut.Should().Contain("Total tests: 3. Passed: 1. Failed: 2. Skipped: 0.");
-            //result.StdOut.Should().Contain("Failed   TestNamespace.VSTestTests.VSTestFailTestNetCoreApp");
         }
     }
 }

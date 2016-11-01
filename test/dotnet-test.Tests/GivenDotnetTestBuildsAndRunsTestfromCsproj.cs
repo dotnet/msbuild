@@ -13,10 +13,10 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 {
     public class GivenDotnettestBuildsAndRunsTestfromCsproj : TestBase
     {
-        //[Fact]
+        [Fact]
         public void TestsFromAGivenProjectShouldRunWithExpectedOutput()
         {
-            // Copy DotNetCoreTestProject project in output directory of project dotnet-vstest.Tests
+            // Copy VSTestDotNetCoreProject project in output directory of project dotnet-vstest.Tests
             string testAppName = "VSTestDotNetCoreProject";
             TestInstance testInstance = TestAssetsManager.CreateTestInstance(testAppName);
 
@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Call test
             CommandResult result = new DotnetTestCommand()
                                         .WithWorkingDirectory(testProjectDirectory)
-                                        .ExecuteWithCapturedOutput("/p:TargetFramework=netcoreapp1.0");
+                                        .ExecuteWithCapturedOutput("-f netcoreapp1.0");
 
             // Verify
             result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
@@ -40,10 +40,10 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.StdOut.Should().Contain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
         }
 
-        //[Fact]
+        [Fact]
         public void TestWillNotBuildTheProjectIfNoBuildArgsIsGiven()
         {
-            // Copy DotNetCoreTestProject project in output directory of project dotnet-vstest.Tests
+            // Copy VSTestDotNetCoreProject project in output directory of project dotnet-vstest.Tests
             string testAppName = "VSTestDotNetCoreProject";
             TestInstance testInstance = TestAssetsManager.CreateTestInstance(testAppName);
 
@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                                    configuration, "netcoreapp1.0", "VSTestDotNetCoreProject.dll");
             expectedError = "The test source file " + "\"" + expectedError + "\"" + " provided was not found.";
 
-            // Call test3
+            // Call test
             CommandResult result = new DotnetTestCommand()
                                        .WithWorkingDirectory(testProjectDirectory)
                                        .ExecuteWithCapturedOutput("--noBuild");
