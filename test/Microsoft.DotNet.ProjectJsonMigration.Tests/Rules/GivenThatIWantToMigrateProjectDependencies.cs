@@ -253,9 +253,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         public void It_migrates_unqualified_dependencies_as_ProjectReference_when_a_matching_project_is_found()
         {
             var mockProj = MigrateProject("TestAppWithUnqualifiedDependencies", "ProjectA");
+            var projectReferenceInclude = Path.Combine("..", "ProjectB", "ProjectB.csproj");            
 
             var projectReferences = mockProj.Items.Should().ContainSingle(
-                item => item.ItemType == "ProjectReference" && item.Include == "../ProjectB/ProjectB.csproj");
+                item => item.ItemType == "ProjectReference" && item.Include == projectReferenceInclude);
         }
 
         private ProjectRootElement MigrateProject(string solution, string project)
