@@ -242,10 +242,29 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [Fact]
         public void It_promotes_P2P_references_up_in_the_dependency_chain()
         {
-            var solutionDirectory =
-                TestAssetsManager.CreateTestInstance("TestAppDependencyGraph", callingMethod: "p").Path;
+            var mockProj = MigrateProject("TestAppDependencyGraph", "ProjectA");
 
-            var appDirectory = Path.Combine(solutionDirectory, "ProjectA");
+            var projectReferences = mockProj.Items.Where(
+                item => item.ItemType.Equals("ProjectReference", StringComparison.Ordinal));
+            projectReferences.Count().Should().Be(7);
+        }
+
+        [Fact]
+        public void It_migrates_unqualified_dependencies_as_ProjectReference_when_a_matching_project_is_found()
+        {
+            var mockProj = MigrateProject("TestAppWithUnqualifiedDependencies", "ProjectA");
+            var projectReferenceInclude = Path.Combine("..", "ProjectB", "ProjectB.csproj");            
+
+            var projectReferences = mockProj.Items.Should().ContainSingle(
+                item => item.ItemType == "ProjectReference" && item.Include == projectReferenceInclude);
+        }
+
+        private ProjectRootElement MigrateProject(string solution, string project)
+        {
+            var solutionDirectory =
+                TestAssetsManager.CreateTestInstance(solution, callingMethod: "p").Path;
+
+            var appDirectory = Path.Combine(solutionDirectory, project);
 
             var projectContext = ProjectContext.Create(appDirectory, FrameworkConstants.CommonFrameworks.NetCoreApp10);
             var mockProj = ProjectRootElement.Create();
@@ -254,9 +273,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 mockProj.AddPropertyGroup());
             new MigrateProjectDependenciesRule().Apply(testSettings, testInputs);
 
-            var projectReferences = mockProj.Items.Where(
-                item => item.ItemType.Equals("ProjectReference", StringComparison.Ordinal));
-            projectReferences.Count().Should().Be(7);
+            var s = mockProj.Items.Select(p => $"ItemType = {p.ItemType}, Include = {p.Include}");
+            Console.WriteLine(string.Join(Environment.NewLine, s));
+
+            return mockProj;
         }
     }
 }
