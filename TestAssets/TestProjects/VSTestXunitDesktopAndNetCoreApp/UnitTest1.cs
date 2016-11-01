@@ -13,20 +13,20 @@ namespace TestNamespace
         [Fact]
         public void VSTestXunitFailTest()
         {
-            Assert.Equal(1,2);
+            Assert.Equal(1, 2);
         }
-		
-		#if DESKTOP
-		[Fact]
+
+#if DESKTOP
+        [Fact]
         public void VSTestXunitPassTestDesktop()
         {
         }
-		#else
-		[Fact]
+#else
+        [Fact]
         public void VSTestXunitFailTestNetCoreApp()
         {
-            Assert.Equal(1,2);
+            Assert.Equal(1, 2);
         }
-		#endif
+#endif
     }
 }

@@ -9,11 +9,11 @@ namespace TestNamespace
         public void VSTestXunitPassTest()
         {
         }
-		
-		[Fact]
+
+        [Fact]
         public void VSTestXunitFailTest()
         {
-			Assert.Equal(1,2);
+            Assert.Equal(1, 2);
         }
     }
 }

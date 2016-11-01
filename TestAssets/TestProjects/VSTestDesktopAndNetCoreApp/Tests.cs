@@ -15,18 +15,18 @@ namespace TestNamespace
         {
             Assert.Fail();
         }
-		
-		#if DESKTOP
-		[TestMethod]
+
+#if DESKTOP
+        [TestMethod]
         public void VSTestPassTestDesktop()
         {
         }
-		#else
-		[TestMethod]
+#else
+        [TestMethod]
         public void VSTestFailTestNetCoreApp()
         {
             Assert.Fail();
         }
-		#endif
+#endif
     }
 }
