@@ -104,30 +104,36 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     break;
                 case ProjectType.Test:
                     _transformApplicator.Execute(
-                        PackageDependencyInfoTransform.Transform(
+                        PackageDependencyInfoTransform().Transform(
                             new PackageDependencyInfo
                             {
                                 Name = PackageConstants.TestSdkPackageName,
                                 Version = PackageConstants.TestSdkPackageVersion
-                            }), noFrameworkPackageReferenceItemGroup, mergeExisting: false);
+                            }),
+                        noFrameworkPackageReferenceItemGroup,
+                        mergeExisting: false);
 
                     if (project.TestRunner.Equals("xunit", StringComparison.OrdinalIgnoreCase))
                     {
                         _transformApplicator.Execute(
-                            PackageDependencyInfoTransform.Transform(
+                            PackageDependencyInfoTransform().Transform(
                                 new PackageDependencyInfo
                                 {
                                     Name = PackageConstants.XUnitPackageName,
                                     Version = PackageConstants.XUnitPackageVersion
-                                }), noFrameworkPackageReferenceItemGroup, mergeExisting: false);
+                                }),
+                            noFrameworkPackageReferenceItemGroup,
+                            mergeExisting: false);
 
                         _transformApplicator.Execute(
-                            PackageDependencyInfoTransform.Transform(
+                            PackageDependencyInfoTransform().Transform(
                                 new PackageDependencyInfo
                                 {
                                     Name = PackageConstants.XUnitRunnerPackageName,
                                     Version = PackageConstants.XUnitRunnerPackageVersion
-                                }), noFrameworkPackageReferenceItemGroup, mergeExisting: false);
+                                }),
+                            noFrameworkPackageReferenceItemGroup,
+                            mergeExisting: false);
                     }
                     break;
                 default:

@@ -272,12 +272,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                     ""testRunner"": ""mstest""
                 }");
 
-            var items = mockProj.Items
-                    .Where(i => (i.Include == "Microsoft.NET.Test.Sdk" && i.ItemType == "PackageReference") ||
-                                (i.Include == "xunit" && i.ItemType == "PackageReference") ||
-                                (i.Include == "xunit.runner.visualstudio" && i.ItemType == "PackageReference"));
+            mockProj.Items.Should().ContainSingle(
+                i => (i.Include == "Microsoft.NET.Test.Sdk" && i.ItemType == "PackageReference"));
 
-            items.Should().HaveCount(1);
+            mockProj.Items.Should().NotContain(
+                i => (i.Include == "xunit" && i.ItemType == "PackageReference"));
+
+            mockProj.Items.Should().NotContain(
+                i => (i.Include == "xunit.runner.visualstudio" && i.ItemType == "PackageReference"));
         }
 
         [Fact]
@@ -294,12 +296,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                     ""testRunner"": ""xunit""
                 }");
 
-            var items = mockProj.Items
-                    .Where(i => (i.Include == "Microsoft.NET.Test.Sdk" && i.ItemType == "PackageReference") ||
-                                (i.Include == "xunit" && i.ItemType == "PackageReference") ||
-                                (i.Include == "xunit.runner.visualstudio" && i.ItemType == "PackageReference"));
+            mockProj.Items.Should().ContainSingle(
+                i => (i.Include == "Microsoft.NET.Test.Sdk" && i.ItemType == "PackageReference"));
 
-            items.Should().HaveCount(3);
+            mockProj.Items.Should().ContainSingle(
+                i => (i.Include == "xunit" && i.ItemType == "PackageReference"));
+
+            mockProj.Items.Should().ContainSingle(
+                i => (i.Include == "xunit.runner.visualstudio" && i.ItemType == "PackageReference"));
         }
 
         private void EmitsPackageReferences(ProjectRootElement mockProj, params Tuple<string, string, string>[] packageSpecs)
