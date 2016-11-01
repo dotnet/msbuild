@@ -5,32 +5,65 @@ using System.Collections.Generic;
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
+    internal class PackageDependencyInfo
+    {
+        public string Name { get; set; }
+        public string Version { get; set; }
+        public string PrivateAssets { get; set; }
+    }
+
     internal class PackageConstants
     {
         public const string SdkPackageName = "Microsoft.NET.Sdk";
         public const string WebSdkPackageName = "Microsoft.NET.Sdk.Web";
         public const string TestSdkPackageName = "Microsoft.NET.Test.Sdk";
-        public const string TestSdkPackageVersion = "15.0.0-preview-20161024-02";
         public const string XUnitPackageName = "xunit";
-        public const string XUnitPackageVersion = "2.2.0-beta3-build3402";
         public const string XUnitRunnerPackageName = "xunit.runner.visualstudio";
-        public const string XUnitRunnerPackageVersion = "2.2.0-beta4-build1188";
 
-        public static readonly IDictionary<string, string> AspProjectDependencyToolsPackages = new Dictionary<string, string> {
-            {"Microsoft.EntityFrameworkCore.Tools", "Microsoft.EntityFrameworkCore.Tools"},
-            {"Microsoft.AspNetCore.Razor.Tools", "Microsoft.AspNetCore.Razor.Design"},
-            {"Microsoft.AspNetCore.Razor.Design", "Microsoft.AspNetCore.Razor.Design"},
-            {"Microsoft.VisualStudio.Web.CodeGenerators.Mvc", "Microsoft.VisualStudio.Web.CodGeneration.Design"},
-            {"Microsoft.VisualStudio.Web.CodeGeneration.Tools", ""},
+        public static readonly IDictionary<string, PackageDependencyInfo> ProjectDependencyPackages = 
+            new Dictionary<string, PackageDependencyInfo> {
+                {"Microsoft.EntityFrameworkCore.Tools", new PackageDependencyInfo {
+                    Name = "Microsoft.EntityFrameworkCore.Tools",
+                    Version = ConstantPackageVersions.AspNetToolsVersion } },
+                { "Microsoft.AspNetCore.Razor.Tools", new PackageDependencyInfo {
+                    Name = "Microsoft.AspNetCore.Razor.Design",
+                    Version = ConstantPackageVersions.AspNetToolsVersion } },
+                { "Microsoft.AspNetCore.Razor.Design", new PackageDependencyInfo {
+                    Name = "Microsoft.AspNetCore.Razor.Design",
+                    Version = ConstantPackageVersions.AspNetToolsVersion } },
+                { "Microsoft.VisualStudio.Web.CodeGenerators.Mvc", new PackageDependencyInfo {
+                    Name = "Microsoft.VisualStudio.Web.CodeGeneration.Design",
+                    Version = ConstantPackageVersions.AspNetToolsVersion } },
+                { "Microsoft.VisualStudio.Web.CodeGeneration.Tools", null},
+                { TestSdkPackageName, new PackageDependencyInfo {
+                    Name = TestSdkPackageName,
+                    Version = ConstantPackageVersions.TestSdkPackageVersion } },
+                { XUnitPackageName, new PackageDependencyInfo {
+                    Name = XUnitPackageName,
+                    Version = ConstantPackageVersions.XUnitPackageVersion } },
+                { XUnitRunnerPackageName, new PackageDependencyInfo {
+                    Name = XUnitRunnerPackageName,
+                    Version = ConstantPackageVersions.XUnitRunnerPackageVersion } },
         };
 
-        public static readonly IDictionary<string, string> AspProjectToolsPackages = new Dictionary<string, string> {
-            {"Microsoft.EntityFrameworkCore.Tools", "Microsoft.EntityFrameworkCore.Tools.DotNet"},
-            {"Microsoft.AspNetCore.Razor.Tools", "Microsoft.AspNetCore.Razor.Tools"},
-            {"Microsoft.VisualStudio.Web.CodeGeneration.Tools", "Microsoft.VisualStudio.Web.CodeGeneration.Tools"},
-            {"Microsoft.DotNet.Watcher.Tools", "Microsoft.DotNet.Watcher.Tools"},
-            {"Microsoft.Extensions.SecretManager.Tools", "Microsoft.Extensions.SecretManager.Tools"},
-            {"Microsoft.AspNetCore.Server.IISIntegration.Tools", ""}
+        public static readonly IDictionary<string, PackageDependencyInfo> ProjectToolPackages = 
+            new Dictionary<string, PackageDependencyInfo> {
+                {"Microsoft.EntityFrameworkCore.Tools", new PackageDependencyInfo {
+                    Name = "Microsoft.EntityFrameworkCore.Tools.DotNet",
+                    Version = ConstantPackageVersions.AspNetToolsVersion } },
+                { "Microsoft.AspNetCore.Razor.Tools", new PackageDependencyInfo {
+                    Name = "Microsoft.AspNetCore.Razor.Tools",
+                    Version = ConstantPackageVersions.AspNetToolsVersion } },
+                { "Microsoft.VisualStudio.Web.CodeGeneration.Tools", new PackageDependencyInfo {
+                    Name = "Microsoft.VisualStudio.Web.CodeGeneration.Tools",
+                    Version = ConstantPackageVersions.AspNetToolsVersion } },
+                { "Microsoft.DotNet.Watcher.Tools", new PackageDependencyInfo {
+                    Name = "Microsoft.DotNet.Watcher.Tools",
+                    Version = ConstantPackageVersions.AspNetToolsVersion } },
+                { "Microsoft.Extensions.SecretManager.Tools", new PackageDependencyInfo {
+                    Name = "Microsoft.Extensions.SecretManager.Tools",
+                    Version = ConstantPackageVersions.AspNetToolsVersion } },
+                { "Microsoft.AspNetCore.Server.IISIntegration.Tools", null}
         };
     }
 }
