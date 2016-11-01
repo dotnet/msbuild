@@ -122,6 +122,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var buildCommand = new BuildCommand()
                 .WithWorkingDirectory(testInstance.Root)
                 .WithConfiguration(configuration)
+                .WithRuntime(runtime)
                 .WithCapturedOutput()
                 .Execute()
                 .Should().Pass();
@@ -160,6 +161,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var buildCommand = new BuildCommand()
                 .WithWorkingDirectory(testInstance.Root)
                 .WithConfiguration(configuration)
+                .WithRuntime(runtime)
                 .WithCapturedOutput()
                 .Execute()
                 .Should().Pass();
