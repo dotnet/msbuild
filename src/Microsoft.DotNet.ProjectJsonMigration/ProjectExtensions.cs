@@ -18,6 +18,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             {
                 projectType = ProjectType.Web;
             }
+            else if (project.IsTestProject)
+            {
+                projectType = ProjectType.Test;
+            }
 
             return projectType;
         }

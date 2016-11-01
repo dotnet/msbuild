@@ -257,5 +257,96 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             items = itemGroup.First().Items.ToArray();
             items[0].Include.Should().Be("System");
         }
+
+        [Fact]
+        public void It_migrates_test_projects_to_have_test_sdk()
+        {
+            var mockProj = RunPackageDependenciesRuleOnPj(@"
+                {
+                    ""buildOptions"": {
+                        ""emitEntryPoint"": true
+                    },
+                    ""frameworks"": {
+                        ""netcoreapp1.0"": {}
+                    },
+                    ""testRunner"": ""mstest""
+                }");
+
+            mockProj.Items.Should().ContainSingle(
+                i => (i.Include == "Microsoft.NET.Test.Sdk" && i.ItemType == "PackageReference"));
+
+            mockProj.Items.Should().NotContain(
+                i => (i.Include == "xunit" && i.ItemType == "PackageReference"));
+
+            mockProj.Items.Should().NotContain(
+                i => (i.Include == "xunit.runner.visualstudio" && i.ItemType == "PackageReference"));
+        }
+
+        [Fact]
+        public void It_migrates_test_projects_to_have_test_sdk_and_xunit_packagedependencies()
+        {
+            var mockProj = RunPackageDependenciesRuleOnPj(@"
+                {
+                    ""buildOptions"": {
+                        ""emitEntryPoint"": true
+                    },
+                    ""frameworks"": {
+                        ""netcoreapp1.0"": {}
+                    },
+                    ""testRunner"": ""xunit""
+                }");
+
+            mockProj.Items.Should().ContainSingle(
+                i => (i.Include == "Microsoft.NET.Test.Sdk" && i.ItemType == "PackageReference"));
+
+            mockProj.Items.Should().ContainSingle(
+                i => (i.Include == "xunit" && i.ItemType == "PackageReference"));
+
+            mockProj.Items.Should().ContainSingle(
+                i => (i.Include == "xunit.runner.visualstudio" && i.ItemType == "PackageReference"));
+        }
+
+        private void EmitsPackageReferences(ProjectRootElement mockProj, params Tuple<string, string, string>[] packageSpecs)
+        {
+            foreach (var packageSpec in packageSpecs)
+            {
+                var packageName = packageSpec.Item1;
+                var packageVersion = packageSpec.Item2;
+                var packageTFM = packageSpec.Item3;
+
+                var items = mockProj.Items
+                    .Where(i => i.ItemType == "PackageReference")
+                    .Where(i => string.IsNullOrEmpty(packageTFM) || i.ConditionChain().Any(c => c.Contains(packageTFM)))
+                    .Where(i => i.Include == packageName)
+                    .Where(i => i.GetMetadataWithName("Version").Value == packageVersion);
+
+                items.Should().HaveCount(1);
+            }
+        }
+
+        private void EmitsToolReferences(ProjectRootElement mockProj, params Tuple<string, string>[] toolSpecs)
+        {
+            foreach (var toolSpec in toolSpecs)
+            {
+                var packageName = toolSpec.Item1;
+                var packageVersion = toolSpec.Item2;
+
+                var items = mockProj.Items
+                    .Where(i => i.ItemType == "DotNetCliToolReference")
+                    .Where(i => i.Include == packageName)
+                    .Where(i => i.GetMetadataWithName("Version").Value == packageVersion);
+
+                items.Should().HaveCount(1);
+            }
+        }
+
+        private ProjectRootElement RunPackageDependenciesRuleOnPj(string s, string testDirectory = null)
+        {
+            testDirectory = testDirectory ?? Temp.CreateDirectory().Path;
+            return TemporaryProjectFileRuleRunner.RunRules(new IMigrationRule[]
+            {
+                new MigratePackageDependenciesAndToolsRule()
+            }, s, testDirectory);
+        }
     }
 }
