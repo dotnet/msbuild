@@ -19,6 +19,7 @@ mv $MSBUILD_INSTALL_BIN_DIR/Microsoft.Common.props $XBUILD_DIR/$MSBUILD_TOOLSVER
 rm $MSBUILD_INSTALL_BIN_DIR/*UnitTests*
 rm $MSBUILD_INSTALL_BIN_DIR/*xunit*
 rm $MSBUILD_INSTALL_BIN_DIR/NuGet*
+rm $MSBUILD_INSTALL_BIN_DIR/System.Runtime.InteropServices.RuntimeInformation.dll
 
 cp -R nuget-support/tv/ $XBUILD_DIR/$MSBUILD_TOOLSVERSION
 cp -R nuget-support/tasks-targets/ $XBUILD_DIR/
