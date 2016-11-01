@@ -35,7 +35,7 @@ namespace Microsoft.NET.TestFramework.Commands
             ICommand command = Command.Create(DotNetHostPath, newArgs);
 
             //  Set NUGET_PACKAGES environment variable to match value from build.ps1
-            command = command.EnvironmentVariable("NUGET_PACKAGES", RepoInfo.PackagesPath);
+            command = command.EnvironmentVariable("NUGET_PACKAGES", Path.Combine(RepoInfo.RepoRoot, "packages"));
 
             return command;
         }
