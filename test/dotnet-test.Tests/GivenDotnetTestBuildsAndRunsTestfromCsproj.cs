@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 {
     public class GivenDotnettestBuildsAndRunsTestfromCsproj : TestBase
     {
-        //[Fact]
+        [Fact]
         public void TestsFromAGivenProjectShouldRunWithExpectedOutput()
         {
             // Copy VSTestDotNetCoreProject project in output directory of project dotnet-vstest.Tests
@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.StdOut.Should().Contain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
         }
 
-        //[Fact]
+        [Fact]
         public void TestsFromAGivenXunitProjectShouldRunWithExpectedOutput()
         {
             // Copy VSTestXunitDotNetCoreProject project in output directory of project dotnet-vstest.Tests
@@ -67,7 +67,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.StdOut.Should().Contain("Failed   TestNamespace.VSTestXunitTests.VSTestXunitFailTest");
         }
 
-        //[Fact]
+        [Fact]
         public void TestWillNotBuildTheProjectIfNoBuildArgsIsGiven()
         {
             // Copy VSTestDotNetCoreProject project in output directory of project dotnet-vstest.Tests
