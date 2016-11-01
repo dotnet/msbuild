@@ -96,7 +96,7 @@ namespace Microsoft.DotNet.Migration.Tests
             VerifyAllMSBuildOutputsRunnable(projectDirectory);
         }
 
-        [Fact]
+        [Fact(Skip="Final tools version missing.")]
         public void It_migrates_old_dotnet_new_web_without_tools_with_outputs_containing_project_json_outputs()
         {
             var testInstance = TestAssetsManager
