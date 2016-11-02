@@ -14,6 +14,7 @@ using System.Runtime.Versioning;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -181,11 +182,14 @@ namespace Microsoft.NET.Build.Tests
             File.WriteAllText(path, contents);
         }
 
-        [Fact]
-        public void It_creates_a_documentation_file()
+        private TestAsset CreateDocumentationFileLibraryAsset(bool? generateDocumentationFile, string documentationFile, [CallerMemberName] string callingMethod = "")
         {
+            string genDocFileIdentifier = generateDocumentationFile == null ? "null" : generateDocumentationFile.Value.ToString();
+            string docFileIdentifier = documentationFile == null ? "null" : Path.GetFileName(documentationFile);
+            string identifier = $"genDoc={genDocFileIdentifier}, docFile={Path.GetFileName(docFileIdentifier)}";
+
             var testAsset = _testAssetsManager
-                .CopyTestAsset("AppWithLibrary")
+                .CopyTestAsset("AppWithLibrary", callingMethod, identifier)
                 .WithSource()
                 .WithProjectChanges(project =>
                 {
@@ -193,15 +197,32 @@ namespace Microsoft.NET.Build.Tests
                     var propertyGroup = project.Root.Elements(ns + "PropertyGroup").FirstOrDefault();
                     propertyGroup.Should().NotBeNull();
 
-                    propertyGroup.Add(new XElement(ns + "GenerateDocumentationFile", "true"));
+                    if (generateDocumentationFile != null)
+                    {
+                        propertyGroup.Add(new XElement(ns + "GenerateDocumentationFile", generateDocumentationFile.Value.ToString()));
+                    }
+                    if (documentationFile != null)
+                    {
+                        propertyGroup.Add(new XElement(ns + "DocumentationFile", documentationFile));
+                    }
                 })
                 .Restore(relativePath: "TestLibrary");
+
+            return testAsset;
+        }
+
+        [Fact]
+        public void It_creates_a_documentation_file()
+        {
+            var testAsset = CreateDocumentationFileLibraryAsset(true, null);
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
             var buildCommand = new BuildCommand(Stage0MSBuild, libraryProjectDirectory);
 
             buildCommand
+                //  Capture standard output so that warnings about missing XML documentation don't show up as warnings at the end of the SDK build
+                .CaptureStdOut()
                 .Execute()
                 .Should()
                 .Pass();
@@ -227,28 +248,15 @@ namespace Microsoft.NET.Build.Tests
         [InlineData(false)]
         public void It_allows_us_to_override_the_documentation_file_name(bool setGenerateDocumentationFileProperty)
         {
-            var testAsset = _testAssetsManager
-                .CopyTestAsset("AppWithLibrary")
-                .WithSource()
-                .WithProjectChanges(project =>
-                {
-                    var ns = XNamespace.Get("http://schemas.microsoft.com/developer/msbuild/2003");
-                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").FirstOrDefault();
-                    propertyGroup.Should().NotBeNull();
-
-                    if (setGenerateDocumentationFileProperty)
-                    {
-                        propertyGroup.Add(new XElement(ns + "GenerateDocumentationFile", "true"));
-                    }
-                    propertyGroup.Add(new XElement(ns + "DocumentationFile", "TestLibraryDocumentation.xml"));
-                })
-                .Restore(relativePath: "TestLibrary");
+            var testAsset = CreateDocumentationFileLibraryAsset(setGenerateDocumentationFileProperty ? (bool?)true : null, "TestLibraryDocumentation.xml");
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
             var buildCommand = new BuildCommand(Stage0MSBuild, libraryProjectDirectory);
 
             buildCommand
+                //  Capture standard output so that warnings about missing XML documentation don't show up as warnings at the end of the SDK build
+                .CaptureStdOut()
                 .Execute()
                 .Should()
                 .Pass();
@@ -272,32 +280,36 @@ namespace Microsoft.NET.Build.Tests
             }, SearchOption.TopDirectoryOnly);
         }
 
-        [Fact]
-        public void Invalid_documentation_settings_result_in_an_error()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_does_not_create_a_documentation_file_if_GenerateDocumentationFile_property_is_false(bool setDocumentationFileProperty)
         {
-            var testAsset = _testAssetsManager
-                .CopyTestAsset("AppWithLibrary")
-                .WithSource()
-                .WithProjectChanges(project =>
-                {
-                    var ns = XNamespace.Get("http://schemas.microsoft.com/developer/msbuild/2003");
-                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").FirstOrDefault();
-                    propertyGroup.Should().NotBeNull();
-
-                    propertyGroup.Add(new XElement(ns + "GenerateDocumentationFile", "false"));
-                    propertyGroup.Add(new XElement(ns + "DocumentationFile", "TestLibraryDocumentation.xml"));
-                })
-                .Restore(relativePath: "TestLibrary");
+            var testAsset = CreateDocumentationFileLibraryAsset(false, setDocumentationFileProperty ? "TestLibraryDocumentation.xml" : null);
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
             var buildCommand = new BuildCommand(Stage0MSBuild, libraryProjectDirectory);
 
             buildCommand
-                .CaptureStdOut()
                 .Execute()
                 .Should()
-                .Fail();
+                .Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory("netstandard1.5");
+
+            outputDirectory.Should().OnlyHaveFiles(new[] {
+                "TestLibrary.dll",
+                "TestLibrary.pdb",
+                "TestLibrary.deps.json",
+            });
+
+            //  Make sure documentation file isn't generated in project folder either
+            new DirectoryInfo(libraryProjectDirectory).Should().OnlyHaveFiles(new[]
+            {
+                "Helper.cs",
+                "TestLibrary.csproj"
+            }, SearchOption.TopDirectoryOnly);
         }
 
         [Theory]
