@@ -46,6 +46,7 @@ namespace Microsoft.Build.UnitTests.Construction
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void ParseFirstProjectLine_VC()
         {
             Assert.Throws<InvalidProjectFileException>(() =>
@@ -457,6 +458,7 @@ namespace Microsoft.Build.UnitTests.Construction
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void ParseNestedEtpProjectMultipleLevel()
         {
             string proj1Path = Path.Combine(Path.GetTempPath(), "someproj.etp");

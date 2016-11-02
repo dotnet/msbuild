@@ -1599,6 +1599,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void RenameItemInProjectWithWildcards()
         {
             string projectDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());

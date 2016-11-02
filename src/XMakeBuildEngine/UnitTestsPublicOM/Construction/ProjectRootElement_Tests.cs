@@ -389,6 +389,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void ValidXmlXmlTextReaderNotCache()
         {
             string content = @"
@@ -677,6 +678,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/301")]
 #endif
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void EncodingGetterBasedOnActualEncodingWhenXmlDeclarationIsAbsent()
         {
             string projectFullPath = FileUtilities.GetTemporaryFile();

@@ -88,6 +88,8 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
+        [Trait("Category", "nonlinuxtests")]
+        [Trait("Category", "nonosxtests")]
         public void FindBuildEnvironmentFromVisualStudioRoot()
         {
             using (var env = new EmptyBuildEnviroment())
@@ -104,6 +106,8 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
+        [Trait("Category", "nonlinuxtests")]
+        [Trait("Category", "nonosxtests")]
         public void BuildEnvironmentDetectsVisualStudioByEnvironment()
         {
             using (var env = new EmptyBuildEnviroment())
@@ -117,6 +121,8 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
+        [Trait("Category", "nonlinuxtests")]
+        [Trait("Category", "nonosxtests")]
         public void BuildEnvironmentDetectsVisualStudioByMSBuildProcess()
         {
             using (var env = new EmptyBuildEnviroment())
@@ -129,6 +135,8 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
+        [Trait("Category", "nonlinuxtests")]
+        [Trait("Category", "nonosxtests")]
         public void BuildEnvironmentDetectsVisualStudioByMSBuildProcessAmd64()
         {
             using (var env = new EmptyBuildEnviroment())
@@ -141,6 +149,8 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
+        [Trait("Category", "nonlinuxtests")]
+        [Trait("Category", "nonosxtests")]
         public void BuildEnvironmentDetectsVisualStudioFromSetupInstance()
         {
             using (var env = new EmptyBuildEnviroment())
@@ -189,6 +199,8 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
+        [Trait("Category", "nonlinuxtests")]
+        [Trait("Category", "nonosxtests")]
         public void BuildEnvironmentDetectsVisualStudioByProcessName()
         {
             using (var env = new EmptyBuildEnviroment())
@@ -201,6 +213,8 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
+        [Trait("Category", "nonlinuxtests")]
+        [Trait("Category", "nonosxtests")]
         public void BuildEnvironmentDetectsVisualStudioByBlendProcess()
         {
             using (var env = new EmptyBuildEnviroment())
