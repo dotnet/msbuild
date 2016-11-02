@@ -16,20 +16,20 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
         [Fact]
         public void TestsFromAGivenContainerShouldRunWithExpectedOutput()
         {
-            // Copy DotNetCoreTestProject project in output directory of project dotnet-vstest.Tests
-            string testAppName = "VSTestDotNetCoreProject";
+            // Copy VSTestDotNetCore project in output directory of project dotnet-vstest.Tests
+            string testAppName = "VSTestDotNetCore";
             TestInstance testInstance = TestAssetsManager.CreateTestInstance(testAppName);
 
             string testProjectDirectory = testInstance.TestRoot;
 
-            // Restore project VSTestDotNetCoreProject
+            // Restore project VSTestDotNetCore
             new RestoreCommand()
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute()
                 .Should()
                 .Pass();
 
-            // Build project VSTestDotNetCoreProject
+            // Build project VSTestDotNetCore
             new BuildCommand()
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute()
