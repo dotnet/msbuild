@@ -90,7 +90,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PublishIntermediateOutputPath Condition="'$(PublishIntermediateOutputPath)' == ''">$(PublishIntermediateTempPath)PublishOutput\</PublishIntermediateOutputPath>
     
     <!-- Temporary work-around for Docker -->
-    <PublishIntermediateOutputPath Condition="'$(DockerPublish)' == 'true'">obj\Docker\publish\</PublishIntermediateOutputPath>
+    <PublishIntermediateOutputPath Condition="'$(DockerPublish)' == 'true'">obj/Docker/publish/</PublishIntermediateOutputPath>
   </PropertyGroup>
 
   <!--

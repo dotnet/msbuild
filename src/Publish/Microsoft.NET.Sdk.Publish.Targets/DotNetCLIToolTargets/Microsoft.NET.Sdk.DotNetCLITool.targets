@@ -13,6 +13,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+
+  <Target Name="_InitProjectCapabilityProperties">
+    <PropertyGroup>
+      <_IsManagedProject Condition="%(ProjectCapability.Identity) == 'Managed'">true</_IsManagedProject>
+      <_IsAspNetCoreProject Condition="%(ProjectCapability.Identity) == 'AspNetCore'">true</_IsAspNetCoreProject>
+    </PropertyGroup>
+  </Target>  
+  
   <!--
   ***********************************************************************************************
   TARGET : DotNet CLI Publish Command : Pre-Publish
@@ -20,30 +28,27 @@ Copyright (C) Microsoft Corporation. All rights reserved.
  -->
 
   <PropertyGroup>
-    <DotNetCLIPrePublishDependsOn>
-      ManagedProjectSystemPrePublish;
-    </DotNetCLIPrePublishDependsOn>
+    <_DotNetCLIPrePublishDependsOn>
+      _InitProjectCapabilityProperties;
+      _ManagedProjectSystemPrePublish;
+    </_DotNetCLIPrePublishDependsOn>
   </PropertyGroup>
 
-  <Target Name ="DotNetCLIPrePublish"
-          DependsOnTargets="$(DotNetCLIPrePublishDependsOn)"
-          BeforeTargets="Publish"
+  <Target Name ="_DotNetCLIPrePublish"
+          DependsOnTargets="$(_DotNetCLIPrePublishDependsOn)"
+          BeforeTargets="PrepareForPublish"
           Condition="'$(DeployOnBuild)' != 'true'">
-    <PropertyGroup>
-      <_IsManagedProject Condition="%(ProjectCapability.Identity) == 'Managed'">true</_IsManagedProject>
-      <_IsAspNetCoreProject Condition="%(ProjectCapability.Identity) == 'AspNetCore'">true</_IsAspNetCoreProject>
-    </PropertyGroup>
   </Target>
 
     <PropertyGroup>
-      <ManagedProjectSystemPrePublishDependsOn>
+      <_ManagedProjectSystemPrePublishDependsOn>
         BeforePublish;
-      </ManagedProjectSystemPrePublishDependsOn>
+      </_ManagedProjectSystemPrePublishDependsOn>
     </PropertyGroup>
 
-    <Target Name="ManagedProjectSystemPrePublish"
+    <Target Name="_ManagedProjectSystemPrePublish"
             Condition="'$(_IsManagedProject)' == 'true' And '$(_IsAspNetCoreProject)' == 'true'"
-            DependsOnTargets="$(ManagedProjectSystemPrePublishDependsOn)">
+            DependsOnTargets="$(_ManagedProjectSystemPrePublishDependsOn)">
     </Target>
 
     <!--
@@ -52,32 +57,29 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   ***********************************************************************************************
  -->
   <PropertyGroup>
-    <DotNetCLIPostPublishDependsOn>
-      ManagedProjectSystemPostPublish;
-    </DotNetCLIPostPublishDependsOn>
+    <_DotNetCLIPostPublishDependsOn>
+      _InitProjectCapabilityProperties;
+      _ManagedProjectSystemPostPublish;
+    </_DotNetCLIPostPublishDependsOn>
   </PropertyGroup>
 
-  <Target Name ="DotNetCLIPostPublish"
-          DependsOnTargets="$(DotNetCLIPostPublishDependsOn)"
+  <Target Name ="_DotNetCLIPostPublish"
+          DependsOnTargets="$(_DotNetCLIPostPublishDependsOn)"
           AfterTargets="Publish"
           Condition="'$(DeployOnBuild)' != 'true'">
-    <PropertyGroup>
-      <_IsManagedProject Condition="%(ProjectCapability.Identity) == 'Managed'">true</_IsManagedProject>
-      <_IsAspNetCoreProject Condition="%(ProjectCapability.Identity) == 'AspNetCore'">true</_IsAspNetCoreProject>
-    </PropertyGroup>
   </Target>
 
 
   <PropertyGroup>
-    <ManagedProjectSystemPostPublishDependsOn>
+    <_ManagedProjectSystemPostPublishDependsOn>
       _InitPublishIntermediateOutputPath;
       $(_DotNetPublishTransformFiles);
-    </ManagedProjectSystemPostPublishDependsOn>
+    </_ManagedProjectSystemPostPublishDependsOn>
   </PropertyGroup>
 
-  <Target Name="ManagedProjectSystemPostPublish"
+  <Target Name="_ManagedProjectSystemPostPublish"
           Condition="'$(_IsManagedProject)' == 'true' And '$(_IsAspNetCoreProject)' == 'true'"
-          DependsOnTargets="$(ManagedProjectSystemPostPublishDependsOn)">
+          DependsOnTargets="$(_ManagedProjectSystemPostPublishDependsOn)">
   </Target>
 
   <Target Name="_InitPublishIntermediateOutputPath">
