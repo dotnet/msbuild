@@ -18,7 +18,8 @@ namespace Microsoft.DotNet.Tools.MSBuild
         {
             try
             {
-                string sessionId = Environment.GetEnvironmentVariable(MSBuildForwardingApp.TelemetrySessionIdEnvironmentVariableName);
+                string sessionId = 
+                    Environment.GetEnvironmentVariable(MSBuildForwardingApp.TelemetrySessionIdEnvironmentVariableName);
 
                 if (sessionId != null)
                 {

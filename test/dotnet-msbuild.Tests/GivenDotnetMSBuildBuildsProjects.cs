@@ -84,7 +84,9 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
             allArgs.Should().NotBeNull();
 
-            allArgs.Should().Contain(value => value.StartsWith("\"/Logger:"), "The MSBuild logger argument should be specified when telemetry is enabled.");
+            allArgs.Should().Contain(
+                value => value.StartsWith("\"/Logger:"),
+                "The MSBuild logger argument should be specified when telemetry is enabled.");
         }
 
         [Fact]
@@ -94,7 +96,9 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
             allArgs.Should().NotBeNull();
 
-            allArgs.Should().NotContain(value => value.IndexOf("/Logger", StringComparison.OrdinalIgnoreCase) >= 0, $"The MSBuild logger argument should not be specified when telemetry is disabled.");
+            allArgs.Should().NotContain(
+                value => value.IndexOf("/Logger", StringComparison.OrdinalIgnoreCase) >= 0,
+                $"The MSBuild logger argument should not be specified when telemetry is disabled.");
         }
 
         private string[] GetArgsForMSBuild(Func<bool> sentinelExists)
@@ -103,11 +107,15 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
             MSBuildForwardingApp msBuildForwardingApp = new MSBuildForwardingApp(Enumerable.Empty<string>());
 
-            FieldInfo forwardingAppFieldInfo = msBuildForwardingApp.GetType().GetField("_forwardingApp", BindingFlags.Instance | BindingFlags.NonPublic);
+            FieldInfo forwardingAppFieldInfo = msBuildForwardingApp
+                .GetType()
+                .GetField("_forwardingApp", BindingFlags.Instance | BindingFlags.NonPublic);
 
             ForwardingApp forwardingApp = forwardingAppFieldInfo?.GetValue(msBuildForwardingApp) as ForwardingApp;
 
-            FieldInfo allArgsFieldinfo = forwardingApp?.GetType().GetField("_allArgs", BindingFlags.Instance | BindingFlags.NonPublic);
+            FieldInfo allArgsFieldinfo = forwardingApp?
+                .GetType()
+                .GetField("_allArgs", BindingFlags.Instance | BindingFlags.NonPublic);
 
             return allArgsFieldinfo?.GetValue(forwardingApp) as string[];
         }
