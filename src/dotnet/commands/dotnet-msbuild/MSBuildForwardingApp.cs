@@ -37,7 +37,10 @@ namespace Microsoft.DotNet.Tools.MSBuild
                 {
                     Type loggerType = typeof(MSBuildLogger);
 
-                    argsToForward = argsToForward.Concat(new[] { $"\"/Logger:{loggerType.FullName},{loggerType.GetTypeInfo().Assembly.Location}\"" });
+                    argsToForward = argsToForward.Concat(new[]
+                    {
+                        $"\"/Logger:{loggerType.FullName},{loggerType.GetTypeInfo().Assembly.Location}\""
+                    });
                 }
                 catch (Exception)
                 {
