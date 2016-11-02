@@ -29,12 +29,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 {"Microsoft.EntityFrameworkCore.Tools", new PackageDependencyInfo {
                     Name = "Microsoft.EntityFrameworkCore.Tools",
                     Version = ConstantPackageVersions.AspNetToolsVersion } },
-                { "Microsoft.AspNetCore.Razor.Tools", new PackageDependencyInfo {
-                    Name = "Microsoft.AspNetCore.Razor.Design",
-                    Version = ConstantPackageVersions.AspNetToolsVersion } },
-                { "Microsoft.AspNetCore.Razor.Design", new PackageDependencyInfo {
-                    Name = "Microsoft.AspNetCore.Razor.Design",
-                    Version = ConstantPackageVersions.AspNetToolsVersion } },
+                { "Microsoft.AspNetCore.Razor.Tools", null },
+                { "Microsoft.AspNetCore.Razor.Design", null },
                 { "Microsoft.VisualStudio.Web.CodeGenerators.Mvc", new PackageDependencyInfo {
                     Name = "Microsoft.VisualStudio.Web.CodeGeneration.Design",
                     Version = ConstantPackageVersions.AspNetToolsVersion } },
@@ -61,9 +57,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 {"Microsoft.EntityFrameworkCore.Tools", new PackageDependencyInfo {
                     Name = "Microsoft.EntityFrameworkCore.Tools.DotNet",
                     Version = ConstantPackageVersions.AspNetToolsVersion } },
-                { "Microsoft.AspNetCore.Razor.Tools", new PackageDependencyInfo {
-                    Name = "Microsoft.AspNetCore.Razor.Tools",
-                    Version = ConstantPackageVersions.AspNetToolsVersion } },
+                { "Microsoft.AspNetCore.Razor.Tools", null },
                 { "Microsoft.VisualStudio.Web.CodeGeneration.Tools", new PackageDependencyInfo {
                     Name = "Microsoft.VisualStudio.Web.CodeGeneration.Tools",
                     Version = ConstantPackageVersions.AspNetToolsVersion } },
