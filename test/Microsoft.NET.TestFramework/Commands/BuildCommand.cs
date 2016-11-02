@@ -11,9 +11,17 @@ namespace Microsoft.NET.TestFramework.Commands
 {
     public sealed class BuildCommand : TestCommand
     {
+        bool _captureStdOut;
+
         public BuildCommand(MSBuildTest msbuild, string projectRootPath, string relativePathToProject = null)
             : base(msbuild, projectRootPath, relativePathToProject)
         {
+        }
+
+        public BuildCommand CaptureStdOut()
+        {
+            _captureStdOut = true;
+            return this;
         }
 
         public override CommandResult Execute(params string[] args)
@@ -22,6 +30,11 @@ namespace Microsoft.NET.TestFramework.Commands
             newArgs.Insert(0, FullPathProjectFile);
 
             var command = MSBuild.CreateCommandForTarget("build", newArgs.ToArray());
+
+            if (_captureStdOut)
+            {
+                command = command.CaptureStdOut();
+            }
 
             return command.Execute();
         }

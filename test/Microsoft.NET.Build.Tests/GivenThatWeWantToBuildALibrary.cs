@@ -294,6 +294,7 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new BuildCommand(Stage0MSBuild, libraryProjectDirectory);
 
             buildCommand
+                .CaptureStdOut()
                 .Execute()
                 .Should()
                 .Fail();
