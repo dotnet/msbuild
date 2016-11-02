@@ -90,7 +90,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Call test
             CommandResult result = new DotnetTestCommand()
                                        .WithWorkingDirectory(testProjectDirectory)
-                                       .ExecuteWithCapturedOutput();
+                                       .ExecuteWithCapturedOutput("--diag LogFile2.txt");
 
             try
             {
@@ -111,8 +111,8 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                 Console.WriteLine("*********************************Xunit StdErr****************************************************************");
                 Console.WriteLine(result.StdErr.ToString());
 
-                string logfile1 = Path.Combine(testProjectDirectory, "LogFile.txt");
-                string[] logfile2 = Directory.GetFiles(testProjectDirectory, "LogFile.host.*");
+                string logfile1 = Path.Combine(testProjectDirectory, "LogFile2.txt");
+                string[] logfile2 = Directory.GetFiles(testProjectDirectory, "LogFile2.host.*");
 
                 Console.WriteLine("**********************************Xunit Vstest.console Log****************************************************************");
                 Console.WriteLine(File.ReadAllText(logfile1));
