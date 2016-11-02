@@ -92,15 +92,34 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                                        .WithWorkingDirectory(testProjectDirectory)
                                        .ExecuteWithCapturedOutput();
 
+            try
+            {
+                // Verify
+                // for target framework net46
+                result.StdOut.Should().Contain("Total tests: 3. Passed: 2. Failed: 1. Skipped: 0.");
+                result.StdOut.Should().Contain("Passed   TestNamespace.VSTestXunitTests.VSTestXunitPassTestDesktop");
 
-            // Verify
-            // for target framework net46
-            result.StdOut.Should().Contain("Total tests: 3. Passed: 2. Failed: 1. Skipped: 0.");
-            result.StdOut.Should().Contain("Passed   TestNamespace.VSTestXunitTests.VSTestXunitPassTestDesktop");
+                // for target framework netcoreapp1.0
+                result.StdOut.Should().Contain("Total tests: 3. Passed: 1. Failed: 2. Skipped: 0.");
+                result.StdOut.Should().Contain("Failed   TestNamespace.VSTestXunitTests.VSTestXunitFailTestNetCoreApp");
+            }
+            catch
+            {
+                Console.WriteLine("*********************************Xunit StdOut****************************************************************");
+                Console.WriteLine(result.StdOut.ToString());
 
-            // for target framework netcoreapp1.0
-            result.StdOut.Should().Contain("Total tests: 3. Passed: 1. Failed: 2. Skipped: 0.");
-            result.StdOut.Should().Contain("Failed   TestNamespace.VSTestXunitTests.VSTestXunitFailTestNetCoreApp");
+                Console.WriteLine("*********************************Xunit StdErr****************************************************************");
+                Console.WriteLine(result.StdErr.ToString());
+
+                string logfile1 = Path.Combine(testProjectDirectory, "LogFile.txt");
+                string[] logfile2 = Directory.GetFiles(testProjectDirectory, "LogFile.host.*");
+
+                Console.WriteLine("**********************************Xunit Vstest.console Log****************************************************************");
+                Console.WriteLine(File.ReadAllText(logfile1));
+                Console.WriteLine("**********************************Xunit TestHost Log****************************************************************");
+                Console.WriteLine(logfile2.Length > 0 ? File.ReadAllText(logfile2[0]) : "No log file found");
+                Console.WriteLine("**************************************************************************************************");
+            }
         }
     }
 }
