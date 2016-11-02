@@ -5,7 +5,6 @@ using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 
 namespace Microsoft.DotNet.Tools.MSBuild
@@ -17,34 +16,57 @@ namespace Microsoft.DotNet.Tools.MSBuild
 
         public MSBuildLogger()
         {
-            string sessionId = Environment.GetEnvironmentVariable(MSBuildForwardingApp.TelemetrySessionIdEnvironmentVariableName);
-
-            if (sessionId != null)
+            try
             {
-                _telemetry = new Telemetry(_sentinel, sessionId);
+                string sessionId = 
+                    Environment.GetEnvironmentVariable(MSBuildForwardingApp.TelemetrySessionIdEnvironmentVariableName);
+
+                if (sessionId != null)
+                {
+                    _telemetry = new Telemetry(_sentinel, sessionId);
+                }
+            }
+            catch (Exception)
+            {
+                // Exceptions during telemetry shouldn't cause anything else to fail
             }
         }
 
         public override void Initialize(IEventSource eventSource)
         {
-            if (_telemetry != null)
+            try
             {
-                IEventSource2 eventSource2 = eventSource as IEventSource2;
-
-                if (eventSource2 != null)
+                if (_telemetry != null && _telemetry.Enabled)
                 {
-                    eventSource2.TelemetryLogged += (sender, telemetryEventArgs) =>
+                    IEventSource2 eventSource2 = eventSource as IEventSource2;
+
+                    if (eventSource2 != null)
                     {
-                        Console.WriteLine($"Received telemetry event '{telemetryEventArgs.EventName}'");
-                        _telemetry.TrackEvent(telemetryEventArgs.EventName, telemetryEventArgs.Properties, measurements: null);
-                    };
+                        eventSource2.TelemetryLogged += OnTelemetryLogged;
+                    }
                 }
             }
+            catch(Exception)
+            {
+                // Exceptions during telemetry shouldn't cause anything else to fail
+            }
+        }
+
+        private void OnTelemetryLogged(object sender, TelemetryEventArgs args)
+        {
+            _telemetry.TrackEvent(args.EventName, args.Properties, measurements: null);
         }
 
         public override void Shutdown()
         {
-            _sentinel?.Dispose();
+            try
+            {
+                _sentinel?.Dispose();
+            }
+            catch (Exception)
+            {
+                // Exceptions during telemetry shouldn't cause anything else to fail
+            }
 
             base.Shutdown();
         }

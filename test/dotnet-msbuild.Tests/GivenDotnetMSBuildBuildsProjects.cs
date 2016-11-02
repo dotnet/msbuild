@@ -1,9 +1,17 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using FluentAssertions;
+using Microsoft.DotNet.Configurer;
+using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using NuGet.Protocol;
 using Xunit;
+using MSBuildCommand = Microsoft.DotNet.Tools.Test.Utilities.MSBuildCommand;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
@@ -57,7 +65,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             var result = new TestCommand("dotnet")
                 .WithWorkingDirectory(projectDirectory.Path)
                 .ExecuteWithCapturedOutput($"{commandName} --help");
-            
+
             result.ExitCode.Should().Be(0);
             if (isMSBuildCommand)
             {
@@ -69,5 +77,68 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             }
         }
 
+        [Fact]
+        public void WhenTelemetryIsEnabledTheLoggerIsAddedToTheCommandLine()
+        {
+            string[] allArgs = GetArgsForMSBuild(() => true);
+
+            allArgs.Should().NotBeNull();
+
+            allArgs.Should().Contain(
+                value => value.IndexOf("/Logger", StringComparison.OrdinalIgnoreCase) >= 0,
+                "The MSBuild logger argument should be specified when telemetry is enabled.");
+        }
+
+        [Fact]
+        public void WhenTelemetryIsDisabledTheLoggerIsNotAddedToTheCommandLine()
+        {
+            string[] allArgs = GetArgsForMSBuild(() => false);
+
+            allArgs.Should().NotBeNull();
+
+            allArgs.Should().NotContain(
+                value => value.IndexOf("/Logger", StringComparison.OrdinalIgnoreCase) >= 0,
+                $"The MSBuild logger argument should not be specified when telemetry is disabled.");
+        }
+
+        private string[] GetArgsForMSBuild(Func<bool> sentinelExists)
+        {
+            Telemetry telemetry = new Telemetry(new MockNuGetCacheSentinel(sentinelExists));
+
+            MSBuildForwardingApp msBuildForwardingApp = new MSBuildForwardingApp(Enumerable.Empty<string>());
+
+            FieldInfo forwardingAppFieldInfo = msBuildForwardingApp
+                .GetType()
+                .GetField("_forwardingApp", BindingFlags.Instance | BindingFlags.NonPublic);
+
+            ForwardingApp forwardingApp = forwardingAppFieldInfo?.GetValue(msBuildForwardingApp) as ForwardingApp;
+
+            FieldInfo allArgsFieldinfo = forwardingApp?
+                .GetType()
+                .GetField("_allArgs", BindingFlags.Instance | BindingFlags.NonPublic);
+
+            return allArgsFieldinfo?.GetValue(forwardingApp) as string[];
+        }
+    }
+
+    public sealed class MockNuGetCacheSentinel : INuGetCacheSentinel
+    {
+        private readonly Func<bool> _exists;
+
+        public MockNuGetCacheSentinel(Func<bool> exists = null)
+        {
+            _exists = exists ?? (() => true);
+        }
+        public void Dispose()
+        {
+        }
+
+        public bool InProgressSentinelAlreadyExists() => false;
+
+        public bool Exists() => _exists();
+
+        public void CreateIfNotExists()
+        {
+        }
     }
 }
