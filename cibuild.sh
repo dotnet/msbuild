@@ -136,7 +136,7 @@ MSBUILD_ZIP="$PACKAGES_DIR/msbuild.zip"
 HOME_DEFAULT="$WORKSPACE/msbuild-CI-home"
 
 PROJECT_FILE_ARG='"'"$THIS_SCRIPT_PATH/build.proj"'"'
-BOOTSTRAP_FILE_ARG='"'"$THIS_SCRIPT_PATH/BootStrapMSBuild.proj"'"'
+BOOTSTRAP_FILE_ARG='"'"$THIS_SCRIPT_PATH/targets/BootStrapMSBuild.proj"'"'
 BOOTSTRAPPED_RUNTIME_HOST='"'"$THIS_SCRIPT_PATH/bin/Bootstrap-NetCore/dotnet"'"'
 MSBUILD_BOOTSTRAPPED_EXE='"'"$THIS_SCRIPT_PATH/bin/Bootstrap-NetCore/MSBuild.dll"'"'
 

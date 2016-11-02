@@ -104,7 +104,7 @@ echo ** Moving bootstrapped MSBuild to the bootstrap folder
 taskkill /F /IM vbcscompiler.exe
 
 set MSBUILDLOGPATH=%~dp0msbuild_move_bootstrap-%HOST%.log
-set MSBUILD_ARGS=/verbosity:minimal BootStrapMSbuild.proj /p:Configuration=%BUILD_CONFIGURATION%
+set MSBUILD_ARGS=/verbosity:minimal targets\BootStrapMSbuild.proj /p:Configuration=%BUILD_CONFIGURATION%
 
 call "%~dp0build.cmd"
 if %ERRORLEVEL% NEQ 0 (
