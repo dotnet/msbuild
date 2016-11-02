@@ -42,5 +42,17 @@ namespace Microsoft.NET.TestFramework.Commands
 
             return buildProjectFiles[0];
         }
+
+        public DirectoryInfo GetOutputDirectory(string targetFramework, string configuration = "Debug")
+        {
+            string output = Path.Combine(ProjectRootPath, "bin", configuration, targetFramework);
+            return new DirectoryInfo(output);
+        }
+
+        public DirectoryInfo GetBaseIntermediateDirectory()
+        {
+            string output = Path.Combine(ProjectRootPath, "obj");
+            return new DirectoryInfo(output);
+        }
     }
 }

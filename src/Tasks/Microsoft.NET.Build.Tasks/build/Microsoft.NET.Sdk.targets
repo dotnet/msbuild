@@ -18,11 +18,11 @@ Copyright (c) .NET Foundation. All rights reserved.
   </ImportGroup>
 
   <PropertyGroup>
-    <DefaultExcludes>bin\**;obj\**</DefaultExcludes>
+    <DefaultRemoves>bin\**;obj\**;packages\**</DefaultRemoves>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Remove="$(DefaultExcludes)" />
-    <EmbeddedResource Remove="$(DefaultExcludes)" />
+  <ItemGroup Condition="'$(DisableDefaultRemoves)' != 'true'">
+    <Compile Remove="$(DefaultRemoves)" />
+    <EmbeddedResource Remove="$(DefaultRemoves)" />
   </ItemGroup>
   
   <UsingTask TaskName="GenerateDepsFile" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
