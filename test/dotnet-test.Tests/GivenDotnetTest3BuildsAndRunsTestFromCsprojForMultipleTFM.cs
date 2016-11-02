@@ -65,8 +65,10 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
                 Console.WriteLine("**********************************Vstest.console Log****************************************************************");
                 Console.WriteLine(File.ReadAllText(logfile1));
-                Console.WriteLine("**********************************TestHost Log****************************************************************");
+                Console.WriteLine("**********************************TestHost Log1****************************************************************");
                 Console.WriteLine(logfile2.Length > 0 ? File.ReadAllText(logfile2[0]) : "No log file found");
+                Console.WriteLine("**********************************TestHost Log2****************************************************************");
+                Console.WriteLine(logfile2.Length > 1 ? File.ReadAllText(logfile2[1]) : "No log file found");
                 Console.WriteLine("**************************************************************************************************");
             }
         }
@@ -116,8 +118,10 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
                 Console.WriteLine("**********************************Xunit Vstest.console Log****************************************************************");
                 Console.WriteLine(File.ReadAllText(logfile1));
-                Console.WriteLine("**********************************Xunit TestHost Log****************************************************************");
+                Console.WriteLine("**********************************Xunit TestHost Log1****************************************************************");
                 Console.WriteLine(logfile2.Length > 0 ? File.ReadAllText(logfile2[0]) : "No log file found");
+                Console.WriteLine("**********************************Xunit TestHost Log2****************************************************************");
+                Console.WriteLine(logfile2.Length > 1 ? File.ReadAllText(logfile2[1]) : "No log file found");
                 Console.WriteLine("**************************************************************************************************");
             }
         }
