@@ -130,6 +130,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         private Func<CommonCompilerOptions, string, IEnumerable<ProjectItemElement>> CopyToOutputFilesTransformExecute =>
             (compilerOptions, projectDirectory) =>
                     CopyToOutputFilesTransform.Transform(GetCopyToOutputIncludeContext(compilerOptions, projectDirectory));
+
+        private readonly string[] DefaultEmptyExcludeOption = new string[0];
         
         private readonly ProjectPropertyGroupElement _configurationPropertyGroup;
         private readonly ProjectItemGroupElement _configurationItemGroup;
@@ -328,7 +330,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     "compile",
                     new JObject(),
                     ProjectFilesCollection.DefaultCompileBuiltInPatterns,
-                    ProjectFilesCollection.DefaultBuiltInExcludePatterns);
+                    DefaultEmptyExcludeOption);
         }
 
         private IncludeContext GetEmbedIncludeContext(CommonCompilerOptions compilerOptions, string projectDirectory)
@@ -340,7 +342,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     "embed",
                     new JObject(),
                     ProjectFilesCollection.DefaultResourcesBuiltInPatterns,
-                    ProjectFilesCollection.DefaultBuiltInExcludePatterns);
+                    DefaultEmptyExcludeOption);
         }
 
         private IncludeContext GetCopyToOutputIncludeContext(CommonCompilerOptions compilerOptions, string projectDirectory)
