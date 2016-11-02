@@ -20,6 +20,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- General Properties -->
   <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+
     <!-- Flag PackageDependency Tasks -->
     <EnableResolvePackageDependencies
       Condition="'$(EnableResolvePackageDependencies)' == ''">true</EnableResolvePackageDependencies>
