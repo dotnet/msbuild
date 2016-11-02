@@ -17,7 +17,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <!-- For .net core projects, we use the csc.exe bundled with msbuild -->
-    <PropertyGroup Condition="$(TargetFrameworks.StartsWith('netcoreapp'))">
+    <PropertyGroup Condition="$(TargetFramework.StartsWith('netcoreapp'))">
         <CscToolPath Condition="'$(CscToolPath)' == ''">$(MSBuildBinPath)\</CscToolPath>
 
         <!-- Writing full pdbs is not supported on !windows platforms, so use portable
@@ -26,7 +26,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </PropertyGroup>
 
     <!-- For any non-.net core project, we default to using mcs instead of csc -->
-    <PropertyGroup Condition="!$(TargetFrameworks.StartsWith('netcoreapp'))">
+    <PropertyGroup Condition="!$(TargetFramework.StartsWith('netcoreapp'))">
         <!-- Using _CscToolExeTmp instead of CscToolExe directly here, as we don't want to override it
              for !mono case -->
         <_CscToolExeTmp Condition="'$(CscToolExe)' != ''">$(CscToolExe)</_CscToolExeTmp>
