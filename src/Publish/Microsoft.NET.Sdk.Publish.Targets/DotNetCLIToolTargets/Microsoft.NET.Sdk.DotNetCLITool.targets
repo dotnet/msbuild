@@ -60,6 +60,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <_DotNetCLIPostPublishDependsOn>
       _InitProjectCapabilityProperties;
       _ManagedProjectSystemPostPublish;
+      AfterPublish;
     </_DotNetCLIPostPublishDependsOn>
   </PropertyGroup>
 
