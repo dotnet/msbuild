@@ -13,18 +13,4 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <PropertyGroup>
-    <BeforePublishDependsOn>
-      $(BeforePublishDependsOn);
-    </BeforePublishDependsOn>
-  </PropertyGroup>
-
-  <Target Name="BeforePublish" 
-          DependsOnTargets="$(BeforePublishDependsOn)">
-
-    <PropertyGroup>
-      <_IsManagedProject Condition="%(ProjectCapability.Identity) == 'Managed'">true</_IsManagedProject>
-    </PropertyGroup>
-    
-  </Target>
 </Project>

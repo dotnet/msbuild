@@ -43,7 +43,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     
 
     <TransformWebConfig
-        Condition="'$(_IsManagedProject)' == 'true' And '$(_IsAspNetCoreProject)' == 'true'"
+        Condition="'$(_IsManagedProject)' == 'true' And '$(_IsAspNetCoreProject)' == 'true' And '$(IsWebConfigTransformDisabled)' != 'true'"
         TargetPath="$(TargetPath)"
         PublishDir="$(PublishIntermediateOutputPath)"
         IsPortable="$(_IsPortable)"
