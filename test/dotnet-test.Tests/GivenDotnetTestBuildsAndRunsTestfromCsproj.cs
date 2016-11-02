@@ -16,13 +16,13 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         [Fact]
         public void MSTestSingleTFM()
         {
-            // Copy VSTestDotNetCoreProject project in output directory of project dotnet-vstest.Tests
-            string testAppName = "VSTestDotNetCoreProject";
+            // Copy VSTestDotNetCore project in output directory of project dotnet-vstest.Tests
+            string testAppName = "VSTestDotNetCore";
             TestInstance testInstance = TestAssetsManager.CreateTestInstance(testAppName);
 
             string testProjectDirectory = testInstance.TestRoot;
 
-            // Restore project VSTestDotNetCoreProject
+            // Restore project VSTestDotNetCore
             new RestoreCommand()
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute()
@@ -43,13 +43,13 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         [Fact]
         public void XunitSingleTFM()
         {
-            // Copy VSTestXunitDotNetCoreProject project in output directory of project dotnet-vstest.Tests
-            string testAppName = "VSTestXunitDotNetCoreProject";
+            // Copy VSTestXunitDotNetCore project in output directory of project dotnet-vstest.Tests
+            string testAppName = "VSTestXunitDotNetCore";
             TestInstance testInstance = TestAssetsManager.CreateTestInstance(testAppName);
 
             string testProjectDirectory = testInstance.TestRoot;
 
-            // Restore project VSTestXunitDotNetCoreProject
+            // Restore project VSTestXunitDotNetCore
             new RestoreCommand()
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute()
@@ -70,13 +70,13 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         [Fact]
         public void TestWillNotBuildTheProjectIfNoBuildArgsIsGiven()
         {
-            // Copy VSTestDotNetCoreProject project in output directory of project dotnet-vstest.Tests
-            string testAppName = "VSTestDotNetCoreProject";
+            // Copy VSTestDotNetCore project in output directory of project dotnet-vstest.Tests
+            string testAppName = "VSTestDotNetCore";
             TestInstance testInstance = TestAssetsManager.CreateTestInstance(testAppName);
 
             string testProjectDirectory = testInstance.TestRoot;
 
-            // Restore project VSTestDotNetCoreProject
+            // Restore project VSTestDotNetCore
             new RestoreCommand()
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute()
@@ -85,7 +85,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             string configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
             string expectedError = Path.Combine(testProjectDirectory, "bin",
-                                   configuration, "netcoreapp1.0", "VSTestDotNetCoreProject.dll");
+                                   configuration, "netcoreapp1.0", "VSTestDotNetCore.dll");
             expectedError = "The test source file " + "\"" + expectedError + "\"" + " provided was not found.";
 
             // Call test

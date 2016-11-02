@@ -16,13 +16,13 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         [WindowsOnlyFact]
         public void MStestMultiTFM()
         {
-            // Copy VSTestDesktopAndNetCoreApp project in output directory of project dotnet-test.Tests
-            string testAppName = "VSTestDesktopAndNetCoreApp";
+            // Copy VSTestDesktopAndNetCore project in output directory of project dotnet-test.Tests
+            string testAppName = "VSTestDesktopAndNetCore";
             TestInstance testInstance = TestAssetsManager.CreateTestInstance(testAppName);
 
             string testProjectDirectory = testInstance.TestRoot;
 
-            // Restore project VSTestDesktopAndNetCoreApp
+            // Restore project VSTestDesktopAndNetCore
             new RestoreCommand()
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute()
@@ -48,13 +48,13 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         [WindowsOnlyFact]
         public void XunitMultiTFM()
         {
-            // Copy VSTestXunitDesktopAndNetCoreApp project in output directory of project dotnet-test.Tests
-            string testAppName = "VSTestXunitDesktopAndNetCoreApp";
+            // Copy VSTestXunitDesktopAndNetCore project in output directory of project dotnet-test.Tests
+            string testAppName = "VSTestXunitDesktopAndNetCore";
             TestInstance testInstance = TestAssetsManager.CreateTestInstance(testAppName);
 
             string testProjectDirectory = testInstance.TestRoot;
 
-            // Restore project VSTestXunitDesktopAndNetCoreApp
+            // Restore project VSTestXunitDesktopAndNetCore
             new RestoreCommand()
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute()
