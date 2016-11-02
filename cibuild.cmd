@@ -85,7 +85,7 @@ call %~dp0init-tools.cmd
 echo.
 echo ** Rebuilding MSBuild with downloaded binaries
 
-set MSBUILDLOGPATH=%~dp0msbuild_bootstrap_build.log
+set MSBUILDLOGPATH=%~dp0msbuild_bootstrap_build-%HOST%.log
 call "%~dp0build.cmd" /t:Rebuild /p:Configuration=%BUILD_CONFIGURATION% /p:"SkipBuildPackages=true" %LOCALIZED_BUILD_ARGUMENT% %SYNC_XLF_ARGUMENT%
 
 if %ERRORLEVEL% NEQ 0 (
@@ -103,7 +103,7 @@ echo ** Moving bootstrapped MSBuild to the bootstrap folder
 :: Kill Roslyn, which may have handles open to files we want
 taskkill /F /IM vbcscompiler.exe
 
-set MSBUILDLOGPATH=%~dp0msbuild_move_bootstrap.log
+set MSBUILDLOGPATH=%~dp0msbuild_move_bootstrap-%HOST%.log
 set MSBUILD_ARGS=/verbosity:minimal BootStrapMSbuild.proj /p:Configuration=%BUILD_CONFIGURATION%
 
 call "%~dp0build.cmd"
@@ -117,7 +117,7 @@ if "%BOOTSTRAP_ONLY%"=="true" goto :success
 set MSBUILD_ARGS=
 
 :: Rebuild with bootstrapped msbuild
-set MSBUILDLOGPATH=%~dp0msbuild_local_build.log
+set MSBUILDLOGPATH=%~dp0msbuild_local_build-%HOST%.log
 
 :: Only CoreCLR requires an override--it should use the host
 :: downloaded as part of its NuGet package references, rather
@@ -127,7 +127,7 @@ if /i "%TARGET%"=="CoreCLR" (
 )
 
 if /i "%TARGET%"=="CoreCLR" (
-    set MSBUILD_CUSTOM_PATH="%~dp0bin\Bootstrap\MSBuild.dll"
+    set MSBUILD_CUSTOM_PATH="%~dp0bin\Bootstrap-NetCore\MSBuild.dll"
 ) else (
     set MSBUILD_CUSTOM_PATH="%~dp0bin\Bootstrap\15.0\Bin\MSBuild.exe"
 )

@@ -43,7 +43,6 @@
     <!-- Output directories -->
     <BinDir>$(ProjectDir)bin\</BinDir>
     <TestWorkingDir>$(BinDir)tests\</TestWorkingDir>
-    <BootstrapDestination>$(BinDir)Bootstrap\</BootstrapDestination>
 
     <!-- Package version / directories -->
     <BuildToolsVersion>1.0.27-prerelease-00927-05</BuildToolsVersion>
@@ -96,11 +95,6 @@
 
     <!-- packageresolve.targets from build tools uses the DnuRestoreCommand property. Setting it to use dotnet CLI under the hood-->
     <DnuRestoreCommand>$(DnuCoreRestoreCommand) --packages $(PackagesDir)</DnuRestoreCommand>
-  </PropertyGroup>
-
-  <!-- If we're building with a bootstrapped MSBuild, use fresh extensions instead of the installed ones. -->
-  <PropertyGroup Condition="'$(BootstrappedMSBuild)' == 'true'">
-    <MSBuildExtensionsPath>$(BootstrapDestination)</MSBuildExtensionsPath>
   </PropertyGroup>
 
   <!-- Common nuget properties -->
@@ -203,6 +197,15 @@
     <PlatformTarget Condition="'$(PlatformSpecificBuild)' != 'true'">AnyCPU</PlatformTarget>
     <PlatformTarget Condition="'$(PlatformSpecificBuild)' == 'true' AND '$(FullFrameworkBuild)' == 'true'">$(Platform)</PlatformTarget>
     <PlatformTarget Condition="'$(PlatformSpecificBuild)' == 'true' AND '$(FullFrameworkBuild)' != 'true'">AnyCPU</PlatformTarget>
+  </PropertyGroup>
+
+  <!-- Configure bootstrapping -->
+  <PropertyGroup>
+    <BootstrapDestination Condition="'$(NetCoreBuild)' != 'true'">$(BinDir)Bootstrap$([System.IO.Path]::DirectorySeparatorChar)</BootstrapDestination>
+    <BootstrapDestination Condition="'$(NetCoreBuild)' == 'true'">$(BinDir)Bootstrap-NetCore$([System.IO.Path]::DirectorySeparatorChar)</BootstrapDestination>
+
+    <!-- If we're building with a bootstrapped MSBuild, use fresh extensions instead of the installed ones. -->
+    <MSBuildExtensionsPath Condition="'$(BootstrappedMSBuild)' == 'true'">$(BootstrapDestination)</MSBuildExtensionsPath>
   </PropertyGroup>
 
   <!-- This configuration builds against the full .NET Framework but with the compilation constants to compile against
@@ -398,8 +401,6 @@
 
     <DeploymentDir>$([System.IO.Path]::Combine($(BaseOutputPath), $(Configuration), $(DeploymentDirName)))$([System.IO.Path]::DirectorySeparatorChar)</DeploymentDir>
     <TestDeploymentDir>$([System.IO.Path]::Combine($(BaseOutputPath), $(Configuration), $(TestDeploymentDirName)))$([System.IO.Path]::DirectorySeparatorChar)</TestDeploymentDir>
-
-    <BootstrapDestination>$(BinDir)Bootstrap$([System.IO.Path]::DirectorySeparatorChar)</BootstrapDestination>
 
     <!-- Output path for helper tasks that we build for our own build process (e.g. localization tasks). Tasks should be imported from this property -->
     <BuildBinDir>$([System.IO.Path]::Combine($(ProjectDir), "build", "bin", $(RelativeOutputPathWithConfig), "Output"))$([System.IO.Path]::DirectorySeparatorChar)</BuildBinDir>

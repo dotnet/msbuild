@@ -135,14 +135,10 @@ MSBUILD_DOWNLOAD_URL="https://github.com/Microsoft/msbuild/releases/download/mon
 MSBUILD_ZIP="$PACKAGES_DIR/msbuild.zip"
 HOME_DEFAULT="$WORKSPACE/msbuild-CI-home"
 
-BOOTSTRAP_BUILD_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_bootstrap_build.log"
-LOCAL_BUILD_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_local_build.log"
-MOVE_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_move_bootstrap.log"
-
 PROJECT_FILE_ARG='"'"$THIS_SCRIPT_PATH/build.proj"'"'
 BOOTSTRAP_FILE_ARG='"'"$THIS_SCRIPT_PATH/BootStrapMSBuild.proj"'"'
-BOOTSTRAPPED_RUNTIME_HOST='"'"$THIS_SCRIPT_PATH/bin/Bootstrap/dotnet"'"'
-MSBUILD_BOOTSTRAPPED_EXE='"'"$THIS_SCRIPT_PATH/bin/Bootstrap/MSBuild.dll"'"'
+BOOTSTRAPPED_RUNTIME_HOST='"'"$THIS_SCRIPT_PATH/bin/Bootstrap-NetCore/dotnet"'"'
+MSBUILD_BOOTSTRAPPED_EXE='"'"$THIS_SCRIPT_PATH/bin/Bootstrap-NetCore/MSBuild.dll"'"'
 
 # Default msbuild arguments
 TARGET_ARG="Build"
@@ -269,6 +265,10 @@ case $host in
         exit 1
         ;;
 esac
+
+BOOTSTRAP_BUILD_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_bootstrap_build-$host.log"
+LOCAL_BUILD_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_local_build-$host.log"
+MOVE_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_move_bootstrap-$host.log"
 
 BUILD_MSBUILD_ARGS="$PROJECT_FILE_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURATION /p:OverrideToolHost=$RUNTIME_HOST /verbosity:minimal $EXTRA_ARGS"
 
