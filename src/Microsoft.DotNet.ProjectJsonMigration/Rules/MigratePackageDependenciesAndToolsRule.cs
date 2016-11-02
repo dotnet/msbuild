@@ -135,6 +135,28 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                             noFrameworkPackageReferenceItemGroup,
                             mergeExisting: false);
                     }
+                    else if (project.TestRunner.Equals("mstest", StringComparison.OrdinalIgnoreCase))
+                    {
+                        _transformApplicator.Execute(
+                            PackageDependencyInfoTransform().Transform(
+                                new PackageDependencyInfo
+                                {
+                                    Name = PackageConstants.MstestTestAdapterName,
+                                    Version = ConstantPackageVersions.MstestTestAdapterVersion
+                                }),
+                            noFrameworkPackageReferenceItemGroup,
+                            mergeExisting: false);
+
+                        _transformApplicator.Execute(
+                            PackageDependencyInfoTransform().Transform(
+                                new PackageDependencyInfo
+                                {
+                                    Name = PackageConstants.MstestTestFrameworkName,
+                                    Version = ConstantPackageVersions.MstestTestFrameworkVersion
+                                }),
+                            noFrameworkPackageReferenceItemGroup,
+                            mergeExisting: false);
+                    }
                     break;
                 case ProjectType.Library:
                     if (!project.HasDependency(

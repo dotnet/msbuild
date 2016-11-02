@@ -13,33 +13,32 @@ using FluentAssertions;
 
 namespace Microsoft.DotNet.New.Tests
 {
-    public class GivenThatIWantANewCSLibrary : TestBase
+    public class GivenThatIWantANewCSAppWithSpecifiedType : TestBase
     {
-        [Fact]
-        public void When_library_created_Then_project_restores()
+        [Theory]
+        [InlineData("Console", false)]
+        [InlineData("Lib", false)]
+        [InlineData("Web", true)]
+        [InlineData("Mstest", false)]
+        [InlineData("XUnittest", false)]
+        public void When_dotnet_build_is_invoked_then_project_restores_and_builds_without_warnings(
+            string projectType,
+            bool useNuGetConfigForAspNet)
         {
-            var rootPath = TestAssetsManager.CreateTestDirectory().Path;
+            var rootPath = TestAssetsManager.CreateTestDirectory(callingMethod: "i").Path;
 
             new TestCommand("dotnet") { WorkingDirectory = rootPath }
-                .Execute("new --type lib")
+                .Execute($"new --type {projectType}")
                 .Should().Pass();
-            
+
+            if (useNuGetConfigForAspNet)
+            {
+                File.Copy("NuGet.tempaspnetpatch.config", Path.Combine(rootPath, "NuGet.Config"));
+            }
+
             new TestCommand("dotnet") { WorkingDirectory = rootPath }
-                .Execute("restore /p:SkipInvalidConfigurations=true")
+                .Execute($"restore /p:SkipInvalidConfigurations=true")
                 .Should().Pass();
-            
-        }
-
-        [Fact]
-        public void When_dotnet_build_is_invoked_Then_library_builds_without_warnings()
-        {
-            var rootPath = TestAssetsManager.CreateTestDirectory().Path;
-
-            new TestCommand("dotnet") { WorkingDirectory = rootPath }
-                .Execute("new --type lib");
-
-            new TestCommand("dotnet") { WorkingDirectory = rootPath }
-                .Execute("restore /p:SkipInvalidConfigurations=true");
 
             var buildResult = new TestCommand("dotnet")
                 .WithWorkingDirectory(rootPath)

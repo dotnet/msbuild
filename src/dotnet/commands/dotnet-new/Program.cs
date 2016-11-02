@@ -138,7 +138,8 @@ namespace Microsoft.DotNet.Tools.New
                                    new { Name = "Console", isMsBuild = true }, 
                                    new { Name = "Web", isMsBuild = true }, 
                                    new { Name = "Lib", isMsBuild = true },
-                                   new { Name = "Xunittest", isMsBuild = true }
+                                   new { Name = "mstest", isMsBuild = true },
+                                   new { Name = "xunittest", isMsBuild = true }
                                }
             };
 

@@ -10,8 +10,8 @@
     <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">$(PackageTargetFallback);dnxcore50;netstandardapp1.5;portable-net45+win8;portable-net45+wp80+win8+wpa81+dnxcore50</PackageTargetFallback>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="**\*.cs" Exclude="commands\dotnet-new\CSharp_Console\**;commands\dotnet-new\CSharp_Web\**;commands\dotnet-new\CSharp_Lib\**;commands\dotnet-new\CSharp_xunittest\**" />
-    <EmbeddedResource Include="commands\dotnet-new\CSharp_Console.zip;commands\dotnet-new\CSharp_Lib.zip;commands\dotnet-new\CSharp_Web.zip;commands\dotnet-new\CSharp_xunittest.zip" />
+    <Compile Include="**\*.cs" Exclude="commands\dotnet-new\CSharp_Console\**;commands\dotnet-new\CSharp_Web\**;commands\dotnet-new\CSharp_Lib\**;commands\dotnet-new\CSharp_mstest\**;commands\dotnet-new\CSharp_xunittest\**" />
+    <EmbeddedResource Include="commands\dotnet-new\CSharp_Console.zip;commands\dotnet-new\CSharp_Lib.zip;commands\dotnet-new\CSharp_Web.zip;commands\dotnet-new\CSharp_mstest.zip;commands\dotnet-new\CSharp_xunittest.zip" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />

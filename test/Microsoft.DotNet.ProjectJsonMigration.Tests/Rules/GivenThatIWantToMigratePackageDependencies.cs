@@ -269,7 +269,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                     ""frameworks"": {
                         ""netcoreapp1.0"": {}
                     },
-                    ""testRunner"": ""mstest""
+                    ""testRunner"": ""somerunner""
                 }");
 
             mockProj.Items.Should().ContainSingle(
@@ -282,6 +282,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             mockProj.Items.Should().NotContain(
                 i => (i.Include == "xunit.runner.visualstudio" && i.ItemType == "PackageReference"));
+
+            mockProj.Items.Should().NotContain(
+                i => (i.Include == "MSTest.TestAdapter" && i.ItemType == "PackageReference"));
+
+            mockProj.Items.Should().NotContain(
+                i => (i.Include == "MSTest.TestFramework" && i.ItemType == "PackageReference"));
         }
 
         [Fact]
@@ -312,6 +318,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 i => (i.Include == "xunit.runner.visualstudio" && 
                       i.ItemType == "PackageReference" &&
                       i.GetMetadataWithName("Version").Value == "2.2.0-beta4-build1188"));
+
+            mockProj.Items.Should().NotContain(
+                i => (i.Include == "MSTest.TestAdapter" && i.ItemType == "PackageReference"));
+
+            mockProj.Items.Should().NotContain(
+                i => (i.Include == "MSTest.TestFramework" && i.ItemType == "PackageReference"));
         }
 
         [Fact]
@@ -345,6 +357,48 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 i => (i.Include == "xunit.runner.visualstudio" &&
                       i.ItemType == "PackageReference" &&
                       i.GetMetadataWithName("Version").Value == "2.2.0-beta4-build1188"));
+
+            mockProj.Items.Should().NotContain(
+                i => (i.Include == "MSTest.TestAdapter" && i.ItemType == "PackageReference"));
+
+            mockProj.Items.Should().NotContain(
+                i => (i.Include == "MSTest.TestFramework" && i.ItemType == "PackageReference"));
+        }
+
+        [Fact]
+        public void It_migrates_test_projects_to_have_test_sdk_and_mstest_packagedependencies()
+        {
+            var mockProj = RunPackageDependenciesRuleOnPj(@"
+                {
+                    ""buildOptions"": {
+                        ""emitEntryPoint"": true
+                    },
+                    ""frameworks"": {
+                        ""netcoreapp1.0"": {}
+                    },
+                    ""testRunner"": ""mstest""
+                }");
+
+            mockProj.Items.Should().ContainSingle(
+                i => (i.Include == "Microsoft.NET.Test.Sdk" &&
+                      i.ItemType == "PackageReference" &&
+                      i.GetMetadataWithName("Version").Value == "15.0.0-preview-20161024-02"));
+
+            mockProj.Items.Should().ContainSingle(
+                i => (i.Include == "MSTest.TestAdapter" &&
+                      i.ItemType == "PackageReference" &&
+                      i.GetMetadataWithName("Version").Value == "1.1.3-preview"));
+
+            mockProj.Items.Should().ContainSingle(
+                i => (i.Include == "MSTest.TestFramework" &&
+                      i.ItemType == "PackageReference" &&
+                      i.GetMetadataWithName("Version").Value == "1.0.4-preview"));
+
+            mockProj.Items.Should().NotContain(
+                i => (i.Include == "xunit" && i.ItemType == "PackageReference"));
+
+            mockProj.Items.Should().NotContain(
+                i => (i.Include == "xunit.runner.visualstudio" && i.ItemType == "PackageReference"));
         }
 
         [Theory]
