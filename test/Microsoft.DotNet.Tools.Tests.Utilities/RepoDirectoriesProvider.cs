@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             _nugetPackages = nugetPackages ?? Path.Combine(RepoRoot, ".nuget", "packages");
             _pjDotnet = pjDotnet ?? GetPjDotnetPath();
             _stage2Sdk = Directory.EnumerateDirectories(Path.Combine(_artifacts, "stage2", "sdk")).First();
-            _testPackages = Path.Combine(_artifacts, "tests", "packages");
+            _testPackages = Path.Combine(RepoRoot, "artifacts", "testpackages", "packages");
         }
 
         private string GetPjDotnetPath()

@@ -1,12 +1,15 @@
 {
   "version": "1.0.0-*",
   "buildOptions": {
-    "debugType": "portable",
-    "emitEntryPoint": true
+    "emitEntryPoint": true,
+    "preserveCompilationContext": true
   },
-  "dependencies": {},
+  "dependencies": {
+    "ProjectB": "1.0.0-*",
+    "Microsoft.NETCore.App": "1.0.1"
+  },
   "frameworks": {
-    "net451": {}
+    "netcoreapp1.0": {}
   },
   "runtimes": {
     "win7-x64": {},

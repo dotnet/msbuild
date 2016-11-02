@@ -273,7 +273,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 }");
 
             mockProj.Items.Should().ContainSingle(
-                i => (i.Include == "Microsoft.NET.Test.Sdk" && i.ItemType == "PackageReference"));
+                i => (i.Include == "Microsoft.NET.Test.Sdk" &&
+                      i.ItemType == "PackageReference" &&
+                      i.GetMetadataWithName("Version").Value == "15.0.0-preview-20161024-02"));
 
             mockProj.Items.Should().NotContain(
                 i => (i.Include == "xunit" && i.ItemType == "PackageReference"));
@@ -297,13 +299,82 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 }");
 
             mockProj.Items.Should().ContainSingle(
-                i => (i.Include == "Microsoft.NET.Test.Sdk" && i.ItemType == "PackageReference"));
+                i => (i.Include == "Microsoft.NET.Test.Sdk" && 
+                      i.ItemType == "PackageReference" &&
+                      i.GetMetadataWithName("Version").Value == "15.0.0-preview-20161024-02"));
 
             mockProj.Items.Should().ContainSingle(
-                i => (i.Include == "xunit" && i.ItemType == "PackageReference"));
+                i => (i.Include == "xunit" && 
+                      i.ItemType == "PackageReference" &&
+                      i.GetMetadataWithName("Version").Value == "2.2.0-beta3-build3402"));
 
             mockProj.Items.Should().ContainSingle(
-                i => (i.Include == "xunit.runner.visualstudio" && i.ItemType == "PackageReference"));
+                i => (i.Include == "xunit.runner.visualstudio" && 
+                      i.ItemType == "PackageReference" &&
+                      i.GetMetadataWithName("Version").Value == "2.2.0-beta4-build1188"));
+        }
+
+        [Fact]
+        public void It_migrates_test_projects_to_have_test_sdk_and_xunit_packagedependencies_overwrite_existing_packagedependencies()
+        {
+            var mockProj = RunPackageDependenciesRuleOnPj(@"
+                {
+                    ""buildOptions"": {
+                        ""emitEntryPoint"": true
+                    },
+                    ""dependencies"": {
+                        ""xunit"": ""2.2.0-beta3-build3330""
+                    },
+                    ""frameworks"": {
+                        ""netcoreapp1.0"": {}
+                    },
+                    ""testRunner"": ""xunit""
+                }");
+
+            mockProj.Items.Should().ContainSingle(
+                i => (i.Include == "Microsoft.NET.Test.Sdk" &&
+                      i.ItemType == "PackageReference" &&
+                      i.GetMetadataWithName("Version").Value == "15.0.0-preview-20161024-02"));
+
+            mockProj.Items.Should().ContainSingle(
+                i => (i.Include == "xunit" &&
+                      i.ItemType == "PackageReference" &&
+                      i.GetMetadataWithName("Version").Value == "2.2.0-beta3-build3402"));
+
+            mockProj.Items.Should().ContainSingle(
+                i => (i.Include == "xunit.runner.visualstudio" &&
+                      i.ItemType == "PackageReference" &&
+                      i.GetMetadataWithName("Version").Value == "2.2.0-beta4-build1188"));
+        }
+
+        [Theory]
+        [InlineData(@"
+            {
+              ""frameworks"": {
+                ""netstandard1.3"": {
+                    ""dependencies"": {
+                        ""System.AppContext"": ""4.1.0"",
+                        ""NETStandard.Library"": ""1.5.0""
+                    }
+                }
+              }
+            }")]
+        [InlineData(@"
+            {
+              ""frameworks"": {
+                ""netstandard1.3"": {
+                    ""dependencies"": {
+                        ""System.AppContext"": ""4.1.0""
+                    }
+                }
+              }
+            }")]
+        public void It_migrates_library_and_does_not_double_netstandard_ref(string pjContent)
+        {
+            var mockProj = RunPackageDependenciesRuleOnPj(pjContent);
+
+            mockProj.Items.Should().ContainSingle(
+                i => (i.Include == "NETStandard.Library" && i.ItemType == "PackageReference"));
         }
 
         private void EmitsPackageReferences(ProjectRootElement mockProj, params Tuple<string, string, string>[] packageSpecs)

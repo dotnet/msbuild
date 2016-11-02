@@ -98,7 +98,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration
      
             foreach (var projectFileDependency in
                 projectFileDependenciesForFramework.Where(p =>
-                    p.LibraryRange.TypeConstraint == LibraryDependencyTarget.Project))
+                    p.LibraryRange.TypeConstraint == LibraryDependencyTarget.Project ||
+                    p.LibraryRange.TypeConstraint == LibraryDependencyTarget.All))
             {
                 var dependencyName = projectFileDependency.Name;
 

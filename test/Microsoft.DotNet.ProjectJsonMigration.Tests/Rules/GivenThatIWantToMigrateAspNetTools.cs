@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [InlineData("Microsoft.EntityFrameworkCore.Tools", "Microsoft.EntityFrameworkCore.Tools", ConstantPackageVersions.AspNetToolsVersion)]
         [InlineData("Microsoft.AspNetCore.Razor.Tools", "Microsoft.AspNetCore.Razor.Design", ConstantPackageVersions.AspNetToolsVersion)]
         [InlineData("Microsoft.AspNetCore.Razor.Design", "Microsoft.AspNetCore.Razor.Design", ConstantPackageVersions.AspNetToolsVersion)]
-        [InlineData("Microsoft.VisualStudio.Web.CodeGenerators.Mvc", "Microsoft.VisualStudio.Web.CodGeneration.Design", ConstantPackageVersions.AspNetToolsVersion)]
+        [InlineData("Microsoft.VisualStudio.Web.CodeGenerators.Mvc", "Microsoft.VisualStudio.Web.CodeGeneration.Design", ConstantPackageVersions.AspNetToolsVersion)]
         public void It_migrates_project_dependencies_to_a_new_name_and_version(
             string sourceToolName,
             string targetToolName,
@@ -44,7 +44,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                     }
                 }");
 
-            var packageRef = mockProj.Items.Where(i => i.Include != "Microsoft.NET.Sdk" && i.ItemType == "PackageReference").Should().BeEmpty();
+            var packageRef = mockProj.Items.Where(i =>
+                i.Include != "Microsoft.NET.Sdk" &&
+                i.Include != "NETStandard.Library" &&
+                i.ItemType == "PackageReference").Should().BeEmpty();
         }
 
         [Theory]

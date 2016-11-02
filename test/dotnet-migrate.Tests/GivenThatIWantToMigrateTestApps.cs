@@ -371,13 +371,14 @@ namespace Microsoft.DotNet.Migration.Tests
         [InlineData("TestProjects", "PJTestAppSimple", false)]
         public void It_auto_add_desktop_references_during_migrate(string testGroup, string projectName, bool isDesktopApp)
         {
+            var runtime = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
             var testAssetManager = GetTestGroupTestAssetsManager(testGroup);
             var projectDirectory = testAssetManager.CreateTestInstance(projectName).WithLockFiles().Path;
             
             CleanBinObj(projectDirectory);
             MigrateProject(new string[] { projectDirectory });
-            Restore(projectDirectory);
-            BuildMSBuild(projectDirectory, projectName);
+            Restore(projectDirectory, runtime: runtime);
+            BuildMSBuild(projectDirectory, projectName, runtime:runtime);
             VerifyAutoInjectedDesktopReferences(projectDirectory, projectName, isDesktopApp);
             VerifyAllMSBuildOutputsRunnable(projectDirectory);
         }
@@ -420,6 +421,19 @@ namespace Microsoft.DotNet.Migration.Tests
             BuildMSBuild(projectDirectory, projectName);
             Directory.EnumerateFiles(Path.Combine(projectDirectory, "bin"), $"{expectedOutputName}.pdb", SearchOption.AllDirectories)
                 .Count().Should().Be(1);
+        }
+
+        [Theory]
+        [InlineData("LibraryWithoutNetStandardLibRef")]
+        [InlineData("LibraryWithNetStandardLibRef")]
+        public void It_migrates_and_builds_library(string projectName)
+        {
+            var projectDirectory = TestAssetsManager.CreateTestInstance(projectName,
+                callingMethod: $"{nameof(It_migrates_and_builds_library)}-projectName").Path;
+
+            MigrateProject(projectDirectory);
+            Restore(projectDirectory, projectName);
+            BuildMSBuild(projectDirectory, projectName);
         }
 
         private void VerifyAutoInjectedDesktopReferences(string projectDirectory, string projectName, bool shouldBePresent)
@@ -584,10 +598,11 @@ namespace Microsoft.DotNet.Migration.Tests
                 .Should().Pass();
         }
 
-        private void Restore(string projectDirectory, string projectName=null)
+        private void Restore(string projectDirectory, string projectName=null, string runtime=null)
         {
             var command = new RestoreCommand()
-                .WithWorkingDirectory(projectDirectory);
+                .WithWorkingDirectory(projectDirectory)
+                .WithRuntime(runtime);
 
             if (projectName != null)
             {
@@ -601,7 +616,11 @@ namespace Microsoft.DotNet.Migration.Tests
             }
         }
 
-        private string BuildMSBuild(string projectDirectory, string projectName, string configuration="Debug")
+        private string BuildMSBuild(
+            string projectDirectory,
+            string projectName,
+            string configuration="Debug",
+            string runtime=null)
         {
             if (projectName != null)
             {
@@ -612,6 +631,7 @@ namespace Microsoft.DotNet.Migration.Tests
 
             var result = new BuildCommand()
                 .WithWorkingDirectory(projectDirectory)
+                .WithRuntime(runtime)
                 .ExecuteWithCapturedOutput($"{projectName} /p:Configuration={configuration}");
 
             result

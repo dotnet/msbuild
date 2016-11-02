@@ -108,7 +108,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                             new PackageDependencyInfo
                             {
                                 Name = PackageConstants.TestSdkPackageName,
-                                Version = PackageConstants.TestSdkPackageVersion
+                                Version = ConstantPackageVersions.TestSdkPackageVersion
                             }),
                         noFrameworkPackageReferenceItemGroup,
                         mergeExisting: false);
@@ -120,7 +120,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                                 new PackageDependencyInfo
                                 {
                                     Name = PackageConstants.XUnitPackageName,
-                                    Version = PackageConstants.XUnitPackageVersion
+                                    Version = ConstantPackageVersions.XUnitPackageVersion
                                 }),
                             noFrameworkPackageReferenceItemGroup,
                             mergeExisting: false);
@@ -130,10 +130,25 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                                 new PackageDependencyInfo
                                 {
                                     Name = PackageConstants.XUnitRunnerPackageName,
-                                    Version = PackageConstants.XUnitRunnerPackageVersion
+                                    Version = ConstantPackageVersions.XUnitRunnerPackageVersion
                                 }),
                             noFrameworkPackageReferenceItemGroup,
                             mergeExisting: false);
+                    }
+                    break;
+                case ProjectType.Library:
+                    if (!project.HasDependency(
+                        (dep) => dep.Name.Trim().ToLower() == PackageConstants.NetStandardPackageName.ToLower()))
+                    {
+                        _transformApplicator.Execute(
+                            PackageDependencyInfoTransform().Transform(
+                                new PackageDependencyInfo
+                                {
+                                    Name = PackageConstants.NetStandardPackageName,
+                                    Version = PackageConstants.NetStandardPackageVersion
+                                }),
+                            noFrameworkPackageReferenceItemGroup,
+                            mergeExisting: true);
                     }
                     break;
                 default:
@@ -186,7 +201,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 _transformApplicator.Execute(
                     ToolTransform().Transform(ToPackageDependencyInfo(
                         tool,
-                        PackageConstants.AspProjectToolsPackages)),
+                        PackageConstants.ProjectToolPackages)),
                     itemGroup,
                     mergeExisting: true);
             }
@@ -243,7 +258,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 _transformApplicator.Execute(
                     transform.Transform(ToPackageDependencyInfo(
                         packageDependency,
-                        PackageConstants.AspProjectDependencyToolsPackages)),
+                        PackageConstants.ProjectDependencyPackages)),
                     itemGroup,
                     mergeExisting: true);
             }
@@ -251,22 +266,23 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
         private PackageDependencyInfo ToPackageDependencyInfo(
             ProjectLibraryDependency dependency,
-            IDictionary<string, string> toolsDictionary)
+            IDictionary<string, PackageDependencyInfo> dependencyToVersionMap)
         {
             var name = dependency.Name;
             var version = dependency.LibraryRange?.VersionRange?.OriginalString;
 
-            if (toolsDictionary.ContainsKey(name))
+            if (dependencyToVersionMap.ContainsKey(name))
             {
-                name = toolsDictionary[name];
-                version = ConstantPackageVersions.AspNetToolsVersion;
-
-                if(string.IsNullOrEmpty(name))
+                var dependencyInfo = dependencyToVersionMap[name];
+                if (dependencyInfo == null)
                 {
                     return null;
                 }
-            }
 
+                name = dependencyInfo.Name;
+                version = dependencyInfo.Version;
+            }
+            
             return new PackageDependencyInfo
             {
                 Name = name,
@@ -391,12 +407,5 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 "PackageTargetFallback",
                 t => $"$(PackageTargetFallback);{string.Join(";", t.Imports)}",
                 t => t.Imports.OrEmptyIfNull().Any());
-
-        private class PackageDependencyInfo
-        {
-            public string Name {get; set;}
-            public string Version {get; set;}
-            public string PrivateAssets {get; set;}
-        }
     }
 }
