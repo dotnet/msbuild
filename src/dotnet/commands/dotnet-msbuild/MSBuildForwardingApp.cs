@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
 
                     argsToForward = argsToForward.Concat(new[]
                     {
-                        $"\"/Logger:{loggerType.FullName},{loggerType.GetTypeInfo().Assembly.Location}\""
+                        $"/Logger:{loggerType.FullName},{loggerType.GetTypeInfo().Assembly.Location}"
                     });
                 }
                 catch (Exception)

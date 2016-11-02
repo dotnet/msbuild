@@ -85,7 +85,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             allArgs.Should().NotBeNull();
 
             allArgs.Should().Contain(
-                value => value.StartsWith("\"/Logger:"),
+                value => value.IndexOf("/Logger", StringComparison.OrdinalIgnoreCase) >= 0,
                 "The MSBuild logger argument should be specified when telemetry is enabled.");
         }
 
