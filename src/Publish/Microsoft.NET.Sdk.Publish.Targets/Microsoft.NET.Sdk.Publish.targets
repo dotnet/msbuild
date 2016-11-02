@@ -68,6 +68,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PublishProtocol Condition="'$(PublishProtocol)' == ''">$(WebPublishMethod)</PublishProtocol>
     <!-- For backward compat -->
     <PublishProtocol Condition="'$(PublishProtocol)' == 'Package'">MSDeployPackage</PublishProtocol>
+    
     <!-- For Docker Support -->
     <PublishProtocol Condition="'$(DockerPublish)' == 'true'">Docker</PublishProtocol>
     
@@ -87,6 +88,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <PublishIntermediateTempPath Condition="'$(PublishIntermediateTempPath)' == ''">$([System.IO.Path]::GetFullPath($(BaseIntermediateOutputPath)$(_PublishConfigurationPath)$(_PublishFrameworkPath)$(_RuntimeIdentifierPath)PublishTemp\))</PublishIntermediateTempPath>
     <PublishIntermediateOutputPath Condition="'$(PublishIntermediateOutputPath)' == ''">$(PublishIntermediateTempPath)PublishOutput\</PublishIntermediateOutputPath>
+    
+    <!-- Temporary work-around for Docker -->
+    <PublishIntermediateOutputPath Condition="'$(DockerPublish)' == 'true'">obj\Docker\publish\</PublishIntermediateOutputPath>
   </PropertyGroup>
 
   <!--

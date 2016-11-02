@@ -17,7 +17,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <_DotNetPublishComputeFiles>
       _DetermineProjectType;
-      _ManagedProjectComputeFiles;
       _WebAppComputeFiles;
       _ConsoleAppComputeFiles;
     </_DotNetPublishComputeFiles>
@@ -37,64 +36,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_PublishProjectType Condition="'$(_PublishProjectType)' == '' ">WebSite</_PublishProjectType>
     </PropertyGroup>
   </Target>
-
-
-  <!--***************************************************************-->
-  <!-- Target _ComputeFiles (Managed Project System)                 -->
-  <!--***************************************************************-->
-
-  <PropertyGroup>
-    <_ManagedProjectComputeFilesDependsOn>
-      $(_ManagedProjectComputeFilesDependsOn);
-      _PrepareForManagedProjectSystemPublish;
-      Publish;
-      _ComputeFilesFromPublishDir;
-      </_ManagedProjectComputeFilesDependsOn>
-  </PropertyGroup>
-  
-  <Target Name="_ManagedProjectComputeFiles"
-          Condition="'$(_PublishProjectType)' == 'Managed'"
-          DependsOnTargets="$(_ManagedProjectComputeFilesDependsOn)">
-  </Target>
-  
-  <!--***************************************************************-->
-  <!-- Target _PrepareForManagedProjectSystemPublish                 -->
-  <!--***************************************************************-->
-  
-  <Target Name="_PrepareForManagedProjectSystemPublish">   
-    <PropertyGroup>
-      <PublishTempGuid>$([System.Guid]::NewGuid())</PublishTempGuid>
-      <PublishDir>$([System.IO.Path]::GetTempPath())PublishTemp\$(PublishTempGuid)\</PublishDir>
-      <TargetFramework>$(PublishFramework)</TargetFramework>
-      <Configuration>$(PublishConfiguration)</Configuration>
-    </PropertyGroup>
-    
-    <MakeDir Directories="$(PublishDir)" Condition="!Exists('$(PublishDir)')"/>
-  </Target>
-  
-
-  <!--***************************************************************-->
-  <!-- Target _ComputeFilesFromPublishDir                            -->
-  <!--***************************************************************-->
-  
-  <Target Name="_ComputeFilesFromPublishDir" Condition="'$(PublishDir)' != ''">
-    <ItemGroup>
-      <_PublishDirFiles
-        Include="$(PublishDir)**\*.*">
-      </_PublishDirFiles>
-    </ItemGroup>
-
-    <CreateItem
-      Include="@(_PublishDirFiles)"
-      AdditionalMetadata="DestinationRelativePath=%(RecursiveDir)%(Filename)%(Extension)">
-      <Output TaskParameter="Include" ItemName="_publishDirFilesWithMetadata"/>
-    </CreateItem>
-
-    <ItemGroup>
-      <DotNetPublishFiles Include="@(_publishDirFilesWithMetadata)" />
-    </ItemGroup>
-  </Target>
-
 
   <!--***************************************************************-->
   <!-- Target _ComputeFiles (Web App)                                -->
@@ -173,7 +114,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup>
       <_OutDirFiles
         Include="$(OutDir)**\*.*"
-        Exclude="$(OutDir)PublishOutput\**\*.*">
+        Exclude="$(OutDir)Publish\**\*.*">
       </_OutDirFiles>
     </ItemGroup>
 
