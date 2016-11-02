@@ -43,6 +43,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Content Include="wwwroot\**">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
+    <Folder Include="wwwroot" />
     <Content Include="**\*.cshtml" Exclude="wwwroot\**\*.cshtml">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
