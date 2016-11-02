@@ -11,21 +11,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <!--
-     Apply the same defaults as Microsoft.Common.targets now since we're running before them,
-     but need to adjust them and/or make decisions in terms of them.
-   -->
-  <PropertyGroup>
-    <Platform Condition="'$(Platform)'==''">AnyCPU</Platform>
-    <PlatformName Condition="'$(PlatformName)' == ''">$(Platform)</PlatformName>
-    <Configuration Condition="'$(Configuration)'==''">Debug</Configuration>
-    <OutputPath Condition="'$(OutputPath)' != '' and !HasTrailingSlash('$(OutputPath)')">$(OutputPath)\</OutputPath>
-    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' == ''">obj\</BaseIntermediateOutputPath>
-    <BaseIntermediateOutputPath Condition="!HasTrailingSlash('$(BaseIntermediateOutputPath)')">$(BaseIntermediateOutputPath)\</BaseIntermediateOutputPath>
-    <IntermediateOutputPath Condition=" $(IntermediateOutputPath) == '' and '$(PlatformName)' == 'AnyCPU' ">$(BaseIntermediateOutputPath)$(Configuration)\</IntermediateOutputPath>
-    <IntermediateOutputPath Condition=" $(IntermediateOutputPath) == '' and '$(PlatformName)' != 'AnyCPU' ">$(BaseIntermediateOutputPath)$(PlatformName)\$(Configuration)\</IntermediateOutputPath>
-  </PropertyGroup>
-
+  <!-- Set default intermediate and output paths -->
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DefaultOutputPaths.targets" />
+  
   <!-- 
     Expand TargetFramework (if set) to TargetFrameworkIdentifier and TargetFrameworkVersion,
     and adjust intermediate and output paths to include it.
@@ -35,7 +23,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     Use RuntimeIdentifier to determine PlatformTarget.
-    Also, enforce that RuntimeIdentifier always be specified for .NETFramework executables.
+    Also, enforce that RuntimeIdentifier is always specified for .NETFramework executables.
   -->
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.RuntimeIdentifierInference.targets" />
 

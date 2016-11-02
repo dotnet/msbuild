@@ -78,12 +78,11 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     Append $(TargetFramework) directory to output and intermediate paths to prevent bin clashes between
-    targets. However, we must leave OutputPath unset if it's not already as common targets use this to 
-    detect an invalid configuration or platform.
+    targets.
    -->
   <PropertyGroup>
     <IntermediateOutputPath>$(IntermediateOutputPath)$(TargetFramework)\</IntermediateOutputPath>
-    <OutputPath Condition="'$(OutputPath)' != ''">$(OutputPath)$(TargetFramework)\</OutputPath>
+    <OutputPath>$(OutputPath)$(TargetFramework)\</OutputPath>
   </PropertyGroup>
 
 </Project>

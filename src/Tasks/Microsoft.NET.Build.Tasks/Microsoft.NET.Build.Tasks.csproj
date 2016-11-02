@@ -71,6 +71,9 @@
     <None Include="buildCrossTargeting\Microsoft.NET.Sdk.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="build\Microsoft.NET.DefaultOutputPaths.targets">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="build\Microsoft.NET.RuntimeIdentifierInference.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -81,6 +84,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="build\Microsoft.NET.GenerateAssemblyInfo.targets">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="build\Microsoft.NET.Sdk.BeforeCommonCrossTargeting.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="build\Microsoft.NET.Sdk.VisualBasic.props">
