@@ -2,14 +2,6 @@
 
 namespace TestNamespace
 {
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-
-        }
-    }
-
     [TestClass]
     public class VSTestTests
     {
@@ -23,5 +15,18 @@ namespace TestNamespace
         {
             Assert.Fail();
         }
+
+#if DESKTOP
+        [TestMethod]
+        public void VSTestPassTestDesktop()
+        {
+        }
+#else
+        [TestMethod]
+        public void VSTestFailTestNetCoreApp()
+        {
+            Assert.Fail();
+        }
+#endif
     }
 }

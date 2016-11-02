@@ -13,16 +13,16 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 {
     public class GivenDotnettestBuildsAndRunsTestfromCsproj : TestBase
     {
-        //[Fact]
-        public void TestsFromAGivenProjectShouldRunWithExpectedOutput()
+        [Fact]
+        public void MSTestSingleTFM()
         {
-            // Copy DotNetCoreTestProject project in output directory of project dotnet-vstest.Tests
-            string testAppName = "VSTestDotNetCoreProject";
+            // Copy VSTestDotNetCore project in output directory of project dotnet-vstest.Tests
+            string testAppName = "VSTestDotNetCore";
             TestInstance testInstance = TestAssetsManager.CreateTestInstance(testAppName);
 
             string testProjectDirectory = testInstance.TestRoot;
 
-            // Restore project VSTestDotNetCoreProject
+            // Restore project VSTestDotNetCore
             new RestoreCommand()
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute()
@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Call test
             CommandResult result = new DotnetTestCommand()
                                         .WithWorkingDirectory(testProjectDirectory)
-                                        .ExecuteWithCapturedOutput("/p:TargetFramework=netcoreapp1.0");
+                                        .ExecuteWithCapturedOutput();
 
             // Verify
             result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
@@ -40,16 +40,43 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.StdOut.Should().Contain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
         }
 
-        //[Fact]
-        public void TestWillNotBuildTheProjectIfNoBuildArgsIsGiven()
+        [Fact]
+        public void XunitSingleTFM()
         {
-            // Copy DotNetCoreTestProject project in output directory of project dotnet-vstest.Tests
-            string testAppName = "VSTestDotNetCoreProject";
+            // Copy VSTestXunitDotNetCore project in output directory of project dotnet-vstest.Tests
+            string testAppName = "VSTestXunitDotNetCore";
             TestInstance testInstance = TestAssetsManager.CreateTestInstance(testAppName);
 
             string testProjectDirectory = testInstance.TestRoot;
 
-            // Restore project VSTestDotNetCoreProject
+            // Restore project VSTestXunitDotNetCore
+            new RestoreCommand()
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute()
+                .Should()
+                .Pass();
+
+            // Call test
+            CommandResult result = new DotnetTestCommand()
+                                        .WithWorkingDirectory(testProjectDirectory)
+                                        .ExecuteWithCapturedOutput();
+
+            // Verify
+            result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
+            result.StdOut.Should().Contain("Passed   TestNamespace.VSTestXunitTests.VSTestXunitPassTest");
+            result.StdOut.Should().Contain("Failed   TestNamespace.VSTestXunitTests.VSTestXunitFailTest");
+        }
+
+        [Fact]
+        public void TestWillNotBuildTheProjectIfNoBuildArgsIsGiven()
+        {
+            // Copy VSTestDotNetCore project in output directory of project dotnet-vstest.Tests
+            string testAppName = "VSTestDotNetCore";
+            TestInstance testInstance = TestAssetsManager.CreateTestInstance(testAppName);
+
+            string testProjectDirectory = testInstance.TestRoot;
+
+            // Restore project VSTestDotNetCore
             new RestoreCommand()
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute()
@@ -58,10 +85,10 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             string configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
             string expectedError = Path.Combine(testProjectDirectory, "bin",
-                                   configuration, "netcoreapp1.0", "VSTestDotNetCoreProject.dll");
+                                   configuration, "netcoreapp1.0", "VSTestDotNetCore.dll");
             expectedError = "The test source file " + "\"" + expectedError + "\"" + " provided was not found.";
 
-            // Call test3
+            // Call test
             CommandResult result = new DotnetTestCommand()
                                        .WithWorkingDirectory(testProjectDirectory)
                                        .ExecuteWithCapturedOutput("--noBuild");
