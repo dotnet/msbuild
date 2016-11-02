@@ -12,15 +12,10 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 {
     public class GivenDotnetTest3BuildsAndRunsTestFromCsprojForMultipleTFM : TestBase
     {
-        // Adding log to root cause test failure for net46
-        private const string vstestLog = "VSTEST_TRACE_BUILD";
-
         // project targeting net46 will not run in non windows machine.
         [WindowsOnlyFact]
-        public void TestsFromAGivenProjectShouldRunWithExpectedOutputForMultiTFM()
+        public void MStestMultiTFM()
         {
-            Environment.SetEnvironmentVariable(vstestLog, "1");
-
             // Copy VSTestDesktopAndNetCoreApp project in output directory of project dotnet-test.Tests
             string testAppName = "VSTestDesktopAndNetCoreApp";
             TestInstance testInstance = TestAssetsManager.CreateTestInstance(testAppName);
@@ -37,44 +32,21 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Call test
             CommandResult result = new DotnetTestCommand()
                                        .WithWorkingDirectory(testProjectDirectory)
-                                       .ExecuteWithCapturedOutput("--diag LogFile.txt");
+                                       .ExecuteWithCapturedOutput();
 
 
+            // Verify
+            // for target framework net46
+            result.StdOut.Should().Contain("Total tests: 3. Passed: 2. Failed: 1. Skipped: 0.");
+            result.StdOut.Should().Contain("Passed   TestNamespace.VSTestTests.VSTestPassTestDesktop");
 
-            try
-            {
-                // Verify
-                // for target framework net46
-                result.StdOut.Should().Contain("Total tests: 3. Passed: 2. Failed: 1. Skipped: 0.");
-                result.StdOut.Should().Contain("Passed   TestNamespace.VSTestTests.VSTestPassTestDesktop");
-
-                // for target framework netcoreapp1.0
-                result.StdOut.Should().Contain("Total tests: 3. Passed: 1. Failed: 2. Skipped: 0.");
-                result.StdOut.Should().Contain("Failed   TestNamespace.VSTestTests.VSTestFailTestNetCoreApp");
-            }
-            catch
-            {
-                Console.WriteLine("*********************************StdOut****************************************************************");
-                Console.WriteLine(result.StdOut.ToString());
-
-                Console.WriteLine("*********************************StdErr****************************************************************");
-                Console.WriteLine(result.StdErr.ToString());
-
-                string logfile1 = Path.Combine(testProjectDirectory, "LogFile.txt");
-                string[] logfile2 = Directory.GetFiles(testProjectDirectory, "LogFile.host.*");
-
-                Console.WriteLine("**********************************Vstest.console Log****************************************************************");
-                Console.WriteLine(File.ReadAllText(logfile1));
-                Console.WriteLine("**********************************TestHost Log1****************************************************************");
-                Console.WriteLine(logfile2.Length > 0 ? File.ReadAllText(logfile2[0]) : "No log file found");
-                Console.WriteLine("**********************************TestHost Log2****************************************************************");
-                Console.WriteLine(logfile2.Length > 1 ? File.ReadAllText(logfile2[1]) : "No log file found");
-                Console.WriteLine("**************************************************************************************************");
-            }
+            // for target framework netcoreapp1.0
+            result.StdOut.Should().Contain("Total tests: 3. Passed: 1. Failed: 2. Skipped: 0.");
+            result.StdOut.Should().Contain("Failed   TestNamespace.VSTestTests.VSTestFailTestNetCoreApp");
         }
 
         [WindowsOnlyFact]
-        public void TestsFromAGivenXunitProjectShouldRunWithExpectedOutputForMultiTFM()
+        public void XunitMultiTFM()
         {
             // Copy VSTestXunitDesktopAndNetCoreApp project in output directory of project dotnet-test.Tests
             string testAppName = "VSTestXunitDesktopAndNetCoreApp";
@@ -92,38 +64,16 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Call test
             CommandResult result = new DotnetTestCommand()
                                        .WithWorkingDirectory(testProjectDirectory)
-                                       .ExecuteWithCapturedOutput("--diag LogFile2.txt");
+                                       .ExecuteWithCapturedOutput();
 
-            try
-            {
-                // Verify
-                // for target framework net46
-                result.StdOut.Should().Contain("Total tests: 3. Passed: 2. Failed: 1. Skipped: 0.");
-                result.StdOut.Should().Contain("Passed   TestNamespace.VSTestXunitTests.VSTestXunitPassTestDesktop");
+            // Verify
+            // for target framework net46
+            result.StdOut.Should().Contain("Total tests: 3. Passed: 2. Failed: 1. Skipped: 0.");
+            result.StdOut.Should().Contain("Passed   TestNamespace.VSTestXunitTests.VSTestXunitPassTestDesktop");
 
-                // for target framework netcoreapp1.0
-                result.StdOut.Should().Contain("Total tests: 3. Passed: 1. Failed: 2. Skipped: 0.");
-                result.StdOut.Should().Contain("Failed   TestNamespace.VSTestXunitTests.VSTestXunitFailTestNetCoreApp");
-            }
-            catch
-            {
-                Console.WriteLine("*********************************Xunit StdOut****************************************************************");
-                Console.WriteLine(result.StdOut.ToString());
-
-                Console.WriteLine("*********************************Xunit StdErr****************************************************************");
-                Console.WriteLine(result.StdErr.ToString());
-
-                string logfile1 = Path.Combine(testProjectDirectory, "LogFile2.txt");
-                string[] logfile2 = Directory.GetFiles(testProjectDirectory, "LogFile2.host.*");
-
-                Console.WriteLine("**********************************Xunit Vstest.console Log****************************************************************");
-                Console.WriteLine(File.ReadAllText(logfile1));
-                Console.WriteLine("**********************************Xunit TestHost Log1****************************************************************");
-                Console.WriteLine(logfile2.Length > 0 ? File.ReadAllText(logfile2[0]) : "No log file found");
-                Console.WriteLine("**********************************Xunit TestHost Log2****************************************************************");
-                Console.WriteLine(logfile2.Length > 1 ? File.ReadAllText(logfile2[1]) : "No log file found");
-                Console.WriteLine("**************************************************************************************************");
-            }
+            // for target framework netcoreapp1.0
+            result.StdOut.Should().Contain("Total tests: 3. Passed: 1. Failed: 2. Skipped: 0.");
+            result.StdOut.Should().Contain("Failed   TestNamespace.VSTestXunitTests.VSTestXunitFailTestNetCoreApp");
         }
     }
 }

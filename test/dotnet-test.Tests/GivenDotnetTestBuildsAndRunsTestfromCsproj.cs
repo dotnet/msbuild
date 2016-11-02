@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
     public class GivenDotnettestBuildsAndRunsTestfromCsproj : TestBase
     {
         [Fact]
-        public void TestsFromAGivenProjectShouldRunWithExpectedOutput()
+        public void MSTestSingleTFM()
         {
             // Copy VSTestDotNetCoreProject project in output directory of project dotnet-vstest.Tests
             string testAppName = "VSTestDotNetCoreProject";
@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         }
 
         [Fact]
-        public void TestsFromAGivenXunitProjectShouldRunWithExpectedOutput()
+        public void XunitSingleTFM()
         {
             // Copy VSTestXunitDotNetCoreProject project in output directory of project dotnet-vstest.Tests
             string testAppName = "VSTestXunitDotNetCoreProject";
