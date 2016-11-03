@@ -28,10 +28,9 @@
       <DotNetPublish ToolPath="$(Stage0Directory)"
                      WorkingDirectory="$(RepoRoot)/tools/Archiver"
                      Output="$(ToolsOutputDirectory)"
-                     Configuration="$(Configuration)"
-                     Runtime="$(CoreCLRRid)" />
+                     Configuration="$(Configuration)" />
 
-      <Exec Command="$(ArchiverExe) -a $(IntermediateArchive) $(NuGetPackagesArchiveFolder)" />
+      <Exec Command="$(DotnetStage0) $(ArchiverDll) -a $(IntermediateArchive) $(NuGetPackagesArchiveFolder)" />
 
       <Copy SourceFiles="$(IntermediateArchive)" DestinationFiles="$(FinalArchive)" />
     </Target>
@@ -41,7 +40,7 @@
       <PropertyGroup>
         <NuGetPackagesArchiveProject>$(IntermediateDirectory)/NuGetPackagesArchiveProject</NuGetPackagesArchiveProject>
         <NuGetPackagesArchiveFolder>$(IntermediateDirectory)/NuGetPackagesArchiveFolder</NuGetPackagesArchiveFolder>
-        <ArchiverExe>$(ToolsOutputDirectory)/Archiver</ArchiverExe>
+        <ArchiverDll>$(ToolsOutputDirectory)/Archiver.dll</ArchiverDll>
         <IntermediateArchive>$(IntermediateDirectory)/nuGetPackagesArchive.lzma</IntermediateArchive>
         <FinalArchive>$(Stage2Directory)/sdk/$(SdkVersion)/nuGetPackagesArchive.lzma</FinalArchive>
       </PropertyGroup>
