@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             IEnumerable<string> preResolvedProjects=null)
         {
             var projects = new List<ProjectDependency> { projectToResolve };
-            var allDependencies = new List<ProjectDependency>();
+            var allDependencies = new HashSet<ProjectDependency>();
             while (projects.Count > 0)
             {
                 var project = projects.First();
@@ -65,24 +65,33 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 var dependencies = ResolveDirectProjectDependenciesForFramework(
                     projectContext.ProjectFile,
                     framework,
-                    preResolvedProjects
+                    preResolvedProjects,
+                    HoistDependenciesThatAreNotDirectDependencies(projectToResolve, project)
                 );
                 projects.AddRange(dependencies);
-                allDependencies.AddRange(dependencies);
+                allDependencies.UnionWith(dependencies);
             }
 
             return allDependencies;
         }
 
+        private bool HoistDependenciesThatAreNotDirectDependencies(
+            ProjectDependency originalProject,
+            ProjectDependency dependenciesOwner)
+        {
+            return originalProject != dependenciesOwner;
+        }
+
         public IEnumerable<ProjectDependency> ResolveDirectProjectDependenciesForFramework(
             Project project, 
             NuGetFramework framework, 
-            IEnumerable<string> preResolvedProjects=null)
+            IEnumerable<string> preResolvedProjects=null,
+            bool hoistedDependencies = false)
         {
             preResolvedProjects = preResolvedProjects ?? new HashSet<string>();
 
             var possibleProjectDependencies = 
-                FindPossibleProjectDependencies(project.ProjectFilePath);
+                FindPossibleProjectDependencies(project.ProjectFilePath, hoistedDependencies);
 
             var projectDependencies = new List<ProjectDependency>();
 
@@ -205,7 +214,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                                                                           PathUtility.GetPathWithDirectorySeparator(p))));
         }
 
-        private Dictionary<string, ProjectDependency> FindPossibleProjectDependencies(string projectJsonFilePath)
+        private Dictionary<string, ProjectDependency> FindPossibleProjectDependencies(
+            string projectJsonFilePath,
+            bool hoistedDependencies = false)
         {
             var projectRootDirectory = GetRootFromProjectJson(projectJsonFilePath);
 
@@ -217,7 +228,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
             var projects = new Dictionary<string, ProjectDependency>(StringComparer.Ordinal);
 
-            foreach (var project in GetPotentialProjects(projectSearchPaths))
+            foreach (var project in GetPotentialProjects(projectSearchPaths, hoistedDependencies))
             {
                 if (projects.ContainsKey(project.Name))
                 {
@@ -278,7 +289,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         /// <summary>
         /// Create the list of potential projects from the search paths.
         /// </summary>
-        private static List<ProjectDependency> GetPotentialProjects(IEnumerable<string> searchPaths)
+        private static List<ProjectDependency> GetPotentialProjects(
+            IEnumerable<string> searchPaths,
+            bool hoistedDependencies = false)
         {
             var projects = new List<ProjectDependency>();
 
@@ -301,7 +314,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                     // Instead, we'll do an exists check when we try to resolve
 
                     // Check if we've already added this, just in case it was pre-loaded into the cache
-                    var project = new ProjectDependency(projectDirectory.Name, projectFilePath);
+                    var project = new ProjectDependency(
+                        projectDirectory.Name,
+                        projectFilePath,
+                        hoistedDependencies);
 
                     projects.Add(project);
                 }

@@ -250,6 +250,45 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
+        public void All_promoted_P2P_references_are_marked_with_a_FromP2P_attribute()
+        {
+            var expectedHoistedProjectReferences = new [] {
+                Path.Combine("..", "ProjectD", "ProjectD.csproj"),
+                Path.Combine("..", "ProjectE", "ProjectE.csproj"),
+                Path.Combine("..", "CsprojLibrary1", "CsprojLibrary1.csproj"),
+                Path.Combine("..", "CsprojLibrary2", "CsprojLibrary2.csproj"),
+                Path.Combine("..", "CsprojLibrary3", "CsprojLibrary3.csproj")
+            };
+
+            var mockProj = MigrateProject("TestAppDependencyGraph", "ProjectA");
+
+            var projectReferences = mockProj.Items
+                .Where(item =>
+                    item.ItemType == "ProjectReference" && item.GetMetadataWithName("FromP2P") != null)
+                .Select(i => i.Include);
+
+            projectReferences.Should().BeEquivalentTo(expectedHoistedProjectReferences);
+        }
+
+        [Fact]
+        public void All_non_promoted_P2P_references_are_not_marked_with_a_FromP2P_attribute()
+        {
+            var expectedNonHoistedProjectReferences = new [] {
+                Path.Combine("..", "ProjectB", "ProjectB.csproj"),
+                Path.Combine("..", "ProjectC", "ProjectC.csproj")
+            };
+
+            var mockProj = MigrateProject("TestAppDependencyGraph", "ProjectA");
+
+            var projectReferences = mockProj.Items
+                .Where(item =>
+                    item.ItemType == "ProjectReference" && item.GetMetadataWithName("FromP2P") == null)
+                .Select(i => i.Include);
+
+            projectReferences.Should().BeEquivalentTo(expectedNonHoistedProjectReferences);
+        }
+
+        [Fact]
         public void It_migrates_unqualified_dependencies_as_ProjectReference_when_a_matching_project_is_found()
         {
             var mockProj = MigrateProject("TestAppWithUnqualifiedDependencies", "ProjectA");

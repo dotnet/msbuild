@@ -106,12 +106,15 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             ProjectRootElement outputMSBuildProject)
         {
             var projectDependencies = _projectDependencyFinder.ResolveAllProjectDependenciesForFramework(
-                    new ProjectDependency(project.Name, project.ProjectFilePath),
+                    new ProjectDependency(project.Name, project.ProjectFilePath, false),
                     framework,
                     migratedXProjDependencyNames);
 
             var projectDependencyTransformResults = 
-                projectDependencies.Select(p => ProjectDependencyTransform.Transform(p));
+                projectDependencies.Select(p => 
+                    p.Hoisted ? 
+                        HoistedDependencyTransform.Transform(p) :
+                        ProjectDependencyTransform.Transform(p));
             
             if (projectDependencyTransformResults.Any())
             {
@@ -138,18 +141,26 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             }
         }
         
-        private AddItemTransform<ProjectDependency> ProjectDependencyTransform => new AddItemTransform<ProjectDependency>(
-            "ProjectReference",
-            dep => 
-            {
-                var projectDir = Path.GetDirectoryName(dep.ProjectFilePath);
-                var migratedProjectFileName = Path.GetFileName(projectDir) + ".csproj";
-                var relativeProjectDir = PathUtility.GetRelativePath(_projectDirectory + "/", projectDir);
+        private AddItemTransform<ProjectDependency> ProjectDependencyTransform => 
+            GetProjectDependencyTransfrom();
 
-                return Path.Combine(relativeProjectDir, migratedProjectFileName);
-            },
-            dep => "",
-            dep => true);
+        private AddItemTransform<ProjectDependency> HoistedDependencyTransform =>
+            GetProjectDependencyTransfrom()
+            .WithMetadata("FromP2P", "true");
+
+        private Func<AddItemTransform<ProjectDependency>> GetProjectDependencyTransfrom => 
+            () => new AddItemTransform<ProjectDependency>(
+                "ProjectReference",
+                dep => 
+                {
+                    var projectDir = Path.GetDirectoryName(dep.ProjectFilePath);
+                    var migratedProjectFileName = Path.GetFileName(projectDir) + ".csproj";
+                    var relativeProjectDir = PathUtility.GetRelativePath(_projectDirectory + "/", projectDir);
+
+                    return Path.Combine(relativeProjectDir, migratedProjectFileName);
+                },
+                dep => "",
+                dep => true);
 
         private AddItemTransform<string> ProjectDependencyStringTransform => new AddItemTransform<string>(
             "ProjectReference",

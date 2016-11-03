@@ -7,11 +7,25 @@ namespace Microsoft.DotNet.ProjectJsonMigration
     {
         public string Name { get; }
         public string ProjectFilePath { get; }
+        public bool Hoisted { get; }
 
-        public ProjectDependency(string name, string projectFilePath)
+        public ProjectDependency(string name, string projectFilePath, bool hoisted)
         {
             Name = name;
             ProjectFilePath = System.IO.Path.GetFullPath(projectFilePath);
+            Hoisted = hoisted;
+        }
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as ProjectDependency;
+
+            return other != null && other.ProjectFilePath == ProjectFilePath;
+        }
+
+        public override int GetHashCode()
+        {
+            return ProjectFilePath.GetHashCode();
         }
     }
 }
