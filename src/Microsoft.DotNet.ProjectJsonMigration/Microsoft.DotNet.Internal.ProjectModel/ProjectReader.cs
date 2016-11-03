@@ -504,12 +504,6 @@ namespace Microsoft.DotNet.Internal.ProjectModel
 
             // Add the target framework specific define
             var defines = new HashSet<string>(compilerOptions.Defines ?? Enumerable.Empty<string>());
-            var frameworkDefine = MakeDefaultTargetFrameworkDefine(frameworkName);
-
-            if (!string.IsNullOrEmpty(frameworkDefine))
-            {
-                defines.Add(frameworkDefine);
-            }
 
             compilerOptions.Defines = defines;
 
@@ -801,34 +795,6 @@ namespace Microsoft.DotNet.Internal.ProjectModel
                     rawProject,
                     defaultBuiltInInclude: null,
                     defaultBuiltInExclude: ProjectFilesCollection.DefaultPublishExcludePatterns);
-            }
-
-            return null;
-        }
-
-        private static string MakeDefaultTargetFrameworkDefine(NuGetFramework targetFramework)
-        {
-            var shortName = targetFramework.GetTwoDigitShortFolderName();
-
-            if (targetFramework.IsPCL)
-            {
-                return null;
-            }
-
-            var candidateName = shortName.ToUpperInvariant();
-
-            // Replace '-', '.', and '+' in the candidate name with '_' because TFMs with profiles use those (like "net40-client")
-            // and we want them representable as defines (i.e. "NET40_CLIENT")
-            candidateName = candidateName.Replace('-', '_').Replace('+', '_').Replace('.', '_');
-
-            // We require the following from our Target Framework Define names
-            // Starts with A-Z or _
-            // Contains only A-Z, 0-9 and _
-            if (!string.IsNullOrEmpty(candidateName) &&
-                (char.IsLetter(candidateName[0]) || candidateName[0] == '_') &&
-                candidateName.All(c => Char.IsLetterOrDigit(c) || c == '_'))
-            {
-                return candidateName;
             }
 
             return null;

@@ -63,6 +63,21 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
+        public void It_does_not_add_a_define_for_the_framework()
+        {
+            var mockProj = RunConfigurationsRuleOnPj(@"
+                {
+                    ""frameworks"": {
+                        ""netcoreapp1.0"": {
+                        }
+                    }
+                }");
+
+            mockProj.Properties.Count(
+                prop => prop.Name == "DefineConstants" && prop.Value.Contains("NETCOREAPP1_0")).Should().Be(0);
+        }
+
+        [Fact]
         public void Configuration_buildOptions_properties_are_not_written_when_they_overlap_with_buildOptions()
         {
             var mockProj = RunConfigurationsAndBuildOptionsRuleOnPj(@"

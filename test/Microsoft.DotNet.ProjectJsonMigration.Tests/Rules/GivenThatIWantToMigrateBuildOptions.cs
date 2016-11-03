@@ -58,9 +58,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             mockProj.Items.Count().Should().Be(2);
             mockProj.Items.First(i => i.ItemType == "Compile").Include.Should().Be(@"**\*.cs");
-            mockProj.Items.First(i => i.ItemType == "Compile").Exclude.Should().Be(@"bin\**;obj\**;**\*.xproj;packages\**");
+            mockProj.Items.First(i => i.ItemType == "Compile").Exclude.Should().BeEmpty();
             mockProj.Items.First(i => i.ItemType == "EmbeddedResource").Include.Should().Be(@"compiler\resources\**\*;**\*.resx");
-            mockProj.Items.First(i => i.ItemType == "EmbeddedResource").Exclude.Should().Be(@"bin\**;obj\**;**\*.xproj;packages\**");
+            mockProj.Items.First(i => i.ItemType == "EmbeddedResource").Exclude.Should().BeEmpty();
         }
 
         [Fact]
