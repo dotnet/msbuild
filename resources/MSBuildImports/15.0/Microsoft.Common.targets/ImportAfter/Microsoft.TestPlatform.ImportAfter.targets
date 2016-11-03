@@ -13,6 +13,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <!-- Import Microsoft.TestPlatform.targets for VSTest target -->
   <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     <VSTestTargets Condition="'$(VSTestTargets)'==''">$(MSBuildExtensionsPath)\Microsoft.TestPlatform.targets</VSTestTargets>
   </PropertyGroup>
   <Import Condition="Exists('$(VSTestTargets)')" Project="$(VSTestTargets)" />
