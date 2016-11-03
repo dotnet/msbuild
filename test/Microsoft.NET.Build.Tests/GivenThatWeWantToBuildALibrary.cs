@@ -186,7 +186,7 @@ namespace Microsoft.NET.Build.Tests
         {
             string genDocFileIdentifier = generateDocumentationFile == null ? "null" : generateDocumentationFile.Value.ToString();
             string docFileIdentifier = documentationFile == null ? "null" : Path.GetFileName(documentationFile);
-            string identifier = $"genDoc={genDocFileIdentifier}, docFile={Path.GetFileName(docFileIdentifier)}";
+            string identifier = $"-genDoc={genDocFileIdentifier}, docFile={Path.GetFileName(docFileIdentifier)}";
 
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibrary", callingMethod, identifier)
@@ -248,7 +248,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData(false)]
         public void It_allows_us_to_override_the_documentation_file_name(bool setGenerateDocumentationFileProperty)
         {
-            var testAsset = CreateDocumentationFileLibraryAsset(setGenerateDocumentationFileProperty ? (bool?)true : null, "TestLibraryDocumentation.xml");
+            var testAsset = CreateDocumentationFileLibraryAsset(setGenerateDocumentationFileProperty ? (bool?)true : null, "TestLibDoc.xml", "OverrideDocFileName");
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
@@ -267,7 +267,7 @@ namespace Microsoft.NET.Build.Tests
                 "TestLibrary.dll",
                 "TestLibrary.pdb",
                 "TestLibrary.deps.json",
-                "TestLibraryDocumentation.xml"
+                "TestLibDoc.xml"
             });
 
             //  Due to the way the DocumentationFile works, if you specify an unrooted filename, then the documentation file will be generated in that
@@ -276,7 +276,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 "Helper.cs",
                 "TestLibrary.csproj",
-                "TestLibraryDocumentation.xml"
+                "TestLibDoc.xml"
             }, SearchOption.TopDirectoryOnly);
         }
 
@@ -285,7 +285,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData(false)]
         public void It_does_not_create_a_documentation_file_if_GenerateDocumentationFile_property_is_false(bool setDocumentationFileProperty)
         {
-            var testAsset = CreateDocumentationFileLibraryAsset(false, setDocumentationFileProperty ? "TestLibraryDocumentation.xml" : null);
+            var testAsset = CreateDocumentationFileLibraryAsset(false, setDocumentationFileProperty ? "TestLibDoc.xml" : null, "DoesntCreateDocFile");
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
