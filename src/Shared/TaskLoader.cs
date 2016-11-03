@@ -6,6 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 
@@ -105,6 +106,13 @@ namespace Microsoft.Build.Shared
                             // is not done, we will not be able to find Microsoft.Build.* assemblies.
                             appDomainInfo.ApplicationBase = BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
                             appDomainInfo.ConfigurationFile = BuildEnvironmentHelper.Instance.CurrentMSBuildConfigurationFile;
+                        }
+                        else
+                        {
+                            // Set the taskAppDomain's BaseDirectory to the one containing the msbuild assemblies
+                            // This host assembly might not be MSBuild.exe and so could be in a different location,
+                            // so, look for a type in Microsoft.Build.dll
+                            appDomainInfo.ApplicationBase = Path.GetDirectoryName(typeof(Microsoft.Build.Execution.ProjectInstance).Assembly.Location);
                         }
 
                         AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolver;
