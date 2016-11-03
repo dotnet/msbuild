@@ -3,16 +3,16 @@
 
 namespace Microsoft.DotNet.Cli.Build
 {
-    public class DotNetBuildMsbuildLegacy : DotNetTool
+    public class DotNetBuildPJ : DotNetTool
     {
         protected override string Command
         {
-            get { return "build3"; }
+            get { return "build"; }
         }
 
         protected override string Args
         {
-            get { return $"{GetProjectPath()} {GetConfiguration()} {GetFramework()}"; }
+            get { return $"{GetProjectPath()} {GetConfiguration()} {GetFramework()} {GetBuildBasePath()}"; }
         }
 
         public string BuildBasePath { get; set; }
@@ -22,7 +22,17 @@ namespace Microsoft.DotNet.Cli.Build
         public string Framework { get; set; }
 
         public string ProjectPath { get; set; }
-        
+
+        private string GetBuildBasePath()
+        {
+            if (!string.IsNullOrEmpty(BuildBasePath))
+            {
+                return $"--build-base-path {BuildBasePath}";
+            }
+
+            return null;
+        }
+
         private string GetConfiguration()
         {
             if (!string.IsNullOrEmpty(Configuration))

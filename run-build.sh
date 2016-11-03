@@ -129,6 +129,10 @@ while read line; do
 done < "$REPOROOT/branchinfo.txt"
 
 # Use a repo-local install directory (but not the artifacts directory because that gets cleaned a lot
+[ -z "$DOTNET_INSTALL_DIR_PJ" ] && export DOTNET_INSTALL_DIR_PJ=$REPOROOT/.dotnet_stage0PJ/$ARCHITECTURE
+[ -d "$DOTNET_INSTALL_DIR_PJ" ] || mkdir -p $DOTNET_INSTALL_DIR_PJ
+
+# Also create an install directory for a post-PJnistic CLI 
 [ -z "$DOTNET_INSTALL_DIR" ] && export DOTNET_INSTALL_DIR=$REPOROOT/.dotnet_stage0/$ARCHITECTURE
 [ -d "$DOTNET_INSTALL_DIR" ] || mkdir -p $DOTNET_INSTALL_DIR
 
@@ -138,6 +142,7 @@ export __INIT_TOOLS_RESTORE_ARGS="$__INIT_TOOLS_RESTORE_ARGS --disable-parallel"
 DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 toolsLocalPath="$REPOROOT/build_tools"
 bootStrapperPath="$toolsLocalPath/bootstrap.sh"
+dotnetInstallPath="$toolsLocalPath/dotnet-install.sh"
 if [ ! -f $bootStrapperPath ]; then
     if [ ! -d $toolsLocalPath ]; then
         mkdir $toolsLocalPath
@@ -146,10 +151,18 @@ if [ ! -f $bootStrapperPath ]; then
     chmod u+x $bootStrapperPath
 fi
 
-$bootStrapperPath --repositoryRoot "$REPOROOT" --toolsLocalPath "$toolsLocalPath" --cliInstallPath $DOTNET_INSTALL_DIR --architecture $ARCHITECTURE > bootstrap.log
+$bootStrapperPath --repositoryRoot "$REPOROOT" --toolsLocalPath "$toolsLocalPath" --cliInstallPath $DOTNET_INSTALL_DIR_PJ --architecture $ARCHITECTURE > bootstrap.log
 
 if [ $? != 0 ]; then
     echo "run-build: Error: Boot-strapping failed with exit code $?, see bootstrap.log for more information." >&2
+    exit $?
+fi
+
+# now execute the script
+echo "installing CLI: $dotnetInstallPath --version \"latest\" --install-dir $DOTNET_INSTALL_DIR --architecture \"$ARCHITECTURE\""
+$dotnetInstallPath --version "latest" --install-dir $DOTNET_INSTALL_DIR --architecture "$ARCHITECTURE"
+if [ $? != 0 ]; then
+    echo "run-build: Error: Boot-strapping post-PJ stage0 with exit code $?." >&2
     exit $?
 fi
 

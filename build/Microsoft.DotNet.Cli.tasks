@@ -8,15 +8,14 @@
   <UsingTask TaskName="CreateAzureContainer" AssemblyFile="$(CLIBuildDll)"/>
   <UsingTask TaskName="Crossgen" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="DotNetBuild" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="DotNetBuildMsbuildLegacy" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="DotNetBuildPJ" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="DotNetNew" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="DotNetPack" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="DotNetPackMsbuildLegacy" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="DotNetPackPJ" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="DotNetPublish" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="DotNetPublishMsbuildLegacy" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="DotNetPublishPJ" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="DotNetRestore" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="DotNetRestoreProjectJson" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="DotNetRestoreMsbuildLegacy" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="DotNetRestorePJ" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="DotNetTest" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="DownloadFile" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="GenerateBuildVersionInfo" AssemblyFile="$(CLIBuildDll)" />

@@ -3,11 +3,11 @@
 
 namespace Microsoft.DotNet.Cli.Build
 {
-    public class DotNetPublishMsbuildLegacy : DotNetTool
+    public class DotNetPublishPJ : DotNetTool
     {
         protected override string Command
         {
-            get { return "publish3"; }
+            get { return "publish"; }
         }
 
         protected override string Args

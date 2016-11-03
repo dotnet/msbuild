@@ -49,6 +49,17 @@ cat "$RepoRoot\branchinfo.txt" | ForEach-Object {
 }
 
 # Use a repo-local install directory (but not the artifacts directory because that gets cleaned a lot
+if (!$env:DOTNET_INSTALL_DIR_PJ)
+{
+    $env:DOTNET_INSTALL_DIR_PJ="$RepoRoot\.dotnet_stage0PJ\$Architecture"
+}
+
+if (!(Test-Path $env:DOTNET_INSTALL_DIR_PJ))
+{
+    mkdir $env:DOTNET_INSTALL_DIR_PJ | Out-Null
+}
+
+# Also create an install directory for a post-PJnistic CLI
 if (!$env:DOTNET_INSTALL_DIR)
 {
     $env:DOTNET_INSTALL_DIR="$RepoRoot\.dotnet_stage0\$Architecture"
@@ -78,12 +89,24 @@ if ((Test-Path $bootStrapperPath) -eq 0)
 }
 
 # now execute it
-& $bootStrapperPath -RepositoryRoot (Get-Location) -ToolsLocalPath $toolsLocalPath -CliLocalPath $env:DOTNET_INSTALL_DIR -Architecture $Architecture | Out-File (Join-Path (Get-Location) "bootstrap.log")
+& $bootStrapperPath -RepositoryRoot (Get-Location) -ToolsLocalPath $toolsLocalPath -CliLocalPath $env:DOTNET_INSTALL_DIR_PJ -Architecture $Architecture | Out-File (Join-Path (Get-Location) "bootstrap.log")
 if ($LastExitCode -ne 0)
 {
     Write-Output "Boot-strapping failed with exit code $LastExitCode, see bootstrap.log for more information."
     exit $LastExitCode
 }
+
+# install the post-PJnistic stage0
+$dotnetInstallPath = Join-Path $toolsLocalPath "dotnet-install.ps1"
+
+Write-Host "$dotnetInstallPath -Version ""latest"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
+Invoke-Expression "$dotnetInstallPath -Version ""latest"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
+if ($LastExitCode -ne 0)
+{
+    Write-Output "The .NET CLI installation failed with exit code $LastExitCode"
+    exit $LastExitCode
+}
+
 
 # Put the stage0 on the path
 $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"

@@ -33,6 +33,7 @@
       <IsDesktopAvailable>False</IsDesktopAvailable>
       <IsDesktopAvailable Condition=" '$(OSName)' == 'win' ">True</IsDesktopAvailable>
       <DotNetPath>$(Stage0Directory)</DotNetPath>
+      <DotNetPjPath>$(Stage0PjDirectory)</DotNetPjPath>
 
       <BaseOutputDirectory>$(RepoRoot)/artifacts/$(Rid)</BaseOutputDirectory>
       <ToolsOutputDirectory>$(BaseOutputDirectory)/tools</ToolsOutputDirectory>
@@ -189,7 +190,8 @@
 
     <CallTarget Targets="CleanSrcLockFiles" />
 
-    <DotNetRestoreMsbuildLegacy WorkingDirectory="%(RestoreSrcPackagesInput.RootDir)%(RestoreSrcPackagesInput.Directory)" ToolPath="$(DotNetPath)" Root="&quot;%(RestoreSrcPackagesInput.FullPath)&quot;" />
+    <DotNetRestore ToolPath="$(DotNetPath)" 
+                   Root="&quot;%(RestoreSrcPackagesInput.FullPath)&quot;" />
 
   </Target>
 
@@ -213,7 +215,8 @@
 
     <CallTarget Targets="CleanToolsLockFiles" />
 
-    <DotNetRestoreMsbuildLegacy WorkingDirectory="%(RestoreToolsPackagesInput.RootDir)%(RestoreToolsPackagesInput.Directory)" ToolPath="$(DotNetPath)" Root="&quot;%(RestoreToolsPackagesInput.FullPath)&quot;" />
+    <DotNetRestore ToolPath="$(DotNetPath)" 
+                   Root="&quot;%(RestoreToolsPackagesInput.FullPath)&quot;" />
 
   </Target>
 
@@ -237,8 +240,10 @@
 
     <CallTarget Targets="CleanSrcToolsProjectJsonLockFiles" />
 
-    <DotNetRestore WorkingDirectory="$(RepoRoot)/src" ToolPath="$(DotNetPath)" />
-    <DotNetRestore WorkingDirectory="$(RepoRoot)/tools" ToolPath="$(DotNetPath)" />
+    <DotNetRestorePJ WorkingDirectory="$(RepoRoot)/src" 
+                     ToolPath="$(DotNetPjPath)" />
+    <DotNetRestorePJ WorkingDirectory="$(RepoRoot)/tools" 
+                     ToolPath="$(DotNetPjPath)" />
 
   </Target>
 

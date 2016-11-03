@@ -32,7 +32,9 @@
     <ExeExtension Condition=" '$(OS)' != 'Windows_NT' "></ExeExtension>
 
     <Stage0Directory>$(RepoRoot)/.dotnet_stage0/$(Architecture)</Stage0Directory>
+    <Stage0PjDirectory>$(RepoRoot)/.dotnet_stage0PJ/$(Architecture)</Stage0PjDirectory>
     <DotnetStage0>$(Stage0Directory)/dotnet$(ExeExtension)</DotnetStage0>
+    <DotnetStage0Pj>$(Stage0PjDirectory)/dotnet$(ExeExtension)</DotnetStage0Pj>
     <DotnetCliBuildDirectory>$(RepoRoot)/build_projects/dotnet-cli-build</DotnetCliBuildDirectory>
     <PackagesDir>$(RepoRoot)/.nuget</PackagesDir>
   </PropertyGroup>
@@ -55,7 +57,8 @@
           DependsOnTargets="MSBuildWorkaroundTarget;
                             RestoreDotnetCliBuildFramework">
 
-    <Exec Command="$(DotnetStage0) publish3 -o $(DotnetCliBuildDirectory)/bin --framework netcoreapp1.0" WorkingDirectory="$(DotnetCliBuildDirectory)"/>
+    <Exec Command="$(DotnetStage0) publish -o $(DotnetCliBuildDirectory)/bin --framework netcoreapp1.0" 
+          WorkingDirectory="$(DotnetCliBuildDirectory)"/>
   </Target>
   
   <ItemGroup>
@@ -72,7 +75,8 @@
       <ExtraRestoreArgs Condition="'$(OS)' != 'Windows_NT'">$(ExtraRestoreArgs) --disable-parallel</ExtraRestoreArgs>
     </PropertyGroup>
 
-    <Exec Command="$(DotnetStage0) restore3 $(ExtraRestoreArgs)" WorkingDirectory="$(DotnetCliBuildDirectory)"/>
+    <Exec Command="$(DotnetStage0) restore $(ExtraRestoreArgs)" 
+          WorkingDirectory="$(DotnetCliBuildDirectory)"/>
   </Target>
 
   <Target DependsOnTargets="$(CLITargets)" Name="BuildTheWholeCli"></Target>

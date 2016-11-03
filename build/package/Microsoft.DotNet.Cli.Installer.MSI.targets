@@ -144,7 +144,7 @@
 
       <Exec Command ="powershell -NoProfile -NoLogo $(SdkTestMsiPowershellScript)
                       -InputMsi '$(SdkInstallerFile)'
-                      -DotnetDir '$(Stage0Directory)'" />
+                      -DotnetDir '$(Stage0PjDirectory)'" />
 
       <WriteLinesToFile
           File="$(SdkMsiTestedSentinel)"

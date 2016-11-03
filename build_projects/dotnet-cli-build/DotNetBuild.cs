@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         protected override string Args
         {
-            get { return $"{GetProjectPath()} {GetConfiguration()} {GetFramework()} {GetBuildBasePath()}"; }
+            get { return $"{GetProjectPath()} {GetConfiguration()} {GetFramework()}"; }
         }
 
         public string BuildBasePath { get; set; }
@@ -22,17 +22,7 @@ namespace Microsoft.DotNet.Cli.Build
         public string Framework { get; set; }
 
         public string ProjectPath { get; set; }
-
-        private string GetBuildBasePath()
-        {
-            if (!string.IsNullOrEmpty(BuildBasePath))
-            {
-                return $"--build-base-path {BuildBasePath}";
-            }
-
-            return null;
-        }
-
+        
         private string GetConfiguration()
         {
             if (!string.IsNullOrEmpty(Configuration))

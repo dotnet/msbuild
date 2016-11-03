@@ -12,8 +12,10 @@ namespace Microsoft.DotNet.Cli.Build
 
         protected override string Args
         {
-            get { return $"{GetSource()} {GetPackages()} {GetSkipInvalidConfigurations()} {GetDisableParallel()}"; }
+            get { return $"{Root} {GetSource()} {GetPackages()} {GetSkipInvalidConfigurations()}"; }
         }
+
+        public string Root { get; set; }
 
         public string Source { get; set; }
 
@@ -49,11 +51,6 @@ namespace Microsoft.DotNet.Cli.Build
             }
 
             return null;
-        }
-
-        private string GetDisableParallel()
-        {
-            return "--disable-parallel";
         }
     }
 }

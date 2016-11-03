@@ -103,7 +103,7 @@
           DestinationFiles="@(HackFilesToCopy->'$(SdkOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
     
       <!-- Publish DotNet -->
-    <DotNetPublishMsbuildLegacy ToolPath="%(Stage.DotnetDir)"
+    <DotNetPublish ToolPath="%(Stage.DotnetDir)"
                                 Output="$(SdkOutputDirectory)"
                                 Configuration="$(Configuration)"
                                 VersionSuffix="$(CommitCount)"
