@@ -3,7 +3,6 @@
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />  
   <PropertyGroup>
     <Version>42.43.44.45-alpha</Version>
-    <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <OutputType>Library</OutputType>
     <TargetFramework>netstandard1.5</TargetFramework>
   </PropertyGroup>

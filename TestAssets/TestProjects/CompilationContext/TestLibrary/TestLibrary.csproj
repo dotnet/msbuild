@@ -2,7 +2,6 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
   <PropertyGroup>
-    <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <OutputType>Library</OutputType>
     <TargetFramework>netstandard1.3</TargetFramework>
   </PropertyGroup>
