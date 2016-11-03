@@ -1438,7 +1438,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             Version expectedVersion = new Version(MSBuildConstants.CurrentAssemblyVersion);
 
-            Assert.Equal(expectedVersion, ProjectCollection.Version);
+            Assert.Equal(expectedVersion.Major, ProjectCollection.Version.Major);
+            Assert.Equal(expectedVersion.Minor, ProjectCollection.Version.Minor);
         }
 
         /// <summary>

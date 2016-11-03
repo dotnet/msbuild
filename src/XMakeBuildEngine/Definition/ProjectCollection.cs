@@ -403,7 +403,7 @@ namespace Microsoft.Build.Evaluation
                     // work when Microsoft.Build.dll has been shadow-copied, for example
                     // in scenarios where NUnit is loading Microsoft.Build.
                     var versionInfo = FileVersionInfo.GetVersionInfo(FileUtilities.ExecutingAssemblyPath);
-                    s_engineVersion = new Version(versionInfo.ProductMajorPart, versionInfo.ProductMinorPart, versionInfo.ProductBuildPart, versionInfo.ProductPrivatePart);
+                    s_engineVersion = new Version(versionInfo.FileMajorPart, versionInfo.FileMinorPart, versionInfo.FileBuildPart, versionInfo.FilePrivatePart);
                 }
 
                 return s_engineVersion;
