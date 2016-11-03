@@ -1,0 +1,21 @@
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.25827.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "x64SolutionBuild", "x64SolutionBuild.csproj", "{544B615E-491F-4C80-9918-B10A6FB4B3CD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{544B615E-491F-4C80-9918-B10A6FB4B3CD}.Debug|x64.ActiveCfg = Debug|x64
+		{544B615E-491F-4C80-9918-B10A6FB4B3CD}.Debug|x64.Build.0 = Debug|x64
+		{544B615E-491F-4C80-9918-B10A6FB4B3CD}.Release|x64.ActiveCfg = Release|Any CPU
+		{544B615E-491F-4C80-9918-B10A6FB4B3CD}.Release|x64.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

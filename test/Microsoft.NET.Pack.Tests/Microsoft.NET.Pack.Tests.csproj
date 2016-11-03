@@ -36,6 +36,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GivenThatWeWantToPackASimpleLibrary.cs" />
     <Compile Include="GivenThatWeWantToPackACrossTargetedLibrary.cs" />
     <EmbeddedResource Include="**\*.resx" Exclude="$(GlobalExclude)" />
   </ItemGroup>

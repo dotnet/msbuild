@@ -15,11 +15,26 @@ Copyright (c) .NET Foundation. All rights reserved.
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
 
+  <!-- Default configuration and platform to Debug|AnyCPU--> 
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+  </PropertyGroup>
+
+  <!--
+    Ensure VS sees two default configurations: Debug|AnyCPU and Release|AnyCPU
+
+    This is temproary until we have designed and implemented a new configuration management scheme,
+    which is tracked by https://github.com/dotnet/sdk/issues/350. In the meantime, one consequence of
+    defining these defaults here with the old inference-from-usage scheme here is that the user cannot
+    remove or rename them.
+  -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' "/>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' "/>
+
   <!-- User-facing configuration-agnostic defaults -->
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform>AnyCPU</Platform>
     <FileAlignment>512</FileAlignment>
     <ErrorReport>prompt</ErrorReport>
     <AssemblyName>$(MSBuildProjectName)</AssemblyName>
@@ -28,14 +43,19 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <!-- User-facing configuration-specific defaults -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Platform)' == 'x64' ">
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Platform)' == 'x86' ">
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
 
   <!-- Default settings for all projects built with this Sdk package -->
@@ -60,6 +80,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Workaround: https://github.com/Microsoft/msbuild/issues/1045: This is the only before common targets hook available to us, but using it is hijacking a hook that should belong to the user. -->
     <CustomBeforeMicrosoftCommonTargets>$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.BeforeCommon.targets</CustomBeforeMicrosoftCommonTargets>
+    <CustomBeforeMicrosoftCommonCrossTargetingTargets>$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.BeforeCommonCrossTargeting.targets</CustomBeforeMicrosoftCommonCrossTargetingTargets>
   </PropertyGroup>
 
   <!-- Workaround: https://github.com/Microsoft/msbuild/issues/1293 -->

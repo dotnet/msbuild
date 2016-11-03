@@ -17,21 +17,22 @@ namespace Microsoft.NET.TestFramework.Commands
 
         public string FullPathProjectFile => Path.Combine(ProjectRootPath, ProjectFile);
 
-        protected TestCommand(MSBuildTest msBuild, string projectRootPath, bool skipResolvingProjectFile = false)
+        protected TestCommand(MSBuildTest msBuild, string projectRootPath, string relativePathToProject = null)
         {
             MSBuild = msBuild;
             ProjectRootPath = projectRootPath;
-
-            if (!skipResolvingProjectFile)
-            {
-                ProjectFile = FindProjectFile();
-            }
+            ProjectFile = FindProjectFile(relativePathToProject);
         }
 
         public abstract CommandResult Execute(params string[] args);
 
-        private string FindProjectFile()
+        private string FindProjectFile(string relativePathToProject)
         {
+            if (!string.IsNullOrEmpty(relativePathToProject))
+            {
+                return Path.Combine(ProjectRootPath, relativePathToProject);
+            }
+
             var buildProjectFiles = Directory.GetFiles(ProjectRootPath, "*.csproj");
 
             if(buildProjectFiles.Length != 1)
