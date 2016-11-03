@@ -13,8 +13,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
     {
         [Theory]
         [InlineData("Microsoft.EntityFrameworkCore.Tools", "Microsoft.EntityFrameworkCore.Tools", ConstantPackageVersions.AspNetToolsVersion)]
-        [InlineData("Microsoft.AspNetCore.Razor.Tools", "Microsoft.AspNetCore.Razor.Design", ConstantPackageVersions.AspNetToolsVersion)]
-        [InlineData("Microsoft.AspNetCore.Razor.Design", "Microsoft.AspNetCore.Razor.Design", ConstantPackageVersions.AspNetToolsVersion)]
         [InlineData("Microsoft.VisualStudio.Web.CodeGenerators.Mvc", "Microsoft.VisualStudio.Web.CodeGeneration.Design", ConstantPackageVersions.AspNetToolsVersion)]
         public void It_migrates_project_dependencies_to_a_new_name_and_version(
             string sourceToolName,
@@ -31,13 +29,16 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             packageRef.GetMetadataWithName("PrivateAssets").Value.Should().NotBeNull().And.Be("All");
         }
 
-        [Fact]
-        public void It_does_not_migrate_MicrosoftVisualStudioWebCodeGenerationTools()
+        [Theory]
+        [InlineData("Microsoft.AspNetCore.Razor.Tools")]
+        [InlineData("Microsoft.AspNetCore.Razor.Design")]
+        [InlineData("Microsoft.VisualStudio.Web.CodeGeneration.Tools")]
+        public void It_does_not_migrate_asp_project_tool_dependency(string dependencyName)
         {
             var mockProj = RunPackageDependenciesRuleOnPj(@"
                 {
                     ""dependencies"": {
-                        ""Microsoft.VisualStudio.Web.CodeGeneration.Tools"" : {
+                        """ + dependencyName + @""" : {
                             ""version"": ""1.0.0-preview2-final"",
                             ""type"": ""build""
                         }
@@ -52,7 +53,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
         [Theory]
         [InlineData("Microsoft.EntityFrameworkCore.Tools", "Microsoft.EntityFrameworkCore.Tools.DotNet", ConstantPackageVersions.AspNetToolsVersion)]
-        [InlineData("Microsoft.AspNetCore.Razor.Tools", "Microsoft.AspNetCore.Razor.Tools", ConstantPackageVersions.AspNetToolsVersion)]
         [InlineData("Microsoft.VisualStudio.Web.CodeGeneration.Tools", "Microsoft.VisualStudio.Web.CodeGeneration.Tools", ConstantPackageVersions.AspNetToolsVersion)]
         [InlineData("Microsoft.DotNet.Watcher.Tools", "Microsoft.DotNet.Watcher.Tools", ConstantPackageVersions.AspNetToolsVersion)]
         [InlineData("Microsoft.Extensions.SecretManager.Tools", "Microsoft.Extensions.SecretManager.Tools", ConstantPackageVersions.AspNetToolsVersion)]
@@ -67,13 +67,15 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             EmitsToolReferences(mockProj, Tuple.Create(targetToolName, targetVersion));
         }
 
-        [Fact]
-        public void It_does_not_migrate_MicrosoftAspNetCoreServerIISIntegrationTools()
+        [Theory]
+        [InlineData("Microsoft.AspNetCore.Razor.Tools")]
+        [InlineData("Microsoft.AspNetCore.Server.IISIntegration.Tools")]
+        public void It_does_not_migrate_asp_project_tool(string toolName)
         {
             var mockProj = RunPackageDependenciesRuleOnPj(@"
                 {
                     ""tools"": {
-                        ""Microsoft.AspNetCore.Server.IISIntegration.Tools"": ""1.0.0-preview2-final""
+                        """ + toolName + @""": ""1.0.0-preview2-final""
                     }
                 }");
 
