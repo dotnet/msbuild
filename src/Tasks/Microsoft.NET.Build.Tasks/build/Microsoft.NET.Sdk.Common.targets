@@ -32,5 +32,40 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Product Condition="'$(Product)' == ''">$(AssemblyName)</Product>
     <NeutralLanguage Condition="'$(NeutralLanguage)' == ''">en</NeutralLanguage>
   </PropertyGroup>
+
+  <UsingTask TaskName="GetNearestTargetFramework" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
+  <!--
+  ============================================================
+                              GetTargetFrameworkProperties
+
+    Invoked by common targets to return the set of properties 
+    (in the form  "key1=value1;...keyN=valueN") needed to build 
+    against the target framework that best matches the referring
+    project's target framework.
+
+    The referring project's $(TargetFrameworkMoniker) is passed 
+    in as $(ReferringTargetFramework).
+
+    This is in the common targets so that it will apply to both
+    cross-targeted and single-targeted projects.  It is run
+    for single-targeted projects so that an error will be
+    generated if the referenced project is not compatible
+    with the referencing project's target framework.
+  ============================================================
+   -->
+  <Target Name="GetTargetFrameworkProperties" Returns="TargetFramework=$(NearestTargetFramework)">
+
+    <PropertyGroup>
+      <_PossibleTargetFrameworks Condition="'$($TargetFramework)' != ''">$(TargetFramework)</_PossibleTargetFrameworks>
+      <_PossibleTargetFrameworks Condition="'$($TargetFramework)' == ''">$(TargetFrameworks)</_PossibleTargetFrameworks>
+    </PropertyGroup>
+
+    <GetNearestTargetFramework ReferringTargetFramework="$(ReferringTargetFramework)" 
+                               PossibleTargetFrameworks="$(_PossibleTargetFrameworks)"
+                               ProjectFilePath="$(MSBuildProjectFullPath)">
+      <Output PropertyName="NearestTargetFramework" TaskParameter="NearestTargetFramework" />
+    </GetNearestTargetFramework>
+  </Target>
   
 </Project>

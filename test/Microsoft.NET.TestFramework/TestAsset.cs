@@ -15,11 +15,17 @@ namespace Microsoft.NET.TestFramework
     public class TestAsset : TestDirectory
     {
         private readonly string _testAssetRoot;
-        private readonly string _buildVersion;
 
-        private List<string> _projectFiles = new List<string>();
+        public string BuildVersion { get; }
+
+        private List<string> _projectFiles;
 
         public string TestRoot => Path;
+
+        internal TestAsset(string testDestination, string buildVersion) : base(testDestination)
+        {
+            BuildVersion = buildVersion;
+        }
 
         internal TestAsset(string testAssetRoot, string testDestination, string buildVersion) : base(testDestination)
         {
@@ -29,11 +35,29 @@ namespace Microsoft.NET.TestFramework
             }
 
             _testAssetRoot = testAssetRoot;
-            _buildVersion = buildVersion;
+            BuildVersion = buildVersion;
+        }
+
+        internal void FindProjectFiles()
+        {
+            _projectFiles = new List<string>();
+
+            var files = Directory.GetFiles(base.Path, "*.*", SearchOption.AllDirectories)
+                .Where(file => !IsInBinOrObjFolder(file));
+
+            foreach (string file in files)
+            {
+                if (System.IO.Path.GetFileName(file).EndsWith("proj"))
+                {
+                    _projectFiles.Add(file);
+                }
+            }
         }
 
         public TestAsset WithSource()
         {
+            _projectFiles = new List<string>();
+
             var sourceDirs = Directory.GetDirectories(_testAssetRoot, "*", SearchOption.AllDirectories)
               .Where(dir => !IsBinOrObjFolder(dir));
 
@@ -60,7 +84,7 @@ namespace Microsoft.NET.TestFramework
                         .Descendants(XName.Get("PackageReference", "http://schemas.microsoft.com/developer/msbuild/2003"))
                         .FirstOrDefault(pr => pr.Attribute("Include")?.Value == "Microsoft.NET.Sdk")
                         ?.Element(XName.Get("Version", "http://schemas.microsoft.com/developer/msbuild/2003"))
-                        ?.SetValue('[' +_buildVersion + ']');
+                        ?.SetValue('[' +BuildVersion + ']');
 
                     using (var file = File.CreateText(destFile))
                     {
@@ -80,6 +104,11 @@ namespace Microsoft.NET.TestFramework
 
         public TestAsset WithProjectChanges(Action<XDocument> xmlAction)
         {
+            if (_projectFiles == null)
+            {
+                FindProjectFiles();
+            }
+
             foreach (var projectFile in _projectFiles)
             {
                 var project = XDocument.Load(projectFile);
@@ -95,11 +124,16 @@ namespace Microsoft.NET.TestFramework
             
         }
 
+        public RestoreCommand GetRestoreCommand(string relativePath = "", params string[] args)
+        {
+            return new RestoreCommand(Stage0MSBuild, System.IO.Path.Combine(TestRoot, relativePath))
+                .AddSourcesFromCurrentConfig()
+                .AddSource(RepoInfo.PackagesPath);
+        }
+
         public TestAsset Restore(string relativePath = "", params string[] args)
         {
-            var commandResult = new RestoreCommand(Stage0MSBuild, System.IO.Path.Combine(TestRoot, relativePath))
-                .AddSourcesFromCurrentConfig()
-                .AddSource(RepoInfo.PackagesPath)
+            var commandResult = GetRestoreCommand(relativePath, args)
                 .Execute(args);
 
             commandResult.Should().Pass();

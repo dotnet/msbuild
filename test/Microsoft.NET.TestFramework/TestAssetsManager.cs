@@ -1,7 +1,9 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.NET.TestFramework.ProjectConstruction;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 
@@ -63,6 +65,39 @@ namespace Microsoft.NET.TestFramework
                 GetTestDestinationDirectoryPath(testProjectName, callingMethod, identifier);
 
             var testAsset = new TestAsset(testProjectDirectory, testDestinationDirectory, BuildVersion);
+            return testAsset;
+        }
+
+        public TestAsset CreateTestProject(
+            TestProject testProject,
+            [CallerMemberName] string callingMethod = "",
+            string identifier = "")
+        {
+            var testDestinationDirectory =
+                GetTestDestinationDirectoryPath(testProject.Name, callingMethod, identifier);
+
+            var testAsset = new TestAsset(testDestinationDirectory, BuildVersion);
+
+            Stack<TestProject> projectStack = new Stack<TestProject>();
+            projectStack.Push(testProject);
+
+            HashSet<TestProject> createdProjects = new HashSet<TestProject>();
+
+            while (projectStack.Count > 0)
+            {
+                var project = projectStack.Pop();
+                if (!createdProjects.Contains(project))
+                {
+                    project.Create(testAsset, ProjectsRoot);
+                    createdProjects.Add(project);
+
+                    foreach (var referencedProject in project.ReferencedProjects)
+                    {
+                        projectStack.Push(referencedProject);
+                    }
+                }
+            }
+
             return testAsset;
         }
 

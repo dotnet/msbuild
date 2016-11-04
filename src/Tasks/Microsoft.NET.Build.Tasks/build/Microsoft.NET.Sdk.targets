@@ -221,20 +221,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
   ============================================================
-                                 GetTargetFrameworkProperties
-
-  This target is called to assign properties that invoke the
-  correct inner build for a given referring framework. This 
-  override handles the non-cross-targeting project case, where
-  we simply return 'TargetFramework=$(TargetFramework)' to ensure
-  that global /p:TargetFramework=X passed to referring project 
-  doesn't flow to us.
-  ============================================================
-  -->
-  <Target Name="GetTargetFrameworkProperties" Returns="TargetFramework=$(TargetFramework)" />
-
-  <!--
-  ============================================================
                                          Project Capabilities
   ============================================================
   -->
