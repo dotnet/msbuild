@@ -96,13 +96,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         private AddPropertyTransform<CommonCompilerOptions> XmlDocTransform =>
             new AddPropertyTransform<CommonCompilerOptions>("GenerateDocumentationFile",
                 compilerOptions => compilerOptions.GenerateXmlDocumentation.ToString().ToLower(),
-                compilerOptions => compilerOptions.GenerateXmlDocumentation != null && compilerOptions.GenerateXmlDocumentation.Value);
-
-        // TODO: https://github.com/dotnet/sdk/issues/67
-        private AddPropertyTransform<CommonCompilerOptions> XmlDocTransformFilePath =>
-            new AddPropertyTransform<CommonCompilerOptions>("DocumentationFile",
-                @"$(OutputPath)\$(TargetFramework)\$(AssemblyName).xml",
-                compilerOptions => compilerOptions.GenerateXmlDocumentation != null && compilerOptions.GenerateXmlDocumentation.Value);
+                compilerOptions => compilerOptions.GenerateXmlDocumentation != null && compilerOptions.GenerateXmlDocumentation.Value);    
 
         private AddPropertyTransform<CommonCompilerOptions> AssemblyNameTransform =>
             new AddPropertyTransform<CommonCompilerOptions>("AssemblyName",
@@ -177,7 +171,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 PublicSignTransform,
                 DebugTypeTransform,
                 XmlDocTransform,
-                XmlDocTransformFilePath,
                 PreserveCompilationContextTransform,
                 AssemblyNameTransform
             };

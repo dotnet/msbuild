@@ -21,7 +21,7 @@
       <Version>1.0.1</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NET.Sdk.Web">
-      <Version>1.0.0-alpha-20161102-2-100</Version>
+      <Version>1.0.0-alpha-20161104-2-112</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics">
       <Version>1.0.0</Version>
