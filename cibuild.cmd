@@ -27,24 +27,25 @@ if /i "%SCOPE%"=="Build" set TARGET_ARG=Build
 
 :: Default to full-framework build
 if not defined TARGET (
-    set TARGET=Desktop
+    set TARGET=Full
 )
 
 set BUILD_CONFIGURATION=
 if /i "%TARGET%"=="CoreCLR" (
     set BUILD_CONFIGURATION=Debug-NetCore
-) else if /i "%TARGET%"=="Desktop" (
+) else if /i "%TARGET%"=="Full" (
     set BUILD_CONFIGURATION=Debug
 ) else if /i "%TARGET%"=="All" (
     SET _originalArguments=%*
-    CALL "!_originalScript!" !_originalArguments:All=Desktop!
+    CALL "!_originalScript!" !_originalArguments:All=Full!
     IF ERRORLEVEL 1 GOTO :error
     CALL "!_originalScript!" !_originalArguments:All=CoreCLR!
     IF ERRORLEVEL 1 GOTO :error
     EXIT /B 0
 ) else (
-    echo Unsupported target detected: %TARGET%. Aborting.
-    goto :error
+    echo Unsupported target detected: %TARGET%. Configuring as if for Full.
+    set TARGET=Full
+    set BUILD_CONFIGURATION=Debug
 )
 
 :: Assign runtime host
@@ -54,7 +55,7 @@ if not defined HOST (
     if /i "%TARGET%"=="CoreCLR" (
         set HOST=CoreCLR
     ) else (
-        set HOST=Desktop
+        set HOST=Full
     )
 )
 
@@ -62,7 +63,7 @@ set RUNTIME_HOST=
 if /i "%HOST%"=="CoreCLR" (
     set RUNTIME_HOST=%~dp0Tools\DotNetCLI\Dotnet.exe
     set MSBUILD_CUSTOM_PATH=%~dp0Tools\MSBuild.exe
-) else if /i "%HOST%"=="Desktop" (
+) else if /i "%HOST%"=="Full" (
     set RUNTIME_HOST=
 ) else (
     echo Unsupported host detected: %HOST%. Aborting.
@@ -79,6 +80,12 @@ if "%SYNC_XLF%"=="true" (
     set SYNC_XLF_ARGUMENT="/p:SyncXlf=true"
 )
 
+:: Full Framework MSBuild does not have the new built-in property MSBuildRuntimeType
+set RUNTIMETYPE_ARGUMENT=
+if "%TARGET%"=="Full" (
+    set RUNTIMETYPE_ARGUMENT="/p:MSBuildRuntimeType=Full"
+)
+
 :: Restore build tools
 call %~dp0init-tools.cmd
 
@@ -86,7 +93,7 @@ echo.
 echo ** Rebuilding MSBuild with downloaded binaries
 
 set MSBUILDLOGPATH=%~dp0msbuild_bootstrap_build-%HOST%.log
-call "%~dp0build.cmd" /t:Rebuild /p:Configuration=%BUILD_CONFIGURATION% /p:"SkipBuildPackages=true" %LOCALIZED_BUILD_ARGUMENT% %SYNC_XLF_ARGUMENT%
+call "%~dp0build.cmd" /t:Rebuild /p:Configuration=%BUILD_CONFIGURATION% /p:"SkipBuildPackages=true" %LOCALIZED_BUILD_ARGUMENT% %SYNC_XLF_ARGUMENT% %RUNTIMETYPE_ARGUMENT%
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
@@ -104,7 +111,7 @@ echo ** Moving bootstrapped MSBuild to the bootstrap folder
 taskkill /F /IM vbcscompiler.exe
 
 set MSBUILDLOGPATH=%~dp0msbuild_move_bootstrap-%HOST%.log
-set MSBUILD_ARGS=/verbosity:minimal targets\BootStrapMSbuild.proj /p:Configuration=%BUILD_CONFIGURATION%
+set MSBUILD_ARGS=/verbosity:minimal targets\BootStrapMSbuild.proj /p:Configuration=%BUILD_CONFIGURATION% %RUNTIMETYPE_ARGUMENT%
 
 call "%~dp0build.cmd"
 if %ERRORLEVEL% NEQ 0 (
@@ -154,8 +161,8 @@ exit /b 0
 :usage
 echo Options
 echo   --scope ^<scope^>                Scope of the build ^(Compile / Test^)
-echo   --target ^<target^>              CoreCLR, Desktop, or All ^(default: Desktop^)
-echo   --host ^<host^>                  CoreCLR or Desktop ^(default: Desktop^)
+echo   --target ^<target^>              CoreCLR, Full, or All ^(default: Full^)
+echo   --host ^<host^>                  CoreCLR or Full ^(default: Full^)
 echo   --build-only                     Only build using a downloaded copy of MSBuild but do not bootstrap
 echo                                    or build again with those binaries
 echo   --bootstrap-only                 Build and bootstrap MSBuild but do not build again with those binaries
