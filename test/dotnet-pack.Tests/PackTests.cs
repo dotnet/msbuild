@@ -90,9 +90,8 @@ namespace Microsoft.DotNet.Tools.Pack.Tests
             informationalVersion.Should().NotBeNull()
                                 .And.BeEquivalentTo("1.0.0-85");
 
-            // netstandard1.5 is a workaround for https://github.com/dotnet/sdk/issues/318
             var outputPackage = testInstance.Root
-                                            .GetDirectory("bin", "Debug", "netstandard1.5")
+                                            .GetDirectory("bin", "Debug")
                                             .GetFile("TestLibraryWithConfiguration.1.0.0-85.nupkg");
             
             outputPackage.Should().Exist();
@@ -191,8 +190,7 @@ namespace Microsoft.DotNet.Tools.Pack.Tests
 
             result.Should().Pass();
 
-            // netstandard1.5 is a workaround for https://github.com/dotnet/sdk/issues/318
-            var outputDir = testInstance.Root.GetDirectory("bin", "Debug", "netstandard1.5");
+            var outputDir = testInstance.Root.GetDirectory("bin", "Debug");
 
             outputDir.Should().Exist()
                           .And.HaveFile("TestLibraryWithConfiguration.1.0.0.nupkg");
