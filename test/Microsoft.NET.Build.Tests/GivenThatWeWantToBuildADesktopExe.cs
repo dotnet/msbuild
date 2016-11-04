@@ -109,5 +109,33 @@ namespace Microsoft.NET.Build.Tests
                     "AssemblyDescriptionAttribute",
                     $"PlatformTarget=x64");
         }
+
+        [Fact]
+        public void It_generates_binding_redirects_if_needed()
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("DesktopNeedsBindingRedirects")
+                .WithSource()
+                .Restore();
+
+            var buildCommand = new BuildCommand(Stage0MSBuild, testAsset.TestRoot);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory("net452");
+
+            outputDirectory.Should().HaveFiles(new[] {
+                "DesktopNeedsBindingRedirects.exe",
+                "DesktopNeedsBindingRedirects.exe.config"
+            });
+        }
     }
 }
