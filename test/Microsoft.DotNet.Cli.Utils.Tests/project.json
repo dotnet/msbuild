@@ -30,10 +30,10 @@
     },
     "System.Diagnostics.TraceSource": "4.0.0",
     "System.Runtime.Serialization.Primitives": "4.1.1",
-    "NuGet.Versioning": "4.0.0-rc-2037",
-    "NuGet.Packaging": "4.0.0-rc-2037",
-    "NuGet.Frameworks": "4.0.0-rc-2037",
-    "NuGet.ProjectModel": "4.0.0-rc-2037",
+    "NuGet.Versioning": "4.0.0-rc-2048",
+    "NuGet.Packaging": "4.0.0-rc-2048",
+    "NuGet.Frameworks": "4.0.0-rc-2048",
+    "NuGet.ProjectModel": "4.0.0-rc-2048",
     "Microsoft.DotNet.Cli.Utils": {
       "target": "project"
     },

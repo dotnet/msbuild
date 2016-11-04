@@ -8,7 +8,7 @@
       "type": "platform",
       "version": "1.0.1"
     },
-    "NuGet.CommandLine.XPlat": "4.0.0-rc-2037"
+    "NuGet.CommandLine.XPlat": "4.0.0-rc-2048"
   },
   "frameworks": {
     "netcoreapp1.0": {
