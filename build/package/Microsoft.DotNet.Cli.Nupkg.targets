@@ -15,35 +15,18 @@
         <ProjectName>Microsoft.DotNet.Cli.Utils</ProjectName>
         <Version>$(SdkNugetVersion)</Version>
       </ProjectsToPack>
-      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.InternalAbstractions">
-        <ProjectName>Microsoft.DotNet.InternalAbstractions</ProjectName>
-        <Version>$(DependencyModelAndInternalAbstractionsNugetVersion)</Version>
-      </ProjectsToPack>
-      <ProjectsToPack Include="$(ProjectsSrcDirectory)/Microsoft.DotNet.ProjectJsonMigration">
-        <ProjectName>Microsoft.DotNet.ProjectJsonMigration</ProjectName>
-        <Version>$(SdkNugetVersion)</Version>
-      </ProjectsToPack>
-    </ItemGroup>
-  </Target>
-
-  <Target Name="SetupGenerateNugetPackagesInputsOutputs"
-          DependsOnTargets="SetupProjectsToPack">
-    <ItemGroup>
-      <ProjectPackTargetInputs Include="$(PackagingBuildBasePath)/src/%(ProjectsToPack.ProjectName)/**/netstandard*/%(ProjectsToPack.ProjectName).dll" />
-      <ProjectPackTargetOutputs Include="$(NupkgOutputDirectory)/%(ProjectsToPack.ProjectName).%(ProjectsToPack.Version).nupkg" />
     </ItemGroup>
   </Target>
 
   <Target Name="GenerateNugetPackages"
-          DependsOnTargets="SetupGenerateNugetPackagesInputsOutputs"
-          Inputs="@(ProjectPackTargetInputs -> '%(Identity)')"
-          Outputs="@(ProjectPackTargetOutputs -> '%(Identity)')">
+          DependsOnTargets="Init; SetupProjectsToPack"
+          Condition=" '$(OS)' == 'Windows_NT' ">
 
     <DotNetPack NoBuild="True"
                 Output="$(NupkgOutputDirectory)"
                 ProjectPath="%(ProjectsToPack.Identity)/%(ProjectsToPack.ProjectName).csproj"
                 ToolPath="$(Stage0Directory)"
-                VersionSuffix="$(NupkgVersionSuffix)"
+                VersionSuffix="preview3-$(NupkgVersionSuffix)"
                 Configuration="$(Configuration)" />
   </Target>
 
