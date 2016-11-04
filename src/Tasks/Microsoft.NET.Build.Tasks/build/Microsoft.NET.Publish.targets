@@ -177,6 +177,12 @@ Copyright (c) .NET Foundation. All rights reserved.
                               Condition="'$(CopyBuildOutputToPublishDirectory)' == 'true'">
         <RelativePath>@(IntermediateAssembly->'%(Filename)%(Extension)')</RelativePath>
       </ResolvedFileToPublish>
+      
+      <!-- Copy the app.config (if any) -->
+      <ResolvedFileToPublish Include="@(AppConfigWithTargetPath)"
+                              Condition="'$(CopyBuildOutputToPublishDirectory)' == 'true'">
+        <RelativePath>@(AppConfigWithTargetPath->'%(TargetPath)')</RelativePath>
+      </ResolvedFileToPublish>
 
       <!-- Copy the debug information file (.pdb), if any -->
       <ResolvedFileToPublish Include="@(_DebugSymbolsIntermediatePath)"
