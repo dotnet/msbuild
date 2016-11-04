@@ -67,7 +67,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 { "Microsoft.Extensions.SecretManager.Tools", new PackageDependencyInfo {
                     Name = "Microsoft.Extensions.SecretManager.Tools",
                     Version = ConstantPackageVersions.AspNetToolsVersion } },
-                { "Microsoft.AspNetCore.Server.IISIntegration.Tools", null}
+                { "Microsoft.AspNetCore.Server.IISIntegration.Tools", null},
+                { "BundlerMinifier.Core", new PackageDependencyInfo {
+                    Name = "BundlerMinifier.Core",
+                    Version = ConstantPackageVersions.BundleMinifierToolVersion } }
         };
     }
 }

@@ -11,5 +11,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         public const string XUnitRunnerPackageVersion = "2.2.0-beta4-build1188";
         public const string MstestTestAdapterVersion = "1.1.3-preview";
         public const string MstestTestFrameworkVersion = "1.0.4-preview";
+        public const string BundleMinifierToolVersion = "2.2.301";
     }
 }
