@@ -12,37 +12,33 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 {
     public class GivenDotnetTest3BuildsAndRunsTestFromCsprojForMultipleTFM : TestBase
     {
-        // project targeting net46 will not run in non windows machine.
-        [WindowsOnlyFact]
+        [WindowsOnlyFact(Skip="https://github.com/dotnet/cli/issues/4616")]
         public void MStestMultiTFM()
         {
-            // Copy VSTestDesktopAndNetCore project in output directory of project dotnet-test.Tests
-            string testAppName = "VSTestDesktopAndNetCore";
-            TestInstance testInstance = TestAssetsManager.CreateTestInstance(testAppName);
+            var testProjectDirectory = TestAssets.Get("VSTestDesktopAndNetCore")
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithNuGetConfig(new RepoDirectoriesProvider().TestPackages)
+                .Root;
+            
+            var runtime = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
 
-            string testProjectDirectory = testInstance.TestRoot;
-
-            // Restore project VSTestDesktopAndNetCore
             new RestoreCommand()
                 .WithWorkingDirectory(testProjectDirectory)
+                .WithRuntime(runtime)
                 .Execute()
-                .Should()
-                .Pass();
+                .Should().Pass();
 
-            // Call test
-            CommandResult result = new DotnetTestCommand()
-                                       .WithWorkingDirectory(testProjectDirectory)
-                                       .ExecuteWithCapturedOutput();
+            var result = new DotnetTestCommand()
+                .WithWorkingDirectory(testProjectDirectory)
+                .WithRuntime(runtime)
+                .ExecuteWithCapturedOutput();
 
-
-            // Verify
-            // for target framework net46
-            result.StdOut.Should().Contain("Total tests: 3. Passed: 2. Failed: 1. Skipped: 0.");
-            result.StdOut.Should().Contain("Passed   TestNamespace.VSTestTests.VSTestPassTestDesktop");
-
-            // for target framework netcoreapp1.0
-            result.StdOut.Should().Contain("Total tests: 3. Passed: 1. Failed: 2. Skipped: 0.");
-            result.StdOut.Should().Contain("Failed   TestNamespace.VSTestTests.VSTestFailTestNetCoreApp");
+            result.StdOut
+                .Should().Contain("Total tests: 3. Passed: 2. Failed: 1. Skipped: 0.", "because .NET 4.6 tests will pass")
+                     .And.Contain("Passed   TestNamespace.VSTestTests.VSTestPassTestDesktop", "because .NET 4.6 tests will pass")
+                     .And.Contain("Total tests: 3. Passed: 1. Failed: 2. Skipped: 0.", "because netcoreapp1.0 tests will fail")
+                     .And.Contain("Failed   TestNamespace.VSTestTests.VSTestFailTestNetCoreApp", "because netcoreapp1.0 tests will fail");
         }
 
         [WindowsOnlyFact]

@@ -7,26 +7,19 @@
       "include": [
         "commands/dotnet-new/CSharp_Console.zip",
         "commands/dotnet-new/CSharp_Lib.zip",
-        "commands/dotnet-new/CSharp_MSBuild.zip",
-        "commands/dotnet-new/CSharp_xunittest.zip",
+        "commands/dotnet-new/CSharp_Mstest.zip",
         "commands/dotnet-new/CSharp_Web.zip",
-        "commands/dotnet-new/CSharp_nunittest.zip",
-        "commands/dotnet-new/FSharp_Console.zip",
-        "commands/dotnet-new/FSharp_Lib.zip",
-        "commands/dotnet-new/CSharp_Mstest.zip"
+        "commands/dotnet-new/CSharp_Xunittest.zip"
       ]
     },
     "compile": {
       "exclude": [
         "commands/dotnet-new/CSharp_Console/**",
-        "commands/dotnet-new/FSharp_Console/**",
-        "commands/dotnet-new/CSharp_Web/**",
         "commands/dotnet-new/CSharp_Lib/**",
-        "commands/dotnet-new/CSharp_MSBuild/**",
-        "commands/dotnet-new/FSharp_Lib/**",
-        "commands/dotnet-new/CSharp_xunittest/**",
-        "commands/dotnet-new/CSharp_nunittest/**",
         "commands/dotnet-new/CSharp_Mstest/**",
+        "commands/dotnet-new/CSharp_Web/**",
+        "commands/dotnet-new/CSharp_Xunittest/**"
+
       ]
     }
   },

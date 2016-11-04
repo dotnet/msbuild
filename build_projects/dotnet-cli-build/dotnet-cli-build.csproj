@@ -43,7 +43,7 @@
       <Version>1.0.1-beta-000933</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NET.Sdk">
-      <Version>1.0.0-alpha-20161029-1</Version>
+      <Version>1.0.0-alpha-20161102-2</Version>
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
   </ItemGroup>
