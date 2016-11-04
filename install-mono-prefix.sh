@@ -26,4 +26,6 @@ cp -R nuget-support/tasks-targets/ $XBUILD_DIR/
 
 for f in $XBUILD_DIR/Microsoft/NuGet/*; do ln -s $f $XBUILD_DIR ; done
 
-cp msbuild-mono-deploy.in $MONO_PREFIX/bin/msbuild
+sed -e 's,@bindir@,'$MONO_PREFIX'/bin,' -e 's,@mono_instdir@,'$MONO_PREFIX/lib/mono',' msbuild-mono-deploy.in > msbuild-mono-deploy.tmp
+chmod +x msbuild-mono-deploy.tmp
+cp msbuild-mono-deploy.tmp $MONO_PREFIX/bin/msbuild
