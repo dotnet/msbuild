@@ -3,7 +3,7 @@
   "frameworks": {
     "netstandard1.5": {
       "dependencies": {
-        "Microsoft.NET.Sdk": "1.0.0-alpha-20161102-2",
+        "Microsoft.NET.Sdk": "1.0.0-alpha-20161104-02",
         "NETStandard.Library": "1.6.0"
       }
     }
