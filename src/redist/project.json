@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-preview3-*",
+  "version": "1.0.0-preview4-*",
   "buildOptions": {
     "emitEntryPoint": true,
     "copyToOutput": {
@@ -14,10 +14,10 @@
       "type": "platform",
       "version": "1.0.1"
     },
-    "tool_csc": "1.0.0-preview3-*",
-    "dotnet": "1.0.0-preview3-*",
-    "tool_nuget": "1.0.0-preview3-*",
-    "tool_msbuild": "1.0.0-preview3-*",
+    "tool_csc": "1.0.0-preview4-*",
+    "dotnet": "1.0.0-preview4-*",
+    "tool_nuget": "1.0.0-preview4-*",
+    "tool_msbuild": "1.0.0-preview4-*",
 
     "Microsoft.Build.Runtime": "15.1.0-preview-000370-00",
     "Microsoft.CodeAnalysis.Build.Tasks": "2.0.0-beta6-60922-08",
