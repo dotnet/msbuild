@@ -113,18 +113,21 @@ namespace Microsoft.Build.Tasks
         {
             s_assemblyFolders = new Hashtable(StringComparer.OrdinalIgnoreCase);
 
-            // Populate the table of assembly folders.
-            AddFoldersFromRegistryKey
-            (
-                @"SOFTWARE\Microsoft\.NETFramework\AssemblyFolders",
-                s_assemblyFolders
-            );
+            if (NativeMethodsShared.IsWindows)
+            {
+                // Populate the table of assembly folders.
+                AddFoldersFromRegistryKey
+                (
+                    @"SOFTWARE\Microsoft\.NETFramework\AssemblyFolders",
+                    s_assemblyFolders
+                );
 
-            AddFoldersFromRegistryKey
-            (
-                @"SOFTWARE\Microsoft\VisualStudio\8.0\AssemblyFolders",
-                s_assemblyFolders
-            );
+                AddFoldersFromRegistryKey
+                (
+                    @"SOFTWARE\Microsoft\VisualStudio\8.0\AssemblyFolders",
+                    s_assemblyFolders
+                );
+            }
         }
 
         /// <summary>
