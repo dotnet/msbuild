@@ -419,7 +419,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 System.Threading.Thread.Sleep(200);
                 if (!NativeMethodsShared.IsWindows)
                 {
-                    // Must be > 1 sec on HFS+ timestamp granularity
+                    // Must be > 1 sec on some file systems for proper timestamp granularity
+                    // TODO: Implement an interface for fetching deterministic timestamps rather than relying on the file
                     System.Threading.Thread.Sleep(1000);
                 }
 
@@ -613,7 +614,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 if (!NativeMethodsShared.IsWindows)
                 {
-                    // Must be > 1 sec for HFS+ timestamp granularity
+                    // Must be > 1 sec on some file systems for proper timestamp granularity
+                    // TODO: Implement an interface for fetching deterministic timestamps rather than relying on the file
                     System.Threading.Thread.Sleep(1100);
                 }
 
