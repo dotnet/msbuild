@@ -231,7 +231,7 @@ case $target in
     Mono)
         setMonoDir
         CONFIGURATION=Debug-MONO
-        EXTRA_ARGS="/p:CscToolExe=mcs /p:CscToolPath=$MONO_BIN_DIR"
+        EXTRA_ARGS="$EXTRA_ARGS /p:CscToolExe=mcs /p:CscToolPath=$MONO_BIN_DIR"
         RUNTIME_HOST_ARGS="--debug"
         ;;
     *)
