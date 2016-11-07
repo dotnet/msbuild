@@ -156,7 +156,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// </summary>
         /// <remarks>System dll is not locked because it forces a new app domain</remarks> 
         [Fact]
-        [Trait("Category", "netcore-linux-failing")]
         public void ResX2ResourcesWithReferences()
         {
             string systemDll = Utilities.GetPathToCopiedSystemDLL();
@@ -389,7 +388,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         ///  Force partially out-of-date: should build only the out of date inputs
         /// </summary>
         [Fact]
-        [Trait("Category", "netcore-linux-failing")]
         public void ForceSomeOutOfDate()
         {
             string resxFile = null;
@@ -419,9 +417,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 DateTime time2 = File.GetLastWriteTime(t.OutputResources[1].ItemSpec);
 
                 System.Threading.Thread.Sleep(200);
-                if (NativeMethodsShared.IsOSX)
+                if (!NativeMethodsShared.IsWindows)
                 {
-                    // Must be > 1 sec on HFS+ timestamp granularity
+                    // Must be > 1 sec on some file systems for proper timestamp granularity
+                    // TODO: Implement an interface for fetching deterministic timestamps rather than relying on the file
                     System.Threading.Thread.Sleep(1000);
                 }
 
@@ -579,7 +578,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// </summary>
         /// <remarks>System dll is not locked because it forces a new app domain</remarks>
         [Fact]
-        [Trait("Category", "netcore-linux-failing")]
         public void NothingOutOfDateExceptReference()
         {
             string resxFile = null;
@@ -614,9 +612,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 t3.References = new ITaskItem[] { new TaskItem(systemDll) };
                 t3.StateFile = new TaskItem(t.StateFile);
 
-                if (NativeMethodsShared.IsOSX)
+                if (!NativeMethodsShared.IsWindows)
                 {
-                    // Must be > 1 sec for HFS+ timestamp granularity
+                    // Must be > 1 sec on some file systems for proper timestamp granularity
+                    // TODO: Implement an interface for fetching deterministic timestamps rather than relying on the file
                     System.Threading.Thread.Sleep(1100);
                 }
 
@@ -3366,9 +3365,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
 
             string pathToSystemDLL =
 #if FEATURE_INSTALLED_MSBUILD
-                ToolLocationHelper.GetPathToDotNetFrameworkFile("system.dll", TargetDotNetFrameworkVersion.Version45);
+                ToolLocationHelper.GetPathToDotNetFrameworkFile("System.dll", TargetDotNetFrameworkVersion.Version45);
 #else
-                Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "system.dll");
+                Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "System.dll");
 #endif
 
             File.Copy(pathToSystemDLL, tempSystemDLL);
