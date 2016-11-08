@@ -23,10 +23,10 @@
       <Version>15.0.0-preview-20161024-02</Version>
     </PackageReference>
     <PackageReference Include="xunit">
-      <Version>2.2.0-beta3-build3402</Version>
+      <Version>2.2.0-beta4-build3444</Version>
     </PackageReference>
     <PackageReference Include="xunit.runner.visualstudio">
-      <Version>2.2.0-beta4-build1188</Version>
+      <Version>2.2.0-beta4-build1194</Version>
     </PackageReference>
   </ItemGroup>
 

@@ -312,12 +312,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             mockProj.Items.Should().ContainSingle(
                 i => (i.Include == "xunit" && 
                       i.ItemType == "PackageReference" &&
-                      i.GetMetadataWithName("Version").Value == "2.2.0-beta3-build3402"));
+                      i.GetMetadataWithName("Version").Value == "2.2.0-beta4-build3444"));
 
             mockProj.Items.Should().ContainSingle(
                 i => (i.Include == "xunit.runner.visualstudio" && 
                       i.ItemType == "PackageReference" &&
-                      i.GetMetadataWithName("Version").Value == "2.2.0-beta4-build1188"));
+                      i.GetMetadataWithName("Version").Value == "2.2.0-beta4-build1194"));
 
             mockProj.Items.Should().NotContain(
                 i => (i.Include == "MSTest.TestAdapter" && i.ItemType == "PackageReference"));
@@ -351,12 +351,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             mockProj.Items.Should().ContainSingle(
                 i => (i.Include == "xunit" &&
                       i.ItemType == "PackageReference" &&
-                      i.GetMetadataWithName("Version").Value == "2.2.0-beta3-build3402"));
+                      i.GetMetadataWithName("Version").Value == "2.2.0-beta4-build3444"));
 
             mockProj.Items.Should().ContainSingle(
                 i => (i.Include == "xunit.runner.visualstudio" &&
                       i.ItemType == "PackageReference" &&
-                      i.GetMetadataWithName("Version").Value == "2.2.0-beta4-build1188"));
+                      i.GetMetadataWithName("Version").Value == "2.2.0-beta4-build1194"));
 
             mockProj.Items.Should().NotContain(
                 i => (i.Include == "MSTest.TestAdapter" && i.ItemType == "PackageReference"));
