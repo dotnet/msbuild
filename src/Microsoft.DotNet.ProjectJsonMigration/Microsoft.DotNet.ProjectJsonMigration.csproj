@@ -1,7 +1,7 @@
 ﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
   <PropertyGroup>
-    <VersionPrefix>1.0.0-preview3</VersionPrefix>
+    <VersionPrefix>1.0.0-preview4</VersionPrefix>
     <TargetFramework>netcoreapp1.0</TargetFramework>
     <WarningsAsErrors>true</WarningsAsErrors>
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
