@@ -24,17 +24,28 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
         public List<TestProject> ReferencedProjects { get; } = new List<TestProject>();
 
-        public bool BuildsOnNonWindows
+        public IEnumerable<string> ShortTargetFrameworkIdentifiers
         {
             get
             {
                 if (!IsSdkProject)
                 {
-                    return false;
+                    //  Assume .NET Framework
+                    yield return "net";
+                    yield break;
                 }
 
-                //  Currently can't build projects targeting .NET Framework on non-Windows: https://github.com/dotnet/sdk/issues/335
-                foreach (var target in TargetFrameworks?.Split(';') ?? new[] { TargetFramework })
+                string[] targetFrameworks;
+                if (!string.IsNullOrEmpty(TargetFramework))
+                {
+                    targetFrameworks = new[] { TargetFramework };
+                }
+                else
+                {
+                    targetFrameworks = TargetFrameworks.Split(';');
+                }
+
+                foreach (var target in targetFrameworks)
                 {
                     int identifierLength = 0;
                     for (; identifierLength < target.Length; identifierLength++)
@@ -46,6 +57,23 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                     }
 
                     string identifier = target.Substring(0, identifierLength);
+                    yield return identifier;
+                }
+            }
+        }
+
+        public bool BuildsOnNonWindows
+        {
+            get
+            {
+                if (!IsSdkProject)
+                {
+                    return false;
+                }
+
+                //  Currently can't build projects targeting .NET Framework on non-Windows: https://github.com/dotnet/sdk/issues/335
+                foreach (var identifier in ShortTargetFrameworkIdentifiers)
+                {
                     if (identifier.Equals("net", StringComparison.OrdinalIgnoreCase))
                     {
                         return false;
@@ -54,8 +82,6 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                 return true;
             }
         }
-
-        //  TODO: Source files
 
         internal void Create(TestAsset targetTestAsset, string testProjectsSourceFolder)
         {
@@ -72,7 +98,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
             }
             else
             {
-                throw new NotImplementedException("Non-SDK project generation not yet supported");
+                sourceProject = Path.Combine(sourceProjectBase, "NetFrameworkProject", "NetFrameworkProject.csproj");
             }
 
             var projectXml = XDocument.Load(sourceProject);
@@ -120,6 +146,16 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                         ?.Element(ns + "Version")
                         ?.SetValue('[' + targetTestAsset.BuildVersion + ']');
             }
+            else
+            {
+                var targetFrameworkVersionElement = propertyGroup.Element(ns + "TargetFrameworkVersion");
+                targetFrameworkVersionElement.SetValue(this.TargetFrameworkVersion);
+            }
+
+            if (this.IsExe)
+            {
+                propertyGroup.Element(ns + "OutputType").SetValue("Exe");
+            }
 
             if (this.ReferencedProjects.Any())
             {
@@ -142,6 +178,46 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
             {
                 projectXml.Save(file);
             }
+
+            string source;
+
+            if (this.IsExe)
+            {
+                source =
+@"using System;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Console.WriteLine(""Hello World!"");
+";
+
+                foreach (var dependency in this.ReferencedProjects)
+                {
+                    source += $"        Console.WriteLine({dependency.Name}.{dependency.Name}Class.Name);" + Environment.NewLine;
+                }
+
+                source +=
+@"    }
+}";
+            }
+            else
+            {
+                source =
+$@"using System;
+
+namespace {this.Name}
+{{
+    public class {this.Name}Class
+    {{
+        public static string Name {{ get {{ return ""{this.Name}""; }} }}
+    }}
+}}";
+            }
+            string sourcePath = Path.Combine(targetFolder, this.Name + ".cs");
+
+            File.WriteAllText(sourcePath, source);
         }
 
         public override string ToString()
