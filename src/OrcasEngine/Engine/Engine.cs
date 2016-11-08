@@ -584,20 +584,25 @@ namespace Microsoft.Build.BuildEngine
             {
                 if (engineVersion == null)
                 {
-                    // Get the file version from the currently executing assembly.
-                    // Use .CodeBase instead of .Location, because .Location doesn't
-                    // work when Microsoft.Build.Engine.dll has been shadow-copied, for example
-                    // in scenarios where NUnit is loading Microsoft.Build.Engine.
+                    string msbuildPath = null;
+
                     try
                     {
-                        engineVersion = new Version(FileVersionInfo.GetVersionInfo(new Uri(Assembly.GetExecutingAssembly().EscapedCodeBase).LocalPath).ProductVersion);
+                        // Get the file version from the currently executing assembly.
+                        // Use .CodeBase instead of .Location, because .Location doesn't
+                        // work when Microsoft.Build.Engine.dll has been shadow-copied, for example
+                        // in scenarios where NUnit is loading Microsoft.Build.Engine.
+                        msbuildPath = new Uri(Assembly.GetExecutingAssembly().EscapedCodeBase).LocalPath;
                     }
                     catch (InvalidOperationException)
                     {
                         // Workaround for Watson Bug: #161292 people getting relative uri crash here.
                         // Last resort. We may have a problem when the assembly is shadow-copied.
-                        engineVersion = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion);
+                        msbuildPath = Path.GetFullPath(typeof(Engine).Assembly.Location);
                     }
+
+                    var versionInfo = FileVersionInfo.GetVersionInfo(msbuildPath);
+                    engineVersion = new Version(versionInfo.FileMajorPart, versionInfo.FileMinorPart, versionInfo.FileBuildPart, versionInfo.FilePrivatePart);
                 }
 
                 return engineVersion;
