@@ -14,7 +14,7 @@ mkdir -p ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}
 mkdir -p ${DESTDIR}${XBUILD_DIR}/$MSBUILD_TOOLSVERSION
 mkdir -p ${DESTDIR}${MONO_PREFIX}/bin
 
-cp -r $MSBUILD_OUT_DIR/ ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}
+cp -r $MSBUILD_OUT_DIR/* ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}
 mv ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/Microsoft.Common.props ${DESTDIR}${XBUILD_DIR}/$MSBUILD_TOOLSVERSION
 
 rm ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/*UnitTests*
@@ -22,8 +22,8 @@ rm ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/*xunit*
 rm ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/NuGet*
 rm ${DESTDIR}${MSBUILD_INSTALL_BIN_DIR}/System.Runtime.InteropServices.RuntimeInformation.dll
 
-cp -R nuget-support/tv/ ${DESTDIR}${XBUILD_DIR}/$MSBUILD_TOOLSVERSION
-cp -R nuget-support/tasks-targets/ ${DESTDIR}${XBUILD_DIR}/
+cp -R nuget-support/tv/* ${DESTDIR}${XBUILD_DIR}/$MSBUILD_TOOLSVERSION
+cp -R nuget-support/tasks-targets/* ${DESTDIR}${XBUILD_DIR}/
 
 for f in ${XBUILD_DIR}/Microsoft/NuGet/*; do ln -s $f ${DESTDIR}${XBUILD_DIR} ; done
 
