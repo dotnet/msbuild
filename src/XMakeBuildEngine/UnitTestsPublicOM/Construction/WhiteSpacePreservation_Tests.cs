@@ -259,6 +259,158 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 (pe, p) => { pe.ItemGroups.ElementAt(1).AddItem("i2", "b"); });
         }
 
+        [Theory]
+        [InlineData(
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <i Include=`a` />
+  </ItemGroup>
+</Project>",
+
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <i Include=`a` />
+    <i2 Include=`b` />
+  </ItemGroup>
+</Project>")]
+
+        [InlineData(
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <i Include=`a` />
+
+  </ItemGroup>
+</Project>",
+
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <i Include=`a` />
+    <i2 Include=`b` />
+
+  </ItemGroup>
+</Project>")]
+
+        [InlineData(
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+
+    <i Include=`a` />
+  </ItemGroup>
+</Project>",
+
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+
+    <i Include=`a` />
+
+    <i2 Include=`b` />
+  </ItemGroup>
+</Project>")]
+
+        [InlineData(
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+
+    <i Include=`a` />
+
+  </ItemGroup>
+</Project>",
+
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+
+    <i Include=`a` />
+
+    <i2 Include=`b` />
+
+  </ItemGroup>
+</Project>")]
+        // AddItem ends up calling InsertAfterChild
+        public void AddChildWithExistingSiblingsViaAddItem(string projectContents, string updatedProject)
+        {
+            AssertWhiteSpacePreservation(projectContents, updatedProject,
+                (pe, p) => { pe.ItemGroups.First().AddItem("i2", "b"); });
+        }
+
+        [Theory]
+        [InlineData(
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <i Include=`a` />
+  </ItemGroup>
+</Project>",
+
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <i2 Include=`b` />
+    <i Include=`a` />
+  </ItemGroup>
+</Project>")]
+
+        [InlineData(
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <i Include=`a` />
+
+  </ItemGroup>
+</Project>",
+
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <i2 Include=`b` />
+    <i Include=`a` />
+
+  </ItemGroup>
+</Project>")]
+
+        [InlineData(
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+
+    <i Include=`a` />
+  </ItemGroup>
+</Project>",
+
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+
+    <i2 Include=`b` />
+
+    <i Include=`a` />
+  </ItemGroup>
+</Project>")]
+
+        [InlineData(
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+
+    <i Include=`a` />
+
+  </ItemGroup>
+</Project>",
+
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+
+    <i2 Include=`b` />
+
+    <i Include=`a` />
+
+  </ItemGroup>
+</Project>")]
+        public void AddChildWithExistingSiblingsViaInsertBeforeChild(string projectContents, string updatedProject)
+        {
+            AssertWhiteSpacePreservation(projectContents, updatedProject,
+                (pe, p) =>
+                {
+                    var itemGroup = pe.ItemGroups.First();
+                    var existingItemElement = itemGroup.FirstChild;
+                    var newItemElement = itemGroup.ContainingProject.CreateItemElement("i2", "b");
+
+                    itemGroup.InsertBeforeChild(newItemElement, existingItemElement);
+                });
+        }
+
         private void AssertWhiteSpacePreservation(string projectContents, string updatedProject,
             Action<ProjectRootElement, Project> act)
         {
