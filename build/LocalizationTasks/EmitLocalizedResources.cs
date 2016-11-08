@@ -31,13 +31,6 @@ namespace Microsoft.Build.LocalizationTasks
         [Required]
         public string LocalizedResxRoot { get; set; }
 
-        /// <summary>
-        /// Path to the root directory that contains the xlf files for a neutral resource
-        /// Assumes all neutral resource have the same relative path to their xlf
-        /// </summary>
-        [Required]
-        public string RelativePathToXlfRoot { get; set; }
-
         [Output]
         public ITaskItem[] ResolvedXlfResources { get; set; }
 
@@ -78,8 +71,7 @@ namespace Microsoft.Build.LocalizationTasks
 
         private IEnumerable<ITaskItem> ComputeXlfResourceItems(ITaskItem neutralResource)
         {
-            var neutralResxRootDirectory = Path.GetDirectoryName(neutralResource.GetMetadata("FullPath"));
-            var xlfRootPath = Path.Combine(neutralResxRootDirectory, RelativePathToXlfRoot);
+            string xlfRootPath = LocalizationUtils.ComputeXlfRootPath(neutralResource);
 
             if (!Directory.Exists(xlfRootPath))
             {
@@ -87,20 +79,9 @@ namespace Microsoft.Build.LocalizationTasks
                     $"Could not find expected xlf root {xlfRootPath} next to its neutral resource {neutralResource.ItemSpec}");
             }
 
-            var resx = neutralResource.ItemSpec;
-
             return
-                (Directory.EnumerateFiles(xlfRootPath)
-                    .Where(f => IsValidXlf(f, resx))
-                    .Select((f => CreateXLFTaskItemForNeutralResx(f, resx))));
-        }
-
-        private bool IsValidXlf(string xlfPath, string resx)
-        {
-            var resxFileName = Path.GetFileNameWithoutExtension(resx);
-            var xlfFileName = Path.GetFileName(xlfPath);
-
-            return Regex.IsMatch(xlfFileName, $"^{resxFileName}\\.[a-zA-Z\\-]+\\.xlf$");
+                LocalizationUtils.LocalizedXlfFiles(neutralResource)
+                    .Select(f => CreateXLFTaskItemForNeutralResx(f, neutralResource.ItemSpec));
         }
 
         private ITaskItem CreateXLFTaskItemForNeutralResx(string xlfPath, string neutralResx)

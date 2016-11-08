@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" original="../Strings.ManifestUtilities.resx">
+    <body>
+      <group id="MICROSOFT.BUILD.TASKS/MANIFESTUTIL/RESOURCES/STRINGS.RESX" datatype="resx" />
+      <trans-unit id="ComImporter.LocalServerNotSupported">
+        <source>Out of process servers are not supported</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ComImporter.MissingValue">
+        <source>Registry key '{0}' is missing value '{1}'.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ComImporter.NoRegisteredClasses">
+        <source>No registered classes were detected for this component.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ComImporter.ProtectedFile">
+        <source>Components under system file protection should not be isolated.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ComImporter.TypeLibraryLoadFailure">
+        <source>Could not load type library.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ComImporter.SubKeyNotImported">
+        <source>Registry key '{0}' was not imported.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ComImporter.ValueNotImported">
+        <source>Registry value '{0}' was not imported.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="SecurityUtil.SignTargetNotFound">
+        <source>The file to be signed {0} could not be found.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="SecurityUtil.SigntoolFail">
+        <source>Failed to sign {0}. {1}</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="SecurityUtil.SigntoolWarning">
+        <source>Warning while signing {0}. {1}</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="SecurityUtil.SigntoolNotFound">
+        <source>SignTool.exe was not found at path {0}.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="SecurityUtil.TimestampUrlNotFound">
+        <source>Timestamp URL server name or address could not be resolved.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="SecurityUtil.OnlyRSACertsAreAllowed">
+        <source>Only certificates using RSA encryption are valid for signing ClickOnce manifests.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="TrustInfo.RequestedExecutionLevelComment">
+        <source>
+          UAC Manifest Options
+          If you want to change the Windows User Account Control level replace the 
+          requestedExecutionLevel node with one of the following.
+
+        &lt;requestedExecutionLevel  level="asInvoker" uiAccess="false" /&gt;
+        &lt;requestedExecutionLevel  level="requireAdministrator" uiAccess="false" /&gt;
+        &lt;requestedExecutionLevel  level="highestAvailable" uiAccess="false" /&gt;
+
+         If you want to utilize File and Registry Virtualization for backward 
+         compatibility then delete the requestedExecutionLevel node.
+    </source>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

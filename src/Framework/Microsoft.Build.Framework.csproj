@@ -9,6 +9,7 @@
     <AssemblyName>Microsoft.Build.Framework</AssemblyName>
     <EnableDocumentationFile>true</EnableDocumentationFile>
     <UpdateNuGetPackageDependencies>true</UpdateNuGetPackageDependencies>
+    <DoNotLocalizeProject>true</DoNotLocalizeProject>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
