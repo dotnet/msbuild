@@ -10,6 +10,7 @@ using Microsoft.DotNet.ProjectJsonMigration.Transforms;
 using Microsoft.DotNet.Internal.ProjectModel;
 using Microsoft.DotNet.Tools.Common;
 using NuGet.Frameworks;
+using NuGet.LibraryModel;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
@@ -123,6 +124,56 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     projectDependencyTransformResults, 
                     framework);
             }
+
+            HoistFrameworkAssembliesForProjectDependencies(projectDependencies, outputMSBuildProject);
+        }
+
+        private void HoistFrameworkAssembliesForProjectDependencies(
+            IEnumerable<ProjectDependency> projectDependencies,
+            ProjectRootElement outputMSBuildProject)
+        {
+            foreach (var projectDependency in projectDependencies)
+            {
+                HoistFrameworkAssembliesForDesktopFrameworks(projectDependency, outputMSBuildProject);
+            }
+        }
+
+        private void HoistFrameworkAssembliesForDesktopFrameworks(
+            ProjectDependency projectDependency,
+            ProjectRootElement outputMSBuildProject)
+        {
+            var targetFrameworks = ProjectReader
+                    .GetProject(projectDependency.ProjectFilePath)
+                    .GetTargetFrameworks().Where(p => !p.FrameworkName.IsPackageBased);
+
+            foreach (var targetFramework in targetFrameworks)
+            {
+                HoistFrameworkAssemblies(targetFramework, outputMSBuildProject);
+            }
+        }
+
+        private void HoistFrameworkAssemblies(
+            TargetFrameworkInformation targetFramework,
+            ProjectRootElement outputMSBuildProject)
+        {
+            var frameworkAssemblies = targetFramework.Dependencies.Where(d =>
+                    d.LibraryRange.TypeConstraint == LibraryDependencyTarget.Reference);
+            if(frameworkAssemblies.Any())
+            {
+                var condition = targetFramework.FrameworkName.GetMSBuildCondition();
+                var itemGroup =
+                    outputMSBuildProject.ItemGroups.FirstOrDefault(i => i.Condition == condition) ??
+                    outputMSBuildProject.AddItemGroup();
+                itemGroup.Condition = condition;
+
+                foreach (var frameworkAssembly in frameworkAssemblies)
+                {
+                    _transformApplicator.Execute(
+                        FrameworkDependencyTransform.Transform(frameworkAssembly),
+                        itemGroup,
+                        mergeExisting: true);
+                }
+            }
         }
 
         private void AddProjectDependenciesToNewItemGroup(
@@ -167,5 +218,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             path => path,
             path => "",
             path => true);
+
+        private AddItemTransform<ProjectLibraryDependency> FrameworkDependencyTransform =>
+            new AddItemTransform<ProjectLibraryDependency>(
+                "Reference",
+                dep => dep.Name,
+                dep => "",
+                dep => true)
+            .WithMetadata("FromP2P", "true");
     }
 }

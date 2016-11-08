@@ -250,6 +250,29 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
+        public void It_promotes_FrameworkAssemblies_from_P2P_references_up_in_the_dependency_chain()
+        {
+            var solutionDirectory = TestAssets.Get(TestAssetKinds.DesktopTestProjects, "TestAppWithFrameworkAssemblies")
+                .CreateInstance()
+                .WithSourceFiles().Root;
+
+            var appDirectory = Path.Combine(solutionDirectory.FullName, "ProjectA");
+
+            var projectContext = ProjectContext.Create(appDirectory, FrameworkConstants.CommonFrameworks.Net451);
+            var mockProj = ProjectRootElement.Create();
+            var testSettings = new MigrationSettings(appDirectory, appDirectory, "1.0.0", mockProj, null);
+            var testInputs = new MigrationRuleInputs(new[] {projectContext}, mockProj, mockProj.AddItemGroup(),
+                mockProj.AddPropertyGroup());
+            new MigrateProjectDependenciesRule().Apply(testSettings, testInputs);
+
+            var frameworkAssemblyReferences = mockProj.Items.Where(
+                item => item.ItemType == "Reference" &&
+                item.Include == "System.ComponentModel.DataAnnotations" &&
+                item.Parent.Condition == " '$(TargetFramework)' == 'net451' ");
+            frameworkAssemblyReferences.Count().Should().Be(1);
+        }
+
+        [Fact]
         public void All_promoted_P2P_references_are_marked_with_a_FromP2P_attribute()
         {
             var expectedHoistedProjectReferences = new [] {
@@ -300,12 +323,20 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
         private ProjectRootElement MigrateProject(string solution, string project)
         {
+            return MigrateProject(solution, project, FrameworkConstants.CommonFrameworks.NetCoreApp10);
+        }
+
+        private ProjectRootElement MigrateProject(
+            string solution,
+            string project,
+            NuGetFramework targetFramework)
+        {
             var solutionDirectory =
                 TestAssetsManager.CreateTestInstance(solution, callingMethod: "p").Path;
 
             var appDirectory = Path.Combine(solutionDirectory, project);
 
-            var projectContext = ProjectContext.Create(appDirectory, FrameworkConstants.CommonFrameworks.NetCoreApp10);
+            var projectContext = ProjectContext.Create(appDirectory, targetFramework);
             var mockProj = ProjectRootElement.Create();
             var testSettings = new MigrationSettings(appDirectory, appDirectory, "1.0.0", mockProj, null);
             var testInputs = new MigrationRuleInputs(new[] {projectContext}, mockProj, mockProj.AddItemGroup(),
