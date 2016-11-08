@@ -139,12 +139,12 @@ namespace Microsoft.Build.Construction
 
         internal static bool AttributeNameCanRepresentMetadata(string name)
         {
-            bool isReserverdAttributeName;
+            bool isReservedAttributeName;
             bool isValidMetadataNameInAttribute;
 
-            ProjectParser.CheckMetadataAsAttributeName(name, out isReserverdAttributeName, out isValidMetadataNameInAttribute);
+            ProjectParser.CheckMetadataAsAttributeName(name, out isReservedAttributeName, out isValidMetadataNameInAttribute);
 
-            return !isReserverdAttributeName && isValidMetadataNameInAttribute;
+            return !isReservedAttributeName && isValidMetadataNameInAttribute;
         }
 
         /// <summary>
