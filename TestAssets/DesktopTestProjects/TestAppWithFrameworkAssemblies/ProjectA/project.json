@@ -8,11 +8,14 @@
     "ProjectB": {
       "target": "project",
       "version": "1.0.0-*"
-    },
-    "Microsoft.NETCore.App": "1.0.1"
+    }
   },
   "frameworks": {
-    "netcoreapp1.0": {},
+    "netcoreapp1.0": {
+      "dependencies": {
+        "Microsoft.NETCore.App": "1.0.1"
+      }
+    },
     "net451": {}
   },
   "runtimes": {
