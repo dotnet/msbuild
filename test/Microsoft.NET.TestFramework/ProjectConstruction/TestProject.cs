@@ -116,7 +116,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
         public override string ToString()
         {
-            StringBuilder ret = new StringBuilder();
+            var ret = new StringBuilder();
             if (!string.IsNullOrEmpty(Name))
             {
                 ret.Append(Name);
