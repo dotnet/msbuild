@@ -369,7 +369,10 @@ namespace Microsoft.Build.Construction
             // Copy over the attributes from the template element.
             foreach (XmlAttribute attribute in element.XmlElement.Attributes)
             {
-                this.XmlElement.SetAttribute(attribute.LocalName, attribute.NamespaceURI, attribute.Value);
+                if (ShouldCloneXmlAttribute(attribute))
+                {
+                    this.XmlElement.SetAttribute(attribute.LocalName, attribute.NamespaceURI, attribute.Value);
+                }
             }
 
             // If this element has pure text content, copy that over.
@@ -381,6 +384,14 @@ namespace Microsoft.Build.Construction
             this._expressedAsAttribute = element._expressedAsAttribute;
 
             this.MarkDirty("CopyFrom", null);
+        }
+
+        /// <summary>
+        /// Hook for subclasses to specify whether the given <param name="attribute"></param> should be cloned or not
+        /// </summary>
+        protected virtual bool ShouldCloneXmlAttribute(XmlAttribute attribute)
+        {
+            return true;
         }
 
         /// <summary>

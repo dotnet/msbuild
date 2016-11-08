@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 #if FEATURE_SECURITY_PRINCIPAL_WINDOWS
@@ -1199,6 +1200,42 @@ Project(""{";
             var extensions = pre.CreateProjectExtensionsElement();
             extensions.Content = "<a><b/></a>";
             pre.AppendChild(extensions);
+
+            ValidateDeepCloneAndCopyFrom(pre);
+        }
+
+        /// <summary>
+        /// Tests DeepClone and CopyFrom when there is metadata expressed as attributes
+        /// </summary>
+        [Fact]
+        public void DeepCloneWithMetadataAsAttributes()
+        {
+            var project =
+@"<?xml version=`1.0` encoding=`utf-8`?>
+  <Project xmlns = 'msbuildnamespace'>
+
+    <ItemGroup>
+      <Compile Include=`Class1.cs` A=`a` />
+      <Compile Include=`Class2.cs` />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <P>val</P>
+    </PropertyGroup>
+
+    <Target Name=`Build`>
+      <ItemGroup>
+        <A Include=`a` />
+        <B Include=`b` M1=`v1`>
+          <M2>v2</M2>
+        </B>
+        <C Include=`c`/>
+      </ItemGroup>
+    </Target>
+
+  </Project>";
+
+            var pre = ProjectRootElement.Create(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(project))));
 
             ValidateDeepCloneAndCopyFrom(pre);
         }
