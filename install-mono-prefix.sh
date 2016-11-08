@@ -30,3 +30,4 @@ for f in ${XBUILD_DIR}/Microsoft/NuGet/*; do ln -s $f ${DESTDIR}${XBUILD_DIR} ; 
 sed -e 's,@bindir@,'$MONO_PREFIX'/bin,' -e 's,@mono_instdir@,'$MONO_PREFIX/lib/mono',' msbuild-mono-deploy.in > msbuild-mono-deploy.tmp
 chmod +x msbuild-mono-deploy.tmp
 cp msbuild-mono-deploy.tmp ${DESTDIR}${MONO_PREFIX}/bin/msbuild
+rm -f msbuild-mono-deploy.tmp
