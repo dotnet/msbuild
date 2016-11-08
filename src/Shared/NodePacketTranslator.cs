@@ -1318,7 +1318,7 @@ namespace Microsoft.Build.BackEnd
                         projectContextId = context.ProjectContextId;
                         taskId = context.TaskId;
                         projectInstanceId = context.ProjectInstanceId;
-                        submissionId = context.ProjectInstanceId;
+                        submissionId = context.SubmissionId;
                     }
 
                     translator.Translate(ref nodeId);
