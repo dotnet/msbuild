@@ -17,29 +17,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Import Project="..\build\Microsoft.NET.Sdk.Common.targets"/>
 
-  <UsingTask TaskName="GetNearestTargetFramework" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-
-  <!--
-  ============================================================
-                              GetTargetFrameworkProperties
-
-    Invoked by common targets to return the set of properties 
-    (in the form  "key1=value1;...keyN=valueN") needed to build 
-    against the target framework that best matches the referring
-    project's target framework.
-
-    The referring project's $(TargetFrameworkMoniker) is passed 
-    in as $(ReferringTargetFramework).
-  ============================================================
-   -->
-  <Target Name="GetTargetFrameworkProperties" Returns="TargetFramework=$(NearestTargetFramework)">
-    <GetNearestTargetFramework ReferringTargetFramework="$(ReferringTargetFramework)" 
-                               PossibleTargetFrameworks="$(TargetFrameworks)"
-                               ProjectFilePath="$(MSBuildProjectFullPath)">
-      <Output PropertyName="NearestTargetFramework" TaskParameter="NearestTargetFramework" />
-    </GetNearestTargetFramework>
-  </Target>
-
   <!--
   ============================================================
                               Publish

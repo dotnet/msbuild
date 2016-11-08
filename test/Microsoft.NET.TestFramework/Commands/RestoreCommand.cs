@@ -12,6 +12,7 @@ namespace Microsoft.NET.TestFramework.Commands
     public sealed class RestoreCommand : TestCommand
     {
         private List<string> _sources = new List<string>();
+        private bool _captureStdOut;
 
         public RestoreCommand(MSBuildTest msbuild, string projectPath)
             : base(msbuild, projectPath)
@@ -37,6 +38,12 @@ namespace Microsoft.NET.TestFramework.Commands
             return this;
         }
 
+        public RestoreCommand CaptureStdOut()
+        {
+            _captureStdOut = true;
+            return this;
+        }
+
         public override CommandResult Execute(params string[] args)
         {
             var newArgs = new List<string>();
@@ -51,6 +58,11 @@ namespace Microsoft.NET.TestFramework.Commands
             newArgs.AddRange(args);
 
             var command = MSBuild.CreateCommandForTarget("restore", newArgs.ToArray());
+
+            if (_captureStdOut)
+            {
+                command = command.CaptureStdOut();
+            }
 
             return command.Execute();
         }
