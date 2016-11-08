@@ -9,6 +9,7 @@ using System.IO;
 using System.Text;
 using Xunit;
 using FluentAssertions;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -84,6 +85,15 @@ namespace Microsoft.NET.Build.Tests
             }
 
             referencerProject.ReferencedProjects.Add(dependencyProject);
+
+            //  Skip running test if not running on Windows
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                if (!referencerProject.BuildsOnNonWindows || !dependencyProject.BuildsOnNonWindows)
+                {
+                    return;
+                }
+            }
 
             var testAsset = _testAssetsManager.CreateTestProject(referencerProject, nameof(It_checks_for_valid_references), identifier);
 

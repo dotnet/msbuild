@@ -22,8 +22,38 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
         //  TargetFrameworkVersion applies to non-SDK projects
         public string TargetFrameworkVersion { get; set; }
 
-
         public List<TestProject> ReferencedProjects { get; } = new List<TestProject>();
+
+        public bool BuildsOnNonWindows
+        {
+            get
+            {
+                if (!IsSdkProject)
+                {
+                    return false;
+                }
+
+                //  Currently can't build projects targeting .NET Framework on non-Windows: https://github.com/dotnet/sdk/issues/335
+                foreach (var target in TargetFrameworks?.Split(';') ?? new[] { TargetFramework })
+                {
+                    int identifierLength = 0;
+                    for (; identifierLength < target.Length; identifierLength++)
+                    {
+                        if (!char.IsLetter(target[identifierLength]))
+                        {
+                            break;
+                        }
+                    }
+
+                    string identifier = target.Substring(0, identifierLength);
+                    if (identifier.Equals("net", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
 
         //  TODO: Source files
 
