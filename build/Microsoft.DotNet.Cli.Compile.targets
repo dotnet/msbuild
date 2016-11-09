@@ -19,7 +19,7 @@
                                            SetupStage;
                                            CompileStage;
                                            BuildProjectsForNuGetPackages;
-                                           GenerateNuGetPackagesArchive" />
+                                           GetNuGetPackagesArchive" />
 
   <Target Name="SetupStage"
           DependsOnTargets="Prepare">
