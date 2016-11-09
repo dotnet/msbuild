@@ -172,17 +172,18 @@ namespace Microsoft.Build.Internal
         }
 
         /// Returns a Func that will return true IFF its argument matches any of the specified filespecs
-        /// Assumes inputs may be escaped, so it unescapes them
-        internal static Func<string, bool> GetMatchTester(IList<string> filespecsEscaped, string currentDirectory)
+        /// Assumes filespec may be escaped, so it unescapes it
+        /// The returned function makes no escaping assumptions or escaping operations. Its callers should control escaping.
+        internal static Func<string, bool> GetFileSpecMatchTester(IList<string> filespecsEscaped, string currentDirectory)
         {
             var matchers = filespecsEscaped
-                .Select(fs => new Lazy<Func<string, bool>>(() => GetMatchTester(fs, currentDirectory)))
+                .Select(fs => new Lazy<Func<string, bool>>(() => GetFileSpecMatchTester(fs, currentDirectory)))
                 .ToList();
 
             return file => matchers.Any(m => m.Value(file));
         }
 
-        internal static Func<string, bool> GetMatchTester(string filespec, string currentDirectory)
+        internal static Func<string, bool> GetFileSpecMatchTester(string filespec, string currentDirectory)
         {
             var unescapedSpec = EscapingUtilities.UnescapeAll(filespec);
             Regex regex = null;
@@ -209,15 +210,13 @@ namespace Microsoft.Build.Internal
 
             return file =>
             {
-                var unescapedFile = EscapingUtilities.UnescapeAll(file);
-
                 // check if there is a regex matching the file
                 if (regex != null)
                 {
-                    return regex.IsMatch(unescapedFile);
+                    return regex.IsMatch(file);
                 }
 
-                return FileUtilities.ComparePathsNoThrow(unescapedSpec, unescapedFile, currentDirectory);
+                return FileUtilities.ComparePathsNoThrow(unescapedSpec, file, currentDirectory);
             };
         }
     }

@@ -479,13 +479,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             "b",
             new string[0],
             new[] { "a" })]
-        //// items as strings: escaped include matches non-escaped exclude
+        // items as strings: escaped include matches non-escaped exclude
         [InlineData(ItemWithIncludeAndExclude,
             "%61",
             "a",
             new string[0],
             new string[0])]
-        //// items as strings: non-escaped include matches escaped exclude
+        // items as strings: non-escaped include matches escaped exclude
         [InlineData(ItemWithIncludeAndExclude,
             "a",
             "%61",

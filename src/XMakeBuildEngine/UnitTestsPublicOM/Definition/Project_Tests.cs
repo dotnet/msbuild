@@ -3099,28 +3099,143 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             AssertProvenanceResult(expected, project, "A");
         }
 
-        [Fact]
-        public void GetItemProvenanceShouldWorkWithEscapedCharacters()
+
+        public static IEnumerable<object[]> GetItemProvenanceShouldWorkWithEscapedCharactersTestData
         {
-            var project =
+            get
+            {
+                var projectTemplate =
                 @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
                   <ItemGroup>
-                    <A Include=`a;%61;*%61*`/>
-                    <A Update=`a;%61;*%61*`/>
-                    <A Remove=`a;%61;*%61*`/>
+                    <A Include=`{0}`/>
+                    <A Update=`{0}`/>
+                    <A Remove=`{0}`/>
                   </ItemGroup>
-                </Project>
-                ";
+                </Project>";
 
-            var expected = new ProvenanceResultTupleList
-            {
-                Tuple.Create("A", Operation.Include, Provenance.StringLiteral | Provenance.Glob, 3),
-                Tuple.Create("A", Operation.Update, Provenance.StringLiteral | Provenance.Glob, 3),
-                Tuple.Create("A", Operation.Remove, Provenance.StringLiteral | Provenance.Glob, 3)
-            };
+                yield return new object[]
+                {
+                    // the itemspec for the include, update, and remove
+                    string.Format(projectTemplate, "a;%61;*%61*"),
+                    // the string argument sent to GetItemProvenance
+                    "a",
+                    // the expected GetItemProvenance result
+                    new ProvenanceResultTupleList
+                    {
+                        Tuple.Create("A", Operation.Include, Provenance.StringLiteral | Provenance.Glob, 3),
+                        Tuple.Create("A", Operation.Update, Provenance.StringLiteral | Provenance.Glob, 3),
+                        Tuple.Create("A", Operation.Remove, Provenance.StringLiteral | Provenance.Glob, 3)
+                    }
+                };
 
-            AssertProvenanceResult(expected, project, "a");
-            AssertProvenanceResult(expected, project, "%61");
+                yield return new object[]
+                {
+                    string.Format(projectTemplate, "a;%61;*%61*"),
+                    "%61",
+                    new ProvenanceResultTupleList()
+                };
+
+                yield return new object[]
+                {
+                    string.Format(projectTemplate, "%61b%63"),
+                    "abc",
+                    new ProvenanceResultTupleList
+                    {
+                        Tuple.Create("A", Operation.Include, Provenance.StringLiteral, 1),
+                        Tuple.Create("A", Operation.Update, Provenance.StringLiteral, 1),
+                        Tuple.Create("A", Operation.Remove, Provenance.StringLiteral, 1)
+                    }
+                };
+
+                yield return new object[]
+                {
+                    string.Format(projectTemplate, "%61b%63"),
+                    "ab%63",
+                    new ProvenanceResultTupleList()
+                };
+
+                yield return new object[]
+                {
+                    string.Format(projectTemplate, "a?c"),
+                    "ab%63",
+                    new ProvenanceResultTupleList()
+                };
+
+                yield return new object[]
+                {
+                    string.Format(projectTemplate, "a?c"),
+                    "a%62c",
+                    new ProvenanceResultTupleList()
+                };
+
+                yield return new object[]
+                {
+                    string.Format(projectTemplate, "a?%63"),
+                    "abc",
+                    new ProvenanceResultTupleList
+                    {
+                        Tuple.Create("A", Operation.Include, Provenance.Glob, 1),
+                        Tuple.Create("A", Operation.Update, Provenance.Glob, 1),
+                        Tuple.Create("A", Operation.Remove, Provenance.Glob, 1)
+                    }
+                };
+
+                yield return new object[]
+                {
+                    string.Format(projectTemplate, "a?%63"),
+                    "ab%63",
+                    new ProvenanceResultTupleList()
+                };
+
+                yield return new object[]
+                {
+                    string.Format(projectTemplate, "a?%63"),
+                    "a%62c",
+                    new ProvenanceResultTupleList()
+                };
+
+                yield return new object[]
+                {
+                    string.Format(projectTemplate, "a*c"),
+                    "a%62c",
+                    new ProvenanceResultTupleList
+                    {
+                        Tuple.Create("A", Operation.Include, Provenance.Glob, 1),
+                        Tuple.Create("A", Operation.Update, Provenance.Glob, 1),
+                        Tuple.Create("A", Operation.Remove, Provenance.Glob, 1)
+                    }
+                };
+
+                yield return new object[]
+                {
+                    string.Format(projectTemplate, "a*%63"),
+                    "abcdefc",
+                    new ProvenanceResultTupleList
+                    {
+                        Tuple.Create("A", Operation.Include, Provenance.Glob, 1),
+                        Tuple.Create("A", Operation.Update, Provenance.Glob, 1),
+                        Tuple.Create("A", Operation.Remove, Provenance.Glob, 1)
+                    }
+                };
+
+                yield return new object[]
+                {
+                    string.Format(projectTemplate, "a*%63"),
+                    "a%62%61c",
+                    new ProvenanceResultTupleList
+                    {
+                        Tuple.Create("A", Operation.Include, Provenance.Glob, 1),
+                        Tuple.Create("A", Operation.Update, Provenance.Glob, 1),
+                        Tuple.Create("A", Operation.Remove, Provenance.Glob, 1)
+                    }
+                };
+            }
+        }
+        [Theory]
+        [MemberData(nameof(GetItemProvenanceShouldWorkWithEscapedCharactersTestData))]
+        public void GetItemProvenanceShouldWorkWithEscapedCharacters(string project, string provenanceArgument, ProvenanceResultTupleList expectedProvenance)
+        {
+            AssertProvenanceResult(expectedProvenance, project, provenanceArgument);
         }
 
         [Fact]

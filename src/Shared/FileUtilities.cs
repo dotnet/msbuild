@@ -56,6 +56,16 @@ namespace Microsoft.Build.Shared
         internal static readonly StringComparison PathComparison = StringComparison.OrdinalIgnoreCase;
 
         /// <summary>
+        /// Path.GetInvalidPathChars() clones the array, so caching the result here to avoid needless memory churn
+        /// </summary>
+        internal static char[] InvalidPathChars = Path.GetInvalidPathChars();
+
+        /// <summary>
+        /// Path.GetInvalidFileNameChars() clones the array, so caching the result here to avoid needless memory churn
+        /// </summary>
+        internal static char[] InvalidFileNameChars = Path.GetInvalidFileNameChars();
+
+        /// <summary>
         /// Retrieves the MSBuild runtime cache directory
         /// </summary>
         internal static string GetCacheDirectory()
@@ -571,46 +581,25 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string NormalizePathForComparisonNoThrow(string path, string currentDirectory)
         {
-            return GetFullPathNoThrow(path, currentDirectory).NormalizeForPathComparison();
-        }
-
-        /// <summary>
-        /// A variation of Path.GetFullPath that will return the input value 
-        /// instead of throwing any IO exception.
-        /// Useful to get a better path for an error message, without the risk of throwing
-        /// if the error message was itself caused by the path being invalid!
-        /// </summary>
-        internal static string GetFullPathNoThrow(string fileSpec, string currentDirectory)
-        {
-            var fullPath = fileSpec;
-
             // file is invalid, return early to avoid triggering an exception
-            if (IsInvalidPath(fullPath))
+            if (PathIsInvalid(path))
             {
-                return fullPath;
+                return path;
             }
 
-            try
-            {
-                fullPath = GetFullPath(fileSpec, currentDirectory);
-            }
-            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
-            {
-            }
-
-            return fullPath;
+            return GetFullPathNoThrow(Path.Combine(currentDirectory, path)).NormalizeForPathComparison();
         }
 
-        private static bool IsInvalidPath(string path)
+        private static bool PathIsInvalid(string path)
         {
-            if (path.IndexOfAny(Path.GetInvalidPathChars()) >= 0)
+            if (path.IndexOfAny(InvalidPathChars) >= 0)
             {
                 return true;
             }
 
             var filename = Path.GetFileName(path);
 
-            return filename.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0;
+            return filename.IndexOfAny(InvalidFileNameChars) >= 0;
         }
 
         /// <summary>
