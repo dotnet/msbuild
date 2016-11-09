@@ -9,7 +9,7 @@ using System;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 {
-    public class GivenThatIWantToMigrateAspNetTools : PackageDependenciesTestBase
+    public class GivenThatIWantToMigrateTools : PackageDependenciesTestBase
     {
         [Theory]
         [InlineData("Microsoft.EntityFrameworkCore.Tools", "Microsoft.EntityFrameworkCore.Tools", ConstantPackageVersions.AspNetToolsVersion)]
@@ -33,7 +33,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [InlineData("Microsoft.AspNetCore.Razor.Tools")]
         [InlineData("Microsoft.AspNetCore.Razor.Design")]
         [InlineData("Microsoft.VisualStudio.Web.CodeGeneration.Tools")]
-        public void It_does_not_migrate_asp_project_tool_dependency(string dependencyName)
+        [InlineData("dotnet-test-xunit")]
+        public void It_does_not_migrate_project_tool_dependency_that_is_no_longer_needed(string dependencyName)
         {
             var mockProj = RunPackageDependenciesRuleOnPj(@"
                 {
