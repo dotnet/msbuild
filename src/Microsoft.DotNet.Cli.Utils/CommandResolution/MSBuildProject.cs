@@ -124,7 +124,9 @@ namespace Microsoft.DotNet.Cli.Utils
             var lockFilePath = GetLockFilePathFromProjectLockFileProperty() ??
                 GetLockFilePathFromIntermediateBaseOutputPath();
 
-            return new LockFileFormat().Read(lockFilePath);
+            return new LockFileFormat()
+                .ReadWithLock(lockFilePath)
+                .Result;
         }
 
         private string GetLockFilePathFromProjectLockFileProperty()

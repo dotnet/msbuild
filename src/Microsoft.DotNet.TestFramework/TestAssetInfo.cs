@@ -220,8 +220,11 @@ namespace Microsoft.DotNet.TestFramework
             if (exitCode != 0)
             {
                 Console.WriteLine(commandResult.StdOut);
+
                 Console.WriteLine(commandResult.StdErr);
+
                 string message = string.Format($"TestAsset Build '{_assetName}' Failed with {exitCode}");
+                
                 throw new Exception(message);
             }
         }

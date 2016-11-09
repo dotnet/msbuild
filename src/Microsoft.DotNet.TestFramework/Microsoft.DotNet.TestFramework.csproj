@@ -21,6 +21,11 @@
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' != 'net46' ">
+    <PackageReference Include="System.IO.FileSystem.Primitives">
+      <Version>4.0.1</Version>
+    </PackageReference>
+  </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />

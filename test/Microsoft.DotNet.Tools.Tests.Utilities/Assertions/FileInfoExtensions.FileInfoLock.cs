@@ -11,19 +11,19 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 {
     public static partial class FileInfoExtensions
     {
-        public static FileInfoAssertions Should(this FileInfo file)
+        private class FileInfoLock : IDisposable
         {
-            return new FileInfoAssertions(file);
-        }
+            private FileStream _fileStream;
 
-        public static IDisposable Lock(this FileInfo subject)
-        {
-            return new FileInfoLock(subject);
-        }
+            public FileInfoLock(FileInfo fileInfo)
+            {
+                _fileStream = fileInfo.Open(FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+            }
 
-        public static IDisposable NuGetLock(this FileInfo subject)
-        {
-            return new FileInfoNuGetLock(subject);
+            public void Dispose()
+            {
+                _fileStream.Dispose();
+            }
         }
     }
 }

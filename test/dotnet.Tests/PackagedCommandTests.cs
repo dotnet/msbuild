@@ -221,6 +221,50 @@ namespace Microsoft.DotNet.Tests
             result.Should().Fail();        
         }
 
+        [Fact]
+        public void When_assets_file_is_in_use_Then_CLI_retries_launching_the_command_for_at_least_one_second()
+        {
+            var testInstance = TestAssets.Get("AppWithToolDependency")
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithRestoreFiles();
+
+            var assetsFile = testInstance.Root.GetDirectory("obj").GetFile("project.assets.json");
+
+            using (assetsFile.Lock()
+                             .DisposeAfter(TimeSpan.FromMilliseconds(1000)))
+            {
+                new PortableCommand()
+                    .WithWorkingDirectory(testInstance.Root)
+                    .ExecuteWithCapturedOutput()
+                    .Should().HaveStdOutContaining("Hello Portable World!" + Environment.NewLine)
+                        .And.NotHaveStdErr()
+                        .And.Pass();
+            }
+        }
+
+        [Fact]
+        public void When_assets_file_is_locked_by_NuGet_Then_CLI_retries_launching_the_command_for_at_least_one_second()
+        {
+            var testInstance = TestAssets.Get("AppWithToolDependency")
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithRestoreFiles();
+
+            var assetsFile = testInstance.Root.GetDirectory("obj").GetFile("project.assets.json");
+
+            using (assetsFile.NuGetLock()
+                             .DisposeAfter(TimeSpan.FromMilliseconds(1000)))
+            {
+                new PortableCommand()
+                    .WithWorkingDirectory(testInstance.Root)
+                    .ExecuteWithCapturedOutput()
+                    .Should().HaveStdOutContaining("Hello Portable World!" + Environment.NewLine)
+                        .And.NotHaveStdErr()
+                        .And.Pass();
+            }
+        }
+
         class HelloCommand : TestCommand
         {
             public HelloCommand()
