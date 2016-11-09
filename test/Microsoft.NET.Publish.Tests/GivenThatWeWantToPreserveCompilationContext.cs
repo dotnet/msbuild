@@ -12,6 +12,7 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
+using System.Xml.Linq;
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -24,7 +25,17 @@ namespace Microsoft.NET.Publish.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("CompilationContext", "PreserveCompilationContext")
-                .WithSource();
+                .WithSource()
+                .WithProjectChanges(project =>
+                {
+                    //  Workaround for https://github.com/dotnet/sdk/issues/367
+
+                    var ns = XNamespace.Get("http://schemas.microsoft.com/developer/msbuild/2003");
+                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").FirstOrDefault();
+                    propertyGroup.Should().NotBeNull();
+
+                    propertyGroup.Add(new XElement(ns + "DisableImplicitFrameworkReferences", "true"));
+                });
 
             testAsset.Restore("TestApp");
             testAsset.Restore("TestLibrary");

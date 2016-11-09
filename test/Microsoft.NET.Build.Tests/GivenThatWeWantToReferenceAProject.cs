@@ -119,6 +119,12 @@ namespace Microsoft.NET.Build.Tests
                 buildCommand = buildCommand.CaptureStdOut();
             }
 
+            //  Suppress ResolveAssemblyReference warning output due to https://github.com/Microsoft/msbuild/issues/1329
+            if (buildSucceeds && referencerProject.IsExe && referencerProject.ShortTargetFrameworkIdentifiers.Contains("net"))
+            {
+                buildCommand = buildCommand.CaptureStdOut();
+            }
+
             var result = buildCommand.Execute();
 
             if (buildSucceeds)

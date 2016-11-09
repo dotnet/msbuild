@@ -9,6 +9,7 @@ using Microsoft.NET.TestFramework.Commands;
 using Xunit;
 using FluentAssertions;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
+using Microsoft.NET.TestFramework.ProjectConstruction;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -108,6 +109,50 @@ namespace Microsoft.NET.Build.Tests
                 .Contain(
                     "AssemblyDescriptionAttribute",
                     $"PlatformTarget=x64");
+        }
+
+        [Fact]
+        public void It_includes_default_framework_references()
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
+            var testProject = new TestProject()
+            {
+                Name = "DefaultReferences",
+                TargetFrameworks = "net461",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            string sourceFile =
+@"using System;
+
+namespace DefaultReferences
+{
+    public class TestClass
+    {
+        public static void Main(string [] args)
+        {
+            var uri = new System.Uri(""http://github.com/dotnet/corefx"");
+            var currentProcess = System.Diagnostics.Process.GetCurrentProcess();
+        }
+    }
+}";
+            testProject.SourceFiles.Add("TestClass.cs", sourceFile);
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .Restore("DefaultReferences");
+
+            var buildCommand = new BuildCommand(Stage0MSBuild, Path.Combine(testAsset.TestRoot, "DefaultReferences"));
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
         }
 
         [Fact]

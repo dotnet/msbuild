@@ -23,6 +23,8 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
         public List<TestProject> ReferencedProjects { get; } = new List<TestProject>();
 
+        public Dictionary<string, string> SourceFiles { get; } = new Dictionary<string, string>();
+
         private static string GetShortTargetFrameworkIdentifier(string targetFramework)
         {
             int identifierLength = 0;
@@ -212,12 +214,14 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                 projectXml.Save(file);
             }
 
-            string source;
-
-            if (this.IsExe)
+            if (SourceFiles.Count == 0)
             {
-                source =
-@"using System;
+                string source;
+
+                if (this.IsExe)
+                {
+                    source =
+    @"using System;
 
 class Program
 {
@@ -226,19 +230,19 @@ class Program
         Console.WriteLine(""Hello World!"");
 ";
 
-                foreach (var dependency in this.ReferencedProjects)
-                {
-                    source += $"        Console.WriteLine({dependency.Name}.{dependency.Name}Class.Name);" + Environment.NewLine;
-                }
+                    foreach (var dependency in this.ReferencedProjects)
+                    {
+                        source += $"        Console.WriteLine({dependency.Name}.{dependency.Name}Class.Name);" + Environment.NewLine;
+                    }
 
-                source +=
-@"    }
+                    source +=
+    @"    }
 }";
-            }
-            else
-            {
-                source =
-$@"using System;
+                }
+                else
+                {
+                    source =
+    $@"using System;
 
 namespace {this.Name}
 {{
@@ -247,10 +251,18 @@ namespace {this.Name}
         public static string Name {{ get {{ return ""{this.Name}""; }} }}
     }}
 }}";
-            }
-            string sourcePath = Path.Combine(targetFolder, this.Name + ".cs");
+                }
+                string sourcePath = Path.Combine(targetFolder, this.Name + ".cs");
 
-            File.WriteAllText(sourcePath, source);
+                File.WriteAllText(sourcePath, source);
+            }
+            else
+            {
+                foreach (var kvp in SourceFiles)
+                {
+                    File.WriteAllText(Path.Combine(targetFolder, kvp.Key), kvp.Value);
+                }
+            }
         }
 
         public override string ToString()
