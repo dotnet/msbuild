@@ -2,11 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using NuGet.Configuration;
-using NuGet.Frameworks;
 using NuGet.ProjectModel;
 
 namespace Microsoft.NET.Build.Tasks
@@ -44,9 +41,9 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
-            LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(AssetsFilePath);
-            NuGetPathContext nugetPathContext = NuGetPathContext.Create(Path.GetDirectoryName(ProjectPath));
+            LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(AssetsFilePath);            
             IEnumerable<string> privateAssetsPackageIds = PackageReferenceConverter.GetPackageIds(PrivateAssetsPackageReferences);
+            IPackageResolver packageResolver = NuGetPackageResolver.CreateResolver(lockFile, ProjectPath);
 
             ProjectContext projectContext = lockFile.CreateProjectContext(
                 NuGetUtils.ParseFrameworkName(TargetFramework),
@@ -54,7 +51,7 @@ namespace Microsoft.NET.Build.Tasks
                 PlatformLibraryName);
 
             IEnumerable<ResolvedFile> resolvedAssemblies = 
-                new PublishAssembliesResolver(new NuGetPackageResolver(nugetPathContext))
+                new PublishAssembliesResolver(packageResolver)
                     .WithPrivateAssets(privateAssetsPackageIds)
                     .Resolve(projectContext);
 

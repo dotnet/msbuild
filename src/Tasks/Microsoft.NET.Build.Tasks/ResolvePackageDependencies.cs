@@ -131,8 +131,7 @@ namespace Microsoft.NET.Build.Tasks
             {
                 if (_packageResolver == null)
                 {
-                    NuGetPathContext nugetPathContext = NuGetPathContext.Create(Path.GetDirectoryName(ProjectPath));
-                    _packageResolver = new NuGetPackageResolver(nugetPathContext);
+                    _packageResolver = NuGetPackageResolver.CreateResolver(LockFile, ProjectPath);
                 }
 
                 return _packageResolver;
