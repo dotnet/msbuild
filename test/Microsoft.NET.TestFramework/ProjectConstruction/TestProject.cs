@@ -15,14 +15,28 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
         public bool IsExe { get; set; }
 
-        //  Apply to SDK Projects
-        public string TargetFramework { get; set; }
+        //  Applies to SDK Projects
         public string TargetFrameworks { get; set; }
 
         //  TargetFrameworkVersion applies to non-SDK projects
         public string TargetFrameworkVersion { get; set; }
 
         public List<TestProject> ReferencedProjects { get; } = new List<TestProject>();
+
+        private static string GetShortTargetFrameworkIdentifier(string targetFramework)
+        {
+            int identifierLength = 0;
+            for (; identifierLength < targetFramework.Length; identifierLength++)
+            {
+                if (!char.IsLetter(targetFramework[identifierLength]))
+                {
+                    break;
+                }
+            }
+
+            string identifier = targetFramework.Substring(0, identifierLength);
+            return identifier;
+        }
 
         public IEnumerable<string> ShortTargetFrameworkIdentifiers
         {
@@ -35,29 +49,9 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                     yield break;
                 }
 
-                string[] targetFrameworks;
-                if (!string.IsNullOrEmpty(TargetFramework))
+                foreach (var target in TargetFrameworks.Split(';'))
                 {
-                    targetFrameworks = new[] { TargetFramework };
-                }
-                else
-                {
-                    targetFrameworks = TargetFrameworks.Split(';');
-                }
-
-                foreach (var target in targetFrameworks)
-                {
-                    int identifierLength = 0;
-                    for (; identifierLength < target.Length; identifierLength++)
-                    {
-                        if (!char.IsLetter(target[identifierLength]))
-                        {
-                            break;
-                        }
-                    }
-
-                    string identifier = target.Substring(0, identifierLength);
-                    yield return identifier;
+                    yield return GetShortTargetFrameworkIdentifier(target);
                 }
             }
         }
@@ -115,32 +109,71 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                     .First();
             }
 
+            var targetFrameworks = IsSdkProject ? TargetFrameworks.Split(';') : new[] { "net" };
+
             if (IsSdkProject)
             {
-                if (this.TargetFramework != null)
-                {
-                    propertyGroup.Add(new XElement(ns + "TargetFramework", this.TargetFramework));
-                }
-                if (this.TargetFrameworks != null)
+                if (this.TargetFrameworks.Contains(";"))
                 {
                     propertyGroup.Add(new XElement(ns + "TargetFrameworks", this.TargetFrameworks));
                 }
-
-                if (this.IsExe)
-                {
-                    packageReferenceItemGroup.Add(new XElement(ns + "PackageReference",
-                            new XAttribute("Include", "Microsoft.NETCore.App"),
-                            new XAttribute("Version", "1.0.1")
-                        ));
-                }
                 else
                 {
-                    packageReferenceItemGroup.Add(new XElement(ns + "PackageReference",
-                            new XAttribute("Include", "NETStandard.Library"),
-                            new XAttribute("Version", "1.6.0")
-                        ));
+                    propertyGroup.Add(new XElement(ns + "TargetFramework", this.TargetFrameworks));
                 }
 
+                //  If there are any targets that aren't .NET Framework, add appropriate package reference
+                if (targetFrameworks.Any(identifier => !GetShortTargetFrameworkIdentifier(identifier).Equals("net", StringComparison.OrdinalIgnoreCase)))
+                {
+                    XElement packageReference;
+                    if (this.IsExe)
+                    {
+                        packageReference = new XElement(ns + "PackageReference",
+                                new XAttribute("Include", "Microsoft.NETCore.App"),
+                                new XAttribute("Version", "1.0.1")
+                            );
+                    }
+                    else
+                    {
+                        packageReference = new XElement(ns + "PackageReference",
+                                new XAttribute("Include", "NETStandard.Library"),
+                                new XAttribute("Version", "1.6.0")
+                            );
+                    }
+
+                    if (targetFrameworks.Any(identifier => GetShortTargetFrameworkIdentifier(identifier).Equals("net", StringComparison.OrdinalIgnoreCase)))
+                    {
+                        string condition = null;
+
+                        foreach (var target in targetFrameworks)
+                        {
+                            if (!GetShortTargetFrameworkIdentifier(target).Equals("net", StringComparison.OrdinalIgnoreCase))
+                            {
+                                if (condition == null)
+                                {
+                                    condition = "";
+                                }
+                                else
+                                {
+                                    condition += " Or ";
+                                }
+
+                                condition += $"'$(TargetFramework)' == '{target}'";
+                            }
+                        }
+
+                        packageReference.SetAttributeValue("Condition", condition);
+                    }
+
+                    packageReferenceItemGroup.Add(packageReference);
+                }
+
+                if (this.IsExe && targetFrameworks.Any(identifier => GetShortTargetFrameworkIdentifier(identifier).Equals("net", StringComparison.OrdinalIgnoreCase)))
+                {
+                    propertyGroup.Add(new XElement(ns + "RuntimeIdentifier", "win7-x86"));
+                }
+
+                //  Update SDK reference to the version under test
                 projectXml.Descendants(ns +"PackageReference")
                         .FirstOrDefault(pr => pr.Attribute("Include")?.Value == "Microsoft.NET.Sdk")
                         ?.Element(ns + "Version")
@@ -235,13 +268,9 @@ namespace {this.Name}
             {
                 ret.Append("Exe");
             }
-            if (!string.IsNullOrEmpty(TargetFramework))
-            {
-                ret.Append(TargetFramework);
-            }
             if (!string.IsNullOrEmpty(TargetFrameworks))
             {
-                ret.Append("(" + TargetFramework + ")");
+                ret.Append(TargetFrameworks);
             }
             if (!string.IsNullOrEmpty(TargetFrameworkVersion))
             {

@@ -142,14 +142,7 @@ namespace Microsoft.NET.Build.Tests
 
             if (isSdkProject)
             {
-                if (target.Contains(";"))
-                {
-                    ret.TargetFrameworks = target;
-                }
-                else
-                {
-                    ret.TargetFramework = target;
-                }
+                ret.TargetFrameworks = target;
             }
             else
             {
