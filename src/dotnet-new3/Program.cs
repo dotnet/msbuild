@@ -18,6 +18,8 @@ namespace dotnet_new3
     {
         public static int Main(string[] args)
         {
+            //Console.ReadLine();
+            
             CommandLineApplication app = new CommandLineApplication(false)
             {
                 Name = "dotnet new3",
@@ -125,7 +127,7 @@ namespace dotnet_new3
                 string aliasName = alias.HasValue() ? alias.Value() : null;
                 string fallbackName = new DirectoryInfo(Directory.GetCurrentDirectory()).Name;
 
-                if (await TemplateCreator.Instantiate(template.Value ?? "", name.Value(), fallbackName, dir.HasValue(), aliasName, parameters, skipUpdateCheck.HasValue()) == -1)
+                if (await TemplateCreator.InstantiateAsync(template.Value ?? "", name.Value(), fallbackName, dir.HasValue(), aliasName, parameters, skipUpdateCheck.HasValue()) == -1)
                 {
                     ListTemplates(template);
                     return -1;
@@ -289,17 +291,20 @@ namespace dotnet_new3
 
             foreach (string package in packages)
             {
-                if (package.Exists())
-                {
-                    TemplateCache.Scan(package);
-                }
-                else
-                {
-                    toInstall.Add(package);
-                }
+                string pkg = package.Trim();
+                pkg = Environment.ExpandEnvironmentVariables(pkg);
+
+                //if (package.Exists())
+                //{
+                    TemplateCache.Scan(pkg);
+                //}
+                //else
+                //{
+                //    toInstall.Add(package);
+                //}
             }
 
-            NuGetUtil.InstallPackage(toInstall, quiet);
+            //NuGetUtil.InstallPackage(toInstall, quiet);
 
             TemplateCache.WriteTemplateCaches();
 
