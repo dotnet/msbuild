@@ -1177,6 +1177,7 @@ namespace Microsoft.Build.Tasks
         public Microsoft.Build.Framework.ITaskItem File { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem[] Lines { get { throw null; } set { } }
         public bool Overwrite { get { throw null; } set { } }
+        public bool WriteOnlyWhenDifferent { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public override bool Execute() { throw null; }
     }
     public partial class XamlTaskFactory : Microsoft.Build.Framework.ITaskFactory
