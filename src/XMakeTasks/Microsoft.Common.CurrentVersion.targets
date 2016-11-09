@@ -3010,6 +3010,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       _GenerateCompileInputs;
       BeforeCompile;
       _TimeStampBeforeCompile;
+      _GenerateCompileDependencyCache;
       CoreCompile;
       _TimeStampAfterCompile;
       AfterCompile;
@@ -3162,6 +3163,31 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_AssemblyTimestampBeforeCompile>%(IntermediateAssembly.ModifiedTime)</_AssemblyTimestampBeforeCompile>
     </PropertyGroup>
 
+  </Target>
+
+  <!--
+    ============================================================
+                                        _GenerateCompileDependencyCache
+
+    Generate a file used to track compiler dependencies between incremental build
+    executions. This handles cases where items are added or removed from a glob (e.g.
+    <Compile Include="**\*.cs" />) and can't otherwise be detected with timestamp 
+    comparisons. The file contains a hash of compiler inputs that are known to 
+    contribute to incremental build inconsistencies.
+    ============================================================
+    -->
+  <Target Name="_GenerateCompileDependencyCache" DependsOnTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <CustomAdditionalCompileInputs Include="$(IntermediateOutputPath)CoreCompileInputs.cache" />
+      <CoreCompileCache Include="@(Compile->'%(FullPath)')" />
+      <CoreCompileCache Include="@(ReferencePath->'%(FullPath)')" />
+    </ItemGroup>
+
+    <Hash ItemsToHash="@(CoreCompileCache)">
+      <Output TaskParameter="HashResult" PropertyName="CoreCompileDependencyHash" />
+    </Hash>
+
+    <WriteLinesToFile Lines="$(CoreCompileDependencyHash)" File="$(IntermediateOutputPath)CoreCompileInputs.cache" Overwrite="True" WriteOnlyWhenDifferent="True" />
   </Target>
 
   <!--
