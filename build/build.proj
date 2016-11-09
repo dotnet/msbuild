@@ -36,13 +36,20 @@
 
     <Message Text="Restoring nuget packages" Importance="high" />
 
-    <Exec Command="$(DotNetTool) nuget restore %(DirectoryToNugetRestore.Identity) --legacy-packages-directory --verbosity Minimal"
+    <PropertyGroup>
+        <__NewLine><![CDATA[
+]]></__NewLine>
+        <__SetNuget_Packages Condition="'$(OS)' == 'Windows_NT'">set NUGET_PACKAGES=$(NuGet_Packages)</__SetNuget_Packages>
+        <__SetNuget_Packages Condition="'$(OS)' != 'Windows_NT'">export NUGET_PACKAGES=$(NuGet_Packages)</__SetNuget_Packages>
+    </PropertyGroup>
+
+    <Exec Command="$(__SetNuget_Packages)$(__NewLine)$(DotNetTool) nuget restore %(DirectoryToNugetRestore.Identity) --legacy-packages-directory --verbosity Minimal"
           WorkingDirectory="$(RepositoryRootDirectory)"
           />
 
 
     <!-- work around https://github.com/dotnet/sdk/issues/203 by passing in /p:SkipInvalidConfigurations=true /p:_InvalidConfigurationWarning=false -->
-    <Exec Command="$(DotNetTool) restore %(ProjectToDotnetRestore.Identity) /v:minimal /p:SkipInvalidConfigurations=true /p:_InvalidConfigurationWarning=false"
+    <Exec Command="$(__SetNuget_Packages)$(__NewLine)$(DotNetTool) restore %(ProjectToDotnetRestore.Identity) /v:minimal /p:SkipInvalidConfigurations=true /p:_InvalidConfigurationWarning=false"
           Condition="'$(BuildTemplates)' != 'true'"
           WorkingDirectory="$(RepositoryRootDirectory)"
           />
@@ -144,7 +151,9 @@
 
   </Target>
 
-  <Target Name="Build" DependsOnTargets="RestorePackages;BuildSolution;SignPackages;BuildNuGetPackages;BuildModernVsixPackages;Test" />
-  <Target Name="Rebuild" DependsOnTargets="RestorePackages;RebuildSolution;SignPackages;RebuildNuGetPackages;RebuildModernVsixPackages;Test" />
+  <Target Name="BuildWithoutTesting" DependsOnTargets="RestorePackages;BuildSolution;SignPackages;BuildNuGetPackages;BuildModernVsixPackages" />
+  <Target Name="RebuildWithoutTesting" DependsOnTargets="RestorePackages;RebuildSolution;SignPackages;RebuildNuGetPackages;RebuildModernVsixPackages" />
 
+  <Target Name="Build" DependsOnTargets="BuildWithoutTesting;Test" />
+  <Target Name="Rebuild" DependsOnTargets="RebuildWithoutTesting;Test" />
 </Project>
