@@ -34,17 +34,17 @@ namespace Microsoft.DotNet.Cli.Build
             {
                 var getTask = httpClient.GetStreamAsync(Uri);
 
-                using (var outStream = File.Create(DestinationPath))
+                try
                 {
-                    try
+                    using (var outStream = File.Create(DestinationPath))
                     {
                         getTask.Result.CopyTo(outStream);
                     }
-                    catch (Exception)
-                    {
-                        File.Delete(DestinationPath);
-                        throw;
-                    }
+                }
+                catch (Exception)
+                {
+                    File.Delete(DestinationPath);
+                    throw;
                 }
             }
 
