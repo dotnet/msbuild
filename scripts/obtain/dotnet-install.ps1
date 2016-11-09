@@ -144,7 +144,9 @@ function GetHTTPResponse([Uri] $Uri)
         else {
             $HttpClient = New-Object System.Net.Http.HttpClient
         }
-
+        # Default timeout for HttpClient is 100s.  For a 50 MB download this assumes 500 KB/s average, any less will time out
+        # 5 minutes allows it to work over much slower connections.
+        $HttpClient.Timeout = New-TimeSpan -Minutes 5 
         $Response = $HttpClient.GetAsync($Uri).Result
         if (($Response -eq $null) -or (-not ($Response.IsSuccessStatusCode)))
         {
