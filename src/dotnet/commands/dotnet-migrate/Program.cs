@@ -36,14 +36,14 @@ namespace Microsoft.DotNet.Tools.Migrate
                 " - a directory to migrate, it will recursively search for project.json files to migrate.",
                 "Defaults to current directory if nothing is specified."));
 
-            CommandOption template = app.Option("-t|--template-file", "Base MSBuild template to use for migrated app. The default is the project included in dotnet new", CommandOptionType.SingleValue);
-            CommandOption sdkVersion = app.Option("-v|--sdk-package-version", "The version of the sdk package that will be referenced in the migrated app. The default is the version of the sdk in dotnet new", CommandOptionType.SingleValue);
+            CommandOption template = app.Option("-t|--template-file", "Base MSBuild template to use for migrated app. The default is the project included in dotnet new.", CommandOptionType.SingleValue);
+            CommandOption sdkVersion = app.Option("-v|--sdk-package-version", "The version of the sdk package that will be referenced in the migrated app. The default is the version of the sdk in dotnet new.", CommandOptionType.SingleValue);
             CommandOption xprojFile = app.Option("-x|--xproj-file", "The path to the xproj file to use. Required when there is more than one xproj in a project directory.", CommandOptionType.SingleValue);
-            CommandOption skipProjectReferences = app.Option("-s|--skip-project-references", "Skip migrating project references. By default project references are migrated recursively", CommandOptionType.BoolValue);
-            
-            CommandOption reportFile = app.Option("-r|--report-file", "Output migration report to a file in addition to the console.", CommandOptionType.SingleValue);
-            CommandOption structuredReportOutput = app.Option("--format-report-file-json", "Output migration report file as json rather than user messages", CommandOptionType.BoolValue);
-            CommandOption skipBackup = app.Option("--skip-backup", "Skip moving project.json, global.json, and *.xproj to a `backup` directory after successful migration.", CommandOptionType.BoolValue); 
+            CommandOption skipProjectReferences = app.Option("-s|--skip-project-references", "Skip migrating project references. By default project references are migrated recursively.", CommandOptionType.BoolValue);
+
+            CommandOption reportFile = app.Option("-r|--report-file", "Output migration report to the given file in addition to the console.", CommandOptionType.SingleValue);
+            CommandOption structuredReportOutput = app.Option("--format-report-file-json", "Output migration report file as json rather than user messages.", CommandOptionType.BoolValue);
+            CommandOption skipBackup = app.Option("--skip-backup", "Skip moving project.json, global.json, and *.xproj to a `backup` directory after successful migration.", CommandOptionType.BoolValue);
 
             app.OnExecute(() =>
             {
