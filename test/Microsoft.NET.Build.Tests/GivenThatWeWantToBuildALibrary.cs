@@ -100,6 +100,10 @@ namespace Microsoft.NET.Build.Tests
                         {
                             if (!previousLine.Trim().Equals("</Import>", StringComparison.OrdinalIgnoreCase))
                             {
+                                //  MSBuild replaces "--" with "__" in the filenames, since a double hyphen isn't allowed in XML comments per the spec.
+                                //  This causes problems on the CI machines where the path includes "---".  So convert it back here.
+                                previousLine = previousLine.Replace("__", "--");
+
                                 expectedAllProjects.Add(previousLine);
                             }
                         }
