@@ -138,8 +138,9 @@ namespace Microsoft.NET.Build.Tests
             //  TODO: Uncomment the following lines when the following bugs are fixed:
             //          - https://github.com/Microsoft/msbuild/issues/1298
             //          - https://github.com/NuGet/Home/issues/3851
-            //          - https://github.com/dotnet/cli/issues/4571,
+            //          - https://github.com/dotnet/cli/issues/4571
             //          - https://github.com/dotnet/roslyn/issues/14870
+            //  Tracking bug in the SDK repo for this: https://github.com/dotnet/sdk/issues/380
 
             //intermediateProjectsFromProperty.Should().BeEquivalentTo(expectedIntermediateProjects);
             //builtinProjectsFromProperty.Should().BeEquivalentTo(expectedBuiltinProjects);
