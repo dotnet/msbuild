@@ -5,8 +5,8 @@
     <VersionPrefix>1.0.0</VersionPrefix>
     <TargetFrameworks>netcoreapp1.0</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">$(PackageTargetFallback);dnxcore50;portable-net45+win8</PackageTargetFallback>
     <OutputPath>bin\$(Configuration)</OutputPath>
+    <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">$(PackageTargetFallback);portable-net45+win8+wp8+wpa81</PackageTargetFallback> 
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="NETStandard.Library">
@@ -31,7 +31,7 @@
       <Version>4.0.11</Version>
     </PackageReference>
     <PackageReference Include="WindowsAzure.Storage">
-      <Version>6.2.2-preview</Version>
+      <Version>7.2.1</Version>
     </PackageReference>
     <PackageReference Include="NuGet.CommandLine.XPlat">
       <Version>4.0.0-rc-2048</Version>
