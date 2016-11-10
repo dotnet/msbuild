@@ -12,6 +12,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     <WarningLevel>4</WarningLevel>
     <NoWarn>1701;1702;1705</NoWarn>
   </PropertyGroup>

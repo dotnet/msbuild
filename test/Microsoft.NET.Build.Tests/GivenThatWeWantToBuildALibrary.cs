@@ -70,6 +70,83 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Fact]
+        public void All_props_and_targets_add_themselves_to_MSBuildAllTargets()
+        {
+            List<string> expectedAllProjects = new List<string>();
+            string baseIntermediateDirectory = null;
+
+            var allProjectsFromProperty = GetValuesFromTestLibrary("MSBuildAllProjects", getValuesCommand =>
+            {
+                baseIntermediateDirectory = getValuesCommand.GetBaseIntermediateDirectory().FullName;
+
+                string preprocessedFile = Path.Combine(getValuesCommand.GetOutputDirectory("netstandard1.5").FullName, "preprocessed.xml");
+
+                //  Preprocess the file, and then scan it to find all the project files that were imported.  The preprocessed output
+                //  includes comments with long lines of "======", between which is the import statement and then the path to the file
+                //  that was imported
+                getValuesCommand.Execute("/pp:" + preprocessedFile)
+                    .Should()
+                    .Pass();
+
+                string previousLine = null;
+                bool insideDelimiters = false;
+                int lineNumber = 0;
+                foreach (string line in File.ReadAllLines(preprocessedFile))
+                {
+                    lineNumber++;
+                    if (line.All(c => c == '=') && line.Length >= 80)
+                    {
+                        if (insideDelimiters)
+                        {
+                            if (!previousLine.Trim().Equals("</Import>", StringComparison.OrdinalIgnoreCase))
+                            {
+                                //  MSBuild replaces "--" with "__" in the filenames, since a double hyphen isn't allowed in XML comments per the spec.
+                                //  This causes problems on the CI machines where the path includes "---".  So convert it back here.
+                                previousLine = previousLine.Replace("__", "--");
+
+                                expectedAllProjects.Add(previousLine);
+                            }
+                        }
+                        insideDelimiters = !insideDelimiters;
+                    }
+
+                    previousLine = line;
+                }
+
+                File.Delete(preprocessedFile);
+            }, valueType: GetValuesCommand.ValueType.Property);
+
+            string dotnetRoot = Path.GetDirectoryName(RepoInfo.DotNetHostPath);
+
+            expectedAllProjects = expectedAllProjects.Distinct().ToList();
+
+            var expectedBuiltinProjects = expectedAllProjects.Where(project => project.StartsWith(dotnetRoot, StringComparison.OrdinalIgnoreCase)).ToList();
+            var expectedIntermediateProjects = expectedAllProjects.Where(project => project.StartsWith(baseIntermediateDirectory, StringComparison.OrdinalIgnoreCase)).ToList();
+            var expectedOtherProjects = expectedAllProjects
+                .Except(expectedBuiltinProjects)
+                .Except(expectedIntermediateProjects)
+                //  TODO: Remove this when https://github.com/NuGet/Home/issues/3851 is fixed
+                .Where(project => !Path.GetFileName(project).Equals("NuGet.Build.Tasks.Pack.targets", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            var builtinProjectsFromProperty = allProjectsFromProperty.Where(project => project.StartsWith(dotnetRoot, StringComparison.OrdinalIgnoreCase)).ToList();
+            var intermediateProjectsFromProperty = allProjectsFromProperty.Where(project => project.StartsWith(baseIntermediateDirectory, StringComparison.OrdinalIgnoreCase)).ToList();
+            var otherProjectsFromProperty = allProjectsFromProperty.Except(builtinProjectsFromProperty).Except(intermediateProjectsFromProperty).ToList();
+
+            otherProjectsFromProperty.Should().BeEquivalentTo(expectedOtherProjects);
+
+            //  TODO: Uncomment the following lines when the following bugs are fixed:
+            //          - https://github.com/Microsoft/msbuild/issues/1298
+            //          - https://github.com/NuGet/Home/issues/3851
+            //          - https://github.com/dotnet/cli/issues/4571
+            //          - https://github.com/dotnet/roslyn/issues/14870
+            //  Tracking bug in the SDK repo for this: https://github.com/dotnet/sdk/issues/380
+
+            //intermediateProjectsFromProperty.Should().BeEquivalentTo(expectedIntermediateProjects);
+            //builtinProjectsFromProperty.Should().BeEquivalentTo(expectedBuiltinProjects);
+        }
+
+        [Fact]
         public void It_ignores_excluded_folders()
         {
             Action<GetValuesCommand> setup = getValuesCommand =>
@@ -84,7 +161,7 @@ namespace Microsoft.NET.Build.Tests
                     "public class Class1 {}");
             };
 
-            var compileItems = GetItemsFromTestLibrary("Compile", setup);
+            var compileItems = GetValuesFromTestLibrary("Compile", setup);
 
             RemoveGeneratedCompileItems(compileItems);
 
@@ -114,7 +191,7 @@ namespace Microsoft.NET.Build.Tests
                     "public class Class1 {}");
             };
 
-            var compileItems = GetItemsFromTestLibrary("Compile", setup, "/p:DisableDefaultRemoves=true");
+            var compileItems = GetValuesFromTestLibrary("Compile", setup, new[] { "/p:DisableDefaultRemoves=true" }, GetValuesCommand.ValueType.Item);
 
             RemoveGeneratedCompileItems(compileItems);
 
@@ -149,21 +226,27 @@ namespace Microsoft.NET.Build.Tests
             }
         }
 
-        private List<string> GetItemsFromTestLibrary(string itemType, Action<GetValuesCommand> setup, params string[] msbuildArgs)
+        private List<string> GetValuesFromTestLibrary(string itemTypeOrPropertyName, Action<GetValuesCommand> setup = null, string[] msbuildArgs = null,
+            GetValuesCommand.ValueType valueType = GetValuesCommand.ValueType.Item, [CallerMemberName] string callingMethod = "")
         {
+            msbuildArgs = msbuildArgs ?? Array.Empty<string>();
+
             string targetFramework = "netstandard1.5";
 
             var testAsset = _testAssetsManager
-                .CopyTestAsset("AppWithLibrary")
+                .CopyTestAsset("AppWithLibrary", callingMethod)
                 .WithSource()
                 .Restore(relativePath: "TestLibrary");
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
             var getValuesCommand = new GetValuesCommand(Stage0MSBuild, libraryProjectDirectory,
-                targetFramework, itemType, GetValuesCommand.ValueType.Item);
+                targetFramework, itemTypeOrPropertyName, valueType);
 
-            setup(getValuesCommand);
+            if (setup != null)
+            {
+                setup(getValuesCommand);
+            }
 
             getValuesCommand
                 .Execute(msbuildArgs)

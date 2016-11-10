@@ -11,6 +11,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" InitialTargets="CheckRuntimeIdentifier">
 
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+  </PropertyGroup>
+  
   <!-- Determine PlatformTarget (if not already set) from runtime identifier. -->
   <Choose>
     <When Condition="'$(PlatformTarget)' != '' or '$(RuntimeIdentifier)' == ''" />
