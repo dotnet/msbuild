@@ -14,7 +14,7 @@
             DependsOnTargets="SetupNuGetPackagesArchiveInputsOutputs;
                               SetupAzureBlobInformation;
                               GenerateNuGetPackagesArchive"
-            Condition=" 'UploadNuGetPackagesArchiveToAzure' == 'true' And  '$(PUBLISH_TO_AZURE_BLOB)' != '' ">
+            Condition=" '$(UploadNuGetPackagesArchiveToAzure)' == 'true' And  '$(PUBLISH_TO_AZURE_BLOB)' != '' ">
       <ItemGroup>
         <NuGetPackagesArchiveToUpload Include="$(IntermediateArchive)" />
       </ItemGroup>
