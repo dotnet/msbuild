@@ -56,14 +56,33 @@ namespace Microsoft.Build.Shared
         internal static readonly StringComparison PathComparison = StringComparison.OrdinalIgnoreCase;
 
         /// <summary>
-        /// Path.GetInvalidPathChars() clones the array, so caching the result here to avoid needless memory churn
+        /// Copied from https://github.com/dotnet/corefx/blob/056715ff70e14712419d82d51c8c50c54b9ea795/src/Common/src/System/IO/PathInternal.Windows.cs#L61
+        /// MSBuild should support the union of invalid path chars across the supported OSes, so builds can have the same behaviour crossplatform: https://github.com/Microsoft/msbuild/issues/781#issuecomment-243942514
         /// </summary>
-        internal static char[] InvalidPathChars = Path.GetInvalidPathChars();
+
+        internal static char[] InvalidPathChars => new char[]
+        {
+            '|', '\0',
+            (char)1, (char)2, (char)3, (char)4, (char)5, (char)6, (char)7, (char)8, (char)9, (char)10,
+            (char)11, (char)12, (char)13, (char)14, (char)15, (char)16, (char)17, (char)18, (char)19, (char)20,
+            (char)21, (char)22, (char)23, (char)24, (char)25, (char)26, (char)27, (char)28, (char)29, (char)30,
+            (char)31
+        };
 
         /// <summary>
-        /// Path.GetInvalidFileNameChars() clones the array, so caching the result here to avoid needless memory churn
+        /// Copied from https://github.com/dotnet/corefx/blob/387cf98c410bdca8fd195b28cbe53af578698f94/src/System.Runtime.Extensions/src/System/IO/Path.Windows.cs#L18
+        /// MSBuild should support the union of invalid path chars across the supported OSes, so builds can have the same behaviour crossplatform: https://github.com/Microsoft/msbuild/issues/781#issuecomment-243942514
         /// </summary>
-        internal static char[] InvalidFileNameChars = Path.GetInvalidFileNameChars();
+        internal static char[] InvalidFileNameChars => new char[]
+        {
+            '\"', '<', '>', '|', '\0',
+            (char)1, (char)2, (char)3, (char)4, (char)5, (char)6, (char)7, (char)8, (char)9, (char)10,
+            (char)11, (char)12, (char)13, (char)14, (char)15, (char)16, (char)17, (char)18, (char)19, (char)20,
+            (char)21, (char)22, (char)23, (char)24, (char)25, (char)26, (char)27, (char)28, (char)29, (char)30,
+            (char)31, ':', '*', '?', '\\', '/'
+        };
+
+        private static readonly char[] Slashes = { '/', '\\' };
 
         /// <summary>
         /// Retrieves the MSBuild runtime cache directory
@@ -389,7 +408,7 @@ namespace Microsoft.Build.Shared
             // have no slashes.
             if (NativeMethodsShared.IsWindows || string.IsNullOrEmpty(value) ||
                 value.StartsWith("$(") || value.StartsWith("@(") || value.StartsWith("\\\\") ||
-                value.IndexOfAny(new[] { '/', '\\' }) == -1)
+                value.IndexOfAny(Slashes) == -1)
             {
                 return value;
             }
@@ -561,7 +580,6 @@ namespace Microsoft.Build.Shared
         /// <returns></returns>
         internal static bool ComparePathsNoThrow(string first, string second, string currentDirectory)
         {
-
             // perf: try comparing the bare strings first
             if (string.Equals(first, second, PathComparison))
             {
@@ -587,7 +605,10 @@ namespace Microsoft.Build.Shared
                 return path;
             }
 
-            return GetFullPathNoThrow(Path.Combine(currentDirectory, path)).NormalizeForPathComparison();
+            var normalizedPath = path.NormalizeForPathComparison();
+            var fullPath = GetFullPathNoThrow(Path.Combine(currentDirectory, normalizedPath));
+
+            return fullPath;
         }
 
         private static bool PathIsInvalid(string path)
@@ -597,9 +618,18 @@ namespace Microsoft.Build.Shared
                 return true;
             }
 
-            var filename = Path.GetFileName(path);
+            var filename = GetFileName(path);
 
             return filename.IndexOfAny(InvalidFileNameChars) >= 0;
+        }
+
+        // Path.GetFileName does not react well to malformed filenames.
+        // For example, Path.GetFileName("a/b/foo:bar") returns bar instead of foo:bar
+        // It also throws exceptions on illegal path characters
+        private static string GetFileName(string path)
+        {
+            var lastDirectorySeparator = path.LastIndexOfAny(Slashes);
+            return lastDirectorySeparator >= 0 ? path.Substring(lastDirectorySeparator + 1) : path;
         }
 
         /// <summary>

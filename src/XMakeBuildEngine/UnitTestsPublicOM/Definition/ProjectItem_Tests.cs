@@ -491,20 +491,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             "%61",
             new string[0],
             new string[0])]
-        // items as strings: include with escaped wildcard and non-escaped wildcard matches exclude with escaped wildcard and non-escaped wildcard. Both are treated as values and not as globs
-        [InlineData(ItemWithIncludeAndExclude,
-            @"**/a%2Axb",
-            @"**/a%2Axb",
-            new string[0],
-            new string[0])]
         // items as files: non-escaped wildcard include matches escaped non-wildcard character
         [InlineData(ItemWithIncludeAndExclude,
             "a?b",
             "a%40b",
             new[] { "acb", "a@b" },
             new[] { "acb" })]
-       // items as files: non-escaped non-wildcard include matches escaped non-wildcard character
-       [InlineData(ItemWithIncludeAndExclude,
+        // items as files: non-escaped non-wildcard include matches escaped non-wildcard character
+        [InlineData(ItemWithIncludeAndExclude,
            "acb;a@b",
            "a%40b",
            new string[0],
@@ -521,22 +515,47 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             "a%40?b",
             new[] { "a@b", "a@ab", "a@bb" },
             new[] { "a@b" })]
-       // items as files: non-escaped recursive wildcard include matches escaped recursive wildcard exclude
-       [InlineData(ItemWithIncludeAndExclude,
+        // items as files: non-escaped recursive wildcard include matches escaped recursive wildcard exclude
+        [InlineData(ItemWithIncludeAndExclude,
            @"**\a*b",
            @"**\a*%78b",
            new[] { "aab", "aaxb", @"dir\abb", @"dir\abxb" },
            new[] { "aab", @"dir\abb" })]
         // items as files: include with non-escaped glob does not match exclude with escaped wildcard character.
-        // The exclude is treated as a literal and only matches against non-glob include fragments (i.e., against values and item references). %2A is *
+        // The exclude is treated as a literal, not a glob, and therefore should not match the input files
         [InlineData(ItemWithIncludeAndExclude,
-            @"**\a*b;**\a%2Axb",
+            @"**\a*b",
             @"**\a%2Axb",
             new[] { "aab", "aaxb", @"dir\abb", @"dir\abxb" },
             new[] { "aab", "aaxb", @"dir\abb", @"dir\abxb" })]
         public void IncludeExcludeWithEscapedCharacters(string projectContents, string includeString, string excludeString, string[] inputFiles, string[] expectedInclude)
         {
             TestIncludeExcludeWithDifferentSlashes(projectContents, includeString, excludeString, inputFiles, expectedInclude);
+        }
+
+        [Theory]
+        // items as strings: include with both escaped and unescaped glob should be treated as literal and therefore not match against files as a glob
+        [InlineData(ItemWithIncludeAndExclude,
+            @"**\a%2Axb",
+            @"foo",
+            new[] { "aab", "aaxb", @"dir\abb", @"dir\abxb" },
+            new[] { @"**\a*xb" })]
+        // Include with both escaped and unescaped glob does not match exclude with escaped wildcard character which has a different slash orientation
+        // The presence of the escaped and unescaped glob should make things behave as strings-which-are-not-paths and not as strings-which-are-paths
+        [InlineData(ItemWithIncludeAndExclude,
+            @"**\a%2Axb",
+            @"**/a%2Axb",
+            new string[0],
+            new[] { @"**\a*xb" })]
+        // Slashes are not normalized when contents is not a path
+        [InlineData(ItemWithIncludeAndExclude,
+            @"a/b/foo::||bar;a/b/foo::||bar/;a/b/foo::||bar\;a/b\foo::||bar",
+            @"a/b/foo::||bar",
+            new string[0],
+            new [] { "a/b/foo::||bar/", @"a/b/foo::||bar\", @"a/b\foo::||bar" })]
+        public void IncludeExcludeWithNonPathContents(string projectContents, string includeString, string excludeString, string[] inputFiles, string[] expectedInclude)
+        {
+            TestIncludeExclude(projectContents, inputFiles, expectedInclude, includeString, excludeString, normalizeSlashes: false);
         }
 
         [Theory]
