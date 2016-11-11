@@ -115,9 +115,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         // ProjectJson Script Set Name to 
         private static Dictionary<string, TargetHookInfo> ScriptSetToMSBuildHookTargetMap => new Dictionary<string, TargetHookInfo>()
         {
-            { "precompile",  new TargetHookInfo(true, "Build") },
+            { "precompile",  new TargetHookInfo(true, "BeforeBuild") },
             { "postcompile", new TargetHookInfo(false, "Build") },
-            { "prepublish",  new TargetHookInfo(true, "Publish") },
+            { "prepublish",  new TargetHookInfo(true, "PrepareForPublish") },
             { "postpublish", new TargetHookInfo(false, "Publish") }
         };
 

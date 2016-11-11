@@ -53,8 +53,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Theory]
-        [InlineData("precompile", "Build")]
-        [InlineData("prepublish", "Publish")]
+        [InlineData("precompile", "BeforeBuild")]
+        [InlineData("prepublish", "PrepareForPublish")]
         public void Migrating_pre_scripts_populates_BeforeTargets_with_appropriate_target(string scriptName, string targetName)
         {
             var scriptMigrationRule = new MigrateScriptsRule();
