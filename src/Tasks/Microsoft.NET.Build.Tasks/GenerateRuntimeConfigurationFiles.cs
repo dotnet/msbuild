@@ -38,6 +38,14 @@ namespace Microsoft.NET.Build.Tasks
 
         public string UserRuntimeConfig { get; set; }
 
+        List<ITaskItem> _filesWritten = new List<ITaskItem>();
+
+        [Output]
+        public ITaskItem[] FilesWritten
+        {
+            get { return _filesWritten.ToArray(); }
+        }
+
         protected override void ExecuteCore()
         {
             LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(AssetsFilePath);
@@ -63,6 +71,7 @@ namespace Microsoft.NET.Build.Tasks
             AddUserRuntimeOptions(config.RuntimeOptions);
 
             WriteToJsonFile(RuntimeConfigPath, config);
+            _filesWritten.Add(new TaskItem(RuntimeConfigPath));
         }
 
         private void AddFramework(RuntimeOptions runtimeOptions, ProjectContext projectContext)
@@ -105,6 +114,7 @@ namespace Microsoft.NET.Build.Tasks
             AddAdditionalProbingPaths(devConfig.RuntimeOptions, projectContext);
 
             WriteToJsonFile(RuntimeConfigDevPath, devConfig);
+            _filesWritten.Add(new TaskItem(RuntimeConfigDevPath));
         }
 
         private void AddAdditionalProbingPaths(RuntimeOptions runtimeOptions, ProjectContext projectContext)

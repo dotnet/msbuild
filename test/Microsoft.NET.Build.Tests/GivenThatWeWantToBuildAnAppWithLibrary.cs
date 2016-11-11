@@ -12,6 +12,9 @@ using Microsoft.NET.TestFramework.Commands;
 using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using FluentAssertions;
+using System.Xml.Linq;
+using System.Linq;
+using System;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -133,6 +136,50 @@ namespace Microsoft.NET.Build.Tests
 
                 commandResult.Should().HaveStdOutContaining(val);
             }
+        }
+        [Fact]
+        public void The_clean_target_removes_all_files_from_the_output_folder()
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("AppWithLibrary")
+                .WithSource()
+                .Restore("TestApp");
+
+            var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
+
+            var buildCommand = new BuildCommand(Stage0MSBuild, appProjectDirectory);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp1.0");
+
+            outputDirectory.Should().OnlyHaveFiles(new[] {
+                "TestApp.dll",
+                "TestApp.pdb",
+                "TestApp.deps.json",
+                "TestApp.runtimeconfig.dev.json",
+                "TestApp.runtimeconfig.json",
+                "TestLibrary.dll",
+                "TestLibrary.pdb"
+            });
+
+            var cleanCommand = Stage0MSBuild.CreateCommandForTarget("Clean", buildCommand.FullPathProjectFile);
+
+            cleanCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            outputDirectory.Should().OnlyHaveFiles(Array.Empty<string>());
+
         }
     }
 }
