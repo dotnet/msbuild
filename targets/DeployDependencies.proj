@@ -94,12 +94,17 @@
       <DestinationFolder>$(DeploymentDir)</DestinationFolder>
       <TestDeploymentDir>$(TestDeploymentDir)</TestDeploymentDir>
     </RuntimeProjectJson>
+    <RuntimeProjectJson Include="$(MSBuildThisFileDirectory)roslyn\project.json">
+      <LockFile>$(MSBuildThisFileDirectory)roslyn\project.lock.json</LockFile>
+      <DestinationFolder>$(DeploymentDir)\Roslyn</DestinationFolder>
+      <TestDeploymentDir>$(TestDeploymentDir)\Roslyn</TestDeploymentDir>
+    </RuntimeProjectJson>
   </ItemGroup>
 
   <Target Name="RestoreRuntimePackages"
           Inputs="$(DnuToolPath);$(RuntimeProjectJson)"
           Outputs="@(RuntimeProjectJson->'%(LockFile)')">
-    <Exec Command="$(DnuRestoreCommand) &quot;%(RuntimeProjectJson->FullPath)&quot;" StandardOutputImportance="Low" />
+    <Exec Command="$(DnuRestoreCommand) &quot;%(RuntimeProjectJson.FullPath)&quot;" StandardOutputImportance="Low" />
 
     <!-- It appears that NuGet doesn't re-write the project.lock.json file if the contents would be the same. This can mess up incremental builds
         if you make a non-significant change to project.json.  To avoid that, update the timestamp of the lock file here. -->
