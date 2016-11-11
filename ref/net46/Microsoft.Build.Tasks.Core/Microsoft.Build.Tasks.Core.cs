@@ -655,6 +655,15 @@ namespace Microsoft.Build.Tasks
         public string TargetSDKVersion { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public override bool Execute() { throw null; }
     }
+    public partial class Hash : Microsoft.Build.Tasks.TaskExtension
+    {
+        public Hash() { }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public string HashResult { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        [Microsoft.Build.Framework.RequiredAttribute]
+        public Microsoft.Build.Framework.ITaskItem[] ItemsToHash { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public override bool Execute() { throw null; }
+    }
     [System.Runtime.InteropServices.GuidAttribute("00020401-0000-0000-C000-000000000046")]
     [System.Runtime.InteropServices.InterfaceTypeAttribute((System.Runtime.InteropServices.ComInterfaceType)(1))]
     public partial interface IFixedTypeInfo
