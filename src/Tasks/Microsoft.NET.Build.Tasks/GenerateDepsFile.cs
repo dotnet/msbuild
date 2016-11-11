@@ -55,6 +55,14 @@ namespace Microsoft.NET.Build.Tasks
 
         public ITaskItem[] PrivateAssetsPackageReferences { get; set; }
 
+        List<ITaskItem> _filesWritten = new List<ITaskItem>();
+
+        [Output]
+        public ITaskItem[] FilesWritten
+        {
+            get { return _filesWritten.ToArray(); }
+        }
+
         protected override void ExecuteCore()
         {
             LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(AssetsFilePath);
@@ -94,6 +102,8 @@ namespace Microsoft.NET.Build.Tasks
             {
                 writer.Write(dependencyContext, fileStream);
             }
+            _filesWritten.Add(new TaskItem(DepsFilePath));
+
         }
     }
 }

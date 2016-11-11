@@ -70,6 +70,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="GenerateBuildDependencyFile"
           DependsOnTargets="_DefaultMicrosoftNETPlatformLibrary"
+          BeforeTargets="_CheckForCompileOutputs"
           Condition=" '$(GenerateDependencyFile)' == 'true'"
           Inputs="$(ProjectAssetsFile)"
           Outputs="$(ProjectDepsFilePath)">
@@ -90,7 +91,10 @@ Copyright (c) .NET Foundation. All rights reserved.
                       ReferenceSatellitePaths="@(ReferenceSatellitePaths)"
                       RuntimeIdentifier="$(RuntimeIdentifier)"
                       PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
-                      CompilerOptions="@(DependencyFileCompilerOptions)" />
+                      CompilerOptions="@(DependencyFileCompilerOptions)">
+
+      <Output TaskParameter="FilesWritten" ItemName="FileWrites" />
+    </GenerateDepsFile>
 
   </Target>
 
@@ -104,6 +108,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="GenerateBuildRuntimeConfigurationFiles"
           DependsOnTargets="_DefaultMicrosoftNETPlatformLibrary"
+          BeforeTargets="_CheckForCompileOutputs"
           Condition=" '$(GenerateRuntimeConfigurationFiles)' == 'true'"
           Inputs="$(ProjectAssetsFile);$(UserRuntimeConfig)"
           Outputs="$(ProjectRuntimeConfigFilePath);$(ProjectRuntimeConfigDevFilePath)">
@@ -114,7 +119,10 @@ Copyright (c) .NET Foundation. All rights reserved.
                                        RuntimeConfigDevPath="$(ProjectRuntimeConfigDevFilePath)"
                                        RuntimeIdentifier="$(RuntimeIdentifier)"
                                        PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
-                                       UserRuntimeConfig="$(UserRuntimeConfig)" />
+                                       UserRuntimeConfig="$(UserRuntimeConfig)">
+      
+      <Output TaskParameter="FilesWritten" ItemName="FileWrites" />
+    </GenerateRuntimeConfigurationFiles>
 
   </Target>
 
