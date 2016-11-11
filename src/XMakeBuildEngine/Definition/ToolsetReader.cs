@@ -631,7 +631,7 @@ namespace Microsoft.Build.Evaluation
         {
             if (0 == String.Compare(property.Name, ReservedPropertyNames.toolsPath, StringComparison.OrdinalIgnoreCase))
             {
-                toolsPath = ExpandPropertyLeaveEscaped(property, expander);
+                toolsPath = ExpandPropertyUnescaped(property, expander);
                 toolsPath = ExpandRelativePathsRelativeToExeLocation(toolsPath);
 
                 if (accumulateProperties)
@@ -646,7 +646,7 @@ namespace Microsoft.Build.Evaluation
             }
             else if (0 == String.Compare(property.Name, ReservedPropertyNames.binPath, StringComparison.OrdinalIgnoreCase))
             {
-                binPath = ExpandPropertyLeaveEscaped(property, expander);
+                binPath = ExpandPropertyUnescaped(property, expander);
                 binPath = ExpandRelativePathsRelativeToExeLocation(binPath);
 
                 if (accumulateProperties)
@@ -668,7 +668,7 @@ namespace Microsoft.Build.Evaluation
             else
             {
                 // It's an arbitrary property
-                property.Value = ExpandPropertyLeaveEscaped(property, expander);
+                property.Value = ExpandPropertyUnescaped(property, expander);
 
                 SetProperty(property, properties, globalProperties);
 
@@ -688,11 +688,11 @@ namespace Microsoft.Build.Evaluation
         /// Expands the given unexpanded property expression using the properties in the
         /// given expander.
         /// </summary>
-        private string ExpandPropertyLeaveEscaped(ToolsetPropertyDefinition property, Expander<ProjectPropertyInstance, ProjectItemInstance> expander)
+        private string ExpandPropertyUnescaped(ToolsetPropertyDefinition property, Expander<ProjectPropertyInstance, ProjectItemInstance> expander)
         {
             try
             {
-                return expander.ExpandIntoStringLeaveEscaped(property.Value, ExpanderOptions.ExpandProperties, property.Source);
+                return expander.ExpandIntoStringAndUnescape(property.Value, ExpanderOptions.ExpandProperties, property.Source);
             }
             catch (InvalidProjectFileException ex)
             {
