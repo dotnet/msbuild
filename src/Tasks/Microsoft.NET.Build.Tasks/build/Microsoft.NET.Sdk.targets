@@ -131,6 +131,16 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   </Target>
 
+  <!-- Add runtimeconfig.json file to BuiltProjectOutputGroupOutput, so that it will get included in the NuGet package by the Pack target -->
+  <Target Name="AddRuntimeConfigFileToBuiltProjectOutputGroupOutput"
+          Condition=" '$(GenerateRuntimeConfigurationFiles)' == 'true'"
+          BeforeTargets="BuiltProjectOutputGroup"
+          DependsOnTargets="GenerateBuildRuntimeConfigurationFiles">
+    <ItemGroup>
+      <BuiltProjectOutputGroupOutput Include="$(ProjectRuntimeConfigFilePath)" FinalOutputPath="$(ProjectRuntimeConfigFilePath)" />
+    </ItemGroup>
+  </Target>
+
   <!--
     ============================================================
                                         DefaultRuntimeHostConfigurationOptions
