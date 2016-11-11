@@ -7,6 +7,7 @@ using System.Linq;
 using Microsoft.Build.Construction;
 using System.Collections.Immutable;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -54,7 +55,7 @@ namespace Microsoft.Build.Evaluation
 
                     if (excludePatterns.Any())
                     {
-                        excludeTester = new Lazy<Func<string, bool>>(() => EngineFileUtilities.GetMatchTester(excludePatterns, _rootDirectory));
+                        excludeTester = new Lazy<Func<string, bool>>(() => EngineFileUtilities.GetFileSpecMatchTester(excludePatterns, _rootDirectory));
                     }
                 }
 
@@ -84,7 +85,7 @@ namespace Microsoft.Build.Evaluation
                         string value = ((ValueFragment)fragment).ItemSpecFragment;
 
                         if (excludeTester == null ||
-                            !excludeTester.Value(value))
+                            !excludeTester.Value(EscapingUtilities.UnescapeAll(value)))
                         {
                             var item = _itemFactory.CreateItem(value, value, _itemElement.ContainingProject.FullPath);
                             itemsToAdd.Add(item);
