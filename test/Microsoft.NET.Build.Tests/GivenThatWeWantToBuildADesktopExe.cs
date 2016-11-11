@@ -122,7 +122,8 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "DefaultReferences",
-                TargetFrameworks = "net461",
+                //  TODO: Add net35 to the TargetFrameworks list once https://github.com/Microsoft/msbuild/issues/1333 is fixed
+                TargetFrameworks = "net40;net45;net461",
                 IsSdkProject = true,
                 IsExe = true
             };
@@ -149,9 +150,12 @@ namespace DefaultReferences
             var buildCommand = new BuildCommand(Stage0MSBuild, Path.Combine(testAsset.TestRoot, "DefaultReferences"));
 
             buildCommand
+                .CaptureStdOut()
                 .Execute()
                 .Should()
-                .Pass();
+                .Pass()
+                .And
+                .NotHaveStdOutMatching("Could not resolve this reference", System.Text.RegularExpressions.RegexOptions.CultureInvariant | System.Text.RegularExpressions.RegexOptions.IgnoreCase);
 
         }
 

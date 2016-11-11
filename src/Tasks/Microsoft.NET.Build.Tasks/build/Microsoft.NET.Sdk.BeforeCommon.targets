@@ -68,20 +68,21 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- For .NET Framework, reference core assemblies -->
 
   <PropertyGroup>
-    <_TargetFrameworkVersionSegmentCount>$(TargetFrameworkVersion.Split('.').Length)</_TargetFrameworkVersionSegmentCount>
-    <_TargetFrameworkMajorVersion>$(TargetFrameworkVersion.Split('.')[0])</_TargetFrameworkMajorVersion>
-    <_TargetFrameworkMajorVersion Condition="$(_TargetFrameworkMajorVersion.StartsWith('v'))">$(TargetFrameworkVersion.Substring(1))</_TargetFrameworkMajorVersion>
-    <_TargetFrameworkMinorVersion Condition="$(_TargetFrameworkVersionSegmentCount) > 1">$(TargetFrameworkVersion.Split('.')[1])</_TargetFrameworkMinorVersion>
+    <_TargetFrameworkVersionWithoutV>$(TargetFrameworkVersion)</_TargetFrameworkVersionWithoutV>
+    <_TargetFrameworkVersionWithoutV Condition="$(TargetFrameworkVersion.StartsWith('v'))">$(TargetFrameworkVersion.Substring(1))</_TargetFrameworkVersionWithoutV>
   </PropertyGroup>
   
   <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Reference Include="System"/>
     <Reference Include="System.Core"/>
-    <Reference Include="System.Xml.Linq"/>
-    <Reference Include="System.Data.DataSetExtensions"/>
-    <Reference Include="Microsoft.CSharp"/>
     <Reference Include="System.Data"/>
-    <Reference Include="System.Net.Http" Condition="($(_TargetFrameworkMajorVersion) > 4) Or ($(_TargetFrameworkMajorVersion) == 4 And $(_TargetFrameworkMinorVersion) >= 5)"/>
+    <Reference Include="System.Drawing"/>
+    <Reference Include="System.IO.Compression.FileSystem" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>
+    <Reference Include="System.IO.Compression" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>
+    <Reference Include="System.Net.Http" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>
+    <Reference Include="System.Numerics" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.0' "/>
+    <Reference Include="System.Runtime.Serialization"/>
+    <Reference Include="System.Xml.Linq"/>
     <Reference Include="System.Xml"/>
   </ItemGroup>
 
