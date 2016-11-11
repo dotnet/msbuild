@@ -34,6 +34,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [InlineData("Microsoft.AspNetCore.Razor.Design")]
         [InlineData("Microsoft.VisualStudio.Web.CodeGeneration.Tools")]
         [InlineData("dotnet-test-xunit")]
+        [InlineData("dotnet-test-mstest")]
         public void It_does_not_migrate_project_tool_dependency_that_is_no_longer_needed(string dependencyName)
         {
             var mockProj = RunPackageDependenciesRuleOnPj(@"
