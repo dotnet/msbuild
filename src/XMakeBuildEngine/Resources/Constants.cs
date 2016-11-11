@@ -44,7 +44,6 @@ namespace Microsoft.Build.Internal
         internal const string buildNodeCount = "MSBuildNodeCount";
         internal const string lastTaskResult = "MSBuildLastTaskResult";
         internal const string extensionsPathSuffix = "MSBuild";
-        internal const string appLocalExtensionsPathSuffix = "Extensions";
         internal const string userExtensionsPathSuffix = "Microsoft\\MSBuild";
         internal const string programFiles32 = "MSBuildProgramFiles32";
         internal const string localAppData = "LocalAppData";
