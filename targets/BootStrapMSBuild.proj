@@ -46,13 +46,13 @@
       <InstalledNuGetFiles Include="$(MSBuildExtensionsPath)\Microsoft\NuGet\*" />
 
       <FreshlyBuiltBinaries Include="$(DeploymentDir)**\*.dll" />
-      <FreshlyBuiltBinaries Include="$(DeploymentDir)*.exe" />
-      <FreshlyBuiltBinaries Include="$(DeploymentDir)*.pdb" />
-      <FreshlyBuiltBinaries Include="$(DeploymentDir)*.exe.config" />
+      <FreshlyBuiltBinaries Include="$(DeploymentDir)**\*.exe" />
+      <FreshlyBuiltBinaries Include="$(DeploymentDir)**\*.pdb" />
+      <FreshlyBuiltBinaries Include="$(DeploymentDir)**\*.exe.config" />
 
-      <FreshlyBuiltProjects Include="$(DeploymentDir)*props" />
-      <FreshlyBuiltProjects Include="$(DeploymentDir)*targets" />
-      <FreshlyBuiltProjects Include="$(DeploymentDir)*tasks" />
+      <FreshlyBuiltProjects Include="$(DeploymentDir)**\*props" />
+      <FreshlyBuiltProjects Include="$(DeploymentDir)**\*targets" />
+      <FreshlyBuiltProjects Include="$(DeploymentDir)**\*tasks" />
     </ItemGroup>
 
     <!-- Copy in props and targets from the machine-installed MSBuildExtensionsPath -->
@@ -74,7 +74,7 @@
 
     <!-- Copy our freshly-built props and targets, overwriting anything we copied from the machine -->
     <Copy SourceFiles="@(FreshlyBuiltProjects)"
-          DestinationFolder="$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin" />
+          DestinationFiles="@(FreshlyBuiltProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
   <Target Name="BootstrapNetCore">
