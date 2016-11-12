@@ -15,11 +15,6 @@ namespace StreamForwarderTests
     {
         private static readonly string s_rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
 
-        public static void Main()
-        {
-            Console.WriteLine("Dummy Entrypoint");
-        }
-
         public static IEnumerable<object[]> ForwardingTheoryVariations
         {
             get

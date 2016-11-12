@@ -4,7 +4,6 @@
 using System;
 using Microsoft.DotNet.Cli.Utils;
 using System.Runtime.InteropServices;
-using Microsoft.DotNet.ProjectModel;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {

@@ -2,7 +2,6 @@
 using System.IO;
 using System.Collections.Generic;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using System.Runtime.InteropServices;
 using Xunit;

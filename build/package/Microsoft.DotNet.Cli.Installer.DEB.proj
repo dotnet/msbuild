@@ -92,10 +92,9 @@
       <Exec Command="sudo dpkg -i $(SdkInstallerFile)" />
 
       <!-- Run E2E -->
-      <DotNetTest WorkingDirectory="$(EndToEndTestDirectory)"
+      <DotNetTest ProjectPath="$(EndToEndTestProject)"
                   EnvironmentVariables="@(TestSdkDebTaskEnvironmentVariables)"
-                  ToolPath="$(Stage0PjDirectory)"
-                  Xml="$(DebianTestResultsXmlFile)" />
+                  ToolPath="$(Stage0Directory)" />
 
       <!-- Clean up Packages -->
       <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" />

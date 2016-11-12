@@ -7,7 +7,6 @@ using System.IO.Compression;
 using System.Linq;
 using System.Xml.Linq;
 using FluentAssertions;
-using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 

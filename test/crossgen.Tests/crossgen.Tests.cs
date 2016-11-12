@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection.PortableExecutable;
-using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using FluentAssertions;
 using Xunit;
@@ -62,7 +61,7 @@ namespace Microsoft.DotNet.Tests
 
         private static string FindDotnetDirInPath()
         {
-            string dotnetExecutable = $"dotnet{FileNameSuffixes.CurrentPlatform.Exe}";
+            string dotnetExecutable = $"dotnet{Microsoft.DotNet.Cli.Utils.FileNameSuffixes.CurrentPlatform.Exe}";
             foreach (string path in (Environment.GetEnvironmentVariable("PATH") ?? "").Split(Path.PathSeparator))
             {
                 string dotnetPath = Path.Combine(path, dotnetExecutable);

@@ -11,12 +11,11 @@
   <UsingTask TaskName="DotNetTest" AssemblyFile="$(CLIBuildDllPath)" />
 
   <Target Name="RunTest">
-    <DotNetTest WorkingDirectory="$(WorkingDirectory)"
-                EnvironmentVariables="$(EnvironmentVariables)"
+    <DotNetTest EnvironmentVariables="$(EnvironmentVariables)"
                 ToolPath="$(ToolPath)"
                 Configuration="$(Configuration)"
                 NoBuild="True"
-                NoTrait="category=failing"
-                Xml="$(TestResultXmlDir)/$(TestProjectName)-testResults.xml" />
+                Logger="trx"
+                ProjectPath="$(TestProject)" />
   </Target>
 </Project>

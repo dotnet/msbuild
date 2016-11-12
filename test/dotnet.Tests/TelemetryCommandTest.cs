@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Tests
         {
             MockTelemetry mockTelemetry = new MockTelemetry();
             string[] args = { "help" };
-            Program.ProcessArgs(args, mockTelemetry);
+            Microsoft.DotNet.Cli.Program.ProcessArgs(args, mockTelemetry);
             Assert.Equal(mockTelemetry.EventName, args[0]);
         }
     }

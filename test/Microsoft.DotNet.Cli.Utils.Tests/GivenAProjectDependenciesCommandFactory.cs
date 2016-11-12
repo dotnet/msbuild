@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using FluentAssertions;
-using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using NuGet.Frameworks;

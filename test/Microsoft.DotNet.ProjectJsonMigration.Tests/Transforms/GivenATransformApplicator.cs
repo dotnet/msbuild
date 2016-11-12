@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.Build.Construction;
 using Xunit;
-using Xunit.Runner.DotNet;
 using FluentAssertions;
 using System.Linq;
 using Microsoft.DotNet.ProjectJsonMigration.Models;

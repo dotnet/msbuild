@@ -12,14 +12,14 @@ namespace Microsoft.DotNet.Cli.Build
 
         protected override string Args
         {
-            get { return $"{GetConfiguration()} {GetNoBuild()} {GetXml()} {GetNoTrait()}"; }
+            get { return $"{GetProjectPath()} {GetConfiguration()} {GetLogger()} {GetNoBuild()}"; }
         }
 
         public string Configuration { get; set; }
 
-        public string Xml { get; set; }
+        public string Logger { get; set; }
 
-        public string NoTrait { get; set; }
+        public string ProjectPath { get; set; }
 
         public bool NoBuild { get; set; }
 
@@ -33,31 +33,31 @@ namespace Microsoft.DotNet.Cli.Build
             return null;
         }
 
-        private string GetNoTrait()
+        private string GetLogger()
         {
-            if (!string.IsNullOrEmpty(Configuration))
+            if (!string.IsNullOrEmpty(Logger))
             {
-                return $"-notrait {NoTrait}";
+                return $"--logger:{Logger}";
             }
 
             return null;
         }
 
-        private string GetXml()
+        private string GetProjectPath()
         {
-            if (!string.IsNullOrEmpty(Xml))
+            if (!string.IsNullOrEmpty(ProjectPath))
             {
-                return $"-xml {Xml}";
+                return $"{ProjectPath}";
             }
 
             return null;
         }
-
+        
         private string GetNoBuild()
         {
             if (NoBuild)
             {
-                return "--no-build";
+                return "--noBuild";
             }
 
             return null;

@@ -135,7 +135,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 .AllEvaluatedProperties
                 .Where(p => p.Name.Equals("ProjectAssetsFile"))
                 .Select(p => p.EvaluatedValue)
-                .FirstOrDefault(p => File.Exists(p));
+                .FirstOrDefault(p => Path.IsPathRooted(p) && File.Exists(p));
         }
 
         private string GetLockFilePathFromIntermediateBaseOutputPath()
