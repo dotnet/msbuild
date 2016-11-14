@@ -1,4 +1,5 @@
-﻿<package>
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>$id$</id>
     <version>$version$</version>
@@ -16,13 +17,13 @@
       <files include="**" buildAction="None" copyToOutput="true" flatten="false" />
     </contentFiles>
     <dependencies>
-      <group targetFramework="netstandard1.5">
+      <group targetFramework=".NETStandard1.5">
         <dependency id="Microsoft.Build" version="[$version$]" />
         <dependency id="Microsoft.Build.Framework" version="[$version$]" />
         <dependency id="Microsoft.Build.Tasks.Core" version="[$version$]" />
         <dependency id="Microsoft.Build.Utilities.Core" version="[$version$]" />
       </group>
-      <group targetFramework="net46">
+      <group targetFramework=".NETFramework4.6">
         <dependency id="Microsoft.Build" version="[$version$]" />
         <dependency id="Microsoft.Build.Framework" version="[$version$]" />
         <dependency id="Microsoft.Build.Tasks.Core" version="[$version$]" />

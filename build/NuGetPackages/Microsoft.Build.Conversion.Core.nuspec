@@ -1,4 +1,5 @@
-﻿<package>
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>$id$</id>
     <version>$version$</version>
@@ -13,7 +14,7 @@
     <tags>MSBuild</tags>
     <copyright>Copyright © Microsoft Corporation</copyright>
     <dependencies>
-      <group targetFramework="net46">
+      <group targetFramework=".NETFramework4.6">
         <dependency id="Microsoft.Build" version="[$version$]" />
         <dependency id="Microsoft.Build.Engine" version="[$version$]" />
       </group>
