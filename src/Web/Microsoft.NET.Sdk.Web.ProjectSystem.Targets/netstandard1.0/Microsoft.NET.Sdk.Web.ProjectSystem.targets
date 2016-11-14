@@ -40,10 +40,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- Core web globbing patterns -->
   <ItemGroup>
-    <Content Include="wwwroot\**">
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-    <Folder Include="wwwroot" />
     <Content Include="**\*.cshtml" Exclude="wwwroot\**\*.cshtml">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
@@ -89,7 +85,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </Content>
     <Content Include="**\*.coffee" Exclude="wwwroot\**\*.coffee"/>
     <Content Include="**\*.iced" Exclude="wwwroot\**\*.iced"/>
-    <None Include=".bowerrc"/>
+    <None Include="**\.bowerrc"/>
 
     <!-- Markup -->
     <Content Include="**\*.htm" Exclude="wwwroot\**\*.htm">
@@ -129,6 +125,10 @@ Copyright (c) .NET Foundation. All rights reserved.
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
     <Content Include="**\*.svgz" Exclude="wwwroot\**\*.svgz">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+
+    <Content Include="wwwroot\**">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
 
