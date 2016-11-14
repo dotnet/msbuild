@@ -16,32 +16,38 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 -->
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <!-- For .net core projects, we use the csc.exe bundled with msbuild -->
-    <PropertyGroup Condition="$(TargetFramework.StartsWith('netcoreapp'))">
-        <CscToolPath Condition="'$(CscToolPath)' == ''">$(MSBuildBinPath)\</CscToolPath>
+    <Choose>
+        <When Condition="$(TargetFramework.StartsWith('netcoreapp')) or $(TargetFramework.StartsWith('netstandard'))">
+            <!-- For .net core and netstandard projects, we use the csc.exe bundled with msbuild -->
+            <PropertyGroup>
+                <CscToolPath Condition="'$(CscToolPath)' == ''">$(MSBuildBinPath)\</CscToolPath>
 
-        <!-- Writing full pdbs is not supported on !windows platforms, so use portable
-             format instead -->
-        <DebugType Condition="'$(OS)' != 'Windows_NT'">portable</DebugType>
-    </PropertyGroup>
+                <!-- Writing full pdbs is not supported on !windows platforms, so use portable
+                     format instead -->
+                <DebugType Condition="'$(OS)' != 'Windows_NT'">portable</DebugType>
+            </PropertyGroup>
+        </When>
 
-    <!-- For any non-.net core project, we default to using mcs instead of csc -->
-    <PropertyGroup Condition="!$(TargetFramework.StartsWith('netcoreapp'))">
-        <!-- Using _CscToolExeTmp instead of CscToolExe directly here, as we don't want to override it
-             for !mono case -->
-        <_CscToolExeTmp Condition="'$(CscToolExe)' != ''">$(CscToolExe)</_CscToolExeTmp>
-        <_CscToolExeTmp Condition="'$(CscToolExeTmp)' == '' and '$(MSBuildRuntimeType)' == 'Mono'">mcs.exe</_CscToolExeTmp>
+        <Otherwise>
+            <!-- For any non-.net core or netstandard project, we default to using mcs instead of csc -->
+            <PropertyGroup>
+                <!-- Using _CscToolExeTmp instead of CscToolExe directly here, as we don't want to override it
+                     for !mono case -->
+                <_CscToolExeTmp Condition="'$(CscToolExe)' != ''">$(CscToolExe)</_CscToolExeTmp>
+                <_CscToolExeTmp Condition="'$(CscToolExeTmp)' == '' and '$(MSBuildRuntimeType)' == 'Mono'">mcs.exe</_CscToolExeTmp>
 
-        <CscDebugFileExt Condition="'$(CscDebugFileExt)' == '' and ('$(_CscToolExeTmp)' == 'mcs' or '$(_CscToolExeTmp)' == 'mcs.exe')">.mdb</CscDebugFileExt>
-        <_DebugFileExt Condition="'$(CscDebugFileExt)' != ''">$(CscDebugFileExt)</_DebugFileExt>
+                <CscDebugFileExt Condition="'$(CscDebugFileExt)' == '' and ('$(_CscToolExeTmp)' == 'mcs' or '$(_CscToolExeTmp)' == 'mcs.exe')">.mdb</CscDebugFileExt>
+                <_DebugFileExt Condition="'$(CscDebugFileExt)' != ''">$(CscDebugFileExt)</_DebugFileExt>
 
-        <!-- Select a default C# compiler here, if unspecified, instead of in the Csc task, so that we can also
-             decide on the debug extension to be used. Don't do this for the roslyn/csc case as it depends on the
-             default being "unset".
-             -->
-        <CscToolExe Condition="'$(CscToolExe)' == '' and '$(MSBuildRuntimeType)' == 'Mono'">mcs.exe</CscToolExe>
-        <CscToolPath Condition="'$(CscToolPath)' == '' and '$(MSBuildRuntimeType)' == 'Mono'">$(MSBuildFrameworkToolsPath)\</CscToolPath>
+                <!-- Select a default C# compiler here, if unspecified, instead of in the Csc task, so that we can also
+                     decide on the debug extension to be used. Don't do this for the roslyn/csc case as it depends on the
+                     default being "unset".
+                     -->
+                <CscToolExe Condition="'$(CscToolExe)' == '' and '$(MSBuildRuntimeType)' == 'Mono'">mcs.exe</CscToolExe>
+                <CscToolPath Condition="'$(CscToolPath)' == '' and '$(MSBuildRuntimeType)' == 'Mono'">$(MSBuildFrameworkToolsPath)\</CscToolPath>
 
-        <UseSharedCompilation Condition="'$(UseSharedCompilation)' == '' and '$(MSBuildRuntimeType)' == 'Mono'">false</UseSharedCompilation>
-    </PropertyGroup>
+                <UseSharedCompilation Condition="'$(UseSharedCompilation)' == '' and '$(MSBuildRuntimeType)' == 'Mono'">false</UseSharedCompilation>
+            </PropertyGroup>
+        </Otherwise>
+    </Choose>
 </Project>
