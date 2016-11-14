@@ -172,7 +172,8 @@
     <Message Text="Skipping projects with .noautobuild files:" />
     <Message Text="%(NoAutoBuildDesktopTestAssetProjects.FullPath)" />
 
-    <DotNetBuild  Configuration="$(Configuration)"
+    <DotNetBuild  Condition="'@(BuildableDesktopTestAssetProjects)' != ''"
+                  Configuration="$(Configuration)"
                   Framework="net46"
                   ProjectPath="%(BuildableDesktopTestAssetProjects.FullPath)"
                   ToolPath="$(Stage0PjDirectory)" />
@@ -197,39 +198,75 @@
   </Target>
 
   <Target Name="CreateTestAssetPackageNuPkgs"
-          DependsOnTargets="BuildTestAssetPackageProjects;
+          DependsOnTargets="CreateTestAssetPackageNuPkgsFromProjectJsons;
+                            CreateTestAssetPackageNuPkgsFromMsbuildProjects;">
+  </Target>
+  
+  <Target Name="CreateTestAssetPackageNuPkgsFromProjectJsons"
+          DependsOnTargets="BuildTestAssetPackageJsonProjects;
                             SetupTestPackageProjectData;"
           Inputs="%(TestPackageProject.PackInputs)"
           Outputs="%(TestPackageProject.PackOutputs)">
 
-    <DotNetPackPj BuildBasePath="$(TestPackagesBuildDir)"
+    <DotNetPackPj Condition="'%(TestPackageProject.IsMsbuild)' != 'True'"
+                  BuildBasePath="$(TestPackagesBuildDir)"
                   NoBuild="True"
                   Output="$(TestPackagesDir)"
                   ProjectPath="%(TestPackageProject.FullPath)"
                   ToolPath="$(Stage0PjDirectory)"
                   VersionSuffix="%(TestPackageProject.VersionSuffix)" />
   </Target>
+  
+  <Target Name="CreateTestAssetPackageNuPkgsFromMsbuildProjects"
+          DependsOnTargets="RestoreTestAssetPackageMsbuildProjects;
+                            SetupTestPackageProjectData;">
+    <DotNetPack Condition="'@(TestPackageCsProj)' != ''"
+                Output="$(TestPackagesDir)"
+                Runtime="%(TestPackageCsProj.Runtime)"
+                ToolPath="$(Stage2Directory)"
+                VersionSuffix="%(TestPackageCsProj.VersionSuffix)"
+                WorkingDirectory="%(TestPackageCsProj.WorkingDirectory)" />
+  </Target>
 
-  <Target Name="BuildTestAssetPackageProjects"
-          DependsOnTargets="RestoreTestAssetPackageProjects;
+  <Target Name="BuildTestAssetPackageJsonProjects"
+          DependsOnTargets="RestoreTestAssetPackageJsonProjects;
                             SetupTestPackageProjectData;"
           Inputs="%(TestPackageProject.BuildInputs)"
           Outputs="%(TestPackageProject.BuildOutputs)">
-
-    <DotNetBuildPj  BuildBasePath="$(TestPackagesBuildDir)"
+    <DotNetBuildPj  Condition="'%(TestPackageProject.IsMsbuild)' != 'True'"
+                    BuildBasePath="$(TestPackagesBuildDir)"
                     Framework="%(TestPackageProject.Framework)"
                     ProjectPath="%(TestPackageProject.FullPath)"
                     ToolPath="$(Stage0PjDirectory)" />
   </Target>
 
-  <Target Name="RestoreTestAssetPackageProjects"
+  <Target Name="PrepareTestAssetPackageMsbuildProjects">
+    <ItemGroup>
+      <TestPackageCsProj Condition="'%(TestPackageProject.IsMsbuild)' == 'True'"
+                         Include="@(TestPackageProject)">
+        <Framework>%(TestPackageProject.Framework)</Framework>
+        <Runtime>%(TestPackageProject.Runtime)</Runtime>
+        <VersionSuffix>rc-%(TestPackageProject.VersionSuffix)</VersionSuffix>
+        <WorkingDirectory>%(TestPackageProject.FullPath)</WorkingDirectory>
+      </TestPackageCsProj>
+    </ItemGroup>
+  </Target>
+  
+  <Target Name="RestoreTestAssetPackageJsonProjects"
           DependsOnTargets="PrepareTests;
                             SetupRestoreTestAssetPackageProjectsInputs;"
           Inputs="@(RestoreTestAssetPackageProjectsInputs)"
           Outputs="@(RestoreTestAssetPackageProjectsInputs->'%(RelativeDir)/project.lock.json')">
-
     <DotNetRestorePJ  ToolPath="$(Stage0PjDirectory)"
                       WorkingDirectory="$(RepoRoot)/TestAssets/TestPackages/" />
+  </Target>
+
+  <Target Name="RestoreTestAssetPackageMsbuildProjects"
+          DependsOnTargets="PrepareTestAssetPackageMsbuildProjects">
+    <DotNetRestore Condition="'@(TestPackageCsProj)' != ''"
+                   ToolPath="$(Stage2Directory)"
+                   Runtime="%(TestPackageCsProj.Runtime)"
+                   WorkingDirectory="%(TestPackageCsProj.WorkingDirectory)" />
   </Target>
 
   <Target Name="SetupRestoreTestAssetPackageProjectsInputs"

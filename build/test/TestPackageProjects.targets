@@ -109,11 +109,13 @@
                           Condition=" '$(IsDesktopAvailable)' == 'True' ">
         <Name>dotnet-desktop-binding-redirects</Name>
         <IsTool>True</IsTool>
+        <IsMsbuild>True</IsMsbuild>
         <IsApplicable>$(DesktopAvailable)</IsApplicable>
         <VersionPrefix>1.0.0-rc-</VersionPrefix>
         <VersionSuffix>$(TestPackageBuildVersionSuffix)</VersionSuffix>
         <Clean>True</Clean>
         <Frameworks>net451</Frameworks>
+        <Runtime>win7-x86</Runtime>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-hello/v1/dotnet-hello">
         <Name>dotnet-hello</Name>

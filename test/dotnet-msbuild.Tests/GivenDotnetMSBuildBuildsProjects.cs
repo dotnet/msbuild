@@ -80,13 +80,17 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [Fact]
         public void WhenTelemetryIsEnabledTheLoggerIsAddedToTheCommandLine()
         {
-            string[] allArgs = GetArgsForMSBuild(() => true);
+            Telemetry telemetry;
+            string[] allArgs = GetArgsForMSBuild(() => true, out telemetry);
+            // telemetry will still be disabled if environmental variable is set
+            if (telemetry.Enabled)
+            {
+                allArgs.Should().NotBeNull();
 
-            allArgs.Should().NotBeNull();
-
-            allArgs.Should().Contain(
-                value => value.IndexOf("/Logger", StringComparison.OrdinalIgnoreCase) >= 0,
-                "The MSBuild logger argument should be specified when telemetry is enabled.");
+                allArgs.Should().Contain(
+                    value => value.IndexOf("/Logger", StringComparison.OrdinalIgnoreCase) >= 0,
+                    "The MSBuild logger argument should be specified when telemetry is enabled.");
+            }
         }
 
         [Fact]
@@ -103,7 +107,13 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
         private string[] GetArgsForMSBuild(Func<bool> sentinelExists)
         {
-            Telemetry telemetry = new Telemetry(new MockNuGetCacheSentinel(sentinelExists));
+            Telemetry telemetry;
+            return GetArgsForMSBuild(sentinelExists, out telemetry);
+        }
+
+        private string[] GetArgsForMSBuild(Func<bool> sentinelExists, out Telemetry telemetry)
+        {
+            telemetry = new Telemetry(new MockNuGetCacheSentinel(sentinelExists));
 
             MSBuildForwardingApp msBuildForwardingApp = new MSBuildForwardingApp(Enumerable.Empty<string>());
 

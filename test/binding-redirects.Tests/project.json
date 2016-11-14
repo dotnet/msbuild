@@ -5,18 +5,18 @@
     "dotnet-test-xunit": "1.0.0-rc2-350904-49",
     "Microsoft.NETCore.Platforms": "1.0.1",
     "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000933",
-    "Microsoft.DotNet.Tools.Tests.Utilities": {
-      "target": "project"
-    }
+    "Microsoft.DotNet.Cli.Utils": { "target": "project" },
+    "Microsoft.DotNet.Tools.Tests.Utilities": { "target": "project" }
   },
   "frameworks": {
-    "net46": {
-      "frameworkAssemblies": {
-        "System.Configuration": ""
-      },
+    "netcoreapp1.0": {
       "dependencies": {
         "System.Console": "4.0.0"
-      }
+      },
+      "imports": [
+        "dotnet5.4",
+        "portable-net451+win8"
+      ]
     }
   },
   "runtimes": {

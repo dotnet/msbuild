@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         protected override string Args
         {
-            get { return $"{GetProjectPath()} {GetConfiguration()} {GetNoBuild()} {GetOutput()} {GetVersionSuffix()}"; }
+            get { return $"{GetProjectPath()} {GetConfiguration()} {GetNoBuild()} {GetOutput()} {GetVersionSuffix()} {GetRuntime()}"; }
         }
 
         public string Configuration { get; set; }
@@ -24,6 +24,8 @@ namespace Microsoft.DotNet.Cli.Build
         public string ProjectPath { get; set; }
 
         public string VersionSuffix { get; set; }
+        
+        public string Runtime { get; set; }
 
         private string GetConfiguration()
         {
@@ -70,6 +72,16 @@ namespace Microsoft.DotNet.Cli.Build
             if (!string.IsNullOrEmpty(VersionSuffix))
             {
                 return $"--version-suffix {VersionSuffix}";
+            }
+
+            return null;
+        }
+        
+        private string GetRuntime()
+        {
+            if (!string.IsNullOrEmpty(Runtime))
+            {
+                return $"/p:RuntimeIdentifier={Runtime}";
             }
 
             return null;

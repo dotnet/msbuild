@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.IO;
-using Microsoft.DotNet.InternalAbstractions;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using NuGet.Frameworks;
@@ -17,46 +17,36 @@ namespace Microsoft.DotNet.BindingRedirects.Tests
         private const string AppWithoutConfig = "AppWithRedirectsNoConfig";
 
         private string _Runtime = RuntimeEnvironmentRidExtensions.GetLegacyRestoreRuntimeIdentifier();
-        private string _desktopProjectsRoot = Path.Combine(RepoRoot, "TestAssets", "DesktopTestProjects");
-        private string _buildRelativePath;
         private string _appWithConfigProjectRoot;
-        private string _appWithConfigBuildDir;
-        private string _appWithConfigPublishDir;
         private string _appWithoutConfigProjectRoot;
-        private string _appWithoutConfigBuildDir;
-        private string _appWithoutConfigPublishDir;
-        private TestInstance _testInstance;
+        private TestAssetInstance _testInstance;
 
         public string AppWithConfigProjectRoot { get { return _appWithConfigProjectRoot; } }
-        public string AppWithConfigBuildOutput { get; }
-        public string AppWithConfigPublishOutput { get; }
         public string AppWithoutConfigProjectRoot { get { return _appWithoutConfigProjectRoot; } }
-        public string AppWithoutConfigBuildOutput { get; }
-        public string AppWithoutConfigPublishOutput { get; }
 
         public TestSetupFixture()
         {
-            _buildRelativePath = Path.Combine("bin", Config, Framework.GetShortFolderName(), _Runtime);
-            var testAssetsMgr = new TestAssetsManager(_desktopProjectsRoot);
-            _testInstance = testAssetsMgr.CreateTestInstance("BindingRedirectSample")
-                                         .WithLockFiles();
+            _testInstance = TestAssets.Get("DesktopTestProjects", "BindingRedirectSample")
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithNuGetConfig(new RepoDirectoriesProvider().TestPackages);
 
-            Setup(AppWithConfig, ref _appWithConfigProjectRoot, ref _appWithConfigBuildDir, ref _appWithConfigPublishDir);
-            Setup(AppWithoutConfig, ref _appWithoutConfigProjectRoot, ref _appWithoutConfigBuildDir, ref _appWithoutConfigPublishDir);
-
-            AppWithConfigBuildOutput = Path.Combine(_appWithConfigBuildDir, AppWithConfig + ".exe");
-            AppWithConfigPublishOutput = Path.Combine(_appWithConfigPublishDir, AppWithConfig + ".exe");
-            AppWithoutConfigBuildOutput = Path.Combine(_appWithoutConfigBuildDir, AppWithoutConfig + ".exe");
-            AppWithoutConfigPublishOutput = Path.Combine(_appWithoutConfigPublishDir, AppWithoutConfig + ".exe");
+            _appWithConfigProjectRoot = Setup(AppWithConfig);
+            _appWithoutConfigProjectRoot = Setup(AppWithoutConfig);
         }
 
-        private void Setup(string project, ref string projectDir, ref string buildDir, ref string publishDir)
+        private string Setup(string project)
         {
-            projectDir = Path.Combine(_testInstance.TestRoot, project);
-            buildDir = Path.Combine(projectDir, _buildRelativePath);
-            publishDir = Path.Combine(projectDir, "publish");
+            string projectDir = Path.Combine(_testInstance.Root.FullName, project);
+            string publishDir = Path.Combine(projectDir, "publish");
 
-            var buildCommand = new BuildCommand()
+            new RestoreCommand()
+                .WithWorkingDirectory(projectDir)
+                .WithRuntime(_Runtime)
+                .ExecuteWithCapturedOutput()
+                .Should().Pass();
+
+            new BuildCommand()
                 .WithWorkingDirectory(projectDir)
                 .WithFramework(Framework)
                 .WithRuntime(_Runtime)
@@ -70,6 +60,8 @@ namespace Microsoft.DotNet.BindingRedirects.Tests
                 .WithRuntime(_Runtime)
                 .Execute()
                 .Should().Pass();
+
+            return projectDir;
         }
     }
 }

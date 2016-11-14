@@ -16,6 +16,8 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         private NuGetFramework _framework;
 
+        private string _runtime;
+
         private bool _noDependencies;
 
         private DirectoryInfo _outputPath;
@@ -31,7 +33,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         public override CommandResult Execute(string args = "")
         {
-            args = $"build {GetNoDependencies()} {GetProjectFile()} {GetOutputPath()} {GetConfiguration()} {GetFramework()} {args}";
+            args = $"build {GetNoDependencies()} {GetProjectFile()} {GetOutputPath()} {GetConfiguration()} {GetFramework()} {GetRuntime()} {args}";
 
             if (_workingDirectory != null)
             {
@@ -72,6 +74,13 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         public BuildPJCommand WithFramework(NuGetFramework framework)
         {
             _framework = framework;
+
+            return this;
+        }
+
+        public BuildPJCommand WithRuntime(string runtime)
+        {
+            _runtime = runtime;
 
             return this;
         }
@@ -129,6 +138,16 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             }
 
             return $"--framework {_framework.GetShortFolderName()}";
+        }
+
+        private string GetRuntime()
+        {
+            if (_runtime == null)
+            {
+                return null;
+            }
+
+            return $"--runtime {_runtime}";
         }
 
         private string GetNoDependencies()

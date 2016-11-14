@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         protected override string Args
         {
-            get { return $"{GetProjectPath()} {GetConfiguration()} {GetFramework()}"; }
+            get { return $"{GetProjectPath()} {GetConfiguration()} {GetFramework()} {GetRuntime()} {GetOutputPath()}"; }
         }
 
         public string BuildBasePath { get; set; }
@@ -20,9 +20,23 @@ namespace Microsoft.DotNet.Cli.Build
         public string Configuration { get; set; }
 
         public string Framework { get; set; }
+        
+        public string Runtime { get; set; }
 
         public string ProjectPath { get; set; }
+
+        public string OutputPath { get; set; }
         
+        private string GetOutputPath()
+        {
+            if (!string.IsNullOrEmpty(OutputPath))
+            {
+                return $"--output {OutputPath}";
+            }
+
+            return null;
+        }
+
         private string GetConfiguration()
         {
             if (!string.IsNullOrEmpty(Configuration))
@@ -38,6 +52,16 @@ namespace Microsoft.DotNet.Cli.Build
             if (!string.IsNullOrEmpty(Framework))
             {
                 return $"--framework {Framework}";
+            }
+
+            return null;
+        }
+        
+        private string GetRuntime()
+        {
+            if (!string.IsNullOrEmpty(Runtime))
+            {
+                return $"--runtime {Runtime}";
             }
 
             return null;

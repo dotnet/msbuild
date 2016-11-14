@@ -557,6 +557,24 @@ namespace Microsoft.DotNet.Migration.Tests
                             .Select(p => Path.GetFullPath(p).Substring(fullBinPath.Length));
         }
 
+        private static void DeleteDirectory(string dir)
+        {
+            foreach (string directory in Directory.EnumerateDirectories(dir))
+            {
+                DeleteDirectory(directory);
+            }
+
+            try
+            {
+                Directory.Delete(dir, true);
+            }
+            catch
+            {
+                // retry, if still doesn't delete then throw
+                Directory.Delete(dir, true);
+            }
+        }
+
         private void CleanBinObj(string projectDirectory)
         {
             var dirs = new string[] { Path.Combine(projectDirectory, "bin"), Path.Combine(projectDirectory, "obj") };
@@ -565,7 +583,7 @@ namespace Microsoft.DotNet.Migration.Tests
             {
                 if(Directory.Exists(dir))
                 {
-                    Directory.Delete(dir, true);
+                    DeleteDirectory(dir);
                 }
             }
         }

@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         protected override string Args
         {
-            get { return $"{GetProjectPath()} {GetSource()} {GetPackages()} {GetSkipInvalidConfigurations()}"; }
+            get { return $"{GetProjectPath()} {GetSource()} {GetPackages()} {GetSkipInvalidConfigurations()} {GetRuntime()}"; }
         }
 
         public string ProjectPath { get; set; }
@@ -22,6 +22,8 @@ namespace Microsoft.DotNet.Cli.Build
         public string Packages { get; set; }
 
         public bool SkipInvalidConfigurations { get; set; }
+        
+        public string Runtime { get; set; }
 
         private string GetSource()
         {
@@ -58,6 +60,16 @@ namespace Microsoft.DotNet.Cli.Build
             if (SkipInvalidConfigurations)
             {
                 return "/p:SkipInvalidConfigurations=true";
+            }
+
+            return null;
+        }
+        
+        private string GetRuntime()
+        {
+            if (!string.IsNullOrEmpty(Runtime))
+            {
+                return $"/p:RuntimeIdentifier={Runtime}";
             }
 
             return null;
