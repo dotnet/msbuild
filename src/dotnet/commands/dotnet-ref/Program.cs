@@ -56,13 +56,6 @@ namespace Microsoft.DotNet.Tools.Ref
                     var rootElement = ProjectRootElement.Open(projectFile.FullName);
                     AddOrUpdatePackageRef(packageNameArg.Value, version, rootElement);         
                     rootElement.Save();
-
-                    // List<string> msbuildArgs = new List<string>();
-                    // msbuildArgs.Add("/t:RefAdd");
-                    // msbuildArgs.Add($"/p:PackageName={packageNameArg.Value}");
-                    // msbuildArgs.Add($"/p:PackageVersion={version}");
-                    // msbuildArgs.AddRange(app.RemainingArguments);
-                    // return new MSBuildForwardingApp(msbuildArgs).Execute();
                     return 1;
                 });
                 
@@ -80,12 +73,6 @@ namespace Microsoft.DotNet.Tools.Ref
                     var rootElement = ProjectRootElement.Open(projectFile.FullName);
                     RemovePackageRef(packageNameArg.Value, rootElement);
                     rootElement.Save();
-
-                    // List<string> msbuildArgs = new List<string>();
-                    // msbuildArgs.Add("/t:RefDel");                    
-                    // msbuildArgs.Add($"/p:PackageName={packageNameArg.Value}");
-                    // msbuildArgs.AddRange(app.RemainingArguments);
-                    // return new MSBuildForwardingApp(msbuildArgs).Execute();
                     return 1;
                 });
                 
