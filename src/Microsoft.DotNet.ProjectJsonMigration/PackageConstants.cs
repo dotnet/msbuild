@@ -24,6 +24,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         public const string NetStandardPackageName = "NETStandard.Library";
         public const string NetStandardPackageVersion = "1.6.0";
         public const string DotnetTestXunit = "dotnet-test-xunit";
+        public const string DotnetTestMSTest = "dotnet-test-mstest";
 
         public static readonly IDictionary<string, PackageDependencyInfo> ProjectDependencyPackages = 
             new Dictionary<string, PackageDependencyInfo> {
@@ -52,6 +53,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                     Name = MstestTestFrameworkName,
                     Version = ConstantPackageVersions.MstestTestFrameworkVersion } },
                 { DotnetTestXunit, null },
+                { DotnetTestMSTest, null },
         };
 
         public static readonly IDictionary<string, PackageDependencyInfo> ProjectToolPackages = 
