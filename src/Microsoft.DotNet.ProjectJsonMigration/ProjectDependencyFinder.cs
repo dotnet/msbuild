@@ -55,6 +55,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             {
                 var project = projects.First();
                 projects.Remove(project);
+                if (!File.Exists(project.ProjectFilePath))
+                {
+                    MigrationErrorCodes
+                        .MIGRATE1018($"Dependency project not found ({project.ProjectFilePath})").Throw();
+                }
+
                 var projectContext =
                     ProjectContext.CreateContextForEachFramework(project.ProjectFilePath).FirstOrDefault();
                 if(projectContext == null)

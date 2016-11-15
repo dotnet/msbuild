@@ -28,6 +28,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         public static Func<string, MigrationError> MIGRATE1017
             => (message) => new MigrationError(nameof(MIGRATE1017), "Multiple Xproj Files", message);
 
+        public static Func<string, MigrationError> MIGRATE1018
+            => (message) => new MigrationError(nameof(MIGRATE1018), "Dependency Project not found", message);
+
         // Potentially Temporary (Point in Time) Errors
         public static Func<string, MigrationError> MIGRATE20011
             => (message) => new MigrationError(nameof(MIGRATE20011), "Multi-TFM", message);

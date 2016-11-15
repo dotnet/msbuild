@@ -436,6 +436,19 @@ namespace Microsoft.DotNet.Migration.Tests
             BuildMSBuild(projectDirectory, projectName);
         }
 
+        [Fact]
+        public void It_fails_gracefully_when_migrating_app_with_missing_dependency()
+        {
+            string projectName = "MigrateAppWithMissingDep";
+            var projectDirectory = Path.Combine(GetTestGroupTestAssetsManager("NonRestoredTestProjects").CreateTestInstance(projectName).Path, "MyApp");
+
+            string migrationOutputFile = Path.Combine(projectDirectory, "migration-output.json");
+            File.Exists(migrationOutputFile).Should().BeFalse();
+            MigrateCommand.Run(new string[] { projectDirectory, "-r", migrationOutputFile, "--format-report-file-json" }).Should().NotBe(0);
+            File.Exists(migrationOutputFile).Should().BeTrue();
+            File.ReadAllText(migrationOutputFile).Should().Contain("MIGRATE1018");
+        }
+
         private void VerifyAutoInjectedDesktopReferences(string projectDirectory, string projectName, bool shouldBePresent)
         {
             if (projectName != null)
