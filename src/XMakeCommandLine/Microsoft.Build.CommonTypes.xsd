@@ -179,13 +179,6 @@ elementFormDefault="qualified">
         <xs:extension base="msb:SimpleItemType">
           <xs:sequence minOccurs="0" maxOccurs="unbounded">
             <xs:choice>
-              <xs:element name="Version">
-                <xs:annotation>
-                  <xs:documentation>
-                    <!-- _locID_text="PackageReference_Version" _locComment="" -->Version of dependency
-                  </xs:documentation>
-                </xs:annotation>
-              </xs:element>
               <xs:element name="IncludeAssets">
                 <xs:annotation>
                   <xs:documentation>
@@ -209,6 +202,13 @@ elementFormDefault="qualified">
               </xs:element>
             </xs:choice>
           </xs:sequence>
+          <xs:attribute name="Version" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                <!-- _locID_text="PackageReference_Version" _locComment="" -->Version of dependency
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
         </xs:extension>
       </xs:complexContent>
     </xs:complexType>
