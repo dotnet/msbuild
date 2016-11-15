@@ -24,6 +24,7 @@ using Microsoft.DotNet.Tools.Run;
 using Microsoft.DotNet.Tools.Test;
 using Microsoft.DotNet.Tools.VSTest;
 using NuGet.Frameworks;
+using Microsoft.DotNet.Tools.Add;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -45,6 +46,7 @@ namespace Microsoft.DotNet.Cli
             ["run"] = RunCommand.Run,
             ["test"] = TestCommand.Run,
             ["vstest"] = VSTestCommand.Run,
+            ["add"] = AddCommand.Run,
         };
 
         public static int Main(string[] args)

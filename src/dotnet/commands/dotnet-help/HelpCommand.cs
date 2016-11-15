@@ -36,6 +36,7 @@ Commands:
   migrate       Migrates a project.json based project to a msbuild based project
 
 Advanced Commands:
+  add           Group of commands - run `dotnet add --help` for more information
   nuget         Provides additional NuGet commands
   msbuild       msbuilds a project and all of its dependencies
   vstest        Runs tests from the specified files";
