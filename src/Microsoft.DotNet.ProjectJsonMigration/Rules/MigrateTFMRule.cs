@@ -15,6 +15,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
     // TODO: Support Multi-TFM
     internal class MigrateTFMRule : IMigrationRule
     {
+        private const string RuntimeIdentifiers =
+            "win7-x64;win7-x86;osx.10.10-x64;osx.10.11-x64;ubuntu.14.04-x64;ubuntu.16.04-x64;centos.7-x64;rhel.7.2-x64;debian.8-x64;fedora.23-x64;opensuse.13.2-x64";
+
         private readonly ITransformApplicator _transformApplicator;
 
         public MigrateTFMRule(ITransformApplicator transformApplicator = null)
@@ -37,11 +40,21 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                         migrationRuleInputs.ProjectContexts.Single().TargetFramework),
                     propertyGroup,
                     mergeExisting: true);
+                _transformApplicator.Execute(
+                    FrameworkRuntimeIdentifiersTransform.Transform(
+                        migrationRuleInputs.ProjectContexts.Single().TargetFramework),
+                    propertyGroup,
+                    mergeExisting: true);
             }
             else
             {
                 _transformApplicator.Execute(
                     FrameworksTransform.Transform(
+                        migrationRuleInputs.ProjectContexts.Select(p => p.TargetFramework)),
+                    propertyGroup,
+                    mergeExisting: true);
+                _transformApplicator.Execute(
+                    FrameworksRuntimeIdentifiersTransform.Transform(
                         migrationRuleInputs.ProjectContexts.Select(p => p.TargetFramework)),
                     propertyGroup,
                     mergeExisting: true);
@@ -109,10 +122,22 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 frameworks => string.Join(";", frameworks.Select(f => f.GetShortFolderName())),
                 frameworks => true);
 
+        private AddPropertyTransform<IEnumerable<NuGetFramework>> FrameworksRuntimeIdentifiersTransform =>
+            new AddPropertyTransform<IEnumerable<NuGetFramework>>(
+                "RuntimeIdentifiers",
+                frameworks => RuntimeIdentifiers,
+                frameworks => frameworks.Any(f => !f.IsPackageBased));
+
         private AddPropertyTransform<NuGetFramework> FrameworkTransform =>
             new AddPropertyTransform<NuGetFramework>(
                 "TargetFramework",
                 framework => framework.GetShortFolderName(),
                 framework => true);
+
+        private AddPropertyTransform<NuGetFramework> FrameworkRuntimeIdentifiersTransform =>
+            new AddPropertyTransform<NuGetFramework>(
+                "RuntimeIdentifiers",
+                framework => RuntimeIdentifiers,
+                framework => !framework.IsPackageBased);
     }
 }
