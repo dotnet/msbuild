@@ -12,13 +12,15 @@ namespace Microsoft.DotNet.Cli.Build
 
         protected override string Args
         {
-            get { return $"{GetProjectPath()} {GetConfiguration()} {GetNoBuild()} {GetOutput()} {GetVersionSuffix()} {GetRuntime()}"; }
+            get { return $"{GetProjectPath()} {GetConfiguration()} {GetNoBuild()} {GetOutput()} {GetVersionSuffix()} {GetRuntime()} {MsbuildArgs}"; }
         }
 
         public string Configuration { get; set; }
 
         public bool NoBuild { get; set; }
-        
+
+        public string MsbuildArgs { get; set; }
+
         public string Output { get; set; }
 
         public string ProjectPath { get; set; }
