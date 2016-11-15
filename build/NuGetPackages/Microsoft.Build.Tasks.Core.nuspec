@@ -11,8 +11,8 @@
     <projectUrl>$projectUrl$</projectUrl>
     <iconUrl>$iconUrl$</iconUrl>
     <description>This package contains the $id$ assembly which implements the commonly used tasks of MSBuild.</description>
-    <tags>MSBuild</tags>
     <copyright>Copyright © Microsoft Corporation</copyright>
+    <tags>MSBuild</tags>
     <dependencies>
       <group targetFramework=".NETStandard1.3">
         <dependency id="Microsoft.Build.Framework" version="[$version$]" />

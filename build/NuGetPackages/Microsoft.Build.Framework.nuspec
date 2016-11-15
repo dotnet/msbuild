@@ -11,8 +11,8 @@
     <projectUrl>$projectUrl$</projectUrl>
     <iconUrl>$iconUrl$</iconUrl>
     <description>This package contains the $id$ assembly which is a common assembly used by other MSBuild assemblies.</description>
-    <tags>MSBuild</tags>
     <copyright>Copyright © Microsoft Corporation</copyright>
+    <tags>MSBuild</tags>
     <dependencies>
       <group targetFramework=".NETStandard1.3">
         <dependency id="System.Collections" version="4.0.11" />
