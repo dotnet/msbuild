@@ -49,6 +49,7 @@ namespace Microsoft.DotNet.Tools.Pack
             var argRoot = cmd.Argument("<PROJECT>",
                 "The project to pack, defaults to the project file in the current directory. Can be a path to any project file",
                 multipleValues:true);
+            CommandOption verbosityOption = MSBuildForwardingApp.AddVerbosityOption(cmd);
 
             cmd.OnExecute(() =>
             {
@@ -90,6 +91,11 @@ namespace Microsoft.DotNet.Tools.Pack
                 if (serviceable.HasValue())
                 {
                     msbuildArgs.Add($"/p:Serviceable=true");
+                }
+
+                if (verbosityOption.HasValue())
+                {
+                    msbuildArgs.Add($"/verbosity:{verbosityOption.Value()}");
                 }
 
                 msbuildArgs.AddRange(argRoot.Values);

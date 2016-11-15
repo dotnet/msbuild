@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.CommandLine;
 
 namespace Microsoft.DotNet.Tools.MSBuild
 {
@@ -27,7 +28,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
             };
         
         private readonly IEnumerable<string> _msbuildRequiredParameters = 
-            new List<string> { "/m" };
+            new List<string> { "/m", "/v:m" };
 
         public MSBuildForwardingApp(IEnumerable<string> argsToForward)
         {
@@ -66,6 +67,11 @@ namespace Microsoft.DotNet.Tools.MSBuild
             {
                 Environment.SetEnvironmentVariable(TelemetrySessionIdEnvironmentVariableName, null);
             }
+        }
+
+        internal static CommandOption AddVerbosityOption(CommandLineApplication app)
+        {
+            return app.Option("-v|--verbosity", "Set the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]", CommandOptionType.SingleValue);
         }
 
         private static string GetMSBuildExePath()

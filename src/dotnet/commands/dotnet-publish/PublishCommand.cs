@@ -16,6 +16,7 @@ namespace Microsoft.DotNet.Tools.Publish
         public string OutputPath { get; set; }
         public string Configuration { get; set; }
         public string VersionSuffix { get; set; }
+        public string Verbosity { get; set; }
 
         public List<string> ExtraMSBuildArguments { get; set; }
 
@@ -57,6 +58,11 @@ namespace Microsoft.DotNet.Tools.Publish
             if (!string.IsNullOrEmpty(VersionSuffix))
             {
                 msbuildArgs.Add($"/p:VersionSuffix={VersionSuffix}");
+            }
+
+            if (!string.IsNullOrEmpty(Verbosity))
+            {
+                msbuildArgs.Add($"/verbosity:{Verbosity}");
             }
 
             msbuildArgs.AddRange(ExtraMSBuildArguments);

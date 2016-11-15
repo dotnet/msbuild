@@ -3,6 +3,7 @@
 
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools.MSBuild;
 
 namespace Microsoft.DotNet.Tools.Publish
 {
@@ -43,6 +44,7 @@ namespace Microsoft.DotNet.Tools.Publish
             CommandOption versionSuffixOption = app.Option(
                 "--version-suffix <VERSION_SUFFIX>", "Defines the value for the $(VersionSuffix) property in the project",
                 CommandOptionType.SingleValue);
+            CommandOption verbosityOption = MSBuildForwardingApp.AddVerbosityOption(app);
 
             app.OnExecute(() =>
             {
@@ -54,6 +56,7 @@ namespace Microsoft.DotNet.Tools.Publish
                 publish.OutputPath = outputOption.Value();
                 publish.Configuration = configurationOption.Value();
                 publish.VersionSuffix = versionSuffixOption.Value();
+                publish.Verbosity = verbosityOption.Value();
                 publish.ExtraMSBuildArguments = app.RemainingArguments;
 
                 return publish.Execute();

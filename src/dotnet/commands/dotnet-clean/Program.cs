@@ -31,6 +31,7 @@ namespace Microsoft.DotNet.Tools.Clean
             CommandOption outputOption = app.Option("-o|--output <OUTPUT_DIR>", "Directory in which the build outputs have been placed", CommandOptionType.SingleValue);
             CommandOption frameworkOption = app.Option("-f|--framework <FRAMEWORK>", "Clean a specific framework", CommandOptionType.SingleValue);
             CommandOption configurationOption = app.Option("-c|--configuration <CONFIGURATION>", "Clean a specific configuration", CommandOptionType.SingleValue);
+            CommandOption verbosityOption = MSBuildForwardingApp.AddVerbosityOption(app);
 
             app.OnExecute(() =>
             {
@@ -56,6 +57,11 @@ namespace Microsoft.DotNet.Tools.Clean
                 if (configurationOption.HasValue())
                 {
                     msbuildArgs.Add($"/p:Configuration={configurationOption.Value()}");
+                }
+
+                if (verbosityOption.HasValue())
+                {
+                    msbuildArgs.Add($"/verbosity:{verbosityOption.Value()}");
                 }
 
                 msbuildArgs.AddRange(app.RemainingArguments);

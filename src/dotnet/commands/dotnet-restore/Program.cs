@@ -65,6 +65,8 @@ namespace Microsoft.DotNet.Tools.Restore
                 "Set this flag to ignore project to project references and only restore the root project",
                 CommandOptionType.NoValue);
 
+            CommandOption verbosityOption = MSBuildForwardingApp.AddVerbosityOption(cmd);
+
             cmd.OnExecute(() =>
             {
                 var msbuildArgs = new List<string>()
@@ -107,6 +109,11 @@ namespace Microsoft.DotNet.Tools.Restore
                 if (noDependenciesOption.HasValue())
                 {
                     msbuildArgs.Add($"/p:RestoreRecursive=false");
+                }
+
+                if (verbosityOption.HasValue())
+                {
+                    msbuildArgs.Add($"/verbosity:{verbosityOption.Value()}");
                 }
 
                 // Add in arguments

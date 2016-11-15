@@ -87,6 +87,8 @@ namespace Microsoft.DotNet.Tools.Test
                @"Do not build project before testing.",
                CommandOptionType.NoValue);
 
+            CommandOption verbosityOption = MSBuildForwardingApp.AddVerbosityOption(cmd);
+
             cmd.OnExecute(() =>
             {
                 var msbuildArgs = new List<string>()
@@ -94,7 +96,6 @@ namespace Microsoft.DotNet.Tools.Test
                     "/t:VSTest"
                 };
 
-                msbuildArgs.Add("/verbosity:quiet");
                 msbuildArgs.Add("/nologo");
 
                 if (settingOption.HasValue())
@@ -145,6 +146,15 @@ namespace Microsoft.DotNet.Tools.Test
                 if (noBuildtOption.HasValue())
                 {
                     msbuildArgs.Add($"/p:VSTestNoBuild=true");
+                }
+
+                if (verbosityOption.HasValue())
+                {
+                    msbuildArgs.Add($"/verbosity:{verbosityOption.Value()}");
+                }
+                else
+                {
+                    msbuildArgs.Add("/verbosity:quiet");
                 }
 
                 string defaultproject = GetSingleTestProjectToRunTestIfNotProvided(argRoot.Value, cmd.RemainingArguments);

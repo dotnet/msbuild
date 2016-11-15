@@ -13,6 +13,7 @@
 
   <Target Name="Publish"
           DependsOnTargets="Validate" />
+
   <Target Name="Restore"
           DependsOnTargets="Validate" />
   
@@ -28,5 +29,9 @@
     
     <Error Condition=" '$(CscToolExe)' == '' " 
            Text="Expect CscToolExe to be set, but it is not." />
+
+    <Message Importance="low" Text="Message with low importance" />
+    <Message Importance="normal" Text="Message with normal importance" />
+    <Message Importance="high" Text="Message with high importance" />
   </Target>
 </Project>

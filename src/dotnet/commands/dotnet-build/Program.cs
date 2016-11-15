@@ -36,6 +36,7 @@ namespace Microsoft.DotNet.Tools.Build
 
             CommandOption noIncrementalOption = app.Option("--no-incremental", "Set this flag to turn off incremental build", CommandOptionType.NoValue);
             CommandOption noDependenciesOption = app.Option("--no-dependencies", "Set this flag to ignore project to project references and only build the root project", CommandOptionType.NoValue);
+            CommandOption verbosityOption = MSBuildForwardingApp.AddVerbosityOption(app);
 
             app.OnExecute(() =>
             {
@@ -83,6 +84,11 @@ namespace Microsoft.DotNet.Tools.Build
                 if (noDependenciesOption.HasValue())
                 {
                     msbuildArgs.Add("/p:BuildProjectReferences=false");
+                }
+
+                if (verbosityOption.HasValue())
+                {
+                    msbuildArgs.Add($"/verbosity:{verbosityOption.Value()}");
                 }
 
                 msbuildArgs.AddRange(app.RemainingArguments);

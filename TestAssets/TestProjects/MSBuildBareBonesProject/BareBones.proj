@@ -2,15 +2,15 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <Target Name="SayHello">
-    <Message Text="Hello, from MSBuild!" />
+    <Message Importance="high" Text="Hello, from MSBuild!" />
   </Target>
 
   <Target Name="SayGoodbye">
-    <Message Text="Goodbye, from MSBuild. :'(" />
+    <Message Importance="high" Text="Goodbye, from MSBuild. :'(" />
   </Target>
 
   <Target Name="SayThis">
-    <Message Text="You want me to say '$(This)'" />
+    <Message Importance="high" Text="You want me to say '$(This)'" />
   </Target>
 
 </Project>
