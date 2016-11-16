@@ -19,7 +19,7 @@ namespace Microsoft.NET.Build.Tasks
             {
                 ExecuteCore();
             }
-            catch (ReportUserErrorException e)
+            catch (BuildErrorException e)
             {
                 Log.LogErrorFromException(e);
             }

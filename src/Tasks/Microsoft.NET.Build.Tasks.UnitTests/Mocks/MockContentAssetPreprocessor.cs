@@ -47,7 +47,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                         string value;
                         if (!_preprocessorValues.TryGetValue(token, out value))
                         {
-                            throw new Exception($"The token '${token}$' is unrecognized");
+                            throw new InvalidDataException($"The token '${token}$' is unrecognized");
                         }
                         return value;
                     });

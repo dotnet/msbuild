@@ -83,7 +83,7 @@ namespace Microsoft.NET.Build.Tasks
                     return package.FrameworkAssemblies.Select(c => Tuple.Create(c, _emptyProperties));
 
                 default:
-                    throw new Exception($"Unexpected file group in project.lock.json target library {package.Name}");
+                    throw new BuildErrorException(Strings.UnexpectedFileGroupInAssetsFile, package.Name);
             }
         }
 

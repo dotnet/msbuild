@@ -322,7 +322,7 @@ namespace Microsoft.NET.Build.Tasks
                 string version;
                 if (!resolvedPackageVersions.TryGetValue(deps.Id, out version))
                 {
-                    Log.LogError($"Unexpected Dependency {deps.Id} with no version number");
+                    Log.LogError(Strings.UnexpectedDependencyWithNoVersionNumber, deps.Id);
                     continue;
                 }
 
@@ -387,7 +387,7 @@ namespace Microsoft.NET.Build.Tasks
                 }
                 else if (currentFileType != fileType)
                 {
-                    throw new Exception($"Unexpected file type for {fileKey}. Type is both {fileType} and {currentFileType}");
+                    throw new BuildErrorException(Strings.UnexpectedFileType, fileKey, fileType, currentFileType);
                 }
             }
         }
@@ -401,7 +401,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 if (string.IsNullOrEmpty(relativeMSBuildProjectPath))
                 {
-                    ReportException($"Your project is consuming assets from the project but no MSBuild project is found in '{ProjectAssetsFile}'");
+                    throw new BuildErrorException(Strings.ProjectAssetsConsumedWithoutMSBuildProjectPath, package.Name, ProjectAssetsFile); 
                 }
 
                 return GetAbsolutePathFromProjectRelativePath(relativeMSBuildProjectPath);
@@ -429,11 +429,6 @@ namespace Microsoft.NET.Build.Tasks
         private string GetAbsolutePathFromProjectRelativePath(string path)
         {
             return Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Path.GetFullPath(ProjectAssetsFile)), path));
-        }
-
-        private void ReportException(string message)
-        {
-            throw new ReportUserErrorException(message);
         }
     }
 }

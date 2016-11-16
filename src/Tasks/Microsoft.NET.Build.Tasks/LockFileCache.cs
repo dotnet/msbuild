@@ -22,9 +22,7 @@ namespace Microsoft.NET.Build.Tasks
         {
             if (!Path.IsPathRooted(path))
             {
-                throw new ArgumentException(
-                    $"The path '{path}' specified to LockFileCache.GetLockFile is not rooted. Only full paths are supported.", 
-                    nameof(path));
+                throw new BuildErrorException(Strings.AssetsFilePathNotRooted, path);
             }
 
             string lockFileKey = GetTaskObjectKey(path);
@@ -54,7 +52,7 @@ namespace Microsoft.NET.Build.Tasks
         {
             if (!File.Exists(path))
             {
-                throw new ReportUserErrorException($"Assets file '{path}' couldn't be found. Run a NuGet package restore to generate this file.");
+                throw new BuildErrorException(Strings.AssetsFileNotFound, path);
             }
 
             // TODO - https://github.com/dotnet/sdk/issues/18 adapt task logger to Nuget Logger

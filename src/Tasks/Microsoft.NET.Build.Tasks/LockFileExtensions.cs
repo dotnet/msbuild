@@ -36,9 +36,7 @@ namespace Microsoft.NET.Build.Tasks
                     frameworkString :
                     $"{frameworkString}/{runtime}";
 
-                throw new ReportUserErrorException($"Assets file '{lockFile.Path}' doesn't have a target for '{targetMoniker}'." +
-                    $" Ensure you have restored this project for TargetFramework='{framework.GetShortFolderName()}'" +
-                    $" and RuntimeIdentifier='{runtime}'.");
+                throw new BuildErrorException(Strings.AssetsFileMissingTarget, lockFile.Path, targetMoniker, framework.GetShortFolderName(), runtime);
             }
 
             return new ProjectContext(lockFile, lockFileTarget, platformLibraryName);

@@ -27,7 +27,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     For cases where inference is not supported, identifier, version and profile can be specified explicitly as follows:
        <PropertyGroup>
-         <TargetFrameworks>net451+win81;xyz1.0</TargetFrameworks>
+         <TargetFrameworks>portable-net451+win81;xyz1.0</TargetFrameworks>
        <PropertyGroup>
        <PropertyGroup Condition="'$(TargetFramework)' == 'net451+win81'">
          <TargetFrameworkIdentifier>.NETPortable</TargetFrameworkIdentifier>
@@ -71,12 +71,19 @@ Copyright (c) .NET Foundation. All rights reserved.
     <TargetFrameworkVersion Condition="$(_ShortFrameworkVersion.Length) == 3">v$(_ShortFrameworkVersion[0]).$(_ShortFrameworkVersion[1]).$(_ShortFrameworkVersion[2])</TargetFrameworkVersion>
   </PropertyGroup>
 
-  <!-- Trigger an error if we're unable to infer the framework identifier and version. -->
+  <!-- 
+    Trigger an error if we're unable to infer the framework identifier and version. 
+
+    We have to evaluate this here and not in the target because by the time the target runs,
+    Microsoft.Common.targets will have defaulted to .NETFramework,Version=v4.0
+  -->
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '' or '$(TargetFrameworkVersion)' == ''">
-    <_UnsupportedTargetFrameworkError>Cannot infer TargetFrameworkIdentifier and/or TargetFrameworkVersion from TargetFramework='$(TargetFramework)'. See comment in $(MSBuildThisFileFullPath) showing how to specify them explicitly.</_UnsupportedTargetFrameworkError>
+    <_UnsupportedTargetFrameworkError>true</_UnsupportedTargetFrameworkError>
   </PropertyGroup>
   <Target Name="_CheckForUnsupportedTargetFramework" BeforeTargets="_CheckForInvalidConfigurationAndPlatform">
-    <Error Condition="'$(_UnsupportedTargetFrameworkError)' != ''" Text="$(_UnsupportedTargetFrameworkError)" />
+    <NETSdkError Condition="'$(_UnsupportedTargetFrameworkError)' == 'true'" 
+                 ResourceName="CannotInferTargetFrameworkIdentiferAndVersion"
+                 FormatArguments="$(TargetFramework)" />
   </Target>
 
   <!--

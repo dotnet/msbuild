@@ -154,9 +154,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 foreach (var duplicatedPreprocessorKey in duplicatedPreprocessorKeys)
                 {
-                    Log.LogWarning(
-                        $"The preprocessor token '{duplicatedPreprocessorKey}' has been given more than one value." +
-                        $" Choosing '{preprocessorValues[duplicatedPreprocessorKey]}' as the value.");
+                    Log.LogWarning(Strings.DuplicatePreprocessorToken, duplicatedPreprocessorKey, preprocessorValues[duplicatedPreprocessorKey]);
                 }
 
                 AssetPreprocessor.ConfigurePreprocessor(ContentPreprocessorOutputDirectory, preprocessorValues);
@@ -209,7 +207,7 @@ namespace Microsoft.NET.Build.Tasks
             string resolvedPath;
             if (!_resolvedPaths.TryGetValue(contentFile.ItemSpec, out resolvedPath))
             {
-                Log.LogWarning($"Unable to find resolved path for {contentFile.ItemSpec}");
+                Log.LogWarning(Strings.UnableToFindResolvedPath, contentFile.ItemSpec);
                 return;
             }
 
@@ -221,13 +219,12 @@ namespace Microsoft.NET.Build.Tasks
             {
                 if (string.IsNullOrEmpty(ContentPreprocessorOutputDirectory))
                 {
-                    throw new Exception($"The {nameof(ContentPreprocessorOutputDirectory)} property must be set in order to consume preprocessed content");
+                    throw new BuildErrorException(Strings.ContentPreproccessorParameterRequired, nameof(ProduceContentAssets), nameof(ContentPreprocessorOutputDirectory));
                 }
-
                 string [] parts = parentPackage?.Split('/');
                 if (parts == null)
                 {
-                    throw new Exception($"Content File {contentFile.ItemSpec} does not contain expected parent package information");
+                    throw new BuildErrorException(Strings.ContentFileDoesNotContainExpectedParentPackageInformation, contentFile.ItemSpec);
                 }
 
                 // We need the preprocessed output, so let's run the preprocessor here
@@ -252,8 +249,7 @@ namespace Microsoft.NET.Build.Tasks
                 }
                 else
                 {
-                    Log.LogWarning($"Content Item for {pathToFinalAsset} sets 'copyToOutput' " + 
-                        "but does not provide an 'outputPath' or 'ppOutputPath'");
+                    Log.LogWarning(Strings.ContentItemDoesNotProvideOutputPath, pathToFinalAsset, "copyToOutput", "outputPath", "ppOutputPath");
                 }
             }
 
