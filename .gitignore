@@ -296,3 +296,8 @@ test/PackagedCommands/Consumers/*/project.json
 
 # VS generated files
 launchSettings.json
+
+# user files used in tests
+!TestAssets/TestProjects/TestAppWithLibrary/TestLibrary/TestLibrary.xproj.user
+!TestAssets/TestProjects/TestAppWithLibrary/TestApp/TestApp.xproj.user
+!TestAssets/TestProjects/PJTestAppSimple/PJTestAppSimple.xproj.user
