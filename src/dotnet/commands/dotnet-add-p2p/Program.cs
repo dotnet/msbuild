@@ -8,7 +8,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Construction;
-using Microsoft.DotNet.ProjectJsonMigration;
+using Microsoft.Build.Evaluation;
 
 namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
 {
@@ -22,31 +22,40 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
             {
                 Name = "dotnet add p2p",
                 FullName = ".NET Add Project to Project (p2p) reference Command",
-                Description = "Command to add project to project (p2p) reference"
+                Description = "Command to add project to project (p2p) reference",
+                AllowArgumentSeparator = true,
+                ArgumentSeparatorHelpText = "Project to project references to add"
             };
+
             app.HelpOption("-h|--help");
 
             CommandArgument projectArgument = app.Argument("<PROJECT>",
-                "The MSBuild project file to modify. If a project file is not specified," +
+                "The project file to modify. If a project file is not specified," +
                 " it searches the current working directory for an MSBuild file that has a file extension that ends in `proj` and uses that file.");
 
             CommandOption frameworkOption = app.Option("-f|--framework <FRAMEWORK>", "Add reference only when targetting a specific framework", CommandOptionType.SingleValue);
-            CommandOption referenceOption = app.Option("-r|--reference <REFERENCE>", "Add project to project <REFERENCE> to <PROJECT>", CommandOptionType.MultipleValue);
-
 
             app.OnExecute(() => {
-                ProjectRootElement project = projectArgument.Value != null ?
-                                                GetProjectFromFileOrThrow(projectArgument.Value) :
-                                                GetProjectFromCurrentDirectoryOrThrow();
+                if (projectArgument.Value == null)
+                {
+                    throw new GracefulException("Argument <Project> is required.");
+                }
 
-                if (referenceOption.Values.Count == 0)
+                ProjectRootElement project = File.Exists(projectArgument.Value) ?
+                                                GetProjectFromFileOrThrow(projectArgument.Value) :
+                                                GetProjectFromDirectoryOrThrow(projectArgument.Value);
+
+                if (app.RemainingArguments.Count == 0)
                 {
                     throw new GracefulException("You must specify at least one reference to add.");
                 }
 
-                AddProjectToProjectReference(project, frameworkOption.Value(), referenceOption.Values);
+                int numberOfAddedReferences = AddProjectToProjectReference(project, frameworkOption.Value(), app.RemainingArguments);
 
-                //project.Save();
+                if (numberOfAddedReferences != 0)
+                {
+                    project.Save();
+                }
 
                 return 0;
             });
@@ -57,7 +66,8 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
             }
             catch (GracefulException e)
             {
-                Reporter.Error.WriteLine(e.Message);
+                Reporter.Error.WriteLine(e.Message.Red());
+                app.ShowHelp();
                 return 1;
             }
         }
@@ -68,7 +78,7 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
         {
             try
             {
-                return ProjectRootElement.Open(filename);
+                return ProjectRootElement.Open(filename, new ProjectCollection(), preserveFormatting: true);
             }
             catch (Microsoft.Build.Exceptions.InvalidProjectFileException)
             {
@@ -86,19 +96,34 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
             var project = TryOpenProject(filename);
             if (project == null)
             {
-                throw new GracefulException($"Invalid MSBuild project `{filename}`.");
+                throw new GracefulException($"Invalid project `{filename}`.");
             }
 
             return project;
         }
 
-        public static ProjectRootElement GetProjectFromCurrentDirectoryOrThrow()
+        // TODO: improve errors
+        public static ProjectRootElement GetProjectFromDirectoryOrThrow(string directory)
         {
-            DirectoryInfo currDir = new DirectoryInfo(Directory.GetCurrentDirectory());
-            FileInfo[] files = currDir.GetFiles("*proj");
+            DirectoryInfo dir;
+            try
+            {
+                dir = new DirectoryInfo(directory);
+            }
+            catch (ArgumentException)
+            {
+                throw new GracefulException($"Could not find project or directory `{directory}`.");
+            }
+
+            if (!dir.Exists)
+            {
+                throw new GracefulException($"Could not find project or directory `{directory}`.");
+            }
+
+            FileInfo[] files = dir.GetFiles("*proj");
             if (files.Length == 0)
             {
-                throw new GracefulException("Could not find any MSBuild project in the current directory.");
+                throw new GracefulException($"Could not find any project in `{directory}`.");
             }
 
             if (files.Length > 1)
@@ -110,123 +135,40 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
 
             if (!projectFile.Exists)
             {
-                throw new GracefulException("Could not find any project in the current directory.");
+                throw new GracefulException($"Could not find any project in `{directory}`.");
             }
 
             var ret = TryOpenProject(projectFile.FullName);
             if (ret == null)
             {
-                throw new GracefulException($"Found an MSBuild project `{projectFile.FullName}` in the current directory but it is invalid.");
+                throw new GracefulException($"Found a project `{projectFile.FullName}` but it is invalid.");
             }
 
             return ret;
         }
 
-        public static Func<T, bool> AndPred<T>(params Func<T, bool>[] preds)
+        public static int AddProjectToProjectReference(ProjectRootElement root, string framework, IEnumerable<string> refs)
         {
-            return (el) => preds.All((pred) => pred == null || pred(el));
-        }
-
-        public static string GetFrameworkConditionString(string framework)
-        {
-            if (string.IsNullOrEmpty(framework))
-            {
-                return null;
-            }
-
-            return $" '$(TargetFramework)' == '{framework}' ";
-        }
-
-        public static Func<T, bool> FrameworkPred<T>(string framework) where T : ProjectElement
-        {
-            string conditionStr = GetFrameworkConditionString(framework);
-            if (conditionStr == null)
-            {
-                return (ig) => {
-                    var condChain = ig.ConditionChain();
-                    return condChain.Count == 0;
-                };
-            }
-
-            conditionStr = conditionStr.Trim();
-            return (ig) => {
-                var condChain = ig.ConditionChain();
-                return condChain.Count == 1 && condChain.First().Trim() == conditionStr;
-            };
-        }
-
-        public static Func<ProjectItemGroupElement, bool> UniformItemElementTypePred(string projectItemElementType)
-        {
-            return (ig) => ig.Items.All((it) => it.ItemType == projectItemElementType);
-        }
-
-        public static Func<ProjectItemElement, bool> IncludePred(string include)
-        {
-            return (it) => it.Include == include;
-        }
-
-        public static ProjectItemElement[] FindExistingItemsWithCondition(ProjectRootElement root, string framework, string include)
-        {
-            return root.Items
-                       .Where(
-                            AndPred(
-                                FrameworkPred<ProjectItemElement>(framework),
-                                IncludePred(include)))
-                       .ToArray();
-        }
-
-        public static ProjectItemGroupElement FindExistingUniformItemGroupWithCondition(ProjectRootElement root, string projectItemElementType, string framework)
-        {
-            return root.ItemGroupsReversed
-                            .FirstOrDefault(
-                                AndPred(
-                                    // When adding more predicates which operate on ItemGroup.Condition
-                                    // some slightly more advanced logic need to be used:
-                                    // i.e. ConditionPred(FrameworkConditionPred(framework), RuntimeConditionPred(runtime))
-                                    //   FrameworkConditionPred and RuntimeConditionPred would need to operate on a single condition
-                                    //   and ConditionPred would need to check if whole Condition Chain is satisfied
-                                    FrameworkPred<ProjectItemGroupElement>(framework),
-                                    UniformItemElementTypePred(projectItemElementType)));
-        }
-
-        public static ProjectItemGroupElement FindUniformOrCreateItemGroupWithCondition(ProjectRootElement root, string projectItemElementType, string framework)
-        {
-            var lastMatchingItemGroup = FindExistingUniformItemGroupWithCondition(root, projectItemElementType, framework);
-
-            if (lastMatchingItemGroup != null)
-            {
-                return lastMatchingItemGroup;
-            }
-
-            ProjectItemGroupElement ret = root.CreateItemGroupElement();
-            string condStr = GetFrameworkConditionString(framework);
-            if (condStr != null)
-            {
-                ret.Condition = condStr;
-            }
-
-            root.AppendChild(ret);
-            return ret;
-        }
-
-        public static void AddProjectToProjectReference(ProjectRootElement root, string framework, IEnumerable<string> refs)
-        {
+            int numberOfAddedReferences = 0;
             const string ProjectItemElementType = "ProjectReference";
 
             ProjectItemGroupElement ig = null;
             foreach (var @ref in refs)
             {
-                if (FindExistingItemsWithCondition(root, framework, @ref).Length == 0)
+                if (root.HasExistingItemWithCondition(framework, @ref))
                 {
-                    Reporter.Output.WriteLine($"Item {ProjectItemElementType} including `{@ref}` is already present.");
+                    Reporter.Output.WriteLine($"Project already has a reference to `{@ref}`.");
                     continue;
                 }
 
-                ig = ig ?? FindUniformOrCreateItemGroupWithCondition(root, ProjectItemElementType, framework);
+                numberOfAddedReferences++;
+                ig = ig ?? root.FindUniformOrCreateItemGroupWithCondition(ProjectItemElementType, framework);
                 ig.AppendChild(root.CreateItemElement(ProjectItemElementType, @ref));
 
-                Reporter.Output.WriteLine($"Item {ProjectItemElementType} including `{@ref}` added to project.");
+                Reporter.Output.WriteLine($"Reference `{@ref}` added to the project.");
             }
+
+            return numberOfAddedReferences;
         }
     }
 }

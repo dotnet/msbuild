@@ -2,7 +2,7 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <TargetFrameworks>net451;netcoreapp1.0</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
@@ -18,15 +18,9 @@
       <Version>1.0.1</Version>
     </PackageReference>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'net451'">
-    <!-- This is intentionally empty - do not remove -->
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">
+    <SomeItemCausingThisGroupToNotBeUniform Include="foo" />
+    <ProjectReference Include="..\Lib\Lib.csproj" />
   </ItemGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
-    <DefineConstants>$(DefineConstants);NETCOREAPP1_0</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net451' ">
-    <DefineConstants>$(DefineConstants);NET451</DefineConstants>
-  </PropertyGroup>
-
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
