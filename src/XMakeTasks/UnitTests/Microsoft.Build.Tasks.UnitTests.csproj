@@ -62,6 +62,7 @@
     <Compile Include="FindInList_Tests.cs" />
     <Compile Include="FindUnderPath_Tests.cs" />
     <Compile Include="GenerateBindingRedirects_Tests.cs" />
+    <Compile Include="Hash_Tests.cs" />
     <Compile Include="GenerateResource_Tests.cs" />
     <Compile Include="GetReferencePaths_Tests.cs" />
     <Compile Include="DirectoryBuildProjectImportTestBase.cs" />

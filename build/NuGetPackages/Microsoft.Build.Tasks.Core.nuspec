@@ -47,6 +47,8 @@
         <dependency id="System.Runtime.InteropServices.RuntimeInformation" version="4.0.0" />
         <dependency id="System.Runtime.Serialization.Primitives" version="4.1.1" />
         <dependency id="System.Runtime.Serialization.Xml" version="4.1.1" />
+        <dependency id="System.Security.Cryptography.Algorithms" version="4.2.0" />
+        <dependency id="System.Security.Cryptography.Primitives" version="4.0.0" />
         <dependency id="System.Security.Cryptography.X509Certificates" version="4.1.0" />
         <dependency id="System.Text.Encoding" version="4.0.11" />
         <dependency id="System.Text.Encoding.Extensions" version="4.0.11" />
