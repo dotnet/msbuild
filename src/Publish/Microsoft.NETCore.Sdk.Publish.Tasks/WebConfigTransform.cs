@@ -5,7 +5,7 @@ using System.Xml.Linq;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks
 {
-    internal static class WebConfigTransform
+    public static class WebConfigTransform
     {
         public static XDocument Transform(XDocument webConfig, string appName, bool configureForAzure, bool isPortable)
         {
