@@ -77,6 +77,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Reference Include="System.Core"/>
     <Reference Include="System.Data"/>
     <Reference Include="System.Drawing"/>
+    <!-- When doing greater than/less than comparisons between strings, MSBuild will try to parse the strings as Version objects and compare them as
+         such if the parse succeeds. -->
     <Reference Include="System.IO.Compression.FileSystem" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>
     <Reference Include="System.IO.Compression" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>
     <Reference Include="System.Net.Http" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>
