@@ -3121,7 +3121,9 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_18_DistributedLoggerSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_21_DistributedFileLoggerSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_11_LoggerSwitch"));
+#if FEATURE_XML_SCHEMA_VALIDATION
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_15_ValidateSwitch"));
+#endif
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_19_IgnoreProjectExtensionsSwitch"));
 #if FEATURE_NODE_REUSE
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_24_NodeReuse"));
