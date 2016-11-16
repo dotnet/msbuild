@@ -396,12 +396,6 @@ if ($DryRun) {
 $InstallRoot = Resolve-Installation-Path $InstallDir
 Say-Verbose "InstallRoot: $InstallRoot"
 
-$free = Get-CimInstance -Class win32_logicaldisk | where Deviceid -eq "$((Get-Item $InstallRoot).PSDrive.Name):"
-if ($free.Freespace / 1MB -le 250 ) {
-    Say "there is not enough disk space on drive c:"
-    exit 0
-}
-
 $IsSdkInstalled = Is-Dotnet-Package-Installed -InstallRoot $InstallRoot -RelativePathToPackage "sdk" -SpecificVersion $SpecificVersion
 Say-Verbose ".NET SDK installed? $IsSdkInstalled"
 if ($IsSdkInstalled) {
@@ -410,6 +404,12 @@ if ($IsSdkInstalled) {
 }
 
 New-Item -ItemType Directory -Force -Path $InstallRoot | Out-Null
+
+$free = Get-CimInstance -Class win32_logicaldisk | where Deviceid -eq "$((Get-Item $InstallRoot).PSDrive.Name):"
+if ($free.Freespace / 1MB -le 250 ) {
+    Say "there is not enough disk space on drive c:"
+    exit 0
+}
 
 foreach ($DownloadLink in $DownloadLinks) {
     $ZipPath = [System.IO.Path]::GetTempFileName()
