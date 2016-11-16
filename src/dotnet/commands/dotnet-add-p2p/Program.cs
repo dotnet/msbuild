@@ -129,12 +129,18 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
 
         public static string GetFrameworkConditionString(string framework)
         {
+            if (string.IsNullOrEmpty(framework))
+            {
+                return null;
+            }
+
             return $" '$(TargetFramework)' == '{framework}' ";
         }
 
         public static Func<T, bool> FrameworkPred<T>(string framework) where T : ProjectElement
         {
-            if (string.IsNullOrEmpty(framework))
+            string conditionStr = GetFrameworkConditionString(framework);
+            if (conditionStr == null)
             {
                 return (ig) => {
                     var condChain = ig.ConditionChain();
@@ -142,7 +148,7 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
                 };
             }
 
-            string conditionStr = GetFrameworkConditionString(framework).Trim();
+            conditionStr = conditionStr.Trim();
             return (ig) => {
                 var condChain = ig.ConditionChain();
                 return condChain.Count == 1 && condChain.First().Trim() == conditionStr;
@@ -193,7 +199,12 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
             }
 
             ProjectItemGroupElement ret = root.CreateItemGroupElement();
-            ret.Condition = GetFrameworkConditionString(framework);
+            string condStr = GetFrameworkConditionString(framework);
+            if (condStr != null)
+            {
+                ret.Condition = condStr;
+            }
+
             root.AppendChild(ret);
             return ret;
         }
