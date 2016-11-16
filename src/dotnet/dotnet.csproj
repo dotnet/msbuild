@@ -1,6 +1,5 @@
 ﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
-  
   <PropertyGroup>
     <VersionPrefix>1.0.0-preview4</VersionPrefix>
     <TargetFramework>netcoreapp1.0</TargetFramework>
@@ -9,15 +8,13 @@
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
-    <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">$(PackageTargetFallback);dotnet5.4</PackageTargetFallback> 
+    <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">$(PackageTargetFallback);dotnet5.4</PackageTargetFallback>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Include="**\*.cs" Exclude="commands\dotnet-new\CSharp_Console\**;commands\dotnet-new\CSharp_Lib\**;commands\dotnet-new\CSharp_Mstest\**;commands\dotnet-new\CSharp_Web\**;commands\dotnet-new\CSharp_Xunittest\**;bin\**;obj\**;**\*.xproj;packages\**" />
     <EmbeddedResource Include="**\*.resx" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
     <EmbeddedResource Include="commands\dotnet-new\CSharp_Console.zip;commands\dotnet-new\CSharp_Lib.zip;commands\dotnet-new\CSharp_Mstest.zip;commands\dotnet-new\CSharp_Xunittest.zip;commands\dotnet-new\CSharp_Web.zip;compiler\resources\**\*" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="../Microsoft.DotNet.Configurer/Microsoft.DotNet.Configurer.csproj" />
     <ProjectReference Include="../Microsoft.DotNet.ProjectJsonMigration/Microsoft.DotNet.ProjectJsonMigration.csproj" />
@@ -25,7 +22,6 @@
     <ProjectReference Include="../Microsoft.DotNet.Archive/Microsoft.DotNet.Archive.csproj" />
     <ProjectReference Include="../Microsoft.DotNet.Cli.Utils/Microsoft.DotNet.Cli.Utils.csproj" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Sdk">
       <Version>1.0.0-alpha-20161104-2</Version>
@@ -78,14 +74,11 @@
       <Version>1.0.1-beta-000933</Version>
     </PackageReference>
   </ItemGroup>
-
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
     <DefineConstants>$(DefineConstants);NETCOREAPP1_0</DefineConstants>
   </PropertyGroup>
-
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
   </PropertyGroup>
-  
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

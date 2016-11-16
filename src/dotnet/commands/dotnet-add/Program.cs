@@ -10,6 +10,7 @@ using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectJsonMigration;
 using NuGet.Frameworks;
+using Microsoft.DotNet.Tools.Add.ProjectToProjectReference;
 
 namespace Microsoft.DotNet.Tools.Add
 {
@@ -27,7 +28,7 @@ Commands:
 
         private static Dictionary<string, Func<string[], int>> s_builtIns = new Dictionary<string, Func<string[], int>>
         {
-            ["p2p"] = null,
+            ["p2p"] = AddProjectToProjectReferenceCommand.Run,
         };
 
         public static int Run(string[] args)
