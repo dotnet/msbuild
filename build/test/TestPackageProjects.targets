@@ -117,7 +117,7 @@
         <Name>dotnet-desktop-binding-redirects</Name>
         <ProjectName>dotnet-desktop-binding-redirects.csproj</ProjectName>
         <IsTool>True</IsTool>
-		<IsMsbuild>True</IsMsbuild>
+        <IsMsbuild>True</IsMsbuild>
         <IsApplicable>$(DesktopAvailable)</IsApplicable>
         <VersionPrefix>1.0.0-rc-</VersionPrefix>
         <VersionSuffix>rc-$(TestPackageBuildVersionSuffix)</VersionSuffix>

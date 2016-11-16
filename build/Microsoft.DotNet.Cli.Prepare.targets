@@ -4,7 +4,7 @@
   <Import Project="prepare/CheckPrereqs.targets" />
 
   <Target Name="Prepare"
-          DependsOnTargets="Init;DownloadHostAndSharedFxArtifacts;RestoreSrcPackages;RestoreToolsPackages;RestoreProjectJsonPackages;ZipTemplates" />
+          DependsOnTargets="Init;DownloadHostAndSharedFxArtifacts;RestoreSrcPackages;RestoreToolsPackages;ZipTemplates" />
 
   <Target Name="Init"
           DependsOnTargets="InitializeCommonProps;
@@ -33,8 +33,6 @@
       <IsDesktopAvailable>False</IsDesktopAvailable>
       <IsDesktopAvailable Condition=" '$(OSName)' == 'win' ">True</IsDesktopAvailable>
       <DotNetPath>$(Stage0Directory)</DotNetPath>
-      <DotNetPjPath>$(Stage0PjDirectory)</DotNetPjPath>
-
       <BaseOutputDirectory>$(RepoRoot)/artifacts/$(Rid)</BaseOutputDirectory>
       <ToolsOutputDirectory>$(BaseOutputDirectory)/tools</ToolsOutputDirectory>
       <Stage1Directory>$(BaseOutputDirectory)/stage1</Stage1Directory>
@@ -230,34 +228,6 @@
   <Target Name="SetupRestoreToolsPackagesInputsOutputs">
     <ItemGroup>
       <RestoreToolsPackagesInput Include="$(RepoRoot)/tools/**/*.csproj" />
-    </ItemGroup>
-  </Target>
-
-  <Target Name="RestoreProjectJsonPackages"
-          DependsOnTargets="SetupRestoreProjectJsonPackagesInputsOutputs;Init"
-          Inputs="@(RestoreProjectJsonPackagesInput)"
-          Outputs="@(RestoreProjectJsonPackagesInput->'%(RelativeDir)/project.lock.json')">
-
-    <CallTarget Targets="CleanSrcToolsProjectJsonLockFiles" />
-
-    <DotNetRestorePJ WorkingDirectory="$(RepoRoot)/src" 
-                     ToolPath="$(DotNetPjPath)" />
-    <DotNetRestorePJ WorkingDirectory="$(RepoRoot)/tools" 
-                     ToolPath="$(DotNetPjPath)" />
-
-  </Target>
-
-  <Target Name="CleanSrcToolsProjectJsonLockFiles" >
-    <ItemGroup>
-      <SrcToolsLockFiles Include="$(RepoRoot)/src/**/project.lock.json;$(RepoRoot)/tools/**/project.lock.json" />
-    </ItemGroup>
-    <Delete Files="@(SrcToolsLockFiles)" />
-  </Target>
-
-  <Target Name="SetupRestoreProjectJsonPackagesInputsOutputs">
-    <ItemGroup>
-      <RestoreProjectJsonPackagesInput Include="$(RepoRoot)/src/**/project.json" />
-      <RestoreProjectJsonPackagesInput Include="$(RepoRoot)/tools/**/project.json" />
     </ItemGroup>
   </Target>
 

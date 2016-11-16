@@ -36,16 +36,14 @@ if(!(Test-Path $inputMsi))
 }
 
 $testName = "Microsoft.DotNet.Cli.Msi.Tests"
-$testDir="$PSScriptRoot\$testName"
+$testProj="$PSScriptRoot\$testName\$testName.csproj"
 $testBin="$RepoRoot\artifacts\tests\$testName"
 
 pushd "$DotnetDir"
 
 try {
     .\dotnet restore `
-        --infer-runtimes `
-        $testDir `
-        -f https://www.myget.org/F/dotnet-buildtools/api/v3/index.json | Out-Host
+        $testProj | Out-Host
 
     if($LastExitCode -ne 0)
     {
@@ -55,7 +53,7 @@ try {
     .\dotnet publish `
         --framework net46 `
         --output $testBin `
-        $testDir | Out-Host
+        $testProj | Out-Host
 
     if($LastExitCode -ne 0)
     {
