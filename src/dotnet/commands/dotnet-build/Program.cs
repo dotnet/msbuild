@@ -22,9 +22,7 @@ namespace Microsoft.DotNet.Tools.Build
             app.ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText;
             app.HelpOption("-h|--help");
 
-            CommandArgument projectArgument = app.Argument("<{LocalizableStrings.ProjectArgumentValueName}>",
-                LocalizableStrings.ProjectArgumentDescription1 +
-                LocalizableStrings.ProjectArgumentDescription2);
+            CommandArgument projectArgument = app.Argument("<{LocalizableStrings.ProjectArgumentValueName}>", LocalizableStrings.ProjectArgumentDescription);
 
             CommandOption outputOption = app.Option("-o|--output <{LocalizableStrings.OutputOptionName}>", LocalizableStrings.OutputOptionDescription, CommandOptionType.SingleValue);
             CommandOption frameworkOption = app.Option("-f|--framework <{LocalizableStrings.FrameworkOptionName}>", LocalizableStrings.FrameworkOptionDescription, CommandOptionType.SingleValue);

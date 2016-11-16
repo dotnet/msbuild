@@ -22,9 +22,7 @@
 
         public const string OutputOptionName = "OUTPUT_DIR";
 
-        public const string ProjectArgumentDescription1 = "The MSBuild project file to build. If a project file is not specified,";
-
-        public const string ProjectArgumentDescription2 = " MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.";
+        public const string ProjectArgumentDescription = "The MSBuild project file to build. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.";
 
         public const string ProjectArgumentValueName = "PROJECT";
 
