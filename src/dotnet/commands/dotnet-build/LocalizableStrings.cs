@@ -1,4 +1,4 @@
-﻿namespace dotnet.commands.dotnet_build
+﻿namespace Microsoft.DotNet.Tools.Build
 {
     internal class LocalizableStrings
     {
