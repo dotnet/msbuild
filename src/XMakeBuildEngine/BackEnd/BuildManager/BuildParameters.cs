@@ -201,6 +201,11 @@ namespace Microsoft.Build.Execution
         private bool _onlyLogCriticalEvents = false;
 
         /// <summary>
+        /// A list of warnings to treat as errors.
+        /// </summary>
+        private ISet<string> _warningsAsErrors = null;
+
+        /// <summary>
         /// The location of the toolset definitions.
         /// </summary>
         private ToolsetDefinitionLocations _toolsetDefinitionLocations = ToolsetDefinitionLocations.Default;
@@ -320,6 +325,7 @@ namespace Microsoft.Build.Execution
             _disableInProcNode = other._disableInProcNode;
             _logTaskInputs = other._logTaskInputs;
             _logInitialPropertiesAndItems = other._logInitialPropertiesAndItems;
+            _warningsAsErrors = other._warningsAsErrors == null ? null : new HashSet<string>(other._warningsAsErrors, StringComparer.OrdinalIgnoreCase);
         }
 
 #if FEATURE_THREAD_PRIORITY
@@ -581,6 +587,15 @@ namespace Microsoft.Build.Execution
         {
             get { return _onlyLogCriticalEvents; }
             set { _onlyLogCriticalEvents = value; }
+        }
+
+        /// <summary>
+        /// A list of warnings to treat as errors.  To treat all warnings as errors, set this to an empty <see cref="HashSet{String}"/>.  
+        /// </summary>
+        public ISet<string> WarningsAsErrors
+        {
+            get { return _warningsAsErrors; }
+            set { _warningsAsErrors = value; }
         }
 
         /// <summary>

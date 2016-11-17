@@ -574,6 +574,25 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      MSBuild XML and any tasks and loggers it uses.
    </value>
   </data>
+  <data name="HelpMessage_28_WarnAsErrorSwitch" UESanitized="false" Visibility="Public">
+    <value>  /warnaserror[:code[;code2]]
+                     List of warning codes to treats as errors.  Use a semicolon
+                     or a comma to separate multiple warning codes. To treat all
+                     warnings as errors use the switch with no values.
+                     (Short form: /err[:c;[c2]])
+
+                     Example:
+                       /warnaserror:MSB4130
+
+                     When a warning is treated as an error the target will
+                     continue to execute as if it was a warning but the overall
+                     build will fail.
+    </value>
+    <comment>
+      LOCALIZATION: "warnaserror" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </comment>
+  </data>
   <data name="InvalidConfigurationFile" Visibility="Public">
     <value>MSBUILD : Configuration error MSB1043: The application could not start. {0}</value>
     <comment>

@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Security;
 using System.Text;
@@ -545,6 +546,7 @@ namespace Microsoft.Build.CommandLine
                 TextWriter preprocessWriter = null;
                 bool debugger = false;
                 bool detailedSummary = false;
+                ISet<string> warningsAsErrors = null;
 
                 CommandLineSwitches switchesFromAutoResponseFile;
                 CommandLineSwitches switchesNotFromAutoResponseFile;
@@ -571,6 +573,7 @@ namespace Microsoft.Build.CommandLine
                         ref preprocessWriter,
                         ref debugger,
                         ref detailedSummary,
+                        ref warningsAsErrors,
                         recursing: false
                         ))
                 {
@@ -599,7 +602,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_XML_SCHEMA_VALIDATION
                             needToValidateProject, schemaFile,
 #endif
-                            cpuCount, enableNodeReuse, preprocessWriter, debugger, detailedSummary))
+                            cpuCount, enableNodeReuse, preprocessWriter, debugger, detailedSummary, warningsAsErrors))
                         {
                             exitType = ExitType.BuildError;
                         }
@@ -890,7 +893,8 @@ namespace Microsoft.Build.CommandLine
             bool enableNodeReuse,
             TextWriter preprocessWriter,
             bool debugger,
-            bool detailedSummary
+            bool detailedSummary,
+            ISet<string> warningsAsErrors
         )
         {
             if (String.Equals(Path.GetExtension(projectFile), ".vcproj", StringComparison.OrdinalIgnoreCase) ||
@@ -1054,6 +1058,7 @@ namespace Microsoft.Build.CommandLine
                     parameters.ToolsetDefinitionLocations = Microsoft.Build.Evaluation.ToolsetDefinitionLocations.ConfigurationFile | Microsoft.Build.Evaluation.ToolsetDefinitionLocations.Registry;
                     parameters.DetailedSummary = detailedSummary;
                     parameters.LogTaskInputs = logTaskInputs;
+                    parameters.WarningsAsErrors = warningsAsErrors;
 
                     if (!String.IsNullOrEmpty(toolsVersion))
                     {
@@ -1423,6 +1428,7 @@ namespace Microsoft.Build.CommandLine
                         bool multipleParametersAllowed;
                         string missingParametersErrorMessage;
                         bool unquoteParameters;
+                        bool allowEmptyParameters;
 
                         // Special case: for the switch "/m" or "/maxCpuCount" we wish to pretend we saw "/m:<number of cpus>"
                         // This allows a subsequent /m:n on the command line to override it.
@@ -1443,9 +1449,9 @@ namespace Microsoft.Build.CommandLine
                         {
                             GatherParameterlessCommandLineSwitch(commandLineSwitches, parameterlessSwitch, switchParameters, duplicateSwitchErrorMessage, unquotedCommandLineArg);
                         }
-                        else if (CommandLineSwitches.IsParameterizedSwitch(switchName, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters))
+                        else if (CommandLineSwitches.IsParameterizedSwitch(switchName, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out allowEmptyParameters))
                         {
-                            GatherParameterizedCommandLineSwitch(commandLineSwitches, parameterizedSwitch, switchParameters, duplicateSwitchErrorMessage, multipleParametersAllowed, missingParametersErrorMessage, unquoteParameters, unquotedCommandLineArg);
+                            GatherParameterizedCommandLineSwitch(commandLineSwitches, parameterizedSwitch, switchParameters, duplicateSwitchErrorMessage, multipleParametersAllowed, missingParametersErrorMessage, unquoteParameters, unquotedCommandLineArg, allowEmptyParameters);
                         }
                         else
                         {
@@ -1676,7 +1682,8 @@ namespace Microsoft.Build.CommandLine
             bool multipleParametersAllowed,
             string missingParametersErrorMessage,
             bool unquoteParameters,
-            string unquotedCommandLineArg
+            string unquotedCommandLineArg,
+            bool allowEmptyParameters
         )
         {
             if (// switch must have parameters
@@ -1695,7 +1702,7 @@ namespace Microsoft.Build.CommandLine
                     }
 
                     // save the parameters after unquoting and splitting them if necessary
-                    if (!commandLineSwitches.SetParameterizedSwitch(parameterizedSwitch, unquotedCommandLineArg, switchParameters, multipleParametersAllowed, unquoteParameters))
+                    if (!commandLineSwitches.SetParameterizedSwitch(parameterizedSwitch, unquotedCommandLineArg, switchParameters, multipleParametersAllowed, unquoteParameters, allowEmptyParameters))
                     {
                         // if parsing revealed there were no real parameters, flag an error, unless the parameters are optional
                         if (missingParametersErrorMessage != null)
@@ -1785,6 +1792,7 @@ namespace Microsoft.Build.CommandLine
             ref TextWriter preprocessWriter,
             ref bool debugger,
             ref bool detailedSummary,
+            ref ISet<string> warningsAsErrors,
             bool recursing
         )
         {
@@ -1888,6 +1896,7 @@ namespace Microsoft.Build.CommandLine
                                                                ref preprocessWriter,
                                                                ref debugger,
                                                                ref detailedSummary,
+                                                               ref warningsAsErrors,
                                                                recursing: true
                                                              );
                         }
@@ -1921,6 +1930,8 @@ namespace Microsoft.Build.CommandLine
                     debugger = commandLineSwitches.IsParameterlessSwitchSet(CommandLineSwitches.ParameterlessSwitch.Debugger);
 #endif
                     detailedSummary = commandLineSwitches.IsParameterlessSwitchSet(CommandLineSwitches.ParameterlessSwitch.DetailedSummary);
+
+                    warningsAsErrors = ProcessWarnAsErrorSwitch(commandLineSwitches);
 
                     // figure out which loggers are going to listen to build events
                     string[][] groupedFileLoggerParameters = commandLineSwitches.GetFileLoggerParameters();
@@ -2027,6 +2038,37 @@ namespace Microsoft.Build.CommandLine
             }
 
             return writer;
+        }
+
+        internal static ISet<string> ProcessWarnAsErrorSwitch(CommandLineSwitches commandLineSwitches)
+        {
+            // TODO: Parse an environment variable as well?
+
+            if (!commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.WarningsAsErrors))
+            {
+                return null;
+            }
+
+            string[] parameters = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.WarningsAsErrors];
+
+            ISet<string> warningsAsErrors = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (string code in parameters
+                .SelectMany(parameter => parameter?.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries) ?? new string[] { null }))
+            {
+                if (code == null)
+                {
+                    // An empty /warnaserror is added as "null".  In this case, the list is cleared
+                    // so that all warnings are treated errors
+                    warningsAsErrors.Clear();
+                }
+                else if(!String.IsNullOrWhiteSpace(code))
+                {
+                    warningsAsErrors.Add(code.Trim());
+                }
+            }
+
+            return warningsAsErrors;
         }
 
         /// <summary>
@@ -3121,6 +3163,7 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_18_DistributedLoggerSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_21_DistributedFileLoggerSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_11_LoggerSwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_28_WarnAsErrorSwitch"));
 #if FEATURE_XML_SCHEMA_VALIDATION
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_15_ValidateSwitch"));
 #endif

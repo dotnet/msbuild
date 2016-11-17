@@ -938,6 +938,7 @@ namespace Microsoft.Build.Execution
         public System.Collections.Generic.ICollection<Microsoft.Build.Evaluation.Toolset> Toolsets { get { throw null; } }
         public System.Globalization.CultureInfo UICulture { get { throw null; } set { } }
         public bool UseSynchronousLogging { get { throw null; } set { } }
+        public System.Collections.Generic.ISet<string> WarningsAsErrors { get { throw null; } set { } }
         public Microsoft.Build.Execution.BuildParameters Clone() { throw null; }
         public Microsoft.Build.Evaluation.Toolset GetToolset(string toolsVersion) { throw null; }
     }
