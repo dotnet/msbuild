@@ -144,9 +144,6 @@
   <data name="MissingItemMetadata" xml:space="preserve">
     <value>Missing '{0}' metadata on '{1}' item '{2}'.</value>
   </data>
-  <data name="UnexpectedFileGroupInAssetsFile" xml:space="preserve">
-    <value>Unexpected file group in assets file for target library '{0}'.</value>
-  </data>
   <data name="UnrecognizedPreprocessorToken" xml:space="preserve">
     <value>Unrecognized preprocessor token '{0}' in '{1}'.</value>
   </data>
@@ -179,5 +176,11 @@
   </data>
   <data name="RuntimeIdentifierMustBeSetForNETFramework" xml:space="preserve">
     <value>RuntimeIdentifier must be set for .NETFramework executables. Consider RuntimeIdentifier=win7-x86 or RuntimeIdentifier=win7-x64.</value>
+  </data>
+  <data name="AssetPreprocessorMustBeConfigured" xml:space="preserve">
+    <value>Asset preprocessor must be configured before assets are processed.</value>
+  </data>
+  <data name="InvalidNuGetVersionString" xml:space="preserve">
+    <value>Invalid NuGet version string: '{0}'.</value>
   </data>
 </root>

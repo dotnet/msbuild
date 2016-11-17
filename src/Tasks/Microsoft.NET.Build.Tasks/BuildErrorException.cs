@@ -7,7 +7,7 @@ using System.Globalization;
 namespace Microsoft.NET.Build.Tasks
 {
     /// <summary>
-    /// Represents an error that neither avoidable in all cases nor indicative of a bug in this library.
+    /// Represents an error that is neither avoidable in all cases nor indicative of a bug in this library.
     /// It will be logged as a plain build error without the exception type or stack.
     /// </summary>
     internal class BuildErrorException : Exception
@@ -25,7 +25,7 @@ namespace Microsoft.NET.Build.Tasks
         }
 
         public BuildErrorException(string format, params string[] args)
-            : this(String.Format(CultureInfo.CurrentCulture, format, args))
+            : this(string.Format(CultureInfo.CurrentCulture, format, args))
         {
         }
     }

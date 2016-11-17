@@ -21,6 +21,7 @@ namespace Microsoft.NET.Build.Tasks
         /// result to specified output path
         /// </summary>
         /// <returns>true if an asset is written, false otherwise</returns>
+        /// <exception cref="InvalidOperationException"><see cref="ConfigurePreprocessor"/> was not called.</exception>
         bool Process(string originalAssetPath, string relativeOutputPath, out string pathToFinalAsset);
     }
 }

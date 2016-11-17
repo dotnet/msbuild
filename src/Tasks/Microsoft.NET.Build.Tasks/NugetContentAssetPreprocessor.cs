@@ -27,8 +27,7 @@ namespace Microsoft.NET.Build.Tasks
         {
             if (_preprocessedOutputDirectory == null)
             {
-                Debug.Fail($"{nameof(NugetContentAssetPreprocessor)} should be configured before any assets are processed");
-                throw new InvalidOperationException();
+                throw new InvalidOperationException(Strings.AssetPreprocessorMustBeConfigured);
             }
 
             bool fileWritten = false;

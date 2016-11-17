@@ -19,13 +19,16 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public string ResourceName { get; set; }
 
+        /// <summary>
+        /// The arguments provided to <see cref="string.Format"/> along with the retrieved resource as the format.
+        /// </summary>
         public string[] FormatArguments { get; set; }
 
         protected override void ExecuteCore()
         {
             string format = Strings.ResourceManager.GetString(ResourceName, Strings.Culture);
             string[] arguments = FormatArguments ?? Array.Empty<string>();
-            string message = String.Format(format, arguments);
+            string message = string.Format(CultureInfo.CurrentCulture, format, arguments);
 
             Log.LogError(message);
         }

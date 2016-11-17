@@ -62,6 +62,15 @@ namespace Microsoft.NET.Build.Tasks {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Asset preprocessor must be configured before assets are processed..
+        /// </summary>
+        internal static string AssetPreprocessorMustBeConfigured {
+            get {
+                return ResourceManager.GetString("AssetPreprocessorMustBeConfigured", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Assets file &apos;{0}&apos; doesn&apos;t have a target for &apos;{1}&apos;. Ensure you have restored this project for TargetFramework=&apos;{2}&apos; and RuntimeIdentifier=&apos;{3}&apos;..
         /// </summary>
         internal static string AssetsFileMissingTarget {
@@ -170,6 +179,15 @@ namespace Microsoft.NET.Build.Tasks {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid NuGet version string: &apos;{0}&apos;..
+        /// </summary>
+        internal static string InvalidNuGetVersionString {
+            get {
+                return ResourceManager.GetString("InvalidNuGetVersionString", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Missing &apos;{0}&apos; metadata on &apos;{1}&apos; item &apos;{2}&apos;..
         /// </summary>
         internal static string MissingItemMetadata {
@@ -220,15 +238,6 @@ namespace Microsoft.NET.Build.Tasks {
         internal static string UnexpectedDependencyWithNoVersionNumber {
             get {
                 return ResourceManager.GetString("UnexpectedDependencyWithNoVersionNumber", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Unexpected file group in assets file for target library &apos;{0}&apos;..
-        /// </summary>
-        internal static string UnexpectedFileGroupInAssetsFile {
-            get {
-                return ResourceManager.GetString("UnexpectedFileGroupInAssetsFile", resourceCulture);
             }
         }
         
