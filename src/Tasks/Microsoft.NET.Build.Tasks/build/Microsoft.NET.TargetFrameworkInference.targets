@@ -29,7 +29,7 @@ Copyright (c) .NET Foundation. All rights reserved.
        <PropertyGroup>
          <TargetFrameworks>portable-net451+win81;xyz1.0</TargetFrameworks>
        <PropertyGroup>
-       <PropertyGroup Condition="'$(TargetFramework)' == 'net451+win81'">
+       <PropertyGroup Condition="'$(TargetFramework)' == 'portable-net451+win81'">
          <TargetFrameworkIdentifier>.NETPortable</TargetFrameworkIdentifier>
          <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
          <TargetFrameworkProfile>Profile44</TargetFrameworkProfile>
