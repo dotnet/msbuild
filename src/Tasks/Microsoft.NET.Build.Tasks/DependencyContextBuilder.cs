@@ -421,7 +421,7 @@ namespace Microsoft.NET.Build.Tasks
         {
             if (referenceProjectInfo == null)
             {
-                throw new Exception($"Could not find valid a SingleProjectInfo for LockFileTargetLibrary '{libraryName}'");
+                throw new BuildErrorException(Strings.CannotFindProjectInfo, libraryName);
             }
         }
 
@@ -430,7 +430,7 @@ namespace Microsoft.NET.Build.Tasks
             string projectPath = library.MSBuildProject;
             if (string.IsNullOrEmpty(projectPath))
             {
-                throw new Exception($"Could not find valid 'MSBuildProject' for project LockFileTargetLibrary '{library.Name}'");
+                throw new BuildErrorException(Strings.CannotFindProjectInfo, library.Name);
             }
 
             string mainProjectDirectory = Path.GetDirectoryName(_mainProjectInfo.ProjectPath);
@@ -440,7 +440,7 @@ namespace Microsoft.NET.Build.Tasks
             if (_referenceProjectInfos?.TryGetValue(fullProjectPath, out referenceProjectInfo) != true ||
                 referenceProjectInfo == null)
             {
-                throw new Exception($"Could not find valid a SingleProjectInfo for project '{fullProjectPath}'");
+                throw new BuildErrorException(Strings.CannotFindProjectInfo, fullProjectPath);
             }
 
             return referenceProjectInfo;

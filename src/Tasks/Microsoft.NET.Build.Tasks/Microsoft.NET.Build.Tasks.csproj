@@ -35,10 +35,16 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="NETSdkError.cs" />
     <Compile Include="LockFileLookup.cs" />
     <Compile Include="FrameworkReferenceResolver.cs" />
-    <Compile Include="ReportUserErrorException.cs" />
+    <Compile Include="BuildErrorException.cs" />
     <Compile Include="ReferenceInfo.cs" />
+    <Compile Include="Resources\Strings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
     <Compile Include="TaskBase.cs" />
     <Compile Include="PackageReferenceConverter.cs" />
     <Compile Include="NugetContentAssetPreprocessor.cs" />
@@ -130,6 +136,13 @@
     <Compile Include="MetadataKeys.cs" />
     <Compile Include="ResolvePackageDependencies.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Strings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>Microsoft.NET.Build.Tasks</CustomToolNamespace>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="..\..\..\build\Targets\Signing.Imports.targets" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

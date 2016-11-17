@@ -64,7 +64,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 if (!result.Success)
                 {
-                    Log.LogError($"Errors ocurred when emitting satellite assembly - {satelliteAssembly}");
+                    Log.LogError(Strings.ErrorsOccurredWhenEmittingSatelliteAssembly, satelliteAssembly);
                     foreach (var diagnostic in result.Diagnostics)
                     {
                         Log.LogError(diagnostic.ToString());

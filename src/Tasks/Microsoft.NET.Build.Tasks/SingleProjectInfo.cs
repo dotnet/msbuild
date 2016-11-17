@@ -62,7 +62,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 if (string.IsNullOrEmpty(sourceProjectFile))
                 {
-                    throw new Exception($"Could not find valid 'MSBuildSourceProjectFile' metadata on ReferencePath '{projectReferencePath.ItemSpec}'");
+                    throw new BuildErrorException(Strings.MissingItemMetadata, "MSBuildSourceProjectFile", "ReferencePath", projectReferencePath.ItemSpec);
                 }
 
                 string outputName = Path.GetFileName(projectReferencePath.ItemSpec);
@@ -86,7 +86,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 if (string.IsNullOrEmpty(sourceProjectFile))
                 {
-                    throw new Exception($"Could not find valid 'MSBuildSourceProjectFile' metadata on ReferenceSatellitePath '{projectReferenceSatellitePath.ItemSpec}'");
+                    throw new BuildErrorException(Strings.MissingItemMetadata, "MSBuildSourceProjectFile", "ReferenceSatellitePath", projectReferenceSatellitePath.ItemSpec);
                 }
 
                 SingleProjectInfo referenceProjectInfo;

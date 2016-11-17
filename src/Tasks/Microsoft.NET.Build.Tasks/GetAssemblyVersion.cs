@@ -29,15 +29,14 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
-            // Using try/catch instead of TryParse so that we don't need to maintain our own error message here.
-            try
+            NuGetVersion nugetVersion;
+            if (!NuGet.Versioning.NuGetVersion.TryParse(NuGetVersion, out nugetVersion))
             {
-                AssemblyVersion = NuGet.Versioning.NuGetVersion.Parse(NuGetVersion).Version.ToString();
+                Log.LogError(Strings.InvalidNuGetVersionString, NuGetVersion);
+                return;
             }
-            catch (ArgumentException ex)
-            {
-                Log.LogError(ex.Message);
-            }
+
+            AssemblyVersion = nugetVersion.Version.ToString();
         }
     }
 }

@@ -107,7 +107,7 @@ namespace Microsoft.NET.TestFramework
 
             if (!Directory.Exists(testProjectDirectory))
             {
-                throw new Exception($"Cannot find '{testProjectName}' at '{ProjectsRoot}'");
+                throw new DirectoryNotFoundException($"Cannot find '{testProjectName}' at '{ProjectsRoot}'");
             }
 
             return testProjectDirectory;

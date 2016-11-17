@@ -43,8 +43,7 @@ namespace Microsoft.NET.Build.Tasks
         {
             if (PossibleTargetFrameworks.Length < 1)
             {
-                // TODO: localize: https://github.com/dotnet/sdk/issues/33
-                Log.LogError("At least one possible target framework must be specified.");
+                Log.LogError(Strings.AtLeastOneTargetFrameworkMustBeSpecified);
                 return;
             }
 
@@ -59,8 +58,7 @@ namespace Microsoft.NET.Build.Tasks
             var nearestNuGetFramework = new FrameworkReducer().GetNearest(referringNuGetFramework, possibleNuGetFrameworks);
             if (nearestNuGetFramework == null)
             {
-                // TODO: localize: https://github.com/dotnet/sdk/issues/33
-                Log.LogError($"Project '{ProjectFilePath}' has no target framework compatible with '{ReferringTargetFramework}'.");
+                Log.LogError(Strings.NoCompatibleTargetFramework, ProjectFilePath, ReferringTargetFramework);
                 return;
             }
 
@@ -81,8 +79,7 @@ namespace Microsoft.NET.Build.Tasks
 
             if (framework == null)
             {
-                // TODO: localize: https://github.com/dotnet/sdk/issues/33
-                Log.LogError($"Invalid framework name: '{framework}'.");
+                Log.LogError(Strings.InvalidFrameworkName, framework);
             }
 
             return framework;

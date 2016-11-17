@@ -4,6 +4,7 @@
 using NuGet.Common;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -11,7 +12,7 @@ using System.Text;
 
 namespace Microsoft.NET.Build.Tasks
 {
-    public class NugetContentAssetPreprocessor : IContentAssetPreprocessor
+    internal class NugetContentAssetPreprocessor : IContentAssetPreprocessor
     {
         private Dictionary<string, string> _preprocessorValues = new Dictionary<string, string>();
         private string _preprocessedOutputDirectory = null;
@@ -26,7 +27,7 @@ namespace Microsoft.NET.Build.Tasks
         {
             if (_preprocessedOutputDirectory == null)
             {
-                throw new Exception($"{nameof(NugetContentAssetPreprocessor)} should be configured before any assets are processed");
+                throw new InvalidOperationException(Strings.AssetPreprocessorMustBeConfigured);
             }
 
             bool fileWritten = false;
@@ -43,7 +44,7 @@ namespace Microsoft.NET.Build.Tasks
                         string value;
                         if (!_preprocessorValues.TryGetValue(token, out value))
                         {
-                            throw new Exception($"The token '${token}$' is unrecognized");
+                            throw new BuildErrorException(Strings.UnrecognizedPreprocessorToken, $"${token}$", originalAssetPath);
                         }
                         return value;
                     });

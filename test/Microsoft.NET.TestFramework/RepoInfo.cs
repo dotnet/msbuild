@@ -31,7 +31,7 @@ namespace Microsoft.NET.TestFramework
 
                 if (directory == null)
                 {
-                    throw new Exception("Cannot find the git repository root");
+                    throw new DirectoryNotFoundException("Cannot find the git repository root");
                 }
 
                 s_repoRoot = directory;
