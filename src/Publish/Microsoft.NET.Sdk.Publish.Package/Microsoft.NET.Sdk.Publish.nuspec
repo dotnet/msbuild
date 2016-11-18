@@ -6,11 +6,10 @@
     <title>Microsoft.NET.Sdk.Publish</title>
     <authors>Microsoft Corporation</authors>
     <owners>Microsoft</owners>
-    <licenseUrl>http://www.microsoft.com/web/webpi/eula/net_library_eula_enu.htm</licenseUrl>
-    <projectUrl>http://github.com/aspnet/websdk</projectUrl>
+    <licenseUrl>https://www.microsoft.com/web/webpi/eula/net_library_eula_enu.htm</licenseUrl>
+    <projectUrl>https://github.com/aspnet/websdk</projectUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>This package contains MSBuild targets and tasks for publishing ASP.NET projects. This package is required for publishing ASP.NET Core projects.</description>
-    <summary>This package contains MSBuild targets and tasks for publishing ASP.NET projects. This package is required for publishing ASP.NET Core projects.</summary>
     <copyright>&#169; Microsoft Corporation. All rights reserved.</copyright>
     <tags></tags>
   </metadata>
