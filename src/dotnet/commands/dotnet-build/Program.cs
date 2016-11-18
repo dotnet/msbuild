@@ -16,26 +16,24 @@ namespace Microsoft.DotNet.Tools.Build
 
             CommandLineApplication app = new CommandLineApplication(throwOnUnexpectedArg: false);
             app.Name = "dotnet build";
-            app.FullName = ".NET Builder";
-            app.Description = "Builder for the .NET Platform. Delegates to the MSBuild 'Build' target in the project file.";
+            app.FullName = LocalizableStrings.AppFullName;
+            app.Description = LocalizableStrings.AppDescription;
             app.AllowArgumentSeparator = true;
             app.ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText;
             app.HelpOption("-h|--help");
 
-            CommandArgument projectArgument = app.Argument("<PROJECT>",
-                "The MSBuild project file to build. If a project file is not specified," +
-                " MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.");
+            CommandArgument projectArgument = app.Argument("<{LocalizableStrings.ProjectArgumentValueName}>", LocalizableStrings.ProjectArgumentDescription);
 
-            CommandOption outputOption = app.Option("-o|--output <OUTPUT_DIR>", "Directory in which to place outputs", CommandOptionType.SingleValue);
-            CommandOption frameworkOption = app.Option("-f|--framework <FRAMEWORK>", "Compile a specific framework", CommandOptionType.SingleValue);
+            CommandOption outputOption = app.Option("-o|--output <{LocalizableStrings.OutputOptionName}>", LocalizableStrings.OutputOptionDescription, CommandOptionType.SingleValue);
+            CommandOption frameworkOption = app.Option("-f|--framework <{LocalizableStrings.FrameworkOptionName}>", LocalizableStrings.FrameworkOptionDescription, CommandOptionType.SingleValue);
             CommandOption runtimeOption = app.Option(
-                "-r|--runtime <RUNTIME_IDENTIFIER>", "Target runtime to build for. The default is to build a portable application.",
+                "-r|--runtime <{LocalizableStrings.RuntimeOptionName}>", LocalizableStrings.RuntimeOptionDescription,
                 CommandOptionType.SingleValue);
-            CommandOption configurationOption = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
-            CommandOption versionSuffixOption = app.Option("--version-suffix <VERSION_SUFFIX>", "Defines the value for the $(VersionSuffix) property in the project", CommandOptionType.SingleValue);
+            CommandOption configurationOption = app.Option("-c|--configuration <{LocalizableStrings.ConfigurationOptionName}>", LocalizableStrings.FrameworkOptionDescription, CommandOptionType.SingleValue);
+            CommandOption versionSuffixOption = app.Option("--version-suffix <{LocalizableStrings.VersionSuffixOptionName}>", LocalizableStrings.VersionSuffixOptionDescription, CommandOptionType.SingleValue);
 
-            CommandOption noIncrementalOption = app.Option("--no-incremental", "Set this flag to turn off incremental build", CommandOptionType.NoValue);
-            CommandOption noDependenciesOption = app.Option("--no-dependencies", "Set this flag to ignore project to project references and only build the root project", CommandOptionType.NoValue);
+            CommandOption noIncrementalOption = app.Option("--no-incremental", LocalizableStrings.NoIncrementialOptionDescription, CommandOptionType.NoValue);
+            CommandOption noDependenciesOption = app.Option("--no-dependencies", LocalizableStrings.NoDependenciesOptionDescription, CommandOptionType.NoValue);
             CommandOption verbosityOption = MSBuildForwardingApp.AddVerbosityOption(app);
 
             app.OnExecute(() =>
