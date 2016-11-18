@@ -3,14 +3,14 @@
   <metadata>
     <id>Microsoft.NET.Sdk.Publish</id>
     <version>$WebSdkVersion$</version>
-    <title>Microsoft DotNet Publish</title>
+    <title>Microsoft.NET.Sdk.Publish</title>
     <authors>Microsoft Corporation</authors>
     <owners>Microsoft</owners>
     <licenseUrl>http://www.microsoft.com/web/webpi/eula/net_library_eula_enu.htm</licenseUrl>
-    <projectUrl>http://github.com/dotnet</projectUrl>
+    <projectUrl>http://github.com/aspnet/websdk</projectUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
-    <description>Supports publishing DotNet applications</description>
-    <summary></summary>
+    <description>This package contains MSBuild targets and tasks for publishing ASP.NET projects. This package is required for publishing ASP.NET Core projects.</description>
+    <summary>This package contains MSBuild targets and tasks for publishing ASP.NET projects. This package is required for publishing ASP.NET Core projects.</summary>
     <copyright>&#169; Microsoft Corporation. All rights reserved.</copyright>
     <tags></tags>
   </metadata>
