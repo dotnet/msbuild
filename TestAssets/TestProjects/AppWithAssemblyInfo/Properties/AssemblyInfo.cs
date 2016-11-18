@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using System.Resources;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -7,16 +6,15 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("ConsoleApp1")]
+[assembly: AssemblyCompanyAttribute("")]
+[assembly: System.Reflection.AssemblyProduct("ConsoleApp1")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyFileVersion("")]
 [assembly: AssemblyInformationalVersion("")]
-[assembly: AssemblyTitle("")]
-[assembly: AssemblyVersion("1.0.0")]
-[assembly: NeutralResourcesLanguage("")]
+[assembly: System.Reflection.AssemblyTitleAttribute("")]
+[assembly: AssemblyVersion("1.0.0"), System.Resources.NeutralResourcesLanguageAttribute("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
 // to COM components.  If you need to access a type in this assembly from
