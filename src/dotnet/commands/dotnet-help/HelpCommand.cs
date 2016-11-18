@@ -33,6 +33,11 @@ Commands:
   run           Compiles and immediately executes a .NET project
   test          Runs unit tests using the test runner specified in the project
   pack          Creates a NuGet package
+  migrate       Migrates a project.json based project to a msbuild based project
+
+Advanced Commands:
+  nuget         Provides additional NuGet commands
+  msbuild       msbuilds a project and all of its dependencies
   vstest        Runs tests from the specified files";
 
         public static int Run(string[] args)
