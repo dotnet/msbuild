@@ -19,23 +19,26 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
     internal class MigrateAssemblyInfoRule : IMigrationRule
     {
+        private const string SystemReflectionNamespace = "System.Reflection";
+        private const string SystemResourcesNamespace = "System.Resources";
+
         private static IReadOnlyDictionary<string, IReadOnlyList<string>> Suppresses { get; } = new Dictionary<string, IReadOnlyList<string>>
         {
             { "csc", new string[] {"CS1701", "CS1702", "CS1705" } }
         };
 
-        private static IReadOnlyList<string> GenerateAssemblyInfoWhitelist = new List<string>()
+        private static IReadOnlyList<KnownAssemblyAttribute> GenerateAssemblyInfoWhitelist = new List<KnownAssemblyAttribute>()
         {
-            "AssemblyCompany",
-            "AssemblyConfiguration",
-            "AssemblyCopyright",
-            "AssemblyDescription",
-            "AssemblyFileVersion",
-            "AssemblyInformationalVersion",
-            "AssemblyProduct",
-            "AssemblyTitle",
-            "AssemblyVersion",
-            "NeutralResourcesLanguage"
+            new KnownAssemblyAttribute(SystemReflectionNamespace, "AssemblyCompany"),
+            new KnownAssemblyAttribute(SystemReflectionNamespace, "AssemblyConfiguration"),
+            new KnownAssemblyAttribute(SystemReflectionNamespace, "AssemblyCopyright"),
+            new KnownAssemblyAttribute(SystemReflectionNamespace, "AssemblyDescription"),
+            new KnownAssemblyAttribute(SystemReflectionNamespace, "AssemblyFileVersion"),
+            new KnownAssemblyAttribute(SystemReflectionNamespace, "AssemblyInformationalVersion"),
+            new KnownAssemblyAttribute(SystemReflectionNamespace, "AssemblyProduct"),
+            new KnownAssemblyAttribute(SystemReflectionNamespace, "AssemblyTitle"),
+            new KnownAssemblyAttribute(SystemReflectionNamespace, "AssemblyVersion"),
+            new KnownAssemblyAttribute(SystemResourcesNamespace, "NeutralResourcesLanguage")
         };
 
         private readonly ITransformApplicator _transformApplicator;
@@ -50,23 +53,23 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             var projectContext = migrationRuleInputs.DefaultProjectContext;
             var compilationOptions = ResolveCompilationOptions(projectContext, "Debug");
             var sources = GetCompilationSources(projectContext, compilationOptions);
-            var assemblyInfoList = GetAssemblyInfo(sources);
+            var assemblyAttributeList = GetWhitelistedKnownAssemblyAttributes(sources);
 
-            foreach(var assemblyInfo in assemblyInfoList)
+            foreach(var assemblyAttribute in assemblyAttributeList)
             {
                 var propertyTransform = new AddPropertyTransform<string>(
-                    $"Generate{assemblyInfo}Attribute",
+                    assemblyAttribute.GenerateAssemblyAttributePropertyName,
                     a => "false",
                     a => true);
 
                 _transformApplicator.Execute(
-                    propertyTransform.Transform(assemblyInfo),
+                    propertyTransform.Transform(assemblyAttribute.AttributeName),
                     migrationRuleInputs.CommonPropertyGroup,
                     true);
             }
         }
 
-        public IEnumerable<string> GetCompilationSources(ProjectContext project, CommonCompilerOptions compilerOptions)
+        private IEnumerable<string> GetCompilationSources(ProjectContext project, CommonCompilerOptions compilerOptions)
         {
             if (compilerOptions.CompileInclude == null)
             {
@@ -78,28 +81,28 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             return includeFiles.Select(f => f.SourcePath);
         }
 
-        public List<string> GetAssemblyInfo(IEnumerable<string> sourceFiles)
+        private List<KnownAssemblyAttribute> GetWhitelistedKnownAssemblyAttributes(IEnumerable<string> sourceFiles)
         {
-            var assemblyInfoList = new List<string>();
+            var assemblyInfoList = new List<KnownAssemblyAttribute>();
             foreach (var sourceFile in sourceFiles)
             {
                 var tree = CSharpSyntaxTree.ParseText(File.ReadAllText(sourceFile));
                 var root = tree.GetRoot();
 
                 // assembly attributes can be only on first level
-                foreach (var attributeListSyntax in root.ChildNodes().OfType<AttributeListSyntax>())
-                {
-                    if (attributeListSyntax.Target.Identifier.Kind() == SyntaxKind.AssemblyKeyword)
-                    {
-                        foreach (var attributeSyntax in attributeListSyntax
-                            .Attributes
-                            .Select(a => a.Name.ToString())
-                            .Where(a => GenerateAssemblyInfoWhitelist.Contains(a)))
-                        {
-                            assemblyInfoList.Add(attributeSyntax);
-                        }
-                    }
-                }
+                var attributeListSyntaxNodes = root.ChildNodes().OfType<AttributeListSyntax>();
+
+                assemblyInfoList.AddRange(
+                    attributeListSyntaxNodes
+                    .Where(node => node.Target.Identifier.Kind() == SyntaxKind.AssemblyKeyword)
+                    .SelectMany(node => node.Attributes)
+                    .Select(attribute => attribute.Name.ToString())
+                    .Select(name =>
+                        GenerateAssemblyInfoWhitelist
+                        .FirstOrDefault(b => b.MatchNames.Contains(name))
+                    )
+                    .Where(knownAttribute => knownAttribute != null)
+                );
             }
 
             return assemblyInfoList;
@@ -141,6 +144,27 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             }
 
             return baseOption;
+        }
+
+        private class KnownAssemblyAttribute
+        {
+            public string Namespace { get; }
+            public string AttributeName { get; }
+            public IList<string> MatchNames { get; }
+            public string GenerateAssemblyAttributePropertyName { get; }
+
+            public KnownAssemblyAttribute(string namespaceName, string attributeName)
+            {
+                Namespace = namespaceName;
+                AttributeName = attributeName;
+                GenerateAssemblyAttributePropertyName = $"Generate{attributeName}Attribute";
+                MatchNames = new [] {
+                    attributeName,
+                    $"{attributeName}Attribute",
+                    $"{namespaceName}.{attributeName}",
+                    $"{namespaceName}.{attributeName}Attribute"
+                };
+            }
         }
     }
 }
