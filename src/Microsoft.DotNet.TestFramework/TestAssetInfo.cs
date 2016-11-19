@@ -9,6 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.PlatformAbstractions;
+using NuGet.Common;
 
 namespace Microsoft.DotNet.TestFramework
 {
@@ -102,24 +103,22 @@ namespace Microsoft.DotNet.TestFramework
 
         private void SaveInventory(FileInfo file, IEnumerable<FileInfo> inventory)
         {
-            StreamWriter writer;
-
-            if (file.Exists)
-            {
-                writer = file.AppendText();
-            }
-            else
-            {
-                writer = file.CreateText();
-            }
-
-            using(writer)
-            {
-                foreach (var path in inventory.Select(i => i.FullName))
+            FileUtility.ReplaceWithLock(
+                filePath =>
                 {
-                    writer.WriteLine(path);
-                }
-            }
+                    using (var stream =
+                        new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
+                    {
+                        using (var writer = new StreamWriter(stream))
+                        {
+                            foreach (var path in inventory.Select(i => i.FullName))
+                            {
+                                writer.WriteLine(path);
+                            }
+                        }
+                    }
+                },
+                file.FullName);
         }
 
         private IEnumerable<FileInfo> GetFileList()
@@ -141,14 +140,31 @@ namespace Microsoft.DotNet.TestFramework
 
         internal IEnumerable<FileInfo> GetBuildFiles()
         {
-            return GetInventory(_inventoryFiles.Build, GetRestoreFiles, DoBuild);
+            return GetInventory(
+                _inventoryFiles.Build,
+                () =>
+                {
+                    var preInventory = new List<FileInfo>(GetRestoreFiles());
+                    preInventory.AddRange(GetSourceFiles());
+                    return preInventory;
+                },
+                DoBuild);
         }
 
-        private IEnumerable<FileInfo> GetInventory(FileInfo file, Func<IEnumerable<FileInfo>> beforeAction, Action action)
+        private IEnumerable<FileInfo> GetInventory(
+            FileInfo file,
+            Func<IEnumerable<FileInfo>> beforeAction,
+            Action action)
         {
+            var inventory = Enumerable.Empty<FileInfo>();
             if (file.Exists)
             {
-                return LoadInventory(file);
+                inventory = LoadInventory(file);
+            }
+
+            if(inventory.Any())
+            {
+                return inventory;
             }
 
             IEnumerable<FileInfo> preInventory;
@@ -159,14 +175,12 @@ namespace Microsoft.DotNet.TestFramework
             }
             else
             {
-                beforeAction();
-
-                preInventory = GetFileList();
+                preInventory = beforeAction();
             }
 
             action();
 
-            var inventory = GetFileList().Where(i => !preInventory.Select(p => p.FullName).Contains(i.FullName));
+            inventory = GetFileList().Where(i => !preInventory.Select(p => p.FullName).Contains(i.FullName));
 
             SaveInventory(file, inventory);
 
