@@ -9,7 +9,7 @@
     <NuSpecProperties>CoreSdkVersion=$(CoreSdkVersion);WebSdkVersion=$(WebSdkVersion)</NuSpecProperties>
   </PropertyGroup>
   <ItemGroup>
-    <NuGetContent Include="$(WebSdkRootDir)\bin\$(Configuration)\Microsoft.NET.Sdk.Publish.Tasks.dll" >
+    <NuGetContent Include="$(WebSdkRootDir)\bin\$(Configuration)\net46\Microsoft.NET.Sdk.Publish.Tasks.dll" >
       <Destination>tools\net46</Destination>
     </NuGetContent>
 
