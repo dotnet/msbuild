@@ -17,8 +17,8 @@ namespace Microsoft.DotNet.Tools.Restore
             CommandLineApplication cmd = new CommandLineApplication(throwOnUnexpectedArg: false)
             {
                 Name = "restore",
-                FullName = "restore",
-                Description = "restore for msbuild",
+                FullName = LocalizableStrings.AppFullName,
+                Description = LocalizableStrings.AppDescription,
                 AllowArgumentSeparator = true,
                 ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText
             };
@@ -26,43 +26,43 @@ namespace Microsoft.DotNet.Tools.Restore
             cmd.HelpOption("-h|--help");
 
             var argRoot = cmd.Argument(
-                    "[root]",
-                    "Optional path to a project file or MSBuild arguments.",
+                    "[{LocalizableStrings.CmdArgument}]",
+                    LocalizableStrings.CmdArgumentDescription,
                     multipleValues: true);
 
             var sourceOption = cmd.Option(
-                    "-s|--source <source>",
-                    "Specifies a NuGet package source to use during the restore.",
+                    "-s|--source <{LocalizableStrings.CmdSourceOption}>",
+                    LocalizableStrings.CmdSourceOptionDescription,
                     CommandOptionType.MultipleValue);
 
             var packagesOption = cmd.Option(
-                    "--packages <packagesDirectory>",
-                    "Directory to install packages in.",
+                    "--packages <{LocalizableStrings.CmdPackagesOption}>",
+                    LocalizableStrings.CmdPackagesOptionDescription,
                     CommandOptionType.SingleValue);
 
             var disableParallelOption = cmd.Option(
                     "--disable-parallel",
-                    "Disables restoring multiple projects in parallel.",
+                    LocalizableStrings.CmdDisableParallelOptionDescription,
                     CommandOptionType.NoValue);
 
             var configFileOption = cmd.Option(
-                    "--configfile <file>",
-                    "The NuGet configuration file to use.",
+                    "--configfile <{LocalizableStrings.CmdConfigFileOption}>",
+                    LocalizableStrings.CmdConfigFileOptionDescription,
                     CommandOptionType.SingleValue);
 
             var noCacheOption = cmd.Option(
                     "--no-cache",
-                    "Do not cache packages and http requests.",
+                    LocalizableStrings.CmdNoCacheOptionDescription,
                     CommandOptionType.NoValue);
 
             var ignoreFailedSourcesOption = cmd.Option(
                     "--ignore-failed-sources",
-                    "Treat package source failures as warnings.",
+                    LocalizableStrings.CmdIgnoreFailedSourcesOptionDescription,
                     CommandOptionType.NoValue);
 
             var noDependenciesOption = cmd.Option(
                 "--no-dependencies",
-                "Set this flag to ignore project to project references and only restore the root project",
+                LocalizableStrings.CmdNoDependenciesOptionDescription,
                 CommandOptionType.NoValue);
 
             CommandOption verbosityOption = MSBuildForwardingApp.AddVerbosityOption(cmd);

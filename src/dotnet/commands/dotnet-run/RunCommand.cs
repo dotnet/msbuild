@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Tools.Run
             if (buildResult != 0)
             {
                 Reporter.Error.WriteLine();
-                throw new GracefulException("The build failed. Please fix the build errors and run again.");
+                throw new GracefulException(LocalizableStrings.RunCommandException);
             }
         }
 
@@ -69,34 +69,34 @@ namespace Microsoft.DotNet.Tools.Run
         {
             Dictionary<string, string> globalProperties = new Dictionary<string, string>()
             {
-                { "MSBuildExtensionsPath", AppContext.BaseDirectory }
+                { LocalizableStrings.RunCommandMSBuildExtensionsPath, AppContext.BaseDirectory }
             };
 
             if (!string.IsNullOrWhiteSpace(Configuration))
             {
-                globalProperties.Add("Configuration", Configuration);
+                globalProperties.Add(LocalizableStrings.RunCommandConfiguration, Configuration);
             }
 
             if (!string.IsNullOrWhiteSpace(Framework))
             {
-                globalProperties.Add("TargetFramework", Framework);
+                globalProperties.Add(LocalizableStrings.RunCommandTargetFramework, Framework);
             }
 
             ProjectInstance projectInstance = new ProjectInstance(Project, globalProperties, null);
 
-            string runProgram = projectInstance.GetPropertyValue("RunCommand");
+            string runProgram = projectInstance.GetPropertyValue(LocalizableStrings.RunCommandProjectInstance);
             if (string.IsNullOrEmpty(runProgram))
             {
-                string outputType = projectInstance.GetPropertyValue("OutputType");
+                string outputType = projectInstance.GetPropertyValue(LocalizableStrings.RunCommandOutputType);
 
                 throw new GracefulException(string.Join(Environment.NewLine,
-                    "Unable to run your project.",
-                    "Please ensure you have a runnable project type and ensure 'dotnet run' supports this project.",
-                    $"The current OutputType is '{outputType}'."));
+                    LocalizableStrings.RunCommandExceptionUnableToRun1,
+                    LocalizableStrings.RunCommandExceptionUnableToRun2,
+                    $"{LocalizableStrings.RunCommandExceptionUnableToRun3} '{outputType}'."));
             }
 
-            string runArguments = projectInstance.GetPropertyValue("RunArguments");
-            string runWorkingDirectory = projectInstance.GetPropertyValue("RunWorkingDirectory");
+            string runArguments = projectInstance.GetPropertyValue(LocalizableStrings.RunCommandRunArguments);
+            string runWorkingDirectory = projectInstance.GetPropertyValue(LocalizableStrings.RunCommandRunWorkingDirectory);
 
             string fullArguments = runArguments;
             if (_args.Any())
@@ -120,13 +120,13 @@ namespace Microsoft.DotNet.Tools.Run
                 if (projectFiles.Length == 0)
                 {
                     throw new InvalidOperationException(
-                        $"Couldn't find a project to run. Ensure a project exists in {directory}." + Environment.NewLine +
-                        "Or pass the path to the project using --project");
+                        $"{LocalizableStrings.RunCommandInvalidOperationException1} {directory}." + Environment.NewLine +
+                        LocalizableStrings.RunCommandInvalidOperationException2);
                 }
                 else if (projectFiles.Length > 1)
                 {
                     throw new InvalidOperationException(
-                        $"Specify which project file to use because this '{directory}' contains more than one project file.");
+                        $"{LocalizableStrings.RunCommandInvalidOperationException3}'{directory}'{LocalizableStrings.RunCommandInvalidOperationException4}");
                 }
 
                 Project = projectFiles[0];

@@ -15,21 +15,21 @@ namespace Microsoft.DotNet.Tools.Run
 
             CommandLineApplication app = new CommandLineApplication(throwOnUnexpectedArg: false);
             app.Name = "dotnet run";
-            app.FullName = ".NET Run Command";
-            app.Description = "Command used to run .NET apps";
+            app.FullName = LocalizableStrings.AppFullName;
+            app.Description = LocalizableStrings.AppDescription;
             app.HandleResponseFiles = true;
             app.AllowArgumentSeparator = true;
             app.ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText;
             app.HelpOption("-h|--help");
 
             CommandOption configuration = app.Option(
-                "-c|--configuration", "Configuration under which to build",
+                "-c|--configuration", LocalizableStrings.CommandOptionConfigurationDescription,
                 CommandOptionType.SingleValue);
             CommandOption framework = app.Option(
-                "-f|--framework <FRAMEWORK>", "Compile a specific framework",
+                "-f|--framework <{LocalizableStrings.CommandOptionFramework}>", LocalizableStrings.CommandOptionFrameworkDescription,
                 CommandOptionType.SingleValue);
             CommandOption project = app.Option(
-                "-p|--project", "The path to the project file to run (defaults to the current directory if there is only one project).",
+                "-p|--project", LocalizableStrings.CommandOptionProjectDescription,
                 CommandOptionType.SingleValue);
 
             app.OnExecute(() =>

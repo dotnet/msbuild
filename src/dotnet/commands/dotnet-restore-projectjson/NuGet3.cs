@@ -13,9 +13,9 @@ namespace Microsoft.DotNet.Tools.RestoreProjectJson
             if (!args.Any(s => s.Equals("--verbosity", StringComparison.OrdinalIgnoreCase) || s.Equals("-v", StringComparison.OrdinalIgnoreCase)))
             {
                 prefixArgs.Add("--verbosity");
-                prefixArgs.Add("minimal");
+                prefixArgs.Add(LocalizableStrings.AddMinimal);
             }
-            prefixArgs.Add("restore");
+            prefixArgs.Add(LocalizableStrings.AddRestore);
 
             var nugetApp = new NuGetForwardingApp(Enumerable.Concat(prefixArgs, args));
 
