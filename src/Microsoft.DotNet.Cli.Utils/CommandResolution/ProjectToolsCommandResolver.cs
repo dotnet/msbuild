@@ -76,7 +76,6 @@ namespace Microsoft.DotNet.Cli.Utils
                 tools,
                 commandResolverArguments.CommandName,
                 commandResolverArguments.CommandArguments.OrEmptyIfNull(),
-                project.GetLockFile(),
                 project);
         }
 
@@ -84,7 +83,6 @@ namespace Microsoft.DotNet.Cli.Utils
             IEnumerable<SingleProjectInfo> toolsLibraries,
             string commandName,
             IEnumerable<string> args,
-            LockFile lockFile,
             IProject project)
         {
             Reporter.Verbose.WriteLine($"projecttoolscommandresolver: resolving commandspec from {toolsLibraries.Count()} Tool Libraries.");
@@ -95,7 +93,6 @@ namespace Microsoft.DotNet.Cli.Utils
                     toolLibrary,
                     commandName,
                     args,
-                    lockFile,
                     project);
 
                 if (commandSpec != null)
@@ -113,7 +110,6 @@ namespace Microsoft.DotNet.Cli.Utils
             SingleProjectInfo toolLibraryRange,
             string commandName,
             IEnumerable<string> args,
-            LockFile lockFile,
             IProject project)
         {
             Reporter.Verbose.WriteLine($"projecttoolscommandresolver: Attempting to resolve command spec from tool {toolLibraryRange.Name}");
