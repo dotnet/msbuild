@@ -621,6 +621,22 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 @"a\foo",
                 "build.proj"
             })]
+        [InlineData(ItemWithIncludeAndExclude,
+            @"**\*",
+            @"a\af*\*",
+            new[]
+            {
+                @"a\foo",
+                @"a\a\foo",
+                @"a\b\foo",
+            },
+            new[]
+            {
+                @"a\a\foo",
+                @"a\b\foo",
+                @"a\foo",
+                "build.proj"
+            })]
         public void ExcludeVectorWithWildCards(string projectContents, string includeString, string excludeString, string[] inputFiles, string[] expectedInclude)
         {
             TestIncludeExcludeWithDifferentSlashes(projectContents, includeString, excludeString, inputFiles, expectedInclude);

@@ -722,9 +722,12 @@ namespace Microsoft.Build.Shared
                     filesToExclude = new HashSet<string>();
                     foreach (var excludeStep in excludeNextSteps)
                     {
-                        foreach (var file in excludeStep.Files)
+                        if (excludeStep.Files != null)
                         {
-                            filesToExclude.Add(file);
+                            foreach (var file in excludeStep.Files)
+                            {
+                                filesToExclude.Add(file);
+                            }
                         }
                     }
                 }
