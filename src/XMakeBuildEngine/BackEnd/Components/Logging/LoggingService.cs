@@ -224,6 +224,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private ISet<string> _warningsAsErrors = null;
 
+        /// <summary>
+        /// A list of warnings to treat as low importance messages.
+        /// </summary>
+        private ISet<string> _warningsAsMessages = null;
+
         #endregion
 
         #endregion
@@ -457,6 +462,15 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             get { return _warningsAsErrors; }
             set { _warningsAsErrors = value; }
+        }
+
+        /// <summary>
+        /// A list of warnings to treat as low importance messages.
+        /// </summary>
+        public ISet<string> WarningsAsMessages
+        {
+            get { return _warningsAsMessages; }
+            set { _warningsAsMessages = value; }
         }
 
         /// <summary>
@@ -819,7 +833,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 // create an eventSourceSink which the central logger will register with to receive the events from the forwarding logger
                 EventSourceSink eventSourceSink = new EventSourceSink
                 {
-                    WarningsAsErrors = WarningsAsErrors == null ? null : new HashSet<string>(WarningsAsErrors, StringComparer.OrdinalIgnoreCase)
+                    WarningsAsErrors = WarningsAsErrors == null ? null : new HashSet<string>(WarningsAsErrors, StringComparer.OrdinalIgnoreCase),
+                    WarningsAsMessages = WarningsAsMessages == null ? null : new HashSet<string>(WarningsAsMessages, StringComparer.OrdinalIgnoreCase),
                 };
 
                 // If the logger is already in the list it should not be registered again.
@@ -1135,7 +1150,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 _filterEventSource = new EventSourceSink
                 {
                     Name = "Sink for Distributed/Filter loggers",
-                    WarningsAsErrors = WarningsAsErrors == null ? null : new HashSet<string>(WarningsAsErrors, StringComparer.OrdinalIgnoreCase)
+                    WarningsAsErrors = WarningsAsErrors == null ? null : new HashSet<string>(WarningsAsErrors, StringComparer.OrdinalIgnoreCase),
+                    WarningsAsMessages = WarningsAsMessages == null ? null : new HashSet<string>(WarningsAsMessages, StringComparer.OrdinalIgnoreCase),
                 };
             }
         }

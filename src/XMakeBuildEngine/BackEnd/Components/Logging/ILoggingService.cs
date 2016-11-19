@@ -162,6 +162,15 @@ namespace Microsoft.Build.BackEnd.Logging
             get;
             set;
         }
+
+        /// <summary>
+        /// A list of warnings to treat as low importance messages.
+        /// </summary>
+        ISet<string> WarningsAsMessages
+        {
+            get;
+            set;
+        }
         #endregion
 
         /// <summary>
@@ -467,6 +476,15 @@ namespace Microsoft.Build.BackEnd.Logging
         /// A list of warnings to treat as errors.  If null, nothing is treated as an error.  If an empty set, all warnings are treated as errors.
         /// </summary>
         ISet<string> WarningsAsErrors
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// A list of warnings to treat as low importance messages.
+        /// </summary>
+        ISet<string> WarningsAsMessages
         {
             get;
             set;

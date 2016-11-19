@@ -103,6 +103,7 @@ namespace Microsoft.Build.CommandLine
             ServerToClientPipeHandle,
 #endif
             WarningsAsErrors,
+            WarningsAsMessages,
             NumberOfParameterizedSwitches
         }
 
@@ -281,6 +282,7 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "serverToClientPipeHandle", "s2c" },   ParameterizedSwitch.ServerToClientPipeHandle,   null,                           false,          null,                                  true,   false  ),
 #endif
             new ParameterizedSwitchInfo(  new string[] { "warnaserror", "err" },                ParameterizedSwitch.WarningsAsErrors,           null,                           true,           null,                                  true,   true  ),
+            new ParameterizedSwitchInfo(  new string[] { "warnasmessage", "nowarn" },           ParameterizedSwitch.WarningsAsMessages,         null,                           true,           "MissingWarnAsMessageParameterError",  true,   false ),
         };
 
         /// <summary>

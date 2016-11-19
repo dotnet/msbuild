@@ -156,6 +156,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             set;
         }
 
+        /// <summary>
+        /// List of warnings to treat as low importance messages.
+        /// </summary>
+        public ISet<string> WarningsAsMessages
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Is the logging service on a remote node, this is used to determine if properties need to be serialized

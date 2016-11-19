@@ -141,6 +141,15 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// A list of warnings to treat as low importance messages.
+        /// </summary>
+        public ISet<string> WarningsAsMessages
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// A list of build submission IDs that have logged errors.  If an error is logged outside of a submission, the submission ID is <see cref="BuildEventContext.InvalidSubmissionId"/>.
         /// </summary>
         public ISet<int> BuildSubmissionIdsThatHaveLoggedErrors
@@ -224,9 +233,33 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 BuildWarningEventArgs warningEvent = (BuildWarningEventArgs) buildEvent;
 
-                // Treat this warning as an error if an empty set of warnings was specified or this code was specified
-                if (WarningsAsErrors != null && (WarningsAsErrors.Count == 0 || WarningsAsErrors.Contains(warningEvent.Code)))
+                if (WarningsAsMessages != null && WarningsAsMessages.Contains(warningEvent.Code))
                 {
+                    // Treat this warning as a message with low importance if its in the list
+                    BuildMessageEventArgs errorEvent = new BuildMessageEventArgs(
+                        warningEvent.Subcategory,
+                        warningEvent.Code,
+                        warningEvent.File,
+                        warningEvent.LineNumber,
+                        warningEvent.ColumnNumber,
+                        warningEvent.EndLineNumber,
+                        warningEvent.EndColumnNumber,
+                        warningEvent.Message,
+                        warningEvent.HelpKeyword,
+                        warningEvent.SenderName,
+                        MessageImportance.Low,
+                        warningEvent.Timestamp)
+                    {
+                        BuildEventContext = warningEvent.BuildEventContext,
+                        ProjectFile = warningEvent.ProjectFile,
+                    };
+
+                    this.RaiseMessageEvent(null, errorEvent);
+
+                }
+                else if (WarningsAsErrors != null && (WarningsAsErrors.Count == 0 || WarningsAsErrors.Contains(warningEvent.Code)))
+                {
+                    // Treat this warning as an error if an empty set of warnings was specified or this code was specified
                     BuildErrorEventArgs errorEvent = new BuildErrorEventArgs(
                         warningEvent.Subcategory,
                         warningEvent.Code,

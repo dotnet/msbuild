@@ -206,6 +206,11 @@ namespace Microsoft.Build.Execution
         private ISet<string> _warningsAsErrors = null;
 
         /// <summary>
+        /// A list of warnings to treat as low importance messages.
+        /// </summary>
+        private ISet<string> _warningsAsMessages = null;
+
+        /// <summary>
         /// The location of the toolset definitions.
         /// </summary>
         private ToolsetDefinitionLocations _toolsetDefinitionLocations = ToolsetDefinitionLocations.Default;
@@ -326,6 +331,7 @@ namespace Microsoft.Build.Execution
             _logTaskInputs = other._logTaskInputs;
             _logInitialPropertiesAndItems = other._logInitialPropertiesAndItems;
             _warningsAsErrors = other._warningsAsErrors == null ? null : new HashSet<string>(other._warningsAsErrors, StringComparer.OrdinalIgnoreCase);
+            _warningsAsMessages = other._warningsAsMessages == null ? null : new HashSet<string>(other._warningsAsMessages, StringComparer.OrdinalIgnoreCase);
         }
 
 #if FEATURE_THREAD_PRIORITY
@@ -596,6 +602,15 @@ namespace Microsoft.Build.Execution
         {
             get { return _warningsAsErrors; }
             set { _warningsAsErrors = value; }
+        }
+
+        /// <summary>
+        /// A list of warnings to treat as low importance messages.
+        /// </summary>
+        public ISet<string> WarningsAsMessages
+        {
+            get { return _warningsAsMessages; }
+            set { _warningsAsMessages = value; }
         }
 
         /// <summary>
