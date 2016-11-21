@@ -31,4 +31,4 @@ msbuild %WebSdkRoot%\dirs.proj /p:configuration=Release;SkipInvalidConfiguration
 
 :ERROR
 endlocal
-exit /b 0
+exit /b 1
