@@ -86,6 +86,12 @@ if "%TARGET%"=="Full" (
     set RUNTIMETYPE_ARGUMENT="/p:MSBuildRuntimeType=Full"
 )
 
+:: Set different paths if running in CI
+IF DEFINED WORKSPACE (
+    SET TEMP=%WORKSPACE%\Temp
+    SET TMP=%WORKSPACE%\Temp
+)
+
 :: Restore build tools
 call %~dp0init-tools.cmd
 
