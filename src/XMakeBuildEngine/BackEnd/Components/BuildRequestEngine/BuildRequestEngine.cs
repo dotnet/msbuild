@@ -840,14 +840,14 @@ namespace Microsoft.Build.BackEnd
         {
             if (!NativeMethodsShared.IsWindows || BuildEnvironmentHelper.Instance.RunningInVisualStudio)
             {
-                /// Since this causes synchronous I/O and a stop-the-world GC, it can be very expensive. If
-                /// something other than build results is taking up the bulk of the memory space, it may not
-                /// free any space. That's caused customer reports of VS hangs resulting from build requests
-                /// that are very slow because something in VS is taking all of the memory, but every
-                /// project build is slowed down by this codepath. To mitigate this, don't perform these
-                /// checks in devenv.exe. On the command line, 32-bit MSBuild may still need to cache build
-                /// results on very large builds, but build results are much more likely to be the bulk of
-                /// memory usage there.
+                // Since this causes synchronous I/O and a stop-the-world GC, it can be very expensive. If
+                // something other than build results is taking up the bulk of the memory space, it may not
+                // free any space. That's caused customer reports of VS hangs resulting from build requests
+                // that are very slow because something in VS is taking all of the memory, but every
+                // project build is slowed down by this codepath. To mitigate this, don't perform these
+                // checks in devenv.exe. On the command line, 32-bit MSBuild may still need to cache build
+                // results on very large builds, but build results are much more likely to be the bulk of
+                // memory usage there.
                 return;
             }
 

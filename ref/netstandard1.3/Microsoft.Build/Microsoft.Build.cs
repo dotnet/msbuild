@@ -49,6 +49,7 @@ namespace Microsoft.Build.Construction
         protected internal virtual Microsoft.Build.Construction.ProjectElement Clone(Microsoft.Build.Construction.ProjectRootElement factory) { throw null; }
         public virtual void CopyFrom(Microsoft.Build.Construction.ProjectElement element) { }
         protected abstract Microsoft.Build.Construction.ProjectElement CreateNewInstance(Microsoft.Build.Construction.ProjectRootElement owner);
+        protected virtual bool ShouldCloneXmlAttribute(System.Xml.XmlAttribute attribute) { throw null; }
     }
     public abstract partial class ProjectElementContainer : Microsoft.Build.Construction.ProjectElement
     {
@@ -148,6 +149,7 @@ namespace Microsoft.Build.Construction
         public Microsoft.Build.Construction.ProjectMetadataElement AddMetadata(string name, string unevaluatedValue, bool expressAsAttribute) { throw null; }
         public override void CopyFrom(Microsoft.Build.Construction.ProjectElement element) { }
         protected override Microsoft.Build.Construction.ProjectElement CreateNewInstance(Microsoft.Build.Construction.ProjectRootElement owner) { throw null; }
+        protected override bool ShouldCloneXmlAttribute(System.Xml.XmlAttribute attribute) { throw null; }
     }
     [System.Diagnostics.DebuggerDisplayAttribute("#Items={Count} Condition={Condition} Label={Label}")]
     public partial class ProjectItemGroupElement : Microsoft.Build.Construction.ProjectElementContainer
