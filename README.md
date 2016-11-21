@@ -4,15 +4,17 @@ The Microsoft Build Engine is a platform for building applications. This engine,
 For more information on MSBuild, see the [MSDN documentation](https://msdn.microsoft.com/en-us/library/dd393574%28v=vs.140%29.aspx).
 
 ### Build Status
-Full framework build from `master` (stable, inserted into Visual Studio builds):
-[![Build Status](https://ci.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_master_Windows_NT_Desktop)](https://ci.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_master_Windows_NT_Desktop)
 
-The `xplat` branch is soon to be merged back upstream. Follow the [The Great Merge](https://github.com/Microsoft/msbuild/milestone/6) milestone for progress.
+The current development branch is `xplat`. It builds for .NET Core and the full desktop .NET framework.
 
 | Runtime\OS | Windows | Ubuntu 14.04 | Ubuntu 16.04 |Mac OS X|
 |:------|:------:|:------:|:------:|:------:|
 | **Full Framework** |[![Build Status](https://ci.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_xplat_Windows_NT_Desktop)](https://ci.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_xplat_Windows_NT_Desktop)| N/A | N/A | N/A |
 |**.NET Core**|[![Build Status](https://ci.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_xplat_Windows_NT_CoreCLR)](https://ci.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_xplat_Windows_NT_CoreCLR)|[![Build Status](https://ci.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_xplat_Ubuntu14.04_CoreCLR)](https://ci.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_xplat_Ubuntu14.04_CoreCLR)|[![Build Status](https://ci.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_xplat_Ubuntu16.04_CoreCLR)](https://ci.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_xplat_Ubuntu16.04_CoreCLR)|[![Build Status](https://ci.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_xplat_OSX_CoreCLR)](https://ci.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_xplat_OSX_CoreCLR)|
+
+Full-framework-only build from `master` (deprecated):
+[![Build Status](https://ci.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_master_Windows_NT_Desktop)](https://ci.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_master_Windows_NT_Desktop)
+
 
 [![Join the chat at https://gitter.im/Microsoft/msbuild](https://badges.gitter.im/Microsoft/msbuild.svg)](https://gitter.im/Microsoft/msbuild?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Check out what we're working on using our Waffle board!](https://badge.waffle.io/Microsoft/msbuild.svg?label=In+Progress&title=waffle+board)](http://waffle.io/Microsoft/msbuild)
