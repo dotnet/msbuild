@@ -572,7 +572,7 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Compare if two paths, relative to the given currentDirectory are equal.
-        /// Does not throw IO exceptions. See <see cref="GetFullPathNoThrow(string, string)"/>
+        /// Does not throw IO exceptions. See <see cref="GetFullPathNoThrow(string)"/>
         /// </summary>
         /// <param name="first"></param>
         /// <param name="second"></param>
@@ -594,7 +594,7 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Normalizes a path for path comparison
-        /// Does not throw IO exceptions. See <see cref="GetFullPathNoThrow(string, string)"/>
+        /// Does not throw IO exceptions. See <see cref="GetFullPathNoThrow(string)"/>
         /// 
         /// </summary>
         internal static string NormalizePathForComparisonNoThrow(string path, string currentDirectory)
