@@ -88,15 +88,17 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)] // TODO: https://github.com/Microsoft/msbuild/issues/434
         public void Timeout()
         {
+            // On non-Windows the exit code of a killed process is SIGTERM (143)
+            int expectedExitCode = NativeMethodsShared.IsWindows ? -1 : 143;
+
             Exec exec = PrepareExec(NativeMethodsShared.IsWindows ? ":foo \n goto foo" : "while true; do sleep 1; done");
             exec.Timeout = 5;
             bool result = exec.Execute();
 
             Assert.Equal(false, result);
-            Assert.Equal(-1, exec.ExitCode);
+            Assert.Equal(expectedExitCode, exec.ExitCode);
             ((MockEngine)exec.BuildEngine).AssertLogContains("MSB5002");
             Assert.Equal(1, ((MockEngine)exec.BuildEngine).Warnings);
 
