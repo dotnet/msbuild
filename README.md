@@ -17,7 +17,6 @@ Full-framework-only build from `master` (deprecated):
 
 
 [![Join the chat at https://gitter.im/Microsoft/msbuild](https://badges.gitter.im/Microsoft/msbuild.svg)](https://gitter.im/Microsoft/msbuild?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Check out what we're working on using our Waffle board!](https://badge.waffle.io/Microsoft/msbuild.svg?label=In+Progress&title=waffle+board)](http://waffle.io/Microsoft/msbuild)
 
 ### Source code
 
