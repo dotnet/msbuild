@@ -23,8 +23,8 @@ Full-framework-only build from `master` (deprecated):
 * Clone the sources: `git clone https://github.com/Microsoft/msbuild.git`
 
 ### Building
-## Building MSBuild in VS 2015
-For the full supported experience, you will need to have Visual Studio 2015. You can open the solution in Visual Studio 2013, but you will encounter issues building with the provided scripts.
+## Building MSBuild with VS 2015
+For the full supported experience, you will need to have Visual Studio 2015. You can open the solution in Visual Studio 2017 RC, but you will encounter issues building with the provided scripts.
 
 To get started on **Visual Studio 2015**:
 
@@ -33,8 +33,7 @@ To get started on **Visual Studio 2015**:
   - _Universal Windows App Development Tools_
     - _Tools and Windows SDK 10.0.10240_
 2. Clone the source code (see above).
-3. (on the `xplat` branch only) Initialize tools the first time: `init-tools.cmd`
-4. Restore NuGet packages: `msbuild /t:BulkRestoreNugetPackages build.proj`
+3. Build the code using the `cibuild.cmd` script.
 5. Open src/MSBuild.sln solution in Visual Studio 2015.
 
 ## Building MSBuild in Unix (Mac & Linux)
