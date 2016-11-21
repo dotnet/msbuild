@@ -291,21 +291,10 @@ namespace Microsoft.Build.Tasks
             }
 
             // No reference assembly paths could be found, log an error so an invalid build will not be produced.
-            // 1/26/16: Note this was changed from a warning to an error (see GitHub #173). Also added the escape hatch 
-            // (set MSBUILDWARNONNOREFERENCEASSEMBLYDIRECTORY = 1) in case this causes issues.
-            // TODO: This should be removed for Dev15
+            // 1/26/16: Note this was changed from a warning to an error (see GitHub #173).
             if (pathsToReturn.Count == 0)
             {
-                var warn = Environment.GetEnvironmentVariable(WARNONNOREFERENCEASSEMBLYDIRECTORY);
-
-                if (string.Equals(warn, "1", StringComparison.Ordinal))
-                {
-                    Log.LogWarningWithCodeFromResources("GetReferenceAssemblyPaths.NoReferenceAssemblyDirectoryFound", frameworkmoniker.ToString());
-                }
-                else
-                {
-                    Log.LogErrorWithCodeFromResources("GetReferenceAssemblyPaths.NoReferenceAssemblyDirectoryFound", frameworkmoniker.ToString());
-                }
+                Log.LogErrorWithCodeFromResources("GetReferenceAssemblyPaths.NoReferenceAssemblyDirectoryFound", frameworkmoniker.ToString());
             }
 
             return pathsToReturn;
