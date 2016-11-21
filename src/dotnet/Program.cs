@@ -244,6 +244,7 @@ namespace Microsoft.DotNet.Cli
             Reporter.Output.WriteLine($" OS Version:  {RuntimeEnvironment.OperatingSystemVersion}");
             Reporter.Output.WriteLine($" OS Platform: {RuntimeEnvironment.OperatingSystemPlatform}");
             Reporter.Output.WriteLine($" RID:         {GetDisplayRid(versionFile)}");
+            Reporter.Output.WriteLine($" Base Path:   {ApplicationEnvironment.ApplicationBasePath}");
         }
 
         private static bool IsArg(string candidate, string longName)
