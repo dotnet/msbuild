@@ -98,7 +98,7 @@ namespace Microsoft.Build.UnitTests
             bool result = exec.Execute();
 
             Assert.Equal(false, result);
-            Assert.Equal(-1, exec.ExitCode);
+            Assert.Equal(expectedExitCode, exec.ExitCode);
             ((MockEngine)exec.BuildEngine).AssertLogContains("MSB5002");
             Assert.Equal(1, ((MockEngine)exec.BuildEngine).Warnings);
 
