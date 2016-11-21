@@ -6,6 +6,7 @@ using System.IO;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using FluentAssertions;
+using Microsoft.Build.Construction;
 
 namespace Microsoft.DotNet.Cli.Add.P2P.Tests
 {
@@ -458,14 +459,99 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
             csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(LibRefPath, ConditionFrameworkNet451).Should().Be(1);
         }
 
-        [Fact(Skip = "Not finished")]
+        [Fact]
         public void WhenProjectNameIsNotPassedItFindsItAndAddsReference()
+        {
+            var lib = NewLib();
+
+            int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
+            var cmd = new AddP2PCommand()
+                .WithWorkingDirectory(lib.Path)
+                .Execute($"\"{ValidRefPath}\"");
+            cmd.Should().Pass();
+            cmd.StdOut.Should().Contain("added to the project");
+            cmd.StdErr.Should().BeEmpty();
+            var csproj = lib.CsProj();
+            csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
+            csproj.NumberOfProjectReferencesWithIncludeContaining(ValidRefCsproj).Should().Be(1);
+        }
+
+        [Fact]
+        public void ItAddsRefBetweenImports()
+        {
+            var lib = NewLib();
+
+            var cmd = new AddP2PCommand()
+                .WithWorkingDirectory(lib.Path)
+                .WithProject(lib.CsProjName)
+                .Execute($"\"{ValidRefPath}\"");
+            cmd.Should().Pass();
+            cmd.StdOut.Should().Contain("added to the project");
+            cmd.StdErr.Should().BeEmpty();
+
+            int state = 0;
+            foreach (var el in lib.CsProj().AllChildren)
+            {
+                var import = el as ProjectImportElement;
+                var projRef = el as ProjectItemElement;
+                switch (state)
+                {
+                    case 0:
+                        if (import != null && import.Project.EndsWith(".props"))
+                        {
+                            state++;
+                        }
+                        break;
+                    case 1:
+                        if (projRef != null && projRef.ItemType == "ProjectReference" && projRef.Include.Contains(ValidRefCsproj))
+                        {
+                            state++;
+                        }
+                        break;
+                    case 2:
+                        if (import != null && import.Project.EndsWith(".targets"))
+                        {
+                            state++;
+                        }
+                        break;
+                }
+            }
+
+            state.Should().Be(3);
+        }
+
+        [Fact(Skip = "Not finished")]
+        public void WhenPassedReferenceDoesNotExistItShowsAnError()
         {
             throw new NotImplementedException();
         }
 
         [Fact(Skip = "Not finished")]
-        public void ItAddsRefBeforeImports()
+        public void WhenPassedMultipleRefsAndOneOfthemDoesNotExistItCancelsWholeOperation()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Fact(Skip = "Not finished")]
+        public void WhenPassedReferenceDoesNotExistAndForceSwitchIsPassedItAddsIt()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Fact(Skip = "Not finished")]
+        public void WhenPassedReferenceIsUsingSlashesItNormalizesItToBackslashes()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Fact(Skip = "Not finished")]
+        public void WhenPassedRefIsUsingBackslashesItDoesntNormalizeIt()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Fact(Skip = "Not finished")]
+        public void WhenReferenceIsRelativeAndProjectIsNotInCurrentDirectoryReferencePathIsFixed()
         {
             throw new NotImplementedException();
         }

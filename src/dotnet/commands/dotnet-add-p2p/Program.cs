@@ -50,7 +50,10 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
                     throw new GracefulException("You must specify at least one reference to add.");
                 }
 
-                int numberOfAddedReferences = AddProjectToProjectReference(project, frameworkOption.Value(), app.RemainingArguments);
+                int numberOfAddedReferences = AddProjectToProjectReference(
+                    project,
+                    frameworkOption.Value(),
+                    app.RemainingArguments);
 
                 if (numberOfAddedReferences != 0)
                 {
@@ -74,7 +77,7 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
 
         // There is ProjectRootElement.TryOpen but it does not work as expected
         // I.e. it returns null for some valid projects
-        public static ProjectRootElement TryOpenProject(string filename)
+        internal static ProjectRootElement TryOpenProject(string filename)
         {
             try
             {
@@ -86,7 +89,7 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
             }
         }
 
-        public static ProjectRootElement GetProjectFromFileOrThrow(string filename)
+        internal static ProjectRootElement GetProjectFromFileOrThrow(string filename)
         {
             if (!File.Exists(filename))
             {
@@ -103,7 +106,7 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
         }
 
         // TODO: improve errors
-        public static ProjectRootElement GetProjectFromDirectoryOrThrow(string directory)
+        internal static ProjectRootElement GetProjectFromDirectoryOrThrow(string directory)
         {
             DirectoryInfo dir;
             try
@@ -128,7 +131,7 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
 
             if (files.Length > 1)
             {
-                throw new GracefulException("Found more than one MSBuild project in the current directory. Please specify which one to use.");
+                throw new GracefulException("Found more than one project in the current directory. Please specify which one to use.");
             }
 
             FileInfo projectFile = files.First();
@@ -147,7 +150,7 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
             return ret;
         }
 
-        public static int AddProjectToProjectReference(ProjectRootElement root, string framework, IEnumerable<string> refs)
+        internal static int AddProjectToProjectReference(ProjectRootElement root, string framework, IEnumerable<string> refs)
         {
             int numberOfAddedReferences = 0;
             const string ProjectItemElementType = "ProjectReference";

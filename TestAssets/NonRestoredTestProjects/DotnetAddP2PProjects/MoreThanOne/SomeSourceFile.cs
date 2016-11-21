@@ -1,8 +1,3 @@
-﻿using System;
-
-namespace SomeNS
+﻿public class SomeClass
 {
-    public class SomeClass
-    {
-    }
 }
