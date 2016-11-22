@@ -375,9 +375,19 @@ namespace Microsoft.Build.Evaluation
             return FileUtilities.EnsureTrailingSlash(path);
         }
 
-        public static string GetCurrentExecutableDirectory()
+        public static string GetCurrentToolsDirectory()
         {
             return BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
+        }
+
+        public static string GetToolsDirectory32()
+        {
+            return BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
+        }
+
+        public static string GetToolsDirectory64()
+        {
+            return BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64;
         }
 
         public static string GetVsInstallRoot()
