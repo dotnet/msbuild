@@ -1181,6 +1181,7 @@ typedef enum _tagAssemblyComparisonResult
             }
         }
 
+        // Based on coreclr baseassemblyspec.inl (https://github.com/dotnet/coreclr/blob/32f0f9721afb584b4a14d69135bea7ddc129f755/src/vm/baseassemblyspec.inl#L679-L683)
         private static bool IsStrongNamed(AssemblyName assembly)
         {
             var refPkt = assembly.GetPublicKeyToken();
