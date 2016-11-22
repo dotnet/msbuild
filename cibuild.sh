@@ -24,6 +24,10 @@ setHome()
     then
         export HOME=$HOME_DEFAULT
         mkdir -p $HOME_DEFAULT
+
+        # Use a different temp directory in CI so that hopefully things are a little more stable
+        export TMPDIR=$TEMP_DEFAULT
+        mkdir -p $TEMP_DEFAULT
     fi
 }
 
@@ -134,6 +138,7 @@ TOOLS_DIR="$THIS_SCRIPT_PATH/Tools"
 MSBUILD_DOWNLOAD_URL="https://github.com/Microsoft/msbuild/releases/download/mono-hosted-msbuild-v0.2/mono_msbuild_bootstrap_5e01f07.zip"
 MSBUILD_ZIP="$PACKAGES_DIR/msbuild.zip"
 HOME_DEFAULT="$WORKSPACE/msbuild-CI-home"
+TEMP_DEFAULT="$WORKSPACE/tmp"
 
 PROJECT_FILE_ARG='"'"$THIS_SCRIPT_PATH/build.proj"'"'
 BOOTSTRAP_FILE_ARG='"'"$THIS_SCRIPT_PATH/targets/BootStrapMSBuild.proj"'"'
