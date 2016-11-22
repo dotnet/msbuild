@@ -3361,5 +3361,27 @@ $(
                     );
             }
         }
+
+        [Fact]
+        public void PropertyFunctionEnsureTrailingSlash()
+        {
+            string path = Path.Combine("foo", "bar");
+
+            PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
+
+            pg.Set(ProjectPropertyInstance.Create("SomeProperty", path));
+
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
+
+            // Verify a constant expands properly
+            string result = expander.ExpandIntoStringLeaveEscaped($"$([MSBuild]::EnsureTrailingSlash('{path}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+            Assert.Equal(path + Path.DirectorySeparatorChar, result);
+
+            // Verify that a property expands properly
+            result = expander.ExpandIntoStringLeaveEscaped("$([MSBuild]::EnsureTrailingSlash($(SomeProperty)))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+            Assert.Equal(path + Path.DirectorySeparatorChar, result);
+        }
     }
 }
