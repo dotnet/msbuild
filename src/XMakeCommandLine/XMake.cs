@@ -491,6 +491,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                 case "2":
                     // Sometimes easier to attach rather than deal with JIT prompt
+                    Console.WriteLine($"Waiting for debugger to attach (PID {Process.GetCurrentProcess().Id}).  Press enter to continue...");
                     Console.ReadLine();
                     break;
             }
