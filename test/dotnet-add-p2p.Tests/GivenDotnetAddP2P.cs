@@ -16,25 +16,13 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         const string ConditionFrameworkNet451 = "== 'net451'";
         const string FrameworkNetCoreApp10Arg = "-f netcoreapp1.0";
         const string ConditionFrameworkNetCoreApp10 = "== 'netcoreapp1.0'";
-        private static readonly string ValidRef = "ValidRef";
-        private static readonly string ValidRefCsproj = $"{ValidRef}.csproj";
-        private static readonly string ValidRefPath = Path.Combine("..", ValidRef, ValidRefCsproj);
 
-        private static readonly string LibRef = "Lib";
-        private static readonly string LibRefCsproj = $"{LibRef}.csproj";
-        private static readonly string LibRefPath = Path.Combine("..", LibRef, LibRefCsproj);
-
-        private static readonly string AppPath = Path.Combine("App", "App.csproj");
-        private static readonly string Lib1Path = Path.Combine("Lib1", "Lib1.csproj");
-        private static readonly string Lib2Path = Path.Combine("Lib2", "Lib2.csproj");
-        private static readonly string Lib3Path = Path.Combine("Lib3", "Lib3.csproj");
-        private static readonly string Lib4Path = Path.Combine("Lib4", "Lib4.csproj");
-
-        private string Setup([System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(Setup), string identifier = "")
+        private TestSetup Setup([System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(Setup), string identifier = "")
         {
-            const string TestGroup = "NonRestoredTestProjects";
-            const string ProjectName = "DotnetAddP2PProjects";
-            return GetTestGroupTestAssetsManager(TestGroup).CreateTestInstance(ProjectName, callingMethod: callingMethod, identifier: identifier).Path;
+            return new TestSetup(
+                GetTestGroupTestAssetsManager(TestSetup.TestGroup)
+                    .CreateTestInstance(TestSetup.ProjectName, callingMethod: callingMethod, identifier: identifier)
+                    .Path);
         }
 
         private ProjDir NewDir([System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(NewDir), string identifier = "")
@@ -55,7 +43,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
             }
             catch (System.ComponentModel.Win32Exception e)
             {
-                throw new Exception($"DIDIDIDIDOIDIR: {dir.Path}\n{e}");
+                throw new Exception($"Intermittent error in `dotnet new` occurred when running it in dir `{dir.Path}`\nException:\n{e}");
             }
 
             return dir;
@@ -77,10 +65,12 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         public void WhenNonExistingProjectIsPassedItPrintsErrorAndUsage(string projName)
         {
             string testRoot = NewDir().Path;
+            var setup = Setup();
+
             var cmd = new AddP2PCommand()
-                    .WithWorkingDirectory(testRoot)
+                    .WithWorkingDirectory(setup.TestRoot)
                     .WithProject(projName)
-                    .Execute($"\"{ValidRefPath}\"");
+                    .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Contain("Could not find");
             cmd.StdOut.Should().Contain("Usage");
@@ -91,11 +81,12 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         public void WhenBrokenProjectIsPassedItPrintsErrorAndUsage()
         {
             string projName = "Broken/Broken.csproj";
-            string testRoot = Setup();
+            var setup = Setup();
+
             var cmd = new AddP2PCommand()
-                    .WithWorkingDirectory(testRoot)
+                    .WithWorkingDirectory(setup.TestRoot)
                     .WithProject(projName)
-                    .Execute($"\"{ValidRefPath}\"");
+                    .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Contain("Invalid project");
             cmd.StdOut.Should().Contain("Usage");
@@ -104,10 +95,11 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void WhenMoreThanOneProjectExistsInTheDirectoryItPrintsErrorAndUsage()
         {
-            string testRoot = Setup();
+            var setup = Setup();
+
             var cmd = new AddP2PCommand()
-                    .WithWorkingDirectory(Path.Combine(testRoot, "MoreThanOne"))
-                    .Execute($"\"{ValidRefPath}\"");
+                    .WithWorkingDirectory(Path.Combine(setup.TestRoot, "MoreThanOne"))
+                    .Execute($"\"{setup.ValidRefCsprojRelPath}\"");
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Contain("more than one");
             cmd.StdOut.Should().Contain("Usage");
@@ -116,10 +108,11 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void WhenNoProjectsExistsInTheDirectoryItPrintsErrorAndUsage()
         {
-            string testRoot = Setup();
+            var setup = Setup();
+
             var cmd = new AddP2PCommand()
-                    .WithWorkingDirectory(testRoot)
-                    .Execute($"\"{ValidRefPath}\"");
+                    .WithWorkingDirectory(setup.TestRoot)
+                    .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Contain("not find any");
             cmd.StdOut.Should().Contain("Usage");
@@ -129,187 +122,194 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         public void ItAddsRefWithoutCondAndPrintsStatus()
         {
             var lib = NewLib();
+            var setup = Setup();
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
             var cmd = new AddP2PCommand()
-                .WithWorkingDirectory(lib.Path)
-                .WithProject(lib.CsProjName)
-                .Execute($"\"{ValidRefPath}\"");
+                .WithWorkingDirectory(setup.TestRoot)
+                .WithProject(lib.CsProjPath)
+                .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
             cmd.StdOut.Should().Contain("added to the project");
             cmd.StdErr.Should().BeEmpty();
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
-            csproj.NumberOfProjectReferencesWithIncludeContaining(ValidRefCsproj).Should().Be(1);
+            csproj.NumberOfProjectReferencesWithIncludeContaining(setup.ValidRefCsprojName).Should().Be(1);
         }
 
         [Fact]
         public void ItAddsRefWithCondAndPrintsStatus()
         {
             var lib = NewLib();
+            var setup = Setup();
 
             int condBefore = lib.CsProj().NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451);
             var cmd = new AddP2PCommand()
-                .WithWorkingDirectory(lib.Path)
-                .WithProject(lib.CsProjName)
-                .Execute($"{FrameworkNet451Arg} \"{ValidRefPath}\"");
+                .WithWorkingDirectory(setup.TestRoot)
+                .WithProject(lib.CsProjPath)
+                .Execute($"{FrameworkNet451Arg} \"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
             cmd.StdOut.Should().Contain("added to the project");
             cmd.StdErr.Should().BeEmpty();
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451).Should().Be(condBefore + 1);
-            csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(ValidRefCsproj, ConditionFrameworkNet451).Should().Be(1);
+            csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(setup.ValidRefCsprojName, ConditionFrameworkNet451).Should().Be(1);
         }
 
         [Fact]
         public void WhenRefWithoutCondIsPresentItAddsDifferentRefWithoutCond()
         {
             var lib = NewLib();
+            var setup = Setup();
 
             new AddP2PCommand()
-                .WithWorkingDirectory(lib.Path)
-                .WithProject(lib.CsProjName)
-                .Execute($"\"{LibRefPath}\"")
+                .WithWorkingDirectory(setup.TestRoot)
+                .WithProject(lib.CsProjPath)
+                .Execute($"\"{setup.LibCsprojPath}\"")
                 .Should().Pass();
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
             var cmd = new AddP2PCommand()
                 .WithWorkingDirectory(lib.Path)
                 .WithProject(lib.CsProjName)
-                .Execute($"\"{ValidRefPath}\"");
+                .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
             cmd.StdOut.Should().Contain("added to the project");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore);
-            csproj.NumberOfProjectReferencesWithIncludeContaining(ValidRefCsproj).Should().Be(1);
+            csproj.NumberOfProjectReferencesWithIncludeContaining(setup.ValidRefCsprojName).Should().Be(1);
         }
 
         [Fact]
         public void WhenRefWithCondIsPresentItAddsDifferentRefWithCond()
         {
             var lib = NewLib();
+            var setup = Setup();
 
             new AddP2PCommand()
-                .WithWorkingDirectory(lib.Path)
-                .WithProject(lib.CsProjName)
-                .Execute($"{FrameworkNet451Arg} \"{LibRefPath}\"")
+                .WithWorkingDirectory(setup.TestRoot)
+                .WithProject(lib.CsProjPath)
+                .Execute($"{FrameworkNet451Arg} \"{setup.LibCsprojPath}\"")
                 .Should().Pass();
 
             int condBefore = lib.CsProj().NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451);
             var cmd = new AddP2PCommand()
-                .WithWorkingDirectory(lib.Path)
-                .WithProject(lib.CsProjName)
-                .Execute($"{FrameworkNet451Arg} \"{ValidRefPath}\"");
+                .WithWorkingDirectory(setup.TestRoot)
+                .WithProject(lib.CsProjPath)
+                .Execute($"{FrameworkNet451Arg} \"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
             cmd.StdOut.Should().Contain("added to the project");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451).Should().Be(condBefore);
-            csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(ValidRefCsproj, ConditionFrameworkNet451).Should().Be(1);
+            csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(setup.ValidRefCsprojName, ConditionFrameworkNet451).Should().Be(1);
         }
 
         [Fact]
         public void WhenRefWithCondIsPresentItAddsRefWithDifferentCond()
         {
             var lib = NewLib();
+            var setup = Setup();
 
             new AddP2PCommand()
-                .WithWorkingDirectory(lib.Path)
-                .WithProject(lib.CsProjName)
-                .Execute($"{FrameworkNetCoreApp10Arg} \"{ValidRefPath}\"")
+                .WithWorkingDirectory(setup.TestRoot)
+                .WithProject(lib.CsProjPath)
+                .Execute($"{FrameworkNetCoreApp10Arg} \"{setup.ValidRefCsprojPath}\"")
                 .Should().Pass();
 
             int condBefore = lib.CsProj().NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451);
             var cmd = new AddP2PCommand()
-                .WithWorkingDirectory(lib.Path)
-                .WithProject(lib.CsProjName)
-                .Execute($"{FrameworkNet451Arg} \"{ValidRefPath}\"");
+                .WithWorkingDirectory(setup.TestRoot)
+                .WithProject(lib.CsProjPath)
+                .Execute($"{FrameworkNet451Arg} \"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
             cmd.StdOut.Should().Contain("added to the project");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451).Should().Be(condBefore + 1);
-            csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(ValidRefCsproj, ConditionFrameworkNet451).Should().Be(1);
+            csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(setup.ValidRefCsprojName, ConditionFrameworkNet451).Should().Be(1);
         }
 
         [Fact]
         public void WhenRefWithConditionIsPresentItAddsDifferentRefWithoutCond()
         {
             var lib = NewLib();
+            var setup = Setup();
 
             new AddP2PCommand()
-                .WithWorkingDirectory(lib.Path)
-                .WithProject(lib.CsProjName)
-                .Execute($"{FrameworkNet451Arg} \"{LibRefPath}\"")
+                .WithWorkingDirectory(setup.TestRoot)
+                .WithProject(lib.CsProjPath)
+                .Execute($"{FrameworkNet451Arg} \"{setup.LibCsprojPath}\"")
                 .Should().Pass();
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
             var cmd = new AddP2PCommand()
-                .WithWorkingDirectory(lib.Path)
-                .WithProject(lib.CsProjName)
-                .Execute($"\"{ValidRefPath}\"");
+                .WithWorkingDirectory(setup.TestRoot)
+                .WithProject(lib.CsProjPath)
+                .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
 
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
-            csproj.NumberOfProjectReferencesWithIncludeContaining(ValidRefCsproj).Should().Be(1);
+            csproj.NumberOfProjectReferencesWithIncludeContaining(setup.ValidRefCsprojName).Should().Be(1);
         }
 
         [Fact]
         public void WhenRefWithNoCondAlreadyExistsItDoesntDuplicate()
         {
             var lib = NewLib();
+            var setup = Setup();
 
             new AddP2PCommand()
-                .WithWorkingDirectory(lib.Path)
-                .WithProject(lib.CsProjName)
-                .Execute($"\"{ValidRefPath}\"")
+                .WithWorkingDirectory(setup.TestRoot)
+                .WithProject(lib.CsProjPath)
+                .Execute($"\"{setup.ValidRefCsprojPath}\"")
                 .Should().Pass();
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
             var cmd = new AddP2PCommand()
                 .WithWorkingDirectory(lib.Path)
                 .WithProject(lib.CsProjName)
-                .Execute($"\"{ValidRefPath}\"");
+                .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
             cmd.StdOut.Should().Contain("already has a reference");
 
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore);
-            csproj.NumberOfProjectReferencesWithIncludeContaining(ValidRefCsproj).Should().Be(1);
+            csproj.NumberOfProjectReferencesWithIncludeContaining(setup.ValidRefCsprojName).Should().Be(1);
         }
 
         [Fact]
         public void WhenRefWithCondOnItemAlreadyExistsItDoesntDuplicate()
         {
-            string testRoot = Setup();
+            var setup = Setup();
+            var proj = new ProjDir(Path.Combine(setup.TestRoot, "WithExistingRefCondOnItem"));
 
-            string projDir = Path.Combine(testRoot, "WithExistingRefCondOnItem");
-            string projName = Path.Combine(projDir, "WithExistingRefCondOnItem.csproj");
-            string contentBefore = File.ReadAllText(projName);
+            string contentBefore = proj.CsProjContent();
             var cmd = new AddP2PCommand()
-                    .WithWorkingDirectory(projDir)
-                    .WithProject(projName)
-                    .Execute($"{FrameworkNet451Arg} \"{LibRefPath}\"");
+                    .WithWorkingDirectory(proj.Path)
+                    .WithProject(proj.CsProjPath)
+                    .Execute($"{FrameworkNet451Arg} \"{setup.LibCsprojRelPath}\"");
             cmd.Should().Pass();
             cmd.StdOut.Should().Contain("already has a reference");
-            File.ReadAllText(projName).Should().BeEquivalentTo(contentBefore);
+            proj.CsProjContent().Should().BeEquivalentTo(contentBefore);
         }
 
         [Fact]
         public void WhenRefWithCondOnItemGroupAlreadyExistsItDoesntDuplicate()
         {
             var lib = NewLib();
+            var setup = Setup();
 
             new AddP2PCommand()
-                .WithWorkingDirectory(lib.Path)
-                .WithProject(lib.CsProjName)
-                .Execute($"{FrameworkNet451Arg} \"{ValidRefPath}\"")
+                .WithWorkingDirectory(setup.TestRoot)
+                .WithProject(lib.CsProjPath)
+                .Execute($"{FrameworkNet451Arg} \"{setup.ValidRefCsprojPath}\"")
                 .Should().Pass();
 
             var csprojContentBefore = lib.CsProjContent();
             var cmd = new AddP2PCommand()
-                .WithWorkingDirectory(lib.Path)
-                .WithProject(lib.CsProjName)
-                .Execute($"{FrameworkNet451Arg} \"{ValidRefPath}\"");
+                .WithWorkingDirectory(setup.TestRoot)
+                .WithProject(lib.CsProjPath)
+                .Execute($"{FrameworkNet451Arg} \"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
             cmd.StdOut.Should().Contain("already has a reference");
             lib.CsProjContent().Should().BeEquivalentTo(csprojContentBefore);
@@ -318,173 +318,171 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void WhenRefWithCondWithWhitespaceOnItemGroupExistsItDoesntDuplicate()
         {
-            string testRoot = Setup();
+            var setup = Setup();
+            var proj = new ProjDir(Path.Combine(setup.TestRoot, "WithExistingRefCondWhitespaces"));
 
-            string projDir = Path.Combine(testRoot, "WithExistingRefCondWhitespaces");
-            string projName = Path.Combine(projDir, "WithExistingRefCondWhitespaces.csproj");
-            string contentBefore = File.ReadAllText(projName);
+            string contentBefore = proj.CsProjContent();
             var cmd = new AddP2PCommand()
-                    .WithWorkingDirectory(projDir)
-                    .WithProject(projName)
-                    .Execute($"{FrameworkNet451Arg} \"{LibRefPath}\"");
+                    .WithWorkingDirectory(proj.Path)
+                    .WithProject(proj.CsProjName)
+                    .Execute($"{FrameworkNet451Arg} \"{setup.LibCsprojRelPath}\"");
             cmd.Should().Pass();
             cmd.StdOut.Should().Contain("already has a reference");
-            File.ReadAllText(projName).Should().BeEquivalentTo(contentBefore);
+            proj.CsProjContent().Should().BeEquivalentTo(contentBefore);
         }
 
         [Fact]
         public void WhenRefWithoutCondAlreadyExistsInNonUniformItemGroupItDoesntDuplicate()
         {
-            string testRoot = Setup();
+            var setup = Setup();
+            var proj = new ProjDir(Path.Combine(setup.TestRoot, "WithRefNoCondNonUniform"));
 
-            string projDir = Path.Combine(testRoot, "WithRefNoCondNonUniform");
-            string projName = Path.Combine(projDir, "WithRefNoCondNonUniform.csproj");
-            string contentBefore = File.ReadAllText(projName);
+            string contentBefore = proj.CsProjContent();
             var cmd = new AddP2PCommand()
-                    .WithWorkingDirectory(projDir)
-                    .WithProject(projName)
-                    .Execute($"\"{LibRefPath}\"");
+                    .WithWorkingDirectory(proj.Path)
+                    .WithProject(proj.CsProjName)
+                    .Execute($"\"{setup.LibCsprojRelPath}\"");
             cmd.Should().Pass();
             cmd.StdOut.Should().Contain("already has a reference");
-            File.ReadAllText(projName).Should().BeEquivalentTo(contentBefore);
+            proj.CsProjContent().Should().BeEquivalentTo(contentBefore);
         }
 
         [Fact]
         public void WhenRefWithoutCondAlreadyExistsInNonUniformItemGroupItAddsDifferentRefInDifferentGroup()
         {
-            string testRoot = Setup();
-
-            var proj = new ProjDir(Path.Combine(testRoot, "WithRefNoCondNonUniform"));
+            var setup = Setup();
+            var proj = new ProjDir(Path.Combine(setup.TestRoot, "WithRefNoCondNonUniform"));
 
             int noCondBefore = proj.CsProj().NumberOfItemGroupsWithoutCondition();
             var cmd = new AddP2PCommand()
-                    .WithWorkingDirectory(proj.Path)
+                    .WithWorkingDirectory(setup.TestRoot)
                     .WithProject(proj.CsProjPath)
-                    .Execute($"\"{ValidRefPath}\"");
+                    .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
             cmd.StdOut.Should().Contain("added to the project");
             var csproj = proj.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
-            csproj.NumberOfProjectReferencesWithIncludeContaining(ValidRefPath).Should().Be(1);
+            csproj.NumberOfProjectReferencesWithIncludeContaining(setup.ValidRefCsprojName).Should().Be(1);
         }
 
         [Fact]
         public void WhenRefWithCondAlreadyExistsInNonUniformItemGroupItDoesntDuplicate()
         {
-            string testRoot = Setup();
+            var setup = Setup();
+            var proj = new ProjDir(Path.Combine(setup.TestRoot, "WithRefCondNonUniform"));
 
-            string projDir = Path.Combine(testRoot, "WithRefCondNonUniform");
-            string projName = Path.Combine(projDir, "WithRefCondNonUniform.csproj");
-            string contentBefore = File.ReadAllText(projName);
+            string contentBefore = proj.CsProjContent();
             var cmd = new AddP2PCommand()
-                    .WithWorkingDirectory(projDir)
-                    .WithProject(projName)
-                    .Execute($"{FrameworkNet451Arg} \"{LibRefPath}\"");
+                    .WithWorkingDirectory(proj.Path)
+                    .WithProject(proj.CsProjName)
+                    .Execute($"{FrameworkNet451Arg} \"{setup.LibCsprojRelPath}\"");
             cmd.Should().Pass();
             cmd.StdOut.Should().Contain("already has a reference");
-            File.ReadAllText(projName).Should().BeEquivalentTo(contentBefore);
+            proj.CsProjContent().Should().BeEquivalentTo(contentBefore);
         }
 
         [Fact]
         public void WhenRefWithCondAlreadyExistsInNonUniformItemGroupItAddsDifferentRefInDifferentGroup()
         {
-            string testRoot = Setup();
-
-            var proj = new ProjDir(Path.Combine(testRoot, "WithRefCondNonUniform"));
+            var setup = Setup();
+            var proj = new ProjDir(Path.Combine(setup.TestRoot, "WithRefCondNonUniform"));
 
             int condBefore = proj.CsProj().NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451);
             var cmd = new AddP2PCommand()
-                    .WithWorkingDirectory(proj.Path)
+                    .WithWorkingDirectory(setup.TestRoot)
                     .WithProject(proj.CsProjPath)
-                    .Execute($"{FrameworkNet451Arg} \"{ValidRefPath}\"");
+                    .Execute($"{FrameworkNet451Arg} \"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
             cmd.StdOut.Should().Contain("added to the project");
             var csproj = proj.CsProj();
             csproj.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451).Should().Be(condBefore + 1);
-            csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(ValidRefPath, ConditionFrameworkNet451).Should().Be(1);
+            csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(setup.ValidRefCsprojName, ConditionFrameworkNet451).Should().Be(1);
         }
 
         [Fact]
         public void WhenEmptyItemGroupPresentItAddsRefInIt()
         {
-            string testRoot = Setup();
-
-            var proj = new ProjDir(Path.Combine(testRoot, "EmptyItemGroup"));
+            var setup = Setup();
+            var proj = new ProjDir(Path.Combine(setup.TestRoot, "EmptyItemGroup"));
 
             int noCondBefore = proj.CsProj().NumberOfItemGroupsWithoutCondition();
             var cmd = new AddP2PCommand()
-                    .WithWorkingDirectory(proj.Path)
+                    .WithWorkingDirectory(setup.TestRoot)
                     .WithProject(proj.CsProjPath)
-                    .Execute($"\"{ValidRefPath}\"");
+                    .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
             cmd.StdOut.Should().Contain("added to the project");
             var csproj = proj.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore);
-            csproj.NumberOfProjectReferencesWithIncludeContaining(ValidRefPath).Should().Be(1);
+            csproj.NumberOfProjectReferencesWithIncludeContaining(setup.ValidRefCsprojName).Should().Be(1);
         }
 
         [Fact]
         public void ItAddsMultipleRefsNoCondToTheSameItemGroup()
         {
             var lib = NewLib();
+            var setup = Setup();
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
             var cmd = new AddP2PCommand()
-                .WithWorkingDirectory(lib.Path)
-                .WithProject(lib.CsProjName)
-                .Execute($"\"{LibRefPath}\" \"{ValidRefPath}\"");
+                .WithWorkingDirectory(setup.TestRoot)
+                .WithProject(lib.CsProjPath)
+                .Execute($"\"{setup.LibCsprojPath}\" \"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
             cmd.StdOut.Should().Contain("added to the project").And.NotContain("already has a reference");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
-            csproj.NumberOfProjectReferencesWithIncludeContaining(ValidRefCsproj).Should().Be(1);
-            csproj.NumberOfProjectReferencesWithIncludeContaining(LibRefPath).Should().Be(1);
+            csproj.NumberOfProjectReferencesWithIncludeContaining(setup.ValidRefCsprojName).Should().Be(1);
+            csproj.NumberOfProjectReferencesWithIncludeContaining(setup.LibCsprojName).Should().Be(1);
         }
 
         [Fact]
         public void ItAddsMultipleRefsWithCondToTheSameItemGroup()
         {
             var lib = NewLib();
+            var setup = Setup();
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451);
             var cmd = new AddP2PCommand()
-                .WithWorkingDirectory(lib.Path)
-                .WithProject(lib.CsProjName)
-                .Execute($"{FrameworkNet451Arg}  \"{LibRefPath}\" \"{ValidRefPath}\"");
+                .WithWorkingDirectory(setup.TestRoot)
+                .WithProject(lib.CsProjPath)
+                .Execute($"{FrameworkNet451Arg}  \"{setup.LibCsprojPath}\" \"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
             cmd.StdOut.Should().Contain("added to the project").And.NotContain("already has a reference");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451).Should().Be(noCondBefore + 1);
-            csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(ValidRefCsproj, ConditionFrameworkNet451).Should().Be(1);
-            csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(LibRefPath, ConditionFrameworkNet451).Should().Be(1);
+            csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(setup.ValidRefCsprojName, ConditionFrameworkNet451).Should().Be(1);
+            csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(setup.LibCsprojName, ConditionFrameworkNet451).Should().Be(1);
         }
 
         [Fact]
         public void WhenProjectNameIsNotPassedItFindsItAndAddsReference()
         {
             var lib = NewLib();
+            var setup = Setup();
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
             var cmd = new AddP2PCommand()
                 .WithWorkingDirectory(lib.Path)
-                .Execute($"\"{ValidRefPath}\"");
+                .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
             cmd.StdOut.Should().Contain("added to the project");
             cmd.StdErr.Should().BeEmpty();
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
-            csproj.NumberOfProjectReferencesWithIncludeContaining(ValidRefCsproj).Should().Be(1);
+            csproj.NumberOfProjectReferencesWithIncludeContaining(setup.ValidRefCsprojName).Should().Be(1);
         }
 
         [Fact]
         public void ItAddsRefBetweenImports()
         {
             var lib = NewLib();
+            var setup = Setup();
 
             var cmd = new AddP2PCommand()
                 .WithWorkingDirectory(lib.Path)
                 .WithProject(lib.CsProjName)
-                .Execute($"\"{ValidRefPath}\"");
+                .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
             cmd.StdOut.Should().Contain("added to the project");
             cmd.StdErr.Should().BeEmpty();
@@ -503,7 +501,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                         }
                         break;
                     case 1:
-                        if (projRef != null && projRef.ItemType == "ProjectReference" && projRef.Include.Contains(ValidRefCsproj))
+                        if (projRef != null && projRef.ItemType == "ProjectReference" && projRef.Include.Contains(setup.ValidRefCsprojName))
                         {
                             state++;
                         }
@@ -520,16 +518,36 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
             state.Should().Be(3);
         }
 
-        [Fact(Skip = "Not finished")]
+        [Fact]
         public void WhenPassedReferenceDoesNotExistItShowsAnError()
         {
-            throw new NotImplementedException();
+            var lib = NewLib();
+
+            var contentBefore = lib.CsProjContent();
+            var cmd = new AddP2PCommand()
+                .WithWorkingDirectory(lib.Path)
+                .WithProject(lib.CsProjName)
+                .Execute("\"IDoNotExist.csproj\"");
+            cmd.Should().Fail();
+            cmd.StdErr.Should().Contain("does not exist");
+            lib.CsProjContent().Should().BeEquivalentTo(contentBefore);
         }
 
-        [Fact(Skip = "Not finished")]
+        [Fact]
         public void WhenPassedMultipleRefsAndOneOfthemDoesNotExistItCancelsWholeOperation()
         {
-            throw new NotImplementedException();
+            var lib = NewLib();
+            var setup = Setup();
+
+            var contentBefore = lib.CsProjContent();
+            var cmd = new AddP2PCommand()
+                .WithWorkingDirectory(setup.TestRoot)
+                .WithProject(lib.CsProjPath)
+                .Execute($"\"{setup.ValidRefCsprojPath}\" \"IDoNotExist.csproj\"");
+            cmd.Should().Fail();
+            cmd.StdErr.Should().Contain("does not exist");
+            cmd.StdErr.Should().NotMatchRegex("(.*does not exist.*){2,}");
+            lib.CsProjContent().Should().BeEquivalentTo(contentBefore);
         }
 
         [Fact(Skip = "Not finished")]

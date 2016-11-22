@@ -29,11 +29,21 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
 
             app.HelpOption("-h|--help");
 
-            CommandArgument projectArgument = app.Argument("<PROJECT>",
+            CommandArgument projectArgument = app.Argument(
+                "<PROJECT>",
                 "The project file to modify. If a project file is not specified," +
-                " it searches the current working directory for an MSBuild file that has a file extension that ends in `proj` and uses that file.");
+                " it searches the current working directory for an MSBuild file that has" +
+                " a file extension that ends in `proj` and uses that file.");
 
-            CommandOption frameworkOption = app.Option("-f|--framework <FRAMEWORK>", "Add reference only when targetting a specific framework", CommandOptionType.SingleValue);
+            CommandOption frameworkOption = app.Option(
+                "-f|--framework <FRAMEWORK>",
+                "Add reference only when targetting a specific framework",
+                CommandOptionType.SingleValue);
+
+            CommandOption forceOption = app.Option(
+                "--force", 
+                "Add reference even if it does not exist",
+                CommandOptionType.NoValue);
 
             app.OnExecute(() => {
                 if (projectArgument.Value == null)
@@ -50,10 +60,31 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
                     throw new GracefulException("You must specify at least one reference to add.");
                 }
 
+                List<string> references = app.RemainingArguments;
+                if (!forceOption.HasValue())
+                {
+                    var notExisting = new List<string>();
+                    foreach (var r in references)
+                    {
+                        if (!File.Exists(r))
+                        {
+                            notExisting.Add(r);
+                        }
+                    }
+
+                    if (notExisting.Count > 0)
+                    {
+                        throw new GracefulException(
+                            string.Join(
+                                Environment.NewLine,
+                                notExisting.Select((ne) => $"Reference `{ne}` does not exist.")));
+                    }
+                }
+                
                 int numberOfAddedReferences = AddProjectToProjectReference(
                     project,
                     frameworkOption.Value(),
-                    app.RemainingArguments);
+                    references);
 
                 if (numberOfAddedReferences != 0)
                 {
