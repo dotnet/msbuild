@@ -364,6 +364,17 @@ namespace Microsoft.Build.Evaluation
             return false;
         }
 
+        /// <summary>
+        /// If the given path doesn't have a trailing slash then add one.
+        /// If the path is an empty string, does not modify it.
+        /// </summary>
+        /// <param name="path">The path to check.</param>
+        /// <returns>The specified path with a trailing slash.</returns>
+        internal static string EnsureTrailingSlash(string path)
+        {
+            return FileUtilities.EnsureTrailingSlash(path);
+        }
+
         public static string GetCurrentExecutableDirectory()
         {
             return BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
