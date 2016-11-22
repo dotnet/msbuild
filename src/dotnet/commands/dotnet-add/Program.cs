@@ -18,17 +18,17 @@ namespace Microsoft.DotNet.Tools.Add
     {
         public const string HelpText = @".NET Add Command
 
-Usage: dotnet add [options] [object] <command> [[--] <arg>...]]
+Usage: dotnet add [options] <object> <command> [[--] <arg>...]]
+
+Options:
+  -h|--help  Show help information
 
 Arguments:
   <object>   The object of the operation. If a project file is not specified, it defaults to the current directory.
   <command>  Command to be executed on <object>.
 
-Options:
-  -h|--help  Show help information
-
 Args:
-  Any extra arguments passed to the command.
+  Any extra arguments passed to the command. Use `dotnet add <command> --help` to get help about these arguments.
 
 Commands:
   p2p        Add project to project (p2p) reference to a project";

@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
 
         public static ProjectItemGroupElement FindExistingUniformItemGroupWithCondition(this ProjectRootElement root, string projectItemElementType, string framework)
         {
-            return root.ItemGroupsReversed.FirstOrDefault((ig) => ig.IsConditionalOnFramework(framework) && ig.IsUniformItemElementType(projectItemElementType));
+            return root.ItemGroupsReversed.FirstOrDefault((itemGroup) => itemGroup.IsConditionalOnFramework(framework) && itemGroup.IsUniformItemElementType(projectItemElementType));
         }
 
         public static bool IsUniformItemElementType(this ProjectItemGroupElement group, string projectItemElementType)

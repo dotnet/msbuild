@@ -215,7 +215,7 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
             int numberOfAddedReferences = 0;
             const string ProjectItemElementType = "ProjectReference";
 
-            ProjectItemGroupElement ig = null;
+            ProjectItemGroupElement itemGroup = root.FindUniformOrCreateItemGroupWithCondition(ProjectItemElementType, framework);
             foreach (var @ref in refs.Select((r) => NormalizeSlashesForMsbuild(r)))
             {
                 if (root.HasExistingItemWithCondition(framework, @ref))
@@ -225,8 +225,7 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
                 }
 
                 numberOfAddedReferences++;
-                ig = ig ?? root.FindUniformOrCreateItemGroupWithCondition(ProjectItemElementType, framework);
-                ig.AppendChild(root.CreateItemElement(ProjectItemElementType, @ref));
+                itemGroup.AppendChild(root.CreateItemElement(ProjectItemElementType, @ref));
 
                 Reporter.Output.WriteLine($"Reference `{@ref}` added to the project.");
             }

@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.IO;
-using Microsoft.DotNet.TestFramework;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 
@@ -10,12 +9,6 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
 {
     internal class ProjDir
     {
-        public ProjDir(TestAssetsManager tam, [System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(ProjDir), string identifier = "")
-        {
-            Path = tam.CreateTestDirectory(callingMethod: callingMethod, identifier: identifier).Path;
-            Name = new DirectoryInfo(Path).Name;
-        }
-
         public ProjDir(string path)
         {
             Path = path;

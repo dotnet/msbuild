@@ -2,9 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Construction;
-using System;
-using System.Linq;
 using Microsoft.DotNet.ProjectJsonMigration;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Cli.Add.P2P.Tests
@@ -13,7 +12,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
     {
         public static int NumberOfItemGroupsWithConditionContaining(this ProjectRootElement root, string patternInCondition)
         {
-            return root.ItemGroups.Count((ig) => ig.Condition.Contains(patternInCondition));
+            return root.ItemGroups.Count((itemGroup) => itemGroup.Condition.Contains(patternInCondition));
         }
 
         public static int NumberOfItemGroupsWithoutCondition(this ProjectRootElement root)

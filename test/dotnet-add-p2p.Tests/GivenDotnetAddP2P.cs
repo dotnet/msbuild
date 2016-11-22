@@ -1,12 +1,12 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.IO;
-using Microsoft.DotNet.Tools.Test.Utilities;
-using Xunit;
 using FluentAssertions;
 using Microsoft.Build.Construction;
+using Microsoft.DotNet.Tools.Test.Utilities;
+using System;
+using System.IO;
+using Xunit;
 
 namespace Microsoft.DotNet.Cli.Add.P2P.Tests
 {
@@ -20,19 +20,21 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         private TestSetup Setup([System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(Setup), string identifier = "")
         {
             return new TestSetup(
-                GetTestGroupTestAssetsManager(TestSetup.TestGroup)
-                    .CreateTestInstance(TestSetup.ProjectName, callingMethod: callingMethod, identifier: identifier)
-                    .Path);
+                TestAssets.Get(TestSetup.TestGroup, TestSetup.ProjectName)
+                    .CreateInstance()
+                    .WithSourceFiles()
+                    .Root
+                    .FullName);
         }
 
         private ProjDir NewDir([System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(NewDir), string identifier = "")
         {
-            return new ProjDir(TestAssetsManager, callingMethod, identifier: identifier);
+            return new ProjDir(TestAssetsManager.CreateTestDirectory(callingMethod: callingMethod, identifier: identifier).Path);
         }
 
         private ProjDir NewLib([System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(NewDir), string identifier = "")
         {
-            var dir = new ProjDir(TestAssetsManager, callingMethod, identifier: identifier);
+            var dir = NewDir(callingMethod: callingMethod, identifier: identifier);
 
             try
             {
@@ -76,7 +78,6 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         }
 
         [Fact]
-
         public void WhenBrokenProjectIsPassedItPrintsErrorAndUsage()
         {
             string projName = "Broken/Broken.csproj";
