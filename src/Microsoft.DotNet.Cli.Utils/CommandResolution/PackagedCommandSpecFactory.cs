@@ -10,6 +10,13 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public class PackagedCommandSpecFactory : IPackagedCommandSpecFactory
     {
+        private Action<string, IList<string>> _addAdditionalArguments;
+
+        internal PackagedCommandSpecFactory(Action<string, IList<string>> addAdditionalArguments = null)
+        {
+            _addAdditionalArguments = addAdditionalArguments;
+        }
+
         public CommandSpec CreateCommandSpecFromLibrary(
             LockFileTargetLibrary toolLibrary,
             string commandName,
@@ -119,6 +126,11 @@ namespace Microsoft.DotNet.Cli.Utils
 
             arguments.Add("--additionalprobingpath");
             arguments.Add(nugetPackagesRoot);
+
+            if(_addAdditionalArguments != null)
+            {
+                _addAdditionalArguments(commandPath, arguments);
+            }
 
             arguments.Add(commandPath);
             arguments.AddRange(commandArguments);
