@@ -138,7 +138,6 @@ HOME_DEFAULT="$WORKSPACE/msbuild-CI-home"
 PROJECT_FILE_ARG='"'"$THIS_SCRIPT_PATH/build.proj"'"'
 BOOTSTRAP_FILE_ARG='"'"$THIS_SCRIPT_PATH/targets/BootStrapMSBuild.proj"'"'
 BOOTSTRAPPED_RUNTIME_HOST='"'"$THIS_SCRIPT_PATH/bin/Bootstrap-NetCore/dotnet"'"'
-MSBUILD_BOOTSTRAPPED_EXE='"'"$THIS_SCRIPT_PATH/bin/Bootstrap-NetCore/MSBuild.dll"'"'
 
 # Default msbuild arguments
 TARGET_ARG="Build"
@@ -221,6 +220,7 @@ fi
 case $target in
     CoreCLR)
         CONFIGURATION=Debug-NetCore
+        MSBUILD_BOOTSTRAPPED_EXE='"'"$THIS_SCRIPT_PATH/bin/Bootstrap-NetCore/MSBuild.dll"'"'
         ;;
 
     Mono)
@@ -228,6 +228,7 @@ case $target in
         CONFIGURATION=Debug-MONO
         EXTRA_ARGS="/p:CscToolExe=mcs /p:CscToolPath=$MONO_BIN_DIR"
         RUNTIME_HOST_ARGS="--debug"
+        MSBUILD_BOOTSTRAPPED_EXE='"'"$THIS_SCRIPT_PATH/bin/Bootstrap/MSBuild.dll"'"'
         ;;
     *)
         echo "Unsupported target detected: $target. Aborting."
