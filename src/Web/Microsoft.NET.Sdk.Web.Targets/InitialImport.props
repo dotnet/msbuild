@@ -11,13 +11,13 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
- <Import Project="$(MSBuildSDKsPath)\Microsoft.NET.Sdk\1.0.0-rc2\build\InitialImport.props" 
-        Condition="Exists('$(MSBuildSDKsPath)\Microsoft.NET.Sdk\1.0.0-rc2\build\InitialImport.props')" />
+ <Import Project="$(MSBuildSDKsPath)\Microsoft.NET.Sdk\%(___MSBuildSDK.Version)\build\InitialImport.props" 
+        Condition="Exists('$(MSBuildSDKsPath)\Microsoft.NET.Sdk\%(___MSBuildSDK.Version)\build\InitialImport.props')" />
 
- <Import Project="$(MSBuildSDKsPath)\Microsoft.NET.Sdk.Web.ProjectSystem\1.0.0-rc2\build\InitialImport.props" 
-          Condition="Exists('$(MSBuildSDKsPath)\Microsoft.NET.Sdk.Web.ProjectSystem\1.0.0-rc2\build\InitialImport.props')" />
+ <Import Project="$(MSBuildSDKsPath)\Microsoft.NET.Sdk.Web.ProjectSystem\%(___MSBuildSDK.Version)\build\InitialImport.props" 
+          Condition="Exists('$(MSBuildSDKsPath)\Microsoft.NET.Sdk.Web.ProjectSystem\%(___MSBuildSDK.Version)\build\InitialImport.props')" />
 
- <Import Project="$(MSBuildSDKsPath)\Microsoft.NET.Sdk.Publish\1.0.0-rc2\build\InitialImport.props" 
-          Condition="Exists('$(MSBuildSDKsPath)\Microsoft.NET.Sdk.Publish\1.0.0-rc2\build\InitialImport.props')" />
+ <Import Project="$(MSBuildSDKsPath)\Microsoft.NET.Sdk.Publish\%(___MSBuildSDK.Version)\build\InitialImport.props" 
+          Condition="Exists('$(MSBuildSDKsPath)\Microsoft.NET.Sdk.Publish\%(___MSBuildSDK.Version)\build\InitialImport.props')" />
 
 </Project>

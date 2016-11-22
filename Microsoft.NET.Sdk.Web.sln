@@ -30,6 +30,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{1CAF6E2F
 		dirs.proj = dirs.proj
 		dotnet-install.ps1 = dotnet-install.ps1
 		tools\EnsureWebSdkEnv.cmd = tools\EnsureWebSdkEnv.cmd
+		tools\NuGet\NuGet.targets = tools\NuGet\NuGet.targets
+		tools\NuGet\NuGetProj.targets = tools\NuGet\NuGetProj.targets
 		tools\WebSdkEnv.cmd = tools\WebSdkEnv.cmd
 	EndProjectSection
 EndProject

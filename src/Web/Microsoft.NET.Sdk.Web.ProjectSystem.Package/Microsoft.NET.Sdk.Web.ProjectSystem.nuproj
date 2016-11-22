@@ -6,8 +6,8 @@
     <NuSpecFile>$(MSBuildProjectName).nuspec</NuSpecFile>
     <OutputPath>$(WebSdkRootDir)bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>$(WebSdkRootDir)obj\$(Configuration)\</IntermediateOutputPath>
-    <CoreSdkVersion Condition="'$(BuildingInsideVisualStudio)' =='true'">1.0.0-rc2</CoreSdkVersion>
-    <WebSdkVersion Condition="'$(BuildingInsideVisualStudio)' =='true'">$(CoreSdkVersion)</WebSdkVersion>
+    <CoreSdkVersion Condition="'$(CoreSdkVersion)' ==''">1.0.0</CoreSdkVersion>
+    <WebSdkVersion Condition="'$(WebSdkVersion)' ==''">$(CoreSdkVersion)</WebSdkVersion>
     <NuSpecProperties>CoreSdkVersion=$(CoreSdkVersion);WebSdkVersion=$(WebSdkVersion)</NuSpecProperties>
   </PropertyGroup>
   <ItemGroup>
@@ -16,6 +16,12 @@
     </NuGetContent>
     <NuGetContent Include="$(WebSourceDir)\Web\Microsoft.NET.Sdk.Web.ProjectSystem.Targets\netstandard1.0\Microsoft.NET.Sdk.Web.ProjectSystem.targets">
       <Destination>build\netstandard1.0</Destination>
+    </NuGetContent>
+    <NuGetContent Include="$(WebSourceDir)\Web\Microsoft.NET.Sdk.Web.ProjectSystem.Targets\*.props">
+      <Destination>build</Destination>
+    </NuGetContent>
+    <NuGetContent Include="$(WebSourceDir)\Web\Microsoft.NET.Sdk.Web.ProjectSystem.Targets\*.targets">
+      <Destination>build</Destination>
     </NuGetContent>
   </ItemGroup>
   <Import Project="$(WebSdkRootDir)tools\NuGet\NuGetProj.targets"/>
