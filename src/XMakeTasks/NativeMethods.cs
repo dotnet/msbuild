@@ -1171,19 +1171,20 @@ typedef enum _tagAssemblyComparisonResult
         //  Based on coreclr baseassemblyspec.cpp (https://github.com/dotnet/coreclr/blob/4cf8a6b082d9bb1789facd996d8265d3908757b2/src/vm/baseassemblyspec.cpp#L330)
         private static bool RefMatchesDef(AssemblyName @ref, AssemblyName def)
         {
-            var refPkt = @ref.GetPublicKeyToken();
-            bool refStrongNamed = refPkt != null && refPkt.Length != 0;
-            if (refStrongNamed)
+            if (IsStrongNamed(@ref))
             {
-                var defPkt = def.GetPublicKeyToken();
-                bool defStrongNamed = defPkt != null && defPkt.Length != 0;
-
-                return CompareRefToDef(@ref, def);
+                return IsStrongNamed(def) && CompareRefToDef(@ref, def);
             }
             else
             {
                 return @ref.Name.Equals(def.Name, StringComparison.OrdinalIgnoreCase);
             }
+        }
+
+        private static bool IsStrongNamed(AssemblyName assembly)
+        {
+            var refPkt = assembly.GetPublicKeyToken();
+            return refPkt != null && refPkt.Length != 0;
         }
 
         //  Based on https://github.com/dotnet/coreclr/blob/4cf8a6b082d9bb1789facd996d8265d3908757b2/src/vm/baseassemblyspec.cpp#L241
