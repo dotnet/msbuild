@@ -19,7 +19,7 @@ using Microsoft.Build.Shared;
 using System.Diagnostics;
 using System.Globalization;
 using Microsoft.Build.BackEnd;
-
+using Microsoft.Build.Internal;
 using OutOfProcNode = Microsoft.Build.Execution.OutOfProcNode;
 
 namespace Microsoft.Build.Evaluation
@@ -238,13 +238,9 @@ namespace Microsoft.Build.Evaluation
                             XmlDocument document = new XmlDocument();
                             document.PreserveWhitespace = projectRootElement.XmlDocument.PreserveWhitespace;
 
-                            XmlReaderSettings dtdSettings = new XmlReaderSettings();
-                            dtdSettings.DtdProcessing = DtdProcessing.Ignore;
-
-                            using (var stream = new FileStream(projectRootElement.FullPath, FileMode.Open, FileAccess.Read, FileShare.Read))
-                            using (XmlReader xtr = XmlReader.Create(stream, dtdSettings))
+                            using (var xtr = XmlReaderExtension.Create(projectRootElement.FullPath))
                             {
-                                document.Load(xtr);
+                                document.Load(xtr.Reader);
                             }
 
                             string diskContent = document.OuterXml;
