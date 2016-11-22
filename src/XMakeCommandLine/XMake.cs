@@ -3096,7 +3096,24 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private static void DisplayCopyrightMessage()
         {
-            Console.WriteLine(ResourceUtilities.FormatResourceString("CopyrightMessage", ProjectCollection.Version.ToString()));
+#if DEBUG
+            // Attempt to get the assembly informational version
+            string assemblyInformationalVersion = null;
+            try
+            {
+                assemblyInformationalVersion = typeof(MSBuildApp).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+            }
+            catch
+            {
+                assemblyInformationalVersion = "";
+            }
+
+            string displayVersion = $"{ProjectCollection.Version} ({assemblyInformationalVersion})";
+#else
+            // For release builds, only show the assembly version
+            string displayVersion = ProjectCollection.Version.ToString();
+#endif
+            Console.WriteLine(ResourceUtilities.FormatResourceString("CopyrightMessage", displayVersion));
         }
 
         /// <summary>
