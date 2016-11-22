@@ -10,6 +10,7 @@ using System;
 using System.Xml;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
 
@@ -185,6 +186,55 @@ namespace Microsoft.Build.Construction
             // The element wasn't available to the ProjectRootElement constructor,
             // so we have to set it now
             _project.SetProjectRootElementFromParser(element, _project);
+
+            if (element.HasAttribute("Sdk"))
+            {
+                // TODO: don't get root of SDKs from the environment, use a built-in or toolset prop
+                // TODO: version?
+                var initialImportPath = Path.Combine(Environment.GetEnvironmentVariable("MSBUILDMAGICIMPORTDIRECTORY"),
+                    element.GetAttribute("Sdk"), "Sdk.props");
+
+                var finalImportPath = Path.Combine(Environment.GetEnvironmentVariable("MSBUILDMAGICIMPORTDIRECTORY"),
+                    element.GetAttribute("Sdk"), "Sdk.targets");
+
+                // Desired approach:
+
+                //ProjectElement child =
+                //    ProjectImportElement.CreateDisconnected(
+                //        Path.Combine(Environment.GetEnvironmentVariable("MSBUILDMAGICIMPORTDIRECTORY"), element.GetAttribute("Sdk"), "Sdk.props"),
+                //        _project);
+                //_project.AppendChild(child);
+
+                // But this doesn't work because it gets doubly considered: at the beginning of _project,
+                // and at the end of the Project element's children (where it gets created).
+
+                // Instead, create an XML element directly and inject it in the right place.
+
+                if (File.Exists(initialImportPath))
+                {
+                    var implicitImportElement = element.OwnerDocument.CreateElement(XMakeElements.import);
+
+                    implicitImportElement.SetAttribute(XMakeAttributes.project,
+                        initialImportPath);
+
+                    // TODO: make this <Import Project="Sdk.props" Sdk="$(SdkName)" />
+
+                    element.PrependChild(implicitImportElement);
+                }
+
+                if (File.Exists(finalImportPath))
+                {
+                    var implicitImportElement = element.OwnerDocument.CreateElement(XMakeElements.import);
+
+                    implicitImportElement.SetAttribute(XMakeAttributes.project,
+                        finalImportPath);
+
+                    // TODO: make this <Import Project="Sdk.targets" Sdk="$(SdkName)" />
+
+                    element.AppendChild(implicitImportElement);
+                }
+
+            }
 
             ParseProjectRootElementChildren(element);
         }
