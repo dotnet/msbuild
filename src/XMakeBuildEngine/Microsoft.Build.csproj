@@ -595,6 +595,7 @@
     <Compile Include="Xml\ProjectXmlUtilities.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="Xml\XmlReaderExtension.cs" />
     <Compile Include="..\Shared\AssemblyLoadInfo.cs">
       <Link>SharedUtilities\AssemblyLoadInfo.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>

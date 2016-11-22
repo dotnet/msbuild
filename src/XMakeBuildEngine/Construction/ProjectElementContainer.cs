@@ -530,8 +530,8 @@ namespace Microsoft.Build.Construction
 
                         var parentIndentation = GetElementIndentation(XmlElement);
 
-                        var leadingWhitespaceNode = XmlDocument.CreateWhitespace("\n" + parentIndentation + DEFAULT_INDENT);
-                        var trailingWhiteSpaceNode = XmlDocument.CreateWhitespace("\n" + parentIndentation);
+                        var leadingWhitespaceNode = XmlDocument.CreateWhitespace(Environment.NewLine + parentIndentation + DEFAULT_INDENT);
+                        var trailingWhiteSpaceNode = XmlDocument.CreateWhitespace(Environment.NewLine + parentIndentation);
 
                         XmlElement.InsertBefore(leadingWhitespaceNode, child.XmlElement);
                         XmlElement.InsertAfter(trailingWhiteSpaceNode, child.XmlElement);

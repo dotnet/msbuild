@@ -17,6 +17,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Internal;
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
 #if MSBUILDENABLEVSPROFILING 
@@ -195,7 +196,7 @@ namespace Microsoft.Build.Construction
 
             XmlReaderSettings xrs = new XmlReaderSettings();
             xrs.DtdProcessing = DtdProcessing.Ignore;
-            
+
             var emptyProjectFile = string.Format(EmptyProjectFileContent,
                 (projectFileOptions & NewProjectFileOptions.IncludeXmlDeclaration) != 0 ? EmptyProjectFileXmlDeclaration : string.Empty,
                 (projectFileOptions & NewProjectFileOptions.IncludeToolsVersion) != 0 ? EmptyProjectFileToolsVersion : string.Empty,
@@ -2038,19 +2039,10 @@ namespace Microsoft.Build.Construction
                     string beginProjectLoad = String.Format(CultureInfo.CurrentCulture, "Load Project {0} From File - Start", fullPath);
                     DataCollection.CommentMarkProfile(8806, beginProjectLoad);
 #endif
-
-                    XmlReaderSettings dtdSettings = new XmlReaderSettings();
-                    dtdSettings.DtdProcessing = DtdProcessing.Ignore;
-
-                    using (var stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read))
-                    using (var stream2 = new StreamReader(stream, Encoding.UTF8, true))
-                    using (XmlReader xtr = XmlReader.Create(stream2, dtdSettings))
+                    using (var xtr = XmlReaderExtension.Create(fullPath))
                     {
-                        // Start the reader so it has an idea of what the encoding is.
-                        xtr.Read();
-                        var encoding = xtr.GetAttribute("encoding");
-                        _encoding = !string.IsNullOrEmpty(encoding) ? Encoding.GetEncoding(encoding) : stream2.CurrentEncoding;
-                        document.Load(xtr);
+                        _encoding = xtr.Encoding;
+                        document.Load(xtr.Reader);
                     }
 
                     document.FullPath = fullPath;
