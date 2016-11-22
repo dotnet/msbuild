@@ -429,7 +429,7 @@ namespace Microsoft.Build.UnitTests
             File.Delete(task.OutputFile.ItemSpec);
         }
 
-        public static string EscapedLineSeparator => (NativeMethodsShared.IsWindows ? "\\r" : "") + "\\n";
+        public static string EscapedLineSeparator => NativeMethodsShared.IsWindows ? "\\r\\n" : "\\n";
 
         /// <summary>
         /// Multi line argument values should cause a verbatim string to be used
