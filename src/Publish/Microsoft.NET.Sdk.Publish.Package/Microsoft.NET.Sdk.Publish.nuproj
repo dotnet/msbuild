@@ -6,6 +6,8 @@
     <NuSpecFile>$(MSBuildProjectName).nuspec</NuSpecFile>
     <OutputPath>$(WebSdkRootDir)bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>$(WebSdkRootDir)obj\$(Configuration)\</IntermediateOutputPath>
+    <CoreSdkVersion Condition="'$(BuildingInsideVisualStudio)' =='true'">1.0.0-rc2</CoreSdkVersion>
+    <WebSdkVersion Condition="'$(BuildingInsideVisualStudio)' =='true'">$(CoreSdkVersion)</WebSdkVersion>
     <NuSpecProperties>CoreSdkVersion=$(CoreSdkVersion);WebSdkVersion=$(WebSdkVersion)</NuSpecProperties>
   </PropertyGroup>
   <ItemGroup>
@@ -17,35 +19,39 @@
       <Destination>tools\netcoreapp1.0</Destination>
     </NuGetContent>
 
-    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\BeforePublishTargets\*.*">
+    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\BeforePublishTargets\*.*">
       <Destination>build\netstandard1.0\BeforePublishTargets</Destination>
     </NuGetContent>
     
-    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\ComputeTargets\*.*">
+    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\ComputeTargets\*.*">
       <Destination>build\netstandard1.0\ComputeTargets</Destination>
     </NuGetContent>
 
-    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\PublishTargets\*.*">
+    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\PublishTargets\*.*">
       <Destination>build\netstandard1.0\PublishTargets</Destination>
     </NuGetContent>
 
-    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\CopyTargets\*.*">
+    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\CopyTargets\*.*">
       <Destination>build\netstandard1.0\CopyTargets</Destination>
     </NuGetContent>
 
-    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\TransformTargets\*.*">
+    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\TransformTargets\*.*">
       <Destination>build\netstandard1.0\TransformTargets</Destination>
     </NuGetContent>
 
-    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\PublishProfiles\*.*">
+    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\PublishProfiles\*.*">
       <Destination>build\netstandard1.0\PublishProfiles</Destination>
     </NuGetContent>
 
-    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\DotNetCLIToolTargets\*.*">
+    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\DotNetCLIToolTargets\*.*">
       <Destination>build\netstandard1.0\DotNetCLIToolTargets</Destination>
     </NuGetContent>
 
-    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\Microsoft.NET.Sdk.Publish.targets">
+    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\Microsoft.NET.Sdk.Publish.props">
+      <Destination>build\netstandard1.0</Destination>
+    </NuGetContent>
+    
+    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\Microsoft.NET.Sdk.Publish.targets">
       <Destination>build\netstandard1.0</Destination>
     </NuGetContent>
   </ItemGroup>

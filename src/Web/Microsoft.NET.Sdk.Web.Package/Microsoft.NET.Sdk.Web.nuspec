@@ -14,6 +14,7 @@
     <projectUrl>https://github.com/aspnet/websdk</projectUrl>
     <copyright>&#169; Microsoft Corporation. All rights reserved.</copyright>
     <dependencies>
+      <dependency id="Microsoft.NET.Sdk" version="$CoreSdkVersion$" />
       <dependency id="Microsoft.NET.Sdk.Web.ProjectSystem" version="$WebSdkVersion$" />
       <dependency id="Microsoft.NET.Sdk.Publish" version="$WebSdkVersion$" />
     </dependencies>

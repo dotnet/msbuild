@@ -13,8 +13,5 @@
     <licenseUrl>https://www.microsoft.com/web/webpi/eula/net_library_eula_enu.htm</licenseUrl>
     <projectUrl>https://github.com/aspnet/websdk</projectUrl>
     <copyright>&#169; Microsoft Corporation. All rights reserved.</copyright>
-    <dependencies>
-      <dependency id="Microsoft.NET.Sdk" version="$CoreSdkVersion$" />
-    </dependencies>
   </metadata>
 </package>
