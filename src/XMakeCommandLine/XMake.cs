@@ -2199,13 +2199,33 @@ namespace Microsoft.Build.CommandLine
         {
             ErrorUtilities.VerifyThrow(parameters.Length <= 1, "It should not be possible to specify more than 1 project at a time.");
             string projectFile = null;
-            // We need to look in the current directory for a project file...
-            if (parameters.Length == 0)
+
+            string projectDirectory = null;
+
+            if (parameters.Length == 1)
+            {
+                projectFile = FileUtilities.FixFilePath(parameters[0]);
+
+                if (Directory.Exists(projectFile))
+                {
+                    // If the project file is actually a directory then change the directory to be searched
+                    // and null out the project file
+                    projectDirectory = projectFile;
+                    projectFile = null;
+                }
+                else
+                {
+                    InitializationException.VerifyThrow(File.Exists(projectFile), "ProjectNotFoundError", projectFile);
+                }
+            }
+
+            // We need to look in a directory for a project file...
+            if (projectFile == null)
             {
                 // Get all files in the current directory that have a proj-like extension
-                string[] potentialProjectFiles = getFiles(".", "*.*proj");
+                string[] potentialProjectFiles = getFiles(projectDirectory ?? ".", "*.*proj");
                 // Get all files in the current directory that have a sln extension
-                string[] potentialSolutionFiles = getFiles(".", "*.sln");
+                string[] potentialSolutionFiles = getFiles(projectDirectory ?? ".", "*.sln");
 
                 List<string> extensionsToIgnore = new List<string>();
                 if (projectsExtensionsToIgnore != null)
@@ -2261,12 +2281,12 @@ namespace Microsoft.Build.CommandLine
                     string solutionName = Path.GetFileNameWithoutExtension(potentialSolutionFiles[0]);
                     string projectName = Path.GetFileNameWithoutExtension(potentialProjectFiles[0]);
                     // Compare the names and error if they are not identical
-                    InitializationException.VerifyThrow(String.Compare(solutionName, projectName, StringComparison.OrdinalIgnoreCase) == 0, "AmbiguousProjectError");
+                    InitializationException.VerifyThrow(String.Compare(solutionName, projectName, StringComparison.OrdinalIgnoreCase) == 0, projectDirectory == null ? "AmbiguousProjectError" : "AmbiguousProjectDirectoryError", null, projectDirectory);
                 }
                 // If there is more than one solution file in the current directory we have no idea which one to use
                 else if (potentialSolutionFiles.Length > 1)
                 {
-                    InitializationException.VerifyThrow(false, "AmbiguousProjectError");
+                    InitializationException.VerifyThrow(false, projectDirectory == null ? "AmbiguousProjectError" : "AmbiguousProjectDirectoryError", null, projectDirectory);
                 }
                 // If there is more than one project file in the current directory we may be able to figure it out
                 else if (potentialProjectFiles.Length > 1)
@@ -2299,7 +2319,7 @@ namespace Microsoft.Build.CommandLine
                             }
                         }
                     }
-                    InitializationException.VerifyThrow(!isAmbiguousProject, "AmbiguousProjectError");
+                    InitializationException.VerifyThrow(!isAmbiguousProject, projectDirectory == null ? "AmbiguousProjectError" : "AmbiguousProjectDirectoryError", null, projectDirectory);
                 }
                 // if there are no project or solution files in the directory, we can't build
                 else if ((potentialProjectFiles.Length == 0) &&
@@ -2312,11 +2332,6 @@ namespace Microsoft.Build.CommandLine
                 // If only 1 solution build the solution.  If only 1 project build the project
                 // If 1 solution and 1 project and they are of the same name build the solution
                 projectFile = (potentialSolutionFiles.Length == 1) ? potentialSolutionFiles[0] : potentialProjectFiles[0];
-            }
-            else
-            {
-                projectFile = FileUtilities.FixFilePath(parameters[0]);
-                InitializationException.VerifyThrow(File.Exists(projectFile), "ProjectNotFoundError", projectFile);
             }
 
             return projectFile;

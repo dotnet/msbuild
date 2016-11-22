@@ -174,6 +174,23 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
+        /// Throws the exception if the specified condition is not met.
+        /// </summary>
+        internal static void VerifyThrow(bool condition, string messageResourceName, string invalidSwitch, params object[] args)
+        {
+            if (!condition)
+            {
+                string errorMessage = AssemblyResources.GetString(messageResourceName);
+
+                ErrorUtilities.VerifyThrow(errorMessage != null, "The resource string must exist.");
+
+                errorMessage = ResourceUtilities.FormatString(errorMessage, args);
+
+                InitializationException.Throw(errorMessage, invalidSwitch);
+            }
+        }
+
+        /// <summary>
         /// Throws the exception using the given exception context.
         /// </summary>
         /// <param name="messageResourceName"></param>

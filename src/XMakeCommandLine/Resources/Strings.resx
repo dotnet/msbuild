@@ -65,6 +65,16 @@
       fire this error.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</comment>
   </data>
+  <data name="AmbiguousProjectDirectoryError" UESanitized="false" Visibility="Public">
+    <value>MSBUILD : error MSB1050: Specify which project or solution file to use because the folder "{0}" contains more than one project or solution file.</value>
+    <comment>
+      {StrBegin="MSBUILD : error MSB1050: "}UE: If no project or solution file is explicitly specified on the MSBuild.exe command-line, then the engine searches for a
+      project or solution file in the current directory by looking for *.*PROJ and *.SLN. If more than one file is found that matches this wildcard, we
+      fire this error.
+      LOCALIZATION: The prefix "MSB1050 : error MSBxxxx:" should not be localized.
+    </comment>
+  </data>
+  
   <data name="ConfigurationFailurePrefixNoErrorCode" UESanitized="false" Visibility="Public">
     <value>MSBUILD : Configuration error {0}: {1}</value>
     <comment>{SubString="Configuration"}UE: This prefixes any error from reading the toolset definitions in msbuild.exe.config or the registry.
@@ -96,7 +106,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" and "MSBuild" should not be localized.</comment>
   </data>
   <data name="HelpMessage_1_Syntax" UESanitized="true" Visibility="Public">
-    <value>Syntax:              MSBuild.exe [options] [project file]
+    <value>Syntax:              MSBuild.exe [options] [project file | directory]
 </value>
     <comment>
       LOCALIZATION: The following should not be localized:
@@ -111,7 +121,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <value>Description:         Builds the specified targets in the project file. If
                      a project file is not specified, MSBuild searches the
                      current working directory for a file that has a file
-                     extension that ends in "proj" and uses that file.
+                     extension that ends in "proj" and uses that file.  If
+                     a directory is specified, MSBuild searches that
+                     directory for a project file.
 </value>
     <comment>
       LOCALIZATION: The following should not be localized:
@@ -948,7 +960,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 
-        Next error code should be MSB1050.
+        Next error code should be MSB1051.
 
         Don't forget to update this comment after using the new code.
   -->
