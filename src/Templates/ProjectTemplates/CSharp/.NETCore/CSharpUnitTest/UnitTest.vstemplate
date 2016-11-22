@@ -6,7 +6,7 @@
     <Icon Package="{52CBD135-1F97-2580-011F-C7CD052E44DE}" ID="531"/>
     <ProjectType>CSharp</ProjectType>
     <RequiredFrameworkVersion>2.0</RequiredFrameworkVersion>
-    <SortOrder>12</SortOrder>
+    <SortOrder>15</SortOrder>
     <TemplateID>Microsoft.CSharp.NETCore.UnitTest</TemplateID>
     <CreateNewFolder>true</CreateNewFolder>
     <CreateInPlace>true</CreateInPlace>
