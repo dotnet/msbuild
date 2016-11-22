@@ -14,8 +14,6 @@ usage()
 }
 
 restoreBuildTools(){
-    # Work around issue where NuGet can't restore  because it can't get a lock
-
     eval "$THIS_SCRIPT_PATH/init-tools.sh"
 }
 
@@ -27,7 +25,7 @@ setHome()
         export HOME=$HOME_DEFAULT
         mkdir -p $HOME_DEFAULT
 
-        # Use a different temp directory in CI
+        # Use a different temp directory in CI so that hopefully things are a little more stable
         export TMPDIR=$TEMP_DEFAULT
         mkdir -p $TEMP_DEFAULT
     fi
