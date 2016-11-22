@@ -64,7 +64,6 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [InlineData("ihave?inv@lid/char\\acters")]
         public void WhenNonExistingProjectIsPassedItPrintsErrorAndUsage(string projName)
         {
-            string testRoot = NewDir().Path;
             var setup = Setup();
 
             var cmd = new AddP2PCommand()
@@ -99,7 +98,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
 
             var cmd = new AddP2PCommand()
                     .WithWorkingDirectory(Path.Combine(setup.TestRoot, "MoreThanOne"))
-                    .Execute($"\"{setup.ValidRefCsprojRelPath}\"");
+                    .Execute($"\"{setup.ValidRefCsprojRelToOtherProjPath}\"");
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Contain("more than one");
             cmd.StdOut.Should().Contain("Usage");
@@ -550,28 +549,80 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
             lib.CsProjContent().Should().BeEquivalentTo(contentBefore);
         }
 
-        [Fact(Skip = "Not finished")]
+        [Fact]
         public void WhenPassedReferenceDoesNotExistAndForceSwitchIsPassedItAddsIt()
         {
-            throw new NotImplementedException();
+            var lib = NewLib();
+            const string nonExisting = "IDoNotExist.csproj";
+
+            int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
+            var cmd = new AddP2PCommand()
+                .WithWorkingDirectory(lib.Path)
+                .WithProject(lib.CsProjName)
+                .Execute($"--force \"{nonExisting}\"");
+            cmd.Should().Pass();
+            cmd.StdOut.Should().Contain("added to the project");
+            cmd.StdErr.Should().BeEmpty();
+            var csproj = lib.CsProj();
+            csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
+            csproj.NumberOfProjectReferencesWithIncludeContaining(nonExisting).Should().Be(1);
         }
 
-        [Fact(Skip = "Not finished")]
+        [Fact]
         public void WhenPassedReferenceIsUsingSlashesItNormalizesItToBackslashes()
         {
-            throw new NotImplementedException();
+            var lib = NewLib();
+            var setup = Setup();
+
+            int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
+            var cmd = new AddP2PCommand()
+                .WithWorkingDirectory(lib.Path)
+                .WithProject(lib.CsProjName)
+                .Execute($"--force \"{setup.ValidRefCsprojPath.Replace('\\', '/')}\"");
+            cmd.Should().Pass();
+            cmd.StdOut.Should().Contain("added to the project");
+            cmd.StdErr.Should().BeEmpty();
+            var csproj = lib.CsProj();
+            csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
+            csproj.NumberOfProjectReferencesWithIncludeContaining(setup.ValidRefCsprojPath.Replace('/', '\\')).Should().Be(1);
         }
 
-        [Fact(Skip = "Not finished")]
-        public void WhenPassedRefIsUsingBackslashesItDoesntNormalizeIt()
-        {
-            throw new NotImplementedException();
-        }
-
-        [Fact(Skip = "Not finished")]
+        [Fact]
         public void WhenReferenceIsRelativeAndProjectIsNotInCurrentDirectoryReferencePathIsFixed()
         {
-            throw new NotImplementedException();
+            var setup = Setup();
+            var proj = new ProjDir(setup.LibDir);
+
+            int noCondBefore = proj.CsProj().NumberOfItemGroupsWithoutCondition();
+            var cmd = new AddP2PCommand()
+                .WithWorkingDirectory(setup.TestRoot)
+                .WithProject(setup.LibCsprojPath)
+                .Execute($"\"{setup.ValidRefCsprojRelPath}\"");
+            cmd.Should().Pass();
+            cmd.StdOut.Should().Contain("added to the project");
+            cmd.StdErr.Should().BeEmpty();
+            var csproj = proj.CsProj();
+            csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
+            csproj.NumberOfProjectReferencesWithIncludeContaining(setup.ValidRefCsprojRelToOtherProjPath).Should().Be(1);
+        }
+
+        [Fact]
+        public void WhenReferenceIsRelativeAndProjectIsNotInCurrentDirectoryAndForceSwitchIsPassedItDoesNotChangeIt()
+        {
+            var setup = Setup();
+            var proj = new ProjDir(setup.LibDir);
+
+            int noCondBefore = proj.CsProj().NumberOfItemGroupsWithoutCondition();
+            var cmd = new AddP2PCommand()
+                .WithWorkingDirectory(setup.TestRoot)
+                .WithProject(setup.LibCsprojPath)
+                .Execute($"--force \"{setup.ValidRefCsprojRelPath}\"");
+            cmd.Should().Pass();
+            cmd.StdOut.Should().Contain("added to the project");
+            cmd.StdErr.Should().BeEmpty();
+            var csproj = proj.CsProj();
+            csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
+            csproj.NumberOfProjectReferencesWithIncludeContaining(setup.ValidRefCsprojRelPath).Should().Be(1);
         }
     }
 }

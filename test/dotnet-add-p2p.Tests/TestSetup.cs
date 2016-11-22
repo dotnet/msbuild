@@ -14,19 +14,17 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
 
         public string TestRoot { get; private set; }
 
-
         private const string ValidRef = "ValidRef";
         public string ValidRefCsprojName => $"{ValidRef}.csproj";
-        public string ValidRefCsprojPath => Path.Combine(TestRoot, ValidRef, ValidRefCsprojName);
-        public string ValidRefCsprojRelPath => Path.Combine("..", ValidRef, ValidRefCsprojName);
-
+        public string ValidRefCsprojRelPath => Path.Combine(ValidRef, ValidRefCsprojName);
+        public string ValidRefCsprojPath => Path.Combine(TestRoot, ValidRefCsprojRelPath);
+        public string ValidRefCsprojRelToOtherProjPath => Path.Combine("..", ValidRefCsprojRelPath);
 
         private const string Lib = "Lib";
+        public string LibDir => Path.Combine(TestRoot, Lib);
         public string LibCsprojName => $"{Lib}.csproj";
         public string LibCsprojPath => Path.Combine(TestRoot, Lib, LibCsprojName);
         public string LibCsprojRelPath => Path.Combine("..", Lib, LibCsprojName);
-
-        
 
         public TestSetup(string testRoot)
         {

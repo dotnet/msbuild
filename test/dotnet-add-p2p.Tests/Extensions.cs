@@ -11,43 +11,6 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
 {
     internal static class Extensions
     {
-        //public static int CountOccurrances(this string s, string pattern)
-        //{
-        //    int ret = 0;
-        //    for (int i = s.IndexOf(pattern); i != -1; i = s.IndexOf(pattern, i + 1))
-        //    {
-        //        ret++;
-        //    }
-
-        //    return ret;
-        //}
-
-        //public static int NumberOfLinesWith(this string s, params string[] patterns)
-        //{
-        //    int ret = 0;
-        //    string[] lines = s.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-        //    foreach (var line in lines)
-        //    {
-        //        bool shouldCount = true;
-
-        //        foreach (var p in patterns)
-        //        {
-        //            if (!line.Contains(p))
-        //            {
-        //                shouldCount = false;
-        //                break;
-        //            }
-        //        }
-
-        //        if (shouldCount)
-        //        {
-        //            ret++;
-        //        }
-        //    }
-
-        //    return ret;
-        //}
-
         public static int NumberOfItemGroupsWithConditionContaining(this ProjectRootElement root, string patternInCondition)
         {
             return root.ItemGroups.Count((ig) => ig.Condition.Contains(patternInCondition));

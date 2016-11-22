@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
+using Microsoft.DotNet.Tools.Common;
 
 namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
 {
@@ -42,18 +43,29 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
 
             CommandOption forceOption = app.Option(
                 "--force", 
-                "Add reference even if it does not exist",
+                "Add reference even if it does not exist, do not convert paths to relative",
                 CommandOptionType.NoValue);
 
             app.OnExecute(() => {
-                if (projectArgument.Value == null)
+                if (string.IsNullOrEmpty(projectArgument.Value))
                 {
                     throw new GracefulException("Argument <Project> is required.");
                 }
 
-                ProjectRootElement project = File.Exists(projectArgument.Value) ?
-                                                GetProjectFromFileOrThrow(projectArgument.Value) :
-                                                GetProjectFromDirectoryOrThrow(projectArgument.Value);
+                ProjectRootElement project;
+                string projectDir;
+                if (File.Exists(projectArgument.Value))
+                {
+                    project = GetProjectFromFileOrThrow(projectArgument.Value);
+                    projectDir = new FileInfo(projectArgument.Value).DirectoryName;
+                }
+                else
+                {
+                    project = GetProjectFromDirectoryOrThrow(projectArgument.Value);
+                    projectDir = projectArgument.Value;
+                }
+
+                projectDir = PathUtility.EnsureTrailingSlash(projectDir);
 
                 if (app.RemainingArguments.Count == 0)
                 {
@@ -63,22 +75,8 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
                 List<string> references = app.RemainingArguments;
                 if (!forceOption.HasValue())
                 {
-                    var notExisting = new List<string>();
-                    foreach (var r in references)
-                    {
-                        if (!File.Exists(r))
-                        {
-                            notExisting.Add(r);
-                        }
-                    }
-
-                    if (notExisting.Count > 0)
-                    {
-                        throw new GracefulException(
-                            string.Join(
-                                Environment.NewLine,
-                                notExisting.Select((ne) => $"Reference `{ne}` does not exist.")));
-                    }
+                    EnsureAllReferencesExist(references);
+                    ConvertPathsToRelative(projectDir, ref references);
                 }
                 
                 int numberOfAddedReferences = AddProjectToProjectReference(
@@ -104,6 +102,32 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
                 app.ShowHelp();
                 return 1;
             }
+        }
+
+        internal static void EnsureAllReferencesExist(List<string> references)
+        {
+            var notExisting = new List<string>();
+            foreach (var r in references)
+            {
+                if (!File.Exists(r))
+                {
+                    notExisting.Add(r);
+                }
+            }
+
+            if (notExisting.Count > 0)
+            {
+                throw new GracefulException(
+                    string.Join(
+                        Environment.NewLine,
+                        notExisting.Select((ne) => $"Reference `{ne}` does not exist.")));
+            }
+        }
+
+        internal static void ConvertPathsToRelative(string root, ref List<string> references)
+        {
+            root = PathUtility.EnsureTrailingSlash(Path.GetFullPath(root));
+            references = references.Select((r) => PathUtility.GetRelativePath(root, Path.GetFullPath(r))).ToList();
         }
 
         // There is ProjectRootElement.TryOpen but it does not work as expected
@@ -181,13 +205,18 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
             return ret;
         }
 
+        private static string NormalizeSlashesForMsbuild(string path)
+        {
+            return path.Replace('/', '\\');
+        }
+
         internal static int AddProjectToProjectReference(ProjectRootElement root, string framework, IEnumerable<string> refs)
         {
             int numberOfAddedReferences = 0;
             const string ProjectItemElementType = "ProjectReference";
 
             ProjectItemGroupElement ig = null;
-            foreach (var @ref in refs)
+            foreach (var @ref in refs.Select((r) => NormalizeSlashesForMsbuild(r)))
             {
                 if (root.HasExistingItemWithCondition(framework, @ref))
                 {
