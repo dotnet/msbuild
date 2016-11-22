@@ -730,6 +730,17 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
+        /// Whether the XML is preserving formatting or not.
+        /// </summary>
+        public bool PreserveFormatting
+        {
+            get
+            {
+                return XmlDocument?.PreserveWhitespace ?? false;
+            }
+        }
+
+        /// <summary>
         /// Version number of this object.
         /// A host can compare this to a stored version number to determine whether
         /// a project's XML has changed, even if it has also been saved since.
@@ -1105,6 +1116,25 @@ namespace Microsoft.Build.Construction
         /// this method returning false does not indicate that it has never been loaded, only that it is not currently in memory.
         /// </remarks>
         public static ProjectRootElement TryOpen(string path, ProjectCollection projectCollection)
+        {
+            return TryOpen(path, projectCollection, preserveFormatting: false);
+        }
+
+        /// <summary>
+        /// Returns the ProjectRootElement for the given path if it has been loaded, or null if it is not currently in memory.
+        /// Uses the specified project collection.
+        /// </summary>
+        /// <param name="path">The path of the ProjectRootElement, cannot be null.</param>
+        // <param name="projectCollection">The <see cref="ProjectCollection"/> to load the project into.</param>
+        /// <param name="preserveFormatting">
+        /// The formatting to open with. Must match the formatting in the collection to succeed.
+        /// </param>
+        /// <returns>The loaded ProjectRootElement, or null if it is not currently in memory.</returns>
+        /// <remarks>
+        /// It is possible for ProjectRootElements to be brought into memory and discarded due to memory pressure. Therefore
+        /// this method returning false does not indicate that it has never been loaded, only that it is not currently in memory.
+        /// </remarks>
+        public static ProjectRootElement TryOpen(string path, ProjectCollection projectCollection, bool preserveFormatting)
         {
             ErrorUtilities.VerifyThrowArgumentLength(path, "path");
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection, "projectCollection");
