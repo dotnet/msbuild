@@ -306,7 +306,7 @@ namespace Microsoft.DotNet.Tests
 
             result.Should().NotBeNull();
 
-            result.Args.Should().NotContain("-fx-version");
+            result.Args.Should().NotContain("--fx-version");
         }
 
         private ProjectToolsCommandResolver SetupProjectToolsCommandResolver()
