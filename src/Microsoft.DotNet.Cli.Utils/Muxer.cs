@@ -15,7 +15,8 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             get
             {
-                return new DirectoryInfo(Path.GetDirectoryName(GetDataFromAppDomain("FX_DEPS_FILE"))).Name;
+                var depsFile = new FileInfo(Path.GetDirectoryName(GetDataFromAppDomain("FX_DEPS_FILE")));
+                return depsFile.Directory.Name;
             }
         }
 

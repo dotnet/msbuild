@@ -80,16 +80,16 @@ namespace Microsoft.DotNet.Tests
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
-            var testInstance = TestAssetsManager
-                .CreateTestInstance(TestProjectName)
-                .WithNuGetMSBuildFiles()
-                .WithLockFiles();
+            var testInstance = TestAssets.Get(TestProjectName)
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithRestoreFiles();
 
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "nonexistent-command",
                 CommandArguments = null,
-                ProjectDirectory = testInstance.Path
+                ProjectDirectory = testInstance.Root.FullName
             };
 
             var result = projectToolsCommandResolver.Resolve(commandResolverArguments);
@@ -102,16 +102,16 @@ namespace Microsoft.DotNet.Tests
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
-            var testInstance = TestAssetsManager
-                .CreateTestInstance(TestProjectName)
-                .WithNuGetMSBuildFiles()
-                .WithLockFiles();
+            var testInstance = TestAssets.Get(TestProjectName)
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithRestoreFiles();
 
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "dotnet-portable",
                 CommandArguments = null,
-                ProjectDirectory = testInstance.Path
+                ProjectDirectory = testInstance.Root.FullName
             };
 
             var result = projectToolsCommandResolver.Resolve(commandResolverArguments);
@@ -266,23 +266,23 @@ namespace Microsoft.DotNet.Tests
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
-            var testInstance = TestAssetsManager
-                .CreateTestInstance("MSBuildTestApp")
-                .WithNuGetMSBuildFiles()
-                .WithLockFiles();
+            var testInstance = TestAssets.Get("MSBuildTestApp")
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithRestoreFiles();
 
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "dotnet-prefercliruntime",
                 CommandArguments = null,
-                ProjectDirectory = testInstance.Path
+                ProjectDirectory = testInstance.Root.FullName
             };
 
             var result = projectToolsCommandResolver.Resolve(commandResolverArguments);
 
             result.Should().NotBeNull();
 
-            result.Args.Should().Contain("-fx-version 1.0.1");
+            result.Args.Should().Contain("--fx-version 1.0.1");
         }
 
         [Fact]
@@ -290,16 +290,16 @@ namespace Microsoft.DotNet.Tests
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
-            var testInstance = TestAssetsManager
-                .CreateTestInstance(TestProjectName)
-                .WithNuGetMSBuildFiles()
-                .WithLockFiles();
+            var testInstance = TestAssets.Get(TestProjectName)
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithRestoreFiles();
 
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "dotnet-portable",
                 CommandArguments = null,
-                ProjectDirectory = testInstance.Path
+                ProjectDirectory = testInstance.Root.FullName
             };
 
             var result = projectToolsCommandResolver.Resolve(commandResolverArguments);

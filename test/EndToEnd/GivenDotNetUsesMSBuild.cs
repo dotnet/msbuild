@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         }
 
         [Fact]
-        public void ItCanRunToolsThatPrefersTheCliRuntime()
+        public void ItCanRunToolsThatPrefersTheCliRuntimeEvenWhenTheToolItselfDeclaresADifferentRuntime()
         {
             var testInstance = TestAssets.Get("MSBuildTestApp")
                                          .CreateInstance()
@@ -82,10 +82,8 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             new DotnetCommand()
                 .WithWorkingDirectory(testInstance.Root)
                 .ExecuteWithCapturedOutput("prefercliruntime")
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello I prefer the cli runtime World!");;
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello I prefer the cli runtime World!");;
         }
 
         [Fact]
