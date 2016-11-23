@@ -604,7 +604,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
             cmd.StdErr.Should().BeEmpty();
             var csproj = proj.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
-            csproj.NumberOfProjectReferencesWithIncludeContaining(setup.ValidRefCsprojRelToOtherProjPath).Should().Be(1);
+            csproj.NumberOfProjectReferencesWithIncludeContaining(setup.ValidRefCsprojRelToOtherProjPath.Replace('/', '\\')).Should().Be(1);
         }
 
         [Fact]
@@ -623,7 +623,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
             cmd.StdErr.Should().BeEmpty();
             var csproj = proj.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
-            csproj.NumberOfProjectReferencesWithIncludeContaining(setup.ValidRefCsprojRelPath).Should().Be(1);
+            csproj.NumberOfProjectReferencesWithIncludeContaining(setup.ValidRefCsprojRelPath.Replace('/', '\\')).Should().Be(1);
         }
     }
 }
