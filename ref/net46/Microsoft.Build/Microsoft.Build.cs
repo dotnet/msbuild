@@ -83,6 +83,7 @@ namespace Microsoft.Build.Construction
     public partial class ProjectImportElement : Microsoft.Build.Construction.ProjectElement
     {
         internal ProjectImportElement() { }
+        public bool Implicit { get { throw null; } }
         public string Project { get { throw null; } set { } }
         public Microsoft.Build.Construction.ElementLocation ProjectLocation { get { throw null; } }
         protected override Microsoft.Build.Construction.ProjectElement CreateNewInstance(Microsoft.Build.Construction.ProjectRootElement owner) { throw null; }

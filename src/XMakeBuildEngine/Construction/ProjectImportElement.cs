@@ -59,7 +59,8 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Gets the Implicit state of the element: true if the element was not in the read XML.
         /// </summary>
-        internal bool Implicit
+        // TODO: *should* this be public? if it's not, you can't determine if an import is implicit from the public OM.
+        public bool Implicit
         {
             get { return XmlElement.HasAttribute(XMakeAttributes.@implicit); }
         }
