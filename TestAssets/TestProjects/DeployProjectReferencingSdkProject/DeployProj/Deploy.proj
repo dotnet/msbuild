@@ -1,0 +1,19 @@
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  
+  <PropertyGroup>
+    <SkipCopyBuildProduct>true</SkipCopyBuildProduct>
+    <TargetRuntime>None</TargetRuntime>
+    <OutputType>FabricApplication</OutputType>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="../HelloWorld/HelloWorld.csproj" />
+  </ItemGroup>
+
+
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
+
+  <Target Name="CreateManifestResourceNames" />
+  <Target Name="CoreCompile" />
+  
+</Project>

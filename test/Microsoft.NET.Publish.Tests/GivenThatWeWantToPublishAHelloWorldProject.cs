@@ -94,5 +94,23 @@ namespace Microsoft.NET.Publish.Tests
                 .And
                 .HaveStdOutContaining("Hello World!");
         }
+
+        [Fact]
+        public void A_deployment_project_can_reference_the_hello_world_project()
+        {
+            var rid = RuntimeEnvironment.GetRuntimeIdentifier();
+
+            var helloWorldAsset = _testAssetsManager
+                .CopyTestAsset("DeployProjectReferencingSdkProject")
+                .WithSource()
+                .Restore(relativePath: "HelloWorld", args: $"/p:RuntimeIdentifiers={rid}");
+
+            var buildCommand = new BuildCommand(Stage0MSBuild, helloWorldAsset.TestRoot, @"DeployProj\Deploy.proj");
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+        }
     }
 }
