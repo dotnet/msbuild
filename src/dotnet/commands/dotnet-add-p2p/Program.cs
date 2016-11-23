@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
             app.OnExecute(() => {
                 if (string.IsNullOrEmpty(projectArgument.Value))
                 {
-                    throw new GracefulException("Argument <Project> is required.");
+                    throw new GracefulException(Strings.RequiredArgumentNotPassed, "<Project>");
                 }
 
                 ProjectRootElement project;
@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
 
                 if (app.RemainingArguments.Count == 0)
                 {
-                    throw new GracefulException("You must specify at least one reference to add.");
+                    throw new GracefulException(Strings.SpecifyAtLeastOneReference);
                 }
 
                 List<string> references = app.RemainingArguments;
@@ -120,7 +120,7 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
                 throw new GracefulException(
                     string.Join(
                         Environment.NewLine,
-                        notExisting.Select((ne) => $"Reference `{ne}` does not exist.")));
+                        notExisting.Select((r) => string.Format(Strings.ReferenceDoesNotExist, r))));
             }
         }
 
@@ -148,19 +148,18 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
         {
             if (!File.Exists(filename))
             {
-                throw new GracefulException($"Provided project `{filename}` does not exist.");
+                throw new GracefulException(Strings.ProjectDoesNotExist, filename);
             }
 
             var project = TryOpenProject(filename);
             if (project == null)
             {
-                throw new GracefulException($"Invalid project `{filename}`.");
+                throw new GracefulException(Strings.ProjectIsInvalid, filename);
             }
 
             return project;
         }
 
-        // TODO: improve errors
         internal static ProjectRootElement GetProjectFromDirectoryOrThrow(string directory)
         {
             DirectoryInfo dir;
@@ -170,36 +169,36 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
             }
             catch (ArgumentException)
             {
-                throw new GracefulException($"Could not find project or directory `{directory}`.");
+                throw new GracefulException(Strings.CouldNotFindProjectOrDirectory, directory);
             }
 
             if (!dir.Exists)
             {
-                throw new GracefulException($"Could not find project or directory `{directory}`.");
+                throw new GracefulException(Strings.CouldNotFindProjectOrDirectory, directory);
             }
 
             FileInfo[] files = dir.GetFiles("*proj");
             if (files.Length == 0)
             {
-                throw new GracefulException($"Could not find any project in `{directory}`.");
+                throw new GracefulException(Strings.CouldNotFindAnyProjectInDirectory, directory);
             }
 
             if (files.Length > 1)
             {
-                throw new GracefulException("Found more than one project in the current directory. Please specify which one to use.");
+                throw new GracefulException(Strings.MoreThanOneProjectInDirectory, directory);
             }
 
             FileInfo projectFile = files.First();
 
             if (!projectFile.Exists)
             {
-                throw new GracefulException($"Could not find any project in `{directory}`.");
+                throw new GracefulException(Strings.CouldNotFindAnyProjectInDirectory, directory);
             }
 
             var ret = TryOpenProject(projectFile.FullName);
             if (ret == null)
             {
-                throw new GracefulException($"Found a project `{projectFile.FullName}` but it is invalid.");
+                throw new GracefulException(Strings.FoundInvalidProject, projectFile.FullName);
             }
 
             return ret;
@@ -220,14 +219,14 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
             {
                 if (root.HasExistingItemWithCondition(framework, @ref))
                 {
-                    Reporter.Output.WriteLine($"Project already has a reference to `{@ref}`.");
+                    Reporter.Output.WriteLine(string.Format(Strings.ProjectAlreadyHasAreference, @ref));
                     continue;
                 }
 
                 numberOfAddedReferences++;
                 itemGroup.AppendChild(root.CreateItemElement(ProjectItemElementType, @ref));
 
-                Reporter.Output.WriteLine($"Reference `{@ref}` added to the project.");
+                Reporter.Output.WriteLine(string.Format(Strings.ReferenceAddedToTheProject, @ref));
             }
 
             return numberOfAddedReferences;

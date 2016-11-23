@@ -12,6 +12,10 @@ namespace Microsoft.DotNet.Cli.Utils
         {
         }
 
+        public GracefulException(string format, params string[] args) : this(string.Format(format, args))
+        {
+        }
+
         public GracefulException(string message, Exception innerException) : base(message, innerException)
         {
         }
