@@ -84,7 +84,7 @@ namespace Microsoft.DotNet.Migration.Tests
         {
             var catalog = new Dictionary<string, string>();
             
-            var patterns = new [] { "global.json", "project.json", "*.xproj", "*.xproj.user" };
+            var patterns = new [] { "global.json", "project.json", "project.lock.json", "*.xproj", "*.xproj.user" };
 
             foreach (var pattern in patterns)
             {
