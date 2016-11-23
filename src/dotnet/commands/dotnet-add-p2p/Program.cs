@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
             app.OnExecute(() => {
                 if (string.IsNullOrEmpty(projectArgument.Value))
                 {
-                    throw new GracefulException(Strings.RequiredArgumentNotPassed, "<Project>");
+                    throw new GracefulException(LocalizableStrings.RequiredArgumentNotPassed, "<Project>");
                 }
 
                 ProjectRootElement project;
@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
 
                 if (app.RemainingArguments.Count == 0)
                 {
-                    throw new GracefulException(Strings.SpecifyAtLeastOneReference);
+                    throw new GracefulException(LocalizableStrings.SpecifyAtLeastOneReference);
                 }
 
                 List<string> references = app.RemainingArguments;
@@ -120,7 +120,7 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
                 throw new GracefulException(
                     string.Join(
                         Environment.NewLine,
-                        notExisting.Select((r) => string.Format(Strings.ReferenceDoesNotExist, r))));
+                        notExisting.Select((r) => string.Format(LocalizableStrings.ReferenceDoesNotExist, r))));
             }
         }
 
@@ -148,13 +148,13 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
         {
             if (!File.Exists(filename))
             {
-                throw new GracefulException(Strings.ProjectDoesNotExist, filename);
+                throw new GracefulException(LocalizableStrings.ProjectDoesNotExist, filename);
             }
 
             var project = TryOpenProject(filename);
             if (project == null)
             {
-                throw new GracefulException(Strings.ProjectIsInvalid, filename);
+                throw new GracefulException(LocalizableStrings.ProjectIsInvalid, filename);
             }
 
             return project;
@@ -169,36 +169,36 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
             }
             catch (ArgumentException)
             {
-                throw new GracefulException(Strings.CouldNotFindProjectOrDirectory, directory);
+                throw new GracefulException(LocalizableStrings.CouldNotFindProjectOrDirectory, directory);
             }
 
             if (!dir.Exists)
             {
-                throw new GracefulException(Strings.CouldNotFindProjectOrDirectory, directory);
+                throw new GracefulException(LocalizableStrings.CouldNotFindProjectOrDirectory, directory);
             }
 
             FileInfo[] files = dir.GetFiles("*proj");
             if (files.Length == 0)
             {
-                throw new GracefulException(Strings.CouldNotFindAnyProjectInDirectory, directory);
+                throw new GracefulException(LocalizableStrings.CouldNotFindAnyProjectInDirectory, directory);
             }
 
             if (files.Length > 1)
             {
-                throw new GracefulException(Strings.MoreThanOneProjectInDirectory, directory);
+                throw new GracefulException(LocalizableStrings.MoreThanOneProjectInDirectory, directory);
             }
 
             FileInfo projectFile = files.First();
 
             if (!projectFile.Exists)
             {
-                throw new GracefulException(Strings.CouldNotFindAnyProjectInDirectory, directory);
+                throw new GracefulException(LocalizableStrings.CouldNotFindAnyProjectInDirectory, directory);
             }
 
             var ret = TryOpenProject(projectFile.FullName);
             if (ret == null)
             {
-                throw new GracefulException(Strings.FoundInvalidProject, projectFile.FullName);
+                throw new GracefulException(LocalizableStrings.FoundInvalidProject, projectFile.FullName);
             }
 
             return ret;
@@ -219,14 +219,14 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
             {
                 if (root.HasExistingItemWithCondition(framework, @ref))
                 {
-                    Reporter.Output.WriteLine(string.Format(Strings.ProjectAlreadyHasAreference, @ref));
+                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.ProjectAlreadyHasAreference, @ref));
                     continue;
                 }
 
                 numberOfAddedReferences++;
                 itemGroup.AppendChild(root.CreateItemElement(ProjectItemElementType, @ref));
 
-                Reporter.Output.WriteLine(string.Format(Strings.ReferenceAddedToTheProject, @ref));
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.ReferenceAddedToTheProject, @ref));
             }
 
             return numberOfAddedReferences;

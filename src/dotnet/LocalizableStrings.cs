@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Microsoft.DotNet.Tools
 {
-    internal static class Strings
+    internal static class LocalizableStrings
     {
         // Arguments parsing
         public const string RequiredArgumentNotPassed = "Required argument {0} was not passed.";

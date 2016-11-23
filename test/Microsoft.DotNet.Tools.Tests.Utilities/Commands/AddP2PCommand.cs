@@ -12,7 +12,6 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         public AddP2PCommand()
             : base("dotnet")
         {
-
         }
 
         public override CommandResult Execute(string args = "")

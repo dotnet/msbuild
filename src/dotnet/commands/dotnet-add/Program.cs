@@ -58,7 +58,7 @@ Commands:
             }
             else if (args.Length == 1)
             {
-                Reporter.Error.WriteLine(string.Format(Strings.RequiredArgumentNotPassed, "<command>").Red());
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.RequiredArgumentNotPassed, "<command>").Red());
                 Reporter.Output.WriteLine(HelpText);
                 return 1;
             }
@@ -76,7 +76,7 @@ Commands:
                 return builtin(args);
             }
 
-            Reporter.Error.WriteLine(string.Format(Strings.RequiredArgumentIsInvalid, "<command>").Red());
+            Reporter.Error.WriteLine(string.Format(LocalizableStrings.RequiredArgumentIsInvalid, "<command>").Red());
             Reporter.Output.WriteLine(HelpText);
             return 1;
         }

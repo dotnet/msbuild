@@ -8,9 +8,11 @@ using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Cli.Add.P2P.Tests
 {
-    internal static class Extensions
+    internal static class ProjectRootElementExtensions
     {
-        public static int NumberOfItemGroupsWithConditionContaining(this ProjectRootElement root, string patternInCondition)
+        public static int NumberOfItemGroupsWithConditionContaining(
+            this ProjectRootElement root,
+            string patternInCondition)
         {
             return root.ItemGroups.Count((itemGroup) => itemGroup.Condition.Contains(patternInCondition));
         }
@@ -20,7 +22,11 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
             return root.ItemGroups.Count((ig) => string.IsNullOrEmpty(ig.Condition));
         }
 
-        public static IEnumerable<ProjectElement> ItemsWithIncludeAndConditionContaining(this ProjectRootElement root, string itemType, string includePattern, string patternInCondition)
+        public static IEnumerable<ProjectElement> ItemsWithIncludeAndConditionContaining(
+            this ProjectRootElement root,
+            string itemType,
+            string includePattern,
+            string patternInCondition)
         {
             return root.Items.Where((it) =>
             {
@@ -34,17 +40,29 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
             });
         }
 
-        public static int NumberOfProjectReferencesWithIncludeAndConditionContaining(this ProjectRootElement root, string includePattern, string patternInCondition)
+        public static int NumberOfProjectReferencesWithIncludeAndConditionContaining(
+            this ProjectRootElement root, 
+            string includePattern, 
+            string patternInCondition)
         {
-            return root.ItemsWithIncludeAndConditionContaining("ProjectReference", includePattern, patternInCondition).Count();
+            return root.ItemsWithIncludeAndConditionContaining(
+                "ProjectReference",
+                includePattern,
+                patternInCondition)
+                .Count();
         }
 
-        public static IEnumerable<ProjectElement> ItemsWithIncludeContaining(this ProjectRootElement root, string itemType, string includePattern)
+        public static IEnumerable<ProjectElement> ItemsWithIncludeContaining(
+            this ProjectRootElement root,
+            string itemType,
+            string includePattern)
         {
             return root.Items.Where((it) => it.ItemType == itemType && it.Include.Contains(includePattern));
         }
 
-        public static int NumberOfProjectReferencesWithIncludeContaining(this ProjectRootElement root, string includePattern)
+        public static int NumberOfProjectReferencesWithIncludeContaining(
+            this ProjectRootElement root,
+            string includePattern)
         {
             return root.ItemsWithIncludeContaining("ProjectReference", includePattern).Count();
         }
