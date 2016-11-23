@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         {
             return new TestSetup(
                 TestAssets.Get(TestSetup.TestGroup, TestSetup.ProjectName)
-                    .CreateInstance()
+                    .CreateInstance(callingMethod: callingMethod, identifier: identifier)
                     .WithSourceFiles()
                     .Root
                     .FullName);
