@@ -13,11 +13,11 @@
     </ItemGroup>
 
     <Copy SourceFiles="@(CompilerToolsFiles)"
-          DestinationFolder="$(DeploymentDir)\Roslyn"
+          DestinationFolder="$(DeploymentDir)\"
           SkipUnchangedFiles="true" />
 
     <Copy SourceFiles="@(CompilerToolsFiles)"
-          DestinationFolder="$(TestDeploymentDir)\Roslyn"
+          DestinationFolder="$(TestDeploymentDir)\"
           SkipUnchangedFiles="true" />
   </Target>
 
@@ -81,10 +81,6 @@
     <!--At build time, we target netstandard to be runnable on many runtimes.
         To get a set of runnable bits, we need to deploy a specific one. On the xplat branch we are testing the .net core runtime platform, so we target netcoreapp -->
     <NuGetTargetMoniker Condition="'$(NetCoreBuild)' == 'true'">.NETCoreApp,Version=v1.0</NuGetTargetMoniker>
-
-    <RuntimeProjectJson>$(MSBuildThisFileDirectory)runtimeDependencies\project.json</RuntimeProjectJson>
-    <RuntimeProjectLockJson>$(MSBuildThisFileDirectory)runtimeDependencies\project.lock.json</RuntimeProjectLockJson>
-
     <NuGetRuntimeIdentifier>$(RuntimeSystem)-$(RuntimeArchitecture)</NuGetRuntimeIdentifier>
   </PropertyGroup>
 
@@ -96,13 +92,13 @@
     </RuntimeProjectJson>
     <RuntimeProjectJson Include="$(MSBuildThisFileDirectory)roslyn\project.json">
       <LockFile>$(MSBuildThisFileDirectory)roslyn\project.lock.json</LockFile>
-      <DestinationFolder>$(DeploymentDir)\Roslyn</DestinationFolder>
-      <TestDeploymentDir>$(TestDeploymentDir)\Roslyn</TestDeploymentDir>
+      <DestinationFolder>$(DeploymentDir)</DestinationFolder>
+      <TestDeploymentDir>$(TestDeploymentDir)</TestDeploymentDir>
     </RuntimeProjectJson>
   </ItemGroup>
 
   <Target Name="RestoreRuntimePackages"
-          Inputs="$(DnuToolPath);$(RuntimeProjectJson)"
+          Inputs="$(DnuToolPath);@(RuntimeProjectJson)"
           Outputs="@(RuntimeProjectJson->'%(LockFile)')">
     <Exec Command="$(DnuRestoreCommand) &quot;%(RuntimeProjectJson.FullPath)&quot;" StandardOutputImportance="Low" />
 
@@ -113,7 +109,7 @@
 
   <Target Name="DeployRuntime"
           DependsOnTargets="RestoreRuntimePackages"
-          Outputs="%(RuntimeProjectJson.DestinationFolder)\dummy">
+          Outputs="%(RuntimeProjectJson.LockFile).IntentionallyDoesNotExistSoThisAlwaysRuns">
     <PrereleaseResolveNuGetPackageAssets AllowFallbackOnTargetSelection="false"
                                          IncludeFrameworkReferences="false"
                                          NuGetPackagesDirectory="$(PackagesDir)"
