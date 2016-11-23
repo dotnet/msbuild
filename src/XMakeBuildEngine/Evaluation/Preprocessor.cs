@@ -166,13 +166,16 @@ namespace Microsoft.Build.Evaluation
                 {
                     // To display what the <Import> tag looked like
                     string importCondition = ((XmlElement)child).GetAttribute(XMakeAttributes.condition);
+                    string condition = importCondition.Length > 0 ? $" Condition=\"{importCondition}\"" : String.Empty;
                     string importProject = ((XmlElement)child).GetAttribute(XMakeAttributes.project);
+                    string importSdk = ((XmlElement)child).GetAttribute(XMakeAttributes.sdk);
 
                     IList<ProjectRootElement> resolvedList;
                     if (!_importTable.TryGetValue(child as XmlElement, out resolvedList))
                     {
                         // Import didn't resolve to anything; just display as a comment and move on
-                        string closedImportTag = "<Import Project=\"" + importProject + "\"" + ((importCondition.Length > 0) ? " Condition=\"" + importCondition + "\"" : String.Empty) + " />";
+                        string closedImportTag =
+                            $"<Import Project=\"{importProject}\"{condition} />";
                         destination.AppendChild(destinationDocument.CreateComment(closedImportTag));
 
                         continue;
@@ -183,8 +186,18 @@ namespace Microsoft.Build.Evaluation
                         ProjectRootElement resolved = resolvedList[i];
                         XmlDocument innerDocument = resolved.XmlDocument;
 
-                        string importTag = "  <Import Project=\"" + importProject + "\"" + ((importCondition.Length > 0) ? " Condition=\"" + importCondition + "\"" : String.Empty) + ">";
-                        destination.AppendChild(destinationDocument.CreateComment("\r\n" + new String('=', 140) + "\r\n" + importTag + "\r\n\r\n" + resolved.FullPath.Replace("--", "__") + "\r\n" + new String('=', 140) + "\r\n"));
+                        string sdk = importSdk.Length > 0 ? $" {XMakeAttributes.sdk}=\"{importSdk}\"" : String.Empty;
+                        string importTag =
+                            $"  <Import Project=\"{importProject}\"{sdk}{condition}>";
+
+                        if (((XmlElement)child).GetAttribute(XMakeAttributes.@implicit).Length > 0)
+                        {
+                            importTag =
+                                $"  Import of \"{importProject}\" from Sdk \"{importSdk}\" was implied by the {XMakeElements.project} element's {XMakeAttributes.sdk} attribute.";
+                        }
+
+                        destination.AppendChild(destinationDocument.CreateComment(
+                            $"\r\n{new String('=', 140)}\r\n{importTag}\r\n\r\n{resolved.FullPath.Replace("--", "__")}\r\n{new String('=', 140)}\r\n"));
 
                         _filePaths.Push(resolved.FullPath);
                         CloneChildrenResolvingImports(innerDocument, destination);

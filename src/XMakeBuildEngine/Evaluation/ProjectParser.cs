@@ -47,7 +47,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Valid attributes on import element
         /// </summary>
-        private readonly static string[] s_validAttributesOnImport = new string[] { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.project };
+        private readonly static string[] s_validAttributesOnImport = new string[] { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.project, XMakeAttributes.sdk, XMakeAttributes.@implicit };
 
         /// <summary>
         /// Valid attributes on usingtask element
@@ -187,6 +187,46 @@ namespace Microsoft.Build.Construction
             // so we have to set it now
             _project.SetProjectRootElementFromParser(element, _project);
 
+            if (element.HasAttribute("Sdk"))
+            {
+                // TODO: don't get root of SDKs from the environment, use a built-in or toolset prop
+                // TODO: version?
+                // TODO: multiples
+
+                // TODO: paths should just be Sdk.props/targets; Sdk-aware imports should do the rest of the path.
+                var initialImportPath = Path.Combine(Environment.GetEnvironmentVariable("MSBUILDMAGICIMPORTDIRECTORY"),
+                    element.GetAttribute("Sdk"), "Sdk.props");
+                var finalImportPath = Path.Combine(Environment.GetEnvironmentVariable("MSBUILDMAGICIMPORTDIRECTORY"),
+                    element.GetAttribute("Sdk"), "Sdk.targets");
+
+                if (File.Exists(initialImportPath))
+                {
+                    var implicitImportElement = element.OwnerDocument.CreateElement(XMakeElements.import);
+
+                    // TODO: make this <Import Project="Sdk.props" Sdk="$(SdkName)" />
+                    implicitImportElement.SetAttribute(XMakeAttributes.project,
+                        initialImportPath);
+                    implicitImportElement.SetAttribute(XMakeAttributes.@implicit, $"Sdk = {element.GetAttribute("Sdk")}");
+                    implicitImportElement.SetAttribute(XMakeAttributes.sdk, element.GetAttribute("Sdk"));
+
+                    element.PrependChild(implicitImportElement);
+                }
+
+                if (File.Exists(finalImportPath))
+                {
+                    var implicitImportElement = element.OwnerDocument.CreateElement(XMakeElements.import);
+
+                    // TODO: make this <Import Project="Sdk.targets" Sdk="$(SdkName)" />
+                    implicitImportElement.SetAttribute(XMakeAttributes.project,
+                        finalImportPath);
+                    implicitImportElement.SetAttribute(XMakeAttributes.@implicit, $"Sdk = {element.GetAttribute("Sdk")}");
+                    implicitImportElement.SetAttribute(XMakeAttributes.sdk, element.GetAttribute("Sdk"));
+
+                    element.AppendChild(implicitImportElement);
+                }
+
+            }
+
             ParseProjectRootElementChildren(element);
         }
 
@@ -195,37 +235,6 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private void ParseProjectRootElementChildren(XmlElementWithLocation element)
         {
-            string initialImportPath = null;
-            string finalImportPath = null;
-
-            if (element.HasAttribute("Sdk"))
-            {
-                // TODO: don't get root of SDKs from the environment, use a built-in or toolset prop
-                // TODO: version?
-                initialImportPath = Path.Combine(Environment.GetEnvironmentVariable("MSBUILDMAGICIMPORTDIRECTORY"),
-                    element.GetAttribute("Sdk"), "Sdk.props");
-
-                finalImportPath = Path.Combine(Environment.GetEnvironmentVariable("MSBUILDMAGICIMPORTDIRECTORY"),
-                    element.GetAttribute("Sdk"), "Sdk.targets");
-            }
-
-            if (initialImportPath != null && File.Exists(initialImportPath))
-            {
-                ProjectElement child = ProjectImportElement.CreateDisconnected(initialImportPath, _project,
-                    isImplicit: true);
-                _project.PrependChild(child);
-
-                //var implicitImportElement = element.OwnerDocument.CreateElement(XMakeElements.import);
-
-                //implicitImportElement.SetAttribute(XMakeAttributes.project,
-                //    initialImportPath);
-
-                //// TODO: make this <Import Project="Sdk.props" Sdk="$(SdkName)" />
-
-                //element.PrependChild(implicitImportElement);
-            }
-
-
             foreach (XmlElementWithLocation childElement in ProjectXmlUtilities.GetVerifyThrowProjectChildElements(element))
             {
                 ProjectElement child = null;
@@ -281,23 +290,6 @@ namespace Microsoft.Build.Construction
                 }
 
                 _project.AppendParentedChildNoChecks(child);
-            }
-
-
-            if (finalImportPath!= null && File.Exists(finalImportPath))
-            {
-                ProjectElement child = ProjectImportElement.CreateDisconnected(finalImportPath, _project,
-                    isImplicit: true);
-                _project.AppendChild(child);
-
-                //var implicitImportElement = element.OwnerDocument.CreateElement(XMakeElements.import);
-
-                //implicitImportElement.SetAttribute(XMakeAttributes.project,
-                //    finalImportPath);
-
-                //// TODO: make this <Import Project="Sdk.targets" Sdk="$(SdkName)" />
-
-                //element.AppendChild(implicitImportElement);
             }
         }
 
