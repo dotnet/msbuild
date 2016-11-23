@@ -395,6 +395,11 @@ namespace Microsoft.Build.Evaluation
             return BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory;
         }
 
+        public static string GetProgramFiles32()
+        {
+            return FrameworkLocationHelper.programFiles32;
+        }
+
         #region Debug only intrinsics
 
         /// <summary>
