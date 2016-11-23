@@ -19,6 +19,9 @@ namespace Microsoft.Build.Construction
     [DebuggerDisplay("Project={Project} Condition={Condition}")]
     public class ProjectImportElement : ProjectElement
     {
+        internal bool Implicit { get; } = false;
+        private string _implicitProject = null;
+
         /// <summary>
         /// Initialize a parented ProjectImportElement
         /// </summary>
@@ -37,6 +40,15 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
+        /// Initialize an unparented implicit ProjectImportElement
+        /// </summary>
+        private ProjectImportElement(XmlElementWithLocation xmlElement, ProjectRootElement containingProject, bool isImplicit)
+            : this(xmlElement, containingProject)
+        {
+            Implicit = isImplicit;
+        }
+
+        /// <summary>
         /// Gets or sets the Project value. 
         /// </summary>
         public string Project
@@ -44,25 +56,34 @@ namespace Microsoft.Build.Construction
             get
             {
                 return
-                    FileUtilities.FixFilePath(
-                        ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.project));
+                    FileUtilities.FixFilePath(Implicit
+                        ? _implicitProject
+                        : ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.project));
             }
 
             set
             {
                 ErrorUtilities.VerifyThrowArgumentLength(value, XMakeAttributes.project);
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.project, value);
-                MarkDirty("Set Import Project {0}", value);
+
+                if (Implicit)
+                {
+                    _implicitProject = value;
+                }
+                else
+                {
+                    ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.project, value);
+                    MarkDirty("Set Import Project {0}", value);
+                }
             }
         }
 
         /// <summary>
         /// Location of the project attribute
         /// </summary>
-        public ElementLocation ProjectLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.project); }
-        }
+        /// <remarks>
+        /// For an implicit import, the location points to the Sdk attribute on the Project element.
+        /// </remarks>
+        public ElementLocation ProjectLocation => XmlElement.GetAttributeLocation(Implicit ? XMakeAttributes.sdk : XMakeAttributes.project);
 
         /// <summary>
         /// Creates an unparented ProjectImportElement, wrapping an unparented XmlElement.
@@ -74,6 +95,20 @@ namespace Microsoft.Build.Construction
             XmlElementWithLocation element = containingProject.CreateElement(XMakeElements.import);
 
             ProjectImportElement import = new ProjectImportElement(element, containingProject);
+
+            import.Project = project;
+
+            return import;
+        }
+
+        /// <summary>
+        /// Creates an unparented ProjectImportElement, wrapping an unparented XmlElement.
+        /// Validates the project value.
+        /// Caller should then ensure the element is added to a parent
+        /// </summary>
+        internal static ProjectImportElement CreateDisconnected(string project, ProjectRootElement containingProject, bool isImplicit)
+        {
+            ProjectImportElement import = new ProjectImportElement(containingProject.XmlElement, containingProject, isImplicit);
 
             import.Project = project;
 

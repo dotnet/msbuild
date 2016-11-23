@@ -1140,18 +1140,6 @@ namespace Microsoft.Build.Evaluation
                     continue;
                 }
 
-                ProjectImplicitImportElement implicitImport = element as ProjectImplicitImportElement;
-                if (implicitImport != null)
-                {
-                    var substituteRegularImport = new ProjectImportElement(currentProjectOrImport.XmlElement, implicitImport.Parent,
-                        implicitImport.ContainingProject);
-                    substituteRegularImport.Project = implicitImport.Project;
-
-                    EvaluateImportElement(currentProjectOrImport.DirectoryPath, substituteRegularImport);
-
-                    continue;
-                }
-
                 ErrorUtilities.ThrowInternalError("Unexpected child type");
             }
 

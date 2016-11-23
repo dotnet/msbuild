@@ -551,7 +551,7 @@ namespace Microsoft.Build.Construction
             // Xml tree. It's implied by other parts of the project file but exists directly
             // only on the ProjectElement side.
 
-            return !(element is ProjectImplicitImportElement);
+            return (element as ProjectImportElement)?.Implicit != true;
         }
 
         private string GetElementIndentation(XmlElementWithLocation xmlElement)
