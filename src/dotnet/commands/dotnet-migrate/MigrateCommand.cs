@@ -149,8 +149,10 @@ namespace Microsoft.DotNet.Tools.Migrate
 
             var movableFiles = new DirectoryInfo(projectDirectory)
                 .EnumerateFiles()
-                .Where(f => f.Name == Project.FileName || f.Extension == ".xproj" || 
-                            f.FullName.EndsWith(".xproj.user"));
+                .Where(f => f.Name == Project.FileName 
+                         || f.Extension == ".xproj"
+                         || f.FullName.EndsWith(".xproj.user")
+                         || f.FullName.EndsWith(".lock.json"));
             
             foreach (var movableFile in movableFiles)
             {
