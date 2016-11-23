@@ -1081,7 +1081,6 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 ProjectImportElement import = element as ProjectImportElement;
-
                 if (import != null)
                 {
                     EvaluateImportElement(currentProjectOrImport.DirectoryPath, import);
@@ -1138,6 +1137,18 @@ namespace Microsoft.Build.Evaluation
 
                 if (element is ProjectExtensionsElement)
                 {
+                    continue;
+                }
+
+                ProjectImplicitImportElement implicitImport = element as ProjectImplicitImportElement;
+                if (implicitImport != null)
+                {
+                    var substituteRegularImport = new ProjectImportElement(currentProjectOrImport.XmlElement, implicitImport.Parent,
+                        implicitImport.ContainingProject);
+                    substituteRegularImport.Project = implicitImport.Project;
+
+                    EvaluateImportElement(currentProjectOrImport.DirectoryPath, substituteRegularImport);
+
                     continue;
                 }
 

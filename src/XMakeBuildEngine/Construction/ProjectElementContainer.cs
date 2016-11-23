@@ -455,6 +455,11 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal void AddToXml(ProjectElement child)
         {
+            if (!HasXmlRepresentation(child))
+            {
+                return;
+            }
+
             if (child.ExpressedAsAttribute)
             {
                 // todo children represented as attributes need to be placed in order too
@@ -540,6 +545,15 @@ namespace Microsoft.Build.Construction
             }
         }
 
+        private static bool HasXmlRepresentation(ProjectElement element)
+        {
+            // The implicit-import element is special: it has no direct representation in the
+            // Xml tree. It's implied by other parts of the project file but exists directly
+            // only on the ProjectElement side.
+
+            return !(element is ProjectImplicitImportElement);
+        }
+
         private string GetElementIndentation(XmlElementWithLocation xmlElement)
         {
             if (xmlElement.PreviousSibling?.NodeType != XmlNodeType.Whitespace)
@@ -619,7 +633,11 @@ namespace Microsoft.Build.Construction
             AddToXml(child);
 
             _count++;
-            MarkDirty("Add child element named '{0}'", child.ElementName);
+
+            if (HasXmlRepresentation(child))
+            {
+                MarkDirty("Add child element named '{0}'", child.ElementName);
+            }
         }
 
         /// <summary>

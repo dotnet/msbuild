@@ -212,14 +212,20 @@ namespace Microsoft.Build.Construction
 
                 if (File.Exists(initialImportPath))
                 {
-                    var implicitImportElement = element.OwnerDocument.CreateElement(XMakeElements.import);
+                    ProjectElement child =
+                        ProjectImplicitImportElement.CreateDisconnected(
+                            Path.Combine(Environment.GetEnvironmentVariable("MSBUILDMAGICIMPORTDIRECTORY"), element.GetAttribute("Sdk"), "Sdk.props"),
+                            _project);
+                    _project.AppendChild(child);
 
-                    implicitImportElement.SetAttribute(XMakeAttributes.project,
-                        initialImportPath);
+                    //var implicitImportElement = element.OwnerDocument.CreateElement(XMakeElements.import);
 
-                    // TODO: make this <Import Project="Sdk.props" Sdk="$(SdkName)" />
+                    //implicitImportElement.SetAttribute(XMakeAttributes.project,
+                    //    initialImportPath);
 
-                    element.PrependChild(implicitImportElement);
+                    //// TODO: make this <Import Project="Sdk.props" Sdk="$(SdkName)" />
+
+                    //element.PrependChild(implicitImportElement);
                 }
 
                 if (File.Exists(finalImportPath))
