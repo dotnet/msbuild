@@ -287,5 +287,47 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 }
             }
         }
+
+        [Fact]
+        public void SdkImportsAreInImportList()
+        {
+            var testSdkRoot = Path.Combine(Path.GetTempPath(), "MSBuildUnitTest");
+            var testSdkDirectory = Path.Combine(testSdkRoot, "MSBuildUnitTestSdk");
+
+            try
+            {
+                Directory.CreateDirectory(testSdkDirectory);
+
+                string sdkPropsPath = Path.Combine(testSdkDirectory, "Sdk.props");
+                string sdkTargetsPath = Path.Combine(testSdkDirectory, "Sdk.targets");
+
+                File.WriteAllText(sdkPropsPath, string.Empty);
+                File.WriteAllText(sdkTargetsPath, string.Empty);
+
+                using (new Helpers.TemporaryEnvironment("MSBuildSDKsPath", testSdkRoot))
+                {
+                    string content = @"
+                    <Project Sdk='MSBuildUnitTestSdk' >
+                    </Project>";
+
+                    ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+
+                    List<ProjectImportElement> imports = Helpers.MakeList(project.Imports);
+
+                    Assert.Equal(2, imports.Count);
+                    Assert.Equal(sdkPropsPath, imports[0].Project);
+                    Assert.True(imports[0].Implicit);
+                    Assert.Equal(sdkTargetsPath, imports[1].Project);
+                    Assert.True(imports[1].Implicit);
+                }
+            }
+            finally
+            {
+                if (Directory.Exists(testSdkDirectory))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(testSdkDirectory, true);
+                }
+            }
+        }
     }
 }
