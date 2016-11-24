@@ -10,7 +10,7 @@ using System;
 
 namespace Microsoft.DotNet.Cli.Test.Tests
 {
-    public class GivenDotnetTest3BuildsAndRunsTestFromCsprojForMultipleTFM : TestBase
+    public class GivenDotnetTestBuildsAndRunsTestFromCsprojForMultipleTFM : TestBase
     {
         [WindowsOnlyFact(Skip="https://github.com/dotnet/cli/issues/4616")]
         public void MStestMultiTFM()

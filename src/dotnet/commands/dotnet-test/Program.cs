@@ -24,6 +24,8 @@ namespace Microsoft.DotNet.Tools.Test
                 Description = "Test Driver for the .NET Platform"
             };
 
+            cmd.AllowArgumentSeparator = true;
+            cmd.ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText;
             cmd.HelpOption("-h|--help");
 
             var argRoot = cmd.Argument(

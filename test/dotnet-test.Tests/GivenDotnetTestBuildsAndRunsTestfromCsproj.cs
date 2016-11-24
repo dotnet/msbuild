@@ -96,5 +96,40 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Verify
             result.StdOut.Should().Contain(expectedError); 
         }
+
+        [Fact]
+        public void TestWillCreateTrxLogger()
+        {
+            // Copy VSTestDotNetCore project in output directory of project dotnet-vstest.Tests
+            string testAppName = "VSTestDotNetCore";
+            TestInstance testInstance = TestAssetsManager.CreateTestInstance(testAppName);
+
+            string testProjectDirectory = testInstance.TestRoot;
+
+            // Restore project VSTestDotNetCore
+            new RestoreCommand()
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute()
+                .Should()
+                .Pass();
+
+            string trxLoggerDirectory = Path.Combine(testProjectDirectory, "TestResults");
+
+            // Delete trxLoggerDirectory if it exist
+            if(Directory.Exists(trxLoggerDirectory))
+            {
+                Directory.Delete(trxLoggerDirectory, true);
+            }
+
+            // Call test with logger enable
+            CommandResult result = new DotnetTestCommand()
+                                       .WithWorkingDirectory(testProjectDirectory)
+                                       .ExecuteWithCapturedOutput("--logger:trx");
+
+            // Verify
+            String[] trxFiles = Directory.GetFiles(trxLoggerDirectory, "*.trx");
+            Assert.Equal(1, trxFiles.Length);
+            result.StdOut.Should().Contain(trxFiles[0]);
+        }
     }
 }

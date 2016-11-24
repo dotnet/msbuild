@@ -11,8 +11,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
+    <VSTestTaskAssemblyFile Condition="$(VSTestTaskAssemblyFile) == ''">$(MSBuildExtensionsPath)\Microsoft.TestPlatform.Build.dll</VSTestTaskAssemblyFile>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
+  <UsingTask TaskName="Microsoft.TestPlatform.Build.Tasks.BuildLogTask" AssemblyFile="$(VSTestTaskAssemblyFile)" />
   <!--
   ===================================================================================
                DispatchToInnerBuildsWithVSTestTarget
@@ -38,7 +40,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <MSBuild Projects="$(MSBuildProjectFile)"
              Condition="'$(TargetFrameworks)' != '' "
              Targets="$(InnerVSTestTargets)"
-             Properties="TargetFramework=%(_TargetFramework.Identity);VSTestNoBuild=true">
+             Properties="TargetFramework=%(_TargetFramework.Identity);VSTestNoBuild=true"
+             ContinueOnError="true">
       <Output ItemName="InnerOutput" TaskParameter="TargetOutputs" />
     </MSBuild>
   </Target>
@@ -62,9 +65,15 @@ Copyright (c) .NET Foundation. All rights reserved.
   =================================================================================
   -->
   <Target Name="VSTest" >
-    <CallTarget Condition="'$(VSTestNoBuild)' != 'true'" Targets="Build" />
+    <CallTarget Condition="'$(VSTestNoBuild)' != 'true'" Targets="BuildProject" />
     <CallTarget Targets="SetVSTestInnerTarget" />
     <CallTarget Targets="DispatchToInnerBuildsWithVSTestTarget" />
+  </Target>
+
+  <Target Name="BuildProject">
+    <Microsoft.TestPlatform.Build.Tasks.BuildLogTask BuildStarted="True" />
+    <CallTarget Targets="Build" />
+    <Microsoft.TestPlatform.Build.Tasks.BuildLogTask />
   </Target>
 
   <Target Name="SetVSTestInnerTarget" Returns="@(InnerOutput)">

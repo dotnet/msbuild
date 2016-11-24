@@ -33,10 +33,10 @@
       <Version>4.0.0-rc-2048</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.TestPlatform.CLI">
-      <Version>15.0.0-preview-20161102-02</Version>
+      <Version>15.0.0-preview-20161123-03</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.TestPlatform.Build">
-      <Version>15.0.0-preview-20161107-06</Version>
+      <Version>15.0.0-preview-20161123-03</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
