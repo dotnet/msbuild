@@ -143,7 +143,18 @@ namespace Microsoft.DotNet.Tools.New
                                }
             };
 
-            var languages = new[] { csharp };
+            var fsharp = new { Name = "F#", Alias = new[] { "f#", "fs", "fsharp" }, TemplatePrefix = "FSharp", 
+                               Templates = new[] 
+                               { 
+                                   new { Name = "Console", isMsBuild = true }, 
+                                   new { Name = "Web", isMsBuild = true }, 
+                                   new { Name = "Lib", isMsBuild = true },
+                                   new { Name = "Mstest", isMsBuild = true },
+                                   new { Name = "Xunittest", isMsBuild = true }
+                               }
+            };
+
+            var languages = new[] { csharp, fsharp };
 
             string langValuesString = string.Join(", ", languages.Select(l => l.Name));
             var typeValues = 
@@ -160,7 +171,7 @@ namespace Microsoft.DotNet.Tools.New
             {
                 string languageValue = lang.Value() ?? csharp.Name;
 
-                var language = new[] { csharp }
+                var language = languages
                     .FirstOrDefault(l => l.Alias.Contains(languageValue, StringComparer.OrdinalIgnoreCase));
 
                 if (language == null)
