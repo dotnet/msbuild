@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,6 +20,14 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public static async Task<LockFile> ReadWithLock(this LockFileFormat subject, string path)
         {
+            if(!File.Exists(path))
+            {
+                throw new GracefulException(string.Join(
+                    Environment.NewLine,
+                    $"File not found `{path}`.",
+                    "The project may not have been restored or restore failed - run `dotnet restore`"));
+            }
+
             return await ConcurrencyUtilities.ExecuteWithFileLockedAsync(
                 path, 
                 lockedToken =>
