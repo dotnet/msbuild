@@ -1,0 +1,6 @@
+<Project ToolsVersion="15.0">
+  <ItemGroup>
+    <BundledSdk Include="Microsoft.Core.Sdk" Version="1.0.0-RC2" />
+    <BundledSdk Include="Microsoft.Web.Sdk" Version="1.0.0-RC2" />
+  </ItemGroup>
+</Project>

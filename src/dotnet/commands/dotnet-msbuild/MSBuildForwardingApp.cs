@@ -16,7 +16,9 @@ namespace Microsoft.DotNet.Tools.MSBuild
     {
         internal const string TelemetrySessionIdEnvironmentVariableName = "DOTNET_CLI_TELEMETRY_SESSIONID";
 
-        private const string s_msbuildExeName = "MSBuild.dll";
+        private const string MSBuildExeName = "MSBuild.dll";
+
+        private const string ExtensionsDirectoryName = "Extensions";
 
         private readonly ForwardingApp _forwardingApp;
 
@@ -24,7 +26,8 @@ namespace Microsoft.DotNet.Tools.MSBuild
             new Dictionary<string, string>
             {
                 { "MSBuildExtensionsPath", AppContext.BaseDirectory },
-                { "CscToolExe", GetRunCscPath() }
+                { "CscToolExe", GetRunCscPath() },
+                { "MSBuildSDKsPath", GetMSBuildSDKsPath() }
             };
         
         private readonly IEnumerable<string> _msbuildRequiredParameters = 
@@ -78,7 +81,14 @@ namespace Microsoft.DotNet.Tools.MSBuild
         {
             return Path.Combine(
                 AppContext.BaseDirectory,
-                s_msbuildExeName);
+                MSBuildExeName);
+        }
+
+        private static string GetMSBuildSDKsPath()
+        {
+            return Path.Combine(
+                AppContext.BaseDirectory,
+                ExtensionsDirectoryName);
         }
 
         private static string GetRunCscPath()

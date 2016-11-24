@@ -18,8 +18,9 @@
   <Target Name="Compile" DependsOnTargets="Prepare;
                                            SetupStage;
                                            CompileStage;
+                                           PublishSdks;
                                            BuildProjectsForNuGetPackages;
-                                           GetNuGetPackagesArchive" />
+                                           GetNuGetPackagesArchive;" />
 
   <Target Name="SetupStage"
           DependsOnTargets="Prepare">
@@ -241,5 +242,19 @@
           DestinationFiles="@(FilesToCopy->'$(StageSymbolsDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
       <Delete Files="@(PdbsToClean)" />
+  </Target>
+
+  <Target Name="PublishSdks">
+    <MakeDir Directories="$(SdkOutputDirectory)/Extensions/%(BundledSdk.Identity)/%(BundledSdk.Version)/build/" />
+    
+    <!-- Generate sdk placeholder files -->
+    <WriteLinesToFile File="$(SdkOutputDirectory)/Extensions/%(BundledSdk.Identity)/%(BundledSdk.Version)/build/InitialImport.props"
+                      Lines="placeholder"
+                      Overwrite="true" />
+    
+    <WriteLinesToFile File="$(SdkOutputDirectory)/Extensions/%(BundledSdk.Identity)/%(BundledSdk.Version)/build/FinalImport.targets"
+                      Lines="placeholder"
+                      Overwrite="true" />
+
   </Target>
 </Project>

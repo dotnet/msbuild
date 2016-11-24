@@ -1,0 +1,6 @@
+<Project ToolsVersion="14.0" DefaultTargets="Validate">
+  <ItemGroup>
+    <Sdk Include="Microsoft.Core.Sdk" Version="1.0.0-RC2" />
+    <Sdk Include="Microsoft.Web.Sdk" Version="1.0.0-RC2" />
+  </ItemGroup>
+</Project>
