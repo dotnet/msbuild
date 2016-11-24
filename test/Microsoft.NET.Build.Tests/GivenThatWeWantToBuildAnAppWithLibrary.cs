@@ -32,15 +32,37 @@ namespace Microsoft.NET.Build.Tests
             testAsset.Restore("TestApp");
             testAsset.Restore("TestLibrary");
 
+            VerifyAppBuilds(testAsset);
+        }
+
+        [Fact]
+        public void It_builds_the_project_successfully_twice()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("AppWithLibrary")
+                .WithSource();
+
+            testAsset.Restore("TestApp");
+            testAsset.Restore("TestLibrary");
+
+
+            for (int i = 0; i < 2; i++)
+            {
+                VerifyAppBuilds(testAsset);
+            }
+        }
+
+        void VerifyAppBuilds(TestAsset testAsset)
+        {
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
 
             var buildCommand = new BuildCommand(Stage0MSBuild, appProjectDirectory);
+            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp1.0");
+
             buildCommand
                 .Execute()
                 .Should()
                 .Pass();
-
-            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp1.0");
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "TestApp.dll",
