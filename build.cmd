@@ -20,14 +20,13 @@ set MSBUILD_ARGS=%MSBUILD_ARGS% /fileloggerparameters:Verbosity=diag;LogFile="%M
 :: Check for a runtime host. If not defined, do not use a host
 if not defined RUNTIME_HOST (
 	set BUILD_COMMAND="%MSBUILD_CUSTOM_PATH%" /nodeReuse:false %MSBUILD_ARGS%
-
     :: Check prerequisites for full framework build
- 	if not "%VisualStudioVersion%" == "14.0" (
-	    echo Error: build.cmd should be run from a Visual Studio 2015 Command when RUNTIME_HOST is not defined. Prompt.  
+ 	if not "%VisualStudioVersion%" == "14.0" if not "%VisualStudioVersion%" == "15.0" (
+	    echo Error: build.cmd should be run from a Visual Studio 2015/2017 Command when RUNTIME_HOST is not defined. Prompt.  
 	    echo        Please see https://github.com/Microsoft/msbuild/wiki/Building-Testing-and-Debugging for build instructions.
 	    exit /b 1
 	)
-) ELSE (
+) else (
 	set BUILD_COMMAND= "%RUNTIME_HOST%" "%MSBUILD_CUSTOM_PATH%" %MSBUILD_ARGS% /p:"OverrideToolHost=%RUNTIME_HOST%"
 )
 

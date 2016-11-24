@@ -18,9 +18,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'" />
   <ItemGroup>
-    <Reference Include="Microsoft.Build, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
-    <Reference Include="Microsoft.Build.Framework, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
-    <Reference Include="Microsoft.Build.Utilities.Core, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -46,6 +43,20 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UnknownTaskParameterPrefixException.cs" />
     <Compile Include="XmlFileLogger.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Framework\Microsoft.Build.Framework.csproj">
+      <Project>{571f09db-a81a-4444-945c-6f7b530054cd}</Project>
+      <Name>Microsoft.Build.Framework</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\Utilities\Microsoft.Build.Utilities.csproj">
+      <Project>{828566ee-6f6a-4ef4-98b0-513f7df9c628}</Project>
+      <Name>Microsoft.Build.Utilities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\XMakeBuildEngine\Microsoft.Build.csproj">
+      <Project>{16cd7635-7cf4-4c62-a77b-cf87d0f09a58}</Project>
+      <Name>Microsoft.Build</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

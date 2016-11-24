@@ -82,7 +82,7 @@ if "%SYNC_XLF%"=="true" (
 
 :: Full Framework MSBuild does not have the new built-in property MSBuildRuntimeType
 set RUNTIMETYPE_ARGUMENT=
-if "%TARGET%"=="Full" (
+if "%TARGET%"=="Full" if "%VisualStudioVersion%" == "14.0" (
     set RUNTIMETYPE_ARGUMENT="/p:MSBuildRuntimeType=Full"
 )
 
