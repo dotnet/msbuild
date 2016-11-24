@@ -1264,6 +1264,11 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         internal static string[] CreateFilesInDirectory(string rootDirectory, params string[] files)
         {
+            if (files == null)
+            {
+                return null;
+            }
+
             Assert.True(Directory.Exists(rootDirectory), $"Directory {rootDirectory} does not exist");
 
             var result = new string[files.Length];
