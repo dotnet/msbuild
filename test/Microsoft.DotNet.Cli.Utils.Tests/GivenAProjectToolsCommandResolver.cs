@@ -17,7 +17,8 @@ namespace Microsoft.DotNet.Tests
 {
     public class GivenAProjectToolsCommandResolver : TestBase
     {
-        private static readonly NuGetFramework s_toolPackageFramework = FrameworkConstants.CommonFrameworks.NetCoreApp10;
+        private static readonly NuGetFramework s_toolPackageFramework =
+            FrameworkConstants.CommonFrameworks.NetCoreApp10;
 
         private const string TestProjectName = "AppWithToolDependency";
 
@@ -79,16 +80,16 @@ namespace Microsoft.DotNet.Tests
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
-            var testInstance = TestAssetsManager
-                .CreateTestInstance(TestProjectName)
-                .WithNuGetMSBuildFiles()
-                .WithLockFiles();
+            var testInstance = TestAssets.Get(TestProjectName)
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithRestoreFiles();
 
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "nonexistent-command",
                 CommandArguments = null,
-                ProjectDirectory = testInstance.Path
+                ProjectDirectory = testInstance.Root.FullName
             };
 
             var result = projectToolsCommandResolver.Resolve(commandResolverArguments);
@@ -101,16 +102,16 @@ namespace Microsoft.DotNet.Tests
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
-            var testInstance = TestAssetsManager
-                .CreateTestInstance(TestProjectName)
-                .WithNuGetMSBuildFiles()
-                .WithLockFiles();
+            var testInstance = TestAssets.Get(TestProjectName)
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithRestoreFiles();
 
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "dotnet-portable",
                 CommandArguments = null,
-                ProjectDirectory = testInstance.Path
+                ProjectDirectory = testInstance.Root.FullName
             };
 
             var result = projectToolsCommandResolver.Resolve(commandResolverArguments);
@@ -260,16 +261,64 @@ namespace Microsoft.DotNet.Tests
             File.Delete(depsJsonFile);
         }
 
-        private ProjectToolsCommandResolver SetupProjectToolsCommandResolver(
-            IPackagedCommandSpecFactory packagedCommandSpecFactory = null)
+        [Fact]
+        public void It_adds_fx_version_as_a_param_when_the_tool_has_the_prefercliruntime_file()
+        {
+            var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
+
+            var testInstance = TestAssets.Get("MSBuildTestApp")
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithRestoreFiles();
+
+            var commandResolverArguments = new CommandResolverArguments()
+            {
+                CommandName = "dotnet-prefercliruntime",
+                CommandArguments = null,
+                ProjectDirectory = testInstance.Root.FullName
+            };
+
+            var result = projectToolsCommandResolver.Resolve(commandResolverArguments);
+
+            result.Should().NotBeNull();
+
+            result.Args.Should().Contain("--fx-version 1.0.1");
+        }
+
+        [Fact]
+        public void It_does_not_add_fx_version_as_a_param_when_the_tool_does_not_have_the_prefercliruntime_file()
+        {
+            var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
+
+            var testInstance = TestAssets.Get(TestProjectName)
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithRestoreFiles();
+
+            var commandResolverArguments = new CommandResolverArguments()
+            {
+                CommandName = "dotnet-portable",
+                CommandArguments = null,
+                ProjectDirectory = testInstance.Root.FullName
+            };
+
+            var result = projectToolsCommandResolver.Resolve(commandResolverArguments);
+
+            result.Should().NotBeNull();
+
+            result.Args.Should().NotContain("--fx-version");
+        }
+
+        private ProjectToolsCommandResolver SetupProjectToolsCommandResolver()
         {
             Environment.SetEnvironmentVariable(
                 Constants.MSBUILD_EXE_PATH,
                 Path.Combine(new RepoDirectoriesProvider().Stage2Sdk, "MSBuild.dll"));
 
-            packagedCommandSpecFactory = packagedCommandSpecFactory ?? new PackagedCommandSpecFactory();
+            var packagedCommandSpecFactory = new PackagedCommandSpecFactoryWithCliRuntime();
 
-            var projectToolsCommandResolver = new ProjectToolsCommandResolver(packagedCommandSpecFactory, new EnvironmentProvider());
+            var projectToolsCommandResolver =
+                new ProjectToolsCommandResolver(packagedCommandSpecFactory, new EnvironmentProvider());
 
             return projectToolsCommandResolver;
         }

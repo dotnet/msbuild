@@ -11,6 +11,15 @@ namespace Microsoft.DotNet.Cli.Utils
 
         private string _muxerPath;
 
+        internal string SharedFxVersion
+        {
+            get
+            {
+                var depsFile = new FileInfo(GetDataFromAppDomain("FX_DEPS_FILE"));
+                return depsFile.Directory.Name;
+            }
+        }
+
         public string MuxerPath
         {
             get

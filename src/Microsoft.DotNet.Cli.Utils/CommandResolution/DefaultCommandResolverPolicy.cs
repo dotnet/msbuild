@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli.Utils
         public static CompositeCommandResolver Create()
         {
             var environment = new EnvironmentProvider();
-            var packagedCommandSpecFactory = new PackagedCommandSpecFactory();
+            var packagedCommandSpecFactory = new PackagedCommandSpecFactoryWithCliRuntime();
             var publishedPathCommandSpecFactory = new PublishPathCommandSpecFactory();
 
             var platformCommandSpecFactory = default(IPlatformCommandSpecFactory);

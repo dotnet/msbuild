@@ -70,6 +70,23 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         }
 
         [Fact]
+        public void ItCanRunToolsThatPrefersTheCliRuntimeEvenWhenTheToolItselfDeclaresADifferentRuntime()
+        {
+            var testInstance = TestAssets.Get("MSBuildTestApp")
+                                         .CreateInstance()
+                                         .WithSourceFiles()
+                                         .WithRestoreFiles();
+
+            var testProjectDirectory = testInstance.Root;
+
+            new DotnetCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .ExecuteWithCapturedOutput("prefercliruntime")
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello I prefer the cli runtime World!");;
+        }
+
+        [Fact]
         public void ItCanRunAToolThatInvokesADependencyToolInACSProj()
         {
             var repoDirectoriesProvider = new RepoDirectoriesProvider();
