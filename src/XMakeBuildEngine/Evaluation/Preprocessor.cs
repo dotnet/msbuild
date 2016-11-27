@@ -93,6 +93,8 @@ namespace Microsoft.Build.Evaluation
 
             XmlDocument destinationDocument = (XmlDocument)outerDocument.CloneNode(false /* shallow */);
 
+            //  TODO: Remove Sdk attribute from destination document and put it in a comment (so that if you do a build on a preprocessed file it won't try to import the Sdk imports twice)
+
             _filePaths.Push(_project.FullPath);
 
             if (!String.IsNullOrEmpty(_project.FullPath)) // Ignore in-memory projects

@@ -192,12 +192,13 @@ namespace Microsoft.Build.Construction
                 // TODO: don't get root of SDKs from the environment, use a built-in or toolset prop
                 // TODO: version?
                 // TODO: multiples
+                //  TODO: Don't null ref if MSBuildSDKsPath isn't defined
 
                 // TODO: paths should just be Sdk.props/targets; Sdk-aware imports should do the rest of the path.
-                var initialImportPath = Path.Combine(Environment.GetEnvironmentVariable("MSBUILDMAGICIMPORTDIRECTORY"),
-                    element.GetAttribute("Sdk"), "Sdk.props");
-                var finalImportPath = Path.Combine(Environment.GetEnvironmentVariable("MSBUILDMAGICIMPORTDIRECTORY"),
-                    element.GetAttribute("Sdk"), "Sdk.targets");
+                var initialImportPath = Path.Combine(Environment.GetEnvironmentVariable("MSBuildSDKsPath"),
+                    element.GetAttribute("Sdk"), "Sdk", "Sdk.props");
+                var finalImportPath = Path.Combine(Environment.GetEnvironmentVariable("MSBuildSDKsPath"),
+                    element.GetAttribute("Sdk"), "Sdk", "Sdk.targets");
 
                 if (File.Exists(initialImportPath))
                 {
