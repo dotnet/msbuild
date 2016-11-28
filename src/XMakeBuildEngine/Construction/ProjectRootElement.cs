@@ -1745,8 +1745,23 @@ namespace Microsoft.Build.Construction
                 {
                     using (ProjectWriter projectWriter = new ProjectWriter(_projectFileLocation.File, saveEncoding))
                     {
-                        projectWriter.Initialize(XmlDocument);
-                        XmlDocument.Save(projectWriter);
+                        var xmlWithNoImplicits = (XmlDocument)XmlDocument.Clone();
+
+                        var implicitElements =
+                            xmlWithNoImplicits.SelectNodes($"//*[@{XMakeAttributes.@implicit}]");
+
+                        if (implicitElements == null)
+                        {
+                            ErrorUtilities.ThrowInternalError("SelectNodes returned null when trying to find implicit elements.");
+                        }
+
+                        foreach (XmlNode implicitElement in implicitElements)
+                        {
+                            implicitElement.ParentNode.RemoveChild(implicitElement);
+                        }
+
+                        projectWriter.Initialize(xmlWithNoImplicits);
+                        xmlWithNoImplicits.Save(projectWriter);
                     }
 
                     _encoding = saveEncoding;
