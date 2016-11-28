@@ -6,15 +6,15 @@
     <NuSpecFile>$(MSBuildProjectName).nuspec</NuSpecFile>
     <OutputPath>$(WebSdkRootDir)bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>$(WebSdkRootDir)obj\$(Configuration)\</IntermediateOutputPath>
-    <CoreSdkVersion Condition="'$(CoreSdkVersion)' ==''">1.0.0</CoreSdkVersion>
+    <CoreSdkVersion Condition="'$(CoreSdkVersion)' ==''">1.0.0-rc2</CoreSdkVersion>
     <WebSdkVersion Condition="'$(WebSdkVersion)' ==''">$(CoreSdkVersion)</WebSdkVersion>
     <NuSpecProperties>CoreSdkVersion=$(CoreSdkVersion);WebSdkVersion=$(WebSdkVersion)</NuSpecProperties>
   </PropertyGroup>
   <ItemGroup>
-    <NuGetContent Include="$(WebSourceDir)\Web\Microsoft.NET.Sdk.Web.Targets\*.props">
+    <NuGetContent Include="$(WebSourceDir)\Web\Microsoft.NET.Sdk.Web.Targets\sdk.props">
       <Destination>build</Destination>
     </NuGetContent>
-    <NuGetContent Include="$(WebSourceDir)\Web\Microsoft.NET.Sdk.Web.Targets\*.targets">
+    <NuGetContent Include="$(WebSourceDir)\Web\Microsoft.NET.Sdk.Web.Targets\sdk.targets">
       <Destination>build</Destination>
     </NuGetContent>
   </ItemGroup>
