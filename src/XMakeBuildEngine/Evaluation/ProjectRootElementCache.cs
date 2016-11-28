@@ -346,8 +346,20 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal ProjectRootElement TryGet(string projectFile)
         {
-            ProjectRootElement result = Get(projectFile, null /* no delegate to load it */, false, /*Since we are not creating a PRE this can be true or false*/
-                preserveFormatting: false);
+            return TryGet(projectFile, preserveFormatting: false);
+        }
+
+        /// <summary>
+        /// Returns any a ProjectRootElement in the cache with the provided full path,
+        /// otherwise null.
+        /// </summary>
+        internal ProjectRootElement TryGet(string projectFile, bool preserveFormatting)
+        {
+            ProjectRootElement result = Get(
+                projectFile,
+                openProjectRootElement: null, // no delegate to load it
+                isExplicitlyLoaded: false, // Since we are not creating a PRE this can be true or false
+                preserveFormatting: preserveFormatting);
 
             return result;
         }

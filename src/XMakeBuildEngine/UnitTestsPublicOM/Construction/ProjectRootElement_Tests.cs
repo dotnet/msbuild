@@ -1241,6 +1241,29 @@ Project(""{";
         }
 
         /// <summary>
+        /// Tests TryOpen when preserveFormatting is the same and different than the cached project.
+        /// </summary>
+        [Fact]
+        public void TryOpenWithPreserveFormatting()
+        {
+            string project =
+@"<?xml version=`1.0` encoding=`utf-8`?>
+<Project xmlns = 'msbuildnamespace'>
+</Project>";
+
+            var collection = new ProjectCollection();
+            var projectXml = ProjectRootElement.Create(
+                XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(project))),
+                collection,
+                preserveFormatting: true);
+
+            projectXml.Save(FileUtilities.GetTemporaryFile());
+
+            Assert.NotNull(ProjectRootElement.TryOpen(projectXml.FullPath, collection, preserveFormatting: true));
+            Assert.Null(ProjectRootElement.TryOpen(projectXml.FullPath, collection, preserveFormatting: false));
+        }
+
+        /// <summary>
         /// Test helper for validating that DeepClone and CopyFrom work as advertised.
         /// </summary>
         private static void ValidateDeepCloneAndCopyFrom(ProjectRootElement pre)
