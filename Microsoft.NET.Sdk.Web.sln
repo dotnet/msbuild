@@ -42,10 +42,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{4927120B-89F5-4009-9C8E-43EEFFC566EC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.NET.Sdk.Publish.Package", "src\Publish\Microsoft.NET.Sdk.Publish.Package\Microsoft.NET.Sdk.Publish.Package.csproj", "{66A79C91-8FB7-4F46-8B43-3D4CD32F5736}"
-	ProjectSection(ProjectDependencies) = postProject
-		{994A9D35-ED60-4000-B7A1-A7CDD71B0E60} = {994A9D35-ED60-4000-B7A1-A7CDD71B0E60}
-		{F81ED1C2-3D7A-46A9-9E39-F2B718CA940F} = {F81ED1C2-3D7A-46A9-9E39-F2B718CA940F}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.NET.Sdk.Publish.Tasks", "src\Publish\Microsoft.NET.Sdk.Publish.Tasks\Microsoft.NET.Sdk.Publish.Tasks.csproj", "{994A9D35-ED60-4000-B7A1-A7CDD71B0E60}"
 EndProject
