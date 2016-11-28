@@ -130,6 +130,12 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             String[] trxFiles = Directory.GetFiles(trxLoggerDirectory, "*.trx");
             Assert.Equal(1, trxFiles.Length);
             result.StdOut.Should().Contain(trxFiles[0]);
+
+            // Cleanup trxLoggerDirectory if it exist
+            if(Directory.Exists(trxLoggerDirectory))
+            {
+                Directory.Delete(trxLoggerDirectory, true);
+            }
         }
     }
 }
