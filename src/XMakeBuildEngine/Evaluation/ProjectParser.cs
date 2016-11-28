@@ -573,6 +573,16 @@ namespace Microsoft.Build.Construction
 
             ProjectXmlUtilities.VerifyThrowProjectNoChildElements(element);
 
+            if (element.HasAttribute(XMakeAttributes.@implicit))
+            {
+                // the implicit attribute is only allowed on Import, but only if MSBuild itself
+                // put it there. If a user specified it in a project, error just like we would
+                // when encountering an unknown attribute.
+                ProjectXmlUtilities.VerifyThrowProjectInvalidAttribute(
+                    element.Location.Line == 0 && element.Location.Column == 0,
+                    element.GetAttributeWithLocation(XMakeAttributes.@implicit));
+            }
+
             return new ProjectImportElement(element, parent, _project);
         }
 
