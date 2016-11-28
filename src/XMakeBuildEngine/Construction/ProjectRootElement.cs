@@ -1125,7 +1125,7 @@ namespace Microsoft.Build.Construction
         /// Uses the specified project collection.
         /// </summary>
         /// <param name="path">The path of the ProjectRootElement, cannot be null.</param>
-        // <param name="projectCollection">The <see cref="ProjectCollection"/> to load the project into.</param>
+        /// <param name="projectCollection">The <see cref="ProjectCollection"/> to load the project into.</param>
         /// <param name="preserveFormatting">
         /// The formatting to open with. Must match the formatting in the collection to succeed.
         /// </param>
