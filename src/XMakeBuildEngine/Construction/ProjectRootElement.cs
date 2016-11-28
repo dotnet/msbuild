@@ -1141,7 +1141,7 @@ namespace Microsoft.Build.Construction
 
             path = FileUtilities.NormalizePath(path);
 
-            ProjectRootElement projectRootElement = projectCollection.ProjectRootElementCache.TryGet(path);
+            ProjectRootElement projectRootElement = projectCollection.ProjectRootElementCache.TryGet(path, preserveFormatting);
 
             return projectRootElement;
         }
