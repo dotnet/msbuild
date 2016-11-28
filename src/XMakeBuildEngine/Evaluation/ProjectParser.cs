@@ -187,13 +187,13 @@ namespace Microsoft.Build.Construction
             // so we have to set it now
             _project.SetProjectRootElementFromParser(element, _project);
 
-            if (element.HasAttribute("Sdk"))
+            if (element.HasAttribute(XMakeAttributes.sdk))
             {
                 // TODO: don't get root of SDKs from the environment, use a built-in or toolset prop
                 // TODO: version?
                 // TODO: Don't null ref if MSBuildSDKsPath isn't defined
 
-                var sdksString = element.GetAttribute("Sdk");
+                var sdksString = element.GetAttribute(XMakeAttributes.sdk);
 
                 var sdkNames = sdksString.Contains(";") ? sdksString.Split(';') : new[] {sdksString};
 
