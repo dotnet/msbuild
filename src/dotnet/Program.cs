@@ -198,7 +198,7 @@ namespace Microsoft.DotNet.Cli
                 using (var nugetPackagesArchiver = new NuGetPackagesArchiver())
                 {
                     var environmentProvider = new EnvironmentProvider();
-                    var commandFactory = new DotNetCommandFactory();
+                    var commandFactory = new DotNetCommandFactory(alwaysRunOutOfProc: true);
                     var nugetCachePrimer = 
                         new NuGetCachePrimer(commandFactory, nugetPackagesArchiver, nugetCacheSentinel);
                     var dotnetConfigurer = new DotnetFirstTimeUseConfigurer(

@@ -160,7 +160,7 @@ namespace Microsoft.DotNet.Cli.Utils
 #endif
 
             return new CommandResult(
-                this._process.StartInfo,
+                _process.StartInfo,
                 exitCode,
                 _stdOut?.CapturedOutput,
                 _stdErr?.CapturedOutput);

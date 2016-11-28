@@ -11,9 +11,13 @@ namespace Microsoft.DotNet.Configurer
     public class NuGetCachePrimer : INuGetCachePrimer
     {
         private readonly ICommandFactory _commandFactory;
+
         private readonly IDirectory _directory;
+
         private readonly IFile _file;
+
         private readonly INuGetPackagesArchiver _nugetPackagesArchiver;
+
         private readonly INuGetCacheSentinel _nuGetCacheSentinel;
 
         public NuGetCachePrimer(
@@ -36,9 +40,13 @@ namespace Microsoft.DotNet.Configurer
             IFile file)
         {
             _commandFactory = commandFactory;
+
             _directory = directory;
+
             _nugetPackagesArchiver = nugetPackagesArchiver;
+
             _nuGetCacheSentinel = nuGetCacheSentinel;
+
             _file = file;
         }
 
@@ -64,12 +72,14 @@ namespace Microsoft.DotNet.Configurer
             using (var temporaryDotnetNewDirectory = _directory.CreateTemporaryDirectory())
             {
                 var workingDirectory = temporaryDotnetNewDirectory.DirectoryPath;
+
                 var createProjectSucceeded = CreateTemporaryProject(workingDirectory);
 
                 if (createProjectSucceeded)
                 {
                     var restoreProjectSucceeded =
                         RestoreTemporaryProject(extractedPackagesArchiveDirectory, workingDirectory);
+
                     if (restoreProjectSucceeded)
                     {
                         _nuGetCacheSentinel.CreateIfNotExists();
@@ -93,8 +103,8 @@ namespace Microsoft.DotNet.Configurer
 
         private bool RunCommand(string commandToExecute, IEnumerable<string> args, string workingDirectory)
         {
-            var command = _commandFactory
-                .Create(commandToExecute, args)
+            var command = _commandFactory 
+                .Create(commandToExecute, args) 
                 .WorkingDirectory(workingDirectory)
                 .CaptureStdOut()
                 .CaptureStdErr();
@@ -104,6 +114,7 @@ namespace Microsoft.DotNet.Configurer
             if (commandResult.ExitCode != 0)
             {
                 Reporter.Verbose.WriteLine(commandResult.StdErr);
+
                 Reporter.Error.WriteLine(
                     $"Failed to create prime the NuGet cache. {commandToExecute} failed with: {commandResult.ExitCode}");
             }

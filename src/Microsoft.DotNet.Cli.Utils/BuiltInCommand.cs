@@ -166,12 +166,14 @@ namespace Microsoft.DotNet.Cli.Utils
         public ICommand CaptureStdErr()
         {
             _stdErr.Capture();
+
             return this;
         }
 
         public ICommand CaptureStdOut()
         {
             _stdOut.Capture();
+            
             return this;
         }
 

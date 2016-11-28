@@ -11,6 +11,13 @@ namespace Microsoft.DotNet.Cli
 {
     public class DotNetCommandFactory : ICommandFactory
     {
+        private bool _alwaysRunOutOfProc;
+
+        public DotNetCommandFactory(bool alwaysRunOutOfProc = false)
+        {
+            _alwaysRunOutOfProc = alwaysRunOutOfProc;
+        }
+
         public ICommand Create(
         	string commandName, 
         	IEnumerable<string> args, 
@@ -18,7 +25,7 @@ namespace Microsoft.DotNet.Cli
         	string configuration = Constants.DefaultConfiguration)
         {
             Func<string[], int> builtInCommand;
-            if (Program.TryGetBuiltInCommand(commandName, out builtInCommand))
+            if (!_alwaysRunOutOfProc && Program.TryGetBuiltInCommand(commandName, out builtInCommand))
             {
                 Debug.Assert(framework == null, "BuiltInCommand doesn't support the 'framework' argument.");
                 Debug.Assert(configuration == Constants.DefaultConfiguration, "BuiltInCommand doesn't support the 'configuration' argument.");
