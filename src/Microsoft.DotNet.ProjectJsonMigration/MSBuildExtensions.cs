@@ -27,14 +27,18 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             // Different includes
             if (item.IntersectIncludes(otherItem).Count() != item.Includes().Count())
             {
+#if !DISABLE_TRACE
                 MigrationTrace.Instance.WriteLine($"{nameof(MSBuildExtensions)}.{nameof(IsEquivalentTo)} includes not equivalent.");
+#endif
                 return false;
             }
 
             // Different Excludes
             if (item.IntersectExcludes(otherItem).Count() != item.Excludes().Count())
             {
+#if !DISABLE_TRACE
                 MigrationTrace.Instance.WriteLine($"{nameof(MSBuildExtensions)}.{nameof(IsEquivalentTo)} excludes not equivalent.");
+#endif
                 return false;
             }
 
@@ -46,7 +50,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             // Different remove
             if (item.Remove != otherItem.Remove)
             {
+#if !DISABLE_TRACE
                 MigrationTrace.Instance.WriteLine($"{nameof(MSBuildExtensions)}.{nameof(IsEquivalentTo)} removes not equivalent.");
+#endif
                 return false;
             }
 
@@ -61,13 +67,17 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 var otherMetadata = itemToCompare.GetMetadataWithName(metadata.Name);
                 if (otherMetadata == null)
                 {
+#if !DISABLE_TRACE
                     MigrationTrace.Instance.WriteLine($"{nameof(MSBuildExtensions)}.{nameof(IsEquivalentTo)} metadata doesn't exist {{ {metadata.Name} {metadata.Value} }}");
+#endif
                     return false;
                 }
 
                 if (!metadata.ValueEquals(otherMetadata))
                 {
+#if !DISABLE_TRACE
                     MigrationTrace.Instance.WriteLine($"{nameof(MSBuildExtensions)}.{nameof(IsEquivalentTo)} metadata has another value {{ {metadata.Name} {metadata.Value} {otherMetadata.Value} }}");
+#endif
                     return false;
                 }
             }
@@ -197,7 +207,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
             if (existingMetadata == default(ProjectMetadataElement))
             {
+#if !DISABLE_TRACE
                 MigrationTrace.Instance.WriteLine($"{nameof(AddMetadata)}: Adding metadata to {item.ItemType} item: {{ {metadata.Name}, {metadata.Value} }}");
+#endif
                 item.AddMetadata(metadata.Name, metadata.Value);
             }
         }

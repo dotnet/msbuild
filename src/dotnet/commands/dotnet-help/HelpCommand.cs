@@ -35,6 +35,9 @@ Commands:
   pack          Creates a NuGet package
   migrate       Migrates a project.json based project to a msbuild based project
 
+Project modification commands:
+  add           Add items to the project
+
 Advanced Commands:
   nuget         Provides additional NuGet commands
   msbuild       msbuilds a project and all of its dependencies
