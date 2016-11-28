@@ -1,0 +1,32 @@
+use vs
+
+package name=Microsoft.Net.Sdk
+        version=$(Version)
+
+vs.localizedResources
+  vs.localizedResource language=en-us
+                       title="Microsoft Net Sdk"
+                       description="SDK for .NET projects"
+
+folder "InstallDir:MSBuild\Sdks\Microsoft.Net.Sdk\1.0.0-rc2\Sdk"
+  file source="$(OutputPath)sdk\Sdk.props"
+  file source="$(OutputPath)sdk\Sdk.targets"
+
+folder "InstallDir:MSBuild\Sdks\Microsoft.Net.Sdk\1.0.0-rc2\build"
+  file source="$(OutputPath)build\Microsoft.NET.DefaultOutputPaths.targets"
+  file source="$(OutputPath)build\Microsoft.NET.DisableStandardFrameworkResolution.targets"
+  file source="$(OutputPath)build\Microsoft.NET.GenerateAssemblyInfo.targets"
+  file source="$(OutputPath)build\Microsoft.NET.PreserveCompilationContext.targets"
+  file source="$(OutputPath)build\Microsoft.NET.Publish.targets"
+  file source="$(OutputPath)build\Microsoft.NET.RuntimeIdentifierInference.targets"
+  file source="$(OutputPath)build\Microsoft.NET.Sdk.BeforeCommon.targets"
+  file source="$(OutputPath)build\Microsoft.NET.Sdk.BeforeCommonCrossTargeting.targets"
+  file source="$(OutputPath)build\Microsoft.NET.Sdk.Common.targets"
+  file source="$(OutputPath)build\Microsoft.NET.Sdk.CSharp.props"
+  file source="$(OutputPath)build\Microsoft.NET.Sdk.CSharp.targets"
+  file source="$(OutputPath)build\Microsoft.NET.Sdk.props"
+  file source="$(OutputPath)build\Microsoft.NET.Sdk.targets"
+  file source="$(OutputPath)build\Microsoft.NET.Sdk.VisualBasic.props"
+  file source="$(OutputPath)build\Microsoft.NET.Sdk.VisualBasic.targets"
+  file source="$(OutputPath)build\Microsoft.NET.TargetFrameworkInference.targets"
+  file source="$(OutputPath)build\Microsoft.PackageDependencyResolution.targets"
