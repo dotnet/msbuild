@@ -59,9 +59,6 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Location of the project attribute
         /// </summary>
-        /// <remarks>
-        /// For an implicit import, the location points to the Sdk attribute on the Project element.
-        /// </remarks>
         public ElementLocation ProjectLocation => XmlElement.GetAttributeLocation(XMakeAttributes.project);
 
         /// <summary>
