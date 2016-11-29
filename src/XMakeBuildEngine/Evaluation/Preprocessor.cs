@@ -171,13 +171,14 @@ namespace Microsoft.Build.Evaluation
                     string condition = importCondition.Length > 0 ? $" Condition=\"{importCondition}\"" : String.Empty;
                     string importProject = ((XmlElement)child).GetAttribute(XMakeAttributes.project);
                     string importSdk = ((XmlElement)child).GetAttribute(XMakeAttributes.sdk);
+                    string sdk = importSdk.Length > 0 ? $" {XMakeAttributes.sdk}=\"{importSdk}\"" : String.Empty;
 
                     IList<ProjectRootElement> resolvedList;
                     if (!_importTable.TryGetValue(child as XmlElement, out resolvedList))
                     {
                         // Import didn't resolve to anything; just display as a comment and move on
                         string closedImportTag =
-                            $"<Import Project=\"{importProject}\"{condition} />";
+                            $"<Import Project=\"{importProject}\"{sdk}{condition} />";
                         destination.AppendChild(destinationDocument.CreateComment(closedImportTag));
 
                         continue;
@@ -188,7 +189,6 @@ namespace Microsoft.Build.Evaluation
                         ProjectRootElement resolved = resolvedList[i];
                         XmlDocument innerDocument = resolved.XmlDocument;
 
-                        string sdk = importSdk.Length > 0 ? $" {XMakeAttributes.sdk}=\"{importSdk}\"" : String.Empty;
                         string importTag =
                             $"  <Import Project=\"{importProject}\"{sdk}{condition}>";
 
