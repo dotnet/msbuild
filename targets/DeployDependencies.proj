@@ -13,11 +13,11 @@
     </ItemGroup>
 
     <Copy SourceFiles="@(CompilerToolsFiles)"
-          DestinationFolder="$(DeploymentDir)\"
+          DestinationFolder="$(DeploymentDir)\Roslyn"
           SkipUnchangedFiles="true" />
 
     <Copy SourceFiles="@(CompilerToolsFiles)"
-          DestinationFolder="$(TestDeploymentDir)\"
+          DestinationFolder="$(TestDeploymentDir)\Roslyn"
           SkipUnchangedFiles="true" />
   </Target>
 
@@ -92,8 +92,8 @@
     </RuntimeProjectJson>
     <RuntimeProjectJson Include="$(MSBuildThisFileDirectory)roslyn\project.json">
       <LockFile>$(MSBuildThisFileDirectory)roslyn\project.lock.json</LockFile>
-      <DestinationFolder>$(DeploymentDir)</DestinationFolder>
-      <TestDeploymentDir>$(TestDeploymentDir)</TestDeploymentDir>
+      <DestinationFolder>$(DeploymentDir)\Roslyn</DestinationFolder>
+      <TestDeploymentDir>$(TestDeploymentDir)\Roslyn</TestDeploymentDir>
     </RuntimeProjectJson>
   </ItemGroup>
 
