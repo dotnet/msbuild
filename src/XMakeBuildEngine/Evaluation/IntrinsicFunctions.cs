@@ -375,6 +375,16 @@ namespace Microsoft.Build.Evaluation
             return FileUtilities.EnsureTrailingSlash(path);
         }
 
+        /// <summary>
+        /// Gets the canonicalized full path of the provided path and ensures it contains the correct directory separator characters for the current operating system.
+        /// </summary>
+        /// <param name="path">The path to normalize.</param>
+        /// <returns>A canonicalized full path with the correct directory separators.</returns>
+        internal static string NormalizePath(string path)
+        {
+            return FileUtilities.NormalizePath(path);
+        }
+
         public static string GetCurrentToolsDirectory()
         {
             return BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
