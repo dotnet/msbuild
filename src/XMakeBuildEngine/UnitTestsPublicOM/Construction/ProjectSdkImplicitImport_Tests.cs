@@ -44,9 +44,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                     Assert.Equal(2, imports.Count);
                     Assert.Equal(sdkPropsPath, imports[0].Project);
-                    Assert.True(imports[0].Implicit);
+                    Assert.True(imports[0].IsImplicit);
                     Assert.Equal(sdkTargetsPath, imports[1].Project);
-                    Assert.True(imports[1].Implicit);
+                    Assert.True(imports[1].IsImplicit);
                 }
             }
             finally

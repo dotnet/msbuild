@@ -455,7 +455,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal void AddToXml(ProjectElement child)
         {
-            if (child.Implicit)
+            if (child.IsImplicit)
             {
                 return;
             }
@@ -625,7 +625,7 @@ namespace Microsoft.Build.Construction
 
             _count++;
 
-            if (!child.Implicit)
+            if (!child.IsImplicit)
             {
                 MarkDirty("Add child element named '{0}'", child.ElementName);
             }
