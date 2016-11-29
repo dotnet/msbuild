@@ -206,7 +206,7 @@ namespace Microsoft.Build.Construction
                     if (sdkName.Contains("/"))
                     {
                         ProjectErrorUtilities.ThrowInvalidProject(element.GetAttributeLocation(XMakeAttributes.sdk),
-                            "InvalidSdkFormatTooManySlashes");
+                            "InvalidSdkFormat");
                     }
 
                     // TODO: paths should just be Sdk.props/targets; Sdk-aware imports should do the rest of the path.

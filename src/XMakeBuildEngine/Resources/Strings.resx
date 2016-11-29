@@ -1169,6 +1169,10 @@
     <value>MSB4228: The name "{0}" is not valid for metadata expressed as an attribute (on element &lt;{1}&gt;)</value>
     <comment>{StrBegin="MSB4228: "}</comment>
   </data>
+  <data name="InvalidSdkFormat" UESanitized="false" Visibility="Public">
+    <value>MSB4229: The value "{0}" is not valid for an Sdk specification. The attribute should be a semicolon-delimited list of Sdk-name/minimum-version pairs, separated by a forward slash.</value>
+    <comment>{StrBegin="MSB4229: "}</comment>
+  </data>
   <data name="UnrecognizedParentElement" UESanitized="true" Visibility="Public">
     <value>MSB4189: &lt;{1}&gt; is not a valid child of the &lt;{0}&gt; element.</value>
     <comment>{StrBegin="MSB4189: "}</comment>
