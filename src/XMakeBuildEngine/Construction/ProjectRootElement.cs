@@ -1750,11 +1750,6 @@ namespace Microsoft.Build.Construction
                         var implicitElements =
                             xmlWithNoImplicits.SelectNodes($"//*[@{XMakeAttributes.@implicit}]");
 
-                        if (implicitElements == null)
-                        {
-                            ErrorUtilities.ThrowInternalError("SelectNodes returned null when trying to find implicit elements.");
-                        }
-
                         foreach (XmlNode implicitElement in implicitElements)
                         {
                             implicitElement.ParentNode.RemoveChild(implicitElement);
