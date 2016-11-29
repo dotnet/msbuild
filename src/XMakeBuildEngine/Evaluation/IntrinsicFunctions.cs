@@ -378,11 +378,11 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Gets the canonicalized full path of the provided path and ensures it contains the correct directory separator characters for the current operating system.
         /// </summary>
-        /// <param name="path">The path to normalize.</param>
+        /// <param name="path">One or more paths to combine and normalize.</param>
         /// <returns>A canonicalized full path with the correct directory separators.</returns>
-        internal static string NormalizePath(string path)
+        internal static string NormalizePath(params string[] path)
         {
-            return FileUtilities.NormalizePath(path);
+            return FileUtilities.NormalizePath(Path.Combine(path));
         }
 
         public static string GetCurrentToolsDirectory()
