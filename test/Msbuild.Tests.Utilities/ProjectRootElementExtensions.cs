@@ -6,9 +6,9 @@ using Microsoft.DotNet.ProjectJsonMigration;
 using System.Linq;
 using System.Collections.Generic;
 
-namespace Microsoft.DotNet.Cli.Add.P2P.Tests
+namespace Msbuild.Tests.Utilities
 {
-    internal static class ProjectRootElementExtensions
+    public static class ProjectRootElementExtensions
     {
         public static int NumberOfItemGroupsWithConditionContaining(
             this ProjectRootElement root,

@@ -4,6 +4,7 @@
 using FluentAssertions;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Msbuild.Tests.Utilities;
 using System;
 using System.IO;
 using Xunit;

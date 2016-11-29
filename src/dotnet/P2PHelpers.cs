@@ -115,7 +115,7 @@ namespace Microsoft.DotNet.Tools
         // Project = /some/path/a/b/p.proj
         //
         // We do not know the format of passed reference so
-        // directories to consider for removal are following:
+        // path references to consider for removal are following:
         // - full path to ref.proj [/some/path/a/d/ref.proj]
         // - string which is passed as reference is relative to project [../d/ref.proj]
         // - string which is passed as reference is relative to current dir [../../d/ref.proj]

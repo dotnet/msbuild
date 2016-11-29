@@ -3,9 +3,9 @@
 
 using System.IO;
 
-namespace Microsoft.DotNet.Cli.Add.P2P.Tests
+namespace Msbuild.Tests.Utilities
 {
-    internal class TestSetup
+    public class TestSetup
     {
         public const string TestGroup = "NonRestoredTestProjects";
         public const string ProjectName = "DotnetAddP2PProjects";
