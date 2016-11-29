@@ -10,15 +10,15 @@ using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectJsonMigration;
 using NuGet.Frameworks;
-using Microsoft.DotNet.Tools.Add.ProjectToProjectReference;
+using Microsoft.DotNet.Tools.Remove.ProjectToProjectReference;
 
-namespace Microsoft.DotNet.Tools.Add
+namespace Microsoft.DotNet.Tools.Remove
 {
-    public class AddCommand : DispatchCommand
+    public class RemoveCommand : DispatchCommand
     {
-        protected override string HelpText => @".NET Add Command
+        protected override string HelpText => @".NET Remove Command;
 
-Usage: dotnet add [options] <object> <command> [[--] <arg>...]]
+Usage: dotnet remove [options] <object> <command> [[--] <arg>...]]
 
 Options:
   -h|--help  Show help information
@@ -31,11 +31,11 @@ Args:
   Any extra arguments passed to the command. Use `dotnet add <command> --help` to get help about these arguments.
 
 Commands:
-  p2p        Add project to project (p2p) reference to a project";
+  p2p        Remove project to project (p2p) reference from a project";
 
         protected override Dictionary<string, Func<string[], int>> BuiltInCommands => new Dictionary<string, Func<string[], int>>
         {
-            ["p2p"] = AddProjectToProjectReferenceCommand.Run,
+            ["p2p"] = RemoveProjectToProjectReferenceCommand.Run,
         };
     }
 }

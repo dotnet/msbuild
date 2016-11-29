@@ -37,6 +37,7 @@ Commands:
 
 Project modification commands:
   add           Add items to the project
+  remove        Remove items from the project
 
 Advanced Commands:
   nuget         Provides additional NuGet commands

@@ -3,7 +3,7 @@ using Microsoft.DotNet.ProjectJsonMigration;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
+namespace Microsoft.DotNet.Tools
 {
     internal static class MsbuildProjectExtensions
     {
