@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
                     P2PHelpers.ConvertPathsToRelative(msbuildProj.ProjectDirectory, ref references);
                 }
                 
-                int numberOfAddedReferences = P2PHelpers.AddProjectToProjectReference(
+                int numberOfAddedReferences = P2PHelpers.AddProjectToProjectReferences(
                     msbuildProj.Project,
                     frameworkOption.Value(),
                     references);

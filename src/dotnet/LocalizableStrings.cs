@@ -24,5 +24,7 @@ namespace Microsoft.DotNet.Tools
         public const string ReferenceDoesNotExist = "Reference `{0}` does not exist.";
         public const string SpecifyAtLeastOneReferenceToAdd = "You must specify at least one reference to add.";
         public const string SpecifyAtLeastOneReferenceToRemove = "You must specify at least one reference to remove.";
+        public const string ProjectReferenceCouldNotBeFound = "Project reference `{0}` could not be found.";
+        public const string ProjectReferenceRemoved = "Project reference `{0}` removed.";
     }
 }

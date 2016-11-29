@@ -14,6 +14,8 @@ namespace Microsoft.DotNet.Tools
 {
     internal static class P2PHelpers
     {
+        const string ProjectItemElementType = "ProjectReference";
+
         public static void EnsureAllReferencesExist(List<string> references)
         {
             var notExisting = new List<string>();
@@ -45,10 +47,9 @@ namespace Microsoft.DotNet.Tools
             return path.Replace('/', '\\');
         }
 
-        public static int AddProjectToProjectReference(ProjectRootElement root, string framework, IEnumerable<string> refs)
+        public static int AddProjectToProjectReferences(ProjectRootElement root, string framework, IEnumerable<string> refs)
         {
             int numberOfAddedReferences = 0;
-            const string ProjectItemElementType = "ProjectReference";
 
             ProjectItemGroupElement itemGroup = root.FindUniformOrCreateItemGroupWithCondition(ProjectItemElementType, framework);
             foreach (var @ref in refs.Select((r) => NormalizeSlashesForMsbuild(r)))
@@ -68,9 +69,67 @@ namespace Microsoft.DotNet.Tools
             return numberOfAddedReferences;
         }
 
-        public static int RemoveProjectToProjectReference(ProjectRootElement root, string framework, IEnumerable<string> refs)
+        public static int RemoveProjectToProjectReferences(MsbuildProject msbuildProject, string framework, IEnumerable<string> refs)
         {
-            throw new NotImplementedException();
+            int totalNumberOfRemovedReferences = 0;
+
+            foreach (var @ref in refs)
+            {
+                totalNumberOfRemovedReferences += RemoveProjectToProjectReferenceAlternatives(msbuildProject, framework, @ref);
+            }
+
+            return totalNumberOfRemovedReferences;
+        }
+
+        private static int RemoveProjectToProjectReferenceAlternatives(MsbuildProject msbuildProject, string framework, string reference)
+        {
+            int numberOfRemovedRefs = 0;
+            foreach (var r in GetIncludeAlternativesForRemoval(msbuildProject, reference))
+            {
+                foreach (var existingItem in msbuildProject.Project.FindExistingItemsWithCondition(framework, r))
+                {
+                    ProjectElementContainer itemGroup = existingItem.Parent;
+                    itemGroup.RemoveChild(existingItem);
+                    if (itemGroup.Children.Count == 0)
+                    {
+                        itemGroup.Parent.RemoveChild(itemGroup);
+                    }
+
+                    numberOfRemovedRefs++;
+                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.ProjectReferenceRemoved, r));
+                }
+            }
+
+            if (numberOfRemovedRefs == 0)
+            {
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.ProjectReferenceCouldNotBeFound, reference));
+            }
+
+            return numberOfRemovedRefs;
+        }
+
+        // Easiest way to explain rationale for this function is on the example. Let's consider following directory structure:
+        // .../a/b/p.proj <project>
+        // .../a/d/ref.proj <reference>
+        // .../a/e/f/ <current working directory>
+        // Project = /some/path/a/b/p.proj
+        //
+        // We do not know the format of passed reference so
+        // directories to consider for removal are following:
+        // - full path to ref.proj [/some/path/a/d/ref.proj]
+        // - string which is passed as reference is relative to project [../d/ref.proj]
+        // - string which is passed as reference is relative to current dir [../../d/ref.proj]
+        private static IEnumerable<string> GetIncludeAlternativesForRemoval(MsbuildProject msbuildProject, string reference)
+        {
+            // We do not care about duplicates in case when i.e. reference is already full path
+            var ret = new List<string>();
+            ret.Add(reference);
+
+            string fullPath = Path.GetFullPath(reference);
+            ret.Add(fullPath);
+            ret.Add(PathUtility.GetRelativePath(msbuildProject.ProjectDirectory, fullPath));
+
+            return ret;
         }
     }
 }
