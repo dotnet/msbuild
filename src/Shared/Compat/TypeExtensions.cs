@@ -577,15 +577,15 @@ namespace System.Reflection
                             {
                                 testForParamArray = true;
                             }
-                            else
-                            {
-                                // From our existing code, our policy here is that if a parameterInfo 
-                                // is optional then all subsequent parameterInfos shall be optional. 
+                            //else
+                            //{
+                            //    // From our existing code, our policy here is that if a parameterInfo 
+                            //    // is optional then all subsequent parameterInfos shall be optional. 
 
-                                // Thus, iff the first parameterInfo is not optional then this MethodInfo is no longer a canidate.
-                                if (!parameterInfos[argumentTypes.Length].IsOptional)
-                                    testForParamArray = true;
-                            }
+                            //    // Thus, iff the first parameterInfo is not optional then this MethodInfo is no longer a canidate.
+                            //    if (!parameterInfos[argumentTypes.Length].IsOptional)
+                            //        testForParamArray = true;
+                            //}
                             #endregion
                         }
 

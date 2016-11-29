@@ -27,7 +27,7 @@
     <Compile Include="Alpha.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
     <Reference Include="System" />
   </ItemGroup>
   <Import Project="..\dir.targets" />

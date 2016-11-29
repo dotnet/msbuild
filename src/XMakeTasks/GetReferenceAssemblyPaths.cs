@@ -26,6 +26,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private const string WARNONNOREFERENCEASSEMBLYDIRECTORY = "MSBUILDWARNONNOREFERENCEASSEMBLYDIRECTORY";
 
+#if FEATURE_GAC
         /// <summary>
         /// This is the sentinel assembly for .NET FX 3.5 SP1
         /// Used to determine if SP1 of 3.5 is installed
@@ -36,6 +37,7 @@ namespace Microsoft.Build.Tasks
         /// Cache in a static whether or not we have found the 35sp1sentinel assembly.
         /// </summary>
         private static bool? s_net35SP1SentinelAssemblyFound;
+#endif
 
         /// <summary>
         /// Hold the reference assembly paths based on the passed in targetframeworkmoniker.

@@ -458,7 +458,11 @@ namespace Microsoft.Build.BackEnd
                         }
 #endif
                     }
-                    catch (IOException e)
+                    catch (IOException
+#if FEATURE_NAMED_PIPES_FULL_DUPLEX
+                    e
+#endif
+                    )
                     {
                         // We will get here when:
                         // 1. The host (OOP main node) connects to us, it immediately checks for user privileges

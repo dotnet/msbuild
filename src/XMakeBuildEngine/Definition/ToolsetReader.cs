@@ -80,12 +80,12 @@ namespace Microsoft.Build.Evaluation
             get;
         }
 
+#if FEATURE_WIN32_REGISTRY || FEATURE_SYSTEM_CONFIGURATION
         /// <summary>
         /// Gathers toolset data from the registry and configuration file, if any:
         /// allows you to specify which of the registry and configuration file to
         /// read from by providing ToolsetInitialization
         /// </summary>
-#if FEATURE_WIN32_REGISTRY || FEATURE_SYSTEM_CONFIGURATION
         internal static string ReadAllToolsets(Dictionary<string, Toolset> toolsets, PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, ToolsetDefinitionLocations locations)
         {
             return ReadAllToolsets(toolsets,
