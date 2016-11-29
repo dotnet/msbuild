@@ -548,6 +548,7 @@ namespace Microsoft.Build.CommandLine
                 bool debugger = false;
                 bool detailedSummary = false;
                 ISet<string> warningsAsErrors = null;
+                ISet<string> warningsAsMessages = null;
 
                 CommandLineSwitches switchesFromAutoResponseFile;
                 CommandLineSwitches switchesNotFromAutoResponseFile;
@@ -575,6 +576,7 @@ namespace Microsoft.Build.CommandLine
                         ref debugger,
                         ref detailedSummary,
                         ref warningsAsErrors,
+                        ref warningsAsMessages,
                         recursing: false
                         ))
                 {
@@ -603,7 +605,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_XML_SCHEMA_VALIDATION
                             needToValidateProject, schemaFile,
 #endif
-                            cpuCount, enableNodeReuse, preprocessWriter, debugger, detailedSummary, warningsAsErrors))
+                            cpuCount, enableNodeReuse, preprocessWriter, debugger, detailedSummary, warningsAsErrors, warningsAsMessages))
                         {
                             exitType = ExitType.BuildError;
                         }
@@ -895,7 +897,8 @@ namespace Microsoft.Build.CommandLine
             TextWriter preprocessWriter,
             bool debugger,
             bool detailedSummary,
-            ISet<string> warningsAsErrors
+            ISet<string> warningsAsErrors,
+            ISet<string> warningsAsMessages
         )
         {
             if (String.Equals(Path.GetExtension(projectFile), ".vcproj", StringComparison.OrdinalIgnoreCase) ||
@@ -1060,6 +1063,7 @@ namespace Microsoft.Build.CommandLine
                     parameters.DetailedSummary = detailedSummary;
                     parameters.LogTaskInputs = logTaskInputs;
                     parameters.WarningsAsErrors = warningsAsErrors;
+                    parameters.WarningsAsMessages = warningsAsMessages;
 
                     if (!String.IsNullOrEmpty(toolsVersion))
                     {
@@ -1794,6 +1798,7 @@ namespace Microsoft.Build.CommandLine
             ref bool debugger,
             ref bool detailedSummary,
             ref ISet<string> warningsAsErrors,
+            ref ISet<string> warningsAsMessages,
             bool recursing
         )
         {
@@ -1898,6 +1903,7 @@ namespace Microsoft.Build.CommandLine
                                                                ref debugger,
                                                                ref detailedSummary,
                                                                ref warningsAsErrors,
+                                                               ref warningsAsMessages,
                                                                recursing: true
                                                              );
                         }
@@ -1933,6 +1939,8 @@ namespace Microsoft.Build.CommandLine
                     detailedSummary = commandLineSwitches.IsParameterlessSwitchSet(CommandLineSwitches.ParameterlessSwitch.DetailedSummary);
 
                     warningsAsErrors = ProcessWarnAsErrorSwitch(commandLineSwitches);
+
+                    warningsAsMessages = ProcessWarnAsMessageSwitch(commandLineSwitches);
 
                     // figure out which loggers are going to listen to build events
                     string[][] groupedFileLoggerParameters = commandLineSwitches.GetFileLoggerParameters();
@@ -2070,6 +2078,28 @@ namespace Microsoft.Build.CommandLine
             }
 
             return warningsAsErrors;
+        }
+
+        internal static ISet<string> ProcessWarnAsMessageSwitch(CommandLineSwitches commandLineSwitches)
+        {
+            if (!commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.WarningsAsMessages))
+            {
+                return null;
+            }
+
+            string[] parameters = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.WarningsAsMessages];
+
+            ISet<string> warningsAsMessages = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (string code in parameters
+                .SelectMany(parameter => parameter?.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries))
+                .Where(i => !String.IsNullOrWhiteSpace(i))
+                .Select(i => i.Trim()))
+            {
+                warningsAsMessages.Add(code);
+            }
+
+            return warningsAsMessages;
         }
 
         /// <summary>
@@ -3180,6 +3210,7 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_21_DistributedFileLoggerSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_11_LoggerSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_28_WarnAsErrorSwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_29_WarnAsMessageSwitch"));
 #if FEATURE_XML_SCHEMA_VALIDATION
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_15_ValidateSwitch"));
 #endif

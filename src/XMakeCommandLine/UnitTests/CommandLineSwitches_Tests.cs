@@ -1123,7 +1123,8 @@ namespace Microsoft.Build.UnitTests
                                         new StringWriter(),
                                         false,
                                         false, 
-                                        warningsAsErrors: null);
+                                        warningsAsErrors: null,
+                                        warningsAsMessages: null);
                 }
                 finally
                 {
@@ -1204,7 +1205,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ProcessWarnAsErrorSwitchWithCodes()
         {
-            ISet<string> expectedWarningsAsErors = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "a", "B", "c", "D", "e" };
+            ISet<string> expectedWarningsAsErrors = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "a", "B", "c", "D", "e" };
 
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
 
@@ -1222,7 +1223,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.NotNull(actualWarningsAsErrors);
 
-            Assert.Equal(expectedWarningsAsErors, actualWarningsAsErrors, StringComparer.OrdinalIgnoreCase);
+            Assert.Equal(expectedWarningsAsErrors, actualWarningsAsErrors, StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -1285,6 +1286,46 @@ namespace Microsoft.Build.UnitTests
             Assert.NotNull(actualWarningsAsErrors);
 
             Assert.Equal(0, actualWarningsAsErrors.Count);
+        }
+
+        /// <summary>
+        /// Verifies that when the /warnasmessage switch is used with no values that an error is shown.
+        /// </summary>
+        [Fact]
+        public void ProcessWarnAsMessageSwitchEmpty()
+        {
+            CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
+
+            MSBuildApp.GatherCommandLineSwitches(new ArrayList(new[] { "/warnasmessage" }), commandLineSwitches);
+
+            VerifySwitchError(commandLineSwitches, "/warnasmessage", AssemblyResources.GetString("MissingWarnAsMessageParameterError"));
+        }
+
+        /// <summary>
+        /// Verifies that the /warnasmessage switch is parsed properly when codes are specified.
+        /// </summary>
+        [Fact]
+        public void ProcessWarnAsMessageSwitchWithCodes()
+        {
+            ISet<string> expectedWarningsAsMessages = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "a", "B", "c", "D", "e" };
+
+            CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
+
+            MSBuildApp.GatherCommandLineSwitches(new ArrayList(new[]
+            {
+                "\"/warnasmessage: a,B ; c \"", // Leading, trailing, leading and trailing whitespace
+                "/warnasmessage:A,b,C",         // Repeats of different case
+                "\"/warnasmessage:,    ,,\"",   // Empty items
+                "/nowarn:D,d;E,e",              // A different source with new items and uses the short form
+                "/warnasmessage:a",             // A different source with a single duplicate
+                "/warnasmessage:a,b",           // A different source with  multiple duplicates
+            }), commandLineSwitches);
+
+            ISet<string> actualWarningsAsMessages = MSBuildApp.ProcessWarnAsMessageSwitch(commandLineSwitches);
+
+            Assert.NotNull(actualWarningsAsMessages);
+
+            Assert.Equal(expectedWarningsAsMessages, actualWarningsAsMessages, StringComparer.OrdinalIgnoreCase);
         }
 
 #if FEATURE_RESOURCEMANAGER_GETRESOURCESET
@@ -1355,9 +1396,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies that a switch collection has an error registered for the given command line arg.
         /// </summary>
-        /// <param name="switches"></param>
-        /// <param name="badCommandLineArg"></param>
-        private void VerifySwitchError(CommandLineSwitches switches, string badCommandLineArg)
+        private void VerifySwitchError(CommandLineSwitches switches, string badCommandLineArg, string expectedMessage = null)
         {
             bool caughtError = false;
 
@@ -1370,6 +1409,11 @@ namespace Microsoft.Build.UnitTests
                 Assert.Equal(badCommandLineArg, e.CommandLineArg);
 
                 caughtError = true;
+
+                if (expectedMessage != null)
+                {
+                    Assert.True(e.Message.Contains(expectedMessage));
+                }
 
                 // so I can see the message in NUnit's "Standard Out" window
                 Console.WriteLine(e.Message);

@@ -424,7 +424,7 @@ namespace Microsoft.Build.Execution
                 }
 
                 // Set up the logging service.
-                ILoggingService loggingService = CreateLoggingService(_buildParameters.Loggers, _buildParameters.ForwardingLoggers, _buildParameters.WarningsAsErrors);
+                ILoggingService loggingService = CreateLoggingService(_buildParameters.Loggers, _buildParameters.ForwardingLoggers, _buildParameters.WarningsAsErrors, _buildParameters.WarningsAsMessages);
 
                 _nodeManager.RegisterPacketHandler(NodePacketType.LogMessage, LogMessagePacket.FactoryForDeserialization, loggingService as INodePacketHandler);
                 try
@@ -1736,7 +1736,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Creates a logging service around the specified set of loggers.
         /// </summary>
-        private ILoggingService CreateLoggingService(IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> forwardingLoggers, ISet<string> warningsAsErrors)
+        private ILoggingService CreateLoggingService(IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> forwardingLoggers, ISet<string> warningsAsErrors, ISet<string> warningsAsMessages)
         {
             int cpuCount = _buildParameters.MaxNodeCount;
 
@@ -1764,6 +1764,7 @@ namespace Microsoft.Build.Execution
             loggingService.OnProjectStarted += _projectStartedEventHandler;
             loggingService.OnProjectFinished += _projectFinishedEventHandler;
             loggingService.WarningsAsErrors = warningsAsErrors;
+            loggingService.WarningsAsMessages = warningsAsMessages;
 
             try
             {
