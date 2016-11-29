@@ -56,11 +56,11 @@
     </NuGetContent>
 
     <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\sdk.props">
-      <Destination>build</Destination>
+      <Destination>Sdk</Destination>
     </NuGetContent>
     
     <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\sdk.targets">
-      <Destination>build</Destination>
+      <Destination>Sdk</Destination>
     </NuGetContent>
     
   </ItemGroup>

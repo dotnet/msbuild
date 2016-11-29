@@ -18,10 +18,10 @@
       <Destination>build\netstandard1.0</Destination>
     </NuGetContent>
     <NuGetContent Include="$(WebSourceDir)\Web\Microsoft.NET.Sdk.Web.ProjectSystem.Targets\sdk.props">
-      <Destination>build</Destination>
+      <Destination>Sdk</Destination>
     </NuGetContent>
     <NuGetContent Include="$(WebSourceDir)\Web\Microsoft.NET.Sdk.Web.ProjectSystem.Targets\sdk.targets">
-      <Destination>build</Destination>
+      <Destination>Sdk</Destination>
     </NuGetContent>
   </ItemGroup>
   <Import Project="$(WebSdkRootDir)tools\NuGet\NuGetProj.targets"/>
