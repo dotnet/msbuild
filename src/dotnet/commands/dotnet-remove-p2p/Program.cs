@@ -3,10 +3,7 @@
 
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.Build.Construction;
-using Microsoft.DotNet.Tools.Common;
 using System.Collections.Generic;
-using System.IO;
 
 namespace Microsoft.DotNet.Tools.Remove.ProjectToProjectReference
 {

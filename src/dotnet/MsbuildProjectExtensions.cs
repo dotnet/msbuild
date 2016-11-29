@@ -66,7 +66,16 @@ namespace Microsoft.DotNet.Tools
 
         public static bool HasInclude(this ProjectItemElement el, string include)
         {
-            return el.Includes().Contains(include);
+            include = NormalizeIncludeForComparison(include);
+            foreach (var i in el.Includes())
+            {
+                if (include == NormalizeIncludeForComparison(i))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static bool TryGetFrameworkConditionString(string framework, out string condition)
@@ -79,6 +88,11 @@ namespace Microsoft.DotNet.Tools
 
             condition = $"'$(TargetFramework)' == '{framework}'";
             return true;
+        }
+
+        private static string NormalizeIncludeForComparison(string include)
+        {
+            return P2PHelpers.NormalizeSlashesForMsbuild(include.ToLower());
         }
     }
 }
