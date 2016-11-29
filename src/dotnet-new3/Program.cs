@@ -18,8 +18,6 @@ namespace dotnet_new3
     {
         public static int Main(string[] args)
         {
-            //Console.ReadLine();
-            
             CommandLineApplication app = new CommandLineApplication(false)
             {
                 Name = "dotnet new3",
