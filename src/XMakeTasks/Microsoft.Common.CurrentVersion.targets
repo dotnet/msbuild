@@ -5323,6 +5323,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <SatelliteDllsProjectOutputGroupOutputIntermediate Include="$(IntermediateOutputPath)%(EmbeddedResource.Culture)\$(TargetName).resources.dll"
                                                          Condition="'%(WithCulture)' == 'true'">
         <TargetPath>%(EmbeddedResource.Culture)\$(TargetName).resources.dll</TargetPath>
+        <Culture>%(EmbeddedResource.Culture)</Culture>
       </SatelliteDllsProjectOutputGroupOutputIntermediate>
     </ItemGroup>
 
