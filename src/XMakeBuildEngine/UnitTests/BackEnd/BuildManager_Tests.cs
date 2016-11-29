@@ -3595,6 +3595,101 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Verifies that all warnings are treated as errors and that the overall build result is a failure.
+        /// </summary>
+        [Fact]
+        public void WarningsAreTreatedAsErrorsAll()
+        {
+            string contents = ObjectModelHelpers.CleanupFileContents(@"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+ <Target Name='target1'>
+    <Warning Text='This warning should be treated as an error' Code='ABC123'/>
+    <Warning Text='This warning should NOT be treated as an error' />
+ </Target>
+</Project>
+");
+            _parameters.WarningsAsErrors = new HashSet<string>();
+
+            Project project = CreateProject(contents, ObjectModelHelpers.MSBuildDefaultToolsVersion, _projectCollection, true);
+            ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
+            _buildManager.BeginBuild(_parameters);
+            BuildResult result1 = _buildManager.BuildRequest(new BuildRequestData(instance, new string[] { "target1" }));
+            _buildManager.EndBuild();
+
+            Assert.Equal(0, _logger.WarningCount);
+            Assert.Equal(2, _logger.ErrorCount);
+
+            Assert.Equal(BuildResultCode.Failure, result1.OverallResult);
+            Assert.True(result1.HasResultsForTarget("target1"));
+        }
+
+        /// <summary>
+        /// Verifies that only the specified warnings are treated as errors and that the overall build result is a failure.
+        /// </summary>
+        [Fact]
+        public void WarningsAreTreatedAsErrorsSpecific()
+        {
+            string contents = ObjectModelHelpers.CleanupFileContents(@"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+ <Target Name='target1'>
+    <Warning Text='This warning should be treated as an error' Code='ABC123'/>
+    <Warning Text='This warning should NOT be treated as an error' Code='NA123' />
+    <Warning Text='This warning should NOT be treated as an error' />
+ </Target>
+</Project>
+");
+            _parameters.WarningsAsErrors = new HashSet<string> { "ABC123" };
+
+            Project project = CreateProject(contents, ObjectModelHelpers.MSBuildDefaultToolsVersion, _projectCollection, true);
+            ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
+            _buildManager.BeginBuild(_parameters);
+            BuildResult result1 = _buildManager.BuildRequest(new BuildRequestData(instance, new string[] { "target1" }));
+            _buildManager.EndBuild();
+
+            Assert.Equal(2, _logger.WarningCount);
+            Assert.Equal(1, _logger.ErrorCount);
+
+            Assert.Equal(BuildResultCode.Failure, result1.OverallResult);
+            Assert.True(result1.HasResultsForTarget("target1"));
+        }
+
+        /// <summary>
+        /// Verifies that when building targets which emit warnings, they still show as succeeding but the overall build result is a failure.
+        /// </summary>
+        [Fact]
+        public void WarningsAreTreatedAsErrorsButTargetsStillSucceed()
+        {
+            string contents = ObjectModelHelpers.CleanupFileContents(@"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+<Target Name='target1'>
+    <Message Text='text'/>
+ </Target>
+ <Target Name='target2'>
+    <Warning Text='This warning should be treated as an error' Code='ABC123'/>
+ </Target>
+</Project>
+");
+            _parameters.WarningsAsErrors = new HashSet<string> { "ABC123" };
+
+            Project project = CreateProject(contents, ObjectModelHelpers.MSBuildDefaultToolsVersion, _projectCollection, true);
+            ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
+            _buildManager.BeginBuild(_parameters);
+            BuildResult buildResult = _buildManager.BuildRequest(new BuildRequestData(instance, new string[] { "target1", "target2" }));
+            _buildManager.EndBuild();
+
+            Assert.Equal(0, _logger.WarningCount);
+            Assert.Equal(1, _logger.ErrorCount);
+
+            Assert.Equal(BuildResultCode.Failure, buildResult.OverallResult);
+            Assert.True(buildResult.HasResultsForTarget("target1"));
+            Assert.True(buildResult.HasResultsForTarget("target2"));
+            // The two targets should still show as success because they don't know their warning was changed to an error
+            // Logging a warning as an error does not change execution, only the final result of the build
+            Assert.Equal(TargetResultCode.Success, buildResult.ResultsByTarget["target1"].ResultCode);
+            Assert.Equal(TargetResultCode.Success, buildResult.ResultsByTarget["target2"].ResultCode);
+        }
+
+        /// <summary>
         /// Helper for cache tests.  Builds a project and verifies the right cache files are created.
         /// </summary>
         private string BuildAndCheckCache(BuildManager localBuildManager, IEnumerable<string> exceptCacheDirectories)
