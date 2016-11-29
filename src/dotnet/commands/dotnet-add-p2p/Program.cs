@@ -49,20 +49,7 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
                     throw new GracefulException(LocalizableStrings.RequiredArgumentNotPassed, "<Project>");
                 }
 
-                ProjectRootElement project;
-                string projectDir;
-                if (File.Exists(projectArgument.Value))
-                {
-                    project = P2PHelpers.GetProjectFromFileOrThrow(projectArgument.Value);
-                    projectDir = new FileInfo(projectArgument.Value).DirectoryName;
-                }
-                else
-                {
-                    project = P2PHelpers.GetProjectFromDirectoryOrThrow(projectArgument.Value);
-                    projectDir = projectArgument.Value;
-                }
-
-                projectDir = PathUtility.EnsureTrailingSlash(projectDir);
+                var msbuildProj = MsbuildProject.FromFileOrDirectory(projectArgument.Value);
 
                 if (app.RemainingArguments.Count == 0)
                 {
@@ -73,17 +60,17 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
                 if (!forceOption.HasValue())
                 {
                     P2PHelpers.EnsureAllReferencesExist(references);
-                    P2PHelpers.ConvertPathsToRelative(projectDir, ref references);
+                    P2PHelpers.ConvertPathsToRelative(msbuildProj.ProjectDirectory, ref references);
                 }
                 
                 int numberOfAddedReferences = P2PHelpers.AddProjectToProjectReference(
-                    project,
+                    msbuildProj.Project,
                     frameworkOption.Value(),
                     references);
 
                 if (numberOfAddedReferences != 0)
                 {
-                    project.Save();
+                    msbuildProj.Project.Save();
                 }
 
                 return 0;

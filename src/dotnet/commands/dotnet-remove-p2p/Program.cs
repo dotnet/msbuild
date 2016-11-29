@@ -44,20 +44,7 @@ namespace Microsoft.DotNet.Tools.Remove.ProjectToProjectReference
                     throw new GracefulException(LocalizableStrings.RequiredArgumentNotPassed, "<Project>");
                 }
 
-                ProjectRootElement project;
-                string projectDir;
-                if (File.Exists(projectArgument.Value))
-                {
-                    project = P2PHelpers.GetProjectFromFileOrThrow(projectArgument.Value);
-                    projectDir = new FileInfo(projectArgument.Value).DirectoryName;
-                }
-                else
-                {
-                    project = P2PHelpers.GetProjectFromDirectoryOrThrow(projectArgument.Value);
-                    projectDir = projectArgument.Value;
-                }
-
-                projectDir = PathUtility.EnsureTrailingSlash(projectDir);
+                var msbuildProj = MsbuildProject.FromFileOrDirectory(projectArgument.Value);
 
                 if (app.RemainingArguments.Count == 0)
                 {
@@ -67,13 +54,13 @@ namespace Microsoft.DotNet.Tools.Remove.ProjectToProjectReference
                 List<string> references = app.RemainingArguments;
                 
                 int numberOfRemovedReferences = P2PHelpers.RemoveProjectToProjectReference(
-                    project,
+                    msbuildProj.Project,
                     frameworkOption.Value(),
                     references);
 
                 if (numberOfRemovedReferences != 0)
                 {
-                    project.Save();
+                    msbuildProj.Project.Save();
                 }
 
                 return 0;
