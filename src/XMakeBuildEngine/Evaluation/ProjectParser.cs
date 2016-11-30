@@ -213,7 +213,8 @@ namespace Microsoft.Build.Construction
                     var finalImportPath = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildSDKsPath,
                         sdkName, "Sdk", "Sdk.targets");
 
-                    if (File.Exists(initialImportPath))
+                    // TODO: don't require all SDKs to have both props and targets
+                    // if (File.Exists(initialImportPath))
                     {
                         var implicitImportElement = element.OwnerDocument.CreateElement(XMakeElements.import);
 
@@ -226,7 +227,8 @@ namespace Microsoft.Build.Construction
                         element.PrependChild(implicitImportElement);
                     }
 
-                    if (File.Exists(finalImportPath))
+                    // TODO: don't require all SDKs to have both props and targets
+                    // if (File.Exists(finalImportPath))
                     {
                         var implicitImportElement = element.OwnerDocument.CreateElement(XMakeElements.import);
 
