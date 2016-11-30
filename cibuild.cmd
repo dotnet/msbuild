@@ -1,3 +1,8 @@
+git fsck
+IF ERRORLEVEL 1 EXIT /B %ERRORLEVEL%
+git gc
+IF ERRORLEVEL 1 EXIT /B %ERRORLEVEL%
+
 @if not defined _echo echo off
 setlocal ENABLEDELAYEDEXPANSION ENABLEEXTENSIONS
 SET _originalScript=%~f0
