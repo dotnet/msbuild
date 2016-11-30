@@ -99,7 +99,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
             var projectXml = XDocument.Load(sourceProject);
 
-            var ns = XNamespace.Get("http://schemas.microsoft.com/developer/msbuild/2003");
+            var ns = projectXml.Root.Name.Namespace;
 
             var propertyGroup = projectXml.Root.Elements(ns + "PropertyGroup").First();
 

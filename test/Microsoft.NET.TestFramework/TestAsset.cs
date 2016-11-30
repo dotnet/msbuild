@@ -122,7 +122,7 @@ namespace Microsoft.NET.TestFramework
 
         public void SetSdkVersion(XDocument project)
         {
-            var ns = XNamespace.Get("http://schemas.microsoft.com/developer/msbuild/2003");
+            var ns = project.Root.Name.Namespace;
 
             project
                 .Descendants(ns + "PackageReference")

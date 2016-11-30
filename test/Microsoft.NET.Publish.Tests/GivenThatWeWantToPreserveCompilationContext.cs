@@ -30,7 +30,7 @@ namespace Microsoft.NET.Publish.Tests
                 {
                     //  Workaround for https://github.com/dotnet/sdk/issues/367
 
-                    var ns = XNamespace.Get("http://schemas.microsoft.com/developer/msbuild/2003");
+                    var ns = project.Root.Name.Namespace;
                     var propertyGroup = project.Root.Elements(ns + "PropertyGroup").FirstOrDefault();
                     propertyGroup.Should().NotBeNull();
 
