@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
+  <Import Project="$(MSBuildSDKsPath)\microsoft.net.sdk\Sdk\Sdk.props" />
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>netstandard1.5</TargetFramework>
@@ -20,10 +20,6 @@
     <PackageReference Include="Newtonsoft.Json">
       <Version>9.0.1</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.NET.Sdk">
-      <Version>0.0</Version>
-      <PrivateAssets>All</PrivateAssets>
-    </PackageReference>
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(MSBuildSDKsPath)\microsoft.net.sdk\Sdk\Sdk.targets" />
 </Project>
