@@ -15,34 +15,33 @@ namespace Microsoft.DotNet.Tools.Publish
 
             CommandLineApplication app = new CommandLineApplication(throwOnUnexpectedArg: false);
             app.Name = "dotnet publish";
-            app.FullName = ".NET Publisher";
-            app.Description = "Publisher for the .NET Platform";
+            app.FullName = LocalizableStrings.AppFullName;
+            app.Description = LocalizableStrings.AppDescription;
             app.AllowArgumentSeparator = true;
             app.ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText;
             app.HelpOption("-h|--help");
 
-            CommandArgument projectArgument = app.Argument("<PROJECT>",
-                "The MSBuild project file to publish. If a project file is not specified, MSBuild searches the current" +
-                " working directory for a file that has a file extension that ends in `proj` and uses that file.");
+            CommandArgument projectArgument = app.Argument($"<{LocalizableStrings.ProjectArgument}>",
+                LocalizableStrings.ProjectArgDescription);
 
             CommandOption frameworkOption = app.Option(
-                "-f|--framework <FRAMEWORK>", "Target framework to publish for",
+                $"-f|--framework <{LocalizableStrings.FrameworkOption}>", LocalizableStrings.FrameworkOptionDescription,
                 CommandOptionType.SingleValue);
 
             CommandOption runtimeOption = app.Option(
-                "-r|--runtime <RUNTIME_IDENTIFIER>", "Target runtime to publish for. The default is to publish a portable application.",
+                $"-r|--runtime <{LocalizableStrings.RuntimeOption}>", LocalizableStrings.RuntimeOptionDescription,
                 CommandOptionType.SingleValue);
 
             CommandOption outputOption = app.Option(
-                "-o|--output <OUTPUT_DIR>", "Path in which to publish the app",
+                $"-o|--output <{LocalizableStrings.OutputOption}>", LocalizableStrings.OutputOptionDescription,
                 CommandOptionType.SingleValue);
 
             CommandOption configurationOption = app.Option(
-                "-c|--configuration <CONFIGURATION>", "Configuration under which to build",
+                $"-c|--configuration <{LocalizableStrings.ConfigurationOption}>", LocalizableStrings.ConfigurationOptionDescription,
                 CommandOptionType.SingleValue);
 
             CommandOption versionSuffixOption = app.Option(
-                "--version-suffix <VERSION_SUFFIX>", "Defines the value for the $(VersionSuffix) property in the project",
+               $"--version-suffix <{LocalizableStrings.VersionSuffixOption}>", LocalizableStrings.VersionSuffixOptionDescription,
                 CommandOptionType.SingleValue);
             CommandOption verbosityOption = MSBuildForwardingApp.AddVerbosityOption(app);
 
