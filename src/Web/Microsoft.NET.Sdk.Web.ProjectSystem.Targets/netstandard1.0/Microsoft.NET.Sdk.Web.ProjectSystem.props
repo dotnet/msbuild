@@ -9,16 +9,31 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
 Copyright (c) .NET Foundation. All rights reserved. 
 ***********************************************************************************************
 -->
+<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.Web.ProjectSystem.props
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved. 
+***********************************************************************************************
+-->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   
   <PropertyGroup>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <PublishFiles>**\*.cshtml;**\web.config;**\web.*.config</PublishFiles>
-    <ContentFiles>**\*.json;**\*.js;**\*.jsx;**\*.map;**\*.coffee;**\*.iced;**\*.htm;**\*.html;**\*.md;**\*.mdown;**\*.markdown;**\*.mdwn;**\*.css;**\*.less;**\*.scss;**\*.sass;**\*.png;**\*.jpg;**\*.svg;**\*.svgz</ContentFiles>
-    <GlobalExclude>$(GlobalExclude);wwwroot\**</GlobalExclude>
     <PublishProfilesDir>$(AppDesignerFolder)\PublishProfiles</PublishProfilesDir>
-    <MiscFiles>**\.bowerrc;$(PublishProfilesDir)\**\*.pubxml;$(PublishProfilesDir)\**\*.ps1;$(PublishProfilesDir)\**\*.psm1</MiscFiles>
-    <ContentExclude>bin\**;obj\**;node_modules\**;jspm_packages\**</ContentExclude>
   </PropertyGroup>
   
+  <ItemGroup>
+    <PublishFiles Include="**\*.cshtml;**\*.config;**\*.json" />
+    <ContentFiles Include="**\*.js;**\*.jsx;**\*.map;**\*.coffee;**\*.iced;**\*.htm;**\*.html;**\*.md;**\*.mdown;**\*.markdown;**\*.mdwn;**\*.css;**\*.less;**\*.scss;**\*.sass;**\*.png;**\*.jpg;**\*.svg;**\*.svgz" />
+    <GlobalExclude Include="$(GlobalExclude);wwwroot\**;bin\**;obj\**" />
+    <MiscFiles Include="**\.bowerrc;$(PublishProfilesDir)\**\*.pubxml;$(PublishProfilesDir)\**\*.ps1;$(PublishProfilesDir)\**\*.psm1" />
+    <ContentExclude Include="bin\**;obj\**;node_modules\**;jspm_packages\**;bower_components\**" />
+  </ItemGroup>
+  
 </Project>
+
