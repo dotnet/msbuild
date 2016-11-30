@@ -56,12 +56,11 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
                 List<string> references = app.RemainingArguments;
                 if (!forceOption.HasValue())
                 {
-                    P2PHelpers.EnsureAllReferencesExist(references);
-                    P2PHelpers.ConvertPathsToRelative(msbuildProj.ProjectDirectory, ref references);
+                    MsbuildProject.EnsureAllReferencesExist(references);
+                    msbuildProj.ConvertPathsToRelative(ref references);
                 }
                 
-                int numberOfAddedReferences = P2PHelpers.AddProjectToProjectReferences(
-                    msbuildProj.Project,
+                int numberOfAddedReferences = msbuildProj.AddProjectToProjectReferences(
                     frameworkOption.Value(),
                     references);
 

@@ -95,7 +95,7 @@ namespace Microsoft.DotNet.Tools
 
         private static string NormalizeIncludeForComparison(string include)
         {
-            return P2PHelpers.NormalizeSlashesForMsbuild(include.ToLower());
+            return MsbuildProject.NormalizeSlashes(include.ToLower());
         }
     }
 }

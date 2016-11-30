@@ -50,8 +50,7 @@ namespace Microsoft.DotNet.Tools.Remove.ProjectToProjectReference
 
                 List<string> references = app.RemainingArguments;
                 
-                int numberOfRemovedReferences = P2PHelpers.RemoveProjectToProjectReferences(
-                    msbuildProj,
+                int numberOfRemovedReferences = msbuildProj.RemoveProjectToProjectReferences(
                     frameworkOption.Value(),
                     references);
 
