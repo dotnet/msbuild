@@ -705,8 +705,10 @@ namespace Microsoft.Build.Construction
                 {
                     using (ProjectWriter projectWriter = new ProjectWriter(stringWriter))
                     {
-                        projectWriter.Initialize(XmlDocument);
-                        XmlDocument.Save(projectWriter);
+                        var xmlWithNoImplicits = RemoveImplicits();
+
+                        projectWriter.Initialize(xmlWithNoImplicits);
+                        xmlWithNoImplicits.Save(projectWriter);
                     }
 
                     return stringWriter.ToString();
@@ -1745,15 +1747,7 @@ namespace Microsoft.Build.Construction
                 {
                     using (ProjectWriter projectWriter = new ProjectWriter(_projectFileLocation.File, saveEncoding))
                     {
-                        var xmlWithNoImplicits = (XmlDocument)XmlDocument.CloneNode(deep: true);
-
-                        var implicitElements =
-                            xmlWithNoImplicits.SelectNodes($"//*[@{XMakeAttributes.@implicit}]");
-
-                        foreach (XmlNode implicitElement in implicitElements)
-                        {
-                            implicitElement.ParentNode.RemoveChild(implicitElement);
-                        }
+                        var xmlWithNoImplicits = RemoveImplicits();
 
                         projectWriter.Initialize(xmlWithNoImplicits);
                         xmlWithNoImplicits.Save(projectWriter);
@@ -1783,6 +1777,20 @@ namespace Microsoft.Build.Construction
                 DataCollection.CommentMarkProfile(8811, endProjectSave);
             }
 #endif
+        }
+
+        private XmlDocument RemoveImplicits()
+        {
+            var xmlWithNoImplicits = (XmlDocument) XmlDocument.CloneNode(deep: true);
+
+            var implicitElements =
+                xmlWithNoImplicits.SelectNodes($"//*[@{XMakeAttributes.@implicit}]");
+
+            foreach (XmlNode implicitElement in implicitElements)
+            {
+                implicitElement.ParentNode.RemoveChild(implicitElement);
+            }
+            return xmlWithNoImplicits;
         }
 
         /// <summary>
