@@ -3207,7 +3207,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void AddProperty_WithSdk_KeepsSdkAndImplicitImports()
         {
             var testSdkRoot = Path.Combine(Path.GetTempPath(), "MSBuildUnitTest");
-            var testSdkDirectory = Path.Combine(testSdkRoot, "MSBuildUnitTestSdk");
+            var testSdkDirectory = Path.Combine(testSdkRoot, "MSBuildUnitTestSdk", "Sdk");
 
             try
             {
