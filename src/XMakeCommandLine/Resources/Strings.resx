@@ -991,9 +991,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <comment>A file location to be embedded in a string.</comment>
   </data>
   <data name="MissingWarnAsMessageParameterError" UESanitized="true" Visibility="Public">
-    <value>MSBUILD : error MSB1050: Specify one or more warning codes to treat as low importance messages when using the /warnasmessage switch.</value>
+    <value>MSBUILD : error MSB1051: Specify one or more warning codes to treat as low importance messages when using the /warnasmessage switch.</value>
     <comment>
-      {StrBegin="MSBUILD : error MSB1050: "}
+      {StrBegin="MSBUILD : error MSB1051: "}
       UE: This happens if the user does something like "msbuild.exe /warnasmessage:" without any codes.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </comment>
@@ -1002,7 +1002,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 
-        Next error code should be MSB1051.
+        Next error code should be MSB1052.
 
         Don't forget to update this comment after using the new code.
   -->
