@@ -40,9 +40,11 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition="'$(IsCrossTargetingBuild)' != 'true'"/>
   
   <!-- Import targets from NuGet.Build.Tasks.Pack package/Sdk -->
-  <Import Project="$(MSBuildSDKsPath)\NuGet.Build.Tasks.Pack\buildCrossTargeting\NuGet.Build.Tasks.Pack.targets"
-          Condition="'$(IsCrossTargetingBuild)' == 'true'"/>
-  <Import Project="$(MSBuildSDKsPath)\NuGet.Build.Tasks.Pack\build\NuGet.Build.Tasks.Pack.targets"
-          Condition="'$(IsCrossTargetingBuild)' != 'true'"/>
+  <PropertyGroup>
+    <NuGetBuildTasksPackTargets Condition="'$(IsCrossTargetingBuild)' == 'true'">$(MSBuildSDKsPath)\NuGet.Build.Tasks.Pack\buildCrossTargeting\NuGet.Build.Tasks.Pack.targets</NuGetBuildTasksPackTargets>
+    <NuGetBuildTasksPackTargets Condition="'$(IsCrossTargetingBuild)' != 'true'">$(MSBuildSDKsPath)\NuGet.Build.Tasks.Pack\build\NuGet.Build.Tasks.Pack.targets</NuGetBuildTasksPackTargets>
+  </PropertyGroup>
   
+  <Import Project="$(NuGetBuildTasksPackTargets)"
+          Condition="Exists('$(NuGetBuildTasksPackTargets)')"/>  
 </Project>
