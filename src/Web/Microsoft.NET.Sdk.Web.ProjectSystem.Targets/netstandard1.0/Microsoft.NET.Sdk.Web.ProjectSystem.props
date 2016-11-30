@@ -1,6 +1,6 @@
 ﻿<!--
 ***********************************************************************************************
-Microsoft.NET.Sdk.Web.props
+Microsoft.NET.Sdk.Web.ProjectSystem.props
 
 WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
           created a backup copy.  Incorrect changes to this file will make it
@@ -10,5 +10,15 @@ Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-
+  
+  <PropertyGroup>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <PublishFiles>**\*.cshtml;**\web.config;**\web.*.config</PublishFiles>
+    <ContentFiles>**\*.json;**\*.js;**\*.jsx;**\*.map;**\*.coffee;**\*.iced;**\*.htm;**\*.html;**\*.md;**\*.mdown;**\*.markdown;**\*.mdwn;**\*.css;**\*.less;**\*.scss;**\*.sass;**\*.png;**\*.jpg;**\*.svg;**\*.svgz</ContentFiles>
+    <GlobalExclude>$(GlobalExclude);wwwroot\**</GlobalExclude>
+    <PublishProfilesDir>$(AppDesignerFolder)\PublishProfiles</PublishProfilesDir>
+    <MiscFiles>**\.bowerrc;$(PublishProfilesDir)\**\*.pubxml;$(PublishProfilesDir)\**\*.ps1;$(PublishProfilesDir)\**\*.psm1</MiscFiles>
+    <ContentExclude>bin\**;obj\**;node_modules\**;jspm_packages\**</ContentExclude>
+  </PropertyGroup>
+  
 </Project>
