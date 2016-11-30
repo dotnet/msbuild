@@ -16,8 +16,4 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   
-  <!-- So we can check if PlatformTarget was inferred via AssemblyDescription -->
-  <PropertyGroup>
-     <Description>PlatformTarget=$(PlatformTarget)</Description>
-  </PropertyGroup>
 </Project>
