@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="de" original="src/Tasks/Microsoft.NET.Build.Tasks/Resources/Strings.resx">
+    <body>
+      <group id="src/Tasks/Microsoft.NET.Build.Tasks/Resources/Strings.resx" />
+      <trans-unit id="AtLeastOneTargetFrameworkMustBeSpecified">
+        <source>At least one possible target framework must be specified.</source>
+        <target state="new">At least one possible target framework must be specified.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="NoCompatibleTargetFramework">
+        <source>Project '{0}' has no target framework compatible with '{1}'.</source>
+        <target state="new">Project '{0}' has no target framework compatible with '{1}'.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="InvalidFrameworkName">
+        <source>Invalid framework name: '{0}'.</source>
+        <target state="new">Invalid framework name: '{0}'.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AssetsFileNotFound">
+        <source>Assets file '{0}' not found. Run a NuGet package restore to generate this file.</source>
+        <target state="new">Assets file '{0}' not found. Run a NuGet package restore to generate this file.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AssetsFileMissingTarget">
+        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have restored this project for TargetFramework='{2}' and RuntimeIdentifier='{3}'.</source>
+        <target state="new">Assets file '{0}' doesn't have a target for '{1}'. Ensure you have restored this project for TargetFramework='{2}' and RuntimeIdentifier='{3}'.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AssetsFilePathNotRooted">
+        <source>Assets file path '{0}' is not rooted. Only full paths are supported.</source>
+        <target state="new">Assets file path '{0}' is not rooted. Only full paths are supported.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CannotFindProjectInfo">
+        <source>Cannot find project info for '{0}'. This can indicate a missing project reference.</source>
+        <target state="new">Cannot find project info for '{0}'. This can indicate a missing project reference.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ContentFileDoesNotContainExpectedParentPackageInformation">
+        <source>Content file '{0}' does not contain expected parent package information.</source>
+        <target state="new">Content file '{0}' does not contain expected parent package information.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MissingItemMetadata">
+        <source>Missing '{0}' metadata on '{1}' item '{2}'.</source>
+        <target state="new">Missing '{0}' metadata on '{1}' item '{2}'.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="UnrecognizedPreprocessorToken">
+        <source>Unrecognized preprocessor token '{0}' in '{1}'.</source>
+        <target state="new">Unrecognized preprocessor token '{0}' in '{1}'.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ContentPreproccessorParameterRequired">
+        <source>The '{0}' task must be given a value for parameter '{1}' in order to consume preprocessed content.</source>
+        <target state="new">The '{0}' task must be given a value for parameter '{1}' in order to consume preprocessed content.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">
+        <source>Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</source>
+        <target state="new">Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="UnexpectedFileType">
+        <source>Unexpected file type for '{0}'. Type is both '{1}' and '{2}'.</source>
+        <target state="new">Unexpected file type for '{0}'. Type is both '{1}' and '{2}'.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CannotInferTargetFrameworkIdentiferAndVersion">
+        <source>Cannot infer TargetFrameworkIdentifier and/or TargetFrameworkVersion from TargetFramework='{0}'. They must be specified explicitly.</source>
+        <target state="new">Cannot infer TargetFrameworkIdentifier and/or TargetFrameworkVersion from TargetFramework='{0}'. They must be specified explicitly.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ContentItemDoesNotProvideOutputPath">
+        <source>Content item for '{0}' sets '{1}', but does not provide  '{2}' or '{3}'.</source>
+        <target state="new">Content item for '{0}' sets '{1}', but does not provide  '{2}' or '{3}'.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="DuplicatePreprocessorToken">
+        <source>The preprocessor token '{0}' has been given more than one value. Choosing '{1}' as the value.</source>
+        <target state="new">The preprocessor token '{0}' has been given more than one value. Choosing '{1}' as the value.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ErrorsOccurredWhenEmittingSatelliteAssembly">
+        <source>Errors occured when emitting satellite assembly '{0}'.</source>
+        <target state="new">Errors occured when emitting satellite assembly '{0}'.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="UnableToFindResolvedPath">
+        <source>Unable to find resolved path for '{0}'.</source>
+        <target state="new">Unable to find resolved path for '{0}'.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="UnexpectedDependencyWithNoVersionNumber">
+        <source>Unexpected dependency '{0}' with no version number.</source>
+        <target state="new">Unexpected dependency '{0}' with no version number.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RuntimeIdentifierMustBeSetForNETFramework">
+        <source>RuntimeIdentifier must be set for .NETFramework executables. Consider RuntimeIdentifier=win7-x86 or RuntimeIdentifier=win7-x64.</source>
+        <target state="new">RuntimeIdentifier must be set for .NETFramework executables. Consider RuntimeIdentifier=win7-x86 or RuntimeIdentifier=win7-x64.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AssetPreprocessorMustBeConfigured">
+        <source>Asset preprocessor must be configured before assets are processed.</source>
+        <target state="new">Asset preprocessor must be configured before assets are processed.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="InvalidNuGetVersionString">
+        <source>Invalid NuGet version string: '{0}'.</source>
+        <target state="new">Invalid NuGet version string: '{0}'.</target>
+        <note></note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
