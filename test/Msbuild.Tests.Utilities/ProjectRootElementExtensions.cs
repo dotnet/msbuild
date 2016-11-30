@@ -57,7 +57,8 @@ namespace Msbuild.Tests.Utilities
             string itemType,
             string includePattern)
         {
-            return root.Items.Where((it) => it.ItemType == itemType && it.Include.Contains(includePattern));
+            return root.Items.Where((it) => it.ItemType == itemType && it.Include.Contains(includePattern)
+                    && it.ConditionChain().Count() == 0);
         }
 
         public static int NumberOfProjectReferencesWithIncludeContaining(

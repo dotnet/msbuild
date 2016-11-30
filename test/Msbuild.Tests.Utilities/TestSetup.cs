@@ -13,6 +13,7 @@ namespace Msbuild.Tests.Utilities
         public string TestRoot { get; private set; }
 
         private const string ValidRef = "ValidRef";
+        public string ValidRefDir => Path.Combine(TestRoot, ValidRef);
         public string ValidRefCsprojName => $"{ValidRef}.csproj";
         public string ValidRefCsprojRelPath => Path.Combine(ValidRef, ValidRefCsprojName);
         public string ValidRefCsprojPath => Path.Combine(TestRoot, ValidRefCsprojRelPath);
