@@ -454,7 +454,8 @@ namespace Microsoft.Build.Shared
 
                 if (VisualStudioInstallRootDirectory != null)
                 {
-                    defaultSdkPath = Path.Combine(VisualStudioInstallRootDirectory, "MSBuild", "Sdks");
+                    // Can't use the N-argument form of Combine because it doesn't exist on .NET 3.5
+                    defaultSdkPath = FileUtilities.CombinePaths(VisualStudioInstallRootDirectory, "MSBuild", "Sdks");
                 }
                 else
                 {
