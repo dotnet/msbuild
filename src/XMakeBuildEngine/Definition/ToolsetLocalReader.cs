@@ -57,6 +57,7 @@ namespace Microsoft.Build.Evaluation
         protected override IEnumerable<ToolsetPropertyDefinition> GetPropertyDefinitions(string toolsVersion)
         {
             yield return new ToolsetPropertyDefinition(MSBuildConstants.ToolsPath, BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, _sourceLocation);
+            yield return new ToolsetPropertyDefinition(MSBuildConstants.SdksPath, BuildEnvironmentHelper.Instance.MSBuildSDKsPath, _sourceLocation);
             yield return new ToolsetPropertyDefinition("RoslynTargetsPath", BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, _sourceLocation);
         }
 

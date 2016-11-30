@@ -444,6 +444,19 @@ namespace Microsoft.Build.Shared
         internal string MSBuildToolsDirectory64 { get; private set; }
 
         /// <summary>
+        /// Path to the Sdks folder for this MSBuild instance.
+        /// </summary>
+        internal string MSBuildSDKsPath
+        {
+            get
+            {
+                // Allow an environment-variable override of the default SDK location
+                return Environment.GetEnvironmentVariable("MSBuildSDKsPath") ??
+                       Path.Combine(CurrentMSBuildToolsDirectory, "Sdks");
+            }
+        }
+
+        /// <summary>
         /// Full path to the current MSBuild configuration file.
         /// </summary>
         internal string CurrentMSBuildConfigurationFile { get; private set; }

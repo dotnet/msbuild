@@ -189,8 +189,6 @@ namespace Microsoft.Build.Construction
 
             if (element.HasAttribute(XMakeAttributes.sdk))
             {
-                // TODO: don't get root of SDKs from the environment, use a built-in or toolset prop
-                // TODO: Don't null ref if MSBuildSDKsPath isn't defined
 
                 var sdksString = element.GetAttribute(XMakeAttributes.sdk);
 
@@ -210,9 +208,9 @@ namespace Microsoft.Build.Construction
                     }
 
                     // TODO: paths should just be Sdk.props/targets; Sdk-aware imports should do the rest of the path.
-                    var initialImportPath = Path.Combine(Environment.GetEnvironmentVariable("MSBuildSDKsPath"),
+                    var initialImportPath = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildSDKsPath,
                         sdkName, "Sdk", "Sdk.props");
-                    var finalImportPath = Path.Combine(Environment.GetEnvironmentVariable("MSBuildSDKsPath"),
+                    var finalImportPath = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildSDKsPath,
                         sdkName, "Sdk", "Sdk.targets");
 
                     if (File.Exists(initialImportPath))
