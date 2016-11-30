@@ -455,6 +455,11 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal void AddToXml(ProjectElement child)
         {
+            if (child.IsImplicit)
+            {
+                return;
+            }
+
             if (child.ExpressedAsAttribute)
             {
                 // todo children represented as attributes need to be placed in order too
@@ -619,7 +624,11 @@ namespace Microsoft.Build.Construction
             AddToXml(child);
 
             _count++;
-            MarkDirty("Add child element named '{0}'", child.ElementName);
+
+            if (!child.IsImplicit)
+            {
+                MarkDirty("Add child element named '{0}'", child.ElementName);
+            }
         }
 
         /// <summary>

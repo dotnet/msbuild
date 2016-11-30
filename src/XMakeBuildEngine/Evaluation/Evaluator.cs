@@ -1081,7 +1081,6 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 ProjectImportElement import = element as ProjectImportElement;
-
                 if (import != null)
                 {
                     EvaluateImportElement(currentProjectOrImport.DirectoryPath, import);

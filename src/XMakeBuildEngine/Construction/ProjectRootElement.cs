@@ -1745,8 +1745,18 @@ namespace Microsoft.Build.Construction
                 {
                     using (ProjectWriter projectWriter = new ProjectWriter(_projectFileLocation.File, saveEncoding))
                     {
-                        projectWriter.Initialize(XmlDocument);
-                        XmlDocument.Save(projectWriter);
+                        var xmlWithNoImplicits = (XmlDocument)XmlDocument.CloneNode(deep: true);
+
+                        var implicitElements =
+                            xmlWithNoImplicits.SelectNodes($"//*[@{XMakeAttributes.@implicit}]");
+
+                        foreach (XmlNode implicitElement in implicitElements)
+                        {
+                            implicitElement.ParentNode.RemoveChild(implicitElement);
+                        }
+
+                        projectWriter.Initialize(xmlWithNoImplicits);
+                        xmlWithNoImplicits.Save(projectWriter);
                     }
 
                     _encoding = saveEncoding;

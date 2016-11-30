@@ -444,6 +444,30 @@ namespace Microsoft.Build.Shared
         internal string MSBuildToolsDirectory64 { get; private set; }
 
         /// <summary>
+        /// Path to the Sdks folder for this MSBuild instance.
+        /// </summary>
+        internal string MSBuildSDKsPath
+        {
+            get
+            {
+                string defaultSdkPath;
+
+                if (VisualStudioInstallRootDirectory != null)
+                {
+                    // Can't use the N-argument form of Combine because it doesn't exist on .NET 3.5
+                    defaultSdkPath = FileUtilities.CombinePaths(VisualStudioInstallRootDirectory, "MSBuild", "Sdks");
+                }
+                else
+                {
+                    defaultSdkPath = Path.Combine(CurrentMSBuildToolsDirectory, "Sdks");
+                }
+
+                // Allow an environment-variable override of the default SDK location
+                return Environment.GetEnvironmentVariable("MSBuildSDKsPath") ?? defaultSdkPath;
+            }
+        }
+
+        /// <summary>
         /// Full path to the current MSBuild configuration file.
         /// </summary>
         internal string CurrentMSBuildConfigurationFile { get; private set; }
