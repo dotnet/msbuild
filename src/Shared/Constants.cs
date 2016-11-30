@@ -22,6 +22,11 @@ namespace Microsoft.Build.Shared
         internal const string ToolsPath64 = "MSBuildToolsPath64";
 
         /// <summary>
+        /// Name of the property that indicates the root of the SDKs folder
+        /// </summary>
+        internal const string SdksPath = "MSBuildSDKsPath";
+
+        /// <summary>
         /// The most current Visual Studio Version known to this version of MSBuild. 
         /// </summary>
 #if STANDALONEBUILD

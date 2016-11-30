@@ -3199,6 +3199,62 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             return expected;
         }
 
+        /// <summary>
+        /// Add a property to an empty project
+        /// should add to new property group
+        /// </summary>
+        [Fact]
+        public void AddProperty_WithSdk_KeepsSdkAndImplicitImports()
+        {
+            var testSdkRoot = Path.Combine(Path.GetTempPath(), "MSBuildUnitTest");
+            var testSdkDirectory = Path.Combine(testSdkRoot, "MSBuildUnitTestSdk", "Sdk");
+
+            try
+            {
+                Directory.CreateDirectory(testSdkDirectory);
+
+                string sdkPropsPath = Path.Combine(testSdkDirectory, "Sdk.props");
+                string sdkTargetsPath = Path.Combine(testSdkDirectory, "Sdk.targets");
+
+                File.WriteAllText(sdkPropsPath, "<Project />");
+                File.WriteAllText(sdkTargetsPath, "<Project />");
+
+                using (new Helpers.TemporaryEnvironment("MSBuildSDKsPath", testSdkRoot))
+                {
+                    using (var testProject = new Helpers.TestProjectWithFiles(@"
+                    <Project Sdk='MSBuildUnitTestSdk' >
+                    </Project>", null))
+                    {
+
+                        string content = @"
+                    <Project Sdk='MSBuildUnitTestSdk' >
+                    </Project>";
+
+                        File.WriteAllText(testProject.ProjectFile, content);
+
+                        var p = new Project(testProject.ProjectFile);
+
+                        var addedProperty = p.Xml.AddProperty("propName", "propValue");
+
+                        var updated = Path.Combine(testProject.TestRoot, "updated.proj");
+
+                        p.Save(updated);
+
+                        var updatedContents = File.ReadAllText(updated);
+
+                        Assert.False(updatedContents.Contains("<Import"));
+                    }
+                }
+            }
+            finally
+            {
+                if (Directory.Exists(testSdkDirectory))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(testSdkDirectory, true);
+                }
+            }
+        }
+
         private static string AdjustSpacesForItem(string expectedItem)
         {
             Assert.False(string.IsNullOrEmpty(expectedItem));

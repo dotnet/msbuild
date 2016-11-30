@@ -390,6 +390,11 @@ namespace Microsoft.Build.Evaluation
             return BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64;
         }
 
+        public static string GetMSBuildSDKsPath()
+        {
+            return BuildEnvironmentHelper.Instance.MSBuildSDKsPath;
+        }
+
         public static string GetVsInstallRoot()
         {
             return BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory;
