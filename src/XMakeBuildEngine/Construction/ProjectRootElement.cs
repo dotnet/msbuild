@@ -1745,7 +1745,7 @@ namespace Microsoft.Build.Construction
                 {
                     using (ProjectWriter projectWriter = new ProjectWriter(_projectFileLocation.File, saveEncoding))
                     {
-                        var xmlWithNoImplicits = (XmlDocument)XmlDocument.Clone();
+                        var xmlWithNoImplicits = (XmlDocument)XmlDocument.CloneNode(deep: true);
 
                         var implicitElements =
                             xmlWithNoImplicits.SelectNodes($"//*[@{XMakeAttributes.@implicit}]");
