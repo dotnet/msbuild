@@ -42,7 +42,7 @@
 - send a PR with an updated `<target>` element of the xlf resource (do not include other non-localization changes)
 - we will notify the localization team, which will then take over and review the PR
 
-## Caveats
+## Internally localized files
 Non resx localized files are localized inside the internal VSTS MSBuild repo. This means that whenever we change the files in the Githun repo, we should migrate the commit into the internal repo, so the automated loc process there can pick up and localize the changes. The non-resx localized files are:
 - [src/XMakeCommandLine/Microsoft.Build.Core.xsd](https://github.com/Microsoft/msbuild/blob/xplat/src/XMakeCommandLine/Microsoft.Build.Core.xsd)
 - [src/XMakeCommandLine/Microsoft.Build.CommonTypes.xsd](https://github.com/Microsoft/msbuild/blob/xplat/src/XMakeCommandLine/Microsoft.Build.CommonTypes.xsd)
