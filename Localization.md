@@ -43,7 +43,8 @@
 - we will notify the localization team, which will then take over and review the PR
 
 ## Internally localized files
-Non resx localized files are localized inside the internal VSTS MSBuild repo. This means that whenever we change the files in the Githun repo, we should migrate the commit into the internal repo, so the automated loc process there can pick up and localize the changes. The non-resx localized files are:
+Changes to these files need to be migrated into the internal repo:
 - [src/XMakeCommandLine/Microsoft.Build.Core.xsd](https://github.com/Microsoft/msbuild/blob/xplat/src/XMakeCommandLine/Microsoft.Build.Core.xsd)
 - [src/XMakeCommandLine/Microsoft.Build.CommonTypes.xsd](https://github.com/Microsoft/msbuild/blob/xplat/src/XMakeCommandLine/Microsoft.Build.CommonTypes.xsd)
+There should be no changes to these files. They are shipped from the internal repo. The github ones are stale.
 - [all XamlRules](https://github.com/Microsoft/msbuild/tree/xplat/src/XMakeTasks/XamlRules)
