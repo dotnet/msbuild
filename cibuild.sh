@@ -301,7 +301,7 @@ fi
 # The set of warnings to suppress for now
 # warning MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.
 # warning MSB3026: Could not copy "XXX" to "XXX". Beginning retry 1 in 1000ms.
-_NOWARN="MSB3270;MSB3277;MSB3026"
+_NOWARN="MSB3277;MSB3026"
 
 echo
 echo "** Rebuilding MSBuild with locally built binaries"
