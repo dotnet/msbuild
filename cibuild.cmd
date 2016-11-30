@@ -3,6 +3,8 @@ IF ERRORLEVEL 1 EXIT /B %ERRORLEVEL%
 git gc
 IF ERRORLEVEL 1 EXIT /B %ERRORLEVEL%
 
+EXIT /B 0
+
 @if not defined _echo echo off
 setlocal ENABLEDELAYEDEXPANSION ENABLEEXTENSIONS
 SET _originalScript=%~f0
