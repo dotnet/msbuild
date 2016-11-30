@@ -139,10 +139,16 @@ if /i "%TARGET%"=="CoreCLR" (
     set MSBUILD_CUSTOM_PATH="%~dp0bin\Bootstrap\15.0\Bin\MSBuild.exe"
 )
 
+:: The set of warnings to suppress for now
+:: warning MSB3270: There was a mismatch between the processor architecture of the project being built "MSIL" and the processor architecture of the reference "D:\MSBuild\bin\x86\Windows_NT\Debug\Output\MSBuild.exe", "x86".
+:: warning MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.
+:: warning MSB3026: Could not copy "XXX" to "XXX". Beginning retry 1 in 1000ms.
+SET _NOWARN=MSB3270;MSB3277;MSB3026
+
 echo.
 echo ** Rebuilding MSBuild with locally built binaries
 
-call "%~dp0build.cmd" /t:%TARGET_ARG% /p:Configuration=%BUILD_CONFIGURATION% %LOCALIZED_BUILD_ARGUMENT%
+call "%~dp0build.cmd" /t:%TARGET_ARG% /p:Configuration=%BUILD_CONFIGURATION% %LOCALIZED_BUILD_ARGUMENT% "/nowarn:%_NOWARN%" /warnaserror
 
 if %ERRORLEVEL% NEQ 0 (
     echo.

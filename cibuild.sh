@@ -298,6 +298,12 @@ if [[ $BOOTSTRAP_ONLY = true ]]; then
     exit $?
 fi
 
+# The set of warnings to suppress for now
+# warning MSB3270: There was a mismatch between the processor architecture of the project being built "MSIL" and the processor architecture of the reference "D:\MSBuild\bin\x86\Windows_NT\Debug\Output\MSBuild.exe", "x86".
+# warning MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.
+# warning MSB3026: Could not copy "XXX" to "XXX". Beginning retry 1 in 1000ms.
+_NOWARN=MSB3270;MSB3277;MSB3026
+
 echo
 echo "** Rebuilding MSBuild with locally built binaries"
-runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_BOOTSTRAPPED_EXE" "/t:$TARGET_ARG $BUILD_MSBUILD_ARGS" "$LOCAL_BUILD_LOG_PATH"
+runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_BOOTSTRAPPED_EXE" "/t:$TARGET_ARG $BUILD_MSBUILD_ARGS /warnaserror /nowarn:$_NOWARN" "$LOCAL_BUILD_LOG_PATH"
