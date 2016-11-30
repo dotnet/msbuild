@@ -31,12 +31,12 @@ namespace Microsoft.DotNet.Tools.Restore
                     multipleValues: true);
 
             var sourceOption = cmd.Option(
-                    "-s|--source <{LocalizableStrings.CmdSourceOption}>",
+                    $"-s|--source <{LocalizableStrings.CmdSourceOption}>",
                     LocalizableStrings.CmdSourceOptionDescription,
                     CommandOptionType.MultipleValue);
 
             var packagesOption = cmd.Option(
-                    "--packages <{LocalizableStrings.CmdPackagesOption}>",
+                    $"--packages <{LocalizableStrings.CmdPackagesOption}>",
                     LocalizableStrings.CmdPackagesOptionDescription,
                     CommandOptionType.SingleValue);
 
@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Tools.Restore
                     CommandOptionType.NoValue);
 
             var configFileOption = cmd.Option(
-                    "--configfile <{LocalizableStrings.CmdConfigFileOption}>",
+                    $"--configfile <{LocalizableStrings.CmdConfigFileOption}>",
                     LocalizableStrings.CmdConfigFileOptionDescription,
                     CommandOptionType.SingleValue);
 
