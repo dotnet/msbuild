@@ -323,7 +323,7 @@ namespace Microsoft.Build.Shared
                         // we reluctantly have to restrict things here.
                         if (length >= MaxPath)
                         {
-                            throw new PathTooLongException(path);
+                            throw new PathTooLongException();
                         }
 
                         // Avoid creating new strings unnecessarily
