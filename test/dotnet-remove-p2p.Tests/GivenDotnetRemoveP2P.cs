@@ -52,8 +52,117 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
             return dir;
         }
 
+        [Theory]
+        [InlineData("--help")]
+        [InlineData("-h")]
+        public void WhenHelpOptionIsPassedItPrintsUsage(string helpArg)
+        {
+            var cmd = new RemoveP2PCommand().Execute(helpArg);
+            cmd.Should().Pass();
+            cmd.StdOut.Should().Contain("Usage");
+        }
+
+        [Theory]
+        [InlineData("idontexist.csproj")]
+        [InlineData("ihave?inv@lid/char\\acters")]
+        public void WhenNonExistingProjectIsPassedItPrintsErrorAndUsage(string projName)
+        {
+            var setup = Setup();
+
+            var cmd = new RemoveP2PCommand()
+                    .WithWorkingDirectory(setup.TestRoot)
+                    .WithProject(projName)
+                    .Execute($"\"{setup.ValidRefCsprojPath}\"");
+            cmd.ExitCode.Should().NotBe(0);
+            cmd.StdErr.Should().Contain("Could not find");
+            cmd.StdOut.Should().Contain("Usage");
+        }
+
         [Fact]
-        public void FinishMe()
+        public void WhenBrokenProjectIsPassedItPrintsErrorAndUsage()
+        {
+            string projName = "Broken/Broken.csproj";
+            var setup = Setup();
+
+            var cmd = new RemoveP2PCommand()
+                    .WithWorkingDirectory(setup.TestRoot)
+                    .WithProject(projName)
+                    .Execute($"\"{setup.ValidRefCsprojPath}\"");
+            cmd.ExitCode.Should().NotBe(0);
+            cmd.StdErr.Should().Contain("Invalid project");
+            cmd.StdOut.Should().Contain("Usage");
+        }
+
+        [Fact]
+        public void WhenMoreThanOneProjectExistsInTheDirectoryItPrintsErrorAndUsage()
+        {
+            var setup = Setup();
+
+            var cmd = new RemoveP2PCommand()
+                    .WithWorkingDirectory(Path.Combine(setup.TestRoot, "MoreThanOne"))
+                    .Execute($"\"{setup.ValidRefCsprojRelToOtherProjPath}\"");
+            cmd.ExitCode.Should().NotBe(0);
+            cmd.StdErr.Should().Contain("more than one");
+            cmd.StdOut.Should().Contain("Usage");
+        }
+
+        [Fact]
+        public void WhenNoProjectsExistsInTheDirectoryItPrintsErrorAndUsage()
+        {
+            var setup = Setup();
+
+            var cmd = new RemoveP2PCommand()
+                    .WithWorkingDirectory(setup.TestRoot)
+                    .Execute($"\"{setup.ValidRefCsprojPath}\"");
+            cmd.ExitCode.Should().NotBe(0);
+            cmd.StdErr.Should().Contain("not find any");
+            cmd.StdOut.Should().Contain("Usage");
+        }
+
+        [Fact]
+        public void ItRemovesRefWithoutCondAndPrintsStatus()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Fact]
+        public void ItRemovesRefWithConAndPrintsStatus()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Fact]
+        public void WhenTwoRefsArePresentItDoesNotRemoveBoth()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Fact]
+        public void WhenRefWithoutCondIsNotThereItPrintsMessage()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Fact]
+        public void WhenRefWithCondIsNotThereItPrintsMessage()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Fact]
+        public void WhenRefWithCondIsPresentAndRemovingNoCondItDoesNotRemoveIt()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Fact]
+        public void WhenRefWithoutCondIsPresentAndRemovingRefWithCondItDoesNotRemoveIt()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Fact]
+        public void WhenRefWithDifferentCondIsPresentItDoesNotRemoveIt()
         {
             throw new NotImplementedException();
         }
