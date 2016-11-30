@@ -41,10 +41,3 @@
 ## Contributing a better translation
 - send a PR with an updated `<target>` element of the xlf resource (do not include other non-localization changes)
 - we will notify the localization team, which will then take over and review the PR
-
-## Internally localized files
-Changes to these files need to be migrated into the internal repo:
-- [src/XMakeCommandLine/Microsoft.Build.Core.xsd](https://github.com/Microsoft/msbuild/blob/xplat/src/XMakeCommandLine/Microsoft.Build.Core.xsd)
-- [src/XMakeCommandLine/Microsoft.Build.CommonTypes.xsd](https://github.com/Microsoft/msbuild/blob/xplat/src/XMakeCommandLine/Microsoft.Build.CommonTypes.xsd)
-There should be no changes to these files. They are shipped from the internal repo. The github ones are stale.
-- [all XamlRules](https://github.com/Microsoft/msbuild/tree/xplat/src/XMakeTasks/XamlRules)
