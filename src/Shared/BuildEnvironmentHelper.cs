@@ -450,9 +450,19 @@ namespace Microsoft.Build.Shared
         {
             get
             {
+                string defaultSdkPath;
+
+                if (VisualStudioInstallRootDirectory != null)
+                {
+                    defaultSdkPath = Path.Combine(VisualStudioInstallRootDirectory, "MSBuild", "Sdks");
+                }
+                else
+                {
+                    defaultSdkPath = Path.Combine(CurrentMSBuildToolsDirectory, "Sdks");
+                }
+
                 // Allow an environment-variable override of the default SDK location
-                return Environment.GetEnvironmentVariable("MSBuildSDKsPath") ??
-                       Path.Combine(CurrentMSBuildToolsDirectory, "Sdks");
+                return Environment.GetEnvironmentVariable("MSBuildSDKsPath") ?? defaultSdkPath;
             }
         }
 
