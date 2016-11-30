@@ -1826,8 +1826,10 @@ namespace Microsoft.Build.Construction
         {
             using (ProjectWriter projectWriter = new ProjectWriter(writer))
             {
-                projectWriter.Initialize(XmlDocument);
-                XmlDocument.Save(projectWriter);
+                var xmlWithNoImplicits = RemoveImplicits();
+
+                projectWriter.Initialize(xmlWithNoImplicits);
+                xmlWithNoImplicits.Save(projectWriter);
             }
 
             _versionOnDisk = Version;
