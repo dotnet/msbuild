@@ -30,3 +30,6 @@ folder "InstallDir:MSBuild\Sdks\Microsoft.Net.Sdk\build"
   file source="$(OutputPath)build\Microsoft.NET.Sdk.VisualBasic.targets"
   file source="$(OutputPath)build\Microsoft.NET.TargetFrameworkInference.targets"
   file source="$(OutputPath)build\Microsoft.PackageDependencyResolution.targets"
+
+folder "InstallDir:MSBuild\Sdks\Microsoft.Net.Sdk\buildCrossTargeting"
+  file source="$(OutputPath)buildCrossTargeting\Microsoft.NET.Sdk.targets"
