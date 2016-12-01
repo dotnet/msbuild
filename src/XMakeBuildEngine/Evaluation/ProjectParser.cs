@@ -208,10 +208,11 @@ namespace Microsoft.Build.Construction
                     }
 
                     // TODO: paths should just be Sdk.props/targets; Sdk-aware imports should do the rest of the path.
+                    //  Use lower case version of Sdk name when constructing the path so that it can be case-insensitive even on case-sensitive file systems
                     var initialImportPath = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildSdksPath,
-                        sdkName, "Sdk", "Sdk.props");
+                        sdkName.ToLowerInvariant(), "Sdk", "Sdk.props");
                     var finalImportPath = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildSdksPath,
-                        sdkName, "Sdk", "Sdk.targets");
+                        sdkName.ToLowerInvariant(), "Sdk", "Sdk.targets");
 
                     // TODO: don't require all SDKs to have both props and targets
                     // if (File.Exists(initialImportPath))
