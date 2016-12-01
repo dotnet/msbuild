@@ -17,10 +17,10 @@
     <NuGetContent Include="$(WebSourceDir)\Web\Microsoft.NET.Sdk.Web.ProjectSystem.Targets\netstandard1.0\Microsoft.NET.Sdk.Web.ProjectSystem.targets">
       <Destination>build\netstandard1.0</Destination>
     </NuGetContent>
-    <NuGetContent Include="$(WebSourceDir)\Web\Microsoft.NET.Sdk.Web.ProjectSystem.Targets\sdk.props">
+    <NuGetContent Include="$(WebSourceDir)\Web\Microsoft.NET.Sdk.Web.ProjectSystem.Targets\Sdk.props">
       <Destination>Sdk</Destination>
     </NuGetContent>
-    <NuGetContent Include="$(WebSourceDir)\Web\Microsoft.NET.Sdk.Web.ProjectSystem.Targets\sdk.targets">
+    <NuGetContent Include="$(WebSourceDir)\Web\Microsoft.NET.Sdk.Web.ProjectSystem.Targets\Sdk.targets">
       <Destination>Sdk</Destination>
     </NuGetContent>
   </ItemGroup>

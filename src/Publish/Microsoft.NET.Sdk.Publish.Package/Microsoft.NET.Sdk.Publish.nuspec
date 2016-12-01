@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
-    <id>Microsoft.NET.Sdk.Publish</id>
+    <id>microsoft.net.sdk.publish</id>
     <version>$WebSdkVersion$</version>
     <title>Microsoft.NET.Sdk.Publish</title>
     <authors>Microsoft Corporation</authors>

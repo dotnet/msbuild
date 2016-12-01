@@ -55,11 +55,11 @@
       <Destination>build\netstandard1.0</Destination>
     </NuGetContent>
 
-    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\sdk.props">
+    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\Sdk.props">
       <Destination>Sdk</Destination>
     </NuGetContent>
     
-    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\sdk.targets">
+    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\Sdk.targets">
       <Destination>Sdk</Destination>
     </NuGetContent>
     
