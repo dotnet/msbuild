@@ -36,4 +36,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     </PropertyPageSchema>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="@(Content);@(Compile);@(EmbeddedResource);$(GlobalExclude)" />
+    <Compile Remove="@(Content);$(GlobalExclude)" />
+    <EmbeddedResource Remove="@(Content);$(GlobalExclude)" />
+    <Content Remove="$(GlobalExclude)" />
+  </ItemGroup>
+
 </Project>
