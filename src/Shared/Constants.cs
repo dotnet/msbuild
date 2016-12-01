@@ -24,7 +24,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Name of the property that indicates the root of the SDKs folder
         /// </summary>
-        internal const string SdksPath = "MSBuildSDKsPath";
+        internal const string SdksPath = "MSBuildSdksPath";
 
         /// <summary>
         /// The most current Visual Studio Version known to this version of MSBuild. 

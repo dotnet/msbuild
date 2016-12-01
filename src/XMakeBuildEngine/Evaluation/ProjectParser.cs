@@ -208,9 +208,9 @@ namespace Microsoft.Build.Construction
                     }
 
                     // TODO: paths should just be Sdk.props/targets; Sdk-aware imports should do the rest of the path.
-                    var initialImportPath = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildSDKsPath,
+                    var initialImportPath = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildSdksPath,
                         sdkName, "Sdk", "Sdk.props");
-                    var finalImportPath = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildSDKsPath,
+                    var finalImportPath = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildSdksPath,
                         sdkName, "Sdk", "Sdk.targets");
 
                     // TODO: don't require all SDKs to have both props and targets
