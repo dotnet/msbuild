@@ -381,14 +381,9 @@ namespace Microsoft.Build.Evaluation
         /// while ensuring it has a trailing slash.
         /// </summary>
         /// <param name="path">One or more directory paths to combine and normalize.</param>
-        /// <returns>A canonicalized full directory path with the correct directory separators and a trailing slash.  If no path is specified, the return value is <see cref="String.Empty"/>.</returns>
+        /// <returns>A canonicalized full directory path with the correct directory separators and a trailing slash.</returns>
         internal static string NormalizeDirectory(params string[] path)
         {
-            if (path.Length == 0 || path.All(String.IsNullOrWhiteSpace))
-            {
-                return String.Empty;
-            }
-
             return EnsureTrailingSlash(NormalizePath(path));
         }
 

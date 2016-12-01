@@ -2782,13 +2782,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(new[]
             {
-                ProjectPropertyInstance.Create("EmptyPath", ""),
                 ProjectPropertyInstance.Create("MyPath", "one"),
                 ProjectPropertyInstance.Create("MySecondPath", "two"),
             }));
-
-            Assert.Equal(String.Empty, expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::NormalizeDirectory(''))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance));
-            Assert.Equal(String.Empty, expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::NormalizeDirectory($(EmptyPath)))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance));
 
             Assert.Equal(
                 $"{Path.GetFullPath("one")}{Path.DirectorySeparatorChar}",
