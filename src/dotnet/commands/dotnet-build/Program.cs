@@ -22,15 +22,15 @@ namespace Microsoft.DotNet.Tools.Build
             app.ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText;
             app.HelpOption("-h|--help");
 
-            CommandArgument projectArgument = app.Argument("<{LocalizableStrings.ProjectArgumentValueName}>", LocalizableStrings.ProjectArgumentDescription);
+            CommandArgument projectArgument = app.Argument($"<{LocalizableStrings.ProjectArgumentValueName}>", LocalizableStrings.ProjectArgumentDescription);
 
-            CommandOption outputOption = app.Option("-o|--output <{LocalizableStrings.OutputOptionName}>", LocalizableStrings.OutputOptionDescription, CommandOptionType.SingleValue);
-            CommandOption frameworkOption = app.Option("-f|--framework <{LocalizableStrings.FrameworkOptionName}>", LocalizableStrings.FrameworkOptionDescription, CommandOptionType.SingleValue);
+            CommandOption outputOption = app.Option($"-o|--output <{LocalizableStrings.OutputOptionName}>", LocalizableStrings.OutputOptionDescription, CommandOptionType.SingleValue);
+            CommandOption frameworkOption = app.Option($"-f|--framework <{LocalizableStrings.FrameworkOptionName}>", LocalizableStrings.FrameworkOptionDescription, CommandOptionType.SingleValue);
             CommandOption runtimeOption = app.Option(
-                "-r|--runtime <{LocalizableStrings.RuntimeOptionName}>", LocalizableStrings.RuntimeOptionDescription,
+                $"-r|--runtime <{LocalizableStrings.RuntimeOptionName}>", LocalizableStrings.RuntimeOptionDescription,
                 CommandOptionType.SingleValue);
-            CommandOption configurationOption = app.Option("-c|--configuration <{LocalizableStrings.ConfigurationOptionName}>", LocalizableStrings.FrameworkOptionDescription, CommandOptionType.SingleValue);
-            CommandOption versionSuffixOption = app.Option("--version-suffix <{LocalizableStrings.VersionSuffixOptionName}>", LocalizableStrings.VersionSuffixOptionDescription, CommandOptionType.SingleValue);
+            CommandOption configurationOption = app.Option($"-c|--configuration <{LocalizableStrings.ConfigurationOptionName}>", LocalizableStrings.FrameworkOptionDescription, CommandOptionType.SingleValue);
+            CommandOption versionSuffixOption = app.Option($"--version-suffix <{LocalizableStrings.VersionSuffixOptionName}>", LocalizableStrings.VersionSuffixOptionDescription, CommandOptionType.SingleValue);
 
             CommandOption noIncrementalOption = app.Option("--no-incremental", LocalizableStrings.NoIncrementialOptionDescription, CommandOptionType.NoValue);
             CommandOption noDependenciesOption = app.Option("--no-dependencies", LocalizableStrings.NoDependenciesOptionDescription, CommandOptionType.NoValue);

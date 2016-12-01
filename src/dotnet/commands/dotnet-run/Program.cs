@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Tools.Run
                 "-c|--configuration", LocalizableStrings.CommandOptionConfigurationDescription,
                 CommandOptionType.SingleValue);
             CommandOption framework = app.Option(
-                "-f|--framework <{LocalizableStrings.CommandOptionFramework}>", LocalizableStrings.CommandOptionFrameworkDescription,
+                $"-f|--framework <{LocalizableStrings.CommandOptionFramework}>", LocalizableStrings.CommandOptionFrameworkDescription,
                 CommandOptionType.SingleValue);
             CommandOption project = app.Option(
                 "-p|--project", LocalizableStrings.CommandOptionProjectDescription,
