@@ -17,20 +17,29 @@ namespace Microsoft.DotNet.Tools.Clean
             CommandLineApplication app = new CommandLineApplication(throwOnUnexpectedArg: false)
             {
                 Name = "dotnet clean",
-                FullName = ".NET Clean Command",
-                Description = "Command to clean previously generated build outputs.",
+                FullName = LocalizableStrings.AppFullName,
+                Description = LocalizableStrings.AppDescription,
                 AllowArgumentSeparator = true,
                 ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText
             };
             app.HelpOption("-h|--help");
 
-            CommandArgument projectArgument = app.Argument("<PROJECT>",
-                "The MSBuild project file to build. If a project file is not specified," +
-                " MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.");
+            CommandArgument projectArgument = app.Argument(
+                $"<{LocalizableStrings.CmdArgProject}>",
+                LocalizableStrings.CmdArgProjDescription);
 
-            CommandOption outputOption = app.Option("-o|--output <OUTPUT_DIR>", "Directory in which the build outputs have been placed", CommandOptionType.SingleValue);
-            CommandOption frameworkOption = app.Option("-f|--framework <FRAMEWORK>", "Clean a specific framework", CommandOptionType.SingleValue);
-            CommandOption configurationOption = app.Option("-c|--configuration <CONFIGURATION>", "Clean a specific configuration", CommandOptionType.SingleValue);
+            CommandOption outputOption = app.Option(
+                $"-o|--output <{LocalizableStrings.CmdOutputDir}>", 
+                LocalizableStrings.CmdOutputDirDescription, 
+                CommandOptionType.SingleValue);
+            CommandOption frameworkOption = app.Option(
+                $"-f|--framework <{LocalizableStrings.CmdFramework}>", 
+                LocalizableStrings.CmdFrameworkDescription, 
+                CommandOptionType.SingleValue);
+            CommandOption configurationOption = app.Option(
+                $"-c|--configuration <{LocalizableStrings.CmdConfiguration}>", 
+                LocalizableStrings.CmdConfigurationDescription, 
+                CommandOptionType.SingleValue);
             CommandOption verbosityOption = MSBuildForwardingApp.AddVerbosityOption(app);
 
             app.OnExecute(() =>
