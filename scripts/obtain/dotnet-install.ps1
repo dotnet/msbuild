@@ -379,6 +379,17 @@ function DownloadFile([Uri]$Uri, [string]$OutPath) {
     }
 }
 
+function Prepend-Sdk-InstallRoot-To-Path([string]$InstallRoot, [string]$BinFolderRelativePath) {
+    $BinPath = Get-Absolute-Path $(Join-Path -Path $InstallRoot -ChildPath $BinFolderRelativePath)
+    if (-Not $NoPath) {
+        Say "Adding to current process PATH: `"$BinPath`". Note: This change will not be visible if PowerShell was run as a child process."
+        $env:path = "$BinPath;" + $env:path
+    }
+    else {
+        Say "Binaries of dotnet can be found in $BinPath"
+    }
+}
+
 $AzureChannel = Get-Azure-Channel-From-Channel -Channel $Channel
 $CLIArchitecture = Get-CLIArchitecture-From-Architecture $Architecture
 $SpecificVersion = Get-Specific-Version-From-Version -AzureFeed $AzureFeed -AzureChannel $AzureChannel -CLIArchitecture $CLIArchitecture -Version $Version
@@ -400,6 +411,7 @@ $IsSdkInstalled = Is-Dotnet-Package-Installed -InstallRoot $InstallRoot -Relativ
 Say-Verbose ".NET SDK installed? $IsSdkInstalled"
 if ($IsSdkInstalled) {
     Say ".NET SDK version $SpecificVersion is already installed."
+    Prepend-Sdk-InstallRoot-To-Path -InstallRoot $InstallRoot -BinFolderRelativePath $BinFolderRelativePath
     exit 0
 }
 
@@ -422,14 +434,7 @@ foreach ($DownloadLink in $DownloadLinks) {
     Remove-Item $ZipPath
 }
 
-$BinPath = Get-Absolute-Path $(Join-Path -Path $InstallRoot -ChildPath $BinFolderRelativePath)
-if (-Not $NoPath) {
-    Say "Adding to current process PATH: `"$BinPath`". Note: This change will not be visible if PowerShell was run as a child process."
-    $env:path = "$BinPath;" + $env:path
-}
-else {
-    Say "Binaries of dotnet can be found in $BinPath"
-}
+Prepend-Sdk-InstallRoot-To-Path -InstallRoot $InstallRoot -BinFolderRelativePath $BinFolderRelativePath
 
 Say "Installation finished"
 exit 0
