@@ -51,7 +51,8 @@
                              Include="test$(PathSeparator)ArgumentsReflector$(PathSeparator)ArgumentsReflector.csproj;
                                       test$(PathSeparator)Microsoft.DotNet.Tools.Tests.Utilities$(PathSeparator)Microsoft.DotNet.Tools.Tests.Utilities.csproj;
                                       test$(PathSeparator)TestingAbstractions$(PathSeparator)TestAppWithFullPdbs$(PathSeparator)TestAppWithFullPdbs.csproj;
-                                      test$(PathSeparator)TestingAbstractions$(PathSeparator)TestAppWithPortablePdbs$(PathSeparator)TestAppWithPortablePdbs.csproj" />
+                                      test$(PathSeparator)TestingAbstractions$(PathSeparator)TestAppWithPortablePdbs$(PathSeparator)TestAppWithPortablePdbs.csproj;
+                                      test$(PathSeparator)Msbuild.Tests.Utilities$(PathSeparator)Msbuild.Tests.Utilities.csproj" />
 
       <PreTestProjectsToExclude Condition=" 'Executed after primary test phase.' != ' Consider moving.' "
                              Include="test$(PathSeparator)Installer$(PathSeparator)Microsoft.DotNet.Cli.Msi.Tests$(PathSeparator)Microsoft.DotNet.Cli.Msi.Tests.csproj;" />

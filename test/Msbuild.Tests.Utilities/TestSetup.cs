@@ -3,9 +3,9 @@
 
 using System.IO;
 
-namespace Microsoft.DotNet.Cli.Add.P2P.Tests
+namespace Msbuild.Tests.Utilities
 {
-    internal class TestSetup
+    public class TestSetup
     {
         public const string TestGroup = "NonRestoredTestProjects";
         public const string ProjectName = "DotnetAddP2PProjects";
@@ -13,6 +13,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         public string TestRoot { get; private set; }
 
         private const string ValidRef = "ValidRef";
+        public string ValidRefDir => Path.Combine(TestRoot, ValidRef);
         public string ValidRefCsprojName => $"{ValidRef}.csproj";
         public string ValidRefCsprojRelPath => Path.Combine(ValidRef, ValidRefCsprojName);
         public string ValidRefCsprojPath => Path.Combine(TestRoot, ValidRefCsprojRelPath);

@@ -1,9 +1,12 @@
-﻿using Microsoft.Build.Construction;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectJsonMigration;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
+namespace Microsoft.DotNet.Tools
 {
     internal static class MsbuildProjectExtensions
     {
@@ -66,7 +69,16 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
 
         public static bool HasInclude(this ProjectItemElement el, string include)
         {
-            return el.Includes().Contains(include);
+            include = NormalizeIncludeForComparison(include);
+            foreach (var i in el.Includes())
+            {
+                if (include == NormalizeIncludeForComparison(i))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static bool TryGetFrameworkConditionString(string framework, out string condition)
@@ -79,6 +91,11 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
 
             condition = $"'$(TargetFramework)' == '{framework}'";
             return true;
+        }
+
+        private static string NormalizeIncludeForComparison(string include)
+        {
+            return MsbuildProject.NormalizeSlashes(include.ToLower());
         }
     }
 }

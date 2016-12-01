@@ -18,6 +18,7 @@ using Microsoft.DotNet.Tools.New;
 using Microsoft.DotNet.Tools.NuGet;
 using Microsoft.DotNet.Tools.Pack;
 using Microsoft.DotNet.Tools.Publish;
+using Microsoft.DotNet.Tools.Remove;
 using Microsoft.DotNet.Tools.Restore;
 using Microsoft.DotNet.Tools.RestoreProjectJson;
 using Microsoft.DotNet.Tools.Run;
@@ -31,7 +32,7 @@ namespace Microsoft.DotNet.Cli
     {
         private static Dictionary<string, Func<string[], int>> s_builtIns = new Dictionary<string, Func<string[], int>>
         {
-            ["add"] = AddCommand.Run,
+            ["add"] = (new AddCommand()).Run,
             ["build"] = BuildCommand.Run,
             ["clean"] = CleanCommand.Run,
             ["help"] = HelpCommand.Run,
@@ -41,6 +42,7 @@ namespace Microsoft.DotNet.Cli
             ["nuget"] = NuGetCommand.Run,
             ["pack"] = PackCommand.Run,
             ["publish"] = PublishCommand.Run,
+            ["remove"] = (new RemoveCommand()).Run,
             ["restore"] = RestoreCommand.Run,
             ["restore-projectjson"] = RestoreProjectJsonCommand.Run,
             ["run"] = RunCommand.Run,

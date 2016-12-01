@@ -6,9 +6,9 @@ using Microsoft.DotNet.ProjectJsonMigration;
 using System.Linq;
 using System.Collections.Generic;
 
-namespace Microsoft.DotNet.Cli.Add.P2P.Tests
+namespace Msbuild.Tests.Utilities
 {
-    internal static class ProjectRootElementExtensions
+    public static class ProjectRootElementExtensions
     {
         public static int NumberOfItemGroupsWithConditionContaining(
             this ProjectRootElement root,
@@ -57,7 +57,8 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
             string itemType,
             string includePattern)
         {
-            return root.Items.Where((it) => it.ItemType == itemType && it.Include.Contains(includePattern));
+            return root.Items.Where((it) => it.ItemType == itemType && it.Include.Contains(includePattern)
+                    && it.ConditionChain().Count() == 0);
         }
 
         public static int NumberOfProjectReferencesWithIncludeContaining(

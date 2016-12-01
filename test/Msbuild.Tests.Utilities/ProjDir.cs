@@ -5,9 +5,9 @@ using System.IO;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 
-namespace Microsoft.DotNet.Cli.Add.P2P.Tests
+namespace Msbuild.Tests.Utilities
 {
-    internal class ProjDir
+    public class ProjDir
     {
         public ProjDir(string path)
         {
