@@ -180,6 +180,9 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                         .FirstOrDefault(pr => pr.Attribute("Include")?.Value == "Microsoft.NET.Sdk")
                         ?.Element(ns + "Version")
                         ?.SetValue('[' + targetTestAsset.BuildVersion + ']');
+
+                targetTestAsset.SetSdkVersion(projectXml);
+                
             }
             else
             {

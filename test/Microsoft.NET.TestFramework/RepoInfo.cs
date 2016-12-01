@@ -65,6 +65,11 @@ namespace Microsoft.NET.TestFramework
             get { return Path.Combine(BinPath, Configuration, "Packages"); }
         }
 
+        public static string SdksPath
+        {
+            get { return Path.Combine(BinPath, Configuration, "Sdks"); }
+        }
+
         public static string DotNetHostPath
         {
             get
