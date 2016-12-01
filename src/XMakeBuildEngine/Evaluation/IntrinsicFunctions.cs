@@ -8,6 +8,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 using Microsoft.Build.Internal;
@@ -373,6 +374,27 @@ namespace Microsoft.Build.Evaluation
         internal static string EnsureTrailingSlash(string path)
         {
             return FileUtilities.EnsureTrailingSlash(path);
+        }
+
+        /// <summary>
+        /// Gets the canonicalized full path of the provided directory and ensures it contains the correct directory separator characters for the current operating system
+        /// while ensuring it has a trailing slash.
+        /// </summary>
+        /// <param name="path">One or more directory paths to combine and normalize.</param>
+        /// <returns>A canonicalized full directory path with the correct directory separators and a trailing slash.</returns>
+        internal static string NormalizeDirectory(params string[] path)
+        {
+            return EnsureTrailingSlash(NormalizePath(path));
+        }
+
+        /// <summary>
+        /// Gets the canonicalized full path of the provided path and ensures it contains the correct directory separator characters for the current operating system.
+        /// </summary>
+        /// <param name="path">One or more paths to combine and normalize.</param>
+        /// <returns>A canonicalized full path with the correct directory separators.</returns>
+        internal static string NormalizePath(params string[] path)
+        {
+            return FileUtilities.NormalizePath(Path.Combine(path));
         }
 
         public static string GetCurrentToolsDirectory()
