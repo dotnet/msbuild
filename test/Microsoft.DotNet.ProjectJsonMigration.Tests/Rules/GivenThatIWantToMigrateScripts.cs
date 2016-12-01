@@ -154,5 +154,19 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var target = scriptMigrationRule.MigrateScriptSet(mockProj, mockProj.AddPropertyGroup(), commands, "prepublish");
             target.Condition.Should().Be(" '$(IsCrossTargetingBuild)' != 'true' ");
         }
+
+        [Fact]
+        public void Migrating_scripts_throws_on_invalid_ScriptSet()
+        {
+            var scriptMigrationRule = new MigrateScriptsRule();
+            ProjectRootElement mockProj = ProjectRootElement.Create();
+
+            var commands = new string[] { "fakecommand" };
+
+            Action action = () => scriptMigrationRule.MigrateScriptSet(mockProj, mockProj.AddPropertyGroup(),  commands, "invalidScriptSet");
+
+            action.ShouldThrow<MigrationException>()
+                .WithMessage("MIGRATE1019::Unsupported Script Event Hook: invalidScriptSet is an unsupported script event hook for project migration");
+        }
     }
 }

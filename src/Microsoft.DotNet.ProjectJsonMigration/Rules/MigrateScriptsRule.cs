@@ -87,7 +87,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         private ProjectTargetElement CreateTarget(ProjectRootElement csproj, string scriptSetName)
         {
             var targetName = $"{scriptSetName[0].ToString().ToUpper()}{string.Concat(scriptSetName.Skip(1))}Script";
-            var targetHookInfo = ScriptSetToMSBuildHookTargetMap[scriptSetName];
+
+            TargetHookInfo targetHookInfo;
+            if(!ScriptSetToMSBuildHookTargetMap.TryGetValue(scriptSetName, out targetHookInfo))
+            {
+                MigrationErrorCodes.MIGRATE1019(
+                        $"{scriptSetName} is an unsupported script event hook for project migration")
+                    .Throw();
+            }
 
             var target = csproj.CreateTargetElement(targetName);
             csproj.InsertBeforeChild(target, csproj.LastChild);
