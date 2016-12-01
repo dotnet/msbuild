@@ -103,5 +103,23 @@ namespace Microsoft.DotNet.Cli.MSBuild.IntegrationTests
 
             cmd.ExitCode.Should().NotBe(0);
         }
+
+        [Fact]
+        public void When_MSBuildSDKsPath_is_set_by_env_var_then_it_is_not_overridden()
+        {
+            var testInstance = TestAssets.Get("MSBuildIntegration")
+                .CreateInstance()
+                .WithSourceFiles();
+
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .WithEnvironmentVariable("MSBuildSDKsPath", "AnyString")
+                .ExecuteWithCapturedOutput($"msbuild");
+
+            cmd.ExitCode.Should().NotBe(0);
+
+            cmd.StdOut.Should().Contain("Expected 'AnyString")
+                           .And.Contain("to exist, but it does not.");
+        }
     }
 }

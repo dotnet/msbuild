@@ -86,6 +86,13 @@ namespace Microsoft.DotNet.Tools.MSBuild
 
         private static string GetMSBuildSDKsPath()
         {
+            var envMSBuildSDKsPath = Environment.GetEnvironmentVariable("MSBuildSDKsPath");
+
+            if (envMSBuildSDKsPath != null)
+            {
+                return envMSBuildSDKsPath;
+            }
+
             return Path.Combine(
                 AppContext.BaseDirectory,
                 ExtensionsDirectoryName);

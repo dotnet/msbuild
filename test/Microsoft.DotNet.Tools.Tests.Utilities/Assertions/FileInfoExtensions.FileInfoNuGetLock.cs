@@ -15,8 +15,6 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
     {
         private class FileInfoNuGetLock : IDisposable
         {
-            private FileStream _fileStream;
-
             private CancellationTokenSource _cancellationTokenSource;
 
             private Task _task;
