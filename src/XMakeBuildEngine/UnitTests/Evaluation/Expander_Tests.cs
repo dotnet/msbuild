@@ -2777,6 +2777,28 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 #endif
 
+        [Fact]
+        public void PropertyFunctionNormalizeDirectory()
+        {
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(new[]
+            {
+                ProjectPropertyInstance.Create("EmptyPath", ""),
+                ProjectPropertyInstance.Create("MyPath", "one"),
+                ProjectPropertyInstance.Create("MySecondPath", "two"),
+            }));
+
+            Assert.Equal(String.Empty, expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::NormalizeDirectory(''))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance));
+            Assert.Equal(String.Empty, expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::NormalizeDirectory($(EmptyPath)))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance));
+
+            Assert.Equal(
+                $"{Path.GetFullPath("one")}{Path.DirectorySeparatorChar}",
+                expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::NormalizeDirectory($(MyPath)))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance));
+
+            Assert.Equal(
+                $"{Path.GetFullPath(Path.Combine("one", "two"))}{Path.DirectorySeparatorChar}",
+                expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::NormalizeDirectory($(MyPath), $(MySecondPath)))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance));
+        }
+
         /// <summary>
         /// Expand property function that tests for existence of the task host
         /// </summary>
