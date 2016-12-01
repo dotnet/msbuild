@@ -1091,6 +1091,7 @@ namespace Microsoft.Build.UnitTests
 
 #pragma warning restore 618
 
+#if FEATURE_CODETASKFACTORY
         private static string s_verifyToolsetAndToolLocationHelperProjectCommonContent = @"
                                     string currentInstallFolderLocation = null;
 
@@ -1144,7 +1145,6 @@ namespace Microsoft.Build.UnitTests
                                     }
   ";
 
-#if FEATURE_CODETASKFACTORY
         [Fact]
         public void VerifyToolsetAndToolLocationHelperAgree()
         {

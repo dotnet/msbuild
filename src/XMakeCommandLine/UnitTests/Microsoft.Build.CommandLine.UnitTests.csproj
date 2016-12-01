@@ -12,6 +12,7 @@
     <RootNamespace>Microsoft.Build.CommandLine.UnitTests</RootNamespace>
     <AssemblyName>Microsoft.Build.CommandLine.UnitTests</AssemblyName>
     <IsTestProject>true</IsTestProject>
+    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />

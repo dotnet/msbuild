@@ -32,12 +32,13 @@ namespace Microsoft.Build.Tasks
         private IMetaDataDispenser _metadataDispenser = null;
         private IMetaDataAssemblyImport _assemblyImport = null;
         private static Guid s_importerGuid = new Guid(((GuidAttribute)Attribute.GetCustomAttribute(typeof(IMetaDataImport), typeof(GuidAttribute), false)).Value);
+        private readonly Assembly _assembly;
 #endif
         private string _sourceFile;
         private FrameworkName _frameworkName;
+#if FEATURE_ASSEMBLY_LOADFROM && !MONO
         private static string s_targetFrameworkAttribute = "System.Runtime.Versioning.TargetFrameworkAttribute";
-        private readonly Assembly _assembly;
-
+#endif
         // Borrowed from genman.
         private const int GENMAN_STRING_BUF_SIZE = 1024;
         private const int GENMAN_LOCALE_BUF_SIZE = 64;

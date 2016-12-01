@@ -298,6 +298,12 @@ if [[ $BOOTSTRAP_ONLY = true ]]; then
     exit $?
 fi
 
+# The set of warnings to suppress for now
+# warning MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.
+# warning MSB3026: Could not copy "XXX" to "XXX". Beginning retry 1 in 1000ms.
+# warning AL1053: The version '1.2.3.4-foo' specified for the 'product version' is not in the normal 'major.minor.build.revision' format
+_NOWARN="MSB3277;MSB3026;AL1053"
+
 echo
 echo "** Rebuilding MSBuild with locally built binaries"
-runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_BOOTSTRAPPED_EXE" "/t:$TARGET_ARG $BUILD_MSBUILD_ARGS" "$LOCAL_BUILD_LOG_PATH"
+runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_BOOTSTRAPPED_EXE" "/t:$TARGET_ARG $BUILD_MSBUILD_ARGS /warnaserror /nowarn:\"$_NOWARN\"" "$LOCAL_BUILD_LOG_PATH"

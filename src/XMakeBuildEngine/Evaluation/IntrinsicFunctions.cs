@@ -417,6 +417,7 @@ namespace Microsoft.Build.Evaluation
 
         #endregion
 
+#if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Following function will parse a keyName and returns the basekey for it.
         /// It will also store the subkey name in the out parameter.
@@ -424,7 +425,6 @@ namespace Microsoft.Build.Evaluation
         /// The return value shouldn't be null.
         /// Taken from: \ndp\clr\src\BCL\Microsoft\Win32\Registry.cs
         /// </summary>
-#if FEATURE_WIN32_REGISTRY
         private static RegistryKey GetBaseKeyFromKeyName(string keyName, RegistryView view, out string subKeyName)
         {
             if (keyName == null)

@@ -43,7 +43,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 get { return _wrappedReader.BaseURI; }
             }
 
-            public new void Close()
+            protected override void Dispose(bool disposing)
             {
                 _wrappedReader.Dispose();
             }

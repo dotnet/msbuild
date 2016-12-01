@@ -146,11 +146,13 @@ namespace Microsoft.Build.Tasks
         // Contains the list of paths from which inputs will not be taken into account during up-to-date check.  
         private ITaskItem[] _excludedInputPaths;
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// The task items that we remoted across the appdomain boundary
         /// we use this list to disconnect the task items once we're done.
         /// </summary>
         private List<ITaskItem> _remotedTaskItems;
+#endif
 
         /// <summary>
         /// Satellite input assemblies.
@@ -880,6 +882,7 @@ namespace Microsoft.Build.Tasks
             return clonedOutput;
         }
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// Remember this TaskItem so that we can disconnect it when this Task has finished executing
         /// Only if we're passing TaskItems to another AppDomain is this necessary. This call
@@ -893,6 +896,7 @@ namespace Microsoft.Build.Tasks
                 _remotedTaskItems.AddRange(items);
             }
         }
+#endif
 
         /// <summary>
         /// Computes the path to ResGen.exe for use in logging and for passing to the 
@@ -2195,11 +2199,13 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private ITaskItem[] _assemblyFiles;
 
+#if FEATURE_ASSEMBLY_LOADFROM
         /// <summary>
         /// The AssemblyNameExtensions for each of the referenced assemblies in "assemblyFiles".
         /// This is populated lazily.
         /// </summary>
         private AssemblyNameExtension[] _assemblyNames;
+#endif
 
         /// <summary>
         /// List of input files to process.
@@ -2285,7 +2291,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool _useSourcePath = false;
 
-        #endregion
+#endregion
 
         /// <summary>
         /// Process all files.
@@ -2436,7 +2442,7 @@ namespace Microsoft.Build.Tasks
         }
 #endif
 
-        #region Code from ResGen.EXE
+#region Code from ResGen.EXE
 
         /// <summary>
         /// Read all resources from a file and write to a new file in the chosen format
@@ -3780,7 +3786,7 @@ namespace Microsoft.Build.Tasks
             public string name;
             public object value;
         }
-        #endregion // Code from ResGen.EXE
+#endregion // Code from ResGen.EXE
     }
 
 #if FEATURE_ASSEMBLY_LOADFROM

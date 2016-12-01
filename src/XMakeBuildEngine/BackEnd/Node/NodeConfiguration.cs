@@ -39,6 +39,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private LoggerDescription[] _forwardingLoggers;
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// Constructor
         /// </summary>
@@ -50,19 +51,34 @@ namespace Microsoft.Build.BackEnd
             (
             int nodeId,
             BuildParameters buildParameters,
-            LoggerDescription[] forwardingLoggers
-#if FEATURE_APPDOMAIN
-            , AppDomainSetup appDomainSetup
-#endif
+            LoggerDescription[] forwardingLoggers,
+            AppDomainSetup appDomainSetup
             )
         {
             _nodeId = nodeId;
             _buildParameters = buildParameters;
             _forwardingLoggers = forwardingLoggers;
-#if FEATURE_APPDOMAIN
             _appDomainSetup = appDomainSetup;
-#endif
         }
+#else
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="nodeId">The node id.</param>
+        /// <param name="buildParameters">The build parameters</param>
+        /// <param name="forwardingLoggers">The forwarding loggers.</param>
+        public NodeConfiguration
+            (
+            int nodeId,
+            BuildParameters buildParameters,
+            LoggerDescription[] forwardingLoggers
+            )
+        {
+            _nodeId = nodeId;
+            _buildParameters = buildParameters;
+            _forwardingLoggers = forwardingLoggers;
+        }
+#endif
 
         /// <summary>
         /// Private constructor for deserialization
@@ -117,7 +133,7 @@ namespace Microsoft.Build.BackEnd
         }
 #endif
 
-        #region INodePacket Members
+#region INodePacket Members
 
         /// <summary>
         /// Retrieves the packet type.
@@ -129,9 +145,9 @@ namespace Microsoft.Build.BackEnd
             { return NodePacketType.NodeConfiguration; }
         }
 
-        #endregion
+#endregion
 
-        #region INodePacketTranslatable Members
+#region INodePacketTranslatable Members
 
         /// <summary>
         /// Translates the packet to/from binary form.
@@ -156,7 +172,7 @@ namespace Microsoft.Build.BackEnd
             configuration.Translate(translator);
             return configuration;
         }
-        #endregion
+#endregion
 
         /// <summary>
         /// We need to clone this object since it gets modified for each node which is launched.

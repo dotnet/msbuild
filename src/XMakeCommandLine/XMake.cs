@@ -536,8 +536,8 @@ namespace Microsoft.Build.CommandLine
                 List<DistributedLoggerRecord> distributedLoggerRecords = null;
 #if FEATURE_XML_SCHEMA_VALIDATION
                 bool needToValidateProject = false;
-#endif
                 string schemaFile = null;
+#endif
                 int cpuCount = 1;
 #if FEATURE_NODE_REUSE
                 bool enableNodeReuse = true;

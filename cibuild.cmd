@@ -139,10 +139,16 @@ if /i "%TARGET%"=="CoreCLR" (
     set MSBUILD_CUSTOM_PATH="%~dp0bin\Bootstrap\15.0\Bin\MSBuild.exe"
 )
 
+:: The set of warnings to suppress for now
+:: warning MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.
+:: warning MSB3026: Could not copy "XXX" to "XXX". Beginning retry 1 in 1000ms.
+:: warning AL1053: The version '1.2.3.4-foo' specified for the 'product version' is not in the normal 'major.minor.build.revision' format
+SET _NOWARN=MSB3277;MSB3026;AL1053
+
 echo.
 echo ** Rebuilding MSBuild with locally built binaries
 
-call "%~dp0build.cmd" /t:%TARGET_ARG% /p:Configuration=%BUILD_CONFIGURATION% %LOCALIZED_BUILD_ARGUMENT%
+call "%~dp0build.cmd" /t:%TARGET_ARG% /p:Configuration=%BUILD_CONFIGURATION% %LOCALIZED_BUILD_ARGUMENT% "/nowarn:%_NOWARN%" /warnaserror
 
 if %ERRORLEVEL% NEQ 0 (
     echo.

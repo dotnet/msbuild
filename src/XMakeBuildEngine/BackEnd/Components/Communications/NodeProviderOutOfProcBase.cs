@@ -485,9 +485,6 @@ namespace Microsoft.Build.BackEnd
             processSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
             threadSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
 
-            BackendNativeMethods.PROCESS_INFORMATION processInfo = new BackendNativeMethods.PROCESS_INFORMATION();
-
-
             CommunicationsUtilities.Trace("Launching node from {0}", msbuildLocation);
 
 #if RUNTIME_TYPE_NETCORE
@@ -523,6 +520,8 @@ namespace Microsoft.Build.BackEnd
             CommunicationsUtilities.Trace("Successfully launched msbuild.exe node with PID {0}", process.Id);
             return process.Id;
 #else
+            BackendNativeMethods.PROCESS_INFORMATION processInfo = new BackendNativeMethods.PROCESS_INFORMATION();
+
             string exeName = msbuildLocation;
             
             bool result = BackendNativeMethods.CreateProcess
