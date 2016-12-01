@@ -1,5 +1,5 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildSDKsPath)\microsoft.net.sdk\Sdk\Sdk.props" />
+  <Import Project="$(MSBuildSDKsPath)\Microsoft.NET.Sdk\Sdk\Sdk.props" />
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -26,5 +26,5 @@
     </PackageReference>
   </ItemGroup>
 
-  <Import Project="$(MSBuildSDKsPath)\microsoft.net.sdk\Sdk\Sdk.targets" />
+  <Import Project="$(MSBuildSDKsPath)\Microsoft.NET.Sdk\Sdk\Sdk.targets" />
 </Project>
