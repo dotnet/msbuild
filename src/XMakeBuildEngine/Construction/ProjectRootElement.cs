@@ -158,6 +158,11 @@ namespace Microsoft.Build.Construction
         private BuildEventContext _buildEventContext;
 
         /// <summary>
+        /// Xpath expression that will find any element with the implicit attribute
+        /// </summary>
+        private static readonly string ImplicitAttributeXpath = $"//*[@{XMakeAttributes.@implicit}]";
+
+        /// <summary>
         /// Initialize a ProjectRootElement instance from a XmlReader.
         /// May throw InvalidProjectFileException.
         /// Leaves the project dirty, indicating there are unsaved changes.
@@ -1781,15 +1786,21 @@ namespace Microsoft.Build.Construction
 
         private XmlDocument RemoveImplicits()
         {
+            if (XmlDocument.SelectSingleNode(ImplicitAttributeXpath) == null)
+            {
+                return XmlDocument;
+            }
+
             var xmlWithNoImplicits = (XmlDocument) XmlDocument.CloneNode(deep: true);
 
             var implicitElements =
-                xmlWithNoImplicits.SelectNodes($"//*[@{XMakeAttributes.@implicit}]");
+                xmlWithNoImplicits.SelectNodes(ImplicitAttributeXpath);
 
             foreach (XmlNode implicitElement in implicitElements)
             {
                 implicitElement.ParentNode.RemoveChild(implicitElement);
             }
+
             return xmlWithNoImplicits;
         }
 
