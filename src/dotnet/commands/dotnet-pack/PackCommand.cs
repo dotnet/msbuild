@@ -17,37 +17,45 @@ namespace Microsoft.DotNet.Tools.Pack
             CommandLineApplication cmd = new CommandLineApplication(throwOnUnexpectedArg: false)
             {
                 Name = "pack",
-                FullName = "pack",
-                Description = "pack for msbuild",
+                FullName = LocalizableStrings.AppFullName,
+                Description = LocalizableStrings.AppDescription,
                 AllowArgumentSeparator = true,
                 ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText
             };
 
             cmd.HelpOption("-h|--help");
 
-            var output = cmd.Option("-o|--output <OUTPUT_DIR>",
-                "Directory in which to place outputs",
+            var output = cmd.Option(
+                $"-o|--output <{LocalizableStrings.CmdOutputDir}>",
+                LocalizableStrings.CmdOutputDirDescription,
                 CommandOptionType.SingleValue);
-            var noBuild = cmd.Option("--no-build",
-                "Do not build project before packing", 
+            var noBuild = cmd.Option(
+                "--no-build",
+                LocalizableStrings.CmdNoBuildOptionDescription, 
                 CommandOptionType.NoValue);
-            var includeSymbols = cmd.Option("--include-symbols",
-                "Include PDBs along with the DLLs in the output folder",
+            var includeSymbols = cmd.Option(
+                "--include-symbols",
+                LocalizableStrings.CmdIncludeSymbolsDescription,
                 CommandOptionType.NoValue);
-            var includeSource = cmd.Option("--include-source",
-                "Include PDBs and source files. Source files go into the src folder in the resulting nuget package",
+            var includeSource = cmd.Option(
+                "--include-source",
+                LocalizableStrings.CmdIncludeSourceDescription,
                 CommandOptionType.NoValue);
-            var configuration = cmd.Option("-c|--configuration <CONFIGURATION>",
-                "Configuration under which to build", 
+            var configuration = cmd.Option(
+                $"-c|--configuration <{LocalizableStrings.CmdConfig}>",
+                LocalizableStrings.CmdConfigDescription, 
                 CommandOptionType.SingleValue);
-            var versionSuffix = cmd.Option("--version-suffix <VERSION_SUFFIX>",
-                "Defines what `*` should be replaced with in version field in project.json",
+            var versionSuffix = cmd.Option(
+                $"--version-suffix <{LocalizableStrings.CmdVersionSuffix}>",
+                LocalizableStrings.CmdVersionSuffixDescription,
                 CommandOptionType.SingleValue);
-            var serviceable = cmd.Option("-s|--serviceable", 
-                "Set the serviceable flag in the package", 
+            var serviceable = cmd.Option(
+                "-s|--serviceable",
+                LocalizableStrings.CmdServiceableDescription, 
                 CommandOptionType.NoValue);
-            var argRoot = cmd.Argument("<PROJECT>",
-                "The project to pack, defaults to the project file in the current directory. Can be a path to any project file",
+            var argRoot = cmd.Argument(
+                $"<{LocalizableStrings.CmdArgumentProject}>",
+                LocalizableStrings.CmdArgumentDescription,
                 multipleValues:true);
             CommandOption verbosityOption = MSBuildForwardingApp.AddVerbosityOption(cmd);
 
