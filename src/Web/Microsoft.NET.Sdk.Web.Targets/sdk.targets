@@ -11,13 +11,13 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
- <Import Project="$(MSBuildSdksPath)\Microsoft.NET.Sdk\Sdk\Sdk.targets" 
-        Condition="Exists('$(MSBuildSdksPath)\Microsoft.NET.Sdk\Sdk\Sdk.targets')" />
+ <Import Project="$(MSBuildSdksPath)\microsoft.net.sdk\Sdk\Sdk.targets" 
+        Condition="Exists('$(MSBuildSdksPath)\microsoft.net.sdk\Sdk\Sdk.targets')" />
 
- <Import Project="$(MSBuildSdksPath)\Microsoft.NET.Sdk.Web.ProjectSystem\Sdk\Sdk.targets" 
-          Condition="Exists('$(MSBuildSdksPath)\Microsoft.NET.Sdk.Web.ProjectSystem\Sdk\Sdk.targets')" />
+ <Import Project="$(MSBuildSdksPath)\microsoft.net.sdk.web.projectsystem\Sdk\Sdk.targets" 
+          Condition="Exists('$(MSBuildSdksPath)\microsoft.net.sdk.web.projectsystem\Sdk\Sdk.targets')" />
 
- <Import Project="$(MSBuildSdksPath)\Microsoft.NET.Sdk.Publish\Sdk\Sdk.targets" 
-          Condition="Exists('$(MSBuildSdksPath)\Microsoft.NET.Sdk.Publish\Sdk\Sdk.targets')" />
+ <Import Project="$(MSBuildSdksPath)\microsoft.net.sdk.publish\Sdk\Sdk.targets" 
+          Condition="Exists('$(MSBuildSdksPath)\microsoft.net.sdk.publish\Sdk\Sdk.targets')" />
 
 </Project>

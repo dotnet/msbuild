@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
-    <id>Microsoft.NET.Sdk.Web.ProjectSystem</id>
+    <id>microsoft.net.sdk.web.projectsystem</id>
     <description>
       This package contains MSBuild targets and tasks for building ASP.NET Core projects. This package is required for building ASP.NET Core projects.
     </description>

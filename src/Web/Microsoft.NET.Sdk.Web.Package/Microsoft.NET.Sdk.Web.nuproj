@@ -11,10 +11,10 @@
     <NuSpecProperties>CoreSdkVersion=$(CoreSdkVersion);WebSdkVersion=$(WebSdkVersion)</NuSpecProperties>
   </PropertyGroup>
   <ItemGroup>
-    <NuGetContent Include="$(WebSourceDir)\Web\Microsoft.NET.Sdk.Web.Targets\sdk.props">
+    <NuGetContent Include="$(WebSourceDir)\Web\Microsoft.NET.Sdk.Web.Targets\Sdk.props">
       <Destination>Sdk</Destination>
     </NuGetContent>
-    <NuGetContent Include="$(WebSourceDir)\Web\Microsoft.NET.Sdk.Web.Targets\sdk.targets">
+    <NuGetContent Include="$(WebSourceDir)\Web\Microsoft.NET.Sdk.Web.Targets\Sdk.targets">
       <Destination>Sdk</Destination>
     </NuGetContent>
   </ItemGroup>
