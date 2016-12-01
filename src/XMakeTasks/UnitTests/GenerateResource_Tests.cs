@@ -2071,6 +2071,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 #else
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
 #endif
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void StateFileUnwritable()
         {
             GenerateResource t = Utilities.CreateTask();

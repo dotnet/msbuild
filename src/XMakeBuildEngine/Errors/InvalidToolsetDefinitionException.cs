@@ -93,7 +93,9 @@ namespace Microsoft.Build.Exceptions
         /// </summary>
         /// <param name="info"></param>
         /// <param name="context"></param>
+#if FEATURE_SECURITY_PERMISSIONS
         [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+#endif
         override public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             ErrorUtilities.VerifyThrowArgumentNull(info, "info");
