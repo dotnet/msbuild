@@ -65,17 +65,34 @@ namespace dotnet_new3
                     continue;
                 }
 
+                bool wellFormedParam = true;
                 if (!key.StartsWith("--", StringComparison.Ordinal))
                 {
-                    throw new Exception("Parameter names must start with --");
+                    if (!key.StartsWith("-p:", StringComparison.Ordinal))
+                    {
+                        if (key.StartsWith("-", StringComparison.Ordinal)
+                            && (key.Length != 2 || !Char.IsLetter(key[1])))
+                        {
+                            wellFormedParam = false;
+                        }
+                    }
+                    else
+                    {
+                        wellFormedParam = false;
+                    }
                 }
 
+                if (!wellFormedParam)
+                {
+                    throw new Exception($"Invalid parameter name [${key}]. Parameter names must begin with '--', '-p:', or be exactly '-<single letter>'");
+                }
 
                 string value = null;
                 if (app.RemainingArguments.Count > i + 1)
                 {
                     value = app.RemainingArguments[i + 1];
-                    if (value.StartsWith("--", StringComparison.Ordinal))
+                    //if (value.StartsWith("--", StringComparison.Ordinal))
+                    if (value.StartsWith("-", StringComparison.Ordinal))
                     {
                         value = null;
                     }
