@@ -22,10 +22,6 @@ namespace Microsoft.Build.Tasks
     {
         #region Data
         /// <summary>
-        /// Environment variable name for the override error on missing reference assembly directory.
-        /// </summary>
-        private const string WARNONNOREFERENCEASSEMBLYDIRECTORY = "MSBUILDWARNONNOREFERENCEASSEMBLYDIRECTORY";
-
 #if FEATURE_GAC
         /// <summary>
         /// This is the sentinel assembly for .NET FX 3.5 SP1
