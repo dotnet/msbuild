@@ -1,6 +1,6 @@
 use vs
 
-package name=Microsoft.Net.Sdk
+package name=Microsoft.NET.Sdk
         version=$(Version)
 
 vs.localizedResources
@@ -8,11 +8,11 @@ vs.localizedResources
                        title="Microsoft Net Sdk"
                        description="SDK for .NET projects"
 
-folder "InstallDir:MSBuild\Sdks\Microsoft.Net.Sdk\Sdk"
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\Sdk"
   file source="$(OutputPath)PackagesLayout\sdk\Sdk.props"
   file source="$(OutputPath)PackagesLayout\sdk\Sdk.targets"
 
-folder "InstallDir:MSBuild\Sdks\Microsoft.Net.Sdk\build"
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\build"
   file source="$(OutputPath)PackagesLayout\build\Microsoft.NET.DefaultOutputPaths.targets"
   file source="$(OutputPath)PackagesLayout\build\Microsoft.NET.DisableStandardFrameworkResolution.targets"
   file source="$(OutputPath)PackagesLayout\build\Microsoft.NET.GenerateAssemblyInfo.targets"
@@ -31,10 +31,10 @@ folder "InstallDir:MSBuild\Sdks\Microsoft.Net.Sdk\build"
   file source="$(OutputPath)PackagesLayout\build\Microsoft.NET.TargetFrameworkInference.targets"
   file source="$(OutputPath)PackagesLayout\build\Microsoft.PackageDependencyResolution.targets"
 
-folder "InstallDir:MSBuild\Sdks\Microsoft.Net.Sdk\buildCrossTargeting"
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\buildCrossTargeting"
   file source="$(OutputPath)PackagesLayout\buildCrossTargeting\Microsoft.NET.Sdk.targets"
 
-folder "InstallDir:MSBuild\Sdks\Microsoft.Net.Sdk\tools\net46"
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\net46"
   file source="$(OutputPath)PackagesLayout\tools\net46\Microsoft.DotNet.PlatformAbstractions.dll"
   file source="$(OutputPath)PackagesLayout\tools\net46\Microsoft.Extensions.DependencyModel.dll"
   file source="$(OutputPath)PackagesLayout\tools\net46\Microsoft.NET.Build.Tasks.dll"
@@ -58,7 +58,7 @@ folder "InstallDir:MSBuild\Sdks\Microsoft.Net.Sdk\tools\net46"
   file source="$(OutputPath)PackagesLayout\tools\net46\System.Security.Cryptography.Primitives.dll"
   file source="$(OutputPath)PackagesLayout\tools\net46\System.Threading.Thread.dll"
 
-folder "InstallDir:MSBuild\Sdks\Microsoft.Net.Sdk\tools\netcoreapp1.0"
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\netcoreapp1.0"
   file source="$(OutputPath)PackagesLayout\tools\netcoreapp1.0\Microsoft.DotNet.PlatformAbstractions.dll"
   file source="$(OutputPath)PackagesLayout\tools\netcoreapp1.0\Microsoft.Extensions.DependencyModel.dll"
   file source="$(OutputPath)PackagesLayout\tools\netcoreapp1.0\Microsoft.NET.Build.Tasks.dll"

@@ -7,7 +7,7 @@
     <OutputLocalized>false</OutputLocalized>
     <OutputType>vsix</OutputType>
     <IsPackage>true</IsPackage>
-    <OutputName>Microsoft.Net.Sdk</OutputName>
+    <OutputName>Microsoft.NET.Sdk</OutputName>
     <UseVisualStudioVersion>true</UseVisualStudioVersion>
   </PropertyGroup>
 
@@ -20,7 +20,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Package Include="Microsoft.Net.Sdk.swr" />
+    <Package Include="Microsoft.NET.Sdk.swr" />
   </ItemGroup>
 
   <Import Project="$(NuGet_Packages)\MicroBuild.Core\$(MicroBuildVersion)\build\MicroBuild.Core.targets" />
