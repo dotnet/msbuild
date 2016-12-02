@@ -195,7 +195,7 @@ namespace Microsoft.Build.Evaluation
                         if (((XmlElement)child).GetAttribute(XMakeAttributes.@implicit).Length > 0)
                         {
                             importTag =
-                                $"  Import of \"{importProject}\" from Sdk \"{importSdk}\" was implied by the {XMakeElements.project} element's {XMakeAttributes.sdk} attribute.";
+                                $"  Import of \"{importProject.Replace("--", "__")}\" from Sdk \"{importSdk}\" was implied by the {XMakeElements.project} element's {XMakeAttributes.sdk} attribute.";
                         }
 
                         destination.AppendChild(destinationDocument.CreateComment(
