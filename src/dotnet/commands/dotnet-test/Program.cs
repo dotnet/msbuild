@@ -20,8 +20,8 @@ namespace Microsoft.DotNet.Tools.Test
             var cmd = new CommandLineApplication(throwOnUnexpectedArg: false)
             {
                 Name = "dotnet test",
-                FullName = ".NET Test Driver",
-                Description = "Test Driver for the .NET Platform"
+                FullName = LocalizableStrings.AppFullName,
+                Description = LocalizableStrings.AppDescription
             };
 
             cmd.AllowArgumentSeparator = true;
@@ -29,64 +29,58 @@ namespace Microsoft.DotNet.Tools.Test
             cmd.HelpOption("-h|--help");
 
             var argRoot = cmd.Argument(
-                "<PROJECT>",
-                "The project to test, defaults to the current directory.",
+                $"<{LocalizableStrings.CmdArgProject}>",
+                LocalizableStrings.CmdArgDescription,
                 multipleValues: false);
 
             var settingOption = cmd.Option(
-                "-s|--settings <SettingsFile>",
-                "Settings to use when running tests.",
+                $"-s|--settings <{LocalizableStrings.CmdSettingsFile}>",
+                LocalizableStrings.CmdSettingsDescription,
                 CommandOptionType.SingleValue);
 
             var listTestsOption = cmd.Option(
                 "-lt|--listTests",
-                @"Lists discovered tests",
+                LocalizableStrings.CmdListTestsDescription,
                 CommandOptionType.NoValue);
 
             var testCaseFilterOption = cmd.Option(
-                "-tcf|--testCaseFilter <Expression>",
-                @"Run tests that match the given expression.
-                                        Examples:
-                                        --testCaseFilter:""Priority = 1""
-                                        --testCaseFilter: ""(FullyQualifiedName~Nightly | Name = MyTestMethod)""",
+                $"-tcf|--testCaseFilter <{LocalizableStrings.CmdTestCaseFilterExpression}>",
+                LocalizableStrings.CmdTestCaseFilterDescription,
                 CommandOptionType.SingleValue);
 
             var testAdapterPathOption = cmd.Option(
                 "-tap|--testAdapterPath",
-                @"Use custom adapters from the given path in the test run.
-                                        Example: --testAdapterPath:<pathToCustomAdapters>",
+                LocalizableStrings.CmdTestAdapterPathDescription,
                 CommandOptionType.SingleValue);
 
             var loggerOption = cmd.Option(
-                "-l|--logger <LoggerUri/FriendlyName>",
-                @"Specify a logger for test results. 
-                                        Example: --logger:trx",
+                $"-l|--logger <{LocalizableStrings.CmdLoggerOption}>",
+                LocalizableStrings.CmdLoggerDescription,
                 CommandOptionType.SingleValue);
 
             var configurationOption = cmd.Option(
-                "-c|--configuration <configuration>",
-                @"Configuration under which to build, i.e. Debug/Release",
+                $"-c|--configuration <{LocalizableStrings.CmdConfiguration}>",
+                LocalizableStrings.CmdConfigDescription,
                 CommandOptionType.SingleValue);
 
             var frameworkOption = cmd.Option(
-                "-f|--framework <FrameworkVersion>",
-                @"Looks for test binaries for a specific framework",
+                $"-f|--framework <{LocalizableStrings.CmdFramework}>",
+                LocalizableStrings.CmdFrameworkDescription,
                 CommandOptionType.SingleValue);
 
             var outputOption = cmd.Option(
-                "-o|--output <OutputDir>",
-                @"Directory in which to find the binaries to be run",
+                $"-o|--output <{LocalizableStrings.CmdOutputDir}>",
+                LocalizableStrings.CmdOutputDescription,
                 CommandOptionType.SingleValue);
 
             var diagOption = cmd.Option(
-                "-d|--diag <PathToLogFile>",
-                @"Enable verbose logs for test platform.
-                                        Logs are written to the provided file.",
+                $"-d|--diag <{LocalizableStrings.CmdPathToLogFile}>",
+                LocalizableStrings.CmdPathTologFileDescription,
                 CommandOptionType.SingleValue);
 
             var noBuildtOption = cmd.Option(
                "--noBuild",
-               @"Do not build project before testing.",
+               LocalizableStrings.CmdNoBuildDescription,
                CommandOptionType.NoValue);
 
             CommandOption verbosityOption = MSBuildForwardingApp.AddVerbosityOption(cmd);
