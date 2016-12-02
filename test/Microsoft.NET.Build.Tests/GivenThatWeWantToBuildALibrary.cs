@@ -498,7 +498,6 @@ namespace Microsoft.NET.Build.Tests
         [InlineData(".NETStandard,Version=v1.0", new[] { "NETSTANDARD1_0" }, false)]
         [InlineData("netstandard1.3", new[] { "NETSTANDARD1_3" }, false)]
         [InlineData("netstandard1.6", new[] { "NETSTANDARD1_6" }, false)]
-        [InlineData("netstandard20", new[] { "NETSTANDARD2_0" }, false)]
         [InlineData("net45", new[] { "NET45" }, true)]
         [InlineData("net461", new[] { "NET461" }, true)]
         [InlineData("netcoreapp1.0", new[] { "NETCOREAPP1_0" }, false)]

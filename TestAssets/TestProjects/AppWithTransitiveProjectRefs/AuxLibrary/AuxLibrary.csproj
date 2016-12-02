@@ -10,8 +10,4 @@
     <EmbeddedResource Include="**\*.resx" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="NETStandard.Library" Version="1.6" />
-  </ItemGroup>
-
 </Project>

@@ -92,6 +92,18 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Reference Include="System.Xml"/>
   </ItemGroup>
 
+  <!-- Set the default versions of the NETStandard.Library or Microsoft.NETCore.App packages to reference.
+       The implicit package references themselves are defined in Microsoft.NET.Sdk.props, so that they can be overridden
+       in the project file. -->
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' And '$(NetStandardDefaultPackageVersion)' == ''">
+    <NetStandardDefaultPackageVersion>1.6</NetStandardDefaultPackageVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(NetCoreAppDefaultPackageVersion)' == ''" >
+    <NetCoreAppDefaultPackageVersion>1.0.1</NetCoreAppDefaultPackageVersion>
+  </PropertyGroup>
+
+
   <!-- Add conditional compilation symbols for the target framework (for example NET461, NETSTANDARD2_0, NETCOREAPP1_0) -->
   <PropertyGroup Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' and '$(TargetFrameworkIdentifier)' != '.NETPortable'">
     <_FrameworkIdentifierForImplicitDefine>$(TargetFrameworkIdentifier.Replace('.', '').ToUpperInvariant())</_FrameworkIdentifierForImplicitDefine>
