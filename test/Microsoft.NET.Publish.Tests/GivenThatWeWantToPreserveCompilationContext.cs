@@ -30,7 +30,7 @@ namespace Microsoft.NET.Publish.Tests
                 {
                     //  Workaround for https://github.com/dotnet/sdk/issues/367
 
-                    var ns = XNamespace.Get("http://schemas.microsoft.com/developer/msbuild/2003");
+                    var ns = project.Root.Name.Namespace;
                     var propertyGroup = project.Root.Elements(ns + "PropertyGroup").FirstOrDefault();
                     propertyGroup.Should().NotBeNull();
 
@@ -92,7 +92,7 @@ namespace Microsoft.NET.Publish.Tests
                     dependencyContext.CompilationOptions.EmitEntryPoint.Should().Be(true);
                     dependencyContext.CompilationOptions.DebugType.Should().Be("portable");
 
-                    dependencyContext.CompileLibraries.Count.Should().Be(targetFramework == "net46" ? 53 : 149);
+                    dependencyContext.CompileLibraries.Count.Should().Be(targetFramework == "net46" ? 51 : 147);
 
                     // Ensure P2P references are specified correctly
                     var testLibrary = dependencyContext

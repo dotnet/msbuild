@@ -276,7 +276,7 @@ namespace Microsoft.NET.Build.Tests
                 .WithSource()
                 .WithProjectChanges(project =>
                 {
-                    var ns = XNamespace.Get("http://schemas.microsoft.com/developer/msbuild/2003");
+                    var ns = project.Root.Name.Namespace;
                     var propertyGroup = project.Root.Elements(ns + "PropertyGroup").FirstOrDefault();
                     propertyGroup.Should().NotBeNull();
 
@@ -417,7 +417,7 @@ namespace Microsoft.NET.Build.Tests
                 .WithProjectChanges(project =>
                 {
                     //  Update target framework in project
-                    var ns = XNamespace.Get("http://schemas.microsoft.com/developer/msbuild/2003");
+                    var ns = project.Root.Name.Namespace;
                     var targetFrameworkProperties = project.Root
                         .Elements(ns + "PropertyGroup")
                         .Elements(ns + "TargetFramework")

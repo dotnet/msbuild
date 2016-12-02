@@ -37,6 +37,8 @@ namespace Microsoft.NET.TestFramework.Commands
             //  Set NUGET_PACKAGES environment variable to match value from build.ps1
             command = command.EnvironmentVariable("NUGET_PACKAGES", Path.Combine(RepoInfo.RepoRoot, "packages"));
 
+            command = command.EnvironmentVariable("MSBuildSDKsPath", RepoInfo.SdksPath);
+
             return command;
         }
     }

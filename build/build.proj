@@ -121,6 +121,36 @@
              />
   </Target>
 
+  <!-- Restore Sdks -->
+  <Target Name="DeployMSBuildSdks" AfterTargets="BuildNuGetPackages;RebuildNuGetPackages">
+    <ReadLinesFromFile File="$(RepositoryRootDirectory)TestAssets\buildVersion.txt">
+      <Output TaskParameter="Lines" ItemName="SdkBuildVersion" />
+    </ReadLinesFromFile>
+    
+    <PropertyGroup>
+      <SdkBuildVersion>@(SdkBuildVersion)</SdkBuildVersion>
+      <_RestoreSdkCommand>$(DotNetTool) restore</_RestoreSdkCommand>
+      <_RestoreSdkCommand>$(_RestoreSdkCommand) $(RepositoryRootDirectory)\build\Sdk\SdkRestoreProject.proj</_RestoreSdkCommand>
+      <_RestoreSdkCommand>$(_RestoreSdkCommand) /p:ExcludeRestorePackageImports=true</_RestoreSdkCommand>
+      <_RestoreSdkCommand>$(_RestoreSdkCommand) --packages $(NuGet_Packages)</_RestoreSdkCommand>
+    </PropertyGroup>
+    
+    <Exec Command="$(_RestoreSdkCommand)" />
+
+    <ItemGroup>
+      <SdkFile Include="$(PackagesLayoutDir)\**\*.*">
+        <SdkDir>Microsoft.NET.Sdk</SdkDir>
+      </SdkFile>
+      <SdkFile Include="$(NuGet_Packages)\nuget.build.tasks.pack\$(NuGetVersion)\**\*.*">
+        <SdkDir>NuGet.Build.Tasks.Pack</SdkDir>
+      </SdkFile>
+    </ItemGroup>
+
+    <Copy SourceFiles="@(SdkFile)"
+          DestinationFiles="$(RepositoryRootDirectory)bin\$(Configuration)\Sdks\%(SdkFile.SdkDir)\%(SdkFile.RecursiveDir)\%(SdkFile.Filename)%(SdkFile.Extension)" />
+    
+  </Target>
+
   <Target Name="Test" Condition="'$(BuildTemplates)' != 'true'">
 
     <ItemGroup>
@@ -151,8 +181,8 @@
 
   </Target>
 
-  <Target Name="BuildWithoutTesting" DependsOnTargets="RestorePackages;BuildSolution;SignPackages;BuildNuGetPackages;BuildModernVsixPackages" />
-  <Target Name="RebuildWithoutTesting" DependsOnTargets="RestorePackages;RebuildSolution;SignPackages;RebuildNuGetPackages;RebuildModernVsixPackages" />
+  <Target Name="BuildWithoutTesting" DependsOnTargets="RestorePackages;BuildSolution;SignPackages;BuildNuGetPackages;BuildModernVsixPackages;DeployMSBuildSdks" />
+  <Target Name="RebuildWithoutTesting" DependsOnTargets="RestorePackages;RebuildSolution;SignPackages;RebuildNuGetPackages;RebuildModernVsixPackages;DeployMSBuildSdks" />
 
   <Target Name="Build" DependsOnTargets="BuildWithoutTesting;Test" />
   <Target Name="Rebuild" DependsOnTargets="RebuildWithoutTesting;Test" />
