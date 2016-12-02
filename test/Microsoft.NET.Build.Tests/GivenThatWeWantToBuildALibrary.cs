@@ -72,6 +72,12 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void All_props_and_targets_add_themselves_to_MSBuildAllTargets()
         {
+            //  Workaround MSBuild bug causing preprocessing to fail if there is a "--" in a resolved Sdk path: https://github.com/Microsoft/msbuild/pull/1428
+            if (RepoInfo.RepoRoot.Contains("--"))
+            {
+                return;
+            }
+
             List<string> expectedAllProjects = new List<string>();
             string baseIntermediateDirectory = null;
 
