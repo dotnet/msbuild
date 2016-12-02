@@ -1,5 +1,7 @@
 ﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  
   <PropertyGroup>
     <VersionPrefix>1.0.0-preview4</VersionPrefix>
     <TargetFramework>netcoreapp1.0</TargetFramework>
@@ -13,7 +15,7 @@
       <Version>1.0.1</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Build.Runtime">
-      <Version>15.1.0-preview-000370-00</Version>
+      <Version>$(CLI_MSBuild_Version)</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Net.Compilers.netcore">
       <Version>2.0.0-beta6-60922-08</Version>

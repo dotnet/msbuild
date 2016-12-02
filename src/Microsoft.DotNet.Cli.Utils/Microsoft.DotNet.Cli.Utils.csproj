@@ -1,5 +1,7 @@
 ﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  
   <PropertyGroup>
     <VersionPrefix>1.0.0-preview4</VersionPrefix>
     <TargetFrameworks>netstandard1.5;net46</TargetFrameworks>
@@ -35,10 +37,10 @@
       <Version>4.0.0-rc-2048</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Build">
-      <Version>15.1.0-preview-000370-00</Version>
+      <Version>$(CLI_MSBuild_Version)</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Build.Utilities.Core">
-      <Version>15.1.0-preview-000370-00</Version>
+      <Version>$(CLI_MSBuild_Version)</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
