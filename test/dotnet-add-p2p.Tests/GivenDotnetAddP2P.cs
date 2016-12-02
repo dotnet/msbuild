@@ -89,7 +89,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                     .WithProject(projName)
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
-            cmd.StdErr.Should().Contain("Invalid project");
+            cmd.StdErr.Should().Contain(" is invalid.");
             cmd.StdOut.Should().Contain("Usage");
         }
 
