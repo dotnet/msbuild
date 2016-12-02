@@ -40,6 +40,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             var target = CreateTarget(csproj, scriptSetName);
             foreach (var scriptCommand in scriptCommands)
             {
+                if (CommandIsNotNeededInMSBuild(scriptCommand))
+                {
+                    continue;
+                }
+
                 AddExec(target, FormatScriptCommand(scriptCommand));
             }
 
@@ -77,6 +82,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             scriptArguments = scriptArguments.Where(argument => !string.IsNullOrEmpty(argument)).ToArray();
 
             return string.Join(" ", scriptArguments);
+        }
+
+        private bool CommandIsNotNeededInMSBuild(string command)
+        {
+            return command.Contains("dotnet publish-iis");
         }
 
         private bool IsPathRootedForAnyOS(string path)
