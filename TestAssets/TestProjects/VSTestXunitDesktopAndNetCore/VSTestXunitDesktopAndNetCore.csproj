@@ -1,5 +1,6 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -22,6 +23,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Sdk">
+      <!-- Should be $(CLI_NETSDK_Version) but https://github.com/dotnet/cli/issues/4892 -->
       <Version>1.0.0-alpha-20161026-2</Version>
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>

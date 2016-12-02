@@ -2,5 +2,6 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <CLI_MSBuild_Version>15.1.0-preview-000451-02</CLI_MSBuild_Version>
+    <CLI_NETSDK_Version>1.0.0-alpha-20161104-2</CLI_NETSDK_Version>
   </PropertyGroup>
 </Project>
