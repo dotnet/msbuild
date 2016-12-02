@@ -92,10 +92,13 @@ Copyright (c) .NET Foundation. All rights reserved.
                       RuntimeIdentifier="$(RuntimeIdentifier)"
                       PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                       CompilerOptions="@(DependencyFileCompilerOptions)">
-
-      <Output TaskParameter="FilesWritten" ItemName="FileWrites" />
     </GenerateDepsFile>
 
+    <ItemGroup>
+      <!-- Do this in an ItemGroup instead of as an output parameter of the GenerateDepsFile task so that it still gets added to the item set
+           during incremental builds when the task is skipped -->
+      <FileWrites Include="$(ProjectDepsFilePath)" Condition="Exists('$(ProjectDepsFilePath)')"/>
+    </ItemGroup>
   </Target>
 
   <!--
@@ -212,6 +215,14 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <Output TaskParameter="OutputAssembly" ItemName="FileWrites"/>
     </GenerateSatelliteAssemblies>
+  </Target>
+
+  <!-- TODO: Remove this target and put the property in a .props file once https://github.com/NuGet/Home/issues/4046 is fixed
+      The value may also change as a result of https://github.com/NuGet/Home/issues/4047 -->
+  <Target Name="OverrideProjectRestoreType" AfterTargets="_GetProjectRestoreType">
+    <PropertyGroup>
+      <_ProjectRestoreType>NETCore</_ProjectRestoreType>
+    </PropertyGroup>
   </Target>
 
   <!--

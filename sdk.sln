@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.25916.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tasks", "Tasks", "{1FEED16D-E07D-47C1-BB4C-56CD9F42B53B}"
 EndProject
@@ -58,6 +58,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.NET.Build.Tests",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.NET.Pack.Tests", "test\Microsoft.NET.Pack.Tests\Microsoft.NET.Pack.Tests.csproj", "{588516D7-96AD-4447-A1EB-244D737A3C87}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sdk", "Sdk", "{91FD1BAF-80A9-4841-9975-6B0B42AE21B2}"
+	ProjectSection(SolutionItems) = preProject
+		build\Sdk\SdkRestoreProject.proj = build\Sdk\SdkRestoreProject.proj
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -110,5 +115,6 @@ Global
 		{0C1312C0-0A29-4EB2-8294-6D1C54D78F61} = {50A89C27-BA35-44B2-AC57-E54551791C64}
 		{EC640B7E-332E-40A2-BB6E-5B7EC788F315} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 		{588516D7-96AD-4447-A1EB-244D737A3C87} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
+		{91FD1BAF-80A9-4841-9975-6B0B42AE21B2} = {50A89C27-BA35-44B2-AC57-E54551791C64}
 	EndGlobalSection
 EndGlobal

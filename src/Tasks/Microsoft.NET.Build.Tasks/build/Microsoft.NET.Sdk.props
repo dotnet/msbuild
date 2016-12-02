@@ -77,10 +77,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Workaround: https://github.com/Microsoft/msbuild/issues/720 -->
     <OverrideToolHost Condition=" '$(DotnetHostPath)' != '' and '$(OverrideToolHost)' == ''">$(DotnetHostPath)</OverrideToolHost>
-
-    <!-- Workaround: https://github.com/Microsoft/msbuild/issues/1045: This is the only before common targets hook available to us, but using it is hijacking a hook that should belong to the user. -->
-    <CustomBeforeMicrosoftCommonTargets>$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.BeforeCommon.targets</CustomBeforeMicrosoftCommonTargets>
-    <CustomBeforeMicrosoftCommonCrossTargetingTargets>$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.BeforeCommonCrossTargeting.targets</CustomBeforeMicrosoftCommonCrossTargetingTargets>
   </PropertyGroup>
 
   <!-- Workaround: https://github.com/Microsoft/msbuild/issues/1293 -->

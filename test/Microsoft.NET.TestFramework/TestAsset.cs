@@ -80,11 +80,7 @@ namespace Microsoft.NET.TestFramework
                 {
                     var project = XDocument.Load(srcFile);
 
-                    project
-                        .Descendants(XName.Get("PackageReference", "http://schemas.microsoft.com/developer/msbuild/2003"))
-                        .FirstOrDefault(pr => pr.Attribute("Include")?.Value == "Microsoft.NET.Sdk")
-                        ?.Element(XName.Get("Version", "http://schemas.microsoft.com/developer/msbuild/2003"))
-                        ?.SetValue($"[{BuildVersion}]");
+                    SetSdkVersion(project);
 
                     using (var file = File.CreateText(destFile))
                     {
@@ -122,6 +118,18 @@ namespace Microsoft.NET.TestFramework
             }
             return this;
             
+        }
+
+        public void SetSdkVersion(XDocument project)
+        {
+            var ns = project.Root.Name.Namespace;
+
+            project
+                .Descendants(ns + "PackageReference")
+                .FirstOrDefault(pr => pr.Attribute("Include")?.Value == "Microsoft.NET.Sdk")
+                ?.Element(ns + "Version")
+                ?.SetValue($"[{BuildVersion}]");
+
         }
 
         public RestoreCommand GetRestoreCommand(string relativePath = "", params string[] args)

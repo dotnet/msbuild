@@ -100,7 +100,13 @@
         <RelativePath>buildCrossTargeting\%(RecursiveDir)</RelativePath>
       </CopyLocalBuildCrossTargetingFile>
 
+      <CopyLocalSdkFile Include="$(OutDir)sdk\**\*.*" />
+      <CopyLocalSdkFile>
+        <RelativePath>Sdk\%(RecursiveDir)</RelativePath>
+      </CopyLocalSdkFile>
+
       <CopyLocalBuildFile Include="@(CopyLocalBuildCrossTargetingFile)" />
+      <CopyLocalBuildFile Include="@(CopyLocalSdkFile)" />
     </ItemGroup>
 
     <Copy SourceFiles="%(Net46CopyLocalAssembly.FullFilePath)"

@@ -68,19 +68,18 @@ namespace Microsoft.NET.Build.Tests
                 .WithSource()
                 .Restore("", $"/p:RuntimeIdentifier={runtimeIdentifier}");
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, testAsset.TestRoot);
-            buildCommand
+            var getValuesCommand = new GetValuesCommand(Stage0MSBuild, testAsset.TestRoot,
+                "net46", "PlatformTarget", GetValuesCommand.ValueType.Property);
+
+            getValuesCommand
                 .Execute($"/p:RuntimeIdentifier={runtimeIdentifier}")
                 .Should()
                 .Pass();
 
-            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("net46").FullName, "DesktopMinusRid.exe");
-            var assemblyInfo = AssemblyInfo.Get(assemblyPath);
-            assemblyInfo
+            getValuesCommand
+                .GetValues()
                 .Should()
-                .Contain(
-                    "AssemblyDescriptionAttribute",
-                    $"PlatformTarget={expectedPlatformTarget}");
+                .BeEquivalentTo(expectedPlatformTarget);
         }
 
         [Fact]
@@ -96,19 +95,18 @@ namespace Microsoft.NET.Build.Tests
                 .WithSource()
                 .Restore("", $"/p:RuntimeIdentifier=win7-x86");
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, testAsset.TestRoot);
-            buildCommand
+            var getValuesCommand = new GetValuesCommand(Stage0MSBuild, testAsset.TestRoot,
+                "net46", "PlatformTarget", GetValuesCommand.ValueType.Property);
+
+            getValuesCommand
                 .Execute($"/p:RuntimeIdentifier=win7-x86", "/p:PlatformTarget=x64")
                 .Should()
                 .Pass();
 
-            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("net46").FullName, "DesktopMinusRid.exe");
-            var assemblyInfo = AssemblyInfo.Get(assemblyPath);
-            assemblyInfo
+            getValuesCommand
+                .GetValues()
                 .Should()
-                .Contain(
-                    "AssemblyDescriptionAttribute",
-                    $"PlatformTarget=x64");
+                .BeEquivalentTo("x64");
         }
 
         [Fact]
