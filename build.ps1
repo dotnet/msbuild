@@ -61,6 +61,14 @@ if ($RealSign) {
 
 $commonBuildArgs = echo $RepoRoot\build\build.proj /m /nologo /p:Configuration=$Configuration /p:Platform=$Platform /p:SignType=$signType 
 
+# NET Core Build 
+$msbuildSummaryLog = Join-Path -path $logPath -childPath "sdk.log"
+$msbuildWarningLog = Join-Path -path $logPath -childPath "sdk.wrn"
+$msbuildFailureLog = Join-Path -path $logPath -childPath "sdk.err"
+
+dotnet build $commonBuildArgs /flp1:Summary`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildSummaryLog /flp2:WarningsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildWarningLog /flp3:ErrorsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildFailureLog
+if($LASTEXITCODE -ne 0) { throw "Failed to build" }
+
 # Template Build
 $msbuildSummaryLog = Join-Path -path $logPath -childPath "templates.log"
 $msbuildWarningLog = Join-Path -path $logPath -childPath "templates.wrn"
@@ -85,11 +93,3 @@ if($LASTEXITCODE -ne 0) { throw "Failed to restore nuget packages for templates"
 
 msbuild $commonBuildArgs /nr:false /p:BuildTemplates=true /flp1:Summary`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildSummaryLog /flp2:WarningsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildWarningLog /flp3:ErrorsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildFailureLog
 if($LASTEXITCODE -ne 0) { throw "Failed to build templates" }
-
-# NET Core Build 
-$msbuildSummaryLog = Join-Path -path $logPath -childPath "sdk.log"
-$msbuildWarningLog = Join-Path -path $logPath -childPath "sdk.wrn"
-$msbuildFailureLog = Join-Path -path $logPath -childPath "sdk.err"
-
-dotnet build $commonBuildArgs /flp1:Summary`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildSummaryLog /flp2:WarningsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildWarningLog /flp3:ErrorsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildFailureLog
-if($LASTEXITCODE -ne 0) { throw "Failed to build" }
