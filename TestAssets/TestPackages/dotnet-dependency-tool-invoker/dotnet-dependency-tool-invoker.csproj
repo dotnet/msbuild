@@ -31,7 +31,7 @@
       <Version>1.0.1</Version>
     </PackageReference>
     <PackageReference Include="NuGet.Frameworks">
-      <Version>4.0.0-rc-2048</Version>
+      <Version>4.0.0-rc2</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.DotNet.Cli.Utils">
       <Version>1.0.0-preview4-*</Version>

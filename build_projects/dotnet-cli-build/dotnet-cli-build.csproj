@@ -36,7 +36,7 @@
       <Version>7.2.1</Version>
     </PackageReference>
     <PackageReference Include="NuGet.CommandLine.XPlat">
-      <Version>4.0.0-rc-2048</Version>
+      <Version>4.0.0-rc2</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Build.Utilities.Core">
       <Version>$(CLI_MSBuild_Version)</Version>

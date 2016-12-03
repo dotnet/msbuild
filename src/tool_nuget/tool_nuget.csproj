@@ -15,7 +15,7 @@
       <Version>1.0.1</Version>
     </PackageReference>
     <PackageReference Include="NuGet.CommandLine.XPlat">
-      <Version>4.0.0-rc-2048</Version>
+      <Version>4.0.0-rc2</Version>
     </PackageReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
