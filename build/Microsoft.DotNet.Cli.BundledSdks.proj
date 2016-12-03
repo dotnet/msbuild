@@ -1,0 +1,42 @@
+<Project ToolsVersion="15.0" DefaultTargets="CopySdkToOutput">
+  <!-- workaround for https://github.com/Microsoft/msbuild/issues/885 -->
+  <!-- renaming the property because the original property is a global property and therefore
+       cannot be redefined at runtime. -->
+  <PropertyGroup>
+    <CLIBuildDllPath>$([MSBuild]::Unescape($(CLIBuildDll)))</CLIBuildDllPath>
+  </PropertyGroup>
+
+  <UsingTask TaskName="DotNetRestore" AssemblyFile="$(CLIBuildDllPath)" />
+
+  <Target Name="CopySdkToOutput"
+          DependsOnTargets="PrepareBundledSdksProps;
+                            EnsureSdkRestored;
+                            GetSdkItemsToCopy"
+          Inputs="@(SdkContent)"
+          Outputs="@(SdkContent->'$(SdkLayoutDirectory)/%(RecursiveDir)%(FileName)%(Extension)')">
+    <Copy SourceFiles="@(SdkContent)"
+          DestinationFiles="@(SdkContent->'$(SdkLayoutDirectory)/%(RecursiveDir)%(FileName)%(Extension)')" />
+  </Target>
+
+  <Target Name="GetSdkItemsToCopy">
+    <ItemGroup>
+      <SdkContent Include="$(SdkNuPkgPath)/**/*" 
+                  Exclude="$(SdkNuPkgPath)/$(SdkPackageName).nuspec;
+                           $(SdkNuPkgPath)/$(SdkPackageName).$(SdkPackageVersion).nupkg;
+                           $(SdkNuPkgPath)/$(SdkPackageName).$(SdkPackageVersion).nupkg.sha512" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="EnsureSdkRestored"
+          Condition="!Exists('$(SdkNuPkgPath)/$(SdkPackageName.ToLower()).nuspec')">
+    <DotNetRestore ToolPath="$(Stage0Directory)"
+                   ProjectPath="$(MSBuildThisFileDirectory)/sdks/sdks.csproj"
+                   AdditionalParameters="/p:SdkPackageName=$(SdkPackageName) /p:SdkPackageVersion=$(SdkPackageVersion)" />
+  </Target>
+
+  <Target Name="PrepareBundledSdksProps">
+    <PropertyGroup>
+      <SdkNuPkgPath>$(NuGetPackagesDir)/$(SdkPackageName.ToLower())/$(SdkPackageVersion.ToLower())</SdkNuPkgPath>
+    </PropertyGroup>
+  </Target>
+</Project>

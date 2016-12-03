@@ -244,17 +244,24 @@
       <Delete Files="@(PdbsToClean)" />
   </Target>
 
-  <Target Name="PublishSdks">
-    <MakeDir Directories="$(SdkOutputDirectory)/Extensions/%(BundledSdk.Identity)/%(BundledSdk.Version)/build/" />
-    
-    <!-- Generate sdk placeholder files -->
-    <WriteLinesToFile File="$(SdkOutputDirectory)/Extensions/%(BundledSdk.Identity)/%(BundledSdk.Version)/build/InitialImport.props"
-                      Lines="placeholder"
-                      Overwrite="true" />
-    
-    <WriteLinesToFile File="$(SdkOutputDirectory)/Extensions/%(BundledSdk.Identity)/%(BundledSdk.Version)/build/FinalImport.targets"
-                      Lines="placeholder"
-                      Overwrite="true" />
+  <Target Name="PublishSdks"
+          DependsOnTargets="Prepare">
+    <ItemGroup>
+      <SdksToBundle Include="build/Microsoft.DotNet.Cli.BundledSdks.proj">
+        <Properties>
+          CLIBuildDll=$(CLIBuildDll);
+          NuGetPackagesDir=$(NuGetPackagesDir);
+          SdkLayoutDirectory=$(SdkOutputDirectory)/Extensions/%(BundledSdk.Identity);
+          SdkPackageName=%(BundledSdk.Identity);
+          SdkPackageVersion=%(BundledSdk.Version);
+          Stage0Directory=$(Stage0Directory)
+        </Properties>
+      </SdksToBundle>
+    </ItemGroup>
 
+    <MSBuild
+      BuildInParallel="True"
+      Projects="@(SdksToBundle)">
+    </MSBuild>
   </Target>
 </Project>

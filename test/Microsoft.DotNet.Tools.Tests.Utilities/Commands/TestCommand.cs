@@ -25,6 +25,8 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         private List<Action<string>> _writeLines = new List<Action<string>>();
 
+        private List<string> _cliGeneratedEnvironmentVariables = new List<string> { "MSBuildSDKsPath" };
+
         public TestCommand(string command)
         {
             _command = command;
@@ -178,6 +180,8 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 UseShellExecute = false
             };
 
+            RemoveCliGeneratedEnvironmentVariables(psi);
+
             foreach (var item in Environment)
             {
 #if NET451
@@ -218,6 +222,18 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             }
 
             return $" in pwd {WorkingDirectory}";
+        }
+
+        private void RemoveCliGeneratedEnvironmentVariables(ProcessStartInfo psi)
+        {
+            foreach (var name in _cliGeneratedEnvironmentVariables)
+            {
+#if NET451
+                psi.EnvironmentVariables.Remove(name);
+#else
+                psi.Environment.Remove(name);
+#endif
+            }
         }
     }
 }

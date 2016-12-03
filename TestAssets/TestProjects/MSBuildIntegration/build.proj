@@ -35,11 +35,11 @@
     <Error Condition=" '$(MSBuildSDKsPath)' == '' " 
            Text="Expected MSBuildSDKsPath to be set, but it is not." />
 
-    <Error Condition=" !Exists('$(MSBuildSDKsPath)/%(Sdk.Identity)/%(Sdk.Version)/build/InitialImport.props') " 
-           Text="Expected '$(MSBuildSDKsPath)/%(Sdk.Identity)/%(Sdk.Version)/build/InitialImport.props' to exist, but it does not. " />
+    <Error Condition=" !Exists('$(MSBuildSDKsPath)/%(Sdk.Identity)/Sdk/Sdk.props') " 
+           Text="Expected '$(MSBuildSDKsPath)/%(Sdk.Identity)/Sdk/Sdk.props' to exist, but it does not. " />
 
-    <Error Condition=" !Exists('$(MSBuildSDKsPath)/%(Sdk.Identity)/%(Sdk.Version)/build/FinalImport.targets') " 
-           Text="Expected '$(MSBuildSDKsPath)/%(Sdk.Identity)/%(Sdk.Version)/build/FinalImport.targets' to exist, but it does not. " />
+    <Error Condition=" !Exists('$(MSBuildSDKsPath)/%(Sdk.Identity)/Sdk/Sdk.targets') " 
+           Text="Expected '$(MSBuildSDKsPath)/%(Sdk.Identity)/Sdk/Sdk.targets' to exist, but it does not. " />
 
     <Message Importance="low" Text="Message with low importance" />
     <Message Importance="normal" Text="Message with normal importance" />

@@ -12,8 +12,10 @@ namespace Microsoft.DotNet.Cli.Build
 
         protected override string Args
         {
-            get { return $"{GetProjectPath()} {GetSource()} {GetPackages()} {GetSkipInvalidConfigurations()} {GetRuntime()}"; }
+            get { return $"{GetProjectPath()} {GetSource()} {GetPackages()} {GetSkipInvalidConfigurations()} {GetRuntime()} {GetAdditionalParameters()}"; }
         }
+
+        public string AdditionalParameters { get; set; }
 
         public string ProjectPath { get; set; }
 
@@ -73,6 +75,11 @@ namespace Microsoft.DotNet.Cli.Build
             }
 
             return null;
+        }
+
+        private string GetAdditionalParameters()
+        {
+            return AdditionalParameters;
         }
     }
 }

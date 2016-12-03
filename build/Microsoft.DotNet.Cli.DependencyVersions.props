@@ -3,5 +3,6 @@
   <PropertyGroup>
     <CLI_MSBuild_Version>15.1.0-preview-000451-02</CLI_MSBuild_Version>
     <CLI_NETSDK_Version>1.0.0-alpha-20161104-2</CLI_NETSDK_Version>
+    <CLI_WEBSDK_Version>1.0.0-alpha-20161104-2-112</CLI_WEBSDK_Version>
   </PropertyGroup>
 </Project>
