@@ -1,0 +1,125 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="tr" original="src/dotnet/commands/dotnet-test/LocalizableStrings.resx">
+    <body>
+      <group id="src/dotnet/commands/dotnet-test/LocalizableStrings.resx" />
+      <trans-unit id="AppFullName">
+        <source>.NET Test Driver</source>
+        <target state="new">.NET Test Driver</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Test Driver for the .NET Platform</source>
+        <target state="new">Test Driver for the .NET Platform</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdArgProject">
+        <source>PROJECT</source>
+        <target state="new">PROJECT</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdArgDescription">
+        <source>The project to test, defaults to the current directory.</source>
+        <target state="new">The project to test, defaults to the current directory.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdSettingsFile">
+        <source>SettingsFile</source>
+        <target state="new">SettingsFile</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdSettingsDescription">
+        <source>Settings to use when running tests.</source>
+        <target state="new">Settings to use when running tests.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdListTestsDescription">
+        <source>Lists discovered tests</source>
+        <target state="new">Lists discovered tests</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdTestCaseFilterExpression">
+        <source>Expression</source>
+        <target state="new">Expression</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdTestCaseFilterDescription">
+        <source>Run tests that match the given expression.
+                                        Examples:
+                                        --testCaseFilter:"Priority = 1"
+                                        --testCaseFilter: "(FullyQualifiedName~Nightly | Name = MyTestMethod)"</source>
+        <target state="new">Run tests that match the given expression.
+                                        Examples:
+                                        --testCaseFilter:"Priority = 1"
+                                        --testCaseFilter: "(FullyQualifiedName~Nightly | Name = MyTestMethod)"</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdTestAdapterPathDescription">
+        <source>Use custom adapters from the given path in the test run.
+                                        Example: --testAdapterPath:&lt;pathToCustomAdapters&gt;</source>
+        <target state="new">Use custom adapters from the given path in the test run.
+                                        Example: --testAdapterPath:&lt;pathToCustomAdapters&gt;</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdLoggerOption">
+        <source>LoggerUri/FriendlyName</source>
+        <target state="new">LoggerUri/FriendlyName</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdLoggerDescription">
+        <source>Specify a logger for test results. 
+                                        Example: --logger:trx</source>
+        <target state="new">Specify a logger for test results. 
+                                        Example: --logger:trx</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdConfiguration">
+        <source>configuration</source>
+        <target state="new">configuration</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdConfigDescription">
+        <source>Configuration under which to build, i.e. Debug/Release</source>
+        <target state="new">Configuration under which to build, i.e. Debug/Release</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdFramework">
+        <source>FrameworkVersion</source>
+        <target state="new">FrameworkVersion</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdFrameworkDescription">
+        <source>Looks for test binaries for a specific framework</source>
+        <target state="new">Looks for test binaries for a specific framework</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdOutputDir">
+        <source>OutputDir</source>
+        <target state="new">OutputDir</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdOutputDescription">
+        <source>Directory in which to find the binaries to be run</source>
+        <target state="new">Directory in which to find the binaries to be run</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdPathToLogFile">
+        <source>PathToLogFile</source>
+        <target state="new">PathToLogFile</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdPathTologFileDescription">
+        <source>Enable verbose logs for test platform.
+                                        Logs are written to the provided file.</source>
+        <target state="new">Enable verbose logs for test platform.
+                                        Logs are written to the provided file.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdNoBuildDescription">
+        <source>Do not build project before testing.</source>
+        <target state="new">Do not build project before testing.</target>
+        <note></note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

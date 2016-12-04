@@ -3,7 +3,10 @@
   
   <ItemGroup>
     <!-- CLI cannot use the latest SDK until we move away from SDK PackageRef -->
-    <BundledSdk Include="Microsoft.Net.Sdk" Version="1.0.0-alpha-20161202-1" />
+    <BundledSdk Include="NuGet.Build.Tasks.Pack" Version="4.0.0-rc2" />
+    <BundledSdk Include="Microsoft.Net.Sdk" Version="1.0.0-alpha-20161203-1" />
     <BundledSdk Include="Microsoft.NET.Sdk.Web" Version="$(CLI_WEBSDK_Version)" />
+    <BundledSdk Include="Microsoft.NET.Sdk.Publish" Version="$(CLI_WEBSDK_Version)" />
+    <BundledSdk Include="Microsoft.NET.Sdk.Web.ProjectSystem" Version="$(CLI_WEBSDK_Version)" />
   </ItemGroup>
 </Project>

@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="pt-BR" original="src/dotnet/commands/dotnet-pack/LocalizableStrings.resx">
+    <body>
+      <group id="src/dotnet/commands/dotnet-pack/LocalizableStrings.resx" />
+      <trans-unit id="AppFullName">
+        <source>pack</source>
+        <target state="new">pack</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>pack for msbuild</source>
+        <target state="new">pack for msbuild</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdOutputDir">
+        <source>OUTPUT_DIR</source>
+        <target state="new">OUTPUT_DIR</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdOutputDirDescription">
+        <source>Directory in which to place outputs</source>
+        <target state="new">Directory in which to place outputs</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdNoBuildOptionDescription">
+        <source>Do not build project before packing</source>
+        <target state="new">Do not build project before packing</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdIncludeSymbolsDescription">
+        <source>Include PDBs along with the DLLs in the output folder</source>
+        <target state="new">Include PDBs along with the DLLs in the output folder</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdIncludeSourceDescription">
+        <source>Include PDBs and source files. Source files go into the src folder in the resulting nuget package</source>
+        <target state="new">Include PDBs and source files. Source files go into the src folder in the resulting nuget package</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdConfig">
+        <source>CONFIGURATION</source>
+        <target state="new">CONFIGURATION</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdConfigDescription">
+        <source>Configuration under which to build</source>
+        <target state="new">Configuration under which to build</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdVersionSuffix">
+        <source>VERSION_SUFFIX</source>
+        <target state="new">VERSION_SUFFIX</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdVersionSuffixDescription">
+        <source>Defines what `*` should be replaced with in version field in project.json</source>
+        <target state="new">Defines what `*` should be replaced with in version field in project.json</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdServiceableDescription">
+        <source>Set the serviceable flag in the package</source>
+        <target state="new">Set the serviceable flag in the package</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdArgumentProject">
+        <source>PROJECT</source>
+        <target state="new">PROJECT</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdArgumentDescription">
+        <source>The project to pack, defaults to the project file in the current directory. Can be a path to any project file</source>
+        <target state="new">The project to pack, defaults to the project file in the current directory. Can be a path to any project file</target>
+        <note></note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

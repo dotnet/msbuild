@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ru" original="src/dotnet/commands/dotnet-clean/LocalizableStrings.resx">
+    <body>
+      <group id="src/dotnet/commands/dotnet-clean/LocalizableStrings.resx" />
+      <trans-unit id="AppFullName">
+        <source>.NET Clean Command</source>
+        <target state="new">.NET Clean Command</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Command to clean previously generated build outputs.</source>
+        <target state="new">Command to clean previously generated build outputs.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdArgProject">
+        <source>PROJECT</source>
+        <target state="new">PROJECT</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdArgProjDescription">
+        <source>The MSBuild project file to build. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.</source>
+        <target state="new">The MSBuild project file to build. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdOutputDir">
+        <source>OUTPUT_DIR</source>
+        <target state="new">OUTPUT_DIR</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdOutputDirDescription">
+        <source>Directory in which the build outputs have been placed</source>
+        <target state="new">Directory in which the build outputs have been placed</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdFramework">
+        <source>FRAMEWORK</source>
+        <target state="new">FRAMEWORK</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdFrameworkDescription">
+        <source>Clean a specific framework</source>
+        <target state="new">Clean a specific framework</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdConfiguration">
+        <source>CONFIGURATION</source>
+        <target state="new">CONFIGURATION</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdConfigurationDescription">
+        <source>Clean a specific configuration</source>
+        <target state="new">Clean a specific configuration</target>
+        <note></note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

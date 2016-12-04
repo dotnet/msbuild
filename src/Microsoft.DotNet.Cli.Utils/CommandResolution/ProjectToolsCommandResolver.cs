@@ -248,14 +248,12 @@ namespace Microsoft.DotNet.Cli.Utils
 
             try
             {
-                File.Copy(tempDepsFile, depsPath);
+                File.Move(tempDepsFile, depsPath);
             }
             catch (Exception e)
             {
                 Reporter.Verbose.WriteLine($"unable to generate deps.json, it may have been already generated: {e.Message}");
-            }
-            finally
-            {
+                
                 try
                 {
                     File.Delete(tempDepsFile);
