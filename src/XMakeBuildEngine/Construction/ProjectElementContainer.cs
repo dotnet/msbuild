@@ -485,9 +485,9 @@ namespace Microsoft.Build.Construction
                 // If none is found, then the node being added is inserted as the only node of its kind
 
                 ProjectElement referenceSibling;
-                Predicate<ProjectElement> siblingIsSameAsChild = _ => _.ExpressedAsAttribute == false;
+                Predicate<ProjectElement> siblingIsExplicitElement = _ => _.ExpressedAsAttribute == false && _.IsImplicit == false;
 
-                if (TrySearchLeftSiblings(child.PreviousSibling, siblingIsSameAsChild, out referenceSibling))
+                if (TrySearchLeftSiblings(child.PreviousSibling, siblingIsExplicitElement, out referenceSibling))
                 {
                     //  Add after previous sibling
                     XmlElement.InsertAfter(child.XmlElement, referenceSibling.XmlElement);
@@ -503,7 +503,7 @@ namespace Microsoft.Build.Construction
                         }
                     }
                 }
-                else if (TrySearchRightSiblings(child.NextSibling, siblingIsSameAsChild, out referenceSibling))
+                else if (TrySearchRightSiblings(child.NextSibling, siblingIsExplicitElement, out referenceSibling))
                 {
                     //  Add as first child
                     XmlElement.InsertBefore(child.XmlElement, referenceSibling.XmlElement);
