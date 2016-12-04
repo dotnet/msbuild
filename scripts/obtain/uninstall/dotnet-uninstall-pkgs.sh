@@ -6,9 +6,9 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-current_user=$(whoami)
-if [ $current_user != "root" ]; then
-    echo "$(basename "$0") uninstallation script requires superuser privileges to run"
+current_userid=$(id -u)
+if [ $current_userid -ne 0 ]; then
+    echo "$(basename "$0") uninstallation script requires superuser privileges to run" >&2
     exit 1
 fi
 
@@ -22,17 +22,17 @@ remove_dotnet_pkgs(){
     
     for i in "${installed_pkgs[@]}"
     do
-        echo "Removing dotnet component - \"$i\""
+        echo "Removing dotnet component - \"$i\"" >&2
         pkgutil --force --forget "$i"
     done
 }
 
 remove_dotnet_pkgs
-[ "$?" -ne 0 ] && echo "Failed to remove dotnet packages." && exit 1
+[ "$?" -ne 0 ] && echo "Failed to remove dotnet packages." >&2 && exit 1
 
-echo "Deleting install root - $dotnet_install_root"
-rm -r "$dotnet_install_root"
-rm "$dotnet_path_file"
+echo "Deleting install root - $dotnet_install_root" >&2
+rm -rf "$dotnet_install_root"
+rm -f "$dotnet_path_file"
 
-echo "dotnet packages removal succeeded."
+echo "dotnet packages removal succeeded." >&2
 exit 0
