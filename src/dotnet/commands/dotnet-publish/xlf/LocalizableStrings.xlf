@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" original="src/dotnet/commands/dotnet-publish/LocalizableStrings.resx">
+    <body>
+      <group id="src/dotnet/commands/dotnet-publish/LocalizableStrings.resx" />
+      <trans-unit id="AppFullName">
+        <source>.NET Publisher</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Publisher for the .NET Platform</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ProjectArgument">
+        <source>PROJECT</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ProjectArgDescription">
+        <source>The MSBuild project file to publish. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="FrameworkOption">
+        <source>FRAMEWORK</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>Target framework to publish for</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RuntimeOption">
+        <source>RUNTIME_IDENTIFIER</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>Target runtime to publish for. The default is to publish a portable application.</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="OutputOption">
+        <source>OUTPUT_DIR</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="OutputOptionDescription">
+        <source>Path in which to publish the app</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ConfigurationOption">
+        <source>CONFIGURATION</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>Configuration under which to build</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="VersionSuffixOption">
+        <source>VERSION_SUFFIX</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="VersionSuffixOptionDescription">
+        <source>Defines the value for the $(VersionSuffix) property in the project</source>
+        <note></note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

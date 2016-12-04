@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" original="src/dotnet/commands/dotnet-pack/LocalizableStrings.resx">
+    <body>
+      <group id="src/dotnet/commands/dotnet-pack/LocalizableStrings.resx" />
+      <trans-unit id="AppFullName">
+        <source>pack</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>pack for msbuild</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdOutputDir">
+        <source>OUTPUT_DIR</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdOutputDirDescription">
+        <source>Directory in which to place outputs</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdNoBuildOptionDescription">
+        <source>Do not build project before packing</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdIncludeSymbolsDescription">
+        <source>Include PDBs along with the DLLs in the output folder</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdIncludeSourceDescription">
+        <source>Include PDBs and source files. Source files go into the src folder in the resulting nuget package</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdConfig">
+        <source>CONFIGURATION</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdConfigDescription">
+        <source>Configuration under which to build</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdVersionSuffix">
+        <source>VERSION_SUFFIX</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdVersionSuffixDescription">
+        <source>Defines what `*` should be replaced with in version field in project.json</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdServiceableDescription">
+        <source>Set the serviceable flag in the package</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdArgumentProject">
+        <source>PROJECT</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdArgumentDescription">
+        <source>The project to pack, defaults to the project file in the current directory. Can be a path to any project file</source>
+        <note></note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="src/dotnet/commands/dotnet-publish/LocalizableStrings.resx">
+    <body>
+      <group id="src/dotnet/commands/dotnet-publish/LocalizableStrings.resx" />
+      <trans-unit id="AppFullName">
+        <source>.NET Publisher</source>
+        <target state="new">.NET Publisher</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Publisher for the .NET Platform</source>
+        <target state="new">Publisher for the .NET Platform</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ProjectArgument">
+        <source>PROJECT</source>
+        <target state="new">PROJECT</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ProjectArgDescription">
+        <source>The MSBuild project file to publish. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.</source>
+        <target state="new">The MSBuild project file to publish. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="FrameworkOption">
+        <source>FRAMEWORK</source>
+        <target state="new">FRAMEWORK</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>Target framework to publish for</source>
+        <target state="new">Target framework to publish for</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RuntimeOption">
+        <source>RUNTIME_IDENTIFIER</source>
+        <target state="new">RUNTIME_IDENTIFIER</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>Target runtime to publish for. The default is to publish a portable application.</source>
+        <target state="new">Target runtime to publish for. The default is to publish a portable application.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="OutputOption">
+        <source>OUTPUT_DIR</source>
+        <target state="new">OUTPUT_DIR</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="OutputOptionDescription">
+        <source>Path in which to publish the app</source>
+        <target state="new">Path in which to publish the app</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ConfigurationOption">
+        <source>CONFIGURATION</source>
+        <target state="new">CONFIGURATION</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>Configuration under which to build</source>
+        <target state="new">Configuration under which to build</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="VersionSuffixOption">
+        <source>VERSION_SUFFIX</source>
+        <target state="new">VERSION_SUFFIX</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="VersionSuffixOptionDescription">
+        <source>Defines the value for the $(VersionSuffix) property in the project</source>
+        <target state="new">Defines the value for the $(VersionSuffix) property in the project</target>
+        <note></note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

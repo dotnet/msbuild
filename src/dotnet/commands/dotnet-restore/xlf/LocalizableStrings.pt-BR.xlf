@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="pt-BR" original="src/dotnet/commands/dotnet-restore/LocalizableStrings.resx">
+    <body>
+      <group id="src/dotnet/commands/dotnet-restore/LocalizableStrings.resx" />
+      <trans-unit id="AppFullName">
+        <source>restore</source>
+        <target state="new">restore</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>restore for msbuild</source>
+        <target state="new">restore for msbuild</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdArgument">
+        <source>root</source>
+        <target state="new">root</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdArgumentDescription">
+        <source>Optional path to a project file or MSBuild arguments.</source>
+        <target state="new">Optional path to a project file or MSBuild arguments.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdSourceOption">
+        <source>source</source>
+        <target state="new">source</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdSourceOptionDescription">
+        <source>Specifies a NuGet package source to use during the restore.</source>
+        <target state="new">Specifies a NuGet package source to use during the restore.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdPackagesOption">
+        <source>packagesDirectory</source>
+        <target state="new">packagesDirectory</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdPackagesOptionDescription">
+        <source>Directory to install packages in.</source>
+        <target state="new">Directory to install packages in.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdDisableParallelOptionDescription">
+        <source>Disables restoring multiple projects in parallel.</source>
+        <target state="new">Disables restoring multiple projects in parallel.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdConfigFileOption">
+        <source>file</source>
+        <target state="new">file</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdConfigFileOptionDescription">
+        <source>The NuGet configuration file to use.</source>
+        <target state="new">The NuGet configuration file to use.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdNoCacheOptionDescription">
+        <source>Do not cache packages and http requests.</source>
+        <target state="new">Do not cache packages and http requests.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdIgnoreFailedSourcesOptionDescription">
+        <source>Treat package source failures as warnings.</source>
+        <target state="new">Treat package source failures as warnings.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdNoDependenciesOptionDescription">
+        <source>Set this flag to ignore project to project references and only restore the root project</source>
+        <target state="new">Set this flag to ignore project to project references and only restore the root project</target>
+        <note></note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

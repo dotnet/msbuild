@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hans" original="src/dotnet/commands/dotnet-run/LocalizableStrings.resx">
+    <body>
+      <group id="src/dotnet/commands/dotnet-run/LocalizableStrings.resx" />
+      <trans-unit id="AppFullName">
+        <source>.NET Run Command</source>
+        <target state="new">.NET Run Command</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Command used to run .NET apps</source>
+        <target state="new">Command used to run .NET apps</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CommandOptionConfigurationDescription">
+        <source>Configuration under which to build</source>
+        <target state="new">Configuration under which to build</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CommandOptionFramework">
+        <source>FRAMEWORK</source>
+        <target state="new">FRAMEWORK</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CommandOptionFrameworkDescription">
+        <source>Compile a specific framework</source>
+        <target state="new">Compile a specific framework</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CommandOptionProjectDescription">
+        <source>The path to the project file to run (defaults to the current directory if there is only one project).</source>
+        <target state="new">The path to the project file to run (defaults to the current directory if there is only one project).</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RunCommandException">
+        <source>The build failed. Please fix the build errors and run again.</source>
+        <target state="new">The build failed. Please fix the build errors and run again.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RunCommandMSBuildExtensionsPath">
+        <source>MSBuildExtensionsPath</source>
+        <target state="new">MSBuildExtensionsPath</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RunCommandConfiguration">
+        <source>Configuration</source>
+        <target state="new">Configuration</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RunCommandTargetFramework">
+        <source>TargetFramework</source>
+        <target state="new">TargetFramework</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RunCommandProjectInstance">
+        <source>RunCommand</source>
+        <target state="new">RunCommand</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RunCommandOutputType">
+        <source>OutputType</source>
+        <target state="new">OutputType</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionUnableToRun1">
+        <source>Unable to run your project.</source>
+        <target state="new">Unable to run your project.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionUnableToRun2">
+        <source>Please ensure you have a runnable project type and ensure 'dotnet run' supports this project.</source>
+        <target state="new">Please ensure you have a runnable project type and ensure 'dotnet run' supports this project.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionUnableToRun3">
+        <source>The current OutputType is </source>
+        <target state="new">The current OutputType is </target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RunCommandRunArguments">
+        <source>RunArguments</source>
+        <target state="new">RunArguments</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RunCommandRunWorkingDirectory">
+        <source>RunWorkingDirectory</source>
+        <target state="new">RunWorkingDirectory</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RunCommandInvalidOperationException1">
+        <source>Couldn't find a project to run. Ensure a project exists in </source>
+        <target state="new">Couldn't find a project to run. Ensure a project exists in </target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RunCommandInvalidOperationException2">
+        <source>Or pass the path to the project using --project</source>
+        <target state="new">Or pass the path to the project using --project</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RunCommandInvalidOperationException3">
+        <source>Specify which project file to use because this </source>
+        <target state="new">Specify which project file to use because this </target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RunCommandInvalidOperationException4">
+        <source>contains more than one project file.</source>
+        <target state="new">contains more than one project file.</target>
+        <note></note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
