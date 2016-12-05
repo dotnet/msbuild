@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Tools.New
                         {
                             if (File.Exists(Path.Combine(Directory.GetCurrentDirectory(), entry)))
                             {
-                                Reporter.Error.WriteLine(LocalizableStrings.ProjectContainsError, languageName, entry);
+                                Reporter.Error.WriteLine(string.Format(LocalizableStrings.ProjectContainsError, languageName, entry));
                                 return 1;
                             }
                         }
