@@ -13,27 +13,6 @@ namespace Microsoft.DotNet.New.Tests
 {
     public class GivenThatIWantANewCSApp : TestBase
     {
-        [Fact(Skip="https://github.com/dotnet/cli/issues/4381")]
-        public void When_NewtonsoftJson_dependency_added_Then_project_restores_and_runs()
-        {
-            var rootPath = TestAssetsManager.CreateTestDirectory().Path;
-            var projectName = new DirectoryInfo(rootPath).Name;
-            var projectFile = Path.Combine(rootPath, $"{projectName}.csproj");
-
-            new TestCommand("dotnet") { WorkingDirectory = rootPath }
-                .Execute("new");
-            
-            AddProjectDependency(projectFile, "Newtonsoft.Json", "7.0.1");
-
-            new TestCommand("dotnet") { WorkingDirectory = rootPath }
-                .Execute("restore /p:SkipInvalidConfigurations=true")
-                .Should().Pass();
-
-            new TestCommand("dotnet") { WorkingDirectory = rootPath }
-                .Execute("run")
-                .Should().Pass();
-        }
-        
         [Fact]
         public void When_dotnet_build_is_invoked_Then_app_builds_without_warnings()
         {
