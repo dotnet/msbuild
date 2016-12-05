@@ -440,10 +440,19 @@ namespace Microsoft.NET.Build.Tests
 
             var command = Stage0MSBuild.CreateCommandForTarget("ResolveAssemblyReferencesDesignTime", args);
 
-            command
-                .Execute()
-                .Should()
-                .Pass();
+            var result = command
+                .CaptureStdOut()
+                .Execute();
+
+            //  In CI builds, VSINSTALLDIR is set but the CompileDesignTime target doesn't exist, probably because
+            //  it's an earlier version of Visual Studio
+            if (result.ExitCode != 0)
+            {
+                result
+                    .StdOut
+                    .Should()
+                    .Contain("The target \"CompileDesignTime\" does not exist");
+            }
         }
 
         [Fact]
