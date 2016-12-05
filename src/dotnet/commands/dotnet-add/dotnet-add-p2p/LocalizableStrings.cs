@@ -5,6 +5,8 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
         public const string AppFullName = ".NET Add Project to Project (p2p) reference Command";
 
         public const string AppDescription = "Command to add project to project (p2p) reference";
+        
+        public const string SpecifyAtLeastOneReferenceToAdd = "You must specify at least one reference to add. Please run dotnet add --help for more information.";
 
         public const string AppHelpText = "Project to project references to add";
 
