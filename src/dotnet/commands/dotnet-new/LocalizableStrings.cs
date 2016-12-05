@@ -2,11 +2,9 @@ namespace Microsoft.DotNet.Tools.New
 {
     internal class LocalizableStrings
     {
-        public const string CreatingNewError = "Creating new ";
+        public const string CreatingNewError = "Creating new {0} project failed, project already exists.";
 
         public const string CreatedNew = "Created new ";
-
-        public const string CreatingNewError2 = " project failed, project already exists.";
 
         public const string DirectoryContainsError = " project failed, directory already contains ";
 

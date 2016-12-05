@@ -33,7 +33,8 @@ namespace Microsoft.DotNet.Tools.New
             // Check if project.json exists in the folder
             if (File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "project.json")) && !isMsBuild)
             {
-                Reporter.Error.WriteLine($"{LocalizableStrings.CreatingNewError}{languageName}{LocalizableStrings.CreatingNewError2}");
+                Reporter.Error.WriteLine(String.Format(LocalizableStrings.CreatingNewError,languageName));
+                
                 return 1;
             }
 
