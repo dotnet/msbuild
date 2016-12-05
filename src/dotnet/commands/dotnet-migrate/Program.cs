@@ -21,29 +21,43 @@ namespace Microsoft.DotNet.Tools.Migrate
 
             CommandLineApplication app = new CommandLineApplication();
             app.Name = "dotnet migrate";
-            app.FullName = ".NET Migrate Command";
-            app.Description = "Command used to migrate project.json projects to msbuild";
+            app.FullName = LocalizableStrings.AppFullName;
+            app.Description = LocalizableStrings.AppDescription;
             app.HandleResponseFiles = true;
             app.HelpOption("-h|--help");
 
-            CommandArgument projectArgument = app.Argument("<PROJECT_JSON/GLOBAL_JSON/PROJECT_DIR>",
-                string.Join(Environment.NewLine,
-                "The path to ",
-                " - a project.json file to migrate.",
-                "or",
-                " - a global.json file, it will migrate the folders specified in global.json.",
-                "or",
-                " - a directory to migrate, it will recursively search for project.json files to migrate.",
-                "Defaults to current directory if nothing is specified."));
+            CommandArgument projectArgument = app.Argument(
+                $"<{LocalizableStrings.CmdProjectArgument}>",
+                LocalizableStrings.CmdProjectArgumentDescription);
 
-            CommandOption template = app.Option("-t|--template-file", "Base MSBuild template to use for migrated app. The default is the project included in dotnet new.", CommandOptionType.SingleValue);
-            CommandOption sdkVersion = app.Option("-v|--sdk-package-version", "The version of the sdk package that will be referenced in the migrated app. The default is the version of the sdk in dotnet new.", CommandOptionType.SingleValue);
-            CommandOption xprojFile = app.Option("-x|--xproj-file", "The path to the xproj file to use. Required when there is more than one xproj in a project directory.", CommandOptionType.SingleValue);
-            CommandOption skipProjectReferences = app.Option("-s|--skip-project-references", "Skip migrating project references. By default project references are migrated recursively.", CommandOptionType.BoolValue);
+            CommandOption template = app.Option(
+                "-t|--template-file",
+                LocalizableStrings.CmdTemplateDescription,
+                CommandOptionType.SingleValue);
+            CommandOption sdkVersion = app.Option(
+                "-v|--sdk-package-version", 
+                LocalizableStrings.CmdVersionDescription, 
+                CommandOptionType.SingleValue);
+            CommandOption xprojFile = app.Option(
+                "-x|--xproj-file", 
+                LocalizableStrings.CmdXprojFileDescription, 
+                CommandOptionType.SingleValue);
+            CommandOption skipProjectReferences = app.Option(
+                "-s|--skip-project-references", 
+                LocalizableStrings.CmdSkipProjectReferencesDescription, 
+                CommandOptionType.BoolValue);
 
-            CommandOption reportFile = app.Option("-r|--report-file", "Output migration report to the given file in addition to the console.", CommandOptionType.SingleValue);
-            CommandOption structuredReportOutput = app.Option("--format-report-file-json", "Output migration report file as json rather than user messages.", CommandOptionType.BoolValue);
-            CommandOption skipBackup = app.Option("--skip-backup", "Skip moving project.json, global.json, and *.xproj to a `backup` directory after successful migration.", CommandOptionType.BoolValue);
+            CommandOption reportFile = app.Option(
+                "-r|--report-file", 
+                LocalizableStrings.CmdReportFileDescription, 
+                CommandOptionType.SingleValue);
+            CommandOption structuredReportOutput = app.Option(
+                "--format-report-file-json", 
+                LocalizableStrings.CmdReportOutputDescription, 
+                CommandOptionType.BoolValue);
+            CommandOption skipBackup = app.Option("--skip-backup", 
+                LocalizableStrings.CmdSkipBackupDescription, 
+                CommandOptionType.BoolValue);
 
             app.OnExecute(() =>
             {
@@ -71,7 +85,7 @@ namespace Microsoft.DotNet.Tools.Migrate
 #else
                 Reporter.Error.WriteLine(ex.Message);
 #endif
-                Reporter.Error.WriteLine("Migration failed.");
+                Reporter.Error.WriteLine(LocalizableStrings.MigrationFailedError);
                 return 1;
             }
         }
