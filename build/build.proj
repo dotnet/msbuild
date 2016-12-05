@@ -151,7 +151,7 @@
     
   </Target>
 
-  <Target Name="Test" Condition="'$(BuildTemplates)' != 'true'">
+  <Target Name="Test" Condition="'$(BuildTemplates)' != 'true' and '$(RunTests)' != 'false'">
 
     <ItemGroup>
       <TestAssembly Include="$(TestsDirectory)*Tests.dll" />
