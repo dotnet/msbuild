@@ -5,9 +5,9 @@ using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using System.Collections.Generic;
 
-namespace Microsoft.DotNet.Tools.Remove.ProjectToProjectReference
+namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
 {
-    public class RemoveProjectToProjectReferenceCommand
+    public class AddProjectToProjectReferenceCommand
     {
         public static int Run(string[] args)
         {
@@ -15,11 +15,11 @@ namespace Microsoft.DotNet.Tools.Remove.ProjectToProjectReference
 
             CommandLineApplication app = new CommandLineApplication(throwOnUnexpectedArg: false)
             {
-                Name = "dotnet remove p2p",
-                FullName = ".NET Remove Project to Project (p2p) reference Command",
-                Description = "Command to remove project to project (p2p) reference",
+                Name = "dotnet add p2p",
+                FullName = ".NET Add Project to Project (p2p) reference Command",
+                Description = "Command to add project to project (p2p) reference",
                 AllowArgumentSeparator = true,
-                ArgumentSeparatorHelpText = "Project to project references to remove"
+                ArgumentSeparatorHelpText = "Project to project references to add"
             };
 
             app.HelpOption("-h|--help");
@@ -32,29 +32,39 @@ namespace Microsoft.DotNet.Tools.Remove.ProjectToProjectReference
 
             CommandOption frameworkOption = app.Option(
                 "-f|--framework <FRAMEWORK>",
-                "Remove reference only when targetting a specific framework",
+                "Add reference only when targetting a specific framework",
                 CommandOptionType.SingleValue);
+
+            CommandOption forceOption = app.Option(
+                "--force", 
+                "Add reference even if it does not exist, do not convert paths to relative",
+                CommandOptionType.NoValue);
 
             app.OnExecute(() => {
                 if (string.IsNullOrEmpty(projectArgument.Value))
                 {
-                    throw new GracefulException(LocalizableStrings.RequiredArgumentNotPassed, "<Project>");
+                    throw new GracefulException(CommonLocalizableStrings.RequiredArgumentNotPassed, "<Project>");
                 }
 
                 var msbuildProj = MsbuildProject.FromFileOrDirectory(projectArgument.Value);
 
                 if (app.RemainingArguments.Count == 0)
                 {
-                    throw new GracefulException(LocalizableStrings.SpecifyAtLeastOneReferenceToRemove);
+                    throw new GracefulException(LocalizableStrings.SpecifyAtLeastOneReferenceToAdd);
                 }
 
                 List<string> references = app.RemainingArguments;
+                if (!forceOption.HasValue())
+                {
+                    MsbuildProject.EnsureAllReferencesExist(references);
+                    msbuildProj.ConvertPathsToRelative(ref references);
+                }
                 
-                int numberOfRemovedReferences = msbuildProj.RemoveProjectToProjectReferences(
+                int numberOfAddedReferences = msbuildProj.AddProjectToProjectReferences(
                     frameworkOption.Value(),
                     references);
 
-                if (numberOfRemovedReferences != 0)
+                if (numberOfAddedReferences != 0)
                 {
                     msbuildProj.Project.Save();
                 }

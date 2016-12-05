@@ -41,13 +41,13 @@ namespace Microsoft.DotNet.Tools
         {
             if (!File.Exists(projectPath))
             {
-                throw new GracefulException(LocalizableStrings.ProjectDoesNotExist, projectPath);
+                throw new GracefulException(CommonLocalizableStrings.ProjectDoesNotExist, projectPath);
             }
 
             var project = TryOpenProject(projectPath);
             if (project == null)
             {
-                throw new GracefulException(LocalizableStrings.ProjectIsInvalid, projectPath);
+                throw new GracefulException(CommonLocalizableStrings.ProjectIsInvalid, projectPath);
             }
 
             return new MsbuildProject(project);
@@ -62,36 +62,36 @@ namespace Microsoft.DotNet.Tools
             }
             catch (ArgumentException)
             {
-                throw new GracefulException(LocalizableStrings.CouldNotFindProjectOrDirectory, projectDirectory);
+                throw new GracefulException(CommonLocalizableStrings.CouldNotFindProjectOrDirectory, projectDirectory);
             }
 
             if (!dir.Exists)
             {
-                throw new GracefulException(LocalizableStrings.CouldNotFindProjectOrDirectory, projectDirectory);
+                throw new GracefulException(CommonLocalizableStrings.CouldNotFindProjectOrDirectory, projectDirectory);
             }
 
             FileInfo[] files = dir.GetFiles("*proj");
             if (files.Length == 0)
             {
-                throw new GracefulException(LocalizableStrings.CouldNotFindAnyProjectInDirectory, projectDirectory);
+                throw new GracefulException(CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory, projectDirectory);
             }
 
             if (files.Length > 1)
             {
-                throw new GracefulException(LocalizableStrings.MoreThanOneProjectInDirectory, projectDirectory);
+                throw new GracefulException(CommonLocalizableStrings.MoreThanOneProjectInDirectory, projectDirectory);
             }
 
             FileInfo projectFile = files.First();
 
             if (!projectFile.Exists)
             {
-                throw new GracefulException(LocalizableStrings.CouldNotFindAnyProjectInDirectory, projectDirectory);
+                throw new GracefulException(CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory, projectDirectory);
             }
 
             var project = TryOpenProject(projectFile.FullName);
             if (project == null)
             {
-                throw new GracefulException(LocalizableStrings.FoundInvalidProject, projectFile.FullName);
+                throw new GracefulException(CommonLocalizableStrings.FoundInvalidProject, projectFile.FullName);
             }
 
             return new MsbuildProject(project);
@@ -106,14 +106,14 @@ namespace Microsoft.DotNet.Tools
             {
                 if (Project.HasExistingItemWithCondition(framework, @ref))
                 {
-                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.ProjectAlreadyHasAreference, @ref));
+                    Reporter.Output.WriteLine(string.Format(CommonLocalizableStrings.ProjectAlreadyHasAreference, @ref));
                     continue;
                 }
 
                 numberOfAddedReferences++;
                 itemGroup.AppendChild(Project.CreateItemElement(ProjectItemElementType, @ref));
 
-                Reporter.Output.WriteLine(string.Format(LocalizableStrings.ReferenceAddedToTheProject, @ref));
+                Reporter.Output.WriteLine(string.Format(CommonLocalizableStrings.ReferenceAddedToTheProject, @ref));
             }
 
             return numberOfAddedReferences;
@@ -157,7 +157,7 @@ namespace Microsoft.DotNet.Tools
                 throw new GracefulException(
                     string.Join(
                         Environment.NewLine,
-                        notExisting.Select((r) => string.Format(LocalizableStrings.ReferenceDoesNotExist, r))));
+                        notExisting.Select((r) => string.Format(CommonLocalizableStrings.ReferenceDoesNotExist, r))));
             }
         }
 
@@ -176,13 +176,13 @@ namespace Microsoft.DotNet.Tools
                     }
 
                     numberOfRemovedRefs++;
-                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.ProjectReferenceRemoved, r));
+                    Reporter.Output.WriteLine(string.Format(CommonLocalizableStrings.ProjectReferenceRemoved, r));
                 }
             }
 
             if (numberOfRemovedRefs == 0)
             {
-                Reporter.Output.WriteLine(string.Format(LocalizableStrings.ProjectReferenceCouldNotBeFound, reference));
+                Reporter.Output.WriteLine(string.Format(CommonLocalizableStrings.ProjectReferenceCouldNotBeFound, reference));
             }
 
             return numberOfRemovedRefs;

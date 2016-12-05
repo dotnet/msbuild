@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Tools
             }
             else if (args.Length == 1)
             {
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.RequiredArgumentNotPassed, "<command>").Red());
+                Reporter.Error.WriteLine(string.Format(CommonLocalizableStrings.RequiredArgumentNotPassed, "<command>").Red());
                 Reporter.Output.WriteLine(HelpText);
                 return 1;
             }
@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Tools
                 return builtin(args);
             }
 
-            Reporter.Error.WriteLine(string.Format(LocalizableStrings.RequiredArgumentIsInvalid, "<command>").Red());
+            Reporter.Error.WriteLine(string.Format(CommonLocalizableStrings.RequiredArgumentIsInvalid, "<command>").Red());
             Reporter.Output.WriteLine(HelpText);
             return 1;
         }
