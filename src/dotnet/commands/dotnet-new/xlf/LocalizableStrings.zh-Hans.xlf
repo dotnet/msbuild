@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hans" original="src/dotnet/commands/dotnet-new/LocalizableStrings.resx">
+    <body>
+      <group id="src/dotnet/commands/dotnet-new/LocalizableStrings.resx" />
+      <trans-unit id="ProjectExistsError">
+        <source>Creating new {0} project failed, project already exists.</source>
+        <target state="new">Creating new {0} project failed, project already exists.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ProjectContainsError">
+        <source>Creating new {0} project failed, directory already contains {1}</source>
+        <target state="new">Creating new {0} project failed, directory already contains {1}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ProjectFailedError">
+        <source>Creating new {0} project failed.</source>
+        <target state="new">Creating new {0} project failed.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CreatedNewProject">
+        <source>Created new {0} project in {1}.</source>
+        <target state="new">Created new {0} project in {1}.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AppFullName">
+        <source>.NET Initializer</source>
+        <target state="new">.NET Initializer</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Initializes empty project for .NET Platform</source>
+        <target state="new">Initializes empty project for .NET Platform</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ValidValuesText">
+        <source>Valid values for {0}: {1}.</source>
+        <target state="new">Valid values for {0}: {1}.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="Language">
+        <source>LANGUAGE</source>
+        <target state="new">LANGUAGE</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="LanguageOfProject">
+        <source>Language of project    Valid values: {0}.</source>
+        <target state="new">Language of project    Valid values: {0}.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="Type">
+        <source>TYPE</source>
+        <target state="new">TYPE</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="TypeOfProject">
+        <source>Type of project        {0}</source>
+        <target state="new">Type of project        {0}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="UnrecognizedLanguage">
+        <source>Unrecognized language: {0}</source>
+        <target state="new">Unrecognized language: {0}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="UnrecognizedType">
+        <source>Unrecognized type: {0}</source>
+        <target state="new">Unrecognized type: {0}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AvailableTypes">
+        <source>Available types for {0} :</source>
+        <target state="new">Available types for {0} :</target>
+        <note></note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

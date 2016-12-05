@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="src/dotnet/commands/dotnet-migrate/LocalizableStrings.resx">
+    <body>
+      <group id="src/dotnet/commands/dotnet-migrate/LocalizableStrings.resx" />
+      <trans-unit id="AppFullName">
+        <source>.NET Migrate Command</source>
+        <target state="new">.NET Migrate Command</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Command used to migrate project.json projects to msbuild</source>
+        <target state="new">Command used to migrate project.json projects to msbuild</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdProjectArgument">
+        <source>PROJECT_JSON/GLOBAL_JSON/PROJECT_DIR</source>
+        <target state="new">PROJECT_JSON/GLOBAL_JSON/PROJECT_DIR</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdProjectArgumentDescription">
+        <source>The path to 
+    - a project.json file to migrate.
+or
+    - a global.json file, it will migrate the folders specified in global.json.
+or
+    - a directory to migrate, it will recursively search for project.json files to migrate.
+Defaults to current directory if nothing is specified.</source>
+        <target state="new">The path to 
+    - a project.json file to migrate.
+or
+    - a global.json file, it will migrate the folders specified in global.json.
+or
+    - a directory to migrate, it will recursively search for project.json files to migrate.
+Defaults to current directory if nothing is specified.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdTemplateDescription">
+        <source>Base MSBuild template to use for migrated app. The default is the project included in dotnet new.</source>
+        <target state="new">Base MSBuild template to use for migrated app. The default is the project included in dotnet new.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdVersionDescription">
+        <source>The version of the sdk package that will be referenced in the migrated app. The default is the version of the sdk in dotnet new.</source>
+        <target state="new">The version of the sdk package that will be referenced in the migrated app. The default is the version of the sdk in dotnet new.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdXprojFileDescription">
+        <source>The path to the xproj file to use. Required when there is more than one xproj in a project directory.</source>
+        <target state="new">The path to the xproj file to use. Required when there is more than one xproj in a project directory.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdSkipProjectReferencesDescription">
+        <source>Skip migrating project references. By default project references are migrated recursively.</source>
+        <target state="new">Skip migrating project references. By default project references are migrated recursively.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdReportFileDescription">
+        <source>Output migration report to the given file in addition to the console.</source>
+        <target state="new">Output migration report to the given file in addition to the console.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdReportOutputDescription">
+        <source>Output migration report file as json rather than user messages.</source>
+        <target state="new">Output migration report file as json rather than user messages.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdSkipBackupDescription">
+        <source>Skip moving project.json, global.json, and *.xproj to a `backup` directory after successful migration.</source>
+        <target state="new">Skip moving project.json, global.json, and *.xproj to a `backup` directory after successful migration.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MigrationFailedError">
+        <source>Migration failed.</source>
+        <target state="new">Migration failed.</target>
+        <note></note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
