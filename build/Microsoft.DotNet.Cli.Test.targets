@@ -11,6 +11,7 @@
   <Import Project="test/TestProjects.targets" />
 
   <Target Name="Test"
+          Condition=" '$(CLIBUILD_SKIP_TESTS)' != 'true' "
           DependsOnTargets="PrepareTests;
                             BuildTestAssets;
                             BuildTests;">
