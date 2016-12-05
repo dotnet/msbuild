@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
 
         private const string MSBuildExeName = "MSBuild.dll";
 
-        private const string ExtensionsDirectoryName = "Extensions";
+        private const string SdksDirectoryName = "Sdks";
 
         private readonly ForwardingApp _forwardingApp;
 
@@ -95,7 +95,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
 
             return Path.Combine(
                 AppContext.BaseDirectory,
-                ExtensionsDirectoryName);
+                SdksDirectoryName);
         }
 
         private static string GetRunCscPath()

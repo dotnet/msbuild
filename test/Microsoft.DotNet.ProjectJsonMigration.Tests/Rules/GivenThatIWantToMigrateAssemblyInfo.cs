@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var projectContext =
                 ProjectContext.Create(projectDirectory, FrameworkConstants.CommonFrameworks.NetCoreApp10);
             _mockProject = ProjectRootElement.Create();
-            var testSettings = new MigrationSettings(projectDirectory, projectDirectory, "1.0.0", _mockProject, null);
+            var testSettings = new MigrationSettings(projectDirectory, projectDirectory, _mockProject, null);
             var testInputs = new MigrationRuleInputs(
                 new[] {projectContext},
                 _mockProject,

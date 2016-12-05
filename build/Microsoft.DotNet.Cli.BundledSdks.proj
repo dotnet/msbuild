@@ -16,6 +16,9 @@
           Outputs="@(SdkContent->'$(SdkLayoutDirectory)/%(RecursiveDir)%(FileName)%(Extension)')">
     <Copy SourceFiles="@(SdkContent)"
           DestinationFiles="@(SdkContent->'$(SdkLayoutDirectory)/%(RecursiveDir)%(FileName)%(Extension)')" />
+    
+    <Message Text="Copied Sdk $(SdkPackageName) from $(SdkNuPkgPath) to $(SdkLayoutDirectory)."
+             Importance="High" />
   </Target>
 
   <Target Name="GetSdkItemsToCopy">

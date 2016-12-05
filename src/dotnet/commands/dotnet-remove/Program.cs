@@ -16,22 +16,22 @@ namespace Microsoft.DotNet.Tools.Remove
 {
     public class RemoveCommand : DispatchCommand
     {
-        protected override string HelpText => @".NET Remove Command;
+        protected override string HelpText => $@"{LocalizableStrings.NetRemoveCommand};
 
-Usage: dotnet remove [options] <object> <command> [[--] <arg>...]]
+{LocalizableStrings.Usage}: dotnet remove [options] <object> <command> [[--] <arg>...]]
 
-Options:
-  -h|--help  Show help information
+{LocalizableStrings.Options}:
+  -h|--help  {LocalizableStrings.HelpDefinition}
 
-Arguments:
-  <object>   The object of the operation. If a project file is not specified, it defaults to the current directory.
-  <command>  Command to be executed on <object>.
+{LocalizableStrings.Arguments}:
+  <object>   {LocalizableStrings.ArgumentsObjectDefinition}
+  <command>  {LocalizableStrings.ArgumentsCommandDefinition}
 
 Args:
-  Any extra arguments passed to the command. Use `dotnet add <command> --help` to get help about these arguments.
+  {LocalizableStrings.ArgsDefinition}
 
-Commands:
-  p2p        Remove project to project (p2p) reference from a project";
+{LocalizableStrings.Commands}:
+  p2p        {LocalizableStrings.CommandP2PDefinition}";
 
         protected override Dictionary<string, Func<string[], int>> BuiltInCommands => new Dictionary<string, Func<string[], int>>
         {

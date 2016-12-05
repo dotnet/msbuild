@@ -17,7 +17,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         private JObject _projectJson;
 
         private bool _baseDefined = false;
-        private bool _baseProjectDirectory;
         
         public ProjectJsonBuilder(TestAssetsManager testAssetsManager)
         {

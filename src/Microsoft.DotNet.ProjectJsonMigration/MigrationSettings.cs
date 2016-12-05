@@ -13,18 +13,16 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         public string ProjectXProjFilePath { get; }
         public string ProjectDirectory { get; }
         public string OutputDirectory { get; }
-        public string SdkPackageVersion { get; }
         public ProjectRootElement MSBuildProjectTemplate { get; }
         public string SdkDefaultsFilePath { get; }
         
         public MigrationSettings(
             string projectDirectory,
             string outputDirectory,
-            string sdkPackageVersion,
             ProjectRootElement msBuildProjectTemplate,
             string projectXprojFilePath=null,
             string sdkDefaultsFilePath=null) : this(
-                projectDirectory, outputDirectory, sdkPackageVersion, projectXprojFilePath, sdkDefaultsFilePath)
+                projectDirectory, outputDirectory, projectXprojFilePath, sdkDefaultsFilePath)
         {
             MSBuildProjectTemplate = msBuildProjectTemplate != null ? msBuildProjectTemplate.DeepClone() : null;
         }
@@ -32,11 +30,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         public MigrationSettings(
             string projectDirectory,
             string outputDirectory,
-            string sdkPackageVersion,
             string msBuildProjectTemplatePath,
             string projectXprojFilePath=null,
             string sdkDefaultsFilePath=null) : this(
-                projectDirectory, outputDirectory, sdkPackageVersion, projectXprojFilePath, sdkDefaultsFilePath)
+                projectDirectory, outputDirectory, projectXprojFilePath, sdkDefaultsFilePath)
         {
             _msBuildProjectTemplatePath = msBuildProjectTemplatePath;
             MSBuildProjectTemplate = ProjectRootElement.Open(
@@ -48,13 +45,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         private MigrationSettings(
             string projectDirectory,
             string outputDirectory,
-            string sdkPackageVersion,
             string projectXprojFilePath=null,
             string sdkDefaultsFilePath=null)
         {
             ProjectDirectory = projectDirectory;
             OutputDirectory = outputDirectory;
-            SdkPackageVersion = sdkPackageVersion;
             ProjectXProjFilePath = projectXprojFilePath;
             SdkDefaultsFilePath = sdkDefaultsFilePath;
         }

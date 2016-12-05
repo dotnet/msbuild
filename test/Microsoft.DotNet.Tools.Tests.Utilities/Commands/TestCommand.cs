@@ -180,7 +180,16 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
             if (tasksToAwait.Any())
             {
-                Task.WaitAll(tasksToAwait.ToArray());
+                try
+                {
+                    Task.WaitAll(tasksToAwait.ToArray());
+                }
+                catch (System.ObjectDisposedException e)
+                {
+                    taskErr = null;
+
+                    taskOut = null;
+                }
             }
 
             var result = new CommandResult(
@@ -244,7 +253,16 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
                 if (tasksToAwait.Any())
                 {
-                    Task.WaitAll(tasksToAwait.ToArray());
+                    try
+                    {
+                        Task.WaitAll(tasksToAwait.ToArray());
+                    }
+                    catch (System.ObjectDisposedException e)
+                    {
+                        taskErr = null;
+
+                        taskOut = null;
+                    }
                 }
                 
                 var result = new CommandResult(

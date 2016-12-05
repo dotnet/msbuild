@@ -14,8 +14,6 @@ namespace Microsoft.DotNet.Tools.Pack.Tests
 {
     public class PackTests : TestBase
     {
-        private readonly string _testProjectsRoot;
-
         [Fact(Skip="https://github.com/dotnet/cli/issues/4488")]
         public void OutputsPackagesToConfigurationSubdirWhenOutputParameterIsNotPassed()
         {

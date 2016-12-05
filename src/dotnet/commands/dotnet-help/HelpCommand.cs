@@ -8,41 +8,41 @@ namespace Microsoft.DotNet.Tools.Help
 {
     public class HelpCommand
     {
-        private const string UsageText = @"Usage: dotnet [host-options] [command] [arguments] [common-options]
+        private static readonly string UsageText = $@"{LocalizableStrings.Usage}: dotnet [host-options] [command] [arguments] [common-options]
 
-Arguments:
-  [command]             The command to execute
-  [arguments]           Arguments to pass to the command
-  [host-options]        Options specific to dotnet (host)
-  [common-options]      Options common to all commands
+{LocalizableStrings.Arguments}:
+  [command]             {LocalizableStrings.CommandDefinition}
+  [arguments]           {LocalizableStrings.ArgumentsDefinition}
+  [host-options]        {LocalizableStrings.HostOptionsDefinition}
+  [common-options]      {LocalizableStrings.OptionsDescription}
 
-Common options:
-  -v|--verbose          Enable verbose output
-  -h|--help             Show help 
+{LocalizableStrings.CommonOptions}:
+  -v|--verbose          {LocalizableStrings.VerboseDefinition}
+  -h|--help             {LocalizableStrings.HelpDefinition} 
 
-Host options (passed before the command):
-  -v|--verbose          Enable verbose output
-  --version             Display .NET CLI Version Number
-  --info                Display .NET CLI Info
+{LocalizableStrings.HostOptions}:
+  -v|--verbose          {LocalizableStrings.VerboseDefinition}
+  --version             {LocalizableStrings.VersionDescription}
+  --info                {LocalizableStrings.InfoDescription}
 
-Commands:
-  new           Initialize a basic .NET project
-  restore       Restore dependencies specified in the .NET project
-  build         Builds a .NET project
-  publish       Publishes a .NET project for deployment (including the runtime)
-  run           Compiles and immediately executes a .NET project
-  test          Runs unit tests using the test runner specified in the project
-  pack          Creates a NuGet package
-  migrate       Migrates a project.json based project to a msbuild based project
+{LocalizableStrings.Commands}:
+  new           {LocalizableStrings.NewDefinition}
+  restore       {LocalizableStrings.RestoreDefinition}
+  build         {LocalizableStrings.BuildDefinition}
+  publish       {LocalizableStrings.PublishDefinition}
+  run           {LocalizableStrings.RunDefinition}
+  test          {LocalizableStrings.TestDefinition}
+  pack          {LocalizableStrings.PackDefinition}
+  migrate       {LocalizableStrings.MigrateDefinition}
 
 Project modification commands:
   add           Add items to the project
   remove        Remove items from the project
 
-Advanced Commands:
-  nuget         Provides additional NuGet commands
-  msbuild       msbuilds a project and all of its dependencies
-  vstest        Runs tests from the specified files";
+{LocalizableStrings.AdvancedCommands}:
+  nuget         {LocalizableStrings.NugetDefinition}
+  msbuild       {LocalizableStrings.MsBuildDefinition}
+  vstest        {LocalizableStrings.VsTestDefinition}";
 
         public static int Run(string[] args)
         {

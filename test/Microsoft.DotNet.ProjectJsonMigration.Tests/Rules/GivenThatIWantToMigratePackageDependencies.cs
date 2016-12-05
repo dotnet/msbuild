@@ -50,31 +50,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void It_migrates_web_projects_to_have_web_sdk_PrivateAssets()
-        {
-            var mockProj = RunPackageDependenciesRuleOnPj(@"
-                {
-                    ""buildOptions"": {
-                        ""emitEntryPoint"": true
-                    },
-                    ""dependencies"": {
-                        ""Microsoft.AspNetCore.Mvc"" : {
-                            ""version"": ""1.0.0""
-                        }
-                    },
-                    ""frameworks"": {
-                        ""netcoreapp1.0"": {}
-                    }
-                }");
-
-            var packageRef = mockProj.Items.FirstOrDefault(i =>
-                i.Include == "Microsoft.NET.Sdk.Web" && i.ItemType == "PackageReference");
-
-            packageRef.Should().NotBeNull();
-            packageRef.GetMetadataWithName("PrivateAssets").Value.Should().NotBeNull().And.Be("All");
-        }
-
-        [Fact]
         public void It_migrates_suppress_parent_array_to_PrivateAssets()
         {
             var mockProj = RunPackageDependenciesRuleOnPj(@"                
@@ -431,7 +406,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 i => (i.Include == "NETStandard.Library" && i.ItemType == "PackageReference"));
         }
 
-        private void EmitsPackageReferences(ProjectRootElement mockProj, params Tuple<string, string, string>[] packageSpecs)
+        new private void EmitsPackageReferences(ProjectRootElement mockProj, params Tuple<string, string, string>[] packageSpecs)
         {
             foreach (var packageSpec in packageSpecs)
             {
@@ -449,7 +424,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             }
         }
 
-        private void EmitsToolReferences(ProjectRootElement mockProj, params Tuple<string, string>[] toolSpecs)
+        new private void EmitsToolReferences(ProjectRootElement mockProj, params Tuple<string, string>[] toolSpecs)
         {
             foreach (var toolSpec in toolSpecs)
             {
@@ -465,7 +440,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             }
         }
 
-        private ProjectRootElement RunPackageDependenciesRuleOnPj(string s, string testDirectory = null)
+        new private ProjectRootElement RunPackageDependenciesRuleOnPj(string s, string testDirectory = null)
         {
             testDirectory = testDirectory ?? Temp.CreateDirectory().Path;
             return TemporaryProjectFileRuleRunner.RunRules(new IMigrationRule[]
