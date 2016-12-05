@@ -16,29 +16,27 @@ namespace Microsoft.DotNet.Tools.Remove.ProjectToProjectReference
             CommandLineApplication app = new CommandLineApplication(throwOnUnexpectedArg: false)
             {
                 Name = "dotnet remove p2p",
-                FullName = ".NET Remove Project to Project (p2p) reference Command",
-                Description = "Command to remove project to project (p2p) reference",
+                FullName = LocalizableStrings.AppFullName,
+                Description = LocalizableStrings.AppDescription,
                 AllowArgumentSeparator = true,
-                ArgumentSeparatorHelpText = "Project to project references to remove"
+                ArgumentSeparatorHelpText = LocalizableStrings.AppArgumentSeparatorHelpText
             };
 
             app.HelpOption("-h|--help");
 
             CommandArgument projectArgument = app.Argument(
-                "<PROJECT>",
-                "The project file to modify. If a project file is not specified," +
-                " it searches the current working directory for an MSBuild file that has" +
-                " a file extension that ends in `proj` and uses that file.");
+                $"<{LocalizableStrings.CmdArgProject}>",
+                LocalizableStrings.CmdArgumentDescription);
 
             CommandOption frameworkOption = app.Option(
-                "-f|--framework <FRAMEWORK>",
-                "Remove reference only when targetting a specific framework",
+                $"-f|--framework <{LocalizableStrings.CmdFramework}>",
+                LocalizableStrings.CmdFrameworkDescription,
                 CommandOptionType.SingleValue);
 
             app.OnExecute(() => {
                 if (string.IsNullOrEmpty(projectArgument.Value))
                 {
-                    throw new GracefulException(CommonLocalizableStrings.RequiredArgumentNotPassed, "<Project>");
+                    throw new GracefulException(CommonLocalizableStrings.RequiredArgumentNotPassed, $"<{LocalizableStrings.ProjectException}>");
                 }
 
                 var msbuildProj = MsbuildProject.FromFileOrDirectory(projectArgument.Value);

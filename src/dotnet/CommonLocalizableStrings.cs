@@ -115,6 +115,12 @@
         public const string SolutionDoesNotExist = "Specified solution file {0} does not exist, or there is no solution file in the directory.";
         public const string SolutionAlreadyContainsAProject = "Solution {0} already contains project {1}.";
 
+        /// add p2p
+        public const string ReferenceDoesNotExistForce = "Reference {0} does not exist. If you still want to add it, please use --force option. Please note that this may have adverse effects on the project. ";
+        public const string ReferenceIsInvalid = "Reference `{0}` is invalid.";
+        public const string SpecifyAtLeastOneReferenceToAdd = "You must specify at least one reference to add. Please run dotnet add --help for more information.";
+        public const string ProjectAlreadyHasAReference = "Project {0} already has a reference `{1}`.";
+
         /// add package
         public const string PackageReferenceDoesNotExist = "Package reference `{0}` does not exist.";
         public const string PackageReferenceIsInvalid = "Package reference `{0}` is invalid.";
@@ -129,6 +135,13 @@
         public const string SpecifyAtLeastOneProjectToAdd = "You must specify at least one project to add. Please run dotnet add --help for more information.";
         public const string ProjectAddedToTheSolution = "Project `{0}` added to the solution.";
         public const string SolutionAlreadyHasAProject = "Solution {0} already contains project {1}.";
+
+        /// del p2p
+        public const string ReferenceNotFoundInTheProject = "Specified reference {0} does not exist in project {1}.";
+        public const string ReferenceRemoved = "Reference `{0}` deleted from the project.";
+        public const string SpecifyAtLeastOneReferenceToRemove = "You must specify at least one reference to delete. Please run dotnet delete --help for more information.";
+        public const string ReferenceDeleted = "Reference `{0}` deleted.";
+        public const string SpecifyAtLeastOneReferenceToDelete = "You must specify at least one reference to delete. Please run dotnet delete --help for more information.";
 
         /// del pkg
         public const string PackageReferenceNotFoundInTheProject = "Package reference `{0}` could not be found in the project.";
