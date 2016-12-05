@@ -14,19 +14,17 @@ namespace Microsoft.DotNet.Tools.New
 
         public const string AppDescription = "Initializes empty project for .NET Platform";
 
-        public const string ValidValuesText = "Valid values for ";
+        public const string ValidValuesText = "Valid values for {0}: {1}.";
 
         public const string Language = "LANGUAGE";
 
-        public const string LanguageOfProject = "Language of project";
-        
-        public const string ValidValues = "Valid values";
+        public const string LanguageOfProject = "Language of project    Valid values: {0}.";
 
         public const string Type = "TYPE";
 
-        public const string TypeOfProject = "Type of project";
+        public const string TypeOfProject = "Type of project        {0}";
 
-        public const string UnrecognizedLanguage = "Unrecognized language";
+        public const string UnrecognizedLanguage = "Unrecognized language: {0}";
 
         public const string UnrecognizedType = "Unrecognized type: {0}";
 
