@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" original="src/dotnet/commands/dotnet-help/LocalizableStrings.resx">
+    <body>
+      <group id="src/dotnet/commands/dotnet-help/LocalizableStrings.resx" />
+      <trans-unit id="Usage">
+        <source>Usage</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="Arguments">
+        <source>Arguments</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CommandDefinition">
+        <source>The command to execute</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ArgumentsDefinition">
+        <source>Arguments to pass to the command</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="HostOptionsDefinition">
+        <source>Options specific to dotnet (host)</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="OptionsDescription">
+        <source>Options common to all commands</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CommonOptions">
+        <source>Common options</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="VerboseDefinition">
+        <source>Enable verbose output</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="HelpDefinition">
+        <source>Show help</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="HostOptions">
+        <source>Host options (passed before the command)</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="VersionDescription">
+        <source>Display .NET CLI Version Number</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="InfoDescription">
+        <source>Display .NET CLI Info</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="Commands">
+        <source>Commands</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="NewDefinition">
+        <source>Initialize a basic .NET project</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RestoreDefinition">
+        <source>Restore dependencies specified in the.NET project</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="BuildDefinition">
+        <source>Builds a .NET project</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="PublishDefinition">
+        <source>Publishes a .NET project for deployment (including the runtime)</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RunDefinition">
+        <source>Compiles and immediately executes a.NET project</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="TestDefinition">
+        <source>Runs unit tests using the test runner specified in the project</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="PackDefinition">
+        <source>Creates a NuGet package</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MigrateDefinition">
+        <source>Migrates a project.json based project to a msbuild based project</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ProjectModificationCommands">
+        <source>Project modification commands</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AddDefinition">
+        <source>Add items to the project</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RemoveDefinition">
+        <source>Remove items from the project</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AdvancedCommands">
+        <source>Advanced Commands</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="NugetDefinition">
+        <source>Provides additional NuGet commands</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MsBuildDefinition">
+        <source>msbuilds a project and all of its dependencies</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="VsTestDefinition">
+        <source>Runs tests from the specified files</source>
+        <note></note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
