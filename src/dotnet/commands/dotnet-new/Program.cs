@@ -87,11 +87,11 @@ namespace Microsoft.DotNet.Tools.New
 
             if (hasFilesToOverride)
             {
-                Reporter.Error.WriteLine(LocalizableStrings.ProjectFailedError, languageName);
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.ProjectFailedError, languageName));
                 return 1;
             }
 
-            Reporter.Output.WriteLine(LocalizableStrings.CreatedNewProject, languageName, Directory.GetCurrentDirectory());
+            Reporter.Output.WriteLine(string.Format(LocalizableStrings.CreatedNewProject, languageName, Directory.GetCurrentDirectory()));
 
             return 0;
         }
