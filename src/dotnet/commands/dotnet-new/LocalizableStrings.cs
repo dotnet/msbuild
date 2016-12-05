@@ -2,15 +2,13 @@ namespace Microsoft.DotNet.Tools.New
 {
     internal class LocalizableStrings
     {
-        public const string CreatingNewError = "Creating new {0} project failed, project already exists.";
+        public const string ProjectExistsError = "Creating new {0} project failed, project already exists.";
 
-        public const string CreatedNew = "Created new ";
+        public const string ProjectContainsError = "Creating new {0} project failed, directory already contains {1}";
 
-        public const string DirectoryContainsError = " project failed, directory already contains ";
+        public const string ProjectFailedError = "Creating new {0} project failed.";
 
-        public const string ProjectFailedError = " project failed.";
-
-        public const string ProjectIn = " project in ";
+        public const string CreatedNewProject = "Created new {0} project in {1}.";
 
         public const string AppFullName = ".NET Initializer";
 
@@ -30,8 +28,9 @@ namespace Microsoft.DotNet.Tools.New
 
         public const string UnrecognizedLanguage = "Unrecognized language";
 
-        public const string UnrecognizedType = "Unrecognized type";
+        public const string UnrecognizedType = "Unrecognized type: {0}";
 
-        public const string AvailableTypes = "Available types for";
+        public const string AvailableTypes = "Available types for {0} :";
+
     }
 }
