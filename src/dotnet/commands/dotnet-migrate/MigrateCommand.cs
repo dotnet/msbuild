@@ -59,10 +59,6 @@ namespace Microsoft.DotNet.Tools.Migrate
             var projectsToMigrate = GetProjectsToMigrate(_projectArg);
 
             var msBuildTemplatePath = _templateFile ?? temporaryDotnetNewProject.MSBuildProjectPath;
-            
-            var sdkVersion = _sdkVersion ?? temporaryDotnetNewProject.MSBuildProject.GetSdkVersion();
-
-            EnsureNotNull(sdkVersion, "Null Sdk Version");
 
             MigrationReport migrationReport = null;
 
@@ -73,7 +69,6 @@ namespace Microsoft.DotNet.Tools.Migrate
                 var migrationSettings = new MigrationSettings(
                     projectDirectory,
                     outputDirectory,
-                    sdkVersion,
                     msBuildTemplatePath,
                     _xprojFilePath);
                 var projectMigrationReport = new ProjectMigrator().Migrate(migrationSettings, _skipProjectReferences);

@@ -74,7 +74,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 var projectDir = Path.GetDirectoryName(project.ProjectFilePath);
                 var settings = new MigrationSettings(projectDir,
                                                      projectDir,
-                                                     rootSettings.SdkPackageVersion,
                                                      tempMSBuildProjectTemplate);
                 MigrateProject(settings);
                 projectMigrationReports.Add(MigrateProject(settings));

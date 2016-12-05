@@ -12,5 +12,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         public const string MstestTestAdapterVersion = "1.1.3-preview";
         public const string MstestTestFrameworkVersion = "1.0.4-preview";
         public const string BundleMinifierToolVersion = "2.2.301";
+        public const string WebSdkPackageVersion = "1.0.0-alpha-20161117-1-119" ;
     }
 }

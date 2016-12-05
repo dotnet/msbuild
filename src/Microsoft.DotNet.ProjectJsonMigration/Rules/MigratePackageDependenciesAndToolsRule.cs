@@ -39,16 +39,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
             var noFrameworkPackageReferenceItemGroup = migrationRuleInputs.OutputMSBuildProject.AddItemGroup();
 
-            // Inject Sdk dependency
-            _transformApplicator.Execute(
-                SdkPackageDependencyTransform.Transform(
-                    new PackageDependencyInfo
-                    {
-                        Name = PackageConstants.SdkPackageName,
-                        Version = migrationSettings.SdkPackageVersion,
-                        PrivateAssets = "All"
-                    }), noFrameworkPackageReferenceItemGroup, mergeExisting: false);
-
             AddProjectTypeSpecificDependencies(
                 migrationRuleInputs,
                 migrationSettings,
@@ -90,18 +80,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             var type = project.GetProjectType();
             switch (type)
             {
-                case ProjectType.Web:
-                    _transformApplicator.Execute(
-                        SdkPackageDependencyTransform.Transform(
-                            new PackageDependencyInfo
-                            {
-                                Name = PackageConstants.WebSdkPackageName,
-                                Version = migrationSettings.SdkPackageVersion,
-                                PrivateAssets = "All"
-                            }),
-                        noFrameworkPackageReferenceItemGroup,
-                        mergeExisting: false);
-                    break;
                 case ProjectType.Test:
                     _transformApplicator.Execute(
                         PackageDependencyInfoTransform().Transform(

@@ -251,7 +251,7 @@
         <Properties>
           CLIBuildDll=$(CLIBuildDll);
           NuGetPackagesDir=$(NuGetPackagesDir);
-          SdkLayoutDirectory=$(SdkOutputDirectory)/Extensions/%(BundledSdk.Identity);
+          SdkLayoutDirectory=$(SdkOutputDirectory)/Sdks/%(BundledSdk.Identity);
           SdkPackageName=%(BundledSdk.Identity);
           SdkPackageVersion=%(BundledSdk.Version);
           Stage0Directory=$(Stage0Directory)
@@ -260,7 +260,7 @@
     </ItemGroup>
 
     <MSBuild
-      BuildInParallel="True"
+      BuildInParallel="False"
       Projects="@(SdksToBundle)">
     </MSBuild>
   </Target>

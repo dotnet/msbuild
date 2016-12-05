@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             ProjectContext projectContext, string testDirectory, ProjectRootElement xproj)
         {
             var project = ProjectRootElement.Create();
-            var testSettings = new MigrationSettings(testDirectory, testDirectory, "1.0.0", project);
+            var testSettings = new MigrationSettings(testDirectory, testDirectory, project);
             var testInputs = new MigrationRuleInputs(new[] {projectContext}, project,
                 project.AddItemGroup(),
                 project.AddPropertyGroup(),

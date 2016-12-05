@@ -2,6 +2,6 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
 
   <ItemGroup>
-    <Sdk Include="Microsoft.Net.Sdk" Version="$(CLI_NETSDK_Version)" />
+    <Sdk Include="Microsoft.NET.Sdk" Version="$(CLI_NETSDK_Version)" />
   </ItemGroup>
 </Project>

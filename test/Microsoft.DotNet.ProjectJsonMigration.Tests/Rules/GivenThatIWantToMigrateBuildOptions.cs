@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var testProjectDirectory = TestAssetsManager.CreateTestInstance("TestAppWithRuntimeOptions").Path;
             var projectContext = ProjectContext.Create(testProjectDirectory, FrameworkConstants.CommonFrameworks.NetCoreApp10);
 
-            var testSettings = new MigrationSettings(testProjectDirectory, testProjectDirectory, "1.0.0", templateProj);
+            var testSettings = new MigrationSettings(testProjectDirectory, testProjectDirectory, templateProj);
             var testInputs = new MigrationRuleInputs(new[] {projectContext}, templateProj, templateProj.AddItemGroup(),
                 templateProj.AddPropertyGroup());
             new MigrateBuildOptionsRule().Apply(testSettings, testInputs);
