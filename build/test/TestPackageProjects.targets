@@ -181,8 +181,8 @@
         <ProjectName>Microsoft.DotNet.Cli.Utils.csproj</ProjectName>
         <IsTool>True</IsTool>
         <IsApplicable>True</IsApplicable>
-        <VersionPrefix>1.0.0-preview4-</VersionPrefix>
-        <VersionSuffix>preview4-$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <VersionPrefix>1.0.0-preview5-</VersionPrefix>
+        <VersionSuffix>preview5-$(TestPackageBuildVersionSuffix)</VersionSuffix>
         <Clean>False</Clean>
         <Frameworks>netstandard1.5</Frameworks>
       </BaseTestPackageProject>
