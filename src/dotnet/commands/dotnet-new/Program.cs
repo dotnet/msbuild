@@ -33,7 +33,8 @@ namespace Microsoft.DotNet.Tools.New
             // Check if project.json exists in the folder
             if (File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "project.json")) && !isMsBuild)
             {
-                Reporter.Error.WriteLine($"Creating new {languageName} project failed, project already exists.");
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.ProjectExistsError, languageName));
+                
                 return 1;
             }
 
@@ -60,7 +61,7 @@ namespace Microsoft.DotNet.Tools.New
                         {
                             if (File.Exists(Path.Combine(Directory.GetCurrentDirectory(), entry)))
                             {
-                                Reporter.Error.WriteLine($"Creating new {languageName} project failed, directory already contains {entry}");
+                                Reporter.Error.WriteLine(string.Format(LocalizableStrings.ProjectContainsError, languageName, entry));
                                 return 1;
                             }
                         }
@@ -86,11 +87,11 @@ namespace Microsoft.DotNet.Tools.New
 
             if (hasFilesToOverride)
             {
-                Reporter.Error.WriteLine($"Creating new {languageName} project failed.");
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.ProjectFailedError, languageName));
                 return 1;
             }
 
-            Reporter.Output.WriteLine($"Created new {languageName} project in {Directory.GetCurrentDirectory()}.");
+            Reporter.Output.WriteLine(string.Format(LocalizableStrings.CreatedNewProject, languageName, Directory.GetCurrentDirectory()));
 
             return 0;
         }
@@ -128,8 +129,8 @@ namespace Microsoft.DotNet.Tools.New
 
             var app = new CommandLineApplication();
             app.Name = "dotnet new";
-            app.FullName = ".NET Initializer";
-            app.Description = "Initializes empty project for .NET Platform";
+            app.FullName = LocalizableStrings.AppFullName;
+            app.Description = LocalizableStrings.AppDescription;
             app.HelpOption("-h|--help");
 
             var csharp = new { Name = "C#", Alias = new[] { "c#", "cs", "csharp" }, TemplatePrefix = "CSharp", 
@@ -160,11 +161,17 @@ namespace Microsoft.DotNet.Tools.New
             var typeValues = 
                 from l in languages
                 let values = string.Join(", ", l.Templates.Select(t => t.Name))
-                select $"Valid values for {l.Name}: {values}.";
+                select string.Format(LocalizableStrings.ValidValuesText, l.Name, values);
             string typeValuesString = string.Join(" ", typeValues);
 
-            var lang = app.Option("-l|--lang <LANGUAGE>", $"Language of project    Valid values: {langValuesString}.", CommandOptionType.SingleValue);
-            var type = app.Option("-t|--type <TYPE>", $"Type of project        {typeValuesString}", CommandOptionType.SingleValue);
+            var lang = app.Option(
+                $"-l|--lang <{LocalizableStrings.Language}>", 
+                string.Format(LocalizableStrings.LanguageOfProject, langValuesString), 
+                CommandOptionType.SingleValue);
+            var type = app.Option(
+                $"-t|--type <{LocalizableStrings.Type}>", 
+                string.Format(LocalizableStrings.TypeOfProject, typeValuesString), 
+                CommandOptionType.SingleValue);
 
             var dotnetNew = new NewCommand();
             app.OnExecute(() =>
@@ -176,7 +183,7 @@ namespace Microsoft.DotNet.Tools.New
 
                 if (language == null)
                 {
-                    Reporter.Error.WriteLine($"Unrecognized language: {languageValue}".Red());
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.UnrecognizedLanguage, languageValue).Red());
                     return -1;
                 }
 
@@ -185,8 +192,8 @@ namespace Microsoft.DotNet.Tools.New
                 var template = language.Templates.FirstOrDefault(t => StringComparer.OrdinalIgnoreCase.Equals(typeValue, t.Name));
                 if (template == null)
                 {
-                    Reporter.Error.WriteLine($"Unrecognized type: {typeValue}".Red());
-                    Reporter.Error.WriteLine($"Available types for {language.Name} :".Red());
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.UnrecognizedType, typeValue).Red());
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.AvailableTypes, language.Name).Red());
                     foreach (var t in language.Templates)
                     {
                         Reporter.Error.WriteLine($"- {t}".Red());
