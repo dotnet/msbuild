@@ -16,34 +16,32 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
             CommandLineApplication app = new CommandLineApplication(throwOnUnexpectedArg: false)
             {
                 Name = "dotnet add p2p",
-                FullName = ".NET Add Project to Project (p2p) reference Command",
-                Description = "Command to add project to project (p2p) reference",
+                FullName = LocalizableStrings.AppFullName,
+                Description = LocalizableStrings.AppDescription,
                 AllowArgumentSeparator = true,
-                ArgumentSeparatorHelpText = "Project to project references to add"
+                ArgumentSeparatorHelpText = LocalizableStrings.AppHelpText
             };
 
             app.HelpOption("-h|--help");
 
             CommandArgument projectArgument = app.Argument(
-                "<PROJECT>",
-                "The project file to modify. If a project file is not specified," +
-                " it searches the current working directory for an MSBuild file that has" +
-                " a file extension that ends in `proj` and uses that file.");
+                $"<{LocalizableStrings.CmdProject}>",
+                LocalizableStrings.CmdProjectDescription);
 
             CommandOption frameworkOption = app.Option(
-                "-f|--framework <FRAMEWORK>",
-                "Add reference only when targetting a specific framework",
+                $"-f|--framework <{LocalizableStrings.CmdFramework}>",
+                LocalizableStrings.CmdFrameworkDescription,
                 CommandOptionType.SingleValue);
 
             CommandOption forceOption = app.Option(
                 "--force", 
-                "Add reference even if it does not exist, do not convert paths to relative",
+                LocalizableStrings.CmdForceDescription,
                 CommandOptionType.NoValue);
 
             app.OnExecute(() => {
                 if (string.IsNullOrEmpty(projectArgument.Value))
                 {
-                    throw new GracefulException(CommonLocalizableStrings.RequiredArgumentNotPassed, "<Project>");
+                    throw new GracefulException(CommonLocalizableStrings.RequiredArgumentNotPassed, $"<{LocalizableStrings.ProjectException}>");
                 }
 
                 var msbuildProj = MsbuildProject.FromFileOrDirectory(projectArgument.Value);

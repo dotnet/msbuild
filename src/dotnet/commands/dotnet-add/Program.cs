@@ -16,22 +16,22 @@ namespace Microsoft.DotNet.Tools.Add
 {
     public class AddCommand : DispatchCommand
     {
-        protected override string HelpText => @".NET Add Command
+        protected override string HelpText => $@"{LocalizableStrings.NetAddCommand}
 
-Usage: dotnet add [options] <object> <command> [[--] <arg>...]]
+{LocalizableStrings.Usage}: dotnet add [options] <object> <command> [[--] <arg>...]]
 
-Options:
-  -h|--help  Show help information
+{LocalizableStrings.Options}:
+  -h|--help  {LocalizableStrings.HelpDefinition}
 
-Arguments:
-  <object>   The object of the operation. If a project file is not specified, it defaults to the current directory.
-  <command>  Command to be executed on <object>.
+{LocalizableStrings.Arguments}:
+  <object>   {LocalizableStrings.ArgumentsObjectDefinition}
+  <command>  {LocalizableStrings.ArgumentsCommandDefinition}
 
 Args:
-  Any extra arguments passed to the command. Use `dotnet add <command> --help` to get help about these arguments.
+  {LocalizableStrings.ArgsDefinition}
 
-Commands:
-  p2p        Add project to project (p2p) reference to a project";
+{LocalizableStrings.Commands}:
+  p2p        {LocalizableStrings.CommandP2PDefinition}";
 
         protected override Dictionary<string, Func<string[], int>> BuiltInCommands => new Dictionary<string, Func<string[], int>>
         {
