@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <Description>Microsoft.DotNet.TestFramework Class Library</Description>
-    <VersionPrefix>1.0.0-preview4</VersionPrefix>
+    <VersionPrefix>1.0.0-preview5</VersionPrefix>
     <TargetFrameworks>netstandard1.5;net46</TargetFrameworks>
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
