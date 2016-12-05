@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Tools.New
                         {
                             if (File.Exists(Path.Combine(Directory.GetCurrentDirectory(), entry)))
                             {
-                                Reporter.Error.WriteLine($"{LocalizableStrings.CreatingNewError}{languageName}{LocalizableStrings.DirectoryContainsError}{entry}");
+                                Reporter.Error.WriteLine(LocalizableStrings.ProjectContainsError, languageName, entry);
                                 return 1;
                             }
                         }
@@ -87,11 +87,11 @@ namespace Microsoft.DotNet.Tools.New
 
             if (hasFilesToOverride)
             {
-                Reporter.Error.WriteLine($"{LocalizableStrings.CreatingNewError}{languageName}{LocalizableStrings.ProjectFailedError}");
+                Reporter.Error.WriteLine(LocalizableStrings.ProjectFailedError, languageName);
                 return 1;
             }
 
-            Reporter.Output.WriteLine($"{LocalizableStrings.CreatedNew}{languageName}{LocalizableStrings.ProjectIn}{Directory.GetCurrentDirectory()}.");
+            Reporter.Output.WriteLine(LocalizableStrings.CreatedNewProject, languageName, Directory.GetCurrentDirectory());
 
             return 0;
         }
@@ -192,8 +192,8 @@ namespace Microsoft.DotNet.Tools.New
                 var template = language.Templates.FirstOrDefault(t => StringComparer.OrdinalIgnoreCase.Equals(typeValue, t.Name));
                 if (template == null)
                 {
-                    Reporter.Error.WriteLine($"{LocalizableStrings.UnrecognizedType}: {typeValue}".Red());
-                    Reporter.Error.WriteLine($"{LocalizableStrings.AvailableTypes} {language.Name} :".Red());
+                    Reporter.Error.WriteLine((LocalizableStrings.UnrecognizedType, typeValue).Red());
+                    Reporter.Error.WriteLine(LocalizableStrings.AvailableTypes, language.Name).Red());
                     foreach (var t in language.Templates)
                     {
                         Reporter.Error.WriteLine($"- {t}".Red());
