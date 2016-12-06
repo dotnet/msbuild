@@ -480,6 +480,28 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             }
         }
 
+        [Fact]
+        public void MigratingTestProjectAddsGenerateRuntimeConfigurationFiles()
+        {
+            var mockProj = RunBuildOptionsRuleOnPj(@"
+                {
+                    ""testRunner"": ""xunit""
+                }");
+
+            mockProj.Properties.Count(p => p.Name == "GenerateRuntimeConfigurationFiles").Should().Be(1);
+            mockProj.Properties.First(p => p.Name == "GenerateRuntimeConfigurationFiles").Value.Should().Be("true");
+        }
+
+        [Fact]
+        public void MigratingANonTestProjectDoesNotAddGenerateRuntimeConfigurationFiles()
+        {
+            var mockProj = RunBuildOptionsRuleOnPj(@"
+                {
+                }");
+
+            mockProj.Properties.Count(p => p.Name == "GenerateRuntimeConfigurationFiles").Should().Be(0);
+        }
+
         private static IEnumerable<string> GetDefaultExcludePatterns(string group)
         {
             return group == "copyToOutput" ? ProjectFilesCollection.DefaultPublishExcludePatterns

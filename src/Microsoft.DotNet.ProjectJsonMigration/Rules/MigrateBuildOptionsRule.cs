@@ -113,6 +113,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             new IncludeContextTransform("Content", transformMappings: true)
                 .WithMetadata("CopyToOutputDirectory", "PreserveNewest");
 
+        private AddPropertyTransform<Project> GenerateRuntimeConfigurationFilesTransform => 
+            new AddPropertyTransform<Project>(
+                "GenerateRuntimeConfigurationFiles", 
+                project => "true",
+                project => project.GetProjectType() == ProjectType.Test);
+
         private Func<CommonCompilerOptions, string, IEnumerable<ProjectItemElement>> CompileFilesTransformExecute =>
             (compilerOptions, projectDirectory) =>
                     CompileFilesTransform.Transform(GetCompileIncludeContext(compilerOptions, projectDirectory));
@@ -219,6 +225,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     _transformApplicator,
                     migrationSettings.ProjectDirectory);
             }
+
+            var transformOutput = GenerateRuntimeConfigurationFilesTransform.Transform(
+                migrationRuleInputs.DefaultProjectContext.ProjectFile);
+            _transformApplicator.Execute(transformOutput, propertyGroup, mergeExisting: true);
         }
 
         private void PerformConfigurationPropertyAndItemMappings(
