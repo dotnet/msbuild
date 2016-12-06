@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
     public class GivenThatIWantToMigrateBuildOptions : TestBase
     {
         [Fact]
-        public void Specified_default_properties_are_removed_when_they_exists_in_the_csproj_template()
+        public void SpecifiedDefaultPropertiesAreRemovedWhenTheyExistInTheCsprojTemplate()
         {
             // Setup project with default properties
             var defaultPropertiesExpectedToBeRemoved = new string[]
@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Migrating_empty_buildOptions_populates_only_Compile_and_EmbeddedResource()
+        public void MigratingEmptyBuildOptionsPopulatesOnlyCompileAndEmbeddedResource()
         {
             var mockProj = RunBuildOptionsRuleOnPj(@"
                 {
@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Migrating_EmitEntryPoint_true_populates_OutputType_field()
+        public void MigratingEmitEntryPointTruePopulatesOutputTypeField()
         {
             var mockProj = RunBuildOptionsRuleOnPj(@"
                 {
@@ -78,7 +78,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Migrating_EmitEntryPoint_false_populates_OutputType_fields()
+        public void MigratingEmitEntryPointFalsePopulatesOutputTypeFields()
         {
             var mockProj = RunBuildOptionsRuleOnPj(@"
                 {
@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Migrating_define_populates_DefineConstants()
+        public void MigratingDefinePopulatesDefineConstants()
         {
             var mockProj = RunBuildOptionsRuleOnPj(@"
                 {
@@ -107,7 +107,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Migrating_nowarn_populates_NoWarn()
+        public void MigratingNowarnPopulatesNoWarn()
         {
             var mockProj = RunBuildOptionsRuleOnPj(@"
                 {
@@ -121,7 +121,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Migrating_warningsAsErrors_populates_WarningsAsErrors()
+        public void MigratingWarningsAsErrorsPopulatesWarningsAsErrors()
         {
             var mockProj = RunBuildOptionsRuleOnPj(@"
                 {
@@ -144,7 +144,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Migrating_allowUnsafe_populates_AllowUnsafeBlocks()
+        public void MigratingAllowUnsafePopulatesAllowUnsafeBlocks()
         {
             var mockProj = RunBuildOptionsRuleOnPj(@"
                 {
@@ -167,7 +167,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Migrating_optimize_populates_Optimize()
+        public void MigratingOptimizePopulatesOptimize()
         {
             var mockProj = RunBuildOptionsRuleOnPj(@"
                 {
@@ -190,7 +190,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Migrating_platform_populates_PlatformTarget()
+        public void MigratingPlatformPopulatesPlatformTarget()
         {
             var mockProj = RunBuildOptionsRuleOnPj(@"
                 {
@@ -224,7 +224,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Migrating_languageVersion_populates_LangVersion()
+        public void MigratingLanguageVersionPopulatesLangVersion()
         {
             var mockProj = RunBuildOptionsRuleOnPj(@"
                 {
@@ -238,7 +238,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Migrating_languageVersion_removes_csharp_in_LangVersion()
+        public void MigratingLanguageVersionRemovesCsharpInLangVersion()
         {
             var mockProj = RunBuildOptionsRuleOnPj(@"
                 {
@@ -252,7 +252,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Migrating_keyFile_populates_AssemblyOriginatorKeyFile_and_SignAssembly()
+        public void MigratingKeyFilePopulatesAssemblyOriginatorKeyFileAndSignAssembly()
         {
             var mockProj = RunBuildOptionsRuleOnPj(@"
                 {
@@ -273,7 +273,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Migrating_delaySign_populates_DelaySign()
+        public void MigratingDelaySignPopulatesDelaySign()
         {
             var mockProj = RunBuildOptionsRuleOnPj(@"
                 {
@@ -296,7 +296,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Migrating_publicSign_populates_PublicSign()
+        public void MigratingPublicSignPopulatesPublicSign()
         {
             var mockProj = RunBuildOptionsRuleOnPj(@"
                 {
@@ -319,7 +319,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Migrating_debugType_populates_DebugType()
+        public void MigratingDebugTypePopulatesDebugType()
         {
             var mockProj = RunBuildOptionsRuleOnPj(@"
                 {
@@ -343,7 +343,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Migrating_xmlDoc_populates_GenerateDocumentationFile()
+        public void MigratingXmlDocPopulatesGenerateDocumentationFile()
         {
             var mockProj = RunBuildOptionsRuleOnPj(@"
                 {
@@ -360,7 +360,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [InlineData("compile", "Compile")]
         [InlineData("embed", "EmbeddedResource")]
         [InlineData("copyToOutput", "Content")]
-        private void Migrating_group_include_exclude_Populates_appropriate_ProjectItemElement(
+        private void MigratingGroupIncludeExcludePopulatesAppropriateProjectItemElement(
             string group,
             string itemName)
         {
@@ -428,7 +428,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [InlineData("compile", "Compile")]
         [InlineData("embed", "EmbeddedResource")]
         [InlineData("copyToOutput", "Content")]
-        private void Migrating_group_include_only_Populates_appropriate_ProjectItemElement(
+        private void MigratingGroupIncludeOnlyPopulatesAppropriateProjectItemElement(
             string group,
             string itemName)
         {
