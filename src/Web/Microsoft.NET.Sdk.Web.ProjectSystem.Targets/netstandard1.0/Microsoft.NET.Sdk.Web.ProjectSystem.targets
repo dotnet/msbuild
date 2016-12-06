@@ -36,31 +36,4 @@ Copyright (c) .NET Foundation. All rights reserved.
     </PropertyPageSchema>
   </ItemGroup>
 
-  <ItemGroup>
-    <None Remove="wwwroot\**" />
-    <None Remove="**\*.cshtml" />
-    <None Remove="**\*.config" />
-    <None Remove="**\*.json" />
-    <None Remove="**\*.cs" />
-    <None Remove="**\*.resx" />
-    <None Remove="$(GlobalExclude)" />
-    <None Remove="@(Content);@(Compile);@(EmbeddedResource)" />
-
-    <Compile Remove="wwwroot\**" />
-    <Compile Remove="**\*.cshtml" />
-    <Compile Remove="**\*.config" />
-    <Compile Remove="**\*.json" />
-    <Compile Remove="$(GlobalExclude)" />
-    <Compile Remove="@(Content)" />
-
-    <EmbeddedResource Remove="wwwroot\**" />
-    <EmbeddedResource Remove="**\*.cshtml" />
-    <EmbeddedResource Remove="**\*.config" />
-    <EmbeddedResource Remove="**\*.json" />
-    <EmbeddedResource Remove="$(GlobalExclude)" />
-    <EmbeddedResource Remove="@(Content)" />
-
-    <Content Remove="$(GlobalExclude)" />
-  </ItemGroup>
-
 </Project>
