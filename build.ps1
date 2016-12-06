@@ -7,7 +7,7 @@ param(
     [string]$Configuration="Debug",
     [string]$Platform="Any CPU",
     [string]$Verbosity="minimal",
-    [string]$RunTests="true",
+    [switch]$SkipTests,
     [switch]$RealSign,
     [switch]$Help)
 
@@ -19,7 +19,7 @@ if($Help)
     Write-Host "  -Configuration <CONFIGURATION>     Build the specified Configuration (Debug or Release, default: Debug)"
     Write-Host "  -Platform <PLATFORM>               Build the specified Platform (Any CPU)"
     Write-Host "  -Verbosity <VERBOSITY>             Build console output verbosity (minimal or diagnostic, default: minimal)"
-    Write-Host "  -RunTests <TRUE|FALSE>             Execute unit tests (default: true)"
+    Write-Host "  -SkipTests                         Skip executing unit tests"
     Write-Host "  -RealSign                          Sign the output DLLs"
     Write-Host "  -Help                              Display this help message"
     exit 0
@@ -67,14 +67,19 @@ if ($RealSign) {
     $signType = 'real'
 }
 
-$commonBuildArgs = echo $RepoRoot\build\build.proj /m /nologo /p:Configuration=$Configuration /p:Platform=$Platform /p:SignType=$signType /p:RunTests=$RunTests /verbosity:$Verbosity
+$buildTarget = 'Build'
+if ($SkipTests) {
+    $buildTarget = 'BuildWithoutTesting'
+}
+
+$commonBuildArgs = echo $RepoRoot\build\build.proj /t:$buildTarget /m /nologo /p:Configuration=$Configuration /p:Platform=$Platform /p:SignType=$signType /verbosity:$Verbosity
 
 # NET Core Build 
 $msbuildSummaryLog = Join-Path -path $logPath -childPath "sdk.log"
 $msbuildWarningLog = Join-Path -path $logPath -childPath "sdk.wrn"
 $msbuildFailureLog = Join-Path -path $logPath -childPath "sdk.err"
 
-dotnet build $commonBuildArgs /flp1:Summary`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildSummaryLog /flp2:WarningsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildWarningLog /flp3:ErrorsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildFailureLog
+dotnet msbuild $commonBuildArgs /flp1:Summary`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildSummaryLog /flp2:WarningsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildWarningLog /flp3:ErrorsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildFailureLog
 if($LASTEXITCODE -ne 0) { throw "Failed to build" }
 
 # Template Build
