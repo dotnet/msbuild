@@ -126,7 +126,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.True(retval);
             Assert.Equal(1, e.Warnings);
-            Assert.Contains(AssemblyResources.GetString("Error.EmptyMessage"), e.Log);
+            Assert.Contains(AssemblyResources.GetString("ErrorAndWarning.EmptyMessage"), e.Log);
         }
 
         /// <summary>
@@ -151,7 +151,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.True(retval);
             Assert.Equal(1, e.Warnings);
-            Assert.Contains(AssemblyResources.GetString("Error.EmptyMessage"), e.Log);
+            Assert.Contains(AssemblyResources.GetString("ErrorAndWarning.EmptyMessage"), e.Log);
         }
 
         /// <summary>
@@ -177,7 +177,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.False(retval);
             Assert.Equal(1, e.Errors);
-            Assert.Contains(AssemblyResources.GetString("Error.EmptyMessage"), e.Log);
+            Assert.Contains(AssemblyResources.GetString("ErrorAndWarning.EmptyMessage"), e.Log);
         }
 
         /// <summary>
@@ -203,7 +203,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.False(retval);
             Assert.Equal(1, e.Errors);
-            Assert.Contains(AssemblyResources.GetString("Error.EmptyMessage"), e.Log);
+            Assert.Contains(AssemblyResources.GetString("ErrorAndWarning.EmptyMessage"), e.Log);
         }
 
         /// <summary>

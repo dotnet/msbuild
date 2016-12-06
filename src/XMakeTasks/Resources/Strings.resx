@@ -2624,7 +2624,7 @@
   </data>
 
 
-  <data name="Error.EmptyMessage">
+  <data name="ErrorAndWarning.EmptyMessage">
     <!-- When a user did not specify a message to an <Error /> or <Warning /> task -->
     <value>(No message specified)</value>
   </data>
