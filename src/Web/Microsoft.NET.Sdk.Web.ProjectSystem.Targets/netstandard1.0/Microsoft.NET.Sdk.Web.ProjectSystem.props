@@ -11,6 +11,16 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  
+  <PropertyGroup>
+    <GlobalExclude>$(GlobalExclude);bin\**;obj\**;node_modules\**;jspm_packages\**;bower_components\**;**\*.user;**\*.*proj</GlobalExclude>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="**\*" Exclude="$(GlobalExclude);**\*.cs;**\*.resx" Condition=" '$(OverrideWebDefaultContentGlob)' != 'True' " />
+    <Content Update="wwwroot\**;**\*.json;**\*.config;**\*.cshtml" CopyToPublishDirectory="PreserveNewest" Condition=" '$(OverrideWebDefaultContentGlob)' != 'True' AND '$(OverrideWebDefaultPublishGlob)' != 'True' " />
+    <Compile Include="**\*.cs" Exclude="$(GlobalExclude);wwwroot\**" Condition=" '$(OverrideWebDefaultCompileGlob)' != 'True' " />
+    <EmbeddedResource Include="**\*.resx" Exclude="$(GlobalExclude);wwwroot\**" Condition=" '$(OverrideWebDefaultEmbeddedResourceGlob)' != 'True' " />
+  </ItemGroup>
+
 </Project>
 
