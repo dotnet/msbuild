@@ -235,6 +235,8 @@ namespace Microsoft.Build.UnitTests
 
         private class GitProject : IDisposable
         {
+            private static readonly string TempRepoRoot = Path.Combine(Path.GetTempPath(), "MSBuildTestProjects");
+
             private readonly string _commit;
 
             private readonly string _repoAddress;
@@ -258,7 +260,7 @@ namespace Microsoft.Build.UnitTests
             public GitProject(string repoAddress, string commit, ProjectType projectType) :
                 this(
                 repoAddress, commit, projectType,
-                Path.Combine(AssemblyDirectory(), "repos"))
+                TempRepoRoot)
             {
             }
 
