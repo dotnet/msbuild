@@ -313,6 +313,7 @@ namespace Microsoft.Build.Tasks
                     break;
                 case "visual basic":
                 case "visualbasic":
+                case "vb":
                     if (AssemblyAttributes == null) return string.Empty;
 
                     extension = "vb";
