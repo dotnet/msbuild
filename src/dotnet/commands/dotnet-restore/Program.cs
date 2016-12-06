@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Tools.Restore
             cmd.HelpOption("-h|--help");
 
             var argRoot = cmd.Argument(
-                    "[{LocalizableStrings.CmdArgument}]",
+                    $"[{LocalizableStrings.CmdArgument}]",
                     LocalizableStrings.CmdArgumentDescription,
                     multipleValues: true);
 
