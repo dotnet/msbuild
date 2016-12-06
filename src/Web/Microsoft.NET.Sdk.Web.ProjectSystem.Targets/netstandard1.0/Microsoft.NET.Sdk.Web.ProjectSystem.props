@@ -16,9 +16,9 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(OverrideWebDefaultGlobs)' != 'True' ">
-    <Content Include="**\*" Exclude="$(GlobalExclude);**\*.cs;**\*.resx;properties\**" Condition=" '$(OverrideWebDefaultContentGlob)' != 'True' " />
+    <Content Include="**\*" Exclude="$(GlobalExclude);**\*.cs;**\*.resx;Properties\**" Condition=" '$(OverrideWebDefaultContentGlob)' != 'True' " />
     <Content Update="wwwroot\**;**\*.json;**\*.config;**\*.cshtml" CopyToPublishDirectory="PreserveNewest" Condition=" '$(OverrideWebDefaultContentGlob)' != 'True' AND '$(OverrideWebDefaultPublishGlob)' != 'True' " />
-    <Content Include="properties\**" Exclude="$(GlobalExclude);**\*.cs;**\*.resx" Condition=" '$(OverrideWebDefaultContentGlob)' != 'True' " />
+    <Content Include="Properties\**" Exclude="$(GlobalExclude);**\*.cs;**\*.resx" Condition=" '$(OverrideWebDefaultContentGlob)' != 'True' " />
     <Compile Include="**\*.cs" Exclude="$(GlobalExclude);wwwroot\**" Condition=" '$(OverrideWebDefaultCompileGlob)' != 'True' " />
     <EmbeddedResource Include="**\*.resx" Exclude="$(GlobalExclude);wwwroot\**" Condition=" '$(OverrideWebDefaultEmbeddedResourceGlob)' != 'True' " />
   </ItemGroup>
