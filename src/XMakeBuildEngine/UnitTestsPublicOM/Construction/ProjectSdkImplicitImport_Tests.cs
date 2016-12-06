@@ -108,5 +108,60 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 }
             }
         }
+
+        [Fact]
+        public void ProjectWithSdkImportsIsRemoveable()
+        {
+            var testSdkRoot = Path.Combine(Path.GetTempPath(), "MSBuildUnitTest");
+            var testSdkDirectory = Path.Combine(testSdkRoot, "MSBuildUnitTestSdk", "Sdk");
+
+            try
+            {
+                Directory.CreateDirectory(testSdkDirectory);
+
+                string sdkPropsPath = Path.Combine(testSdkDirectory, "Sdk.props");
+                string sdkTargetsPath = Path.Combine(testSdkDirectory, "Sdk.targets");
+
+                File.WriteAllText(sdkPropsPath, "<Project />");
+                File.WriteAllText(sdkTargetsPath, "<Project />");
+
+                using (new Helpers.TemporaryEnvironment("MSBuildSDKsPath", testSdkRoot))
+                {
+                    // Based on the new-console-project CLI template (but not matching exactly
+                    // should not be a deal-breaker).
+                    string content = @"<Project Sdk=""Microsoft.NET.Sdk"" ToolsVersion=""15.0"">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp1.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include=""**\*.cs"" />
+    <EmbeddedResource Include=""**\*.resx"" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include=""Microsoft.NETCore.App"" Version=""1.0.1"" />
+  </ItemGroup>
+
+</Project>";
+
+                    ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                    ProjectRootElement clone = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+
+                    clone.DeepCopyFrom(project);
+
+                    clone.RemoveAllChildren();
+                }
+            }
+            finally
+            {
+                if (Directory.Exists(testSdkRoot))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(testSdkDirectory, true);
+                }
+            }
+        }
+
     }
 }

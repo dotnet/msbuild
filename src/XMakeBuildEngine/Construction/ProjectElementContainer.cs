@@ -567,6 +567,11 @@ namespace Microsoft.Build.Construction
 
         internal void RemoveFromXml(ProjectElement child)
         {
+            if (child.IsImplicit)
+            {
+                return;
+            }
+
             if (child.ExpressedAsAttribute)
             {
                 XmlElement.RemoveAttribute(child.XmlElement.Name);
