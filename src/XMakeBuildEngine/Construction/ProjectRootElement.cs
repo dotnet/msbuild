@@ -158,11 +158,6 @@ namespace Microsoft.Build.Construction
         private BuildEventContext _buildEventContext;
 
         /// <summary>
-        /// Xpath expression that will find any element with the implicit attribute
-        /// </summary>
-        private static readonly string ImplicitAttributeXpath = $"//*[@{XMakeAttributes.@implicit}]";
-
-        /// <summary>
         /// Initialize a ProjectRootElement instance from a XmlReader.
         /// May throw InvalidProjectFileException.
         /// Leaves the project dirty, indicating there are unsaved changes.
@@ -655,6 +650,25 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        public string Sdk
+        {
+            [DebuggerStepThrough]
+            get
+            {
+                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.sdk);
+            }
+
+            [DebuggerStepThrough]
+            set
+            {
+                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.sdk, value);
+                MarkDirty("Set project Sdk to '{0}'", value);
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the value of TreatAsLocalProperty. If there is no tag, returns empty string.
         /// If the value being set is null or empty, removes the attribute.
         /// </summary>
@@ -710,10 +724,8 @@ namespace Microsoft.Build.Construction
                 {
                     using (ProjectWriter projectWriter = new ProjectWriter(stringWriter))
                     {
-                        var xmlWithNoImplicits = RemoveImplicits();
-
-                        projectWriter.Initialize(xmlWithNoImplicits);
-                        xmlWithNoImplicits.Save(projectWriter);
+                        projectWriter.Initialize(XmlDocument);
+                        XmlDocument.Save(projectWriter);
                     }
 
                     return stringWriter.ToString();
@@ -846,6 +858,14 @@ namespace Microsoft.Build.Construction
         public ElementLocation InitialTargetsLocation
         {
             get { return XmlElement.GetAttributeLocation(XMakeAttributes.initialTargets); }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public ElementLocation SdkLocation
+        {
+            get { return XmlElement.GetAttributeLocation(XMakeAttributes.sdk); }
         }
 
         /// <summary>
@@ -1752,10 +1772,8 @@ namespace Microsoft.Build.Construction
                 {
                     using (ProjectWriter projectWriter = new ProjectWriter(_projectFileLocation.File, saveEncoding))
                     {
-                        var xmlWithNoImplicits = RemoveImplicits();
-
-                        projectWriter.Initialize(xmlWithNoImplicits);
-                        xmlWithNoImplicits.Save(projectWriter);
+                        projectWriter.Initialize(XmlDocument);
+                        XmlDocument.Save(projectWriter);
                     }
 
                     _encoding = saveEncoding;
@@ -1782,26 +1800,6 @@ namespace Microsoft.Build.Construction
                 DataCollection.CommentMarkProfile(8811, endProjectSave);
             }
 #endif
-        }
-
-        private XmlDocument RemoveImplicits()
-        {
-            if (XmlDocument.SelectSingleNode(ImplicitAttributeXpath) == null)
-            {
-                return XmlDocument;
-            }
-
-            var xmlWithNoImplicits = (XmlDocument) XmlDocument.CloneNode(deep: true);
-
-            var implicitElements =
-                xmlWithNoImplicits.SelectNodes(ImplicitAttributeXpath);
-
-            foreach (XmlNode implicitElement in implicitElements)
-            {
-                implicitElement.ParentNode.RemoveChild(implicitElement);
-            }
-
-            return xmlWithNoImplicits;
         }
 
         /// <summary>
@@ -1837,10 +1835,8 @@ namespace Microsoft.Build.Construction
         {
             using (ProjectWriter projectWriter = new ProjectWriter(writer))
             {
-                var xmlWithNoImplicits = RemoveImplicits();
-
-                projectWriter.Initialize(xmlWithNoImplicits);
-                xmlWithNoImplicits.Save(projectWriter);
+                projectWriter.Initialize(XmlDocument);
+                XmlDocument.Save(projectWriter);
             }
 
             _versionOnDisk = Version;

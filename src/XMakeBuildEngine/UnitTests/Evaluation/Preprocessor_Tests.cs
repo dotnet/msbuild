@@ -885,10 +885,11 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
                     string expected = ObjectModelHelpers.CleanupFileContents(
                         $@"<?xml version=""1.0"" encoding=""utf-16""?>
-<Project Sdk=""MSBuildUnitTestSdk"">
+<Project>
   <!--
 ============================================================================================================================================
-  Import of ""{sdkPropsPath}"" from Sdk ""MSBuildUnitTestSdk"" was implied by the Project element's Sdk attribute.
+  <Import Project=""Sdk.props"" Sdk=""MSBuildUnitTestSdk"">
+  This import was added implicitly because of the Project element's Sdk attribute specified ""MSBuildUnitTestSdk"".
 
 {sdkPropsPath}
 ============================================================================================================================================
@@ -908,7 +909,8 @@ namespace Microsoft.Build.UnitTests.Preprocessor
   </PropertyGroup>
   <!--
 ============================================================================================================================================
-  Import of ""{sdkTargetsPath}"" from Sdk ""MSBuildUnitTestSdk"" was implied by the Project element's Sdk attribute.
+  <Import Project=""Sdk.targets"" Sdk=""MSBuildUnitTestSdk"">
+  This import was added implicitly because of the Project element's Sdk attribute specified ""MSBuildUnitTestSdk"".
 
 {sdkTargetsPath}
 ============================================================================================================================================

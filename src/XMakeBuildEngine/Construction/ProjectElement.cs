@@ -293,11 +293,6 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Gets the Implicit state of the element: true if the element was not in the read XML.
-        /// </summary>
-        public bool IsImplicit => XmlElement.HasAttribute(XMakeAttributes.@implicit);
-
-        /// <summary>
         /// Gets the name of the associated element. 
         /// Useful for display in some circumstances.
         /// </summary>

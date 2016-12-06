@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 using Xunit;
 
@@ -29,24 +30,36 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 string sdkPropsPath = Path.Combine(testSdkDirectory, "Sdk.props");
                 string sdkTargetsPath = Path.Combine(testSdkDirectory, "Sdk.targets");
 
-                File.WriteAllText(sdkPropsPath, "<Project />");
-                File.WriteAllText(sdkTargetsPath, "<Project />");
+                File.WriteAllText(sdkPropsPath, "<Project><PropertyGroup><InitialImportProperty>Hello</InitialImportProperty></PropertyGroup></Project>");
+                File.WriteAllText(sdkTargetsPath, "<Project><PropertyGroup><FinalImportProperty>World</FinalImportProperty></PropertyGroup></Project>");
 
                 using (new Helpers.TemporaryEnvironment("MSBuildSDKsPath", testSdkRoot))
                 {
                     string content = @"
-                    <Project Sdk='MSBuildUnitTestSdk' >
+                    <Project Sdk='MSBuildUnitTestSdk'>
+                        <PropertyGroup>
+                            <UsedToTestIfImplicitImportsAreInTheCorrectLocation>null</UsedToTestIfImplicitImportsAreInTheCorrectLocation>
+                        </PropertyGroup>
                     </Project>";
 
-                    ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                    ProjectRootElement projectRootElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
 
-                    List<ProjectImportElement> imports = Helpers.MakeList(project.Imports);
+                    Project project = new Project(projectRootElement);
 
-                    Assert.Equal(2, imports.Count);
-                    Assert.Equal(sdkPropsPath, imports[0].Project);
-                    Assert.True(imports[0].IsImplicit);
-                    Assert.Equal(sdkTargetsPath, imports[1].Project);
-                    Assert.True(imports[1].IsImplicit);
+                    List<ProjectImportElement> imports = Helpers.MakeList(projectRootElement.Imports);
+
+                    Assert.Equal(0, imports.Count);
+                    //Assert.Equal(sdkPropsPath, imports[0].Project);
+                    //Assert.True(imports[0].IsImplicit);
+                    //Assert.Equal(sdkTargetsPath, imports[1].Project);
+                    //Assert.True(imports[1].IsImplicit);
+
+                    Assert.Equal(2, project.Imports.Count);
+
+                    Assert.Equal(sdkPropsPath, project.Imports[0].ImportedProject.FullPath);
+                    Assert.Equal(sdkTargetsPath, project.Imports[1].ImportedProject.FullPath);
+
+                    // TODO: Check the location of the import, maybe it should point to the location of the SDK attribute?
                 }
             }
             finally

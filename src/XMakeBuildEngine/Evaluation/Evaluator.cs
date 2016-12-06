@@ -987,6 +987,42 @@ namespace Microsoft.Build.Evaluation
                 DebuggerManager.BakeStates(Path.GetFileNameWithoutExtension(currentProjectOrImport.FullPath));
             }
 #endif
+            IList<ProjectImportElement> implicitImports = new List<ProjectImportElement>();
+
+            if (!String.IsNullOrWhiteSpace(currentProjectOrImport.Sdk))
+            {
+                // SDK imports are added implicitly where they are evaluated at the top and bottom as if they are in the XML
+                //
+                foreach (string sdk in currentProjectOrImport.Sdk.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
+                                                                    .Select(i => i.Trim())
+                                                                    .Where(i => !String.IsNullOrWhiteSpace(i)))
+                {
+                    int slashIndex = sdk.LastIndexOf("/", StringComparison.Ordinal);
+                    string sdkName = slashIndex > 0 ? sdk.Substring(0, slashIndex) : sdk;
+
+                    // TODO: do something other than just ignore the version
+
+                    if (sdkName.Contains("/"))
+                    {
+                        ProjectErrorUtilities.ThrowInvalidProject(currentProjectOrImport.SdkLocation, "InvalidSdkFormat");
+                    }
+
+                    ProjectImportElement initialImport = ProjectImportElement.CreateDisconnected("Sdk.props", currentProjectOrImport);
+                    initialImport.Sdk = sdkName;
+                    initialImport.ImplicitImportLocation = ImplicitImportLocation.Top;
+                    implicitImports.Add(initialImport);
+
+                    ProjectImportElement finalImport = ProjectImportElement.CreateDisconnected("Sdk.targets", currentProjectOrImport);
+                    finalImport.Sdk = sdkName;
+                    finalImport.ImplicitImportLocation = ImplicitImportLocation.Bottom;
+                    implicitImports.Add(finalImport);
+                }
+            }
+
+            foreach (var import in implicitImports.Where(i => i.ImplicitImportLocation == ImplicitImportLocation.Top))
+            {
+                EvaluateImportElement(currentProjectOrImport.DirectoryPath, import);
+            }
 
             foreach (ProjectElement element in currentProjectOrImport.Children)
             {
@@ -1141,6 +1177,11 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 ErrorUtilities.ThrowInternalError("Unexpected child type");
+            }
+
+            foreach (var import in implicitImports.Where(i => i.ImplicitImportLocation == ImplicitImportLocation.Bottom))
+            {
+                EvaluateImportElement(currentProjectOrImport.DirectoryPath, import);
             }
 
 #if FEATURE_MSBUILD_DEBUGGER
@@ -2240,7 +2281,14 @@ namespace Microsoft.Build.Evaluation
                     continue;
                 }
 
-                var newExpandedImportPath = importElement.Project.Replace(extensionPropertyRefAsString, extensionPathExpanded);
+                string project = importElement.Project;
+                if (!String.IsNullOrWhiteSpace(importElement.Sdk))
+                {
+                    project = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildSDKsPath, importElement.Sdk, "Sdk", project);
+                }
+                
+
+                var newExpandedImportPath = project.Replace(extensionPropertyRefAsString, extensionPathExpanded);
                 _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "TryingExtensionsPath", newExpandedImportPath, extensionPathExpanded);
 
                 List<ProjectRootElement> projects;
@@ -2307,7 +2355,13 @@ namespace Microsoft.Build.Evaluation
                 return LoadImportsResult.ConditionWasFalse;
             }
 
-            return ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, importElement.Project, throwOnFileNotExistsError, out projects);
+            string project = importElement.Project;
+            if (!String.IsNullOrWhiteSpace(importElement.Sdk))
+            {
+                project = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildSDKsPath, importElement.Sdk, "Sdk", project);
+            }
+
+            return ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, project, throwOnFileNotExistsError, out projects);
         }
 
         /// <summary>
@@ -2410,7 +2464,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         parenthesizedProjectLocation = "[" + _projectRootElement.FullPath + "]";
                     }
-
+                    // TODO: Detect if the duplicate import came from an SDK attribute
                     _loggingService.LogWarning(_buildEventContext, null, new BuildEventFileInfo(importLocationInProject), "DuplicateImport", importFileUnescaped, previouslyImportedAt.Location.LocationString, parenthesizedProjectLocation);
                     duplicateImport = true;
                 }
