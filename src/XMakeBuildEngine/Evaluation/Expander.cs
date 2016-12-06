@@ -3080,6 +3080,23 @@ namespace Microsoft.Build.Evaluation
                         args[0] = Convert.ChangeType(args[0], objectInstance.GetType(), CultureInfo.InvariantCulture);
                     }
 
+                    if (_receiverType == typeof(IntrinsicFunctions))
+                    {
+                        // Special case a few methods that take extra parameters that can't be passed in by the user
+                        //
+
+                        if (_methodMethodName.Equals("GetPathOfFileAbove"))
+                        {
+                            // Append the IElementLocation as a parameter to GetPathOfFileAbove
+                            //
+                            args = new []
+                            {
+                                args[0],
+                                elementLocation,
+                            };
+                        }
+                    }
+
                     // If we've been asked to construct an instance, then we
                     // need to locate an appropriate constructor and invoke it
                     if (String.Equals("new", _methodMethodName, StringComparison.OrdinalIgnoreCase))

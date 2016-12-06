@@ -701,6 +701,8 @@ namespace Microsoft.Build.UnitTests
                 if (s_tempProjectDir == null)
                 {
                     s_tempProjectDir = Path.Combine(Path.GetTempPath(), "TempDirForMSBuildUnitTests");
+
+                    Directory.CreateDirectory(s_tempProjectDir);
                 }
 
                 return s_tempProjectDir;

@@ -2651,6 +2651,61 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
+        /// Verifies that <see cref="IntrinsicFunctions.GetPathOfFileAbove"/> returns the correct path if a file exists
+        /// or an empty string if it doesn't.
+        /// </summary>
+        [Fact]
+        public void PropertyFunctionStaticMethodGetPathOfFileAbove()
+        {
+            // Set element location to a file deep in the directory structure.  This is where the function should start looking
+            //
+            MockElementLocation mockElementLocation = new MockElementLocation(Path.Combine(ObjectModelHelpers.TempProjectDir, "one", "two", "three", "four", "five", Path.GetRandomFileName()));
+            
+            string fileToFind = FileUtilities.GetTemporaryFile(ObjectModelHelpers.TempProjectDir, ".tmp");
+
+            try
+            {
+                PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
+                pg.Set(ProjectPropertyInstance.Create("FileToFind", Path.GetFileName(fileToFind)));
+
+                Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
+
+                string result = expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::GetPathOfFileAbove($(FileToFind)))", ExpanderOptions.ExpandProperties, mockElementLocation);
+
+                Assert.Equal(fileToFind, result);
+
+                result = expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::GetPathOfFileAbove('Hobbits'))", ExpanderOptions.ExpandProperties, mockElementLocation);
+
+                Assert.Equal(String.Empty, result);
+            }
+            finally
+            {
+                ObjectModelHelpers.DeleteTempProjectDirectory();
+            }
+        }
+
+        /// <summary>
+        /// Verifies that <see cref="IntrinsicFunctions.GetPathOfFileAbove"/> only accepts a file name.
+        /// </summary>
+        [Fact]
+        public void PropertyFunctionStaticMethodGetPathOfFileAboveFileNameOnly()
+        {
+            string fileWithPath = Path.Combine("foo", "bar", "file.txt");
+
+            InvalidProjectFileException exception = Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
+                pg.Set(ProjectPropertyInstance.Create("FileWithPath", fileWithPath));
+
+                Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
+
+                string result = expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::GetPathOfFileAbove($(FileWithPath)))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+            });
+
+            Assert.Contains(ResourceUtilities.FormatResourceString("InvalidGetPathOfFileAboveParameter", fileWithPath), exception.Message);
+        }
+
+        /// <summary>
         /// Expand property function that calls GetCultureInfo
         /// </summary>
         [Fact]
