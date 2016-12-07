@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.TemplateEngine.Abstractions;
@@ -112,6 +111,9 @@ namespace dotnet_new3
 
         // This must be called before trying to access the template params or internal params
         // Otherwise an exception is thrown.
+        //
+        // TODO: Instead of having out params, have this setup corresponding properties.
+        //      It'd be more like how CommandLineApplication does things.
         public void ParseExtraArgs(IList<string> extraArgsFileNames, out IReadOnlyDictionary<string, string> templateParameters, out IReadOnlyDictionary<string, IList<string>> internalParameters)
         {
             Dictionary<string, string> tempTemplateParameters = new Dictionary<string, string>();
@@ -170,7 +172,7 @@ namespace dotnet_new3
             templateParameters = tempTemplateParameters;
         }
 
-        // Canonical is the template param name without any dashes. The things mapped to it all have dashes, including the paran name itself.
+        // Canonical is the template param name without any dashes. The things mapped to it all have dashes, including the param name itself.
         public void SetupTemplateParameters(ITemplateInfo templateInfo)
         {
             ITemplate template = SettingsLoader.LoadTemplate(templateInfo);
@@ -204,23 +206,6 @@ namespace dotnet_new3
                     longNameFound = true;
                 }
 
-                // TODO: prefer the Posix over the single letter
-                // always unless taken
-                string singleLetterName = "-" + parameter.Name.Substring(0, 1);
-                if (!IsParameterNameTaken(singleLetterName))
-                {
-                    MapTemplateParamToCanonical(singleLetterName, parameter.Name);
-                    shortNameFound = true;
-                }
-
-                // only as fallback
-                string qualifiedSingleLetterName = "-p:" + parameter.Name.Substring(0, 1);
-                if (!shortNameFound && !IsParameterNameTaken(qualifiedSingleLetterName))
-                {
-                    MapTemplateParamToCanonical(qualifiedSingleLetterName, parameter.Name);
-                    shortNameFound = true;
-                }
-
                 // always unless taken
                 string shortName = "-" + PosixNameToShortName(parameter.Name);
                 if (!IsParameterNameTaken(shortName))
@@ -230,10 +215,26 @@ namespace dotnet_new3
                 }
 
                 // only as fallback
+                string singleLetterName = "-" + parameter.Name.Substring(0, 1);
+                if (!shortNameFound && !IsParameterNameTaken(singleLetterName))
+                {
+                    MapTemplateParamToCanonical(singleLetterName, parameter.Name);
+                    shortNameFound = true;
+                }
+
+                // only as fallback
                 string qualifiedShortName = "-p:" + PosixNameToShortName(parameter.Name);
                 if (!shortNameFound && !IsParameterNameTaken(qualifiedShortName))
                 {
                     MapTemplateParamToCanonical(qualifiedShortName, parameter.Name);
+                    shortNameFound = true;
+                }
+
+                // only as fallback
+                string qualifiedSingleLetterName = "-p:" + parameter.Name.Substring(0, 1);
+                if (!shortNameFound && !IsParameterNameTaken(qualifiedSingleLetterName))
+                {
+                    MapTemplateParamToCanonical(qualifiedSingleLetterName, parameter.Name);
                     shortNameFound = true;
                 }
 

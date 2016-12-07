@@ -4,7 +4,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.CommandLineUtils;
@@ -21,14 +20,9 @@ namespace dotnet_new3
     {
         private static void SetupHiddenCommands(ExtendedCommandParser appExt)
         {
-            appExt.RegisterHiddenOption("-i|--install", "--install", CommandOptionType.MultipleValue);
+            // reserved but not currently used
             appExt.RegisterHiddenOption("-up|--update", "--update", CommandOptionType.MultipleValue);
             appExt.RegisterHiddenOption("-u|--uninstall", "--uninstall", CommandOptionType.MultipleValue);
-            appExt.RegisterHiddenOption("-d|--dir", "--dir", CommandOptionType.NoValue);
-            appExt.RegisterHiddenOption("-a|--alias", "--alias", CommandOptionType.SingleValue);
-            //appExt.RegisterHiddenOption("-x|--extra-args", "--extra-args", CommandOptionType.MultipleValue);
-            //appExt.RegisterHiddenOption("--locale", "--locale", CommandOptionType.SingleValue);
-            //appExt.RegisterHiddenOption("--quiet", "--quiet", CommandOptionType.NoValue);
             appExt.RegisterHiddenOption("--skip-update-check", "--skip-update-check", CommandOptionType.NoValue);
         }
 
@@ -42,77 +36,73 @@ namespace dotnet_new3
 
             SetupHiddenCommands(app);
 
-            //TODO: determine which way we want to deal with options, and unify them. One of:
-            //  1) Like in SetupHiddenCommands()
-            //  2) Like below, using RemoveOption()
             CommandArgument templateNames = app.Argument("template", "The template to instantiate.");
             CommandOption listOnly = app.Option("-l|--list", "List templates containing the specified name.", CommandOptionType.NoValue);
-            CommandOption name = app.Option("-n|--name", "The name for the output being created. If no name is specified, the name of the current directory is used.", CommandOptionType.SingleValue);
-            //CommandOption dir = app.Option("-d|--dir", "Indicates whether to create a directory for the generated content.", CommandOptionType.NoValue);
-            //CommandOption alias = app.Option("-a|--alias", "Creates an alias for the specified template.", CommandOptionType.SingleValue);
+            CommandOption nameOption = app.Option("-n|--name", "The name for the output being created. If no name is specified, the name of the current directory is used.", CommandOptionType.SingleValue);
+            CommandOption helpOption = app.Option("-h|--help", "Display help for the indicated template's parameters.", CommandOptionType.NoValue);
 
+            // the options below get removed from the app, so they don't display in the help
+            CommandOption dirOption = app.Option("-d|--dir", "Indicates whether to create a directory for the generated content.", CommandOptionType.NoValue);
+            CommandOption aliasOption = app.Option("-a|--alias", "Creates an alias for the specified template.", CommandOptionType.SingleValue);
             CommandOption parametersFilesOption = app.Option("-x|--extra-args", "Specifies a file containing additional parameters.", CommandOptionType.MultipleValue);
-            CommandOption help = app.Option("-h|--help", "Display help for the indicated template's parameters.", CommandOptionType.NoValue);
-
             CommandOption localeOption = app.Option("--locale", "The locale to use", CommandOptionType.SingleValue);
             CommandOption quietOption = app.Option("--quiet", "Doesn't output any status information.", CommandOptionType.NoValue);
-
-            //CommandOption install = app.Option("-i|--install", "Installs a source or a template pack.", CommandOptionType.MultipleValue);
+            CommandOption installOption = app.Option("-i|--install", "Installs a source or a template pack.", CommandOptionType.MultipleValue);
             //CommandOption update = app.Option("--update", "Update matching templates.", CommandOptionType.NoValue);
 
             app.OnExecute(async () =>
             {
-            string locale = localeOption.HasValue() ? localeOption.Value() : CultureInfo.CurrentCulture.Name;
-            app.RemoveOption(localeOption);
-            bool quiet = quietOption.HasValue();
-            app.RemoveOption(quietOption);
-            IList<string> parametersFiles = parametersFilesOption.Values;
-            app.RemoveOption(parametersFilesOption);
+                app.RemoveOption(dirOption);
+                app.RemoveOption(aliasOption);
+                app.RemoveOption(parametersFilesOption);
+                app.RemoveOption(localeOption);
+                app.RemoveOption(quietOption);
+                app.RemoveOption(installOption);
 
-            EngineEnvironmentSettings.Host = new DefaultTemplateEngineHost(locale);
+                string locale = localeOption.HasValue() ? localeOption.Value() : CultureInfo.CurrentCulture.Name;
+                EngineEnvironmentSettings.Host = new DefaultTemplateEngineHost(locale);
 
-            bool reinitFlag = app.RemainingArguments.Any(x => x == "--debug:reinit");
-            if (reinitFlag)
-            {
-                Paths.User.FirstRunCookie.Delete();
-            }
-
-            // Note: this leaves things in a weird state. Might be related to the localized caches.
-            // not sure, need to look into it.
-            if (reinitFlag || app.RemainingArguments.Any(x => x == "--debug:reset-config"))
-            {
-                Paths.User.AliasesFile.Delete();
-                Paths.User.SettingsFile.Delete();
-                TemplateCache.DeleteAllLocaleCacheFiles();
-                return 0;
-            }
-
-            if (!Paths.User.BaseDir.Exists() || !Paths.User.FirstRunCookie.Exists())
-            {
-                if (!quiet)
+                bool reinitFlag = app.RemainingArguments.Any(x => x == "--debug:reinit");
+                if (reinitFlag)
                 {
-                    Reporter.Output.WriteLine("Getting things ready for first use...");
+                    Paths.User.FirstRunCookie.Delete();
                 }
 
-                ConfigureEnvironment();
-                Paths.User.FirstRunCookie.WriteAllText("");
-            }
+                // Note: this leaves things in a weird state. Might be related to the localized caches.
+                // not sure, need to look into it.
+                if (reinitFlag || app.RemainingArguments.Any(x => x == "--debug:reset-config"))
+                {
+                    Paths.User.AliasesFile.Delete();
+                    Paths.User.SettingsFile.Delete();
+                    TemplateCache.DeleteAllLocaleCacheFiles();
+                    return 0;
+                }
 
-            if (app.RemainingArguments.Any(x => x == "--debug:showconfig"))
-            {
-                ShowConfig();
-                return 0;
-            }
+                if (!Paths.User.BaseDir.Exists() || !Paths.User.FirstRunCookie.Exists())
+                {
+                    if (!quietOption.HasValue())
+                    {
+                        Reporter.Output.WriteLine("Getting things ready for first use...");
+                    }
 
-            if (listOnly.HasValue())
-            {
-                ListTemplates(templateNames.Value);
-                return -1;
-            }
+                    ConfigureEnvironment();
+                    Paths.User.FirstRunCookie.WriteAllText("");
+                }
 
-            IReadOnlyDictionary<string, string> templateParameters;
-            IReadOnlyDictionary<string, IList<string>> internalParameters;
-            bool anyTemplateMatches = false;
+                if (app.RemainingArguments.Any(x => x == "--debug:showconfig"))
+                {
+                    ShowConfig();
+                    return 0;
+                }
+
+                if (listOnly.HasValue())
+                {
+                    ListTemplates(templateNames.Value);
+                    return -1;
+                }
+
+                IReadOnlyDictionary<string, string> templateParameters;
+                IReadOnlyDictionary<string, IList<string>> internalParameters;
 
                 try
                 {
@@ -122,9 +112,8 @@ namespace dotnet_new3
                         ITemplateInfo templateInfo = templates.First();
                         app.SetupTemplateParameters(templateInfo);
                     }
-                
-                    anyTemplateMatches = templates.Any();
 
+                    IList<string> parametersFiles = parametersFilesOption.Values;
                     app.ParseExtraArgs(parametersFiles, out templateParameters, out internalParameters);
                 }
                 catch (Exception ex)
@@ -134,24 +123,20 @@ namespace dotnet_new3
                     return -1;
                 }
 
-                // No template specified, or none matched the input. General help on this command
-                if (! anyTemplateMatches && help.HasValue())
-                {
-                    app.ShowHelp();
-                    return 0;
-                }
-
-                // Help for the requested template
-                if (help.HasValue())
+                if (helpOption.HasValue())
                 {
                     return DisplayHelp(templateNames.Value, app);
                 }
 
-                // probably doesn't matter if this is before or after the help calls.
-                IList<string> install;
-                if (internalParameters.TryGetValue("--install", out install) && install.Count > 0)
+                //if (internalParameters.TryGetValue("--install", out IList<string> install) && install.Count > 0)
+                //{
+                //    InstallPackage(install.ToList(), quiet);
+                //    return 0;
+                //}
+
+                if (installOption.HasValue())
                 {
-                    InstallPackage(install.ToList(), quiet);
+                    InstallPackage(installOption.Values, quietOption.HasValue());
                     return 0;
                 }
 
@@ -160,19 +145,12 @@ namespace dotnet_new3
                 //    return PerformUpdateAsync(template.Value, quiet, source);
                 //}
 
-                //string aliasName = alias.HasValue() ? alias.Value() : null;
-                string aliasName = null;
-                if (internalParameters.TryGetValue("--alias", out IList<string> aliasNameValues))
-                {
-                    aliasName = aliasNameValues[0];
-                }
-
+                string aliasName = aliasOption.HasValue() ? aliasOption.Value() : null;
                 string fallbackName = new DirectoryInfo(Directory.GetCurrentDirectory()).Name;
-
-                bool dirValue = internalParameters.ContainsKey("--dir");
+                bool dirValue = dirOption.HasValue();
                 bool skipUpdateCheckValue = internalParameters.ContainsKey("--skip-update-check");
-                    
-                if (await TemplateCreator.InstantiateAsync(templateNames.Value ?? "", name.Value(), fallbackName, dirValue, aliasName, templateParameters, skipUpdateCheckValue) == -1)
+
+                if (await TemplateCreator.InstantiateAsync(templateNames.Value ?? "", nameOption.Value(), fallbackName, dirValue, aliasName, templateParameters, skipUpdateCheckValue) == -1)
                 {
                     ListTemplates(templateNames.Value);
                     return -1;
@@ -398,6 +376,12 @@ namespace dotnet_new3
 
         private static int DisplayHelp(string templateNames, ExtendedCommandParser app)
         {
+            if (string.IsNullOrWhiteSpace(templateNames))
+            {   // no template specified
+                app.ShowHelp();
+                return 0;
+            }
+
             IReadOnlyCollection<ITemplateInfo> templates = TemplateCreator.List(templateNames);
 
             if (templates.Count > 1)
@@ -405,9 +389,21 @@ namespace dotnet_new3
                 ListTemplates(templateNames);
                 return -1;
             }
+            else if (templates.Count == 1)
+            {
+                ITemplateInfo templateInfo = templates.First();
+                return TemplateHelp(templateInfo, app);
+            }
+            else
+            {
+                // TODO: add a message indicating no templates matched the pattern. Requires LOC coordination
+                ListTemplates(string.Empty);
+                return -1;
+            }
+        }
 
-            ITemplateInfo templateInfo = templates.First();
-
+        private static int TemplateHelp(ITemplateInfo templateInfo, ExtendedCommandParser app)
+        { 
             Reporter.Output.WriteLine(templateInfo.Name);
             if (!string.IsNullOrWhiteSpace(templateInfo.Author))
             {
