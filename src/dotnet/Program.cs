@@ -12,6 +12,7 @@ using Microsoft.DotNet.Tools.Add;
 using Microsoft.DotNet.Tools.Build;
 using Microsoft.DotNet.Tools.Clean;
 using Microsoft.DotNet.Tools.Help;
+using Microsoft.DotNet.Tools.List;
 using Microsoft.DotNet.Tools.Migrate;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.New;
@@ -32,17 +33,18 @@ namespace Microsoft.DotNet.Cli
     {
         private static Dictionary<string, Func<string[], int>> s_builtIns = new Dictionary<string, Func<string[], int>>
         {
-            ["add"] = (new AddCommand()).Run,
+            ["add"] = AddCommand.Run,
             ["build"] = BuildCommand.Run,
             ["clean"] = CleanCommand.Run,
             ["help"] = HelpCommand.Run,
+            ["list"] = ListCommand.Run,
             ["migrate"] = MigrateCommand.Run,
             ["msbuild"] = MSBuildCommand.Run,
             ["new"] = NewCommand.Run,
             ["nuget"] = NuGetCommand.Run,
             ["pack"] = PackCommand.Run,
             ["publish"] = PublishCommand.Run,
-            ["remove"] = (new RemoveCommand()).Run,
+            ["remove"] = RemoveCommand.Run,
             ["restore"] = RestoreCommand.Run,
             ["restore-projectjson"] = RestoreProjectJsonCommand.Run,
             ["run"] = RunCommand.Run,

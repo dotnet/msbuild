@@ -19,6 +19,7 @@
         public const string ProjectFile = "Project file";
         public const string Reference = "Reference";
         public const string ProjectReference = "Project reference";
+        public const string ProjectReferenceOneOrMore = "Project reference(s)";
         public const string PackageReference = "Package reference";
         public const string P2P = "Project to Project";
         public const string P2PReference = "Project to Project reference";

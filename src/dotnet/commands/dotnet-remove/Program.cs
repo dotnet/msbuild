@@ -37,5 +37,11 @@ Args:
         {
             ["p2p"] = RemoveProjectToProjectReferenceCommand.Run,
         };
+
+        public static int Run(string[] args)
+        {
+            var cmd = new RemoveCommand();
+            return cmd.Start(args);
+        }
     }
 }

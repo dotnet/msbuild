@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Tools
         protected abstract string HelpText { get; }
         protected abstract Dictionary<string, Func<string[], int>> BuiltInCommands { get; }
 
-        public int Run(string[] args)
+        public int Start(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
 

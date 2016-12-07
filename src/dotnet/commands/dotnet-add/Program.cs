@@ -37,5 +37,11 @@ Args:
         {
             ["p2p"] = AddProjectToProjectReferenceCommand.Run,
         };
+
+        public static int Run(string[] args)
+        {
+            var cmd = new AddCommand();
+            return cmd.Start(args);
+        }
     }
 }

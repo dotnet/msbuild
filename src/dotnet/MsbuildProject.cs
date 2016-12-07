@@ -131,6 +131,11 @@ namespace Microsoft.DotNet.Tools
             return totalNumberOfRemovedReferences;
         }
 
+        public IEnumerable<ProjectItemElement> GetProjectToProjectReferences()
+        {
+            return Project.GetAllItemsWithElementType(ProjectItemElementType);
+        }
+
         public void ConvertPathsToRelative(ref List<string> references)
         {
             references = references.Select((r) => PathUtility.GetRelativePath(ProjectDirectory, Path.GetFullPath(r))).ToList();

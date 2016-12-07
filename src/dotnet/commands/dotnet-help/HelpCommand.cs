@@ -38,6 +38,7 @@ namespace Microsoft.DotNet.Tools.Help
 Project modification commands:
   add           Add items to the project
   remove        Remove items from the project
+  list          List items in the project
 
 {LocalizableStrings.AdvancedCommands}:
   nuget         {LocalizableStrings.NugetDefinition}

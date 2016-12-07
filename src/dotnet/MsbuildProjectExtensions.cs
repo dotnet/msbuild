@@ -67,6 +67,11 @@ namespace Microsoft.DotNet.Tools
             return root.FindExistingItemsWithCondition(framework, include).Count() != 0;
         }
 
+        public static IEnumerable<ProjectItemElement> GetAllItemsWithElementType(this ProjectRootElement root, string projectItemElementType)
+        {
+            return root.Items.Where((it) => it.ItemType == projectItemElementType);
+        }
+
         public static bool HasInclude(this ProjectItemElement el, string include)
         {
             include = NormalizeIncludeForComparison(include);
