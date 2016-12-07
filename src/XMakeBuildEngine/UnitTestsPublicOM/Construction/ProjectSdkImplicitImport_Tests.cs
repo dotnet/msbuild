@@ -32,7 +32,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 File.WriteAllText(sdkPropsPath, "<Project />");
                 File.WriteAllText(sdkTargetsPath, "<Project />");
 
-                using (new Helpers.TemporaryEnvironment("MSBuildSDKsPath", testSdkRoot))
+                using (new Helpers.TemporaryEnvironment(MSBuildConstants.SdksPath, testSdkRoot))
                 {
                     string content = @"
                     <Project Sdk='MSBuildUnitTestSdk' >

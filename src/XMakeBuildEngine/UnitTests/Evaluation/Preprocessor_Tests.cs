@@ -869,7 +869,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
     </PropertyGroup>
 </Project>");
 
-                using (new Helpers.TemporaryEnvironment("MSBuildSDKsPath", testSdkRoot))
+                using (new Helpers.TemporaryEnvironment(MSBuildConstants.SdksPath, testSdkRoot))
                 {
                     string content = @"<Project Sdk='MSBuildUnitTestSdk'>
   <PropertyGroup>

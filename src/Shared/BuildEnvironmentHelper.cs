@@ -446,7 +446,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Path to the Sdks folder for this MSBuild instance.
         /// </summary>
-        internal string MSBuildSDKsPath
+        internal string MSBuildSdksPath
         {
             get
             {
@@ -463,7 +463,7 @@ namespace Microsoft.Build.Shared
                 }
 
                 // Allow an environment-variable override of the default SDK location
-                return Environment.GetEnvironmentVariable("MSBuildSDKsPath") ?? defaultSdkPath;
+                return Environment.GetEnvironmentVariable(MSBuildConstants.SdksPath) ?? defaultSdkPath;
             }
         }
 
