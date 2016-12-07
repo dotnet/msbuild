@@ -30,13 +30,13 @@
 
         public const string NewDefinition = "Initialize a basic .NET project";
 
-        public const string RestoreDefinition = "Restore dependencies specified in the.NET project";
+        public const string RestoreDefinition = "Restore dependencies specified in the .NET project";
 
         public const string BuildDefinition = "Builds a .NET project";
 
         public const string PublishDefinition = "Publishes a .NET project for deployment (including the runtime)";
 
-        public const string RunDefinition = "Compiles and immediately executes a.NET project";
+        public const string RunDefinition = "Compiles and immediately executes a .NET project";
 
         public const string TestDefinition = "Runs unit tests using the test runner specified in the project";
 
