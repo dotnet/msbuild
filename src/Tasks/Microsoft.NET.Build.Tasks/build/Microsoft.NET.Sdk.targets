@@ -253,7 +253,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </ItemGroup>
 
   <!-- Reference Manager capabilities -->
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
     <ProjectCapability Remove="ReferenceManagerAssemblies" />
     <ProjectCapability Remove="ReferenceManagerCOM" />
   </ItemGroup>
