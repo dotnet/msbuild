@@ -53,7 +53,7 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = "bin\\debug";
             task.ReferencedAssemblies = new TaskItem[] { new TaskItem("LicensedControl.dll"), new TaskItem("OtherControl.dll") };
             task.NoLogo = true;
-            task.TargetFrameworkVersion = "4.0";
+            task.TargetFrameworkVersion = "4.6";
 
             CommandLine.ValidateHasParameter(task, "/complist:complist.licx", true /* use response file */);
             CommandLine.ValidateHasParameter(task, "/complist:othersrc.txt", true /* use response file */);
