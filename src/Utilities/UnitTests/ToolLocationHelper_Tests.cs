@@ -2644,6 +2644,51 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void GetPathToStandardLibrariesWithCustomTargetFrameworkInFallbackSearchPathAndNullRoot()
+        {
+            string frameworkName = "Foo Framework";
+            string frameworkVersion = "v0.1";
+            string customFrameworkRootPath = Path.Combine(Path.GetTempPath(), "framework-root");
+
+            try {
+                string asmPath = CreateNewFrameworkAndGetAssembliesPath(frameworkName, frameworkVersion, customFrameworkRootPath);
+                string fallbackSearchPaths = $"/foo/bar;{customFrameworkRootPath};/a/b";
+
+                string stdLibPath = ToolLocationHelper.GetPathToStandardLibraries(frameworkName, frameworkVersion, String.Empty, null, null, fallbackSearchPaths);
+                Assert.Equal(asmPath, stdLibPath);
+            } finally {
+                FileUtilities.DeleteDirectoryNoThrow(customFrameworkRootPath, recursive:true);
+            }
+        }
+
+        [Fact]
+        public void GetPathToStandardLibrariesWithCustomRootAndCustomTargetFrameworkInFallbackSearchPath()
+        {
+            // We are creating the same framework in the root path and in a second location, used as a
+            // fallback search path. When trying to find the framework, we should always resolve to
+            // the framework in the root path, because the search order is:
+            //  1. rootPath or default path, if null
+            //  2. fallback search paths
+
+            string frameworkName = "Foo Framework";
+            string frameworkVersion = "v0.1";
+            string rootDir = Path.Combine(Path.GetTempPath(), "framework-root");
+            string fallbackPath = Path.Combine(Path.GetTempPath(), "framework-root");
+
+            try {
+                string asmPathForRoot = CreateNewFrameworkAndGetAssembliesPath(frameworkName, frameworkVersion, rootDir);
+                string fallbackSearchPaths = $"/foo/bar;{fallbackPath};/a/b";
+
+                string stdLibPath = ToolLocationHelper.GetPathToStandardLibraries(frameworkName, frameworkVersion, String.Empty, null, rootDir, fallbackPath);
+                // the path should be for the framework in the root path
+                Assert.Equal(asmPathForRoot, stdLibPath);
+            } finally {
+                FileUtilities.DeleteDirectoryNoThrow(fallbackPath, recursive:true);
+                FileUtilities.DeleteDirectoryNoThrow(rootDir, recursive:true);
+            }
+        }
+
+        [Fact]
         public void GetPathToStandardLibrariesWithNullTargetFrameworkRootPath()
         {
             string frameworkName = ".NETFramework";
@@ -2657,30 +2702,125 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void GetPathToReferenceAssembliesWithCustomTargetFrameworkRoot()
+        public void GetPathToStandardLibrariesWithNullTargetFrameworkFallbackSearchPaths()
         {
-            string frameworkName = "Foo Framework";
-            string frameworkVersion = "v0.1";
-            string rootDir = Path.Combine(Path.GetTempPath(), "framework-root");
+            string frameworkName = ".NETFramework";
+            string frameworkVersion = "v4.5";
+
+            string v45Path = ToolLocationHelper.GetPathToStandardLibraries(frameworkName, frameworkVersion, String.Empty);
+            // This look up should fall back the default path with the .NET frameworks
+            string v45PathWithNullRoot = ToolLocationHelper.GetPathToStandardLibraries(frameworkName, frameworkVersion, String.Empty, null, null);
+
+            Assert.Equal(v45Path, v45PathWithNullRoot);
+        }
+
+        [Fact]
+        public void GetPathToReferenceAssembliesWithCustomTargetFrameworkInRoot()
+        {
+            string customFrameworkDir = Path.Combine(Path.GetTempPath(), "framework-root");
+
+            CheckGetPathToReferenceAssemblies(customFrameworkDir, null,
+                                                (string frameworkName, string frameworkVersion, string frameworkProfile, string _customFrameworkDir, string _fallbackSearchPaths)
+                                                     => ToolLocationHelper.GetPathToReferenceAssemblies(frameworkName, "v" + frameworkVersion, frameworkProfile, _customFrameworkDir));
+        }
+
+        [Fact]
+        public void GetPathToReferenceAssembliesWithCustomTargetFrameworkInFallbackPath()
+        {
+            string customFrameworkDir = Path.Combine(Path.GetTempPath(), "framework-root");
+            string searchPaths = $"/foo/bar;{customFrameworkDir}";
+            string rootDir = FileUtilities.GetTemporaryDirectory();
 
             try {
-                string asmPath = CreateNewFrameworkAndGetAssembliesPath(frameworkName, frameworkVersion, rootDir);
+                CheckGetPathToReferenceAssemblies(customFrameworkDir, searchPaths,
+                                                    (string frameworkName, string frameworkVersion, string frameworkProfile, string _customFrameworkDir, string _fallbackSearchPaths)
+                                                        => ToolLocationHelper.GetPathToReferenceAssemblies(
+                                                                                frameworkName, "v" + frameworkVersion, frameworkProfile,
+                                                                                rootDir, _fallbackSearchPaths));
+            } finally {
+                    FileUtilities.DeleteDirectoryNoThrow(rootDir, recursive:true);
+            }
+        }
 
-                var stdLibPaths = ToolLocationHelper.GetPathToReferenceAssemblies(frameworkName, frameworkVersion, String.Empty, rootDir);
+        [Fact]
+        public void GetPathToReferenceAssembliesWithCustomTargetFrameworkInFallbackPathAndNullRoot()
+        {
+            string customFrameworkDir = Path.Combine(Path.GetTempPath(), "framework-root");
+            string searchPaths = $"/foo/bar;{customFrameworkDir}";
+
+            CheckGetPathToReferenceAssemblies(customFrameworkDir, searchPaths,
+                                                (string frameworkName, string frameworkVersion, string frameworkProfile, string _customFrameworkDir, string _fallbackSearchPaths)
+                                                    => ToolLocationHelper.GetPathToReferenceAssemblies(
+                                                                        frameworkName, "v" + frameworkVersion, frameworkProfile,
+                                                                        targetFrameworkRootPath:null, targetFrameworkFallbackSearchPaths:_fallbackSearchPaths));
+        }
+
+        [Fact]
+        public void GetPathToReferenceAssembliesWithCustomTargetFrameworkInRoot2()
+        {
+            string customFrameworkDir = Path.Combine(Path.GetTempPath(), "framework-root");
+            CheckGetPathToReferenceAssemblies(customFrameworkDir, null,
+                                                (string frameworkName, string frameworkVersion, string frameworkProfile, string _customFrameworkDir, string _fallbackSearchPaths)
+                                                     => ToolLocationHelper.GetPathToReferenceAssemblies(
+                                                                        _customFrameworkDir, _fallbackSearchPaths,
+                                                                        new FrameworkNameVersioning(frameworkName, new Version(frameworkVersion), frameworkProfile)));
+        }
+
+        [Fact]
+        public void GetPathToReferenceAssembliesWithCustomTargetFrameworkRootInFallbackPath2()
+        {
+            string customFrameworkDir = Path.Combine(Path.GetTempPath(), "framework-root");
+            string searchPaths = $"{customFrameworkDir};/a/b";
+            string rootDir = FileUtilities.GetTemporaryDirectory();
+
+            try {
+                CheckGetPathToReferenceAssemblies(customFrameworkDir, searchPaths,
+                                                    (string frameworkName, string frameworkVersion, string frameworkProfile, string _customFrameworkDir, string _fallbackSearchPaths)
+                                                         => ToolLocationHelper.GetPathToReferenceAssemblies(
+                                                                            rootDir, _fallbackSearchPaths,
+                                                                            new FrameworkNameVersioning(frameworkName, new Version(frameworkVersion), frameworkProfile)));
+            } finally {
+                    FileUtilities.DeleteDirectoryNoThrow(rootDir, recursive:true);
+            }
+        }
+
+        [Fact]
+        public void GetPathToReferenceAssembliesWithCustomTargetFrameworkRootInFallbackPathAndNullRoot2()
+        {
+            string customFrameworkDir = Path.Combine(Path.GetTempPath(), "framework-root");
+            string searchPaths = $"{customFrameworkDir};/a/b";
+            CheckGetPathToReferenceAssemblies(customFrameworkDir, searchPaths,
+                                                (string frameworkName, string frameworkVersion, string frameworkProfile, string _customFrameworkDir, string _fallbackSearchPaths)
+                                                     => ToolLocationHelper.GetPathToReferenceAssemblies(
+                                                                        null, _fallbackSearchPaths,
+                                                                        new FrameworkNameVersioning(frameworkName, new Version(frameworkVersion), frameworkProfile)));
+        }
+
+        private void CheckGetPathToReferenceAssemblies(string customFrameworkDir, string fallbackSearchPaths, Func<string, string, string, string, string, IList<string>> getPathToReferenceAssemblies)
+        {
+            string frameworkName = "Foo Framework";
+            string frameworkVersion = "0.1";
+            string frameworkVersionWithV = "v" + frameworkVersion;
+            string frameworkProfile = String.Empty;
+
+            try {
+                string asmPath = CreateNewFrameworkAndGetAssembliesPath(frameworkName, frameworkVersionWithV, customFrameworkDir);
+
+                var stdLibPaths = getPathToReferenceAssemblies(frameworkName, frameworkVersion, frameworkProfile, customFrameworkDir, fallbackSearchPaths);
                 if (NativeMethodsShared.IsMono)
                 {
                     Assert.Equal(2, stdLibPaths.Count);
-                    Assert.Equal(Path.Combine(rootDir, frameworkName, frameworkVersion) + Path.DirectorySeparatorChar.ToString(), stdLibPaths[0]);
+                    Assert.Equal(Path.Combine(customFrameworkDir, frameworkName, frameworkVersionWithV) + Path.DirectorySeparatorChar.ToString(), stdLibPaths[0]);
                     Assert.Equal(asmPath + Path.DirectorySeparatorChar.ToString(), stdLibPaths[1]);
                 }
                 else
                 {
                     Assert.Equal(1, stdLibPaths.Count);
-                    Assert.Equal(Path.Combine(rootDir, frameworkName, frameworkVersion) + Path.DirectorySeparatorChar.ToString(), stdLibPaths[0]);
+                    Assert.Equal(Path.Combine(customFrameworkDir, frameworkName, frameworkVersionWithV) + Path.DirectorySeparatorChar.ToString(), stdLibPaths[0]);
                 }
 
             } finally {
-                FileUtilities.DeleteDirectoryNoThrow(rootDir, recursive:true);
+                FileUtilities.DeleteDirectoryNoThrow(customFrameworkDir, recursive:true);
             }
         }
 
@@ -2694,6 +2834,20 @@ namespace Microsoft.Build.UnitTests
 
             // This look up should fall back the default path with the .NET frameworks
             var v45PathsWithNullRoot = ToolLocationHelper.GetPathToReferenceAssemblies(frameworkName, frameworkVersion, String.Empty, null);
+
+            Assert.Equal(v45Paths, v45PathsWithNullRoot);
+        }
+
+        [Fact]
+        public void GetPathToReferenceAssembliesWithNullTargetFrameworkFallbackSearchPaths()
+        {
+            string frameworkName = ".NETFramework";
+            string frameworkVersion = "v4.5";
+
+            var v45Paths = ToolLocationHelper.GetPathToReferenceAssemblies(frameworkName, frameworkVersion, String.Empty);
+
+            // This look up should fall back the default path with the .NET frameworks
+            var v45PathsWithNullRoot = ToolLocationHelper.GetPathToReferenceAssemblies(frameworkName, frameworkVersion, String.Empty, null, null);
 
             Assert.Equal(v45Paths, v45PathsWithNullRoot);
         }

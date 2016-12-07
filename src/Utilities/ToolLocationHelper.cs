@@ -214,6 +214,12 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         private static List<string> s_targetFrameworkMonikers = null;
 
+        /// <summary>
+        /// Character used to separate search paths specified for MSBuildExtensionsPath* in
+        /// the config file
+        /// </summary>
+        private static char _separatorForFallbackSearchPaths = ';';
+
         private const string retailConfigurationName = "Retail";
         private const string neutralArchitectureName = "Neutral";
         private const string commonConfigurationFolderName = "CommonConfiguration";
@@ -1712,7 +1718,7 @@ namespace Microsoft.Build.Utilities
         /// <returns>Collection of reference assembly locations.</returns>
         public static string GetPathToStandardLibraries(string targetFrameworkIdentifier, string targetFrameworkVersion, string targetFrameworkProfile, string platformTarget)
         {
-            return GetPathToStandardLibraries(targetFrameworkIdentifier, targetFrameworkVersion, targetFrameworkProfile, platformTarget, null);
+            return GetPathToStandardLibraries(targetFrameworkIdentifier, targetFrameworkVersion, targetFrameworkProfile, platformTarget, null, null);
         }
 
         /// <summary>
@@ -1723,9 +1729,12 @@ namespace Microsoft.Build.Utilities
         /// <param name="targetFrameworkProfile">Profile being targeted</param>
         /// <param name="platformTarget">What is the targeted platform, this is used to determine where we should look for the standard libraries. Note, this parameter is only used for .net frameworks less than 4.0</param>
         /// <param name="targetFrameworkRootPath">Root directory where the target framework will be looked for. Uses default path if this is null</param>
+        /// <param name="targetFrameworkFallbackSearchPaths">The target framework named @frameworkName is looked up in @targetFrameworkRootPath. If it is not
+        /// found there, then it is looked up in @targetFrameworkFallbackSearchPaths. This can have multiple paths separated by ';'.
+        /// </param>
         /// <exception cref="ArgumentNullException">When the frameworkName is null</exception>
         /// <returns>Collection of reference assembly locations.</returns>
-        public static string GetPathToStandardLibraries(string targetFrameworkIdentifier, string targetFrameworkVersion, string targetFrameworkProfile, string platformTarget, string targetFrameworkRootPath)
+        public static string GetPathToStandardLibraries(string targetFrameworkIdentifier, string targetFrameworkVersion, string targetFrameworkProfile, string platformTarget, string targetFrameworkRootPath, string targetFrameworkFallbackSearchPaths = null)
         {
             ErrorUtilities.VerifyThrowArgumentLength(targetFrameworkIdentifier, "targetFrameworkIdentifier");
             ErrorUtilities.VerifyThrowArgumentLength(targetFrameworkVersion, "targetFrameworkVersion");
@@ -1762,7 +1771,7 @@ namespace Microsoft.Build.Utilities
                 // location, if so then we can just use what ever version they passed in because it should be MSIL now and not bit specific.
             }
 
-            IList<string> referenceAssemblyDirectories = GetPathToReferenceAssemblies(targetFrameworkIdentifier, targetFrameworkVersion, targetFrameworkProfile, targetFrameworkRootPath);
+            IList<string> referenceAssemblyDirectories = GetPathToReferenceAssemblies(targetFrameworkIdentifier, targetFrameworkVersion, targetFrameworkProfile, targetFrameworkRootPath, targetFrameworkFallbackSearchPaths);
             // Check each returned reference assembly directory for one containing mscorlib.dll
             // When we find it (most of the time it will be the first in the set) we'll
             // return that directory.
@@ -1793,9 +1802,8 @@ namespace Microsoft.Build.Utilities
         /// <returns>Collection of reference assembly locations.</returns>
         public static IList<String> GetPathToReferenceAssemblies(string targetFrameworkIdentifier, string targetFrameworkVersion, string targetFrameworkProfile)
         {
-            return GetPathToReferenceAssemblies(targetFrameworkIdentifier, targetFrameworkVersion, targetFrameworkProfile, null);
+            return GetPathToReferenceAssemblies(targetFrameworkIdentifier, targetFrameworkVersion, targetFrameworkProfile, null, null);
         }
-
         /// <summary>
         /// Returns the paths to the reference assemblies location for the given target framework.
         /// This method will assume the requested ReferenceAssemblyRoot path will be the ProgramFiles directory specified by Environment.SpecialFolder.ProgramFiles
@@ -1809,9 +1817,12 @@ namespace Microsoft.Build.Utilities
         /// generated in the following way TargetFrameworkRootPath\TargetFrameworkIdentifier\TargetFrameworkVersion\SubType\TargetFrameworkSubType.
         /// Uses the default path if this is null.
         /// </param>
+        /// <param name="targetFrameworkFallbackSearchPaths">The target framework named @targetFrameworkIdentifier is looked for in @targetFrameworkRootPath. If it is not
+        /// found there, then it is looked up in @targetFrameworkFallbackSearchPaths. This can have multiple paths separated by ';'.
+        /// </param>
         /// <exception cref="ArgumentNullException">When the frameworkName is null</exception>
         /// <returns>Collection of reference assembly locations.</returns>
-        public static IList<String> GetPathToReferenceAssemblies(string targetFrameworkIdentifier, string targetFrameworkVersion, string targetFrameworkProfile, string targetFrameworkRootPath)
+        public static IList<String> GetPathToReferenceAssemblies(string targetFrameworkIdentifier, string targetFrameworkVersion, string targetFrameworkProfile, string targetFrameworkRootPath, string targetFrameworkFallbackSearchPaths = null)
         {
             ErrorUtilities.VerifyThrowArgumentLength(targetFrameworkVersion, "targetFrameworkVersion");
             ErrorUtilities.VerifyThrowArgumentLength(targetFrameworkIdentifier, "targetFrameworkIdentifier");
@@ -1819,11 +1830,9 @@ namespace Microsoft.Build.Utilities
 
             Version frameworkVersion = ConvertTargetFrameworkVersionToVersion(targetFrameworkVersion);
             FrameworkNameVersioning targetFrameworkName = new FrameworkNameVersioning(targetFrameworkIdentifier, frameworkVersion, targetFrameworkProfile);
-            return String.IsNullOrEmpty(targetFrameworkRootPath)
-                        ? GetPathToReferenceAssemblies(targetFrameworkName)
-                        : GetPathToReferenceAssemblies(targetFrameworkRootPath, targetFrameworkName);
-        }
 
+            return GetPathToReferenceAssemblies(targetFrameworkRootPath, targetFrameworkFallbackSearchPaths, targetFrameworkName);
+        }
 
         /// <summary>
         /// Returns the paths to the reference assemblies location for the given target framework.
@@ -2072,6 +2081,39 @@ namespace Microsoft.Build.Utilities
             return referencePaths;
         }
 
+        /// <summary>
+        /// Returns the paths to the reference assemblies location for the given framework version relative to a given targetFrameworkRoot.
+        /// The method will not check to see if the path exists or not.
+        /// </summary>
+        /// <param name="targetFrameworkRootPath">Root directory which will be used to calculate the reference assembly path. The references assemblies will be
+        /// generated in the following way TargetFrameworkRootPath\TargetFrameworkIdentifier\TargetFrameworkVersion\SubType\TargetFrameworkSubType.
+        /// </param>
+        /// <param name="targetFrameworkFallbackSearchPaths">The target framework named @frameworkName is looked for in @targetFrameworkRootPath. If it is not
+        /// found there, then it is looked up in @targetFrameworkFallbackSearchPaths. This can have multiple paths separated by ';'.
+        /// </param>
+        /// <param name="frameworkName">A frameworkName class which represents a TargetFrameworkMoniker. This cannot be null.</param>
+        /// <returns>Collection of reference assembly locations.</returns>
+        public static IList<String> GetPathToReferenceAssemblies(string targetFrameworkRootPath, string targetFrameworkFallbackSearchPaths, FrameworkNameVersioning frameworkName)
+        {
+            IList<string> pathsList = String.IsNullOrEmpty(targetFrameworkRootPath)
+                                        ? GetPathToReferenceAssemblies(frameworkName)
+                                        : GetPathToReferenceAssemblies(targetFrameworkRootPath, frameworkName);
+
+            if (pathsList?.Count > 0)
+                return pathsList;
+
+            if (!String.IsNullOrEmpty(targetFrameworkFallbackSearchPaths))
+            {
+                foreach (string rootPath in targetFrameworkFallbackSearchPaths.Split(new char[]{_separatorForFallbackSearchPaths}, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    pathsList = GetPathToReferenceAssemblies(rootPath, frameworkName);
+                    if (pathsList?.Count > 0)
+                        return pathsList;
+                }
+            }
+
+            return new List<string>();
+        }
 
         /// <summary>
         /// Returns the paths to the reference assemblies location for the given framework version relative to a given targetFrameworkRoot.
@@ -2081,8 +2123,7 @@ namespace Microsoft.Build.Utilities
         /// generated in the following way TargetFrameworkRootPath\TargetFrameworkIdentifier\TargetFrameworkVersion\SubType\TargetFrameworkSubType.
         /// </param>
         /// <param name="frameworkName">A frameworkName class which represents a TargetFrameworkMoniker. This cannot be null.</param>
-        /// <returns>Collection of reference assembly locations.</returns>
-        public static IList<String> GetPathToReferenceAssemblies(string targetFrameworkRootPath, FrameworkNameVersioning frameworkName)
+         public static IList<String> GetPathToReferenceAssemblies(string targetFrameworkRootPath, FrameworkNameVersioning frameworkName)
         {
             // Verify the root path is not null throw an ArgumentNullException if the given string parameter is null and ArgumentException if it has zero length.
             ErrorUtilities.VerifyThrowArgumentLength(targetFrameworkRootPath, "targetFrameworkRootPath");
