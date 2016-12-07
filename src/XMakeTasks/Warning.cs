@@ -86,10 +86,7 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         public override bool Execute()
         {
-            if (Text != null || Code != null)
-            {
-                Log.LogWarning(null, Code, HelpKeyword, File, 0, 0, 0, 0, (Text == null) ? String.Empty : Text);
-            }
+            Log.LogWarning(null, Code, HelpKeyword, File, 0, 0, 0, 0, Text ?? TaskResources.GetString("ErrorAndWarning.EmptyMessage"));
 
             return true;
         }
