@@ -19,7 +19,7 @@
     <PackagesLayoutToolsNet46Dir>$(PackagesLayoutToolsDir)net46\</PackagesLayoutToolsNet46Dir>
     <PackagesLayoutToolsNetCoreAppDir>$(PackagesLayoutToolsDir)netcoreapp1.0\</PackagesLayoutToolsNetCoreAppDir>
     
-    <VersionPrefix Condition="'$(VersionPrefix)' == ''">1.0.0</VersionPrefix>
+    <VersionPrefix Condition="'$(VersionPrefix)' == ''">1.1.0</VersionPrefix>
     <VersionPrereleasePrefix Condition="'$(VersionPrereleasePrefix)' == ''">alpha</VersionPrereleasePrefix>
     <!-- When running on VSO (for official builds) use a real number. -->
     <BuildNumber Condition="'$(BuildNumber)' == ''">$(BUILD_BUILDNUMBER)</BuildNumber>
