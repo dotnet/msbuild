@@ -3,8 +3,4 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net46</TargetFramework>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="**\*.cs" />
-    <EmbeddedResource Include="**\*.resx" />
-  </ItemGroup>
 </Project>

@@ -197,7 +197,19 @@ namespace Microsoft.NET.Build.Tests
                     "public class Class1 {}");
             };
 
-            var compileItems = GetValuesFromTestLibrary("Compile", setup, new[] { "/p:DisableDefaultRemoves=true" }, GetValuesCommand.ValueType.Item);
+            Action<XDocument> projectChanges = project =>
+            {
+                var ns = project.Root.Name.Namespace;
+
+                project.Root.Element(ns + "PropertyGroup").Add(new XElement(ns + "OverrideDefaultGlobs", "True"));
+
+                XElement itemGroup = new XElement(ns + "ItemGroup");
+                project.Root.Add(itemGroup);
+                itemGroup.Add(new XElement(ns + "Compile", new XAttribute("Include", "**\\*.cs")));
+            };
+
+            var compileItems = GetValuesFromTestLibrary("Compile", setup, new[] { "/p:DisableDefaultRemoves=true" }, GetValuesCommand.ValueType.Item,
+                projectChanges: projectChanges);
 
             RemoveGeneratedCompileItems(compileItems);
 
@@ -233,7 +245,8 @@ namespace Microsoft.NET.Build.Tests
         }
 
         private List<string> GetValuesFromTestLibrary(string itemTypeOrPropertyName, Action<GetValuesCommand> setup = null, string[] msbuildArgs = null,
-            GetValuesCommand.ValueType valueType = GetValuesCommand.ValueType.Item, [CallerMemberName] string callingMethod = "")
+            GetValuesCommand.ValueType valueType = GetValuesCommand.ValueType.Item, [CallerMemberName] string callingMethod = "", 
+            Action<XDocument> projectChanges = null)
         {
             msbuildArgs = msbuildArgs ?? Array.Empty<string>();
 
@@ -241,8 +254,14 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibrary", callingMethod)
-                .WithSource()
-                .Restore(relativePath: "TestLibrary");
+                .WithSource();
+
+            if (projectChanges != null)
+            {
+                testAsset.WithProjectChanges(projectChanges);
+            }
+
+            testAsset.Restore(relativePath: "TestLibrary");
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 

@@ -108,7 +108,12 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
             if (packageReferenceItemGroup == null)
             {
                 packageReferenceItemGroup = projectXml.Root.Elements(ns + "ItemGroup")
-                    .First();
+                    .FirstOrDefault();
+            }
+            if (packageReferenceItemGroup == null)
+            {
+                packageReferenceItemGroup = new XElement(ns + "ItemGroup");
+                projectXml.Root.Add(packageReferenceItemGroup);
             }
 
             var targetFrameworks = IsSdkProject ? TargetFrameworks.Split(';') : new[] { "net" };

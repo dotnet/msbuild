@@ -4,6 +4,7 @@
     <TargetFramework>netcoreapp1.0</TargetFramework>
     <ProjectGuid>{C91F7F4C-47ED-4D1C-8990-B2E886B0FAD9}</ProjectGuid>
     <PackageTargetFallback>portable-net45+wp8+win8+wpa</PackageTargetFallback>
+    <OverrideDefaultGlobs>True</OverrideDefaultGlobs>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />

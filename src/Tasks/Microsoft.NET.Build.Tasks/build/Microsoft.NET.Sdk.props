@@ -77,7 +77,17 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GeneratePackageOnBuild Condition="'$(GeneratePackageOnBuild)'==''">false</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance Condition="'$(PackageRequireLicenseAcceptance)'==''">false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
+  
+  <!-- Default glob settings -->
+  <PropertyGroup>
+    <GlobalExclude>$(GlobalExclude);bin\**;obj\**;packages\**</GlobalExclude>
+  </PropertyGroup>
 
+  <ItemGroup Condition=" '$(OverrideDefaultGlobs)' != 'True' ">
+    <Compile Include="**\*.cs" Exclude="$(GlobalExclude);wwwroot\**" Condition=" '$(OverrideDefaultCompileGlob)' != 'True' " />
+    <EmbeddedResource Include="**\*.resx" Exclude="$(GlobalExclude);wwwroot\**" Condition=" '$(OverrideDefaultEmbeddedResourceGlob)' != 'True' " />
+  </ItemGroup>
+  
   <!-- Temporary workarounds -->
   <PropertyGroup>
     <!-- Workaround: https://github.com/dotnet/roslyn/issues/12167 -->
