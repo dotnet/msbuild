@@ -577,7 +577,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       .pdb;
       .xml;
       .pri;
-      .config
+      .dll.config;
+      .exe.config
     </AllowedReferenceRelatedFileExtensions>
 
     <!--
