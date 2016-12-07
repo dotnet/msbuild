@@ -1,7 +1,7 @@
 ﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-  
+
   <PropertyGroup>
     <VersionPrefix>1.0.0-preview5</VersionPrefix>
     <TargetFramework>netcoreapp1.0</TargetFramework>
@@ -15,6 +15,7 @@
     <EmbeddedResource Include="sdkdefaults.json" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Microsoft.DotNet.Cli.Sln.Internal\Microsoft.DotNet.Cli.Sln.Internal.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />
   </ItemGroup>
   <ItemGroup>

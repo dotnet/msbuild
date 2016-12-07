@@ -449,6 +449,25 @@ namespace Microsoft.DotNet.Migration.Tests
             File.ReadAllText(migrationOutputFile).Should().Contain("MIGRATE1018");
         }
 
+        [Fact]
+        public void It_migrates_sln()
+        {
+            var rootDirectory = TestAssetsManager.CreateTestInstance(
+                "TestAppWithSlnAndMultipleProjects",
+                callingMethod: "a").Path;
+
+            var testAppProjectDirectory = Path.Combine(rootDirectory, "TestApp");
+            var testLibProjectDirectory = Path.Combine(rootDirectory, "TestLibrary");
+            string slnPath = Path.Combine(testAppProjectDirectory, "TestApp.sln");
+            
+            CleanBinObj(testAppProjectDirectory);
+            CleanBinObj(testLibProjectDirectory);
+
+            MigrateProject(slnPath);
+            Restore(testAppProjectDirectory, "TestApp.csproj");
+            BuildMSBuild(testAppProjectDirectory, "TestApp.sln", "Release");
+        }
+
         private void VerifyAutoInjectedDesktopReferences(string projectDirectory, string projectName, bool shouldBePresent)
         {
             if (projectName != null)
@@ -637,7 +656,11 @@ namespace Microsoft.DotNet.Migration.Tests
 
             if (projectName != null)
             {
-                command.Execute($"{projectName}.csproj /p:SkipInvalidConfigurations=true;_InvalidConfigurationWarning=false")
+                if (!Path.HasExtension(projectName))
+                {
+                    projectName += ".csproj";
+                }
+                command.Execute($"{projectName} /p:SkipInvalidConfigurations=true;_InvalidConfigurationWarning=false")
                     .Should().Pass();
             }
             else
@@ -653,7 +676,7 @@ namespace Microsoft.DotNet.Migration.Tests
             string configuration="Debug",
             string runtime=null)
         {
-            if (projectName != null)
+            if (projectName != null && !Path.HasExtension(projectName))
             {
                 projectName = projectName + ".csproj";
             }

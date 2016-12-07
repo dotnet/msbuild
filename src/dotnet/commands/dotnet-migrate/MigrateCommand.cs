@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
+using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectJsonMigration;
 using Microsoft.DotNet.Internal.ProjectModel;
@@ -18,6 +19,9 @@ namespace Microsoft.DotNet.Tools.Migrate
 {
     public partial class MigrateCommand
     {
+        private const string CSharpProjectTypeGuid = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}";
+
+        private SlnFile _slnFile;
         private readonly DirectoryInfo _workspaceDirectory;
         private readonly DirectoryInfo _backupDirectory;
         private readonly string _templateFile;
@@ -70,7 +74,9 @@ namespace Microsoft.DotNet.Tools.Migrate
                     projectDirectory,
                     outputDirectory,
                     msBuildTemplatePath,
-                    _xprojFilePath);
+                    _xprojFilePath,
+                    null,
+                    _slnFile);
                 var projectMigrationReport = new ProjectMigrator().Migrate(migrationSettings, _skipProjectReferences);
 
                 if (migrationReport == null)
@@ -87,9 +93,44 @@ namespace Microsoft.DotNet.Tools.Migrate
 
             temporaryDotnetNewProject.Clean();
 
+            UpdateSolutionFile(migrationReport);
+
             MoveProjectJsonArtifactsToBackup(migrationReport);
 
             return migrationReport.FailedProjectsCount;
+        }
+
+        private void UpdateSolutionFile(MigrationReport migrationReport)
+        {
+            if (_slnFile == null)
+            {
+                return;
+            }
+
+            if (migrationReport.FailedProjectsCount > 0)
+            {
+                return;
+            }
+
+            foreach (var project in _slnFile.Projects)
+            {
+                var projectDirectory = Path.Combine(
+                    _slnFile.BaseDirectory.FullPath, 
+                    Path.GetDirectoryName(project.FilePath));
+
+                var csprojFiles = new DirectoryInfo(projectDirectory)
+                    .EnumerateFiles()
+                    .Where(f => f.Extension == ".csproj");
+
+                if (csprojFiles.Count() == 1)
+                {
+                    project.FilePath = Path.Combine(Path.GetDirectoryName(project.FilePath), csprojFiles.First().Name);
+                    project.TypeGuid = CSharpProjectTypeGuid;
+                }
+            }
+
+            _slnFile.Write(Path.Combine(_slnFile.BaseDirectory.FullPath, 
+                Path.GetFileName(_slnFile.FileName)));
         }
 
         private void MoveProjectJsonArtifactsToBackup(MigrationReport migrationReport)
@@ -269,11 +310,21 @@ namespace Microsoft.DotNet.Tools.Migrate
             }
             else if (projectArg.EndsWith(GlobalSettings.FileName, StringComparison.OrdinalIgnoreCase))
             {
-                projects =  GetProjectsFromGlobalJson(projectArg);
+                projects = GetProjectsFromGlobalJson(projectArg);
 
                 if (!projects.Any())
                 {
                     throw new Exception("Unable to find any projects in global.json");
+                }
+            }
+            else if (File.Exists(projectArg) && 
+                string.Equals(Path.GetExtension(projectArg), ".sln", StringComparison.OrdinalIgnoreCase))
+            {
+                projects = GetProjectsFromSolution(projectArg);
+
+                if (!projects.Any())
+                {
+                    throw new Exception($"Unable to find any projects in {projectArg}");
                 }
             }
             else if (Directory.Exists(projectArg))
@@ -287,7 +338,7 @@ namespace Microsoft.DotNet.Tools.Migrate
             }
             else
             {
-                throw new Exception($"Invalid project argument - '{projectArg}' is not a project.json or a global.json file and a directory named '{projectArg}' doesn't exist.");
+                throw new Exception($"Invalid project argument - '{projectArg}' is not a project.json, global.json, or solution.sln file and a directory named '{projectArg}' doesn't exist.");
             }
             
             foreach(var project in projects)
@@ -336,7 +387,7 @@ namespace Microsoft.DotNet.Tools.Migrate
 
                 foreach (var projectDirectory in directory.EnumerateDirectories())
                 {
-                    var projectFilePath = Path.Combine(projectDirectory.FullName, "project.json");
+                    var projectFilePath = Path.Combine(projectDirectory.FullName, Project.FileName);
 
                     if (File.Exists(projectFilePath))
                     {
@@ -345,5 +396,28 @@ namespace Microsoft.DotNet.Tools.Migrate
                 }
             }
         }
+
+        private IEnumerable<string> GetProjectsFromSolution(string slnPath)
+        {
+            if (!File.Exists(slnPath))
+            {
+                throw new Exception($"Unable to find the solution file at {slnPath}");
+            }
+
+            _slnFile = new SlnFile();
+            _slnFile.Read(slnPath);
+
+            foreach (var project in _slnFile.Projects)
+            {
+                var projectFilePath = Path.Combine(_slnFile.BaseDirectory.FullPath,
+                    Path.Combine(Path.GetDirectoryName(project.FilePath), Project.FileName));
+
+                if (File.Exists(projectFilePath))
+                {
+                    yield return projectFilePath;
+                }
+            }
+        }
+
     }
 }

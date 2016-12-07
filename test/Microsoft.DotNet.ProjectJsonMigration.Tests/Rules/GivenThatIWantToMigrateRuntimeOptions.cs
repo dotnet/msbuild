@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var projectContext = ProjectContext.Create(projectDir, FrameworkConstants.CommonFrameworks.NetCoreApp10);
 
-            var testSettings = new MigrationSettings(projectDir, projectDir, default(ProjectRootElement));
+            var testSettings = MigrationSettings.CreateMigrationSettingsTestHook(projectDir, projectDir, default(ProjectRootElement));
             var testInputs = new MigrationRuleInputs(new[] { projectContext }, null, null, null);
             new MigrateRuntimeOptionsRule().Apply(testSettings, testInputs);
 
@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var projectContext = ProjectContext.Create(projectDir, FrameworkConstants.CommonFrameworks.NetCoreApp10);
 
-            var testSettings = new MigrationSettings(projectDir, projectDir, default(ProjectRootElement));
+            var testSettings = MigrationSettings.CreateMigrationSettingsTestHook(projectDir, projectDir, default(ProjectRootElement));
             var testInputs = new MigrationRuleInputs(new[] { projectContext }, null, null, null);
             new MigrateRuntimeOptionsRule().Apply(testSettings, testInputs);
 

@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var projectDirectoryRelativeFilePaths = EnumerateFilesWithRelativePath(testProjectDirectory);
 
             var mockProj = ProjectRootElement.Create();
-            var testSettings = new MigrationSettings(testProjectDirectory, outputDirectory, mockProj);
+            var testSettings = MigrationSettings.CreateMigrationSettingsTestHook(testProjectDirectory, outputDirectory, mockProj);
 
             var projectMigrator = new ProjectMigrator(new FakeEmptyMigrationRule());
             projectMigrator.Migrate(testSettings);
@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                     .Path;
 
             var mockProj = ProjectRootElement.Create();
-            var testSettings = new MigrationSettings(testProjectDirectory, testProjectDirectory, mockProj);
+            var testSettings = MigrationSettings.CreateMigrationSettingsTestHook(testProjectDirectory, testProjectDirectory, mockProj);
 
             var projectMigrator = new ProjectMigrator(new FakeEmptyMigrationRule());
             var report = projectMigrator.Migrate(testSettings);
@@ -67,7 +67,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                     .Path;
 
             var mockProj = ProjectRootElement.Create();
-            var testSettings = new MigrationSettings(testProjectDirectory, testProjectDirectory, mockProj);
+            var testSettings = MigrationSettings.CreateMigrationSettingsTestHook(testProjectDirectory, testProjectDirectory, mockProj);
 
             var projectMigrator = new ProjectMigrator(new FakeEmptyMigrationRule());
             var report = projectMigrator.Migrate(testSettings);

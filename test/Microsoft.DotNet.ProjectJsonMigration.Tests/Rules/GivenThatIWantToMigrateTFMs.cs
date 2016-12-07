@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var projectContext = ProjectContext.Create(testDirectory, FrameworkConstants.CommonFrameworks.NetCoreApp10);
             var mockProj = ProjectRootElement.Create();
 
-            var migrationSettings = new MigrationSettings(testDirectory, testDirectory, mockProj);
+            var migrationSettings = MigrationSettings.CreateMigrationSettingsTestHook(testDirectory, testDirectory, mockProj);
             var migrationInputs = new MigrationRuleInputs(
                 new[] { projectContext }, 
                 mockProj, 
@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var projectContexts = ProjectContext.CreateContextForEachFramework(testDirectory);
             var mockProj = ProjectRootElement.Create();
 
-            var migrationSettings = new MigrationSettings(testDirectory, testDirectory, mockProj);
+            var migrationSettings = MigrationSettings.CreateMigrationSettingsTestHook(testDirectory, testDirectory, mockProj);
             var migrationInputs = new MigrationRuleInputs(
                 projectContexts, 
                 mockProj, 
@@ -79,7 +79,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var projectContexts = ProjectContext.CreateContextForEachFramework(testDirectory);
             var mockProj = ProjectRootElement.Create();
 
-            var migrationSettings = new MigrationSettings(testDirectory, testDirectory, mockProj);
+            var migrationSettings = MigrationSettings.CreateMigrationSettingsTestHook(testDirectory, testDirectory, mockProj);
             var migrationInputs = new MigrationRuleInputs(
                 projectContexts, 
                 mockProj, 
@@ -109,7 +109,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var mockProj = ProjectRootElement.Create();
 
             // Run BuildOptionsRule
-            var migrationSettings = new MigrationSettings(testDirectory, testDirectory, mockProj);
+            var migrationSettings = MigrationSettings.CreateMigrationSettingsTestHook(testDirectory, testDirectory, mockProj);
             var migrationInputs = new MigrationRuleInputs(
                 projectContexts, 
                 mockProj, 

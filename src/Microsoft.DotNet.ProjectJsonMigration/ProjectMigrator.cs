@@ -9,6 +9,7 @@ using Microsoft.DotNet.Internal.ProjectModel.Graph;
 using Microsoft.DotNet.Cli;
 using System.Linq;
 using System.IO;
+using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.ProjectJsonMigration.Rules;
 using Microsoft.DotNet.Tools.Common;
 
@@ -37,8 +38,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             MigrationRuleInputs rootInputs = ComputeMigrationRuleInputs(rootSettings);
             IEnumerable<ProjectDependency> projectDependencies = null;
 
-            var tempMSBuildProjectTemplate = rootSettings.CloneMSBuildProjectTemplate();
-
             try
             {
                 // Verify up front so we can prefer these errors over an unresolved project dependency
@@ -46,7 +45,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
                 projectDependencies = ResolveTransitiveClosureProjectDependencies(
                     rootSettings.ProjectDirectory, 
-                    rootSettings.ProjectXProjFilePath);
+                    rootSettings.ProjectXProjFilePath,
+                    rootSettings.SolutionFile);
             }
             catch (MigrationException e)
             {
@@ -74,7 +74,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 var projectDir = Path.GetDirectoryName(project.ProjectFilePath);
                 var settings = new MigrationSettings(projectDir,
                                                      projectDir,
-                                                     tempMSBuildProjectTemplate);
+                                                     rootSettings.MSBuildProjectTemplatePath);
                 MigrateProject(settings);
                 projectMigrationReports.Add(MigrateProject(settings));
             }
@@ -98,10 +98,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             }
         }
 
-        private IEnumerable<ProjectDependency> ResolveTransitiveClosureProjectDependencies(string rootProject, string xprojFile)
+        private IEnumerable<ProjectDependency> ResolveTransitiveClosureProjectDependencies(
+            string rootProject, string xprojFile, SlnFile solutionFile)
         {
             HashSet<ProjectDependency> projectsMap = new HashSet<ProjectDependency>(new ProjectDependencyComparer());
-            var projectDependencies = _projectDependencyFinder.ResolveProjectDependencies(rootProject, xprojFile);
+            var projectDependencies = _projectDependencyFinder.ResolveProjectDependencies(rootProject, xprojFile, solutionFile);
             Queue<ProjectDependency> projectsQueue = new Queue<ProjectDependency>(projectDependencies);
 
             while (projectsQueue.Count() != 0)

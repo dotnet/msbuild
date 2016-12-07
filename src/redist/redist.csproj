@@ -41,6 +41,7 @@
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
     <ProjectReference Include="..\dotnet\dotnet.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Archive\Microsoft.DotNet.Archive.csproj" />
+    <ProjectReference Include="..\Microsoft.DotNet.Cli.Sln.Internal\Microsoft.DotNet.Cli.Sln.Internal.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Configurer\Microsoft.DotNet.Configurer.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.InternalAbstractions\Microsoft.DotNet.InternalAbstractions.csproj" />

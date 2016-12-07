@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Construction;
+using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectJsonMigration.Transforms;
 using Microsoft.DotNet.Internal.ProjectModel;
@@ -51,6 +52,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 null, 
                 project.Dependencies,
                 migrationRuleInputs.ProjectXproj,
+                migrationSettings.SolutionFile,
                 itemGroup: noFrameworkPackageReferenceItemGroup);
             
             MigrationTrace.Instance.WriteLine($"Migrating {targetFrameworks.Count()} target frameworks");
@@ -65,7 +67,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     migrationRuleInputs.OutputMSBuildProject,
                     targetFramework.FrameworkName, 
                     targetFramework.Dependencies,
-                    migrationRuleInputs.ProjectXproj);
+                    migrationRuleInputs.ProjectXproj,
+                    migrationSettings.SolutionFile);
             }
 
             MigrateTools(project, migrationRuleInputs.OutputMSBuildProject);
@@ -213,9 +216,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             NuGetFramework framework,
             IEnumerable<ProjectLibraryDependency> dependencies, 
             ProjectRootElement xproj,
+            SlnFile solutionFile,
             ProjectItemGroupElement itemGroup=null)
         {
-            var projectDependencies = new HashSet<string>(GetAllProjectReferenceNames(project, framework, xproj));
+            var projectDependencies = new HashSet<string>(GetAllProjectReferenceNames(project, framework, xproj, solutionFile));
             var packageDependencies = dependencies.Where(d => !projectDependencies.Contains(d.Name)).ToList();
 
             string condition = framework?.GetMSBuildCondition() ?? "";
@@ -360,7 +364,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         private IEnumerable<string> GetAllProjectReferenceNames(
             Project project,
             NuGetFramework framework,
-            ProjectRootElement xproj)
+            ProjectRootElement xproj,
+            SlnFile solutionFile)
         {
             var csprojReferenceItems = _projectDependencyFinder.ResolveXProjProjectDependencies(xproj);
             var migratedXProjDependencyPaths = csprojReferenceItems.SelectMany(p => p.Includes());
@@ -370,7 +375,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             var projectDependencies = _projectDependencyFinder.ResolveDirectProjectDependenciesForFramework(
                 project,
                 framework,
-                preResolvedProjects: migratedXProjDependencyNames);
+                preResolvedProjects: migratedXProjDependencyNames,
+                solutionFile: solutionFile);
 
             return projectDependencies.Select(p => p.Name).Concat(migratedXProjDependencyNames);
         }

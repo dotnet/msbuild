@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Construction;
+using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.ProjectJsonMigration.Transforms;
 using Microsoft.DotNet.Internal.ProjectModel;
 using Microsoft.DotNet.Tools.Common;
@@ -36,7 +37,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     Path.GetFileNameWithoutExtension(PathUtility.GetPathWithDirectorySeparator(p))));
             MigrateProjectJsonProjectDependencies(
                 migrationRuleInputs.ProjectContexts, 
-                migratedXProjDependencyNames, 
+                migratedXProjDependencyNames,
+                migrationSettings.SolutionFile,
                 migrationRuleInputs.OutputMSBuildProject);
         }
 
@@ -79,6 +81,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         public void MigrateProjectJsonProjectDependencies(
             IEnumerable<ProjectContext> projectContexts,
             HashSet<string> migratedXProjDependencyNames,
+            SlnFile solutionFile,
             ProjectRootElement outputMSBuildProject)
         {
             if(projectContexts.Any())
@@ -87,6 +90,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     projectContexts.First().ProjectFile,
                     null,
                     migratedXProjDependencyNames,
+                    solutionFile,
                     outputMSBuildProject);
             }
 
@@ -96,6 +100,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     projectContext.ProjectFile,
                     projectContext.TargetFramework,
                     migratedXProjDependencyNames,
+                    solutionFile,
                     outputMSBuildProject);
             }
         }
@@ -104,12 +109,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             Project project,
             NuGetFramework framework,
             HashSet<string> migratedXProjDependencyNames,
+            SlnFile solutionFile,
             ProjectRootElement outputMSBuildProject)
         {
             var projectDependencies = _projectDependencyFinder.ResolveAllProjectDependenciesForFramework(
                     new ProjectDependency(project.Name, project.ProjectFilePath, false),
                     framework,
-                    migratedXProjDependencyNames);
+                    migratedXProjDependencyNames,
+                    solutionFile);
 
             var projectDependencyTransformResults = 
                 projectDependencies.Select(p => 

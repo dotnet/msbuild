@@ -6,12 +6,14 @@ namespace Microsoft.DotNet.Tools.Migrate
 
         public const string AppDescription = "Command used to migrate project.json projects to msbuild";
 
-        public const string CmdProjectArgument = "PROJECT_JSON/GLOBAL_JSON/PROJECT_DIR";
+        public const string CmdProjectArgument = "PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR";
         public const string CmdProjectArgumentDescription = 
 @"The path to 
     - a project.json file to migrate.
 or
     - a global.json file, it will migrate the folders specified in global.json.
+or
+    - a solution.sln file, it will migrate the projects referenced in the solution.
 or
     - a directory to migrate, it will recursively search for project.json files to migrate.
 Defaults to current directory if nothing is specified.";

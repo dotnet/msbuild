@@ -3,41 +3,32 @@
 
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
+using Microsoft.DotNet.Cli.Sln.Internal;
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
     internal class MigrationSettings
     {
-        private string _msBuildProjectTemplatePath;
-
         public string ProjectXProjFilePath { get; }
         public string ProjectDirectory { get; }
         public string OutputDirectory { get; }
         public ProjectRootElement MSBuildProjectTemplate { get; }
+        public string MSBuildProjectTemplatePath { get; }
         public string SdkDefaultsFilePath { get; }
-        
-        public MigrationSettings(
-            string projectDirectory,
-            string outputDirectory,
-            ProjectRootElement msBuildProjectTemplate,
-            string projectXprojFilePath=null,
-            string sdkDefaultsFilePath=null) : this(
-                projectDirectory, outputDirectory, projectXprojFilePath, sdkDefaultsFilePath)
-        {
-            MSBuildProjectTemplate = msBuildProjectTemplate != null ? msBuildProjectTemplate.DeepClone() : null;
-        }
+        public SlnFile SolutionFile { get; }
 
         public MigrationSettings(
             string projectDirectory,
             string outputDirectory,
             string msBuildProjectTemplatePath,
             string projectXprojFilePath=null,
-            string sdkDefaultsFilePath=null) : this(
-                projectDirectory, outputDirectory, projectXprojFilePath, sdkDefaultsFilePath)
+            string sdkDefaultsFilePath=null,
+            SlnFile solutionFile=null) : this(
+                projectDirectory, outputDirectory, projectXprojFilePath, sdkDefaultsFilePath, solutionFile)
         {
-            _msBuildProjectTemplatePath = msBuildProjectTemplatePath;
+            MSBuildProjectTemplatePath = msBuildProjectTemplatePath;
             MSBuildProjectTemplate = ProjectRootElement.Open(
-                _msBuildProjectTemplatePath,
+                MSBuildProjectTemplatePath,
                 new ProjectCollection(),
                 preserveFormatting: true);
         }
@@ -45,31 +36,44 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         private MigrationSettings(
             string projectDirectory,
             string outputDirectory,
-            string projectXprojFilePath=null,
-            string sdkDefaultsFilePath=null)
+            ProjectRootElement msBuildProjectTemplate,
+            string projectXprojFilePath = null,
+            string sdkDefaultsFilePath = null) : this(
+                projectDirectory, outputDirectory, projectXprojFilePath, sdkDefaultsFilePath, null)
+        {
+            MSBuildProjectTemplate = msBuildProjectTemplate != null ? msBuildProjectTemplate.DeepClone() : null;
+        }
+
+        private MigrationSettings(
+            string projectDirectory,
+            string outputDirectory,
+            string projectXprojFilePath,
+            string sdkDefaultsFilePath,
+            SlnFile solutionFile)
         {
             ProjectDirectory = projectDirectory;
             OutputDirectory = outputDirectory;
             ProjectXProjFilePath = projectXprojFilePath;
             SdkDefaultsFilePath = sdkDefaultsFilePath;
+            SolutionFile = solutionFile;
         }
 
-        public ProjectRootElement CloneMSBuildProjectTemplate()
+        public static MigrationSettings CreateMigrationSettingsTestHook(
+            string projectDirectory,
+            string outputDirectory,
+            ProjectRootElement msBuildProjectTemplate,
+            string projectXprojFilePath = null,
+            string sdkDefaultsFilePath = null)
         {
-            ProjectRootElement msBuildProjectTemplateClone = null;
-            if(!string.IsNullOrEmpty(_msBuildProjectTemplatePath))
-            {
-                msBuildProjectTemplateClone = ProjectRootElement.Open(
-                    _msBuildProjectTemplatePath,
-                    new ProjectCollection(),
-                    preserveFormatting: true);
-            }
-            else if(MSBuildProjectTemplate != null)
-            {
-                msBuildProjectTemplateClone = MSBuildProjectTemplate.DeepClone();
-            }
-
-            return msBuildProjectTemplateClone;
+            // Product code should not call this private constructor because we don't want to call DeepClone.
+            // Doing so means we lose formatting.
+            return new MigrationSettings(
+                projectDirectory,
+                outputDirectory,
+                msBuildProjectTemplate,
+                projectXprojFilePath,
+                sdkDefaultsFilePath);
         }
+
     }
 }

@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var projectContext = ProjectContext.Create(appDirectory, FrameworkConstants.CommonFrameworks.NetCoreApp10);
             var mockProj = ProjectRootElement.Create();
-            var testSettings = new MigrationSettings(appDirectory, appDirectory, mockProj, null);
+            var testSettings = MigrationSettings.CreateMigrationSettingsTestHook(appDirectory, appDirectory, mockProj, null);
             var testInputs = new MigrationRuleInputs(new[] {projectContext}, mockProj, mockProj.AddItemGroup(),
                 mockProj.AddPropertyGroup());
             new MigrateProjectDependenciesRule().Apply(testSettings, testInputs);
@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var projectContext = ProjectContext.Create(appDirectory, FrameworkConstants.CommonFrameworks.NetCoreApp10);
             var mockProj = ProjectRootElement.Create();
-            var testSettings = new MigrationSettings(appDirectory, appDirectory, mockProj, null);
+            var testSettings = MigrationSettings.CreateMigrationSettingsTestHook(appDirectory, appDirectory, mockProj, null);
             var testInputs = new MigrationRuleInputs(new[] {projectContext}, mockProj, mockProj.AddItemGroup(),
                 mockProj.AddPropertyGroup());
             new MigrateProjectDependenciesRule().Apply(testSettings, testInputs);
@@ -71,7 +71,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var projectContext = ProjectContext.Create(appDirectory, FrameworkConstants.CommonFrameworks.NetCoreApp10);
             var mockProj = ProjectRootElement.Create();
-            var testSettings = new MigrationSettings(appDirectory, appDirectory, mockProj, null);
+            var testSettings = MigrationSettings.CreateMigrationSettingsTestHook(appDirectory, appDirectory, mockProj, null);
             var testInputs = new MigrationRuleInputs(new[] {projectContext}, mockProj, mockProj.AddItemGroup(),
                 mockProj.AddPropertyGroup());
             new MigrateProjectDependenciesRule().Apply(testSettings, testInputs);
@@ -97,7 +97,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var projectContext = ProjectContext.Create(appDirectory, FrameworkConstants.CommonFrameworks.NetCoreApp10);
             var mockProj = ProjectRootElement.Create();
-            var testSettings = new MigrationSettings(appDirectory, appDirectory, mockProj);
+            var testSettings = MigrationSettings.CreateMigrationSettingsTestHook(appDirectory, appDirectory, mockProj);
             var testInputs = new MigrationRuleInputs(new[] {projectContext}, mockProj, mockProj.AddItemGroup(), mockProj.AddPropertyGroup());
 
             Action action = () => new MigrateProjectDependenciesRule().Apply(testSettings, testInputs);
@@ -260,7 +260,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var projectContext = ProjectContext.Create(appDirectory, FrameworkConstants.CommonFrameworks.Net451);
             var mockProj = ProjectRootElement.Create();
-            var testSettings = new MigrationSettings(appDirectory, appDirectory, mockProj, null);
+            var testSettings = MigrationSettings.CreateMigrationSettingsTestHook(appDirectory, appDirectory, mockProj, null);
             var testInputs = new MigrationRuleInputs(new[] {projectContext}, mockProj, mockProj.AddItemGroup(),
                 mockProj.AddPropertyGroup());
             new MigrateProjectDependenciesRule().Apply(testSettings, testInputs);
@@ -338,7 +338,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var projectContext = ProjectContext.Create(appDirectory, targetFramework);
             var mockProj = ProjectRootElement.Create();
-            var testSettings = new MigrationSettings(appDirectory, appDirectory, mockProj, null);
+            var testSettings = MigrationSettings.CreateMigrationSettingsTestHook(appDirectory, appDirectory, mockProj, null);
             var testInputs = new MigrationRuleInputs(new[] {projectContext}, mockProj, mockProj.AddItemGroup(),
                 mockProj.AddPropertyGroup());
             new MigrateProjectDependenciesRule().Apply(testSettings, testInputs);
