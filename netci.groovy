@@ -11,6 +11,8 @@ def project = GithubProject
 
         if (osName == 'Windows_NT') {
             runtimes.add('Desktop')
+        } else {
+            runtimes.add('Mono')
         }
 
         // TODO: Mono
@@ -55,7 +57,11 @@ def project = GithubProject
                 case 'OSX':
                     newJob.with{
                         steps{
-                            shell("./cibuild.sh --scope Test --target ${runtime}")
+                            buildCmd="./cibuild.sh --scope Test --target ${runtime}"
+                            if (runtime == "Mono") {
+                                buildCmd += " --host Mono"
+                            }
+                            shell(buildCmd)
                         }
                     }
 
@@ -63,7 +69,11 @@ def project = GithubProject
                 case { it.startsWith('Ubuntu') }:
                     newJob.with{
                         steps{
-                            shell("./cibuild.sh --scope Test --target ${runtime}")
+                            buildCmd="./cibuild.sh --scope Test --target ${runtime}"
+                            if (runtime == "Mono") {
+                                buildCmd += " --host Mono"
+                            }
+                            shell(buildCmd)
                         }
                     }
 
