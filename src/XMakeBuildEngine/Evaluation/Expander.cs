@@ -3362,12 +3362,12 @@ namespace Microsoft.Build.Evaluation
 
                 // Try to load the assembly with the computed name
 #if FEATURE_GAC
-#pragma warning disable 618
+#pragma warning disable 618, 612
                 // Unfortunately Assembly.Load is not an alternative to LoadWithPartialName, since
                 // Assembly.Load requires the full assembly name to be passed to it.
                 // Therefore we must ignore the deprecated warning.
                 Assembly candidateAssembly = Assembly.LoadWithPartialName(candidateAssemblyName);
-#pragma warning restore 618
+#pragma warning restore 618, 612
 #else
                 Assembly candidateAssembly = null;
                 try
