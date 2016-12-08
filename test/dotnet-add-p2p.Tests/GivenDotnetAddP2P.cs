@@ -7,6 +7,7 @@ using Microsoft.DotNet.Tools.Test.Utilities;
 using Msbuild.Tests.Utilities;
 using System;
 using System.IO;
+using System.Linq;
 using Xunit;
 
 namespace Microsoft.DotNet.Cli.Add.P2P.Tests
@@ -17,6 +18,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         const string ConditionFrameworkNet451 = "== 'net451'";
         const string FrameworkNetCoreApp10Arg = "-f netcoreapp1.0";
         const string ConditionFrameworkNetCoreApp10 = "== 'netcoreapp1.0'";
+        static readonly string[] DefaultFrameworks = new string[] { "netcoreapp1.0", "net451" };
 
         private TestSetup Setup([System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(Setup), string identifier = "")
         {
@@ -50,6 +52,20 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
             }
 
             return dir;
+        }
+
+        private static void SetTargetFrameworks(ProjDir proj, string[] frameworks)
+        {
+            var csproj = proj.CsProj();
+            csproj.AddProperty("TargetFrameworks", string.Join(";", frameworks));
+            csproj.Save();
+        }
+
+        private ProjDir NewLibWithFrameworks([System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(NewDir), string identifier = "")
+        {
+            var ret = NewLib(callingMethod: callingMethod, identifier: identifier);
+            SetTargetFrameworks(ret, DefaultFrameworks);
+            return ret;
         }
 
         [Theory]
@@ -122,7 +138,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void ItAddsRefWithoutCondAndPrintsStatus()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
@@ -141,7 +157,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void ItAddsRefWithCondAndPrintsStatus()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
 
             int condBefore = lib.CsProj().NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451);
@@ -160,7 +176,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void WhenRefWithoutCondIsPresentItAddsDifferentRefWithoutCond()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
 
             new AddP2PCommand()
@@ -184,7 +200,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void WhenRefWithCondIsPresentItAddsDifferentRefWithCond()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
 
             new AddP2PCommand()
@@ -208,7 +224,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void WhenRefWithCondIsPresentItAddsRefWithDifferentCond()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
 
             new AddP2PCommand()
@@ -232,7 +248,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void WhenRefWithConditionIsPresentItAddsDifferentRefWithoutCond()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
 
             new AddP2PCommand()
@@ -256,7 +272,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void WhenRefWithNoCondAlreadyExistsItDoesntDuplicate()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
 
             new AddP2PCommand()
@@ -297,7 +313,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void WhenRefWithCondOnItemGroupAlreadyExistsItDoesntDuplicate()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
 
             new AddP2PCommand()
@@ -421,7 +437,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void ItAddsMultipleRefsNoCondToTheSameItemGroup()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
@@ -440,7 +456,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void ItAddsMultipleRefsWithCondToTheSameItemGroup()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451);
@@ -459,7 +475,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void WhenProjectNameIsNotPassedItFindsItAndAddsReference()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
@@ -477,7 +493,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void ItAddsRefBetweenImports()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
 
             var cmd = new AddP2PCommand()
@@ -522,7 +538,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void WhenPassedReferenceDoesNotExistItShowsAnError()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
 
             var contentBefore = lib.CsProjContent();
             var cmd = new AddP2PCommand()
@@ -537,7 +553,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void WhenPassedMultipleRefsAndOneOfthemDoesNotExistItCancelsWholeOperation()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
 
             var contentBefore = lib.CsProjContent();
@@ -554,7 +570,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void WhenPassedReferenceDoesNotExistAndForceSwitchIsPassedItAddsIt()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             const string nonExisting = "IDoNotExist.csproj";
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
@@ -573,7 +589,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void WhenPassedReferenceIsUsingSlashesItNormalizesItToBackslashes()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();

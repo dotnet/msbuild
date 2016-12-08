@@ -8,6 +8,7 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
 using NuGet.Frameworks;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -20,45 +21,47 @@ namespace Microsoft.DotNet.Tools
 
         public ProjectRootElement ProjectRoot { get; private set; }
         public string ProjectDirectory { get; private set; }
-        
+
+        private ProjectCollection _collection;
         private List<NuGetFramework> _cachedTfms = null;
         private Project _cachedEvaluatedProject = null;
 
-        private MsbuildProject(ProjectRootElement project)
+        private MsbuildProject(ProjectCollection collection, ProjectRootElement project)
         {
+            _collection = collection;
             ProjectRoot = project;
             ProjectDirectory = PathUtility.EnsureTrailingSlash(ProjectRoot.DirectoryPath);
         }
 
-        public static MsbuildProject FromFileOrDirectory(string fileOrDirectory)
+        public static MsbuildProject FromFileOrDirectory(ProjectCollection collection, string fileOrDirectory)
         {
             if (File.Exists(fileOrDirectory))
             {
-                return FromFile(fileOrDirectory);
+                return FromFile(collection, fileOrDirectory);
             }
             else
             {
-                return FromDirectory(fileOrDirectory);
+                return FromDirectory(collection, fileOrDirectory);
             }
         }
 
-        public static MsbuildProject FromFile(string projectPath)
+        public static MsbuildProject FromFile(ProjectCollection collection, string projectPath)
         {
             if (!File.Exists(projectPath))
             {
                 throw new GracefulException(CommonLocalizableStrings.ProjectDoesNotExist, projectPath);
             }
 
-            var project = TryOpenProject(projectPath);
+            var project = TryOpenProject(collection, projectPath);
             if (project == null)
             {
                 throw new GracefulException(CommonLocalizableStrings.ProjectIsInvalid, projectPath);
             }
 
-            return new MsbuildProject(project);
+            return new MsbuildProject(collection, project);
         }
 
-        public static MsbuildProject FromDirectory(string projectDirectory)
+        public static MsbuildProject FromDirectory(ProjectCollection collection, string projectDirectory)
         {
             DirectoryInfo dir;
             try
@@ -93,13 +96,13 @@ namespace Microsoft.DotNet.Tools
                 throw new GracefulException(CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory, projectDirectory);
             }
 
-            var project = TryOpenProject(projectFile.FullName);
+            var project = TryOpenProject(collection, projectFile.FullName);
             if (project == null)
             {
                 throw new GracefulException(CommonLocalizableStrings.FoundInvalidProject, projectFile.FullName);
             }
 
-            return new MsbuildProject(project);
+            return new MsbuildProject(collection, project);
         }
 
         public int AddProjectToProjectReferences(string framework, IEnumerable<string> refs)
@@ -237,9 +240,16 @@ namespace Microsoft.DotNet.Tools
                 return _cachedEvaluatedProject;
             }
 
+            var loadedProjects = _collection.GetLoadedProjects(ProjectRoot.FullPath);
+            if (loadedProjects.Count >= 1)
+            {
+                _cachedEvaluatedProject = loadedProjects.First();
+                return _cachedEvaluatedProject;
+            }
+
             try
             {
-                _cachedEvaluatedProject = new Project(ProjectRoot);
+                _cachedEvaluatedProject = new Project(ProjectRoot, null, null, _collection);
             }
             catch (InvalidProjectFileException e)
             {
@@ -302,13 +312,13 @@ namespace Microsoft.DotNet.Tools
 
         // There is ProjectRootElement.TryOpen but it does not work as expected
         // I.e. it returns null for some valid projects
-        private static ProjectRootElement TryOpenProject(string filename)
+        private static ProjectRootElement TryOpenProject(ProjectCollection collection, string filename)
         {
             try
             {
-                return ProjectRootElement.Open(filename, new ProjectCollection(), preserveFormatting: true);
+                return ProjectRootElement.Open(filename, collection, preserveFormatting: true);
             }
-            catch (Microsoft.Build.Exceptions.InvalidProjectFileException)
+            catch (InvalidProjectFileException)
             {
                 return null;
             }

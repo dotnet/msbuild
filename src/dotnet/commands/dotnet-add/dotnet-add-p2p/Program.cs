@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Evaluation;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using NuGet.Frameworks;
@@ -46,7 +47,8 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
                     throw new GracefulException(CommonLocalizableStrings.RequiredArgumentNotPassed, $"<{LocalizableStrings.ProjectException}>");
                 }
 
-                var msbuildProj = MsbuildProject.FromFileOrDirectory(projectArgument.Value);
+                ProjectCollection collection = new ProjectCollection();
+                var msbuildProj = MsbuildProject.FromFileOrDirectory(collection, projectArgument.Value);
 
                 if (app.RemainingArguments.Count == 0)
                 {
@@ -58,7 +60,7 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
                 if (!forceOption.HasValue())
                 {
                     MsbuildProject.EnsureAllReferencesExist(references);
-                    IEnumerable<MsbuildProject> refs = references.Select((r) => MsbuildProject.FromFile(r));
+                    IEnumerable<MsbuildProject> refs = references.Select((r) => MsbuildProject.FromFile(collection, r));
 
                     if (frameworkString == null)
                     {
