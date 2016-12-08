@@ -18,48 +18,59 @@ namespace dotnet_new3
 {
     public class Program
     {
-        private static void SetupHiddenCommands(ExtendedCommandParser appExt)
+        private static void SetupInternalCommands(ExtendedCommandParser appExt)
         {
+            // visible
+            appExt.InternalOption("-l|--list", "--list", "List templates containing the specified name.", CommandOptionType.NoValue);
+            appExt.InternalOption("-n|--name", "--name", "The name for the output being created. If no name is specified, the name of the current directory is used.", CommandOptionType.SingleValue);
+            appExt.InternalOption("-h|--help", "--help", "Display help for the indicated template's parameters.", CommandOptionType.NoValue);
+
+            // hidden
+            appExt.HiddenInternalOption("-d|--dir", "--dir", CommandOptionType.NoValue);
+            appExt.HiddenInternalOption("-a|--alias", "--alias", CommandOptionType.SingleValue);
+            appExt.HiddenInternalOption("-x|--extra-args", "--extra-args", CommandOptionType.MultipleValue);
+            appExt.HiddenInternalOption("--locale", "--locale", CommandOptionType.SingleValue);
+            appExt.HiddenInternalOption("--quiet", "--quiet", CommandOptionType.NoValue);
+            appExt.HiddenInternalOption("-i|--install", "--install", CommandOptionType.MultipleValue);
+
             // reserved but not currently used
-            appExt.RegisterHiddenOption("-up|--update", "--update", CommandOptionType.MultipleValue);
-            appExt.RegisterHiddenOption("-u|--uninstall", "--uninstall", CommandOptionType.MultipleValue);
-            appExt.RegisterHiddenOption("--skip-update-check", "--skip-update-check", CommandOptionType.NoValue);
+            appExt.HiddenInternalOption("-up|--update", "--update", CommandOptionType.MultipleValue);
+            appExt.HiddenInternalOption("-u|--uninstall", "--uninstall", CommandOptionType.MultipleValue);
+            appExt.HiddenInternalOption("--skip-update-check", "--skip-update-check", CommandOptionType.NoValue);
         }
 
         public static int Main(string[] args)
         {
-            ExtendedCommandParser app = new ExtendedCommandParser(false)
+            ExtendedCommandParser app = new ExtendedCommandParser()
             {
                 Name = "dotnet new3",
                 FullName = "Template Instantiation Commands for .NET Core CLI."
             };
 
-            SetupHiddenCommands(app);
+            SetupInternalCommands(app);
 
             CommandArgument templateNames = app.Argument("template", "The template to instantiate.");
-            CommandOption listOnly = app.Option("-l|--list", "List templates containing the specified name.", CommandOptionType.NoValue);
-            CommandOption nameOption = app.Option("-n|--name", "The name for the output being created. If no name is specified, the name of the current directory is used.", CommandOptionType.SingleValue);
-            CommandOption helpOption = app.Option("-h|--help", "Display help for the indicated template's parameters.", CommandOptionType.NoValue);
 
-            // the options below get removed from the app, so they don't display in the help
-            CommandOption dirOption = app.Option("-d|--dir", "Indicates whether to create a directory for the generated content.", CommandOptionType.NoValue);
-            CommandOption aliasOption = app.Option("-a|--alias", "Creates an alias for the specified template.", CommandOptionType.SingleValue);
-            CommandOption parametersFilesOption = app.Option("-x|--extra-args", "Specifies a file containing additional parameters.", CommandOptionType.MultipleValue);
-            CommandOption localeOption = app.Option("--locale", "The locale to use", CommandOptionType.SingleValue);
-            CommandOption quietOption = app.Option("--quiet", "Doesn't output any status information.", CommandOptionType.NoValue);
-            CommandOption installOption = app.Option("-i|--install", "Installs a source or a template pack.", CommandOptionType.MultipleValue);
+            // Preserve these for now - they've got the help text, in case we want it back
+            //
+            //CommandOption dirOption = app.Option("-d|--dir", "Indicates whether to create a directory for the generated content.", CommandOptionType.NoValue);
+            //CommandOption aliasOption = app.Option("-a|--alias", "Creates an alias for the specified template.", CommandOptionType.SingleValue);
+            //CommandOption parametersFilesOption = app.Option("-x|--extra-args", "Specifies a file containing additional parameters.", CommandOptionType.MultipleValue);
+            //CommandOption localeOption = app.Option("--locale", "The locale to use", CommandOptionType.SingleValue);
+            //CommandOption quietOption = app.Option("--quiet", "Doesn't output any status information.", CommandOptionType.NoValue);
+            //CommandOption installOption = app.Option("-i|--install", "Installs a source or a template pack.", CommandOptionType.MultipleValue);
+
             //CommandOption update = app.Option("--update", "Update matching templates.", CommandOptionType.NoValue);
 
             app.OnExecute(async () =>
             {
-                app.RemoveOption(dirOption);
-                app.RemoveOption(aliasOption);
-                app.RemoveOption(parametersFilesOption);
-                app.RemoveOption(localeOption);
-                app.RemoveOption(quietOption);
-                app.RemoveOption(installOption);
+                app.ParseArgs();
+                if (app.InternalParamHasValue("--extra-args"))
+                {
+                    app.ParseArgs(app.InternalParamValueList("--extra-args"));
+                }
 
-                string locale = localeOption.HasValue() ? localeOption.Value() : CultureInfo.CurrentCulture.Name;
+                string locale = app.InternalParamValue("--locale") ?? CultureInfo.CurrentCulture.Name;
                 EngineEnvironmentSettings.Host = new DefaultTemplateEngineHost(locale);
 
                 bool reinitFlag = app.RemainingArguments.Any(x => x == "--debug:reinit");
@@ -80,7 +91,7 @@ namespace dotnet_new3
 
                 if (!Paths.User.BaseDir.Exists() || !Paths.User.FirstRunCookie.Exists())
                 {
-                    if (!quietOption.HasValue())
+                    if (app.InternalParamHasValue("--quiet"))
                     {
                         Reporter.Output.WriteLine("Getting things ready for first use...");
                     }
@@ -95,15 +106,6 @@ namespace dotnet_new3
                     return 0;
                 }
 
-                if (listOnly.HasValue())
-                {
-                    ListTemplates(templateNames.Value);
-                    return -1;
-                }
-
-                IReadOnlyDictionary<string, string> templateParameters;
-                IReadOnlyDictionary<string, IList<string>> internalParameters;
-
                 try
                 {
                     IReadOnlyCollection<ITemplateInfo> templates = TemplateCreator.List(templateNames.Value);
@@ -113,8 +115,8 @@ namespace dotnet_new3
                         app.SetupTemplateParameters(templateInfo);
                     }
 
-                    IList<string> parametersFiles = parametersFilesOption.Values;
-                    app.ParseExtraArgs(parametersFiles, out templateParameters, out internalParameters);
+                    // re-parse after setting up the template params
+                    app.ParseArgs(app.InternalParamValueList("--extra-args"));
                 }
                 catch (Exception ex)
                 {
@@ -123,20 +125,20 @@ namespace dotnet_new3
                     return -1;
                 }
 
-                if (helpOption.HasValue())
+                if (app.InternalParamHasValue("--list"))
                 {
-                    return DisplayHelp(templateNames.Value, app);
+                    ListTemplates(templateNames.Value);
+                    return -1;
                 }
 
-                //if (internalParameters.TryGetValue("--install", out IList<string> install) && install.Count > 0)
-                //{
-                //    InstallPackage(install.ToList(), quiet);
-                //    return 0;
-                //}
-
-                if (installOption.HasValue())
+                if (app.InternalParamHasValue("--help"))
                 {
-                    InstallPackage(installOption.Values, quietOption.HasValue());
+                    return DisplayHelp(templateNames.Value, app, app.AllTemplateParams);
+                }
+
+                if (app.InternalParamHasValue("--install"))
+                {
+                    InstallPackages(app.InternalParamValueList("--install").ToList(), app.InternalParamHasValue("--quiet"));
                     return 0;
                 }
 
@@ -145,18 +147,60 @@ namespace dotnet_new3
                 //    return PerformUpdateAsync(template.Value, quiet, source);
                 //}
 
-                string aliasName = aliasOption.HasValue() ? aliasOption.Value() : null;
-                string fallbackName = new DirectoryInfo(Directory.GetCurrentDirectory()).Name;
-                bool dirValue = dirOption.HasValue();
-                bool skipUpdateCheckValue = internalParameters.ContainsKey("--skip-update-check");
-
-                if (await TemplateCreator.InstantiateAsync(templateNames.Value ?? "", nameOption.Value(), fallbackName, dirValue, aliasName, templateParameters, skipUpdateCheckValue) == -1)
+                if (string.IsNullOrEmpty(templateNames.Value))
                 {
-                    ListTemplates(templateNames.Value);
+                    ListTemplates(string.Empty);
                     return -1;
                 }
 
-                return 0;
+                string nameValue = app.InternalParamValue("--name");
+                string fallbackName = new DirectoryInfo(Directory.GetCurrentDirectory()).Name;
+                bool dirValue = app.InternalParamHasValue("--dir");
+                string aliasName = app.InternalParamValue("--alias");
+                bool skipUpdateCheckValue = app.InternalParamHasValue("--skip-update-check");
+                TemplateCreationResult instantiateResult = new TemplateCreationResult();
+
+                // TODO: refactor alias creation out of InstantiateAsync()
+                int instantiateReturnCode = await TemplateCreator.InstantiateAsync(templateNames.Value ?? "", nameValue, fallbackName, dirValue, aliasName, app.AllTemplateParams, skipUpdateCheckValue, instantiateResult);
+
+                string resultTemplateName = string.IsNullOrEmpty(instantiateResult.TemplateFullName) ? templateNames.Value : instantiateResult.TemplateFullName;
+
+                switch (instantiateResult.Status)
+                {
+                    case CreationResultStatus.AliasSucceeded:
+                        // TODO: get this localized - in the mean time just list the templates, showing the alias
+                        //EngineEnvironmentSettings.Host.LogMessage("Alias creation successful");
+                        ListTemplates(templateNames.Value);
+                        break;
+                    case CreationResultStatus.AliasFailed:
+                        EngineEnvironmentSettings.Host.LogMessage(string.Format("Specified alias {0} already exists. Please specify a different alias.", aliasName));
+                        ListTemplates(templateNames.Value);
+                        break;
+                    case CreationResultStatus.CreateSucceeded:
+                        EngineEnvironmentSettings.Host.LogMessage(string.Format("The template {0} created successfully. Please run \"dotnet restore\" to get started!", resultTemplateName));
+                        break;
+                    case CreationResultStatus.CreateFailed:
+                        EngineEnvironmentSettings.Host.LogMessage(string.Format("Template {0} could not be created. Error returned was: {1}", resultTemplateName, instantiateResult.Message));
+                        ListTemplates(templateNames.Value);
+                        break;
+                    case CreationResultStatus.InstallSucceeded:
+                        EngineEnvironmentSettings.Host.LogMessage(string.Format("The template {0} installed successfully. You can use \"dotnet new {0}\" to get started with the new template.", resultTemplateName));
+                        break;
+                    case CreationResultStatus.InstallFailed:
+                        EngineEnvironmentSettings.Host.LogMessage(string.Format("Template {0} could not be created. Error returned was: {1}.", resultTemplateName, instantiateResult.Message));
+                        break;
+                    case CreationResultStatus.MissingMandatoryParam:
+                        EngineEnvironmentSettings.Host.LogMessage(string.Format("Mandatory parameter {0} missing for template {1}.", instantiateResult.Message, resultTemplateName));
+                        break;
+                    case CreationResultStatus.TemplateNotFound:
+                        EngineEnvironmentSettings.Host.LogMessage(string.Format("Template {0} could not be created. Error returned was: {1}.", resultTemplateName, instantiateResult.Message));
+                        ListTemplates(templateNames.Value);
+                        break;
+                    default:
+                        break;
+                }
+
+                return instantiateReturnCode;
             });
 
             int result;
@@ -298,33 +342,25 @@ namespace dotnet_new3
             string[] packages = Paths.Global.DefaultInstallPackageList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
             if (packages.Length > 0)
             {
-                InstallPackage(packages, true);
+                InstallPackages(packages, true);
             }
 
             packages = Paths.Global.DefaultInstallTemplateList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
             if (packages.Length > 0)
             {
-                InstallPackage(packages, true);
+                InstallPackages(packages, true);
             }
         }
 
-        private static void InstallPackage(IReadOnlyList<string> packages, bool quiet = false)
+        private static void InstallPackages(IReadOnlyList<string> packageNames, bool quiet = false)
         {
             List<string> toInstall = new List<string>();
 
-            foreach (string package in packages)
+            foreach (string package in packageNames)
             {
                 string pkg = package.Trim();
                 pkg = Environment.ExpandEnvironmentVariables(pkg);
-
-                //if (package.Exists())
-                //{
                 TemplateCache.Scan(pkg);
-                //}
-                //else
-                //{
-                //    toInstall.Add(package);
-                //}
             }
 
             //NuGetUtil.InstallPackage(toInstall, quiet);
@@ -374,7 +410,7 @@ namespace dotnet_new3
             });
         }
 
-        private static int DisplayHelp(string templateNames, ExtendedCommandParser app)
+        private static int DisplayHelp(string templateNames, ExtendedCommandParser app, IReadOnlyDictionary<string, string> userParameters)
         {
             if (string.IsNullOrWhiteSpace(templateNames))
             {   // no template specified
@@ -392,7 +428,7 @@ namespace dotnet_new3
             else if (templates.Count == 1)
             {
                 ITemplateInfo templateInfo = templates.First();
-                return TemplateHelp(templateInfo, app);
+                return TemplateHelp(templateInfo, app, userParameters);
             }
             else
             {
@@ -402,7 +438,7 @@ namespace dotnet_new3
             }
         }
 
-        private static int TemplateHelp(ITemplateInfo templateInfo, ExtendedCommandParser app)
+        private static int TemplateHelp(ITemplateInfo templateInfo, ExtendedCommandParser app, IReadOnlyDictionary<string, string> userParameters)
         { 
             Reporter.Output.WriteLine(templateInfo.Name);
             if (!string.IsNullOrWhiteSpace(templateInfo.Author))
@@ -416,10 +452,8 @@ namespace dotnet_new3
             }
 
             ITemplate template = SettingsLoader.LoadTemplate(templateInfo);
-            IParameterSet allParams = template.Generator.GetParametersForTemplate(template);
-
-            //Reporter.Output.WriteLine($"Parameters: {templateInfo.Description}");
-
+            IParameterSet allParams = TemplateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName);
+            TemplateCreator.ResolveUserParameters(template, allParams, userParameters);
             ParameterHelp(allParams, app);
 
             return 0;
@@ -456,6 +490,18 @@ namespace dotnet_new3
                         {
                             displayValue.Append(param.DataType ?? "string");
                             displayValue.AppendLine(" - " + param.Priority.ToString());
+                        }
+
+                        if (allParams.ResolvedValues.TryGetValue(param, out object resolvedValueObject))
+                        {
+                            string resolvedValue = resolvedValueObject as string;
+
+                            if (!string.IsNullOrEmpty(resolvedValue)
+                                && !string.IsNullOrEmpty(param.DefaultValue)
+                                && !string.Equals(param.DefaultValue, resolvedValue))
+                            {
+                                displayValue.AppendLine("Configured Value: " + resolvedValue);
+                            }
                         }
 
                         if (!string.IsNullOrEmpty(param.DefaultValue))

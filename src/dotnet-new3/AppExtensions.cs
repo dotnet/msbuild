@@ -38,7 +38,11 @@ namespace dotnet_new3
                             {
                                 IList<string> values = new List<string>();
                                 values.Add(property.Value.ToString());
-                                parameters[property.Name] = values;
+                                // adding 2 dashes to the file-based params
+                                // won't work right if there's a param that should have 1 dash
+                                //
+                                // TOOD: come up with a better way to deal with this
+                                parameters["--" + property.Name] = values;
                             }
                         }
                     }

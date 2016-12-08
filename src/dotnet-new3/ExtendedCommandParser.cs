@@ -23,13 +23,33 @@ namespace dotnet_new3
         // maps the template param variants to the canonical forms
         private IDictionary<string, string> _templateParamCanonicalMapping;
 
-        public ExtendedCommandParser(bool throwOnUnknownArg)
+        // stores the parsed values
+        private IDictionary<string, string> _parsedTemplateParams;
+        private IDictionary<string, IList<string>> _parsedInternalParams;
+
+        // stores the options & arguments that are NOT hidden
+        // this is used exclusively to show the help.
+        // it's a bit of a hack.
+        CommandLineApplication _helpDisplayer;
+
+        public ExtendedCommandParser()
         {
-            _app = new CommandLineApplication(throwOnUnknownArg);
+            _app = new CommandLineApplication(false);
             _defaultCommandOptions = new HashSet<string>();
             _hiddenCommandOptions = new Dictionary<string, CommandOptionType>();
             _hiddenCommandCanonicalMapping = new Dictionary<string, string>();
             _templateParamCanonicalMapping = new Dictionary<string, string>();
+
+            _parsedTemplateParams = new Dictionary<string, string>();
+            _parsedInternalParams = new Dictionary<string, IList<string>>();
+
+            _helpDisplayer = new CommandLineApplication(false);
+        }
+
+        // TODO: consider optionally showing help for things not handled by the CommandLineApplication instance
+        public void ShowHelp()
+        {
+            _helpDisplayer.ShowHelp();
         }
 
         public void RemoveOption(CommandOption option)
@@ -70,29 +90,21 @@ namespace dotnet_new3
 
             _defaultCommandOptions.Add(parameter);
 
+            // its not hidden, add it to the help
+            _helpDisplayer.Argument(parameter, description);
+
             return _app.Argument(parameter, description);
         }
 
-        public CommandOption Option(string parameterVariants, string description, CommandOptionType option)
+        public void InternalOption(string parameterVariants, string canonical, string description, CommandOptionType optionType)
         {
-            string[] parameters = parameterVariants.Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
-
-            for (int i = 0; i < parameters.Length; i++)
-            {
-                if (IsParameterNameTaken(parameters[i]))
-                {
-                    throw new Exception($"Parameter name ${parameters[i]} cannot be used for multiple purposes");
-                }
-
-                _defaultCommandOptions.Add(parameters[i]);
-            }
-
-            return _app.Option(parameterVariants, description, option);
+            _helpDisplayer.Option(parameterVariants, description, optionType);
+            HiddenInternalOption(parameterVariants, canonical, optionType);
         }
 
         // NOTE: the exceptions here should never happen, this is strictly called by the program
         // Once testing is done, we can probably remove them.
-        public void RegisterHiddenOption(string parameterVariants, string canonical, CommandOptionType option)
+        public void HiddenInternalOption(string parameterVariants, string canonical, CommandOptionType optionType)
         {
             string[] parameters = parameterVariants.Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -106,19 +118,64 @@ namespace dotnet_new3
                 _hiddenCommandCanonicalMapping.Add(parameters[i], canonical);
             }
 
-            _hiddenCommandOptions.Add(canonical, option);
+            _hiddenCommandOptions.Add(canonical, optionType);
         }
 
-        // This must be called before trying to access the template params or internal params
-        // Otherwise an exception is thrown.
-        //
-        // TODO: Instead of having out params, have this setup corresponding properties.
-        //      It'd be more like how CommandLineApplication does things.
-        public void ParseExtraArgs(IList<string> extraArgsFileNames, out IReadOnlyDictionary<string, string> templateParameters, out IReadOnlyDictionary<string, IList<string>> internalParameters)
+        public bool TemplateParamHasValue(string paramName)
         {
-            Dictionary<string, string> tempTemplateParameters = new Dictionary<string, string>();
-            Dictionary<string, IList<string>> tempInternalParameters = new Dictionary<string, IList<string>>();
-            IReadOnlyDictionary<string, IList<string>> allParameters = _app.ParseExtraArgs(extraArgsFileNames);
+            return _parsedTemplateParams.ContainsKey(paramName);
+        }
+
+        public string TemplateParamValue(string paramName)
+        {
+            _parsedTemplateParams.TryGetValue(paramName, out string value);
+            return value;
+        }
+
+        // returns a copy of the template params
+        public IReadOnlyDictionary<string, string> AllTemplateParams
+        {
+            get
+            {
+                return new Dictionary<string, string>(_parsedTemplateParams);
+            }
+        }
+
+        public bool InternalParamHasValue(string paramName)
+        {
+            return _parsedInternalParams.ContainsKey(paramName);
+        }
+
+        public string InternalParamValue(string paramName)
+        {
+            if (_parsedInternalParams.TryGetValue(paramName, out IList<string> values))
+            {
+                return values.FirstOrDefault();
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public IList<string> InternalParamValueList(string paramName)
+        {
+            _parsedInternalParams.TryGetValue(paramName, out IList<string> values);
+            return values;
+        }
+
+        // Parses all command line args, and any input arg files.
+        // NOTE: any previously parsed values are lost - this resets the parsed values.
+        public void ParseArgs(IList<string> extraArgFileNames = null)
+        {
+            _parsedTemplateParams = new Dictionary<string, string>();
+            _parsedInternalParams = new Dictionary<string, IList<string>>();
+
+            if (extraArgFileNames == null)
+            {
+                extraArgFileNames = new List<string>();
+            }
+            IReadOnlyDictionary<string, IList<string>> allParameters = _app.ParseExtraArgs(extraArgFileNames);
 
             foreach (KeyValuePair<string, IList<string>> param in allParameters)
             {
@@ -140,17 +197,17 @@ namespace dotnet_new3
                     }
                     else // NoValue
                     {
-                        if (param.Value.Count > 0)
+                        if (param.Value.Count != 1 || param.Value[0] != null)
                         {
                             throw new Exception($"Value specified for valueless parameter: ${canonicalName}");
                         }
                     }
 
-                    tempInternalParameters.Add(canonicalName, param.Value);
+                    _parsedInternalParams.Add(canonicalName, param.Value);
                 }
                 else if (_templateParamCanonicalMapping.TryGetValue(param.Key, out canonicalName))
                 {
-                    if (tempTemplateParameters.ContainsKey(canonicalName))
+                    if (_parsedTemplateParams.ContainsKey(canonicalName))
                     {
                         // error, the same param was specified twice
                         throw new Exception($"Parameter [${canonicalName}] was specified multiple times, including with the flag [${param.Key}]");
@@ -158,7 +215,7 @@ namespace dotnet_new3
                     else
                     {
                         // TODO: allow for multi-valued params
-                        tempTemplateParameters[canonicalName] = param.Value[0];
+                        _parsedTemplateParams[canonicalName] = param.Value[0];
                     }
                 }
                 else
@@ -167,9 +224,6 @@ namespace dotnet_new3
                     // TODO: determine a better way to deal with this. As-is, the param will be ignored.
                 }
             }
-
-            internalParameters = tempInternalParameters;
-            templateParameters = tempTemplateParameters;
         }
 
         // Canonical is the template param name without any dashes. The things mapped to it all have dashes, including the param name itself.
@@ -273,12 +327,6 @@ namespace dotnet_new3
             }
 
             return string.Join("", firstLetters);
-        }
-
-        // TODO: consider optionally showing help for things not handled by the CommandLineApplication instance
-        public void ShowHelp()
-        {
-            _app.ShowHelp();
         }
 
         private IDictionary<string, IList<string>> _canonicalToVariantsTemplateParamMap;
