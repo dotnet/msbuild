@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Tools.Remove.ProjectToProjectReference
 
                 if (numberOfRemovedReferences != 0)
                 {
-                    msbuildProj.Project.Save();
+                    msbuildProj.ProjectRoot.Save();
                 }
 
                 return 0;

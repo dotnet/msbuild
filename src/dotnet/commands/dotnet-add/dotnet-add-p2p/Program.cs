@@ -3,7 +3,9 @@
 
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
+using NuGet.Frameworks;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
 {
@@ -51,10 +53,43 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
                     throw new GracefulException(LocalizableStrings.SpecifyAtLeastOneReferenceToAdd);
                 }
 
+                string frameworkString = frameworkOption.Value();
                 List<string> references = app.RemainingArguments;
                 if (!forceOption.HasValue())
                 {
                     MsbuildProject.EnsureAllReferencesExist(references);
+                    IEnumerable<MsbuildProject> refs = references.Select((r) => MsbuildProject.FromFile(r));
+
+                    if (frameworkString == null)
+                    {
+                        foreach (var tfm in msbuildProj.GetTargetFrameworks())
+                        {
+                            foreach (var r in refs)
+                            {
+                                if (!r.CanWorkOnFramework(tfm))
+                                {
+                                    throw new GracefulException(string.Format(CommonLocalizableStrings.ProjectNotCompatibleWithFramework, r.ProjectRoot.FullPath, GetFrameworkDisplayString(tfm)));
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        var framework = NuGetFramework.Parse(frameworkString);
+                        if (!msbuildProj.TargetsFramework(framework))
+                        {
+                            throw new GracefulException(string.Format(CommonLocalizableStrings.ProjectDoesNotTargetFramework, msbuildProj.ProjectRoot.FullPath, GetFrameworkDisplayString(framework)));
+                        }
+
+                        foreach (var r in refs)
+                        {
+                            if (!r.CanWorkOnFramework(framework))
+                            {
+                                throw new GracefulException(string.Format(CommonLocalizableStrings.ProjectNotCompatibleWithFramework, r.ProjectRoot.FullPath, GetFrameworkDisplayString(framework)));
+                            }
+                        }
+                    }
+
                     msbuildProj.ConvertPathsToRelative(ref references);
                 }
                 
@@ -64,7 +99,7 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
 
                 if (numberOfAddedReferences != 0)
                 {
-                    msbuildProj.Project.Save();
+                    msbuildProj.ProjectRoot.Save();
                 }
 
                 return 0;
@@ -80,6 +115,11 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
                 app.ShowHelp();
                 return 1;
             }
+        }
+
+        private static string GetFrameworkDisplayString(NuGetFramework framework)
+        {
+            return framework.GetShortFolderName();
         }
     }
 }

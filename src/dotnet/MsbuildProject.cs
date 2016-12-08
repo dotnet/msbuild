@@ -3,8 +3,10 @@
 
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Exceptions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
+using NuGet.Frameworks;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,13 +18,16 @@ namespace Microsoft.DotNet.Tools
     {
         const string ProjectItemElementType = "ProjectReference";
 
-        public ProjectRootElement Project { get; private set; }
+        public ProjectRootElement ProjectRoot { get; private set; }
         public string ProjectDirectory { get; private set; }
+        
+        private List<NuGetFramework> _cachedTfms = null;
+        private Project _cachedEvaluatedProject = null;
 
         private MsbuildProject(ProjectRootElement project)
         {
-            Project = project;
-            ProjectDirectory = PathUtility.EnsureTrailingSlash(Project.DirectoryPath);
+            ProjectRoot = project;
+            ProjectDirectory = PathUtility.EnsureTrailingSlash(ProjectRoot.DirectoryPath);
         }
 
         public static MsbuildProject FromFileOrDirectory(string fileOrDirectory)
@@ -101,17 +106,17 @@ namespace Microsoft.DotNet.Tools
         {
             int numberOfAddedReferences = 0;
 
-            ProjectItemGroupElement itemGroup = Project.FindUniformOrCreateItemGroupWithCondition(ProjectItemElementType, framework);
+            ProjectItemGroupElement itemGroup = ProjectRoot.FindUniformOrCreateItemGroupWithCondition(ProjectItemElementType, framework);
             foreach (var @ref in refs.Select((r) => NormalizeSlashes(r)))
             {
-                if (Project.HasExistingItemWithCondition(framework, @ref))
+                if (ProjectRoot.HasExistingItemWithCondition(framework, @ref))
                 {
                     Reporter.Output.WriteLine(string.Format(CommonLocalizableStrings.ProjectAlreadyHasAreference, @ref));
                     continue;
                 }
 
                 numberOfAddedReferences++;
-                itemGroup.AppendChild(Project.CreateItemElement(ProjectItemElementType, @ref));
+                itemGroup.AppendChild(ProjectRoot.CreateItemElement(ProjectItemElementType, @ref));
 
                 Reporter.Output.WriteLine(string.Format(CommonLocalizableStrings.ReferenceAddedToTheProject, @ref));
             }
@@ -133,7 +138,7 @@ namespace Microsoft.DotNet.Tools
 
         public IEnumerable<ProjectItemElement> GetProjectToProjectReferences()
         {
-            return Project.GetAllItemsWithElementType(ProjectItemElementType);
+            return ProjectRoot.GetAllItemsWithElementType(ProjectItemElementType);
         }
 
         public void ConvertPathsToRelative(ref List<string> references)
@@ -166,12 +171,90 @@ namespace Microsoft.DotNet.Tools
             }
         }
 
+        public IEnumerable<NuGetFramework> GetTargetFrameworks()
+        {
+            if (_cachedTfms != null)
+            {
+                return _cachedTfms;
+            }
+
+            var project = GetEvaluatedProject();
+
+            var properties = project.AllEvaluatedProperties
+                                    .Where(p => p.Name.Equals("TargetFrameworks", StringComparison.OrdinalIgnoreCase) ||
+                                                p.Name.Equals("TargetFramework", StringComparison.OrdinalIgnoreCase))
+                                    .Select(p => p.EvaluatedValue.ToLower()).ToList();
+
+            var uniqueTfms = new HashSet<string>();
+
+            foreach (var property in properties)
+            {
+                var tfms = property
+                                .Split(';')
+                                .Select((tfm) => tfm.Trim())
+                                .Where((tfm) => !string.IsNullOrEmpty(tfm));
+
+                foreach (var tfm in tfms)
+                {
+                    uniqueTfms.Add(tfm);
+                }
+            }
+
+            _cachedTfms = uniqueTfms.Select((frameworkString) => NuGetFramework.Parse(frameworkString)).ToList();
+            return _cachedTfms;
+        }
+
+        public bool CanWorkOnFramework(NuGetFramework framework)
+        {
+            foreach (var tfm in GetTargetFrameworks())
+            {
+                if (DefaultCompatibilityProvider.Instance.IsCompatible(framework, tfm))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public bool TargetsFramework(NuGetFramework framework)
+        {
+            foreach (var tfm in GetTargetFrameworks())
+            {
+                if (framework.Equals(tfm))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private Project GetEvaluatedProject()
+        {
+            if (_cachedEvaluatedProject != null)
+            {
+                return _cachedEvaluatedProject;
+            }
+
+            try
+            {
+                _cachedEvaluatedProject = new Project(ProjectRoot);
+            }
+            catch (InvalidProjectFileException e)
+            {
+                throw new GracefulException(string.Format(CommonLocalizableStrings.ProjectCouldNotBeEvaluated, ProjectRoot.FullPath, e.Message));
+            }
+
+            return _cachedEvaluatedProject;
+        }
+
         private int RemoveProjectToProjectReferenceAlternatives(string framework, string reference)
         {
             int numberOfRemovedRefs = 0;
             foreach (var r in GetIncludeAlternativesForRemoval(reference))
             {
-                foreach (var existingItem in Project.FindExistingItemsWithCondition(framework, r))
+                foreach (var existingItem in ProjectRoot.FindExistingItemsWithCondition(framework, r))
                 {
                     ProjectElementContainer itemGroup = existingItem.Parent;
                     itemGroup.RemoveChild(existingItem);
