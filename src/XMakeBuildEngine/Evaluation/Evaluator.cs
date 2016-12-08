@@ -2654,13 +2654,28 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void ThrowForImportedProjectWithSearchPathsNotFound(ProjectImportPathMatch searchPathMatch, ProjectImportElement importElement)
         {
-            string extensionsPathPropValue = _data.GetProperty(searchPathMatch.PropertyName).EvaluatedValue;
+            var extensionsPathProp = _data.GetProperty(searchPathMatch.PropertyName);
+            string importExpandedWithDefaultPath;
+            string relativeProjectPath;
 
-            string importExpandedWithDefaultPath = _expander.ExpandIntoStringLeaveEscaped(
-                                                                    importElement.Project.Replace(searchPathMatch.MsBuildPropertyFormat, extensionsPathPropValue),
-                                                                    ExpanderOptions.ExpandProperties, importElement.ProjectLocation);
+            if (extensionsPathProp != null)
+            {
+                string extensionsPathPropValue = extensionsPathProp.EvaluatedValue;
+                importExpandedWithDefaultPath =
+                    _expander.ExpandIntoStringLeaveEscaped(
+                        importElement.Project.Replace(searchPathMatch.MsBuildPropertyFormat, extensionsPathPropValue),
+                        ExpanderOptions.ExpandProperties, importElement.ProjectLocation);
 
-            string relativeProjectPath = FileUtilities.MakeRelative(extensionsPathPropValue, importExpandedWithDefaultPath);
+                relativeProjectPath = FileUtilities.MakeRelative(extensionsPathPropValue, importExpandedWithDefaultPath);
+            }
+            else
+            {
+                // If we can't get the original property, just use the actual text from the project file in the error message.
+                // This should be a very rare case where the toolset is out of sync with the fallback. This will resolve
+                // a null ref calling EvaluatedValue on the property.
+                importExpandedWithDefaultPath = importElement.Project;
+                relativeProjectPath = importElement.Project;
+            }
 
             var onlyFallbackSearchPaths = searchPathMatch.SearchPaths.Select(s => _data.ExpandString(s)).ToList();
 
