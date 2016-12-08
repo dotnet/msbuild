@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.TemplateEngine.Abstractions;
@@ -16,39 +18,62 @@ namespace dotnet_new3
 {
     public class Program
     {
+        private static void SetupInternalCommands(ExtendedCommandParser appExt)
+        {
+            // visible
+            appExt.InternalOption("-l|--list", "--list", "List templates containing the specified name.", CommandOptionType.NoValue);
+            appExt.InternalOption("-n|--name", "--name", "The name for the output being created. If no name is specified, the name of the current directory is used.", CommandOptionType.SingleValue);
+            appExt.InternalOption("-h|--help", "--help", "Display help for the indicated template's parameters.", CommandOptionType.NoValue);
+
+            // hidden
+            appExt.HiddenInternalOption("-d|--dir", "--dir", CommandOptionType.NoValue);
+            appExt.HiddenInternalOption("-a|--alias", "--alias", CommandOptionType.SingleValue);
+            appExt.HiddenInternalOption("-x|--extra-args", "--extra-args", CommandOptionType.MultipleValue);
+            appExt.HiddenInternalOption("--locale", "--locale", CommandOptionType.SingleValue);
+            appExt.HiddenInternalOption("--quiet", "--quiet", CommandOptionType.NoValue);
+            appExt.HiddenInternalOption("-i|--install", "--install", CommandOptionType.MultipleValue);
+
+            // reserved but not currently used
+            appExt.HiddenInternalOption("-up|--update", "--update", CommandOptionType.MultipleValue);
+            appExt.HiddenInternalOption("-u|--uninstall", "--uninstall", CommandOptionType.MultipleValue);
+            appExt.HiddenInternalOption("--skip-update-check", "--skip-update-check", CommandOptionType.NoValue);
+        }
+
         public static int Main(string[] args)
         {
-            CommandLineApplication app = new CommandLineApplication(false)
+            ExtendedCommandParser app = new ExtendedCommandParser()
             {
                 Name = "dotnet new3",
                 FullName = "Template Instantiation Commands for .NET Core CLI."
             };
 
-            CommandArgument template = app.Argument("template", "The template to instantiate.");
-            CommandOption listOnly = app.Option("-l|--list", "Lists templates with containing the specified name.", CommandOptionType.NoValue);
-            CommandOption name = app.Option("-n|--name", "The name for the output. If no name is specified, the name of the current directory is used.", CommandOptionType.SingleValue);
-            CommandOption dir = app.Option("-d|--dir", "Indicates whether to display create a directory for the generated content.", CommandOptionType.NoValue);
-            CommandOption alias = app.Option("-a|--alias", "Creates an alias for the specified template", CommandOptionType.SingleValue);
-            CommandOption parametersFiles = app.Option("-x|--extra-args", "Adds a parameters file.", CommandOptionType.MultipleValue);
-            CommandOption install = app.Option("-i|--install", "Installs a source or a template pack.", CommandOptionType.MultipleValue);
-            CommandOption help = app.Option("-h|--help", "Indicates whether to display the help for the template's parameters instead of creating it.", CommandOptionType.NoValue);
+            SetupInternalCommands(app);
 
-            CommandOption quiet = app.Option("--quiet", "Doesn't output any status information.", CommandOptionType.NoValue);
-            CommandOption skipUpdateCheck = app.Option("--skip-update-check", "Don't check for updates.", CommandOptionType.NoValue);
-            CommandOption update = app.Option("--update", "Update matching templates.", CommandOptionType.NoValue);
+            CommandArgument templateNames = app.Argument("template", "The template to instantiate.");
 
-            CommandOption localeOption = app.Option("--locale", "The locale to use", CommandOptionType.SingleValue);
+            // Preserve these for now - they've got the help text, in case we want it back
+            //
+            //CommandOption dirOption = app.Option("-d|--dir", "Indicates whether to create a directory for the generated content.", CommandOptionType.NoValue);
+            //CommandOption aliasOption = app.Option("-a|--alias", "Creates an alias for the specified template.", CommandOptionType.SingleValue);
+            //CommandOption parametersFilesOption = app.Option("-x|--extra-args", "Specifies a file containing additional parameters.", CommandOptionType.MultipleValue);
+            //CommandOption localeOption = app.Option("--locale", "The locale to use", CommandOptionType.SingleValue);
+            //CommandOption quietOption = app.Option("--quiet", "Doesn't output any status information.", CommandOptionType.NoValue);
+            //CommandOption installOption = app.Option("-i|--install", "Installs a source or a template pack.", CommandOptionType.MultipleValue);
+
+            //CommandOption update = app.Option("--update", "Update matching templates.", CommandOptionType.NoValue);
 
             app.OnExecute(async () =>
             {
-                //TODO: properly determine the locale, pass it to the host constructor
-                // specifying on the command line is probaby not the ultimate answer.
-                // Regardless, the locale should get set before anything else happens.
-                string locale = localeOption.HasValue() ? localeOption.Value() : "en_US";
+                app.ParseArgs();
+                if (app.InternalParamHasValue("--extra-args"))
+                {
+                    app.ParseArgs(app.InternalParamValueList("--extra-args"));
+                }
+
+                string locale = app.InternalParamValue("--locale") ?? CultureInfo.CurrentCulture.Name;
                 EngineEnvironmentSettings.Host = new DefaultTemplateEngineHost(locale);
 
                 bool reinitFlag = app.RemainingArguments.Any(x => x == "--debug:reinit");
-
                 if (reinitFlag)
                 {
                     Paths.User.FirstRunCookie.Delete();
@@ -66,7 +91,7 @@ namespace dotnet_new3
 
                 if (!Paths.User.BaseDir.Exists() || !Paths.User.FirstRunCookie.Exists())
                 {
-                    if (!quiet.HasValue())
+                    if (app.InternalParamHasValue("--quiet"))
                     {
                         Reporter.Output.WriteLine("Getting things ready for first use...");
                     }
@@ -81,28 +106,17 @@ namespace dotnet_new3
                     return 0;
                 }
 
-                if (install.HasValue())
-                {
-                    InstallPackage(install.Values, quiet.HasValue());
-                    return 0;
-                }
-
-                if (update.HasValue())
-                {
-                    //return PerformUpdateAsync(template.Value, quiet.HasValue(), source);
-                }
-
-                if (listOnly.HasValue())
-                {
-                    ListTemplates(template);
-                    return 0;
-                }
-
-                IReadOnlyDictionary<string, string> parameters;
-
                 try
                 {
-                    parameters = app.ParseExtraArgs(parametersFiles);
+                    IReadOnlyCollection<ITemplateInfo> templates = TemplateCreator.List(templateNames.Value);
+                    if (templates.Count == 1)
+                    {
+                        ITemplateInfo templateInfo = templates.First();
+                        app.SetupTemplateParameters(templateInfo);
+                    }
+
+                    // re-parse after setting up the template params
+                    app.ParseArgs(app.InternalParamValueList("--extra-args"));
                 }
                 catch (Exception ex)
                 {
@@ -111,27 +125,82 @@ namespace dotnet_new3
                     return -1;
                 }
 
-                if (string.IsNullOrWhiteSpace(template.Value) && help.HasValue())
+                if (app.InternalParamHasValue("--list"))
                 {
-                    app.ShowHelp();
-                    return 0;
-                }
-
-                if (help.HasValue())
-                {
-                    return DisplayHelp(template);
-                }
-
-                string aliasName = alias.HasValue() ? alias.Value() : null;
-                string fallbackName = new DirectoryInfo(Directory.GetCurrentDirectory()).Name;
-
-                if (await TemplateCreator.InstantiateAsync(template.Value ?? "", name.Value(), fallbackName, dir.HasValue(), aliasName, parameters, skipUpdateCheck.HasValue()) == -1)
-                {
-                    ListTemplates(template);
+                    ListTemplates(templateNames.Value);
                     return -1;
                 }
 
-                return 0;
+                if (app.InternalParamHasValue("--help"))
+                {
+                    return DisplayHelp(templateNames.Value, app, app.AllTemplateParams);
+                }
+
+                if (app.InternalParamHasValue("--install"))
+                {
+                    InstallPackages(app.InternalParamValueList("--install").ToList(), app.InternalParamHasValue("--quiet"));
+                    return 0;
+                }
+
+                //if (update.HasValue())
+                //{
+                //    return PerformUpdateAsync(template.Value, quiet, source);
+                //}
+
+                if (string.IsNullOrEmpty(templateNames.Value))
+                {
+                    ListTemplates(string.Empty);
+                    return -1;
+                }
+
+                string nameValue = app.InternalParamValue("--name");
+                string fallbackName = new DirectoryInfo(Directory.GetCurrentDirectory()).Name;
+                bool dirValue = app.InternalParamHasValue("--dir");
+                string aliasName = app.InternalParamValue("--alias");
+                bool skipUpdateCheckValue = app.InternalParamHasValue("--skip-update-check");
+                TemplateCreationResult instantiateResult = new TemplateCreationResult();
+
+                // TODO: refactor alias creation out of InstantiateAsync()
+                int instantiateReturnCode = await TemplateCreator.InstantiateAsync(templateNames.Value ?? "", nameValue, fallbackName, dirValue, aliasName, app.AllTemplateParams, skipUpdateCheckValue, instantiateResult);
+
+                string resultTemplateName = string.IsNullOrEmpty(instantiateResult.TemplateFullName) ? templateNames.Value : instantiateResult.TemplateFullName;
+
+                switch (instantiateResult.Status)
+                {
+                    case CreationResultStatus.AliasSucceeded:
+                        // TODO: get this localized - in the mean time just list the templates, showing the alias
+                        //EngineEnvironmentSettings.Host.LogMessage("Alias creation successful");
+                        ListTemplates(templateNames.Value);
+                        break;
+                    case CreationResultStatus.AliasFailed:
+                        EngineEnvironmentSettings.Host.LogMessage(string.Format("Specified alias {0} already exists. Please specify a different alias.", aliasName));
+                        ListTemplates(templateNames.Value);
+                        break;
+                    case CreationResultStatus.CreateSucceeded:
+                        EngineEnvironmentSettings.Host.LogMessage(string.Format("The template {0} created successfully. Please run \"dotnet restore\" to get started!", resultTemplateName));
+                        break;
+                    case CreationResultStatus.CreateFailed:
+                        EngineEnvironmentSettings.Host.LogMessage(string.Format("Template {0} could not be created. Error returned was: {1}", resultTemplateName, instantiateResult.Message));
+                        ListTemplates(templateNames.Value);
+                        break;
+                    case CreationResultStatus.InstallSucceeded:
+                        EngineEnvironmentSettings.Host.LogMessage(string.Format("The template {0} installed successfully. You can use \"dotnet new {0}\" to get started with the new template.", resultTemplateName));
+                        break;
+                    case CreationResultStatus.InstallFailed:
+                        EngineEnvironmentSettings.Host.LogMessage(string.Format("Template {0} could not be created. Error returned was: {1}.", resultTemplateName, instantiateResult.Message));
+                        break;
+                    case CreationResultStatus.MissingMandatoryParam:
+                        EngineEnvironmentSettings.Host.LogMessage(string.Format("Mandatory parameter {0} missing for template {1}.", instantiateResult.Message, resultTemplateName));
+                        break;
+                    case CreationResultStatus.TemplateNotFound:
+                        EngineEnvironmentSettings.Host.LogMessage(string.Format("Template {0} could not be created. Error returned was: {1}.", resultTemplateName, instantiateResult.Message));
+                        ListTemplates(templateNames.Value);
+                        break;
+                    default:
+                        break;
+                }
+
+                return instantiateReturnCode;
             });
 
             int result;
@@ -273,33 +342,25 @@ namespace dotnet_new3
             string[] packages = Paths.Global.DefaultInstallPackageList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
             if (packages.Length > 0)
             {
-                InstallPackage(packages, true);
+                InstallPackages(packages, true);
             }
 
             packages = Paths.Global.DefaultInstallTemplateList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
             if (packages.Length > 0)
             {
-                InstallPackage(packages, true);
+                InstallPackages(packages, true);
             }
         }
 
-        private static void InstallPackage(IReadOnlyList<string> packages, bool quiet = false)
+        private static void InstallPackages(IReadOnlyList<string> packageNames, bool quiet = false)
         {
             List<string> toInstall = new List<string>();
 
-            foreach (string package in packages)
+            foreach (string package in packageNames)
             {
                 string pkg = package.Trim();
                 pkg = Environment.ExpandEnvironmentVariables(pkg);
-
-                //if (package.Exists())
-                //{
-                    TemplateCache.Scan(pkg);
-                //}
-                //else
-                //{
-                //    toInstall.Add(package);
-                //}
+                TemplateCache.Scan(pkg);
             }
 
             //NuGetUtil.InstallPackage(toInstall, quiet);
@@ -308,19 +369,18 @@ namespace dotnet_new3
 
             if (!quiet)
             {
-                ListTemplates(new CommandArgument());
+                ListTemplates(string.Empty);
             }
         }
 
-        private static void ListTemplates(CommandArgument template)
+        private static void ListTemplates(string templateNames)
         {
-            IEnumerable<ITemplateInfo> results = Microsoft.TemplateEngine.Edge.Template.TemplateCreator.List(template.Value);
-            TableFormatter.Print(results, "(No Items)", "   ", '-', new Dictionary<string, Func<ITemplateInfo, object>>
-            {
-                {"Templates", x => x.Name},
-                {"Short Names", x => $"[{x.ShortName}]"},
-                {"Alias", x => AliasRegistry.GetAliasForTemplate(x) ?? ""}
-            });
+            IEnumerable<ITemplateInfo> results = TemplateCreator.List(templateNames);
+            HelpFormatter<ITemplateInfo> formatter = new HelpFormatter<ITemplateInfo>(results, 6, '-', false);
+            formatter.DefineColumn(delegate(ITemplateInfo t) { return t.Name; }, "Templates");
+            formatter.DefineColumn(delegate(ITemplateInfo t) { return $"[{t.ShortName}]"; }, "Short Name");
+            formatter.DefineColumn(delegate(ITemplateInfo t) { return AliasRegistry.GetAliasForTemplate(t) ?? ""; }, "Alias");
+            Reporter.Output.WriteLine(formatter.Layout());
         }
 
         private static void ShowConfig()
@@ -350,69 +410,116 @@ namespace dotnet_new3
             });
         }
 
-        private static int DisplayHelp(CommandArgument template)
+        private static int DisplayHelp(string templateNames, ExtendedCommandParser app, IReadOnlyDictionary<string, string> userParameters)
         {
-            IReadOnlyCollection<ITemplateInfo> templates = TemplateCreator.List(template.Value);
+            if (string.IsNullOrWhiteSpace(templateNames))
+            {   // no template specified
+                app.ShowHelp();
+                return 0;
+            }
+
+            IReadOnlyCollection<ITemplateInfo> templates = TemplateCreator.List(templateNames);
 
             if (templates.Count > 1)
             {
-                ListTemplates(template);
+                ListTemplates(templateNames);
                 return -1;
             }
-
-            ITemplateInfo tmplt = templates.First();
-
-            Reporter.Output.WriteLine(tmplt.Name);
-            if (!string.IsNullOrWhiteSpace(tmplt.Author))
+            else if (templates.Count == 1)
             {
-                Reporter.Output.WriteLine($"Author: {tmplt.Author}");
+                ITemplateInfo templateInfo = templates.First();
+                return TemplateHelp(templateInfo, app, userParameters);
+            }
+            else
+            {
+                // TODO: add a message indicating no templates matched the pattern. Requires LOC coordination
+                ListTemplates(string.Empty);
+                return -1;
+            }
+        }
+
+        private static int TemplateHelp(ITemplateInfo templateInfo, ExtendedCommandParser app, IReadOnlyDictionary<string, string> userParameters)
+        { 
+            Reporter.Output.WriteLine(templateInfo.Name);
+            if (!string.IsNullOrWhiteSpace(templateInfo.Author))
+            {
+                Reporter.Output.WriteLine($"Author: {templateInfo.Author}");
             }
 
-            if (!string.IsNullOrWhiteSpace(tmplt.Description))
+            if (!string.IsNullOrWhiteSpace(templateInfo.Description))
             {
-                Reporter.Output.WriteLine($"Description: {tmplt.Description}");
+                Reporter.Output.WriteLine($"Description: {templateInfo.Description}");
             }
 
-            ITemplate realTmplt = SettingsLoader.LoadTemplate(tmplt);
-            IParameterSet allParams = realTmplt.Generator.GetParametersForTemplate(realTmplt);
+            ITemplate template = SettingsLoader.LoadTemplate(templateInfo);
+            IParameterSet allParams = TemplateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName);
+            TemplateCreator.ResolveUserParameters(template, allParams, userParameters);
+            ParameterHelp(allParams, app);
 
-            Reporter.Output.WriteLine($"Parameters: {tmplt.Description}");
+            return 0;
+        }
 
-            bool anyParams = false;
-            foreach (ITemplateParameter parameter in allParams.ParameterDefinitions.OrderBy(x => x.Priority))
+        private static void ParameterHelp(IParameterSet allParams, ExtendedCommandParser app)
+        {
+            bool anyParams = allParams.ParameterDefinitions.Any(x => x.Priority != TemplateParameterPriority.Implicit);
+
+            if (anyParams)
             {
-                if (parameter.Priority == TemplateParameterPriority.Implicit)
-                {
-                    continue;
-                }
+                HelpFormatter<ITemplateParameter> formatter = new HelpFormatter<ITemplateParameter>(allParams.ParameterDefinitions, 2, null, true);
 
-                anyParams = true;
-                Reporter.Output.WriteLine($"    --{parameter.Name} ({parameter.DataType ?? "string"} - {parameter.Priority})");
-                Reporter.Output.WriteLine($"    {parameter.Documentation}");
-
-                if (string.Equals(parameter.DataType, "choice", StringComparison.OrdinalIgnoreCase))
-                {
-                    Reporter.Output.WriteLine($"    Allowed values:");
-                    foreach (string choice in parameter.Choices)
+                formatter.DefineColumn(delegate (ITemplateParameter param)
                     {
-                        Reporter.Output.WriteLine($"        {choice}");
-                    }
-                }
+                        // the key is guaranteed to exist
+                        IList<string> variants = app.CanonicalToVariantsTemplateParamMap[param.Name];
+                        string options = string.Join("|", variants.Reverse());
+                        return "  " + options;
+                    },
+                    "Options:"
+                );
 
-                if (!string.IsNullOrEmpty(parameter.DefaultValue))
-                {
-                    Reporter.Output.WriteLine($"    Default: {parameter.DefaultValue}");
-                }
+                formatter.DefineColumn(delegate (ITemplateParameter param)
+                    {
+                        StringBuilder displayValue = new StringBuilder(255);
+                        displayValue.AppendLine(param.Documentation);
 
-                Reporter.Output.WriteLine(" ");
+                        if (string.Equals(param.DataType, "choice", StringComparison.OrdinalIgnoreCase))
+                        {
+                            displayValue.AppendLine(string.Join(", ", param.Choices));
+                        }
+                        else
+                        {
+                            displayValue.Append(param.DataType ?? "string");
+                            displayValue.AppendLine(" - " + param.Priority.ToString());
+                        }
+
+                        if (allParams.ResolvedValues.TryGetValue(param, out object resolvedValueObject))
+                        {
+                            string resolvedValue = resolvedValueObject as string;
+
+                            if (!string.IsNullOrEmpty(resolvedValue)
+                                && !string.IsNullOrEmpty(param.DefaultValue)
+                                && !string.Equals(param.DefaultValue, resolvedValue))
+                            {
+                                displayValue.AppendLine("Configured Value: " + resolvedValue);
+                            }
+                        }
+
+                        if (!string.IsNullOrEmpty(param.DefaultValue))
+                        {
+                            displayValue.AppendLine("Default: " + param.DefaultValue);
+                        }
+
+                        return displayValue.ToString();
+                    },
+                    string.Empty
+                );
+
+                Reporter.Output.WriteLine(formatter.Layout());
             }
-
-            if (!anyParams)
+            else
             {
                 Reporter.Output.WriteLine("    (No Parameters)");
             }
-
-            return 0;
         }
     }
 

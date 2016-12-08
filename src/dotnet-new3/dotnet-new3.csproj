@@ -15,6 +15,7 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <OutputPath Condition="'$(OutputPath)'=='' ">bin\$(Configuration)</OutputPath>
+	<TargetFrameworkFallback>$(TargetFrameworkFallback);netstandard1.1;netstandard1.2;netstandard1.3;netstandard1.4;netstandard1.5;netstandard1.6</TargetFrameworkFallback>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,9 +28,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Microsoft.TemplateEngine.Utils\Microsoft.TemplateEngine.Utils.csproj" />
-    <ProjectReference Include="..\Microsoft.TemplateEngine.Abstractions\Microsoft.TemplateEngine.Abstractions.csproj" />
-    <ProjectReference Include="..\Microsoft.TemplateEngine.Edge\Microsoft.TemplateEngine.Edge.csproj" />
+	<PackageReference Include="Microsoft.TemplateEngine.Utils" Version="*" />
+	<PackageReference Include="Microsoft.TemplateEngine.Abstractions" Version="*" />
+	<PackageReference Include="Microsoft.TemplateEngine.Edge" Version="*" />
   </ItemGroup>
 
   <ItemGroup>

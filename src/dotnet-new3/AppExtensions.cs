@@ -16,13 +16,15 @@ namespace dotnet_new3
             return app.Option("-h|--help", "Displays help for this command.", CommandOptionType.NoValue);
         }
 
-        public static IReadOnlyDictionary<string, string> ParseExtraArgs(this CommandLineApplication app, CommandOption extraArgs)
+        public static IReadOnlyDictionary<string, IList<string>> ParseExtraArgs(this CommandLineApplication app, IList<string> extraArgFileNames)
         {
-            Dictionary<string, string> parameters = new Dictionary<string, string>();
+            Dictionary<string, IList<string>> parameters = new Dictionary<string, IList<string>>();
 
-            if (extraArgs.HasValue())
-            {
-                foreach (string argFile in extraArgs.Values)
+            // Note: If the same param is specified multiple times across the files, last-in-wins
+            // TODO: consider another course of action.
+            if (extraArgFileNames.Count > 0)
+            { 
+                foreach (string argFile in extraArgFileNames)
                 {
                     using (Stream s = File.OpenRead(argFile))
                     using (TextReader r = new StreamReader(s, Encoding.UTF8, true, 4096, true))
@@ -34,7 +36,13 @@ namespace dotnet_new3
                         {
                             if(property.Value.Type == JTokenType.String)
                             {
-                                parameters[property.Name] = property.Value.ToString();
+                                IList<string> values = new List<string>();
+                                values.Add(property.Value.ToString());
+                                // adding 2 dashes to the file-based params
+                                // won't work right if there's a param that should have 1 dash
+                                //
+                                // TOOD: come up with a better way to deal with this
+                                parameters["--" + property.Name] = values;
                             }
                         }
                     }
@@ -65,17 +73,19 @@ namespace dotnet_new3
                     continue;
                 }
 
-                if (!key.StartsWith("--", StringComparison.Ordinal))
+                if (!key.StartsWith("-", StringComparison.Ordinal))
                 {
-                    throw new Exception("Parameter names must start with --");
+                    throw new Exception("Parameter names must start with -- or -");
                 }
 
-
+                // Check the next value. If it doesn't start with a '-' then it's a value for the current param.
+                // Otherwise it's its own param.
                 string value = null;
                 if (app.RemainingArguments.Count > i + 1)
                 {
                     value = app.RemainingArguments[i + 1];
-                    if (value.StartsWith("--", StringComparison.Ordinal))
+
+                    if (value.StartsWith("-", StringComparison.Ordinal))
                     {
                         value = null;
                     }
@@ -85,7 +95,14 @@ namespace dotnet_new3
                     }
                 }
 
-                parameters[key.Substring(2)] = value;
+                IList<string> valueList;
+                if (!parameters.TryGetValue(key, out valueList))
+                {
+                    valueList = new List<string>();
+                    parameters.Add(key, valueList);
+                }
+
+                valueList.Add(value);
             }
 
             return parameters;
