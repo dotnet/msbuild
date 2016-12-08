@@ -461,14 +461,10 @@ namespace dotnet_new3
 
         private static void ParameterHelp(IParameterSet allParams, ExtendedCommandParser app)
         {
-            //bool anyParams = allParams.ParameterDefinitions.Any(x => x.Priority != TemplateParameterPriority.Implicit);
-
             IEnumerable<ITemplateParameter> filteredParams = allParams.ParameterDefinitions.Where(x => x.Priority != TemplateParameterPriority.Implicit);
 
-            //if (anyParams)
             if (filteredParams.Any())
             {
-                //HelpFormatter<ITemplateParameter> formatter = new HelpFormatter<ITemplateParameter>(allParams.ParameterDefinitions, 2, null, true);
                 HelpFormatter<ITemplateParameter> formatter = new HelpFormatter<ITemplateParameter>(filteredParams, 2, null, true);
 
                 formatter.DefineColumn(delegate (ITemplateParameter param)
