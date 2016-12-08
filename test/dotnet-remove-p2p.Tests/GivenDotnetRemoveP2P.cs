@@ -17,6 +17,7 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
         const string ConditionFrameworkNet451 = "== 'net451'";
         const string FrameworkNetCoreApp10Arg = "-f netcoreapp1.0";
         const string ConditionFrameworkNetCoreApp10 = "== 'netcoreapp1.0'";
+        static readonly string[] DefaultFrameworks = new string[] { "netcoreapp1.0", "net451" };
 
         private TestSetup Setup([System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(Setup), string identifier = "")
         {
@@ -50,6 +51,20 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
             }
 
             return dir;
+        }
+
+        private static void SetTargetFrameworks(ProjDir proj, string[] frameworks)
+        {
+            var csproj = proj.CsProj();
+            csproj.AddProperty("TargetFrameworks", string.Join(";", frameworks));
+            csproj.Save();
+        }
+
+        private ProjDir NewLibWithFrameworks([System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(NewDir), string identifier = "")
+        {
+            var ret = NewLib(callingMethod: callingMethod, identifier: identifier);
+            SetTargetFrameworks(ret, DefaultFrameworks);
+            return ret;
         }
 
         private ProjDir GetLibRef(TestSetup setup)
@@ -151,7 +166,7 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
         [Fact]
         public void ItRemovesRefWithoutCondAndPrintsStatus()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
             var libref = AddLibRef(setup, lib);
 
@@ -170,7 +185,7 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
         [Fact]
         public void ItRemovesRefWithCondAndPrintsStatus()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
             var libref = AddLibRef(setup, lib, FrameworkNet451Arg);
 
@@ -189,7 +204,7 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
         [Fact]
         public void WhenTwoDifferentRefsArePresentItDoesNotRemoveBoth()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
             var libref = AddLibRef(setup, lib);
             var validref = AddValidRef(setup, lib);
@@ -210,7 +225,7 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
         [Fact]
         public void WhenRefWithoutCondIsNotThereItPrintsMessage()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
             var libref = GetLibRef(setup);
 
@@ -227,7 +242,7 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
         [Fact]
         public void WhenRefWithCondIsNotThereItPrintsMessage()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
             var libref = GetLibRef(setup);
 
@@ -244,7 +259,7 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
         [Fact]
         public void WhenRefWithAndWithoutCondArePresentAndRemovingNoCondItDoesNotRemoveOther()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
             var librefCond = AddLibRef(setup, lib, FrameworkNet451Arg);
             var librefNoCond = AddLibRef(setup, lib);
@@ -269,7 +284,7 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
         [Fact]
         public void WhenRefWithAndWithoutCondArePresentAndRemovingCondItDoesNotRemoveOther()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
             var librefCond = AddLibRef(setup, lib, FrameworkNet451Arg);
             var librefNoCond = AddLibRef(setup, lib);
@@ -294,7 +309,7 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
         [Fact]
         public void WhenRefWithDifferentCondIsPresentItDoesNotRemoveIt()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
             var librefCondNet451 = AddLibRef(setup, lib, FrameworkNet451Arg);
             var librefCondNetCoreApp10 = AddLibRef(setup, lib, FrameworkNetCoreApp10Arg);
@@ -396,7 +411,7 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
         [Fact]
         public void WhenPassingMultipleReferencesItRemovesThemAll()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
             var libref = AddLibRef(setup, lib);
             var validref = AddValidRef(setup, lib);
@@ -417,7 +432,7 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
         [Fact]
         public void WhenPassingMultipleReferencesAndOneOfThemDoesNotExistItRemovesOne()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
             var libref = GetLibRef(setup);
             var validref = AddValidRef(setup, lib);
