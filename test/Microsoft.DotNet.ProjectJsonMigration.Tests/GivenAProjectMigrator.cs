@@ -80,9 +80,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [Fact]
         public void ItHasErrorWhenMigratingAProjectJsonWithoutAFrameworks()
         {
-            var testAppName = "TestLibraryWithProjectFileWithoutFrameworks";
-            var testInstance = TestAssets.Get(testAppName)
-                .CreateInstance(testAppName)
+            var testInstance = TestAssets.Get(
+                    "NonRestoredTestProjects", 
+                    "TestLibraryWithProjectFileWithoutFrameworks")
+                .CreateInstance()
                 .WithSourceFiles();
 
             var testProjectDirectory = testInstance.Root.FullName;
@@ -98,9 +99,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var projectReport = report.ProjectMigrationReports.First();
 
-            var errorMessage = projectReport.Errors.First().GetFormattedErrorMessage();
-            errorMessage.Should().Contain("MIGRATE1013::No Project:");
-            errorMessage.Should().Contain($"The project.json specifies no target frameworks in {testProjectDirectory}");
+            projectReport.Errors.First().GetFormattedErrorMessage()
+                .Should().Contain("MIGRATE1013::No Project:")
+                .And.Contain($"The project.json specifies no target frameworks in {testProjectDirectory}");
         }
 
         private IEnumerable<string> EnumerateFilesWithRelativePath(string testProjectDirectory)
