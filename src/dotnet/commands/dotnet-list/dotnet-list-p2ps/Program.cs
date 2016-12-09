@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Evaluation;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using System.Collections.Generic;
@@ -31,7 +32,7 @@ namespace Microsoft.DotNet.Tools.List.ProjectToProjectReferences
                     throw new GracefulException(CommonLocalizableStrings.RequiredArgumentNotPassed, $"<{LocalizableStrings.ProjectArgumentValueName}>");
                 }
 
-                var msbuildProj = MsbuildProject.FromFileOrDirectory(projectArgument.Value);
+                var msbuildProj = MsbuildProject.FromFileOrDirectory(new ProjectCollection(), projectArgument.Value);
 
                 var p2ps = msbuildProj.GetProjectToProjectReferences();
                 if (p2ps.Count() == 0)

@@ -7,6 +7,7 @@ using Microsoft.DotNet.Tools.Test.Utilities;
 using Msbuild.Tests.Utilities;
 using System;
 using System.IO;
+using System.Linq;
 using Xunit;
 
 namespace Microsoft.DotNet.Cli.Add.P2P.Tests
@@ -17,7 +18,10 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         const string ConditionFrameworkNet451 = "== 'net451'";
         const string FrameworkNetCoreApp10Arg = "-f netcoreapp1.0";
         const string ConditionFrameworkNetCoreApp10 = "== 'netcoreapp1.0'";
-
+        const string ProjectNotCompatibleErrorMessageRegEx = "Project `[^`]*` cannot be added due to incompatible targeted frameworks between the two projects\\. Please review the project you are trying to add and verify that is compatible with the following targets\\:";
+        const string ProjectDoesNotTargetFrameworkErrorMessageRegEx = "Project `[^`]*` does not target framework `[^`]*`.";
+        static readonly string[] DefaultFrameworks = new string[] { "netcoreapp1.0", "net451" };
+        
         private TestSetup Setup([System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(Setup), string identifier = "")
         {
             return new TestSetup(
@@ -50,6 +54,20 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
             }
 
             return dir;
+        }
+
+        private static void SetTargetFrameworks(ProjDir proj, string[] frameworks)
+        {
+            var csproj = proj.CsProj();
+            csproj.AddProperty("TargetFrameworks", string.Join(";", frameworks));
+            csproj.Save();
+        }
+
+        private ProjDir NewLibWithFrameworks([System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(NewDir), string identifier = "")
+        {
+            var ret = NewLib(callingMethod: callingMethod, identifier: identifier);
+            SetTargetFrameworks(ret, DefaultFrameworks);
+            return ret;
         }
 
         [Theory]
@@ -122,7 +140,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void ItAddsRefWithoutCondAndPrintsStatus()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
@@ -141,7 +159,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void ItAddsRefWithCondAndPrintsStatus()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
 
             int condBefore = lib.CsProj().NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451);
@@ -160,7 +178,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void WhenRefWithoutCondIsPresentItAddsDifferentRefWithoutCond()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
 
             new AddP2PCommand()
@@ -184,7 +202,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void WhenRefWithCondIsPresentItAddsDifferentRefWithCond()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
 
             new AddP2PCommand()
@@ -208,7 +226,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void WhenRefWithCondIsPresentItAddsRefWithDifferentCond()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
 
             new AddP2PCommand()
@@ -232,7 +250,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void WhenRefWithConditionIsPresentItAddsDifferentRefWithoutCond()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
 
             new AddP2PCommand()
@@ -256,7 +274,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void WhenRefWithNoCondAlreadyExistsItDoesntDuplicate()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
 
             new AddP2PCommand()
@@ -297,7 +315,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void WhenRefWithCondOnItemGroupAlreadyExistsItDoesntDuplicate()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
 
             new AddP2PCommand()
@@ -421,7 +439,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void ItAddsMultipleRefsNoCondToTheSameItemGroup()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
@@ -440,7 +458,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void ItAddsMultipleRefsWithCondToTheSameItemGroup()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451);
@@ -459,7 +477,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void WhenProjectNameIsNotPassedItFindsItAndAddsReference()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
@@ -477,7 +495,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void ItAddsRefBetweenImports()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
 
             var cmd = new AddP2PCommand()
@@ -522,7 +540,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void WhenPassedReferenceDoesNotExistItShowsAnError()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
 
             var contentBefore = lib.CsProjContent();
             var cmd = new AddP2PCommand()
@@ -537,7 +555,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void WhenPassedMultipleRefsAndOneOfthemDoesNotExistItCancelsWholeOperation()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
 
             var contentBefore = lib.CsProjContent();
@@ -554,7 +572,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void WhenPassedReferenceDoesNotExistAndForceSwitchIsPassedItAddsIt()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             const string nonExisting = "IDoNotExist.csproj";
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
@@ -573,7 +591,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void WhenPassedReferenceIsUsingSlashesItNormalizesItToBackslashes()
         {
-            var lib = NewLib();
+            var lib = NewLibWithFrameworks();
             var setup = Setup();
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
@@ -625,6 +643,82 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
             var csproj = proj.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
             csproj.NumberOfProjectReferencesWithIncludeContaining(setup.ValidRefCsprojRelPath.Replace('/', '\\')).Should().Be(1);
+        }
+
+        [Fact]
+        public void ItCanAddReferenceWithConditionOnCompatibleFramework()
+        {
+            var setup = Setup();
+            var lib = new ProjDir(setup.LibDir);
+            var net45lib = new ProjDir(Path.Combine(setup.TestRoot, "Net45Lib"));
+
+            int condBefore = lib.CsProj().NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451);
+            var cmd = new AddP2PCommand()
+                    .WithProject(lib.CsProjPath)
+                    .Execute($"{FrameworkNet451Arg} \"{net45lib.CsProjPath}\"");
+            cmd.Should().Pass();
+            cmd.StdOut.Should().Contain("added to the project");
+            var csproj = lib.CsProj();
+            csproj.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451).Should().Be(condBefore + 1);
+            csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(net45lib.CsProjName, ConditionFrameworkNet451).Should().Be(1);
+        }
+
+        [Fact]
+        public void ItCanAddRefWithoutCondAndTargetingSupersetOfFrameworksAndOneOfReferencesCompatible()
+        {
+            var setup = Setup();
+            var lib = new ProjDir(setup.LibDir);
+            var net452netcoreapp10lib = new ProjDir(Path.Combine(setup.TestRoot, "Net452AndNetCoreApp10Lib"));
+
+            int noCondBefore = net452netcoreapp10lib.CsProj().NumberOfItemGroupsWithoutCondition();
+            var cmd = new AddP2PCommand()
+                    .WithProject(net452netcoreapp10lib.CsProjPath)
+                    .Execute($"\"{lib.CsProjPath}\"");
+            cmd.Should().Pass();
+            cmd.StdOut.Should().Contain("added to the project");
+            var csproj = net452netcoreapp10lib.CsProj();
+            csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
+            csproj.NumberOfProjectReferencesWithIncludeContaining(lib.CsProjName).Should().Be(1);
+        }
+
+        [Theory]
+        [InlineData("net45")]
+        [InlineData("net40")]
+        [InlineData("netcoreapp1.1")]
+        [InlineData("nonexistingframeworkname")]
+        public void WhenFrameworkSwitchIsNotMatchingAnyOfTargetedFrameworksItPrintsError(string framework)
+        {
+            var setup = Setup();
+            var lib = new ProjDir(setup.LibDir);
+            var net45lib = new ProjDir(Path.Combine(setup.TestRoot, "Net45Lib"));
+
+            var csProjContent = lib.CsProjContent();
+            var cmd = new AddP2PCommand()
+                    .WithProject(lib.CsProjPath)
+                    .Execute($"-f {framework} \"{net45lib.CsProjPath}\"");
+            cmd.Should().Fail();
+            cmd.StdErr.Should().MatchRegex(ProjectDoesNotTargetFrameworkErrorMessageRegEx);
+            cmd.StdErr.Should().Contain($"`{framework}`");
+            lib.CsProjContent().Should().BeEquivalentTo(csProjContent);
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("-f net45")]
+        public void WhenIncompatibleFrameworkDetectedItPrintsError(string frameworkArg)
+        {
+            var setup = Setup();
+            var lib = new ProjDir(setup.LibDir);
+            var net45lib = new ProjDir(Path.Combine(setup.TestRoot, "Net45Lib"));
+
+            var csProjContent = net45lib.CsProjContent();
+            var cmd = new AddP2PCommand()
+                    .WithProject(net45lib.CsProjPath)
+                    .Execute($"{frameworkArg} \"{lib.CsProjPath}\"");
+            cmd.Should().Fail();
+            cmd.StdErr.Should().MatchRegex(ProjectNotCompatibleErrorMessageRegEx);
+            cmd.StdErr.Should().MatchRegex(" - net45(\n|\r)");
+            net45lib.CsProjContent().Should().BeEquivalentTo(csProjContent);
         }
     }
 }
