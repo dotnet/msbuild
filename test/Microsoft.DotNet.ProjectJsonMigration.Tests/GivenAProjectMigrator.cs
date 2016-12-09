@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
     public class GivenAProjectMigrator : TestBase
     {
         [Fact]
-        public void It_copies_ProjectDirectory_contents_to_OutputDirectory_when_the_directories_are_different()
+        public void ItCopiesProjectDirectoryContentsToOutputDirectoryWhenTheDirectoriesAreDifferent()
         {
             var testProjectDirectory = TestAssetsManager
                 .CreateTestInstance("PJTestAppSimple", callingMethod: "z")
@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void It_has_error_when_migrating_a_deprecated_projectJson()
+        public void ItHasErrorWhenMigratingADeprecatedProjectJson()
         {
             var testProjectDirectory =
                 TestAssetsManager.CreateTestInstance("TestLibraryWithDeprecatedProjectFile", callingMethod: "z")
@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void It_has_error_when_migrating_a_non_csharp_app()
+        public void ItHasErrorWhenMigratingANonCsharpApp()
         {
             var testProjectDirectory =
                 TestAssetsManager.CreateTestInstance("FSharpTestProjects/TestApp", callingMethod: "z")
@@ -75,6 +75,33 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var errorMessage = projectReport.Errors.First().GetFormattedErrorMessage();
             errorMessage.Should().Contain("MIGRATE20013::Non-Csharp App: Cannot migrate project");
+        }
+
+        [Fact]
+        public void ItHasErrorWhenMigratingAProjectJsonWithoutAFrameworks()
+        {
+            var testInstance = TestAssets.Get(
+                    "NonRestoredTestProjects", 
+                    "TestLibraryWithProjectFileWithoutFrameworks")
+                .CreateInstance()
+                .WithSourceFiles();
+
+            var testProjectDirectory = testInstance.Root.FullName;
+
+            var mockProj = ProjectRootElement.Create();
+            var testSettings = MigrationSettings.CreateMigrationSettingsTestHook(
+                testProjectDirectory,
+                testProjectDirectory,
+                mockProj);
+
+            var projectMigrator = new ProjectMigrator(new FakeEmptyMigrationRule());
+            var report = projectMigrator.Migrate(testSettings);
+
+            var projectReport = report.ProjectMigrationReports.First();
+
+            projectReport.Errors.First().GetFormattedErrorMessage()
+                .Should().Contain("MIGRATE1013::No Project:")
+                .And.Contain($"The project.json specifies no target frameworks in {testProjectDirectory}");
         }
 
         private IEnumerable<string> EnumerateFilesWithRelativePath(string testProjectDirectory)
