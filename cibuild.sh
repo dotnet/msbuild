@@ -306,10 +306,13 @@ if [ "$host" = "Mono" ]; then
 fi
 
 # The set of warnings to suppress for now
+# warning MSB3276: Found conflicts between different versions of the same dependent assembly.
+#   - Microsoft.VisualStudio.Setup.Configuration.Interop.dll (referenced from Utilities project) references mscorlib 2.0 and thus conflicting
+#     with mscorlib 4.0
 # warning MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.
 # warning MSB3026: Could not copy "XXX" to "XXX". Beginning retry 1 in 1000ms.
 # warning AL1053: The version '1.2.3.4-foo' specified for the 'product version' is not in the normal 'major.minor.build.revision' format
-_NOWARN="MSB3277;MSB3026;AL1053"
+_NOWARN="MSB3276;MSB3277;MSB3026;AL1053"
 
 echo
 echo "** Rebuilding MSBuild with locally built binaries"
