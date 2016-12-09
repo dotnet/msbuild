@@ -18,8 +18,10 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         const string ConditionFrameworkNet451 = "== 'net451'";
         const string FrameworkNetCoreApp10Arg = "-f netcoreapp1.0";
         const string ConditionFrameworkNetCoreApp10 = "== 'netcoreapp1.0'";
+        const string ProjectNotCompatibleErrorMessageRegEx = "Project `[^`]*` cannot be added due to incompatible targeted frameworks between the two projects\\. Please review the project you are trying to add and verify that is compatible with the following targets\\:";
+        const string ProjectDoesNotTargetFrameworkErrorMessageRegEx = "Project `[^`]*` does not target framework `[^`]*`.";
         static readonly string[] DefaultFrameworks = new string[] { "netcoreapp1.0", "net451" };
-
+        
         private TestSetup Setup([System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(Setup), string identifier = "")
         {
             return new TestSetup(
@@ -644,7 +646,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         }
 
         [Fact]
-        public void ItCanAddRefWithCondOnCompatibleFramework()
+        public void ItCanAddReferenceWithConditionOnCompatibleFramework()
         {
             var setup = Setup();
             var lib = new ProjDir(setup.LibDir);
@@ -695,7 +697,8 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                     .WithProject(lib.CsProjPath)
                     .Execute($"-f {framework} \"{net45lib.CsProjPath}\"");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Contain("does not target");
+            cmd.StdErr.Should().MatchRegex(ProjectDoesNotTargetFrameworkErrorMessageRegEx);
+            cmd.StdErr.Should().Contain($"`{framework}`");
             lib.CsProjContent().Should().BeEquivalentTo(csProjContent);
         }
 
@@ -713,7 +716,8 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                     .WithProject(net45lib.CsProjPath)
                     .Execute($"{frameworkArg} \"{lib.CsProjPath}\"");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Contain("is not compatible with");
+            cmd.StdErr.Should().MatchRegex(ProjectNotCompatibleErrorMessageRegEx);
+            cmd.StdErr.Should().MatchRegex(" - net45(\n|\r)");
             net45lib.CsProjContent().Should().BeEquivalentTo(csProjContent);
         }
     }

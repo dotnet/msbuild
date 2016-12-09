@@ -6,9 +6,9 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
+using Microsoft.DotNet.Tools.ProjectExtensions;
 using NuGet.Frameworks;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -19,49 +19,48 @@ namespace Microsoft.DotNet.Tools
     {
         const string ProjectItemElementType = "ProjectReference";
 
-        public ProjectRootElement ProjectRoot { get; private set; }
+        public ProjectRootElement ProjectRootElement { get; private set; }
         public string ProjectDirectory { get; private set; }
 
-        private ProjectCollection _collection;
+        private ProjectCollection _projects;
         private List<NuGetFramework> _cachedTfms = null;
-        private Project _cachedEvaluatedProject = null;
 
-        private MsbuildProject(ProjectCollection collection, ProjectRootElement project)
+        private MsbuildProject(ProjectCollection projects, ProjectRootElement project)
         {
-            _collection = collection;
-            ProjectRoot = project;
-            ProjectDirectory = PathUtility.EnsureTrailingSlash(ProjectRoot.DirectoryPath);
+            _projects = projects;
+            ProjectRootElement = project;
+            ProjectDirectory = PathUtility.EnsureTrailingSlash(ProjectRootElement.DirectoryPath);
         }
 
-        public static MsbuildProject FromFileOrDirectory(ProjectCollection collection, string fileOrDirectory)
+        public static MsbuildProject FromFileOrDirectory(ProjectCollection projects, string fileOrDirectory)
         {
             if (File.Exists(fileOrDirectory))
             {
-                return FromFile(collection, fileOrDirectory);
+                return FromFile(projects, fileOrDirectory);
             }
             else
             {
-                return FromDirectory(collection, fileOrDirectory);
+                return FromDirectory(projects, fileOrDirectory);
             }
         }
 
-        public static MsbuildProject FromFile(ProjectCollection collection, string projectPath)
+        public static MsbuildProject FromFile(ProjectCollection projects, string projectPath)
         {
             if (!File.Exists(projectPath))
             {
                 throw new GracefulException(CommonLocalizableStrings.ProjectDoesNotExist, projectPath);
             }
 
-            var project = TryOpenProject(collection, projectPath);
+            var project = TryOpenProject(projects, projectPath);
             if (project == null)
             {
                 throw new GracefulException(CommonLocalizableStrings.ProjectIsInvalid, projectPath);
             }
 
-            return new MsbuildProject(collection, project);
+            return new MsbuildProject(projects, project);
         }
 
-        public static MsbuildProject FromDirectory(ProjectCollection collection, string projectDirectory)
+        public static MsbuildProject FromDirectory(ProjectCollection projects, string projectDirectory)
         {
             DirectoryInfo dir;
             try
@@ -81,7 +80,9 @@ namespace Microsoft.DotNet.Tools
             FileInfo[] files = dir.GetFiles("*proj");
             if (files.Length == 0)
             {
-                throw new GracefulException(CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory, projectDirectory);
+                throw new GracefulException(
+                    CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory,
+                    projectDirectory);
             }
 
             if (files.Length > 1)
@@ -93,33 +94,39 @@ namespace Microsoft.DotNet.Tools
 
             if (!projectFile.Exists)
             {
-                throw new GracefulException(CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory, projectDirectory);
+                throw new GracefulException(
+                    CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory,
+                    projectDirectory);
             }
 
-            var project = TryOpenProject(collection, projectFile.FullName);
+            var project = TryOpenProject(projects, projectFile.FullName);
             if (project == null)
             {
                 throw new GracefulException(CommonLocalizableStrings.FoundInvalidProject, projectFile.FullName);
             }
 
-            return new MsbuildProject(collection, project);
+            return new MsbuildProject(projects, project);
         }
 
         public int AddProjectToProjectReferences(string framework, IEnumerable<string> refs)
         {
             int numberOfAddedReferences = 0;
 
-            ProjectItemGroupElement itemGroup = ProjectRoot.FindUniformOrCreateItemGroupWithCondition(ProjectItemElementType, framework);
+            ProjectItemGroupElement itemGroup = ProjectRootElement.FindUniformOrCreateItemGroupWithCondition(
+                ProjectItemElementType,
+                framework);
             foreach (var @ref in refs.Select((r) => NormalizeSlashes(r)))
             {
-                if (ProjectRoot.HasExistingItemWithCondition(framework, @ref))
+                if (ProjectRootElement.HasExistingItemWithCondition(framework, @ref))
                 {
-                    Reporter.Output.WriteLine(string.Format(CommonLocalizableStrings.ProjectAlreadyHasAreference, @ref));
+                    Reporter.Output.WriteLine(string.Format(
+                        CommonLocalizableStrings.ProjectAlreadyHasAreference, 
+                        @ref));
                     continue;
                 }
 
                 numberOfAddedReferences++;
-                itemGroup.AppendChild(ProjectRoot.CreateItemElement(ProjectItemElementType, @ref));
+                itemGroup.AppendChild(ProjectRootElement.CreateItemElement(ProjectItemElementType, @ref));
 
                 Reporter.Output.WriteLine(string.Format(CommonLocalizableStrings.ReferenceAddedToTheProject, @ref));
             }
@@ -141,12 +148,16 @@ namespace Microsoft.DotNet.Tools
 
         public IEnumerable<ProjectItemElement> GetProjectToProjectReferences()
         {
-            return ProjectRoot.GetAllItemsWithElementType(ProjectItemElementType);
+            return ProjectRootElement.GetAllItemsWithElementType(ProjectItemElementType);
         }
 
         public void ConvertPathsToRelative(ref List<string> references)
         {
-            references = references.Select((r) => PathUtility.GetRelativePath(ProjectDirectory, Path.GetFullPath(r))).ToList();
+            references = references.Select((r) =>
+                PathUtility.GetRelativePath(
+                    ProjectDirectory,
+                    Path.GetFullPath(r)))
+                .ToList();
         }
 
         public static string NormalizeSlashes(string path)
@@ -182,28 +193,7 @@ namespace Microsoft.DotNet.Tools
             }
 
             var project = GetEvaluatedProject();
-
-            var properties = project.AllEvaluatedProperties
-                                    .Where(p => p.Name.Equals("TargetFrameworks", StringComparison.OrdinalIgnoreCase) ||
-                                                p.Name.Equals("TargetFramework", StringComparison.OrdinalIgnoreCase))
-                                    .Select(p => p.EvaluatedValue.ToLower()).ToList();
-
-            var uniqueTfms = new HashSet<string>();
-
-            foreach (var property in properties)
-            {
-                var tfms = property
-                                .Split(';')
-                                .Select((tfm) => tfm.Trim())
-                                .Where((tfm) => !string.IsNullOrEmpty(tfm));
-
-                foreach (var tfm in tfms)
-                {
-                    uniqueTfms.Add(tfm);
-                }
-            }
-
-            _cachedTfms = uniqueTfms.Select((frameworkString) => NuGetFramework.Parse(frameworkString)).ToList();
+            _cachedTfms = project.GetTargetFrameworks().ToList();
             return _cachedTfms;
         }
 
@@ -220,7 +210,7 @@ namespace Microsoft.DotNet.Tools
             return false;
         }
 
-        public bool TargetsFramework(NuGetFramework framework)
+        public bool IsTargettingFramework(NuGetFramework framework)
         {
             foreach (var tfm in GetTargetFrameworks())
             {
@@ -235,28 +225,16 @@ namespace Microsoft.DotNet.Tools
 
         private Project GetEvaluatedProject()
         {
-            if (_cachedEvaluatedProject != null)
-            {
-                return _cachedEvaluatedProject;
-            }
-
-            var loadedProjects = _collection.GetLoadedProjects(ProjectRoot.FullPath);
-            if (loadedProjects.Count >= 1)
-            {
-                _cachedEvaluatedProject = loadedProjects.First();
-                return _cachedEvaluatedProject;
-            }
-
             try
             {
-                _cachedEvaluatedProject = new Project(ProjectRoot, null, null, _collection);
+                return _projects.LoadProject(ProjectRootElement.FullPath);
             }
             catch (InvalidProjectFileException e)
             {
-                throw new GracefulException(string.Format(CommonLocalizableStrings.ProjectCouldNotBeEvaluated, ProjectRoot.FullPath, e.Message));
+                throw new GracefulException(string.Format(
+                    CommonLocalizableStrings.ProjectCouldNotBeEvaluated,
+                    ProjectRootElement.FullPath, e.Message));
             }
-
-            return _cachedEvaluatedProject;
         }
 
         private int RemoveProjectToProjectReferenceAlternatives(string framework, string reference)
@@ -264,7 +242,7 @@ namespace Microsoft.DotNet.Tools
             int numberOfRemovedRefs = 0;
             foreach (var r in GetIncludeAlternativesForRemoval(reference))
             {
-                foreach (var existingItem in ProjectRoot.FindExistingItemsWithCondition(framework, r))
+                foreach (var existingItem in ProjectRootElement.FindExistingItemsWithCondition(framework, r))
                 {
                     ProjectElementContainer itemGroup = existingItem.Parent;
                     itemGroup.RemoveChild(existingItem);
@@ -280,7 +258,9 @@ namespace Microsoft.DotNet.Tools
 
             if (numberOfRemovedRefs == 0)
             {
-                Reporter.Output.WriteLine(string.Format(CommonLocalizableStrings.ProjectReferenceCouldNotBeFound, reference));
+                Reporter.Output.WriteLine(string.Format(
+                    CommonLocalizableStrings.ProjectReferenceCouldNotBeFound,
+                    reference));
             }
 
             return numberOfRemovedRefs;
@@ -312,11 +292,11 @@ namespace Microsoft.DotNet.Tools
 
         // There is ProjectRootElement.TryOpen but it does not work as expected
         // I.e. it returns null for some valid projects
-        private static ProjectRootElement TryOpenProject(ProjectCollection collection, string filename)
+        private static ProjectRootElement TryOpenProject(ProjectCollection projects, string filename)
         {
             try
             {
-                return ProjectRootElement.Open(filename, collection, preserveFormatting: true);
+                return ProjectRootElement.Open(filename, projects, preserveFormatting: true);
             }
             catch (InvalidProjectFileException)
             {
