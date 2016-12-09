@@ -261,6 +261,35 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     ============================================================
+    ProjectReference Targets: Include transitive project references before 
+                              ResolveProjectReferences is called
+    - _ComputeTransitiveProjectReferences
+    - IncludeTransitiveProjectReferences
+    ============================================================
+    -->
+
+  <Target Name="_ComputeTransitiveProjectReferences"
+          DependsOnTargets="RunResolvePackageDependencies"
+          Returns="_TransitiveProjectReferences">
+    <ItemGroup>
+      <ProjectDefs Include="@(PackageDefinitions->WithMetadataValue('Type', 'project'))" />
+
+      <_TransitiveProjectReferences Include="%(ProjectDefs.Path)">
+        <ResolvedPath>%(ProjectDefs.ResolvedPath)</ResolvedPath>
+      </_TransitiveProjectReferences>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="IncludeTransitiveProjectReferences"
+          DependsOnTargets="_ComputeTransitiveProjectReferences" BeforeTargets="AssignProjectConfiguration">
+    <ItemGroup>
+      <!-- Add the references we computed -->
+      <ProjectReference Include="@(_TransitiveProjectReferences)" />
+    </ItemGroup>
+  </Target>
+  
+  <!--
+    ============================================================
     Analyzer Targets: For populating Analyzers based on lock file
     - _ComputeLockFileAnalyzers
     - ResolveLockFileAnalyzers
