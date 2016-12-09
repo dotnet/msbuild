@@ -1,0 +1,12 @@
+{
+  "author": "Microsoft",
+  "classifications": ["Visual C#"],
+  "name": "Class library (.NET Standard)",
+  "groupIdentity": "NetCoreClassLib",
+  "identity": "Microsoft.Standard.QuickStarts.ClassLib.CSharp",
+  "shortName": "classlib",
+  "tags": {
+    "language": "C#"
+  },
+  "sourceName": "ClassLibrary1"
+}

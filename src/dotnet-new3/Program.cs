@@ -41,6 +41,8 @@ namespace dotnet_new3
 
         public static int Main(string[] args)
         {
+            Console.ReadLine();
+
             ExtendedCommandParser app = new ExtendedCommandParser()
             {
                 Name = "dotnet new3",
@@ -91,7 +93,7 @@ namespace dotnet_new3
 
                 if (!Paths.User.BaseDir.Exists() || !Paths.User.FirstRunCookie.Exists())
                 {
-                    if (app.InternalParamHasValue("--quiet"))
+                    if (!app.InternalParamHasValue("--quiet"))
                     {
                         Reporter.Output.WriteLine("Getting things ready for first use...");
                     }
