@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         {
             get
             {
-                return ProjectContexts.First();
+                return ProjectContexts.FirstOrDefault();
             }
         }
 

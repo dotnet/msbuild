@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                     {
                         new ProjectMigrationReport(
                             rootSettings.ProjectDirectory,
-                            rootInputs?.DefaultProjectContext.GetProjectName(),
+                            rootInputs?.DefaultProjectContext?.GetProjectName(),
                             new List<MigrationError> {e.Error},
                             null)
                     });
@@ -193,7 +193,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         {
             if (!projectContexts.Any())
             {
-                MigrationErrorCodes.MIGRATE1013($"No projects found in {projectDirectory}").Throw();
+                MigrationErrorCodes.MIGRATE1013($"The project.json specifies no target frameworks in {projectDirectory}").Throw();
             }
 
             var defaultProjectContext = projectContexts.First();
