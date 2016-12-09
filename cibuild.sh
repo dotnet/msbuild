@@ -147,7 +147,7 @@ BOOTSTRAPPED_RUNTIME_HOST='"'"$THIS_SCRIPT_PATH/bin/Bootstrap-NetCore/dotnet"'"'
 # Default msbuild arguments
 TARGET_ARG="Build"
 EXTRA_ARGS=""
-
+CSC_ARGS=""
 
 #parse command line args
 while [ $# -gt 0 ]
@@ -231,7 +231,7 @@ case $target in
     Mono)
         setMonoDir
         CONFIGURATION=Debug-MONO
-        EXTRA_ARGS="/p:CscToolExe=mcs /p:CscToolPath=$MONO_BIN_DIR"
+        CSC_ARGS="/p:CscToolExe=csc.exe /p:CscToolPath=$PACKAGES_DIR/msbuild/ /p:DebugType=portable"
         RUNTIME_HOST_ARGS="--debug"
         MSBUILD_BOOTSTRAPPED_EXE='"'"$THIS_SCRIPT_PATH/bin/Bootstrap/MSBuild.dll"'"'
         ;;
@@ -284,7 +284,7 @@ restoreBuildTools
 
 echo
 echo "** Rebuilding MSBuild with downloaded binaries"
-runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_EXE" "/t:Rebuild $BUILD_MSBUILD_ARGS" "$BOOTSTRAP_BUILD_LOG_PATH"
+runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_EXE" "/t:Rebuild $BUILD_MSBUILD_ARGS $CSC_ARGS" "$BOOTSTRAP_BUILD_LOG_PATH"
 
 if [[ $BUILD_ONLY = true ]]; then
     exit $?
@@ -299,6 +299,12 @@ if [[ $BOOTSTRAP_ONLY = true ]]; then
     exit $?
 fi
 
+# Microsoft.Net.Compilers package is available now, so we can use the latest csc.exe
+if [ "$host" = "Mono" ]; then
+        CSC_EXE="$PACKAGES_DIR/microsoft.net.compilers/2.0.0-beta3/tools/csc.exe"
+        CSC_ARGS="/p:CscToolExe=csc.exe /p:CscToolPath=`dirname $CSC_EXE` /p:DebugType=portable"
+fi
+
 # The set of warnings to suppress for now
 # warning MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.
 # warning MSB3026: Could not copy "XXX" to "XXX". Beginning retry 1 in 1000ms.
@@ -307,4 +313,4 @@ _NOWARN="MSB3277;MSB3026;AL1053"
 
 echo
 echo "** Rebuilding MSBuild with locally built binaries"
-runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_BOOTSTRAPPED_EXE" "/t:$TARGET_ARG $BUILD_MSBUILD_ARGS /warnaserror /nowarn:\"$_NOWARN\"" "$LOCAL_BUILD_LOG_PATH"
+runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_BOOTSTRAPPED_EXE" "/t:$TARGET_ARG $BUILD_MSBUILD_ARGS $CSC_ARGS /warnaserror /nowarn:\"$_NOWARN\"" "$LOCAL_BUILD_LOG_PATH"
