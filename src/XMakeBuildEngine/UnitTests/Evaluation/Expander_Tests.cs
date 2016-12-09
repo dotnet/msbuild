@@ -2685,6 +2685,20 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
+        /// Verifies that the usage of GetPathOfFileAbove() within an in-memory project throws an exception.
+        /// </summary>
+        [Fact]
+        public void PropertyFunctionStaticMethodGetPathOfFileAboveInMemoryProject()
+        {
+            InvalidProjectFileException exception = Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                ObjectModelHelpers.CreateInMemoryProject("<Project><PropertyGroup><foo>$([MSBuild]::GetPathOfFileAbove('foo'))</foo></PropertyGroup></Project>");
+            });
+
+            Assert.Equal("The expression \"[MSBuild]::GetPathOfFileAbove(foo, \'\')\" cannot be evaluated. The path is not of a legal form.", exception.Message);
+        }
+
+        /// <summary>
         /// Verifies that <see cref="IntrinsicFunctions.GetPathOfFileAbove"/> only accepts a file name.
         /// </summary>
         [Fact]

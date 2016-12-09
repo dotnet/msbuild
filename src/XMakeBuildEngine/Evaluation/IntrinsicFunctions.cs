@@ -309,27 +309,19 @@ namespace Microsoft.Build.Evaluation
         /// Searches for a file based on the specified <see cref="IElementLocation"/>.
         /// </summary>
         /// <param name="file">The file to search for.</param>
-        /// <param name="elementLocation">An <see cref="IElementLocation"/>.  The directory of the <see cref="IElementLocation.File"/> is used as the starting
-        /// location of the file search.</param>
-        /// <returns>The full path of the file if it is found in a path above the <see cref="IElementLocation.File"/>.</returns>
-        internal static string GetPathOfFileAbove(string file, IElementLocation elementLocation)
+        /// <param name="startingDirectory">An optional directory to start the search in.  The default location is the directory
+        /// of the file containing the property funciton.</param>
+        /// <returns>The full path of the file if it is found, otherwise an empty string.</returns>
+        internal static string GetPathOfFileAbove(string file, string startingDirectory)
         {
-            if (String.IsNullOrWhiteSpace(elementLocation?.File))
-            {
-                ErrorUtilities.ThrowInternalError($"{nameof(elementLocation)} should not be null and it should have a file path associated with it.");
-            }
-
             // This method does not accept a path, only a file name
             if(file.Any(i => i.Equals(Path.DirectorySeparatorChar) || i.Equals(Path.AltDirectorySeparatorChar)))
             {
                 ErrorUtilities.ThrowArgument("InvalidGetPathOfFileAboveParameter", file);
             }
 
-            // Get the full path to the file and then the directory
-            string lookInDirectory = Path.GetDirectoryName(elementLocation.File);
-
             // Search for a directory that contains that file
-            string directoryName = GetDirectoryNameOfFileAbove(lookInDirectory, file);
+            string directoryName = GetDirectoryNameOfFileAbove(startingDirectory, file);
 
             return String.IsNullOrWhiteSpace(directoryName) ? String.Empty : NormalizePath(directoryName, file);
         }
