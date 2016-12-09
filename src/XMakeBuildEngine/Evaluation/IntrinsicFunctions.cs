@@ -306,6 +306,27 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// Searches for a file based on the specified <see cref="IElementLocation"/>.
+        /// </summary>
+        /// <param name="file">The file to search for.</param>
+        /// <param name="startingDirectory">An optional directory to start the search in.  The default location is the directory
+        /// of the file containing the property funciton.</param>
+        /// <returns>The full path of the file if it is found, otherwise an empty string.</returns>
+        internal static string GetPathOfFileAbove(string file, string startingDirectory)
+        {
+            // This method does not accept a path, only a file name
+            if(file.Any(i => i.Equals(Path.DirectorySeparatorChar) || i.Equals(Path.AltDirectorySeparatorChar)))
+            {
+                ErrorUtilities.ThrowArgument("InvalidGetPathOfFileAboveParameter", file);
+            }
+
+            // Search for a directory that contains that file
+            string directoryName = GetDirectoryNameOfFileAbove(startingDirectory, file);
+
+            return String.IsNullOrWhiteSpace(directoryName) ? String.Empty : NormalizePath(directoryName, file);
+        }
+
+        /// <summary>
         /// Return the string in parameter 'defaultValue' only if parameter 'conditionValue' is empty
         /// else, return the value conditionValue
         /// </summary>

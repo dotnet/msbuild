@@ -23,6 +23,18 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         private static MockElementLocation s_instance = new MockElementLocation();
 
+        private string _file = "mock.targets";
+
+
+        /// <summary>
+        /// Initializes a new instance of the MockElementLocation class.
+        /// </summary>
+        /// <param name="file">The path of the file to use.</param>
+        public MockElementLocation(string file)
+        {
+            _file = file;
+        }
+
         /// <summary>
         /// Private constructor
         /// </summary>
@@ -35,7 +47,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public override string File
         {
-            get { return "mock.targets"; }
+            get { return _file; }
         }
 
         /// <summary>
