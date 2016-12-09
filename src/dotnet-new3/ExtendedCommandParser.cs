@@ -28,6 +28,7 @@ namespace dotnet_new3
         // stores the parsed values
         private IDictionary<string, string> _parsedTemplateParams;
         private IDictionary<string, IList<string>> _parsedInternalParams;
+        private IDictionary<string, IList<string>> _parsedRemainingParams;
 
         // stores the options & arguments that are NOT hidden
         // this is used exclusively to show the help.
@@ -45,6 +46,7 @@ namespace dotnet_new3
 
             _parsedTemplateParams = new Dictionary<string, string>();
             _parsedInternalParams = new Dictionary<string, IList<string>>();
+            _parsedRemainingParams = new Dictionary<string, IList<string>>();
 
             _helpDisplayer = new CommandLineApplication(false);
         }
@@ -167,6 +169,14 @@ namespace dotnet_new3
             return values;
         }
 
+        public IDictionary<string, IList<string>> RemainingParameters
+        {
+            get
+            {
+                return _parsedRemainingParams;
+            }
+        }
+
         // Parses all command line args, and any input arg files.
         // NOTE: any previously parsed values are lost - this resets the parsed values.
         public void ParseArgs(IList<string> extraArgFileNames = null)
@@ -229,7 +239,7 @@ namespace dotnet_new3
                 else
                 {
                     // not a known internal or template param.
-                    // TODO: determine a better way to deal with this. As-is, the param will be ignored.
+                    _parsedRemainingParams[param.Key] = param.Value;
                 }
             }
         }
