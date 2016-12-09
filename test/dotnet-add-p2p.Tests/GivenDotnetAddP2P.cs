@@ -642,5 +642,79 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
             csproj.NumberOfProjectReferencesWithIncludeContaining(setup.ValidRefCsprojRelPath.Replace('/', '\\')).Should().Be(1);
         }
+
+        [Fact]
+        public void ItCanAddRefWithCondOnCompatibleFramework()
+        {
+            var setup = Setup();
+            var lib = new ProjDir(setup.LibDir);
+            var net45lib = new ProjDir(Path.Combine(setup.TestRoot, "Net45Lib"));
+
+            int condBefore = lib.CsProj().NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451);
+            var cmd = new AddP2PCommand()
+                    .WithProject(lib.CsProjPath)
+                    .Execute($"{FrameworkNet451Arg} \"{net45lib.CsProjPath}\"");
+            cmd.Should().Pass();
+            cmd.StdOut.Should().Contain("added to the project");
+            var csproj = lib.CsProj();
+            csproj.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451).Should().Be(condBefore + 1);
+            csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(net45lib.CsProjName, ConditionFrameworkNet451).Should().Be(1);
+        }
+
+        [Fact]
+        public void ItCanAddRefWithoutCondAndTargetingSupersetOfFrameworksAndOneOfReferencesCompatible()
+        {
+            var setup = Setup();
+            var lib = new ProjDir(setup.LibDir);
+            var net452netcoreapp10lib = new ProjDir(Path.Combine(setup.TestRoot, "Net452AndNetCoreApp10Lib"));
+
+            int noCondBefore = net452netcoreapp10lib.CsProj().NumberOfItemGroupsWithoutCondition();
+            var cmd = new AddP2PCommand()
+                    .WithProject(net452netcoreapp10lib.CsProjPath)
+                    .Execute($"\"{lib.CsProjPath}\"");
+            cmd.Should().Pass();
+            cmd.StdOut.Should().Contain("added to the project");
+            var csproj = net452netcoreapp10lib.CsProj();
+            csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
+            csproj.NumberOfProjectReferencesWithIncludeContaining(lib.CsProjName).Should().Be(1);
+        }
+
+        [Theory]
+        [InlineData("net45")]
+        [InlineData("net40")]
+        [InlineData("netcoreapp1.1")]
+        [InlineData("nonexistingframeworkname")]
+        public void WhenFrameworkSwitchIsNotMatchingAnyOfTargetedFrameworksItPrintsError(string framework)
+        {
+            var setup = Setup();
+            var lib = new ProjDir(setup.LibDir);
+            var net45lib = new ProjDir(Path.Combine(setup.TestRoot, "Net45Lib"));
+
+            var csProjContent = lib.CsProjContent();
+            var cmd = new AddP2PCommand()
+                    .WithProject(lib.CsProjPath)
+                    .Execute($"-f {framework} \"{net45lib.CsProjPath}\"");
+            cmd.Should().Fail();
+            cmd.StdErr.Should().Contain("does not target");
+            lib.CsProjContent().Should().BeEquivalentTo(csProjContent);
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("-f net45")]
+        public void WhenIncompatibleFrameworkDetectedItPrintsError(string frameworkArg)
+        {
+            var setup = Setup();
+            var lib = new ProjDir(setup.LibDir);
+            var net45lib = new ProjDir(Path.Combine(setup.TestRoot, "Net45Lib"));
+
+            var csProjContent = net45lib.CsProjContent();
+            var cmd = new AddP2PCommand()
+                    .WithProject(net45lib.CsProjPath)
+                    .Execute($"{frameworkArg} \"{lib.CsProjPath}\"");
+            cmd.Should().Fail();
+            cmd.StdErr.Should().Contain("is not compatible with");
+            net45lib.CsProjContent().Should().BeEquivalentTo(csProjContent);
+        }
     }
 }

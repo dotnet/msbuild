@@ -180,7 +180,6 @@
         public const string SpecifiedAliasExists = "Specified alias {0} already exists. Please specify a different alias.";
         public const string MandatoryParameterMissing = "Mandatory parameter {0} missing for template {1}. ";
 
-        /// compatibility
         public const string ProjectNotCompatibleWithFramework = "Project `{0}` is not compatible with `{1}`.";
         public const string ProjectDoesNotTargetFramework = "Project `{0}` does not target `{1}`.";
         public const string ProjectCouldNotBeEvaluated = "Project `{0}` could not be evaluated. Evaluation failed with following error:\n{1}";
