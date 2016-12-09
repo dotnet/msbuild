@@ -1,5 +1,4 @@
-<Project ToolsVersion="15.0">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
+<Project Sdk="FSharp.NET.Sdk;Microsoft.NET.Sdk" ToolsVersion="15.0">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -14,13 +13,10 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.App" Version="1.0.1" />
     <PackageReference Include="Microsoft.FSharp.Core.netcore" Version="1.0.0-alpha-161023" />
-    <PackageReference Include="Microsoft.NET.Sdk" Version="1.0.0-alpha-20161104-2">
-      <PrivateAssets>All</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20161109-01" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20161123-03" />
     <PackageReference Include="MSTest.TestAdapter" Version="1.1.5-preview" />
     <PackageReference Include="MSTest.TestFramework" Version="1.0.6-preview" />
-    <PackageReference Include="FSharp.NET.Sdk" Version="1.0.0-alpha-*">
+    <PackageReference Include="FSharp.NET.Sdk" Version="1.0.0-beta-*">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
   </ItemGroup>
@@ -31,5 +27,4 @@
     </DotNetCliToolReference>
   </ItemGroup>
 
-  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
 </Project>

@@ -1,5 +1,4 @@
-<Project ToolsVersion="15.0">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
+<Project ToolsVersion="15.0" Sdk="FSharp.NET.Sdk;Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -11,20 +10,26 @@
     <PackageTargetFallback>$(PackageTargetFallback);portable-net45+win8+wp8+wpa81;</PackageTargetFallback>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <GlobalExclude>$(GlobalExclude);bin\**;obj\**;node_modules\**;jspm_packages\**;bower_components\**;**\*.user;**\*.*proj</GlobalExclude>
+  </PropertyGroup>
+
   <ItemGroup>
+    <None Include="**\*" />
     <Compile Include="Controllers\*.fs" />
     <Compile Include="Startup.fs" />
     <Compile Include="Program.fs" />
     <EmbeddedResource Include="**\*.resx" />
+    <Content Include="wwwroot\**" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="**\*.cshtml" Exclude="wwwroot\**\*.cshtml" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="**\*.config" Exclude="wwwroot\**\*.config" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="**\*.json" Exclude="wwwroot\**\*.json" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.App" Version="1.0.1" />
-    <PackageReference Include="Microsoft.NET.Sdk.Web" Version="1.0.0-alpha-20161117-1-119">
-      <PrivateAssets>All</PrivateAssets>
-    </PackageReference>
     <PackageReference Include="Microsoft.FSharp.Core.netcore" Version="1.0.0-alpha-161023" />
-    <PackageReference Include="FSharp.NET.Sdk" Version="1.0.0-alpha-*">
+    <PackageReference Include="FSharp.NET.Sdk" Version="1.0.0-beta-*">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics" Version="1.0.0" />
@@ -49,5 +54,4 @@
     </DotNetCliToolReference>
   </ItemGroup>
 
-  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
 </Project>

@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Migration.Tests
         [InlineData("TestAppWithRuntimeOptions")]
         [InlineData("TestAppWithContents")]
         [InlineData("AppWithAssemblyInfo")]
-        public void It_migrates_apps(string projectName)
+        public void ItMigratesApps(string projectName)
         {
             var projectDirectory = TestAssetsManager.CreateTestInstance(projectName, identifier: projectName)
                                                     .WithLockFiles()
@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Fact]
-        public void It_migrates_signed_apps()
+        public void ItMigratesSignedApps()
         {
             var projectDirectory = TestAssetsManager.CreateTestInstance("TestAppWithSigning").WithLockFiles().Path;
 
@@ -74,7 +74,7 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Fact]
-        public void It_migrates_dotnet_new_console_with_identical_outputs()
+        public void ItMigratesDotnetNewConsoleWithIdenticalOutputs()
         {
             var testInstance = TestAssetsManager
                 .CreateTestInstance("ProjectJsonConsoleTemplate");
@@ -96,8 +96,8 @@ namespace Microsoft.DotNet.Migration.Tests
             VerifyAllMSBuildOutputsRunnable(projectDirectory);
         }
 
-        [Fact(Skip="Final tools version missing.")]
-        public void It_migrates_old_dotnet_new_web_without_tools_with_outputs_containing_project_json_outputs()
+        [Fact]
+        public void ItMigratesOldDotnetNewWebWithoutToolsWithOutputsContainingProjectJsonOutputs()
         {
             var testInstance = TestAssetsManager
                 .CreateTestInstance("ProjectJsonWebTemplate")
@@ -108,10 +108,7 @@ namespace Microsoft.DotNet.Migration.Tests
             var globalDirectory = Path.Combine(projectDirectory, "..");  
             var projectJsonFile = Path.Combine(projectDirectory, "project.json");  
               
-            WriteGlobalJson(globalDirectory);  
-            var projectJson = JObject.Parse(File.ReadAllText(projectJsonFile));  
-            projectJson.Remove("tools");  
-            File.WriteAllText(projectJsonFile, projectJson.ToString());  
+            WriteGlobalJson(globalDirectory);
 
             var outputComparisonData = GetComparisonData(projectDirectory);
 
@@ -126,9 +123,27 @@ namespace Microsoft.DotNet.Migration.Tests
             outputsIdentical.Should().BeTrue();
         }
 
+        public void ItAddsMicrosoftNetWebSdkToTheSdkAttributeOfAWebApp()
+        {
+            var testInstance = TestAssetsManager
+                .CreateTestInstance("ProjectJsonWebTemplate")
+                .WithLockFiles();
+
+            var projectDirectory = testInstance.Path;
+
+            var globalDirectory = Path.Combine(projectDirectory, "..");  
+            var projectJsonFile = Path.Combine(projectDirectory, "project.json");  
+              
+            MigrateProject(new [] { projectDirectory });
+
+            var csProj = Path.Combine(projectDirectory, $"{new DirectoryInfo(projectDirectory).Name}.csproj");
+
+            File.ReadAllText(csProj).Should().Contain(@"Sdk=""Microsoft.NET.Sdk.Web""");
+        }
+
         [Theory]
         [InlineData("TestLibraryWithTwoFrameworks")]
-        public void It_migrates_projects_with_multiple_TFMs(string projectName)
+        public void ItMigratesProjectsWithMultipleTFMs(string projectName)
         {
             var projectDirectory =
                 TestAssetsManager.CreateTestInstance(projectName, identifier: projectName).WithLockFiles().Path;
@@ -150,7 +165,7 @@ namespace Microsoft.DotNet.Migration.Tests
         [InlineData("TestAppWithLibrary/TestLibrary")]
         [InlineData("TestLibraryWithAnalyzer")]
         [InlineData("PJTestLibraryWithConfiguration")]
-        public void It_migrates_a_library(string projectName)
+        public void ItMigratesALibrary(string projectName)
         {
             var projectDirectory =
                 TestAssetsManager.CreateTestInstance(projectName, identifier: projectName).WithLockFiles().Path;
@@ -174,7 +189,7 @@ namespace Microsoft.DotNet.Migration.Tests
         [InlineData("ProjectC", "ProjectC,ProjectD,ProjectE")]
         [InlineData("ProjectD", "ProjectD")]
         [InlineData("ProjectE", "ProjectE")]
-        public void It_migrates_root_project_and_references(string projectName, string expectedProjects)
+        public void ItMigratesRootProjectAndReferences(string projectName, string expectedProjects)
         {
             var projectDirectory =
                 TestAssetsManager.CreateTestInstance("TestAppDependencyGraph", callingMethod: $"{projectName}.RefsTest").Path;
@@ -192,7 +207,7 @@ namespace Microsoft.DotNet.Migration.Tests
         [InlineData("ProjectC")]
         [InlineData("ProjectD")]
         [InlineData("ProjectE")]
-        public void It_migrates_root_project_and_skips_references(string projectName)
+        public void ItMigratesRootProjectAndSkipsReferences(string projectName)
         {
             var projectDirectory =
                 TestAssetsManager.CreateTestInstance("TestAppDependencyGraph", callingMethod: $"{projectName}.SkipRefsTest").Path;
@@ -205,7 +220,7 @@ namespace Microsoft.DotNet.Migration.Tests
          [Theory]
          [InlineData(true)]
          [InlineData(false)]
-         public void It_migrates_all_projects_in_given_directory(bool skipRefs)
+         public void ItMigratesAllProjectsInGivenDirectory(bool skipRefs)
          {
             var projectDirectory = TestAssetsManager.CreateTestInstance("TestAppDependencyGraph", callingMethod: $"MigrateDirectory.SkipRefs.{skipRefs}").Path;
 
@@ -224,7 +239,7 @@ namespace Microsoft.DotNet.Migration.Tests
          }
 
          [Fact]
-         public void It_migrates_given_project_json()
+         public void ItMigratesGivenProjectJson()
          {
             var projectDirectory = TestAssetsManager.CreateTestInstance("TestAppDependencyGraph").Path;
 
@@ -239,7 +254,7 @@ namespace Microsoft.DotNet.Migration.Tests
 
          [Fact]
          // regression test for https://github.com/dotnet/cli/issues/4269
-         public void It_migrates_and_builds_P2P_references()
+         public void ItMigratesAndBuildsP2PReferences()
          {
             var assetsDir = TestAssetsManager.CreateTestInstance("TestAppDependencyGraph").WithLockFiles().Path;
 
@@ -269,7 +284,7 @@ namespace Microsoft.DotNet.Migration.Tests
          [Theory]
          [InlineData("src", "ProjectH")]
          [InlineData("src with spaces", "ProjectJ")]
-         public void It_migrates_and_builds_projects_in_global_json(string path, string projectName)
+         public void ItMigratesAndBuildsProjectsInGlobalJson(string path, string projectName)
          {
             var assetsDir = TestAssetsManager.CreateTestInstance(Path.Combine("TestAppDependencyGraph", "ProjectsWithGlobalJson"), 
                                                                  callingMethod: $"ProjectsWithGlobalJson.{projectName}")
@@ -306,7 +321,7 @@ namespace Microsoft.DotNet.Migration.Tests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void Migration_outputs_error_when_no_projects_found(bool useGlobalJson)
+        public void MigrationOutputsErrorWhenNoProjectsFound(bool useGlobalJson)
         {
             var projectDirectory = TestAssetsManager.CreateTestDirectory("Migration_outputs_error_when_no_projects_found");
 
@@ -353,7 +368,7 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Fact]
-        public void It_migrates_and_publishes_projects_with_runtimes()
+        public void ItMigratesAndPublishesProjectsWithRuntimes()
         {
             var projectName = "PJTestAppSimple";
             var projectDirectory = TestAssetsManager
@@ -369,7 +384,7 @@ namespace Microsoft.DotNet.Migration.Tests
         [WindowsOnlyTheory]
         [InlineData("DesktopTestProjects", "AutoAddDesktopReferencesDuringMigrate", true)]
         [InlineData("TestProjects", "PJTestAppSimple", false)]
-        public void It_auto_add_desktop_references_during_migrate(string testGroup, string projectName, bool isDesktopApp)
+        public void ItAutoAddDesktopReferencesDuringMigrate(string testGroup, string projectName, bool isDesktopApp)
         {
             var runtime = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
             var testAssetManager = GetTestGroupTestAssetsManager(testGroup);
@@ -384,7 +399,7 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Fact]
-        public void It_builds_a_migrated_app_with_a_indirect_dependency()
+        public void ItBuildsAMigratedAppWithAnIndirectDependency()
         {
             const string projectName = "ProjectA";
             var solutionDirectory =
@@ -399,7 +414,7 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Fact]
-        public void It_migrates_project_with_output_name()
+        public void ItMigratesProjectWithOutputName()
         {
             string projectName = "AppWithOutputAssemblyName";
             string expectedOutputName = "MyApp";
@@ -426,10 +441,10 @@ namespace Microsoft.DotNet.Migration.Tests
         [Theory]
         [InlineData("LibraryWithoutNetStandardLibRef")]
         [InlineData("LibraryWithNetStandardLibRef")]
-        public void It_migrates_and_builds_library(string projectName)
+        public void ItMigratesAndBuildsLibrary(string projectName)
         {
             var projectDirectory = TestAssetsManager.CreateTestInstance(projectName,
-                callingMethod: $"{nameof(It_migrates_and_builds_library)}-projectName").Path;
+                callingMethod: $"{nameof(ItMigratesAndBuildsLibrary)}-projectName").Path;
 
             MigrateProject(projectDirectory);
             Restore(projectDirectory, projectName);
@@ -437,7 +452,7 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Fact]
-        public void It_fails_gracefully_when_migrating_app_with_missing_dependency()
+        public void ItFailsGracefullyWhenMigratingAppWithMissingDependency()
         {
             string projectName = "MigrateAppWithMissingDep";
             var projectDirectory = Path.Combine(GetTestGroupTestAssetsManager("NonRestoredTestProjects").CreateTestInstance(projectName).Path, "MyApp");

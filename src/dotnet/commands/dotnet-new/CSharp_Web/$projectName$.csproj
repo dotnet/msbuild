@@ -9,20 +9,6 @@
     <PackageTargetFallback>$(PackageTargetFallback);portable-net45+win8+wp8+wpa81;</PackageTargetFallback>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <GlobalExclude>$(GlobalExclude);bin\**;obj\**;node_modules\**;jspm_packages\**;bower_components\**;**\*.user;**\*.*proj</GlobalExclude>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <None Include="**\*" />
-    <Compile Include="**\*.cs" />
-    <EmbeddedResource Include="**\*.resx" />
-    <Content Include="wwwroot\**" CopyToPublishDirectory="PreserveNewest" />
-    <Content Include="**\*.cshtml" Exclude="wwwroot\**\*.cshtml" CopyToPublishDirectory="PreserveNewest" />
-    <Content Include="**\*.config" Exclude="wwwroot\**\*.config" CopyToPublishDirectory="PreserveNewest" />
-    <Content Include="**\*.json" Exclude="wwwroot\**\*.json" CopyToPublishDirectory="PreserveNewest" />
-  </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.App" Version="1.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics" Version="1.0.0" />

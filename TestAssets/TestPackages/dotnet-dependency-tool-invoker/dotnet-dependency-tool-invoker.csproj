@@ -10,6 +10,10 @@
     <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">$(PackageTargetFallback);portable-net45+win8;dnxcore50</PackageTargetFallback>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <SdkNugetVersion Condition=" '$(SdkNugetVersion)' == ''">1.0.0-preview5-*</SdkNugetVersion>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Include="**\*.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
     <Compile Include="..\..\..\src\dotnet\CommandLine\*.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
@@ -34,7 +38,7 @@
       <Version>4.0.0-rc2</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.DotNet.Cli.Utils">
-      <Version>1.0.0-preview5-*</Version>
+      <Version>$(SdkNugetVersion)</Version>
     </PackageReference>
   </ItemGroup>
 

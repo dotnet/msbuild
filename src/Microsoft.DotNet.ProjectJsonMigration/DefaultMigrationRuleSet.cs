@@ -25,7 +25,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             new MigrateAssemblyInfoRule(),
             new RemoveDefaultsFromProjectRule(),
             new CleanOutputProjectRule(),
-            new SaveOutputProjectRule()
+            new SaveOutputProjectRule(),
+            new MigrateWebSdkRule()
         };
 
         public void Apply(MigrationSettings migrationSettings, MigrationRuleInputs migrationRuleInputs)

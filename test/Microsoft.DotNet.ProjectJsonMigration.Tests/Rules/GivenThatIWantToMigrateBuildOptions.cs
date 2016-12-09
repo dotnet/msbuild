@@ -64,6 +64,27 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
+        public void MigratingWebProjectWithoutCustomSourcesOrResourcesDoesNotEmitCompileAndEmbeddedResource()
+        {
+            var mockProj = RunBuildOptionsRuleOnPj(@"
+                {
+                    ""buildOptions"": {
+                        ""emitEntryPoint"": true
+                    },
+                    ""dependencies"": {
+                        ""Microsoft.AspNetCore.Mvc"" : {
+                            ""version"": ""1.0.0""
+                        }
+                    },
+                    ""frameworks"": {
+                        ""netcoreapp1.0"": {}
+                    }
+                }");
+
+            mockProj.Items.Count().Should().Be(0);
+        }
+
+        [Fact]
         public void MigratingEmitEntryPointTruePopulatesOutputTypeField()
         {
             var mockProj = RunBuildOptionsRuleOnPj(@"
