@@ -209,12 +209,13 @@
       <DotNetPackMsbuildArgs Condition=" '$(IsDesktopAvailable)' == 'True' And '%(TestPackageProject.PackRuntime)' != '' ">/p:RuntimeIdentifier=%(TestPackageProject.PackRuntime)</DotNetPackMsbuildArgs>
     </PropertyGroup>
     
+    <!-- https://github.com/NuGet/Home/issues/4063 -->
     <DotNetPack NoBuild="True"
                 Output="$(TestPackagesDir)"
                 ProjectPath="%(TestPackageProject.ProjectPath)"
                 ToolPath="$(Stage0Directory)"
                 VersionSuffix="%(TestPackageProject.VersionSuffix)"
-                MsbuildArgs="$(DotNetPackMsbuildArgs)" />
+                MsbuildArgs="$(DotNetPackMsbuildArgs) /p:SdkNuGetVersion=$(SdkNugetVersion)" />
   </Target>
 
   <Target Name="BuildTestAssetPackageProjects"

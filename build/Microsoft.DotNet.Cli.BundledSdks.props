@@ -8,5 +8,6 @@
     <BundledSdk Include="Microsoft.NET.Sdk.Web" Version="$(CLI_WEBSDK_Version)" />
     <BundledSdk Include="Microsoft.NET.Sdk.Publish" Version="$(CLI_WEBSDK_Version)" />
     <BundledSdk Include="Microsoft.NET.Sdk.Web.ProjectSystem" Version="$(CLI_WEBSDK_Version)" />
+    <BundledSdk Include="FSharp.NET.Sdk" Version="1.0.0-beta-040011" />
   </ItemGroup>
 </Project>
