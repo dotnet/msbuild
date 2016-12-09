@@ -13,10 +13,10 @@ namespace Microsoft.Build.Engine.UnitTests
 {
     public class BuildEnvironmentHelper_Tests
     {
-#if FEATURE_RUN_EXE_IN_TESTS
-        private const string MSBuildExeName = "MSBuild.exe";
-#else
+#if USE_MSBUILD_DLL_EXTN
         private const string MSBuildExeName = "MSBuild.dll";
+#else
+        private const string MSBuildExeName = "MSBuild.exe";
 #endif
         [Fact]
         public void GetExecutablePath()

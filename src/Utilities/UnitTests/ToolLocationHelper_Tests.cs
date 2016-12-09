@@ -31,10 +31,10 @@ namespace Microsoft.Build.UnitTests
     {
         private readonly ITestOutputHelper _output;
 
-#if FEATURE_RUN_EXE_IN_TESTS
-        private const string MSBuildExeName = "MSBuild.exe";
-#else
+#if USE_MSBUILD_DLL_EXTN
         private const string MSBuildExeName = "MSBuild.dll";
+#else
+        private const string MSBuildExeName = "MSBuild.exe";
 #endif
 
         public ToolLocationHelper_Tests(ITestOutputHelper output)

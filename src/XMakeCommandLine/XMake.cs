@@ -1353,7 +1353,7 @@ namespace Microsoft.Build.CommandLine
             s_exeName = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
 #endif
 
-#if (RUNTIME_TYPE_NETCORE || MONO) && !FEATURE_RUN_EXE_IN_TESTS
+#if USE_MSBUILD_DLL_EXTN
             var msbuildExtn = ".dll";
 #else
             var msbuildExtn = ".exe";

@@ -24,10 +24,10 @@ namespace Microsoft.Build.UnitTests
 {
     public class XMakeAppTests
     {
-#if FEATURE_RUN_EXE_IN_TESTS
-        private const string MSBuildExeName = "MSBuild.exe";
-#else
+#if USE_MSBUILD_DLL_EXTN
         private const string MSBuildExeName = "MSBuild.dll";
+#else
+        private const string MSBuildExeName = "MSBuild.exe";
 #endif
 
         private const string AutoResponseFileName = "MSBuild.rsp";
