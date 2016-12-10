@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.New.Tests
         [InlineData("Web", true)]
         [InlineData("Mstest", false)]
         [InlineData("XUnittest", false)]
-        public void When_dotnet_build_is_invoked_then_project_restores_and_builds_without_warnings(
+        public void ICanRestoreBuildAndPublishTheAppWithoutWarnings(
             string projectType,
             bool useNuGetConfigForAspNet)
         {
@@ -36,15 +36,56 @@ namespace Microsoft.DotNet.New.Tests
                 File.Copy("NuGet.tempaspnetpatch.config", Path.Combine(rootPath, "NuGet.Config"));
             }
 
-            new TestCommand("dotnet") { WorkingDirectory = rootPath }
-                .Execute($"restore /p:SkipInvalidConfigurations=true")
+            new RestoreCommand()
+                .WithWorkingDirectory(rootPath)
+                .Execute("/p:SkipInvalidConfigurations=true")
                 .Should().Pass();
 
-            var buildResult = new TestCommand("dotnet")
+            new BuildCommand()
                 .WithWorkingDirectory(rootPath)
-                .ExecuteWithCapturedOutput("build")
+                .ExecuteWithCapturedOutput()
                 .Should().Pass()
                 .And.NotHaveStdErr();
+
+            new PublishCommand()
+                .WithWorkingDirectory(rootPath)
+                .ExecuteWithCapturedOutput()
+                .Should().Pass()
+                .And.NotHaveStdErr();
+        }
+
+        [Fact]
+        public void RestoreDoesNotUseAnyCliProducedPackagesOnItsTemplates()
+        {
+            var cSharpTemplates = new [] { "Console", "Lib", "Web", "Mstest", "XUnittest" };
+
+            var rootPath = TestAssetsManager.CreateTestDirectory().Path;
+            var packagesDirectory = Path.Combine(rootPath, "packages");
+
+            foreach (var cSharpTemplate in cSharpTemplates)
+            {
+                var projectFolder = Path.Combine(rootPath, cSharpTemplate);
+                Directory.CreateDirectory(projectFolder);
+                CreateAndRestoreNewProject(cSharpTemplate, projectFolder, packagesDirectory);
+            }
+
+            Directory.EnumerateFiles(packagesDirectory, $"*.nupkg", SearchOption.AllDirectories)
+                .Should().NotContain(p => p.Contains("Microsoft.DotNet.Cli.Utils"));
+        }
+
+        private void CreateAndRestoreNewProject(
+            string projectType,
+            string projectFolder,
+            string packagesDirectory)
+        {
+            new TestCommand("dotnet") { WorkingDirectory = projectFolder }
+                .Execute($"new --type {projectType}")
+                .Should().Pass();
+
+            new RestoreCommand()
+                .WithWorkingDirectory(projectFolder)
+                .Execute($"--packages {packagesDirectory} /p:SkipInvalidConfigurations=true")
+                .Should().Pass();
         }
     }
 }
