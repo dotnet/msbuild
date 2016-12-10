@@ -84,6 +84,36 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             mockProj.Items.Count().Should().Be(0);
         }
 
+        public void MigratingOutputNamePopulatesAssemblyName()
+        {
+            var mockProj = RunBuildOptionsRuleOnPj(@"
+                {
+                    ""buildOptions"": {
+                        ""outputName"": ""some name""
+                    }
+                }");
+
+            mockProj.Properties.Count(p => p.Name == "AssemblyName").Should().Be(1);
+            mockProj.Properties.First(p => p.Name == "AssemblyName").Value.Should().Be("some name");
+        }
+
+        [Fact]
+        public void MigratingOutputNamePopulatesPackageIdWithTheProjectContainingFolderName()
+        {
+            var testDirectoryPath = Temp.CreateDirectory().Path;
+            var testDirectoryName = new DirectoryInfo(testDirectoryPath).Name;
+            var mockProj = RunBuildOptionsRuleOnPj(@"
+                {
+                    ""buildOptions"": {
+                        ""outputName"": ""some name""
+                    }
+                }",
+                testDirectoryPath);
+
+            mockProj.Properties.Count(p => p.Name == "PackageId").Should().Be(1);
+            mockProj.Properties.First(p => p.Name == "PackageId").Value.Should().Be(testDirectoryName);
+        }
+
         [Fact]
         public void MigratingEmitEntryPointTruePopulatesOutputTypeField()
         {

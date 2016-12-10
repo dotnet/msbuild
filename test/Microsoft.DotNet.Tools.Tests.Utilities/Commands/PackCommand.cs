@@ -107,6 +107,12 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return base.Execute(args);
         }
 
+        public override CommandResult ExecuteWithCapturedOutput(string args = "")
+        {
+            args = $"pack {BuildArgs()} {args}";
+            return base.ExecuteWithCapturedOutput(args);
+        }
+
         private string BuildArgs()
         {
             return $"{_projectPath} {OutputOption} {BuildBasePathOption} {TempOutputOption} {ConfigurationOption} {VersionSuffixOption} {ServiceableOption}";

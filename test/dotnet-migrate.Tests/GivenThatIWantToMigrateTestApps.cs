@@ -434,7 +434,17 @@ namespace Microsoft.DotNet.Migration.Tests
             File.Exists(expectedCsprojPath).Should().BeTrue();
             Restore(projectDirectory, projectName);
             BuildMSBuild(projectDirectory, projectName);
-            Directory.EnumerateFiles(Path.Combine(projectDirectory, "bin"), $"{expectedOutputName}.pdb", SearchOption.AllDirectories)
+            Directory.EnumerateFiles(
+                    Path.Combine(projectDirectory, "bin"),
+                    $"{expectedOutputName}.pdb",
+                    SearchOption.AllDirectories)
+                .Count().Should().Be(1);
+
+            PackMSBuild(projectDirectory, projectName);
+            Directory.EnumerateFiles(
+                    Path.Combine(projectDirectory, "bin"),
+                    $"{projectName}.1.0.0.nupkg",
+                    SearchOption.AllDirectories)
                 .Count().Should().Be(1);
         }
 
@@ -465,7 +475,7 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Fact]
-        public void It_migrates_sln()
+        public void ItMigratesSln()
         {
             var rootDirectory = TestAssetsManager.CreateTestInstance(
                 "TestAppWithSlnAndMultipleProjects",
@@ -709,7 +719,11 @@ namespace Microsoft.DotNet.Migration.Tests
             return result.StdOut;
         }
 
-        private string PublishMSBuild(string projectDirectory, string projectName, string runtime, string configuration = "Debug")
+        private string PublishMSBuild(
+            string projectDirectory,
+            string projectName,
+            string runtime,
+            string configuration = "Debug")
         {
             if (projectName != null)
             {
@@ -722,6 +736,22 @@ namespace Microsoft.DotNet.Migration.Tests
                 .WithRuntime(runtime)
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"{projectName} /p:Configuration={configuration}");
+
+            result.Should().Pass();
+
+            return result.StdOut;
+        }
+
+        private string PackMSBuild(string projectDirectory, string projectName)
+        {
+            if (projectName != null && !Path.HasExtension(projectName))
+            {
+                projectName = projectName + ".csproj";
+            }
+
+            var result = new PackCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput($"{projectName}");
 
             result.Should().Pass();
 

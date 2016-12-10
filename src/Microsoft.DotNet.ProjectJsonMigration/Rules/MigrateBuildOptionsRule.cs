@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectJsonMigration.Transforms;
@@ -103,6 +104,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 compilerOptions => compilerOptions.OutputName,
                 compilerOptions => compilerOptions.OutputName != null);
 
+        private Func<string, AddPropertyTransform<CommonCompilerOptions>> PackageIdTransformExecute =>
+            (projectFolderName) =>
+                new AddPropertyTransform<CommonCompilerOptions>("PackageId",
+                    compilerOptions => projectFolderName,
+                    compilerOptions => compilerOptions.OutputName != null);
+
         private IncludeContextTransform CompileFilesTransform =>
             new IncludeContextTransform("Compile", transformMappings: false);
 
@@ -201,6 +208,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             var itemGroup = _configurationItemGroup ?? migrationRuleInputs.CommonItemGroup;
 
             var compilerOptions = projectContext.ProjectFile.GetCompilerOptions(null, null);
+
+            var projectDirectoryName = new DirectoryInfo(migrationSettings.ProjectDirectory).Name;
+            _propertyTransforms.Add(PackageIdTransformExecute(projectDirectoryName));
 
             var project = migrationRuleInputs.DefaultProjectContext.ProjectFile;
             var projectType = project.GetProjectType();
