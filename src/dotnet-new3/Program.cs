@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.TemplateEngine.Abstractions;
@@ -13,12 +14,13 @@ using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Edge.Template;
 using Microsoft.TemplateEngine.Utils;
-using System.Threading.Tasks;
 
 namespace dotnet_new3
 {
     public class Program
     {
+        private static readonly string HostIdentifier = "cli";
+
         private static void SetupInternalCommands(ExtendedCommandParser appExt)
         {
             // visible
@@ -54,8 +56,6 @@ namespace dotnet_new3
 
         public static int Main(string[] args)
         {
-            Console.ReadLine();
-
             ExtendedCommandParser app = new ExtendedCommandParser()
             {
                 Name = "dotnet new3",
@@ -73,7 +73,7 @@ namespace dotnet_new3
                 }
 
                 string locale = app.InternalParamValue("--locale") ?? CultureInfo.CurrentCulture.Name;
-                EngineEnvironmentSettings.Host = new DefaultTemplateEngineHost(locale);
+                EngineEnvironmentSettings.Host = new DefaultTemplateEngineHost(HostIdentifier, locale);
 
                 int resultCode = InitializationAndDebugging(app, out bool shouldExit);
                 if (shouldExit)
@@ -237,7 +237,11 @@ namespace dotnet_new3
                 if (templates.Count == 1)
                 {
                     ITemplateInfo templateInfo = templates.First();
-                    app.SetupTemplateParameters(templateInfo);
+
+                    ITemplate template = SettingsLoader.LoadTemplate(templateInfo);
+                    IParameterSet allParams = template.Generator.GetParametersForTemplate(template);
+                    IReadOnlyDictionary<string, string> parameterNameMap = template.Generator.ParameterMapForTemplate(template);
+                    app.SetupTemplateParameters(allParams, parameterNameMap);
                 }
 
                 // re-parse after setting up the template params
@@ -421,10 +425,10 @@ namespace dotnet_new3
             {
                 string pkg = package.Trim();
                 pkg = Environment.ExpandEnvironmentVariables(pkg);
-                TemplateCache.Scan(pkg);
+                //TemplateCache.Scan(pkg);
 
-                //string packageUri = new Uri(pkg).AbsolutePath;
-                //TemplateCache.Scan(packageUri);
+                string packageUri = new Uri(pkg).AbsolutePath;
+                TemplateCache.Scan(packageUri);
             }
 
             TemplateCache.WriteTemplateCaches();

@@ -183,6 +183,7 @@ namespace dotnet_new3
         {
             _parsedTemplateParams = new Dictionary<string, string>();
             _parsedInternalParams = new Dictionary<string, IList<string>>();
+            _parsedRemainingParams = new Dictionary<string, IList<string>>();
 
             if (extraArgFileNames == null)
             {
@@ -245,10 +246,8 @@ namespace dotnet_new3
         }
 
         // Canonical is the template param name without any dashes. The things mapped to it all have dashes, including the param name itself.
-        public void SetupTemplateParameters(ITemplateInfo templateInfo)
+        public void SetupTemplateParameters(IParameterSet allParams, IReadOnlyDictionary<string, string> parameterNameMap)
         {
-            ITemplate template = SettingsLoader.LoadTemplate(templateInfo);
-            IParameterSet allParams = template.Generator.GetParametersForTemplate(template);
             HashSet<string> invalidParams = new HashSet<string>();
 
             foreach (ITemplateParameter parameter in allParams.ParameterDefinitions.Where(x => x.Priority != TemplateParameterPriority.Implicit).OrderBy(x => x.Name))
@@ -259,11 +258,17 @@ namespace dotnet_new3
                     continue;
                 }
 
+                string flagFullText;
+                if (parameterNameMap == null || !parameterNameMap.TryGetValue(parameter.Name, out flagFullText))
+                {
+                    flagFullText = parameter.Name;
+                }
+
                 bool longNameFound = false;
                 bool shortNameFound = false;
 
                 // always unless taken
-                string nameAsParameter = "--" + parameter.Name;
+                string nameAsParameter = "--" + flagFullText;
                 if (!IsParameterNameTaken(nameAsParameter))
                 {
                     MapTemplateParamToCanonical(nameAsParameter, parameter.Name);
@@ -271,7 +276,7 @@ namespace dotnet_new3
                 }
 
                 // only as fallback
-                string qualifiedName = "--param:" + parameter.Name;
+                string qualifiedName = "--param:" + flagFullText;
                 if (!longNameFound && !IsParameterNameTaken(qualifiedName))
                 {
                     MapTemplateParamToCanonical(qualifiedName, parameter.Name);
@@ -279,7 +284,7 @@ namespace dotnet_new3
                 }
 
                 // always unless taken
-                string shortName = "-" + PosixNameToShortName(parameter.Name);
+                string shortName = "-" + PosixNameToShortName(flagFullText);
                 if (!IsParameterNameTaken(shortName))
                 {
                     MapTemplateParamToCanonical(shortName, parameter.Name);
@@ -287,7 +292,7 @@ namespace dotnet_new3
                 }
 
                 // only as fallback
-                string singleLetterName = "-" + parameter.Name.Substring(0, 1);
+                string singleLetterName = "-" + flagFullText.Substring(0, 1);
                 if (!shortNameFound && !IsParameterNameTaken(singleLetterName))
                 {
                     MapTemplateParamToCanonical(singleLetterName, parameter.Name);
@@ -295,7 +300,7 @@ namespace dotnet_new3
                 }
 
                 // only as fallback
-                string qualifiedShortName = "-p:" + PosixNameToShortName(parameter.Name);
+                string qualifiedShortName = "-p:" + PosixNameToShortName(flagFullText);
                 if (!shortNameFound && !IsParameterNameTaken(qualifiedShortName))
                 {
                     MapTemplateParamToCanonical(qualifiedShortName, parameter.Name);
@@ -303,7 +308,7 @@ namespace dotnet_new3
                 }
 
                 // only as fallback
-                string qualifiedSingleLetterName = "-p:" + parameter.Name.Substring(0, 1);
+                string qualifiedSingleLetterName = "-p:" + flagFullText.Substring(0, 1);
                 if (!shortNameFound && !IsParameterNameTaken(qualifiedSingleLetterName))
                 {
                     MapTemplateParamToCanonical(qualifiedSingleLetterName, parameter.Name);
@@ -312,7 +317,7 @@ namespace dotnet_new3
 
                 if (!shortNameFound && !longNameFound)
                 {
-                    invalidParams.Add(parameter.Name);
+                    invalidParams.Add(flagFullText);
                 }
                 else
                 {
