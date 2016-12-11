@@ -1,0 +1,12 @@
+{
+  "author": "Microsoft",
+  "classifications": ["Visual C#"],
+  "name": "Console App (.NET Core)",
+  "groupIdentity": "NetCoreConsole",
+  "identity": "Microsoft.Standard.QuickStarts.ConsoleApp.CSharp",
+  "shortName": "consoleapp",
+  "tags": {
+    "language": "C#"
+  },
+  "sourceName": "ConsoleApp1"
+}

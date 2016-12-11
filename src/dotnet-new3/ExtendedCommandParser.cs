@@ -22,10 +22,13 @@ namespace dotnet_new3
 
         // maps the template param variants to the canonical forms
         private IDictionary<string, string> _templateParamCanonicalMapping;
+        // Canonical form -> data type
+        private IDictionary<string, string> _templateParamDataTypeMapping;
 
         // stores the parsed values
         private IDictionary<string, string> _parsedTemplateParams;
         private IDictionary<string, IList<string>> _parsedInternalParams;
+        private IDictionary<string, IList<string>> _parsedRemainingParams;
 
         // stores the options & arguments that are NOT hidden
         // this is used exclusively to show the help.
@@ -39,9 +42,11 @@ namespace dotnet_new3
             _hiddenCommandOptions = new Dictionary<string, CommandOptionType>();
             _hiddenCommandCanonicalMapping = new Dictionary<string, string>();
             _templateParamCanonicalMapping = new Dictionary<string, string>();
+            _templateParamDataTypeMapping = new Dictionary<string, string>();
 
             _parsedTemplateParams = new Dictionary<string, string>();
             _parsedInternalParams = new Dictionary<string, IList<string>>();
+            _parsedRemainingParams = new Dictionary<string, IList<string>>();
 
             _helpDisplayer = new CommandLineApplication(false);
         }
@@ -85,7 +90,7 @@ namespace dotnet_new3
         {
             if (IsParameterNameTaken(parameter))
             {
-                throw new Exception($"Parameter name ${parameter} cannot be used for multiple purposes");
+                throw new Exception($"Parameter name {parameter} cannot be used for multiple purposes");
             }
 
             _defaultCommandOptions.Add(parameter);
@@ -112,7 +117,7 @@ namespace dotnet_new3
             {
                 if (IsParameterNameTaken(parameters[i]))
                 {
-                    throw new Exception($"Parameter name ${parameters[i]} cannot be used for multiple purposes");
+                    throw new Exception($"Parameter name {parameters[i]} cannot be used for multiple purposes");
                 }
 
                 _hiddenCommandCanonicalMapping.Add(parameters[i], canonical);
@@ -164,12 +169,21 @@ namespace dotnet_new3
             return values;
         }
 
+        public IDictionary<string, IList<string>> RemainingParameters
+        {
+            get
+            {
+                return _parsedRemainingParams;
+            }
+        }
+
         // Parses all command line args, and any input arg files.
         // NOTE: any previously parsed values are lost - this resets the parsed values.
         public void ParseArgs(IList<string> extraArgFileNames = null)
         {
             _parsedTemplateParams = new Dictionary<string, string>();
             _parsedInternalParams = new Dictionary<string, IList<string>>();
+            _parsedRemainingParams = new Dictionary<string, IList<string>>();
 
             if (extraArgFileNames == null)
             {
@@ -192,14 +206,14 @@ namespace dotnet_new3
                     {
                         if (param.Value.Count != 1)
                         {
-                            throw new Exception($"Multiple values specified for single value parameter: ${canonicalName}");
+                            throw new Exception($"Multiple values specified for single value parameter: {canonicalName}");
                         }
                     }
                     else // NoValue
                     {
                         if (param.Value.Count != 1 || param.Value[0] != null)
                         {
-                            throw new Exception($"Value specified for valueless parameter: ${canonicalName}");
+                            throw new Exception($"Value specified for valueless parameter: {canonicalName}");
                         }
                     }
 
@@ -210,10 +224,15 @@ namespace dotnet_new3
                     if (_parsedTemplateParams.ContainsKey(canonicalName))
                     {
                         // error, the same param was specified twice
-                        throw new Exception($"Parameter [${canonicalName}] was specified multiple times, including with the flag [${param.Key}]");
+                        throw new Exception($"Parameter [{canonicalName}] was specified multiple times, including with the flag [{param.Key}]");
                     }
                     else
                     {
+                        if ((param.Value[0] == null) && (_templateParamDataTypeMapping[canonicalName] != "bool"))
+                        {
+                            throw new Exception($"Parameter [{param.Key}] ({canonicalName}) must be given a value");
+                        }
+                        
                         // TODO: allow for multi-valued params
                         _parsedTemplateParams[canonicalName] = param.Value[0];
                     }
@@ -221,19 +240,17 @@ namespace dotnet_new3
                 else
                 {
                     // not a known internal or template param.
-                    // TODO: determine a better way to deal with this. As-is, the param will be ignored.
+                    _parsedRemainingParams[param.Key] = param.Value;
                 }
             }
         }
 
         // Canonical is the template param name without any dashes. The things mapped to it all have dashes, including the param name itself.
-        public void SetupTemplateParameters(ITemplateInfo templateInfo)
+        public void SetupTemplateParameters(IParameterSet allParams, IReadOnlyDictionary<string, string> parameterNameMap)
         {
-            ITemplate template = SettingsLoader.LoadTemplate(templateInfo);
-            IParameterSet allParams = template.Generator.GetParametersForTemplate(template);
             HashSet<string> invalidParams = new HashSet<string>();
 
-            foreach (ITemplateParameter parameter in allParams.ParameterDefinitions.OrderBy(x => x.Name))
+            foreach (ITemplateParameter parameter in allParams.ParameterDefinitions.Where(x => x.Priority != TemplateParameterPriority.Implicit).OrderBy(x => x.Name))
             {
                 if (parameter.Name.IndexOf(':') >= 0)
                 {   // Colon is reserved, template param names cannot have any.
@@ -241,11 +258,17 @@ namespace dotnet_new3
                     continue;
                 }
 
+                string flagFullText;
+                if (parameterNameMap == null || !parameterNameMap.TryGetValue(parameter.Name, out flagFullText))
+                {
+                    flagFullText = parameter.Name;
+                }
+
                 bool longNameFound = false;
                 bool shortNameFound = false;
 
                 // always unless taken
-                string nameAsParameter = "--" + parameter.Name;
+                string nameAsParameter = "--" + flagFullText;
                 if (!IsParameterNameTaken(nameAsParameter))
                 {
                     MapTemplateParamToCanonical(nameAsParameter, parameter.Name);
@@ -253,7 +276,7 @@ namespace dotnet_new3
                 }
 
                 // only as fallback
-                string qualifiedName = "--param:" + parameter.Name;
+                string qualifiedName = "--param:" + flagFullText;
                 if (!longNameFound && !IsParameterNameTaken(qualifiedName))
                 {
                     MapTemplateParamToCanonical(qualifiedName, parameter.Name);
@@ -261,7 +284,7 @@ namespace dotnet_new3
                 }
 
                 // always unless taken
-                string shortName = "-" + PosixNameToShortName(parameter.Name);
+                string shortName = "-" + PosixNameToShortName(flagFullText);
                 if (!IsParameterNameTaken(shortName))
                 {
                     MapTemplateParamToCanonical(shortName, parameter.Name);
@@ -269,7 +292,7 @@ namespace dotnet_new3
                 }
 
                 // only as fallback
-                string singleLetterName = "-" + parameter.Name.Substring(0, 1);
+                string singleLetterName = "-" + flagFullText.Substring(0, 1);
                 if (!shortNameFound && !IsParameterNameTaken(singleLetterName))
                 {
                     MapTemplateParamToCanonical(singleLetterName, parameter.Name);
@@ -277,7 +300,7 @@ namespace dotnet_new3
                 }
 
                 // only as fallback
-                string qualifiedShortName = "-p:" + PosixNameToShortName(parameter.Name);
+                string qualifiedShortName = "-p:" + PosixNameToShortName(flagFullText);
                 if (!shortNameFound && !IsParameterNameTaken(qualifiedShortName))
                 {
                     MapTemplateParamToCanonical(qualifiedShortName, parameter.Name);
@@ -285,7 +308,7 @@ namespace dotnet_new3
                 }
 
                 // only as fallback
-                string qualifiedSingleLetterName = "-p:" + parameter.Name.Substring(0, 1);
+                string qualifiedSingleLetterName = "-p:" + flagFullText.Substring(0, 1);
                 if (!shortNameFound && !IsParameterNameTaken(qualifiedSingleLetterName))
                 {
                     MapTemplateParamToCanonical(qualifiedSingleLetterName, parameter.Name);
@@ -294,14 +317,18 @@ namespace dotnet_new3
 
                 if (!shortNameFound && !longNameFound)
                 {
-                    invalidParams.Add(parameter.Name);
+                    invalidParams.Add(flagFullText);
+                }
+                else
+                {
+                    _templateParamDataTypeMapping[parameter.Name] = parameter.DataType;
                 }
             }
 
             if (invalidParams.Count > 0)
             {
                 string unusableDisplayList = string.Join(", ", invalidParams);
-                throw new Exception($"Template is malformed. The following parameter names are invalid: ${unusableDisplayList}");
+                throw new Exception($"Template is malformed. The following parameter names are invalid: {unusableDisplayList}");
             }
         }
 
@@ -309,7 +336,7 @@ namespace dotnet_new3
         {
             if (_templateParamCanonicalMapping.TryGetValue(variant, out string existingCanonical))
             {
-                throw new Exception($"Option variant {variant} for canonical {canonical} was already defined for canonical ${existingCanonical}");
+                throw new Exception($"Option variant {variant} for canonical {canonical} was already defined for canonical {existingCanonical}");
             }
 
             _templateParamCanonicalMapping[variant] = canonical;
