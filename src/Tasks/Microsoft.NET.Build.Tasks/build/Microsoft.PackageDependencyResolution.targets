@@ -281,7 +281,9 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <Target Name="IncludeTransitiveProjectReferences"
-          DependsOnTargets="_ComputeTransitiveProjectReferences" BeforeTargets="AssignProjectConfiguration">
+          Condition="'$(ResolvePackageDependenciesForBuild)' == 'true' and '$(EnableResolvePackageDependencies)' == 'true' and Exists('$(ProjectAssetsFile)')"
+          DependsOnTargets="_ComputeTransitiveProjectReferences" 
+          BeforeTargets="AssignProjectConfiguration">
     <ItemGroup>
       <!-- Add the references we computed -->
       <ProjectReference Include="@(_TransitiveProjectReferences)" />
