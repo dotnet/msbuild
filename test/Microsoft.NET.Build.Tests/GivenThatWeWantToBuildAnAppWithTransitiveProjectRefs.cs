@@ -69,49 +69,56 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            //outputDirectory.Should().OnlyHaveFiles(new[] {
-            //    "TestApp.dll",
-            //    "TestApp.pdb",
-            //    "TestApp.deps.json",
-            //    "TestApp.runtimeconfig.json",
-            //    "TestApp.runtimeconfig.dev.json",
-            //    "TestLibrary.dll",
-            //    "TestLibrary.pdb",
-            //});
+            outputDirectory.Should().OnlyHaveFiles(new[] {
+                "TestApp.dll",
+                "TestApp.pdb",
+                "TestApp.deps.json",
+                "TestApp.runtimeconfig.json",
+                "TestApp.runtimeconfig.dev.json",
+                "MainLibrary.dll",
+                "MainLibrary.pdb",
+                "AuxLibrary.dll",
+                "AuxLibrary.pdb",
+            });
 
             Command.Create(RepoInfo.DotNetHostPath, new[] { Path.Combine(outputDirectory.FullName, "TestApp.dll") })
                 .CaptureStdOut()
                 .Execute()
                 .Should()
-                .Pass();
-                //.And
-                //.HaveStdOutContaining("This string came from the test library!");
+                .Pass()
+                .And
+                .HaveStdOutContaining("This string came from MainLibrary!")
+                .And
+                .HaveStdOutContaining("This string came from AuxLibrary!");
 
-            //var appInfo = FileVersionInfo.GetVersionInfo(Path.Combine(outputDirectory.FullName, "TestApp.dll"));
-            //appInfo.CompanyName.Should().Be("Test Authors");
-            //appInfo.FileVersion.Should().Be("1.2.3.0");
-            //appInfo.FileDescription.Should().Be("Test AssemblyTitle");
-            //appInfo.LegalCopyright.Should().Be("Copyright (c) Test Authors");
-            //appInfo.ProductName.Should().Be("Test Product");
+            var appInfo = FileVersionInfo.GetVersionInfo(Path.Combine(outputDirectory.FullName, "TestApp.dll"));
+            appInfo.CompanyName.Should().Be("Test Authors");
+            appInfo.FileVersion.Should().Be("1.2.3.0");
+            appInfo.FileDescription.Should().Be("Test AssemblyTitle");
+            appInfo.LegalCopyright.Should().Be("Copyright (c) Test Authors");
+            appInfo.ProductName.Should().Be("Test Product");
 
-            //// This check is blocked from working on non-Windows by https://github.com/dotnet/corefx/issues/11163
-            //if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            //{
-            //    appInfo.ProductVersion.Should().Be("1.2.3-beta");
-            //}
+            // This check is blocked from working on non-Windows by https://github.com/dotnet/corefx/issues/11163
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                appInfo.ProductVersion.Should().Be("1.2.3-beta");
+            }
 
-            //var libInfo = FileVersionInfo.GetVersionInfo(Path.Combine(outputDirectory.FullName, "TestLibrary.dll"));
-            //libInfo.CompanyName.Trim().Should().Be("TestLibrary");
-            //libInfo.FileVersion.Should().Be("42.43.44.45");
-            //libInfo.FileDescription.Should().Be("TestLibrary");
-            //libInfo.LegalCopyright.Trim().Should().BeEmpty();
-            //libInfo.ProductName.Should().Be("TestLibrary");
+            new List<string> { "MainLibrary", "AuxLibrary" }.ForEach(libName => 
+            {
+                var libInfo = FileVersionInfo.GetVersionInfo(Path.Combine(outputDirectory.FullName, $"{libName}.dll"));
+                libInfo.CompanyName.Trim().Should().Be(libName);
+                libInfo.FileVersion.Should().Be("42.43.44.45");
+                libInfo.FileDescription.Should().Be(libName);
+                libInfo.LegalCopyright.Trim().Should().BeEmpty();
+                libInfo.ProductName.Should().Be(libName);
 
-            //// This check is blocked from working on non-Windows by https://github.com/dotnet/corefx/issues/11163
-            //if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            //{
-            //    libInfo.ProductVersion.Should().Be("42.43.44.45-alpha");
-            //}
+                // This check is blocked from working on non-Windows by https://github.com/dotnet/corefx/issues/11163
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    libInfo.ProductVersion.Should().Be("42.43.44.45-alpha");
+                }
+            });
         }
 
         //[Fact]
