@@ -56,7 +56,6 @@ namespace dotnet_new3
 
         public static int Main(string[] args)
         {
-            Console.ReadLine();
             ExtendedCommandParser app = new ExtendedCommandParser()
             {
                 Name = "dotnet new3",
