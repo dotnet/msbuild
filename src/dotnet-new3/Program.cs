@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.CommandLineUtils;
@@ -73,6 +74,11 @@ namespace dotnet_new3
                 }
 
                 string locale = app.InternalParamValue("--locale") ?? CultureInfo.CurrentCulture.Name;
+                if (!ValidateLocaleFormat(locale))
+                {
+                    EngineEnvironmentSettings.Host.LogMessage(string.Format("Invalid format for input locale: [{0}]. Example valid formats: [en] [en-US]", locale));
+                    return -1;
+                }
                 EngineEnvironmentSettings.Host = new DefaultTemplateEngineHost(HostIdentifier, locale);
 
                 int resultCode = InitializationAndDebugging(app, out bool shouldExit);
@@ -307,6 +313,18 @@ namespace dotnet_new3
 
             shouldExit = false;
             return 0;
+        }
+
+        private static Regex _localeFormatRegex = new Regex(@"
+            ^
+                [a-z]{2}
+                (?:-[A-Z]{2})?
+            $"
+            , RegexOptions.IgnorePatternWhitespace);
+
+        private static bool ValidateLocaleFormat(string localeToCheck)
+        {
+            return _localeFormatRegex.IsMatch(localeToCheck);
         }
 
         //private static async Task<int> PerformUpdateAsync(string name, bool quiet, CommandOption source)
