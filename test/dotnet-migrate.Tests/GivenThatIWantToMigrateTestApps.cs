@@ -123,6 +123,23 @@ namespace Microsoft.DotNet.Migration.Tests
             outputsIdentical.Should().BeTrue();
         }
 
+        [Fact]
+        public void ItMigratesAndPublishesWebAppWithFilesThatDoNotExistInPublishOptions()
+        {
+            const string projectName = "WebAppWithMissingFileInPublishOptions";
+            var testInstance = TestAssets.Get(projectName)
+                .CreateInstance()
+                .WithSourceFiles();
+
+            var projectDirectory = testInstance.Root.FullName;
+
+            MigrateProject(new [] { projectDirectory });
+
+            Restore(projectDirectory);
+            PublishMSBuild(projectDirectory, projectName);
+        }
+
+        [Fact]
         public void ItAddsMicrosoftNetWebSdkToTheSdkAttributeOfAWebApp()
         {
             var testInstance = TestAssetsManager
@@ -722,7 +739,7 @@ namespace Microsoft.DotNet.Migration.Tests
         private string PublishMSBuild(
             string projectDirectory,
             string projectName,
-            string runtime,
+            string runtime = null,
             string configuration = "Debug")
         {
             if (projectName != null)

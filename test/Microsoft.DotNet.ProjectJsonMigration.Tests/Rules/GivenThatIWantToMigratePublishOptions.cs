@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
     public class GivenThatIWantToMigratePublishOptions : TestBase
     {
         [Fact]
-        private void Migrating_publishOptions_include_exclude_populates_Content_item()
+        private void MigratingPublishOptionsIncludeExcludePopulatesContentItem()
         {
             var testDirectory = Temp.CreateDirectory().Path;
             WriteFilesInProjectDirectory(testDirectory);
@@ -55,7 +55,36 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        private void Migrating_publishOptions_and_buildOptions_CopyToOutput_merges_Content_items()
+        public void MigratingPublishOptionsIncludeEmitsConditionalAttribute()
+        {
+
+            var mockProj = RunPublishAndBuildOptionsRuleOnPj(@"
+                {
+                   ""publishOptions"": {
+                       ""include"": [
+                          ""appsettings.json"",
+                          ""appsettings.Production.json"",
+                          ""dist"",
+                          ""Dockerfile"",
+                          ""hosting.json"",
+                          ""web.config""
+                        ]
+                    }
+                }");
+
+            mockProj.Items
+                    .Should()
+                    .ContainSingle(i => i.ItemType == "Content")
+                    .Which
+                    .Metadata
+                    .Should()
+                    .ContainSingle(m => m.Name == "CopyToPublishDirectory" &&
+                                        m.Condition == "Exists(%(Identity))");
+
+        }
+
+        [Fact]
+        private void MigratingPublishOptionsAndBuildOptionsCopyToOutputMergesContentItems()
         {
             var testDirectory = Temp.CreateDirectory().Path;
             WriteFilesInProjectDirectory(testDirectory);

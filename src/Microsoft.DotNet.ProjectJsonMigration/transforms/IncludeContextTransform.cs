@@ -81,15 +81,24 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
             };
         }
 
-        public IncludeContextTransform WithMetadata(string metadataName, string metadataValue)
+        public IncludeContextTransform WithMetadata(
+            string metadataName,
+            string metadataValue,
+            string condition = null)
         {
-            _metadata.Add(new ItemMetadataValue<IncludeContext>(metadataName, metadataValue));
+            _metadata.Add(new ItemMetadataValue<IncludeContext>(metadataName, metadataValue, condition));
             return this;
         }
 
-        public IncludeContextTransform WithMetadata(string metadataName, Func<IncludeContext, string> metadataValueFunc)
+        public IncludeContextTransform WithMetadata(
+            string metadataName,
+            Func<IncludeContext, string> metadataValueFunc,
+            string condition = null)
         {
-            _metadata.Add(new ItemMetadataValue<IncludeContext>(metadataName, metadataValueFunc));
+            _metadata.Add(new ItemMetadataValue<IncludeContext>(
+                metadataName,
+                metadataValueFunc,
+                condition: condition));
             return this;
         }
 

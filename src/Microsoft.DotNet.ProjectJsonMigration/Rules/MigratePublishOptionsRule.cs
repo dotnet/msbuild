@@ -34,6 +34,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
         private IncludeContextTransform CopyToOutputFilesTransform =>
             new IncludeContextTransform("Content", transformMappings: true)
-                .WithMetadata("CopyToPublishDirectory", "PreserveNewest");
+                .WithMetadata("CopyToPublishDirectory", "PreserveNewest", "Exists(%(Identity))");
     }
 }

@@ -109,7 +109,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
             {
                 if (metadata.ShouldWriteMetadata(source))
                 {
-                    item.AddMetadata(metadata.MetadataName, metadata.GetMetadataValue(source));
+                    var metametadata = item.AddMetadata(metadata.MetadataName, metadata.GetMetadataValue(source));
+                    metametadata.Condition = metadata.Condition;
                 }
             }
 
