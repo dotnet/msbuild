@@ -2487,6 +2487,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")] // https://github.com/Microsoft/msbuild/issues/309
+        [Trait("Category", "mono-osx-failing")] // https://github.com/Microsoft/msbuild/issues/677
         public void DontLockP2PReferenceWhenResolvingSystemTypes()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -2538,7 +2539,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             ObjectModelHelpers.BuildTempProjectFileExpectSuccess("lib1.csproj");
 
-            string p2pReference = Path.Combine(ObjectModelHelpers.TempProjectDir, @"bin\debug\lib1.dll");
+            string p2pReference = Path.Combine(ObjectModelHelpers.TempProjectDir, "bin", "debug", "lib1.dll");
             Assert.True(File.Exists(p2pReference)); // "lib1.dll doesn't exist."
 
             // -------------------------------------------------------------------------------
@@ -2666,6 +2667,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")] // https://github.com/Microsoft/msbuild/issues/309
+        [Trait("Category", "mono-osx-failing")] // https://github.com/Microsoft/msbuild/issues/677
         public void ReferencedAssemblySpecifiedUsingRelativePath()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
