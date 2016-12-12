@@ -56,6 +56,7 @@ namespace dotnet_new3
 
         public static int Main(string[] args)
         {
+            Console.ReadLine();
             ExtendedCommandParser app = new ExtendedCommandParser()
             {
                 Name = "dotnet new3",
@@ -428,7 +429,6 @@ namespace dotnet_new3
                 //TemplateCache.Scan(pkg);
 
                 string packageLocation = new DirectoryInfo(pkg).FullName;
-                Console.WriteLine(packageLocation);
                 TemplateCache.Scan(packageLocation);
             }
 
