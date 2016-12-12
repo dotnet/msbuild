@@ -11,9 +11,7 @@
     <Compile Include="**\*.cs" />
     <EmbeddedResource Include="**\*.resx" />
     <EmbeddedResource Include="compiler\resources\**\*" />
-    <Content Include="*.list">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Content Include="*.list" CopyToPublishDirectory="CopyAlways" />
   </ItemGroup>
 
   <ItemGroup>
