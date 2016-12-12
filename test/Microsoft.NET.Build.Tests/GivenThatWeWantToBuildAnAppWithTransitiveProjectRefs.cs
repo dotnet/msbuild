@@ -121,7 +121,7 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
-        //[Fact]
+        [Fact]
         public void The_clean_target_removes_all_files_from_the_output_folder()
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -130,7 +130,7 @@ namespace Microsoft.NET.Build.Tests
             }
 
             var testAsset = _testAssetsManager
-                .CopyTestAsset("AppWithLibrary")
+                .CopyTestAsset("AppWithTransitiveProjectRefs")
                 .WithSource()
                 .Restore("TestApp");
 
@@ -151,8 +151,10 @@ namespace Microsoft.NET.Build.Tests
                 "TestApp.deps.json",
                 "TestApp.runtimeconfig.dev.json",
                 "TestApp.runtimeconfig.json",
-                "TestLibrary.dll",
-                "TestLibrary.pdb"
+                "MainLibrary.dll",
+                "MainLibrary.pdb",
+                "AuxLibrary.dll",
+                "AuxLibrary.pdb"
             });
 
             var cleanCommand = Stage0MSBuild.CreateCommandForTarget("Clean", buildCommand.FullPathProjectFile);
@@ -163,7 +165,6 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
 
             outputDirectory.Should().OnlyHaveFiles(Array.Empty<string>());
-
         }
     }
 }
