@@ -11,7 +11,7 @@
     <Compile Include="**\*.cs" />
     <EmbeddedResource Include="**\*.resx" />
     <EmbeddedResource Include="compiler\resources\**\*" />
-    <Content Include="*.list" CopyToPublishDirectory="CopyAlways" />
+    <Content Include="**\*.list" CopyToPublishDirectory="Always" />
   </ItemGroup>
 
   <ItemGroup>
