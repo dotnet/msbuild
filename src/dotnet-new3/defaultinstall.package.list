@@ -1,5 +1,5 @@
-﻿%DN3%\..\artifacts\packages\Microsoft.TemplateEngine.Core.Contracts.1.0.0.nupkg
-%DN3%\..\artifacts\packages\Microsoft.TemplateEngine.Utils.1.0.0.nupkg
-%DN3%\..\artifacts\packages\Microsoft.TemplateEngine.Core.1.0.0.nupkg
-%DN3%\..\artifacts\packages\Microsoft.TemplateEngine.Abstractions.1.0.0.nupkg
-%DN3%\..\artifacts\packages\Microsoft.TemplateEngine.Orchestrator.RunnableProjects.1.0.0.nupkg
+﻿%DN3%\..\artifacts\packages\Microsoft.TemplateEngine.Core.Contracts.1.0.0-beta1.nupkg
+%DN3%\..\artifacts\packages\Microsoft.TemplateEngine.Utils.1.0.0-beta1.nupkg
+%DN3%\..\artifacts\packages\Microsoft.TemplateEngine.Core.1.0.0-beta1.nupkg
+%DN3%\..\artifacts\packages\Microsoft.TemplateEngine.Abstractions.1.0.0-beta1.nupkg
+%DN3%\..\artifacts\packages\Microsoft.TemplateEngine.Orchestrator.RunnableProjects.1.0.0-beta1.nupkg

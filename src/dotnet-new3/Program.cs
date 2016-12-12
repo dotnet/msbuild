@@ -56,6 +56,7 @@ namespace dotnet_new3
 
         public static int Main(string[] args)
         {
+            Console.ReadLine();
             ExtendedCommandParser app = new ExtendedCommandParser()
             {
                 Name = "dotnet new3",
@@ -411,6 +412,7 @@ namespace dotnet_new3
             }
 
             packages = Paths.Global.DefaultInstallTemplateList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
             if (packages.Length > 0)
             {
                 InstallPackages(packages, true);
@@ -423,12 +425,11 @@ namespace dotnet_new3
 
             foreach (string package in packageNames)
             {
-                string pkg = package.Trim();
+                string pkg = package.Trim();                
                 pkg = Environment.ExpandEnvironmentVariables(pkg);
-                //TemplateCache.Scan(pkg);
 
-                string packageUri = new Uri(pkg).AbsolutePath;
-                TemplateCache.Scan(packageUri);
+                string packageLocation = new DirectoryInfo(pkg).FullName;
+                TemplateCache.Scan(packageLocation);
             }
 
             TemplateCache.WriteTemplateCaches();
