@@ -411,6 +411,7 @@ namespace dotnet_new3
             }
 
             packages = Paths.Global.DefaultInstallTemplateList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
             if (packages.Length > 0)
             {
                 InstallPackages(packages, true);
@@ -423,9 +424,8 @@ namespace dotnet_new3
 
             foreach (string package in packageNames)
             {
-                string pkg = package.Trim();
+                string pkg = package.Trim();                
                 pkg = Environment.ExpandEnvironmentVariables(pkg);
-                //TemplateCache.Scan(pkg);
 
                 string packageLocation = new DirectoryInfo(pkg).FullName;
                 TemplateCache.Scan(packageLocation);
