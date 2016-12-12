@@ -250,6 +250,7 @@ namespace Microsoft.Build.UnitTests
         /// Test with the VB language
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void OneAttributeNoParamsVb()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -479,6 +480,7 @@ namespace Microsoft.Build.UnitTests
         /// Multi line argument values should cause a verbatim string to be used
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void MultilineAttributeVB()
         {
             var lines = new []{ "line 1", "line 2", "line 3" };
@@ -614,6 +616,7 @@ namespace Microsoft.Build.UnitTests
         /// These can also be combined with named params.
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void OneAttributePositionalAndNamedParamsVisualBasic()
         {
             WriteCodeFragment task = new WriteCodeFragment();
