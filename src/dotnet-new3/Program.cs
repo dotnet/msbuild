@@ -427,8 +427,9 @@ namespace dotnet_new3
                 pkg = Environment.ExpandEnvironmentVariables(pkg);
                 //TemplateCache.Scan(pkg);
 
-                string packageUri = new Uri(pkg).AbsolutePath;
-                TemplateCache.Scan(packageUri);
+                string packageLocation = new DirectoryInfo(pkg).FullName;
+                Console.WriteLine(packageLocation);
+                TemplateCache.Scan(packageLocation);
             }
 
             TemplateCache.WriteTemplateCaches();
