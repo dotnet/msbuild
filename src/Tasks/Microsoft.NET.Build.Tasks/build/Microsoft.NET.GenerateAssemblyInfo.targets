@@ -80,7 +80,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <AssemblyAttribute Include="System.Reflection.AssemblyVersionAttribute" Condition="'$(AssemblyVersion)' != '' and '$(GenerateAssemblyVersionAttribute)' == 'true'">
         <_Parameter1>$(AssemblyVersion)</_Parameter1>
       </AssemblyAttribute>
-      <AssemblyAttribute Include="System.Resources.NeutralResourcesLanguageAttribute" Condition="'$(NeutralLanguage)' != '' and '$(GenerateNeutralResourcesLanguageAttribute)'">
+      <AssemblyAttribute Include="System.Resources.NeutralResourcesLanguageAttribute" Condition="'$(NeutralLanguage)' != '' and '$(GenerateNeutralResourcesLanguageAttribute)' == 'true'">
         <_Parameter1>$(NeutralLanguage)</_Parameter1>
       </AssemblyAttribute>
     </ItemGroup>
