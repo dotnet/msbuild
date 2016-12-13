@@ -13,6 +13,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <GlobalExclude>$(GlobalExclude);bin\**;obj\**;node_modules\**;jspm_packages\**;bower_components\**;**\*.user;**\*.*proj;**\*.sln;**\*.vssscc;**\.*\**</GlobalExclude>
+    <PreserveCompilationContext Condition='$(PreserveCompilationContext) == '''>true</PreserveCompilationContext>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(OverrideWebDefaultGlobs)' != 'True' ">
