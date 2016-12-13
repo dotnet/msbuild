@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.Tools.Run
                 throw new GracefulException(string.Join(Environment.NewLine,
                     LocalizableStrings.RunCommandExceptionUnableToRun1,
                     LocalizableStrings.RunCommandExceptionUnableToRun2,
-                    $"{LocalizableStrings.RunCommandExceptionUnableToRun3} '{outputType}'."));
+                    $"{LocalizableStrings.RunCommandExceptionUnableToRun3}'{outputType}'."));
             }
 
             string runArguments = projectInstance.GetPropertyValue(LocalizableStrings.RunCommandRunArguments);
