@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
             var item = element as ProjectItemElement;
             var destinationItemGroup = destinationElement as ProjectItemGroupElement;
 
-            MigrationTrace.Instance.WriteLine($"{nameof(ItemTransformApplicator)}: Item {{ ItemType: {item.ItemType}, Condition: {item.Condition}, Include: {item.Include}, Exclude: {item.Exclude} }}");
+            MigrationTrace.Instance.WriteLine($"{nameof(ItemTransformApplicator)}: Item {{ ItemType: {item.ItemType}, Condition: {item.Condition}, Include: {item.Include}, Exclude: {item.Exclude}, Update: {item.Update} }}");
             MigrationTrace.Instance.WriteLine($"{nameof(ItemTransformApplicator)}: ItemGroup {{ Condition: {destinationItemGroup.Condition} }}");
 
             if (mergeExisting)
@@ -87,6 +87,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
         {
             var outputItem = itemGroup.ContainingProject.CreateItemElement("___TEMP___");
             outputItem.CopyFrom(item);
+
+            MigrationTrace.Instance.WriteLine($"{nameof(ItemTransformApplicator)}: AddItemToItemGroup {{ ItemType: {outputItem.ItemType}, Condition: {outputItem.Condition}, Include: {outputItem.Include}, Exclude: {outputItem.Exclude}, Update: {outputItem.Update} }}");
 
             itemGroup.AppendChild(outputItem);
             outputItem.AddMetadata(item.Metadata);

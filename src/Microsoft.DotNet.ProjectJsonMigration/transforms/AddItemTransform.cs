@@ -18,6 +18,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
 
         private readonly Func<T, string> _includeValueFunc;
         private readonly Func<T, string> _excludeValueFunc;
+        private readonly Func<T, string> _updateValueFunc;
 
         private readonly List<ItemMetadataValue<T>> _metadata = new List<ItemMetadataValue<T>>();
 
@@ -26,7 +27,25 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
             IEnumerable<string> includeValues,
             IEnumerable<string> excludeValues,
             Func<T, bool> condition)
-            : this(itemName, string.Join(";", includeValues), string.Join(";", excludeValues), condition) { }
+            : this(
+                itemName,
+                string.Join(";", includeValues),
+                string.Join(";", excludeValues),
+                condition) { }
+
+        public AddItemTransform(
+            string itemName,
+            Func<T, string> includeValueFunc,
+            Func<T, string> excludeValueFunc,
+            Func<T, string> updateValueFunc,
+            Func<T, bool> condition)
+            : base(condition)
+        {
+            _itemName = itemName;
+            _includeValueFunc = includeValueFunc;
+            _excludeValueFunc = excludeValueFunc;
+            _updateValueFunc = updateValueFunc;
+        }
 
         public AddItemTransform(
             string itemName,
@@ -101,9 +120,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
         {
             string includeValue = _includeValue ?? _includeValueFunc(source);
             string excludeValue = _excludeValue ?? _excludeValueFunc(source);
+            string updateValue = _updateValueFunc != null ? _updateValueFunc(source) : null;
 
-            var item = _itemObjectGenerator.AddItem(_itemName, includeValue);
+            var item = _itemObjectGenerator.AddItem(_itemName, "placeholder");
+            item.Include = includeValue;
             item.Exclude = excludeValue;
+            item.Update = updateValue;
 
             foreach (var metadata in _metadata)
             {

@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             var csproj = migrationRuleInputs.OutputMSBuildProject;
             var projectContext = migrationRuleInputs.DefaultProjectContext;
 
-            var transformResult = CopyToOutputFilesTransform.Transform(projectContext.ProjectFile.PublishOptions);
+            var transformResult = CopyToPublishDirectoryTransform.Transform(projectContext.ProjectFile.PublishOptions);
 
             if (transformResult != null && transformResult.Any())
             {
@@ -32,8 +32,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             }
         }
 
-        private IncludeContextTransform CopyToOutputFilesTransform =>
-            new IncludeContextTransform("Content", transformMappings: true)
-                .WithMetadata("CopyToPublishDirectory", "PreserveNewest", "Exists(%(Identity))");
+        private IncludeContextTransform CopyToPublishDirectoryTransform =>
+            new UpdateContextTransform("Content", transformMappings: true)
+                .WithMetadata("CopyToPublishDirectory", "PreserveNewest");
     }
 }
