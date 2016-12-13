@@ -30,9 +30,9 @@ using System.Text;
 
 namespace Microsoft.DotNet.Cli.Sln.Internal.FileManipulation
 {
-    static class FileUtil
+    static internal class FileUtil
     {
-        public static TextFormatInfo GetTextFormatInfo(string file)
+        internal static TextFormatInfo GetTextFormatInfo(string file)
         {
             var info = new TextFormatInfo();
 
@@ -45,16 +45,22 @@ namespace Microsoft.DotNet.Cli.Sln.Internal.FileManipulation
                 int nread, i;
 
                 if ((nread = fs.Read(buf, 0, buf.Length)) <= 0)
+                {
                     return info;
+                }
 
                 if (TryParse(buf, nread, out encoding))
+                {
                     i = encoding.GetPreamble().Length;
+                }
                 else
+                {
+                    encoding = null;
                     i = 0;
+                }
 
                 do
                 {
-                    // Read to the first newline to figure out which line endings this file is using
                     while (i < nread)
                     {
                         if (buf[i] == '\r')
@@ -83,7 +89,6 @@ namespace Microsoft.DotNet.Cli.Sln.Internal.FileManipulation
                     }
                 } while (newLine == null);
 
-                // Check for a blank line at the end
                 info.EndsWithEmptyLine = fs.Seek(-1, SeekOrigin.End) > 0 && fs.ReadByte() == (int)'\n';
                 info.NewLine = newLine;
                 info.Encoding = encoding;
@@ -100,7 +105,9 @@ namespace Microsoft.DotNet.Cli.Sln.Internal.FileManipulation
                     bool matched = true;
 
                     if (available < table[i].GetPreamble().Length)
+                    {
                         continue;
+                    }
 
                     for (int j = 0; j < table[i].GetPreamble().Length; j++)
                     {
@@ -132,11 +139,13 @@ namespace Microsoft.DotNet.Cli.Sln.Internal.FileManipulation
         };
     }
 
-    class TextFormatInfo
+    internal class TextFormatInfo
     {
         public TextFormatInfo()
         {
             NewLine = Environment.NewLine;
+            Encoding = null;
+            EndsWithEmptyLine = true;
         }
 
         public string NewLine { get; set; }
@@ -144,4 +153,3 @@ namespace Microsoft.DotNet.Cli.Sln.Internal.FileManipulation
         public bool EndsWithEmptyLine { get; set; }
     }
 }
-

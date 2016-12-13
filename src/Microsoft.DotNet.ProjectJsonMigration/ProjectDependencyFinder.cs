@@ -372,7 +372,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             return (solutionFile == null)
                 ? new List<string>()
                 : new List<string>(solutionFile.Projects.Select(p =>
-                      Path.Combine(solutionFile.BaseDirectory.FullPath, Path.GetDirectoryName(p.FilePath))));
+                      Path.Combine(solutionFile.BaseDirectory, Path.GetDirectoryName(p.FilePath))));
         }
 
         private static string ResolveRootDirectory(string projectPath)

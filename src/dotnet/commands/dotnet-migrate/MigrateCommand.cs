@@ -115,7 +115,7 @@ namespace Microsoft.DotNet.Tools.Migrate
             foreach (var project in _slnFile.Projects)
             {
                 var projectDirectory = Path.Combine(
-                    _slnFile.BaseDirectory.FullPath, 
+                    _slnFile.BaseDirectory, 
                     Path.GetDirectoryName(project.FilePath));
 
                 var csprojFiles = new DirectoryInfo(projectDirectory)
@@ -129,8 +129,7 @@ namespace Microsoft.DotNet.Tools.Migrate
                 }
             }
 
-            _slnFile.Write(Path.Combine(_slnFile.BaseDirectory.FullPath, 
-                Path.GetFileName(_slnFile.FileName)));
+            _slnFile.Write();
         }
 
         private void MoveProjectJsonArtifactsToBackup(MigrationReport migrationReport)
@@ -404,13 +403,14 @@ namespace Microsoft.DotNet.Tools.Migrate
                 throw new Exception($"Unable to find the solution file at {slnPath}");
             }
 
-            _slnFile = new SlnFile();
-            _slnFile.Read(slnPath);
+            _slnFile = SlnFile.Read(slnPath);
 
             foreach (var project in _slnFile.Projects)
             {
-                var projectFilePath = Path.Combine(_slnFile.BaseDirectory.FullPath,
-                    Path.Combine(Path.GetDirectoryName(project.FilePath), Project.FileName));
+                var projectFilePath = Path.Combine(
+                    _slnFile.BaseDirectory, 
+                    Path.GetDirectoryName(project.FilePath), 
+                    Project.FileName);
 
                 if (File.Exists(projectFilePath))
                 {

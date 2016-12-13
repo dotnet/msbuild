@@ -40,113 +40,85 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
 {
     public class SlnFile
     {
-        SlnProjectCollection projects = new SlnProjectCollection();
-        SlnSectionCollection sections = new SlnSectionCollection();
-        SlnPropertySet metadata = new SlnPropertySet(true);
-        int prefixBlankLines = 1;
-        TextFormatInfo format = new TextFormatInfo { NewLine = "\r\n" };
+        private SlnProjectCollection _projects = new SlnProjectCollection();
+        private SlnSectionCollection _sections = new SlnSectionCollection();
+        private SlnPropertySet _metadata = new SlnPropertySet(true);
+        private int _prefixBlankLines = 1;
+        private TextFormatInfo _format = new TextFormatInfo();
 
         public string FormatVersion { get; set; }
         public string ProductDescription { get; set; }
 
         public string VisualStudioVersion
         {
-            get { return metadata.GetValue("VisualStudioVersion"); }
-            set { metadata.SetValue("VisualStudioVersion", value); }
+            get { return _metadata.GetValue("VisualStudioVersion"); }
+            set { _metadata.SetValue("VisualStudioVersion", value); }
         }
 
         public string MinimumVisualStudioVersion
         {
-            get { return metadata.GetValue("MinimumVisualStudioVersion"); }
-            set { metadata.SetValue("MinimumVisualStudioVersion", value); }
+            get { return _metadata.GetValue("MinimumVisualStudioVersion"); }
+            set { _metadata.SetValue("MinimumVisualStudioVersion", value); }
         }
 
-        public SlnFile()
+        public string BaseDirectory
         {
-            projects.ParentFile = this;
-            sections.ParentFile = this;
+            get { return Path.GetDirectoryName(FullPath); }
         }
 
-        /// <summary>
-        /// Gets the sln format version of the provided solution file
-        /// </summary>
-        /// <returns>The file version.</returns>
-        /// <param name="file">File.</param>
-        public static string GetFileVersion(string file)
+        public string FullPath { get; set; }
+
+        public SlnPropertySet SolutionConfigurationsSection
         {
-            string strVersion;
-            using (var reader = new StreamReader(new FileStream(file, FileMode.Open)))
+            get
             {
-                var strInput = reader.ReadLine();
-                if (strInput == null)
-                    return null;
-
-                var match = slnVersionRegex.Match(strInput);
-                if (!match.Success)
-                {
-                    strInput = reader.ReadLine();
-                    if (strInput == null)
-                        return null;
-                    match = slnVersionRegex.Match(strInput);
-                    if (!match.Success)
-                        return null;
-                }
-
-                strVersion = match.Groups[1].Value;
-                return strVersion;
+                return _sections
+                    .GetOrCreateSection("SolutionConfigurationPlatforms", SlnSectionType.PreProcess)
+                    .Properties;
             }
         }
 
-        static Regex slnVersionRegex = new Regex(@"Microsoft Visual Studio Solution File, Format Version (\d?\d.\d\d)");
-
-        /// <summary>
-        /// The directory to be used as base for converting absolute paths to relative
-        /// </summary>
-        public FilePath BaseDirectory
-        {
-            get { return FileName.ParentDirectory; }
-        }
-
-        /// <summary>
-        /// Gets the solution configurations section.
-        /// </summary>
-        /// <value>The solution configurations section.</value>
-        public SlnPropertySet SolutionConfigurationsSection
-        {
-            get { return sections.GetOrCreateSection("SolutionConfigurationPlatforms", SlnSectionType.PreProcess).Properties; }
-        }
-
-        /// <summary>
-        /// Gets the project configurations section.
-        /// </summary>
-        /// <value>The project configurations section.</value>
         public SlnPropertySetCollection ProjectConfigurationsSection
         {
-            get { return sections.GetOrCreateSection("ProjectConfigurationPlatforms", SlnSectionType.PostProcess).NestedPropertySets; }
+            get
+            {
+                return _sections
+                    .GetOrCreateSection("ProjectConfigurationPlatforms", SlnSectionType.PostProcess)
+                    .NestedPropertySets;
+            }
         }
 
         public SlnSectionCollection Sections
         {
-            get { return sections; }
+            get { return _sections; }
         }
 
         public SlnProjectCollection Projects
         {
-            get { return projects; }
+            get { return _projects; }
         }
 
-        public FilePath FileName { get; set; }
-
-        public void Read(string file)
+        public SlnFile()
         {
-            FileName = file;
-            format = FileUtil.GetTextFormatInfo(file);
+            _projects.ParentFile = this;
+            _sections.ParentFile = this;
+        }
+
+        public static SlnFile Read(string file)
+        {
+            SlnFile slnFile = new SlnFile();
+            slnFile.FullPath = Path.GetFullPath(file);
+            slnFile._format = FileUtil.GetTextFormatInfo(file);
 
             using (var sr = new StreamReader(new FileStream(file, FileMode.Open)))
-                Read(sr);
+            {
+                slnFile.Read(sr);
+            }
+
+            return slnFile;
         }
 
-        public void Read(TextReader reader)
+        private void Read(TextReader reader)
         {
             string line;
             int curLineNum = 0;
@@ -161,9 +133,11 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
                 {
                     int i = line.LastIndexOf(' ');
                     if (i == -1)
+                    {
                         throw new InvalidSolutionFormatException(curLineNum);
+                    }
                     FormatVersion = line.Substring(i + 1);
-                    prefixBlankLines = curLineNum - 1;
+                    _prefixBlankLines = curLineNum - 1;
                 }
                 if (line.StartsWith("# ", StringComparison.Ordinal))
                 {
@@ -177,12 +151,14 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
                 {
                     SlnProject p = new SlnProject();
                     p.Read(reader, line, ref curLineNum);
-                    projects.Add(p);
+                    _projects.Add(p);
                 }
                 else if (line == "Global")
                 {
                     if (globalFound)
+                    {
                         throw new InvalidSolutionFormatException(curLineNum, "Global section specified more than once");
+                    }
                     globalFound = true;
                     while ((line = reader.ReadLine()) != null)
                     {
@@ -196,67 +172,82 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
                         {
                             var sec = new SlnSection();
                             sec.Read(reader, line, ref curLineNum);
-                            sections.Add(sec);
+                            _sections.Add(sec);
                         }
                         else // Ignore text that's out of place
+                        {
                             continue;
+                        }
                     }
                     if (line == null)
+                    {
                         throw new InvalidSolutionFormatException(curLineNum, "Global section not closed");
+                    }
                 }
                 else if (line.IndexOf('=') != -1)
                 {
-                    metadata.ReadLine(line, curLineNum);
+                    _metadata.ReadLine(line, curLineNum);
                 }
             }
             if (FormatVersion == null)
+            {
                 throw new InvalidSolutionFormatException(curLineNum, "File header is missing");
+            }
         }
 
-        public void Write(string file)
+        public void Write(string file = null)
         {
-            FileName = file;
+            if (!string.IsNullOrEmpty(file))
+            {
+                FullPath = Path.GetFullPath(file);
+            }
             var sw = new StringWriter();
             Write(sw);
-            File.WriteAllText(file, sw.ToString());
+            File.WriteAllText(FullPath, sw.ToString());
         }
 
-        public void Write(TextWriter writer)
+        private void Write(TextWriter writer)
         {
-            writer.NewLine = format.NewLine;
-            for (int n = 0; n < prefixBlankLines; n++)
+            writer.NewLine = _format.NewLine;
+            for (int n = 0; n < _prefixBlankLines; n++)
+            {
                 writer.WriteLine();
+            }
             writer.WriteLine("Microsoft Visual Studio Solution File, Format Version " + FormatVersion);
             writer.WriteLine("# " + ProductDescription);
 
-            metadata.Write(writer);
+            _metadata.Write(writer);
 
-            foreach (var p in projects)
+            foreach (var p in _projects)
+            {
                 p.Write(writer);
+            }
 
             writer.WriteLine("Global");
-            foreach (SlnSection s in sections)
+            foreach (SlnSection s in _sections)
+            {
                 s.Write(writer, "GlobalSection");
+            }
             writer.WriteLine("EndGlobal");
         }
     }
 
     public class SlnProject
     {
-        SlnSectionCollection sections = new SlnSectionCollection();
+        private SlnSectionCollection _sections = new SlnSectionCollection();
 
-        SlnFile parentFile;
+        private SlnFile _parentFile;
 
         public SlnFile ParentFile
         {
             get
             {
-                return parentFile;
+                return _parentFile;
             }
             internal set
             {
-                parentFile = value;
-                sections.ParentFile = parentFile;
+                _parentFile = value;
+                _sections.ParentFile = _parentFile;
             }
         }
 
@@ -269,7 +260,7 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
 
         public SlnSectionCollection Sections
         {
-            get { return sections; }
+            get { return _sections; }
         }
 
         internal void Read(TextReader reader, string line, ref int curLineNum)
@@ -317,10 +308,12 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
                 }
                 if (line.StartsWith("ProjectSection", StringComparison.Ordinal))
                 {
-                    if (sections == null)
-                        sections = new SlnSectionCollection();
+                    if (_sections == null)
+                    {
+                        _sections = new SlnSectionCollection();
+                    }
                     var sec = new SlnSection();
-                    sections.Add(sec);
+                    _sections.Add(sec);
                     sec.Read(reader, line, ref curLineNum);
                 }
             }
@@ -328,14 +321,16 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
             throw new InvalidSolutionFormatException(curLineNum, "Project section not closed");
         }
 
-        void FindNext(int ln, string line, ref int i, char c)
+        private void FindNext(int ln, string line, ref int i, char c)
         {
             i = line.IndexOf(c, i);
             if (i == -1)
+            {
                 throw new InvalidSolutionFormatException(ln);
+            }
         }
 
-        public void Write(TextWriter writer)
+        internal void Write(TextWriter writer)
         {
             writer.Write("Project(\"");
             writer.Write(TypeGuid);
@@ -346,10 +341,12 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
             writer.Write("\", \"");
             writer.Write(Id);
             writer.WriteLine("\"");
-            if (sections != null)
+            if (_sections != null)
             {
-                foreach (SlnSection s in sections)
+                foreach (SlnSection s in _sections)
+                {
                     s.Write(writer, "ProjectSection");
+                }
             }
             writer.WriteLine("EndProject");
         }
@@ -357,10 +354,10 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
 
     public class SlnSection
     {
-        SlnPropertySetCollection nestedPropertySets;
-        SlnPropertySet properties;
-        List<string> sectionLines;
-        int baseIndex;
+        private SlnPropertySetCollection _nestedPropertySets;
+        private SlnPropertySet _properties;
+        private List<string> _sectionLines;
+        private int _baseIndex;
 
         public string Id { get; set; }
         public int Line { get; private set; }
@@ -373,7 +370,9 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
         {
             get
             {
-                return (properties == null || properties.Count == 0) && (nestedPropertySets == null || nestedPropertySets.All(t => t.IsEmpty)) && (sectionLines == null || sectionLines.Count == 0);
+                return (_properties == null || _properties.Count == 0) && 
+                    (_nestedPropertySets == null || _nestedPropertySets.All(t => t.IsEmpty)) && 
+                    (_sectionLines == null || _sectionLines.Count == 0);
             }
         }
 
@@ -385,27 +384,29 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
 
         public void Clear()
         {
-            properties = null;
-            nestedPropertySets = null;
-            sectionLines = null;
+            _properties = null;
+            _nestedPropertySets = null;
+            _sectionLines = null;
         }
 
         public SlnPropertySet Properties
         {
             get
             {
-                if (properties == null)
+                if (_properties == null)
                 {
-                    properties = new SlnPropertySet();
-                    properties.ParentSection = this;
-                    if (sectionLines != null)
+                    _properties = new SlnPropertySet();
+                    _properties.ParentSection = this;
+                    if (_sectionLines != null)
                     {
-                        foreach (var line in sectionLines)
-                            properties.ReadLine(line, Line);
-                        sectionLines = null;
+                        foreach (var line in _sectionLines)
+                        {
+                            _properties.ReadLine(line, Line);
+                        }
+                        _sectionLines = null;
                     }
                 }
-                return properties;
+                return _properties;
             }
         }
 
@@ -413,55 +414,73 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
         {
             get
             {
-                if (nestedPropertySets == null)
+                if (_nestedPropertySets == null)
                 {
-                    nestedPropertySets = new SlnPropertySetCollection(this);
-                    if (sectionLines != null)
+                    _nestedPropertySets = new SlnPropertySetCollection(this);
+                    if (_sectionLines != null)
+                    {
                         LoadPropertySets();
+                    }
                 }
-                return nestedPropertySets;
+                return _nestedPropertySets;
             }
         }
 
         public void SetContent(IEnumerable<KeyValuePair<string, string>> lines)
         {
-            sectionLines = new List<string>(lines.Select(p => p.Key + " = " + p.Value));
-            properties = null;
-            nestedPropertySets = null;
+            _sectionLines = new List<string>(lines.Select(p => p.Key + " = " + p.Value));
+            _properties = null;
+            _nestedPropertySets = null;
         }
 
         public IEnumerable<KeyValuePair<string, string>> GetContent()
         {
-            if (sectionLines != null)
-                return sectionLines.Select(li =>
+            if (_sectionLines != null)
+            {
+                return _sectionLines.Select(li =>
                 {
                     int i = li.IndexOf('=');
                     if (i != -1)
+                    {
                         return new KeyValuePair<string, string>(li.Substring(0, i).Trim(), li.Substring(i + 1).Trim());
+                    }
                     else
+                    {
                         return new KeyValuePair<string, string>(li.Trim(), "");
+                    }
                 });
+            }
             else
+            {
                 return new KeyValuePair<string, string>[0];
+            }
         }
 
         public SlnSectionType SectionType { get; set; }
 
-        SlnSectionType ToSectionType(int curLineNum, string s)
+        private SlnSectionType ToSectionType(int curLineNum, string s)
         {
             if (s == "preSolution" || s == "preProject")
+            {
                 return SlnSectionType.PreProcess;
+            }
             if (s == "postSolution" || s == "postProject")
+            {
                 return SlnSectionType.PostProcess;
+            }
             throw new InvalidSolutionFormatException(curLineNum, "Invalid section type: " + s);
         }
 
-        string FromSectionType(bool isProjectSection, SlnSectionType type)
+        private string FromSectionType(bool isProjectSection, SlnSectionType type)
         {
             if (type == SlnSectionType.PreProcess)
+            {
                 return isProjectSection ? "preProject" : "preSolution";
+            }
             else
+            {
                 return isProjectSection ? "postProject" : "postSolution";
+            }
         }
 
         internal void Read(TextReader reader, string line, ref int curLineNum)
@@ -469,11 +488,15 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
             Line = curLineNum;
             int k = line.IndexOf('(');
             if (k == -1)
+            {
                 throw new InvalidSolutionFormatException(curLineNum, "Section id missing");
+            }
             var tag = line.Substring(0, k).Trim();
             var k2 = line.IndexOf(')', k);
             if (k2 == -1)
+            {
                 throw new InvalidSolutionFormatException(curLineNum);
+            }
             Id = line.Substring(k + 1, k2 - k - 1);
 
             k = line.IndexOf('=', k2);
@@ -481,49 +504,59 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
 
             var endTag = "End" + tag;
 
-            sectionLines = new List<string>();
-            baseIndex = ++curLineNum;
+            _sectionLines = new List<string>();
+            _baseIndex = ++curLineNum;
             while ((line = reader.ReadLine()) != null)
             {
                 curLineNum++;
                 line = line.Trim();
                 if (line == endTag)
+                {
                     break;
-                sectionLines.Add(line);
+                }
+                _sectionLines.Add(line);
             }
             if (line == null)
+            {
                 throw new InvalidSolutionFormatException(curLineNum, "Closing section tag not found");
+            }
         }
 
-        void LoadPropertySets()
+        private void LoadPropertySets()
         {
-            if (sectionLines != null)
+            if (_sectionLines != null)
             {
                 SlnPropertySet curSet = null;
-                for (int n = 0; n < sectionLines.Count; n++)
+                for (int n = 0; n < _sectionLines.Count; n++)
                 {
-                    var line = sectionLines[n];
+                    var line = _sectionLines[n];
                     if (string.IsNullOrEmpty(line.Trim()))
+                    {
                         continue;
+                    }
                     var i = line.IndexOf('.');
                     if (i == -1)
-                        throw new InvalidSolutionFormatException(baseIndex + n);
+                    {
+                        throw new InvalidSolutionFormatException(_baseIndex + n);
+                    }
                     var id = line.Substring(0, i);
                     if (curSet == null || id != curSet.Id)
                     {
                         curSet = new SlnPropertySet(id);
-                        nestedPropertySets.Add(curSet);
+                        _nestedPropertySets.Add(curSet);
                     }
-                    curSet.ReadLine(line.Substring(i + 1), baseIndex + n);
+                    curSet.ReadLine(line.Substring(i + 1), _baseIndex + n);
                 }
-                sectionLines = null;
+                _sectionLines = null;
             }
         }
 
         internal void Write(TextWriter writer, string sectionTag)
         {
             if (SkipIfEmpty && IsEmpty)
+            {
                 return;
+            }
 
             writer.Write("\t");
             writer.Write(sectionTag);
@@ -531,17 +564,23 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
             writer.Write(Id);
             writer.Write(") = ");
             writer.WriteLine(FromSectionType(sectionTag == "ProjectSection", SectionType));
-            if (sectionLines != null)
+            if (_sectionLines != null)
             {
-                foreach (var l in sectionLines)
+                foreach (var l in _sectionLines)
+                {
                     writer.WriteLine("\t\t" + l);
+                }
             }
-            else if (properties != null)
-                properties.Write(writer);
-            else if (nestedPropertySets != null)
+            else if (_properties != null)
             {
-                foreach (var ps in nestedPropertySets)
+                _properties.Write(writer);
+            }
+            else if (_nestedPropertySets != null)
+            {
+                foreach (var ps in _nestedPropertySets)
+                {
                     ps.Write(writer);
+                }
             }
             writer.WriteLine("\tEnd" + sectionTag);
         }
@@ -552,8 +591,8 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
     /// </summary>
     public class SlnPropertySet : IDictionary<string, string>
     {
-        OrderedDictionary values = new OrderedDictionary();
-        bool isMetadata;
+        private OrderedDictionary _values = new OrderedDictionary();
+        private bool _isMetadata;
 
         internal bool Processed { get; set; }
 
@@ -585,65 +624,69 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
 
         internal SlnPropertySet(bool isMetadata)
         {
-            this.isMetadata = isMetadata;
+            _isMetadata = isMetadata;
         }
 
-        /// <summary>
-        /// Gets a value indicating whether this property set is empty.
-        /// </summary>
-        /// <value><c>true</c> if this instance is empty; otherwise, <c>false</c>.</value>
         public bool IsEmpty
         {
             get
             {
-                return values.Count == 0;
+                return _values.Count == 0;
             }
         }
 
         internal void ReadLine(string line, int currentLine)
         {
             if (Line == 0)
+            {
                 Line = currentLine;
+            }
             int k = line.IndexOf('=');
             if (k != -1)
             {
                 var name = line.Substring(0, k).Trim();
                 var val = line.Substring(k + 1).Trim();
-                values[name] = val;
+                _values[name] = val;
             }
             else
             {
                 line = line.Trim();
                 if (!string.IsNullOrWhiteSpace(line))
-                    values.Add(line, null);
+                {
+                    _values.Add(line, null);
+                }
             }
         }
 
         internal void Write(TextWriter writer)
         {
-            foreach (DictionaryEntry e in values)
+            foreach (DictionaryEntry e in _values)
             {
-                if (!isMetadata)
+                if (!_isMetadata)
+                {
                     writer.Write("\t\t");
+                }
                 if (Id != null)
+                {
                     writer.Write(Id + ".");
+                }
                 writer.WriteLine(e.Key + " = " + e.Value);
             }
         }
 
-        /// <summary>
-        /// Gets the identifier of the property set
-        /// </summary>
-        /// <value>The identifier.</value>
         public string Id { get; private set; }
 
         public string GetValue(string name, string defaultValue = null)
         {
             string res;
             if (TryGetValue(name, out res))
+            {
                 return res;
+            }
             else
+            {
                 return defaultValue;
+            }
         }
 
         public T GetValue<T>(string name)
@@ -662,40 +705,57 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
             if (TryGetValue(name, out val))
             {
                 if (t == typeof(bool))
+                {
                     return (object)val.Equals("true", StringComparison.OrdinalIgnoreCase);
+                }
                 if (t.GetTypeInfo().IsEnum)
+                {
                     return Enum.Parse(t, val, true);
+                }
                 if (t.GetTypeInfo().IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>))
                 {
                     var at = t.GetTypeInfo().GetGenericArguments()[0];
                     if (string.IsNullOrEmpty(val))
+                    {
                         return null;
+                    }
                     return Convert.ChangeType(val, at, CultureInfo.InvariantCulture);
 
                 }
                 return Convert.ChangeType(val, t, CultureInfo.InvariantCulture);
             }
             else
+            {
                 return defaultValue;
+            }
         }
 
         public void SetValue(string name, string value, string defaultValue = null, bool preserveExistingCase = false)
         {
             if (value == null && defaultValue == "")
+            {
                 value = "";
+            }
             if (value == defaultValue)
             {
                 // if the value is default, only remove the property if it was not already the default
                 // to avoid unnecessary project file churn
                 string res;
-                if (TryGetValue(name, out res) && !string.Equals(defaultValue ?? "", res, preserveExistingCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+                if (TryGetValue(name, out res) &&
+                    !string.Equals(defaultValue ?? "",
+                        res, preserveExistingCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+                {
                     Remove(name);
+                }
                 return;
             }
             string currentValue;
-            if (preserveExistingCase && TryGetValue(name, out currentValue) && string.Equals(value, currentValue, StringComparison.OrdinalIgnoreCase))
+            if (preserveExistingCase && TryGetValue(name, out currentValue) &&
+                string.Equals(value, currentValue, StringComparison.OrdinalIgnoreCase))
+            {
                 return;
-            values[name] = value;
+            }
+            _values[name] = value;
         }
 
         public void SetValue(string name, object value, object defaultValue = null)
@@ -705,15 +765,22 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
             {
                 // if the value is default, only remove the property if it was not already the default
                 // to avoid unnecessary project file churn
-                if (ContainsKey(name) && (defaultValue == null || !object.Equals(defaultValue, GetValue(name, defaultValue.GetType(), null))))
+                if (ContainsKey(name) && (defaultValue == null ||
+                    !object.Equals(defaultValue, GetValue(name, defaultValue.GetType(), null))))
+                {
                     Remove(name);
+                }
                 return;
             }
 
             if (value is bool)
-                values[name] = (bool)value ? "TRUE" : "FALSE";
+            {
+                _values[name] = (bool)value ? "TRUE" : "FALSE";
+            }
             else
-                values[name] = Convert.ToString(value, CultureInfo.InvariantCulture);
+            {
+                _values[name] = Convert.ToString(value, CultureInfo.InvariantCulture);
+            }
         }
 
         void IDictionary<string, string>.Add(string key, string value)
@@ -721,52 +788,33 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
             SetValue(key, value);
         }
 
-        /// <summary>
-        /// Determines whether the current instance contains an entry with the specified key
-        /// </summary>
-        /// <returns><c>true</c>, if key was containsed, <c>false</c> otherwise.</returns>
-        /// <param name="key">Key.</param>
         public bool ContainsKey(string key)
         {
-            return values.Contains(key);
+            return _values.Contains(key);
         }
 
-        /// <summary>
-        /// Removes a property
-        /// </summary>
-        /// <param name="key">Property name</param>
         public bool Remove(string key)
         {
-            var wasThere = values.Contains(key);
-            values.Remove(key);
+            var wasThere = _values.Contains(key);
+            _values.Remove(key);
             return wasThere;
         }
 
-        /// <summary>
-        /// Tries to get the value of a property
-        /// </summary>
-        /// <returns><c>true</c>, if the property exists, <c>false</c> otherwise.</returns>
-        /// <param name="key">Property name</param>
-        /// <param name="value">Value.</param>
         public bool TryGetValue(string key, out string value)
         {
-            value = (string)values[key];
+            value = (string)_values[key];
             return value != null;
         }
 
-        /// <summary>
-        /// Gets or sets the value of a property
-        /// </summary>
-        /// <param name="index">Index.</param>
         public string this[string index]
         {
             get
             {
-                return (string)values[index];
+                return (string)_values[index];
             }
             set
             {
-                values[index] = value;
+                _values[index] = value;
             }
         }
 
@@ -774,13 +822,13 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
         {
             get
             {
-                return values.Values.Cast<string>().ToList();
+                return _values.Values.Cast<string>().ToList();
             }
         }
 
         public ICollection<string> Keys
         {
-            get { return values.Keys.Cast<string>().ToList(); }
+            get { return _values.Keys.Cast<string>().ToList(); }
         }
 
         void ICollection<KeyValuePair<string, string>>.Add(KeyValuePair<string, string> item)
@@ -790,13 +838,15 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
 
         public void Clear()
         {
-            values.Clear();
+            _values.Clear();
         }
 
         internal void ClearExcept(HashSet<string> keys)
         {
-            foreach (var k in values.Keys.Cast<string>().Except(keys).ToArray())
-                values.Remove(k);
+            foreach (var k in _values.Keys.Cast<string>().Except(keys).ToArray())
+            {
+                _values.Remove(k);
+            }
         }
 
         bool ICollection<KeyValuePair<string, string>>.Contains(KeyValuePair<string, string> item)
@@ -807,8 +857,10 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
 
         public void CopyTo(KeyValuePair<string, string>[] array, int arrayIndex)
         {
-            foreach (DictionaryEntry de in values)
+            foreach (DictionaryEntry de in _values)
+            {
                 array[arrayIndex++] = new KeyValuePair<string, string>((string)de.Key, (string)de.Value);
+            }
         }
 
         bool ICollection<KeyValuePair<string, string>>.Remove(KeyValuePair<string, string> item)
@@ -819,22 +871,26 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
                 return true;
             }
             else
+            {
                 return false;
+            }
         }
 
         public int Count
         {
             get
             {
-                return values.Count;
+                return _values.Count;
             }
         }
 
         internal void SetLines(IEnumerable<KeyValuePair<string, string>> lines)
         {
-            values.Clear();
+            _values.Clear();
             foreach (var line in lines)
-                values[line.Key] = line.Value;
+            {
+                _values[line.Key] = line.Value;
+            }
         }
 
         bool ICollection<KeyValuePair<string, string>>.IsReadOnly
@@ -847,32 +903,38 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
 
         public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
         {
-            foreach (DictionaryEntry de in values)
+            foreach (DictionaryEntry de in _values)
+            {
                 yield return new KeyValuePair<string, string>((string)de.Key, (string)de.Value);
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            foreach (DictionaryEntry de in values)
+            foreach (DictionaryEntry de in _values)
+            {
                 yield return new KeyValuePair<string, string>((string)de.Key, (string)de.Value);
+            }
         }
     }
 
     public class SlnProjectCollection : Collection<SlnProject>
     {
-        SlnFile parentFile;
+        private SlnFile _parentFile;
 
         internal SlnFile ParentFile
         {
             get
             {
-                return parentFile;
+                return _parentFile;
             }
             set
             {
-                parentFile = value;
+                _parentFile = value;
                 foreach (var it in this)
-                    it.ParentFile = parentFile;
+                {
+                    it.ParentFile = _parentFile;
+                }
             }
         }
 
@@ -914,26 +976,30 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
         protected override void ClearItems()
         {
             foreach (var it in this)
+            {
                 it.ParentFile = null;
+            }
             base.ClearItems();
         }
     }
 
     public class SlnSectionCollection : Collection<SlnSection>
     {
-        SlnFile parentFile;
+        private SlnFile _parentFile;
 
         internal SlnFile ParentFile
         {
             get
             {
-                return parentFile;
+                return _parentFile;
             }
             set
             {
-                parentFile = value;
+                _parentFile = value;
                 foreach (var it in this)
-                    it.ParentFile = parentFile;
+                {
+                    it.ParentFile = _parentFile;
+                }
             }
         }
 
@@ -950,7 +1016,9 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
         public SlnSection GetOrCreateSection(string id, SlnSectionType sectionType)
         {
             if (id == null)
+            {
                 throw new ArgumentNullException("id");
+            }
             var sec = this.FirstOrDefault(s => s.Id == id);
             if (sec == null)
             {
@@ -964,10 +1032,14 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
         public void RemoveSection(string id)
         {
             if (id == null)
+            {
                 throw new ArgumentNullException("id");
+            }
             var s = GetSection(id);
             if (s != null)
+            {
                 Remove(s);
+            }
         }
 
         protected override void InsertItem(int index, SlnSection item)
@@ -992,18 +1064,20 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
         protected override void ClearItems()
         {
             foreach (var it in this)
+            {
                 it.ParentFile = null;
+            }
             base.ClearItems();
         }
     }
 
     public class SlnPropertySetCollection : Collection<SlnPropertySet>
     {
-        SlnSection parentSection;
+        private SlnSection _parentSection;
 
         internal SlnPropertySetCollection(SlnSection parentSection)
         {
-            this.parentSection = parentSection;
+            _parentSection = parentSection;
         }
 
         public SlnPropertySet GetPropertySet(string id, bool ignoreCase = false)
@@ -1026,13 +1100,13 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
         protected override void InsertItem(int index, SlnPropertySet item)
         {
             base.InsertItem(index, item);
-            item.ParentSection = parentSection;
+            item.ParentSection = _parentSection;
         }
 
         protected override void SetItem(int index, SlnPropertySet item)
         {
             base.SetItem(index, item);
-            item.ParentSection = parentSection;
+            item.ParentSection = _parentSection;
         }
 
         protected override void RemoveItem(int index)
@@ -1045,7 +1119,9 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
         protected override void ClearItems()
         {
             foreach (var it in this)
+            {
                 it.ParentSection = null;
+            }
             base.ClearItems();
         }
     }
@@ -1056,9 +1132,9 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
         {
         }
 
-        public InvalidSolutionFormatException(int line, string msg) : base("Invalid format in line " + line + ": " + msg)
+        public InvalidSolutionFormatException(int line, string msg) 
+            : base("Invalid format in line " + line + ": " + msg)
         {
-
         }
     }
 
