@@ -179,7 +179,9 @@ namespace Microsoft.DotNet.Cli.Utils
 
             try
             {
-                lockFile = new LockFileFormat().Read(lockFilePath);
+                lockFile = new LockFileFormat()
+                    .ReadWithLock(lockFilePath)
+                    .Result;
             }
             catch (FileFormatException ex)
             {

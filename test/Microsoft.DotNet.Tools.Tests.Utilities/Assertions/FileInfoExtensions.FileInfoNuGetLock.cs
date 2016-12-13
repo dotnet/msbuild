@@ -21,17 +21,23 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
             public FileInfoNuGetLock(FileInfo fileInfo)
             {
+                var taskCompletionSource = new TaskCompletionSource<string>();
+
                 _cancellationTokenSource = new CancellationTokenSource();
 
-                _task = ConcurrencyUtilities.ExecuteWithFileLockedAsync<int>(
+                _task = Task.Run(async () => await ConcurrencyUtilities.ExecuteWithFileLockedAsync<int>(
                     fileInfo.FullName,
-                    lockedToken =>
+                    cancellationToken =>
                     {
-                        Task.Delay(60000, _cancellationTokenSource.Token).Wait();
+                        taskCompletionSource.SetResult("Lock is taken so test can continue");
+
+                        Task.Delay(60000, cancellationToken).Wait();
 
                         return Task.FromResult(0);   
                     },
-                    _cancellationTokenSource.Token);
+                    _cancellationTokenSource.Token));
+
+                    taskCompletionSource.Task.Wait();
             }
 
             public void Dispose()

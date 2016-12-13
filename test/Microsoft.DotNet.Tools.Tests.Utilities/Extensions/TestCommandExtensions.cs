@@ -13,7 +13,6 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 {
     public static class TestCommandExtensions
     {
-
         public static TCommand WithWorkingDirectory<TCommand>(this TCommand subject, string workingDirectory) where TCommand : TestCommand
         {
             subject.WorkingDirectory = workingDirectory;
@@ -35,9 +34,25 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return subject;
         }
         
-        public static TCommand WithWriteLine<TCommand>(this TCommand subject, Action<string> writeLine) where TCommand : TestCommand
+        public static TCommand WithOutputDataReceivedHandler<TCommand>(this TCommand subject, Action<string> writeLine) where TCommand : TestCommand
         {
-            subject.AddWriteLine(writeLine);
+            subject.OutputDataReceived += (s, e) => writeLine(e.Data);
+            
+            return subject;
+        }
+        
+        public static TCommand WithErrorDataReceivedHandler<TCommand>(this TCommand subject, Action<string> writeLine) where TCommand : TestCommand
+        {
+            subject.ErrorDataReceived += (s, e) => writeLine(e.Data);
+            
+            return subject;
+        }
+        
+        public static TCommand WithForwardingToConsole<TCommand>(this TCommand subject, Action<string> writeLine) where TCommand : TestCommand
+        {
+            subject.WithOutputDataReceivedHandler(s => Console.Out.WriteLine(s));
+
+            subject.WithErrorDataReceivedHandler(s => Console.Error.WriteLine(s));
             
             return subject;
         }

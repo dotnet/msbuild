@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Tests
         }        
 
         [Fact]
-        public void Using_dotnet_for_the_first_time_succeeds()
+        public void UsingDotnetForTheFirstTimeSucceeds()
         {
             _firstDotnetVerbUseCommandResult
                 .Should()
@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
-        public void Using_dotnet_for_the_first_time_with_non_verbs_doesnt_print_eula()
+        public void UsingDotnetForTheFirstTimeWithNonVerbsDoesNotPrintEula()
         {
             const string firstTimeNonVerbUseMessage = @".NET Command Line Tools";
 
@@ -55,28 +55,30 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
-        public void It_shows_the_appropriate_message_to_the_user()
+        public void ItShowsTheAppropriateMessageToTheUser()
         {
             string firstTimeUseWelcomeMessage = NormalizeLineEndings(@"Welcome to .NET Core!
 ---------------------
 Learn more about .NET Core @ https://aka.ms/dotnet-docs. Use dotnet --help to see available commands or go to https://aka.ms/dotnet-cli-docs.
+
 Telemetry
 --------------
 The .NET Core tools collect usage data in order to improve your experience. The data is anonymous and does not include commandline arguments. The data is collected by Microsoft and shared with the community.
 You can opt out of telemetry by setting a DOTNET_CLI_TELEMETRY_OPTOUT environment variable to 1 using your favorite shell.
 You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-telemetry.
+
 Configuring...
 -------------------
 A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.");
 
             // normalizing line endings as git is occasionally replacing line endings in this file causing this test to fail
             NormalizeLineEndings(_firstDotnetVerbUseCommandResult.StdOut)
-                .Should().StartWith(firstTimeUseWelcomeMessage)
+                .Should().Contain(firstTimeUseWelcomeMessage)
                      .And.NotContain("Restore completed in");
         }
 
     	[Fact]
-    	public void It_restores_the_nuget_packages_to_the_nuget_cache_folder()
+    	public void ItRestoresTheNuGetPackagesToTheNuGetCacheFolder()
     	{
             _nugetCacheFolder
                 .Should()
@@ -84,7 +86,7 @@ A command is running to initially populate your local package cache, to improve 
     	}
 
         [Fact]
-        public void It_creates_a_sentinel_file_under_the_nuget_cache_folder()
+        public void ItCreatesASentinelFileUnderTheNuGetCacheFolder()
         {
             _nugetCacheFolder
                 .Should()

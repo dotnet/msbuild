@@ -16,39 +16,28 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
         [Fact]
         public void TestsFromAGivenContainerShouldRunWithExpectedOutput()
         {
-            // Copy VSTestDotNetCore project in output directory of project dotnet-vstest.Tests
-            string testAppName = "VSTestDotNetCore";
-            TestInstance testInstance = TestAssetsManager.CreateTestInstance(testAppName);
+            var testAppName = "VSTestDotNetCore";
+            var testRoot = TestAssets.Get(testAppName)
+                .CreateInstance()
+                .WithRestoreFiles()
+                .WithBuildFiles()
+                .Root;
 
-            string testProjectDirectory = testInstance.TestRoot;
+            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
-            // Restore project VSTestDotNetCore
-            new RestoreCommand()
-                .WithWorkingDirectory(testProjectDirectory)
-                .Execute()
-                .Should()
-                .Pass();
+            var outputDll = testRoot
+                .GetDirectory("bin", configuration, "netcoreapp1.0")
+                .GetFile($"{testAppName}.dll");
 
-            // Build project VSTestDotNetCore
-            new BuildCommand()
-                .WithWorkingDirectory(testProjectDirectory)
-                .Execute()
-                .Should()
-                .Pass();
-
-            // Prepare args to send vstest
-            string configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
-            string testAdapterPath = Path.Combine(testProjectDirectory, "bin", configuration, "netcoreapp1.0");
-            string outputDll = Path.Combine(testAdapterPath, $"{testAppName}.dll");
-            string argsForVstest = string.Concat("\"", outputDll, "\"");
+            var argsForVstest = $"\"{outputDll.FullName}\"";
 
             // Call vstest
-            CommandResult result = new VSTestCommand().ExecuteWithCapturedOutput(argsForVstest);
-
-            // Verify
-            result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
-            result.StdOut.Should().Contain("Passed   TestNamespace.VSTestTests.VSTestPassTest");
-            result.StdOut.Should().Contain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
+            new VSTestCommand()
+                .ExecuteWithCapturedOutput(argsForVstest)
+                .StdOut
+                .Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.")
+                     .And.Contain("Passed   TestNamespace.VSTestTests.VSTestPassTest")
+                     .And.Contain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
         }
     }
 }

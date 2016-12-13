@@ -13,22 +13,29 @@ using FluentAssertions;
 
 namespace Microsoft.DotNet.New.Tests
 {
-    public class GivenThatIWantANewFSAppWithSpecifiedType : TestBase
+    public class GivenThatIWantANewAppWithSpecifiedType : TestBase
     {
         [Theory]
-        [InlineData("Console", false)]
-        [InlineData("Lib", false)]
-        [InlineData("Web", true)]
-        [InlineData("Mstest", false)]
-        [InlineData("XUnittest", false)]
-        public void When_dotnet_build_is_invoked_then_project_restores_and_builds_without_warnings_fs(
+        [InlineData("C#", "Console", false)]
+        [InlineData("C#", "Lib", false)]
+        [InlineData("C#", "Web", true)]
+        [InlineData("C#", "Mstest", false)]
+        [InlineData("C#", "XUnittest", false)]
+        [InlineData("F#", "Console", false)]
+        [InlineData("F#", "Lib", false)]
+        [InlineData("F#", "Web", true)]
+        [InlineData("F#", "Mstest", false)]
+        [InlineData("F#", "XUnittest", false)]
+        public void TemplateRestoresAndBuildsWithoutWarnings(
+            string language,
             string projectType,
             bool useNuGetConfigForAspNet)
         {
-            var rootPath = TestAssetsManager.CreateTestDirectory(callingMethod: "fs").Path;
+            var rootPath = TestAssetsManager.CreateTestDirectory(identifier: $"{language}_{projectType}").Path;
 
-            new TestCommand("dotnet") { WorkingDirectory = rootPath }
-                .Execute($"new --lang fsharp --type {projectType}")
+            new TestCommand("dotnet") 
+                .WithWorkingDirectory(rootPath)
+                .Execute($"new --type {projectType} --lang {language}")
                 .Should().Pass();
 
             if (useNuGetConfigForAspNet)
@@ -36,8 +43,9 @@ namespace Microsoft.DotNet.New.Tests
                 File.Copy("NuGet.tempaspnetpatch.config", Path.Combine(rootPath, "NuGet.Config"));
             }
 
-            new TestCommand("dotnet") { WorkingDirectory = rootPath }
-                .Execute($"restore /p:SkipInvalidConfigurations=true")
+            new TestCommand("dotnet")
+                .WithWorkingDirectory(rootPath)
+                .Execute($"restore")
                 .Should().Pass();
 
             var buildResult = new TestCommand("dotnet")

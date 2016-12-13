@@ -717,7 +717,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                     .Execute($"{frameworkArg} \"{lib.CsProjPath}\"");
             cmd.Should().Fail();
             cmd.StdErr.Should().MatchRegex(ProjectNotCompatibleErrorMessageRegEx);
-            cmd.StdErr.Should().MatchRegex(" - net45(\n|\r)");
+            cmd.StdErr.Should().MatchRegex(" - net45");
             net45lib.CsProjContent().Should().BeEquivalentTo(csProjContent);
         }
     }

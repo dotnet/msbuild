@@ -48,10 +48,14 @@
       </ProjectsToTest>
     </ItemGroup>
 
+    <Message Text="Starting test execution" Importance="High" />
+  
     <MSBuild
       BuildInParallel="True"
       Projects="@(ProjectsToTest)">
     </MSBuild>
+
+    <Message Text="Finished test execution" Importance="High" />
   </Target>
 
   <Target Name="PrepareTests"
@@ -232,18 +236,9 @@
 
   <Target Name="RestoreTestAssetPackageProjects"
           DependsOnTargets="PrepareTests;
-                            SetupRestoreTestAssetPackageProjectsInputs;"
-          Inputs="@(RestoreTestAssetPackageProjectsInputs)"
-          Outputs="@(RestoreTestAssetPackageProjectsInputs->'%(RelativeDir)/obj/project.assets.json');@(RestoreTestAssetPackageProjectsInputs->'%(RelativeDir)/obj/%(Filename).csproj.nuget.g.props');@(RestoreTestAssetPackageProjectsInputs->'%(RelativeDir)/obj/%(Filename).csproj.nuget.g.targets')">
+                            SetupTestPackageProjectData;">
 
-    <DotNetRestore ToolPath="$(Stage0Directory)"
-                   ProjectPath="&quot;%(RestoreTestAssetPackageProjectsInputs.FullPath)&quot;" />
-  </Target>
-
-  <Target Name="SetupRestoreTestAssetPackageProjectsInputs"
-          DependsOnTargets="Init;">
-    <ItemGroup>
-      <RestoreTestAssetPackageProjectsInputs Include="$(RepoRoot)/TestAssets/TestPackages/**/*.csproj" />
-    </ItemGroup>
+    <DotNetRestore ToolPath="$(Stage2Directory)"
+                   WorkingDirectory="%(TestPackageProject.FullPath)" />
   </Target>
 </Project>

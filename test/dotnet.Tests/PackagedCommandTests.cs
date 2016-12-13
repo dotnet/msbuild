@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using FluentAssertions;
@@ -72,7 +73,7 @@ namespace Microsoft.DotNet.Tests
             new PortableCommand()
                 .WithWorkingDirectory(testInstance.Root)
                 .ExecuteWithCapturedOutput()
-                .Should().HaveStdOutContaining("Hello Portable World!" + Environment.NewLine)
+                .Should().HaveStdOutContaining("Hello Portable World!")
                      .And.NotHaveStdErr()
                      .And.Pass();
         }
@@ -111,14 +112,12 @@ namespace Microsoft.DotNet.Tests
             new BuildCommand()
                 .WithProjectDirectory(testInstance.Root)
                 .WithConfiguration("Debug")
-                .WithWriteLine(_output.WriteLine)
                 .Execute()
                 .Should().Pass();
 
             new DependencyToolInvokerCommand()
                 .WithWorkingDirectory(testInstance.Root)
                 .WithEnvironmentVariable(CommandContext.Variables.Verbose, "true")
-                .WithWriteLine(_output.WriteLine)
                 .ExecuteWithCapturedOutput($"tool-with-output-name", framework, "")
                 .Should().HaveStdOutContaining("Tool with output name!")
                      .And.NotHaveStdErr()
@@ -222,14 +221,18 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
-        public void When_assets_file_is_in_use_Then_CLI_retries_launching_the_command_for_at_least_one_second()
+        public void WhenToolAssetsFileIsInUseThenCLIRetriesLaunchingTheCommandForAtLeastOneSecond()
         {
             var testInstance = TestAssets.Get("AppWithToolDependency")
                 .CreateInstance()
                 .WithSourceFiles()
                 .WithRestoreFiles();
 
-            var assetsFile = testInstance.Root.GetDirectory("obj").GetFile("project.assets.json");
+            var assetsFile = new DirectoryInfo(new RepoDirectoriesProvider().NugetPackages)
+                .GetDirectory(".tools", "dotnet-portable", "1.0.0", "netcoreapp1.0")
+                .GetFile("project.assets.json");
+
+            var stopWatch = Stopwatch.StartNew();
 
             using (assetsFile.Lock()
                              .DisposeAfter(TimeSpan.FromMilliseconds(1000)))
@@ -237,21 +240,29 @@ namespace Microsoft.DotNet.Tests
                 new PortableCommand()
                     .WithWorkingDirectory(testInstance.Root)
                     .ExecuteWithCapturedOutput()
-                    .Should().HaveStdOutContaining("Hello Portable World!" + Environment.NewLine)
+                    .Should().HaveStdOutContaining("Hello Portable World!")
                         .And.NotHaveStdErr()
                         .And.Pass();
             }
+
+            stopWatch.Stop();
+
+            stopWatch.ElapsedMilliseconds.Should().BeGreaterThan(1000, "Because dotnet should respect the NuGet lock");
         }
 
         [Fact]
-        public void When_assets_file_is_locked_by_NuGet_Then_CLI_retries_launching_the_command_for_at_least_one_second()
+        public void WhenToolAssetsFileIsLockedByNuGetThenCLIRetriesLaunchingTheCommandForAtLeastOneSecond()
         {
             var testInstance = TestAssets.Get("AppWithToolDependency")
                 .CreateInstance()
                 .WithSourceFiles()
                 .WithRestoreFiles();
 
-            var assetsFile = testInstance.Root.GetDirectory("obj").GetFile("project.assets.json");
+            var assetsFile = new DirectoryInfo(new RepoDirectoriesProvider().NugetPackages)
+                .GetDirectory(".tools", "dotnet-portable", "1.0.0", "netcoreapp1.0")
+                .GetFile("project.assets.json");
+
+            var stopWatch = Stopwatch.StartNew();
 
             using (assetsFile.NuGetLock()
                              .DisposeAfter(TimeSpan.FromMilliseconds(1000)))
@@ -259,10 +270,14 @@ namespace Microsoft.DotNet.Tests
                 new PortableCommand()
                     .WithWorkingDirectory(testInstance.Root)
                     .ExecuteWithCapturedOutput()
-                    .Should().HaveStdOutContaining("Hello Portable World!" + Environment.NewLine)
+                    .Should().HaveStdOutContaining("Hello Portable World!")
                         .And.NotHaveStdErr()
                         .And.Pass();
             }
+
+            stopWatch.Stop();
+
+            stopWatch.ElapsedMilliseconds.Should().BeGreaterThan(1000, "Because dotnet should respect the NuGet lock");
         }
 
         class HelloCommand : TestCommand

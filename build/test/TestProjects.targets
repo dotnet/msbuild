@@ -37,15 +37,8 @@
       -->
       <PreTestProjectsToExclude Include="test$(PathSeparator)binding-redirects.Tests$(PathSeparator)binding-redirects.Tests.csproj;" />
 
-      <PreTestProjectsToExclude Condition=" 'https://github.com/dotnet/cli/issues/3864' != 'fixed' "
-                             Include="test$(PathSeparator)TestingAbstractions$(PathSeparator)Microsoft.Extensions.Testing.Abstractions.Tests$(PathSeparator)Microsoft.Extensions.Testing.Abstractions.Tests.csproj;
-                                      test$(PathSeparator)TestingAbstractions$(PathSeparator)Microsoft.Extensions.Testing.Abstractions.UnitTests$(PathSeparator)Microsoft.Extensions.Testing.Abstractions.UnitTests.csproj;" />
-
       <PreTestProjectsToExclude Condition=" 'https://github.com/dotnet/cli/issues/3216' != 'fixed' "
                              Include="test$(PathSeparator)Kestrel.Tests$(PathSeparator)Kestrel.Tests.csproj" />
-
-      <PreTestProjectsToExclude Condition=" 'https://github.com/dotnet/cli/issues/3865' != 'fixed' "
-                             Include="test$(PathSeparator)ScriptExecutorTests$(PathSeparator)ScriptExecutorTests.csproj" />
       
       <PreTestProjectsToExclude Condition=" 'Non-test projects in test directory' != 'consider moving elsewhere' "
                              Include="test$(PathSeparator)ArgumentsReflector$(PathSeparator)ArgumentsReflector.csproj;

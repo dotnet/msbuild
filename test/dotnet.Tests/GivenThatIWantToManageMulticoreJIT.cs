@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
-        public void When_invoked_then_dotnet_writes_optimization_data_to_the_profile_root()
+        public void WhenInvokedThenDotnetWritesOptimizationDataToTheProfileRoot()
         {
             var testDirectory = TestAssetsManager.CreateTestDirectory();
             var testStartTime = GetTruncatedDateTime();
@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
-        public void When_invoked_with_MulticoreJit_disabled_then_dotnet_does_not_writes_optimization_data_to_the_profile_root()
+        public void WhenInvokedWithMulticoreJitDisabledThenDotnetDoesNotWriteOptimizationDataToTheProfileRoot()
         {
             var testDirectory = TestAssetsManager.CreateTestDirectory();
             var testStartTime = GetTruncatedDateTime();
@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
-        public void When_the_profile_root_is_undefined_then_dotnet_does_not_crash()
+        public void WhenTheProfileRootIsUndefinedThenDotnetDoesNotCrash()
         {
             var testDirectory = TestAssetsManager.CreateTestDirectory();
             var testStartTime = GetTruncatedDateTime();
@@ -74,7 +74,7 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
-        public void When_cli_repo_builds_then_dotnet_writes_optimization_data_to_the_default_profile_root()
+        public void WhenCliRepoBuildsThenDotnetWritesOptimizationDataToTheDefaultProfileRoot()
         {
             var optimizationProfileFilePath = GetOptimizationProfileFilePath();
 

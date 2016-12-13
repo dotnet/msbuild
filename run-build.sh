@@ -139,6 +139,10 @@ done < "$REPOROOT/branchinfo.txt"
 # During xplat bootstrapping, disable HTTP parallelism to avoid fatal restore timeouts.
 export __INIT_TOOLS_RESTORE_ARGS="$__INIT_TOOLS_RESTORE_ARGS --disable-parallel"
 
+# Enable verbose VS Test Console logging
+export VSTEST_BUILD_TRACE=1
+export VSTEST_TRACE_BUILD=1
+
 DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 toolsLocalPath="$REPOROOT/build_tools"
 bootStrapperPath="$toolsLocalPath/bootstrap.sh"
@@ -183,7 +187,7 @@ export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 echo "${args[@]}"
 
 if [ $BUILD -eq 1 ]; then
-    dotnet msbuild build.proj /m /p:Architecture=$ARCHITECTURE "${args[@]}"
+    dotnet msbuild build.proj /m /v:diag /p:Architecture=$ARCHITECTURE "${args[@]}"
 else
     echo "Not building due to --nobuild"
     echo "Command that would be run is: 'dotnet msbuild build.proj /m /p:Architecture=$ARCHITECTURE ${args[@]}'"
