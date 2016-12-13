@@ -35,6 +35,7 @@ namespace Microsoft.NET.Publish.Tests
                     propertyGroup.Should().NotBeNull();
 
                     propertyGroup.Add(new XElement(ns + "DisableImplicitFrameworkReferences", "true"));
+                    propertyGroup.Add(new XElement(ns + "DisableLockFileFrameworks", "true"));
                 });
 
             testAsset.Restore("TestApp");
