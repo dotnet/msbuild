@@ -37,12 +37,14 @@
     -->
     <file src="$configuration$\Output\MSBuild.exe" target="contentFiles\any\net46\" />
     <file src="$configuration$\Output\MSBuild.exe.config" target="contentFiles\any\net46\" />
+    <file src="$configuration$\Output\Microsoft.Common.MultiTargeting.targets" target="contentFiles\any\net46\" />
     <file src="$configuration$\Output\Microsoft.Common.CrossTargeting.targets" target="contentFiles\any\net46\" />
     <file src="$configuration$\Output\Microsoft.Common.CurrentVersion.targets" target="contentFiles\any\net46\" />
     <file src="$configuration$\Output\Microsoft.Common.overridetasks" target="contentFiles\any\net46\" />
     <file src="$configuration$\Output\Microsoft.Common.props" target="contentFiles\any\net46\$targetMSBuildToolsVersion$\" />
     <file src="$configuration$\Output\Microsoft.Common.targets" target="contentFiles\any\net46\" />
     <file src="$configuration$\Output\Microsoft.Common.tasks" target="contentFiles\any\net46\" />
+    <file src="$configuration$\Output\Microsoft.CSharp.MultiTargeting.targets" target="contentFiles\any\net46\" />
     <file src="$configuration$\Output\Microsoft.CSharp.CrossTargeting.targets" target="contentFiles\any\net46\" />
     <file src="$configuration$\Output\Microsoft.CSharp.CurrentVersion.targets" target="contentFiles\any\net46\" />
     <file src="$configuration$\Output\Microsoft.CSharp.targets" target="contentFiles\any\net46\" />
@@ -52,6 +54,7 @@
     <file src="$configuration$\Output\Microsoft.NETFramework.props" target="contentFiles\any\net46\" />
     <file src="$configuration$\Output\Microsoft.NETFramework.targets" target="contentFiles\any\net46\" />
     <file src="$configuration$\Output\Microsoft.ServiceModel.targets" target="contentFiles\any\net46\" />
+    <file src="$configuration$\Output\Microsoft.VisualBasic.MultiTargeting.targets" target="contentFiles\any\net46\" />
     <file src="$configuration$\Output\Microsoft.VisualBasic.CrossTargeting.targets" target="contentFiles\any\net46\" />
     <file src="$configuration$\Output\Microsoft.VisualBasic.CurrentVersion.targets" target="contentFiles\any\net46\" />
     <file src="$configuration$\Output\Microsoft.VisualBasic.targets" target="contentFiles\any\net46\" />

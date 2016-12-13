@@ -23,11 +23,13 @@ folder InstallDir:\MSBuild\15.0\Bin
   file source=$(X86BinPath)System.Threading.Tasks.Dataflow.dll vs.file.ngen=yes
   file source=$(X86BinPath)System.Collections.Immutable.dll vs.file.ngen=yes
   file source=$(X86BinPath)Microsoft.Common.CurrentVersion.targets
+  file source=$(X86BinPath)Microsoft.Common.MultiTargeting.targets
   file source=$(X86BinPath)Microsoft.Common.CrossTargeting.targets
   file source=$(X86BinPath)Microsoft.Common.overridetasks
   file source=$(X86BinPath)Microsoft.Common.targets
   file source=$(X86BinPath)Microsoft.Common.tasks
   file source=$(X86BinPath)Microsoft.CSharp.CurrentVersion.targets
+  file source=$(X86BinPath)Microsoft.CSharp.MultiTargeting.targets
   file source=$(X86BinPath)Microsoft.CSharp.CrossTargeting.targets
   file source=$(X86BinPath)Microsoft.CSharp.targets
   file source=$(X86BinPath)Microsoft.NetFramework.CurrentVersion.props
@@ -35,6 +37,7 @@ folder InstallDir:\MSBuild\15.0\Bin
   file source=$(X86BinPath)Microsoft.NetFramework.props
   file source=$(X86BinPath)Microsoft.NetFramework.targets
   file source=$(X86BinPath)Microsoft.VisualBasic.CurrentVersion.targets
+  file source=$(X86BinPath)Microsoft.VisualBasic.MultiTargeting.targets
   file source=$(X86BinPath)Microsoft.VisualBasic.CrossTargeting.targets
   file source=$(X86BinPath)Microsoft.VisualBasic.targets
   file source=$(X86BinPath)MSBuild.rsp
@@ -150,11 +153,13 @@ folder InstallDir:\MSBuild\15.0\Bin\amd64
   file source=$(X86BinPath)System.Threading.Tasks.Dataflow.dll vs.file.ngen=yes
   file source=$(X86BinPath)System.Collections.Immutable.dll vs.file.ngen=yes
   file source=$(X86BinPath)Microsoft.Common.CurrentVersion.targets
+  file source=$(X86BinPath)Microsoft.Common.MultiTargeting.targets
   file source=$(X86BinPath)Microsoft.Common.CrossTargeting.targets
   file source=$(X86BinPath)Microsoft.Common.overridetasks
   file source=$(X86BinPath)Microsoft.Common.targets
   file source=$(X86BinPath)Microsoft.Common.tasks
   file source=$(X86BinPath)Microsoft.CSharp.CurrentVersion.targets
+  file source=$(X86BinPath)Microsoft.CSharp.MultiTargeting.targets
   file source=$(X86BinPath)Microsoft.CSharp.CrossTargeting.targets
   file source=$(X86BinPath)Microsoft.CSharp.targets
   file source=$(X86BinPath)Microsoft.NetFramework.CurrentVersion.props
@@ -162,6 +167,7 @@ folder InstallDir:\MSBuild\15.0\Bin\amd64
   file source=$(X86BinPath)Microsoft.NetFramework.props
   file source=$(X86BinPath)Microsoft.NetFramework.targets
   file source=$(X86BinPath)Microsoft.VisualBasic.CurrentVersion.targets
+  file source=$(X86BinPath)Microsoft.VisualBasic.MultiTargeting.targets
   file source=$(X86BinPath)Microsoft.VisualBasic.CrossTargeting.targets
   file source=$(X86BinPath)Microsoft.VisualBasic.targets
   file source=$(X86BinPath)MSBuild.rsp
