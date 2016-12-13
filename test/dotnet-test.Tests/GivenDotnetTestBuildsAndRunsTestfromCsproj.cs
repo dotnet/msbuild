@@ -91,7 +91,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Call test
             CommandResult result = new DotnetTestCommand()
                                        .WithWorkingDirectory(testProjectDirectory)
-                                       .ExecuteWithCapturedOutput("--noBuild");
+                                       .ExecuteWithCapturedOutput("--no-build");
 
             // Verify
             result.StdOut.Should().Contain(expectedError); 

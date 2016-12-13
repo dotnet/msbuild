@@ -20,11 +20,11 @@
 
         public const string CmdTestCaseFilterDescription = @"Run tests that match the given expression.
                                         Examples:
-                                        --testCaseFilter:""Priority = 1""
-                                        --testCaseFilter: ""(FullyQualifiedName~Nightly | Name = MyTestMethod)""";
+                                        --test-case-filter:""Priority = 1""
+                                        --test-case-filter: ""(FullyQualifiedName~Nightly | Name = MyTestMethod)""";
 
         public const string CmdTestAdapterPathDescription = @"Use custom adapters from the given path in the test run.
-                                        Example: --testAdapterPath:<pathToCustomAdapters>";
+                                        Example: --test-adapter-path:<pathToCustomAdapters>";
 
         public const string CmdLoggerOption = "LoggerUri/FriendlyName";
 

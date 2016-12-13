@@ -39,17 +39,17 @@ namespace Microsoft.DotNet.Tools.Test
                 CommandOptionType.SingleValue);
 
             var listTestsOption = cmd.Option(
-                "-lt|--listTests",
+                "-t|--list-tests",
                 LocalizableStrings.CmdListTestsDescription,
                 CommandOptionType.NoValue);
 
             var testCaseFilterOption = cmd.Option(
-                $"-tcf|--testCaseFilter <{LocalizableStrings.CmdTestCaseFilterExpression}>",
+                $"--test-case-filter <{LocalizableStrings.CmdTestCaseFilterExpression}>",
                 LocalizableStrings.CmdTestCaseFilterDescription,
                 CommandOptionType.SingleValue);
 
             var testAdapterPathOption = cmd.Option(
-                "-tap|--testAdapterPath",
+                "-a|--test-adapter-path",
                 LocalizableStrings.CmdTestAdapterPathDescription,
                 CommandOptionType.SingleValue);
 
@@ -79,7 +79,7 @@ namespace Microsoft.DotNet.Tools.Test
                 CommandOptionType.SingleValue);
 
             var noBuildtOption = cmd.Option(
-               "--noBuild",
+               "--no-build",
                LocalizableStrings.CmdNoBuildDescription,
                CommandOptionType.NoValue);
 
