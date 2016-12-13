@@ -326,6 +326,18 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_RestoreProjectName Condition=" '$(_ProjectRestoreType)' == 'NETCore' AND '$(PackageId)' != '' ">$(PackageId)</_RestoreProjectName>
     </PropertyGroup>
 
+    <!-- 
+      Determine project version for .NETCore projects
+      Default to 1.0.0
+      Use Version if it exists
+      Override with PackageVersion if it exists (same as pack)
+    -->
+    <PropertyGroup Condition=" '$(_ProjectRestoreType)' == 'NETCore' ">
+      <_RestoreProjectVersion>1.0.0</_RestoreProjectVersion>
+      <_RestoreProjectVersion Condition=" '$(Version)' != '' ">$(Version)</_RestoreProjectVersion>
+      <_RestoreProjectVersion Condition=" '$(PackageVersion)' != '' ">$(PackageVersion)</_RestoreProjectVersion>
+    </PropertyGroup>
+
     <!-- Determine if this will use cross targeting -->
     <PropertyGroup Condition=" '$(_ProjectRestoreType)' == 'NETCore' AND '$(TargetFrameworks)' != '' ">
       <_RestoreCrossTargeting>true</_RestoreCrossTargeting>
@@ -335,6 +347,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup Condition=" '$(_ProjectRestoreType)' == 'NETCore' ">
       <_RestoreGraphEntry Include="$([System.Guid]::NewGuid())">
         <Type>ProjectSpec</Type>
+        <Version>$(_RestoreProjectVersion)</Version>
         <ProjectUniqueName>$(MSBuildProjectFullPath)</ProjectUniqueName>
         <ProjectPath>$(MSBuildProjectFullPath)</ProjectPath>
         <ProjectName>$(_RestoreProjectName)</ProjectName>
@@ -348,6 +361,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         <RuntimeIdentifiers>$(RuntimeIdentifiers);$(RuntimeIdentifier)</RuntimeIdentifiers>
         <RuntimeSupports>$(RuntimeSupports)</RuntimeSupports>
         <CrossTargeting>$(_RestoreCrossTargeting)</CrossTargeting>
+        <RestoreLegacyPackagesDirectory>$(RestoreLegacyPackagesDirectory)</RestoreLegacyPackagesDirectory>
       </_RestoreGraphEntry>
     </ItemGroup>
 

@@ -47,15 +47,6 @@
             Outgoing edge from <see cref="P:NuGet.DependencyResolver.GraphEdge`1.Item"/>.
             </summary>
         </member>
-        <member name="M:NuGet.DependencyResolver.IProjectDependencyProvider.GetLibrary(NuGet.LibraryModel.LibraryRange,NuGet.Frameworks.NuGetFramework,System.String)">
-            <summary>
-            Resolves a local library.
-            </summary>
-            <param name="libraryRange">Dependency requirements.</param>
-            <param name="targetFramework">Project framework.</param>
-            <param name="rootPath">Root path of the parent project. This is used for resolving global.json.</param>
-            <remarks>The root project is used if no <see cref="!:rootPath" /> is given.</remarks>
-        </member>
         <member name="T:NuGet.DependencyResolver.LocalMatch">
             <summary>
             Extends <see cref="T:NuGet.DependencyResolver.RemoteMatch"/> to add a reference to the full Library.
@@ -69,22 +60,6 @@
         <member name="P:NuGet.DependencyResolver.LocalMatch.LocalProvider">
             <summary>
             The local provider where the library was found.
-            </summary>
-        </member>
-        <member name="M:NuGet.DependencyResolver.RemoteDependencyWalker.GetRootPathForEdge(NuGet.DependencyResolver.GraphEdge{NuGet.DependencyResolver.RemoteResolveResult})">
-            <summary>
-            Returns root directory of the parent project.
-            This will be null if the reference is from a non-project type.
-            </summary>
-        </member>
-        <member name="M:NuGet.DependencyResolver.RemoteDependencyWalker.AllowXProjResolution(NuGet.DependencyResolver.GraphEdge{NuGet.DependencyResolver.RemoteResolveResult})">
-            <summary>
-            True if legacy Xproj resolution is allowed. This will be removed soon!
-            </summary>
-        </member>
-        <member name="M:NuGet.DependencyResolver.RemoteDependencyWalker.GetNearestParentProject(NuGet.DependencyResolver.GraphEdge{NuGet.DependencyResolver.RemoteResolveResult})">
-            <summary>
-            Walk the graph up to the nearest parent project or null if this is the root.
             </summary>
         </member>
         <member name="P:NuGet.DependencyResolver.RemoteWalkContext.FindLibraryEntryCache">
@@ -102,17 +77,7 @@
             True if this is a csproj or similar project. Xproj should be false.
             </summary>
         </member>
-        <member name="T:NuGet.Shared.HashCodeCombiner">
-            <summary>
-            Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
-            </summary>
-        </member>
-        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode(System.Object[])">
-            <summary>
-            Create a unique hash code for the given set of items
-            </summary>
-        </member>
-        <member name="M:NuGet.Shared.Extensions.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+        <member name="M:NuGet.Shared.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
             <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -123,6 +88,22 @@
             <param name="keySelector">The function to extract the key from each item in the list</param>
             <param name="orderComparer">An optional comparer for comparing keys</param>
             <param name="sequenceComparer">An optional comparer for sequences</param>
+        </member>
+        <member name="M:NuGet.Shared.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
+            null for equality.
+            </summary>
+        </member>
+        <member name="T:NuGet.Shared.HashCodeCombiner">
+            <summary>
+            Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode(System.Object[])">
+            <summary>
+            Create a unique hash code for the given set of items
+            </summary>
         </member>
     </members>
 </doc>

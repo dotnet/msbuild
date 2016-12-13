@@ -4,81 +4,6 @@
         <name>NuGet.Commands</name>
     </assembly>
     <members>
-        <member name="T:NuGet.Commands.DeleteRunner">
-            <summary>
-            Shared code to run the "delete" command from the command line projects
-            </summary>
-        </member>
-        <member name="T:NuGet.Commands.LocalsCommandRunner">
-            <summary>
-            Command Runner used to run the business logic for nuget locals command
-            </summary>
-        </member>
-        <member name="M:NuGet.Commands.LocalsCommandRunner.ExecuteCommand(NuGet.Commands.LocalsArgs)">
-            <summary>
-            Executes the logic for nuget locals command.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:NuGet.Commands.LocalsCommandRunner.ListLocalResource(NuGet.Commands.LocalsCommandRunner.LocalResourceName,NuGet.Commands.LocalsArgs)">
-            <summary>
-            Lists out the cache location(s) path.
-            </summary>
-            <param name="localResourceName">Cache resource to be listed</param>
-            <throws>Thorws <code>ArgumentException</code> if the specified resource name does not match a known cache type.</throws>
-        </member>
-        <member name="M:NuGet.Commands.LocalsCommandRunner.PrintLocalResourcePath(System.String,System.String,NuGet.Commands.LocalsArgs)">
-            <summary>
-            Prints the specified local resource path.
-            </summary>
-            <param name="resourceName"> Specified resource name</param>
-            <param name="path"> Path for the specified resource</param>
-        </member>
-        <member name="M:NuGet.Commands.LocalsCommandRunner.ClearLocalResource(NuGet.Commands.LocalsCommandRunner.LocalResourceName,NuGet.Commands.LocalsArgs)">
-            <summary>
-            Clears the specified cache location(s).
-            </summary>
-            <param name="localResourceName"></param>
-            <throws>Thorws <code>ArgumentException</code> if the specified resource name does not match a known cache type.</throws>
-            <returns><code>True</code> if the operation was successful; otherwise <code>false</code>.</returns>
-        </member>
-        <member name="M:NuGet.Commands.LocalsCommandRunner.ClearNuGetGlobalPackagesFolder(NuGet.Commands.LocalsArgs)">
-            <summary>
-            Clears the global NuGet packages cache.
-            </summary>
-            <returns><code>True</code> if the operation was successful; otherwise <code>false</code>.</returns>
-        </member>
-        <member name="M:NuGet.Commands.LocalsCommandRunner.ClearNuGetHttpCache(NuGet.Commands.LocalsArgs)">
-            <summary>
-            Clears the NuGet v3 HTTP cache.
-            </summary>
-            <returns><code>True</code> if the operation was successful; otherwise <code>false</code>.</returns>
-        </member>
-        <member name="M:NuGet.Commands.LocalsCommandRunner.ClearNuGetTempFolder(NuGet.Commands.LocalsArgs)">
-            <summary>
-            Clears the temp folder cache.
-            </summary>
-            <returns><code>True</code> if the operation was successful; otherwise <code>false</code>.</returns>
-        </member>
-        <member name="M:NuGet.Commands.LocalsCommandRunner.GetLocalResourceName(System.String)">
-            <summary>
-            Identifies the specified resource name to be cleared.
-            </summary>
-            <param name="localResourceName">specified resource name</param>
-            <returns>Returns <code>LocalResourceName</code> indicating the local resource name specified.</returns>
-        </member>
-        <member name="M:NuGet.Commands.LocalsCommandRunner.ClearCacheDirectory(System.String,NuGet.Commands.LocalsArgs)">
-            <summary>
-            Recursively deletes the specified directory tree.
-            </summary>
-            <param name="folderPath">Specified directory to be deleted</param>
-            <returns><code>True</code> if the operation was successful; otherwise <code>false</code>.</returns>
-        </member>
-        <member name="T:NuGet.Commands.PushRunner">
-            <summary>
-            Shared code to run the "push" command from the command line projects
-            </summary>
-        </member>
         <member name="T:NuGet.Commands.Strings">
             <summary>
                A strongly-typed resource class, for looking up localized strings, etc.
@@ -716,6 +641,81 @@
                Looks up a localized string similar to {0} was not specified. Using &apos;{1}&apos;..
             </summary>
         </member>
+        <member name="T:NuGet.Commands.DeleteRunner">
+            <summary>
+            Shared code to run the "delete" command from the command line projects
+            </summary>
+        </member>
+        <member name="T:NuGet.Commands.LocalsCommandRunner">
+            <summary>
+            Command Runner used to run the business logic for nuget locals command
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.LocalsCommandRunner.ExecuteCommand(NuGet.Commands.LocalsArgs)">
+            <summary>
+            Executes the logic for nuget locals command.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:NuGet.Commands.LocalsCommandRunner.ListLocalResource(NuGet.Commands.LocalsCommandRunner.LocalResourceName,NuGet.Commands.LocalsArgs)">
+            <summary>
+            Lists out the cache location(s) path.
+            </summary>
+            <param name="localResourceName">Cache resource to be listed</param>
+            <throws>Thorws <code>ArgumentException</code> if the specified resource name does not match a known cache type.</throws>
+        </member>
+        <member name="M:NuGet.Commands.LocalsCommandRunner.PrintLocalResourcePath(System.String,System.String,NuGet.Commands.LocalsArgs)">
+            <summary>
+            Prints the specified local resource path.
+            </summary>
+            <param name="resourceName"> Specified resource name</param>
+            <param name="path"> Path for the specified resource</param>
+        </member>
+        <member name="M:NuGet.Commands.LocalsCommandRunner.ClearLocalResource(NuGet.Commands.LocalsCommandRunner.LocalResourceName,NuGet.Commands.LocalsArgs)">
+            <summary>
+            Clears the specified cache location(s).
+            </summary>
+            <param name="localResourceName"></param>
+            <throws>Thorws <code>ArgumentException</code> if the specified resource name does not match a known cache type.</throws>
+            <returns><code>True</code> if the operation was successful; otherwise <code>false</code>.</returns>
+        </member>
+        <member name="M:NuGet.Commands.LocalsCommandRunner.ClearNuGetGlobalPackagesFolder(NuGet.Commands.LocalsArgs)">
+            <summary>
+            Clears the global NuGet packages cache.
+            </summary>
+            <returns><code>True</code> if the operation was successful; otherwise <code>false</code>.</returns>
+        </member>
+        <member name="M:NuGet.Commands.LocalsCommandRunner.ClearNuGetHttpCache(NuGet.Commands.LocalsArgs)">
+            <summary>
+            Clears the NuGet v3 HTTP cache.
+            </summary>
+            <returns><code>True</code> if the operation was successful; otherwise <code>false</code>.</returns>
+        </member>
+        <member name="M:NuGet.Commands.LocalsCommandRunner.ClearNuGetTempFolder(NuGet.Commands.LocalsArgs)">
+            <summary>
+            Clears the temp folder cache.
+            </summary>
+            <returns><code>True</code> if the operation was successful; otherwise <code>false</code>.</returns>
+        </member>
+        <member name="M:NuGet.Commands.LocalsCommandRunner.GetLocalResourceName(System.String)">
+            <summary>
+            Identifies the specified resource name to be cleared.
+            </summary>
+            <param name="localResourceName">specified resource name</param>
+            <returns>Returns <code>LocalResourceName</code> indicating the local resource name specified.</returns>
+        </member>
+        <member name="M:NuGet.Commands.LocalsCommandRunner.ClearCacheDirectory(System.String,NuGet.Commands.LocalsArgs)">
+            <summary>
+            Recursively deletes the specified directory tree.
+            </summary>
+            <param name="folderPath">Specified directory to be deleted</param>
+            <returns><code>True</code> if the operation was successful; otherwise <code>false</code>.</returns>
+        </member>
+        <member name="T:NuGet.Commands.PushRunner">
+            <summary>
+            Shared code to run the "push" command from the command line projects
+            </summary>
+        </member>
         <member name="M:NuGet.Commands.CompatibilityIssue.FormatMessage(System.String,System.String,System.String)">
             <summary>
             Build a incompatible error message for either a package or project
@@ -1059,6 +1059,26 @@
             ITaskItem abstraction
             </summary>
         </member>
+        <member name="P:NuGet.Commands.IMSBuildItem.Identity">
+            <summary>
+            Include attribute value.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.IMSBuildItem.GetProperty(System.String)">
+            <summary>
+            Retrieve property value and trim.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.IMSBuildItem.GetProperty(System.String,System.Boolean)">
+            <summary>
+            Retrieve property value with optional trimming.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.IMSBuildItem.Properties">
+            <summary>
+            Raw untrimmed properties.
+            </summary>
+        </member>
         <member name="T:NuGet.Commands.IPreLoadedRestoreRequestProvider">
             <summary>
             Retrieves pre-loaded restore requests. The inputs here have already been determined.
@@ -1088,6 +1108,11 @@
             </summary>
         </member>
         <member name="M:NuGet.Commands.MSBuildItem.GetProperty(System.String)">
+            <summary>
+            Get property or null if empty. Trims whitespace from values.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.MSBuildItem.GetProperty(System.String,System.Boolean)">
             <summary>
             Get property or null if empty.
             </summary>
@@ -1216,6 +1241,11 @@
         <member name="M:NuGet.Commands.MSBuildRestoreUtility.GetPackageSpec(System.Collections.Generic.IEnumerable{NuGet.Commands.IMSBuildItem})">
             <summary>
             Convert MSBuild items to a PackageSpec.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.MSBuildRestoreUtility.GetVersion(NuGet.Commands.IMSBuildItem)">
+            <summary>
+            Return the parsed version or 1.0.0 if the property does not exist.
             </summary>
         </member>
         <member name="M:NuGet.Commands.MSBuildRestoreUtility.PersistDGFileIfDebugging(NuGet.ProjectModel.DependencyGraphSpec,NuGet.Common.ILogger)">
@@ -1506,17 +1536,7 @@
             Infer the runtimes from the current environment.
             </summary>
         </member>
-        <member name="T:NuGet.Shared.HashCodeCombiner">
-            <summary>
-            Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
-            </summary>
-        </member>
-        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode(System.Object[])">
-            <summary>
-            Create a unique hash code for the given set of items
-            </summary>
-        </member>
-        <member name="M:NuGet.Shared.Extensions.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+        <member name="M:NuGet.Shared.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
             <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -1527,6 +1547,22 @@
             <param name="keySelector">The function to extract the key from each item in the list</param>
             <param name="orderComparer">An optional comparer for comparing keys</param>
             <param name="sequenceComparer">An optional comparer for sequences</param>
+        </member>
+        <member name="M:NuGet.Shared.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
+            null for equality.
+            </summary>
+        </member>
+        <member name="T:NuGet.Shared.HashCodeCombiner">
+            <summary>
+            Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode(System.Object[])">
+            <summary>
+            Create a unique hash code for the given set of items
+            </summary>
         </member>
         <member name="T:Microsoft.Extensions.Primitives.IChangeToken">
             <summary>

@@ -4,6 +4,11 @@
         <name>NuGet.ProjectModel</name>
     </assembly>
     <members>
+        <member name="T:NuGet.ProjectModel.CircularMemoryStream">
+            <summary>
+            A circular memory stream backed by a fixed-size byte buffer.
+            </summary>
+        </member>
         <member name="P:NuGet.ProjectModel.DependencyGraphSpec.Restore">
             <summary>
             Projects to restore.
@@ -89,15 +94,26 @@
             Project name from the package spec or msbuild file.
             </summary>
         </member>
-        <member name="T:NuGet.ProjectModel.HashCodeCombiner">
-            <summary>
-            Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
-            </summary>
+        <member name="T:NuGet.ProjectModel.HashObjectWriter">
+             <summary>
+             Generates a hash from an object graph.
+            
+             This is non-private only to facilitate unit testing.
+             </summary>
         </member>
-        <member name="M:NuGet.ProjectModel.HashCodeCombiner.GetHashCode(System.Object[])">
+        <member name="M:NuGet.ProjectModel.HashObjectWriter.#ctor(NuGet.ProjectModel.IHashFunction)">
             <summary>
-            Create a unique hash code for the given set of items
+            Creates a new instance with the provide hash function.
             </summary>
+            <param name="hashFunc">An <see cref="T:NuGet.ProjectModel.IHashFunction"/> instance.  Throws if <c>null</c>.</param>
+        </member>
+        <member name="M:NuGet.ProjectModel.HashObjectWriter.GetHash">
+             <summary>
+             Gets the hash for the object.
+            
+             Once GetHash is called, no further writing is allowed.
+             </summary>
+             <returns>A hash of the object.</returns>
         </member>
         <member name="T:NuGet.ProjectModel.IExternalProjectReferenceProvider">
             <summary>
@@ -113,6 +129,29 @@
             <summary>
             Returns all known entry points.
             </summary>
+        </member>
+        <member name="T:NuGet.ProjectModel.IHashFunction">
+            <summary>
+            Provides incremental hashing.
+            
+            This is non-private only to facilitate unit testing.
+            </summary>
+        </member>
+        <member name="M:NuGet.ProjectModel.IHashFunction.GetHash">
+             <summary>
+             Gets the hash.
+            
+             Once GetHash is called, no further hash updates are allowed.
+             </summary>
+             <returns>A base64-encoded hash.</returns>
+        </member>
+        <member name="M:NuGet.ProjectModel.IHashFunction.Update(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            Incrementally updates the hash.
+            </summary>
+            <param name="data">The data to be included in the hash.</param>
+            <param name="offset">The offset from which data should be read.</param>
+            <param name="count">The count of bytes to read.</param>
         </member>
         <member name="M:NuGet.ProjectModel.JsonPackageSpecReader.GetPackageSpec(System.String,System.String)">
             <summary>
@@ -131,12 +170,6 @@
             Additional MSBuild properties.
             </summary>
             <remarks>Optional. This is normally set for internal use only.</remarks>
-        </member>
-        <member name="P:NuGet.ProjectModel.PackageSpec.Properties">
-            <summary>
-            Gets a list of all properties found in the package spec, including
-            those not recognized by the parser.
-            </summary>
         </member>
         <member name="M:NuGet.ProjectModel.PackageSpec.Clone">
             <summary>
@@ -174,9 +207,14 @@
             If the type is set to external project directory discovery will be disabled.
             </summary>
         </member>
-        <member name="M:NuGet.ProjectModel.PackageSpecReferenceDependencyProvider.GetPackageSpecResolver(System.String)">
+        <member name="M:NuGet.ProjectModel.PackageSpecReferenceDependencyProvider.GetDependenciesFromSpecRestoreMetadata(NuGet.ProjectModel.PackageSpec,NuGet.Frameworks.NuGetFramework)">
             <summary>
-            Get and cache the package spec resolver.
+            .NETCore projects
+            </summary>
+        </member>
+        <member name="M:NuGet.ProjectModel.PackageSpecReferenceDependencyProvider.GetDependenciesFromExternalReference(NuGet.ProjectModel.ExternalProjectReference,NuGet.ProjectModel.PackageSpec,NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            UWP Project.json
             </summary>
         </member>
         <member name="M:NuGet.ProjectModel.PackageSpecReferenceDependencyProvider.GetProjectNames(System.Collections.Generic.IEnumerable{NuGet.LibraryModel.LibraryDependency})">
@@ -184,55 +222,36 @@
             Filter dependencies down to only possible project references and return the names.
             </summary>
         </member>
-        <member name="M:NuGet.ProjectModel.PackageSpecResolver.#ctor(NuGet.ProjectModel.PackageSpec)">
+        <member name="M:NuGet.ProjectModel.PackageSpecUtility.SpecifySnapshot(System.String,System.String)">
             <summary>
-            Create a resolver from a package spec. The spec path will be used to find the root
-            and global.json paths.
+            Apply a snapshot value.
             </summary>
         </member>
-        <member name="M:NuGet.ProjectModel.PackageSpecResolver.#ctor(System.String)">
+        <member name="M:NuGet.ProjectModel.PackageSpecUtility.IsSnapshotVersion(System.String)">
             <summary>
-            Use a root path to find projects.
-            </summary>
-            <param name="rootPath">Parent directory of the directory containing project.json file.</param>
-        </member>
-        <member name="M:NuGet.ProjectModel.PackageSpecResolver.FromPackageSpecPath(System.String)">
-            <summary>
-            Create a spec resolver from a project.json path.
-            This will automatically find the root path.
+            True if the string is a snapshot version.
             </summary>
         </member>
-        <member name="P:NuGet.ProjectModel.PackageSpecResolver.RootPath">
+        <member name="T:NuGet.ProjectModel.PackageSpecWriter">
             <summary>
-            Root path used for resolving projects and global.json.
-            This is typically the parent directory of the project directory.
+            Writes out a PackageSpec object graph.
+            
+            This is non-private only to facilitate unit testing.
             </summary>
         </member>
-        <member name="M:NuGet.ProjectModel.PackageSpecResolver.Initialize(System.String)">
+        <member name="M:NuGet.ProjectModel.PackageSpecWriter.Write(NuGet.ProjectModel.PackageSpec,NuGet.RuntimeModel.IObjectWriter)">
             <summary>
-            Build the search path index.
+            Writes a PackageSpec to an <c>NuGet.Common.IObjectWriter</c> instance. 
             </summary>
+            <param name="packageSpec">A <c>PackageSpec</c> instance.</param>
+            <param name="writer">An <c>NuGet.Common.IObjectWriter</c> instance.</param>
         </member>
-        <member name="M:NuGet.ProjectModel.PackageSpecResolver.GetRootFromProjectJson(System.String)">
+        <member name="M:NuGet.ProjectModel.PackageSpecWriter.WriteToFile(NuGet.ProjectModel.PackageSpec,System.String)">
             <summary>
-            Finds the parent directory of the project.json.
+            Writes a PackageSpec to a file.
             </summary>
-            <param name="projectJsonPath">Full path to project.json.</param>
-        </member>
-        <member name="M:NuGet.ProjectModel.PackageSpecResolver.GetGlobalPaths(System.String)">
-            <summary>
-            Read paths from global.json.
-            </summary>
-        </member>
-        <member name="M:NuGet.ProjectModel.PackageSpecResolver.GetPotentialProjects(System.Collections.Generic.IEnumerable{System.String})">
-            <summary>
-            Create the list of potential projects from the search paths.
-            </summary>
-        </member>
-        <member name="M:NuGet.ProjectModel.PackageSpecResolver.ResolveRootDirectory(System.String)">
-            <summary>
-            Find the nearest global.json file.
-            </summary>
+            <param name="packageSpec">A <c>PackageSpec</c> instance.</param>
+            <param name="filePath">A file path to write to.</param>
         </member>
         <member name="P:NuGet.ProjectModel.ProjectRestoreMetadata.OutputType">
             <summary>
@@ -296,6 +315,12 @@
             True if $(TargetFrameworks) is used and the build is using Cross Targeting.
             </summary>
         </member>
+        <member name="P:NuGet.ProjectModel.ProjectRestoreMetadata.LegacyPackagesDirectory">
+            <summary>
+            Whether or not to restore the packages directory using the legacy format, which write original case paths
+            instead of lowercase.
+            </summary>
+        </member>
         <member name="P:NuGet.ProjectModel.ProjectRestoreMetadataFrameworkInfo.FrameworkName">
             <summary>
             Target framework
@@ -352,6 +377,13 @@
             Packages.config project
             </summary>
         </member>
+        <member name="T:NuGet.ProjectModel.Sha512HashFunction">
+            <summary>
+            A SHA-512 hash function that supports incremental hashing.
+            
+            This is non-private only to facilitate unit testing.
+            </summary>
+        </member>
         <member name="T:NuGet.ProjectModel.Strings">
             <summary>
                A strongly-typed resource class, for looking up localized strings, etc.
@@ -366,6 +398,11 @@
             <summary>
                Overrides the current thread's CurrentUICulture property for all
                resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.Strings.ArgumentNullOrEmpty">
+            <summary>
+               Looks up a localized string similar to Argument cannot be null or empty..
             </summary>
         </member>
         <member name="P:NuGet.ProjectModel.Strings.InvalidDependencyTarget">
@@ -424,24 +461,6 @@
             Display warnings when the Imports framework is used.
             </summary>
         </member>
-        <member name="T:NuGet.ProjectModel.XProjUtility">
-            <summary>
-            Helpers for dealing with xproj
-            </summary>
-        </member>
-        <member name="M:NuGet.ProjectModel.XProjUtility.IsMSBuildBasedProject(System.String)">
-            <summary>
-            Returns false for xproj and empty paths.
-            </summary>
-        </member>
-        <member name="M:NuGet.ProjectModel.XProjUtility.GetProjectReferences(System.String)">
-            <summary>
-            Returns the path to all referenced xprojs by using the package spec resolver.
-            This will return references for ALL TxMs. Filtering based on the nearest TxM
-            is needed to apply these results.
-            </summary>
-            <param name="filePath">Full path to the .xproj file.</param>
-        </member>
         <member name="P:NuGet.ProjectModel.LockFileLibrary.Path">
             <summary>
             Relative path to the project.json file for projects
@@ -463,17 +482,7 @@
             Returns the lockfile if it exists, otherwise null.
             </summary>
         </member>
-        <member name="T:NuGet.Shared.HashCodeCombiner">
-            <summary>
-            Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
-            </summary>
-        </member>
-        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode(System.Object[])">
-            <summary>
-            Create a unique hash code for the given set of items
-            </summary>
-        </member>
-        <member name="M:NuGet.Shared.Extensions.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+        <member name="M:NuGet.Shared.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
             <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -484,6 +493,22 @@
             <param name="keySelector">The function to extract the key from each item in the list</param>
             <param name="orderComparer">An optional comparer for comparing keys</param>
             <param name="sequenceComparer">An optional comparer for sequences</param>
+        </member>
+        <member name="M:NuGet.Shared.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
+            null for equality.
+            </summary>
+        </member>
+        <member name="T:NuGet.Shared.HashCodeCombiner">
+            <summary>
+            Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode(System.Object[])">
+            <summary>
+            Create a unique hash code for the given set of items
+            </summary>
         </member>
     </members>
 </doc>

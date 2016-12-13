@@ -80,19 +80,9 @@
             Output items
             </summary>
         </member>
-        <member name="T:NuGet.Build.Tasks.MSBuildLogger">
-            <summary>
-            TaskLoggingHelper -> ILogger
-            </summary>
-        </member>
-        <member name="T:NuGet.Build.Tasks.MSBuildTaskItem">
-            <summary>
-            TaskItem wrapper
-            </summary>
-        </member>
         <member name="T:NuGet.Build.Tasks.RestoreTask">
             <summary>
-            .NET Core compatible restore task for csproj + project.json.
+            .NET Core compatible restore task for PackageReference and UWP project.json projects.
             </summary>
         </member>
         <member name="P:NuGet.Build.Tasks.RestoreTask.RestoreGraphItems">
@@ -140,9 +130,30 @@
             Restore all projects.
             </summary>
         </member>
-        <member name="M:NuGet.Build.Tasks.RestoreTask.GetNullForEmpty(System.String)">
+        <member name="T:NuGet.Build.Tasks.Strings">
             <summary>
-            Convert empty strings to null
+               A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.Strings.ResourceManager">
+            <summary>
+               Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.Strings.Culture">
+            <summary>
+               Overrides the current thread's CurrentUICulture property for all
+               resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.Strings.NoProjectsProvidedToTask">
+            <summary>
+               Looks up a localized string similar to Unable to find a project to restore!.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.Strings.NoProjectsToRestore">
+            <summary>
+               Looks up a localized string similar to Nothing to do. None of the projects specified contain packages to restore..
             </summary>
         </member>
         <member name="T:NuGet.Build.Tasks.WriteRestoreGraphTask">
@@ -165,17 +176,17 @@
             Convert empty strings to null
             </summary>
         </member>
-        <member name="T:NuGet.Shared.HashCodeCombiner">
+        <member name="T:NuGet.Build.MSBuildLogger">
             <summary>
-            Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
+            TaskLoggingHelper -> ILogger
             </summary>
         </member>
-        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode(System.Object[])">
+        <member name="T:NuGet.Build.MSBuildTaskItem">
             <summary>
-            Create a unique hash code for the given set of items
+            TaskItem wrapper
             </summary>
         </member>
-        <member name="M:NuGet.Shared.Extensions.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+        <member name="M:NuGet.Shared.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
             <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -186,6 +197,22 @@
             <param name="keySelector">The function to extract the key from each item in the list</param>
             <param name="orderComparer">An optional comparer for comparing keys</param>
             <param name="sequenceComparer">An optional comparer for sequences</param>
+        </member>
+        <member name="M:NuGet.Shared.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
+            null for equality.
+            </summary>
+        </member>
+        <member name="T:NuGet.Shared.HashCodeCombiner">
+            <summary>
+            Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
+            </summary>
+        </member>
+        <member name="M:NuGet.Shared.HashCodeCombiner.GetHashCode(System.Object[])">
+            <summary>
+            Create a unique hash code for the given set of items
+            </summary>
         </member>
     </members>
 </doc>
