@@ -13,14 +13,15 @@ Copyright (c) .NET Foundation. All rights reserved.
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <OutputType Condition="$(OutputType) == ''">Exe</OutputType>
-    <GlobalExclude>$(GlobalExclude);bin\**;obj\**;node_modules\**;jspm_packages\**;bower_components\**;**\*.user;**\*.*proj;**\*.sln;**\*.vssscc;**\.*\**</GlobalExclude>
-    <PreserveCompilationContext Condition="'$(PreserveCompilationContext)' == ''">true</PreserveCompilationContext>
+    <AppDesignerFolder Condition=" '$(AppDesignerFolder)' == '' ">Properties</AppDesignerFolder>
+    <GlobalExclude>$(GlobalExclude);$(OutputPath)\**;$(BaseIntermediateOutputPath)\**;node_modules\**;jspm_packages\**;bower_components\**;**\*.user;**\*.*proj;**\*.sln;**\*.vssscc;**\.*\**</GlobalExclude>
+    <PreserveCompilationContext Condition='$(PreserveCompilationContext) == '''>true</PreserveCompilationContext>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(OverrideWebDefaultGlobs)' != 'True' ">
-    <Content Include="**\*" Exclude="$(GlobalExclude);**\*.cs;**\*.resx;Properties\**" Condition=" '$(OverrideWebDefaultContentGlob)' != 'True' " />
+    <Content Include="**\*" Exclude="$(GlobalExclude);**\*.cs;**\*.resx" Condition=" '$(OverrideWebDefaultContentGlob)' != 'True' " />
     <Content Update="wwwroot\**;**\*.json;**\*.config;**\*.cshtml" CopyToPublishDirectory="PreserveNewest" Condition=" '$(OverrideWebDefaultContentGlob)' != 'True' AND '$(OverrideWebDefaultPublishGlob)' != 'True' " />
-    <Content Include="Properties\**" Exclude="$(GlobalExclude);**\*.cs;**\*.resx" Condition=" '$(OverrideWebDefaultContentGlob)' != 'True' " />
+    <Content Update="$(AppDesignerFolder)\**" CopyToPublishDirectory="Never" Condition=" '$(OverrideWebDefaultContentGlob)' != 'True' " />
     <Compile Include="**\*.cs" Exclude="$(GlobalExclude);wwwroot\**" Condition=" '$(OverrideWebDefaultCompileGlob)' != 'True' " />
     <EmbeddedResource Include="**\*.resx" Exclude="$(GlobalExclude);wwwroot\**" Condition=" '$(OverrideWebDefaultEmbeddedResourceGlob)' != 'True' " />
   </ItemGroup>
