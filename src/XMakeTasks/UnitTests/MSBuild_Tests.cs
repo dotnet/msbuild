@@ -329,6 +329,7 @@ namespace Microsoft.Build.UnitTests
 #else
         [Fact]
 #endif
+        [Trait("Category", "mono-osx-failing")]
         public void PropertyOverridesContainSemicolon()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -339,7 +340,7 @@ namespace Microsoft.Build.UnitTests
 
             // Just a normal console application project.
             ObjectModelHelpers.CreateFileInTempProjectDirectory(
-                @"bug'533'369\Sub;Dir\ConsoleApplication1\ConsoleApplication1.csproj", @"
+                Path.Combine("bug'533'369", "Sub;Dir", "ConsoleApplication1", "ConsoleApplication1.csproj"), @"
 
                 <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                   <PropertyGroup>
@@ -377,7 +378,7 @@ namespace Microsoft.Build.UnitTests
 
             // Just a normal console application project.
             ObjectModelHelpers.CreateFileInTempProjectDirectory(
-                @"bug'533'369\Sub;Dir\ConsoleApplication1\Program.cs", @"
+                Path.Combine("bug'533'369", "Sub;Dir", "ConsoleApplication1", "Program.cs"), @"
                 using System;
 
                 namespace ConsoleApplication32
@@ -401,7 +402,7 @@ namespace Microsoft.Build.UnitTests
             // is coming from another property which is produced by CreateProperty and has
             // some special characters in it.
             ObjectModelHelpers.CreateFileInTempProjectDirectory(
-                @"bug'533'369\Sub;Dir\TeamBuild.proj", @"
+                Path.Combine("bug'533'369", "Sub;Dir", "TeamBuild.proj"), @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <Target Name=`Build`>
@@ -418,9 +419,9 @@ namespace Microsoft.Build.UnitTests
                 </Project>
                 ");
 
-            ObjectModelHelpers.BuildTempProjectFileExpectSuccess(@"bug'533'369\Sub;Dir\TeamBuild.proj");
+            ObjectModelHelpers.BuildTempProjectFileExpectSuccess(Path.Combine("bug'533'369", "Sub;Dir", "TeamBuild.proj"));
 
-            ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"bug'533'369\Sub;Dir\binaries\ConsoleApplication1.exe");
+            ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(Path.Combine("bug'533'369", "Sub;Dir", "binaries", "ConsoleApplication1.exe"));
         }
 
         /// <summary>
