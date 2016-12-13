@@ -9,6 +9,7 @@
     <RootNamespace>Microsoft.Build.Engine.UnitTests</RootNamespace>
     <AssemblyName>Microsoft.Build.Engine.UnitTests</AssemblyName>
     <IsTestProject>true</IsTestProject>
+    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
@@ -210,7 +211,7 @@
       <Project>{16cd7635-7cf4-4c62-a77b-cf87d0f09a58}</Project>
       <Name>Microsoft.Build</Name>
     </ProjectReference>
-    <Reference Include="Microsoft.Build.Tasks.CodeAnalysis, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="Microsoft.Build.Tasks.CodeAnalysis, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" Condition="'$(NetCoreBuild)' != 'true'">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(CompilerToolsDir)\Microsoft.Build.Tasks.CodeAnalysis.dll</HintPath>
     </Reference>

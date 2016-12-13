@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 #if FEATURE_SECURITY_PRINCIPAL_WINDOWS
@@ -389,6 +390,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void ValidXmlXmlTextReaderNotCache()
         {
             string content = @"
@@ -677,6 +679,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/301")]
 #endif
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void EncodingGetterBasedOnActualEncodingWhenXmlDeclarationIsAbsent()
         {
             string projectFullPath = FileUtilities.GetTemporaryFile();
@@ -1199,6 +1202,65 @@ Project(""{";
             pre.AppendChild(extensions);
 
             ValidateDeepCloneAndCopyFrom(pre);
+        }
+
+        /// <summary>
+        /// Tests DeepClone and CopyFrom when there is metadata expressed as attributes
+        /// </summary>
+        [Fact]
+        public void DeepCloneWithMetadataAsAttributes()
+        {
+            var project =
+@"<?xml version=`1.0` encoding=`utf-8`?>
+  <Project xmlns = 'msbuildnamespace'>
+
+    <ItemGroup>
+      <Compile Include=`Class1.cs` A=`a` />
+      <Compile Include=`Class2.cs` />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <P>val</P>
+    </PropertyGroup>
+
+    <Target Name=`Build`>
+      <ItemGroup>
+        <A Include=`a` />
+        <B Include=`b` M1=`v1`>
+          <M2>v2</M2>
+        </B>
+        <C Include=`c`/>
+      </ItemGroup>
+    </Target>
+
+  </Project>";
+
+            var pre = ProjectRootElement.Create(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(project))));
+
+            ValidateDeepCloneAndCopyFrom(pre);
+        }
+
+        /// <summary>
+        /// Tests TryOpen when preserveFormatting is the same and different than the cached project.
+        /// </summary>
+        [Fact]
+        public void TryOpenWithPreserveFormatting()
+        {
+            string project =
+@"<?xml version=`1.0` encoding=`utf-8`?>
+<Project xmlns = 'msbuildnamespace'>
+</Project>";
+
+            var collection = new ProjectCollection();
+            var projectXml = ProjectRootElement.Create(
+                XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(project))),
+                collection,
+                preserveFormatting: true);
+
+            projectXml.Save(FileUtilities.GetTemporaryFile());
+
+            Assert.NotNull(ProjectRootElement.TryOpen(projectXml.FullPath, collection, preserveFormatting: true));
+            Assert.Null(ProjectRootElement.TryOpen(projectXml.FullPath, collection, preserveFormatting: false));
         }
 
         /// <summary>

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>$id$</id>
     <version>$version$</version>
@@ -11,10 +11,10 @@
     <projectUrl>$projectUrl$</projectUrl>
     <iconUrl>$iconUrl$</iconUrl>
     <description>This package contains the $id$ assembly which is used to create, edit, and evaluation MSBuild projects.</description>
-    <tags>MSBuild</tags>
     <copyright>Copyright © Microsoft Corporation</copyright>
+    <tags>MSBuild</tags>
     <dependencies>
-      <group targetFramework="netstandard1.5">
+      <group targetFramework=".NETStandard1.5">
         <dependency id="Microsoft.Build.Framework" version="[$version$]" />
         <dependency id="Microsoft.Win32.Primitives" version="4.0.1" />
         <dependency id="System.AppContext" version="4.1.0" />
@@ -61,12 +61,12 @@
         <dependency id="System.Xml.XmlDocument" version="4.0.1" />
         <dependency id="System.Xml.XPath.XmlDocument" version="4.0.1" />
       </group>
-      <group targetFramework="net46">
+      <group targetFramework=".NETFramework4.6">
         <dependency id="Microsoft.Build.Framework" version="[$version$]" />
       </group>
     </dependencies>
     <frameworkAssemblies>
-      <frameworkAssembly assemblyName="System.Xml" targetFramework="net46" />
+      <frameworkAssembly assemblyName="System.Xml" targetFramework=".NETFramework4.6" />
     </frameworkAssemblies>
   </metadata>
   <files>

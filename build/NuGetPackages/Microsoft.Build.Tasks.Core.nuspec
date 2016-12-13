@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>$id$</id>
     <version>$version$</version>
@@ -11,10 +11,10 @@
     <projectUrl>$projectUrl$</projectUrl>
     <iconUrl>$iconUrl$</iconUrl>
     <description>This package contains the $id$ assembly which implements the commonly used tasks of MSBuild.</description>
-    <tags>MSBuild</tags>
     <copyright>Copyright © Microsoft Corporation</copyright>
+    <tags>MSBuild</tags>
     <dependencies>
-      <group targetFramework="netstandard1.3">
+      <group targetFramework=".NETStandard1.3">
         <dependency id="Microsoft.Build.Framework" version="[$version$]" />
         <dependency id="Microsoft.Build.Utilities.Core" version="[$version$]" />
         <dependency id="System.Resources.Reader" version="4.0.0" />
@@ -47,6 +47,8 @@
         <dependency id="System.Runtime.InteropServices.RuntimeInformation" version="4.0.0" />
         <dependency id="System.Runtime.Serialization.Primitives" version="4.1.1" />
         <dependency id="System.Runtime.Serialization.Xml" version="4.1.1" />
+        <dependency id="System.Security.Cryptography.Algorithms" version="4.2.0" />
+        <dependency id="System.Security.Cryptography.Primitives" version="4.0.0" />
         <dependency id="System.Security.Cryptography.X509Certificates" version="4.1.0" />
         <dependency id="System.Text.Encoding" version="4.0.11" />
         <dependency id="System.Text.Encoding.Extensions" version="4.0.11" />
@@ -58,7 +60,7 @@
         <dependency id="System.Xml.XDocument" version="4.0.11" />
         <dependency id="System.Xml.XmlDocument" version="4.0.1" />
       </group>
-      <group targetFramework="net46">
+      <group targetFramework=".NETFramework4.6">
         <dependency id="Microsoft.Build.Framework" version="[$version$]" />
         <dependency id="Microsoft.Build.Utilities.Core" version="[$version$]" />
       </group>

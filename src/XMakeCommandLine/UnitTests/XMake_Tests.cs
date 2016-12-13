@@ -1569,6 +1569,54 @@ namespace Microsoft.Build.UnitTests
                 return fileNamesToReturn.ToArray();
             }
         }
+
+        /// <summary>
+        /// Verifies that when a directory is specified that a project can be found.
+        /// </summary>
+        [Fact]
+        public void TestProcessProjectSwitchDirectory()
+        {
+            string projectDirectory = Directory.CreateDirectory(Path.Combine(ObjectModelHelpers.TempProjectDir, Guid.NewGuid().ToString("N"))).FullName;
+
+            try
+            {
+                string expectedProject = "project1.proj";
+                string[] extensionsToIgnore = null;
+                IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(new[] { expectedProject });
+                string actualProject = MSBuildApp.ProcessProjectSwitch(new[] { projectDirectory }, extensionsToIgnore, projectHelper.GetFiles);
+
+                Assert.Equal(expectedProject, actualProject);
+            }
+            finally
+            {
+                RobustDelete(projectDirectory);
+            }
+        }
+
+        /// <summary>
+        /// Verifies that when a directory is specified and there are multiple projects that the correct error is thrown.
+        /// </summary>
+        [Fact]
+        public void TestProcessProjectSwitchDirectoryMultipleProjects()
+        {
+            string projectDirectory = Directory.CreateDirectory(Path.Combine(ObjectModelHelpers.TempProjectDir, Guid.NewGuid().ToString("N"))).FullName;
+
+            try
+            {
+                InitializationException exception = Assert.Throws<InitializationException>(() =>
+                {
+                    string[] extensionsToIgnore = null;
+                    IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(new[] { "project1.proj", "project2.proj" });
+                    MSBuildApp.ProcessProjectSwitch(new[] { projectDirectory }, extensionsToIgnore, projectHelper.GetFiles);
+                });
+
+                Assert.Equal(ResourceUtilities.FormatResourceString("AmbiguousProjectDirectoryError", projectDirectory), exception.Message);
+            }
+            finally
+            {
+                RobustDelete(projectDirectory);
+            }
+        }
 #endregion
 
 #region ProcessFileLoggerSwitches

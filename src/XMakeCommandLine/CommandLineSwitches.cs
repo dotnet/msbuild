@@ -102,6 +102,8 @@ namespace Microsoft.Build.CommandLine
             ClientToServerPipeHandle,
             ServerToClientPipeHandle,
 #endif
+            WarningsAsErrors,
+            WarningsAsMessages,
             NumberOfParameterizedSwitches
         }
 
@@ -171,7 +173,8 @@ namespace Microsoft.Build.CommandLine
                 string duplicateSwitchErrorMessage,
                 bool multipleParametersAllowed,
                 string missingParametersErrorMessage,
-                bool unquoteParameters
+                bool unquoteParameters,
+                bool emptyParametersAllowed
             )
             {
                 this.switchNames = switchNames;
@@ -180,6 +183,7 @@ namespace Microsoft.Build.CommandLine
                 this.missingParametersErrorMessage = missingParametersErrorMessage;
                 this.unquoteParameters = unquoteParameters;
                 this.parameterizedSwitch = parameterizedSwitch;
+                this.emptyParametersAllowed = emptyParametersAllowed;
             }
 
             // names of the switch (without leading switch indicator)
@@ -198,6 +202,8 @@ namespace Microsoft.Build.CommandLine
             internal bool unquoteParameters;
             // the switch id
             internal ParameterizedSwitch parameterizedSwitch;
+            // indicates if empty parameters are allowed and if so an empty string will be added to the list of parameter values
+            internal bool emptyParametersAllowed;
         }
 
 
@@ -240,41 +246,43 @@ namespace Microsoft.Build.CommandLine
         // WARNING: keep this map in the same order as the ParameterizedSwitch enumeration
         private static readonly ParameterizedSwitchInfo[] s_parameterizedSwitchesMap =
         {
-            //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-            //                                          Switch Names                            Switch Id                                       Duplicate Switch Error          Multi Params?   Missing Parameters Error    Unquote?
-            //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-            new ParameterizedSwitchInfo(  new string[] { null },                                ParameterizedSwitch.Project,                    "DuplicateProjectSwitchError",  false,          null,                                  true    ),
-            new ParameterizedSwitchInfo(  new string[] { "target", "t"},                        ParameterizedSwitch.Target,                     null,                           true,           "MissingTargetError",                  true    ),
-            new ParameterizedSwitchInfo(  new string[] { "property", "p" },                     ParameterizedSwitch.Property,                   null,                           true,           "MissingPropertyError",                true    ),
-            new ParameterizedSwitchInfo(  new string[] { "logger", "l" },                       ParameterizedSwitch.Logger,                     null,                           false,          "MissingLoggerError",                  false   ),
-            new ParameterizedSwitchInfo(  new string[] { "distributedlogger", "dl" },           ParameterizedSwitch.DistributedLogger,          null,                           false,          "MissingLoggerError",                  false   ),
-            new ParameterizedSwitchInfo(  new string[] { "verbosity", "v" },                    ParameterizedSwitch.Verbosity,                  null,                           false,          "MissingVerbosityError",               true    ),
+            //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            //                                          Switch Names                            Switch Id                                       Duplicate Switch Error          Multi Params?   Missing Parameters Error           Unquote?    Empty?
+            //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            new ParameterizedSwitchInfo(  new string[] { null },                                ParameterizedSwitch.Project,                    "DuplicateProjectSwitchError",  false,          null,                                  true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "target", "t"},                        ParameterizedSwitch.Target,                     null,                           true,           "MissingTargetError",                  true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "property", "p" },                     ParameterizedSwitch.Property,                   null,                           true,           "MissingPropertyError",                true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "logger", "l" },                       ParameterizedSwitch.Logger,                     null,                           false,          "MissingLoggerError",                  false,  false  ),
+            new ParameterizedSwitchInfo(  new string[] { "distributedlogger", "dl" },           ParameterizedSwitch.DistributedLogger,          null,                           false,          "MissingLoggerError",                  false,  false  ),
+            new ParameterizedSwitchInfo(  new string[] { "verbosity", "v" },                    ParameterizedSwitch.Verbosity,                  null,                           false,          "MissingVerbosityError",               true,   false  ),
 #if FEATURE_XML_SCHEMA_VALIDATION
-            new ParameterizedSwitchInfo(  new string[] { "validate", "val" },                   ParameterizedSwitch.Validate,                   null,                           false,          null,                                  true    ),
+            new ParameterizedSwitchInfo(  new string[] { "validate", "val" },                   ParameterizedSwitch.Validate,                   null,                           false,          null,                                  true,   false  ),
 #endif
-            new ParameterizedSwitchInfo(  new string[] { "consoleloggerparameters", "clp" },    ParameterizedSwitch.ConsoleLoggerParameters,    null,                           false,          "MissingConsoleLoggerParameterError",  true    ),
-            new ParameterizedSwitchInfo(  new string[] { "nodemode", "nmode" },                 ParameterizedSwitch.NodeMode,                   null,                           false,          null,                                  false   ),
-            new ParameterizedSwitchInfo(  new string[] { "maxcpucount", "m" },                  ParameterizedSwitch.MaxCPUCount,                null,                           false,          "MissingMaxCPUCountError",             true    ),
-            new ParameterizedSwitchInfo(  new string[] { "ignoreprojectextensions", "ignore" }, ParameterizedSwitch.IgnoreProjectExtensions,    null,                           true,           "MissingIgnoreProjectExtensionsError", true    ),
-            new ParameterizedSwitchInfo(  new string[] { "toolsversion","tv" },                 ParameterizedSwitch.ToolsVersion,               null,                           false,          "MissingToolsVersionError",            true    ),
-            new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters", "flp" },       ParameterizedSwitch.FileLoggerParameters,       null,                           false,          "MissingFileLoggerParameterError",     true    ),
-            new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters1", "flp1" },     ParameterizedSwitch.FileLoggerParameters1,      null,                           false,          "MissingFileLoggerParameterError",     true    ),
-            new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters2", "flp2" },     ParameterizedSwitch.FileLoggerParameters2,      null,                           false,          "MissingFileLoggerParameterError",     true    ),
-            new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters3", "flp3" },     ParameterizedSwitch.FileLoggerParameters3,      null,                           false,          "MissingFileLoggerParameterError",     true    ),
-            new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters4", "flp4" },     ParameterizedSwitch.FileLoggerParameters4,      null,                           false,          "MissingFileLoggerParameterError",     true    ),
-            new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters5", "flp5" },     ParameterizedSwitch.FileLoggerParameters5,      null,                           false,          "MissingFileLoggerParameterError",     true    ),
-            new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters6", "flp6" },     ParameterizedSwitch.FileLoggerParameters6,      null,                           false,          "MissingFileLoggerParameterError",     true    ),
-            new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters7", "flp7" },     ParameterizedSwitch.FileLoggerParameters7,      null,                           false,          "MissingFileLoggerParameterError",     true    ),
-            new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters8", "flp8" },     ParameterizedSwitch.FileLoggerParameters8,      null,                           false,          "MissingFileLoggerParameterError",     true    ),
-            new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters9", "flp9" },     ParameterizedSwitch.FileLoggerParameters9,      null,                           false,          "MissingFileLoggerParameterError",     true    ),
+            new ParameterizedSwitchInfo(  new string[] { "consoleloggerparameters", "clp" },    ParameterizedSwitch.ConsoleLoggerParameters,    null,                           false,          "MissingConsoleLoggerParameterError",  true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "nodemode", "nmode" },                 ParameterizedSwitch.NodeMode,                   null,                           false,          null,                                  false,  false  ),
+            new ParameterizedSwitchInfo(  new string[] { "maxcpucount", "m" },                  ParameterizedSwitch.MaxCPUCount,                null,                           false,          "MissingMaxCPUCountError",             true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "ignoreprojectextensions", "ignore" }, ParameterizedSwitch.IgnoreProjectExtensions,    null,                           true,           "MissingIgnoreProjectExtensionsError", true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "toolsversion","tv" },                 ParameterizedSwitch.ToolsVersion,               null,                           false,          "MissingToolsVersionError",            true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters", "flp" },       ParameterizedSwitch.FileLoggerParameters,       null,                           false,          "MissingFileLoggerParameterError",     true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters1", "flp1" },     ParameterizedSwitch.FileLoggerParameters1,      null,                           false,          "MissingFileLoggerParameterError",     true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters2", "flp2" },     ParameterizedSwitch.FileLoggerParameters2,      null,                           false,          "MissingFileLoggerParameterError",     true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters3", "flp3" },     ParameterizedSwitch.FileLoggerParameters3,      null,                           false,          "MissingFileLoggerParameterError",     true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters4", "flp4" },     ParameterizedSwitch.FileLoggerParameters4,      null,                           false,          "MissingFileLoggerParameterError",     true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters5", "flp5" },     ParameterizedSwitch.FileLoggerParameters5,      null,                           false,          "MissingFileLoggerParameterError",     true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters6", "flp6" },     ParameterizedSwitch.FileLoggerParameters6,      null,                           false,          "MissingFileLoggerParameterError",     true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters7", "flp7" },     ParameterizedSwitch.FileLoggerParameters7,      null,                           false,          "MissingFileLoggerParameterError",     true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters8", "flp8" },     ParameterizedSwitch.FileLoggerParameters8,      null,                           false,          "MissingFileLoggerParameterError",     true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters9", "flp9" },     ParameterizedSwitch.FileLoggerParameters9,      null,                           false,          "MissingFileLoggerParameterError",     true,   false  ),
 #if FEATURE_NODE_REUSE
-            new ParameterizedSwitchInfo(  new string[] { "nodereuse", "nr" },                   ParameterizedSwitch.NodeReuse,                  null,                           false,          "MissingNodeReuseParameterError",      true    ),
+            new ParameterizedSwitchInfo(  new string[] { "nodereuse", "nr" },                   ParameterizedSwitch.NodeReuse,                  null,                           false,          "MissingNodeReuseParameterError",      true,   false  ),
 #endif
-            new ParameterizedSwitchInfo(  new string[] { "preprocess", "pp" },                  ParameterizedSwitch.Preprocess,                 null,                           false,          null,                                  true    ),
+            new ParameterizedSwitchInfo(  new string[] { "preprocess", "pp" },                  ParameterizedSwitch.Preprocess,                 null,                           false,          null,                                  true,   false  ),
 #if !FEATURE_NAMED_PIPES_FULL_DUPLEX
-            new ParameterizedSwitchInfo(  new string[] { "clientToServerPipeHandle", "c2s" },   ParameterizedSwitch.ClientToServerPipeHandle,   null,                           false,          null,                                  true    ),
-            new ParameterizedSwitchInfo(  new string[] { "serverToClientPipeHandle", "s2c" },   ParameterizedSwitch.ServerToClientPipeHandle,   null,                           false,          null,                                  true    )
+            new ParameterizedSwitchInfo(  new string[] { "clientToServerPipeHandle", "c2s" },   ParameterizedSwitch.ClientToServerPipeHandle,   null,                           false,          null,                                  true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "serverToClientPipeHandle", "s2c" },   ParameterizedSwitch.ServerToClientPipeHandle,   null,                           false,          null,                                  true,   false  ),
 #endif
+            new ParameterizedSwitchInfo(  new string[] { "warnaserror", "err" },                ParameterizedSwitch.WarningsAsErrors,           null,                           true,           null,                                  true,   true  ),
+            new ParameterizedSwitchInfo(  new string[] { "warnasmessage", "nowarn" },           ParameterizedSwitch.WarningsAsMessages,         null,                           true,           "MissingWarnAsMessageParameterError",  true,   false ),
         };
 
         /// <summary>
@@ -343,7 +351,8 @@ namespace Microsoft.Build.CommandLine
             out string duplicateSwitchErrorMessage,
             out bool multipleParametersAllowed,
             out string missingParametersErrorMessage,
-            out bool unquoteParameters
+            out bool unquoteParameters,
+            out bool emptyParametersAllowed
         )
         {
             parameterizedSwitch = ParameterizedSwitch.Invalid;
@@ -351,6 +360,7 @@ namespace Microsoft.Build.CommandLine
             multipleParametersAllowed = false;
             missingParametersErrorMessage = null;
             unquoteParameters = false;
+            emptyParametersAllowed = false;
 
             foreach (ParameterizedSwitchInfo switchInfo in s_parameterizedSwitchesMap)
             {
@@ -363,6 +373,7 @@ namespace Microsoft.Build.CommandLine
                         multipleParametersAllowed = switchInfo.multipleParametersAllowed;
                         missingParametersErrorMessage = switchInfo.missingParametersErrorMessage;
                         unquoteParameters = switchInfo.unquoteParameters;
+                        emptyParametersAllowed = switchInfo.emptyParametersAllowed;
                         break;
                     }
                 }
@@ -454,7 +465,8 @@ namespace Microsoft.Build.CommandLine
             string commandLineArg,
             string switchParameters,
             bool multipleParametersAllowed,
-            bool unquoteParameters
+            bool unquoteParameters,
+            bool emptyParametersAllowed
         )
         {
             bool parametersStored = false;
@@ -481,12 +493,22 @@ namespace Microsoft.Build.CommandLine
             // check if the switch has multiple parameters
             if (multipleParametersAllowed)
             {
-                // store all the switch parameters
-                int emptyParameters;
-                _parameterizedSwitches[(int)parameterizedSwitch].parameters.AddRange(QuotingUtilities.SplitUnquoted(switchParameters, int.MaxValue, false /* discard empty parameters */, unquoteParameters, out emptyParameters, s_parameterSeparators));
+                if (String.Empty.Equals(switchParameters) && emptyParametersAllowed)
+                {
+                    // Store a null parameter if its allowed
+                    _parameterizedSwitches[(int) parameterizedSwitch].parameters.Add(null);
+                    parametersStored = true;
+                }
+                else
+                {
+                    // store all the switch parameters
+                    int emptyParameters;
+                    _parameterizedSwitches[(int)parameterizedSwitch].parameters.AddRange(QuotingUtilities.SplitUnquoted(switchParameters, int.MaxValue, false /* discard empty parameters */, unquoteParameters, out emptyParameters, s_parameterSeparators));
 
-                // check if they were all stored successfully i.e. they were all non-empty (after removing quoting, if requested)
-                parametersStored = (emptyParameters == 0);
+                    // check if they were all stored successfully i.e. they were all non-empty (after removing quoting, if requested)
+                    parametersStored = (emptyParameters == 0);
+                }
+                
             }
             else
             {

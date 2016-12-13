@@ -5,6 +5,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -129,6 +130,33 @@ namespace Microsoft.Build.BackEnd.Logging
             get;
             set;
         }
+
+        /// <summary>
+        /// A list of warnings to treat as errors.  If null, nothing is treated as an error.  If an empty set, all warnings are treated as errors.
+        /// </summary>
+        public ISet<string> WarningsAsErrors
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// A list of warnings to treat as low importance messages.
+        /// </summary>
+        public ISet<string> WarningsAsMessages
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// A list of build submission IDs that have logged errors.  If an error is logged outside of a submission, the submission ID is <see cref="BuildEventContext.InvalidSubmissionId"/>.
+        /// </summary>
+        public ISet<int> BuildSubmissionIdsThatHaveLoggedErrors
+        {
+            get;
+        } = new HashSet<int>();
+        
         #endregion
 
         #region Methods
@@ -203,7 +231,58 @@ namespace Microsoft.Build.BackEnd.Logging
             }
             else if (buildEvent is BuildWarningEventArgs)
             {
-                this.RaiseWarningEvent(null, (BuildWarningEventArgs)buildEvent);
+                BuildWarningEventArgs warningEvent = (BuildWarningEventArgs) buildEvent;
+
+                if (WarningsAsMessages != null && WarningsAsMessages.Contains(warningEvent.Code))
+                {
+                    // Treat this warning as a message with low importance if its in the list
+                    BuildMessageEventArgs errorEvent = new BuildMessageEventArgs(
+                        warningEvent.Subcategory,
+                        warningEvent.Code,
+                        warningEvent.File,
+                        warningEvent.LineNumber,
+                        warningEvent.ColumnNumber,
+                        warningEvent.EndLineNumber,
+                        warningEvent.EndColumnNumber,
+                        warningEvent.Message,
+                        warningEvent.HelpKeyword,
+                        warningEvent.SenderName,
+                        MessageImportance.Low,
+                        warningEvent.Timestamp)
+                    {
+                        BuildEventContext = warningEvent.BuildEventContext,
+                        ProjectFile = warningEvent.ProjectFile,
+                    };
+
+                    this.RaiseMessageEvent(null, errorEvent);
+
+                }
+                else if (WarningsAsErrors != null && (WarningsAsErrors.Count == 0 || WarningsAsErrors.Contains(warningEvent.Code)))
+                {
+                    // Treat this warning as an error if an empty set of warnings was specified or this code was specified
+                    BuildErrorEventArgs errorEvent = new BuildErrorEventArgs(
+                        warningEvent.Subcategory,
+                        warningEvent.Code,
+                        warningEvent.File,
+                        warningEvent.LineNumber,
+                        warningEvent.ColumnNumber,
+                        warningEvent.EndLineNumber,
+                        warningEvent.EndColumnNumber,
+                        warningEvent.Message,
+                        warningEvent.HelpKeyword,
+                        warningEvent.SenderName,
+                        warningEvent.Timestamp)
+                    {
+                        BuildEventContext = warningEvent.BuildEventContext,
+                        ProjectFile = warningEvent.ProjectFile,
+                    };
+
+                    this.RaiseErrorEvent(null, errorEvent);
+                }
+                else
+                {
+                    this.RaiseWarningEvent(null, warningEvent);
+                }
             }
             else if (buildEvent is BuildErrorEventArgs)
             {
@@ -308,6 +387,9 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="Exception">ExceptionHandling.IsCriticalException exceptions will not be wrapped</exception>
         private void RaiseErrorEvent(object sender, BuildErrorEventArgs buildEvent)
         {
+            // Keep track of build submissions that have logged errors.  If there is no build context, add BuildEventContext.InvalidSubmissionId.
+            BuildSubmissionIdsThatHaveLoggedErrors.Add(buildEvent?.BuildEventContext?.SubmissionId ?? BuildEventContext.InvalidSubmissionId);
+
             if (ErrorRaised != null)
             {
                 try

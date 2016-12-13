@@ -31,6 +31,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// </summary>
     public class TaskBuilder_Tests : ITargetBuilderCallback
     {
+#if FEATURE_CODEDOM
         /// <summary>
         /// Task definition for a task that outputs items containing null metadata.
         /// </summary>
@@ -142,6 +143,7 @@ namespace ItemCreationTask
     }
 }
 ";
+#endif
 
         /// <summary>
         /// The mock component host and logger
@@ -440,6 +442,7 @@ namespace ItemCreationTask
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         [Trait("Category", "mono-osx-failing")]
         public void TasksCanAddRecursiveDirBuiltInMetadata()
         {

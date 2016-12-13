@@ -77,13 +77,14 @@
 
   <!-- TODO: enable for all runtime hosts https://github.com/Microsoft/msbuild/issues/694 -->
   <Import Project="$(GitVersioningDir)dotnet\Nerdbank.GitVersioning.targets"
-          Condition="'$(MSBuildRuntimeType)' == 'Desktop'" />
-  <PropertyGroup Condition="'$(MSBuildRuntimeType)' != 'Desktop'">
+          Condition="'$(MSBuildRuntimeType)' == 'Full'" />
+  <PropertyGroup Condition="'$(MSBuildRuntimeType)' != 'Full'">
     <DefineConstants>$(DefineConstants);STATIC_VERSION_NUMBER</DefineConstants>
   </PropertyGroup>
 
   <!-- Update localized resources from the default English ones-->
-  <Import Project="UpdateLocalizedResources.targets" Condition="'$(LocalizationBuildAssetsRequired)' == 'true' and '$(IsTestProject)' != 'true' and '$(DoNotLocalizeProject)' != 'true'"/>
+  <!-- Do not attempt to localize src/dirs.proj since it does not represent a C# project-->
+  <Import Project="UpdateLocalizedResources.targets" Condition="'$(LocalizationBuildAssetsRequired)' == 'true' and '$(IsTestProject)' != 'true' and '$(DoNotLocalizeProject)' != 'true' and '$(AssemblyName)' != 'dirs'" />
 
   <!-- Restore packages -->
   <PropertyGroup>

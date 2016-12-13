@@ -24,6 +24,10 @@ setHome()
     then
         export HOME=$HOME_DEFAULT
         mkdir -p $HOME_DEFAULT
+
+        # Use a different temp directory in CI so that hopefully things are a little more stable
+        export TMPDIR=$TEMP_DEFAULT
+        mkdir -p $TEMP_DEFAULT
     fi
 }
 
@@ -135,15 +139,11 @@ TOOLS_DIR="$THIS_SCRIPT_PATH/Tools"
 MSBUILD_DOWNLOAD_URL="https://github.com/radical/msbuild/releases/download/v0.03/mono_msbuild_d25dd923839404bd64cc63f420e75acf96fc75c4.zip"
 MSBUILD_ZIP="$PACKAGES_DIR/msbuild.zip"
 HOME_DEFAULT="$WORKSPACE/msbuild-CI-home"
-
-BOOTSTRAP_BUILD_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_bootstrap_build.log"
-LOCAL_BUILD_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_local_build.log"
-MOVE_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_move_bootstrap.log"
+TEMP_DEFAULT="$WORKSPACE/tmp"
 
 PROJECT_FILE_ARG='"'"$THIS_SCRIPT_PATH/build.proj"'"'
-BOOTSTRAP_FILE_ARG='"'"$THIS_SCRIPT_PATH/BootStrapMSBuild.proj"'"'
-BOOTSTRAPPED_RUNTIME_HOST='"'"$THIS_SCRIPT_PATH/bin/Bootstrap/dotnet"'"'
-MSBUILD_BOOTSTRAPPED_EXE='"'"$THIS_SCRIPT_PATH/bin/Bootstrap/MSBuild.dll"'"'
+BOOTSTRAP_FILE_ARG='"'"$THIS_SCRIPT_PATH/targets/BootStrapMSBuild.proj"'"'
+BOOTSTRAPPED_RUNTIME_HOST='"'"$THIS_SCRIPT_PATH/bin/Bootstrap-NetCore/dotnet"'"'
 
 # Default msbuild arguments
 TARGET_ARG="Build"
@@ -226,6 +226,7 @@ fi
 case $target in
     CoreCLR)
         CONFIGURATION=Debug-NetCore
+        MSBUILD_BOOTSTRAPPED_EXE='"'"$THIS_SCRIPT_PATH/bin/Bootstrap-NetCore/MSBuild.dll"'"'
         ;;
 
     Mono)
@@ -233,6 +234,7 @@ case $target in
         CONFIGURATION=Debug-MONO
         EXTRA_ARGS="$EXTRA_ARGS /p:CscToolExe=mcs /p:CscToolPath=$MONO_BIN_DIR"
         RUNTIME_HOST_ARGS="--debug"
+        MSBUILD_BOOTSTRAPPED_EXE='"'"$THIS_SCRIPT_PATH/bin/Bootstrap/MSBuild.dll"'"'
         ;;
     *)
         echo "Unsupported target detected: $target. Aborting."
@@ -271,6 +273,10 @@ case $host in
         ;;
 esac
 
+BOOTSTRAP_BUILD_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_bootstrap_build-$host.log"
+LOCAL_BUILD_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_local_build-$host.log"
+MOVE_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_move_bootstrap-$host.log"
+
 BUILD_MSBUILD_ARGS="$PROJECT_FILE_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURATION /p:OverrideToolHost=$RUNTIME_HOST /verbosity:minimal $EXTRA_ARGS"
 
 setHome
@@ -294,6 +300,12 @@ if [[ $BOOTSTRAP_ONLY = true ]]; then
     exit $?
 fi
 
+# The set of warnings to suppress for now
+# warning MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.
+# warning MSB3026: Could not copy "XXX" to "XXX". Beginning retry 1 in 1000ms.
+# warning AL1053: The version '1.2.3.4-foo' specified for the 'product version' is not in the normal 'major.minor.build.revision' format
+_NOWARN="MSB3277;MSB3026;AL1053"
+
 echo
 echo "** Rebuilding MSBuild with locally built binaries"
-runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_BOOTSTRAPPED_EXE" "/t:$TARGET_ARG $BUILD_MSBUILD_ARGS" "$LOCAL_BUILD_LOG_PATH"
+runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_BOOTSTRAPPED_EXE" "/t:$TARGET_ARG $BUILD_MSBUILD_ARGS /warnaserror /nowarn:\"$_NOWARN\"" "$LOCAL_BUILD_LOG_PATH"

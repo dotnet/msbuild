@@ -151,6 +151,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void SetValueEnvironmentProperty()
         {
             Project project = new Project();
@@ -173,6 +174,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void IsEnvironmentVariable()
         {
             Project project = new Project();

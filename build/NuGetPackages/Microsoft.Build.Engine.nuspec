@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>$id$</id>
     <version>$version$</version>
@@ -11,15 +11,15 @@
     <projectUrl>$projectUrl$</projectUrl>
     <iconUrl>$iconUrl$</iconUrl>
     <description>This package contains the $id$ assembly which contains the legacy compatibility shim for the MSBuild engine.  NOTE: This assembly is deprecated.</description>
-    <tags>MSBuild</tags>
     <copyright>Copyright © Microsoft Corporation</copyright>
+    <tags>MSBuild</tags>
     <dependencies>
-      <group targetFramework="net46">
+      <group targetFramework=".NETFramework4.6">
         <dependency id="Microsoft.Build.Framework" version="[$version$]" />
       </group>
     </dependencies>
     <frameworkAssemblies>
-      <frameworkAssembly assemblyName="System.Xml" targetFramework="net46" />
+      <frameworkAssembly assemblyName="System.Xml" targetFramework=".NETFramework4.6" />
     </frameworkAssemblies>
   </metadata>
   <files>

@@ -44,13 +44,13 @@ namespace Microsoft.Build.Construction
             get
             {
                 return
-                    FileUtilities.FixFilePath(
-                        ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.project));
+                    FileUtilities.FixFilePath(ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.project));
             }
 
             set
             {
                 ErrorUtilities.VerifyThrowArgumentLength(value, XMakeAttributes.project);
+
                 ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.project, value);
                 MarkDirty("Set Import Project {0}", value);
             }
@@ -59,10 +59,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Location of the project attribute
         /// </summary>
-        public ElementLocation ProjectLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.project); }
-        }
+        public ElementLocation ProjectLocation => XmlElement.GetAttributeLocation(XMakeAttributes.project);
 
         /// <summary>
         /// Creates an unparented ProjectImportElement, wrapping an unparented XmlElement.

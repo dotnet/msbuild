@@ -271,6 +271,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void ForceOutOfDate()
         {
             string resxFile = Utilities.WriteTestResX(false, null, null);
@@ -416,9 +417,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 DateTime time2 = File.GetLastWriteTime(t.OutputResources[1].ItemSpec);
 
                 System.Threading.Thread.Sleep(200);
-                if (NativeMethodsShared.IsOSX)
+                if (!NativeMethodsShared.IsWindows)
                 {
-                    // Must be > 1 sec on HFS+ timestamp granularity
+                    // Must be > 1 sec on some file systems for proper timestamp granularity
+                    // TODO: Implement an interface for fetching deterministic timestamps rather than relying on the file
                     System.Threading.Thread.Sleep(1000);
                 }
 
@@ -610,9 +612,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 t3.References = new ITaskItem[] { new TaskItem(systemDll) };
                 t3.StateFile = new TaskItem(t.StateFile);
 
-                if (NativeMethodsShared.IsOSX)
+                if (!NativeMethodsShared.IsWindows)
                 {
-                    // Must be > 1 sec for HFS+ timestamp granularity
+                    // Must be > 1 sec on some file systems for proper timestamp granularity
+                    // TODO: Implement an interface for fetching deterministic timestamps rather than relying on the file
                     System.Threading.Thread.Sleep(1100);
                 }
 
@@ -2482,7 +2485,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
     public class References
     {
         [Fact]
-        [Trait("Category", "netcore-osx-failing")] // https://github.com/Microsoft/msbuild/issues/309
+        [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")] // https://github.com/Microsoft/msbuild/issues/309
         public void DontLockP2PReferenceWhenResolvingSystemTypes()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -2660,7 +2664,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// Assembly.LoadFrom instead.
         /// </summary>
         [Fact]
-        [Trait("Category", "netcore-osx-failing")] // https://github.com/Microsoft/msbuild/issues/309
+        [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")] // https://github.com/Microsoft/msbuild/issues/309
         public void ReferencedAssemblySpecifiedUsingRelativePath()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -3361,9 +3366,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
 
             string pathToSystemDLL =
 #if FEATURE_INSTALLED_MSBUILD
-                ToolLocationHelper.GetPathToDotNetFrameworkFile("system.dll", TargetDotNetFrameworkVersion.Version45);
+                ToolLocationHelper.GetPathToDotNetFrameworkFile("System.dll", TargetDotNetFrameworkVersion.Version45);
 #else
-                Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "system.dll");
+                Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "System.dll");
 #endif
 
             File.Copy(pathToSystemDLL, tempSystemDLL);

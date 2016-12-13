@@ -153,7 +153,32 @@ namespace Microsoft.Build.BackEnd.Logging
             get;
             set;
         }
+
+        /// <summary>
+        /// Set of warnings to treat as errors.  An empty non-null set will treat all warnings as errors.
+        /// </summary>
+        ISet<string> WarningsAsErrors
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// A list of warnings to treat as low importance messages.
+        /// </summary>
+        ISet<string> WarningsAsMessages
+        {
+            get;
+            set;
+        }
         #endregion
+
+        /// <summary>
+        /// Determines if the specified submission has logged an errors.
+        /// </summary>
+        /// <param name="submissionId">The ID of the build submission.  A value of "0" means that an error was logged outside of any build submission.</param>
+        /// <returns><code>true</code> if the build submission logged an errors, otherwise <code>false</code>.</returns>
+        bool HasBuildSubmissionLoggedErrors(int submissionId);
 
         #region Register
 
@@ -447,6 +472,29 @@ namespace Microsoft.Build.BackEnd.Logging
             set;
         }
 
+        /// <summary>
+        /// A list of warnings to treat as errors.  If null, nothing is treated as an error.  If an empty set, all warnings are treated as errors.
+        /// </summary>
+        ISet<string> WarningsAsErrors
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// A list of warnings to treat as low importance messages.
+        /// </summary>
+        ISet<string> WarningsAsMessages
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// A list of build submissions that have logged errors.
+        /// </summary>
+        ISet<int> BuildSubmissionIdsThatHaveLoggedErrors { get; }
+
         #endregion
         /// <summary>
         /// Entry point for a sink to consume an event.
@@ -461,7 +509,7 @@ namespace Microsoft.Build.BackEnd.Logging
         void Consume(BuildEventArgs buildEvent);
 
         /// <summary>
-        /// Shutsdown the sink and any resources it may be holding
+        /// Shuts down the sink and any resources it may be holding
         /// </summary>
         void ShutDown();
     }

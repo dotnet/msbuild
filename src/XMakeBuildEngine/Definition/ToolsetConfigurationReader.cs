@@ -240,9 +240,10 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 //FIXME: handle ; in path on Unix
-                var paths =
-                    property.Value.Split(new[] {_separatorForExtensionsPathSearchPaths},
-                        StringSplitOptions.RemoveEmptyEntries).Distinct();
+                var paths = property.Value
+                    .Split(new[] {_separatorForExtensionsPathSearchPaths}, StringSplitOptions.RemoveEmptyEntries)
+                    .Distinct()
+                    .Where(path => !string.IsNullOrEmpty(path));
 
                 pathsTable.Add(property.Name, new ProjectImportPathMatch(property.Name, paths.ToList()));
             }

@@ -31,6 +31,11 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyProduct("Microsoft® Build Tools®")]
 [assembly: AssemblyCopyright("© Microsoft Corporation. All rights reserved.")]
 
+#if STATIC_VERSION_NUMBER
+[assembly: AssemblyVersion(Microsoft.Build.Shared.MSBuildConstants.CurrentAssemblyVersion)]
+[assembly: AssemblyFileVersion(Microsoft.Build.Shared.MSBuildConstants.CurrentAssemblyVersion)]
+#endif
+
 #if (LOCALIZED_BUILD)
 // Needed for the "hub-and-spoke model to locate and retrieve localized resources": https://msdn.microsoft.com/en-us/library/21a15yht(v=vs.110).aspx
 // We want "en" to require a satellite assembly for debug builds in order to flush out localization

@@ -701,6 +701,8 @@ namespace Microsoft.Build.UnitTests
                 if (s_tempProjectDir == null)
                 {
                     s_tempProjectDir = Path.Combine(Path.GetTempPath(), "TempDirForMSBuildUnitTests");
+
+                    Directory.CreateDirectory(s_tempProjectDir);
                 }
 
                 return s_tempProjectDir;
@@ -1264,6 +1266,11 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         internal static string[] CreateFilesInDirectory(string rootDirectory, params string[] files)
         {
+            if (files == null)
+            {
+                return null;
+            }
+
             Assert.True(Directory.Exists(rootDirectory), $"Directory {rootDirectory} does not exist");
 
             var result = new string[files.Length];
@@ -1513,6 +1520,7 @@ namespace Microsoft.Build.UnitTests
                 Path = System.IO.Path.GetFullPath($"TMP_{Guid.NewGuid()}");
                 Directory.CreateDirectory(_path);
 
+                // TODO: this could use TemporaryEnvironment
                 _oldtempPaths = SetTempPath(_path);
             }
 
@@ -1578,6 +1586,40 @@ namespace Microsoft.Build.UnitTests
                 }
 
                 return tempPaths;
+            }
+        }
+
+        internal class TemporaryEnvironment : IDisposable
+        {
+            private bool _disposed;
+            private readonly string _name;
+            private readonly string _originalValue;
+
+            public TemporaryEnvironment(string name, string value)
+            {
+                _name = name;
+                _originalValue = Environment.GetEnvironmentVariable(name);
+
+                Environment.SetEnvironmentVariable(name, value);
+            }
+
+            public void Dispose()
+            {
+                Dispose(true);
+                GC.SuppressFinalize(this);
+            }
+
+            private void Dispose(bool disposing)
+            {
+                if (!_disposed)
+                {
+                    if (disposing)
+                    {
+                        Environment.SetEnvironmentVariable(_name, _originalValue);
+                    }
+
+                    _disposed = true;
+                }
             }
         }
 

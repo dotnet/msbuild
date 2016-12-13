@@ -85,6 +85,7 @@
     <Compile Include="Construction\ElementLocationPublic_Tests.cs" />
     <Compile Include="Construction\ProjectChooseElement_Tests.cs" />
     <Compile Include="Construction\ProjectFormatting_Tests.cs" />
+    <Compile Include="Construction\ProjectSdkImplicitImport_Tests.cs" />
     <Compile Include="Construction\ProjectImportElement_Tests.cs" />
     <Compile Include="Construction\ProjectImportGroupElement_Tests.cs" />
     <Compile Include="Construction\ProjectItemDefinitionGroupElement_Tests.cs" />
@@ -130,7 +131,7 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />

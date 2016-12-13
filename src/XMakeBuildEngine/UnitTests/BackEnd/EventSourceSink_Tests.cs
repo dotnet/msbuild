@@ -83,6 +83,162 @@ namespace Microsoft.Build.UnitTests.Logging
             eventHelper.RaiseBuildEvent(RaiseEventHelper.GenericStatusEvent);
         }
 
+        /// <summary>
+        /// Verifies that a warning is logged as an error when it's warning code specified.
+        /// </summary>
+        [Fact]
+        public void TreatWarningsAsErrorWhenSpecified()
+        {
+            BuildWarningEventArgs expectedBuildEvent = RaiseEventHelper.Warning;
+
+            EventSourceSink eventSourceSink = new EventSourceSink()
+            {
+                WarningsAsErrors = new HashSet<string>
+                {
+                    "123",
+                    expectedBuildEvent.Code,
+                    "ABC",
+                },
+            };
+
+            RaiseEventHelper raiseEventHelper = new RaiseEventHelper(eventSourceSink);
+            EventHandlerHelper eventHandlerHelper = new EventHandlerHelper(eventSourceSink, null);
+
+            raiseEventHelper.RaiseBuildEvent(RaiseEventHelper.Warning);
+
+            Assert.IsType<BuildErrorEventArgs>(eventHandlerHelper.RaisedEvent);
+
+            BuildErrorEventArgs actualBuildEvent = (BuildErrorEventArgs) eventHandlerHelper.RaisedEvent;
+
+            Assert.Equal(expectedBuildEvent.Code, actualBuildEvent.Code);
+            Assert.Equal(expectedBuildEvent.File, actualBuildEvent.File);
+            Assert.Equal(expectedBuildEvent.ProjectFile, actualBuildEvent.ProjectFile);
+            Assert.Equal(expectedBuildEvent.Subcategory, actualBuildEvent.Subcategory);
+            Assert.Equal(expectedBuildEvent.HelpKeyword, actualBuildEvent.HelpKeyword);
+            Assert.Equal(expectedBuildEvent.Message, actualBuildEvent.Message);
+            Assert.Equal(expectedBuildEvent.SenderName, actualBuildEvent.SenderName);
+            Assert.Equal(expectedBuildEvent.ColumnNumber, actualBuildEvent.ColumnNumber);
+            Assert.Equal(expectedBuildEvent.EndColumnNumber, actualBuildEvent.EndColumnNumber);
+            Assert.Equal(expectedBuildEvent.EndLineNumber, actualBuildEvent.EndLineNumber);
+            Assert.Equal(expectedBuildEvent.LineNumber, actualBuildEvent.LineNumber);
+            Assert.Equal(expectedBuildEvent.BuildEventContext, actualBuildEvent.BuildEventContext);
+            Assert.Equal(expectedBuildEvent.ThreadId, actualBuildEvent.ThreadId);
+            Assert.Equal(expectedBuildEvent.Timestamp, actualBuildEvent.Timestamp);
+        }
+
+        /// <summary>
+        /// Verifies that a warning is not treated as an error when other warning codes are specified.
+        /// </summary>
+        [Fact]
+        public void NotTreatWarningsAsErrorWhenNotSpecified()
+        {
+            BuildWarningEventArgs expectedBuildEvent = RaiseEventHelper.Warning;
+
+            EventSourceSink eventSourceSink = new EventSourceSink()
+            {
+                WarningsAsErrors = new HashSet<string>
+                {
+                    "123",
+                    "ABC",
+                },
+            };
+
+            RaiseEventHelper raiseEventHelper = new RaiseEventHelper(eventSourceSink);
+            EventHandlerHelper eventHandlerHelper = new EventHandlerHelper(eventSourceSink, null);
+
+            raiseEventHelper.RaiseBuildEvent(RaiseEventHelper.Warning);
+
+            Assert.Equal(expectedBuildEvent, eventHandlerHelper.RaisedEvent);
+        }
+
+        /// <summary>
+        /// Verifies that a warning is not treated as an error when other warning codes are specified.
+        /// </summary>
+        [Fact]
+        public void TreatWarningsAsErrorWhenAllSpecified()
+        {
+            EventSourceSink eventSourceSink = new EventSourceSink()
+            {
+                WarningsAsErrors = new HashSet<string>(),
+            };
+
+            RaiseEventHelper raiseEventHelper = new RaiseEventHelper(eventSourceSink);
+            EventHandlerHelper eventHandlerHelper = new EventHandlerHelper(eventSourceSink, null);
+
+            raiseEventHelper.RaiseBuildEvent(RaiseEventHelper.Warning);
+
+            Assert.IsType<BuildErrorEventArgs>(eventHandlerHelper.RaisedEvent);
+        }
+
+        /// <summary>
+        /// Verifies that a warning is logged as a low importance message when it's warning code is specified.
+        /// </summary>
+        [Fact]
+        public void TreatWarningsAsMessagesWhenSpecified()
+        {
+            BuildWarningEventArgs expectedBuildEvent = RaiseEventHelper.Warning;
+
+            EventSourceSink eventSourceSink = new EventSourceSink()
+            {
+                WarningsAsMessages = new HashSet<string>
+                {
+                    "FOO",
+                    expectedBuildEvent.Code,
+                    "BAR",
+                },
+            };
+
+            RaiseEventHelper raiseEventHelper = new RaiseEventHelper(eventSourceSink);
+            EventHandlerHelper eventHandlerHelper = new EventHandlerHelper(eventSourceSink, null);
+
+            raiseEventHelper.RaiseBuildEvent(RaiseEventHelper.Warning);
+
+            Assert.IsType<BuildMessageEventArgs>(eventHandlerHelper.RaisedEvent);
+
+            BuildMessageEventArgs actualBuildEvent = (BuildMessageEventArgs)eventHandlerHelper.RaisedEvent;
+
+            Assert.Equal(expectedBuildEvent.BuildEventContext, actualBuildEvent.BuildEventContext);
+            Assert.Equal(expectedBuildEvent.Code, actualBuildEvent.Code);
+            Assert.Equal(expectedBuildEvent.ColumnNumber, actualBuildEvent.ColumnNumber);
+            Assert.Equal(expectedBuildEvent.EndColumnNumber, actualBuildEvent.EndColumnNumber);
+            Assert.Equal(expectedBuildEvent.EndLineNumber, actualBuildEvent.EndLineNumber);
+            Assert.Equal(expectedBuildEvent.File, actualBuildEvent.File);
+            Assert.Equal(expectedBuildEvent.HelpKeyword, actualBuildEvent.HelpKeyword);
+            Assert.Equal(MessageImportance.Low, actualBuildEvent.Importance);
+            Assert.Equal(expectedBuildEvent.LineNumber, actualBuildEvent.LineNumber);
+            Assert.Equal(expectedBuildEvent.Message, actualBuildEvent.Message);
+            Assert.Equal(expectedBuildEvent.ProjectFile, actualBuildEvent.ProjectFile);
+            Assert.Equal(expectedBuildEvent.SenderName, actualBuildEvent.SenderName);
+            Assert.Equal(expectedBuildEvent.Subcategory, actualBuildEvent.Subcategory);
+            Assert.Equal(expectedBuildEvent.ThreadId, actualBuildEvent.ThreadId);
+            Assert.Equal(expectedBuildEvent.Timestamp, actualBuildEvent.Timestamp);
+        }
+
+        /// <summary>
+        /// Verifies that a warning is not treated as a low importance message when other warning codes are specified.
+        /// </summary>
+        [Fact]
+        public void NotTreatWarningsAsMessagesWhenNotSpecified()
+        {
+            BuildWarningEventArgs expectedBuildEvent = RaiseEventHelper.Warning;
+
+            EventSourceSink eventSourceSink = new EventSourceSink()
+            {
+                WarningsAsMessages = new HashSet<string>
+                {
+                    "123",
+                    "ABC",
+                },
+            };
+
+            RaiseEventHelper raiseEventHelper = new RaiseEventHelper(eventSourceSink);
+            EventHandlerHelper eventHandlerHelper = new EventHandlerHelper(eventSourceSink, null);
+
+            raiseEventHelper.RaiseBuildEvent(RaiseEventHelper.Warning);
+
+            Assert.Equal(expectedBuildEvent, eventHandlerHelper.RaisedEvent);
+        }
+
         #region TestsThrowingLoggingExceptions
 
         /// <summary>

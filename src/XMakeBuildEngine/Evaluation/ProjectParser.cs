@@ -10,6 +10,7 @@ using System;
 using System.Xml;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
 
@@ -46,7 +47,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Valid attributes on import element
         /// </summary>
-        private readonly static string[] s_validAttributesOnImport = new string[] { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.project };
+        private readonly static string[] s_validAttributesOnImport = new string[] { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.project, XMakeAttributes.sdk, XMakeAttributes.@implicit };
 
         /// <summary>
         /// Valid attributes on usingtask element
@@ -185,6 +186,62 @@ namespace Microsoft.Build.Construction
             // The element wasn't available to the ProjectRootElement constructor,
             // so we have to set it now
             _project.SetProjectRootElementFromParser(element, _project);
+
+            if (element.HasAttribute(XMakeAttributes.sdk))
+            {
+
+                var sdksString = element.GetAttribute(XMakeAttributes.sdk);
+
+                var sdks = sdksString.Contains(";") ? sdksString.Split(';') : new[] {sdksString};
+
+                foreach (var sdk in sdks)
+                {
+                    var slashIndex = sdk.LastIndexOf("/", StringComparison.Ordinal);
+                    string sdkName = slashIndex > 0 ? sdk.Substring(0, slashIndex) : sdk;
+
+                    // TODO: do something other than just ignore the version
+
+                    if (sdkName.Contains("/"))
+                    {
+                        ProjectErrorUtilities.ThrowInvalidProject(element.GetAttributeLocation(XMakeAttributes.sdk),
+                            "InvalidSdkFormat");
+                    }
+
+                    // TODO: paths should just be Sdk.props/targets; Sdk-aware imports should do the rest of the path.
+                    var initialImportPath = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildSDKsPath,
+                        sdkName, "Sdk", "Sdk.props");
+                    var finalImportPath = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildSDKsPath,
+                        sdkName, "Sdk", "Sdk.targets");
+
+                    // TODO: don't require all SDKs to have both props and targets
+                    // if (File.Exists(initialImportPath))
+                    {
+                        var implicitImportElement = element.OwnerDocument.CreateElement(XMakeElements.import);
+
+                        // TODO: make this <Import Project="Sdk.props" Sdk="$(SdkName)" />
+                        implicitImportElement.SetAttribute(XMakeAttributes.project,
+                            initialImportPath);
+                        implicitImportElement.SetAttribute(XMakeAttributes.@implicit, $"Sdk = {sdkName}");
+                        implicitImportElement.SetAttribute(XMakeAttributes.sdk, sdkName);
+
+                        element.PrependChild(implicitImportElement);
+                    }
+
+                    // TODO: don't require all SDKs to have both props and targets
+                    // if (File.Exists(finalImportPath))
+                    {
+                        var implicitImportElement = element.OwnerDocument.CreateElement(XMakeElements.import);
+
+                        // TODO: make this <Import Project="Sdk.targets" Sdk="$(SdkName)" />
+                        implicitImportElement.SetAttribute(XMakeAttributes.project,
+                            finalImportPath);
+                        implicitImportElement.SetAttribute(XMakeAttributes.@implicit, $"Sdk = {sdkName}");
+                        implicitImportElement.SetAttribute(XMakeAttributes.sdk, sdkName);
+
+                        element.AppendChild(implicitImportElement);
+                    }
+                }
+            }
 
             ParseProjectRootElementChildren(element);
         }
@@ -393,11 +450,11 @@ namespace Microsoft.Build.Construction
             return item;
         }
 
-        internal static void CheckMetadataAsAttributeName(string name, out bool isKnownAttribute, out bool isValidMetadataNameInAttribute)
+        internal static void CheckMetadataAsAttributeName(string name, out bool isReservedAttributeName, out bool isValidMetadataNameInAttribute)
         {
             if (!XmlUtilities.IsValidElementName(name))
             {
-                isKnownAttribute = false;
+                isReservedAttributeName = false;
                 isValidMetadataNameInAttribute = false;
                 return;
             }
@@ -408,13 +465,13 @@ namespace Microsoft.Build.Construction
                 //  error instead of unexpected behavior
                 if (name == s_knownAttributesOnItem[i])
                 {
-                    isKnownAttribute = true;
+                    isReservedAttributeName = true;
                     isValidMetadataNameInAttribute = false;
                     return;
                 }
                 else if (name.Equals(s_knownAttributesOnItem[i], StringComparison.OrdinalIgnoreCase))
                 {
-                    isKnownAttribute = false;
+                    isReservedAttributeName = false;
                     isValidMetadataNameInAttribute = false;
                     return;
                 }
@@ -423,7 +480,7 @@ namespace Microsoft.Build.Construction
             //  Reserve attributes starting with underscores in case we need to add more built-in attributes later
             if (name[0] == '_')
             {
-                isKnownAttribute = false;
+                isReservedAttributeName = false;
                 isValidMetadataNameInAttribute = false;
                 return;
             }
@@ -431,12 +488,12 @@ namespace Microsoft.Build.Construction
             if (FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name) ||
                 XMakeElements.IllegalItemPropertyNames[name] != null)
             {
-                isKnownAttribute = false;
+                isReservedAttributeName = false;
                 isValidMetadataNameInAttribute = false;
                 return;
             }
 
-            isKnownAttribute = false;
+            isReservedAttributeName = false;
             isValidMetadataNameInAttribute = true;
         }
 
@@ -515,6 +572,16 @@ namespace Microsoft.Build.Construction
             ProjectXmlUtilities.VerifyThrowProjectRequiredAttribute(element, XMakeAttributes.project);
 
             ProjectXmlUtilities.VerifyThrowProjectNoChildElements(element);
+
+            if (element.HasAttribute(XMakeAttributes.@implicit))
+            {
+                // the implicit attribute is only allowed on Import, but only if MSBuild itself
+                // put it there. If a user specified it in a project, error just like we would
+                // when encountering an unknown attribute.
+                ProjectXmlUtilities.VerifyThrowProjectInvalidAttribute(
+                    element.Location.Line == 0 && element.Location.Column == 0,
+                    element.GetAttributeWithLocation(XMakeAttributes.@implicit));
+            }
 
             return new ProjectImportElement(element, parent, _project);
         }

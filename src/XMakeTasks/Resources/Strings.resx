@@ -2085,6 +2085,14 @@
     <value>MSB3491: Could not write lines to file "{0}". {1}</value>
     <comment>{StrBegin="MSB3491: "}</comment>
   </data>
+  <data name="WriteLinesToFile.ErrorReadingFile">
+    <value>MSB3492: Could not read existing file "{0}" to determine whether its contents are up to date. Overwriting it.</value>
+    <comment>{StrBegin="MSB3491: "}</comment>
+  </data>
+  <data name="WriteLinesToFile.SkippingUnchangedFile">
+    <value>MSB3493: </value>
+    <comment>{StrBegin="Skipping write to file "{0}" because content would not change."}</comment>
+  </data>
   <!--
         The GetReferenceAssemblyPaths message bucket is: MSB3642 - MSB3646.
         If this bucket overflows, pls. contact 'vsppbdev'.
@@ -2616,6 +2624,10 @@
   </data>
 
 
+  <data name="ErrorAndWarning.EmptyMessage">
+    <!-- When a user did not specify a message to an <Error /> or <Warning /> task -->
+    <value>(No message specified)</value>
+  </data>
   <!--
         The tasks message bucket is: MSB3001 - MSB3999
 

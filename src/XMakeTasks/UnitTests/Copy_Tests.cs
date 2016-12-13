@@ -123,6 +123,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void DoNotNormallyCopyOverReadOnlyFile()
         {
             string source = FileUtilities.GetTemporaryFile();
@@ -181,6 +182,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void CopyOverReadOnlyFileEnvironmentOverride()
         {
             string source = FileUtilities.GetTemporaryFile();
@@ -242,6 +244,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void AlwaysRetryCopyEnvironmentOverride()
         {
             string source = FileUtilities.GetTemporaryFile();
@@ -309,6 +312,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void CopyOverReadOnlyFileParameterIsSet()
         {
             string source = FileUtilities.GetTemporaryFile();
@@ -438,6 +442,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void DoCopyOverDifferentFile()
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
@@ -673,6 +678,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void DoRetryWhenDestinationLocked()
         {
             string destinationFile = Path.GetTempFileName();
@@ -1107,6 +1113,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void CopyFileOnItselfAndFailACopy()
         {
             string temp = Path.GetTempPath();

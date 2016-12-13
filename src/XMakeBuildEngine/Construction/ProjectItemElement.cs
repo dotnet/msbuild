@@ -460,5 +460,10 @@ namespace Microsoft.Build.Construction
         {
             return owner.CreateItemElement(this.ItemType, this.Include);
         }
+
+        /// <summary>
+        /// Do not clone attributes which can be metadata. The corresponding expressed as attribute project elements are responsible for adding their attribute
+        /// </summary>
+        protected override bool ShouldCloneXmlAttribute(XmlAttribute attribute) => !ProjectMetadataElement.AttributeNameIsValidMetadataName(attribute.LocalName);
     }
 }

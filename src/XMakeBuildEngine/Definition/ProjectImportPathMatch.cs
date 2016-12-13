@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -19,6 +20,9 @@ namespace Microsoft.Build.Evaluation
 
         internal ProjectImportPathMatch(string propertyName, List<string> searchPaths)
         {
+            ErrorUtilities.VerifyThrowArgumentNull(propertyName, nameof(propertyName));
+            ErrorUtilities.VerifyThrowArgumentNull(searchPaths, nameof(searchPaths));
+
             PropertyName = propertyName;
             SearchPaths = searchPaths;
             MsBuildPropertyFormat = $"$({PropertyName})";

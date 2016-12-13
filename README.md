@@ -4,26 +4,27 @@ The Microsoft Build Engine is a platform for building applications. This engine,
 For more information on MSBuild, see the [MSDN documentation](https://msdn.microsoft.com/en-us/library/dd393574%28v=vs.140%29.aspx).
 
 ### Build Status
-Full framework build from `master` (stable, inserted into Visual Studio builds):
-[![Build Status](https://ci.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_master_Windows_NT_Desktop)](https://ci.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_master_Windows_NT_Desktop)
 
-The `xplat` branch is soon to be merged back upstream. Follow the [The Great Merge](https://github.com/Microsoft/msbuild/milestone/6) milestone for progress.
+The current development branch is `xplat`. It builds for .NET Core and the full desktop .NET framework.
 
 | Runtime\OS | Windows | Ubuntu 14.04 | Ubuntu 16.04 |Mac OS X|
 |:------|:------:|:------:|:------:|:------:|
-| **Full Framework** |[![Build Status](https://ci.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_xplat_Windows_NT_Desktop)](https://ci.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_xplat_Windows_NT_Desktop)| N/A | N/A | N/A |
-|**.NET Core**|[![Build Status](https://ci.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_xplat_Windows_NT_CoreCLR)](https://ci.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_xplat_Windows_NT_CoreCLR)|[![Build Status](https://ci.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_xplat_Ubuntu14.04_CoreCLR)](https://ci.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_xplat_Ubuntu14.04_CoreCLR)|[![Build Status](https://ci.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_xplat_Ubuntu16.04_CoreCLR)](https://ci.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_xplat_Ubuntu16.04_CoreCLR)|[![Build Status](https://ci.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_xplat_OSX_CoreCLR)](https://ci.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_xplat_OSX_CoreCLR)|
+| **Full Framework** |[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_xplat_Windows_NT_Desktop)](https://ci2.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_xplat_Windows_NT_Desktop)| N/A | N/A | N/A |
+|**.NET Core**|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_xplat_Windows_NT_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_xplat_Windows_NT_CoreCLR)|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_xplat_Ubuntu14.04_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_xplat_Ubuntu14.04_CoreCLR)|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_xplat_Ubuntu16.04_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_xplat_Ubuntu16.04_CoreCLR)|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_xplat_OSX_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_xplat_OSX_CoreCLR)|
+
+Full-framework-only build from `master` (deprecated):
+[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/master/innerloop_master_Windows_NT_Desktop)](https://ci2.dot.net/job/Microsoft_msbuild/job/master/job/innerloop_master_Windows_NT_Desktop)
+
 
 [![Join the chat at https://gitter.im/Microsoft/msbuild](https://badges.gitter.im/Microsoft/msbuild.svg)](https://gitter.im/Microsoft/msbuild?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Check out what we're working on using our Waffle board!](https://badge.waffle.io/Microsoft/msbuild.svg?label=In+Progress&title=waffle+board)](http://waffle.io/Microsoft/msbuild)
 
 ### Source code
 
 * Clone the sources: `git clone https://github.com/Microsoft/msbuild.git`
 
 ### Building
-## Building MSBuild in VS 2015
-For the full supported experience, you will need to have Visual Studio 2015. You can open the solution in Visual Studio 2013, but you will encounter issues building with the provided scripts.
+## Building MSBuild with VS 2015
+For the full supported experience, you will need to have Visual Studio 2015. You can open the solution in Visual Studio 2017 RC, but you will encounter issues building with the provided scripts.
 
 To get started on **Visual Studio 2015**:
 
@@ -32,8 +33,7 @@ To get started on **Visual Studio 2015**:
   - _Universal Windows App Development Tools_
     - _Tools and Windows SDK 10.0.10240_
 2. Clone the source code (see above).
-3. (on the `xplat` branch only) Initialize tools the first time: `init-tools.cmd`
-4. Restore NuGet packages: `msbuild /t:BulkRestoreNugetPackages build.proj`
+3. Build the code using the `cibuild.cmd` script.
 5. Open src/MSBuild.sln solution in Visual Studio 2015.
 
 ## Building MSBuild in Unix (Mac & Linux)

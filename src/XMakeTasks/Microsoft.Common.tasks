@@ -125,6 +125,7 @@
     <UsingTask TaskName="Microsoft.Build.Tasks.GetFrameworkPath"                      AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
     <UsingTask TaskName="Microsoft.Build.Tasks.GetFrameworkSdkPath"                   AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
     <UsingTask TaskName="Microsoft.Build.Tasks.GetReferenceAssemblyPaths"             AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.Hash"                                  AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
     <UsingTask TaskName="Microsoft.Build.Tasks.LC"                                    AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
     <UsingTask TaskName="Microsoft.Build.Tasks.MakeDir"                               AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
     <UsingTask TaskName="Microsoft.Build.Tasks.Message"                               AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
@@ -168,8 +169,8 @@
     <UsingTask TaskName="Microsoft.Build.Tasks.XslTransformation"                     AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
     <UsingTask TaskName="Microsoft.Build.Tasks.WinMDExp"                              AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
 
-    <!-- Roslyn tasks are now in Tasks.Roslyn.dll -->
-    <UsingTask TaskName="Microsoft.CodeAnalysis.BuildTasks.Csc"                       AssemblyFile="Microsoft.Build.Tasks.CodeAnalysis.dll" Condition="'$(MSBuildAssemblyVersion)' != ''" />
-    <UsingTask TaskName="Microsoft.CodeAnalysis.BuildTasks.Vbc"                       AssemblyFile="Microsoft.Build.Tasks.CodeAnalysis.dll" Condition="'$(MSBuildAssemblyVersion)' != ''" />
+    <!-- Roslyn tasks are now in an assembly owned and shipped by Roslyn -->
+    <UsingTask TaskName="Microsoft.CodeAnalysis.BuildTasks.Csc"                       AssemblyFile="$(RoslynTargetsPath)\Microsoft.Build.Tasks.CodeAnalysis.dll" Condition="'$(MSBuildAssemblyVersion)' != ''" />
+    <UsingTask TaskName="Microsoft.CodeAnalysis.BuildTasks.Vbc"                       AssemblyFile="$(RoslynTargetsPath)\Microsoft.Build.Tasks.CodeAnalysis.dll" Condition="'$(MSBuildAssemblyVersion)' != ''" />
 </Project>
 

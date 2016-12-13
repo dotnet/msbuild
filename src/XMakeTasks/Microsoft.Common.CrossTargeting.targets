@@ -10,7 +10,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
 
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ImportByWildcardBeforeMicrosoftCommonCrossTargetingTargets Condition="'$(ImportByWildcardBeforeMicrosoftCommonCrossTargetingTargets)' == ''">true</ImportByWildcardBeforeMicrosoftCommonCrossTargetingTargets>
   </PropertyGroup>

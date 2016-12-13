@@ -323,7 +323,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </Target>
 
     <PropertyGroup>
-        <CSharpCoreTargetsPath Condition="'$(CSharpCoreTargetsPath)' == ''">Microsoft.CSharp.Core.targets</CSharpCoreTargetsPath>
+        <CSharpCoreTargetsPath Condition="'$(CSharpCoreTargetsPath)' == ''">$(RoslynTargetsPath)\Microsoft.CSharp.Core.targets</CSharpCoreTargetsPath>
     </PropertyGroup>
 
     <Import Project="$(CSharpCoreTargetsPath)" />

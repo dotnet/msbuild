@@ -100,6 +100,16 @@ namespace Microsoft.Build.Shared
             _endColumn = 0;
         }
 
+        /// <summary>
+        /// Creates an instance of this class using the information in the given XmlException and file location.
+        /// </summary>
+        internal BuildEventFileInfo(string file, XmlException e) : this(e)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(file, nameof(file));
+
+            _file = file;
+        }
+
         #endregion
 
         #region Properties

@@ -430,6 +430,86 @@ namespace Microsoft.Build.UnitTests
             File.Delete(task.OutputFile.ItemSpec);
         }
 
+        public static string EscapedLineSeparator => NativeMethodsShared.IsWindows ? "\\r\\n" : "\\n";
+
+        /// <summary>
+        /// Multi line argument values should cause a verbatim string to be used
+        /// </summary>
+        [Fact]
+        public void MultilineAttributeCSharp()
+        {
+            var lines = new[] { "line 1", "line 2", "line 3" };
+            var multilineString = String.Join(Environment.NewLine, lines);
+
+            WriteCodeFragment task = new WriteCodeFragment();
+            MockEngine engine = new MockEngine(true);
+            task.BuildEngine = engine;
+            TaskItem attribute = new TaskItem("System.Reflection.AssemblyDescriptionAttribute");
+            attribute.SetMetadata("_Parameter1", multilineString);
+            attribute.SetMetadata("Description", multilineString);
+            task.AssemblyAttributes = new TaskItem[] { attribute };
+            task.Language = "c#";
+            task.OutputDirectory = new TaskItem(Path.GetTempPath());
+            bool result = task.Execute();
+
+            Assert.Equal(true, result);
+
+            string content = File.ReadAllText(task.OutputFile.ItemSpec);
+            Console.WriteLine(content);
+
+            var csMultilineString = lines.Aggregate((l1, l2) => l1 + EscapedLineSeparator + l2);
+            CheckContentCSharp(content, $"[assembly: System.Reflection.AssemblyDescriptionAttribute(\"{csMultilineString}\", Description=\"{csMultilineString}\")]");
+
+            File.Delete(task.OutputFile.ItemSpec);
+        }
+
+        private static readonly string VBCarriageReturn = "Global.Microsoft.VisualBasic.ChrW(13)";
+        private static readonly string VBLineFeed = "Global.Microsoft.VisualBasic.ChrW(10)";
+        private static readonly string WindowsNewLine = $"{VBCarriageReturn}&{VBLineFeed}";
+
+        public static readonly string VBLineSeparator =
+#if FEATURE_CODEDOM
+            WindowsNewLine;
+#else
+            NativeMethodsShared.IsWindows
+                ? WindowsNewLine
+                : VBLineFeed;
+#endif
+
+        /// <summary>
+        /// Multi line argument values should cause a verbatim string to be used
+        /// </summary>
+        [Fact]
+        public void MultilineAttributeVB()
+        {
+            var lines = new []{ "line 1", "line 2", "line 3" };
+            var multilineString = String.Join(Environment.NewLine, lines);
+
+            WriteCodeFragment task = new WriteCodeFragment();
+            MockEngine engine = new MockEngine(true);
+            task.BuildEngine = engine;
+            TaskItem attribute = new TaskItem("System.Reflection.AssemblyDescriptionAttribute");
+            attribute.SetMetadata("_Parameter1", multilineString);
+            attribute.SetMetadata("Description", multilineString);
+            task.AssemblyAttributes = new TaskItem[] { attribute };
+            task.Language = "visualbasic";
+            task.OutputDirectory = new TaskItem(Path.GetTempPath());
+            bool result = task.Execute();
+
+            Assert.Equal(true, result);
+
+            string content = File.ReadAllText(task.OutputFile.ItemSpec);
+            Console.WriteLine(content);
+
+            var vbMultilineString = lines
+                .Select(l => $"\"{l}\"")
+                .Aggregate((l1, l2) => $"{l1}&{VBLineSeparator}&{l2}");
+
+            CheckContentVB(content, $"<Assembly: System.Reflection.AssemblyDescriptionAttribute({vbMultilineString}, Description:={vbMultilineString})>");
+
+            File.Delete(task.OutputFile.ItemSpec);
+        }
+
         /// <summary>
         /// Some attributes only allow positional constructor arguments.
         /// To set those, use metadata names like "_Parameter1", "_Parameter2" etc.

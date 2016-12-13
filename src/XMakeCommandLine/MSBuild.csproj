@@ -26,6 +26,9 @@
     <ApplicationIcon>MSBuild.ico</ApplicationIcon>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(MonoBuild)' == 'true'">
+    <TargetExt>.dll</TargetExt>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
     <StartAction Condition="'$(StartAction)'==''">Program</StartAction>
   </PropertyGroup>

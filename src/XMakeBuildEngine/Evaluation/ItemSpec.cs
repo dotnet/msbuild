@@ -91,7 +91,7 @@ namespace Microsoft.Build.Evaluation
                         var containsRealWildcards = FileMatcher.HasWildcards(splitEscaped);
 
                         // '*' is an illegal character to have in a filename.
-                        // todo file-system assumption on legal path characters: https://github.com/Microsoft/msbuild/issues/781
+                        // todo: file-system assumption on legal path characters: https://github.com/Microsoft/msbuild/issues/781
                         if (containsEscapedWildcards && containsRealWildcards)
                         {
 
@@ -208,7 +208,7 @@ namespace Microsoft.Build.Evaluation
             : this(
                 itemSpecFragment,
                 projectPath,
-                new Lazy<Func<string, bool>>(() => EngineFileUtilities.GetMatchTester(itemSpecFragment, projectPath)))
+                new Lazy<Func<string, bool>>(() => EngineFileUtilities.GetFileSpecMatchTester(itemSpecFragment, projectPath)))
         {
         }
 

@@ -12,7 +12,7 @@ using System.Collections.Generic;
 namespace Microsoft.Build.Collections
 {
     /// <summary>
-    /// Enumerable that uses a provided <see cref="Converter&lt;TFrom, TTo&gt;"/> delegate to
+    /// Enumerable that uses a provided Converter delegate to
     /// convert each item from a backing enumerator as it is returned.
     /// </summary>
     /// <typeparam name="TFrom">Type of underlying enumerator</typeparam>
@@ -55,7 +55,7 @@ namespace Microsoft.Build.Collections
         }
 
         /// <summary>
-        /// Enumerable that uses a provided <see cref="Converter&lt;TFrom, TTo&gt;"/> delegate to
+        /// Enumerable that uses a provided Converter delegate to
         /// convert each item from a backing enumerator as it is returned.
         /// </summary>
         /// <typeparam name="TFrom2">Type of underlying enumerator</typeparam>

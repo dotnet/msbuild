@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Security;
 using System.Text;
@@ -491,6 +492,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                 case "2":
                     // Sometimes easier to attach rather than deal with JIT prompt
+                    Console.WriteLine($"Waiting for debugger to attach (PID {Process.GetCurrentProcess().Id}).  Press enter to continue...");
                     Console.ReadLine();
                     break;
             }
@@ -534,8 +536,8 @@ namespace Microsoft.Build.CommandLine
                 List<DistributedLoggerRecord> distributedLoggerRecords = null;
 #if FEATURE_XML_SCHEMA_VALIDATION
                 bool needToValidateProject = false;
-#endif
                 string schemaFile = null;
+#endif
                 int cpuCount = 1;
 #if FEATURE_NODE_REUSE
                 bool enableNodeReuse = true;
@@ -545,6 +547,8 @@ namespace Microsoft.Build.CommandLine
                 TextWriter preprocessWriter = null;
                 bool debugger = false;
                 bool detailedSummary = false;
+                ISet<string> warningsAsErrors = null;
+                ISet<string> warningsAsMessages = null;
 
                 CommandLineSwitches switchesFromAutoResponseFile;
                 CommandLineSwitches switchesNotFromAutoResponseFile;
@@ -571,6 +575,8 @@ namespace Microsoft.Build.CommandLine
                         ref preprocessWriter,
                         ref debugger,
                         ref detailedSummary,
+                        ref warningsAsErrors,
+                        ref warningsAsMessages,
                         recursing: false
                         ))
                 {
@@ -599,7 +605,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_XML_SCHEMA_VALIDATION
                             needToValidateProject, schemaFile,
 #endif
-                            cpuCount, enableNodeReuse, preprocessWriter, debugger, detailedSummary))
+                            cpuCount, enableNodeReuse, preprocessWriter, debugger, detailedSummary, warningsAsErrors, warningsAsMessages))
                         {
                             exitType = ExitType.BuildError;
                         }
@@ -890,7 +896,9 @@ namespace Microsoft.Build.CommandLine
             bool enableNodeReuse,
             TextWriter preprocessWriter,
             bool debugger,
-            bool detailedSummary
+            bool detailedSummary,
+            ISet<string> warningsAsErrors,
+            ISet<string> warningsAsMessages
         )
         {
             if (String.Equals(Path.GetExtension(projectFile), ".vcproj", StringComparison.OrdinalIgnoreCase) ||
@@ -1054,6 +1062,8 @@ namespace Microsoft.Build.CommandLine
                     parameters.ToolsetDefinitionLocations = Microsoft.Build.Evaluation.ToolsetDefinitionLocations.ConfigurationFile | Microsoft.Build.Evaluation.ToolsetDefinitionLocations.Registry;
                     parameters.DetailedSummary = detailedSummary;
                     parameters.LogTaskInputs = logTaskInputs;
+                    parameters.WarningsAsErrors = warningsAsErrors;
+                    parameters.WarningsAsMessages = warningsAsMessages;
 
                     if (!String.IsNullOrEmpty(toolsVersion))
                     {
@@ -1428,6 +1438,7 @@ namespace Microsoft.Build.CommandLine
                         bool multipleParametersAllowed;
                         string missingParametersErrorMessage;
                         bool unquoteParameters;
+                        bool allowEmptyParameters;
 
                         // Special case: for the switch "/m" or "/maxCpuCount" we wish to pretend we saw "/m:<number of cpus>"
                         // This allows a subsequent /m:n on the command line to override it.
@@ -1448,9 +1459,9 @@ namespace Microsoft.Build.CommandLine
                         {
                             GatherParameterlessCommandLineSwitch(commandLineSwitches, parameterlessSwitch, switchParameters, duplicateSwitchErrorMessage, unquotedCommandLineArg);
                         }
-                        else if (CommandLineSwitches.IsParameterizedSwitch(switchName, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters))
+                        else if (CommandLineSwitches.IsParameterizedSwitch(switchName, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out allowEmptyParameters))
                         {
-                            GatherParameterizedCommandLineSwitch(commandLineSwitches, parameterizedSwitch, switchParameters, duplicateSwitchErrorMessage, multipleParametersAllowed, missingParametersErrorMessage, unquoteParameters, unquotedCommandLineArg);
+                            GatherParameterizedCommandLineSwitch(commandLineSwitches, parameterizedSwitch, switchParameters, duplicateSwitchErrorMessage, multipleParametersAllowed, missingParametersErrorMessage, unquoteParameters, unquotedCommandLineArg, allowEmptyParameters);
                         }
                         else
                         {
@@ -1681,7 +1692,8 @@ namespace Microsoft.Build.CommandLine
             bool multipleParametersAllowed,
             string missingParametersErrorMessage,
             bool unquoteParameters,
-            string unquotedCommandLineArg
+            string unquotedCommandLineArg,
+            bool allowEmptyParameters
         )
         {
             if (// switch must have parameters
@@ -1700,7 +1712,7 @@ namespace Microsoft.Build.CommandLine
                     }
 
                     // save the parameters after unquoting and splitting them if necessary
-                    if (!commandLineSwitches.SetParameterizedSwitch(parameterizedSwitch, unquotedCommandLineArg, switchParameters, multipleParametersAllowed, unquoteParameters))
+                    if (!commandLineSwitches.SetParameterizedSwitch(parameterizedSwitch, unquotedCommandLineArg, switchParameters, multipleParametersAllowed, unquoteParameters, allowEmptyParameters))
                     {
                         // if parsing revealed there were no real parameters, flag an error, unless the parameters are optional
                         if (missingParametersErrorMessage != null)
@@ -1790,6 +1802,8 @@ namespace Microsoft.Build.CommandLine
             ref TextWriter preprocessWriter,
             ref bool debugger,
             ref bool detailedSummary,
+            ref ISet<string> warningsAsErrors,
+            ref ISet<string> warningsAsMessages,
             bool recursing
         )
         {
@@ -1893,6 +1907,8 @@ namespace Microsoft.Build.CommandLine
                                                                ref preprocessWriter,
                                                                ref debugger,
                                                                ref detailedSummary,
+                                                               ref warningsAsErrors,
+                                                               ref warningsAsMessages,
                                                                recursing: true
                                                              );
                         }
@@ -1926,6 +1942,10 @@ namespace Microsoft.Build.CommandLine
                     debugger = commandLineSwitches.IsParameterlessSwitchSet(CommandLineSwitches.ParameterlessSwitch.Debugger);
 #endif
                     detailedSummary = commandLineSwitches.IsParameterlessSwitchSet(CommandLineSwitches.ParameterlessSwitch.DetailedSummary);
+
+                    warningsAsErrors = ProcessWarnAsErrorSwitch(commandLineSwitches);
+
+                    warningsAsMessages = ProcessWarnAsMessageSwitch(commandLineSwitches);
 
                     // figure out which loggers are going to listen to build events
                     string[][] groupedFileLoggerParameters = commandLineSwitches.GetFileLoggerParameters();
@@ -2032,6 +2052,59 @@ namespace Microsoft.Build.CommandLine
             }
 
             return writer;
+        }
+
+        internal static ISet<string> ProcessWarnAsErrorSwitch(CommandLineSwitches commandLineSwitches)
+        {
+            // TODO: Parse an environment variable as well?
+
+            if (!commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.WarningsAsErrors))
+            {
+                return null;
+            }
+
+            string[] parameters = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.WarningsAsErrors];
+
+            ISet<string> warningsAsErrors = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (string code in parameters
+                .SelectMany(parameter => parameter?.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries) ?? new string[] { null }))
+            {
+                if (code == null)
+                {
+                    // An empty /warnaserror is added as "null".  In this case, the list is cleared
+                    // so that all warnings are treated errors
+                    warningsAsErrors.Clear();
+                }
+                else if(!String.IsNullOrWhiteSpace(code))
+                {
+                    warningsAsErrors.Add(code.Trim());
+                }
+            }
+
+            return warningsAsErrors;
+        }
+
+        internal static ISet<string> ProcessWarnAsMessageSwitch(CommandLineSwitches commandLineSwitches)
+        {
+            if (!commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.WarningsAsMessages))
+            {
+                return null;
+            }
+
+            string[] parameters = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.WarningsAsMessages];
+
+            ISet<string> warningsAsMessages = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (string code in parameters
+                .SelectMany(parameter => parameter?.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries))
+                .Where(i => !String.IsNullOrWhiteSpace(i))
+                .Select(i => i.Trim()))
+            {
+                warningsAsMessages.Add(code);
+            }
+
+            return warningsAsMessages;
         }
 
         /// <summary>
@@ -2203,13 +2276,33 @@ namespace Microsoft.Build.CommandLine
         {
             ErrorUtilities.VerifyThrow(parameters.Length <= 1, "It should not be possible to specify more than 1 project at a time.");
             string projectFile = null;
-            // We need to look in the current directory for a project file...
-            if (parameters.Length == 0)
+
+            string projectDirectory = null;
+
+            if (parameters.Length == 1)
+            {
+                projectFile = FileUtilities.FixFilePath(parameters[0]);
+
+                if (Directory.Exists(projectFile))
+                {
+                    // If the project file is actually a directory then change the directory to be searched
+                    // and null out the project file
+                    projectDirectory = projectFile;
+                    projectFile = null;
+                }
+                else
+                {
+                    InitializationException.VerifyThrow(File.Exists(projectFile), "ProjectNotFoundError", projectFile);
+                }
+            }
+
+            // We need to look in a directory for a project file...
+            if (projectFile == null)
             {
                 // Get all files in the current directory that have a proj-like extension
-                string[] potentialProjectFiles = getFiles(".", "*.*proj");
+                string[] potentialProjectFiles = getFiles(projectDirectory ?? ".", "*.*proj");
                 // Get all files in the current directory that have a sln extension
-                string[] potentialSolutionFiles = getFiles(".", "*.sln");
+                string[] potentialSolutionFiles = getFiles(projectDirectory ?? ".", "*.sln");
 
                 List<string> extensionsToIgnore = new List<string>();
                 if (projectsExtensionsToIgnore != null)
@@ -2265,12 +2358,12 @@ namespace Microsoft.Build.CommandLine
                     string solutionName = Path.GetFileNameWithoutExtension(potentialSolutionFiles[0]);
                     string projectName = Path.GetFileNameWithoutExtension(potentialProjectFiles[0]);
                     // Compare the names and error if they are not identical
-                    InitializationException.VerifyThrow(String.Compare(solutionName, projectName, StringComparison.OrdinalIgnoreCase) == 0, "AmbiguousProjectError");
+                    InitializationException.VerifyThrow(String.Compare(solutionName, projectName, StringComparison.OrdinalIgnoreCase) == 0, projectDirectory == null ? "AmbiguousProjectError" : "AmbiguousProjectDirectoryError", null, projectDirectory);
                 }
                 // If there is more than one solution file in the current directory we have no idea which one to use
                 else if (potentialSolutionFiles.Length > 1)
                 {
-                    InitializationException.VerifyThrow(false, "AmbiguousProjectError");
+                    InitializationException.VerifyThrow(false, projectDirectory == null ? "AmbiguousProjectError" : "AmbiguousProjectDirectoryError", null, projectDirectory);
                 }
                 // If there is more than one project file in the current directory we may be able to figure it out
                 else if (potentialProjectFiles.Length > 1)
@@ -2303,7 +2396,7 @@ namespace Microsoft.Build.CommandLine
                             }
                         }
                     }
-                    InitializationException.VerifyThrow(!isAmbiguousProject, "AmbiguousProjectError");
+                    InitializationException.VerifyThrow(!isAmbiguousProject, projectDirectory == null ? "AmbiguousProjectError" : "AmbiguousProjectDirectoryError", null, projectDirectory);
                 }
                 // if there are no project or solution files in the directory, we can't build
                 else if ((potentialProjectFiles.Length == 0) &&
@@ -2316,11 +2409,6 @@ namespace Microsoft.Build.CommandLine
                 // If only 1 solution build the solution.  If only 1 project build the project
                 // If 1 solution and 1 project and they are of the same name build the solution
                 projectFile = (potentialSolutionFiles.Length == 1) ? potentialSolutionFiles[0] : potentialProjectFiles[0];
-            }
-            else
-            {
-                projectFile = FileUtilities.FixFilePath(parameters[0]);
-                InitializationException.VerifyThrow(File.Exists(projectFile), "ProjectNotFoundError", projectFile);
             }
 
             return projectFile;
@@ -3126,7 +3214,11 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_18_DistributedLoggerSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_21_DistributedFileLoggerSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_11_LoggerSwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_28_WarnAsErrorSwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_29_WarnAsMessageSwitch"));
+#if FEATURE_XML_SCHEMA_VALIDATION
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_15_ValidateSwitch"));
+#endif
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_19_IgnoreProjectExtensionsSwitch"));
 #if FEATURE_NODE_REUSE
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_24_NodeReuse"));

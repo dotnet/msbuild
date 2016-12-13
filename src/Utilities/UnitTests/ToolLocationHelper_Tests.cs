@@ -59,6 +59,7 @@ namespace Microsoft.Build.UnitTests
 
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void GetApiContractReferencesHandlesNonExistingLocation()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -226,6 +227,7 @@ namespace Microsoft.Build.UnitTests
 
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void GatherExtensionSDKsInvalidVersionDirectory()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -250,6 +252,7 @@ namespace Microsoft.Build.UnitTests
 
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void GatherExtensionSDKsNoManifest()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -274,6 +277,7 @@ namespace Microsoft.Build.UnitTests
 
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void GatherExtensionSDKsEmptyManifest()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -299,6 +303,7 @@ namespace Microsoft.Build.UnitTests
 
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void GatherExtensionSDKsGarbageManifest()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -633,6 +638,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void ExerciseMiscToolLocationHelperMethods()
         {
             Assert.Equal(ToolLocationHelper.GetDotNetFrameworkVersionFolderPrefix(TargetDotNetFrameworkVersion.Version11), FrameworkLocationHelper.dotNetFrameworkVersionFolderPrefixV11);
@@ -1086,6 +1092,7 @@ namespace Microsoft.Build.UnitTests
 
 #pragma warning restore 618
 
+#if FEATURE_CODETASKFACTORY
         private static string s_verifyToolsetAndToolLocationHelperProjectCommonContent = @"
                                     string currentInstallFolderLocation = null;
 
@@ -1139,7 +1146,6 @@ namespace Microsoft.Build.UnitTests
                                     }
   ";
 
-#if FEATURE_CODETASKFACTORY
         [Fact]
         public void VerifyToolsetAndToolLocationHelperAgree()
         {

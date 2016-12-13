@@ -105,6 +105,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void SimpleBuild()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -358,6 +359,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void InProcForwardPropertiesFromChild()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -410,6 +412,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void InProcMsBuildForwardAllPropertiesFromChild()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -877,6 +880,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void SimpleBuildWithFailure()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -898,6 +902,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void SimpleBuildWithFailureAndWarningOnlyLogCriticalEventsTrue()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -933,6 +938,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void SimpleBuildWithFailureAndWarningOnlyLogCriticalEventsFalse()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1133,6 +1139,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void EndBuildBlocks()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1203,6 +1210,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void SequentialBuild()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1240,6 +1248,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void OverlappingBuildSubmissions()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1283,6 +1292,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void OverlappingIdenticalBuildSubmissions()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1318,6 +1328,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void OverlappingBuildSubmissions_OnlyOneSucceeds()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1438,7 +1449,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A canceled build which waits for the task to get started before canceling.  Because it is a 2.0 task, we should
         /// wait until the task finishes normally (cancellation not supported.)
         /// </summary>
-        [Fact(Skip= "https://github.com/Microsoft/msbuild/issues/696")]
+        [Fact]
         public void CancelledBuildWithDelay20()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 != null)
@@ -1580,6 +1591,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void SequentialBuildsOfTheSameProjectAllowed()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1610,6 +1622,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void OverlappingBuildsOfTheSameProjectDifferentTargetsAreAllowed()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1651,6 +1664,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void OverlappingBuildsOfTheSameProjectSameTargetsAreAllowed()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1750,6 +1764,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void ProjectInstanceRetrievedAfterBuildMatchesSourceProject()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1777,6 +1792,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void ResetCacheClearsInstances()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1810,6 +1826,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void DisablingCacheResetKeepsInstance()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1850,6 +1867,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void GhostProjectRootElementCache()
         {
             string contents1 = ObjectModelHelpers.CleanupFileContents(@"
@@ -2005,6 +2023,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void Regress251333()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -2245,6 +2264,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         [Trait("Category", "mono-osx-failing")]
         public void CacheLifetime()
         {
@@ -2361,6 +2381,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void FailedAfterTargetInP2PShouldCauseOverallBuildFailure_MultipleEntrypoints()
         {
             string projA = null;
@@ -2511,6 +2532,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void NonOverlappingEntrypointTargetsShouldNotInfluenceEachOthersResults()
         {
             string projA = null;
@@ -3173,6 +3195,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void VerifyMultipleRequestForSameProjectWithErrors_DifferentEntrypoints()
         {
             string projA = null;
@@ -3335,6 +3358,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void TestSimultaneousSubmissionsWithLegacyThreadingData_P2P()
         {
             string projectPath1 = null;
@@ -3605,6 +3629,101 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 _buildManager.EndBuild();
             }
+        }
+
+        /// <summary>
+        /// Verifies that all warnings are treated as errors and that the overall build result is a failure.
+        /// </summary>
+        [Fact]
+        public void WarningsAreTreatedAsErrorsAll()
+        {
+            string contents = ObjectModelHelpers.CleanupFileContents(@"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+ <Target Name='target1'>
+    <Warning Text='This warning should be treated as an error' Code='ABC123'/>
+    <Warning Text='This warning should NOT be treated as an error' />
+ </Target>
+</Project>
+");
+            _parameters.WarningsAsErrors = new HashSet<string>();
+
+            Project project = CreateProject(contents, ObjectModelHelpers.MSBuildDefaultToolsVersion, _projectCollection, true);
+            ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
+            _buildManager.BeginBuild(_parameters);
+            BuildResult result1 = _buildManager.BuildRequest(new BuildRequestData(instance, new string[] { "target1" }));
+            _buildManager.EndBuild();
+
+            Assert.Equal(0, _logger.WarningCount);
+            Assert.Equal(2, _logger.ErrorCount);
+
+            Assert.Equal(BuildResultCode.Failure, result1.OverallResult);
+            Assert.True(result1.HasResultsForTarget("target1"));
+        }
+
+        /// <summary>
+        /// Verifies that only the specified warnings are treated as errors and that the overall build result is a failure.
+        /// </summary>
+        [Fact]
+        public void WarningsAreTreatedAsErrorsSpecific()
+        {
+            string contents = ObjectModelHelpers.CleanupFileContents(@"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+ <Target Name='target1'>
+    <Warning Text='This warning should be treated as an error' Code='ABC123'/>
+    <Warning Text='This warning should NOT be treated as an error' Code='NA123' />
+    <Warning Text='This warning should NOT be treated as an error' />
+ </Target>
+</Project>
+");
+            _parameters.WarningsAsErrors = new HashSet<string> { "ABC123" };
+
+            Project project = CreateProject(contents, ObjectModelHelpers.MSBuildDefaultToolsVersion, _projectCollection, true);
+            ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
+            _buildManager.BeginBuild(_parameters);
+            BuildResult result1 = _buildManager.BuildRequest(new BuildRequestData(instance, new string[] { "target1" }));
+            _buildManager.EndBuild();
+
+            Assert.Equal(2, _logger.WarningCount);
+            Assert.Equal(1, _logger.ErrorCount);
+
+            Assert.Equal(BuildResultCode.Failure, result1.OverallResult);
+            Assert.True(result1.HasResultsForTarget("target1"));
+        }
+
+        /// <summary>
+        /// Verifies that when building targets which emit warnings, they still show as succeeding but the overall build result is a failure.
+        /// </summary>
+        [Fact]
+        public void WarningsAreTreatedAsErrorsButTargetsStillSucceed()
+        {
+            string contents = ObjectModelHelpers.CleanupFileContents(@"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+<Target Name='target1'>
+    <Message Text='text'/>
+ </Target>
+ <Target Name='target2'>
+    <Warning Text='This warning should be treated as an error' Code='ABC123'/>
+ </Target>
+</Project>
+");
+            _parameters.WarningsAsErrors = new HashSet<string> { "ABC123" };
+
+            Project project = CreateProject(contents, ObjectModelHelpers.MSBuildDefaultToolsVersion, _projectCollection, true);
+            ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
+            _buildManager.BeginBuild(_parameters);
+            BuildResult buildResult = _buildManager.BuildRequest(new BuildRequestData(instance, new string[] { "target1", "target2" }));
+            _buildManager.EndBuild();
+
+            Assert.Equal(0, _logger.WarningCount);
+            Assert.Equal(1, _logger.ErrorCount);
+
+            Assert.Equal(BuildResultCode.Failure, buildResult.OverallResult);
+            Assert.True(buildResult.HasResultsForTarget("target1"));
+            Assert.True(buildResult.HasResultsForTarget("target2"));
+            // The two targets should still show as success because they don't know their warning was changed to an error
+            // Logging a warning as an error does not change execution, only the final result of the build
+            Assert.Equal(TargetResultCode.Success, buildResult.ResultsByTarget["target1"].ResultCode);
+            Assert.Equal(TargetResultCode.Success, buildResult.ResultsByTarget["target2"].ResultCode);
         }
 
         /// <summary>

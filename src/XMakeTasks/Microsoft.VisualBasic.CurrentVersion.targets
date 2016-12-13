@@ -323,7 +323,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </Target>
 
     <PropertyGroup>
-        <VisualBasicCoreTargetsPath Condition="'$(VisualBasicCoreTargetsPath)' == ''">Microsoft.VisualBasic.Core.targets</VisualBasicCoreTargetsPath>
+        <VisualBasicCoreTargetsPath Condition="'$(VisualBasicCoreTargetsPath)' == ''">$(RoslynTargetsPath)\Microsoft.VisualBasic.Core.targets</VisualBasicCoreTargetsPath>
     </PropertyGroup>
 
     <Import Project="$(VisualBasicCoreTargetsPath)" />

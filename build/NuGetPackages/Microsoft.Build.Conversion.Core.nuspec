@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>$id$</id>
     <version>$version$</version>
@@ -11,10 +11,10 @@
     <projectUrl>$projectUrl$</projectUrl>
     <iconUrl>$iconUrl$</iconUrl>
     <description>This package contains the $id$ assembly which contains logic for converting projects.  NOTE: This assembly is deprecated.</description>
-    <tags>MSBuild</tags>
     <copyright>Copyright © Microsoft Corporation</copyright>
+    <tags>MSBuild</tags>
     <dependencies>
-      <group targetFramework="net46">
+      <group targetFramework=".NETFramework4.6">
         <dependency id="Microsoft.Build" version="[$version$]" />
         <dependency id="Microsoft.Build.Engine" version="[$version$]" />
       </group>

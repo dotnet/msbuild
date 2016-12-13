@@ -178,15 +178,15 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Generates response file with arguments for lc.exe
-        /// Used when targeting framework version is 4.0 or later
+        /// Used when targeting framework version is 4.6 or later
         /// </summary>
         /// <param name="commandLine">command line builder class to add arguments to the response file</param>
         protected internal override void AddResponseFileCommands(CommandLineBuilderExtension commandLine)
         {
             Version targetFramework = Util.GetTargetFrameworkVersion(TargetFrameworkVersion);
-            // Don't generate response file on versions of the framework < 4.0
-            // They will use the 2.x SDK lc.exe which does not understand response files
-            if (targetFramework.CompareTo(new Version("4.0")) < 0)
+            // Don't generate response file on versions of the framework < 4.6
+            // They will use an older lc.exe which does not understand response files
+            if (targetFramework.CompareTo(new Version("4.6")) < 0)
             {
                 return;
             }
@@ -196,15 +196,15 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Generates command line arguments for lc.exe
-        /// Used when targeting framework version is less than 4.0
+        /// Used when targeting framework version is less than 4.6
         /// </summary>
         /// <param name="commandLine">command line builder class to add arguments to the command line</param>
         protected internal override void AddCommandLineCommands(CommandLineBuilderExtension commandLine)
         {
             Version targetFramework = Util.GetTargetFrameworkVersion(TargetFrameworkVersion);
-            // If the target framework version is < 4.0, we will be using lc.exe from an older SDK
+            // If the target framework version is < 4.6, we will be using lc.exe from an older SDK
             // In this case, we want to use command line parameters instead of a response file
-            if (targetFramework.CompareTo(new Version("4.0")) >= 0)
+            if (targetFramework.CompareTo(new Version("4.6")) >= 0)
             {
                 return;
             }

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\dir.props" />
+
+  <!-- 
+  Copies the binaries of MSBuild to a bootstrap folder so we can rebuild msbuild with itself.
+  On netcore and mono it performs a directory copy.
+  On full framework it performs a more involved deployment.
+   -->
+  <Target Name="Build">
+
+    <!-- This sometimes fails so it might need be retried. -->
+    <RemoveDir
+            Directories="$(BootstrapDestination)"
+            ContinueOnError="true"/>
+
+    <CallTarget
+      Targets="BootstrapNetCore"
+      Condition="'$(NetCoreBuild)' == 'true' Or '$(MonoBuild)' == 'true'"
+      />
+
+    <CallTarget
+      Targets="Bootstrap"
+      Condition="'$(FullFrameworkBuild)' == 'true'"
+      />
+
+  </Target>
+
+  <Target Name="Bootstrap">
+
+    <ItemGroup>
+      <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\*.targets" />
+      <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\*.props" />
+
+      <ShimTargets Include="Microsoft.Data.Entity.targets" />
+      <ShimTargets Include="Microsoft.ServiceModel.targets" />
+      <ShimTargets Include="Microsoft.WinFx.targets" />
+      <ShimTargets Include="Microsoft.WorkflowBuildExtensions.targets" />
+      <ShimTargets Include="Microsoft.Xaml.targets" />
+      <ShimTargets Include="Workflow.Targets" />
+      <ShimTargets Include="Workflow.VisualBasic.Targets" />
+
+      <InstalledMicrosoftExtensions Include="$(MSBuildExtensionsPath)\Microsoft\**\*.props" />
+      <InstalledMicrosoftExtensions Include="$(MSBuildExtensionsPath)\Microsoft\**\*.targets" />
+
+      <InstalledNuGetFiles Include="$(MSBuildExtensionsPath)\Microsoft\NuGet\*" />
+
+      <FreshlyBuiltBinaries Include="$(DeploymentDir)**\*.dll" />
+      <FreshlyBuiltBinaries Include="$(DeploymentDir)**\*.exe" />
+      <FreshlyBuiltBinaries Include="$(DeploymentDir)**\*.pdb" />
+      <FreshlyBuiltBinaries Include="$(DeploymentDir)**\*.exe.config" />
+
+      <FreshlyBuiltProjects Include="$(DeploymentDir)**\*props" />
+      <FreshlyBuiltProjects Include="$(DeploymentDir)**\*targets" />
+      <FreshlyBuiltProjects Include="$(DeploymentDir)**\*tasks" />
+    </ItemGroup>
+
+    <!-- Copy in props and targets from the machine-installed MSBuildExtensionsPath -->
+    <Copy SourceFiles="@(InstalledVersionedExtensions)"
+          DestinationFiles="@(InstalledVersionedExtensions->'$(BootstrapDestination)$(TargetMSBuildToolsVersion)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(InstalledMicrosoftExtensions)"
+          DestinationFiles="@(InstalledMicrosoftExtensions->'$(BootstrapDestination)Microsoft\%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <Copy SourceFiles="@(InstalledNuGetFiles)"
+          DestinationFiles="@(InstalledNuGetFiles->'$(BootstrapDestination)Microsoft\NuGet\%(Filename)%(Extension)')" />
+
+    <!-- Delete shim projects, because they point where we can't follow. -->
+    <!-- It would be better to just not copy these. -->
+    <Delete Files="@(ShimTargets->'$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\%(FileName)%(Extension)')" />
+
+    <!-- Copy our binaries -->
+    <Copy SourceFiles="@(FreshlyBuiltBinaries)"
+          DestinationFiles="@(FreshlyBuiltBinaries -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <!-- Copy our freshly-built props and targets, overwriting anything we copied from the machine -->
+    <Copy SourceFiles="@(FreshlyBuiltProjects)"
+          DestinationFiles="@(FreshlyBuiltProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
+  <Target Name="BootstrapNetCore">
+    <ItemGroup>
+      <DeployedItems Include="$(DeploymentDir)\**\*.*"/>
+      <!-- Work around https://github.com/Microsoft/msbuild/issues/658
+           by making sure NuGet DLLs are next to MSBuild.exe -->
+      <DeployedItems Include="$(ToolsDir)\NuGet*.dll" />
+    </ItemGroup>
+
+    <RemoveDir
+            Directories="$(BootstrapDestination)"
+            ContinueOnError="true"/>
+
+    <RemoveDir
+            Directories="$(BootstrapDestination)"
+            ContinueOnError="true"/>
+
+    <Copy SourceFiles="@(DeployedItems)"
+          DestinationFolder="$(BootstrapDestination)\%(RecursiveDir)"
+          />
+
+    <!-- Microsoft.Portable.CSharp.targets imports this file with a capital T -->
+    <Copy SourceFiles="$(DeploymentDir)\Microsoft.CSharp.targets"
+          DestinationFiles="$(BootstrapDestination)\Microsoft.CSharp.Targets" />
+
+    <RemoveDir
+            Directories="$(BaseOutputPathWithConfig)" />
+  </Target>
+</Project>

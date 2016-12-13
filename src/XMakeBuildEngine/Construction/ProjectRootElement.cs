@@ -17,6 +17,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Internal;
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
 #if MSBUILDENABLEVSPROFILING 
@@ -157,6 +158,11 @@ namespace Microsoft.Build.Construction
         private BuildEventContext _buildEventContext;
 
         /// <summary>
+        /// Xpath expression that will find any element with the implicit attribute
+        /// </summary>
+        private static readonly string ImplicitAttributeXpath = $"//*[@{XMakeAttributes.@implicit}]";
+
+        /// <summary>
         /// Initialize a ProjectRootElement instance from a XmlReader.
         /// May throw InvalidProjectFileException.
         /// Leaves the project dirty, indicating there are unsaved changes.
@@ -195,7 +201,7 @@ namespace Microsoft.Build.Construction
 
             XmlReaderSettings xrs = new XmlReaderSettings();
             xrs.DtdProcessing = DtdProcessing.Ignore;
-            
+
             var emptyProjectFile = string.Format(EmptyProjectFileContent,
                 (projectFileOptions & NewProjectFileOptions.IncludeXmlDeclaration) != 0 ? EmptyProjectFileXmlDeclaration : string.Empty,
                 (projectFileOptions & NewProjectFileOptions.IncludeToolsVersion) != 0 ? EmptyProjectFileToolsVersion : string.Empty,
@@ -704,8 +710,10 @@ namespace Microsoft.Build.Construction
                 {
                     using (ProjectWriter projectWriter = new ProjectWriter(stringWriter))
                     {
-                        projectWriter.Initialize(XmlDocument);
-                        XmlDocument.Save(projectWriter);
+                        var xmlWithNoImplicits = RemoveImplicits();
+
+                        projectWriter.Initialize(xmlWithNoImplicits);
+                        xmlWithNoImplicits.Save(projectWriter);
                     }
 
                     return stringWriter.ToString();
@@ -726,6 +734,17 @@ namespace Microsoft.Build.Construction
                 }
 
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Whether the XML is preserving formatting or not.
+        /// </summary>
+        public bool PreserveFormatting
+        {
+            get
+            {
+                return XmlDocument?.PreserveWhitespace ?? false;
             }
         }
 
@@ -1106,12 +1125,31 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         public static ProjectRootElement TryOpen(string path, ProjectCollection projectCollection)
         {
+            return TryOpen(path, projectCollection, preserveFormatting: false);
+        }
+
+        /// <summary>
+        /// Returns the ProjectRootElement for the given path if it has been loaded, or null if it is not currently in memory.
+        /// Uses the specified project collection.
+        /// </summary>
+        /// <param name="path">The path of the ProjectRootElement, cannot be null.</param>
+        /// <param name="projectCollection">The <see cref="ProjectCollection"/> to load the project into.</param>
+        /// <param name="preserveFormatting">
+        /// The formatting to open with. Must match the formatting in the collection to succeed.
+        /// </param>
+        /// <returns>The loaded ProjectRootElement, or null if it is not currently in memory.</returns>
+        /// <remarks>
+        /// It is possible for ProjectRootElements to be brought into memory and discarded due to memory pressure. Therefore
+        /// this method returning false does not indicate that it has never been loaded, only that it is not currently in memory.
+        /// </remarks>
+        public static ProjectRootElement TryOpen(string path, ProjectCollection projectCollection, bool preserveFormatting)
+        {
             ErrorUtilities.VerifyThrowArgumentLength(path, "path");
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection, "projectCollection");
 
             path = FileUtilities.NormalizePath(path);
 
-            ProjectRootElement projectRootElement = projectCollection.ProjectRootElementCache.TryGet(path);
+            ProjectRootElement projectRootElement = projectCollection.ProjectRootElementCache.TryGet(path, preserveFormatting);
 
             return projectRootElement;
         }
@@ -1714,8 +1752,10 @@ namespace Microsoft.Build.Construction
                 {
                     using (ProjectWriter projectWriter = new ProjectWriter(_projectFileLocation.File, saveEncoding))
                     {
-                        projectWriter.Initialize(XmlDocument);
-                        XmlDocument.Save(projectWriter);
+                        var xmlWithNoImplicits = RemoveImplicits();
+
+                        projectWriter.Initialize(xmlWithNoImplicits);
+                        xmlWithNoImplicits.Save(projectWriter);
                     }
 
                     _encoding = saveEncoding;
@@ -1742,6 +1782,26 @@ namespace Microsoft.Build.Construction
                 DataCollection.CommentMarkProfile(8811, endProjectSave);
             }
 #endif
+        }
+
+        private XmlDocument RemoveImplicits()
+        {
+            if (XmlDocument.SelectSingleNode(ImplicitAttributeXpath) == null)
+            {
+                return XmlDocument;
+            }
+
+            var xmlWithNoImplicits = (XmlDocument) XmlDocument.CloneNode(deep: true);
+
+            var implicitElements =
+                xmlWithNoImplicits.SelectNodes(ImplicitAttributeXpath);
+
+            foreach (XmlNode implicitElement in implicitElements)
+            {
+                implicitElement.ParentNode.RemoveChild(implicitElement);
+            }
+
+            return xmlWithNoImplicits;
         }
 
         /// <summary>
@@ -1777,8 +1837,10 @@ namespace Microsoft.Build.Construction
         {
             using (ProjectWriter projectWriter = new ProjectWriter(writer))
             {
-                projectWriter.Initialize(XmlDocument);
-                XmlDocument.Save(projectWriter);
+                var xmlWithNoImplicits = RemoveImplicits();
+
+                projectWriter.Initialize(xmlWithNoImplicits);
+                xmlWithNoImplicits.Save(projectWriter);
             }
 
             _versionOnDisk = Version;
@@ -2038,19 +2100,10 @@ namespace Microsoft.Build.Construction
                     string beginProjectLoad = String.Format(CultureInfo.CurrentCulture, "Load Project {0} From File - Start", fullPath);
                     DataCollection.CommentMarkProfile(8806, beginProjectLoad);
 #endif
-
-                    XmlReaderSettings dtdSettings = new XmlReaderSettings();
-                    dtdSettings.DtdProcessing = DtdProcessing.Ignore;
-
-                    using (var stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read))
-                    using (var stream2 = new StreamReader(stream, Encoding.UTF8, true))
-                    using (XmlReader xtr = XmlReader.Create(stream2, dtdSettings))
+                    using (var xtr = XmlReaderExtension.Create(fullPath))
                     {
-                        // Start the reader so it has an idea of what the encoding is.
-                        xtr.Read();
-                        var encoding = xtr.GetAttribute("encoding");
-                        _encoding = !string.IsNullOrEmpty(encoding) ? Encoding.GetEncoding(encoding) : stream2.CurrentEncoding;
-                        document.Load(xtr);
+                        _encoding = xtr.Encoding;
+                        document.Load(xtr.Reader);
                     }
 
                     document.FullPath = fullPath;
@@ -2077,7 +2130,7 @@ namespace Microsoft.Build.Construction
 
                     if (xmlException != null)
                     {
-                        fileInfo = new BuildEventFileInfo(xmlException);
+                        fileInfo = new BuildEventFileInfo(fullPath, xmlException);
                     }
                     else
                     {

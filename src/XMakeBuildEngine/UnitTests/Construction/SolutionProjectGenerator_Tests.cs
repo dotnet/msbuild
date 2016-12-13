@@ -114,6 +114,7 @@ namespace Microsoft.Build.UnitTests.Construction
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void EmitToolsVersionAttributeToInMemoryProject9()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV35 == null)
@@ -149,6 +150,7 @@ namespace Microsoft.Build.UnitTests.Construction
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void EmitToolsVersionAttributeToInMemoryProject10()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV35 == null)
@@ -958,6 +960,7 @@ EndGlobal
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void Regress751742_SkipNonexistentProjects()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
@@ -1376,6 +1379,7 @@ EndGlobal
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void TestVenusConfigurationDefaults()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
@@ -1406,6 +1410,7 @@ EndGlobal
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void VenusSolutionDefaultTargetFrameworkVersion()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
@@ -1445,6 +1450,7 @@ EndGlobal
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void TestTargetFrameworkPaths0()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkSdkV20 != null)
@@ -1470,6 +1476,7 @@ EndGlobal
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void TestTargetFrameworkPaths1()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
@@ -1496,6 +1503,7 @@ EndGlobal
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void TestTargetFrameworkPaths2()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
@@ -1691,6 +1699,7 @@ EndGlobal
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         [Trait("Category", "mono-osx-failing")]
         public void TestSkipInvalidConfigurationsCase()
         {

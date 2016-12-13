@@ -7,12 +7,14 @@
 
 using System;
 using System.IO;
-using System.Xml;
 using Microsoft.Build.Construction;
 
 using Xunit;
 using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Shared;
 
 
 namespace Microsoft.Build.UnitTests.OM.Construction
@@ -259,32 +261,251 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 (pe, p) => { pe.ItemGroups.ElementAt(1).AddItem("i2", "b"); });
         }
 
+        [Theory]
+        [InlineData(
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <i Include=`a` />
+  </ItemGroup>
+</Project>",
+
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <i Include=`a` />
+    <i2 Include=`b` />
+  </ItemGroup>
+</Project>")]
+
+        [InlineData(
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <i Include=`a` />
+
+  </ItemGroup>
+</Project>",
+
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <i Include=`a` />
+    <i2 Include=`b` />
+
+  </ItemGroup>
+</Project>")]
+
+        [InlineData(
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+
+    <i Include=`a` />
+  </ItemGroup>
+</Project>",
+
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+
+    <i Include=`a` />
+
+    <i2 Include=`b` />
+  </ItemGroup>
+</Project>")]
+
+        [InlineData(
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+
+    <i Include=`a` />
+
+  </ItemGroup>
+</Project>",
+
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+
+    <i Include=`a` />
+
+    <i2 Include=`b` />
+
+  </ItemGroup>
+</Project>")]
+        // AddItem ends up calling InsertAfterChild
+        public void AddChildWithExistingSiblingsViaAddItem(string projectContents, string updatedProject)
+        {
+            AssertWhiteSpacePreservation(projectContents, updatedProject,
+                (pe, p) => { pe.ItemGroups.First().AddItem("i2", "b"); });
+        }
+
+        [Theory]
+        [InlineData(
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <i Include=`a` />
+  </ItemGroup>
+</Project>",
+
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <i2 Include=`b` />
+    <i Include=`a` />
+  </ItemGroup>
+</Project>")]
+
+        [InlineData(
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <i Include=`a` />
+
+  </ItemGroup>
+</Project>",
+
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+    <i2 Include=`b` />
+    <i Include=`a` />
+
+  </ItemGroup>
+</Project>")]
+
+        [InlineData(
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+
+    <i Include=`a` />
+  </ItemGroup>
+</Project>",
+
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+
+    <i2 Include=`b` />
+
+    <i Include=`a` />
+  </ItemGroup>
+</Project>")]
+
+        [InlineData(
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+
+    <i Include=`a` />
+
+  </ItemGroup>
+</Project>",
+
+@"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup>
+
+    <i2 Include=`b` />
+
+    <i Include=`a` />
+
+  </ItemGroup>
+</Project>")]
+        public void AddChildWithExistingSiblingsViaInsertBeforeChild(string projectContents, string updatedProject)
+        {
+            AssertWhiteSpacePreservation(projectContents, updatedProject,
+                (pe, p) =>
+                {
+                    var itemGroup = pe.ItemGroups.First();
+                    var existingItemElement = itemGroup.FirstChild;
+                    var newItemElement = itemGroup.ContainingProject.CreateItemElement("i2", "b");
+
+                    itemGroup.InsertBeforeChild(newItemElement, existingItemElement);
+                });
+        }
+
+        [Fact]
+        public void VerifySaveProjectContainsCorrectLineEndings()
+        {
+            var project = @"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup> <!-- comment here -->
+
+    <i Include=`a` /> <!--
+multi-line comment here
+
+-->
+
+  </ItemGroup>
+</Project>
+";
+            string expected = @"<Project xmlns=`msbuildnamespace`>
+  <ItemGroup> <!-- comment here -->
+
+    <i2 Include=`b` />
+
+    <i Include=`a` /> <!--
+multi-line comment here
+
+-->
+
+  </ItemGroup>
+</Project>
+";
+            // Use existing test to add a sibling and verify the output is as expected (including comments)
+            AddChildWithExistingSiblingsViaInsertBeforeChild(project, expected);
+        }
+
         private void AssertWhiteSpacePreservation(string projectContents, string updatedProject,
             Action<ProjectRootElement, Project> act)
         {
-            var projectElement =
-                ProjectRootElement.Create(
-                    XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(projectContents))),
-                    ProjectCollection.GlobalProjectCollection,
-                    true);
+            // Note: This test will write the project file to disk rather than using in-memory streams.
+            // Using streams can cause issues with CRLF characters being replaced by LF going in to
+            // ProjectRootElement. Saving to disk mimics the real-world behavior so we can specifically
+            // test issues with CRLF characters being normalized. Related issue: #1340
+            var file = FileUtilities.GetTemporaryFile();
+            var expected = ObjectModelHelpers.CleanupFileContents(updatedProject);
+            string actual;
 
-            var project = new Project(projectElement);
+            try
+            {
+                // Write the projectConents to disk and load it
+                File.WriteAllText(file, ObjectModelHelpers.CleanupFileContents(projectContents));
+                var projectElement = ProjectRootElement.Open(file, ProjectCollection.GlobalProjectCollection, true);
+                var project = new Project(projectElement);
 
-            act(projectElement, project);
+                act(projectElement, project);
 
-            var writer = new StringWriter();
-            project.Save(writer);
-
-            var expected = @"<?xml version=""1.0"" encoding=""utf-16""?>" +
-                           ObjectModelHelpers.CleanupFileContents(updatedProject);
-            var actual = writer.ToString();
+                // Write the project to a UTF8 string writer to compare against
+                var writer = new EncodingStringWriter();
+                project.Save(writer);
+                actual = writer.ToString();
+            }
+            finally
+            {
+                FileUtilities.DeleteNoThrow(file);
+            }
 
             VerifyAssertLineByLine(expected, actual);
+
+#if FEATURE_XMLTEXTREADER
+            VerifyLineEndings(actual);
+#endif
         }
 
         private void VerifyAssertLineByLine(string expected, string actual)
         {
             Helpers.VerifyAssertLineByLine(expected, actual, false);
+        }
+
+        /// <summary>
+        /// Ensure that all line-endings in the save result are correct for the current OS
+        /// </summary>
+        /// <param name="projectResults">Project file contents after save.</param>
+        private void VerifyLineEndings(string projectResults)
+        {
+            if (Environment.NewLine.Length == 2)
+            {
+                // Windows, ensure that \n doesn't exist by itself
+                var crlfCount = Regex.Matches(projectResults, @"\r\n", RegexOptions.Multiline).Count;
+                var nlCount = Regex.Matches(projectResults, @"\n").Count;
+
+                // Compare number of \r\n to number of \n, they should be equal.
+                Assert.Equal(crlfCount, nlCount);
+            }
+            else
+            {
+                // Ensure we did not add \r\n
+                Assert.Equal(0, Regex.Matches(projectResults, @"\r\n", RegexOptions.Multiline).Count);
+            }
         }
     }
 }

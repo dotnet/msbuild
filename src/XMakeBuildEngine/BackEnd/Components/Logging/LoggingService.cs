@@ -9,6 +9,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -217,6 +218,16 @@ namespace Microsoft.Build.BackEnd.Logging
         /// so use synchronous version
         /// </summary>
         private LoggerMode _logMode = NativeMethodsShared.IsMono ? LoggerMode.Synchronous : LoggerMode.Asynchronous;
+
+        /// <summary>
+        /// A list of warnings to treat as errors.
+        /// </summary>
+        private ISet<string> _warningsAsErrors = null;
+
+        /// <summary>
+        /// A list of warnings to treat as low importance messages.
+        /// </summary>
+        private ISet<string> _warningsAsMessages = null;
 
         #endregion
 
@@ -442,6 +453,42 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 return _logMode;
             }
+        }
+
+        /// <summary>
+        /// Get of warnings to treat as errors.  An empty non-null set will treat all warnings as errors.
+        /// </summary>
+        public ISet<string> WarningsAsErrors
+        {
+            get { return _warningsAsErrors; }
+            set { _warningsAsErrors = value; }
+        }
+
+        /// <summary>
+        /// A list of warnings to treat as low importance messages.
+        /// </summary>
+        public ISet<string> WarningsAsMessages
+        {
+            get { return _warningsAsMessages; }
+            set { _warningsAsMessages = value; }
+        }
+
+        /// <summary>
+        /// Determines if the specified submission has logged an errors.
+        /// </summary>
+        /// <param name="submissionId">The ID of the build submission.  A value of "0" means that an error was logged outside of any build submission.</param>
+        /// <returns><code>true</code> if the build submission logged an errors, otherwise <code>false</code>.</returns>
+        public bool HasBuildSubmissionLoggedErrors(int submissionId)
+        {
+            // Warnings as errors are not tracked if the user did not specify to do so
+            if (WarningsAsErrors == null)
+            {
+                return false;
+            }
+
+            // Determine if any of the event sinks have logged an error with this submission ID
+            return (_filterEventSource != null && _filterEventSource.BuildSubmissionIdsThatHaveLoggedErrors.Contains(submissionId))
+                || (_eventSinkDictionary != null && _eventSinkDictionary.Values.Any(i => i.BuildSubmissionIdsThatHaveLoggedErrors.Contains(submissionId)));
         }
 
         /// <summary>
@@ -784,7 +831,11 @@ namespace Microsoft.Build.BackEnd.Logging
                 IForwardingLogger localForwardingLogger = null;
 
                 // create an eventSourceSink which the central logger will register with to receive the events from the forwarding logger
-                EventSourceSink eventSourceSink = new EventSourceSink();
+                EventSourceSink eventSourceSink = new EventSourceSink
+                {
+                    WarningsAsErrors = WarningsAsErrors == null ? null : new HashSet<string>(WarningsAsErrors, StringComparer.OrdinalIgnoreCase),
+                    WarningsAsMessages = WarningsAsMessages == null ? null : new HashSet<string>(WarningsAsMessages, StringComparer.OrdinalIgnoreCase),
+                };
 
                 // If the logger is already in the list it should not be registered again.
                 if (_iloggerList.Contains(centralLogger))
@@ -1096,8 +1147,12 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             if (_filterEventSource == null)
             {
-                _filterEventSource = new EventSourceSink();
-                _filterEventSource.Name = "Sink for Distributed/Filter loggers";
+                _filterEventSource = new EventSourceSink
+                {
+                    Name = "Sink for Distributed/Filter loggers",
+                    WarningsAsErrors = WarningsAsErrors == null ? null : new HashSet<string>(WarningsAsErrors, StringComparer.OrdinalIgnoreCase),
+                    WarningsAsMessages = WarningsAsMessages == null ? null : new HashSet<string>(WarningsAsMessages, StringComparer.OrdinalIgnoreCase),
+                };
             }
         }
 

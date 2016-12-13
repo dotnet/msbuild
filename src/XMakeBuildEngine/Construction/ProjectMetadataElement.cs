@@ -131,15 +131,20 @@ namespace Microsoft.Build.Construction
 
         internal static void ValidateValidMetadataAsAttributeName(string name, string parentName, IElementLocation parentLocation)
         {
-            bool isKnownAttribute;
-            bool isValidMetadataNameInAttribute;
-
-            ProjectParser.CheckMetadataAsAttributeName(name, out isKnownAttribute, out isValidMetadataNameInAttribute);
-
-            if (isKnownAttribute || !isValidMetadataNameInAttribute)
+            if (!AttributeNameIsValidMetadataName(name))
             {
                 ProjectErrorUtilities.ThrowInvalidProject(parentLocation, "InvalidMetadataAsAttribute", name, parentName);
             }
+        }
+
+        internal static bool AttributeNameIsValidMetadataName(string name)
+        {
+            bool isReservedAttributeName;
+            bool isValidMetadataNameInAttribute;
+
+            ProjectParser.CheckMetadataAsAttributeName(name, out isReservedAttributeName, out isValidMetadataNameInAttribute);
+
+            return !isReservedAttributeName && isValidMetadataNameInAttribute;
         }
 
         /// <summary>

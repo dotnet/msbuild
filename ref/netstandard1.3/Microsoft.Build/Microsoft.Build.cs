@@ -39,6 +39,7 @@ namespace Microsoft.Build.Construction
         public virtual string Condition { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } [System.Diagnostics.DebuggerStepThroughAttribute]set { } }
         public virtual Microsoft.Build.Construction.ElementLocation ConditionLocation { get { throw null; } }
         public Microsoft.Build.Construction.ProjectRootElement ContainingProject { get { throw null; } }
+        public bool IsImplicit { get { throw null; } }
         public string Label { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } [System.Diagnostics.DebuggerStepThroughAttribute]set { } }
         public Microsoft.Build.Construction.ElementLocation LabelLocation { get { throw null; } }
         public Microsoft.Build.Construction.ElementLocation Location { get { throw null; } }
@@ -49,6 +50,7 @@ namespace Microsoft.Build.Construction
         protected internal virtual Microsoft.Build.Construction.ProjectElement Clone(Microsoft.Build.Construction.ProjectRootElement factory) { throw null; }
         public virtual void CopyFrom(Microsoft.Build.Construction.ProjectElement element) { }
         protected abstract Microsoft.Build.Construction.ProjectElement CreateNewInstance(Microsoft.Build.Construction.ProjectRootElement owner);
+        protected virtual bool ShouldCloneXmlAttribute(System.Xml.XmlAttribute attribute) { throw null; }
     }
     public abstract partial class ProjectElementContainer : Microsoft.Build.Construction.ProjectElement
     {
@@ -148,6 +150,7 @@ namespace Microsoft.Build.Construction
         public Microsoft.Build.Construction.ProjectMetadataElement AddMetadata(string name, string unevaluatedValue, bool expressAsAttribute) { throw null; }
         public override void CopyFrom(Microsoft.Build.Construction.ProjectElement element) { }
         protected override Microsoft.Build.Construction.ProjectElement CreateNewInstance(Microsoft.Build.Construction.ProjectRootElement owner) { throw null; }
+        protected override bool ShouldCloneXmlAttribute(System.Xml.XmlAttribute attribute) { throw null; }
     }
     [System.Diagnostics.DebuggerDisplayAttribute("#Items={Count} Condition={Condition} Label={Label}")]
     public partial class ProjectItemGroupElement : Microsoft.Build.Construction.ProjectElementContainer
@@ -244,6 +247,7 @@ namespace Microsoft.Build.Construction
         public System.Collections.Generic.ICollection<Microsoft.Build.Construction.ProjectItemGroupElement> ItemGroupsReversed { get { throw null; } }
         public System.Collections.Generic.ICollection<Microsoft.Build.Construction.ProjectItemElement> Items { get { throw null; } }
         public System.DateTime LastWriteTimeWhenRead { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
+        public bool PreserveFormatting { get { throw null; } }
         public Microsoft.Build.Construction.ElementLocation ProjectFileLocation { get { throw null; } }
         public System.Collections.Generic.ICollection<Microsoft.Build.Construction.ProjectPropertyElement> Properties { get { throw null; } }
         public System.Collections.Generic.ICollection<Microsoft.Build.Construction.ProjectPropertyGroupElement> PropertyGroups { get { throw null; } }
@@ -315,6 +319,7 @@ namespace Microsoft.Build.Construction
         public void Save(System.Text.Encoding saveEncoding) { }
         public static Microsoft.Build.Construction.ProjectRootElement TryOpen(string path) { throw null; }
         public static Microsoft.Build.Construction.ProjectRootElement TryOpen(string path, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { throw null; }
+        public static Microsoft.Build.Construction.ProjectRootElement TryOpen(string path, Microsoft.Build.Evaluation.ProjectCollection projectCollection, bool preserveFormatting) { throw null; }
     }
     [System.Diagnostics.DebuggerDisplayAttribute("Name={Name} #Children={Count} Condition={Condition}")]
     public partial class ProjectTargetElement : Microsoft.Build.Construction.ProjectElementContainer
@@ -913,6 +918,8 @@ namespace Microsoft.Build.Execution
         public System.Collections.Generic.ICollection<Microsoft.Build.Evaluation.Toolset> Toolsets { get { throw null; } }
         public System.Globalization.CultureInfo UICulture { get { throw null; } set { } }
         public bool UseSynchronousLogging { get { throw null; } set { } }
+        public System.Collections.Generic.ISet<string> WarningsAsErrors { get { throw null; } set { } }
+        public System.Collections.Generic.ISet<string> WarningsAsMessages { get { throw null; } set { } }
         public Microsoft.Build.Execution.BuildParameters Clone() { throw null; }
         public Microsoft.Build.Evaluation.Toolset GetToolset(string toolsVersion) { throw null; }
     }

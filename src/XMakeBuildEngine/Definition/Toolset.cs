@@ -108,11 +108,13 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private const string Dev10LightSwitchInstallKeyRegistryPath = @"Software\Microsoft\DevDiv\vs\Servicing\10.0\vslscore";
 
+#if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Null if it hasn't been figured out yet; true if (some variation of) Visual Studio 2010 is installed on 
         /// the current machine, false otherwise. 
         /// </summary>
         private static bool? s_dev10IsInstalled = null;
+#endif
 
         /// <summary>
         /// Name of the tools version
@@ -1080,7 +1082,7 @@ namespace Microsoft.Build.Evaluation
                 catch (XmlException e)
                 {
                     // handle XML errors in the default tasks file
-                    ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(false, new BuildEventFileInfo(e), taskFileError, e.Message);
+                    ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(false, new BuildEventFileInfo(defaultTasksFile, e), taskFileError, e.Message);
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {

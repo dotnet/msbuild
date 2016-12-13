@@ -47,6 +47,7 @@ namespace Microsoft.Build.UnitTests
         */
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void BogusEmbeddedCulture()
         {
             Culture.ItemCultureInfo info = Culture.GetItemCultureInfo("MyResource.notalocale.resx", null);

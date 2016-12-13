@@ -61,10 +61,9 @@ def project = GithubProject
 
                     break;
                 case { it.startsWith('Ubuntu') }:
-                    // Do not run tests on Ubuntu. We don't yet have a green test baseline.
                     newJob.with{
                         steps{
-                            shell("./cibuild.sh --scope Compile --target ${runtime}")
+                            shell("./cibuild.sh --scope Test --target ${runtime}")
                         }
                     }
 
