@@ -16,8 +16,6 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
 {
     public class AssemblyFoldersFromConfig_Tests : ResolveAssemblyReferenceTestFixture
     {
-        private static readonly string s_rootPathPrefix = NativeMethodsShared.IsWindows ? "C:\\" : Path.VolumeSeparatorChar.ToString();
-
         public AssemblyFoldersFromConfig_Tests()
         {
             s_existentFiles.AddRange(new[]

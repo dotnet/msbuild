@@ -1004,9 +1004,6 @@ namespace Microsoft.Build.Shared
         /// Returns the list of fallback search paths for looking up Target frameworks for the current OS,
         /// specified in app.config like:
         ///
-        ///     <msbuildToolsets default="14.1">
-        ///         <toolset toolsVersion="14.1">
-        ///         <property name="TargetFrameworkRootPathSearchPathsOSX" value="/tmp/foo;/tmp/bar" />
         ///
         /// </summary>
         internal static IList<string> GetTargetFrameworkRootFallbackPathsFromConfigFor(string toolsVersion)
