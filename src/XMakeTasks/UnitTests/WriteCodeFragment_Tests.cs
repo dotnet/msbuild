@@ -480,6 +480,7 @@ namespace Microsoft.Build.UnitTests
         /// Multi line argument values should cause a verbatim string to be used
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void MultilineAttributeVB()
         {
             var lines = new []{ "line 1", "line 2", "line 3" };
