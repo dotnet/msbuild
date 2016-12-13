@@ -20,7 +20,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <When Condition="$(TargetFramework.StartsWith('netcoreapp')) or $(TargetFramework.StartsWith('netstandard'))">
             <!-- For .net core and netstandard projects, we use the csc.exe bundled with msbuild -->
             <PropertyGroup>
-                <CscToolPath Condition="'$(CscToolPath)' == ''">$(MSBuildBinPath)\</CscToolPath>
+                <CscToolPath Condition="'$(CscToolPath)' == ''">$(RoslynTargetsPath)\</CscToolPath>
 
                 <!-- Writing full pdbs is not supported on !windows platforms, so use portable
                      format instead -->
