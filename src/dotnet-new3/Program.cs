@@ -73,6 +73,11 @@ namespace dotnet_new3
                     app.ParseArgs(app.InternalParamValueList("--extra-args"));
                 }
 
+                if (app.RemainingParameters.ContainsKey("--debug:attach"))
+                {
+                    Console.ReadLine();
+                }
+
                 string locale = app.InternalParamValue("--locale") ?? CultureInfo.CurrentCulture.Name;
                 if (!ValidateLocaleFormat(locale))
                 {
@@ -261,7 +266,7 @@ namespace dotnet_new3
                 return -1;
             }
 
-            if (app.RemainingParameters.Any())
+            if (app.RemainingParameters.Any(x => !x.Key.StartsWith("--debug:")))
             {
                 EngineEnvironmentSettings.Host.LogMessage("Invalid input switch:");
                 foreach (string flag in app.RemainingParameters.Keys)
