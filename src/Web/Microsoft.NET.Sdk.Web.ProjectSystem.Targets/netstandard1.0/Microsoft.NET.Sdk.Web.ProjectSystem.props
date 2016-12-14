@@ -14,7 +14,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
     <OutputType Condition="$(OutputType) == ''">Exe</OutputType>
     <AppDesignerFolder Condition=" '$(AppDesignerFolder)' == '' ">Properties</AppDesignerFolder>
-    <GlobalExclude>$(GlobalExclude);$(OutputPath)\**;$(BaseIntermediateOutputPath)\**;node_modules\**;jspm_packages\**;bower_components\**;**\*.user;**\*.*proj;**\*.sln;**\*.vssscc;**\.*\**</GlobalExclude>
+    <GlobalExclude>$(GlobalExclude);$(BaseOutputPath)\**;$(BaseIntermediateOutputPath)\**;node_modules\**;jspm_packages\**;bower_components\**;**\*.user;**\*.*proj;**\*.sln;**\*.vssscc;**\.*\**</GlobalExclude>
     <PreserveCompilationContext Condition='$(PreserveCompilationContext) == '''>true</PreserveCompilationContext>
   </PropertyGroup>
 
