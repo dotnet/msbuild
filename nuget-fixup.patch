@@ -1,0 +1,15 @@
+diff --git a/nuget-support/tv/Microsoft.Common.targets/ImportAfter/Microsoft.NuGet.ImportAfter.targets b/nuget-support/tv/Microsoft.Common.targets/ImportAfter/Microsoft.NuGet.ImportAfter.targets
+index 433922a..3aa22ba 100644
+--- a/nuget-support/tv/Microsoft.Common.targets/ImportAfter/Microsoft.NuGet.ImportAfter.targets
++++ b/nuget-support/tv/Microsoft.Common.targets/ImportAfter/Microsoft.NuGet.ImportAfter.targets
+@@ -10,6 +10,10 @@ Copyright (c) .NET Foundation. All rights reserved.
+ ***********************************************************************************************
+ -->
+ <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <PropertyGroup>
++    <NuGetTargets Condition="'$(NuGetTargets)'==''">$(MSBuildExtensionsPath)\Microsoft.NuGet.targets</NuGetTargets>
++  </PropertyGroup>
++  <Import Condition="Exists('$(NuGetTargets)')" Project="$(NuGetTargets)" />
+   <!-- Import NuGet.targets for Restore -->
+   <PropertyGroup>
+     <NuGetRestoreTargets Condition="'$(NuGetRestoreTargets)'==''">$(MSBuildExtensionsPath)\NuGet.targets</NuGetRestoreTargets>
