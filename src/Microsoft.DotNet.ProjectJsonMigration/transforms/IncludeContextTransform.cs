@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
 {
     internal class IncludeContextTransform : ConditionalTransform<IncludeContext, IEnumerable<ProjectItemElement>>
     {
-        private Func<string, AddItemTransform<IncludeContext>> IncludeFilesExcludeFilesTransformGetter => 
+        protected virtual Func<string, AddItemTransform<IncludeContext>> IncludeFilesExcludeFilesTransformGetter =>
             (itemName) =>
                 new AddItemTransform<IncludeContext>(
                     itemName,
@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
                         && includeContext.IncludeFiles != null 
                         && includeContext.IncludeFiles.Count > 0);
 
-        private Func<string, AddItemTransform<IncludeContext>> IncludeExcludeTransformGetter => 
+        protected virtual Func<string, AddItemTransform<IncludeContext>> IncludeExcludeTransformGetter =>
             (itemName) => new AddItemTransform<IncludeContext>(
                 itemName,
                 includeContext => 
@@ -81,15 +81,24 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
             };
         }
 
-        public IncludeContextTransform WithMetadata(string metadataName, string metadataValue)
+        public IncludeContextTransform WithMetadata(
+            string metadataName,
+            string metadataValue,
+            string condition = null)
         {
-            _metadata.Add(new ItemMetadataValue<IncludeContext>(metadataName, metadataValue));
+            _metadata.Add(new ItemMetadataValue<IncludeContext>(metadataName, metadataValue, condition));
             return this;
         }
 
-        public IncludeContextTransform WithMetadata(string metadataName, Func<IncludeContext, string> metadataValueFunc)
+        public IncludeContextTransform WithMetadata(
+            string metadataName,
+            Func<IncludeContext, string> metadataValueFunc,
+            string condition = null)
         {
-            _metadata.Add(new ItemMetadataValue<IncludeContext>(metadataName, metadataValueFunc));
+            _metadata.Add(new ItemMetadataValue<IncludeContext>(
+                metadataName,
+                metadataValueFunc,
+                condition: condition));
             return this;
         }
 
@@ -148,7 +157,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
             return transformSet.Select(t => t.Item1.Transform(t.Item2));
         }
 
-        private string FormatGlobPatternsForMsbuild(IEnumerable<string> patterns, string projectDirectory)
+        protected string FormatGlobPatternsForMsbuild(IEnumerable<string> patterns, string projectDirectory)
         {
             if (patterns == null)
             {

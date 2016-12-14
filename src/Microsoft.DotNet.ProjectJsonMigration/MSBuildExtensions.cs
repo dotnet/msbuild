@@ -208,10 +208,16 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             if (existingMetadata == default(ProjectMetadataElement))
             {
 #if !DISABLE_TRACE
-                MigrationTrace.Instance.WriteLine($"{nameof(AddMetadata)}: Adding metadata to {item.ItemType} item: {{ {metadata.Name}, {metadata.Value} }}");
+                MigrationTrace.Instance.WriteLine($"{nameof(AddMetadata)}: Adding metadata to {item.ItemType} item: {{ {metadata.Name}, {metadata.Value}, {metadata.Condition} }}");
 #endif
-                item.AddMetadata(metadata.Name, metadata.Value);
+                var metametadata = item.AddMetadata(metadata.Name, metadata.Value);
+                metametadata.Condition = metadata.Condition;
             }
+        }
+
+        public static void SetExcludeOnlyIfIncludeIsSet(this ProjectItemElement item, string exclude)
+        {
+            item.Exclude = string.IsNullOrEmpty(item.Include) ? string.Empty : exclude;
         }
 
         private static IEnumerable<string> SplitSemicolonDelimitedValues(string combinedValue)

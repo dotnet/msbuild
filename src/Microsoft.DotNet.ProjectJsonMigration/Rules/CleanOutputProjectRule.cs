@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
             foreach (var item in msbuildProject.Items)
             {
-                if (string.IsNullOrEmpty(item.Include))
+                if (string.IsNullOrEmpty(item.Include) && string.IsNullOrEmpty(item.Update))
                 {
                     item.Parent.RemoveChild(item);
                 }

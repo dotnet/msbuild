@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
     public class GivenThatIWantToMigratePublishOptions : TestBase
     {
         [Fact]
-        private void Migrating_publishOptions_include_exclude_populates_Content_item()
+        private void MigratingPublishOptionsForConsoleAppIncludeExcludePopulatesContentItemWithInclude()
         {
             var testDirectory = Temp.CreateDirectory().Path;
             WriteFilesInProjectDirectory(testDirectory);
@@ -55,7 +55,54 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        private void Migrating_publishOptions_and_buildOptions_CopyToOutput_merges_Content_items()
+        private void MigratingPublishOptionsForWebAppIncludeExcludePopulatesContentItemWithUpdate()
+        {
+            var testDirectory = Temp.CreateDirectory().Path;
+            WriteFilesInProjectDirectory(testDirectory);
+
+            var mockProj = RunPublishOptionsRuleOnPj(@"
+                {
+                    ""publishOptions"": {
+                        ""include"": [""root"", ""src"", ""rootfile.cs""],
+                        ""exclude"": [""src"", ""rootfile.cs""],
+                        ""includeFiles"": [""src/file1.cs"", ""src/file2.cs""],
+                        ""excludeFiles"": [""src/file2.cs""]
+                    },
+                    ""buildOptions"": {
+                        ""emitEntryPoint"": true
+                    },
+                    ""dependencies"": {
+                        ""Microsoft.AspNetCore.Mvc"" : {
+                            ""version"": ""1.0.0""
+                        }
+                    },
+                    ""frameworks"": {
+                        ""netcoreapp1.0"": {}
+                    }
+                }",
+                testDirectory: testDirectory);
+
+            mockProj.Items.Count(i => i.ItemType.Equals("Content", StringComparison.Ordinal)).Should().Be(2);
+
+            foreach (var item in mockProj.Items.Where(i => i.ItemType.Equals("Content", StringComparison.Ordinal)))
+            {
+                item.Metadata.Count(m => m.Name == "CopyToPublishDirectory").Should().Be(1);
+
+                if (item.Update.Contains(@"src\file1.cs"))
+                {
+                    item.Update.Should().Be(@"src\file1.cs;src\file2.cs");
+                    item.Exclude.Should().BeEmpty();
+                }
+                else
+                {
+                    item.Update.Should().Be(@"root\**\*;src\**\*;rootfile.cs");
+                    item.Exclude.Should().BeEmpty();
+                }
+            }
+        }
+
+        [Fact]
+        private void MigratingConsoleAppWithPublishOptionsAndBuildOptionsCopyToOutputMergesContentItemsWithInclude()
         {
             var testDirectory = Temp.CreateDirectory().Path;
             WriteFilesInProjectDirectory(testDirectory);
@@ -104,6 +151,69 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
                     item.Exclude.Should()
                         .Be(@"src\**\*;rootfile.cs;src\file2.cs;src\file3.cs");
+                }
+            }
+        }
+
+        [Fact]
+        private void MigratingWebAppWithPublishOptionsAndBuildOptionsCopyToOutputMergesContentItemsWithUpdate()
+        {
+            var testDirectory = Temp.CreateDirectory().Path;
+            WriteFilesInProjectDirectory(testDirectory);
+
+            var mockProj = RunPublishAndBuildOptionsRuleOnPj(@"
+                {
+                    ""buildOptions"": {
+                        ""copyToOutput"": {
+                            ""include"": [""src"", ""rootfile.cs""],
+                            ""exclude"": [""src"", ""rootfile.cs""],
+                            ""includeFiles"": [""src/file1.cs"", ""src/file2.cs""],
+                            ""excludeFiles"": [""src/file2.cs""]
+                        },
+                        ""emitEntryPoint"": true
+                    },
+                    ""publishOptions"": {
+                        ""include"": [""root"", ""src"", ""rootfile.cs""],
+                        ""exclude"": [""src"", ""rootfile.cs""],
+                        ""includeFiles"": [""src/file1.cs"", ""src/file2.cs""],
+                        ""excludeFiles"": [""src/file3.cs""]
+                    },
+                    ""dependencies"": {
+                        ""Microsoft.AspNetCore.Mvc"" : {
+                            ""version"": ""1.0.0""
+                        }
+                    },
+                    ""frameworks"": {
+                        ""netcoreapp1.0"": {}
+                    }
+                }",
+                testDirectory: testDirectory);
+
+            mockProj.Items.Count(i => i.ItemType.Equals("Content", StringComparison.Ordinal)).Should().Be(4);
+
+            // From ProjectReader #L725 (Both are empty)
+            var defaultIncludePatterns = Enumerable.Empty<string>();
+            var defaultExcludePatterns = ProjectFilesCollection.DefaultPublishExcludePatterns;
+
+            foreach (var item in mockProj.Items.Where(i => i.ItemType.Equals("Content", StringComparison.Ordinal)))
+            {
+                var metadata = string.Join(",", item.Metadata.Select(m => m.Name));
+                Console.WriteLine($"LICAVALC: Update: {item.Update}, Include: {item.Include}, Metadata: {metadata}");
+
+                if (item.Update.Contains(@"root\**\*"))
+                {
+                    item.Update.Should().Be(@"root\**\*;src\**\*;rootfile.cs");
+                    item.Exclude.Should().BeEmpty();
+                }
+                else if (item.Update.Contains(@"src\file1.cs"))
+                {
+                    item.Update.Should().Be(@"src\file1.cs;src\file2.cs");
+                    item.Exclude.Should().BeEmpty();
+                }
+                else
+                {
+                    item.Update.Should().Be(@"src\**\*;rootfile.cs");
+                    item.Exclude.Should().BeEmpty();
                 }
             }
         }
