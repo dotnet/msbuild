@@ -3,6 +3,7 @@
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.DotNet.Cli.Build
 {
@@ -92,7 +93,9 @@ namespace Microsoft.DotNet.Cli.Build
 
         protected override string GenerateFullPathToTool()
         {
-            return "git";
+            // Workaround: https://github.com/Microsoft/msbuild/issues/1215
+            // There's a "git" folder on the PATH in VS 2017 Developer command prompt and it causes msbuild to fail to execute git.
+            return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "git.exe" : "git";
         }
 
         protected override string GenerateCommandLineCommands()
