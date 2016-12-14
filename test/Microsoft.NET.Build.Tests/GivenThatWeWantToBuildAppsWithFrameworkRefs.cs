@@ -23,6 +23,11 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_builds_the_projects_successfully()
         {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppsWithFrameworkReferences")
                 .WithSource();
@@ -36,6 +41,11 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_builds_with_disable_implicit_frameworkRefs()
         {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppsWithFrameworkReferences")
                 .WithSource()
@@ -61,6 +71,11 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_builds_the_projects_successfully_twice()
         {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppsWithFrameworkReferences")
                 .WithSource();
