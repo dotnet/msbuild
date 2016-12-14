@@ -124,7 +124,7 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Fact]
-        public void ItMigratesAndPublishesWebAppWithFilesThatDoNotExistInPublishOptions()
+        public void ItMigratesAndPublishesWebApp()
         {
             const string projectName = "WebAppWithMissingFileInPublishOptions";
             var testInstance = TestAssets.Get(projectName)

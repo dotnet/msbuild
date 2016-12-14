@@ -124,7 +124,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
 
             var item = _itemObjectGenerator.AddItem(_itemName, "placeholder");
             item.Include = includeValue;
-            item.Exclude = excludeValue;
+            item.SetExcludeOnlyIfIncludeIsSet(excludeValue);
             item.Update = updateValue;
 
             foreach (var metadata in _metadata)

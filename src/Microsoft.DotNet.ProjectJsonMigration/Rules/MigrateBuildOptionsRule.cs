@@ -120,23 +120,34 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             new IncludeContextTransform("Content", transformMappings: true)
                 .WithMetadata("CopyToOutputDirectory", "PreserveNewest");
 
+        private IncludeContextTransform CopyToOutputFilesTransformForWeb =>
+            new UpdateContextTransform("Content", transformMappings: true)
+                .WithMetadata("CopyToOutputDirectory", "PreserveNewest");
+
         private AddPropertyTransform<Project> GenerateRuntimeConfigurationFilesTransform => 
             new AddPropertyTransform<Project>(
                 "GenerateRuntimeConfigurationFiles", 
                 project => "true",
                 project => project.GetProjectType() == ProjectType.Test);
 
-        private Func<CommonCompilerOptions, string, IEnumerable<ProjectItemElement>> CompileFilesTransformExecute =>
-            (compilerOptions, projectDirectory) =>
+        private Func<CommonCompilerOptions, string, ProjectType, IEnumerable<ProjectItemElement>>CompileFilesTransformExecute =>
+            (compilerOptions, projectDirectory, projectType) =>
                     CompileFilesTransform.Transform(GetCompileIncludeContext(compilerOptions, projectDirectory));
 
-        private Func<CommonCompilerOptions, string, IEnumerable<ProjectItemElement>> EmbedFilesTransformExecute =>
-            (compilerOptions, projectDirectory) =>
+        private Func<CommonCompilerOptions, string, ProjectType, IEnumerable<ProjectItemElement>> EmbedFilesTransformExecute =>
+            (compilerOptions, projectDirectory, projectType) =>
                     EmbedFilesTransform.Transform(GetEmbedIncludeContext(compilerOptions, projectDirectory));
 
-        private Func<CommonCompilerOptions, string, IEnumerable<ProjectItemElement>> CopyToOutputFilesTransformExecute =>
-            (compilerOptions, projectDirectory) =>
-                    CopyToOutputFilesTransform.Transform(GetCopyToOutputIncludeContext(compilerOptions, projectDirectory));
+        private Func<CommonCompilerOptions, string, ProjectType, IEnumerable<ProjectItemElement>> CopyToOutputFilesTransformExecute =>
+            (compilerOptions, projectDirectory, projectType) =>
+            {
+                var copyToOutputFilesTransform =
+                    projectType == ProjectType.Web ?
+                    CopyToOutputFilesTransformForWeb :
+                    CopyToOutputFilesTransform;
+
+                return copyToOutputFilesTransform.Transform(GetCopyToOutputIncludeContext(compilerOptions, projectDirectory));
+            };
 
         private readonly string[] DefaultEmptyExcludeOption = new string[0];
         
@@ -145,7 +156,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         private readonly CommonCompilerOptions _configurationBuildOptions;
 
         private List<AddPropertyTransform<CommonCompilerOptions>> _propertyTransforms;
-        private List<Func<CommonCompilerOptions, string, IEnumerable<ProjectItemElement>>> _includeContextTransformExecutes;
+        private List<Func<CommonCompilerOptions, string, ProjectType, IEnumerable<ProjectItemElement>>> _includeContextTransformExecutes;
 
         private readonly ITransformApplicator _transformApplicator;
 
@@ -191,12 +202,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             _propertyTransforms.AddRange(EmitEntryPointTransforms);
             _propertyTransforms.AddRange(KeyFileTransforms);
 
-            _includeContextTransformExecutes = new List<Func<CommonCompilerOptions, string, IEnumerable<ProjectItemElement>>>()
-            {
-                CompileFilesTransformExecute,
-                EmbedFilesTransformExecute,
-                CopyToOutputFilesTransformExecute
-            };
+            _includeContextTransformExecutes =
+                new List<Func<CommonCompilerOptions, string, ProjectType, IEnumerable<ProjectItemElement>>>()
+                {
+                    CompileFilesTransformExecute,
+                    EmbedFilesTransformExecute,
+                    CopyToOutputFilesTransformExecute
+                };
         }
 
         public void Apply(MigrationSettings migrationSettings, MigrationRuleInputs migrationRuleInputs)
@@ -271,9 +283,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
             foreach (var includeContextTransformExecute in _includeContextTransformExecutes)
             {
-                var nonConfigurationOutput = includeContextTransformExecute(compilerOptions, projectDirectory);
+                var nonConfigurationOutput =
+                    includeContextTransformExecute(compilerOptions, projectDirectory, projectType);
                 var configurationOutput =
-                    includeContextTransformExecute(configurationCompilerOptions, projectDirectory);
+                    includeContextTransformExecute(configurationCompilerOptions, projectDirectory, projectType);
 
                 configurationOutput = RemoveDefaultCompileAndEmbeddedResourceForWebProjects(
                     configurationOutput,
@@ -329,7 +342,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
             foreach (var includeContextTransformExecute in _includeContextTransformExecutes)
             {
-                var transform = includeContextTransformExecute(compilerOptions, projectDirectory);
+                var transform = includeContextTransformExecute(compilerOptions, projectDirectory, projectType);
                 
                 transform = RemoveDefaultCompileAndEmbeddedResourceForWebProjects(
                     transform,

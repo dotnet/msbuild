@@ -215,6 +215,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             }
         }
 
+        public static void SetExcludeOnlyIfIncludeIsSet(this ProjectItemElement item, string exclude)
+        {
+            item.Exclude = string.IsNullOrEmpty(item.Include) ? string.Empty : exclude;
+        }
+
         private static IEnumerable<string> SplitSemicolonDelimitedValues(string combinedValue)
         {
             return string.IsNullOrEmpty(combinedValue) ? Enumerable.Empty<string>() : combinedValue.Split(';');
