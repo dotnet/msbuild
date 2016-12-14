@@ -2091,6 +2091,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// should win over whatever MSBuild thinks the default is.
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void MSBuildExtensionsPathWithGlobalOverride()
         {
             Project project = new Project(new ProjectCollection());
@@ -2147,6 +2148,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// of seeing whether our value wins.
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void MSBuildExtensionsPath32WithEnvironmentOverride()
         {
             string originalMSBuildExtensionsPath32Value = Environment.GetEnvironmentVariable("MSBuildExtensionsPath32");
@@ -2170,6 +2172,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// of seeing whether our value wins.
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void MSBuildExtensionsPath32WithGlobalOverride()
         {
             Project project = new Project(new ProjectCollection());
