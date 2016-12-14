@@ -4,8 +4,10 @@
 using Microsoft.Build.Evaluation;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools.Common;
 using NuGet.Frameworks;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -13,53 +15,46 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
 {
     public class AddProjectToProjectReferenceCommand
     {
-        public static int Run(string[] args)
+        internal static CommandLineApplication CreateApplication(CommandLineApplication parentApp)
         {
-            DebugHelper.HandleDebugSwitch(ref args);
-
-            CommandLineApplication app = new CommandLineApplication(throwOnUnexpectedArg: false)
-            {
-                Name = "dotnet add p2p",
-                FullName = LocalizableStrings.AppFullName,
-                Description = LocalizableStrings.AppDescription,
-                AllowArgumentSeparator = true,
-                ArgumentSeparatorHelpText = LocalizableStrings.AppHelpText
-            };
+            CommandLineApplication app = parentApp.Command("p2p", throwOnUnexpectedArg: false);
+            app.FullName = LocalizableStrings.AppFullName;
+            app.Description = LocalizableStrings.AppDescription;
+            app.HandleRemainingArguments = true;
+            app.ArgumentSeparatorHelpText = LocalizableStrings.AppHelpText;
 
             app.HelpOption("-h|--help");
 
-            CommandArgument projectArgument = app.Argument(
-                $"<{LocalizableStrings.CmdProject}>",
-                LocalizableStrings.CmdProjectDescription);
-
             CommandOption frameworkOption = app.Option(
-                $"-f|--framework <{LocalizableStrings.CmdFramework}>",
+                $"-f|--framework <{CommonLocalizableStrings.CmdFramework}>",
                 LocalizableStrings.CmdFrameworkDescription,
                 CommandOptionType.SingleValue);
 
-            CommandOption forceOption = app.Option(
-                "--force", 
-                LocalizableStrings.CmdForceDescription,
-                CommandOptionType.NoValue);
-
-            app.OnExecute(() => {
-                if (string.IsNullOrEmpty(projectArgument.Value))
+            app.OnExecute(() =>
+            {
+                try
                 {
-                    throw new GracefulException(CommonLocalizableStrings.RequiredArgumentNotPassed, $"<{LocalizableStrings.ProjectException}>");
-                }
+                    if (!parentApp.Arguments.Any())
+                    {
+                        throw new GracefulException(CommonLocalizableStrings.RequiredArgumentNotPassed, Constants.ProjectOrSolutionArgumentName);
+                    }
 
-                var projects = new ProjectCollection();
-                var msbuildProj = MsbuildProject.FromFileOrDirectory(projects, projectArgument.Value);
+                    var projectOrDirectory = parentApp.Arguments.First().Value;
+                    if (string.IsNullOrEmpty(projectOrDirectory))
+                    {
+                        projectOrDirectory = PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory());
+                    }
 
-                if (app.RemainingArguments.Count == 0)
-                {
-                    throw new GracefulException(LocalizableStrings.SpecifyAtLeastOneReferenceToAdd);
-                }
+                    var projects = new ProjectCollection();
+                    var msbuildProj = MsbuildProject.FromFileOrDirectory(projects, projectOrDirectory);
 
-                string frameworkString = frameworkOption.Value();
-                List<string> references = app.RemainingArguments;
-                if (!forceOption.HasValue())
-                {
+                    if (app.RemainingArguments.Count == 0)
+                    {
+                        throw new GracefulException(CommonLocalizableStrings.SpecifyAtLeastOneReferenceToAdd);
+                    }
+
+                    string frameworkString = frameworkOption.Value();
+                    List<string> references = app.RemainingArguments;
                     MsbuildProject.EnsureAllReferencesExist(references);
                     IEnumerable<MsbuildProject> refs = references.Select((r) => MsbuildProject.FromFile(projects, r));
 
@@ -101,30 +96,27 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
                     }
 
                     msbuildProj.ConvertPathsToRelative(ref references);
-                }
-                
-                int numberOfAddedReferences = msbuildProj.AddProjectToProjectReferences(
-                    frameworkOption.Value(),
-                    references);
 
-                if (numberOfAddedReferences != 0)
+                    int numberOfAddedReferences = msbuildProj.AddProjectToProjectReferences(
+                        frameworkOption.Value(),
+                        references);
+
+                    if (numberOfAddedReferences != 0)
+                    {
+                        msbuildProj.ProjectRootElement.Save();
+                    }
+
+                    return 0;
+                }
+                catch (GracefulException e)
                 {
-                    msbuildProj.ProjectRootElement.Save();
+                    Reporter.Error.WriteLine(e.Message.Red());
+                    app.ShowHelp();
+                    return 1;
                 }
-
-                return 0;
             });
 
-            try
-            {
-                return app.Execute(args);
-            }
-            catch (GracefulException e)
-            {
-                Reporter.Error.WriteLine(e.Message.Red());
-                app.ShowHelp();
-                return 1;
-            }
+            return app;
         }
 
         private static string GetProjectNotCompatibleWithFrameworksDisplayString(MsbuildProject project, IEnumerable<string> frameworksDisplayStrings)

@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Cli.List.P2P.Tests
         const string ConditionFrameworkNet451 = "== 'net451'";
         const string FrameworkNetCoreApp10Arg = "-f netcoreapp1.0";
         const string ConditionFrameworkNetCoreApp10 = "== 'netcoreapp1.0'";
-        const string UsageText = "Usage: dotnet list p2ps";
+        const string UsageText = "Usage: dotnet list <PROJECT_OR_SOLUTION> p2ps";
 
         [Theory]
         [InlineData("--help")]
@@ -27,6 +27,16 @@ namespace Microsoft.DotNet.Cli.List.P2P.Tests
             var cmd = new ListP2PsCommand().Execute(helpArg);
             cmd.Should().Pass();
             cmd.StdOut.Should().Contain("Usage");
+        }
+
+        [Fact]
+        public void WhenTooManyArgumentsArePassedItPrintsError()
+        {
+            var cmd = new AddP2PCommand()
+                    .WithProject("one two three")
+                    .Execute("proj.csproj");
+            cmd.ExitCode.Should().NotBe(0);
+            cmd.StdErr.Should().Contain("Unrecognized command or argument");
         }
 
         [Theory]
@@ -101,38 +111,38 @@ namespace Microsoft.DotNet.Cli.List.P2P.Tests
         [Fact]
         public void ItPrintsSingleReference()
         {
-            var lib = NewLib();
-            string ref1 = "someref.csproj";
-            AddFakeRef(ref1, lib);
+            var lib = NewLib("ItPrintsSingleReference", "lib");
+            string ref1 = NewLib("ItPrintsSingleReference", "ref").CsProjPath;
+            AddValidRef(ref1, lib);
 
             var cmd = new ListP2PsCommand()
                 .WithProject(lib.CsProjPath)
                 .Execute();
             cmd.Should().Pass();
             cmd.StdOut.Should().Contain("Project reference(s)");
-            cmd.StdOut.Should().Contain(ref1);
+            cmd.StdOut.Should().Contain(@"..\ItPrintsSingleReferenceref\ItPrintsSingleReferenceref.csproj");
         }
 
         [Fact]
         public void ItPrintsMultipleReferences()
         {
-            var lib = NewLib();
-            string ref1 = "someref.csproj";
-            string ref2 = @"..\someref2.csproj";
-            string ref3 = @"..\abc\abc.csproj";
+            var lib = NewLib("ItPrintsSingleReference", "lib");
+            string ref1 = NewLib("ItPrintsSingleReference", "ref1").CsProjPath;
+            string ref2 = NewLib("ItPrintsSingleReference", "ref2").CsProjPath;
+            string ref3 = NewLib("ItPrintsSingleReference", "ref3").CsProjPath;
 
-            AddFakeRef(ref1, lib);
-            AddFakeRef(ref2, lib);
-            AddFakeRef(ref3, lib);
+            AddValidRef(ref1, lib);
+            AddValidRef(ref2, lib);
+            AddValidRef(ref3, lib);
 
             var cmd = new ListP2PsCommand()
                 .WithProject(lib.CsProjPath)
                 .Execute();
             cmd.Should().Pass();
             cmd.StdOut.Should().Contain("Project reference(s)");
-            cmd.StdOut.Should().Contain(ref1);
-            cmd.StdOut.Should().Contain(ref2);
-            cmd.StdOut.Should().Contain(ref3);
+            cmd.StdOut.Should().Contain(@"..\ItPrintsSingleReferenceref1\ItPrintsSingleReferenceref1.csproj");
+            cmd.StdOut.Should().Contain(@"..\ItPrintsSingleReferenceref2\ItPrintsSingleReferenceref2.csproj");
+            cmd.StdOut.Should().Contain(@"..\ItPrintsSingleReferenceref3\ItPrintsSingleReferenceref3.csproj");
         }
 
         private TestSetup Setup([System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(Setup), string identifier = "")
@@ -169,11 +179,11 @@ namespace Microsoft.DotNet.Cli.List.P2P.Tests
             return dir;
         }
 
-        private void AddFakeRef(string path, ProjDir proj)
+        private void AddValidRef(string path, ProjDir proj)
         {
             new AddP2PCommand()
                 .WithProject(proj.CsProjPath)
-                .Execute($"--force \"{path}\"")
+                .Execute($"\"{path}\"")
                 .Should().Pass();
         }
     }

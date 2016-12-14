@@ -80,6 +80,16 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
             cmd.StdOut.Should().Contain("Usage");
         }
 
+        [Fact]
+        public void WhenTooManyArgumentsArePassedItPrintsError()
+        {
+            var cmd = new AddP2PCommand()
+                    .WithProject("one two three")
+                    .Execute("proj.csproj");
+            cmd.ExitCode.Should().NotBe(0);
+            cmd.StdErr.Should().Contain("Unrecognized command or argument");
+        }
+
         [Theory]
         [InlineData("idontexist.csproj")]
         [InlineData("ihave?inv@lid/char\\acters")]
@@ -570,25 +580,6 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         }
 
         [Fact]
-        public void WhenPassedReferenceDoesNotExistAndForceSwitchIsPassedItAddsIt()
-        {
-            var lib = NewLibWithFrameworks();
-            const string nonExisting = "IDoNotExist.csproj";
-
-            int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
-            var cmd = new AddP2PCommand()
-                .WithWorkingDirectory(lib.Path)
-                .WithProject(lib.CsProjName)
-                .Execute($"--force \"{nonExisting}\"");
-            cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("added to the project");
-            cmd.StdErr.Should().BeEmpty();
-            var csproj = lib.CsProj();
-            csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
-            csproj.NumberOfProjectReferencesWithIncludeContaining(nonExisting).Should().Be(1);
-        }
-
-        [Fact]
         public void WhenPassedReferenceIsUsingSlashesItNormalizesItToBackslashes()
         {
             var lib = NewLibWithFrameworks();
@@ -598,13 +589,13 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
             var cmd = new AddP2PCommand()
                 .WithWorkingDirectory(lib.Path)
                 .WithProject(lib.CsProjName)
-                .Execute($"--force \"{setup.ValidRefCsprojPath.Replace('\\', '/')}\"");
+                .Execute($"\"{setup.ValidRefCsprojPath.Replace('\\', '/')}\"");
             cmd.Should().Pass();
             cmd.StdOut.Should().Contain("added to the project");
             cmd.StdErr.Should().BeEmpty();
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
-            csproj.NumberOfProjectReferencesWithIncludeContaining(setup.ValidRefCsprojPath.Replace('/', '\\')).Should().Be(1);
+            csproj.NumberOfProjectReferencesWithIncludeContaining(setup.ValidRefCsprojRelPath.Replace('/', '\\')).Should().Be(1);
         }
 
         [Fact]
@@ -624,25 +615,6 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
             var csproj = proj.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
             csproj.NumberOfProjectReferencesWithIncludeContaining(setup.ValidRefCsprojRelToOtherProjPath.Replace('/', '\\')).Should().Be(1);
-        }
-
-        [Fact]
-        public void WhenReferenceIsRelativeAndProjectIsNotInCurrentDirectoryAndForceSwitchIsPassedItDoesNotChangeIt()
-        {
-            var setup = Setup();
-            var proj = new ProjDir(setup.LibDir);
-
-            int noCondBefore = proj.CsProj().NumberOfItemGroupsWithoutCondition();
-            var cmd = new AddP2PCommand()
-                .WithWorkingDirectory(setup.TestRoot)
-                .WithProject(setup.LibCsprojPath)
-                .Execute($"--force \"{setup.ValidRefCsprojRelPath}\"");
-            cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("added to the project");
-            cmd.StdErr.Should().BeEmpty();
-            var csproj = proj.CsProj();
-            csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
-            csproj.NumberOfProjectReferencesWithIncludeContaining(setup.ValidRefCsprojRelPath.Replace('/', '\\')).Should().Be(1);
         }
 
         [Fact]

@@ -106,6 +106,16 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
             cmd.StdOut.Should().Contain("Usage");
         }
 
+        [Fact]
+        public void WhenTooManyArgumentsArePassedItPrintsError()
+        {
+            var cmd = new AddP2PCommand()
+                    .WithProject("one two three")
+                    .Execute("proj.csproj");
+            cmd.ExitCode.Should().NotBe(0);
+            cmd.StdErr.Should().Contain("Unrecognized command or argument");
+        }
+
         [Theory]
         [InlineData("idontexist.csproj")]
         [InlineData("ihave?inv@lid/char\\acters")]
@@ -356,7 +366,7 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
         {
             var setup = Setup();
             var lib = GetLibRef(setup);
-            var libref = AddValidRef(setup, lib, "--force");
+            var libref = AddValidRef(setup, lib);
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
             var cmd = new RemoveP2PCommand()

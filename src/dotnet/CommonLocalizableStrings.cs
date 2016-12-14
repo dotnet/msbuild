@@ -2,17 +2,9 @@
 {
     internal class CommonLocalizableStrings
     {
-        public const string CouldNotFindAnyProjectInDirectory = "Could not find any project in `{0}`.";
-        public const string MoreThanOneProjectInDirectory = "Found more than one project in `{0}`. Please specify which one to use.";
         public const string ProjectAlreadyHasAreference = "Project already has a reference to `{0}`.";
         public const string ProjectReferenceCouldNotBeFound = "Project reference `{0}` could not be found.";
         public const string ProjectReferenceRemoved = "Project reference `{0}` removed.";
-        
-        // General purpose words
-        public const string RequiredArgument = "Required argument";
-        public const string Option = "Option";
-        public const string Argument = "Argument";
-        public const string Help = "Help";
 
         // Project related
         public const string Project = "Project";
@@ -30,9 +22,7 @@
         public const string Library = "Library";
         public const string Program = "Program";
         public const string Application = "Application";
-        public const string ReferenceDoesNotExist = "Reference {0} does not exist. If you still want to add it, please use --force option. Please note that this may have adverse effects on the project. ";
         public const string ReferenceAddedToTheProject = "Reference `{0}` added to the project.";
-        
 
         // Verbs
         public const string Add = "Add";
@@ -101,9 +91,9 @@
 
         // dotnet <verb>
         /// Project
-        public const string CouldNotFindProjectIn = "Could not find any project in `{0}`.";
+        public const string CouldNotFindAnyProjectInDirectory = "Could not find any project in `{0}`.";
         public const string CouldNotFindProjectOrDirectory = "Could not find project or directory `{0}`.";
-        public const string FoundMoreThanOneProjectIn = "Found more than one project in `{0}`. Please specify which one to use.";
+        public const string MoreThanOneProjectInDirectory = "Found more than one project in `{0}`. Please specify which one to use.";
         public const string FoundInvalidProject = "Found a project `{0}` but it is invalid.";
         public const string InvalidProject = "Invalid project `{0}`.";
 
@@ -117,15 +107,15 @@
         public const string SolutionAlreadyContainsAProject = "Solution {0} already contains project {1}.";
 
         /// add p2p
-        public const string ReferenceDoesNotExistForce = "Reference {0} does not exist. If you still want to add it, please use --force option. Please note that this may have adverse effects on the project. ";
+        public const string ReferenceDoesNotExist = "Reference {0} does not exist.";
         public const string ReferenceIsInvalid = "Reference `{0}` is invalid.";
-        public const string SpecifyAtLeastOneReferenceToAdd = "You must specify at least one reference to add. Please run dotnet add --help for more information.";
+        public const string SpecifyAtLeastOneReferenceToAdd = "You must specify at least one reference to add.";
         public const string ProjectAlreadyHasAReference = "Project {0} already has a reference `{1}`.";
 
         /// add package
         public const string PackageReferenceDoesNotExist = "Package reference `{0}` does not exist.";
         public const string PackageReferenceIsInvalid = "Package reference `{0}` is invalid.";
-        public const string SpecifyAtLeastOnePackageReferenceToAdd = "You must specify at least one reference to add. Please run dotnet add --help for more information.";
+        public const string SpecifyAtLeastOnePackageReferenceToAdd = "You must specify at least one package to add.";
         public const string PackageReferenceAddedToTheProject = "Package reference `{0}` added to the project.";
         public const string ProjectAlreadyHasAPackageReference = "Project {0} already has a reference `{1}`.";
         public const string PleaseSpecifyVersion = "Please specify a version of the package.";
@@ -133,7 +123,7 @@
         /// add sln
         public const string ProjectDoesNotExist = "Project `{0}` does not exist.";
         public const string ProjectIsInvalid = "Project `{0}` is invalid.";
-        public const string SpecifyAtLeastOneProjectToAdd = "You must specify at least one project to add. Please run dotnet add --help for more information.";
+        public const string SpecifyAtLeastOneProjectToAdd = "You must specify at least one project to add.";
         public const string ProjectAddedToTheSolution = "Project `{0}` added to the solution.";
         public const string SolutionAlreadyHasAProject = "Solution {0} already contains project {1}.";
 
@@ -161,6 +151,12 @@
         /// list
         public const string NoReferencesFound = "There are no {0} references in project {1}. ;; {0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). ";
         public const string NoProjectsFound = "No projects found in the solution.";
+
+        /// arguments
+        public const string ArgumentsProjectOrSolutionDescription = "The project or solution to operation on. If a file is not specified, the current directory is searched.";
+
+        /// commands
+        public const string CmdFramework = "FRAMEWORK";
 
         /// update pkg
         public const string PleaseSpecifyNewVersion = "Please specify new version of the package.";

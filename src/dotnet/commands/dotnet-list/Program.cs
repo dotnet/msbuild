@@ -3,38 +3,26 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Tools.List.ProjectToProjectReferences;
 
 namespace Microsoft.DotNet.Tools.List
 {
-    public class ListCommand : DispatchCommand
+    public class ListCommand : DotNetTopLevelCommandBase
     {
-        protected override string HelpText => $@"{LocalizableStrings.ListCommandDescription}
-
-{LocalizableStrings.Usage}: dotnet list [options] <object> <command> [[--] <arg>...]]
-
-Options:
-  -h|--help  {LocalizableStrings.HelpDefinition}
-
-{LocalizableStrings.Arguments}:
-  <object>   {LocalizableStrings.ObjectDefinition}
-  <command>  {LocalizableStrings.CommandDefinition}
-
-{LocalizableStrings.ExtraArgs}:
-  {LocalizableStrings.ExtraArgumentsDefinition}
-
-{LocalizableStrings.Commands}:
-  p2ps       {LocalizableStrings.P2PsDefinition}";
-
-        protected override Dictionary<string, Func<string[], int>> BuiltInCommands => new Dictionary<string, Func<string[], int>>
-        {
-            ["p2ps"] = ListProjectToProjectReferencesCommand.Run,
-        };
+        protected override string CommandName => "list";
+        protected override string FullCommandNameLocalized => LocalizableStrings.NetListCommand;
+        internal override List<Func<CommandLineApplication, CommandLineApplication>> SubCommands =>
+            new List<Func<CommandLineApplication, CommandLineApplication>>
+            {
+                ListProjectToProjectReferencesCommand.CreateApplication,
+            };
 
         public static int Run(string[] args)
         {
-            var cmd = new ListCommand();
-            return cmd.Start(args);
+            var command = new ListCommand();
+            return command.RunCommand(args);
         }
     }
 }
