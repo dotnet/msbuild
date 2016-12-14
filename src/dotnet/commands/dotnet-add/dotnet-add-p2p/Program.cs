@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
 
                     string frameworkString = frameworkOption.Value();
                     List<string> references = app.RemainingArguments;
-                    MsbuildProject.EnsureAllReferencesExist(references);
+                    PathUtility.EnsureAllPathsExist(references, CommonLocalizableStrings.ReferenceDoesNotExist);
                     IEnumerable<MsbuildProject> refs = references.Select((r) => MsbuildProject.FromFile(projects, r));
 
                     if (frameworkString == null)
@@ -95,11 +95,12 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
                         }
                     }
 
-                    msbuildProj.ConvertPathsToRelative(ref references);
+                    var relativePathReferences = references.Select((r) =>
+                        PathUtility.GetRelativePath(msbuildProj.ProjectDirectory, Path.GetFullPath(r))).ToList();
 
                     int numberOfAddedReferences = msbuildProj.AddProjectToProjectReferences(
                         frameworkOption.Value(),
-                        references);
+                        relativePathReferences);
 
                     if (numberOfAddedReferences != 0)
                     {

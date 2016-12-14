@@ -2,7 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Tools.Common
@@ -256,6 +259,26 @@ namespace Microsoft.DotNet.Tools.Common
             }
 
             return Path.GetFullPath(path);
+        }
+
+        public static void EnsureAllPathsExist(List<string> paths, string pathDoesNotExistLocalizedFormatString)
+        {
+            var notExisting = new List<string>();
+            foreach (var p in paths)
+            {
+                if (!File.Exists(p))
+                {
+                    notExisting.Add(p);
+                }
+            }
+
+            if (notExisting.Count > 0)
+            {
+                throw new GracefulException(
+                    string.Join(
+                        Environment.NewLine,
+                        notExisting.Select((p) => string.Format(pathDoesNotExistLocalizedFormatString, p))));
+            }
         }
     }
 }

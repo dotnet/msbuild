@@ -19,8 +19,6 @@ namespace Microsoft.DotNet.Tools.Migrate
 {
     public partial class MigrateCommand
     {
-        private const string CSharpProjectTypeGuid = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}";
-
         private SlnFile _slnFile;
         private readonly DirectoryInfo _workspaceDirectory;
         private readonly DirectoryInfo _backupDirectory;
@@ -125,7 +123,7 @@ namespace Microsoft.DotNet.Tools.Migrate
                 if (csprojFiles.Count() == 1)
                 {
                     project.FilePath = Path.Combine(Path.GetDirectoryName(project.FilePath), csprojFiles.First().Name);
-                    project.TypeGuid = CSharpProjectTypeGuid;
+                    project.TypeGuid = ProjectTypeGuids.CSharpProjectTypeGuid;
                 }
             }
 

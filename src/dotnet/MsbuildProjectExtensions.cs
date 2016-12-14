@@ -3,6 +3,7 @@
 
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectJsonMigration;
+using Microsoft.DotNet.Tools.Common;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -100,7 +101,7 @@ namespace Microsoft.DotNet.Tools
 
         private static string NormalizeIncludeForComparison(string include)
         {
-            return MsbuildProject.NormalizeSlashes(include.ToLower());
+            return PathUtility.GetPathWithBackSlashes(include.ToLower());
         }
     }
 }

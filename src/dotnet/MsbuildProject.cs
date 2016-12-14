@@ -115,7 +115,7 @@ namespace Microsoft.DotNet.Tools
             ProjectItemGroupElement itemGroup = ProjectRootElement.FindUniformOrCreateItemGroupWithCondition(
                 ProjectItemElementType,
                 framework);
-            foreach (var @ref in refs.Select((r) => NormalizeSlashes(r)))
+            foreach (var @ref in refs.Select((r) => PathUtility.GetPathWithBackSlashes(r)))
             {
                 if (ProjectRootElement.HasExistingItemWithCondition(framework, @ref))
                 {
@@ -149,40 +149,6 @@ namespace Microsoft.DotNet.Tools
         public IEnumerable<ProjectItemElement> GetProjectToProjectReferences()
         {
             return ProjectRootElement.GetAllItemsWithElementType(ProjectItemElementType);
-        }
-
-        public void ConvertPathsToRelative(ref List<string> references)
-        {
-            references = references.Select((r) =>
-                PathUtility.GetRelativePath(
-                    ProjectDirectory,
-                    Path.GetFullPath(r)))
-                .ToList();
-        }
-
-        public static string NormalizeSlashes(string path)
-        {
-            return path.Replace('/', '\\');
-        }
-
-        public static void EnsureAllReferencesExist(List<string> references)
-        {
-            var notExisting = new List<string>();
-            foreach (var r in references)
-            {
-                if (!File.Exists(r))
-                {
-                    notExisting.Add(r);
-                }
-            }
-
-            if (notExisting.Count > 0)
-            {
-                throw new GracefulException(
-                    string.Join(
-                        Environment.NewLine,
-                        notExisting.Select((r) => string.Format(CommonLocalizableStrings.ReferenceDoesNotExist, r))));
-            }
         }
 
         public IEnumerable<NuGetFramework> GetTargetFrameworks()

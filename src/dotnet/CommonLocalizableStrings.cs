@@ -100,12 +100,10 @@
         /// Solution
         public const string CouldNotFindSolutionIn = "Specified solution file {0} does not exist, or there is no solution file in the directory.";
         public const string CouldNotFindSolutionOrDirectory = "Could not find solution or directory `{0}`.";
-        public const string FoundMoreThanOneSolutionIn = "Found more than one solution file in {0}. Please specify which one to use.";
-        public const string FoundInvalidSolution = "The solution file {0} seems to be invalid. Please check if it is a valid solution file.";
+        public const string MoreThanOneSolutionInDirectory = "Found more than one solution file in {0}. Please specify which one to use.";
         public const string InvalidSolution = "Invalid solution `{0}`.";
         public const string SolutionDoesNotExist = "Specified solution file {0} does not exist, or there is no solution file in the directory.";
-        public const string SolutionAlreadyContainsAProject = "Solution {0} already contains project {1}.";
-
+        
         /// add p2p
         public const string ReferenceDoesNotExist = "Reference {0} does not exist.";
         public const string ReferenceIsInvalid = "Reference `{0}` is invalid.";
@@ -125,28 +123,25 @@
         public const string ProjectIsInvalid = "Project `{0}` is invalid.";
         public const string SpecifyAtLeastOneProjectToAdd = "You must specify at least one project to add.";
         public const string ProjectAddedToTheSolution = "Project `{0}` added to the solution.";
-        public const string SolutionAlreadyHasAProject = "Solution {0} already contains project {1}.";
+        public const string SolutionAlreadyContainsProject = "Solution {0} already contains project {1}.";
 
         /// del p2p
         public const string ReferenceNotFoundInTheProject = "Specified reference {0} does not exist in project {1}.";
         public const string ReferenceRemoved = "Reference `{0}` deleted from the project.";
-        public const string SpecifyAtLeastOneReferenceToRemove = "You must specify at least one reference to delete. Please run dotnet delete --help for more information.";
+        public const string SpecifyAtLeastOneReferenceToRemove = "You must specify at least one reference to remove.";
         public const string ReferenceDeleted = "Reference `{0}` deleted.";
-        public const string SpecifyAtLeastOneReferenceToDelete = "You must specify at least one reference to delete. Please run dotnet delete --help for more information.";
-
+        
         /// del pkg
         public const string PackageReferenceNotFoundInTheProject = "Package reference `{0}` could not be found in the project.";
         public const string PackageReferenceRemoved = "Reference `{0}` deleted from the project.";
-        public const string SpecifyAtLeastOnePackageReferenceToRemove = "You must specify at least one reference to delete. Please run dotnet delete --help for more information.";
+        public const string SpecifyAtLeastOnePackageReferenceToRemove = "You must specify at least one package reference to remove.";
         public const string PackageReferenceDeleted = "Package reference `{0}` deleted.";
-        public const string SpecifyAtLeastOnePackageReferenceToDelete = "You must specify at least one package reference to delete.";
 
         /// del sln
         public const string ProjectNotFoundInTheSolution = "Project `{0}` could not be found in the solution.";
         public const string ProjectRemoved = "Project `{0}` removed from solution.";
         public const string SpecifyAtLeastOneProjectToRemove = "You must specify at least one project to remove.";
         public const string ProjectDeleted = "Project `{0}` deleted from solution.";
-        public const string SpecifyAtLeastOneProjectToDelete = "You must specify at least one project to delete from solution.";
 
         /// list
         public const string NoReferencesFound = "There are no {0} references in project {1}. ;; {0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). ";

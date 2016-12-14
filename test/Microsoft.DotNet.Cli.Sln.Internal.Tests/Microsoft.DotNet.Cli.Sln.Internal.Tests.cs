@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Cli.Sln.Internal.Tests
     public class GivenAnSlnFile : TestBase
     {
         [Fact]
-        public void It_reads_an_sln_file()
+        public void WhenGivenAValidPathItReadsAnSlnFile()
         {
             var solutionDirectory =
                 TestAssetsManager.CreateTestInstance("TestAppWithSln", callingMethod: "p").Path;
@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.Cli.Sln.Internal.Tests
         }
 
         [Fact]
-        public void It_writes_an_sln_file()
+        public void WhenGivenAValidPathItReadsModifiesThenWritesAnSln()
         {
             var solutionDirectory =
                 TestAssetsManager.CreateTestInstance("TestAppWithSln", callingMethod: "p").Path;
