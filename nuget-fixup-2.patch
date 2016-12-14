@@ -1,13 +1,13 @@
-[1mdiff --git a/nuget-support/tv/Microsoft.Common.targets/ImportAfter/Microsoft.NuGet.ImportAfter.targets b/nuget-support/tv/Microsoft.Common.targets/ImportAfter/Microsoft.NuGet.ImportAfter.targets[m
-[1mindex 3aa22ba..ca7237c 100644[m
-[1m--- a/nuget-support/tv/Microsoft.Common.targets/ImportAfter/Microsoft.NuGet.ImportAfter.targets[m
-[1m+++ b/nuget-support/tv/Microsoft.Common.targets/ImportAfter/Microsoft.NuGet.ImportAfter.targets[m
-[36m@@ -11,7 +11,7 @@[m [mCopyright (c) .NET Foundation. All rights reserved.[m
- -->[m
- <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">[m
-   <PropertyGroup>[m
-[31m-    <NuGetTargets Condition="'$(NuGetTargets)'==''">$(MSBuildExtensionsPath)\Microsoft.NuGet.targets</NuGetTargets>[m
-[32m+[m[32m    <NuGetTargets Condition="'$(NuGetTargets)'==''">$(MSBuildExtensionsPath)\Microsoft\NuGet\Microsoft.NuGet.targets</NuGetTargets>[m
-   </PropertyGroup>[m
-   <Import Condition="Exists('$(NuGetTargets)')" Project="$(NuGetTargets)" />[m
-   <!-- Import NuGet.targets for Restore -->[m
+diff --git a/nuget-support/tv/Microsoft.Common.targets/ImportAfter/Microsoft.NuGet.ImportAfter.targets b/nuget-support/tv/Microsoft.Common.targets/ImportAfter/Microsoft.NuGet.ImportAfter.targets
+index 3aa22ba..ca7237c 100644
+--- a/nuget-support/tv/Microsoft.Common.targets/ImportAfter/Microsoft.NuGet.ImportAfter.targets
++++ b/nuget-support/tv/Microsoft.Common.targets/ImportAfter/Microsoft.NuGet.ImportAfter.targets
+@@ -11,7 +11,7 @@ Copyright (c) .NET Foundation. All rights reserved.
+ -->
+ <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+   <PropertyGroup>
+-    <NuGetTargets Condition="'$(NuGetTargets)'==''">$(MSBuildExtensionsPath)\Microsoft.NuGet.targets</NuGetTargets>
++    <NuGetTargets Condition="'$(NuGetTargets)'==''">$(MSBuildExtensionsPath)\Microsoft\NuGet\Microsoft.NuGet.targets</NuGetTargets>
+   </PropertyGroup>
+   <Import Condition="Exists('$(NuGetTargets)')" Project="$(NuGetTargets)" />
+   <!-- Import NuGet.targets for Restore -->
