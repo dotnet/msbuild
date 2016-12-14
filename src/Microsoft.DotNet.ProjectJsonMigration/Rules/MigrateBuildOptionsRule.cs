@@ -150,7 +150,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             };
 
         private readonly string[] DefaultEmptyExcludeOption = new string[0];
-        
+
         private readonly ProjectPropertyGroupElement _configurationPropertyGroup;
         private readonly ProjectItemGroupElement _configurationItemGroup;
         private readonly CommonCompilerOptions _configurationBuildOptions;
@@ -419,13 +419,17 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         private IncludeContext GetEmbedIncludeContext(CommonCompilerOptions compilerOptions, string projectDirectory)
         {
             // Defaults from src/Microsoft.DotNet.ProjectModel/ProjectReader.cs #L602
-            return compilerOptions.EmbedInclude ??
+            var embedIncludeContext = compilerOptions.EmbedInclude ??
                 new IncludeContext(
                     projectDirectory,
                     "embed",
                     new JObject(),
                     ProjectFilesCollection.DefaultResourcesBuiltInPatterns,
                     DefaultEmptyExcludeOption);
+
+            embedIncludeContext.BuiltInsExclude.Add("@(EmbeddedResource)");
+
+            return embedIncludeContext;
         }
 
         private IncludeContext GetCopyToOutputIncludeContext(CommonCompilerOptions compilerOptions, string projectDirectory)
