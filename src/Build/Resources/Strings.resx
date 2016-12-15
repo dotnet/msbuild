@@ -1551,11 +1551,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   
   <!-- Engine errors for features not supported on .NET Core have the arbitrarily-chosen 48 prefix -->
-  <data name="TaskFactoryNotSupportedFailure" xml:space="preserve">
-    <value>MSB4801: The task factory "{0}" could not be loaded because this version of MSBuild does not support it.</value>
-    <comment>{StrBegin="MSB4801: "}</comment>
-  </data>
-
   <data name="TaskInstantiationFailureNotSupported" xml:space="preserve">
     <value>MSB4802: The "{0}" task could not be instantiated from "{1}". This version of MSBuild does not support {2}.</value>
     <comment>{StrBegin="MSB4802: "}</comment>
@@ -1618,6 +1613,7 @@ MSB4169
 MSB4170
 MSB4171
 MSB4172
+MSB4801
 
 
         Don't forget to update this comment after using a new code.
