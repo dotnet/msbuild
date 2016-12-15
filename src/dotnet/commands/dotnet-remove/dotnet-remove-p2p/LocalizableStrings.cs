@@ -9,7 +9,5 @@ namespace Microsoft.DotNet.Tools.Remove.ProjectToProjectReference
         public const string AppHelpText = "Project to project references to remove";
 
         public const string CmdFrameworkDescription = "Remove reference only when targetting a specific framework";
-
-        public const string SpecifyAtLeastOneReferenceToRemove = "You must specify at least one reference to delete. Please run dotnet delete --help for more information.";
     }
 }

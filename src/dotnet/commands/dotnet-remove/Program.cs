@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.DotNet.Tools.Remove.ProjectFromSolution;
 using Microsoft.DotNet.Tools.Remove.ProjectToProjectReference;
 
 namespace Microsoft.DotNet.Tools.Remove
@@ -16,6 +17,7 @@ namespace Microsoft.DotNet.Tools.Remove
         internal override List<Func<CommandLineApplication, CommandLineApplication>> SubCommands =>
             new List<Func<CommandLineApplication, CommandLineApplication>>
             {
+                RemoveProjectFromSolutionCommand.CreateApplication,
                 RemoveProjectToProjectReferenceCommand.CreateApplication,
             };
 

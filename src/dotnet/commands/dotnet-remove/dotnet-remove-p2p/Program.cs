@@ -4,73 +4,66 @@
 using Microsoft.Build.Evaluation;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools.Common;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using Microsoft.DotNet.Tools.Remove;
 
 namespace Microsoft.DotNet.Tools.Remove.ProjectToProjectReference
 {
-    public class RemoveProjectToProjectReferenceCommand
+    public class RemoveProjectToProjectReference : IRemoveSubCommand
     {
-        internal static CommandLineApplication CreateApplication(CommandLineApplication parentApp)
+        private CommandOption _frameworkOption;
+        private MsbuildProject _msbuildProj;
+
+        internal RemoveProjectToProjectReference(string fileOrDirectory, CommandOption frameworkOption)
         {
-            CommandLineApplication app = parentApp.Command("p2p", throwOnUnexpectedArg: false);
-            app.FullName = LocalizableStrings.AppFullName;
-            app.Description = LocalizableStrings.AppDescription;
-            app.HandleRemainingArguments = true;
-            app.ArgumentSeparatorHelpText = LocalizableStrings.AppHelpText;
+            _msbuildProj = MsbuildProject.FromFileOrDirectory(new ProjectCollection(), fileOrDirectory);
+            _frameworkOption = frameworkOption;
+        }
 
-            app.HelpOption("-h|--help");
+        public void Remove(IList<string> references)
+        {
+            if (references.Count == 0)
+            {
+                throw new GracefulException(CommonLocalizableStrings.SpecifyAtLeastOneReferenceToRemove);
+            }
 
-            CommandOption frameworkOption = app.Option(
+            int numberOfRemovedReferences = _msbuildProj.RemoveProjectToProjectReferences(
+                _frameworkOption.Value(),
+                references);
+
+            if (numberOfRemovedReferences != 0)
+            {
+                _msbuildProj.ProjectRootElement.Save();
+            }
+        }
+    }
+
+    public class RemoveProjectToProjectReferenceCommand : RemoveSubCommandBase
+    {
+        private CommandOption _frameworkOption;
+        
+        protected override string CommandName => "p2p";
+        protected override string LocalizedDisplayName => LocalizableStrings.AppFullName;
+        protected override string LocalizedDescription => LocalizableStrings.AppDescription;
+        protected override string LocalizedHelpText => LocalizableStrings.AppHelpText;
+
+        internal override void AddCustomOptions(CommandLineApplication app)
+        {
+            _frameworkOption = app.Option(
                 $"-f|--framework <{CommonLocalizableStrings.CmdFramework}>",
                 LocalizableStrings.CmdFrameworkDescription,
                 CommandOptionType.SingleValue);
+        }
 
-            app.OnExecute(() => {
-                try
-                {
-                    if (!parentApp.Arguments.Any())
-                    {
-                        throw new GracefulException(CommonLocalizableStrings.RequiredArgumentNotPassed, Constants.ProjectOrSolutionArgumentName);
-                    }
+        protected override IRemoveSubCommand CreateIRemoveSubCommand(string fileOrDirectory)
+        {
+            return new RemoveProjectToProjectReference(fileOrDirectory, _frameworkOption);
+        }
 
-                    var projectOrDirectory = parentApp.Arguments.First().Value;
-                    if (string.IsNullOrEmpty(projectOrDirectory))
-                    {
-                        projectOrDirectory = PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory());
-                    }
-
-                    var msbuildProj = MsbuildProject.FromFileOrDirectory(new ProjectCollection(), projectOrDirectory);
-
-                    if (app.RemainingArguments.Count == 0)
-                    {
-                        throw new GracefulException(LocalizableStrings.SpecifyAtLeastOneReferenceToRemove);
-                    }
-
-                    List<string> references = app.RemainingArguments;
-
-                    int numberOfRemovedReferences = msbuildProj.RemoveProjectToProjectReferences(
-                        frameworkOption.Value(),
-                        references);
-
-                    if (numberOfRemovedReferences != 0)
-                    {
-                        msbuildProj.ProjectRootElement.Save();
-                    }
-
-                    return 0;
-                }
-                catch (GracefulException e)
-                {
-                    Reporter.Error.WriteLine(e.Message.Red());
-                    app.ShowHelp();
-                    return 1;
-                }
-            });
-
-            return app;
+        internal static CommandLineApplication CreateApplication(CommandLineApplication parentApp)
+        {
+            var removeSubCommand = new RemoveProjectToProjectReferenceCommand();
+            return removeSubCommand.Create(parentApp);
         }
     }
 }
