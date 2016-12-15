@@ -201,7 +201,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 var ns = project.Root.Name.Namespace;
 
-                project.Root.Element(ns + "PropertyGroup").Add(new XElement(ns + "OverrideDefaultGlobs", "True"));
+                project.Root.Element(ns + "PropertyGroup").Add(new XElement(ns + "EnableDefaultItems", "False"));
 
                 XElement itemGroup = new XElement(ns + "ItemGroup");
                 project.Root.Add(itemGroup);

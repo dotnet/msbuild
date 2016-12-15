@@ -79,14 +79,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
   
   <!-- Default glob settings -->
-  <PropertyGroup>
-    <GlobalExclude>$(GlobalExclude);bin\**;obj\**;packages\**</GlobalExclude>
-  </PropertyGroup>
-
-  <ItemGroup Condition=" '$(OverrideDefaultGlobs)' != 'True' ">
-    <Compile Include="**\*.cs" Exclude="$(GlobalExclude);wwwroot\**" Condition=" '$(OverrideDefaultCompileGlob)' != 'True' " />
-    <EmbeddedResource Include="**\*.resx" Exclude="$(GlobalExclude);wwwroot\**" Condition=" '$(OverrideDefaultEmbeddedResourceGlob)' != 'True' " />
-  </ItemGroup>
+  <Import Project="Microsoft.NET.Sdk.DefaultItems.props" />
   
   <!-- Temporary workarounds -->
   <PropertyGroup>

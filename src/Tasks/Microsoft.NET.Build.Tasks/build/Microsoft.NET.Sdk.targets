@@ -21,13 +21,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Import Project="$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolution.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolution.targets')" />
   </ImportGroup>
 
-  <PropertyGroup>
-    <DefaultRemoves>bin\**;obj\**;packages\**</DefaultRemoves>
-  </PropertyGroup>
-  <ItemGroup Condition="'$(DisableDefaultRemoves)' != 'true'">
-    <Compile Remove="$(DefaultRemoves)" />
-    <EmbeddedResource Remove="$(DefaultRemoves)" />
-  </ItemGroup>
+  <Import Project="Microsoft.NET.Sdk.DefaultItems.targets" />
   
   <UsingTask TaskName="GenerateDepsFile" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="GenerateRuntimeConfigurationFiles" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />

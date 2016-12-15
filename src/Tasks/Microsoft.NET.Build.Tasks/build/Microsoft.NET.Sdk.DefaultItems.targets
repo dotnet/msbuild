@@ -1,0 +1,66 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.DefaultItems.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved. 
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <EnableDefaultItems Condition=" '$(EnableDefaultItems)' == '' ">true</EnableDefaultItems>
+    <EnableDefaultCompileItems Condition=" '$(EnableDefaultCompileItems)' == '' ">true</EnableDefaultCompileItems>
+    <EnableDefaultEmbeddedResourceItems Condition=" '$(EnableDefaultEmbeddedResourceItems)' == '' ">true</EnableDefaultEmbeddedResourceItems>
+    
+    <!-- The Web SDK would default this to true (and the .NET SDK may too, after investigation) -->
+    <EnableDefaultContentItems Condition=" '$(EnableDefaultItems)' == '' ">false</EnableDefaultContentItems>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- bin folder, by default -->
+    <DefaultRemoves>$(DefaultRemoves);$(BaseOutputPath)/**</DefaultRemoves>
+    <!-- obj folder, by default -->
+    <DefaultRemoves>$(DefaultRemoves);$(BaseIntermediateOutputPath)/**</DefaultRemoves>
+
+    <!-- Various files that should generally always be ignored -->
+    <DefaultRemoves>$(DefaultRemoves);**/*.user</DefaultRemoves>
+    <DefaultRemoves>$(DefaultRemoves);**/*.*proj</DefaultRemoves>
+    <DefaultRemoves>$(DefaultRemoves);**/*.sln</DefaultRemoves>
+    <DefaultRemoves>$(DefaultRemoves);**/*.vssscc</DefaultRemoves>
+    <DefaultRemoves>$(DefaultRemoves);**/.*/**</DefaultRemoves>
+
+    <!-- These should possibly move to Web SDK -->
+    <DefaultRemoves>$(DefaultRemoves);node_modules/**</DefaultRemoves>
+    <DefaultRemoves>$(DefaultRemoves);jspm_packages/**</DefaultRemoves>
+    <DefaultRemoves>$(DefaultRemoves);bower_components/**</DefaultRemoves>
+    
+    <!-- TODO: Verify why this was originally added and whether we really need it -->
+    <DefaultRemoves>$(DefaultRemoves);packages/**</DefaultRemoves>
+    
+  </PropertyGroup>
+  <ItemGroup Condition="'$(DisableDefaultRemoves)' != 'true'">
+    <Compile Remove="$(DefaultRemoves)" />
+    <EmbeddedResource Remove="$(DefaultRemoves)" />
+    <Content Remove="$(DefaultRemoves)" />
+
+    <!-- The project system in VS doesn't understand removes referring to items, but this will help the build behavior to be correct
+         if the globs have been modified, even if some operations in the IDE may add unnecessary entries to the project file. -->
+    <Content Remove="@(Compile)" />
+    <Content Remove="@(EmbeddedResource)" />
+  </ItemGroup>
+  
+  <!-- This would go in the Web SDK -->
+  <ItemGroup Condition="'$(DisableDefaultRemoves)' != 'true'">
+    <Compile Remove="wwwroot/**" />
+    <EmbeddedResource Remove="wwwroot/**" />
+  </ItemGroup>
+
+</Project>
