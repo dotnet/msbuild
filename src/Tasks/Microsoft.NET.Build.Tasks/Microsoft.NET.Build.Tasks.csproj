@@ -35,6 +35,8 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DiagnosticMessageSeverity.cs" />
+    <Compile Include="DiagnosticsHelper.cs" />
     <Compile Include="NETSdkError.cs" />
     <Compile Include="LockFileLookup.cs" />
     <Compile Include="FrameworkReferenceResolver.cs" />

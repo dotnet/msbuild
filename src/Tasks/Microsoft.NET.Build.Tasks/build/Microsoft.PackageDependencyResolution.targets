@@ -73,6 +73,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     </PrepareResourcesDependsOn>
   </PropertyGroup>
 
+  <!-- List of targets that emit DiagnosticMessages items -->
+  <PropertyGroup>
+    <EmitsDiagnosticMessages>
+      RunResolvePackageDependencies;
+      $(EmitsDiagnosticMessages)
+    </EmitsDiagnosticMessages>
+  </PropertyGroup>
+
   <!-- Common tokens used in preprocessed content files -->
   <ItemGroup>
     <PreprocessorValue Include="rootnamespace">
@@ -152,6 +160,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="FileDefinitions" ItemName="FileDefinitions" />
       <Output TaskParameter="PackageDependencies" ItemName="PackageDependencies" />
       <Output TaskParameter="FileDependencies" ItemName="FileDependencies" />
+      <Output TaskParameter="DiagnosticMessages" ItemName="DiagnosticMessages" />
     </ResolvePackageDependencies>
 
   </Target>
@@ -170,14 +179,15 @@ Copyright (c) .NET Foundation. All rights reserved.
   
   <Target Name="ResolvePackageDependenciesDesignTime"
           Returns="@(_DependenciesDesignTime)"
-          DependsOnTargets="ResolveAssemblyReferencesDesignTime;RunResolvePackageDependencies">
+          DependsOnTargets="ResolveAssemblyReferencesDesignTime;RunResolvePackageDependencies;$(EmitsDiagnosticMessages)">
 
     <PreprocessPackageDependenciesDesignTime
           TargetDefinitions="@(TargetDefinitions)"
           PackageDefinitions="@(PackageDefinitions)"
           FileDefinitions="@(FileDefinitions)"
           PackageDependencies="@(PackageDependencies)"
-          FileDependencies="@(FileDependencies)">
+          FileDependencies="@(FileDependencies)"
+          InputDiagnosticMessages="@(DiagnosticMessages)">
 
       <Output TaskParameter="DependenciesDesignTime" ItemName="_DependenciesDesignTime" />
     </PreprocessPackageDependenciesDesignTime>

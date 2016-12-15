@@ -40,6 +40,9 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public ITaskItem[] FileDependencies { get; set; }
 
+        [Required]
+        public ITaskItem[] InputDiagnosticMessages { get; set; }
+
         [Output]
         public ITaskItem[] DependenciesDesignTime { get; set; }
 
@@ -52,6 +55,9 @@ namespace Microsoft.NET.Build.Tasks
         private Dictionary<string, ItemMetadata> Assemblies { get; set; }
                     = new Dictionary<string, ItemMetadata>(StringComparer.OrdinalIgnoreCase);
 
+        private Dictionary<string, ItemMetadata> DiagnosticsMap { get; set; }
+                    = new Dictionary<string, ItemMetadata>(StringComparer.OrdinalIgnoreCase);
+
         private Dictionary<string, ItemMetadata> DependenciesWorld { get; set; }
                     = new Dictionary<string, ItemMetadata>(StringComparer.OrdinalIgnoreCase);
 
@@ -62,6 +68,8 @@ namespace Microsoft.NET.Build.Tasks
             PopulatePackages();
 
             PopulateAssemblies();
+
+            PopulateDiagnosticsMap();
 
             AddDependenciesToTheWorld(Packages, PackageDependencies);
 
@@ -79,6 +87,10 @@ namespace Microsoft.NET.Build.Tasks
                 var fileGroup = item.GetMetadata(MetadataKeys.FileGroup);
                 return string.IsNullOrEmpty(fileGroup) || !fileGroup.Equals(CompileTimeAssemblyMetadata);
             });
+
+            AddDependenciesToTheWorld(DiagnosticsMap, InputDiagnosticMessages, (diagnostic) =>
+                diagnostic.GetMetadata(MetadataKeys.ParentPackage) == null ||
+                diagnostic.GetMetadata(MetadataKeys.ParentTarget) == null);
 
             // prepare output collection: add corresponding metadata to ITaskItem based in item type
             DependenciesDesignTime = DependenciesWorld.Select(itemKvp =>
@@ -163,6 +175,22 @@ namespace Microsoft.NET.Build.Tasks
                 var name = Path.GetFileName(fileDef.ItemSpec);
                 var assembly = new AssemblyMetadata(dependencyType, fileDef, name);
                 Assemblies[fileDef.ItemSpec] = assembly;
+            }
+        }
+
+        private void PopulateDiagnosticsMap()
+        {
+            foreach (var diagnostic in InputDiagnosticMessages)
+            {
+                if (diagnostic.GetMetadata(MetadataKeys.ParentPackage) == null ||
+                    diagnostic.GetMetadata(MetadataKeys.ParentTarget) == null)
+                {
+                    continue;
+                }
+
+                // TODO generate unique ID for each diagnostic as target/package/code may not be unique enough
+                var metadata = new DiagnosticMetadata(diagnostic);
+                DiagnosticsMap[diagnostic.ItemSpec] = metadata;
             }
         }
 
@@ -332,6 +360,49 @@ namespace Microsoft.NET.Build.Tasks
             {
                 Name = name ?? string.Empty;
                 Type = type;
+            }
+        }
+
+        private class DiagnosticMetadata : ItemMetadata
+        {
+            public DiagnosticMetadata(ITaskItem item)
+                : base(DependencyType.Diagnostic)
+            {
+                DiagnosticCode = item.GetMetadata(MetadataKeys.DiagnosticCode) ?? string.Empty;
+                Message = item.GetMetadata(MetadataKeys.Message) ?? string.Empty;
+                FilePath = item.GetMetadata(MetadataKeys.FilePath) ?? string.Empty;
+                Severity = item.GetMetadata(MetadataKeys.Severity) ?? string.Empty;
+                StartLine = item.GetMetadata(MetadataKeys.StartLine) ?? string.Empty;
+                StartColumn = item.GetMetadata(MetadataKeys.StartColumn) ?? string.Empty;
+                EndLine = item.GetMetadata(MetadataKeys.EndLine) ?? string.Empty;
+                EndColumn = item.GetMetadata(MetadataKeys.EndColumn) ?? string.Empty;
+            }
+
+            public string DiagnosticCode { get; }
+            public string Message { get; }
+            public string FilePath { get; }
+            public string Severity { get; }
+            public string StartLine { get; }
+            public string StartColumn { get; }
+            public string EndLine { get; }
+            public string EndColumn { get; }
+
+            public override IDictionary<string, string> ToDictionary()
+            {
+                return new Dictionary<string, string>
+                {
+                    { MetadataKeys.Name, $"{DiagnosticCode}: {Message}" },
+                    { MetadataKeys.DiagnosticCode, DiagnosticCode },
+                    { MetadataKeys.Message, Message },
+                    { MetadataKeys.FilePath, FilePath },
+                    { MetadataKeys.Severity, Severity },
+                    { MetadataKeys.StartLine, StartLine },
+                    { MetadataKeys.StartColumn, StartColumn },
+                    { MetadataKeys.EndLine, EndLine },
+                    { MetadataKeys.EndColumn, EndColumn },
+                    { MetadataKeys.Type, Type.ToString() },
+                    { DependenciesMetadata, string.Join(";", Dependencies) }
+                };
             }
         }
     }
