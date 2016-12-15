@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Tools.Help
   -h|--help             {LocalizableStrings.HelpDefinition} 
 
 {LocalizableStrings.HostOptions}:
-  -v|--verbose          {LocalizableStrings.VerboseDefinition}
+  -d|--diagnostics      {LocalizableStrings.DiagnosticsDefinition}
   --version             {LocalizableStrings.VersionDescription}
   --info                {LocalizableStrings.InfoDescription}
 
