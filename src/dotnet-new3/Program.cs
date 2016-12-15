@@ -20,7 +20,7 @@ namespace dotnet_new3
 {
     public class Program
     {
-        private static readonly string HostIdentifier = "cli";
+        private static readonly string HostIdentifier = "dotnetcli";
 
         private static void SetupInternalCommands(ExtendedCommandParser appExt)
         {
@@ -425,19 +425,18 @@ namespace dotnet_new3
     <add key=""dotnet new3 builtins"" value = ""{Paths.Global.BuiltInsFeed}""/>
   </packageSources>
 </configuration>";
-
             Paths.User.NuGetConfig.WriteAllText(userNuGetConfig);
-            string[] packages = Paths.Global.DefaultInstallPackageList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            if (packages.Length > 0)
+
+            string[] packageList = Paths.Global.DefaultInstallPackageList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            if (packageList.Length > 0)
             {
-                InstallPackages(packages, true);
+                InstallPackages(packageList, true);
             }
 
-            packages = Paths.Global.DefaultInstallTemplateList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
-
-            if (packages.Length > 0)
+            packageList = Paths.Global.DefaultInstallTemplateList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            if (packageList.Length > 0)
             {
-                InstallPackages(packages, true);
+                InstallPackages(packageList, true);
             }
         }
 
@@ -447,11 +446,29 @@ namespace dotnet_new3
 
             foreach (string package in packageNames)
             {
-                string pkg = package.Trim();                
+                string pkg = package.Trim();
                 pkg = Environment.ExpandEnvironmentVariables(pkg);
 
-                string packageLocation = new DirectoryInfo(pkg).FullName;
-                TemplateCache.Scan(packageLocation);
+                try
+                {
+                    if (Directory.Exists(pkg) || File.Exists(pkg))
+                    {
+                        string packageLocation = new DirectoryInfo(pkg).FullName;
+                        TemplateCache.Scan(packageLocation);
+                    }
+                    else
+                    {
+                        string directory = Path.GetDirectoryName(pkg);
+                        string fileGlob = Path.GetFileName(pkg);
+                        string fullDirectory = new DirectoryInfo(directory).FullName;
+                        string fullPathGlob = Path.Combine(fullDirectory, fileGlob);
+                        TemplateCache.Scan(fullPathGlob);
+                    }
+                }
+                catch
+                {
+                    EngineEnvironmentSettings.Host.OnNonCriticalError("InvalidPackageSpecification", string.Format($"Package [{package}] is not a valid package specification"), null, 0);
+                }
             }
 
             TemplateCache.WriteTemplateCaches();

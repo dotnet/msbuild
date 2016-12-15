@@ -1,0 +1,9 @@
+{
+  "author": "Microsoft",
+  "classifications": ["Config"],
+  "name": "Nuget Config",
+  "groupIdentity": "ItemNugetConfig",
+  "identity": "Microsoft.Standard.QuickStarts.Nuget.Config",
+  "shortName": "nugetconfig",
+  "sourceName": "Nuget"
+}
