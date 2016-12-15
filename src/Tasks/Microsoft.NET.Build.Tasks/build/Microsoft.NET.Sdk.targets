@@ -211,7 +211,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateSatelliteAssemblies EmbedResources="@(_SatelliteAssemblyResourceInputs)"
                                  AssemblyInfoFile="$(_AssemblyInfoFile)"
                                  OutputAssembly="$(_OutputAssembly)"
-                                 References="@(Reference)">
+                                 References="@(ReferencePath)"
+                                 KeyContainer="$(KeyContainerName)"
+                                 KeyFile="$(KeyOriginatorFile)"
+                                 PublicSign="$(PublicSign)"
+                                 DelaySign="$(DelaySign)">
 
       <Output TaskParameter="OutputAssembly" ItemName="FileWrites"/>
     </GenerateSatelliteAssemblies>

@@ -1,6 +1,8 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.NET.TestFramework;
@@ -30,17 +32,33 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework: "netcoreapp1.0");
-            outputDirectory.Should().OnlyHaveFiles(new[] {
-                "AllResourcesInSatellite.dll",
+            var targetFramework = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "net46" : "netcoreapp1.0";
+            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);
+
+            var outputFiles = new List<string>
+            {
                 "AllResourcesInSatellite.pdb",
                 "AllResourcesInSatellite.runtimeconfig.json",
                 "AllResourcesInSatellite.runtimeconfig.dev.json",
-                "AllResourcesInSatellite.deps.json",
-                "en/AllResourcesInSatellite.resources.dll",
-            });
+                "en/AllResourcesInSatellite.resources.dll"
+            };
 
-            Command.Create(RepoInfo.DotNetHostPath, new[] { Path.Combine(outputDirectory.FullName, "AllResourcesInSatellite.dll") })
+            Command command;
+            if (targetFramework == "net46")
+            {
+                outputFiles.Add("AllResourcesInSatellite.exe");
+                command = Command.Create(Path.Combine(outputDirectory.FullName, "AllResourcesInSatellite.exe"), Array.Empty<string>());
+            }
+            else
+            {
+                outputFiles.Add("AllResourcesInSatellite.dll");
+                outputFiles.Add("AllResourcesInSatellite.deps.json");
+                command = Command.Create(RepoInfo.DotNetHostPath, new[] { Path.Combine(outputDirectory.FullName, "AllResourcesInSatellite.dll") });
+            }
+
+            outputDirectory.Should().OnlyHaveFiles(outputFiles);
+
+            command
                 .CaptureStdOut()
                 .Execute()
                 .Should()
