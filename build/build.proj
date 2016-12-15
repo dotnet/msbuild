@@ -159,10 +159,10 @@
   <Target Name="Test">
 
     <ItemGroup Condition="'$(BuildTemplates)' != 'true'">
-      <TestAssembly Include="$(TestsDirectory)*Tests.dll" />
+      <TestAssembly Include="$(TestsDirectory)*Tests.dll" Exclude="$(TestsDirectory)Templates.UnitTests.dll" />
       <XmlTestFile Include="$(TestsDirectory)TestResults.xml" />
     </ItemGroup>
-	<ItemGroup Condition="'$(BuildTemplates)' == 'true'">
+    <ItemGroup Condition="'$(BuildTemplates)' == 'true'">
       <TestAssembly Include="$(TestsDirectory)Templates.UnitTests.dll" />
       <XmlTestFile Include="$(TestsDirectory)TemplatesTestResults.xml" />
     </ItemGroup>

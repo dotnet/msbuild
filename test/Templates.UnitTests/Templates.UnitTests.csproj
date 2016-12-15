@@ -20,12 +20,6 @@
     <StartWorkingDirectory>$(OutDir)</StartWorkingDirectory>
     <DebugEngines>{2E36F1D4-B23C-435D-AB41-18E608940038}</DebugEngines>
   </PropertyGroup>
-  <PropertyGroup>
-    <FullPathOutDir>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), $(OutDir)))</FullPathOutDir>
-    <PostBuildEvent>
-      xcopy /S /Y /R  "$(MSBuildProjectDirectory)\..\..\src\Templates\*" "$(FullPathOutDir)\TestAssets\Templates\" /EXCLUDE:$(MSBuildProjectDirectory)\..\..\.gitignore
-    </PostBuildEvent>
-  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Sdk">
       <Version>$(SdkStage0Version)</Version>

@@ -4,42 +4,60 @@
 using System.IO;
 using Xunit;
 using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Templates.UnitTests
 {
     public class EncodeTests
     {
-       [Fact]
+        private static readonly HashSet<string> IgnoreFileExtensionSet = new HashSet<string> {".json", ".props", ".target", ".png"};
+
+        [Fact]
         public void AllFilesInTemplatesShouldBeUTF8Encoded()
         {
-            var dirPath = Path.Combine(AppContext.BaseDirectory, "TestAssets", "Templates");
-            CheckAllFilesUTF8Encoded(dirPath);
+            var dirPath = Path.Combine(AppContext.BaseDirectory, @"..\..\..\src\Templates");
+            this.CheckAllFilesUTF8Encoded(dirPath);
         }
 
         private void CheckAllFilesUTF8Encoded(string dirPath)
         {
             foreach (var filePath in Directory.GetFiles(dirPath))
             {
-                if (Directory.Exists(filePath))
+                var fileExtension = Path.GetExtension(filePath);
+                if (EncodeTests.IgnoreFileExtensionSet.Contains(fileExtension))
                 {
-                    CheckAllFilesUTF8Encoded(filePath);
+                    continue;
                 }
-                else if (File.Exists(filePath))
-                {
-                    Assert.True(IsUTF8EncodedFile(filePath), $"{filePath} should be UTF-8 encoded");
-                }
+                Assert.True(this.IsUTF8EncodedWithBOM(filePath), $"{filePath} should be UTF-8 encoded with BOM");
+            }
+
+            foreach (var childDirPath in Directory.GetDirectories(dirPath))
+            {
+                this.CheckAllFilesUTF8Encoded(childDirPath);
             }
         }
 
         /// <summary>
-        /// Check first three bytes to check the file is UFT-8 or not.
-        /// First three bytes should be EF BB BF for UTF-8
-        /// Ref: https://msdn.microsoft.com/en-us/library/windows/desktop/dd374101(v=vs.85).aspx
+        /// Check file is UTF-8 encoded with BOM.
         /// </summary>
         /// <param name="filePath"></param>
-        /// <returns>true; If file encoding is UTF-8</returns>
-        private bool IsUTF8EncodedFile(string filePath)
+        /// <returns>true; If file encoding is UTF-8 with BOM</returns>
+        private bool IsUTF8EncodedWithBOM(string filePath)
         {
+            var strictUTF8 = new UTF8Encoding(encoderShouldEmitUTF8Identifier: true, throwOnInvalidBytes: true);
+            using (var reader = new StreamReader(File.OpenRead(filePath), strictUTF8, detectEncodingFromByteOrderMarks: false))
+            {
+                try
+                {
+                    reader.ReadToEnd();
+                }
+                catch (DecoderFallbackException)
+                {
+                    return false;
+                }
+            }
+
             var bom = new byte[3];
             using (var file = new FileStream(filePath, FileMode.Open, FileAccess.Read))
             {
