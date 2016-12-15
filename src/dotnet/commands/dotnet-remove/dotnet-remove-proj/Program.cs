@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Tools.Remove.ProjectFromSolution
             bool slnChanged = false;
             foreach (var path in relativeProjectPaths)
             {
-                slnChanged |= RemoveProject(_slnFile, path);
+                slnChanged |= RemoveProject(path);
             }
 
             if (slnChanged)
@@ -46,11 +46,11 @@ namespace Microsoft.DotNet.Tools.Remove.ProjectFromSolution
             }
         }
 
-        private static bool RemoveProject(SlnFile slnFile, string projectPath)
+        private bool RemoveProject(string projectPath)
         {
             var projectPathNormalized = PathUtility.GetPathWithBackSlashes(projectPath);
 
-            var projectsToRemove = slnFile.Projects.Where((p) =>
+            var projectsToRemove = _slnFile.Projects.Where((p) =>
                     string.Equals(p.FilePath, projectPathNormalized, StringComparison.OrdinalIgnoreCase)).ToList();
 
             bool projectRemoved = false;
@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.Tools.Remove.ProjectFromSolution
             {
                 foreach (var slnProject in projectsToRemove)
                 {
-                    slnFile.Projects.Remove(slnProject);
+                    _slnFile.Projects.Remove(slnProject);
                     Reporter.Output.WriteLine(
                         string.Format(CommonLocalizableStrings.ProjectReferenceRemoved, slnProject.FilePath));
                 }
