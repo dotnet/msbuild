@@ -448,6 +448,11 @@ namespace Microsoft.Build.Evaluation
             return FrameworkLocationHelper.programFiles32;
         }
 
+        public static string GetMSBuildExtensionsPath()
+        {
+            return BuildEnvironmentHelper.Instance.MSBuildExtensionsPath;
+        }
+
         #region Debug only intrinsics
 
         /// <summary>
