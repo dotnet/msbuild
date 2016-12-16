@@ -12,7 +12,7 @@
 
         public const string FrameworkOption = "FRAMEWORK";
 
-        public const string FrameworkOptionDescription = " Target framework to publish for. The target framework has to be specified in the project file.";
+        public const string FrameworkOptionDescription = "Target framework to publish for. The target framework has to be specified in the project file.";
 
         public const string RuntimeOption = "RUNTIME_IDENTIFIER";
 

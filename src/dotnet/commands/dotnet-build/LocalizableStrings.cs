@@ -14,7 +14,7 @@
 
         public const string FrameworkOptionName = "FRAMEWORK";
 
-        public const string NoDependenciesOptionDescription = "Set this flag to ignore project to project references and only build the root project";
+        public const string NoDependenciesOptionDescription = "Set this flag to ignore project-to-project references and only build the root project";
 
         public const string NoIncrementialOptionDescription = "Disables incremental build.";
 
