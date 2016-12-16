@@ -74,9 +74,9 @@
         <note />
       </trans-unit>
       <trans-unit id="RestoreDefinition">
-        <source>Restore dependencies specified in the.NET project</source>
-        <target state="translated">.NET 프로젝트에 지정된 종속성을 복원합니다.</target>
-        <note />
+        <source>Restore dependencies specified in the .NET project</source>
+        <target state="needs-review-translation">.NET 프로젝트에 지정된 종속성을 복원합니다.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="BuildDefinition">
         <source>Builds a .NET project</source>
@@ -89,9 +89,9 @@
         <note />
       </trans-unit>
       <trans-unit id="RunDefinition">
-        <source>Compiles and immediately executes a.NET project</source>
-        <target state="translated">.NET 프로젝트를 컴파일하고 즉시 실행합니다.</target>
-        <note />
+        <source>Compiles and immediately executes a .NET project</source>
+        <target state="needs-review-translation">.NET 프로젝트를 컴파일하고 즉시 실행합니다.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="TestDefinition">
         <source>Runs unit tests using the test runner specified in the project</source>

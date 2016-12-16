@@ -46,20 +46,20 @@
       <trans-unit id="CmdTestCaseFilterDescription">
         <source>Run tests that match the given expression.
                                         Examples:
-                                        --testCaseFilter:"Priority = 1"
-                                        --testCaseFilter: "(FullyQualifiedName~Nightly | Name = MyTestMethod)"</source>
-        <target state="translated">지정된 식과 일치하는 테스트를 실행합니다.
+                                        --test-case-filter:"Priority = 1"
+                                        --test-case-filter: "(FullyQualifiedName~Nightly | Name = MyTestMethod)"</source>
+        <target state="needs-review-translation">지정된 식과 일치하는 테스트를 실행합니다.
                                         예:
                                         --testCaseFilter:"Priority = 1"
                                         --testCaseFilter: "(FullyQualifiedName~Nightly | Name = MyTestMethod)"</target>
-        <note />
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdTestAdapterPathDescription">
         <source>Use custom adapters from the given path in the test run.
-                                        Example: --testAdapterPath:&lt;pathToCustomAdapters&gt;</source>
-        <target state="translated">테스트 실행에서 지정된 경로에 있는 사용자 지정 어댑터를 사용합니다.
+                                        Example: --test-adapter-path:&lt;pathToCustomAdapters&gt;</source>
+        <target state="needs-review-translation">테스트 실행에서 지정된 경로에 있는 사용자 지정 어댑터를 사용합니다.
                                         예: --testAdapterPath:&lt;pathToCustomAdapters&gt;</target>
-        <note />
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdLoggerOption">
         <source>LoggerUri/FriendlyName</source>

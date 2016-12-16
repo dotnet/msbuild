@@ -74,9 +74,9 @@
         <note />
       </trans-unit>
       <trans-unit id="RestoreDefinition">
-        <source>Restore dependencies specified in the.NET project</source>
-        <target state="translated">Восстановить зависимости, указанные в проекте .NET</target>
-        <note />
+        <source>Restore dependencies specified in the .NET project</source>
+        <target state="needs-review-translation">Восстановить зависимости, указанные в проекте .NET</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="BuildDefinition">
         <source>Builds a .NET project</source>
@@ -89,9 +89,9 @@
         <note />
       </trans-unit>
       <trans-unit id="RunDefinition">
-        <source>Compiles and immediately executes a.NET project</source>
-        <target state="translated">Компиляция и немедленное выполнение проекта .NET</target>
-        <note />
+        <source>Compiles and immediately executes a .NET project</source>
+        <target state="needs-review-translation">Компиляция и немедленное выполнение проекта .NET</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="TestDefinition">
         <source>Runs unit tests using the test runner specified in the project</source>

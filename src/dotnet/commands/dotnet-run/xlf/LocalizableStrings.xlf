@@ -5,87 +5,87 @@
       <group id="src/dotnet/commands/dotnet-run/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET Run Command</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Command used to run .NET apps</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CommandOptionConfigurationDescription">
         <source>Configuration under which to build</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CommandOptionFramework">
         <source>FRAMEWORK</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CommandOptionFrameworkDescription">
         <source>Compile a specific framework</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CommandOptionProjectDescription">
         <source>The path to the project file to run (defaults to the current directory if there is only one project).</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandException">
         <source>The build failed. Please fix the build errors and run again.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandMSBuildExtensionsPath">
         <source>MSBuildExtensionsPath</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandConfiguration">
         <source>Configuration</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandTargetFramework">
         <source>TargetFramework</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandProjectInstance">
         <source>RunCommand</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandOutputType">
         <source>OutputType</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRun1">
         <source>Unable to run your project.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRun2">
         <source>Please ensure you have a runnable project type and ensure 'dotnet run' supports this project.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRun3">
         <source>The current OutputType is </source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandRunArguments">
         <source>RunArguments</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandRunWorkingDirectory">
         <source>RunWorkingDirectory</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandInvalidOperationException1">
         <source>Couldn't find a project to run. Ensure a project exists in </source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandInvalidOperationException2">
         <source>Or pass the path to the project using --project</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandInvalidOperationException3">
         <source>Specify which project file to use because this </source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandInvalidOperationException4">
         <source>contains more than one project file.</source>
-        <note></note>
+        <note />
       </trans-unit>
     </body>
   </file>

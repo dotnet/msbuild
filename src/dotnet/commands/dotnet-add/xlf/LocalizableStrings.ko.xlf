@@ -8,51 +8,6 @@
         <target state="translated">.NET 추가 명령</target>
         <note />
       </trans-unit>
-      <trans-unit id="Usage">
-        <source>Usage</source>
-        <target state="translated">사용법</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Options">
-        <source>Options</source>
-        <target state="translated">옵션</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="HelpDefinition">
-        <source>Show help information</source>
-        <target state="translated">도움말 정보 표시</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Arguments">
-        <source>Arguments</source>
-        <target state="translated">인수</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ArgumentsObjectDefinition">
-        <source>The object of the operation. If a project file is not specified, it defaults to the current directory.</source>
-        <target state="translated">작업의 개체입니다. 프로젝트 파일을 지정하지 않는 경우 현재 디렉터리로 기본 설정됩니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ArgumentsCommandDefinition">
-        <source>Command to be executed on &lt;object&gt;.</source>
-        <target state="translated">&lt;개체&gt;에 실행할 명령입니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ArgsDefinition">
-        <source>Any extra arguments passed to the command. Use `dotnet add &lt;command&gt; --help` to get help about these arguments.</source>
-        <target state="translated">명령에 전달되는 추가 인수입니다. 이러한 인수에 대한 도움말을 보려면 `dotnet add &lt;명령&gt; --help`를 사용하세요.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Commands">
-        <source>Commands</source>
-        <target state="translated">명령</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandP2PDefinition">
-        <source>Add project to project (p2p) reference to a project</source>
-        <target state="translated">프로젝트에 p2p(프로젝트 간) 참조를 추가합니다.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

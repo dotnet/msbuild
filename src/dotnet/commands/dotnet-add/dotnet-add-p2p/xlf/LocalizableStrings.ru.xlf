@@ -3,11 +3,6 @@
   <file datatype="xml" source-language="en" target-language="ru" original="src/dotnet/commands/dotnet-add/dotnet-add-p2p/LocalizableStrings.resx">
     <body>
       <group id="src/dotnet/commands/dotnet-add/dotnet-add-p2p/LocalizableStrings.resx" />
-      <trans-unit id="SpecifyAtLeastOneReferenceToAdd">
-        <source>You must specify at least one reference to add. Please run dotnet add --help for more information.</source>
-        <target state="translated">Необходимо указать по крайней мере одну добавляемую ссылку. Для получения дополнительных сведений выполните команду dotnet add --help.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="AppFullName">
         <source>.NET Add Project to Project (p2p) reference Command</source>
         <target state="translated">Команда .NET "Добавить ссылку проекта на проект (p2p)"</target>
@@ -23,34 +18,9 @@
         <target state="translated">Добавляемые ссылки проекта на проект.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CmdProject">
-        <source>PROJECT</source>
-        <target state="translated">PROJECT</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdProjectDescription">
-        <source>The project file to modify. If a project file is not specified, it searches the current working directory for an MSBuild file that has a file extension that ends in `proj` and uses that file.</source>
-        <target state="translated">Изменяемый файл проекта. Если файл проекта не указан, MSBuild выполняет в текущем рабочем каталоге поиск файла с расширением, оканчивающимся на PROJ, и использует этот файл.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdFramework">
-        <source>FRAMEWORK</source>
-        <target state="translated">FRAMEWORK</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Add reference only when targetting a specific framework</source>
         <target state="translated">Добавлять ссылку только при выборе конкретной целевой платформы</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdForceDescription">
-        <source>Add reference even if it does not exist, do not convert paths to relative</source>
-        <target state="translated">Добавлять ссылку, даже если она не существует; не преобразовывать пути в относительные</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProjectException">
-        <source>Project</source>
-        <target state="translated">Проект</target>
         <note />
       </trans-unit>
     </body>

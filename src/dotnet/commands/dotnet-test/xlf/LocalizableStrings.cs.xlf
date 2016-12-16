@@ -46,20 +46,20 @@
       <trans-unit id="CmdTestCaseFilterDescription">
         <source>Run tests that match the given expression.
                                         Examples:
-                                        --testCaseFilter:"Priority = 1"
-                                        --testCaseFilter: "(FullyQualifiedName~Nightly | Name = MyTestMethod)"</source>
-        <target state="translated">Spustí testy, které odpovídají danému výrazu.
+                                        --test-case-filter:"Priority = 1"
+                                        --test-case-filter: "(FullyQualifiedName~Nightly | Name = MyTestMethod)"</source>
+        <target state="needs-review-translation">Spustí testy, které odpovídají danému výrazu.
                                         Příklady:
                                         --testCaseFilter:"Priority = 1"
                                         --testCaseFilter: "(FullyQualifiedName~Nightly | Name = MyTestMethod)"</target>
-        <note />
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdTestAdapterPathDescription">
         <source>Use custom adapters from the given path in the test run.
-                                        Example: --testAdapterPath:&lt;pathToCustomAdapters&gt;</source>
-        <target state="translated">Při spuštění testu použijte vlastní adaptéry z dané cesty.
+                                        Example: --test-adapter-path:&lt;pathToCustomAdapters&gt;</source>
+        <target state="needs-review-translation">Při spuštění testu použijte vlastní adaptéry z dané cesty.
                                         Příklad: --testAdapterPath:&lt;pathToCustomAdapters&gt;</target>
-        <note />
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdLoggerOption">
         <source>LoggerUri/FriendlyName</source>

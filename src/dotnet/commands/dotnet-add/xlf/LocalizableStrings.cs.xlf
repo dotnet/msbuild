@@ -8,51 +8,6 @@
         <target state="translated">Příkaz rozhraní .NET pro přidání</target>
         <note />
       </trans-unit>
-      <trans-unit id="Usage">
-        <source>Usage</source>
-        <target state="translated">Použití</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Options">
-        <source>Options</source>
-        <target state="translated">Možnosti</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="HelpDefinition">
-        <source>Show help information</source>
-        <target state="translated">Zobrazit nápovědu</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Arguments">
-        <source>Arguments</source>
-        <target state="translated">Argumenty</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ArgumentsObjectDefinition">
-        <source>The object of the operation. If a project file is not specified, it defaults to the current directory.</source>
-        <target state="translated">Objekt operace Pokud není soubor projektu zadaný, použije se automaticky aktuální adresář.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ArgumentsCommandDefinition">
-        <source>Command to be executed on &lt;object&gt;.</source>
-        <target state="translated">Příkaz prováděný s &lt;objektem&gt;</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ArgsDefinition">
-        <source>Any extra arguments passed to the command. Use `dotnet add &lt;command&gt; --help` to get help about these arguments.</source>
-        <target state="translated">Další argumenty předané příkazu Pokud si chcete přečíst nápovědu k těmto argumentům, použijte příkaz „dotnet add &lt;příkaz&gt; --help“.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Commands">
-        <source>Commands</source>
-        <target state="translated">Příkazy</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandP2PDefinition">
-        <source>Add project to project (p2p) reference to a project</source>
-        <target state="translated">Přidání odkazu na jiný projekt (p2p) do projektu</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>
