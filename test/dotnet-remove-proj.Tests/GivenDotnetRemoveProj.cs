@@ -204,11 +204,12 @@ Args:
             slnFile.Projects.Count.Should().Be(2);
 
             var projectToRemove = Path.Combine("Lib", "Lib.csproj");
+            var projectToRemoveNormalized = @"Lib\Lib.csproj";
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"remove project {projectToRemove}");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be($"Project reference `{projectToRemove}` removed.");
+            cmd.StdOut.Should().Be($"Project reference `{projectToRemoveNormalized}` removed.");
 
             slnFile = SlnFile.Read(solutionPath);
             slnFile.Projects.Count.Should().Be(1);
@@ -230,13 +231,14 @@ Args:
             slnFile.Projects.Count.Should().Be(3);
 
             var projectToRemove = Path.Combine("Lib", "Lib.csproj");
+            var projectToRemoveNormalized = @"Lib\Lib.csproj";
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"remove project {projectToRemove}");
             cmd.Should().Pass();
 
-            string outputText = $@"Project reference `{projectToRemove}` removed.
-Project reference `{projectToRemove}` removed.";
+            string outputText = $@"Project reference `{projectToRemoveNormalized}` removed.
+Project reference `{projectToRemoveNormalized}` removed.";
             cmd.StdOut.Should().Be(outputText);
 
             slnFile = SlnFile.Read(solutionPath);
@@ -259,13 +261,14 @@ Project reference `{projectToRemove}` removed.";
             slnFile.Projects.Count.Should().Be(2);
 
             var projectToRemove = Path.Combine("Lib", "Lib.csproj");
+            var projectToRemoveNormalized = @"Lib\Lib.csproj";
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"remove project idontexist.csproj {projectToRemove} idontexisteither.csproj");
             cmd.Should().Pass();
 
             string outputText = $@"Project reference `idontexist.csproj` could not be found.
-Project reference `{projectToRemove}` removed.
+Project reference `{projectToRemoveNormalized}` removed.
 Project reference `idontexisteither.csproj` could not be found.";
             cmd.StdOut.Should().Be(outputText);
 

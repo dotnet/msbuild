@@ -214,7 +214,7 @@ Args:
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{libref.CsProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be(@"Project reference `DotnetAddP2PProjects\Lib\Lib.csproj` removed.");
+            cmd.StdOut.Should().Be($"Project reference `{Path.Combine(TestSetup.ProjectName, "Lib", setup.LibCsprojName)}` removed.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore - 1);
             csproj.NumberOfProjectReferencesWithIncludeContaining(libref.Name).Should().Be(0);
@@ -233,7 +233,7 @@ Args:
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg} \"{libref.CsProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be(@"Project reference `DotnetAddP2PProjects\Lib\Lib.csproj` removed.");
+            cmd.StdOut.Should().Be($"Project reference `{Path.Combine(TestSetup.ProjectName, "Lib", setup.LibCsprojName)}` removed.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451).Should().Be(condBefore - 1);
             csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(libref.Name, ConditionFrameworkNet451).Should().Be(0);
@@ -253,7 +253,7 @@ Args:
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{libref.CsProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be(@"Project reference `DotnetAddP2PProjects\Lib\Lib.csproj` removed.");
+            cmd.StdOut.Should().Be($"Project reference `{Path.Combine(TestSetup.ProjectName, "Lib", setup.LibCsprojName)}` removed.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore);
             csproj.NumberOfProjectReferencesWithIncludeContaining(libref.Name).Should().Be(0);
@@ -309,7 +309,7 @@ Args:
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{librefNoCond.CsProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be(@"Project reference `DotnetAddP2PProjects\Lib\Lib.csproj` removed.");
+            cmd.StdOut.Should().Be($"Project reference `{Path.Combine(TestSetup.ProjectName, "Lib", setup.LibCsprojName)}` removed.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore - 1);
             csproj.NumberOfProjectReferencesWithIncludeContaining(librefNoCond.Name).Should().Be(0);
@@ -334,7 +334,7 @@ Args:
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg} \"{librefCond.CsProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be(@"Project reference `DotnetAddP2PProjects\Lib\Lib.csproj` removed.");
+            cmd.StdOut.Should().Be($"Project reference `{Path.Combine(TestSetup.ProjectName, "Lib", setup.LibCsprojName)}` removed.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore);
             csproj.NumberOfProjectReferencesWithIncludeContaining(librefNoCond.Name).Should().Be(1);
@@ -359,7 +359,7 @@ Args:
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg} \"{librefCondNet451.CsProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be(@"Project reference `DotnetAddP2PProjects\Lib\Lib.csproj` removed.");
+            cmd.StdOut.Should().Be($"Project reference `{Path.Combine(TestSetup.ProjectName, "Lib", setup.LibCsprojName)}` removed.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451).Should().Be(condNet451Before - 1);
             csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(librefCondNet451.Name, ConditionFrameworkNet451).Should().Be(0);
@@ -371,12 +371,12 @@ Args:
         [Fact]
         public void WhenDuplicateReferencesArePresentItRemovesThemAll()
         {
-            const string RemovedText = @"Project reference `..\Lib\Lib.csproj` removed.
-Project reference `..\Lib\Lib.csproj` removed.";
-
             var setup = Setup();
             var proj = new ProjDir(Path.Combine(setup.TestRoot, "WithDoubledRef"));
             var libref = GetLibRef(setup);
+
+            string removedText = $@"Project reference `{setup.LibCsprojRelPath}` removed.
+Project reference `{setup.LibCsprojRelPath}` removed.";
 
             int noCondBefore = proj.CsProj().NumberOfItemGroupsWithoutCondition();
             var cmd = new RemoveP2PCommand()
@@ -384,7 +384,7 @@ Project reference `..\Lib\Lib.csproj` removed.";
                 .WithProject(proj.CsProjPath)
                 .Execute($"\"{libref.CsProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be(RemovedText);
+            cmd.StdOut.Should().Be(removedText);
 
             var csproj = proj.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore - 1);
@@ -404,7 +404,7 @@ Project reference `..\Lib\Lib.csproj` removed.";
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{setup.ValidRefCsprojRelToOtherProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be(@"Project reference `..\ValidRef\ValidRef.csproj` removed.");
+            cmd.StdOut.Should().Be($"Project reference `{setup.ValidRefCsprojRelToOtherProjPath}` removed.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore - 1);
             csproj.NumberOfProjectReferencesWithIncludeContaining(libref.Name).Should().Be(0);
@@ -423,7 +423,7 @@ Project reference `..\Lib\Lib.csproj` removed.";
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{setup.ValidRefCsprojRelToOtherProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be(@"Project reference `..\ValidRef\ValidRef.csproj` removed.");
+            cmd.StdOut.Should().Be($"Project reference `{setup.ValidRefCsprojRelToOtherProjPath}` removed.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore - 1);
             csproj.NumberOfProjectReferencesWithIncludeContaining(libref.Name).Should().Be(0);
@@ -442,7 +442,7 @@ Project reference `..\Lib\Lib.csproj` removed.";
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be(@"Project reference `..\ValidRef\ValidRef.csproj` removed.");
+            cmd.StdOut.Should().Be($"Project reference `{setup.ValidRefCsprojRelToOtherProjPath}` removed.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore - 1);
             csproj.NumberOfProjectReferencesWithIncludeContaining(libref.Name).Should().Be(0);
@@ -451,13 +451,13 @@ Project reference `..\Lib\Lib.csproj` removed.";
         [Fact]
         public void WhenPassingMultipleReferencesItRemovesThemAll()
         {
-            const string OutputText = @"Project reference `DotnetAddP2PProjects\Lib\Lib.csproj` removed.
-Project reference `DotnetAddP2PProjects\ValidRef\ValidRef.csproj` removed.";
-
             var lib = NewLibWithFrameworks();
             var setup = Setup();
             var libref = AddLibRef(setup, lib);
             var validref = AddValidRef(setup, lib);
+
+            string outputText = $@"Project reference `{Path.Combine(TestSetup.ProjectName, "Lib", setup.LibCsprojName)}` removed.
+Project reference `{Path.Combine(TestSetup.ProjectName, setup.ValidRefCsprojRelPath)}` removed.";
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
             var cmd = new RemoveP2PCommand()
@@ -465,7 +465,7 @@ Project reference `DotnetAddP2PProjects\ValidRef\ValidRef.csproj` removed.";
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{libref.CsProjPath}\" \"{validref.CsProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be(OutputText);
+            cmd.StdOut.Should().Be(outputText);
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore - 1);
             csproj.NumberOfProjectReferencesWithIncludeContaining(libref.Name).Should().Be(0);
@@ -481,7 +481,7 @@ Project reference `DotnetAddP2PProjects\ValidRef\ValidRef.csproj` removed.";
             var validref = AddValidRef(setup, lib);
 
             string OutputText = $@"Project reference `{setup.LibCsprojPath}` could not be found.
-Project reference `DotnetAddP2PProjects\ValidRef\ValidRef.csproj` removed.";
+Project reference `{Path.Combine(TestSetup.ProjectName, setup.ValidRefCsprojRelPath)}` removed.";
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
             var cmd = new RemoveP2PCommand()
