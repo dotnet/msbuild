@@ -74,6 +74,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Prefer32Bit Condition="'$(Prefer32Bit)'==''">false</Prefer32Bit>
     <SignAssembly Condition="'$(SignAssembly)'==''">false</SignAssembly>
     <DelaySign Condition="'$(DelaySign)'==''">false</DelaySign>
+    <GeneratePackageOnBuild Condition="'$(GeneratePackageOnBuild)'==''">false</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance Condition="'$(PackageRequireLicenseAcceptance)'==''">false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <!-- Temporary workarounds -->
