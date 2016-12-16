@@ -16,13 +16,14 @@ namespace Microsoft.Build.UnitTests
 {
     public class PerformanceMeasurements
     {
-        private readonly IEnumerable<GitProject> _gitProjects = new[]
+        private readonly IEnumerable<MsBuildSolution> _testSolutions = new[]
         {
             new GitProject(@"https://github.com/dotnet/corefx.git", "9c0ec0195b1ffbf63e133826856d51b90849532f", ProjectType.csproj),
             //new GitProject(@"https://github.com/dotnet/coreclr.git", "81c42cecca5e1b0b802d4df980280750d2e1419e", ProjectType.csproj), // Remove=""
             new GitProject(@"https://github.com/dotnet/roslyn.git", "45c60edef9ddc10dd2e15c668ea4ab4cec22141b", ProjectType.csproj),
             new GitProject(@"https://github.com/dotnet/roslyn.git", "45c60edef9ddc10dd2e15c668ea4ab4cec22141b", ProjectType.vbproj),
-            new GitProject(@"https://github.com/Microsoft/DirectX-Graphics-Samples.git", "bcf6117b73e03f13c5946a2f80f778575dc2c56c", ProjectType.vcxproj)
+            new GitProject(@"https://github.com/Microsoft/DirectX-Graphics-Samples.git", "bcf6117b73e03f13c5946a2f80f778575dc2c56c", ProjectType.vcxproj),
+            new MsBuildSolution("Generated", @"D:\projects\Domino\Out\Bin\debug\TestProject", ProjectType.csproj)
         };
 
         [Fact]
@@ -31,14 +32,14 @@ namespace Microsoft.Build.UnitTests
         {
             var metrics = new List<IMetrics>();
 
-            foreach (var gitProject in _gitProjects)
+            foreach (var solution in _testSolutions)
             {
-                Console.WriteLine($"\n-----------{gitProject.RepoName} : {gitProject.ProjectType}-----------");
-                gitProject.Materialize();
+                Console.WriteLine($"\n-----------{solution.Name} : {solution.ProjectType}-----------");
+                solution.Materialize();
 
-                var repoMetrics = new RepositoryMetrics(gitProject.RepoName, gitProject.ProjectType, gitProject.GetProjectFilePaths().Count());
+                var repoMetrics = new RepositoryMetrics(solution.Name, solution.ProjectType, solution.ProjectFiles.Count());
 
-                var evaluationMetrics = MeasureEvaluationTimeWithRepeats(gitProject, 4);
+                var evaluationMetrics = MeasureEvaluationTimeWithRepeats(solution, 4);
 
                 metrics.Add(
                     new CompositeMetrics()
@@ -52,17 +53,17 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine($"Wrote measurements in {csvPath}");
         }
 
-        private IMetrics MeasureEvaluationTimeWithRepeats(GitProject gitProject, int repeats)
+        private IMetrics MeasureEvaluationTimeWithRepeats(MsBuildSolution solution, int repeats)
         {
-            Console.WriteLine($"Measuring evaluation time for {gitProject.RepoName}");
+            Console.WriteLine($"Measuring evaluation time for {solution.Name}");
 
             SolutionEvaluationMetrics templateMetrics = null;
 
-            var projectPaths = gitProject.GetProjectFilePaths().ToArray();
+            var projectPaths = solution.ProjectFiles.ToArray();
             var averageProjectLoadingTimes = new List<TimeSpan>(repeats);
             var totalProjectLoadingTimes = new List<TimeSpan>(repeats);
 
-            Debug.Assert(projectPaths.Any(), $"{gitProject.RepoName} should have more than zero {gitProject.ProjectType} files");
+            Debug.Assert(projectPaths.Any(), $"{solution.Name} should have more than zero {solution.ProjectType} files");
 
             for (var i = 0; i < repeats; i++)
             {
@@ -157,7 +158,7 @@ namespace Microsoft.Build.UnitTests
             return Path.GetDirectoryName(currentAssembly);
         }
 
-        private enum ProjectType
+        internal enum ProjectType
         {
             csproj,
             vbproj,
@@ -233,53 +234,88 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        private class GitProject : IDisposable
+        internal interface IMsBuildSolution: IDisposable
         {
-            private static readonly string TempRepoRoot = Path.Combine(Path.GetTempPath(), "MSBuildTestProjects");
+            string Name { get; }
+            string RootDirectory { get; }
+            IList<string> ProjectFiles { get; }
+            void Materialize();
+        }
 
-            private readonly string _commit;
+        internal class MsBuildSolution : IMsBuildSolution
+        {
+            protected static readonly string TempMsBuildTestProjectsRoot = Path.Combine(System.IO.Path.GetTempPath(), "MSBuildTestProjects");
 
-            private readonly string _repoAddress;
-            private readonly string _repoPath;
-            private readonly string _repoRoot;
+            protected bool Materialized;
+            protected bool Disposed;
 
-            private bool _disposed;
+            public string Name { get; }
 
-            public GitProject(string repoAddress, string commit, ProjectType projectType, string repoRoot)
-            {
-                _repoAddress = repoAddress;
-                _commit = commit;
-                ProjectType = projectType;
-                _repoRoot = repoRoot;
+            public string RootDirectory { get; }
 
-                RepoName = GetRepoName(_repoAddress);
+            public virtual IList<string> ProjectFiles => Directory.EnumerateFiles(
+                RootDirectory,
+                $"*.{ProjectType.ToString().ToLower()}",
+                SearchOption.AllDirectories).ToList();
 
-                _repoPath = Path.Combine(_repoRoot, RepoName);
-            }
-
-            public GitProject(string repoAddress, string commit, ProjectType projectType) :
-                this(
-                repoAddress, commit, projectType,
-                TempRepoRoot)
-            {
-            }
-
-            public string RepoName { get; }
             public ProjectType ProjectType { get; }
+
+            public MsBuildSolution(string name, string rootDirectory, ProjectType projectType)
+            {
+                Name = name;
+                RootDirectory = rootDirectory;
+                ProjectType = projectType;
+            }
+
+            public virtual void Materialize()
+            {
+                Console.WriteLine($"Using solution from {RootDirectory}");
+            }
 
             public void Dispose()
             {
-                if (_disposed)
+                if (Disposed)
                 {
                     return;
                 }
 
-                if (Directory.Exists(_repoPath))
+                if (Directory.Exists(RootDirectory))
                 {
-                    FileUtilities.DeleteDirectoryNoThrow(_repoPath, true);
+                    FileUtilities.DeleteDirectoryNoThrow(RootDirectory, true);
                 }
 
-                _disposed = true;
+                Disposed = true;
+            }
+        }
+
+        internal interface IMetric
+        {
+            string GetName();
+            object GetValue();
+        }
+
+        private class GitProject : MsBuildSolution
+        {
+            private readonly string _commit;
+
+            private readonly string _repoAddress;
+            private readonly string _repoRoot;
+
+            public GitProject(string repoAddress, string commit, ProjectType projectType, string repoRoot)
+                : base(GetRepoName(repoAddress), System.IO.Path.Combine(repoRoot, GetRepoName(repoAddress)), projectType)
+            {
+                _repoAddress = repoAddress;
+                _commit = commit;
+                _repoRoot = repoRoot;
+            }
+
+            public GitProject(string repoAddress, string commit, ProjectType projectType) :
+                this(
+                repoAddress,
+                commit,
+                projectType,
+                TempMsBuildTestProjectsRoot)
+            {
             }
 
             private static string GetRepoName(string repoAddress)
@@ -292,12 +328,7 @@ namespace Microsoft.Build.UnitTests
                     : repoAddress.Substring(lastSlash + 1);
             }
 
-            public IEnumerable<string> GetProjectFilePaths()
-            {
-                return Directory.EnumerateFiles(_repoPath, $"*.{ProjectType.ToString().ToLower()}", SearchOption.AllDirectories);
-            }
-
-            public void Materialize()
+            public override void Materialize()
             {
                 CloneIfNecessary();
                 CheckoutCommit();
@@ -305,9 +336,9 @@ namespace Microsoft.Build.UnitTests
 
             private void CloneIfNecessary()
             {
-                if (Directory.Exists(Path.Combine(_repoPath, ".git")))
+                if (Directory.Exists(System.IO.Path.Combine(RootDirectory, ".git")))
                 {
-                    Console.WriteLine($"Reused project from {_repoPath}");
+                    Console.WriteLine($"Reused project from {RootDirectory}");
 
                     // fetch in case the requested commit is newer than what the current repository has
                     Fetch();
@@ -319,18 +350,18 @@ namespace Microsoft.Build.UnitTests
 
             private void Fetch()
             {
-                ShellExec("git.exe", $"fetch", _repoPath);
+                ShellExec("git.exe", $"fetch", RootDirectory);
             }
 
             private void CheckoutCommit()
             {
-                ShellExec("git.exe", $"checkout {_commit}", _repoPath);
+                ShellExec("git.exe", $"checkout {_commit}", RootDirectory);
             }
 
             private void Clone()
             {
-                FileUtilities.DeleteDirectoryNoThrow(_repoPath, true);
-                ShellExec("git.exe", $"clone {_repoAddress} {_repoPath}", _repoRoot);
+                FileUtilities.DeleteDirectoryNoThrow(RootDirectory, true);
+                ShellExec("git.exe", $"clone {_repoAddress} {RootDirectory}", _repoRoot);
             }
 
             private static void ShellExec(string filename, string args, string workingDirectory)
@@ -354,12 +385,6 @@ namespace Microsoft.Build.UnitTests
 
                 Assert.Equal(0, process.ExitCode);
             }
-        }
-
-        internal interface IMetric
-        {
-            string GetName();
-            object GetValue();
         }
 
         internal class Metric<T> : IMetric
