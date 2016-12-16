@@ -38,6 +38,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
             result.StdOut.Should().Contain("Passed   TestNamespace.VSTestTests.VSTestPassTest");
             result.StdOut.Should().Contain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
+            result.ExitCode.Should().Be(1);
         }
 
         [Fact]
@@ -65,6 +66,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
             result.StdOut.Should().Contain("Passed   TestNamespace.VSTestXunitTests.VSTestXunitPassTest");
             result.StdOut.Should().Contain("Failed   TestNamespace.VSTestXunitTests.VSTestXunitFailTest");
+            result.ExitCode.Should().Be(1);
         }
 
         [Fact]
