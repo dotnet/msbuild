@@ -5,118 +5,118 @@
       <group id="src/dotnet/commands/dotnet-remove/dotnet-remove-p2p/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET Remove Project to Project (p2p) reference Command</source>
-        <target state="new">.NET Remove Project to Project (p2p) reference Command</target>
-        <note></note>
+        <target state="translated">.NET Projeden Projeye (p2p) başvuru Kaldırma Komutu</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Command to remove project to project (p2p) reference</source>
-        <target state="new">Command to remove project to project (p2p) reference</target>
-        <note></note>
+        <target state="translated">Projeden projeye (p2p) başvuru kaldırma komutu</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppArgumentSeparatorHelpText">
         <source>Project to project references to remove</source>
-        <target state="new">Project to project references to remove</target>
-        <note></note>
+        <target state="translated">Kaldırılacak olan, projeden projeye başvurular</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdArgProject">
         <source>PROJECT</source>
-        <target state="new">PROJECT</target>
-        <note></note>
+        <target state="translated">PROJE</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdArgumentDescription">
         <source>The project file to modify. If a project file is not specified, it searches the current working directory for an MSBuild file that has a file extension that ends in `proj` and uses that file.</source>
-        <target state="new">The project file to modify. If a project file is not specified, it searches the current working directory for an MSBuild file that has a file extension that ends in `proj` and uses that file.</target>
-        <note></note>
+        <target state="translated">Değiştirilecek proje dosyası. Bir proje dosyası belirtilmezse, geçerli çalışma dizininde dosya uzantısının sonu ‘proj’ olan bir MSBuild dosyası arar ve bu dosyayı kullanır.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
-        <target state="new">FRAMEWORK</target>
-        <note></note>
+        <target state="translated">ÇERÇEVE</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Remove reference only when targetting a specific framework</source>
-        <target state="new">Remove reference only when targetting a specific framework</target>
-        <note></note>
+        <target state="translated">Yalnızca belirli bir çerçeveyi hedeflerken başvuruyu kaldırır</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectException">
         <source>Project</source>
-        <target state="new">Project</target>
-        <note></note>
+        <target state="translated">Proje</target>
+        <note />
       </trans-unit>
       <trans-unit id="ReferenceNotFoundInTheProject">
         <source>Specified reference {0} does not exist in project {1}.</source>
-        <target state="new">Specified reference {0} does not exist in project {1}.</target>
-        <note></note>
+        <target state="translated">Belirtilen {0} başvurusu {1} projesinde yok.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ReferenceRemoved">
         <source>Reference `{0}` deleted from the project.</source>
-        <target state="new">Reference `{0}` deleted from the project.</target>
-        <note></note>
+        <target state="translated">`{0}` başvurusu projeden silindi.</target>
+        <note />
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOneReferenceToRemove">
         <source>You must specify at least one reference to delete. Please run dotnet delete --help for more information.</source>
-        <target state="new">You must specify at least one reference to delete. Please run dotnet delete --help for more information.</target>
-        <note></note>
+        <target state="translated">Silmek için en az bir başvuru belirtmeniz gerekir. Daha fazla bilgi için lütfen dotnet delete --help komutunu çalıştırın.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ReferenceDeleted">
         <source>Reference `{0}` deleted.</source>
-        <target state="new">Reference `{0}` deleted.</target>
-        <note></note>
+        <target state="translated">`{0}` başvurusu silindi.</target>
+        <note />
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOneReferenceToDelete">
         <source>You must specify at least one reference to delete. Please run dotnet delete --help for more information.</source>
-        <target state="new">You must specify at least one reference to delete. Please run dotnet delete --help for more information.</target>
-        <note></note>
+        <target state="translated">Silmek için en az bir başvuru belirtmeniz gerekir. Daha fazla bilgi için lütfen dotnet delete --help komutunu çalıştırın.</target>
+        <note />
       </trans-unit>
       <trans-unit id="NetRemoveCommand">
         <source>.NET Remove Command</source>
-        <target state="new">.NET Remove Command</target>
-        <note></note>
+        <target state="translated">.NET Remove Komutu</target>
+        <note />
       </trans-unit>
       <trans-unit id="Usage">
         <source>Usage</source>
-        <target state="new">Usage</target>
-        <note></note>
+        <target state="translated">Kullanım</target>
+        <note />
       </trans-unit>
       <trans-unit id="Options">
         <source>Options</source>
-        <target state="new">Options</target>
-        <note></note>
+        <target state="translated">Seçenekler</target>
+        <note />
       </trans-unit>
       <trans-unit id="HelpDefinition">
         <source>Show help information</source>
-        <target state="new">Show help information</target>
-        <note></note>
+        <target state="translated">Yardım bilgilerini göster</target>
+        <note />
       </trans-unit>
       <trans-unit id="Arguments">
         <source>Arguments</source>
-        <target state="new">Arguments</target>
-        <note></note>
+        <target state="translated">Bağımsız değişkenler</target>
+        <note />
       </trans-unit>
       <trans-unit id="ArgumentsObjectDefinition">
         <source>The object of the operation. If a project file is not specified, it defaults to the current directory.</source>
-        <target state="new">The object of the operation. If a project file is not specified, it defaults to the current directory.</target>
-        <note></note>
+        <target state="translated">İşlemin nesnesi. Proje dosyası belirtilmezse, geçerli dizini varsayılan olarak kullanır.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ArgumentsCommandDefinition">
         <source>Command to be executed on &lt;object&gt;.</source>
-        <target state="new">Command to be executed on &lt;object&gt;.</target>
-        <note></note>
+        <target state="translated">&lt;Nesne&gt; üzerinde yürütülecek komut.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ArgsDefinition">
         <source>Any extra arguments passed to the command. Use `dotnet add &lt;command&gt; --help` to get help about these arguments.</source>
-        <target state="new">Any extra arguments passed to the command. Use `dotnet add &lt;command&gt; --help` to get help about these arguments.</target>
-        <note></note>
+        <target state="translated">Komuta geçirilen fazladan bağımsız değişkenler. Bu bağımsız değişkenler hakkında yardım almak için `dotnet add &lt;komut&gt; --help` komutunu kullanın.</target>
+        <note />
       </trans-unit>
       <trans-unit id="Commands">
         <source>Commands</source>
-        <target state="new">Commands</target>
-        <note></note>
+        <target state="translated">Komutlar</target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandP2PDefinition">
         <source>Remove project to project (p2p) reference from a project</source>
-        <target state="new">Remove project to project (p2p) reference from a project</target>
-        <note></note>
+        <target state="translated">Projeden projeye (p2p) başvuruyu projeden kaldırma</target>
+        <note />
       </trans-unit>
     </body>
   </file>

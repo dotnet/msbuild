@@ -5,73 +5,73 @@
       <group id="src/dotnet/commands/dotnet-restore/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>restore</source>
-        <target state="new">restore</target>
-        <note></note>
+        <target state="translated">restauração</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>restore for msbuild</source>
-        <target state="new">restore for msbuild</target>
-        <note></note>
+        <target state="translated">restauração para msbuild</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdArgument">
         <source>root</source>
-        <target state="new">root</target>
-        <note></note>
+        <target state="translated">raiz</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdArgumentDescription">
         <source>Optional path to a project file or MSBuild arguments.</source>
-        <target state="new">Optional path to a project file or MSBuild arguments.</target>
-        <note></note>
+        <target state="translated">Caminho opcional para um arquivo de projeto ou argumentos do MSBuild.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSourceOption">
         <source>source</source>
-        <target state="new">source</target>
-        <note></note>
+        <target state="translated">origem</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSourceOptionDescription">
         <source>Specifies a NuGet package source to use during the restore.</source>
-        <target state="new">Specifies a NuGet package source to use during the restore.</target>
-        <note></note>
+        <target state="translated">Especifica uma origem de pacote do NuGet para ser usada durante a restauração.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOption">
         <source>packagesDirectory</source>
-        <target state="new">packagesDirectory</target>
-        <note></note>
+        <target state="translated">packagesDirectory</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOptionDescription">
         <source>Directory to install packages in.</source>
-        <target state="new">Directory to install packages in.</target>
-        <note></note>
+        <target state="translated">Diretório no qual instalar os pacotes.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdDisableParallelOptionDescription">
         <source>Disables restoring multiple projects in parallel.</source>
-        <target state="new">Disables restoring multiple projects in parallel.</target>
-        <note></note>
+        <target state="translated">Desabilita a restauração de vários projetos em paralelo.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfigFileOption">
         <source>file</source>
-        <target state="new">file</target>
-        <note></note>
+        <target state="translated">arquivo</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfigFileOptionDescription">
         <source>The NuGet configuration file to use.</source>
-        <target state="new">The NuGet configuration file to use.</target>
-        <note></note>
+        <target state="translated">O arquivo de configuração do NuGet a ser usado.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdNoCacheOptionDescription">
         <source>Do not cache packages and http requests.</source>
-        <target state="new">Do not cache packages and http requests.</target>
-        <note></note>
+        <target state="translated">Não armazenar pacotes e solicitações HTTP em cache.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdIgnoreFailedSourcesOptionDescription">
         <source>Treat package source failures as warnings.</source>
-        <target state="new">Treat package source failures as warnings.</target>
-        <note></note>
+        <target state="translated">Tratar falhas de origem de pacote como avisos.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdNoDependenciesOptionDescription">
         <source>Set this flag to ignore project to project references and only restore the root project</source>
-        <target state="new">Set this flag to ignore project to project references and only restore the root project</target>
-        <note></note>
+        <target state="translated">Definir esse sinalizador para ignorar referências de projeto para projeto e restaurar apenas o projeto raiz</target>
+        <note />
       </trans-unit>
     </body>
   </file>

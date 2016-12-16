@@ -5,18 +5,18 @@
       <group id="src/dotnet/commands/dotnet-migrate/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET Migrate Command</source>
-        <target state="new">.NET Migrate Command</target>
-        <note></note>
+        <target state="translated">Příkaz .NET pro migraci</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Command used to migrate project.json projects to msbuild</source>
-        <target state="new">Command used to migrate project.json projects to msbuild</target>
-        <note></note>
+        <target state="translated">Příkaz se používá k migraci projektů project.json na MSBuild</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdProjectArgument">
         <source>PROJECT_JSON/GLOBAL_JSON/PROJECT_DIR</source>
-        <target state="new">PROJECT_JSON/GLOBAL_JSON/PROJECT_DIR</target>
-        <note></note>
+        <target state="translated">PROJECT_JSON/GLOBAL_JSON/PROJECT_DIR</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdProjectArgumentDescription">
         <source>The path to 
@@ -26,54 +26,54 @@ or
 or
     - a directory to migrate, it will recursively search for project.json files to migrate.
 Defaults to current directory if nothing is specified.</source>
-        <target state="new">The path to 
-    - a project.json file to migrate.
-or
-    - a global.json file, it will migrate the folders specified in global.json.
-or
-    - a directory to migrate, it will recursively search for project.json files to migrate.
-Defaults to current directory if nothing is specified.</target>
-        <note></note>
+        <target state="translated">Cesta k 
+    - migrovanému souboru project.json.
+nebo
+    - souboru global.json – migrovat se budou složky zadané v souboru global.json.
+nebo
+    - migrovaný adresář – rekurzivně vyhledá migrované soubory project.json.
+Výchozí hodnota je aktuální adresář (pokud není zadaný jiný adresář).</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdTemplateDescription">
         <source>Base MSBuild template to use for migrated app. The default is the project included in dotnet new.</source>
-        <target state="new">Base MSBuild template to use for migrated app. The default is the project included in dotnet new.</target>
-        <note></note>
+        <target state="translated">Základní šablona souboru MSBuild, která se použije pro migrovanou aplikaci. Výchozí hodnotou je projekt v příkazu dotnet new.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>The version of the sdk package that will be referenced in the migrated app. The default is the version of the sdk in dotnet new.</source>
-        <target state="new">The version of the sdk package that will be referenced in the migrated app. The default is the version of the sdk in dotnet new.</target>
-        <note></note>
+        <target state="translated">Verze balíčku SDK, na který bude odkazovat migrovaná aplikace. Výchozí hodnotou je verze SDK v příkazu dotnet new.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdXprojFileDescription">
         <source>The path to the xproj file to use. Required when there is more than one xproj in a project directory.</source>
-        <target state="new">The path to the xproj file to use. Required when there is more than one xproj in a project directory.</target>
-        <note></note>
+        <target state="translated">Cesta k používanému souboru xproj. Pokud je v adresáři projektu více souborů xproj., je tento údaj povinný.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSkipProjectReferencesDescription">
         <source>Skip migrating project references. By default project references are migrated recursively.</source>
-        <target state="new">Skip migrating project references. By default project references are migrated recursively.</target>
-        <note></note>
+        <target state="translated">Přeskočit migraci odkazů na projekt. Odkazy na projekt se automaticky migrují rekurzivně.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdReportFileDescription">
         <source>Output migration report to the given file in addition to the console.</source>
-        <target state="new">Output migration report to the given file in addition to the console.</target>
-        <note></note>
+        <target state="translated">Generovat výstupní sestavu o migraci do určeného souboru (kromě konzoly).</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdReportOutputDescription">
         <source>Output migration report file as json rather than user messages.</source>
-        <target state="new">Output migration report file as json rather than user messages.</target>
-        <note></note>
+        <target state="translated">Generovat místo uživatelských zpráv soubor se sestavou o migraci ve formátu JSON.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSkipBackupDescription">
         <source>Skip moving project.json, global.json, and *.xproj to a `backup` directory after successful migration.</source>
-        <target state="new">Skip moving project.json, global.json, and *.xproj to a `backup` directory after successful migration.</target>
-        <note></note>
+        <target state="translated">Přeskočit po úspěšné migraci přesun souborů project.json, global.json a *.xproj do adresáře backup.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrationFailedError">
         <source>Migration failed.</source>
-        <target state="new">Migration failed.</target>
-        <note></note>
+        <target state="translated">Migrace se nezdařila.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

@@ -5,53 +5,53 @@
       <group id="src/dotnet/commands/dotnet-clean/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET Clean Command</source>
-        <target state="new">.NET Clean Command</target>
-        <note></note>
+        <target state="translated">Comando Clean do .NET</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Command to clean previously generated build outputs.</source>
-        <target state="new">Command to clean previously generated build outputs.</target>
-        <note></note>
+        <target state="translated">Comando para limpar saídas de build geradas anteriormente.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdArgProject">
         <source>PROJECT</source>
-        <target state="new">PROJECT</target>
-        <note></note>
+        <target state="translated">PROJETO</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdArgProjDescription">
         <source>The MSBuild project file to build. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.</source>
-        <target state="new">The MSBuild project file to build. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.</target>
-        <note></note>
+        <target state="translated">O arquivo de projeto do MSBuild para compilar. Se não houver arquivo de projeto especificado, o MSBuild pesquisará no diretório de trabalho atual um arquivo que contenha uma extensão de arquivo que termine em "proj" e usará esse arquivo.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdOutputDir">
         <source>OUTPUT_DIR</source>
-        <target state="new">OUTPUT_DIR</target>
-        <note></note>
+        <target state="translated">DIRETÓRIO_DE_SAÍDA</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
         <source>Directory in which the build outputs have been placed</source>
-        <target state="new">Directory in which the build outputs have been placed</target>
-        <note></note>
+        <target state="translated">O diretório no qual as saídas de build foram colocadas</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
-        <target state="new">FRAMEWORK</target>
-        <note></note>
+        <target state="translated">ESTRUTURA</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Clean a specific framework</source>
-        <target state="new">Clean a specific framework</target>
-        <note></note>
+        <target state="translated">Limpar uma estrutura específica</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfiguration">
         <source>CONFIGURATION</source>
-        <target state="new">CONFIGURATION</target>
-        <note></note>
+        <target state="translated">CONFIGURAÇÃO</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfigurationDescription">
         <source>Clean a specific configuration</source>
-        <target state="new">Clean a specific configuration</target>
-        <note></note>
+        <target state="translated">Limpar uma configuração específica</target>
+        <note />
       </trans-unit>
     </body>
   </file>

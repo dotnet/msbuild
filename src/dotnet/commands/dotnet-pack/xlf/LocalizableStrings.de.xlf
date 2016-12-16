@@ -5,73 +5,73 @@
       <group id="src/dotnet/commands/dotnet-pack/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>pack</source>
-        <target state="new">pack</target>
-        <note></note>
+        <target state="translated">Packen</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>pack for msbuild</source>
-        <target state="new">pack for msbuild</target>
-        <note></note>
+        <target state="translated">Für MSBuild packen</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdOutputDir">
         <source>OUTPUT_DIR</source>
-        <target state="new">OUTPUT_DIR</target>
-        <note></note>
+        <target state="translated">OUTPUT_DIR</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
         <source>Directory in which to place outputs</source>
-        <target state="new">Directory in which to place outputs</target>
-        <note></note>
+        <target state="translated">Verzeichnis für Ausgaben</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
         <source>Do not build project before packing</source>
-        <target state="new">Do not build project before packing</target>
-        <note></note>
+        <target state="translated">Projekt nicht vor dem Packen erstellen</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSymbolsDescription">
         <source>Include PDBs along with the DLLs in the output folder</source>
-        <target state="new">Include PDBs along with the DLLs in the output folder</target>
-        <note></note>
+        <target state="translated">PDBs zusammen mit DLLs im Ausgabeordner einschließen</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSourceDescription">
         <source>Include PDBs and source files. Source files go into the src folder in the resulting nuget package</source>
-        <target state="new">Include PDBs and source files. Source files go into the src folder in the resulting nuget package</target>
-        <note></note>
+        <target state="translated">PDBs und Quelldateien einschließen. Quelldateien werden im Ordner "src" im resultierenden NuGet-Paket abgelegt.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfig">
         <source>CONFIGURATION</source>
-        <target state="new">CONFIGURATION</target>
-        <note></note>
+        <target state="translated">CONFIGURATION</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>Configuration under which to build</source>
-        <target state="new">Configuration under which to build</target>
-        <note></note>
+        <target state="translated">Konfiguration für den Buildvorgang</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffix">
         <source>VERSION_SUFFIX</source>
-        <target state="new">VERSION_SUFFIX</target>
-        <note></note>
+        <target state="translated">VERSION_SUFFIX</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffixDescription">
         <source>Defines what `*` should be replaced with in version field in project.json</source>
-        <target state="new">Defines what `*` should be replaced with in version field in project.json</target>
-        <note></note>
+        <target state="translated">Definiert, wodurch "*" im Versionsfeld in "project.json" ersetzt werden soll.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdServiceableDescription">
         <source>Set the serviceable flag in the package</source>
-        <target state="new">Set the serviceable flag in the package</target>
-        <note></note>
+        <target state="translated">Verarbeitungsflag im Paket festlegen</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdArgumentProject">
         <source>PROJECT</source>
-        <target state="new">PROJECT</target>
-        <note></note>
+        <target state="translated">PROJECT</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdArgumentDescription">
         <source>The project to pack, defaults to the project file in the current directory. Can be a path to any project file</source>
-        <target state="new">The project to pack, defaults to the project file in the current directory. Can be a path to any project file</target>
-        <note></note>
+        <target state="translated">Das zu packende Projekt (standardmäßig die Projektdatei im aktuellen Verzeichnis). Kann ein Pfad zu einer beliebigen Projektdatei sein.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

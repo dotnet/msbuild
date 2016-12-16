@@ -5,143 +5,143 @@
       <group id="src/dotnet/commands/dotnet-help/LocalizableStrings.resx" />
       <trans-unit id="Usage">
         <source>Usage</source>
-        <target state="new">Usage</target>
-        <note></note>
+        <target state="translated">使用法</target>
+        <note />
       </trans-unit>
       <trans-unit id="Arguments">
         <source>Arguments</source>
-        <target state="new">Arguments</target>
-        <note></note>
+        <target state="translated">Arguments</target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandDefinition">
         <source>The command to execute</source>
-        <target state="new">The command to execute</target>
-        <note></note>
+        <target state="translated">実行するコマンド</target>
+        <note />
       </trans-unit>
       <trans-unit id="ArgumentsDefinition">
         <source>Arguments to pass to the command</source>
-        <target state="new">Arguments to pass to the command</target>
-        <note></note>
+        <target state="translated">コマンドに渡す引数</target>
+        <note />
       </trans-unit>
       <trans-unit id="HostOptionsDefinition">
         <source>Options specific to dotnet (host)</source>
-        <target state="new">Options specific to dotnet (host)</target>
-        <note></note>
+        <target state="translated">dotnet (ホスト) 固有のオプション</target>
+        <note />
       </trans-unit>
       <trans-unit id="OptionsDescription">
         <source>Options common to all commands</source>
-        <target state="new">Options common to all commands</target>
-        <note></note>
+        <target state="translated">すべてのコマンドに共通のオプション</target>
+        <note />
       </trans-unit>
       <trans-unit id="CommonOptions">
         <source>Common options</source>
-        <target state="new">Common options</target>
-        <note></note>
+        <target state="translated">共通のオプション</target>
+        <note />
       </trans-unit>
       <trans-unit id="VerboseDefinition">
         <source>Enable verbose output</source>
-        <target state="new">Enable verbose output</target>
-        <note></note>
+        <target state="translated">詳細な出力を有効にする</target>
+        <note />
       </trans-unit>
       <trans-unit id="HelpDefinition">
         <source>Show help</source>
-        <target state="new">Show help</target>
-        <note></note>
+        <target state="translated">ヘルプを表示する</target>
+        <note />
       </trans-unit>
       <trans-unit id="HostOptions">
         <source>Host options (passed before the command)</source>
-        <target state="new">Host options (passed before the command)</target>
-        <note></note>
+        <target state="translated">ホストのオプション (コマンドの前に渡されます)</target>
+        <note />
       </trans-unit>
       <trans-unit id="VersionDescription">
         <source>Display .NET CLI Version Number</source>
-        <target state="new">Display .NET CLI Version Number</target>
-        <note></note>
+        <target state="translated">.NET CLI のバージョン番号を表示する</target>
+        <note />
       </trans-unit>
       <trans-unit id="InfoDescription">
         <source>Display .NET CLI Info</source>
-        <target state="new">Display .NET CLI Info</target>
-        <note></note>
+        <target state="translated">.NET CLI の情報を表示する</target>
+        <note />
       </trans-unit>
       <trans-unit id="Commands">
         <source>Commands</source>
-        <target state="new">Commands</target>
-        <note></note>
+        <target state="translated">コマンド</target>
+        <note />
       </trans-unit>
       <trans-unit id="NewDefinition">
         <source>Initialize a basic .NET project</source>
-        <target state="new">Initialize a basic .NET project</target>
-        <note></note>
+        <target state="translated">基本的な .NET プロジェクトを初期化する</target>
+        <note />
       </trans-unit>
       <trans-unit id="RestoreDefinition">
         <source>Restore dependencies specified in the.NET project</source>
-        <target state="new">Restore dependencies specified in the.NET project</target>
-        <note></note>
+        <target state="translated">.NET プロジェクトに指定されている依存関係を復元する</target>
+        <note />
       </trans-unit>
       <trans-unit id="BuildDefinition">
         <source>Builds a .NET project</source>
-        <target state="new">Builds a .NET project</target>
-        <note></note>
+        <target state="translated">.NET プロジェクトを構築する</target>
+        <note />
       </trans-unit>
       <trans-unit id="PublishDefinition">
         <source>Publishes a .NET project for deployment (including the runtime)</source>
-        <target state="new">Publishes a .NET project for deployment (including the runtime)</target>
-        <note></note>
+        <target state="translated">展開用の .NET プロジェクトを発行する (ランタイムを含む)</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunDefinition">
         <source>Compiles and immediately executes a.NET project</source>
-        <target state="new">Compiles and immediately executes a.NET project</target>
-        <note></note>
+        <target state="translated">.NET プロジェクトをコンパイルして、直ちに実行する</target>
+        <note />
       </trans-unit>
       <trans-unit id="TestDefinition">
         <source>Runs unit tests using the test runner specified in the project</source>
-        <target state="new">Runs unit tests using the test runner specified in the project</target>
-        <note></note>
+        <target state="translated">プロジェクトに指定されているテスト ランナーを使用して、単体テストを実行する</target>
+        <note />
       </trans-unit>
       <trans-unit id="PackDefinition">
         <source>Creates a NuGet package</source>
-        <target state="new">Creates a NuGet package</target>
-        <note></note>
+        <target state="translated">NuGet パッケージを作成する</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrateDefinition">
         <source>Migrates a project.json based project to a msbuild based project</source>
-        <target state="new">Migrates a project.json based project to a msbuild based project</target>
-        <note></note>
+        <target state="translated">project.json ベースのプロジェクトを msbuild ベースのプロジェクトに移行する</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectModificationCommands">
         <source>Project modification commands</source>
-        <target state="new">Project modification commands</target>
-        <note></note>
+        <target state="translated">プロジェクト変更コマンド</target>
+        <note />
       </trans-unit>
       <trans-unit id="AddDefinition">
         <source>Add items to the project</source>
-        <target state="new">Add items to the project</target>
-        <note></note>
+        <target state="translated">項目をプロジェクトに追加する</target>
+        <note />
       </trans-unit>
       <trans-unit id="RemoveDefinition">
         <source>Remove items from the project</source>
-        <target state="new">Remove items from the project</target>
-        <note></note>
+        <target state="translated">項目をプロジェクトから削除する</target>
+        <note />
       </trans-unit>
       <trans-unit id="AdvancedCommands">
         <source>Advanced Commands</source>
-        <target state="new">Advanced Commands</target>
-        <note></note>
+        <target state="translated">高度なコマンド</target>
+        <note />
       </trans-unit>
       <trans-unit id="NugetDefinition">
         <source>Provides additional NuGet commands</source>
-        <target state="new">Provides additional NuGet commands</target>
-        <note></note>
+        <target state="translated">追加の NuGet コマンドを提供する</target>
+        <note />
       </trans-unit>
       <trans-unit id="MsBuildDefinition">
         <source>msbuilds a project and all of its dependencies</source>
-        <target state="new">msbuilds a project and all of its dependencies</target>
-        <note></note>
+        <target state="translated">プロジェクトとそのすべての依存関係を msbuild で構築する</target>
+        <note />
       </trans-unit>
       <trans-unit id="VsTestDefinition">
         <source>Runs tests from the specified files</source>
-        <target state="new">Runs tests from the specified files</target>
-        <note></note>
+        <target state="translated">指定されたファイルからテストを実行する</target>
+        <note />
       </trans-unit>
     </body>
   </file>
