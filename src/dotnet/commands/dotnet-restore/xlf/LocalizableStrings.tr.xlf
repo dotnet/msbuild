@@ -5,73 +5,73 @@
       <group id="src/dotnet/commands/dotnet-restore/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>restore</source>
-        <target state="new">restore</target>
-        <note></note>
+        <target state="translated">restore</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>restore for msbuild</source>
-        <target state="new">restore for msbuild</target>
-        <note></note>
+        <target state="translated">msbuild için geri yükleme</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdArgument">
         <source>root</source>
-        <target state="new">root</target>
-        <note></note>
+        <target state="translated">root</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdArgumentDescription">
         <source>Optional path to a project file or MSBuild arguments.</source>
-        <target state="new">Optional path to a project file or MSBuild arguments.</target>
-        <note></note>
+        <target state="translated">Proje dosyasının veya MSBuild bağımsız değişkenlerinin isteğe bağlı yolu.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSourceOption">
         <source>source</source>
-        <target state="new">source</target>
-        <note></note>
+        <target state="translated">source</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSourceOptionDescription">
         <source>Specifies a NuGet package source to use during the restore.</source>
-        <target state="new">Specifies a NuGet package source to use during the restore.</target>
-        <note></note>
+        <target state="translated">Geri yükleme sırasında kullanılacak bir NuGet paket kaynağı belirtir.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOption">
         <source>packagesDirectory</source>
-        <target state="new">packagesDirectory</target>
-        <note></note>
+        <target state="translated">packagesDirectory</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOptionDescription">
         <source>Directory to install packages in.</source>
-        <target state="new">Directory to install packages in.</target>
-        <note></note>
+        <target state="translated">Paketlerin yükleneceği dizin.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdDisableParallelOptionDescription">
         <source>Disables restoring multiple projects in parallel.</source>
-        <target state="new">Disables restoring multiple projects in parallel.</target>
-        <note></note>
+        <target state="translated">Birden fazla projenin paralel olarak geri yüklenmesini devre dışı bırakır.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfigFileOption">
         <source>file</source>
-        <target state="new">file</target>
-        <note></note>
+        <target state="translated">file</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfigFileOptionDescription">
         <source>The NuGet configuration file to use.</source>
-        <target state="new">The NuGet configuration file to use.</target>
-        <note></note>
+        <target state="translated">Kullanılacak NuGet yapılandırma dosyası.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdNoCacheOptionDescription">
         <source>Do not cache packages and http requests.</source>
-        <target state="new">Do not cache packages and http requests.</target>
-        <note></note>
+        <target state="translated">Paketleri ve http isteklerini önbelleğe almayın.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdIgnoreFailedSourcesOptionDescription">
         <source>Treat package source failures as warnings.</source>
-        <target state="new">Treat package source failures as warnings.</target>
-        <note></note>
+        <target state="translated">Paket kaynağı hatalarını uyarı olarak kabul edin.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdNoDependenciesOptionDescription">
         <source>Set this flag to ignore project to project references and only restore the root project</source>
-        <target state="new">Set this flag to ignore project to project references and only restore the root project</target>
-        <note></note>
+        <target state="translated">Projeden projeye başvuruları yoksaymak ve yalnızca kök projeyi geri yüklemek için bu bayrağı ayarlayın</target>
+        <note />
       </trans-unit>
     </body>
   </file>

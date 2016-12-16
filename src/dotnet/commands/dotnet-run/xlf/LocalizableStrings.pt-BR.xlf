@@ -5,108 +5,108 @@
       <group id="src/dotnet/commands/dotnet-run/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET Run Command</source>
-        <target state="new">.NET Run Command</target>
-        <note></note>
+        <target state="translated">Comando Run do .NET</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Command used to run .NET apps</source>
-        <target state="new">Command used to run .NET apps</target>
-        <note></note>
+        <target state="translated">Comando usado para executar aplicativos .NET</target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandOptionConfigurationDescription">
         <source>Configuration under which to build</source>
-        <target state="new">Configuration under which to build</target>
-        <note></note>
+        <target state="translated">Configuração sob a qual compilar</target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandOptionFramework">
         <source>FRAMEWORK</source>
-        <target state="new">FRAMEWORK</target>
-        <note></note>
+        <target state="translated">ESTRUTURA</target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandOptionFrameworkDescription">
         <source>Compile a specific framework</source>
-        <target state="new">Compile a specific framework</target>
-        <note></note>
+        <target state="translated">Compilar uma estrutura específica</target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandOptionProjectDescription">
         <source>The path to the project file to run (defaults to the current directory if there is only one project).</source>
-        <target state="new">The path to the project file to run (defaults to the current directory if there is only one project).</target>
-        <note></note>
+        <target state="translated">O caminho para o arquivo de projeto a ser executado (usará como padrão o diretório atual se houver apenas um projeto).</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandException">
         <source>The build failed. Please fix the build errors and run again.</source>
-        <target state="new">The build failed. Please fix the build errors and run again.</target>
-        <note></note>
+        <target state="translated">Ocorreu uma falha no build. Corrija os erros de build e execute novamente.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandMSBuildExtensionsPath">
         <source>MSBuildExtensionsPath</source>
-        <target state="new">MSBuildExtensionsPath</target>
-        <note></note>
+        <target state="translated">MSBuildExtensionsPath</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandConfiguration">
         <source>Configuration</source>
-        <target state="new">Configuration</target>
-        <note></note>
+        <target state="translated">Configuração</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandTargetFramework">
         <source>TargetFramework</source>
-        <target state="new">TargetFramework</target>
-        <note></note>
+        <target state="translated">TargetFramework</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandProjectInstance">
         <source>RunCommand</source>
-        <target state="new">RunCommand</target>
-        <note></note>
+        <target state="translated">RunCommand</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandOutputType">
         <source>OutputType</source>
-        <target state="new">OutputType</target>
-        <note></note>
+        <target state="translated">OutputType</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRun1">
         <source>Unable to run your project.</source>
-        <target state="new">Unable to run your project.</target>
-        <note></note>
+        <target state="translated">Não foi possível executar seu projeto.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRun2">
         <source>Please ensure you have a runnable project type and ensure 'dotnet run' supports this project.</source>
-        <target state="new">Please ensure you have a runnable project type and ensure 'dotnet run' supports this project.</target>
-        <note></note>
+        <target state="translated">Certifique-se de que você tenha um tipo de projeto executável e que ‘dotnet run’ dê suporte a esse projeto.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRun3">
         <source>The current OutputType is </source>
-        <target state="new">The current OutputType is </target>
-        <note></note>
+        <target state="translated">O OutputType atual é </target>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandRunArguments">
         <source>RunArguments</source>
-        <target state="new">RunArguments</target>
-        <note></note>
+        <target state="translated">RunArguments</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandRunWorkingDirectory">
         <source>RunWorkingDirectory</source>
-        <target state="new">RunWorkingDirectory</target>
-        <note></note>
+        <target state="translated">RunWorkingDirectory</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandInvalidOperationException1">
         <source>Couldn't find a project to run. Ensure a project exists in </source>
-        <target state="new">Couldn't find a project to run. Ensure a project exists in </target>
-        <note></note>
+        <target state="translated">Não foi possível encontrar um projeto para executar. Certifique-se de que existe um projeto em </target>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandInvalidOperationException2">
         <source>Or pass the path to the project using --project</source>
-        <target state="new">Or pass the path to the project using --project</target>
-        <note></note>
+        <target state="translated">Ou passe o caminho para o projeto usando --project</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandInvalidOperationException3">
         <source>Specify which project file to use because this </source>
-        <target state="new">Specify which project file to use because this </target>
-        <note></note>
+        <target state="translated">Especifique qual arquivo de projeto usar porque este </target>
+        <note />
       </trans-unit>
       <trans-unit id="RunCommandInvalidOperationException4">
         <source>contains more than one project file.</source>
-        <target state="new">contains more than one project file.</target>
-        <note></note>
+        <target state="translated">contém mais de um arquivo de projeto.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

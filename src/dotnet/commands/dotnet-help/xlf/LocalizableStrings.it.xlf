@@ -5,143 +5,143 @@
       <group id="src/dotnet/commands/dotnet-help/LocalizableStrings.resx" />
       <trans-unit id="Usage">
         <source>Usage</source>
-        <target state="new">Usage</target>
-        <note></note>
+        <target state="translated">Utilizzo</target>
+        <note />
       </trans-unit>
       <trans-unit id="Arguments">
         <source>Arguments</source>
-        <target state="new">Arguments</target>
-        <note></note>
+        <target state="translated">Argomenti</target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandDefinition">
         <source>The command to execute</source>
-        <target state="new">The command to execute</target>
-        <note></note>
+        <target state="translated">Comando da eseguire</target>
+        <note />
       </trans-unit>
       <trans-unit id="ArgumentsDefinition">
         <source>Arguments to pass to the command</source>
-        <target state="new">Arguments to pass to the command</target>
-        <note></note>
+        <target state="translated">Argomenti da passare al comando</target>
+        <note />
       </trans-unit>
       <trans-unit id="HostOptionsDefinition">
         <source>Options specific to dotnet (host)</source>
-        <target state="new">Options specific to dotnet (host)</target>
-        <note></note>
+        <target state="translated">Opzioni specifiche di dotnet (host)</target>
+        <note />
       </trans-unit>
       <trans-unit id="OptionsDescription">
         <source>Options common to all commands</source>
-        <target state="new">Options common to all commands</target>
-        <note></note>
+        <target state="translated">Opzioni comuni a tutti i comandi</target>
+        <note />
       </trans-unit>
       <trans-unit id="CommonOptions">
         <source>Common options</source>
-        <target state="new">Common options</target>
-        <note></note>
+        <target state="translated">Opzioni comuni</target>
+        <note />
       </trans-unit>
       <trans-unit id="VerboseDefinition">
         <source>Enable verbose output</source>
-        <target state="new">Enable verbose output</target>
-        <note></note>
+        <target state="translated">Abilita l'output dettagliato</target>
+        <note />
       </trans-unit>
       <trans-unit id="HelpDefinition">
         <source>Show help</source>
-        <target state="new">Show help</target>
-        <note></note>
+        <target state="translated">Mostra la Guida</target>
+        <note />
       </trans-unit>
       <trans-unit id="HostOptions">
         <source>Host options (passed before the command)</source>
-        <target state="new">Host options (passed before the command)</target>
-        <note></note>
+        <target state="translated">Opzioni host (passate prima del comando)</target>
+        <note />
       </trans-unit>
       <trans-unit id="VersionDescription">
         <source>Display .NET CLI Version Number</source>
-        <target state="new">Display .NET CLI Version Number</target>
-        <note></note>
+        <target state="translated">Visualizza il numero di versione dell'interfaccia della riga di comando .NET</target>
+        <note />
       </trans-unit>
       <trans-unit id="InfoDescription">
         <source>Display .NET CLI Info</source>
-        <target state="new">Display .NET CLI Info</target>
-        <note></note>
+        <target state="translated">Visualizza le informazioni sull'interfaccia della riga di comando .NET</target>
+        <note />
       </trans-unit>
       <trans-unit id="Commands">
         <source>Commands</source>
-        <target state="new">Commands</target>
-        <note></note>
+        <target state="translated">Comandi</target>
+        <note />
       </trans-unit>
       <trans-unit id="NewDefinition">
         <source>Initialize a basic .NET project</source>
-        <target state="new">Initialize a basic .NET project</target>
-        <note></note>
+        <target state="translated">Inizializza un progetto .NET di base</target>
+        <note />
       </trans-unit>
       <trans-unit id="RestoreDefinition">
-        <source>Restore dependencies specified in the.NET project</source>
-        <target state="new">Restore dependencies specified in the.NET project</target>
+        <source>Restore dependencies specified in the .NET project</source>
+        <target state="needs-review-translation">Ripristina le dipendenze specificate nel progetto .NET</target>
         <note></note>
       </trans-unit>
       <trans-unit id="BuildDefinition">
         <source>Builds a .NET project</source>
-        <target state="new">Builds a .NET project</target>
-        <note></note>
+        <target state="translated">Compila un progetto .NET</target>
+        <note />
       </trans-unit>
       <trans-unit id="PublishDefinition">
         <source>Publishes a .NET project for deployment (including the runtime)</source>
-        <target state="new">Publishes a .NET project for deployment (including the runtime)</target>
-        <note></note>
+        <target state="translated">Pubblica un progetto .NET per la distribuzione (includendo il runtime)</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunDefinition">
-        <source>Compiles and immediately executes a.NET project</source>
-        <target state="new">Compiles and immediately executes a.NET project</target>
+        <source>Compiles and immediately executes a .NET project</source>
+        <target state="needs-review-translation">Compila ed esegue immediatamente un progetto .NET</target>
         <note></note>
       </trans-unit>
       <trans-unit id="TestDefinition">
         <source>Runs unit tests using the test runner specified in the project</source>
-        <target state="new">Runs unit tests using the test runner specified in the project</target>
-        <note></note>
+        <target state="translated">Esegue gli unit test con l'istanza di Test Runner specificata nel progetto</target>
+        <note />
       </trans-unit>
       <trans-unit id="PackDefinition">
         <source>Creates a NuGet package</source>
-        <target state="new">Creates a NuGet package</target>
-        <note></note>
+        <target state="translated">Crea un pacchetto NuGet</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrateDefinition">
         <source>Migrates a project.json based project to a msbuild based project</source>
-        <target state="new">Migrates a project.json based project to a msbuild based project</target>
-        <note></note>
+        <target state="translated">Esegue la migrazione di un progetto basato su project.json in uno basato su MSBuild</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectModificationCommands">
         <source>Project modification commands</source>
-        <target state="new">Project modification commands</target>
-        <note></note>
+        <target state="translated">Comandi di modifica del progetto</target>
+        <note />
       </trans-unit>
       <trans-unit id="AddDefinition">
         <source>Add items to the project</source>
-        <target state="new">Add items to the project</target>
-        <note></note>
+        <target state="translated">Consente di aggiungere elementi al progetto</target>
+        <note />
       </trans-unit>
       <trans-unit id="RemoveDefinition">
         <source>Remove items from the project</source>
-        <target state="new">Remove items from the project</target>
-        <note></note>
+        <target state="translated">Consente di rimuovere elementi dal progetto</target>
+        <note />
       </trans-unit>
       <trans-unit id="AdvancedCommands">
         <source>Advanced Commands</source>
-        <target state="new">Advanced Commands</target>
-        <note></note>
+        <target state="translated">Comandi avanzati</target>
+        <note />
       </trans-unit>
       <trans-unit id="NugetDefinition">
         <source>Provides additional NuGet commands</source>
-        <target state="new">Provides additional NuGet commands</target>
-        <note></note>
+        <target state="translated">Fornisce comandi NuGet aggiuntivi</target>
+        <note />
       </trans-unit>
       <trans-unit id="MsBuildDefinition">
         <source>msbuilds a project and all of its dependencies</source>
-        <target state="new">msbuilds a project and all of its dependencies</target>
-        <note></note>
+        <target state="translated">Esegue MSBuild su un progetto e su tutte le relative dipendenze</target>
+        <note />
       </trans-unit>
       <trans-unit id="VsTestDefinition">
         <source>Runs tests from the specified files</source>
-        <target state="new">Runs tests from the specified files</target>
-        <note></note>
+        <target state="translated">Esegue i test dai file specificati</target>
+        <note />
       </trans-unit>
     </body>
   </file>

@@ -5,17 +5,17 @@
       <group id="src/dotnet/commands/dotnet-migrate/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET Migrate Command</source>
-        <target state="new">.NET Migrate Command</target>
-        <note></note>
+        <target state="translated">.NET 마이그레이션 명령</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Command used to migrate project.json projects to msbuild</source>
-        <target state="new">Command used to migrate project.json projects to msbuild</target>
-        <note></note>
+        <target state="translated">project.json 프로젝트를 msbuild로 마이그레이션하는 데 사용하는 명령입니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdProjectArgument">
-        <source>PROJECT_JSON/GLOBAL_JSON/PROJECT_DIR</source>
-        <target state="new">PROJECT_JSON/GLOBAL_JSON/PROJECT_DIR</target>
+        <source>PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</source>
+        <target state="needs-review-translation">PROJECT_JSON/GLOBAL_JSON/PROJECT_DIR</target>
         <note></note>
       </trans-unit>
       <trans-unit id="CmdProjectArgumentDescription">
@@ -24,56 +24,58 @@
 or
     - a global.json file, it will migrate the folders specified in global.json.
 or
+    - a solution.sln file, it will migrate the projects referenced in the solution.
+or
     - a directory to migrate, it will recursively search for project.json files to migrate.
 Defaults to current directory if nothing is specified.</source>
-        <target state="new">The path to 
-    - a project.json file to migrate.
-or
-    - a global.json file, it will migrate the folders specified in global.json.
-or
-    - a directory to migrate, it will recursively search for project.json files to migrate.
-Defaults to current directory if nothing is specified.</target>
+        <target state="needs-review-translation">다음 파일의 경로입니다. 
+    - 마이그레이션할 project.json 파일
+또는
+    - global.json 파일. global.json에 지정된 폴더를 마이그레이션합니다.
+또는
+    - 마이그레이션할 디렉터리. 마이그레이션할 project.json 파일을 재귀적으로 검색합니다.
+지정하지 않는 경우 현재 디렉터리로 기본 설정됩니다.</target>
         <note></note>
       </trans-unit>
       <trans-unit id="CmdTemplateDescription">
         <source>Base MSBuild template to use for migrated app. The default is the project included in dotnet new.</source>
-        <target state="new">Base MSBuild template to use for migrated app. The default is the project included in dotnet new.</target>
-        <note></note>
+        <target state="translated">마이그레이션된 앱에 사용할 기본 MSBuild 템플릿입니다. 기본값은 새 dotnet에 포함된 프로젝트입니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>The version of the sdk package that will be referenced in the migrated app. The default is the version of the sdk in dotnet new.</source>
-        <target state="new">The version of the sdk package that will be referenced in the migrated app. The default is the version of the sdk in dotnet new.</target>
-        <note></note>
+        <target state="translated">마이그레이션된 앱에서 참조되는 sdk 패키지의 버전입니다. 기본값은 새 dotnet의 sdk 버전입니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdXprojFileDescription">
         <source>The path to the xproj file to use. Required when there is more than one xproj in a project directory.</source>
-        <target state="new">The path to the xproj file to use. Required when there is more than one xproj in a project directory.</target>
-        <note></note>
+        <target state="translated">사용할 xproj 파일의 경로입니다. 프로젝트 디렉터리에 두 개 이상의 xproj가 있는 경우 필요합니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSkipProjectReferencesDescription">
         <source>Skip migrating project references. By default project references are migrated recursively.</source>
-        <target state="new">Skip migrating project references. By default project references are migrated recursively.</target>
-        <note></note>
+        <target state="translated">프로젝트 참조 마이그레이션을 건너뜁니다. 기본적으로 프로젝트 참조가 재귀적으로 마이그레이션됩니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdReportFileDescription">
         <source>Output migration report to the given file in addition to the console.</source>
-        <target state="new">Output migration report to the given file in addition to the console.</target>
-        <note></note>
+        <target state="translated">마이그레이션 보고서를 콘솔 외에 지정된 파일로도 출력합니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdReportOutputDescription">
         <source>Output migration report file as json rather than user messages.</source>
-        <target state="new">Output migration report file as json rather than user messages.</target>
-        <note></note>
+        <target state="translated">마이그레이션 보고서 파일을 사용자 메시지가 아니라 json으로 출력합니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSkipBackupDescription">
         <source>Skip moving project.json, global.json, and *.xproj to a `backup` directory after successful migration.</source>
-        <target state="new">Skip moving project.json, global.json, and *.xproj to a `backup` directory after successful migration.</target>
-        <note></note>
+        <target state="translated">마이그레이션을 완료한 후 project.json, global.json 및 *.xproj를 `백업` 디렉터리로 이동하는 작업을 건너뜁니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrationFailedError">
         <source>Migration failed.</source>
-        <target state="new">Migration failed.</target>
-        <note></note>
+        <target state="translated">마이그레이션하지 못했습니다.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

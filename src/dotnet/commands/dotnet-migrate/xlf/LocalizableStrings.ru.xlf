@@ -5,17 +5,17 @@
       <group id="src/dotnet/commands/dotnet-migrate/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET Migrate Command</source>
-        <target state="new">.NET Migrate Command</target>
-        <note></note>
+        <target state="translated">Команда .NET "Миграция"</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Command used to migrate project.json projects to msbuild</source>
-        <target state="new">Command used to migrate project.json projects to msbuild</target>
-        <note></note>
+        <target state="translated">Команда, используемая для миграции проектов project.json в msbuild</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdProjectArgument">
-        <source>PROJECT_JSON/GLOBAL_JSON/PROJECT_DIR</source>
-        <target state="new">PROJECT_JSON/GLOBAL_JSON/PROJECT_DIR</target>
+        <source>PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</source>
+        <target state="needs-review-translation">PROJECT_JSON/GLOBAL_JSON/PROJECT_DIR</target>
         <note></note>
       </trans-unit>
       <trans-unit id="CmdProjectArgumentDescription">
@@ -24,56 +24,58 @@
 or
     - a global.json file, it will migrate the folders specified in global.json.
 or
+    - a solution.sln file, it will migrate the projects referenced in the solution.
+or
     - a directory to migrate, it will recursively search for project.json files to migrate.
 Defaults to current directory if nothing is specified.</source>
-        <target state="new">The path to 
-    - a project.json file to migrate.
-or
-    - a global.json file, it will migrate the folders specified in global.json.
-or
-    - a directory to migrate, it will recursively search for project.json files to migrate.
-Defaults to current directory if nothing is specified.</target>
+        <target state="needs-review-translation">Путь к 
+    — переносимому файлу project.json.
+или
+    — файлу global.json; выполняется миграция папок, указанных в файле global.json.
+или
+    — переносимому каталогу; выполняется рекурсивный поиск файлов project.json для миграции.
+По умолчанию применяется текущий каталог, если не указана другая папка.</target>
         <note></note>
       </trans-unit>
       <trans-unit id="CmdTemplateDescription">
         <source>Base MSBuild template to use for migrated app. The default is the project included in dotnet new.</source>
-        <target state="new">Base MSBuild template to use for migrated app. The default is the project included in dotnet new.</target>
-        <note></note>
+        <target state="translated">Основной шаблон MSBuild, используемый для переносимого приложения. По умолчанию применяется проект, указанный в команде dotnet new.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>The version of the sdk package that will be referenced in the migrated app. The default is the version of the sdk in dotnet new.</source>
-        <target state="new">The version of the sdk package that will be referenced in the migrated app. The default is the version of the sdk in dotnet new.</target>
-        <note></note>
+        <target state="translated">Версия пакета SDK, на который будет ссылаться переносимое приложение. По умолчанию применяется версия пакета SDK в команде dotnet new.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdXprojFileDescription">
         <source>The path to the xproj file to use. Required when there is more than one xproj in a project directory.</source>
-        <target state="new">The path to the xproj file to use. Required when there is more than one xproj in a project directory.</target>
-        <note></note>
+        <target state="translated">Путь к используемому XPROJ-файлу. Требуется при наличии нескольких XPROJ-файлов в каталоге проекта.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSkipProjectReferencesDescription">
         <source>Skip migrating project references. By default project references are migrated recursively.</source>
-        <target state="new">Skip migrating project references. By default project references are migrated recursively.</target>
-        <note></note>
+        <target state="translated">Пропустить миграцию ссылок на проект. По умолчанию ссылки на проект переносятся рекурсивно.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdReportFileDescription">
         <source>Output migration report to the given file in addition to the console.</source>
-        <target state="new">Output migration report to the given file in addition to the console.</target>
-        <note></note>
+        <target state="translated">Вывод отчета о миграции в консоли и в заданный файл.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdReportOutputDescription">
         <source>Output migration report file as json rather than user messages.</source>
-        <target state="new">Output migration report file as json rather than user messages.</target>
-        <note></note>
+        <target state="translated">Вывод файла отчета о миграции в формате JSON, а не в виде сообщений для пользователя.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSkipBackupDescription">
         <source>Skip moving project.json, global.json, and *.xproj to a `backup` directory after successful migration.</source>
-        <target state="new">Skip moving project.json, global.json, and *.xproj to a `backup` directory after successful migration.</target>
-        <note></note>
+        <target state="translated">Пропустить перенос файлов project.json, global.json и *.xproj в "резервный" каталог после успешной миграции.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrationFailedError">
         <source>Migration failed.</source>
-        <target state="new">Migration failed.</target>
-        <note></note>
+        <target state="translated">Сбой миграции.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

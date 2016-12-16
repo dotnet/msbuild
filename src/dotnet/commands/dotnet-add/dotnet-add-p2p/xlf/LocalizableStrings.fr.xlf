@@ -3,55 +3,25 @@
   <file datatype="xml" source-language="en" target-language="fr" original="src/dotnet/commands/dotnet-add/dotnet-add-p2p/LocalizableStrings.resx">
     <body>
       <group id="src/dotnet/commands/dotnet-add/dotnet-add-p2p/LocalizableStrings.resx" />
-      <trans-unit id="SpecifyAtLeastOneReferenceToAdd">
-        <source>You must specify at least one reference to add. Please run dotnet add --help for more information.</source>
-        <target state="new">You must specify at least one reference to add. Please run dotnet add --help for more information.</target>
-        <note></note>
-      </trans-unit>
       <trans-unit id="AppFullName">
         <source>.NET Add Project to Project (p2p) reference Command</source>
-        <target state="new">.NET Add Project to Project (p2p) reference Command</target>
-        <note></note>
+        <target state="translated">Commande d'ajout d'une référence projet à projet (p2p) .NET</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Command to add project to project (p2p) reference</source>
-        <target state="new">Command to add project to project (p2p) reference</target>
-        <note></note>
+        <target state="translated">Commande permettant d'ajouter une référence projet à projet (p2p)</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppHelpText">
         <source>Project to project references to add</source>
-        <target state="new">Project to project references to add</target>
-        <note></note>
-      </trans-unit>
-      <trans-unit id="CmdProject">
-        <source>PROJECT</source>
-        <target state="new">PROJECT</target>
-        <note></note>
-      </trans-unit>
-      <trans-unit id="CmdProjectDescription">
-        <source>The project file to modify. If a project file is not specified, it searches the current working directory for an MSBuild file that has a file extension that ends in `proj` and uses that file.</source>
-        <target state="new">The project file to modify. If a project file is not specified, it searches the current working directory for an MSBuild file that has a file extension that ends in `proj` and uses that file.</target>
-        <note></note>
-      </trans-unit>
-      <trans-unit id="CmdFramework">
-        <source>FRAMEWORK</source>
-        <target state="new">FRAMEWORK</target>
-        <note></note>
+        <target state="translated">Références projet à projet à ajouter</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Add reference only when targetting a specific framework</source>
-        <target state="new">Add reference only when targetting a specific framework</target>
-        <note></note>
-      </trans-unit>
-      <trans-unit id="CmdForceDescription">
-        <source>Add reference even if it does not exist, do not convert paths to relative</source>
-        <target state="new">Add reference even if it does not exist, do not convert paths to relative</target>
-        <note></note>
-      </trans-unit>
-      <trans-unit id="ProjectException">
-        <source>Project</source>
-        <target state="new">Project</target>
-        <note></note>
+        <target state="translated">Ajouter une référence uniquement en cas de ciblage d'un framework spécifique</target>
+        <note />
       </trans-unit>
     </body>
   </file>

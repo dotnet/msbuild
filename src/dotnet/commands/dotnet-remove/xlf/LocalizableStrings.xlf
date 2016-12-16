@@ -5,43 +5,7 @@
       <group id="src/dotnet/commands/dotnet-remove/LocalizableStrings.resx" />
       <trans-unit id="NetRemoveCommand">
         <source>.NET Remove Command</source>
-        <note></note>
-      </trans-unit>
-      <trans-unit id="Usage">
-        <source>Usage</source>
-        <note></note>
-      </trans-unit>
-      <trans-unit id="Options">
-        <source>Options</source>
-        <note></note>
-      </trans-unit>
-      <trans-unit id="HelpDefinition">
-        <source>Show help information</source>
-        <note></note>
-      </trans-unit>
-      <trans-unit id="Arguments">
-        <source>Arguments</source>
-        <note></note>
-      </trans-unit>
-      <trans-unit id="ArgumentsObjectDefinition">
-        <source>The object of the operation. If a project file is not specified, it defaults to the current directory.</source>
-        <note></note>
-      </trans-unit>
-      <trans-unit id="ArgumentsCommandDefinition">
-        <source>Command to be executed on &lt;object&gt;.</source>
-        <note></note>
-      </trans-unit>
-      <trans-unit id="ArgsDefinition">
-        <source>Any extra arguments passed to the command. Use `dotnet add &lt;command&gt; --help` to get help about these arguments.</source>
-        <note></note>
-      </trans-unit>
-      <trans-unit id="Commands">
-        <source>Commands</source>
-        <note></note>
-      </trans-unit>
-      <trans-unit id="CommandP2PDefinition">
-        <source>Remove project to project (p2p) reference from a project</source>
-        <note></note>
+        <note />
       </trans-unit>
     </body>
   </file>

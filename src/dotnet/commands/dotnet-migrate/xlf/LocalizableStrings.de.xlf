@@ -5,17 +5,17 @@
       <group id="src/dotnet/commands/dotnet-migrate/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET Migrate Command</source>
-        <target state="new">.NET Migrate Command</target>
-        <note></note>
+        <target state="translated">.NET-Befehl "Migrate"</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Command used to migrate project.json projects to msbuild</source>
-        <target state="new">Command used to migrate project.json projects to msbuild</target>
-        <note></note>
+        <target state="translated">Befehl zum Migrieren von project.json-Projekten zu MSBuild</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdProjectArgument">
-        <source>PROJECT_JSON/GLOBAL_JSON/PROJECT_DIR</source>
-        <target state="new">PROJECT_JSON/GLOBAL_JSON/PROJECT_DIR</target>
+        <source>PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</source>
+        <target state="needs-review-translation">PROJECT_JSON/GLOBAL_JSON/PROJECT_DIR</target>
         <note></note>
       </trans-unit>
       <trans-unit id="CmdProjectArgumentDescription">
@@ -24,56 +24,58 @@
 or
     - a global.json file, it will migrate the folders specified in global.json.
 or
+    - a solution.sln file, it will migrate the projects referenced in the solution.
+or
     - a directory to migrate, it will recursively search for project.json files to migrate.
 Defaults to current directory if nothing is specified.</source>
-        <target state="new">The path to 
-    - a project.json file to migrate.
-or
-    - a global.json file, it will migrate the folders specified in global.json.
-or
-    - a directory to migrate, it will recursively search for project.json files to migrate.
-Defaults to current directory if nothing is specified.</target>
+        <target state="needs-review-translation">Der Pfad zu 
+    - einer zu migrierenden Datei vom Typ "project.json".
+oder
+    - einer Datei vom Typ "global.json". (Hierbei werden die in "global.json" angegebenen Ordner migriert.)
+oder
+    - einem zu migrierenden Verzeichnis. (Hierbei wird rekursiv nach zu migrierenden Dateien vom Typ "project.json" gesucht.)
+Ohne Angabe wird standardmäßig das aktuelle Verzeichnis verwendet.</target>
         <note></note>
       </trans-unit>
       <trans-unit id="CmdTemplateDescription">
         <source>Base MSBuild template to use for migrated app. The default is the project included in dotnet new.</source>
-        <target state="new">Base MSBuild template to use for migrated app. The default is the project included in dotnet new.</target>
-        <note></note>
+        <target state="translated">Grundlegende MSBuild-Vorlage, die für die migrierte App verwendet werden soll. Standardmäßig wird das in "dotnet new" enthaltene Projekt verwendet.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>The version of the sdk package that will be referenced in the migrated app. The default is the version of the sdk in dotnet new.</source>
-        <target state="new">The version of the sdk package that will be referenced in the migrated app. The default is the version of the sdk in dotnet new.</target>
-        <note></note>
+        <target state="translated">Die Version des SDK-Pakets, auf das in der migrierten App verwiesen wird. Standardmäßig wird die Version des SDKs in "dotnet new" verwendet.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdXprojFileDescription">
         <source>The path to the xproj file to use. Required when there is more than one xproj in a project directory.</source>
-        <target state="new">The path to the xproj file to use. Required when there is more than one xproj in a project directory.</target>
-        <note></note>
+        <target state="translated">Der Pfad zu der zu verwendenden XPROJ-Datei. Erforderlich, wenn ein Projektverzeichnis mehrere XPROJ-Dateien enthält.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSkipProjectReferencesDescription">
         <source>Skip migrating project references. By default project references are migrated recursively.</source>
-        <target state="new">Skip migrating project references. By default project references are migrated recursively.</target>
-        <note></note>
+        <target state="translated">Migration von Projektverweisen überspringen. Projektverweise werden standardmäßig rekursiv migriert.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdReportFileDescription">
         <source>Output migration report to the given file in addition to the console.</source>
-        <target state="new">Output migration report to the given file in addition to the console.</target>
-        <note></note>
+        <target state="translated">Migrationsbericht sowohl in der Konsole als auch in die angegebene Datei ausgeben.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdReportOutputDescription">
         <source>Output migration report file as json rather than user messages.</source>
-        <target state="new">Output migration report file as json rather than user messages.</target>
-        <note></note>
+        <target state="translated">Migrationsberichtsdatei nicht als Benutzermeldungen, sondern als JSON ausgeben.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSkipBackupDescription">
         <source>Skip moving project.json, global.json, and *.xproj to a `backup` directory after successful migration.</source>
-        <target state="new">Skip moving project.json, global.json, and *.xproj to a `backup` directory after successful migration.</target>
-        <note></note>
+        <target state="translated">"project.json", "global.json" und "*.xproj" nach erfolgreicher Migration nicht in ein Sicherungsverzeichnis verschieben.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrationFailedError">
         <source>Migration failed.</source>
-        <target state="new">Migration failed.</target>
-        <note></note>
+        <target state="translated">Fehler beim Migrieren.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

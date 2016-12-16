@@ -5,73 +5,73 @@
       <group id="src/dotnet/commands/dotnet-publish/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET Publisher</source>
-        <target state="new">.NET Publisher</target>
-        <note></note>
+        <target state="translated">Editore .NET</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Publisher for the .NET Platform</source>
-        <target state="new">Publisher for the .NET Platform</target>
-        <note></note>
+        <target state="translated">Editore per la piattaforma .NET</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectArgument">
         <source>PROJECT</source>
-        <target state="new">PROJECT</target>
-        <note></note>
+        <target state="translated">PROGETTO</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectArgDescription">
         <source>The MSBuild project file to publish. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.</source>
-        <target state="new">The MSBuild project file to publish. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.</target>
-        <note></note>
+        <target state="translated">File di progetto MSBuild da pubblicare. Se non si specifica un file di progetto, MSBuild cerca nella directory di lavoro corrente un file la cui estensione termina con `proj` e usa tale file.</target>
+        <note />
       </trans-unit>
       <trans-unit id="FrameworkOption">
         <source>FRAMEWORK</source>
-        <target state="new">FRAMEWORK</target>
-        <note></note>
+        <target state="translated">FRAMEWORK</target>
+        <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>Target framework to publish for</source>
-        <target state="new">Target framework to publish for</target>
-        <note></note>
+        <target state="translated">Framework di destinazione per cui eseguire la pubblicazione</target>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeOption">
         <source>RUNTIME_IDENTIFIER</source>
-        <target state="new">RUNTIME_IDENTIFIER</target>
-        <note></note>
+        <target state="translated">IDENTIFICATORE_RUNTIME</target>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>Target runtime to publish for. The default is to publish a portable application.</source>
-        <target state="new">Target runtime to publish for. The default is to publish a portable application.</target>
-        <note></note>
+        <target state="translated">Runtime di destinazione per cui eseguire la pubblicazione. Per impostazione predefinita, viene pubblicata un'applicazione portatile.</target>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
-        <target state="new">OUTPUT_DIR</target>
-        <note></note>
+        <target state="translated">DIR_OUTPUT</target>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>Path in which to publish the app</source>
-        <target state="new">Path in which to publish the app</target>
-        <note></note>
+        <target state="translated">Percorso in cui pubblicare l'app</target>
+        <note />
       </trans-unit>
       <trans-unit id="ConfigurationOption">
         <source>CONFIGURATION</source>
-        <target state="new">CONFIGURATION</target>
-        <note></note>
+        <target state="translated">CONFIGURAZIONE</target>
+        <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>Configuration under which to build</source>
-        <target state="new">Configuration under which to build</target>
-        <note></note>
+        <target state="translated">Configurazione con cui eseguire la compilazione</target>
+        <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOption">
         <source>VERSION_SUFFIX</source>
-        <target state="new">VERSION_SUFFIX</target>
-        <note></note>
+        <target state="translated">SUFFISSO_VERSIONE</target>
+        <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOptionDescription">
         <source>Defines the value for the $(VersionSuffix) property in the project</source>
-        <target state="new">Defines the value for the $(VersionSuffix) property in the project</target>
-        <note></note>
+        <target state="translated">Consente di definire il valore per la proprietà $(VersionSuffix) nel progetto</target>
+        <note />
       </trans-unit>
     </body>
   </file>

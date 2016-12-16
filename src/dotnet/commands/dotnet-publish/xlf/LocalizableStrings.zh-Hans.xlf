@@ -5,73 +5,73 @@
       <group id="src/dotnet/commands/dotnet-publish/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET Publisher</source>
-        <target state="new">.NET Publisher</target>
-        <note></note>
+        <target state="translated">.NET 发布服务器</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Publisher for the .NET Platform</source>
-        <target state="new">Publisher for the .NET Platform</target>
-        <note></note>
+        <target state="translated">适用于 .NET 平台的发布服务器</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectArgument">
         <source>PROJECT</source>
-        <target state="new">PROJECT</target>
-        <note></note>
+        <target state="translated">PROJECT</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectArgDescription">
         <source>The MSBuild project file to publish. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.</source>
-        <target state="new">The MSBuild project file to publish. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.</target>
-        <note></note>
+        <target state="translated">要发布的 MSBuild 项目文件。如果未指定项目文件，MSBuild 将搜索当前工作目录来查找文件扩展名以“proj”结尾的文件并使用该文件。</target>
+        <note />
       </trans-unit>
       <trans-unit id="FrameworkOption">
         <source>FRAMEWORK</source>
-        <target state="new">FRAMEWORK</target>
-        <note></note>
+        <target state="translated">FRAMEWORK</target>
+        <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>Target framework to publish for</source>
-        <target state="new">Target framework to publish for</target>
-        <note></note>
+        <target state="translated">要发布的目标框架</target>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeOption">
         <source>RUNTIME_IDENTIFIER</source>
-        <target state="new">RUNTIME_IDENTIFIER</target>
-        <note></note>
+        <target state="translated">RUNTIME_IDENTIFIER</target>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>Target runtime to publish for. The default is to publish a portable application.</source>
-        <target state="new">Target runtime to publish for. The default is to publish a portable application.</target>
-        <note></note>
+        <target state="translated">要发布的目标运行时默认为发布可移植的应用程序。</target>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
-        <target state="new">OUTPUT_DIR</target>
-        <note></note>
+        <target state="translated">OUTPUT_DIR</target>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>Path in which to publish the app</source>
-        <target state="new">Path in which to publish the app</target>
-        <note></note>
+        <target state="translated">在其中发布应用的路径</target>
+        <note />
       </trans-unit>
       <trans-unit id="ConfigurationOption">
         <source>CONFIGURATION</source>
-        <target state="new">CONFIGURATION</target>
-        <note></note>
+        <target state="translated">CONFIGURATION</target>
+        <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>Configuration under which to build</source>
-        <target state="new">Configuration under which to build</target>
-        <note></note>
+        <target state="translated">在何处生成配置</target>
+        <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOption">
         <source>VERSION_SUFFIX</source>
-        <target state="new">VERSION_SUFFIX</target>
-        <note></note>
+        <target state="translated">VERSION_SUFFIX</target>
+        <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOptionDescription">
         <source>Defines the value for the $(VersionSuffix) property in the project</source>
-        <target state="new">Defines the value for the $(VersionSuffix) property in the project</target>
-        <note></note>
+        <target state="translated">定义项目中 $(VersionSuffix)属性的值</target>
+        <note />
       </trans-unit>
     </body>
   </file>

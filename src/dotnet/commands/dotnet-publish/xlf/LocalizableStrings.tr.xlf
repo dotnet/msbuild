@@ -5,73 +5,73 @@
       <group id="src/dotnet/commands/dotnet-publish/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET Publisher</source>
-        <target state="new">.NET Publisher</target>
-        <note></note>
+        <target state="translated">.NET Yayımcısı</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Publisher for the .NET Platform</source>
-        <target state="new">Publisher for the .NET Platform</target>
-        <note></note>
+        <target state="translated">.NET Platformunun yayımcısı.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectArgument">
         <source>PROJECT</source>
-        <target state="new">PROJECT</target>
-        <note></note>
+        <target state="translated">PROJE</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectArgDescription">
         <source>The MSBuild project file to publish. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.</source>
-        <target state="new">The MSBuild project file to publish. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.</target>
-        <note></note>
+        <target state="translated">Yayımlanacak MSBuild proje dosyası. Bir proje dosyası belirtilmezse MSBuild, geçerli çalışma dizininde dosya uzantısının sonu ‘proj’ olan bir dosyası arar ve bu dosyayı kullanır.</target>
+        <note />
       </trans-unit>
       <trans-unit id="FrameworkOption">
         <source>FRAMEWORK</source>
-        <target state="new">FRAMEWORK</target>
-        <note></note>
+        <target state="translated">ÇERÇEVE</target>
+        <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>Target framework to publish for</source>
-        <target state="new">Target framework to publish for</target>
-        <note></note>
+        <target state="translated">Yayımlamanın yapılacağı hedef çerçeve</target>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeOption">
         <source>RUNTIME_IDENTIFIER</source>
-        <target state="new">RUNTIME_IDENTIFIER</target>
-        <note></note>
+        <target state="translated">ÇALIŞMA_ZAMANI_TANIMLAYICISI</target>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>Target runtime to publish for. The default is to publish a portable application.</source>
-        <target state="new">Target runtime to publish for. The default is to publish a portable application.</target>
-        <note></note>
+        <target state="translated">Yayımlamanın yapılacağı hedef çalışma zamanı. Varsayılan değer, taşınabilir bir uygulama yayımlanmasıdır.</target>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
-        <target state="new">OUTPUT_DIR</target>
-        <note></note>
+        <target state="translated">ÇIKIŞ_DİZİNİ</target>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>Path in which to publish the app</source>
-        <target state="new">Path in which to publish the app</target>
-        <note></note>
+        <target state="translated">Uygulamanın yayımlanacağı yol</target>
+        <note />
       </trans-unit>
       <trans-unit id="ConfigurationOption">
         <source>CONFIGURATION</source>
-        <target state="new">CONFIGURATION</target>
-        <note></note>
+        <target state="translated">YAPILANDIRMA</target>
+        <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>Configuration under which to build</source>
-        <target state="new">Configuration under which to build</target>
-        <note></note>
+        <target state="translated">Derlemenin gerçekleştirileceği yapılandırma</target>
+        <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOption">
         <source>VERSION_SUFFIX</source>
-        <target state="new">VERSION_SUFFIX</target>
-        <note></note>
+        <target state="translated">SÜRÜM_SONEKİ</target>
+        <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOptionDescription">
         <source>Defines the value for the $(VersionSuffix) property in the project</source>
-        <target state="new">Defines the value for the $(VersionSuffix) property in the project</target>
-        <note></note>
+        <target state="translated">Projedeki $(VersionSuffix) özelliğinin değerini tanımlar</target>
+        <note />
       </trans-unit>
     </body>
   </file>
