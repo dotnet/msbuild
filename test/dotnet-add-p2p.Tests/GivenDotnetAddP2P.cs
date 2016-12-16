@@ -14,6 +14,21 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
 {
     public class GivenDotnetAddP2P : TestBase
     {
+        private const string HelpText = @".NET Add Project to Project (p2p) reference Command
+
+Usage: dotnet add <PROJECT_OR_SOLUTION> p2p [options] [args]
+
+Arguments:
+  <PROJECT_OR_SOLUTION>  The project or solution to operation on. If a file is not specified, the current directory is searched.
+
+Options:
+  -h|--help                   Show help information
+  -f|--framework <FRAMEWORK>  Add reference only when targetting a specific framework
+
+Args:
+  Project to project references to add
+";
+
         const string FrameworkNet451Arg = "-f net451";
         const string ConditionFrameworkNet451 = "== 'net451'";
         const string FrameworkNetCoreApp10Arg = "-f netcoreapp1.0";
@@ -77,7 +92,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         {
             var cmd = new AddP2PCommand().Execute(helpArg);
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("Usage");
+            cmd.StdOut.Should().Be(HelpText);
         }
 
         [Fact]
@@ -87,7 +102,8 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                     .WithProject("one two three")
                     .Execute("proj.csproj");
             cmd.ExitCode.Should().NotBe(0);
-            cmd.StdErr.Should().Contain("Unrecognized command or argument");
+            cmd.StdErr.Should().Be("Unrecognized command or argument 'two'");
+            cmd.StdOut.Should().Be("Specify --help for a list of available options and commands.");
         }
 
         [Theory]
@@ -102,8 +118,8 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                     .WithProject(projName)
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
-            cmd.StdErr.Should().Contain("Could not find");
-            cmd.StdOut.Should().Contain("Usage");
+            cmd.StdErr.Should().Be($"Could not find project or directory `{projName}`.");
+            cmd.StdOut.Should().Be(HelpText);
         }
 
         [Fact]
@@ -117,8 +133,8 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                     .WithProject(projName)
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
-            cmd.StdErr.Should().Contain(" is invalid.");
-            cmd.StdOut.Should().Contain("Usage");
+            cmd.StdErr.Should().Be("Project `Broken/Broken.csproj` is invalid.");
+            cmd.StdOut.Should().Be(HelpText);
         }
 
         [Fact]
@@ -126,12 +142,13 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         {
             var setup = Setup();
 
+            var workingDir = Path.Combine(setup.TestRoot, "MoreThanOne");
             var cmd = new AddP2PCommand()
-                    .WithWorkingDirectory(Path.Combine(setup.TestRoot, "MoreThanOne"))
+                    .WithWorkingDirectory(workingDir)
                     .Execute($"\"{setup.ValidRefCsprojRelToOtherProjPath}\"");
             cmd.ExitCode.Should().NotBe(0);
-            cmd.StdErr.Should().Contain("more than one");
-            cmd.StdOut.Should().Contain("Usage");
+            cmd.StdErr.Should().Be($"Found more than one project in `{workingDir + Path.DirectorySeparatorChar}`. Please specify which one to use.");
+            cmd.StdOut.Should().Be(HelpText);
         }
 
         [Fact]
@@ -143,8 +160,8 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                     .WithWorkingDirectory(setup.TestRoot)
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
-            cmd.StdErr.Should().Contain("not find any");
-            cmd.StdOut.Should().Contain("Usage");
+            cmd.StdErr.Should().Be($"Could not find any project in `{setup.TestRoot + Path.DirectorySeparatorChar}`.");
+            cmd.StdOut.Should().Be(HelpText);
         }
 
         [Fact]
@@ -152,14 +169,14 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         {
             var lib = NewLibWithFrameworks();
             var setup = Setup();
-
+            
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
             var cmd = new AddP2PCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("added to the project");
+            cmd.StdOut.Should().Be("Reference `DotnetAddP2PProjects\\ValidRef\\ValidRef.csproj` added to the project.");
             cmd.StdErr.Should().BeEmpty();
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
@@ -178,7 +195,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg} \"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("added to the project");
+            cmd.StdOut.Should().Be("Reference `DotnetAddP2PProjects\\ValidRef\\ValidRef.csproj` added to the project.");
             cmd.StdErr.Should().BeEmpty();
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451).Should().Be(condBefore + 1);
@@ -203,7 +220,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                 .WithProject(lib.CsProjName)
                 .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("added to the project");
+            cmd.StdOut.Should().Be("Reference `DotnetAddP2PProjects\\ValidRef\\ValidRef.csproj` added to the project.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore);
             csproj.NumberOfProjectReferencesWithIncludeContaining(setup.ValidRefCsprojName).Should().Be(1);
@@ -227,7 +244,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg} \"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("added to the project");
+            cmd.StdOut.Should().Be("Reference `DotnetAddP2PProjects\\ValidRef\\ValidRef.csproj` added to the project.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451).Should().Be(condBefore);
             csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(setup.ValidRefCsprojName, ConditionFrameworkNet451).Should().Be(1);
@@ -251,7 +268,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg} \"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("added to the project");
+            cmd.StdOut.Should().Be("Reference `DotnetAddP2PProjects\\ValidRef\\ValidRef.csproj` added to the project.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451).Should().Be(condBefore + 1);
             csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(setup.ValidRefCsprojName, ConditionFrameworkNet451).Should().Be(1);
@@ -275,7 +292,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
-
+            cmd.StdOut.Should().Be("Reference `DotnetAddP2PProjects\\ValidRef\\ValidRef.csproj` added to the project.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
             csproj.NumberOfProjectReferencesWithIncludeContaining(setup.ValidRefCsprojName).Should().Be(1);
@@ -299,7 +316,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                 .WithProject(lib.CsProjName)
                 .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("already has a reference");
+            cmd.StdOut.Should().Be("Project already has a reference to `DotnetAddP2PProjects\\ValidRef\\ValidRef.csproj`.");
 
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore);
@@ -318,7 +335,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                     .WithProject(proj.CsProjPath)
                     .Execute($"{FrameworkNet451Arg} \"{setup.LibCsprojRelPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("already has a reference");
+            cmd.StdOut.Should().Be("Project already has a reference to `..\\Lib\\Lib.csproj`.");
             proj.CsProjContent().Should().BeEquivalentTo(contentBefore);
         }
 
@@ -340,7 +357,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg} \"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("already has a reference");
+            cmd.StdOut.Should().Be("Project already has a reference to `DotnetAddP2PProjects\\ValidRef\\ValidRef.csproj`.");
             lib.CsProjContent().Should().BeEquivalentTo(csprojContentBefore);
         }
 
@@ -356,7 +373,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                     .WithProject(proj.CsProjName)
                     .Execute($"{FrameworkNet451Arg} \"{setup.LibCsprojRelPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("already has a reference");
+            cmd.StdOut.Should().Be("Project already has a reference to `..\\Lib\\Lib.csproj`.");
             proj.CsProjContent().Should().BeEquivalentTo(contentBefore);
         }
 
@@ -372,7 +389,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                     .WithProject(proj.CsProjName)
                     .Execute($"\"{setup.LibCsprojRelPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("already has a reference");
+            cmd.StdOut.Should().Be("Project already has a reference to `..\\Lib\\Lib.csproj`.");
             proj.CsProjContent().Should().BeEquivalentTo(contentBefore);
         }
 
@@ -388,7 +405,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                     .WithProject(proj.CsProjPath)
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("added to the project");
+            cmd.StdOut.Should().Be("Reference `..\\ValidRef\\ValidRef.csproj` added to the project.");
             var csproj = proj.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
             csproj.NumberOfProjectReferencesWithIncludeContaining(setup.ValidRefCsprojName).Should().Be(1);
@@ -406,7 +423,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                     .WithProject(proj.CsProjName)
                     .Execute($"{FrameworkNet451Arg} \"{setup.LibCsprojRelPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("already has a reference");
+            cmd.StdOut.Should().Be("Project already has a reference to `..\\Lib\\Lib.csproj`.");
             proj.CsProjContent().Should().BeEquivalentTo(contentBefore);
         }
 
@@ -422,7 +439,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                     .WithProject(proj.CsProjPath)
                     .Execute($"{FrameworkNet451Arg} \"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("added to the project");
+            cmd.StdOut.Should().Be("Reference `..\\ValidRef\\ValidRef.csproj` added to the project.");
             var csproj = proj.CsProj();
             csproj.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451).Should().Be(condBefore + 1);
             csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(setup.ValidRefCsprojName, ConditionFrameworkNet451).Should().Be(1);
@@ -440,7 +457,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                     .WithProject(proj.CsProjPath)
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("added to the project");
+            cmd.StdOut.Should().Be("Reference `..\\ValidRef\\ValidRef.csproj` added to the project.");
             var csproj = proj.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore);
             csproj.NumberOfProjectReferencesWithIncludeContaining(setup.ValidRefCsprojName).Should().Be(1);
@@ -449,6 +466,9 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void ItAddsMultipleRefsNoCondToTheSameItemGroup()
         {
+            const string OutputText = @"Reference `DotnetAddP2PProjects\Lib\Lib.csproj` added to the project.
+Reference `DotnetAddP2PProjects\ValidRef\ValidRef.csproj` added to the project.";
+
             var lib = NewLibWithFrameworks();
             var setup = Setup();
 
@@ -458,7 +478,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{setup.LibCsprojPath}\" \"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("added to the project").And.NotContain("already has a reference");
+            cmd.StdOut.Should().Be(OutputText);
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
             csproj.NumberOfProjectReferencesWithIncludeContaining(setup.ValidRefCsprojName).Should().Be(1);
@@ -468,6 +488,9 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
         [Fact]
         public void ItAddsMultipleRefsWithCondToTheSameItemGroup()
         {
+            const string OutputText = @"Reference `DotnetAddP2PProjects\Lib\Lib.csproj` added to the project.
+Reference `DotnetAddP2PProjects\ValidRef\ValidRef.csproj` added to the project.";
+
             var lib = NewLibWithFrameworks();
             var setup = Setup();
 
@@ -477,7 +500,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg}  \"{setup.LibCsprojPath}\" \"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("added to the project").And.NotContain("already has a reference");
+            cmd.StdOut.Should().Be(OutputText);
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451).Should().Be(noCondBefore + 1);
             csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(setup.ValidRefCsprojName, ConditionFrameworkNet451).Should().Be(1);
@@ -495,7 +518,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                 .WithWorkingDirectory(lib.Path)
                 .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("added to the project");
+            cmd.StdOut.Should().Be("Reference `DotnetAddP2PProjects\\ValidRef\\ValidRef.csproj` added to the project.");
             cmd.StdErr.Should().BeEmpty();
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
@@ -513,7 +536,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                 .WithProject(lib.CsProjName)
                 .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("added to the project");
+            cmd.StdOut.Should().Be("Reference `DotnetAddP2PProjects\\ValidRef\\ValidRef.csproj` added to the project.");
             cmd.StdErr.Should().BeEmpty();
 
             int state = 0;
@@ -558,7 +581,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                 .WithProject(lib.CsProjName)
                 .Execute("\"IDoNotExist.csproj\"");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Contain("does not exist");
+            cmd.StdErr.Should().Be("Reference IDoNotExist.csproj does not exist.");
             lib.CsProjContent().Should().BeEquivalentTo(contentBefore);
         }
 
@@ -574,8 +597,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{setup.ValidRefCsprojPath}\" \"IDoNotExist.csproj\"");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Contain("does not exist");
-            cmd.StdErr.Should().NotMatchRegex("(.*does not exist.*){2,}");
+            cmd.StdErr.Should().Be("Reference IDoNotExist.csproj does not exist.");
             lib.CsProjContent().Should().BeEquivalentTo(contentBefore);
         }
 
@@ -591,7 +613,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                 .WithProject(lib.CsProjName)
                 .Execute($"\"{setup.ValidRefCsprojPath.Replace('\\', '/')}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("added to the project");
+            cmd.StdOut.Should().Be("Reference `DotnetAddP2PProjects\\ValidRef\\ValidRef.csproj` added to the project.");
             cmd.StdErr.Should().BeEmpty();
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
@@ -610,7 +632,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                 .WithProject(setup.LibCsprojPath)
                 .Execute($"\"{setup.ValidRefCsprojRelPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("added to the project");
+            cmd.StdOut.Should().Be("Reference `..\\ValidRef\\ValidRef.csproj` added to the project.");
             cmd.StdErr.Should().BeEmpty();
             var csproj = proj.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
@@ -629,7 +651,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                     .WithProject(lib.CsProjPath)
                     .Execute($"{FrameworkNet451Arg} \"{net45lib.CsProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("added to the project");
+            cmd.StdOut.Should().Be("Reference `..\\Net45Lib\\Net45Lib.csproj` added to the project.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451).Should().Be(condBefore + 1);
             csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(net45lib.CsProjName, ConditionFrameworkNet451).Should().Be(1);
@@ -647,7 +669,7 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                     .WithProject(net452netcoreapp10lib.CsProjPath)
                     .Execute($"\"{lib.CsProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("added to the project");
+            cmd.StdOut.Should().Be("Reference `..\\Lib\\Lib.csproj` added to the project.");
             var csproj = net452netcoreapp10lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
             csproj.NumberOfProjectReferencesWithIncludeContaining(lib.CsProjName).Should().Be(1);
@@ -669,8 +691,8 @@ namespace Microsoft.DotNet.Cli.Add.P2P.Tests
                     .WithProject(lib.CsProjPath)
                     .Execute($"-f {framework} \"{net45lib.CsProjPath}\"");
             cmd.Should().Fail();
-            cmd.StdErr.Should().MatchRegex(ProjectDoesNotTargetFrameworkErrorMessageRegEx);
-            cmd.StdErr.Should().Contain($"`{framework}`");
+            cmd.StdErr.Should().Be($"Project `{setup.LibCsprojPath}` does not target framework `{framework}`.");
+
             lib.CsProjContent().Should().BeEquivalentTo(csProjContent);
         }
 

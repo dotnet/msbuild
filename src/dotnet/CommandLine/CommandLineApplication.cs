@@ -64,7 +64,21 @@ namespace Microsoft.DotNet.Cli.CommandLine
         public CommandLineApplication Command(string name, Action<CommandLineApplication> configuration,
             bool throwOnUnexpectedArg = true)
         {
-            var command = new CommandLineApplication(throwOnUnexpectedArg) { Name = name, Parent = this };
+            var command = new CommandLineApplication(throwOnUnexpectedArg) { Name = name };
+            return Command(command, configuration, throwOnUnexpectedArg);
+        }
+
+        public CommandLineApplication Command(CommandLineApplication command, bool throwOnUnexpectedArg = true)
+        {
+            return Command(command, _ => { }, throwOnUnexpectedArg);
+        }
+
+        public CommandLineApplication Command(
+            CommandLineApplication command,
+            Action<CommandLineApplication> configuration,
+            bool throwOnUnexpectedArg = true)
+        {
+            command.Parent = this;
             Commands.Add(command);
             configuration(command);
             return command;

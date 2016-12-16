@@ -13,6 +13,21 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
 {
     public class GivenDotnetRemoveP2P : TestBase
     {
+        private const string HelpText = @".NET Remove Project to Project (p2p) reference Command
+
+Usage: dotnet remove <PROJECT_OR_SOLUTION> p2p [options] [args]
+
+Arguments:
+  <PROJECT_OR_SOLUTION>  The project or solution to operation on. If a file is not specified, the current directory is searched.
+
+Options:
+  -h|--help                   Show help information
+  -f|--framework <FRAMEWORK>  Remove reference only when targetting a specific framework
+
+Args:
+  Project to project references to remove
+";
+
         const string FrameworkNet451Arg = "-f net451";
         const string ConditionFrameworkNet451 = "== 'net451'";
         const string FrameworkNetCoreApp10Arg = "-f netcoreapp1.0";
@@ -103,7 +118,7 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
         {
             var cmd = new RemoveP2PCommand().Execute(helpArg);
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("Usage");
+            cmd.StdOut.Should().Be(HelpText);
         }
 
         [Fact]
@@ -113,7 +128,8 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
                     .WithProject("one two three")
                     .Execute("proj.csproj");
             cmd.ExitCode.Should().NotBe(0);
-            cmd.StdErr.Should().Contain("Unrecognized command or argument");
+            cmd.StdErr.Should().Be("Unrecognized command or argument 'two'");
+            cmd.StdOut.Should().Be("Specify --help for a list of available options and commands.");
         }
 
         [Theory]
@@ -128,8 +144,8 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
                     .WithProject(projName)
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
-            cmd.StdErr.Should().Contain("Could not find");
-            cmd.StdOut.Should().Contain("Usage");
+            cmd.StdErr.Should().Be($"Could not find project or directory `{projName}`.");
+            cmd.StdOut.Should().Be(HelpText);
         }
 
         [Fact]
@@ -143,8 +159,8 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
                     .WithProject(projName)
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
-            cmd.StdErr.Should().Contain(" is invalid.");
-            cmd.StdOut.Should().Contain("Usage");
+            cmd.StdErr.Should().Be("Project `Broken/Broken.csproj` is invalid.");
+            cmd.StdOut.Should().Be(HelpText);
         }
 
         [Fact]
@@ -152,12 +168,13 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
         {
             var setup = Setup();
 
+            var workingDir = Path.Combine(setup.TestRoot, "MoreThanOne");
             var cmd = new RemoveP2PCommand()
-                    .WithWorkingDirectory(Path.Combine(setup.TestRoot, "MoreThanOne"))
+                    .WithWorkingDirectory(workingDir)
                     .Execute($"\"{setup.ValidRefCsprojRelToOtherProjPath}\"");
             cmd.ExitCode.Should().NotBe(0);
-            cmd.StdErr.Should().Contain("more than one");
-            cmd.StdOut.Should().Contain("Usage");
+            cmd.StdErr.Should().Be($"Found more than one project in `{workingDir + Path.DirectorySeparatorChar}`. Please specify which one to use.");
+            cmd.StdOut.Should().Be(HelpText);
         }
 
         [Fact]
@@ -169,8 +186,8 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
                     .WithWorkingDirectory(setup.TestRoot)
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
-            cmd.StdErr.Should().Contain("not find any");
-            cmd.StdOut.Should().Contain("Usage");
+            cmd.StdErr.Should().Be($"Could not find any project in `{setup.TestRoot + Path.DirectorySeparatorChar}`.");
+            cmd.StdOut.Should().Be(HelpText);
         }
 
         [Fact]
@@ -186,7 +203,7 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{libref.CsProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().MatchRegex("(^|[\r\n])Project reference[^\r\n]*removed.($|[\r\n])");
+            cmd.StdOut.Should().Be(@"Project reference `DotnetAddP2PProjects\Lib\Lib.csproj` removed.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore - 1);
             csproj.NumberOfProjectReferencesWithIncludeContaining(libref.Name).Should().Be(0);
@@ -205,7 +222,7 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg} \"{libref.CsProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().MatchRegex("(^|[\r\n])Project reference[^\r\n]*removed.($|[\r\n])");
+            cmd.StdOut.Should().Be(@"Project reference `DotnetAddP2PProjects\Lib\Lib.csproj` removed.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451).Should().Be(condBefore - 1);
             csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(libref.Name, ConditionFrameworkNet451).Should().Be(0);
@@ -225,8 +242,7 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{libref.CsProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().MatchRegex("(^|[\r\n])Project reference[^\r\n]*removed.($|[\r\n])");
-            cmd.StdOut.Should().NotContain(validref.Name);
+            cmd.StdOut.Should().Be(@"Project reference `DotnetAddP2PProjects\Lib\Lib.csproj` removed.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore);
             csproj.NumberOfProjectReferencesWithIncludeContaining(libref.Name).Should().Be(0);
@@ -245,7 +261,7 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{libref.CsProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("could not be found");
+            cmd.StdOut.Should().Be($"Project reference `{libref.CsProjPath}` could not be found.");
             lib.CsProjContent().Should().BeEquivalentTo(csprojContetntBefore);
         }
 
@@ -262,7 +278,7 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg} \"{libref.CsProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("could not be found");
+            cmd.StdOut.Should().Be($"Project reference `{libref.CsProjPath}` could not be found.");
             lib.CsProjContent().Should().BeEquivalentTo(csprojContetntBefore);
         }
 
@@ -282,7 +298,7 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{librefNoCond.CsProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().MatchRegex("(^|[\r\n])Project reference[^\r\n]*removed.($|[\r\n])");
+            cmd.StdOut.Should().Be(@"Project reference `DotnetAddP2PProjects\Lib\Lib.csproj` removed.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore - 1);
             csproj.NumberOfProjectReferencesWithIncludeContaining(librefNoCond.Name).Should().Be(0);
@@ -307,7 +323,7 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg} \"{librefCond.CsProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().MatchRegex("(^|[\r\n])Project reference[^\r\n]*removed.($|[\r\n])");
+            cmd.StdOut.Should().Be(@"Project reference `DotnetAddP2PProjects\Lib\Lib.csproj` removed.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore);
             csproj.NumberOfProjectReferencesWithIncludeContaining(librefNoCond.Name).Should().Be(1);
@@ -332,7 +348,7 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg} \"{librefCondNet451.CsProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().MatchRegex("(^|[\r\n])Project reference[^\r\n]*removed.($|[\r\n])");
+            cmd.StdOut.Should().Be(@"Project reference `DotnetAddP2PProjects\Lib\Lib.csproj` removed.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451).Should().Be(condNet451Before - 1);
             csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(librefCondNet451.Name, ConditionFrameworkNet451).Should().Be(0);
@@ -344,6 +360,9 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
         [Fact]
         public void WhenDuplicateReferencesArePresentItRemovesThemAll()
         {
+            const string RemovedText = @"Project reference `..\Lib\Lib.csproj` removed.
+Project reference `..\Lib\Lib.csproj` removed.";
+
             var setup = Setup();
             var proj = new ProjDir(Path.Combine(setup.TestRoot, "WithDoubledRef"));
             var libref = GetLibRef(setup);
@@ -354,7 +373,7 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
                 .WithProject(proj.CsProjPath)
                 .Execute($"\"{libref.CsProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().MatchRegex("(^|[\r\n])Project reference[^\r\n]*removed.($|[\r\n])");
+            cmd.StdOut.Should().Be(RemovedText);
 
             var csproj = proj.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore - 1);
@@ -374,7 +393,7 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{setup.ValidRefCsprojRelToOtherProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().MatchRegex("(^|[\r\n])Project reference[^\r\n]*removed.($|[\r\n])");
+            cmd.StdOut.Should().Be(@"Project reference `..\ValidRef\ValidRef.csproj` removed.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore - 1);
             csproj.NumberOfProjectReferencesWithIncludeContaining(libref.Name).Should().Be(0);
@@ -393,7 +412,7 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{setup.ValidRefCsprojRelToOtherProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().MatchRegex("(^|[\r\n])Project reference[^\r\n]*removed.($|[\r\n])");
+            cmd.StdOut.Should().Be(@"Project reference `..\ValidRef\ValidRef.csproj` removed.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore - 1);
             csproj.NumberOfProjectReferencesWithIncludeContaining(libref.Name).Should().Be(0);
@@ -412,7 +431,7 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().MatchRegex("(^|[\r\n])Project reference[^\r\n]*removed.($|[\r\n])");
+            cmd.StdOut.Should().Be(@"Project reference `..\ValidRef\ValidRef.csproj` removed.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore - 1);
             csproj.NumberOfProjectReferencesWithIncludeContaining(libref.Name).Should().Be(0);
@@ -421,6 +440,9 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
         [Fact]
         public void WhenPassingMultipleReferencesItRemovesThemAll()
         {
+            const string OutputText = @"Project reference `DotnetAddP2PProjects\Lib\Lib.csproj` removed.
+Project reference `DotnetAddP2PProjects\ValidRef\ValidRef.csproj` removed.";
+
             var lib = NewLibWithFrameworks();
             var setup = Setup();
             var libref = AddLibRef(setup, lib);
@@ -432,7 +454,7 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{libref.CsProjPath}\" \"{validref.CsProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().MatchRegex("(^|[\r\n])Project reference[^\r\n]*removed.($|[\r\n])");
+            cmd.StdOut.Should().Be(OutputText);
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore - 1);
             csproj.NumberOfProjectReferencesWithIncludeContaining(libref.Name).Should().Be(0);
@@ -447,14 +469,16 @@ namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
             var libref = GetLibRef(setup);
             var validref = AddValidRef(setup, lib);
 
+            string OutputText = $@"Project reference `{setup.LibCsprojPath}` could not be found.
+Project reference `DotnetAddP2PProjects\ValidRef\ValidRef.csproj` removed.";
+
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
             var cmd = new RemoveP2PCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{libref.CsProjPath}\" \"{validref.CsProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().MatchRegex("(^|[\r\n])Project reference[^\r\n]*removed.($|[\r\n])");
-            cmd.StdOut.Should().Contain("could not be found");
+            cmd.StdOut.Should().Be(OutputText);
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore - 1);
             csproj.NumberOfProjectReferencesWithIncludeContaining(validref.Name).Should().Be(0);

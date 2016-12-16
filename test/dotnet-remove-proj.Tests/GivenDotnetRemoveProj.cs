@@ -34,7 +34,7 @@ Args:
             var cmd = new DotnetCommand()
                 .ExecuteWithCapturedOutput($"remove project {helpArg}");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain(HelpText);
+            cmd.StdOut.Should().Be(HelpText);
         }
 
         [Fact]
@@ -43,8 +43,8 @@ Args:
             var cmd = new DotnetCommand()
                 .ExecuteWithCapturedOutput("remove one.sln two.sln three.sln project");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Contain("Unrecognized command or argument 'two.sln'");
-            cmd.StdOut.Should().Contain("Specify --help for a list of available options and commands.") ;
+            cmd.StdErr.Should().Be("Unrecognized command or argument 'two.sln'");
+            cmd.StdOut.Should().Be("Specify --help for a list of available options and commands.");
         }
 
         [Theory]
@@ -58,8 +58,8 @@ Args:
             var cmd = new DotnetCommand()
                 .ExecuteWithCapturedOutput($"remove {solutionName} project p.csproj");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Contain($"Could not find solution or directory `{solutionName}`.");
-            cmd.StdOut.Should().Contain(HelpText);
+            cmd.StdErr.Should().Be($"Could not find solution or directory `{solutionName}`.");
+            cmd.StdOut.Should().Be(HelpText);
         }
 
         [Fact]
@@ -77,8 +77,8 @@ Args:
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"remove InvalidSolution.sln project {projectToRemove}");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Contain("Invalid solution `InvalidSolution.sln`.");
-            cmd.StdOut.Should().Contain(HelpText);
+            cmd.StdErr.Should().Be("Invalid solution `InvalidSolution.sln`.");
+            cmd.StdOut.Should().Be(HelpText);
         }
 
         [Fact]
@@ -97,8 +97,8 @@ Args:
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"remove project {projectToRemove}");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Contain($"Invalid solution `{solutionPath}`.");
-            cmd.StdOut.Should().Contain(HelpText);
+            cmd.StdErr.Should().Be($"Invalid solution `{solutionPath}`.");
+            cmd.StdOut.Should().Be(HelpText);
         }
 
         [Fact]
@@ -115,8 +115,8 @@ Args:
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput(@"remove App.sln project");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Contain("You must specify at least one project to remove.");
-            cmd.StdOut.Should().Contain(HelpText);
+            cmd.StdErr.Should().Be("You must specify at least one project to remove.");
+            cmd.StdOut.Should().Be(HelpText);
         }
 
         [Fact]
@@ -134,8 +134,8 @@ Args:
                 .WithWorkingDirectory(solutionPath)
                 .ExecuteWithCapturedOutput(@"remove project App.csproj");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Contain($"Specified solution file {solutionPath + Path.DirectorySeparatorChar} does not exist, or there is no solution file in the directory.");
-            cmd.StdOut.Should().Contain(HelpText);
+            cmd.StdErr.Should().Be($"Specified solution file {solutionPath + Path.DirectorySeparatorChar} does not exist, or there is no solution file in the directory.");
+            cmd.StdOut.Should().Be(HelpText);
         }
 
         [Fact]
@@ -153,8 +153,8 @@ Args:
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"remove project {projectToRemove}");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Contain($"Found more than one solution file in {projectDirectory + Path.DirectorySeparatorChar}. Please specify which one to use.");
-            cmd.StdOut.Should().Contain(HelpText);
+            cmd.StdErr.Should().Be($"Found more than one solution file in {projectDirectory + Path.DirectorySeparatorChar}. Please specify which one to use.");
+            cmd.StdOut.Should().Be(HelpText);
         }
 
         [Fact]
@@ -173,7 +173,7 @@ Args:
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput("remove project referenceDoesNotExistInSln.csproj");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("Project reference `referenceDoesNotExistInSln.csproj` could not be found.");
+            cmd.StdOut.Should().Be("Project reference `referenceDoesNotExistInSln.csproj` could not be found.");
             File.ReadAllText(solutionPath)
                 .Should().Be(contentBefore);
         }
@@ -197,7 +197,7 @@ Args:
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"remove project {projectToRemove}");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain($"Project reference `{projectToRemove}` removed.");
+            cmd.StdOut.Should().Be($"Project reference `{projectToRemove}` removed.");
 
             slnFile = SlnFile.Read(solutionPath);
             slnFile.Projects.Count.Should().Be(1);
@@ -223,7 +223,10 @@ Args:
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"remove project {projectToRemove}");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain($"Project reference `{projectToRemove}` removed.");
+
+            string outputText = $@"Project reference `{projectToRemove}` removed.
+Project reference `{projectToRemove}` removed.";
+            cmd.StdOut.Should().Be(outputText);
 
             slnFile = SlnFile.Read(solutionPath);
             slnFile.Projects.Count.Should().Be(1);
@@ -249,7 +252,11 @@ Args:
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"remove project idontexist.csproj {projectToRemove} idontexisteither.csproj");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain($"Project reference `{projectToRemove}` removed.");
+
+            string outputText = $@"Project reference `idontexist.csproj` could not be found.
+Project reference `{projectToRemove}` removed.
+Project reference `idontexisteither.csproj` could not be found.";
+            cmd.StdOut.Should().Be(outputText);
 
             slnFile = SlnFile.Read(solutionPath);
             slnFile.Projects.Count.Should().Be(1);

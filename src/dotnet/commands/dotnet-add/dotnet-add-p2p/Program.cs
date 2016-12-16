@@ -2,9 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Evaluation;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools.Add;
 using Microsoft.DotNet.Tools.Common;
 using NuGet.Frameworks;
 using System.Collections.Generic;
@@ -14,33 +14,48 @@ using System.Text;
 
 namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
 {
-    public class AddProjectToProjectReference : IAddSubCommand
+    internal class AddProjectToProjectReferenceCommand : DotNetSubCommandBase
     {
         private CommandOption _frameworkOption;
-        private MsbuildProject _msbuildProj;
-        private ProjectCollection _projects;
 
-        internal AddProjectToProjectReference(string fileOrDirectory, CommandOption frameworkOption)
+        public static DotNetSubCommandBase Create()
         {
-            _projects = new ProjectCollection();
-            _msbuildProj = MsbuildProject.FromFileOrDirectory(_projects, fileOrDirectory);
-            _frameworkOption = frameworkOption;
+            var command = new AddProjectToProjectReferenceCommand()
+            {
+                Name = "p2p",
+                FullName = LocalizableStrings.AppFullName,
+                Description = LocalizableStrings.AppDescription,
+                HandleRemainingArguments = true,
+                ArgumentSeparatorHelpText = LocalizableStrings.AppHelpText,
+            };
+
+            command.HelpOption("-h|--help");
+
+            command._frameworkOption = command.Option(
+               $"-f|--framework <{CommonLocalizableStrings.CmdFramework}>",
+               LocalizableStrings.CmdFrameworkDescription,
+               CommandOptionType.SingleValue);
+
+            return command;
         }
 
-        public int Add(List<string> references)
+        public override int Run(string fileOrDirectory)
         {
-            if (references.Count == 0)
+            ProjectCollection projects = new ProjectCollection();
+            MsbuildProject msbuildProj = MsbuildProject.FromFileOrDirectory(projects, fileOrDirectory);
+
+            if (RemainingArguments.Count == 0)
             {
                 throw new GracefulException(CommonLocalizableStrings.SpecifyAtLeastOneReferenceToAdd);
             }
 
             string frameworkString = _frameworkOption.Value();
-            PathUtility.EnsureAllPathsExist(references, CommonLocalizableStrings.ReferenceDoesNotExist);
-            IEnumerable<MsbuildProject> refs = references.Select((r) => MsbuildProject.FromFile(_projects, r));
+            PathUtility.EnsureAllPathsExist(RemainingArguments, CommonLocalizableStrings.ReferenceDoesNotExist);
+            IEnumerable<MsbuildProject> refs = RemainingArguments.Select((r) => MsbuildProject.FromFile(projects, r));
 
             if (frameworkString == null)
             {
-                foreach (var tfm in _msbuildProj.GetTargetFrameworks())
+                foreach (var tfm in msbuildProj.GetTargetFrameworks())
                 {
                     foreach (var @ref in refs)
                     {
@@ -48,7 +63,7 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
                         {
                             Reporter.Error.Write(GetProjectNotCompatibleWithFrameworksDisplayString(
                                     @ref,
-                                    _msbuildProj.GetTargetFrameworks().Select((fx) => fx.GetShortFolderName())));
+                                    msbuildProj.GetTargetFrameworks().Select((fx) => fx.GetShortFolderName())));
                             return 1;
                         }
                     }
@@ -57,11 +72,11 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
             else
             {
                 var framework = NuGetFramework.Parse(frameworkString);
-                if (!_msbuildProj.IsTargettingFramework(framework))
+                if (!msbuildProj.IsTargettingFramework(framework))
                 {
                     Reporter.Error.WriteLine(string.Format(
                         CommonLocalizableStrings.ProjectDoesNotTargetFramework,
-                        _msbuildProj.ProjectRootElement.FullPath,
+                        msbuildProj.ProjectRootElement.FullPath,
                         frameworkString));
                     return 1;
                 }
@@ -78,16 +93,16 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
                 }
             }
 
-            var relativePathReferences = references.Select((r) =>
-                PathUtility.GetRelativePath(_msbuildProj.ProjectDirectory, Path.GetFullPath(r))).ToList();
+            var relativePathReferences = RemainingArguments.Select((r) =>
+                PathUtility.GetRelativePath(msbuildProj.ProjectDirectory, Path.GetFullPath(r))).ToList();
 
-            int numberOfAddedReferences = _msbuildProj.AddProjectToProjectReferences(
+            int numberOfAddedReferences = msbuildProj.AddProjectToProjectReferences(
                 _frameworkOption.Value(),
                 relativePathReferences);
 
             if (numberOfAddedReferences != 0)
             {
-                _msbuildProj.ProjectRootElement.Save();
+                msbuildProj.ProjectRootElement.Save();
             }
 
             return 0;
@@ -103,35 +118,6 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
             }
 
             return sb.ToString();
-        }
-    }
-
-    public class AddProjectToProjectReferenceCommand : AddSubCommandBase
-    {
-        private CommandOption _frameworkOption;
-
-        protected override string CommandName => "p2p";
-        protected override string LocalizedDisplayName => LocalizableStrings.AppFullName;
-        protected override string LocalizedDescription => LocalizableStrings.AppDescription;
-        protected override string LocalizedHelpText => LocalizableStrings.AppHelpText;
-
-        internal override void AddCustomOptions(CommandLineApplication app)
-        {
-            _frameworkOption = app.Option(
-                $"-f|--framework <{CommonLocalizableStrings.CmdFramework}>",
-                LocalizableStrings.CmdFrameworkDescription,
-                CommandOptionType.SingleValue);
-        }
-
-        protected override IAddSubCommand CreateIAddSubCommand(string fileOrDirectory)
-        {
-            return new AddProjectToProjectReference(fileOrDirectory, _frameworkOption);
-        }
-
-        internal static CommandLineApplication CreateApplication(CommandLineApplication parentApp)
-        {
-            var addSubCommand = new AddProjectToProjectReferenceCommand();
-            return addSubCommand.Create(parentApp);
         }
     }
 }
