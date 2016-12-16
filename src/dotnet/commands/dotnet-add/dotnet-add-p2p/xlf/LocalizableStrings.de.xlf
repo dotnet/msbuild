@@ -3,11 +3,6 @@
   <file datatype="xml" source-language="en" target-language="de" original="src/dotnet/commands/dotnet-add/dotnet-add-p2p/LocalizableStrings.resx">
     <body>
       <group id="src/dotnet/commands/dotnet-add/dotnet-add-p2p/LocalizableStrings.resx" />
-      <trans-unit id="SpecifyAtLeastOneReferenceToAdd">
-        <source>You must specify at least one reference to add. Please run dotnet add --help for more information.</source>
-        <target state="translated">Geben Sie mindestens einen hinzuzufügenden Verweis an. Führen Sie "dotnet add --help" aus, um weitere Informationen zu erhalten.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="AppFullName">
         <source>.NET Add Project to Project (p2p) reference Command</source>
         <target state="translated">.NET-Befehl zum Hinzufügen von Projekt-zu-Projekt-Verweisen (P2P-Verweise)</target>
@@ -23,34 +18,9 @@
         <target state="translated">Hinzuzufügender Projekt-zu-Projekt-Verweis</target>
         <note />
       </trans-unit>
-      <trans-unit id="CmdProject">
-        <source>PROJECT</source>
-        <target state="translated">PROJECT</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdProjectDescription">
-        <source>The project file to modify. If a project file is not specified, it searches the current working directory for an MSBuild file that has a file extension that ends in `proj` and uses that file.</source>
-        <target state="translated">Die zu ändernde Projektdatei. Ist keine Projektdatei angegeben, wird das aktuelle Arbeitsverzeichnis nach einer Datei mit einer Dateierweiterung durchsucht, die auf "proj" endet. Diese Datei wird dann verwendet.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdFramework">
-        <source>FRAMEWORK</source>
-        <target state="translated">FRAMEWORK</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Add reference only when targetting a specific framework</source>
         <target state="translated">Verweis nur bei Verwendung eines bestimmten Zielframeworks hinzufügen</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdForceDescription">
-        <source>Add reference even if it does not exist, do not convert paths to relative</source>
-        <target state="translated">Verweis auch hinzufügen, wenn er nicht vorhanden ist, und Pfade nicht zu relativen Pfaden konvertieren</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProjectException">
-        <source>Project</source>
-        <target state="translated">Projekt</target>
         <note />
       </trans-unit>
     </body>

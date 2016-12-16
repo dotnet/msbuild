@@ -13,44 +13,9 @@
         <target state="translated">Commande permettant de supprimer une référence projet à projet (p2p)</target>
         <note />
       </trans-unit>
-      <trans-unit id="AppArgumentSeparatorHelpText">
-        <source>Project to project references to remove</source>
-        <target state="translated">Références projet à projet à supprimer</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdArgProject">
-        <source>PROJECT</source>
-        <target state="translated">PROJET</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdArgumentDescription">
-        <source>The project file to modify. If a project file is not specified, it searches the current working directory for an MSBuild file that has a file extension that ends in `proj` and uses that file.</source>
-        <target state="translated">Fichier projet à modifier. Si aucun fichier projet n'est spécifié, il recherche dans le répertoire de travail actif un fichier dont l'extension se termine par 'proj' et utilise ce dernier.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdFramework">
-        <source>FRAMEWORK</source>
-        <target state="translated">FRAMEWORK</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Remove reference only when targetting a specific framework</source>
         <target state="translated">Supprimer la référence uniquement en cas de ciblage d'un framework spécifique</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProjectException">
-        <source>Project</source>
-        <target state="translated">Projet</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ReferenceNotFoundInTheProject">
-        <source>Specified reference {0} does not exist in project {1}.</source>
-        <target state="translated">La référence spécifiée {0} n'existe pas dans le projet {1}.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ReferenceRemoved">
-        <source>Reference `{0}` deleted from the project.</source>
-        <target state="translated">Référence '{0}' supprimée du projet.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOneReferenceToRemove">
@@ -58,65 +23,10 @@
         <target state="translated">Vous devez spécifier au moins une référence à supprimer. Exécutez dotnet delete --help pour plus d'informations.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ReferenceDeleted">
-        <source>Reference `{0}` deleted.</source>
-        <target state="translated">Référence '{0}' supprimée.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SpecifyAtLeastOneReferenceToDelete">
-        <source>You must specify at least one reference to delete. Please run dotnet delete --help for more information.</source>
-        <target state="translated">Vous devez spécifier au moins une référence à supprimer. Exécutez dotnet delete --help pour plus d'informations.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NetRemoveCommand">
-        <source>.NET Remove Command</source>
-        <target state="translated">Commande de suppression .NET</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Usage">
-        <source>Usage</source>
-        <target state="translated">Utilisation</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Options">
-        <source>Options</source>
-        <target state="translated">Options</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="HelpDefinition">
-        <source>Show help information</source>
-        <target state="translated">Afficher des informations d'aide</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Arguments">
-        <source>Arguments</source>
-        <target state="translated">Arguments</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ArgumentsObjectDefinition">
-        <source>The object of the operation. If a project file is not specified, it defaults to the current directory.</source>
-        <target state="translated">Objet de l'opération. Si aucun fichier projet n'est spécifié, le répertoire actif est sélectionné par défaut.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ArgumentsCommandDefinition">
-        <source>Command to be executed on &lt;object&gt;.</source>
-        <target state="translated">Commande à exécuter sur &lt;objet&gt;.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ArgsDefinition">
-        <source>Any extra arguments passed to the command. Use `dotnet add &lt;command&gt; --help` to get help about these arguments.</source>
-        <target state="translated">Arguments supplémentaires passés à la commande. Utilisez 'dotnet add &lt;commande&gt; --help' pour obtenir de l'aide sur ces arguments.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Commands">
-        <source>Commands</source>
-        <target state="translated">Commandes</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandP2PDefinition">
-        <source>Remove project to project (p2p) reference from a project</source>
-        <target state="translated">Supprimer une référence projet à projet (p2p) d'un projet</target>
-        <note />
+      <trans-unit id="AppHelpText">
+        <source>Project to project references to remove</source>
+        <target state="new">Project to project references to remove</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>

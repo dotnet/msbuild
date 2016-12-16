@@ -46,20 +46,20 @@
       <trans-unit id="CmdTestCaseFilterDescription">
         <source>Run tests that match the given expression.
                                         Examples:
-                                        --testCaseFilter:"Priority = 1"
-                                        --testCaseFilter: "(FullyQualifiedName~Nightly | Name = MyTestMethod)"</source>
-        <target state="translated">執行符合指定運算式的測試。
+                                        --test-case-filter:"Priority = 1"
+                                        --test-case-filter: "(FullyQualifiedName~Nightly | Name = MyTestMethod)"</source>
+        <target state="needs-review-translation">執行符合指定運算式的測試。
                                        範例:
                                        --testCaseFilter:"Priority = 1"
                                        --testCaseFilter: "(FullyQualifiedName~Nightly | Name = MyTestMethod)"</target>
-        <note />
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdTestAdapterPathDescription">
         <source>Use custom adapters from the given path in the test run.
-                                        Example: --testAdapterPath:&lt;pathToCustomAdapters&gt;</source>
-        <target state="translated">從測試回合中的指定路徑使用自訂配接器。
+                                        Example: --test-adapter-path:&lt;pathToCustomAdapters&gt;</source>
+        <target state="needs-review-translation">從測試回合中的指定路徑使用自訂配接器。
                                        範例: --testAdapterPath:&lt;自訂配接器路徑&gt;</target>
-        <note />
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdLoggerOption">
         <source>LoggerUri/FriendlyName</source>

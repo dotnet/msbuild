@@ -3,45 +3,21 @@
   <file datatype="xml" source-language="en" original="src/dotnet/commands/dotnet-add/dotnet-add-p2p/LocalizableStrings.resx">
     <body>
       <group id="src/dotnet/commands/dotnet-add/dotnet-add-p2p/LocalizableStrings.resx" />
-      <trans-unit id="SpecifyAtLeastOneReferenceToAdd">
-        <source>You must specify at least one reference to add. Please run dotnet add --help for more information.</source>
-        <note></note>
-      </trans-unit>
       <trans-unit id="AppFullName">
         <source>.NET Add Project to Project (p2p) reference Command</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Command to add project to project (p2p) reference</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="AppHelpText">
         <source>Project to project references to add</source>
-        <note></note>
-      </trans-unit>
-      <trans-unit id="CmdProject">
-        <source>PROJECT</source>
-        <note></note>
-      </trans-unit>
-      <trans-unit id="CmdProjectDescription">
-        <source>The project file to modify. If a project file is not specified, it searches the current working directory for an MSBuild file that has a file extension that ends in `proj` and uses that file.</source>
-        <note></note>
-      </trans-unit>
-      <trans-unit id="CmdFramework">
-        <source>FRAMEWORK</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Add reference only when targetting a specific framework</source>
-        <note></note>
-      </trans-unit>
-      <trans-unit id="CmdForceDescription">
-        <source>Add reference even if it does not exist, do not convert paths to relative</source>
-        <note></note>
-      </trans-unit>
-      <trans-unit id="ProjectException">
-        <source>Project</source>
-        <note></note>
+        <note />
       </trans-unit>
     </body>
   </file>

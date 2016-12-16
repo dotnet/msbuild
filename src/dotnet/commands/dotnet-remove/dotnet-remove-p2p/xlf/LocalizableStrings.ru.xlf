@@ -13,44 +13,9 @@
         <target state="translated">Команда для удаления ссылки проекта на проект (p2p).</target>
         <note />
       </trans-unit>
-      <trans-unit id="AppArgumentSeparatorHelpText">
-        <source>Project to project references to remove</source>
-        <target state="translated">Удаляемая ссылка проекта на проект</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdArgProject">
-        <source>PROJECT</source>
-        <target state="translated">PROJECT</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdArgumentDescription">
-        <source>The project file to modify. If a project file is not specified, it searches the current working directory for an MSBuild file that has a file extension that ends in `proj` and uses that file.</source>
-        <target state="translated">Изменяемый файл проекта. Если файл проекта не указан, MSBuild выполняет в текущем рабочем каталоге поиск файла с расширением, оканчивающимся на PROJ, и использует этот файл.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdFramework">
-        <source>FRAMEWORK</source>
-        <target state="translated">FRAMEWORK</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Remove reference only when targetting a specific framework</source>
         <target state="translated">Удалять ссылку только при выборе конкретной целевой платформы</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProjectException">
-        <source>Project</source>
-        <target state="translated">Проект</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ReferenceNotFoundInTheProject">
-        <source>Specified reference {0} does not exist in project {1}.</source>
-        <target state="translated">Указанная ссылка {0} не существует в проекте {1}.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ReferenceRemoved">
-        <source>Reference `{0}` deleted from the project.</source>
-        <target state="translated">Ссылка "{0}" удалена из проекта.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOneReferenceToRemove">
@@ -58,65 +23,10 @@
         <target state="translated">Необходимо указать по крайней мере одну удаляемую ссылку. Для получения дополнительных сведений выполните команду dotnet delete --help.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ReferenceDeleted">
-        <source>Reference `{0}` deleted.</source>
-        <target state="translated">Ссылка "{0}" удалена.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SpecifyAtLeastOneReferenceToDelete">
-        <source>You must specify at least one reference to delete. Please run dotnet delete --help for more information.</source>
-        <target state="translated">Необходимо указать по крайней мере одну удаляемую ссылку. Для получения дополнительных сведений выполните команду dotnet delete --help.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NetRemoveCommand">
-        <source>.NET Remove Command</source>
-        <target state="translated">Команда .NET "Удалить"</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Usage">
-        <source>Usage</source>
-        <target state="translated">Использование</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Options">
-        <source>Options</source>
-        <target state="translated">Параметры</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="HelpDefinition">
-        <source>Show help information</source>
-        <target state="translated">Показать справку</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Arguments">
-        <source>Arguments</source>
-        <target state="translated">Аргументы</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ArgumentsObjectDefinition">
-        <source>The object of the operation. If a project file is not specified, it defaults to the current directory.</source>
-        <target state="translated">Объект операции. Если файл проекта не указан, по умолчанию используется текущий каталог.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ArgumentsCommandDefinition">
-        <source>Command to be executed on &lt;object&gt;.</source>
-        <target state="translated">Команда, выполняемая для &lt;объекта&gt;.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ArgsDefinition">
-        <source>Any extra arguments passed to the command. Use `dotnet add &lt;command&gt; --help` to get help about these arguments.</source>
-        <target state="translated">Любые дополнительные аргументы, передаваемые в команду. Используйте команду dotnet add &lt;команда&gt; --help, чтобы получить справочные сведения об этих аргументах.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Commands">
-        <source>Commands</source>
-        <target state="translated">Команды</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandP2PDefinition">
-        <source>Remove project to project (p2p) reference from a project</source>
-        <target state="translated">Удаление ссылки проекта на проект (p2p) из проекта</target>
-        <note />
+      <trans-unit id="AppHelpText">
+        <source>Project to project references to remove</source>
+        <target state="new">Project to project references to remove</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>

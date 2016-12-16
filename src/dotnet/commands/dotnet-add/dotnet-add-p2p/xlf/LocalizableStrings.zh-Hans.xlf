@@ -3,11 +3,6 @@
   <file datatype="xml" source-language="en" target-language="zh-Hans" original="src/dotnet/commands/dotnet-add/dotnet-add-p2p/LocalizableStrings.resx">
     <body>
       <group id="src/dotnet/commands/dotnet-add/dotnet-add-p2p/LocalizableStrings.resx" />
-      <trans-unit id="SpecifyAtLeastOneReferenceToAdd">
-        <source>You must specify at least one reference to add. Please run dotnet add --help for more information.</source>
-        <target state="translated">必须至少指定一个要添加的引用。请运行 dotnet add --help，获取更多信息。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="AppFullName">
         <source>.NET Add Project to Project (p2p) reference Command</source>
         <target state="translated">用于项目到项目(p2p)引用的 .NET 添加命令</target>
@@ -23,34 +18,9 @@
         <target state="translated">要添加的项目到项目引用</target>
         <note />
       </trans-unit>
-      <trans-unit id="CmdProject">
-        <source>PROJECT</source>
-        <target state="translated">PROJECT</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdProjectDescription">
-        <source>The project file to modify. If a project file is not specified, it searches the current working directory for an MSBuild file that has a file extension that ends in `proj` and uses that file.</source>
-        <target state="translated">要修改的项目文件。如果未指定项目文件，将搜索当前工作目录来查找文件扩展名以“proj”结尾的 MSBuild 文件并使用该文件。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdFramework">
-        <source>FRAMEWORK</source>
-        <target state="translated">FRAMEWORK</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Add reference only when targetting a specific framework</source>
         <target state="translated">仅针对特定框架添加引用</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdForceDescription">
-        <source>Add reference even if it does not exist, do not convert paths to relative</source>
-        <target state="translated">添加引用(即使引用不存在)，不要将路径转换为相对路径</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProjectException">
-        <source>Project</source>
-        <target state="translated">项目</target>
         <note />
       </trans-unit>
     </body>

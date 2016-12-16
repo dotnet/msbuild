@@ -28,26 +28,6 @@
         <target state="translated">Il riferimento al progetto `{0}` è stato rimosso.</target>
         <note />
       </trans-unit>
-      <trans-unit id="RequiredArgument">
-        <source>Required argument</source>
-        <target state="translated">Argomento obbligatorio</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Option">
-        <source>Option</source>
-        <target state="translated">Opzione</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Argument">
-        <source>Argument</source>
-        <target state="translated">Argomento</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Help">
-        <source>Help</source>
-        <target state="translated">Guida</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Project">
         <source>Project</source>
         <target state="translated">Progetto</target>
@@ -119,9 +99,9 @@
         <note />
       </trans-unit>
       <trans-unit id="ReferenceDoesNotExist">
-        <source>Reference {0} does not exist. If you still want to add it, please use --force option. Please note that this may have adverse effects on the project. </source>
-        <target state="translated">Il riferimento {0} non esiste. Se si vuole aggiungerlo comunque, usare l'opzione --force. Si noti che questo può avere effetti dannosi sul progetto. </target>
-        <note />
+        <source>Reference {0} does not exist.</source>
+        <target state="needs-review-translation">Il riferimento {0} non esiste. Se si vuole aggiungerlo comunque, usare l'opzione --force. Si noti che questo può avere effetti dannosi sul progetto. </target>
+        <note></note>
       </trans-unit>
       <trans-unit id="ReferenceAddedToTheProject">
         <source>Reference `{0}` added to the project.</source>
@@ -348,19 +328,9 @@
         <target state="translated">L'argomento obbligatorio {0} non è stato specificato.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CouldNotFindProjectIn">
-        <source>Could not find any project in `{0}`.</source>
-        <target state="translated">Non è stato trovato alcun progetto in `{0}`.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CouldNotFindProjectOrDirectory">
         <source>Could not find project or directory `{0}`.</source>
         <target state="translated">Non sono stati trovati progetti o directory `{0}`.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FoundMoreThanOneProjectIn">
-        <source>Found more than one project in `{0}`. Please specify which one to use.</source>
-        <target state="translated">Sono stati trovati più progetti in `{0}`. Specificare quello da usare.</target>
         <note />
       </trans-unit>
       <trans-unit id="FoundInvalidProject">
@@ -383,16 +353,6 @@
         <target state="translated">Non sono state trovate soluzioni o directory `{0}`.</target>
         <note />
       </trans-unit>
-      <trans-unit id="FoundMoreThanOneSolutionIn">
-        <source>Found more than one solution file in {0}. Please specify which one to use.</source>
-        <target state="translated">Sono stati trovati più file di soluzione in {0}. Specificare quello da usare.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FoundInvalidSolution">
-        <source>The solution file {0} seems to be invalid. Please check if it is a valid solution file.</source>
-        <target state="translated">Il file di soluzione {0} non sembra valido. Verificare se è un file di soluzione valido.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="InvalidSolution">
         <source>Invalid solution `{0}`.</source>
         <target state="translated">La soluzione `{0}` non è valida.</target>
@@ -403,25 +363,15 @@
         <target state="translated">Il file di soluzione specificato {0} non esiste oppure nella directory non è presente alcun file di soluzione.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SolutionAlreadyContainsAProject">
-        <source>Solution {0} already contains project {1}.</source>
-        <target state="translated">La soluzione {0} contiene già il progetto {\1\}.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ReferenceDoesNotExistForce">
-        <source>Reference {0} does not exist. If you still want to add it, please use --force option. Please note that this may have adverse effects on the project. </source>
-        <target state="translated">Il riferimento {0} non esiste. Se si vuole aggiungerlo comunque, usare l'opzione --force. Si noti che questo può avere effetti dannosi sul progetto. </target>
-        <note />
-      </trans-unit>
       <trans-unit id="ReferenceIsInvalid">
         <source>Reference `{0}` is invalid.</source>
         <target state="translated">Il riferimento `{0}` non è valido.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOneReferenceToAdd">
-        <source>You must specify at least one reference to add. Please run dotnet add --help for more information.</source>
-        <target state="translated">È necessario specificare almeno un riferimento da aggiungere. Per altre informazioni, eseguire dotnet add --help.</target>
-        <note />
+        <source>You must specify at least one reference to add.</source>
+        <target state="needs-review-translation">È necessario specificare almeno un riferimento da aggiungere. Per altre informazioni, eseguire dotnet add --help.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAReference">
         <source>Project {0} already has a reference `{1}`.</source>
@@ -439,9 +389,9 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOnePackageReferenceToAdd">
-        <source>You must specify at least one reference to add. Please run dotnet add --help for more information.</source>
-        <target state="translated">È necessario specificare almeno un riferimento da aggiungere. Per altre informazioni, eseguire dotnet add --help.</target>
-        <note />
+        <source>You must specify at least one package to add.</source>
+        <target state="needs-review-translation">È necessario specificare almeno un riferimento da aggiungere. Per altre informazioni, eseguire dotnet add --help.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="PackageReferenceAddedToTheProject">
         <source>Package reference `{0}` added to the project.</source>
@@ -469,18 +419,13 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOneProjectToAdd">
-        <source>You must specify at least one project to add. Please run dotnet add --help for more information.</source>
-        <target state="translated">È necessario specificare almeno un progetto da aggiungere. Per altre informazioni, eseguire dotnet add --help.</target>
-        <note />
+        <source>You must specify at least one project to add.</source>
+        <target state="needs-review-translation">È necessario specificare almeno un progetto da aggiungere. Per altre informazioni, eseguire dotnet add --help.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="ProjectAddedToTheSolution">
         <source>Project `{0}` added to the solution.</source>
         <target state="translated">Il progetto `{0}` è stato aggiunto alla soluzione.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SolutionAlreadyHasAProject">
-        <source>Solution {0} already contains project {1}.</source>
-        <target state="translated">La soluzione {0} contiene già il progetto {\1\}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ReferenceNotFoundInTheProject">
@@ -494,18 +439,13 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOneReferenceToRemove">
-        <source>You must specify at least one reference to delete. Please run dotnet delete --help for more information.</source>
-        <target state="translated">È necessario specificare almeno un riferimento da eliminare. Per altre informazioni, eseguire dotnet delete --help.</target>
-        <note />
+        <source>You must specify at least one reference to remove.</source>
+        <target state="needs-review-translation">È necessario specificare almeno un riferimento da eliminare. Per altre informazioni, eseguire dotnet delete --help.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="ReferenceDeleted">
         <source>Reference `{0}` deleted.</source>
         <target state="translated">Il riferimento `{0}` è stato eliminato.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SpecifyAtLeastOneReferenceToDelete">
-        <source>You must specify at least one reference to delete. Please run dotnet delete --help for more information.</source>
-        <target state="translated">È necessario specificare almeno un riferimento da eliminare. Per altre informazioni, eseguire dotnet delete --help.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageReferenceNotFoundInTheProject">
@@ -519,18 +459,13 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOnePackageReferenceToRemove">
-        <source>You must specify at least one reference to delete. Please run dotnet delete --help for more information.</source>
-        <target state="translated">È necessario specificare almeno un riferimento da eliminare. Per altre informazioni, eseguire dotnet delete --help.</target>
-        <note />
+        <source>You must specify at least one package reference to remove.</source>
+        <target state="needs-review-translation">È necessario specificare almeno un riferimento da eliminare. Per altre informazioni, eseguire dotnet delete --help.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="PackageReferenceDeleted">
         <source>Package reference `{0}` deleted.</source>
         <target state="translated">Il riferimento al pacchetto `{0}` è stato eliminato.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SpecifyAtLeastOnePackageReferenceToDelete">
-        <source>You must specify at least one package reference to delete.</source>
-        <target state="translated">È necessario specificare almeno un riferimento al pacchetto da eliminare.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectNotFoundInTheSolution">
@@ -551,11 +486,6 @@
       <trans-unit id="ProjectDeleted">
         <source>Project `{0}` deleted from solution.</source>
         <target state="translated">Il progetto `{0}` è stato eliminato dalla soluzione.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SpecifyAtLeastOneProjectToDelete">
-        <source>You must specify at least one project to delete from solution.</source>
-        <target state="translated">È necessario specificare almeno un progetto da eliminare dalla soluzione.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoReferencesFound">
@@ -637,6 +567,53 @@
         <source>Mandatory parameter {0} missing for template {1}. </source>
         <target state="translated">Manca il parametro obbligatorio {0} per il modello {1}. </target>
         <note />
+      </trans-unit>
+      <trans-unit id="ProjectReferenceOneOrMore">
+        <source>Project reference(s)</source>
+        <target state="new">Project reference(s)</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RequiredCommandNotPassed">
+        <source>Required command was not provided.</source>
+        <target state="new">Required command was not provided.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MoreThanOneSolutionInDirectory">
+        <source>Found more than one solution file in {0}. Please specify which one to use.</source>
+        <target state="new">Found more than one solution file in {0}. Please specify which one to use.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="SolutionAlreadyContainsProject">
+        <source>Solution {0} already contains project {1}.</source>
+        <target state="new">Solution {0} already contains project {1}.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ArgumentsProjectOrSolutionDescription">
+        <source>The project or solution to operation on. If a file is not specified, the current directory is searched.</source>
+        <target state="new">The project or solution to operation on. If a file is not specified, the current directory is searched.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdFramework">
+        <source>FRAMEWORK</source>
+        <target state="new">FRAMEWORK</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ProjectNotCompatibleWithFrameworks">
+        <source>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Please review the project you are trying to add and verify that is compatible with the following targets:</source>
+        <target state="new">Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Please review the project you are trying to add and verify that is compatible with the following targets:</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ProjectDoesNotTargetFramework">
+        <source>Project `{0}` does not target framework `{1}`.</source>
+        <target state="new">Project `{0}` does not target framework `{1}`.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ProjectCouldNotBeEvaluated">
+        <source>Project `{0}` could not be evaluated. Evaluation failed with following error:
+{1}</source>
+        <target state="new">Project `{0}` could not be evaluated. Evaluation failed with following error:
+{1}</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>

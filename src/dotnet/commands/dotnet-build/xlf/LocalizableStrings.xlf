@@ -5,67 +5,67 @@
       <group id="src/dotnet/commands/dotnet-build/LocalizableStrings.resx" />
       <trans-unit id="AppDescription">
         <source>Builder for the .NET Platform. Delegates to the MSBuild 'Build' target in the project file.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="AppFullName">
         <source>.NET Builder</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>Configuration under which to build</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionName">
         <source>CONFIGURATION</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>Compile a specific framework</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionName">
         <source>FRAMEWORK</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">
         <source>Set this flag to ignore project to project references and only build the root project</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="NoIncrementialOptionDescription">
         <source>Set this flag to turn off incremental build</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>Directory in which to place outputs</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOptionName">
         <source>OUTPUT_DIR</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectArgumentDescription">
         <source>The MSBuild project file to build. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectArgumentValueName">
         <source>PROJECT</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>Target runtime to build for. The default is to build a portable application.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionName">
         <source>RUNTIME_IDENTIFIER</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOptionDescription">
         <source>Defines the value for the $(VersionSuffix) property in the project</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOptionName">
         <source>VERSION_SUFFIX</source>
-        <note></note>
+        <note />
       </trans-unit>
     </body>
   </file>

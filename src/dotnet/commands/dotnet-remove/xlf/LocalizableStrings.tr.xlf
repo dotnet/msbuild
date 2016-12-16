@@ -8,51 +8,6 @@
         <target state="translated">.NET Remove Komutu</target>
         <note />
       </trans-unit>
-      <trans-unit id="Usage">
-        <source>Usage</source>
-        <target state="translated">Kullanım</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Options">
-        <source>Options</source>
-        <target state="translated">Seçenekler</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="HelpDefinition">
-        <source>Show help information</source>
-        <target state="translated">Yardım bilgilerini göster</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Arguments">
-        <source>Arguments</source>
-        <target state="translated">Bağımsız değişkenler</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ArgumentsObjectDefinition">
-        <source>The object of the operation. If a project file is not specified, it defaults to the current directory.</source>
-        <target state="translated">İşlemin nesnesi. Proje dosyası belirtilmezse, geçerli dizini varsayılan olarak kullanır.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ArgumentsCommandDefinition">
-        <source>Command to be executed on &lt;object&gt;.</source>
-        <target state="translated">&lt;Nesne&gt; üzerinde yürütülecek komut.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ArgsDefinition">
-        <source>Any extra arguments passed to the command. Use `dotnet add &lt;command&gt; --help` to get help about these arguments.</source>
-        <target state="translated">Komuta geçirilen fazladan bağımsız değişkenler. Bu bağımsız değişkenler hakkında yardım almak için `dotnet add &lt;komut&gt; --help` komutunu kullanın.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Commands">
-        <source>Commands</source>
-        <target state="translated">Komutlar</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandP2PDefinition">
-        <source>Remove project to project (p2p) reference from a project</source>
-        <target state="translated">Projeden projeye (p2p) başvuruyu projeden kaldırma</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

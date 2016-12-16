@@ -8,51 +8,6 @@
         <target state="translated">Команда .NET "Удалить"</target>
         <note />
       </trans-unit>
-      <trans-unit id="Usage">
-        <source>Usage</source>
-        <target state="translated">Использование</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Options">
-        <source>Options</source>
-        <target state="translated">Параметры</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="HelpDefinition">
-        <source>Show help information</source>
-        <target state="translated">Показать справку</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Arguments">
-        <source>Arguments</source>
-        <target state="translated">Аргументы</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ArgumentsObjectDefinition">
-        <source>The object of the operation. If a project file is not specified, it defaults to the current directory.</source>
-        <target state="translated">Объект операции. Если файл проекта не указан, по умолчанию используется текущий каталог.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ArgumentsCommandDefinition">
-        <source>Command to be executed on &lt;object&gt;.</source>
-        <target state="translated">Команда, выполняемая для &lt;объекта&gt;.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ArgsDefinition">
-        <source>Any extra arguments passed to the command. Use `dotnet add &lt;command&gt; --help` to get help about these arguments.</source>
-        <target state="translated">Любые дополнительные аргументы, передаваемые в команду. Используйте команду dotnet add &lt;команда&gt; --help, чтобы получить справочные сведения об этих аргументах.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Commands">
-        <source>Commands</source>
-        <target state="translated">Команды</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandP2PDefinition">
-        <source>Remove project to project (p2p) reference from a project</source>
-        <target state="translated">Удаление ссылки проекта на проект (p2p) из проекта</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

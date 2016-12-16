@@ -8,51 +8,6 @@
         <target state="translated">.NET Remove コマンド</target>
         <note />
       </trans-unit>
-      <trans-unit id="Usage">
-        <source>Usage</source>
-        <target state="translated">使用法</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Options">
-        <source>Options</source>
-        <target state="translated">オプション</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="HelpDefinition">
-        <source>Show help information</source>
-        <target state="translated">ヘルプ情報を表示する</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Arguments">
-        <source>Arguments</source>
-        <target state="translated">Arguments</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ArgumentsObjectDefinition">
-        <source>The object of the operation. If a project file is not specified, it defaults to the current directory.</source>
-        <target state="translated">操作のオブジェクト。プロジェクト ファイルを指定しない場合、既定は現在のディレクトリです。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ArgumentsCommandDefinition">
-        <source>Command to be executed on &lt;object&gt;.</source>
-        <target state="translated">&lt;オブジェクト&gt; で実行されるコマンド。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ArgsDefinition">
-        <source>Any extra arguments passed to the command. Use `dotnet add &lt;command&gt; --help` to get help about these arguments.</source>
-        <target state="translated">コマンドに渡されるすべての他の引数。`dotnet add &lt;command&gt; --help` を使用して、これらの引数に関するヘルプを表示します。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Commands">
-        <source>Commands</source>
-        <target state="translated">コマンド</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandP2PDefinition">
-        <source>Remove project to project (p2p) reference from a project</source>
-        <target state="translated">project to project (p2p) 参照をプロジェクトから削除する</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

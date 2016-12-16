@@ -5,43 +5,43 @@
       <group id="src/dotnet/commands/dotnet-clean/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET Clean Command</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Command to clean previously generated build outputs.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CmdArgProject">
         <source>PROJECT</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CmdArgProjDescription">
         <source>The MSBuild project file to build. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CmdOutputDir">
         <source>OUTPUT_DIR</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
         <source>Directory in which the build outputs have been placed</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Clean a specific framework</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfiguration">
         <source>CONFIGURATION</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfigurationDescription">
         <source>Clean a specific configuration</source>
-        <note></note>
+        <note />
       </trans-unit>
     </body>
   </file>

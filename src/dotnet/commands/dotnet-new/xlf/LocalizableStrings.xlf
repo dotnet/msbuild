@@ -5,59 +5,59 @@
       <group id="src/dotnet/commands/dotnet-new/LocalizableStrings.resx" />
       <trans-unit id="ProjectExistsError">
         <source>Creating new {0} project failed, project already exists.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectContainsError">
         <source>Creating new {0} project failed, directory already contains {1}</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectFailedError">
         <source>Creating new {0} project failed.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CreatedNewProject">
         <source>Created new {0} project in {1}.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="AppFullName">
         <source>.NET Initializer</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Initializes empty project for .NET Platform</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="ValidValuesText">
         <source>Valid values for {0}: {1}.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="Language">
         <source>LANGUAGE</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="LanguageOfProject">
         <source>Language of project    Valid values: {0}.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="Type">
         <source>TYPE</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="TypeOfProject">
         <source>Type of project        {0}</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="UnrecognizedLanguage">
         <source>Unrecognized language: {0}</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="UnrecognizedType">
         <source>Unrecognized type: {0}</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="AvailableTypes">
         <source>Available types for {0} :</source>
-        <note></note>
+        <note />
       </trans-unit>
     </body>
   </file>
