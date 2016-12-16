@@ -5,53 +5,53 @@
       <group id="src/dotnet/commands/dotnet-add/LocalizableStrings.resx" />
       <trans-unit id="NetAddCommand">
         <source>.NET Add Command</source>
-        <target state="new">.NET Add Command</target>
-        <note></note>
+        <target state="translated">Команда .NET "Добавить"</target>
+        <note />
       </trans-unit>
       <trans-unit id="Usage">
         <source>Usage</source>
-        <target state="new">Usage</target>
-        <note></note>
+        <target state="translated">Использование</target>
+        <note />
       </trans-unit>
       <trans-unit id="Options">
         <source>Options</source>
-        <target state="new">Options</target>
-        <note></note>
+        <target state="translated">Параметры</target>
+        <note />
       </trans-unit>
       <trans-unit id="HelpDefinition">
         <source>Show help information</source>
-        <target state="new">Show help information</target>
-        <note></note>
+        <target state="translated">Показать справку</target>
+        <note />
       </trans-unit>
       <trans-unit id="Arguments">
         <source>Arguments</source>
-        <target state="new">Arguments</target>
-        <note></note>
+        <target state="translated">Аргументы</target>
+        <note />
       </trans-unit>
       <trans-unit id="ArgumentsObjectDefinition">
         <source>The object of the operation. If a project file is not specified, it defaults to the current directory.</source>
-        <target state="new">The object of the operation. If a project file is not specified, it defaults to the current directory.</target>
-        <note></note>
+        <target state="translated">Объект операции. Если файл проекта не указан, по умолчанию используется текущий каталог.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ArgumentsCommandDefinition">
         <source>Command to be executed on &lt;object&gt;.</source>
-        <target state="new">Command to be executed on &lt;object&gt;.</target>
-        <note></note>
+        <target state="translated">Команда, выполняемая для &lt;объекта&gt;.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ArgsDefinition">
         <source>Any extra arguments passed to the command. Use `dotnet add &lt;command&gt; --help` to get help about these arguments.</source>
-        <target state="new">Any extra arguments passed to the command. Use `dotnet add &lt;command&gt; --help` to get help about these arguments.</target>
-        <note></note>
+        <target state="translated">Любые дополнительные аргументы, передаваемые в команду. Используйте команду dotnet add &lt;команда&gt; --help, чтобы получить справочные сведения об этих аргументах.</target>
+        <note />
       </trans-unit>
       <trans-unit id="Commands">
         <source>Commands</source>
-        <target state="new">Commands</target>
-        <note></note>
+        <target state="translated">Команды</target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandP2PDefinition">
         <source>Add project to project (p2p) reference to a project</source>
-        <target state="new">Add project to project (p2p) reference to a project</target>
-        <note></note>
+        <target state="translated">Добавление ссылки проекта на проект (p2p) в проект</target>
+        <note />
       </trans-unit>
     </body>
   </file>

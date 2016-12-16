@@ -5,53 +5,53 @@
       <group id="src/dotnet/commands/dotnet-add/LocalizableStrings.resx" />
       <trans-unit id="NetAddCommand">
         <source>.NET Add Command</source>
-        <target state="new">.NET Add Command</target>
-        <note></note>
+        <target state="translated">.NET 新增命令</target>
+        <note />
       </trans-unit>
       <trans-unit id="Usage">
         <source>Usage</source>
-        <target state="new">Usage</target>
-        <note></note>
+        <target state="translated">使用方式</target>
+        <note />
       </trans-unit>
       <trans-unit id="Options">
         <source>Options</source>
-        <target state="new">Options</target>
-        <note></note>
+        <target state="translated">選項</target>
+        <note />
       </trans-unit>
       <trans-unit id="HelpDefinition">
         <source>Show help information</source>
-        <target state="new">Show help information</target>
-        <note></note>
+        <target state="translated">顯示說明資訊</target>
+        <note />
       </trans-unit>
       <trans-unit id="Arguments">
         <source>Arguments</source>
-        <target state="new">Arguments</target>
-        <note></note>
+        <target state="translated">Arguments</target>
+        <note />
       </trans-unit>
       <trans-unit id="ArgumentsObjectDefinition">
         <source>The object of the operation. If a project file is not specified, it defaults to the current directory.</source>
-        <target state="new">The object of the operation. If a project file is not specified, it defaults to the current directory.</target>
-        <note></note>
+        <target state="translated">作業的物件。如果未指定專案檔，預設為目前的目錄。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ArgumentsCommandDefinition">
         <source>Command to be executed on &lt;object&gt;.</source>
-        <target state="new">Command to be executed on &lt;object&gt;.</target>
-        <note></note>
+        <target state="translated">要在 &lt;object&gt; 上執行的命令。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ArgsDefinition">
         <source>Any extra arguments passed to the command. Use `dotnet add &lt;command&gt; --help` to get help about these arguments.</source>
-        <target state="new">Any extra arguments passed to the command. Use `dotnet add &lt;command&gt; --help` to get help about these arguments.</target>
-        <note></note>
+        <target state="translated">傳遞至命令的任何額外引數。使用 `dotnet add &lt;command&gt; --help` 以取得這些引數的相關說明。</target>
+        <note />
       </trans-unit>
       <trans-unit id="Commands">
         <source>Commands</source>
-        <target state="new">Commands</target>
-        <note></note>
+        <target state="translated">命令</target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandP2PDefinition">
         <source>Add project to project (p2p) reference to a project</source>
-        <target state="new">Add project to project (p2p) reference to a project</target>
-        <note></note>
+        <target state="translated">將專案對專案 (p2p) 參考新增到專案</target>
+        <note />
       </trans-unit>
     </body>
   </file>

@@ -5,73 +5,73 @@
       <group id="src/dotnet/commands/dotnet-restore/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>restore</source>
-        <target state="new">restore</target>
-        <note></note>
+        <target state="translated">obnovit</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>restore for msbuild</source>
-        <target state="new">restore for msbuild</target>
-        <note></note>
+        <target state="translated">obnovit pro msbuild</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdArgument">
         <source>root</source>
-        <target state="new">root</target>
-        <note></note>
+        <target state="translated">kořen</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdArgumentDescription">
         <source>Optional path to a project file or MSBuild arguments.</source>
-        <target state="new">Optional path to a project file or MSBuild arguments.</target>
-        <note></note>
+        <target state="translated">Volitelná cesta k souboru projektu nebo k argumentům MSBuildu</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSourceOption">
         <source>source</source>
-        <target state="new">source</target>
-        <note></note>
+        <target state="translated">zdroj</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSourceOptionDescription">
         <source>Specifies a NuGet package source to use during the restore.</source>
-        <target state="new">Specifies a NuGet package source to use during the restore.</target>
-        <note></note>
+        <target state="translated">Určuje zdroj balíčku NuGet, který se použije při obnovení.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOption">
         <source>packagesDirectory</source>
-        <target state="new">packagesDirectory</target>
-        <note></note>
+        <target state="translated">packagesDirectory</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOptionDescription">
         <source>Directory to install packages in.</source>
-        <target state="new">Directory to install packages in.</target>
-        <note></note>
+        <target state="translated">Adresář, do kterého se instalují balíčky.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdDisableParallelOptionDescription">
         <source>Disables restoring multiple projects in parallel.</source>
-        <target state="new">Disables restoring multiple projects in parallel.</target>
-        <note></note>
+        <target state="translated">Zakáže souběžné obnovení několika projektů.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfigFileOption">
         <source>file</source>
-        <target state="new">file</target>
-        <note></note>
+        <target state="translated">soubor</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfigFileOptionDescription">
         <source>The NuGet configuration file to use.</source>
-        <target state="new">The NuGet configuration file to use.</target>
-        <note></note>
+        <target state="translated">Konfigurační soubor NuGet, který se použije.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdNoCacheOptionDescription">
         <source>Do not cache packages and http requests.</source>
-        <target state="new">Do not cache packages and http requests.</target>
-        <note></note>
+        <target state="translated">Neukládat balíčky a požadavky http do mezipaměti</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdIgnoreFailedSourcesOptionDescription">
         <source>Treat package source failures as warnings.</source>
-        <target state="new">Treat package source failures as warnings.</target>
-        <note></note>
+        <target state="translated">Zacházet s nenalezenými zdroji balíčku jako s upozorněními</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdNoDependenciesOptionDescription">
         <source>Set this flag to ignore project to project references and only restore the root project</source>
-        <target state="new">Set this flag to ignore project to project references and only restore the root project</target>
-        <note></note>
+        <target state="translated">Když tento příznak nastavíte, ignorují se odkazy mezi projekty a obnoví se jenom kořenový projekt.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

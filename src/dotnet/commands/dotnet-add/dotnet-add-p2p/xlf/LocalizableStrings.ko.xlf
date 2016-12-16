@@ -5,53 +5,53 @@
       <group id="src/dotnet/commands/dotnet-add/dotnet-add-p2p/LocalizableStrings.resx" />
       <trans-unit id="SpecifyAtLeastOneReferenceToAdd">
         <source>You must specify at least one reference to add. Please run dotnet add --help for more information.</source>
-        <target state="new">You must specify at least one reference to add. Please run dotnet add --help for more information.</target>
-        <note></note>
+        <target state="translated">추가할 참조를 하나 이상 지정해야 합니다. 자세한 정보를 보려면 dotnet add --help를 실행하세요.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppFullName">
         <source>.NET Add Project to Project (p2p) reference Command</source>
-        <target state="new">.NET Add Project to Project (p2p) reference Command</target>
-        <note></note>
+        <target state="translated">.NET p2p(프로젝트 간) 참조 추가 명령</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Command to add project to project (p2p) reference</source>
-        <target state="new">Command to add project to project (p2p) reference</target>
-        <note></note>
+        <target state="translated">p2p(프로젝트 간) 참조를 추가하는 명령입니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppHelpText">
         <source>Project to project references to add</source>
-        <target state="new">Project to project references to add</target>
-        <note></note>
+        <target state="translated">추가할 프로젝트 간 참조입니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdProject">
         <source>PROJECT</source>
-        <target state="new">PROJECT</target>
-        <note></note>
+        <target state="translated">PROJECT</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdProjectDescription">
         <source>The project file to modify. If a project file is not specified, it searches the current working directory for an MSBuild file that has a file extension that ends in `proj` and uses that file.</source>
-        <target state="new">The project file to modify. If a project file is not specified, it searches the current working directory for an MSBuild file that has a file extension that ends in `proj` and uses that file.</target>
-        <note></note>
+        <target state="translated">수정할 프로젝트 파일입니다. 프로젝트 파일을 지정하지 않으면 현재 작업 디렉터리에서 파일 확장명이 ‘proj’로 끝나는 MSBuild 파일을 찾아서 사용합니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
-        <target state="new">FRAMEWORK</target>
-        <note></note>
+        <target state="translated">FRAMEWORK</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Add reference only when targetting a specific framework</source>
-        <target state="new">Add reference only when targetting a specific framework</target>
-        <note></note>
+        <target state="translated">특정 프레임워크를 대상으로 지정할 때에만 참조를 추가합니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdForceDescription">
         <source>Add reference even if it does not exist, do not convert paths to relative</source>
-        <target state="new">Add reference even if it does not exist, do not convert paths to relative</target>
-        <note></note>
+        <target state="translated">참조가 없는 경우에도 참조를 추가합니다. 경로를 상대 경로로 변환하지 않습니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectException">
         <source>Project</source>
-        <target state="new">Project</target>
-        <note></note>
+        <target state="translated">프로젝트</target>
+        <note />
       </trans-unit>
     </body>
   </file>

@@ -5,83 +5,83 @@
       <group id="src/dotnet/commands/dotnet-build/LocalizableStrings.resx" />
       <trans-unit id="AppDescription">
         <source>Builder for the .NET Platform. Delegates to the MSBuild 'Build' target in the project file.</source>
-        <target state="new">Builder for the .NET Platform. Delegates to the MSBuild 'Build' target in the project file.</target>
-        <note></note>
+        <target state="translated">Generador para la plataforma .NET. Delega en el destino “Build” de MSBuild del archivo del proyecto.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppFullName">
         <source>.NET Builder</source>
-        <target state="new">.NET Builder</target>
-        <note></note>
+        <target state="translated">Generador para .NET</target>
+        <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>Configuration under which to build</source>
-        <target state="new">Configuration under which to build</target>
-        <note></note>
+        <target state="translated">Configuración para la compilación</target>
+        <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionName">
         <source>CONFIGURATION</source>
-        <target state="new">CONFIGURATION</target>
-        <note></note>
+        <target state="translated">CONFIGURACIÓN</target>
+        <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>Compile a specific framework</source>
-        <target state="new">Compile a specific framework</target>
-        <note></note>
+        <target state="translated">Compilar una plataforma específica</target>
+        <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionName">
         <source>FRAMEWORK</source>
-        <target state="new">FRAMEWORK</target>
-        <note></note>
+        <target state="translated">PLATAFORMA</target>
+        <note />
       </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">
         <source>Set this flag to ignore project to project references and only build the root project</source>
-        <target state="new">Set this flag to ignore project to project references and only build the root project</target>
-        <note></note>
+        <target state="translated">Establezca esta marca para omitir las referencias de proyecto a proyecto y compilar solo el proyecto raíz</target>
+        <note />
       </trans-unit>
       <trans-unit id="NoIncrementialOptionDescription">
         <source>Set this flag to turn off incremental build</source>
-        <target state="new">Set this flag to turn off incremental build</target>
-        <note></note>
+        <target state="translated">Establezca esta marca para desactivar una compilación incremental</target>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>Directory in which to place outputs</source>
-        <target state="new">Directory in which to place outputs</target>
-        <note></note>
+        <target state="translated">Directorio donde se ponen los archivos de salida</target>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOptionName">
         <source>OUTPUT_DIR</source>
-        <target state="new">OUTPUT_DIR</target>
-        <note></note>
+        <target state="translated">DIRECTORIO_DE_SALIDA</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectArgumentDescription">
         <source>The MSBuild project file to build. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.</source>
-        <target state="new">The MSBuild project file to build. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file.</target>
-        <note></note>
+        <target state="translated">Archivo del proyecto de MSBuild para compilar. Si no se especifica un archivo del proyecto, MSBuild busca en el directorio de trabajo actual un archivo que tenga una extensión de archivo que acabe en “proj” y utiliza ese archivo.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectArgumentValueName">
         <source>PROJECT</source>
-        <target state="new">PROJECT</target>
-        <note></note>
+        <target state="translated">PROYECTO</target>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>Target runtime to build for. The default is to build a portable application.</source>
-        <target state="new">Target runtime to build for. The default is to build a portable application.</target>
-        <note></note>
+        <target state="translated">Entorno de tiempo de ejecución para el que se compila. La opción predeterminada es compilar una aplicación móvil.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionName">
         <source>RUNTIME_IDENTIFIER</source>
-        <target state="new">RUNTIME_IDENTIFIER</target>
-        <note></note>
+        <target state="translated">ID_DEL_ENTORNO_DE_TIEMPO_DE_EJECUCIÓN</target>
+        <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOptionDescription">
         <source>Defines the value for the $(VersionSuffix) property in the project</source>
-        <target state="new">Defines the value for the $(VersionSuffix) property in the project</target>
-        <note></note>
+        <target state="translated">Define el valor para la propiedad $(VersionSuffix) del proyecto</target>
+        <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOptionName">
         <source>VERSION_SUFFIX</source>
-        <target state="new">VERSION_SUFFIX</target>
-        <note></note>
+        <target state="translated">SUFIJO_DE_VERSIÓN</target>
+        <note />
       </trans-unit>
     </body>
   </file>

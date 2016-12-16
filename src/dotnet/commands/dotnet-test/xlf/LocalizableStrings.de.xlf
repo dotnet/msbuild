@@ -5,120 +5,120 @@
       <group id="src/dotnet/commands/dotnet-test/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET Test Driver</source>
-        <target state="new">.NET Test Driver</target>
-        <note></note>
+        <target state="translated">.NET-Testtreiber</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Test Driver for the .NET Platform</source>
-        <target state="new">Test Driver for the .NET Platform</target>
-        <note></note>
+        <target state="translated">Testtreiber für die .NET-Plattform</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdArgProject">
         <source>PROJECT</source>
-        <target state="new">PROJECT</target>
-        <note></note>
+        <target state="translated">PROJECT</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdArgDescription">
         <source>The project to test, defaults to the current directory.</source>
-        <target state="new">The project to test, defaults to the current directory.</target>
-        <note></note>
+        <target state="translated">Das zu testende Projekt (standardmäßig das aktuelle Verzeichnis).</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSettingsFile">
         <source>SettingsFile</source>
-        <target state="new">SettingsFile</target>
-        <note></note>
+        <target state="translated">SettingsFile</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSettingsDescription">
         <source>Settings to use when running tests.</source>
-        <target state="new">Settings to use when running tests.</target>
-        <note></note>
+        <target state="translated">Die zu verwendenden Testeinstellungen.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdListTestsDescription">
         <source>Lists discovered tests</source>
-        <target state="new">Lists discovered tests</target>
-        <note></note>
+        <target state="translated">Listet die gefundenen Tests auf.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdTestCaseFilterExpression">
         <source>Expression</source>
-        <target state="new">Expression</target>
-        <note></note>
+        <target state="translated">Ausdruck</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdTestCaseFilterDescription">
         <source>Run tests that match the given expression.
                                         Examples:
                                         --testCaseFilter:"Priority = 1"
                                         --testCaseFilter: "(FullyQualifiedName~Nightly | Name = MyTestMethod)"</source>
-        <target state="new">Run tests that match the given expression.
-                                        Examples:
+        <target state="translated">Führen Sie Tests aus, die dem angegebenen Ausdruck entsprechen.
+                                        Beispiele:
                                         --testCaseFilter:"Priority = 1"
                                         --testCaseFilter: "(FullyQualifiedName~Nightly | Name = MyTestMethod)"</target>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CmdTestAdapterPathDescription">
         <source>Use custom adapters from the given path in the test run.
                                         Example: --testAdapterPath:&lt;pathToCustomAdapters&gt;</source>
-        <target state="new">Use custom adapters from the given path in the test run.
-                                        Example: --testAdapterPath:&lt;pathToCustomAdapters&gt;</target>
-        <note></note>
+        <target state="translated">Verwenden Sie im Testlauf benutzerdefinierte Adapter aus dem angegebenen Pfad.
+                                        Beispiel: --testAdapterPath:&lt;Pfad zu benutzerdefinierten Adaptern&gt;</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdLoggerOption">
         <source>LoggerUri/FriendlyName</source>
-        <target state="new">LoggerUri/FriendlyName</target>
-        <note></note>
+        <target state="translated">LoggerUri/FriendlyName</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdLoggerDescription">
         <source>Specify a logger for test results. 
                                         Example: --logger:trx</source>
-        <target state="new">Specify a logger for test results. 
-                                        Example: --logger:trx</target>
-        <note></note>
+        <target state="translated">Geben Sie einen Protokollierer für Testergebnisse an. 
+                                        Beispiel: --logger:trx</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfiguration">
         <source>configuration</source>
-        <target state="new">configuration</target>
-        <note></note>
+        <target state="translated">configuration</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>Configuration under which to build, i.e. Debug/Release</source>
-        <target state="new">Configuration under which to build, i.e. Debug/Release</target>
-        <note></note>
+        <target state="translated">Konfiguration für den Buildvorgang (Debug/Release)</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FrameworkVersion</source>
-        <target state="new">FrameworkVersion</target>
-        <note></note>
+        <target state="translated">FrameworkVersion</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Looks for test binaries for a specific framework</source>
-        <target state="new">Looks for test binaries for a specific framework</target>
-        <note></note>
+        <target state="translated">Sucht nach Testbinärdateien für ein bestimmtes Framework.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdOutputDir">
         <source>OutputDir</source>
-        <target state="new">OutputDir</target>
-        <note></note>
+        <target state="translated">OutputDir</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdOutputDescription">
         <source>Directory in which to find the binaries to be run</source>
-        <target state="new">Directory in which to find the binaries to be run</target>
-        <note></note>
+        <target state="translated">Verzeichnis mit den auszuführenden Binärdateien</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPathToLogFile">
         <source>PathToLogFile</source>
-        <target state="new">PathToLogFile</target>
-        <note></note>
+        <target state="translated">PathToLogFile</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPathTologFileDescription">
         <source>Enable verbose logs for test platform.
                                         Logs are written to the provided file.</source>
-        <target state="new">Enable verbose logs for test platform.
-                                        Logs are written to the provided file.</target>
-        <note></note>
+        <target state="translated">Aktivieren Sie ausführliche Protokolle für die Testplattform.
+                                        Protokolle werden in die angegebene Datei geschrieben.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildDescription">
         <source>Do not build project before testing.</source>
-        <target state="new">Do not build project before testing.</target>
-        <note></note>
+        <target state="translated">Erstellen Sie das Projekt nicht vor dem Testen.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

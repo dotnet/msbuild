@@ -5,53 +5,53 @@
       <group id="src/dotnet/commands/dotnet-remove/LocalizableStrings.resx" />
       <trans-unit id="NetRemoveCommand">
         <source>.NET Remove Command</source>
-        <target state="new">.NET Remove Command</target>
-        <note></note>
+        <target state="translated">Comando Rimuovi .NET</target>
+        <note />
       </trans-unit>
       <trans-unit id="Usage">
         <source>Usage</source>
-        <target state="new">Usage</target>
-        <note></note>
+        <target state="translated">Utilizzo</target>
+        <note />
       </trans-unit>
       <trans-unit id="Options">
         <source>Options</source>
-        <target state="new">Options</target>
-        <note></note>
+        <target state="translated">Opzioni</target>
+        <note />
       </trans-unit>
       <trans-unit id="HelpDefinition">
         <source>Show help information</source>
-        <target state="new">Show help information</target>
-        <note></note>
+        <target state="translated">Visualizza la Guida</target>
+        <note />
       </trans-unit>
       <trans-unit id="Arguments">
         <source>Arguments</source>
-        <target state="new">Arguments</target>
-        <note></note>
+        <target state="translated">Argomenti</target>
+        <note />
       </trans-unit>
       <trans-unit id="ArgumentsObjectDefinition">
         <source>The object of the operation. If a project file is not specified, it defaults to the current directory.</source>
-        <target state="new">The object of the operation. If a project file is not specified, it defaults to the current directory.</target>
-        <note></note>
+        <target state="translated">Oggetto dell'operazione. Se non è specificato un file di progetto, per impostazione predefinita verrà usata la directory corrente.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ArgumentsCommandDefinition">
         <source>Command to be executed on &lt;object&gt;.</source>
-        <target state="new">Command to be executed on &lt;object&gt;.</target>
-        <note></note>
+        <target state="translated">Comando da eseguire su &lt;oggetto&gt;.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ArgsDefinition">
         <source>Any extra arguments passed to the command. Use `dotnet add &lt;command&gt; --help` to get help about these arguments.</source>
-        <target state="new">Any extra arguments passed to the command. Use `dotnet add &lt;command&gt; --help` to get help about these arguments.</target>
-        <note></note>
+        <target state="translated">Eventuali argomenti aggiuntivi passati al comando. Per visualizzare la Guida su questi argomenti, usare `dotnet add &lt;comando&gt; --help`.</target>
+        <note />
       </trans-unit>
       <trans-unit id="Commands">
         <source>Commands</source>
-        <target state="new">Commands</target>
-        <note></note>
+        <target state="translated">Comandi</target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandP2PDefinition">
         <source>Remove project to project (p2p) reference from a project</source>
-        <target state="new">Remove project to project (p2p) reference from a project</target>
-        <note></note>
+        <target state="translated">Rimuove il riferimento P2P (da progetto a progetto) da un progetto</target>
+        <note />
       </trans-unit>
     </body>
   </file>
