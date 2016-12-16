@@ -688,7 +688,7 @@ namespace Microsoft.Build.Tasks
                                 if (candidateAssembly != null)
                                 {
                                     candidateAssemblyLocation = candidateAssembly.Location;
-                                    s_knownReferenceAssemblies.Add(candidateAssembly.FullName, candidateAssembly);
+                                    s_knownReferenceAssemblies[candidateAssembly.FullName] = candidateAssembly;
                                 }
                             }
                             catch (BadImageFormatException e)
