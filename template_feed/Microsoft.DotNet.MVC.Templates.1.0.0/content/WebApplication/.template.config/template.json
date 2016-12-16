@@ -46,6 +46,7 @@
     },
     "UseLocalDB": {
       "type": "parameter",
+      "datatype": "bool",
       "defaultValue": "false",
       "description": "Whether or not to setup a local DB"
     }

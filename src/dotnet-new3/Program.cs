@@ -21,6 +21,7 @@ namespace dotnet_new3
     public class Program
     {
         private static readonly string HostIdentifier = "dotnetcli";
+        private static readonly Version HostVersion = new Version("0.0.0.99");
 
         private static void SetupInternalCommands(ExtendedCommandParser appExt)
         {
@@ -57,6 +58,9 @@ namespace dotnet_new3
 
         public static int Main(string[] args)
         {
+            // Initial host setup has the current locale. May need to be changed based on inputs.
+            EngineEnvironmentSettings.Host = new DefaultTemplateEngineHost(HostIdentifier, HostVersion, CultureInfo.CurrentCulture.Name);
+
             ExtendedCommandParser app = new ExtendedCommandParser()
             {
                 Name = "dotnet new3",
@@ -78,13 +82,17 @@ namespace dotnet_new3
                     Console.ReadLine();
                 }
 
-                string locale = app.InternalParamValue("--locale") ?? CultureInfo.CurrentCulture.Name;
-                if (!ValidateLocaleFormat(locale))
+                if (app.InternalParamHasValue("--locale"))
                 {
-                    EngineEnvironmentSettings.Host.LogMessage(string.Format("Invalid format for input locale: [{0}]. Example valid formats: [en] [en-US]", locale));
-                    return -1;
+                    string newLocale = app.InternalParamValue("--locale");
+                    if (!ValidateLocaleFormat(newLocale))
+                    {
+                        EngineEnvironmentSettings.Host.LogMessage(string.Format("Invalid format for input locale: [{0}]. Example valid formats: [en] [en-US]", newLocale));
+                        return -1;
+                    }
+
+                    ((DefaultTemplateEngineHost)(EngineEnvironmentSettings.Host)).UpdateLocale(newLocale);
                 }
-                EngineEnvironmentSettings.Host = new DefaultTemplateEngineHost(HostIdentifier, locale);
 
                 int resultCode = InitializationAndDebugging(app, out bool shouldExit);
                 if (shouldExit)
@@ -467,7 +475,7 @@ namespace dotnet_new3
                 }
                 catch
                 {
-                    EngineEnvironmentSettings.Host.OnNonCriticalError("InvalidPackageSpecification", string.Format($"Package [{package}] is not a valid package specification"), null, 0);
+                    EngineEnvironmentSettings.Host.OnNonCriticalError("InvalidPackageSpecification", string.Format($"Package [{pkg}] is not a valid package specification"), null, 0);
                 }
             }
 
