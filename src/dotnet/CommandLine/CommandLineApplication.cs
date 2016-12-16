@@ -56,28 +56,33 @@ namespace Microsoft.DotNet.Cli.CommandLine
         public bool HandleRemainingArguments { get; set; }
         public string ArgumentSeparatorHelpText { get; set; }
 
-        public CommandLineApplication Command(string name, bool throwOnUnexpectedArg = true)
+        public CommandLineApplication AddCommand(string name, bool throwOnUnexpectedArg = true)
         {
-            return Command(name, _ => { }, throwOnUnexpectedArg);
+            return AddCommand(name, _ => { }, throwOnUnexpectedArg);
         }
 
-        public CommandLineApplication Command(string name, Action<CommandLineApplication> configuration,
+        public CommandLineApplication AddCommand(string name, Action<CommandLineApplication> configuration,
             bool throwOnUnexpectedArg = true)
         {
             var command = new CommandLineApplication(throwOnUnexpectedArg) { Name = name };
-            return Command(command, configuration, throwOnUnexpectedArg);
+            return AddCommand(command, configuration, throwOnUnexpectedArg);
         }
 
-        public CommandLineApplication Command(CommandLineApplication command, bool throwOnUnexpectedArg = true)
+        public CommandLineApplication AddCommand(CommandLineApplication command, bool throwOnUnexpectedArg = true)
         {
-            return Command(command, _ => { }, throwOnUnexpectedArg);
+            return AddCommand(command, _ => { }, throwOnUnexpectedArg);
         }
 
-        public CommandLineApplication Command(
+        public CommandLineApplication AddCommand(
             CommandLineApplication command,
             Action<CommandLineApplication> configuration,
             bool throwOnUnexpectedArg = true)
         {
+            if (command == null || configuration == null)
+            {
+                throw new NullReferenceException();
+            }
+
             command.Parent = this;
             Commands.Add(command);
             configuration(command);

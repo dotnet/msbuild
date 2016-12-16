@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
 
         public override int Run(string fileOrDirectory)
         {
-            ProjectCollection projects = new ProjectCollection();
+            var projects = new ProjectCollection();
             MsbuildProject msbuildProj = MsbuildProject.FromFileOrDirectory(projects, fileOrDirectory);
 
             if (RemainingArguments.Count == 0)
@@ -51,7 +51,9 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
 
             string frameworkString = _frameworkOption.Value();
             PathUtility.EnsureAllPathsExist(RemainingArguments, CommonLocalizableStrings.ReferenceDoesNotExist);
-            IEnumerable<MsbuildProject> refs = RemainingArguments.Select((r) => MsbuildProject.FromFile(projects, r));
+            List<MsbuildProject> refs = RemainingArguments
+                .Select((r) => MsbuildProject.FromFile(projects, r))
+                .ToList();
 
             if (frameworkString == null)
             {
@@ -108,7 +110,7 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
             return 0;
         }
 
-        private string GetProjectNotCompatibleWithFrameworksDisplayString(MsbuildProject project, IEnumerable<string> frameworksDisplayStrings)
+        private static string GetProjectNotCompatibleWithFrameworksDisplayString(MsbuildProject project, IEnumerable<string> frameworksDisplayStrings)
         {
             var sb = new StringBuilder();
             sb.AppendLine(string.Format(CommonLocalizableStrings.ProjectNotCompatibleWithFrameworks, project.ProjectRootElement.FullPath));

@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Cli
             foreach (var subCommandCreator in SubCommands)
             {
                 var subCommand = subCommandCreator();
-                command.Command(subCommand);
+                command.AddCommand(subCommand);
 
                 subCommand.OnExecute(() => {
                     try
