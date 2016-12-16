@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             mockProj.Items.First(i => i.ItemType == "Compile").Include.Should().Be(@"**\*.cs");
             mockProj.Items.First(i => i.ItemType == "Compile").Exclude.Should().BeEmpty();
             mockProj.Items.First(i => i.ItemType == "EmbeddedResource").Include.Should().Be(@"compiler\resources\**\*;**\*.resx");
-            mockProj.Items.First(i => i.ItemType == "EmbeddedResource").Exclude.Should().BeEmpty();
+            mockProj.Items.First(i => i.ItemType == "EmbeddedResource").Exclude.Should().Be("@(EmbeddedResource)");
         }
 
         [Fact]
@@ -555,8 +555,16 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
         private static IEnumerable<string> GetDefaultExcludePatterns(string group)
         {
-            return group == "copyToOutput" ? ProjectFilesCollection.DefaultPublishExcludePatterns
-                                       : ProjectFilesCollection.DefaultBuiltInExcludePatterns;
+            var defaultExcludePatterns = new List<string>(group == "copyToOutput" ?
+                                    ProjectFilesCollection.DefaultPublishExcludePatterns :
+                                    ProjectFilesCollection.DefaultBuiltInExcludePatterns);
+
+            if (group == "embed")
+            {
+                defaultExcludePatterns.Add("@(EmbeddedResource)");
+            }
+
+            return defaultExcludePatterns;
         }
 
         private static IEnumerable<string> GetDefaultIncludePatterns(string group)
