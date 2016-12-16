@@ -1,4 +1,7 @@
-﻿namespace Microsoft.DotNet.Tools
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+namespace Microsoft.DotNet.Tools
 {
     internal class CommonLocalizableStrings
     {
@@ -88,6 +91,7 @@
         public const string OptionIsInvalid = "Option {0} is invalid.";
         public const string ArgumentIsInvalid = "Argument {0} is invalid.";
         public const string RequiredArgumentNotPassed = "Required argument {0} was not provided.";
+        public const string RequiredCommandNotPassed = "Required command was not provided.";
 
         // dotnet <verb>
         /// Project

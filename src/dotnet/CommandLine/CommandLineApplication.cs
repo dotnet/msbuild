@@ -175,6 +175,14 @@ namespace Microsoft.DotNet.Cli.CommandLine
                 }
             }
 
+            if (Commands.Count > 0 && command == this)
+            {
+                throw new CommandParsingException(
+                    command,
+                    "Required command missing",
+                    isRequireSubCommandMissing: true);
+            }
+
             return command.Invoke();
         }
 
