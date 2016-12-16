@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Cli.Build
         {
             if (NoBuild)
             {
-                return "--noBuild";
+                return "--no-build";
             }
 
             return null;
