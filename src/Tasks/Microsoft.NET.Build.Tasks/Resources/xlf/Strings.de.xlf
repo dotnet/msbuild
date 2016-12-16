@@ -5,113 +5,113 @@
       <group id="src/Tasks/Microsoft.NET.Build.Tasks/Resources/Strings.resx" />
       <trans-unit id="AtLeastOneTargetFrameworkMustBeSpecified">
         <source>At least one possible target framework must be specified.</source>
-        <target state="new">At least one possible target framework must be specified.</target>
-        <note></note>
+        <target state="translated">Geben Sie mindestens ein mögliches Zielframework an.</target>
+        <note />
       </trans-unit>
       <trans-unit id="NoCompatibleTargetFramework">
         <source>Project '{0}' has no target framework compatible with '{1}'.</source>
-        <target state="new">Project '{0}' has no target framework compatible with '{1}'.</target>
-        <note></note>
+        <target state="translated">Für das Projekt "{0}" ist kein mit "{1}" kompatibles Framework vorhanden.</target>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidFrameworkName">
         <source>Invalid framework name: '{0}'.</source>
-        <target state="new">Invalid framework name: '{0}'.</target>
-        <note></note>
+        <target state="translated">Ungültiger Frameworkname: {0}.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AssetsFileNotFound">
         <source>Assets file '{0}' not found. Run a NuGet package restore to generate this file.</source>
-        <target state="new">Assets file '{0}' not found. Run a NuGet package restore to generate this file.</target>
-        <note></note>
+        <target state="translated">Die Ressourcendatei "{0}" wurde nicht gefunden. Führen Sie eine NuGet-Paketwiederherstellung aus, um diese Datei zu generieren.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AssetsFileMissingTarget">
         <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have restored this project for TargetFramework='{2}' and RuntimeIdentifier='{3}'.</source>
-        <target state="new">Assets file '{0}' doesn't have a target for '{1}'. Ensure you have restored this project for TargetFramework='{2}' and RuntimeIdentifier='{3}'.</target>
-        <note></note>
+        <target state="translated">Die Ressourcendatei "{0}" hat kein Ziel für "{1}". Vergewissern Sie sich, dass Sie dieses Projekt für das Zielframework "{2}" und die Laufzeit-ID "{3}" wiederhergestellt haben.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AssetsFilePathNotRooted">
         <source>Assets file path '{0}' is not rooted. Only full paths are supported.</source>
-        <target state="new">Assets file path '{0}' is not rooted. Only full paths are supported.</target>
-        <note></note>
+        <target state="translated">Der Ressourcendateipfad "{0}" hat keinen Stamm. Nur vollständige Pfade werden unterstützt.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CannotFindProjectInfo">
         <source>Cannot find project info for '{0}'. This can indicate a missing project reference.</source>
-        <target state="new">Cannot find project info for '{0}'. This can indicate a missing project reference.</target>
-        <note></note>
+        <target state="translated">Die Projektinformationen für "{0}" wurden nicht gefunden. Dies ist möglicherweise auf einen fehlenden Projektverweis zurückzuführen.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ContentFileDoesNotContainExpectedParentPackageInformation">
         <source>Content file '{0}' does not contain expected parent package information.</source>
-        <target state="new">Content file '{0}' does not contain expected parent package information.</target>
-        <note></note>
+        <target state="translated">Die Inhaltsdatei "{0}" enthält nicht die erwarteten Informationen zum übergeordneten Paket.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MissingItemMetadata">
         <source>Missing '{0}' metadata on '{1}' item '{2}'.</source>
-        <target state="new">Missing '{0}' metadata on '{1}' item '{2}'.</target>
-        <note></note>
+        <target state="translated">Die Metadaten "{0}" für das Element "{2}" vom Typ "{1}" sind nicht vorhanden.</target>
+        <note />
       </trans-unit>
       <trans-unit id="UnrecognizedPreprocessorToken">
         <source>Unrecognized preprocessor token '{0}' in '{1}'.</source>
-        <target state="new">Unrecognized preprocessor token '{0}' in '{1}'.</target>
-        <note></note>
+        <target state="translated">Unbekanntes Präprozessortoken "{0}" in "{1}".</target>
+        <note />
       </trans-unit>
       <trans-unit id="ContentPreproccessorParameterRequired">
         <source>The '{0}' task must be given a value for parameter '{1}' in order to consume preprocessed content.</source>
-        <target state="new">The '{0}' task must be given a value for parameter '{1}' in order to consume preprocessed content.</target>
-        <note></note>
+        <target state="translated">Die Aufgabe "{0}" muss für die Nutzung vorverarbeiteter Inhalte mit einem Wert für den Parameter "{1}" versehen werden.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">
         <source>Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</source>
-        <target state="new">Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</target>
-        <note></note>
+        <target state="translated">Es werden Ressourcen aus dem Projekt "{0}" genutzt, in "{1}" wurde jedoch kein entsprechender MSBuild-Projektpfad gefunden.</target>
+        <note />
       </trans-unit>
       <trans-unit id="UnexpectedFileType">
         <source>Unexpected file type for '{0}'. Type is both '{1}' and '{2}'.</source>
-        <target state="new">Unexpected file type for '{0}'. Type is both '{1}' and '{2}'.</target>
-        <note></note>
+        <target state="translated">Unerwarteter Dateityp für "{0}". Der Typ ist sowohl "{1}" als auch "{2}".</target>
+        <note />
       </trans-unit>
       <trans-unit id="CannotInferTargetFrameworkIdentiferAndVersion">
         <source>Cannot infer TargetFrameworkIdentifier and/or TargetFrameworkVersion from TargetFramework='{0}'. They must be specified explicitly.</source>
-        <target state="new">Cannot infer TargetFrameworkIdentifier and/or TargetFrameworkVersion from TargetFramework='{0}'. They must be specified explicitly.</target>
-        <note></note>
+        <target state="translated">"TargetFrameworkIdentifier" und/oder "TargetFrameworkVersion" kann nicht von "TargetFramework='{0}'" abgeleitet werden. Sie müssen explizit angegeben werden.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ContentItemDoesNotProvideOutputPath">
         <source>Content item for '{0}' sets '{1}', but does not provide  '{2}' or '{3}'.</source>
-        <target state="new">Content item for '{0}' sets '{1}', but does not provide  '{2}' or '{3}'.</target>
-        <note></note>
+        <target state="translated">Das Inhaltselement für "{0}" legt "{1}" fest, gibt aber "{2}" oder "{3}" nicht an.</target>
+        <note />
       </trans-unit>
       <trans-unit id="DuplicatePreprocessorToken">
         <source>The preprocessor token '{0}' has been given more than one value. Choosing '{1}' as the value.</source>
-        <target state="new">The preprocessor token '{0}' has been given more than one value. Choosing '{1}' as the value.</target>
-        <note></note>
+        <target state="translated">Das Präprozessortoken "{0}" wurde mit mehreren Werten versehen. "{1}" wird als Wert ausgewählt.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ErrorsOccurredWhenEmittingSatelliteAssembly">
         <source>Errors occured when emitting satellite assembly '{0}'.</source>
-        <target state="new">Errors occured when emitting satellite assembly '{0}'.</target>
-        <note></note>
+        <target state="translated">Fehler beim Ausgeben der Satellitenassembly "{0}".</target>
+        <note />
       </trans-unit>
       <trans-unit id="UnableToFindResolvedPath">
         <source>Unable to find resolved path for '{0}'.</source>
-        <target state="new">Unable to find resolved path for '{0}'.</target>
-        <note></note>
+        <target state="translated">Der aufgelöste Pfad für "{0}" wurde nicht gefunden.</target>
+        <note />
       </trans-unit>
       <trans-unit id="UnexpectedDependencyWithNoVersionNumber">
         <source>Unexpected dependency '{0}' with no version number.</source>
-        <target state="new">Unexpected dependency '{0}' with no version number.</target>
-        <note></note>
+        <target state="translated">Unerwartete Abhängigkeit "{0}" ohne Versionsnummer.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeIdentifierMustBeSetForNETFramework">
         <source>RuntimeIdentifier must be set for .NETFramework executables. Consider RuntimeIdentifier=win7-x86 or RuntimeIdentifier=win7-x64.</source>
-        <target state="new">RuntimeIdentifier must be set for .NETFramework executables. Consider RuntimeIdentifier=win7-x86 or RuntimeIdentifier=win7-x64.</target>
-        <note></note>
+        <target state="translated">"RuntimeIdentifier" muss für ausführbare .NETFramework-Dateien festgelegt werden. Verwenden Sie ggf. "RuntimeIdentifier=win7-x86" oder "RuntimeIdentifier=win7-x64".</target>
+        <note />
       </trans-unit>
       <trans-unit id="AssetPreprocessorMustBeConfigured">
         <source>Asset preprocessor must be configured before assets are processed.</source>
-        <target state="new">Asset preprocessor must be configured before assets are processed.</target>
-        <note></note>
+        <target state="translated">Der Ressourcenpräprozessor muss konfiguriert werden, bevor Ressourcen verarbeitet werden.</target>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidNuGetVersionString">
         <source>Invalid NuGet version string: '{0}'.</source>
-        <target state="new">Invalid NuGet version string: '{0}'.</target>
-        <note></note>
+        <target state="translated">Ungültige NuGet-Versionszeichenfolge: {0}.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

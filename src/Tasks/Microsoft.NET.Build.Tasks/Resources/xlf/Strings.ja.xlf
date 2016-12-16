@@ -5,113 +5,113 @@
       <group id="src/Tasks/Microsoft.NET.Build.Tasks/Resources/Strings.resx" />
       <trans-unit id="AtLeastOneTargetFrameworkMustBeSpecified">
         <source>At least one possible target framework must be specified.</source>
-        <target state="new">At least one possible target framework must be specified.</target>
-        <note></note>
+        <target state="translated">可能性のあるターゲット フレームワークを少なくとも 1 つ指定する必要があります。</target>
+        <note />
       </trans-unit>
       <trans-unit id="NoCompatibleTargetFramework">
         <source>Project '{0}' has no target framework compatible with '{1}'.</source>
-        <target state="new">Project '{0}' has no target framework compatible with '{1}'.</target>
-        <note></note>
+        <target state="translated">プロジェクト '{0}' には、'{1}' と互換性のあるターゲット フレームワークがありません。</target>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidFrameworkName">
         <source>Invalid framework name: '{0}'.</source>
-        <target state="new">Invalid framework name: '{0}'.</target>
-        <note></note>
+        <target state="translated">無効なフレームワーク名: '{0}'。</target>
+        <note />
       </trans-unit>
       <trans-unit id="AssetsFileNotFound">
         <source>Assets file '{0}' not found. Run a NuGet package restore to generate this file.</source>
-        <target state="new">Assets file '{0}' not found. Run a NuGet package restore to generate this file.</target>
-        <note></note>
+        <target state="translated">資産ファイル '{0}' が見つかりません。NuGet パッケージの復元を実行して、このファイルを生成してください。</target>
+        <note />
       </trans-unit>
       <trans-unit id="AssetsFileMissingTarget">
         <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have restored this project for TargetFramework='{2}' and RuntimeIdentifier='{3}'.</source>
-        <target state="new">Assets file '{0}' doesn't have a target for '{1}'. Ensure you have restored this project for TargetFramework='{2}' and RuntimeIdentifier='{3}'.</target>
-        <note></note>
+        <target state="translated">資産ファイル '{0}' に '{1}' のターゲットがありません。TargetFramework='{2}' および RuntimeIdentifier='{3}' のこのプロジェクトを復元したことを確認してください。</target>
+        <note />
       </trans-unit>
       <trans-unit id="AssetsFilePathNotRooted">
         <source>Assets file path '{0}' is not rooted. Only full paths are supported.</source>
-        <target state="new">Assets file path '{0}' is not rooted. Only full paths are supported.</target>
-        <note></note>
+        <target state="translated">資産ファイル パス '{0}' にルートが指定されていません。完全パスのみがサポートされます。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CannotFindProjectInfo">
         <source>Cannot find project info for '{0}'. This can indicate a missing project reference.</source>
-        <target state="new">Cannot find project info for '{0}'. This can indicate a missing project reference.</target>
-        <note></note>
+        <target state="translated">'{0}' のプロジェクト情報が見つかりません。これは、プロジェクト参照がないことを示している可能性があります。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ContentFileDoesNotContainExpectedParentPackageInformation">
         <source>Content file '{0}' does not contain expected parent package information.</source>
-        <target state="new">Content file '{0}' does not contain expected parent package information.</target>
-        <note></note>
+        <target state="translated">予期される親パッケージ情報がコンテンツ ファイル '{0}' に入っていません。</target>
+        <note />
       </trans-unit>
       <trans-unit id="MissingItemMetadata">
         <source>Missing '{0}' metadata on '{1}' item '{2}'.</source>
-        <target state="new">Missing '{0}' metadata on '{1}' item '{2}'.</target>
-        <note></note>
+        <target state="translated">'{1}' 項目 '{2}' の '{0}' メタデータがありません。</target>
+        <note />
       </trans-unit>
       <trans-unit id="UnrecognizedPreprocessorToken">
         <source>Unrecognized preprocessor token '{0}' in '{1}'.</source>
-        <target state="new">Unrecognized preprocessor token '{0}' in '{1}'.</target>
-        <note></note>
+        <target state="translated">認識されないプリプロセッサ トークン '{0}' が '{1}' に存在します。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ContentPreproccessorParameterRequired">
         <source>The '{0}' task must be given a value for parameter '{1}' in order to consume preprocessed content.</source>
-        <target state="new">The '{0}' task must be given a value for parameter '{1}' in order to consume preprocessed content.</target>
-        <note></note>
+        <target state="translated">前処理されたコンテンツを使用するためには、パラメーター '{1}' の値を '{0}' タスクに指定する必要があります。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">
         <source>Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</source>
-        <target state="new">Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</target>
-        <note></note>
+        <target state="translated">プロジェクト '{0}' の資産が使用されますが、対応する MSBuild プロジェクト パスが '{1}' で見つかりませんでした。</target>
+        <note />
       </trans-unit>
       <trans-unit id="UnexpectedFileType">
         <source>Unexpected file type for '{0}'. Type is both '{1}' and '{2}'.</source>
-        <target state="new">Unexpected file type for '{0}'. Type is both '{1}' and '{2}'.</target>
-        <note></note>
+        <target state="translated">'{0}' のファイルの種類が正しくありません。種類は '{1}' と '{2}' の両方です。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CannotInferTargetFrameworkIdentiferAndVersion">
         <source>Cannot infer TargetFrameworkIdentifier and/or TargetFrameworkVersion from TargetFramework='{0}'. They must be specified explicitly.</source>
-        <target state="new">Cannot infer TargetFrameworkIdentifier and/or TargetFrameworkVersion from TargetFramework='{0}'. They must be specified explicitly.</target>
-        <note></note>
+        <target state="translated">TargetFrameworkIdentifier または TargetFrameworkVersion あるいはその両方を TargetFramework='{0}' から推論できません。それらは明示的に指定する必要があります。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ContentItemDoesNotProvideOutputPath">
         <source>Content item for '{0}' sets '{1}', but does not provide  '{2}' or '{3}'.</source>
-        <target state="new">Content item for '{0}' sets '{1}', but does not provide  '{2}' or '{3}'.</target>
-        <note></note>
+        <target state="translated">'{0}' のコンテンツ項目で '{1}' が設定されますが、'{2}' または '{3}' は指定されません。</target>
+        <note />
       </trans-unit>
       <trans-unit id="DuplicatePreprocessorToken">
         <source>The preprocessor token '{0}' has been given more than one value. Choosing '{1}' as the value.</source>
-        <target state="new">The preprocessor token '{0}' has been given more than one value. Choosing '{1}' as the value.</target>
-        <note></note>
+        <target state="translated">プリプロセッサ トークン '{0}' に複数の値が指定されています。値として '{1}' を選択します。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ErrorsOccurredWhenEmittingSatelliteAssembly">
         <source>Errors occured when emitting satellite assembly '{0}'.</source>
-        <target state="new">Errors occured when emitting satellite assembly '{0}'.</target>
-        <note></note>
+        <target state="translated">サテライト アセンブリ '{0}' を出力しているときに、エラーが発生しました。</target>
+        <note />
       </trans-unit>
       <trans-unit id="UnableToFindResolvedPath">
         <source>Unable to find resolved path for '{0}'.</source>
-        <target state="new">Unable to find resolved path for '{0}'.</target>
-        <note></note>
+        <target state="translated">解決された '{0}' のパスが見つかりません。</target>
+        <note />
       </trans-unit>
       <trans-unit id="UnexpectedDependencyWithNoVersionNumber">
         <source>Unexpected dependency '{0}' with no version number.</source>
-        <target state="new">Unexpected dependency '{0}' with no version number.</target>
-        <note></note>
+        <target state="translated">バージョン番号のない予期しない依存関係 '{0}' です。</target>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeIdentifierMustBeSetForNETFramework">
         <source>RuntimeIdentifier must be set for .NETFramework executables. Consider RuntimeIdentifier=win7-x86 or RuntimeIdentifier=win7-x64.</source>
-        <target state="new">RuntimeIdentifier must be set for .NETFramework executables. Consider RuntimeIdentifier=win7-x86 or RuntimeIdentifier=win7-x64.</target>
-        <note></note>
+        <target state="translated">.NETFramework 実行可能ファイルの RuntimeIdentifier を設定する必要があります。RuntimeIdentifier=win7-x86 または RuntimeIdentifier=win7-x64 を検討してください。</target>
+        <note />
       </trans-unit>
       <trans-unit id="AssetPreprocessorMustBeConfigured">
         <source>Asset preprocessor must be configured before assets are processed.</source>
-        <target state="new">Asset preprocessor must be configured before assets are processed.</target>
-        <note></note>
+        <target state="translated">資産を処理する前に、資産プリプロセッサを構成する必要があります。</target>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidNuGetVersionString">
         <source>Invalid NuGet version string: '{0}'.</source>
-        <target state="new">Invalid NuGet version string: '{0}'.</target>
-        <note></note>
+        <target state="translated">無効な NuGet バージョン文字列: '{0}'。</target>
+        <note />
       </trans-unit>
     </body>
   </file>
