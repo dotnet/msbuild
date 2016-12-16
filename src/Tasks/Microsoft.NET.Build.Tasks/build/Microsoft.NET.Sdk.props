@@ -73,7 +73,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <TreatWarningsAsErrors Condition="'$(TreatWarningsAsErrors)'==''">false</TreatWarningsAsErrors>
     <Prefer32Bit Condition="'$(Prefer32Bit)'==''">false</Prefer32Bit>
     <SignAssembly Condition="'$(SignAssembly)'==''">false</SignAssembly>
-    <DelaySign Condition="'$(DelaySign)'!=''">false</DelaySign>
+    <DelaySign Condition="'$(DelaySign)'==''">false</DelaySign>
   </PropertyGroup>
 
   <!-- Temporary workarounds -->
