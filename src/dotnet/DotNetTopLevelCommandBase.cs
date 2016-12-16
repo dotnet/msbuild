@@ -76,7 +76,11 @@ namespace Microsoft.DotNet.Cli
             }
             catch (CommandParsingException e)
             {
-                Reporter.Error.WriteLine(e.Message.Red());
+                string errorMessage = e.IsRequireSubCommandMissing
+                    ? CommonLocalizableStrings.RequiredCommandNotPassed
+                    : e.Message;
+
+                Reporter.Error.WriteLine(errorMessage.Red());
                 return 1;
             }
         }

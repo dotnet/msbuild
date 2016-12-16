@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Tools.List.ProjectToProjectReferences;
+using Microsoft.DotNet.Tools.List.ProjectsInSolution;
 
 namespace Microsoft.DotNet.Tools.List
 {
@@ -16,6 +17,7 @@ namespace Microsoft.DotNet.Tools.List
         internal override List<Func<CommandLineApplication, CommandLineApplication>> SubCommands =>
             new List<Func<CommandLineApplication, CommandLineApplication>>
             {
+                ListProjectsInSolutionCommand.CreateApplication,
                 ListProjectToProjectReferencesCommand.CreateApplication,
             };
 

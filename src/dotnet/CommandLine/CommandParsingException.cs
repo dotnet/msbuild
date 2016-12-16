@@ -7,12 +7,17 @@ namespace Microsoft.DotNet.Cli.CommandLine
 {
     internal class CommandParsingException : Exception
     {
-        public CommandParsingException(CommandLineApplication command, string message)
+        public CommandParsingException(
+            CommandLineApplication command,
+            string message,
+            bool isRequireSubCommandMissing = false)
             : base(message)
         {
             Command = command;
+            IsRequireSubCommandMissing = isRequireSubCommandMissing;
         }
 
         public CommandLineApplication Command { get; }
+        public bool IsRequireSubCommandMissing { get; }
     }
 }

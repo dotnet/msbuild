@@ -49,6 +49,15 @@ Args:
             cmd.StdOut.Should().Be("Specify --help for a list of available options and commands.");
         }
 
+        [Fact]
+        public void WhenTooManyArgumentsArePassedItPrintsError()
+        {
+            var cmd = new DotnetCommand()
+                .ExecuteWithCapturedOutput("add one.sln two.sln three.sln project");
+            cmd.Should().Fail();
+            cmd.StdErr.Should().Contain("Unrecognized command or argument");
+        }
+
         [Theory]
         [InlineData("idontexist.sln")]
         [InlineData("ihave?invalidcharacters")]
