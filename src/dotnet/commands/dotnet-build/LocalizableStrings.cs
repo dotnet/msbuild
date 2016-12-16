@@ -6,7 +6,7 @@
 
         public const string AppFullName = ".NET Builder";
 
-        public const string ConfigurationOptionDescription = "Configuration to use for buulding the project. Default is  \"Debug\".";
+        public const string ConfigurationOptionDescription = "Configuration to use for building the project. Default is  \"Debug\".";
 
         public const string ConfigurationOptionName = "CONFIGURATION";
 

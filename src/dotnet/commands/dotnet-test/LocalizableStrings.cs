@@ -10,13 +10,13 @@
 
         public const string CmdArgDescription = "The project to test, defaults to the current directory.";
 
-        public const string CmdSettingsFile = "SettingsFile";
+        public const string CmdSettingsFile = "SETTINGS_FILE";
 
         public const string CmdSettingsDescription = "Settings to use when running tests.";
 
         public const string CmdListTestsDescription = @"Lists discovered tests";
 
-        public const string CmdTestCaseFilterExpression = "Expression";
+        public const string CmdTestCaseFilterExpression = "EXPRESSION";
 
         public const string CmdTestCaseFilterDescription = @"Run tests that match the given expression.
                                         Examples:
@@ -27,26 +27,26 @@
                                         ";
 
         public const string CmdTestAdapterPathDescription = @"Use custom adapters from the given path in the test run.
-                                        Example: --test-adapter-path:<pathToCustomAdapters>";
+                                        Example: --test-adapter-path <PATH_TO_ADAPTER>";
 
         public const string CmdLoggerOption = "LoggerUri/FriendlyName";
 
         public const string CmdLoggerDescription = @"Specify a logger for test results. 
                                         Example: --logger:trx";
 
-        public const string CmdConfiguration = "configuration";
+        public const string CmdConfiguration = "CONFIGURATION";
 
-        public const string CmdConfigDescription = @"Configuration under which to build, i.e. Debug/Release";
+        public const string CmdConfigDescription = "Configuration to use for building the project.  Default is  \"Debug\".";
 
-        public const string CmdFramework = "FrameworkVersion";
+        public const string CmdFramework = "FRAMEWORK";
 
         public const string CmdFrameworkDescription = @"Looks for test binaries for a specific framework";
 
-        public const string CmdOutputDir = "OutputDir";
+        public const string CmdOutputDir = "OUTPUT_DIR";
 
         public const string CmdOutputDescription = @"Directory in which to find the binaries to be run";
 
-        public const string CmdPathToLogFile = "PathToLogFile";
+        public const string CmdPathToLogFile = "PATH_TO_FILE";
 
         public const string CmdPathTologFileDescription = @"Enable verbose logs for test platform.
                                         Logs are written to the provided file.";
