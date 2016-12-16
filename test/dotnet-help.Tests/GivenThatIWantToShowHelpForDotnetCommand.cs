@@ -24,10 +24,10 @@ Arguments:
 
 Common options:
   -v|--verbose          Enable verbose output
-  -h|--help             Show help
+  -h|--help             Show help 
 
 Host options (passed before the command):
-  -d|--diagnostic       Enable diagnostics output
+  -d|--diagnostics      Enable diagnostic output
   --version             Display .NET CLI Version Number
   --info                Display .NET CLI Info
 
