@@ -492,7 +492,8 @@ namespace Microsoft.Build.CommandLine
 #endif
                 case "2":
                     // Sometimes easier to attach rather than deal with JIT prompt
-                    Console.WriteLine($"Waiting for debugger to attach (PID {Process.GetCurrentProcess().Id}).  Press enter to continue...");
+                    Process currentProcess = Process.GetCurrentProcess();
+                    Console.WriteLine($"Waiting for debugger to attach ({currentProcess.MainModule.FileName} PID {currentProcess.Id}).  Press enter to continue...");
                     Console.ReadLine();
                     break;
             }
@@ -1825,7 +1826,8 @@ namespace Microsoft.Build.CommandLine
 
                 if (!Debugger.IsAttached)
                 {
-                    Console.WriteLine("Waiting for debugger to attach... (PID {0})", Process.GetCurrentProcess().Id);
+                    Process currentProcess = Process.GetCurrentProcess();
+                    Console.WriteLine($"Waiting for debugger to attach... ({currentProcess.MainModule.FileName} PID {currentProcess.Id})");
                     while (!Debugger.IsAttached)
                     {
                         Thread.Sleep(100);
