@@ -80,6 +80,19 @@
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions">
       <Version>1.0.1-beta-000933</Version>
     </PackageReference>
+
+    <PackageReference Include="Microsoft.TemplateEngine.Utils">
+      <Version>1.0.0-beta1-20161216-12</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.TemplateEngine.Abstractions">
+      <Version>1.0.0-beta1-20161216-12</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.TemplateEngine.Edge">
+      <Version>1.0.0-beta1-20161216-12</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.TemplateEngine.Orchestrator.RunnableProjects">
+      <Version>1.0.0-beta1-20161216-12</Version>
+    </PackageReference>
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">

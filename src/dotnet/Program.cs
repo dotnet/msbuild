@@ -16,6 +16,7 @@ using Microsoft.DotNet.Tools.List;
 using Microsoft.DotNet.Tools.Migrate;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.New;
+using Microsoft.DotNet.Tools.New3;
 using Microsoft.DotNet.Tools.NuGet;
 using Microsoft.DotNet.Tools.Pack;
 using Microsoft.DotNet.Tools.Publish;
@@ -41,6 +42,7 @@ namespace Microsoft.DotNet.Cli
             ["migrate"] = MigrateCommand.Run,
             ["msbuild"] = MSBuildCommand.Run,
             ["new"] = NewCommand.Run,
+            ["new3"] = New3Command.Run,
             ["nuget"] = NuGetCommand.Run,
             ["pack"] = PackCommand.Run,
             ["publish"] = PublishCommand.Run,
