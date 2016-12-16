@@ -32,39 +32,47 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var targetFramework = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "net46" : "netcoreapp1.0";
-            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);
-
-            var outputFiles = new List<string>
+            foreach (var targetFramework in new[] { "net46", "netcoreapp1.0" })
             {
-                "AllResourcesInSatellite.pdb",
-                "AllResourcesInSatellite.runtimeconfig.json",
-                "AllResourcesInSatellite.runtimeconfig.dev.json",
-                "en/AllResourcesInSatellite.resources.dll"
-            };
+                if (targetFramework == "net46" && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    continue;
+                }
 
-            Command command;
-            if (targetFramework == "net46")
-            {
-                outputFiles.Add("AllResourcesInSatellite.exe");
-                command = Command.Create(Path.Combine(outputDirectory.FullName, "AllResourcesInSatellite.exe"), Array.Empty<string>());
+                var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);
+
+                var outputFiles = new List<string>
+                {
+                    "AllResourcesInSatellite.pdb",
+                    "AllResourcesInSatellite.runtimeconfig.json",
+                    "AllResourcesInSatellite.runtimeconfig.dev.json",
+                    "en/AllResourcesInSatellite.resources.dll"
+                };
+
+                Command command;
+                if (targetFramework == "net46")
+                {
+                    outputFiles.Add("AllResourcesInSatellite.exe");
+                    command = Command.Create(Path.Combine(outputDirectory.FullName, "AllResourcesInSatellite.exe"), Array.Empty<string>());
+                }
+                else
+                {
+                    outputFiles.Add("AllResourcesInSatellite.dll");
+                    outputFiles.Add("AllResourcesInSatellite.deps.json");
+                    command = Command.Create(RepoInfo.DotNetHostPath, new[] { Path.Combine(outputDirectory.FullName, "AllResourcesInSatellite.dll") });
+                }
+
+                outputDirectory.Should().OnlyHaveFiles(outputFiles);
+
+
+                command
+                    .CaptureStdOut()
+                    .Execute()
+                    .Should()
+                    .Pass()
+                    .And
+                    .HaveStdOutContaining("Hello World from en satellite assembly");
             }
-            else
-            {
-                outputFiles.Add("AllResourcesInSatellite.dll");
-                outputFiles.Add("AllResourcesInSatellite.deps.json");
-                command = Command.Create(RepoInfo.DotNetHostPath, new[] { Path.Combine(outputDirectory.FullName, "AllResourcesInSatellite.dll") });
-            }
-
-            outputDirectory.Should().OnlyHaveFiles(outputFiles);
-
-            command
-                .CaptureStdOut()
-                .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World from en satellite assembly");
         }
     }
 }
