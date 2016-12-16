@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Tools.List.ProjectToProjectReferences;
 using Microsoft.DotNet.Tools.List.ProjectsInSolution;
 
@@ -14,11 +13,11 @@ namespace Microsoft.DotNet.Tools.List
     {
         protected override string CommandName => "list";
         protected override string FullCommandNameLocalized => LocalizableStrings.NetListCommand;
-        internal override List<Func<CommandLineApplication, CommandLineApplication>> SubCommands =>
-            new List<Func<CommandLineApplication, CommandLineApplication>>
+        internal override List<Func<DotNetSubCommandBase>> SubCommands =>
+            new List<Func<DotNetSubCommandBase>>
             {
-                ListProjectsInSolutionCommand.CreateApplication,
-                ListProjectToProjectReferencesCommand.CreateApplication,
+                ListProjectsInSolutionCommand.Create,
+                ListProjectToProjectReferencesCommand.Create,
             };
 
         public static int Run(string[] args)

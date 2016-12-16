@@ -31,7 +31,7 @@ Options:
             var cmd = new DotnetCommand()
                 .ExecuteWithCapturedOutput($"list projects {helpArg}");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain(HelpText);
+            cmd.StdOut.Should().Be(HelpText);
         }
 
         [Theory]
@@ -42,7 +42,7 @@ Options:
             var cmd = new DotnetCommand()
                 .ExecuteWithCapturedOutput($"list {commandName}");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Contain("Required command was not provided.");
+            cmd.StdErr.Should().Be("Required command was not provided.");
         }
 
         [Fact]
@@ -51,7 +51,7 @@ Options:
             var cmd = new DotnetCommand()
                 .ExecuteWithCapturedOutput("list one.sln two.sln three.sln projects");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Contain("Unrecognized command or argument 'two.sln'");
+            cmd.StdErr.Should().Be("Unrecognized command or argument 'two.sln'");
         }
 
         [Theory]
@@ -65,8 +65,8 @@ Options:
             var cmd = new DotnetCommand()
                 .ExecuteWithCapturedOutput($"list {solutionName} projects");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Contain($"Could not find solution or directory `{solutionName}`");
-            cmd.StdOut.Should().Contain(HelpText);
+            cmd.StdErr.Should().Be($"Could not find solution or directory `{solutionName}`.");
+            cmd.StdOut.Should().Be(HelpText);
         }
 
         [Fact]
@@ -83,8 +83,8 @@ Options:
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput("list InvalidSolution.sln projects");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Contain("Invalid solution `InvalidSolution.sln`");
-            cmd.StdOut.Should().Contain(HelpText);
+            cmd.StdErr.Should().Be("Invalid solution `InvalidSolution.sln`.");
+            cmd.StdOut.Should().Be(HelpText);
         }
 
         [Fact]
@@ -102,8 +102,8 @@ Options:
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput("list projects");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Contain($"Invalid solution `{solutionFullPath}`");
-            cmd.StdOut.Should().Contain(HelpText);
+            cmd.StdErr.Should().Be($"Invalid solution `{solutionFullPath}`.");
+            cmd.StdOut.Should().Be(HelpText);
         }
 
         [Fact]
@@ -121,8 +121,8 @@ Options:
                 .WithWorkingDirectory(solutionDir)
                 .ExecuteWithCapturedOutput("list projects");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Contain($"Specified solution file {solutionDir + Path.DirectorySeparatorChar} does not exist, or there is no solution file in the directory");
-            cmd.StdOut.Should().Contain(HelpText);
+            cmd.StdErr.Should().Be($"Specified solution file {solutionDir + Path.DirectorySeparatorChar} does not exist, or there is no solution file in the directory.");
+            cmd.StdOut.Should().Be(HelpText);
         }
 
         [Fact]
@@ -139,8 +139,8 @@ Options:
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput("list projects");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Contain($"Found more than one solution file in {projectDirectory + Path.DirectorySeparatorChar}. Please specify which one to use.");
-            cmd.StdOut.Should().Contain(HelpText);
+            cmd.StdErr.Should().Be($"Found more than one solution file in {projectDirectory + Path.DirectorySeparatorChar}. Please specify which one to use.");
+            cmd.StdOut.Should().Be(HelpText);
         }
 
         [Fact]
@@ -157,12 +157,17 @@ Options:
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput("list projects");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("No projects found in the solution.");
+            cmd.StdOut.Should().Be("No projects found in the solution.");
         }
 
         [Fact]
         public void WhenProjectReferencesArePresentInTheSolutionItListsThem()
         {
+            const string OutputText = @"Project reference(s)
+--------------------
+App\App.csproj
+Lib\Lib.csproj";
+
             var projectDirectory = TestAssets
                 .Get("TestAppWithSlnAndExistingCsprojReferences")
                 .CreateInstance()
@@ -174,9 +179,7 @@ Options:
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput("list projects");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Contain("Project reference(s)");
-            cmd.StdOut.Should().Contain(@"App\App.csproj");
-            cmd.StdOut.Should().Contain(@"Lib\Lib.csproj");
+            cmd.StdOut.Should().Be(OutputText);
         }
     }
 }

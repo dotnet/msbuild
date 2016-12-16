@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <Compile Include="**\*.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
-    <Compile Include="..\..\..\src\dotnet\CommandLine\*.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
+    <Compile Include="..\..\..\src\dotnet\CommandLine\*.cs;..\..\..\src\dotnet\CommonLocalizableStrings.cs;" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
     <EmbeddedResource Include="**\*.resx" />
     <EmbeddedResource Include="compiler\resources\**\*" />
   </ItemGroup>

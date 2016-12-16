@@ -121,6 +121,17 @@ Args:
             cmd.StdOut.Should().Be(HelpText);
         }
 
+        [Theory]
+        [InlineData("")]
+        [InlineData("unknownCommandName")]
+        public void WhenNoCommandIsPassedItPrintsError(string commandName)
+        {
+            var cmd = new DotnetCommand()
+                .ExecuteWithCapturedOutput($"remove {commandName}");
+            cmd.Should().Fail();
+            cmd.StdErr.Should().Be("Required command was not provided.");
+        }
+
         [Fact]
         public void WhenTooManyArgumentsArePassedItPrintsError()
         {

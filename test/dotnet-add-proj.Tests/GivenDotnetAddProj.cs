@@ -39,14 +39,15 @@ Args:
             cmd.StdOut.Should().Be(HelpText);
         }
 
-        [Fact]
-        public void WhenTooManyArgumentsArePassedItPrintsError()
+        [Theory]
+        [InlineData("")]
+        [InlineData("unknownCommandName")]
+        public void WhenNoCommandIsPassedItPrintsError(string commandName)
         {
             var cmd = new DotnetCommand()
-                .ExecuteWithCapturedOutput("add one.sln two.sln three.sln project");
+                .ExecuteWithCapturedOutput($"add {commandName}");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be("Unrecognized command or argument 'two.sln'");
-            cmd.StdOut.Should().Be("Specify --help for a list of available options and commands.");
+            cmd.StdErr.Should().Be("Required command was not provided.");
         }
 
         [Fact]
@@ -55,7 +56,8 @@ Args:
             var cmd = new DotnetCommand()
                 .ExecuteWithCapturedOutput("add one.sln two.sln three.sln project");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Contain("Unrecognized command or argument");
+            cmd.StdErr.Should().Be("Unrecognized command or argument 'two.sln'");
+            cmd.StdOut.Should().Be("Specify --help for a list of available options and commands.");
         }
 
         [Theory]
