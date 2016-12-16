@@ -25,7 +25,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ProjectCapability Include="DotNetCoreWeb" />
     <ProjectCapability Include="AspNetCore" />
     <ProjectCapability Include="Web" />
-    <ProjectCapability Include="SupportHierarchyContextSvc" />    
+    <ProjectCapability Include="SupportHierarchyContextSvc" />
+    <ProjectCapability Include="DynamicDependentFile" />    
   </ItemGroup>
 
   <!-- Web specific properties -->
