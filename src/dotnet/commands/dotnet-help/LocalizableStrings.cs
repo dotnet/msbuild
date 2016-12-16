@@ -59,5 +59,7 @@
         public const string MsBuildDefinition = "msbuilds a project and all of its dependencies";
 
         public const string VsTestDefinition = "Runs tests from the specified files";
+
+        public const string CleanDefinition = "Clean build output(s)";
     }
 }

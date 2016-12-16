@@ -2,11 +2,11 @@
 {
     internal class LocalizableStrings
     {
-        public const string AppFullName = "restore";
+        public const string AppFullName = ".NET dependency restorer";
 
         public const string AppDescription = "restore for msbuild";
 
-        public const string CmdArgument = "root";
+        public const string CmdArgument = "project";
 
         public const string CmdArgumentDescription = "Optional path to a project file or MSBuild arguments.";
 

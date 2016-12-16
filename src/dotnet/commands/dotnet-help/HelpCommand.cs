@@ -34,6 +34,7 @@ namespace Microsoft.DotNet.Tools.Help
   test          {LocalizableStrings.TestDefinition}
   pack          {LocalizableStrings.PackDefinition}
   migrate       {LocalizableStrings.MigrateDefinition}
+  clean         {LocalizableStrings.CleanDefinition}
 
 Project modification commands:
   add           Add items to the project

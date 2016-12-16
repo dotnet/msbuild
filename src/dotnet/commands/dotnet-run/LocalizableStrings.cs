@@ -6,11 +6,11 @@
 
         public const string AppDescription = "Command used to run .NET apps";
 
-        public const string CommandOptionConfigurationDescription = "Configuration under which to build";
+        public const string CommandOptionConfigurationDescription = "Configuration to use for building the project. Default is \"Debug\".";
 
         public const string CommandOptionFramework = "FRAMEWORK";
 
-        public const string CommandOptionFrameworkDescription = "Compile a specific framework";
+        public const string CommandOptionFrameworkDescription = "Build and run the specified framework. The framework has to be specified in the project file. ";
 
         public const string CommandOptionProjectDescription = "The path to the project file to run (defaults to the current directory if there is only one project).";
 
@@ -43,5 +43,7 @@
         public const string RunCommandInvalidOperationException3 = "Specify which project file to use because this ";
 
         public const string RunCommandInvalidOperationException4 = "contains more than one project file.";
+
+        public const string RunCommandAdditionalArgsHelpText = "Arguments passed to the application that is being run.";
     }
 }

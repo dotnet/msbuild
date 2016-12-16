@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Tools.Run
             app.Description = LocalizableStrings.AppDescription;
             app.HandleResponseFiles = true;
             app.AllowArgumentSeparator = true;
-            app.ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText;
+            app.ArgumentSeparatorHelpText = $"{HelpMessageStrings.MSBuildAdditionalArgsHelpText}\n{LocalizableStrings.RunCommandAdditionalArgsHelpText}";
             app.HelpOption("-h|--help");
 
             CommandOption configuration = app.Option(
