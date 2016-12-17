@@ -10,6 +10,8 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public class PackagedCommandSpecFactory : IPackagedCommandSpecFactory
     {
+        private const string PackagedCommandSpecFactoryName = "packagedcommandspecfactory";
+
         private Action<string, IList<string>> _addAdditionalArguments;
 
         internal PackagedCommandSpecFactory(Action<string, IList<string>> addAdditionalArguments = null)
@@ -27,14 +29,21 @@ namespace Microsoft.DotNet.Cli.Utils
             string depsFilePath,
             string runtimeConfigPath)
         {
-            Reporter.Verbose.WriteLine($"packagedcommandspecfactory: attempting to find command {commandName} in {toolLibrary.Name}");
+            Reporter.Verbose.WriteLine(string.Format(
+                LocalizableStrings.AttemptingToFindCommand,
+                PackagedCommandSpecFactoryName,
+                commandName,
+                toolLibrary.Name));
 
             var toolAssembly = toolLibrary?.RuntimeAssemblies
                     .FirstOrDefault(r => Path.GetFileNameWithoutExtension(r.Path) == commandName);
 
             if (toolAssembly == null)
             {
-                Reporter.Verbose.WriteLine($"packagedcommandspecfactory: failed to find toolAssembly for {commandName}");
+                Reporter.Verbose.WriteLine(string.Format(
+                    LocalizableStrings.FailedToFindToolAssembly,
+                    PackagedCommandSpecFactoryName,
+                    commandName));
 
                 return null;
             }
@@ -43,7 +52,10 @@ namespace Microsoft.DotNet.Cli.Utils
 
             if (!File.Exists(commandPath))
             {
-                Reporter.Verbose.WriteLine($"packagedcommandspecfactory: failed to find commandPath {commandPath}");
+                Reporter.Verbose.WriteLine(string.Format(
+                    LocalizableStrings.FailedToFindCommandPath,
+                    PackagedCommandSpecFactoryName,
+                    commandPath));
 
                 return null;
             }
@@ -57,12 +69,17 @@ namespace Microsoft.DotNet.Cli.Utils
                 runtimeConfigPath);
         }
 
-        private string GetCommandFilePath(string nugetPackagesRoot, LockFileTargetLibrary toolLibrary, LockFileItem runtimeAssembly)
+        private string GetCommandFilePath(
+            string nugetPackagesRoot,
+            LockFileTargetLibrary toolLibrary,
+            LockFileItem runtimeAssembly)
         {
             var packageDirectory = new VersionFolderPathResolver(nugetPackagesRoot)
                 .GetInstallPath(toolLibrary.Name, toolLibrary.Version);
 
-            var filePath = Path.Combine(packageDirectory, PathUtility.GetPathWithDirectorySeparator(runtimeAssembly.Path));
+            var filePath = Path.Combine(
+                packageDirectory,
+                PathUtility.GetPathWithDirectorySeparator(runtimeAssembly.Path));
 
             return filePath;
         }
@@ -107,7 +124,7 @@ namespace Microsoft.DotNet.Cli.Utils
             host = muxer.MuxerPath;
             if (host == null)
             {
-                throw new Exception("Unable to locate dotnet multiplexer");
+                throw new Exception(LocalizableStrings.UnableToLocateDotnetMultiplexer);
             }
 
             arguments.Add("exec");

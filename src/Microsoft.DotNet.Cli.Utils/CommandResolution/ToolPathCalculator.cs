@@ -35,7 +35,9 @@ namespace Microsoft.DotNet.Cli.Utils
             var bestVersion = versionRange.FindBestMatch(availableToolVersions);
             if (bestVersion == null)
             {
-                throw new GracefulException($"Version for package `{packageId}` could not be resolved.");
+                throw new GracefulException(string.Format(
+                    LocalizableStrings.VersionForPackageCouldNotBeResolved,
+                    packageId));
             }
 
             return GetLockFilePath(packageId, bestVersion, framework);

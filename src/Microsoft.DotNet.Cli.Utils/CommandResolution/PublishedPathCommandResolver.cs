@@ -7,6 +7,8 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public class PublishedPathCommandResolver : ICommandResolver
     {
+        private const string PublishedPathCommandResolverName = "PublishedPathCommandResolver";
+
         private readonly IEnvironmentProvider _environment;
         private readonly IPublishedPathCommandSpecFactory _commandSpecFactory;
 
@@ -39,14 +41,20 @@ namespace Microsoft.DotNet.Cli.Utils
             var depsFilePath = Path.Combine(publishDirectory, $"{applicationName}.deps.json");
             if (!File.Exists(depsFilePath))
             {
-                Reporter.Verbose.WriteLine($"PublishedPathCommandResolver: {depsFilePath} does not exist");
+                Reporter.Verbose.WriteLine(string.Format(
+                    LocalizableStrings.DoesNotExist,
+                    PublishedPathCommandResolverName,
+                    depsFilePath));
                 return null;
             }
 
             var runtimeConfigPath = Path.Combine(publishDirectory, $"{applicationName}.runtimeconfig.json");
             if (!File.Exists(runtimeConfigPath))
             {
-                Reporter.Verbose.WriteLine($"projectdependenciescommandresolver: {runtimeConfigPath} does not exist");
+                Reporter.Verbose.WriteLine(string.Format(
+                    LocalizableStrings.DoesNotExist,
+                    PublishedPathCommandResolverName,
+                    runtimeConfigPath));
                 return null;
             }
 
@@ -62,7 +70,10 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             if (!Directory.Exists(publishDirectory))
             {
-                Reporter.Verbose.WriteLine($"publishedpathresolver: {publishDirectory} does not exist");
+                Reporter.Verbose.WriteLine(string.Format(
+                    LocalizableStrings.DoesNotExist,
+                    PublishedPathCommandResolverName,
+                    publishDirectory));
                 return null;
             }
 

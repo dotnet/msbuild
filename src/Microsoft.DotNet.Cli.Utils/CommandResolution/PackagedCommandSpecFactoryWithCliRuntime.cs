@@ -30,7 +30,10 @@ namespace Microsoft.DotNet.Cli.Utils
             var preferCliRuntimePath = Path.Combine(packageDirectory, "prefercliruntime");
 
             Reporter.Verbose.WriteLine(
-                $"packagedcommandspecfactory: Looking for prefercliruntime file at `{preferCliRuntimePath}`");
+                string.Format(
+                    LocalizableStrings.LookingForPreferCliRuntimeFile,
+                    "packagedcommandspecfactory",
+                    preferCliRuntimePath));
 
             return File.Exists(preferCliRuntimePath);
         }

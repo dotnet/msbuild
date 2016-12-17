@@ -24,8 +24,8 @@ namespace Microsoft.DotNet.Cli.Utils
             {
                 throw new GracefulException(string.Join(
                     Environment.NewLine,
-                    $"File not found `{path}`.",
-                    "The project may not have been restored or restore failed - run `dotnet restore`"));
+                    string.Format(LocalizableStrings.FileNotFound, path),
+                    LocalizableStrings.ProjectNotRestoredOrRestoreFailed));
             }
 
             return await ConcurrencyUtilities.ExecuteWithFileLockedAsync(
