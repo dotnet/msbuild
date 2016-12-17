@@ -19,12 +19,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
         {
             if (typeof(T) != typeof(ProjectItemElement))
             {
-                throw new ArgumentException($"Expected element to be of type {nameof(ProjectItemElement)}, but got {typeof(T)}");
+                throw new ArgumentException(String.Format(LocalizableStrings.ExpectedElementToBeOfTypeNotTypeError, nameof(ProjectItemElement), typeof(T)));
             }
 
             if (typeof(U) != typeof(ProjectItemGroupElement))
             {
-                throw new ArgumentException($"Expected destinationElement to be of type {nameof(ProjectItemGroupElement)}, but got {typeof(U)}");
+                throw new ArgumentException(String.Format(LocalizableStrings.ExpectedElementToBeOfTypeNotTypeError, nameof(ProjectItemGroupElement), typeof(U)));
             }
 
             if (element == null)
@@ -34,14 +34,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
 
             if (destinationElement == null)
             {
-                throw new ArgumentException("expected destinationElement to not be null");
+                throw new ArgumentException(LocalizableStrings.NullDestinationElementError);
             }
 
             var item = element as ProjectItemElement;
             var destinationItemGroup = destinationElement as ProjectItemGroupElement;
 
-            MigrationTrace.Instance.WriteLine($"{nameof(ItemTransformApplicator)}: Item {{ ItemType: {item.ItemType}, Condition: {item.Condition}, Include: {item.Include}, Exclude: {item.Exclude}, Update: {item.Update} }}");
-            MigrationTrace.Instance.WriteLine($"{nameof(ItemTransformApplicator)}: ItemGroup {{ Condition: {destinationItemGroup.Condition} }}");
+            MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.ItemTransformApplicatorHeader, nameof(ItemTransformApplicator), item.ItemType, item.Condition, item.Include, item.Exclude, item.Update));
+            MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.ItemTransformApplicatorItemGroup, nameof(ItemTransformApplicator), destinationItemGroup.Condition));
 
             if (mergeExisting)
             {
@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
                 item = MergeWithExistingItemsWithSameCondition(item, destinationItemGroup);
                 if (item == null)
                 {
-                    MigrationTrace.Instance.WriteLine($"{nameof(ItemTransformApplicator)}: Item completely merged");
+                    MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.ItemTransformAppliatorItemCompletelyMerged, nameof(ItemTransformApplicator)));
                     return;
                 }
 
@@ -57,14 +57,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
                 item = MergeWithExistingItemsWithNoCondition(item, destinationItemGroup);
                 if (item == null)
                 {
-                    MigrationTrace.Instance.WriteLine($"{nameof(ItemTransformApplicator)}: Item completely merged");
+                    MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.ItemTransformAppliatorItemCompletelyMerged, nameof(ItemTransformApplicator)));
                     return;
                 }
 
                 item = MergeWithExistingItemsWithACondition(item, destinationItemGroup);
                 if (item == null)
                 {
-                    MigrationTrace.Instance.WriteLine($"{nameof(ItemTransformApplicator)}: Item completely merged");
+                    MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.ItemTransformAppliatorItemCompletelyMerged, nameof(ItemTransformApplicator)));
                     return;
                 }
             }
@@ -88,7 +88,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
             var outputItem = itemGroup.ContainingProject.CreateItemElement("___TEMP___");
             outputItem.CopyFrom(item);
 
-            MigrationTrace.Instance.WriteLine($"{nameof(ItemTransformApplicator)}: AddItemToItemGroup {{ ItemType: {outputItem.ItemType}, Condition: {outputItem.Condition}, Include: {outputItem.Include}, Exclude: {outputItem.Exclude}, Update: {outputItem.Update} }}");
+            MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.ItemTransformApplicatorAddItemHeader, nameof(ItemTransformApplicator), outputItem.ItemType, outputItem.Condition, outputItem.Include, outputItem.Exclude, outputItem.Update));
 
             itemGroup.AppendChild(outputItem);
             outputItem.AddMetadata(item.Metadata);
@@ -105,7 +105,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
             var existingItemsWithACondition =
                     FindExistingItemsWithACondition(item, destinationItemGroup.ContainingProject, destinationItemGroup);
 
-            MigrationTrace.Instance.WriteLine($"{nameof(ItemTransformApplicator)}: Merging Item with {existingItemsWithACondition.Count()} existing items with a different condition chain.");
+            MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.ItemTransformApplicatorMergingItemWithExistingItems, nameof(ItemTransformApplicator), existingItemsWithACondition.Count()));
 
             foreach (var existingItem in existingItemsWithACondition)
             {
@@ -113,14 +113,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
                 var encompassedIncludes = item.GetEncompassedIncludes(existingItem);
                 if (encompassedIncludes.Any())
                 {
-                    MigrationTrace.Instance.WriteLine($"{nameof(ItemTransformApplicator)}: encompassed includes {string.Join(", ", encompassedIncludes)}");
+                    MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.ItemTransformApplicatorEncompassedIncludes, nameof(ItemTransformApplicator), string.Join(", ", encompassedIncludes)));
                     existingItem.RemoveIncludes(encompassedIncludes);
                 }
 
                 // continue if the existing item is now empty
                 if (!existingItem.Includes().Any())
                 {
-                    MigrationTrace.Instance.WriteLine($"{nameof(ItemTransformApplicator)}: Removing Item {{ ItemType: {existingItem.ItemType}, Condition: {existingItem.Condition}, Include: {existingItem.Include}, Exclude: {existingItem.Exclude} }}");
+                    MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.ItemTransformApplicatorRemovingItem, nameof(ItemTransformApplicator), existingItem.ItemType, existingItem.Condition, existingItem.Include, existingItem.Exclude));
                     existingItem.Parent.RemoveChild(existingItem);
                     continue;
                 }
@@ -172,7 +172,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
             var existingItemsWithNoCondition =
                     FindExistingItemsWithNoCondition(item, destinationItemGroup.ContainingProject, destinationItemGroup);
 
-            MigrationTrace.Instance.WriteLine($"{nameof(ItemTransformApplicator)}: Merging Item with {existingItemsWithNoCondition.Count()} existing items with a different condition chain.");
+            MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.ItemTransformApplicatorMergingItemWithExistingItems, nameof(ItemTransformApplicator), existingItemsWithNoCondition.Count()));
 
             // Handle the item being placed inside of a condition, when it is overlapping with a conditionless item
             // If it is not definining new metadata or excludes, the conditioned item can be merged with the 
@@ -182,11 +182,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
                 var encompassedIncludes = existingItem.GetEncompassedIncludes(item);
                 if (encompassedIncludes.Any())
                 {
-                    MigrationTrace.Instance.WriteLine($"{nameof(ItemTransformApplicator)}: encompassed includes {string.Join(", ", encompassedIncludes)}");
+                    MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.ItemTransformApplicatorEncompassedIncludes, nameof(ItemTransformApplicator), string.Join(", ", encompassedIncludes)));
                     item.RemoveIncludes(encompassedIncludes);
                     if (!item.Includes().Any())
                     {
-                        MigrationTrace.Instance.WriteLine($"{nameof(ItemTransformApplicator)}: Ignoring Item {{ ItemType: {existingItem.ItemType}, Condition: {existingItem.Condition}, Include: {existingItem.Include}, Exclude: {existingItem.Exclude} }}");
+                        MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.ItemTransformApplicatorIgnoringItem, nameof(ItemTransformApplicator), existingItem.ItemType, existingItem.Condition, existingItem.Include, existingItem.Exclude));
                         return null;
                     }
                 }
@@ -225,7 +225,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
             var existingItemsWithSameCondition =
                    FindExistingItemsWithSameCondition(item, destinationItemGroup.ContainingProject, destinationItemGroup);
 
-            MigrationTrace.Instance.WriteLine($"{nameof(TransformApplicator)}: Merging Item with {existingItemsWithSameCondition.Count()} existing items with the same condition chain.");
+            MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.ItemTransformApplicatorMergingItemWithExistingItemsSameChain, nameof(TransformApplicator), existingItemsWithSameCondition.Count()));
 
             foreach (var existingItem in existingItemsWithSameCondition)
             {
@@ -238,7 +238,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
                     existingItem.Parent.RemoveChild(existingItem);
                 }
                 
-                MigrationTrace.Instance.WriteLine($"{nameof(TransformApplicator)}: Adding Merged Item {{ ItemType: {mergeResult.MergedItem.ItemType}, Condition: {mergeResult.MergedItem.Condition}, Include: {mergeResult.MergedItem.Include}, Exclude: {mergeResult.MergedItem.Exclude} }}");
+                MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.ItemTransformApplicatorAddingMergedItem,
+                    nameof(TransformApplicator),
+                    mergeResult.MergedItem.ItemType,
+                    mergeResult.MergedItem.Condition,
+                    mergeResult.MergedItem.Include,
+                    mergeResult.MergedItem.Exclude));
                 AddItemToItemGroup(mergeResult.MergedItem, destinationItemGroup);
             }
 
@@ -261,12 +266,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
         {
             if (!string.Equals(item.ItemType, existingItem.ItemType, StringComparison.Ordinal))
             {
-                throw new InvalidOperationException("Cannot merge items of different types.");
+                throw new InvalidOperationException(LocalizableStrings.CannotMergeItemsOfDifferentTypesError);
             }
 
             if (!item.IntersectIncludes(existingItem).Any())
             {
-                throw new InvalidOperationException("Cannot merge items without a common include.");
+                throw new InvalidOperationException(LocalizableStrings.CannotMergeItemsWithoutCommonIncludeError);
             }
 
             var commonIncludes = item.IntersectIncludes(existingItem).ToList();

@@ -55,10 +55,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 migrationSettings.SolutionFile,
                 itemGroup: noFrameworkPackageReferenceItemGroup);
             
-            MigrationTrace.Instance.WriteLine($"Migrating {targetFrameworks.Count()} target frameworks");
+            MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.MigratingCountTargetFrameworks, targetFrameworks.Count()));
             foreach (var targetFramework in targetFrameworks)
             {
-                MigrationTrace.Instance.WriteLine($"Migrating framework {targetFramework.FrameworkName.GetShortFolderName()}");
+                MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.MigratingFramework, targetFramework.FrameworkName.GetShortFolderName()));
                 
                 MigrateImports(migrationRuleInputs.CommonPropertyGroup, targetFramework);
 
@@ -172,7 +172,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             }
             else
             {
-                MigrationTrace.Instance.WriteLine($"{nameof(MigratePackageDependenciesAndToolsRule)}: imports transform null for {targetFramework.FrameworkName.GetShortFolderName()}");
+                MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.ImportsTransformNullFor, nameof(MigratePackageDependenciesAndToolsRule), targetFramework.FrameworkName.GetShortFolderName()));
             }
         }
 

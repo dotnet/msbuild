@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     if (ScriptVariableToMSBuildMap[key] == null)
                     {
                         MigrationErrorCodes.MIGRATE1016(
-                                $"{key} is currently an unsupported script variable for project migration")
+                                String.Format(LocalizableStrings.MIGRATE1016Arg, key))
                             .Throw();
                     }
 
@@ -102,7 +102,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             if(!ScriptSetToMSBuildHookTargetMap.TryGetValue(scriptSetName, out targetHookInfo))
             {
                 MigrationErrorCodes.MIGRATE1019(
-                        $"{scriptSetName} is an unsupported script event hook for project migration")
+                        String.Format(LocalizableStrings.MIGRATE1019Arg, scriptSetName))
                     .Throw();
             }
 

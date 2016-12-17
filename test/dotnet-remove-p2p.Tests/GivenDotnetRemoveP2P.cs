@@ -24,8 +24,8 @@ Options:
   -h|--help                   Show help information
   -f|--framework <FRAMEWORK>  Remove reference only when targetting a specific framework
 
-Args:
-  Project to project references to remove
+Additional Arguments:
+ Project to project references to remove
 ";
 
         const string FrameworkNet451Arg = "-f net451";

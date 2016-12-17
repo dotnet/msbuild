@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Construction;
@@ -13,7 +14,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
     {
         public void Apply(MigrationSettings migrationSettings, MigrationRuleInputs migrationRuleInputs)
         {
-            MigrationTrace.Instance.WriteLine($"Executing rule: {nameof(MigrateConfigurationsRule)}");
+            MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.ExecutingRule, nameof(MigrateConfigurationsRule)));
             var projectContext = migrationRuleInputs.DefaultProjectContext;
             var configurations = projectContext.ProjectFile.GetConfigurations().ToList();
 
@@ -22,7 +23,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
             if (!configurations.Any() && !frameworks.Any())
             {
-                MigrationTrace.Instance.WriteLine($"{nameof(MigrateConfigurationsRule)}: No configuration or framework build options found in project");
+                MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.NoConfigurationOrFrameworkFoundInProject, nameof(MigrateConfigurationsRule)));
+
                 return;
             }
 

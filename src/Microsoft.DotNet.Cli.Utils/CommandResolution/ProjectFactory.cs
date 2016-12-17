@@ -12,6 +12,8 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     internal class ProjectFactory
     {
+        private const string ProjectFactoryName = "projectfactory";
+
         private IEnvironmentProvider _environment;
 
         public ProjectFactory(IEnvironmentProvider environment)
@@ -37,11 +39,17 @@ namespace Microsoft.DotNet.Cli.Utils
                 Path.Combine(AppContext.BaseDirectory, "MSBuild.dll") :
                 msBuildExePath;
 
-            Reporter.Verbose.WriteLine($"projectfactory: MSBUILD_EXE_PATH = {msBuildExePath}");
+            Reporter.Verbose.WriteLine(string.Format(
+                LocalizableStrings.MSBuildExePath,
+                ProjectFactoryName,
+                msBuildExePath));
 
             string msBuildProjectPath = GetMSBuildProjPath(projectDirectory);
 
-            Reporter.Verbose.WriteLine($"projectfactory: MSBuild project path = {msBuildProjectPath}");
+            Reporter.Verbose.WriteLine(string.Format(
+                LocalizableStrings.MSBuildProjectPath,
+                ProjectFactoryName,
+                msBuildProjectPath));
             
             if(msBuildProjectPath == null)
             {
@@ -72,8 +80,9 @@ namespace Microsoft.DotNet.Cli.Utils
             }
             else if (projectFiles.Count() > 1)
             {
-                throw new InvalidOperationException(
-                    $"Specify which project file to use because this '{projectDirectory}' contains more than one project file.");
+                throw new InvalidOperationException(string.Format(
+                    LocalizableStrings.MultipleProjectFilesFound,
+                    projectDirectory));
             }
 
             return projectFiles.First();

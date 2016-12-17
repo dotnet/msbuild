@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Cli.Utils
             {
                 if (_muxerPath == null)
                 {
-                    throw new InvalidOperationException("Unable to locate dotnet multiplexer");
+                    throw new InvalidOperationException(LocalizableStrings.UnableToLocateDotnetMultiplexer);
                 }
                 return _muxerPath;
             }

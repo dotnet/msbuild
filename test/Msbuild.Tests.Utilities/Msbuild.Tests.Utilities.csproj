@@ -14,6 +14,9 @@
     <Compile Include="..\..\src\Microsoft.DotNet.ProjectJsonMigration\MSBuildExtensions.cs">
         <Link>src\Microsoft.DotNet.ProjectJsonMigration\MSBuildExtensions.cs</Link>
     </Compile>
+    <Compile Include="..\..\src\Microsoft.DotNet.ProjectJsonMigration\LocalizableStrings.cs">
+        <Link>src\Microsoft.DotNet.ProjectJsonMigration\LocalizableStrings.cs</Link>
+    </Compile>
     <EmbeddedResource Include="**\*.resx" />
     <EmbeddedResource Include="compiler\resources\**\*" />
   </ItemGroup>

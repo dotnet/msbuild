@@ -16,6 +16,8 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public class ProjectToolsCommandResolver : ICommandResolver
     {
+        private const string ProjectToolsCommandResolverName = "projecttoolscommandresolver";
+
         private static readonly NuGetFramework s_toolPackageFramework = FrameworkConstants.CommonFrameworks.NetCoreApp10;
 
         private static readonly CommandResolutionStrategy s_commandResolutionStrategy =
@@ -44,7 +46,9 @@ namespace Microsoft.DotNet.Cli.Utils
             if (commandResolverArguments.CommandName == null
                 || commandResolverArguments.ProjectDirectory == null)
             {
-                Reporter.Verbose.WriteLine($"projecttoolscommandresolver: Invalid CommandResolverArguments");
+                Reporter.Verbose.WriteLine(string.Format(
+                    LocalizableStrings.InvalidCommandResolverArguments,
+                    ProjectToolsCommandResolverName));
 
                 return null;
             }
@@ -65,7 +69,8 @@ namespace Microsoft.DotNet.Cli.Utils
 
             if (project == null)
             {
-                Reporter.Verbose.WriteLine($"projecttoolscommandresolver: ProjectFactory did not find Project.");
+                Reporter.Verbose.WriteLine(string.Format(
+                    LocalizableStrings.DidNotFindProject, ProjectToolsCommandResolverName));
 
                 return null;
             }
@@ -85,7 +90,10 @@ namespace Microsoft.DotNet.Cli.Utils
             IEnumerable<string> args,
             IProject project)
         {
-            Reporter.Verbose.WriteLine($"projecttoolscommandresolver: resolving commandspec from {toolsLibraries.Count()} Tool Libraries.");
+            Reporter.Verbose.WriteLine(string.Format(
+                LocalizableStrings.ResolvingCommandSpec,
+                ProjectToolsCommandResolverName,
+                toolsLibraries.Count()));
 
             foreach (var toolLibrary in toolsLibraries)
             {
@@ -101,7 +109,9 @@ namespace Microsoft.DotNet.Cli.Utils
                 }
             }
 
-            Reporter.Verbose.WriteLine($"projecttoolscommandresolver: failed to resolve commandspec from library.");
+            Reporter.Verbose.WriteLine(string.Format(
+                LocalizableStrings.FailedToResolveCommandSpec,
+                ProjectToolsCommandResolverName));
 
             return null;
         }
@@ -112,17 +122,26 @@ namespace Microsoft.DotNet.Cli.Utils
             IEnumerable<string> args,
             IProject project)
         {
-            Reporter.Verbose.WriteLine($"projecttoolscommandresolver: Attempting to resolve command spec from tool {toolLibraryRange.Name}");
+            Reporter.Verbose.WriteLine(string.Format(
+                LocalizableStrings.AttemptingToResolveCommandSpec,
+                ProjectToolsCommandResolverName,
+                toolLibraryRange.Name));
 
             var nuGetPathContext = NuGetPathContext.Create(project.ProjectRoot);
 
             var nugetPackagesRoot = nuGetPathContext.UserPackageFolder;
 
-            Reporter.Verbose.WriteLine($"projecttoolscommandresolver: nuget packages root:\n{nugetPackagesRoot}"); 
+            Reporter.Verbose.WriteLine(string.Format(
+                LocalizableStrings.NuGetPackagesRoot,
+                ProjectToolsCommandResolverName,
+                nugetPackagesRoot));
 
             var toolLockFile = GetToolLockFile(toolLibraryRange, nugetPackagesRoot);
 
-            Reporter.Verbose.WriteLine($"projecttoolscommandresolver: found tool lockfile at : {toolLockFile.Path}");
+            Reporter.Verbose.WriteLine(string.Format(
+                LocalizableStrings.FoundToolLockFile,
+                ProjectToolsCommandResolverName,
+                toolLockFile.Path));
 
             var toolLibrary = toolLockFile.Targets
                 .FirstOrDefault(
@@ -131,7 +150,9 @@ namespace Microsoft.DotNet.Cli.Utils
 
             if (toolLibrary == null)
             {
-                Reporter.Verbose.WriteLine($"projecttoolscommandresolver: library not found in lock file.");  
+                Reporter.Verbose.WriteLine(string.Format(
+                    LocalizableStrings.LibraryNotFoundInLockFile,
+                    ProjectToolsCommandResolverName));
 
                 return null;
             }
@@ -142,7 +163,9 @@ namespace Microsoft.DotNet.Cli.Utils
 
             var normalizedNugetPackagesRoot = PathUtility.EnsureNoTrailingDirectorySeparator(nugetPackagesRoot);
 
-            Reporter.Verbose.WriteLine($"projecttoolscommandresolver: attempting to create commandspec");
+            Reporter.Verbose.WriteLine(string.Format(
+                LocalizableStrings.AttemptingToCreateCommandSpec,
+                ProjectToolsCommandResolverName));
 
             var commandSpec = _packagedCommandSpecFactory.CreateCommandSpecFromLibrary(
                     toolLibrary,
@@ -156,7 +179,9 @@ namespace Microsoft.DotNet.Cli.Utils
 
             if (commandSpec == null)
             {
-                Reporter.Verbose.WriteLine($"projecttoolscommandresolver: commandSpec is null.");
+                Reporter.Verbose.WriteLine(string.Format(
+                    LocalizableStrings.CommandSpecIsNull,
+                    ProjectToolsCommandResolverName));
             }
 
             commandSpec?.AddEnvironmentVariablesFromProject(project);
@@ -212,7 +237,10 @@ namespace Microsoft.DotNet.Cli.Utils
                 depsPathRoot,
                 toolLibrary.Name + FileNameSuffixes.DepsJson);
 
-            Reporter.Verbose.WriteLine($"projecttoolscommandresolver: expect deps.json at: {depsJsonPath}");
+            Reporter.Verbose.WriteLine(string.Format(
+                LocalizableStrings.ExpectDepsJsonAt,
+                ProjectToolsCommandResolverName,
+                depsJsonPath));
 
             EnsureToolJsonDepsFileExists(toolLockFile, depsJsonPath, toolLibrary);
 
@@ -235,7 +263,9 @@ namespace Microsoft.DotNet.Cli.Utils
             string depsPath,
             SingleProjectInfo toolLibrary)
         {
-            Reporter.Verbose.WriteLine($"Generating deps.json at: {depsPath}");
+            Reporter.Verbose.WriteLine(string.Format(
+                LocalizableStrings.GeneratingDepsJson,
+                depsPath));
 
             var dependencyContext = new DepsJsonBuilder()
                 .Build(toolLibrary, null, toolLockFile, s_toolPackageFramework, null);
@@ -254,7 +284,9 @@ namespace Microsoft.DotNet.Cli.Utils
             }
             catch (Exception e)
             {
-                Reporter.Verbose.WriteLine($"unable to generate deps.json, it may have been already generated: {e.Message}");
+                Reporter.Verbose.WriteLine(string.Format(
+                    LocalizableStrings.UnableToGenerateDepsJson,
+                    e.Message));
                 
                 try
                 {
@@ -262,7 +294,9 @@ namespace Microsoft.DotNet.Cli.Utils
                 }
                 catch (Exception e2)
                 {
-                    Reporter.Verbose.WriteLine($"unable to delete temporary deps.json file: {e2.Message}");
+                    Reporter.Verbose.WriteLine(string.Format(
+                        LocalizableStrings.UnableToDeleteTemporaryDepsJson,
+                        e2.Message));
                 }
             }
         }

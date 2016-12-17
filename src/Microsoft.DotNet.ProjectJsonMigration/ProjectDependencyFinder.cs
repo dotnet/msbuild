@@ -66,7 +66,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 if (!File.Exists(project.ProjectFilePath))
                 {
                     MigrationErrorCodes
-                        .MIGRATE1018($"Dependency project not found ({project.ProjectFilePath})").Throw();
+                        .MIGRATE1018(String.Format(LocalizableStrings.MIGRATE1018Arg, project.ProjectFilePath)).Throw();
                 }
 
                 var projectContext =
@@ -140,7 +140,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                     if (projectFileDependency.LibraryRange.TypeConstraint == LibraryDependencyTarget.Project)
                     {
                         MigrationErrorCodes
-                            .MIGRATE1014($"Unresolved project dependency ({dependencyName})").Throw();
+                            .MIGRATE1014(String.Format(LocalizableStrings.MIGRATE1014Arg, dependencyName)).Throw();
                     }
                     else
                     {
@@ -158,7 +158,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         {
             if (xproj == null)
             {
-                MigrationTrace.Instance.WriteLine($"{nameof(ProjectDependencyFinder)}: No xproj file given.");
+                MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.NoXprojFileGivenError, nameof(ProjectDependencyFinder)));
                 return Enumerable.Empty<ProjectItemElement>();
             }
 
@@ -175,7 +175,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             if (allXprojFiles.Count() > 1)
             {
                 MigrationErrorCodes
-                    .MIGRATE1017($"Multiple xproj files found in {projectDirectory}, please specify which to use")
+                    .MIGRATE1017(String.Format(LocalizableStrings.MultipleXprojFilesError, projectDirectory))
                     .Throw();
             }
 
@@ -210,7 +210,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                     if (projectExport.Library.Identity.Type.Equals(LibraryType.Project))
                     {
                         MigrationErrorCodes
-                            .MIGRATE1014($"Unresolved project dependency ({projectExportName})").Throw();
+                            .MIGRATE1014(String.Format(LocalizableStrings.MIGRATE1014Arg, projectExportName)).Throw();
                     }
                     else
                     {

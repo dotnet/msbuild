@@ -25,8 +25,8 @@ Options:
   -h|--help                   Show help information
   -f|--framework <FRAMEWORK>  Add reference only when targetting a specific framework
 
-Args:
-  Project to project references to add
+Additional Arguments:
+ Project to project references to add
 ";
 
         const string FrameworkNet451Arg = "-f net451";

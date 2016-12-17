@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
             }
             else
             {
-                throw new ArgumentException($"Unexpected type {nameof(T)}");
+                throw new ArgumentException(String.Format(LocalizableStrings.UnexpectedTypeError, nameof(T)));
             }
         }
 

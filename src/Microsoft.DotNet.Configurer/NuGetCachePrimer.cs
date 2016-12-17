@@ -116,7 +116,7 @@ namespace Microsoft.DotNet.Configurer
                 Reporter.Verbose.WriteLine(commandResult.StdErr);
 
                 Reporter.Error.WriteLine(
-                    $"Failed to create prime the NuGet cache. {commandToExecute} failed with: {commandResult.ExitCode}");
+                    string.Format(LocalizableStrings.FailedToPrimeCacheError, commandToExecute, commandResult.ExitCode));
             }
 
             return commandResult.ExitCode == 0;

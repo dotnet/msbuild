@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.Cli.Utils
             var host = muxer.MuxerPath;
             if (host == null)
             {
-                throw new Exception("Unable to locate dotnet multiplexer");
+                throw new Exception(LocalizableStrings.UnableToLocateDotnetMultiplexer);
             }
 
             arguments.Add("exec");
