@@ -40,6 +40,7 @@ Commands:
   test          Runs unit tests using the test runner specified in the project.
   pack          Creates a NuGet package.
   migrate       Migrates a project.json based project to a msbuild based project.
+  clean         Clean build output(s).
 
 Project modification commands:
   add           Add items to the project
