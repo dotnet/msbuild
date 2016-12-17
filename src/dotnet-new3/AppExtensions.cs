@@ -36,8 +36,11 @@ namespace dotnet_new3
                         {
                             if(property.Value.Type == JTokenType.String)
                             {
-                                IList<string> values = new List<string>();
-                                values.Add(property.Value.ToString());
+                                IList<string> values = new List<string>
+                                {
+                                    property.Value.ToString()
+                                };
+
                                 // adding 2 dashes to the file-based params
                                 // won't work right if there's a param that should have 1 dash
                                 //
@@ -95,8 +98,7 @@ namespace dotnet_new3
                     }
                 }
 
-                IList<string> valueList;
-                if (!parameters.TryGetValue(key, out valueList))
+                if (!parameters.TryGetValue(key, out IList<string> valueList))
                 {
                     valueList = new List<string>();
                     parameters.Add(key, valueList);
