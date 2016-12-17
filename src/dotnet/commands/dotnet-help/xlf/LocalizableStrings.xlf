@@ -56,64 +56,72 @@
         <note />
       </trans-unit>
       <trans-unit id="NewDefinition">
-        <source>Initialize a basic .NET project</source>
-        <note />
+        <source>Initialize .NET projects.</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="RestoreDefinition">
-        <source>Restore dependencies specified in the .NET project</source>
+        <source>Restore dependencies specified in the .NET project.</source>
         <note></note>
       </trans-unit>
       <trans-unit id="BuildDefinition">
-        <source>Builds a .NET project</source>
-        <note />
+        <source>Builds a .NET project.</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="PublishDefinition">
-        <source>Publishes a .NET project for deployment (including the runtime)</source>
-        <note />
+        <source>Publishes a .NET project for deployment (including the runtime).</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="RunDefinition">
-        <source>Compiles and immediately executes a .NET project</source>
+        <source>Compiles and immediately executes a .NET project.</source>
         <note></note>
       </trans-unit>
       <trans-unit id="TestDefinition">
-        <source>Runs unit tests using the test runner specified in the project</source>
-        <note />
+        <source>Runs unit tests using the test runner specified in the project.</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="PackDefinition">
-        <source>Creates a NuGet package</source>
-        <note />
+        <source>Creates a NuGet package.</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="MigrateDefinition">
-        <source>Migrates a project.json based project to a msbuild based project</source>
-        <note />
+        <source>Migrates a project.json based project to a msbuild based project.</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="ProjectModificationCommands">
         <source>Project modification commands</source>
         <note />
       </trans-unit>
       <trans-unit id="AddDefinition">
-        <source>Add items to the project</source>
-        <note />
+        <source>Add items to the project.</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="RemoveDefinition">
-        <source>Remove items from the project</source>
-        <note />
+        <source>Remove items from the project.</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="AdvancedCommands">
         <source>Advanced Commands</source>
         <note />
       </trans-unit>
       <trans-unit id="NugetDefinition">
-        <source>Provides additional NuGet commands</source>
-        <note />
+        <source>Provides additional NuGet commands.</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="MsBuildDefinition">
-        <source>msbuilds a project and all of its dependencies</source>
-        <note />
+        <source>Runs Microsoft Build Engine (MSBuild).</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="VsTestDefinition">
-        <source>Runs tests from the specified files</source>
-        <note />
+        <source>Runs Microsoft Test Execution Command Line Tool.</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="DiagnosticsDefinition">
+        <source>Enable diagnostic output</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CleanDefinition">
+        <source>Clean build output(s).</source>
+        <note></note>
       </trans-unit>
     </body>
   </file>

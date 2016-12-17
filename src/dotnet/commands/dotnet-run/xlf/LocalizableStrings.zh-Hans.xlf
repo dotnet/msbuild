@@ -14,9 +14,9 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionConfigurationDescription">
-        <source>Configuration under which to build</source>
-        <target state="translated">在何处生成配置</target>
-        <note />
+        <source>Configuration to use for building the project. Default for most projects is "Debug".</source>
+        <target state="needs-review-translation">在何处生成配置</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CommandOptionFramework">
         <source>FRAMEWORK</source>
@@ -24,9 +24,9 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionFrameworkDescription">
-        <source>Compile a specific framework</source>
-        <target state="translated">编译特定的框架</target>
-        <note />
+        <source>Build and run the app using the specified framework. The framework has to be specified in the project file. </source>
+        <target state="needs-review-translation">编译特定的框架</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CommandOptionProjectDescription">
         <source>The path to the project file to run (defaults to the current directory if there is only one project).</source>
@@ -107,6 +107,11 @@
         <source>contains more than one project file.</source>
         <target state="translated">包含多个项目文件。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="RunCommandAdditionalArgsHelpText">
+        <source>Arguments passed to the application that is being run.</source>
+        <target state="new">Arguments passed to the application that is being run.</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>

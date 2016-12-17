@@ -18,11 +18,6 @@
         <target state="translated">Odebrat odkaz jen při zaměření na určitou platformu</target>
         <note />
       </trans-unit>
-      <trans-unit id="SpecifyAtLeastOneReferenceToRemove">
-        <source>You must specify at least one reference to delete. Please run dotnet delete --help for more information.</source>
-        <target state="translated">Musíte zadat aspoň jeden odkaz, který chcete odstranit. Další informace najdete po spuštění příkazu dotnet delete --help.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="AppHelpText">
         <source>Project to project references to remove</source>
         <target state="new">Project to project references to remove</target>

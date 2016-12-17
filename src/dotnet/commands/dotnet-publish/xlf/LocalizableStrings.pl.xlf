@@ -29,9 +29,9 @@
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
-        <source>Target framework to publish for</source>
-        <target state="translated">Docelowa platforma publikacji</target>
-        <note />
+        <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
+        <target state="needs-review-translation">Docelowa platforma publikacji</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="RuntimeOption">
         <source>RUNTIME_IDENTIFIER</source>
@@ -39,9 +39,9 @@
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
-        <source>Target runtime to publish for. The default is to publish a portable application.</source>
-        <target state="translated">Docelowe środowisko uruchomieniowe na potrzeby publikacji. Opcją domyślną jest publikacja aplikacji przenośnej.</target>
-        <note />
+        <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependented app.</source>
+        <target state="needs-review-translation">Docelowe środowisko uruchomieniowe na potrzeby publikacji. Opcją domyślną jest publikacja aplikacji przenośnej.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
@@ -49,9 +49,9 @@
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
-        <source>Path in which to publish the app</source>
-        <target state="translated">Ścieżka, w której ma zostać opublikowana aplikacja</target>
-        <note />
+        <source>Output directory in which to place the published artifacts.</source>
+        <target state="needs-review-translation">Ścieżka, w której ma zostać opublikowana aplikacja</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="ConfigurationOption">
         <source>CONFIGURATION</source>
@@ -59,9 +59,9 @@
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>Configuration under which to build</source>
-        <target state="translated">Konfiguracja, przy użyciu której ma zostać przeprowadzona kompilacja</target>
-        <note />
+        <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
+        <target state="needs-review-translation">Konfiguracja, przy użyciu której ma zostać przeprowadzona kompilacja</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="VersionSuffixOption">
         <source>VERSION_SUFFIX</source>
@@ -69,9 +69,9 @@
         <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOptionDescription">
-        <source>Defines the value for the $(VersionSuffix) property in the project</source>
-        <target state="translated">Określa wartość właściwości $(VersionSuffix) w projekcie</target>
-        <note />
+        <source>Defines the value for the $(VersionSuffix) property in the project.</source>
+        <target state="needs-review-translation">Określa wartość właściwości $(VersionSuffix) w projekcie</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>

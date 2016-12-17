@@ -69,44 +69,44 @@
         <note />
       </trans-unit>
       <trans-unit id="NewDefinition">
-        <source>Initialize a basic .NET project</source>
-        <target state="translated">Inicializar um projeto .NET básico</target>
-        <note />
+        <source>Initialize .NET projects.</source>
+        <target state="needs-review-translation">Inicializar um projeto .NET básico</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="RestoreDefinition">
-        <source>Restore dependencies specified in the .NET project</source>
+        <source>Restore dependencies specified in the .NET project.</source>
         <target state="needs-review-translation">Restaurar dependências especificadas no projeto .NET</target>
         <note></note>
       </trans-unit>
       <trans-unit id="BuildDefinition">
-        <source>Builds a .NET project</source>
-        <target state="translated">Compila um projeto .NET</target>
-        <note />
+        <source>Builds a .NET project.</source>
+        <target state="needs-review-translation">Compila um projeto .NET</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="PublishDefinition">
-        <source>Publishes a .NET project for deployment (including the runtime)</source>
-        <target state="translated">Publica um projeto .NET para implantação (incluindo o tempo de execução)</target>
-        <note />
+        <source>Publishes a .NET project for deployment (including the runtime).</source>
+        <target state="needs-review-translation">Publica um projeto .NET para implantação (incluindo o tempo de execução)</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="RunDefinition">
-        <source>Compiles and immediately executes a .NET project</source>
+        <source>Compiles and immediately executes a .NET project.</source>
         <target state="needs-review-translation">Compila e executa imediatamente um projeto .NET</target>
         <note></note>
       </trans-unit>
       <trans-unit id="TestDefinition">
-        <source>Runs unit tests using the test runner specified in the project</source>
-        <target state="translated">Executa testes de unidade usando o executor de teste especificado no projeto</target>
-        <note />
+        <source>Runs unit tests using the test runner specified in the project.</source>
+        <target state="needs-review-translation">Executa testes de unidade usando o executor de teste especificado no projeto</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="PackDefinition">
-        <source>Creates a NuGet package</source>
-        <target state="translated">Cria um pacote NuGet</target>
-        <note />
+        <source>Creates a NuGet package.</source>
+        <target state="needs-review-translation">Cria um pacote NuGet</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="MigrateDefinition">
-        <source>Migrates a project.json based project to a msbuild based project</source>
-        <target state="translated">Migra um projeto baseado em project.json para um projeto baseado em msbuild</target>
-        <note />
+        <source>Migrates a project.json based project to a msbuild based project.</source>
+        <target state="needs-review-translation">Migra um projeto baseado em project.json para um projeto baseado em msbuild</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="ProjectModificationCommands">
         <source>Project modification commands</source>
@@ -114,14 +114,14 @@
         <note />
       </trans-unit>
       <trans-unit id="AddDefinition">
-        <source>Add items to the project</source>
-        <target state="translated">Adicionar itens ao projeto</target>
-        <note />
+        <source>Add items to the project.</source>
+        <target state="needs-review-translation">Adicionar itens ao projeto</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="RemoveDefinition">
-        <source>Remove items from the project</source>
-        <target state="translated">Remover itens do projeto</target>
-        <note />
+        <source>Remove items from the project.</source>
+        <target state="needs-review-translation">Remover itens do projeto</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="AdvancedCommands">
         <source>Advanced Commands</source>
@@ -129,19 +129,29 @@
         <note />
       </trans-unit>
       <trans-unit id="NugetDefinition">
-        <source>Provides additional NuGet commands</source>
-        <target state="translated">Fornece comandos adicionais do NuGet</target>
-        <note />
+        <source>Provides additional NuGet commands.</source>
+        <target state="needs-review-translation">Fornece comandos adicionais do NuGet</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="MsBuildDefinition">
-        <source>msbuilds a project and all of its dependencies</source>
-        <target state="translated">Executa o msbuild em um projeto e todas as suas dependências</target>
-        <note />
+        <source>Runs Microsoft Build Engine (MSBuild).</source>
+        <target state="needs-review-translation">Executa o msbuild em um projeto e todas as suas dependências</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="VsTestDefinition">
-        <source>Runs tests from the specified files</source>
-        <target state="translated">Executa testes dos arquivos especificados</target>
-        <note />
+        <source>Runs Microsoft Test Execution Command Line Tool.</source>
+        <target state="needs-review-translation">Executa testes dos arquivos especificados</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="DiagnosticsDefinition">
+        <source>Enable diagnostic output</source>
+        <target state="new">Enable diagnostic output</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CleanDefinition">
+        <source>Clean build output(s).</source>
+        <target state="new">Clean build output(s).</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>

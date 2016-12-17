@@ -1,0 +1,303 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="tr" original="src/Microsoft.DotNet.ProjectJsonMigration/LocalizableStrings.resx">
+    <body>
+      <group id="src/Microsoft.DotNet.ProjectJsonMigration/LocalizableStrings.resx" />
+      <trans-unit id="DoubleMigrationError">
+        <source>Detected double project migration: {0}</source>
+        <target state="new">Detected double project migration: {0}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CannotMergeMetadataError">
+        <source>Cannot merge metadata with the same name and different values</source>
+        <target state="new">Cannot merge metadata with the same name and different values</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="NoXprojFileGivenError">
+        <source>{0}: No xproj file given.</source>
+        <target state="new">{0}: No xproj file given.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MultipleXprojFilesError">
+        <source>Multiple xproj files found in {0}, please specify which to use</source>
+        <target state="new">Multiple xproj files found in {0}, please specify which to use</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="NullMSBuildProjectTemplateError">
+        <source>Expected non-null MSBuildProjectTemplate in MigrationSettings</source>
+        <target state="new">Expected non-null MSBuildProjectTemplate in MigrationSettings</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CannotMigrateProjectWithCompilerError">
+        <source>Cannot migrate project {0} using compiler {1}</source>
+        <target state="new">Cannot migrate project {0} using compiler {1}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ExpectedElementToBeOfTypeNotTypeError">
+        <source>Expected element to be of type {0}, but got {1}</source>
+        <target state="new">Expected element to be of type {0}, but got {1}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ProjAlreadyExistsError">
+        <source>{0} already exists. Has migration already been run?</source>
+        <target state="new">{0} already exists. Has migration already been run?</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="NullDestinationElementError">
+        <source>expected destinationElement to not be null</source>
+        <target state="new">expected destinationElement to not be null</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="DiagnosticMessageTemplate">
+        <source>{0} (line: {1}, file: {2})</source>
+        <target state="new">{0} (line: {1}, file: {2})</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CannotMergeItemsOfDifferentTypesError">
+        <source>Cannot merge items of different types.</source>
+        <target state="new">Cannot merge items of different types.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CannotMergeItemsWithoutCommonIncludeError">
+        <source>Cannot merge items without a common include.</source>
+        <target state="new">Cannot merge items without a common include.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="PropertyTransformApplicatorWrongElementTypeError">
+        <source>Expected element to be of type {0}, but got {1}</source>
+        <target state="new">Expected element to be of type {0}, but got {1}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="UnexpectedTypeError">
+        <source>Unexpected type {0}</source>
+        <target state="new">Unexpected type {0}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MIGRATE1011">
+        <source>Deprecated Project</source>
+        <target state="new">Deprecated Project</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MIGRATE1012">
+        <source>Project not Restored</source>
+        <target state="new">Project not Restored</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MIGRATE1013">
+        <source>No Project</source>
+        <target state="new">No Project</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MIGRATE1013Arg">
+        <source>The project.json specifies no target frameworks in {0}</source>
+        <target state="new">The project.json specifies no target frameworks in {0}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MIGRATE1014">
+        <source>Unresolved Dependency</source>
+        <target state="new">Unresolved Dependency</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MIGRATE1014Arg">
+        <source>Unresolved project dependency ({0})</source>
+        <target state="new">Unresolved project dependency ({0})</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MIGRATE1015">
+        <source>File Overwrite</source>
+        <target state="new">File Overwrite</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MIGRATE1016">
+        <source>Unsupported Script Variable</source>
+        <target state="new">Unsupported Script Variable</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MIGRATE1016Arg">
+        <source>{0} is currently an unsupported script variable for project migration</source>
+        <target state="new">{0} is currently an unsupported script variable for project migration</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MIGRATE1017">
+        <source>Multiple Xproj Files</source>
+        <target state="new">Multiple Xproj Files</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MIGRATE1018">
+        <source>Dependency Project not found</source>
+        <target state="new">Dependency Project not found</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MIGRATE1018Arg">
+        <source>Dependency project not found ({0})</source>
+        <target state="new">Dependency project not found ({0})</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MIGRATE1019">
+        <source>Unsupported Script Event Hook</source>
+        <target state="new">Unsupported Script Event Hook</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MIGRATE1019Arg">
+        <source>{0} is an unsupported script event hook for project migration</source>
+        <target state="new">{0} is an unsupported script event hook for project migration</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MIGRATE20011">
+        <source>Multi-TFM</source>
+        <target state="new">Multi-TFM</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MIGRATE20012">
+        <source>Configuration Exclude</source>
+        <target state="new">Configuration Exclude</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MIGRATE20013">
+        <source>Non-Csharp App</source>
+        <target state="new">Non-Csharp App</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MIGRATE20018">
+        <source>Files specified under PackOptions</source>
+        <target state="new">Files specified under PackOptions</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="IncludesNotEquivalent">
+        <source>{0}.{1} includes not equivalent.</source>
+        <target state="new">{0}.{1} includes not equivalent.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ExcludesNotEquivalent">
+        <source>{0}.{1} excludes not equivalent.</source>
+        <target state="new">{0}.{1} excludes not equivalent.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RemovesNotEquivalent">
+        <source>{0}.{1} removes not equivalent.</source>
+        <target state="new">{0}.{1} removes not equivalent.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MetadataDoesntExist">
+        <source>{0}.{1} metadata doesn't exist {{ {2} {3} }}</source>
+        <target state="new">{0}.{1} metadata doesn't exist {{ {2} {3} }}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MetadataHasAnotherValue">
+        <source>{0}.{1} metadata has another value {{ {2} {3} {4} }}</source>
+        <target state="new">{0}.{1} metadata has another value {{ {2} {3} {4} }}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AddingMetadataToItem">
+        <source>{0}: Adding metadata to {1} item: {{ {2}, {3}, {4} }}</source>
+        <target state="new">{0}: Adding metadata to {1} item: {{ {2}, {3}, {4} }}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="SkipMigrationAlreadyMigrated">
+        <source>{0}: Skip migrating {1}, it is already migrated.</source>
+        <target state="new">{0}: Skip migrating {1}, it is already migrated.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ExecutingRule">
+        <source>Executing rule: {0}</source>
+        <target state="new">Executing rule: {0}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="NoConfigurationOrFrameworkFoundInProject">
+        <source>{0}: No configuration or framework build options found in project</source>
+        <target state="new">{0}: No configuration or framework build options found in project</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MigratingCountTargetFrameworks">
+        <source>Migrating {0} target frameworks</source>
+        <target state="new">Migrating {0} target frameworks</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MigratingFramework">
+        <source>Migrating framework {0}</source>
+        <target state="new">Migrating framework {0}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ImportsTransformNullFor">
+        <source>{0}: imports transform null for {1}</source>
+        <target state="new">{0}: imports transform null for {1}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MigratingCountXprojToCsprojReferences">
+        <source>{0}: Migrating {1} xproj to csproj references</source>
+        <target state="new">{0}: Migrating {1} xproj to csproj references</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ExecutingMigrationRule">
+        <source>{0}: Executing migration rule {1}</source>
+        <target state="new">{0}: Executing migration rule {1}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ItemTransformApplicatorHeader">
+        <source>{0}: Item {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4}, Update: {5} }}</source>
+        <target state="new">{0}: Item {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4}, Update: {5} }}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ItemTransformApplicatorItemGroup">
+        <source>{0}: ItemGroup {{ Condition: {1} }}</source>
+        <target state="new">{0}: ItemGroup {{ Condition: {1} }}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ItemTransformAppliatorItemCompletelyMerged">
+        <source>{0}: Item completely merged</source>
+        <target state="new">{0}: Item completely merged</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ItemTransformApplicatorAddItemHeader">
+        <source>{0}: AddItemToItemGroup {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4}, Update: {5} }}</source>
+        <target state="new">{0}: AddItemToItemGroup {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4}, Update: {5} }}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ItemTransformApplicatorMergingItemWithExistingItems">
+        <source>{0}: Merging Item with {1} existing items with a different condition chain.</source>
+        <target state="new">{0}: Merging Item with {1} existing items with a different condition chain.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ItemTransformApplicatorEncompassedIncludes">
+        <source>{0}: encompassed includes {1}</source>
+        <target state="new">{0}: encompassed includes {1}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ItemTransformApplicatorRemovingItem">
+        <source>{0}: Removing Item {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4} }}</source>
+        <target state="new">{0}: Removing Item {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4} }}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ItemTransformApplicatorIgnoringItem">
+        <source>{0}: Ignoring Item {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4} }}</source>
+        <target state="new">{0}: Ignoring Item {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4} }}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ItemTransformApplicatorMergingItemWithExistingItemsSameChain">
+        <source>{0}: Merging Item with {1} existing items with the same condition chain.</source>
+        <target state="new">{0}: Merging Item with {1} existing items with the same condition chain.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ItemTransformApplicatorAddingMergedItem">
+        <source>{0}: Adding Merged Item {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4} }}</source>
+        <target state="new">{0}: Adding Merged Item {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4} }}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MergingProperty">
+        <source>Merging property, output merged property</source>
+        <target state="new">Merging property, output merged property</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="IgnoringMergedProperty">
+        <source>Ignoring fully merged property</source>
+        <target state="new">Ignoring fully merged property</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="PropertyInfo">
+        <source>{0}: {1}, {{ Name={2}, Value={3} }}</source>
+        <target state="new">{0}: {1}, {{ Name={2}, Value={3} }}</target>
+        <note></note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

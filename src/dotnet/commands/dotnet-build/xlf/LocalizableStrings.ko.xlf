@@ -14,9 +14,9 @@
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>Configuration under which to build</source>
-        <target state="translated">빌드할 구성입니다.</target>
-        <note />
+        <source>Configuration to use for building the project. Default for most projects is  "Debug".</source>
+        <target state="needs-review-translation">빌드할 구성입니다.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="ConfigurationOptionName">
         <source>CONFIGURATION</source>
@@ -24,9 +24,9 @@
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
-        <source>Compile a specific framework</source>
-        <target state="translated">특정 프레임워크를 컴파일합니다.</target>
-        <note />
+        <source>Target framework to build for. The target framework has to be specified in the project file.</source>
+        <target state="needs-review-translation">특정 프레임워크를 컴파일합니다.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="FrameworkOptionName">
         <source>FRAMEWORK</source>
@@ -34,19 +34,19 @@
         <note />
       </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">
-        <source>Set this flag to ignore project to project references and only build the root project</source>
-        <target state="translated">프로젝트 간 참조를 무시하고 루트 프로젝트만 빌드하려면 이 플래그를 설정합니다.</target>
-        <note />
+        <source>Set this flag to ignore project-to-project references and only build the root project</source>
+        <target state="needs-review-translation">프로젝트 간 참조를 무시하고 루트 프로젝트만 빌드하려면 이 플래그를 설정합니다.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="NoIncrementialOptionDescription">
-        <source>Set this flag to turn off incremental build</source>
-        <target state="translated">증분 빌드를 해제하려면 이 플래그를 설정합니다.</target>
-        <note />
+        <source>Disables incremental build.</source>
+        <target state="needs-review-translation">증분 빌드를 해제하려면 이 플래그를 설정합니다.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
-        <source>Directory in which to place outputs</source>
-        <target state="translated">출력을 배치할 디렉터리입니다.</target>
-        <note />
+        <source>Output directory in which to place built artifacts.</source>
+        <target state="needs-review-translation">출력을 배치할 디렉터리입니다.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="OutputOptionName">
         <source>OUTPUT_DIR</source>

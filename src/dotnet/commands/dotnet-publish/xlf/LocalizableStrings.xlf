@@ -24,40 +24,40 @@
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
-        <source>Target framework to publish for</source>
-        <note />
+        <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="RuntimeOption">
         <source>RUNTIME_IDENTIFIER</source>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
-        <source>Target runtime to publish for. The default is to publish a portable application.</source>
-        <note />
+        <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependented app.</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
-        <source>Path in which to publish the app</source>
-        <note />
+        <source>Output directory in which to place the published artifacts.</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="ConfigurationOption">
         <source>CONFIGURATION</source>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>Configuration under which to build</source>
-        <note />
+        <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="VersionSuffixOption">
         <source>VERSION_SUFFIX</source>
         <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOptionDescription">
-        <source>Defines the value for the $(VersionSuffix) property in the project</source>
-        <note />
+        <source>Defines the value for the $(VersionSuffix) property in the project.</source>
+        <note></note>
       </trans-unit>
     </body>
   </file>

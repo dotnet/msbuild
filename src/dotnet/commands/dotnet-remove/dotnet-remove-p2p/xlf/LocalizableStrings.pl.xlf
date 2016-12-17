@@ -18,11 +18,6 @@
         <target state="translated">Usuń odwołanie tylko w przypadku określenia konkretnej platformy docelowej</target>
         <note />
       </trans-unit>
-      <trans-unit id="SpecifyAtLeastOneReferenceToRemove">
-        <source>You must specify at least one reference to delete. Please run dotnet delete --help for more information.</source>
-        <target state="translated">Musisz określić co najmniej jedno odwołanie do usunięcia. Uruchom polecenie dotnet delete --help, aby uzyskać więcej informacji.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="AppHelpText">
         <source>Project to project references to remove</source>
         <target state="new">Project to project references to remove</target>

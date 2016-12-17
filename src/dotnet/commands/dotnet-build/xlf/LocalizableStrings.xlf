@@ -12,32 +12,32 @@
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>Configuration under which to build</source>
-        <note />
+        <source>Configuration to use for building the project. Default for most projects is  "Debug".</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="ConfigurationOptionName">
         <source>CONFIGURATION</source>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
-        <source>Compile a specific framework</source>
-        <note />
+        <source>Target framework to build for. The target framework has to be specified in the project file.</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="FrameworkOptionName">
         <source>FRAMEWORK</source>
         <note />
       </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">
-        <source>Set this flag to ignore project to project references and only build the root project</source>
-        <note />
+        <source>Set this flag to ignore project-to-project references and only build the root project</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="NoIncrementialOptionDescription">
-        <source>Set this flag to turn off incremental build</source>
-        <note />
+        <source>Disables incremental build.</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
-        <source>Directory in which to place outputs</source>
-        <note />
+        <source>Output directory in which to place built artifacts.</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="OutputOptionName">
         <source>OUTPUT_DIR</source>

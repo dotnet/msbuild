@@ -20,8 +20,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdSettingsFile">
-        <source>SettingsFile</source>
-        <note />
+        <source>SETTINGS_FILE</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdSettingsDescription">
         <source>Settings to use when running tests.</source>
@@ -32,19 +32,22 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdTestCaseFilterExpression">
-        <source>Expression</source>
-        <note />
+        <source>EXPRESSION</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdTestCaseFilterDescription">
         <source>Run tests that match the given expression.
                                         Examples:
-                                        --test-case-filter:"Priority = 1"
-                                        --test-case-filter: "(FullyQualifiedName~Nightly | Name = MyTestMethod)"</source>
+                                        Run tests with priority set to 1: --filter "Priority = 1"
+                                        Run a test with the specified full name: --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
+                                        Run tests that contain the specified name: --filter "FullyQualifiedName~Namespace.Class"
+                                        More info on filtering support: https://aka.ms/vstest-filtering
+                                        </source>
         <note></note>
       </trans-unit>
       <trans-unit id="CmdTestAdapterPathDescription">
         <source>Use custom adapters from the given path in the test run.
-                                        Example: --test-adapter-path:&lt;pathToCustomAdapters&gt;</source>
+                                        Example: --test-adapter-path &lt;PATH_TO_ADAPTER&gt;</source>
         <note></note>
       </trans-unit>
       <trans-unit id="CmdLoggerOption">
@@ -57,32 +60,32 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdConfiguration">
-        <source>configuration</source>
-        <note />
+        <source>CONFIGURATION</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
-        <source>Configuration under which to build, i.e. Debug/Release</source>
-        <note />
+        <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdFramework">
-        <source>FrameworkVersion</source>
-        <note />
+        <source>FRAMEWORK</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Looks for test binaries for a specific framework</source>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDir">
-        <source>OutputDir</source>
-        <note />
+        <source>OUTPUT_DIR</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdOutputDescription">
         <source>Directory in which to find the binaries to be run</source>
         <note />
       </trans-unit>
       <trans-unit id="CmdPathToLogFile">
-        <source>PathToLogFile</source>
-        <note />
+        <source>PATH_TO_FILE</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdPathTologFileDescription">
         <source>Enable verbose logs for test platform.

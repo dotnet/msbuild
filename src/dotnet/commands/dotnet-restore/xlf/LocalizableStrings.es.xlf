@@ -4,9 +4,9 @@
     <body>
       <group id="src/dotnet/commands/dotnet-restore/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
-        <source>restore</source>
-        <target state="translated">restore</target>
-        <note />
+        <source>.NET dependency restorer</source>
+        <target state="needs-review-translation">restore</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>restore for msbuild</source>
@@ -14,9 +14,9 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdArgument">
-        <source>root</source>
-        <target state="translated">raíz</target>
-        <note />
+        <source>PROJECT</source>
+        <target state="needs-review-translation">raíz</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdArgumentDescription">
         <source>Optional path to a project file or MSBuild arguments.</source>
@@ -24,9 +24,9 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceOption">
-        <source>source</source>
-        <target state="translated">origen</target>
-        <note />
+        <source>SOURCE</source>
+        <target state="needs-review-translation">origen</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdSourceOptionDescription">
         <source>Specifies a NuGet package source to use during the restore.</source>
@@ -34,9 +34,9 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOption">
-        <source>packagesDirectory</source>
-        <target state="translated">DirectorioDePaquetes</target>
-        <note />
+        <source>PACKAGES_DIRECTORY</source>
+        <target state="needs-review-translation">DirectorioDePaquetes</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdPackagesOptionDescription">
         <source>Directory to install packages in.</source>
@@ -49,9 +49,9 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigFileOption">
-        <source>file</source>
-        <target state="translated">archivo</target>
-        <note />
+        <source>FILE</source>
+        <target state="needs-review-translation">archivo</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdConfigFileOptionDescription">
         <source>The NuGet configuration file to use.</source>

@@ -18,11 +18,6 @@
         <target state="translated">只有在以特定架構為目標時才移除參考</target>
         <note />
       </trans-unit>
-      <trans-unit id="SpecifyAtLeastOneReferenceToRemove">
-        <source>You must specify at least one reference to delete. Please run dotnet delete --help for more information.</source>
-        <target state="translated">您必須至少指定一個要刪除的參考。如需詳細資訊，請執行 dotnet delete --help。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="AppHelpText">
         <source>Project to project references to remove</source>
         <target state="new">Project to project references to remove</target>

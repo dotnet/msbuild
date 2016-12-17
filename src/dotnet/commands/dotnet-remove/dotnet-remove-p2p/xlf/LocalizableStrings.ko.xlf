@@ -18,11 +18,6 @@
         <target state="translated">특정 프레임워크를 대상으로 지정할 때에만 참조를 제거합니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SpecifyAtLeastOneReferenceToRemove">
-        <source>You must specify at least one reference to delete. Please run dotnet delete --help for more information.</source>
-        <target state="translated">삭제할 참조를 하나 이상 지정해야 합니다. 자세한 정보를 보려면 dotnet delete --help를 실행하세요.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="AppHelpText">
         <source>Project to project references to remove</source>
         <target state="new">Project to project references to remove</target>
