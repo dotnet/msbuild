@@ -3,7 +3,7 @@
 
 namespace Microsoft.DotNet.ProjectJsonMigration
 {
-    internal class LocalizableStrings
+    public class LocalizableStrings
     {
         public const string DoubleMigrationError = "Detected double project migration: {0}";
 
