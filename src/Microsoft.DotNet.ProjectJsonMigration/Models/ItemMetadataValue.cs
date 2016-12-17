@@ -9,6 +9,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Models
     {
         public string MetadataName { get; }
         public string Condition { get; }
+        public bool ExpressedAsAttribute { get; }
 
         private readonly Func<T, string> _metadataValueFunc;
         private readonly Func<T, bool> _writeMetadataConditionFunc;
@@ -16,10 +17,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Models
         public ItemMetadataValue(
             string metadataName,
             string metadataValue,
-            string condition = null) :
+            string condition = null,
+            bool expressedAsAttribute = false) :
                 this(metadataName,
                      _ => metadataValue,
-                     condition: condition)
+                     condition: condition,
+                     expressedAsAttribute: expressedAsAttribute)
         {
         }
 
@@ -27,7 +30,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Models
             string metadataName,
             Func<T, string> metadataValueFunc,
             Func<T, bool> writeMetadataConditionFunc = null,
-            string condition = null)
+            string condition = null,
+            bool expressedAsAttribute = false)
         {
             if (metadataName == null)
             {
@@ -43,6 +47,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Models
             _metadataValueFunc = metadataValueFunc;
             _writeMetadataConditionFunc = writeMetadataConditionFunc;
             Condition = condition;
+            ExpressedAsAttribute = expressedAsAttribute;
         }
 
         public bool ShouldWriteMetadata(T source)

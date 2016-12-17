@@ -250,7 +250,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             mockProj.Items.Should().ContainSingle(
                 i => (i.Include == "Microsoft.NET.Test.Sdk" &&
                       i.ItemType == "PackageReference" &&
-                      i.GetMetadataWithName("Version").Value == "15.0.0-preview-20161024-02"));
+                      i.GetMetadataWithName("Version").Value == "15.0.0-preview-20161024-02" &&
+                      i.GetMetadataWithName("Version").ExpressedAsAttribute));
 
             mockProj.Items.Should().NotContain(
                 i => (i.Include == "xunit" && i.ItemType == "PackageReference"));
@@ -282,17 +283,20 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             mockProj.Items.Should().ContainSingle(
                 i => (i.Include == "Microsoft.NET.Test.Sdk" && 
                       i.ItemType == "PackageReference" &&
-                      i.GetMetadataWithName("Version").Value == "15.0.0-preview-20161024-02"));
+                      i.GetMetadataWithName("Version").Value == "15.0.0-preview-20161024-02") &&
+                      i.GetMetadataWithName("Version").ExpressedAsAttribute);
 
             mockProj.Items.Should().ContainSingle(
                 i => (i.Include == "xunit" && 
                       i.ItemType == "PackageReference" &&
-                      i.GetMetadataWithName("Version").Value == "2.2.0-beta4-build3444"));
+                      i.GetMetadataWithName("Version").Value == "2.2.0-beta4-build3444" &&
+                      i.GetMetadataWithName("Version").ExpressedAsAttribute));
 
             mockProj.Items.Should().ContainSingle(
                 i => (i.Include == "xunit.runner.visualstudio" && 
                       i.ItemType == "PackageReference" &&
-                      i.GetMetadataWithName("Version").Value == "2.2.0-beta4-build1194"));
+                      i.GetMetadataWithName("Version").Value == "2.2.0-beta4-build1194" &&
+                      i.GetMetadataWithName("Version").ExpressedAsAttribute));
 
             mockProj.Items.Should().NotContain(
                 i => (i.Include == "MSTest.TestAdapter" && i.ItemType == "PackageReference"));
@@ -321,17 +325,20 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             mockProj.Items.Should().ContainSingle(
                 i => (i.Include == "Microsoft.NET.Test.Sdk" &&
                       i.ItemType == "PackageReference" &&
-                      i.GetMetadataWithName("Version").Value == "15.0.0-preview-20161024-02"));
+                      i.GetMetadataWithName("Version").Value == "15.0.0-preview-20161024-02" &&
+                      i.GetMetadataWithName("Version").ExpressedAsAttribute));
 
             mockProj.Items.Should().ContainSingle(
                 i => (i.Include == "xunit" &&
                       i.ItemType == "PackageReference" &&
-                      i.GetMetadataWithName("Version").Value == "2.2.0-beta4-build3444"));
+                      i.GetMetadataWithName("Version").Value == "2.2.0-beta4-build3444" &&
+                      i.GetMetadataWithName("Version").ExpressedAsAttribute));
 
             mockProj.Items.Should().ContainSingle(
                 i => (i.Include == "xunit.runner.visualstudio" &&
                       i.ItemType == "PackageReference" &&
-                      i.GetMetadataWithName("Version").Value == "2.2.0-beta4-build1194"));
+                      i.GetMetadataWithName("Version").Value == "2.2.0-beta4-build1194" &&
+                      i.GetMetadataWithName("Version").ExpressedAsAttribute));
 
             mockProj.Items.Should().NotContain(
                 i => (i.Include == "MSTest.TestAdapter" && i.ItemType == "PackageReference"));
@@ -357,17 +364,20 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             mockProj.Items.Should().ContainSingle(
                 i => (i.Include == "Microsoft.NET.Test.Sdk" &&
                       i.ItemType == "PackageReference" &&
-                      i.GetMetadataWithName("Version").Value == "15.0.0-preview-20161024-02"));
+                      i.GetMetadataWithName("Version").Value == "15.0.0-preview-20161024-02" &&
+                      i.GetMetadataWithName("Version").ExpressedAsAttribute));
 
             mockProj.Items.Should().ContainSingle(
                 i => (i.Include == "MSTest.TestAdapter" &&
                       i.ItemType == "PackageReference" &&
-                      i.GetMetadataWithName("Version").Value == "1.1.3-preview"));
+                      i.GetMetadataWithName("Version").Value == "1.1.3-preview" &&
+                      i.GetMetadataWithName("Version").ExpressedAsAttribute));
 
             mockProj.Items.Should().ContainSingle(
                 i => (i.Include == "MSTest.TestFramework" &&
                       i.ItemType == "PackageReference" &&
-                      i.GetMetadataWithName("Version").Value == "1.0.4-preview"));
+                      i.GetMetadataWithName("Version").Value == "1.0.4-preview" &&
+                      i.GetMetadataWithName("Version").ExpressedAsAttribute));
 
             mockProj.Items.Should().NotContain(
                 i => (i.Include == "xunit" && i.ItemType == "PackageReference"));
@@ -418,7 +428,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                     .Where(i => i.ItemType == "PackageReference")
                     .Where(i => string.IsNullOrEmpty(packageTFM) || i.ConditionChain().Any(c => c.Contains(packageTFM)))
                     .Where(i => i.Include == packageName)
-                    .Where(i => i.GetMetadataWithName("Version").Value == packageVersion);
+                    .Where(i => i.GetMetadataWithName("Version").Value == packageVersion &&
+                                i.GetMetadataWithName("Version").ExpressedAsAttribute);
 
                 items.Should().HaveCount(1);
             }
@@ -434,7 +445,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 var items = mockProj.Items
                     .Where(i => i.ItemType == "DotNetCliToolReference")
                     .Where(i => i.Include == packageName)
-                    .Where(i => i.GetMetadataWithName("Version").Value == packageVersion);
+                    .Where(i => i.GetMetadataWithName("Version").Value == packageVersion &&
+                                i.GetMetadataWithName("Version").ExpressedAsAttribute);
 
                 items.Should().HaveCount(1);
             }

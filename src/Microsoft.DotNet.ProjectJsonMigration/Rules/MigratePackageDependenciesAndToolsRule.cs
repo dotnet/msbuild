@@ -394,7 +394,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 dep => dep.Name,
                 dep => "",
                 dep => dep != null)
-                .WithMetadata("Version", r => r.Version);
+                .WithMetadata("Version", r => r.Version, expressedAsAttribute: true);
 
         private AddItemTransform<PackageDependencyInfo> SdkPackageDependencyTransform => 
             PackageDependencyInfoTransform()
@@ -406,7 +406,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 dep => dep.Name,
                 dep => "",
                 dep => dep != null)
-                .WithMetadata("Version", r => r.Version);
+                .WithMetadata("Version", r => r.Version, expressedAsAttribute: true);
 
         private AddPropertyTransform<TargetFrameworkInformation> ImportsTransformation => 
             new AddPropertyTransform<TargetFrameworkInformation>(

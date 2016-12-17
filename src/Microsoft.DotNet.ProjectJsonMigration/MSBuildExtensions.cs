@@ -212,6 +212,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 #endif
                 var metametadata = item.AddMetadata(metadata.Name, metadata.Value);
                 metametadata.Condition = metadata.Condition;
+                metametadata.ExpressedAsAttribute = metadata.ExpressedAsAttribute;
             }
         }
 
