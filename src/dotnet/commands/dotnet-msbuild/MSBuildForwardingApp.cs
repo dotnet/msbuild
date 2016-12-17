@@ -74,7 +74,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
 
         internal static CommandOption AddVerbosityOption(CommandLineApplication app)
         {
-            return app.Option("-v|--verbosity", "Set the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]", CommandOptionType.SingleValue);
+            return app.Option("-v|--verbosity", LocalizableStrings.VerbosityOptionDescription, CommandOptionType.SingleValue);
         }
 
         private static string GetMSBuildExePath()
