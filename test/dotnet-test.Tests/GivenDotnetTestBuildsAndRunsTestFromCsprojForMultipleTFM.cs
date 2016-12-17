@@ -39,6 +39,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                      .And.Contain("Passed   TestNamespace.VSTestTests.VSTestPassTestDesktop", "because .NET 4.6 tests will pass")
                      .And.Contain("Total tests: 3. Passed: 1. Failed: 2. Skipped: 0.", "because netcoreapp1.0 tests will fail")
                      .And.Contain("Failed   TestNamespace.VSTestTests.VSTestFailTestNetCoreApp", "because netcoreapp1.0 tests will fail");
+            result.ExitCode.Should().Be(1);
         }
 
         [WindowsOnlyFact]
@@ -70,6 +71,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // for target framework netcoreapp1.0
             result.StdOut.Should().Contain("Total tests: 3. Passed: 1. Failed: 2. Skipped: 0.");
             result.StdOut.Should().Contain("Failed   TestNamespace.VSTestXunitTests.VSTestXunitFailTestNetCoreApp");
+            result.ExitCode.Should().Be(1);
         }
     }
 }
