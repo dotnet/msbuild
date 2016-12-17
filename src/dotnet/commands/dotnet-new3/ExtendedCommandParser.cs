@@ -90,7 +90,7 @@ namespace Microsoft.DotNet.Tools.New3
         {
             if (IsParameterNameTaken(parameter))
             {
-                throw new Exception($"Parameter name {parameter} cannot be used for multiple purposes");
+                throw new Exception(string.Format(LocalizableStrings.ParameterReuseError, parameter));
             }
 
             _defaultCommandOptions.Add(parameter);
@@ -117,7 +117,7 @@ namespace Microsoft.DotNet.Tools.New3
             {
                 if (IsParameterNameTaken(parameters[i]))
                 {
-                    throw new Exception($"Parameter name {parameters[i]} cannot be used for multiple purposes");
+                    throw new Exception(string.Format(LocalizableStrings.ParameterReuseError, parameters[i]));
                 }
 
                 _hiddenCommandCanonicalMapping.Add(parameters[i], canonical);
@@ -193,8 +193,7 @@ namespace Microsoft.DotNet.Tools.New3
 
             foreach (KeyValuePair<string, IList<string>> param in allParameters)
             {
-                string canonicalName;
-                if (_hiddenCommandCanonicalMapping.TryGetValue(param.Key, out canonicalName))
+                if (_hiddenCommandCanonicalMapping.TryGetValue(param.Key, out string canonicalName))
                 {
                     CommandOptionType optionType = _hiddenCommandOptions[canonicalName];
 
@@ -206,14 +205,14 @@ namespace Microsoft.DotNet.Tools.New3
                     {
                         if (param.Value.Count != 1)
                         {
-                            throw new Exception($"Multiple values specified for single value parameter: {canonicalName}");
+                            throw new Exception(string.Format(LocalizableStrings.MultipleValuesSpecifiedForSingleValuedParameter, canonicalName));
                         }
                     }
                     else // NoValue
                     {
                         if (param.Value.Count != 1 || param.Value[0] != null)
                         {
-                            throw new Exception($"Value specified for valueless parameter: {canonicalName}");
+                            throw new Exception(string.Format(LocalizableStrings.ValueSpecifiedForValuelessParameter, canonicalName));
                         }
                     }
 
@@ -224,13 +223,13 @@ namespace Microsoft.DotNet.Tools.New3
                     if (_parsedTemplateParams.ContainsKey(canonicalName))
                     {
                         // error, the same param was specified twice
-                        throw new Exception($"Parameter [{canonicalName}] was specified multiple times, including with the flag [{param.Key}]");
+                        throw new Exception(string.Format(LocalizableStrings.ParameterSpecifiedMultipleTimes, canonicalName, param.Key));
                     }
                     else
                     {
                         if ((param.Value[0] == null) && (_templateParamDataTypeMapping[canonicalName] != "bool"))
                         {
-                            throw new Exception($"Parameter [{param.Key}] ({canonicalName}) must be given a value");
+                            throw new Exception(string.Format(LocalizableStrings.ParameterMissingValue, param.Key, canonicalName));
                         }
                         
                         // TODO: allow for multi-valued params
@@ -258,8 +257,7 @@ namespace Microsoft.DotNet.Tools.New3
                     continue;
                 }
 
-                string flagFullText;
-                if (parameterNameMap == null || !parameterNameMap.TryGetValue(parameter.Name, out flagFullText))
+                if (parameterNameMap == null || !parameterNameMap.TryGetValue(parameter.Name, out string flagFullText))
                 {
                     flagFullText = parameter.Name;
                 }
@@ -328,7 +326,7 @@ namespace Microsoft.DotNet.Tools.New3
             if (invalidParams.Count > 0)
             {
                 string unusableDisplayList = string.Join(", ", invalidParams);
-                throw new Exception($"Template is malformed. The following parameter names are invalid: {unusableDisplayList}");
+                throw new Exception(string.Format(LocalizableStrings.TemplateMalformedDueToBadParameters, unusableDisplayList));
             }
         }
 
@@ -336,7 +334,7 @@ namespace Microsoft.DotNet.Tools.New3
         {
             if (_templateParamCanonicalMapping.TryGetValue(variant, out string existingCanonical))
             {
-                throw new Exception($"Option variant {variant} for canonical {canonical} was already defined for canonical {existingCanonical}");
+                throw new Exception(string.Format(LocalizableStrings.OptionVariantAlreadyDefined, variant, canonical, existingCanonical));
             }
 
             _templateParamCanonicalMapping[variant] = canonical;
@@ -370,9 +368,7 @@ namespace Microsoft.DotNet.Tools.New3
                     {
                         string variant = variantToCanonical.Key;
                         string canonical = variantToCanonical.Value;
-
-                        IList<string> variantList;
-                        if (!_canonicalToVariantsTemplateParamMap.TryGetValue(canonical, out variantList))
+                        if (!_canonicalToVariantsTemplateParamMap.TryGetValue(canonical, out var variantList))
                         {
                             variantList = new List<string>();
                             _canonicalToVariantsTemplateParamMap.Add(canonical, variantList);

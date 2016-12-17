@@ -28,9 +28,9 @@ namespace Microsoft.DotNet.Tools.New3
         private static void SetupInternalCommands(ExtendedCommandParser appExt)
         {
             // visible
-            appExt.InternalOption("-l|--list", "--list", "List templates containing the specified name.", CommandOptionType.NoValue);
-            appExt.InternalOption("-n|--name", "--name", "The name for the output being created. If no name is specified, the name of the current directory is used.", CommandOptionType.SingleValue);
-            appExt.InternalOption("-h|--help", "--help", "Display help for the indicated template's parameters.", CommandOptionType.NoValue);
+            appExt.InternalOption("-l|--list", "--list", LocalizableStrings.ListsTemplates, CommandOptionType.NoValue);
+            appExt.InternalOption("-n|--name", "--name", LocalizableStrings.NameOfOutput, CommandOptionType.SingleValue);
+            appExt.InternalOption("-h|--help", "--help", LocalizableStrings.DisplaysHelp, CommandOptionType.NoValue);
 
             // hidden
             appExt.HiddenInternalOption("-d|--dir", "--dir", CommandOptionType.NoValue);
@@ -48,14 +48,14 @@ namespace Microsoft.DotNet.Tools.New3
             // Preserve these for now - they've got the help text, in case we want it back.
             // (they'll need to get converted to extended option calls)
             //
-            //CommandOption dirOption = app.Option("-d|--dir", "Indicates whether to create a directory for the generated content.", CommandOptionType.NoValue);
-            //CommandOption aliasOption = app.Option("-a|--alias", "Creates an alias for the specified template.", CommandOptionType.SingleValue);
-            //CommandOption parametersFilesOption = app.Option("-x|--extra-args", "Specifies a file containing additional parameters.", CommandOptionType.MultipleValue);
-            //CommandOption localeOption = app.Option("--locale", "The locale to use", CommandOptionType.SingleValue);
-            //CommandOption quietOption = app.Option("--quiet", "Doesn't output any status information.", CommandOptionType.NoValue);
-            //CommandOption installOption = app.Option("-i|--install", "Installs a source or a template pack.", CommandOptionType.MultipleValue);
+            //CommandOption dirOption = app.Option("-d|--dir", LocalizableStrings.CreateDirectoryHelp, CommandOptionType.NoValue);
+            //CommandOption aliasOption = app.Option("-a|--alias", LocalizableStrings.CreateAliasHelp, CommandOptionType.SingleValue);
+            //CommandOption parametersFilesOption = app.Option("-x|--extra-args", LocalizableString.ExtraArgsFileHelp, CommandOptionType.MultipleValue);
+            //CommandOption localeOption = app.Option("--locale", LocalizableStrings.LocaleHelp, CommandOptionType.SingleValue);
+            //CommandOption quietOption = app.Option("--quiet", LocalizableStrings.QuietModeHelp, CommandOptionType.NoValue);
+            //CommandOption installOption = app.Option("-i|--install", LocalizableStrings.InstallHelp, CommandOptionType.MultipleValue);
 
-            //CommandOption update = app.Option("--update", "Update matching templates.", CommandOptionType.NoValue);
+            //CommandOption update = app.Option("--update", LocalizableStrings.UpdateHelp, CommandOptionType.NoValue);
         }
 
         public static int Run(string[] args)
@@ -66,11 +66,11 @@ namespace Microsoft.DotNet.Tools.New3
 
             ExtendedCommandParser app = new ExtendedCommandParser()
             {
-                Name = "dotnet new3",
-                FullName = "Template Instantiation Commands for .NET Core CLI."
+                Name = "dotnet new",
+                FullName = LocalizableStrings.CommandDescription
             };
             SetupInternalCommands(app);
-            CommandArgument templateNames = app.Argument("template", "The template to instantiate.");
+            CommandArgument templateNames = app.Argument("template", LocalizableStrings.TemplateArgumentHelp);
 
             app.OnExecute(async () =>
             {
@@ -90,7 +90,7 @@ namespace Microsoft.DotNet.Tools.New3
                     string newLocale = app.InternalParamValue("--locale");
                     if (!ValidateLocaleFormat(newLocale))
                     {
-                        EngineEnvironmentSettings.Host.LogMessage(string.Format("Invalid format for input locale: [{0}]. Example valid formats: [en] [en-US]", newLocale));
+                        EngineEnvironmentSettings.Host.LogMessage(string.Format(LocalizableStrings.BadLocaleError, newLocale));
                         return -1;
                     }
 
@@ -115,7 +115,7 @@ namespace Microsoft.DotNet.Tools.New3
                     return resultCode;
                 }
 
-                return await CreateTemplate(app, templateNames.Value);
+                return await CreateTemplateAsync(app, templateNames.Value);
             });
 
             int result;
@@ -159,7 +159,7 @@ namespace Microsoft.DotNet.Tools.New3
             return result;
         }
 
-        private static async Task<int> CreateTemplate(ExtendedCommandParser app, string templateName)
+        private static async Task<int> CreateTemplateAsync(ExtendedCommandParser app, string templateName)
         {
             string nameValue = app.InternalParamValue("--name");
             string fallbackName = new DirectoryInfo(Directory.GetCurrentDirectory()).Name;
@@ -176,32 +176,29 @@ namespace Microsoft.DotNet.Tools.New3
             {
                 case CreationResultStatus.AliasSucceeded:
                     // TODO: get this localized - in the mean time just list the templates, showing the alias
-                    //EngineEnvironmentSettings.Host.LogMessage("Alias creation successful");
+                    //EngineEnvironmentSettings.Host.LogMessage(LocalizableStrings.AliasCreated);
                     ListTemplates(templateName);
                     break;
                 case CreationResultStatus.AliasFailed:
-                    EngineEnvironmentSettings.Host.LogMessage(string.Format("Specified alias {0} already exists. Please specify a different alias.", aliasName));
+                    EngineEnvironmentSettings.Host.LogMessage(string.Format(LocalizableStrings.AliasAlreadyExists, aliasName));
                     ListTemplates(templateName);
                     break;
                 case CreationResultStatus.CreateSucceeded:
-                    EngineEnvironmentSettings.Host.LogMessage(string.Format("The template {0} created successfully. Please run \"dotnet restore\" to get started!", resultTemplateName));
+                    EngineEnvironmentSettings.Host.LogMessage(string.Format(LocalizableStrings.CreateSuccessful, resultTemplateName));
                     break;
                 case CreationResultStatus.CreateFailed:
-                    EngineEnvironmentSettings.Host.LogMessage(string.Format("Template {0} could not be created. Error returned was: {1}", resultTemplateName, instantiateResult.Message));
+                case CreationResultStatus.TemplateNotFound:
+                    EngineEnvironmentSettings.Host.LogMessage(string.Format(LocalizableStrings.CreateFailed, resultTemplateName, instantiateResult.Message));
                     ListTemplates(templateName);
                     break;
                 case CreationResultStatus.InstallSucceeded:
-                    EngineEnvironmentSettings.Host.LogMessage(string.Format("The template {0} installed successfully. You can use \"dotnet new {0}\" to get started with the new template.", resultTemplateName));
+                    EngineEnvironmentSettings.Host.LogMessage(string.Format(LocalizableStrings.InstallSuccessful, resultTemplateName));
                     break;
                 case CreationResultStatus.InstallFailed:
-                    EngineEnvironmentSettings.Host.LogMessage(string.Format("Template {0} could not be created. Error returned was: {1}.", resultTemplateName, instantiateResult.Message));
+                    EngineEnvironmentSettings.Host.LogMessage(string.Format(LocalizableStrings.InstallFailed, resultTemplateName, instantiateResult.Message));
                     break;
                 case CreationResultStatus.MissingMandatoryParam:
-                    EngineEnvironmentSettings.Host.LogMessage(string.Format("Mandatory parameter {0} missing for template {1}.", instantiateResult.Message, resultTemplateName));
-                    break;
-                case CreationResultStatus.TemplateNotFound:
-                    EngineEnvironmentSettings.Host.LogMessage(string.Format("Template {0} could not be created. Error returned was: {1}.", resultTemplateName, instantiateResult.Message));
-                    ListTemplates(templateName);
+                    EngineEnvironmentSettings.Host.LogMessage(string.Format(LocalizableStrings.MissingRequiredParameter, instantiateResult.Message, resultTemplateName));
                     break;
                 default:
                     break;
@@ -233,7 +230,7 @@ namespace Microsoft.DotNet.Tools.New3
             {
                 if (!app.InternalParamHasValue("--quiet"))
                 {
-                    Reporter.Output.WriteLine("Getting things ready for first use...");
+                    Reporter.Output.WriteLine(LocalizableStrings.GettingReady);
                 }
 
                 ConfigureEnvironment();
@@ -279,7 +276,7 @@ namespace Microsoft.DotNet.Tools.New3
 
             if (app.RemainingParameters.Any(x => !x.Key.StartsWith("--debug:")))
             {
-                EngineEnvironmentSettings.Host.LogMessage("Invalid input switch:");
+                EngineEnvironmentSettings.Host.LogMessage(LocalizableStrings.InvalidInputSwitch);
                 foreach (string flag in app.RemainingParameters.Keys)
                 {
                     EngineEnvironmentSettings.Host.LogMessage($"\t{flag}");
@@ -357,7 +354,7 @@ namespace Microsoft.DotNet.Tools.New3
         //    {
         //        if (!quiet)
         //        {
-        //            Reporter.Output.WriteLine($"Checking for updates for {src.Alias}...");
+        //            Reporter.Output.WriteLine(string.Format(LocalizableStrings.CheckingForUpdates, src.Alias));
         //        }
 
         //        bool updatesReady;
@@ -375,7 +372,7 @@ namespace Microsoft.DotNet.Tools.New3
         //        {
         //            if (!quiet)
         //            {
-        //                Reporter.Output.WriteLine($"An update for {src.Alias} is available...");
+        //                Reporter.Output.WriteLine(string.Format(LocalizableStrings.UpdateAvailable, src.Alias));
         //            }
 
         //            string packageId = src.ParentSource != null
@@ -390,7 +387,7 @@ namespace Microsoft.DotNet.Tools.New3
         //    {
         //        if (!quiet)
         //        {
-        //            Reporter.Output.WriteLine("No updates were found.");
+        //            Reporter.Output.WriteLine(LocalizableStrings.NoUpdates);
         //        }
 
         //        return 0;
@@ -398,7 +395,7 @@ namespace Microsoft.DotNet.Tools.New3
 
         //    if (!quiet)
         //    {
-        //        Reporter.Output.WriteLine("Installing updates...");
+        //        Reporter.Output.WriteLine(LocalizableString.InstallingUpdates);
         //    }
 
         //    List<string> installCommands = new List<string>();
@@ -416,8 +413,8 @@ namespace Microsoft.DotNet.Tools.New3
         //    installCommands.Add("--quiet");
         //    uninstallCommands.Add("--quiet");
 
-        //    Command.CreateDotNet("new3", uninstallCommands).ForwardStdOut().ForwardStdErr().Execute();
-        //    Command.CreateDotNet("new3", installCommands).ForwardStdOut().ForwardStdErr().Execute();
+        //    Command.CreateDotNet("new", uninstallCommands).ForwardStdOut().ForwardStdErr().Execute();
+        //    Command.CreateDotNet("new", installCommands).ForwardStdOut().ForwardStdErr().Execute();
         //    Broker.ComponentRegistry.ForceReinitialize();
 
         //    if (!quiet)
@@ -430,24 +427,24 @@ namespace Microsoft.DotNet.Tools.New3
 
         private static void ConfigureEnvironment()
         {
-            string userNuGetConfig = $@"<?xml version=""1.0"" encoding=""utf-8""?>
-<configuration>
-  <packageSources>
-    <add key=""dotnet new3 builtins"" value = ""{Paths.Global.BuiltInsFeed}""/>
-  </packageSources>
-</configuration>";
-            Paths.User.NuGetConfig.WriteAllText(userNuGetConfig);
+            string[] packageList;
 
-            string[] packageList = Paths.Global.DefaultInstallPackageList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            if (packageList.Length > 0)
+            if (Paths.Global.DefaultInstallPackageList.FileExists())
             {
-                InstallPackages(packageList, true);
+                packageList = Paths.Global.DefaultInstallPackageList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                if (packageList.Length > 0)
+                {
+                    InstallPackages(packageList, true);
+                }
             }
 
-            packageList = Paths.Global.DefaultInstallTemplateList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            if (packageList.Length > 0)
+            if (Paths.Global.DefaultInstallTemplateList.FileExists())
             {
-                InstallPackages(packageList, true);
+                packageList = Paths.Global.DefaultInstallTemplateList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                if (packageList.Length > 0)
+                {
+                    InstallPackages(packageList, true);
+                }
             }
         }
 
@@ -478,7 +475,7 @@ namespace Microsoft.DotNet.Tools.New3
                 }
                 catch
                 {
-                    EngineEnvironmentSettings.Host.OnNonCriticalError("InvalidPackageSpecification", string.Format($"Package [{pkg}] is not a valid package specification"), null, 0);
+                    EngineEnvironmentSettings.Host.OnNonCriticalError("InvalidPackageSpecification", string.Format(LocalizableStrings.BadPackageSpec, pkg), null, 0);
                 }
             }
 
@@ -494,36 +491,36 @@ namespace Microsoft.DotNet.Tools.New3
         {
             IEnumerable<ITemplateInfo> results = TemplateCreator.List(templateNames);
             HelpFormatter<ITemplateInfo> formatter = new HelpFormatter<ITemplateInfo>(results, 6, '-', false);
-            formatter.DefineColumn(delegate (ITemplateInfo t) { return t.Name; }, "Templates");
-            formatter.DefineColumn(delegate (ITemplateInfo t) { return $"[{t.ShortName}]"; }, "Short Name");
-            formatter.DefineColumn(delegate (ITemplateInfo t) { return AliasRegistry.GetAliasForTemplate(t) ?? ""; }, "Alias");
+            formatter.DefineColumn(delegate (ITemplateInfo t) { return t.Name; }, LocalizableStrings.Templates);
+            formatter.DefineColumn(delegate (ITemplateInfo t) { return $"[{t.ShortName}]"; }, LocalizableStrings.ShortName);
+            formatter.DefineColumn(delegate (ITemplateInfo t) { return AliasRegistry.GetAliasForTemplate(t) ?? ""; }, LocalizableStrings.Alias);
             Reporter.Output.WriteLine(formatter.Layout());
         }
 
         private static void ShowConfig()
         {
-            Reporter.Output.WriteLine("dotnet new3 current configuration:");
+            Reporter.Output.WriteLine(LocalizableStrings.CurrentConfiguration);
             Reporter.Output.WriteLine(" ");
-            TableFormatter.Print(SettingsLoader.MountPoints, "(No Items)", "   ", '-', new Dictionary<string, Func<MountPointInfo, object>>
+            TableFormatter.Print(SettingsLoader.MountPoints, LocalizableStrings.NoItems, "   ", '-', new Dictionary<string, Func<MountPointInfo, object>>
             {
-                {"Mount Points", x => x.Place},
-                {"Id", x => x.MountPointId},
-                {"Parent", x => x.ParentMountPointId},
-                {"Factory", x => x.MountPointFactoryId}
+                {LocalizableStrings.MountPoints, x => x.Place},
+                {LocalizableStrings.Id, x => x.MountPointId},
+                {LocalizableStrings.Parent, x => x.ParentMountPointId},
+                {LocalizableStrings.Factory, x => x.MountPointFactoryId}
             });
 
-            TableFormatter.Print(SettingsLoader.Components.OfType<IMountPointFactory>(), "(No Items)", "   ", '-', new Dictionary<string, Func<IMountPointFactory, object>>
+            TableFormatter.Print(SettingsLoader.Components.OfType<IMountPointFactory>(), LocalizableStrings.NoItems, "   ", '-', new Dictionary<string, Func<IMountPointFactory, object>>
             {
-                {"Mount Point Factories", x => x.Id},
-                {"Type", x => x.GetType().FullName},
-                {"Assembly", x => x.GetType().GetTypeInfo().Assembly.FullName}
+                {LocalizableStrings.MountPointFactories, x => x.Id},
+                {LocalizableStrings.Type, x => x.GetType().FullName},
+                {LocalizableStrings.Assembly, x => x.GetType().GetTypeInfo().Assembly.FullName}
             });
 
-            TableFormatter.Print(SettingsLoader.Components.OfType<IGenerator>(), "(No Items)", "   ", '-', new Dictionary<string, Func<IGenerator, object>>
+            TableFormatter.Print(SettingsLoader.Components.OfType<IGenerator>(), LocalizableStrings.NoItems, "   ", '-', new Dictionary<string, Func<IGenerator, object>>
             {
-                {"Generators", x => x.Id},
-                {"Type", x => x.GetType().FullName},
-                {"Assembly", x => x.GetType().GetTypeInfo().Assembly.FullName}
+                {LocalizableStrings.Generators, x => x.Id},
+                {LocalizableStrings.Type, x => x.GetType().FullName},
+                {LocalizableStrings.Assembly, x => x.GetType().GetTypeInfo().Assembly.FullName}
             });
         }
 
@@ -560,12 +557,12 @@ namespace Microsoft.DotNet.Tools.New3
             Reporter.Output.WriteLine(templateInfo.Name);
             if (!string.IsNullOrWhiteSpace(templateInfo.Author))
             {
-                Reporter.Output.WriteLine($"Author: {templateInfo.Author}");
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.Author, templateInfo.Author));
             }
 
             if (!string.IsNullOrWhiteSpace(templateInfo.Description))
             {
-                Reporter.Output.WriteLine($"Description: {templateInfo.Description}");
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.Description, templateInfo.Description));
             }
 
             ITemplate template = SettingsLoader.LoadTemplate(templateInfo);
@@ -584,14 +581,15 @@ namespace Microsoft.DotNet.Tools.New3
             {
                 HelpFormatter<ITemplateParameter> formatter = new HelpFormatter<ITemplateParameter>(filteredParams, 2, null, true);
 
-                formatter.DefineColumn(delegate (ITemplateParameter param)
-                {
-                    // the key is guaranteed to exist
-                    IList<string> variants = app.CanonicalToVariantsTemplateParamMap[param.Name];
-                    string options = string.Join("|", variants.Reverse());
-                    return "  " + options;
-                },
-                    "Options:"
+                formatter.DefineColumn(
+                    param =>
+                    {
+                        // the key is guaranteed to exist
+                        IList<string> variants = app.CanonicalToVariantsTemplateParamMap[param.Name];
+                        string options = string.Join("|", variants.Reverse());
+                        return "  " + options;
+                    },
+                    LocalizableStrings.Options
                 );
 
                 formatter.DefineColumn(delegate (ITemplateParameter param)
@@ -617,13 +615,13 @@ namespace Microsoft.DotNet.Tools.New3
                             && !string.IsNullOrEmpty(param.DefaultValue)
                             && !string.Equals(param.DefaultValue, resolvedValue))
                         {
-                            displayValue.AppendLine("Configured Value: " + resolvedValue);
+                            displayValue.AppendLine(string.Format(LocalizableStrings.ConfiguredValue, resolvedValue));
                         }
                     }
 
                     if (!string.IsNullOrEmpty(param.DefaultValue))
                     {
-                        displayValue.AppendLine("Default: " + param.DefaultValue);
+                        displayValue.AppendLine(string.Format(LocalizableStrings.DefaultValue, param.DefaultValue));
                     }
 
                     return displayValue.ToString();
@@ -635,7 +633,7 @@ namespace Microsoft.DotNet.Tools.New3
             }
             else
             {
-                Reporter.Output.WriteLine("    (No Parameters)");
+                Reporter.Output.WriteLine(LocalizableStrings.NoParameters);
             }
         }
     }
