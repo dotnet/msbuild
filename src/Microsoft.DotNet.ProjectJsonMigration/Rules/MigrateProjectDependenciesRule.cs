@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 csprojTransformedReferences.Add(transformItem);
             }
 
-            MigrationTrace.Instance.WriteLine($"{nameof(MigrateProjectDependenciesRule)}: Migrating {csprojTransformedReferences.Count()} xproj to csproj references");
+            MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.MigratingCountXprojToCsprojReferences, nameof(MigrateProjectDependenciesRule), csprojTransformedReferences.Count()));
 
             foreach (var csprojTransformedReference in csprojTransformedReferences)
             {
