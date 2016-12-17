@@ -116,7 +116,7 @@ namespace Microsoft.DotNet.Cli
             {
                 for (; lastArg < args.Length; lastArg++)
                 {
-                    if (IsArg(args[lastArg], "v", "verbose"))
+                    if (IsArg(args[lastArg], "d", "diagnostics"))
                     {
                         verbose = true;
                     }
