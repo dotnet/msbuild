@@ -157,7 +157,7 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
                 {
                     if (globalFound)
                     {
-                        throw new InvalidSolutionFormatException(curLineNum, "Global section specified more than once");
+                        throw new InvalidSolutionFormatException(curLineNum, LocalizableStrings.GlobalSectionMoreThanOnceError);
                     }
                     globalFound = true;
                     while ((line = reader.ReadLine()) != null)
@@ -181,7 +181,7 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
                     }
                     if (line == null)
                     {
-                        throw new InvalidSolutionFormatException(curLineNum, "Global section not closed");
+                        throw new InvalidSolutionFormatException(curLineNum, LocalizableStrings.GlobalSectionNotClosedError);
                     }
                 }
                 else if (line.IndexOf('=') != -1)
@@ -191,7 +191,7 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
             }
             if (FormatVersion == null)
             {
-                throw new InvalidSolutionFormatException(curLineNum, "File header is missing");
+                throw new InvalidSolutionFormatException(curLineNum, LocalizableStrings.FileHeaderMissingError);
             }
         }
 
@@ -318,7 +318,7 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
                 }
             }
 
-            throw new InvalidSolutionFormatException(curLineNum, "Project section not closed");
+            throw new InvalidSolutionFormatException(curLineNum, LocalizableStrings.ProjectSectionNotClosedError);
         }
 
         private void FindNext(int ln, string line, ref int i, char c)
@@ -468,7 +468,7 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
             {
                 return SlnSectionType.PostProcess;
             }
-            throw new InvalidSolutionFormatException(curLineNum, "Invalid section type: " + s);
+            throw new InvalidSolutionFormatException(curLineNum, String.Format(LocalizableStrings.InvalidSectionTypeError, s));
         }
 
         private string FromSectionType(bool isProjectSection, SlnSectionType type)
@@ -489,7 +489,7 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
             int k = line.IndexOf('(');
             if (k == -1)
             {
-                throw new InvalidSolutionFormatException(curLineNum, "Section id missing");
+                throw new InvalidSolutionFormatException(curLineNum, LocalizableStrings.SectionIdMissingError);
             }
             var tag = line.Substring(0, k).Trim();
             var k2 = line.IndexOf(')', k);
@@ -518,7 +518,7 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
             }
             if (line == null)
             {
-                throw new InvalidSolutionFormatException(curLineNum, "Closing section tag not found");
+                throw new InvalidSolutionFormatException(curLineNum, LocalizableStrings.ClosingSectionTagNotFoundError);
             }
         }
 
