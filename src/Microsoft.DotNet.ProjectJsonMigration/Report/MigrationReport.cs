@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                     }
                     else if (!report.Skipped)
                     {
-                        MigrationTrace.Instance.WriteLine("Detected double project migration: {report.ProjectDirectory}");
+                        MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.DoubleMigrationError, report.ProjectDirectory));
                     }
                 }
                 else

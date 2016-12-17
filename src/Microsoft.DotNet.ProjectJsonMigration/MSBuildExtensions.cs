@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             if (item.IntersectIncludes(otherItem).Count() != item.Includes().Count())
             {
 #if !DISABLE_TRACE
-                MigrationTrace.Instance.WriteLine($"{nameof(MSBuildExtensions)}.{nameof(IsEquivalentTo)} includes not equivalent.");
+                MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.IncludesNotEquivalent, nameof(MSBuildExtensions), nameof(IsEquivalentTo)));
 #endif
                 return false;
             }
@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             if (item.IntersectExcludes(otherItem).Count() != item.Excludes().Count())
             {
 #if !DISABLE_TRACE
-                MigrationTrace.Instance.WriteLine($"{nameof(MSBuildExtensions)}.{nameof(IsEquivalentTo)} excludes not equivalent.");
+                MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.ExcludesNotEquivalent, nameof(MSBuildExtensions), nameof(IsEquivalentTo)));
 #endif
                 return false;
             }
@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             if (item.Remove != otherItem.Remove)
             {
 #if !DISABLE_TRACE
-                MigrationTrace.Instance.WriteLine($"{nameof(MSBuildExtensions)}.{nameof(IsEquivalentTo)} removes not equivalent.");
+                MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.RemovesNotEquivalent, nameof(MSBuildExtensions), nameof(IsEquivalentTo)));
 #endif
                 return false;
             }
@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 if (otherMetadata == null)
                 {
 #if !DISABLE_TRACE
-                    MigrationTrace.Instance.WriteLine($"{nameof(MSBuildExtensions)}.{nameof(IsEquivalentTo)} metadata doesn't exist {{ {metadata.Name} {metadata.Value} }}");
+                    MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.MetadataDoesntExist, nameof(MSBuildExtensions), nameof(IsEquivalentTo), metadata.Name, metadata.Value));
 #endif
                     return false;
                 }
@@ -76,7 +76,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 if (!metadata.ValueEquals(otherMetadata))
                 {
 #if !DISABLE_TRACE
-                    MigrationTrace.Instance.WriteLine($"{nameof(MSBuildExtensions)}.{nameof(IsEquivalentTo)} metadata has another value {{ {metadata.Name} {metadata.Value} {otherMetadata.Value} }}");
+                    MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.MetadataHasAnotherValue, nameof(MSBuildExtensions), nameof(IsEquivalentTo), metadata.Name, metadata.Value, otherMetadata.Value));
 #endif
                     return false;
                 }
@@ -202,13 +202,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
             if (existingMetadata != default(ProjectMetadataElement) && !existingMetadata.ValueEquals(metadata))
             {
-                throw new Exception("Cannot merge metadata with the same name and different values");
+                throw new Exception(LocalizableStrings.CannotMergeMetadataError);
             }
 
             if (existingMetadata == default(ProjectMetadataElement))
             {
 #if !DISABLE_TRACE
-                MigrationTrace.Instance.WriteLine($"{nameof(AddMetadata)}: Adding metadata to {item.ItemType} item: {{ {metadata.Name}, {metadata.Value}, {metadata.Condition} }}");
+                MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.AddingMetadataToItem, nameof(AddMetadata), item.ItemType, metadata.Name, metadata.Value, metadata.Condition));
 #endif
                 var metametadata = item.AddMetadata(metadata.Name, metadata.Value);
                 metametadata.Condition = metadata.Condition;

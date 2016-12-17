@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         {
             foreach (var rule in Rules)
             {
-                MigrationTrace.Instance.WriteLine($"{nameof(DefaultMigrationRuleSet)}: Executing migration rule {rule.GetType().Name}");
+                MigrationTrace.Instance.WriteLine(string.Format(LocalizableStrings.ExecutingMigrationRule, nameof(DefaultMigrationRuleSet), rule.GetType().Name));
                 rule.Apply(migrationSettings, migrationRuleInputs);
             }
         }

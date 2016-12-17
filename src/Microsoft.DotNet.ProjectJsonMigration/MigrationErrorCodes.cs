@@ -8,43 +8,43 @@ namespace Microsoft.DotNet.ProjectJsonMigration
     internal static partial class MigrationErrorCodes
     {
         public static Func<string, MigrationError> MIGRATE1011
-            => (message) => new MigrationError(nameof(MIGRATE1011), "Deprecated Project", message);
+            => (message) => new MigrationError(nameof(MIGRATE1011), LocalizableStrings.MIGRATE1011, message);
 
         public static Func<string, MigrationError> MIGRATE1012
-            => (message) => new MigrationError(nameof(MIGRATE1012), "Project not Restored", message);
+            => (message) => new MigrationError(nameof(MIGRATE1012), LocalizableStrings.MIGRATE1012, message);
 
         public static Func<string, MigrationError> MIGRATE1013
-            => (message) => new MigrationError(nameof(MIGRATE1013), "No Project", message);
+            => (message) => new MigrationError(nameof(MIGRATE1013), LocalizableStrings.MIGRATE1013, message);
 
         public static Func<string, MigrationError> MIGRATE1014
-            => (message) => new MigrationError(nameof(MIGRATE1014), "Unresolved Dependency", message);
+            => (message) => new MigrationError(nameof(MIGRATE1014), LocalizableStrings.MIGRATE1014, message);
 
         public static Func<string, MigrationError> MIGRATE1015
-            => (message) => new MigrationError(nameof(MIGRATE1015), "File Overwrite", message);
+            => (message) => new MigrationError(nameof(MIGRATE1015), LocalizableStrings.MIGRATE1015, message);
 
         public static Func<string, MigrationError> MIGRATE1016
-            => (message) => new MigrationError(nameof(MIGRATE1016), "Unsupported Script Variable", message);
+            => (message) => new MigrationError(nameof(MIGRATE1016), LocalizableStrings.MIGRATE1016, message);
 
         public static Func<string, MigrationError> MIGRATE1017
-            => (message) => new MigrationError(nameof(MIGRATE1017), "Multiple Xproj Files", message);
+            => (message) => new MigrationError(nameof(MIGRATE1017), LocalizableStrings.MIGRATE1017, message);
 
         public static Func<string, MigrationError> MIGRATE1018
-            => (message) => new MigrationError(nameof(MIGRATE1018), "Dependency Project not found", message);
+            => (message) => new MigrationError(nameof(MIGRATE1018), LocalizableStrings.MIGRATE1018, message);
 
         public static Func<string, MigrationError> MIGRATE1019
-            => (message) => new MigrationError(nameof(MIGRATE1019), "Unsupported Script Event Hook", message);
+            => (message) => new MigrationError(nameof(MIGRATE1019), LocalizableStrings.MIGRATE1019, message);
 
         // Potentially Temporary (Point in Time) Errors
         public static Func<string, MigrationError> MIGRATE20011
-            => (message) => new MigrationError(nameof(MIGRATE20011), "Multi-TFM", message);
+            => (message) => new MigrationError(nameof(MIGRATE20011), LocalizableStrings.MIGRATE20011, message);
 
         public static Func<string, MigrationError> MIGRATE20012
-            => (message) => new MigrationError(nameof(MIGRATE20012), "Configuration Exclude", message);
+            => (message) => new MigrationError(nameof(MIGRATE20012), LocalizableStrings.MIGRATE20012, message);
 
         public static Func<string, MigrationError> MIGRATE20013
-            => (message) => new MigrationError(nameof(MIGRATE20013), "Non-Csharp App", message);
+            => (message) => new MigrationError(nameof(MIGRATE20013), LocalizableStrings.MIGRATE20013, message);
 
         public static Func<string, MigrationError> MIGRATE20018
-            => (message) => new MigrationError(nameof(MIGRATE20018), "Files specified under PackOptions", message);
+            => (message) => new MigrationError(nameof(MIGRATE20018), LocalizableStrings.MIGRATE20018, message);
     }
 }
