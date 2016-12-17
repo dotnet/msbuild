@@ -53,7 +53,7 @@
   <ItemGroup>
     <VSTemplate Include="ClassLibrary.vstemplate">
       <SubType>Designer</SubType>
-      <OutputSubPath>.NET Core</OutputSubPath>
+      <OutputSubPath>.NET Standard</OutputSubPath>
     </VSTemplate>
   </ItemGroup>
   <ItemGroup>
