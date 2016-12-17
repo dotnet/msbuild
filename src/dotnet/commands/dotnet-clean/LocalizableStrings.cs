@@ -12,14 +12,14 @@
 
         public const string CmdOutputDir = "OUTPUT_DIR";
 
-        public const string CmdOutputDirDescription = "Directory in which the build outputs have been placed";
+        public const string CmdOutputDirDescription = "Directory in which the build outputs have been placed.";
 
         public const string CmdFramework = "FRAMEWORK";
 
-        public const string CmdFrameworkDescription = "Clean a specific framework";
+        public const string CmdFrameworkDescription = "Clean a specific framework.";
 
         public const string CmdConfiguration = "CONFIGURATION";
 
-        public const string CmdConfigurationDescription = "Clean a specific configuration";
+        public const string CmdConfigurationDescription = "Clean a specific configuration.";
     }
 }
