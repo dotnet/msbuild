@@ -3,83 +3,64 @@
 
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
-using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 namespace Microsoft.DotNet.Tools.Add.ProjectToSolution
 {
-    public class AddProjectToSolutionCommand
+    internal class AddProjectToSolutionCommand : DotNetSubCommandBase
     {
-        internal static CommandLineApplication CreateApplication(CommandLineApplication parentApp)
+        public static DotNetSubCommandBase Create()
         {
-            CommandLineApplication app = parentApp.Command("project", throwOnUnexpectedArg: false);
-            app.FullName = LocalizableStrings.AppFullName;
-            app.Description = LocalizableStrings.AppDescription;
-            app.HandleRemainingArguments = true;
-            app.ArgumentSeparatorHelpText = LocalizableStrings.AppHelpText;
-
-            app.HelpOption("-h|--help");
-
-            app.OnExecute(() =>
+            var command = new AddProjectToSolutionCommand()
             {
-                try
-                {
-                    if (!parentApp.Arguments.Any())
-                    {
-                        throw new GracefulException(CommonLocalizableStrings.RequiredArgumentNotPassed, Constants.ProjectOrSolutionArgumentName);
-                    }
+                Name = "project",
+                FullName = LocalizableStrings.AppFullName,
+                Description = LocalizableStrings.AppDescription,
+                HandleRemainingArguments = true,
+                ArgumentSeparatorHelpText = LocalizableStrings.AppHelpText,
+            };
 
-                    var projectOrDirectory = parentApp.Arguments.First().Value;
-                    if (string.IsNullOrEmpty(projectOrDirectory))
-                    {
-                        projectOrDirectory = PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory());
-                    }
+            command.HelpOption("-h|--help");
 
-                    SlnFile slnFile = SlnFileFactory.CreateFromFileOrDirectory(projectOrDirectory);
-
-                    if (app.RemainingArguments.Count == 0)
-                    {
-                        throw new GracefulException(CommonLocalizableStrings.SpecifyAtLeastOneProjectToAdd);
-                    }
-
-                    List<string> projectPaths = app.RemainingArguments;
-                    PathUtility.EnsureAllPathsExist(projectPaths, CommonLocalizableStrings.ProjectDoesNotExist);
-                    var relativeProjectPaths = projectPaths.Select((p) =>
-                        PathUtility.GetRelativePath(
-                            PathUtility.EnsureTrailingSlash(slnFile.BaseDirectory),
-                            Path.GetFullPath(p))).ToList();
-
-                    int preAddProjectCount = slnFile.Projects.Count;
-                    foreach (var project in relativeProjectPaths)
-                    {
-                        AddProject(slnFile, project);
-                    }
-
-                    if (slnFile.Projects.Count > preAddProjectCount)
-                    {
-                        slnFile.Write();
-                    }
-
-                    return 0;
-                }
-                catch (GracefulException e)
-                {
-                    Reporter.Error.WriteLine(e.Message.Red());
-                    app.ShowHelp();
-                    return 1;
-                }
-            });
-
-            return app;
+            return command;
         }
 
-        private static void AddProject(SlnFile slnFile, string projectPath)
+        public override int Run(string fileOrDirectory)
+        {
+            SlnFile slnFile = SlnFileFactory.CreateFromFileOrDirectory(fileOrDirectory);
+
+            if (RemainingArguments.Count == 0)
+            {
+                throw new GracefulException(CommonLocalizableStrings.SpecifyAtLeastOneProjectToAdd);
+            }
+
+            PathUtility.EnsureAllPathsExist(RemainingArguments, CommonLocalizableStrings.ProjectDoesNotExist);
+            var relativeProjectPaths = RemainingArguments.Select((p) =>
+                PathUtility.GetRelativePath(
+                    PathUtility.EnsureTrailingSlash(slnFile.BaseDirectory),
+                    Path.GetFullPath(p))).ToList();
+
+            int preAddProjectCount = slnFile.Projects.Count;
+            foreach (var project in relativeProjectPaths)
+            {
+                AddProject(slnFile, project);
+            }
+
+            if (slnFile.Projects.Count > preAddProjectCount)
+            {
+                slnFile.Write();
+            }
+
+            return 0;
+        }
+
+        private void AddProject(SlnFile slnFile, string projectPath)
         {
             var projectPathNormalized = PathUtility.GetPathWithBackSlashes(projectPath);
 

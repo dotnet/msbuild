@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.DotNet.Tools.Remove.ProjectFromSolution;
 using Microsoft.DotNet.Tools.Remove.ProjectToProjectReference;
 
 namespace Microsoft.DotNet.Tools.Remove
@@ -13,10 +13,11 @@ namespace Microsoft.DotNet.Tools.Remove
     {
         protected override string CommandName => "remove";
         protected override string FullCommandNameLocalized => LocalizableStrings.NetRemoveCommand;
-        internal override List<Func<CommandLineApplication, CommandLineApplication>> SubCommands =>
-            new List<Func<CommandLineApplication, CommandLineApplication>>
+        internal override List<Func<DotNetSubCommandBase>> SubCommands =>
+            new List<Func<DotNetSubCommandBase>>
             {
-                RemoveProjectToProjectReferenceCommand.CreateApplication,
+                RemoveProjectFromSolutionCommand.Create,
+                RemoveProjectToProjectReferenceCommand.Create,
             };
 
         public static int Run(string[] args)

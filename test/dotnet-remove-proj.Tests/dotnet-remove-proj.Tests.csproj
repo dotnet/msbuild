@@ -1,13 +1,14 @@
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-
+  
   <PropertyGroup>
     <TargetFramework>netcoreapp1.0</TargetFramework>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
-    <AssemblyName>dotnet-add-proj.Tests</AssemblyName>
+    <AssemblyName>dotnet-remove-proj.Tests</AssemblyName>
     <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">$(PackageTargetFallback);dotnet5.4;portable-net451+win8</PackageTargetFallback>
   </PropertyGroup>
+
   <ItemGroup>
     <Compile Include="**\*.cs" />
   </ItemGroup>
@@ -36,9 +37,6 @@
     </PackageReference>
     <PackageReference Include="xunit">
       <Version>2.2.0-beta4-build3444</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Build">
-      <Version>$(CLI_MSBuild_Version)</Version>
     </PackageReference>
   </ItemGroup>
 

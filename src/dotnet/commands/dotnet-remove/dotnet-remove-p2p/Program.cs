@@ -2,75 +2,55 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Evaluation;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools.Common;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 
 namespace Microsoft.DotNet.Tools.Remove.ProjectToProjectReference
 {
-    public class RemoveProjectToProjectReferenceCommand
+    internal class RemoveProjectToProjectReferenceCommand : DotNetSubCommandBase
     {
-        internal static CommandLineApplication CreateApplication(CommandLineApplication parentApp)
+        private CommandOption _frameworkOption;
+
+        public static DotNetSubCommandBase Create()
         {
-            CommandLineApplication app = parentApp.Command("p2p", throwOnUnexpectedArg: false);
-            app.FullName = LocalizableStrings.AppFullName;
-            app.Description = LocalizableStrings.AppDescription;
-            app.HandleRemainingArguments = true;
-            app.ArgumentSeparatorHelpText = LocalizableStrings.AppHelpText;
+            var command = new RemoveProjectToProjectReferenceCommand()
+            {
+                Name = "p2p",
+                FullName = LocalizableStrings.AppFullName,
+                Description = LocalizableStrings.AppDescription,
+                HandleRemainingArguments = true,
+                ArgumentSeparatorHelpText = LocalizableStrings.AppHelpText,
+            };
 
-            app.HelpOption("-h|--help");
+            command.HelpOption("-h|--help");
 
-            CommandOption frameworkOption = app.Option(
-                $"-f|--framework <{CommonLocalizableStrings.CmdFramework}>",
-                LocalizableStrings.CmdFrameworkDescription,
-                CommandOptionType.SingleValue);
+            command._frameworkOption = command.Option(
+               $"-f|--framework <{CommonLocalizableStrings.CmdFramework}>",
+               LocalizableStrings.CmdFrameworkDescription,
+               CommandOptionType.SingleValue);
 
-            app.OnExecute(() => {
-                try
-                {
-                    if (!parentApp.Arguments.Any())
-                    {
-                        throw new GracefulException(CommonLocalizableStrings.RequiredArgumentNotPassed, Constants.ProjectOrSolutionArgumentName);
-                    }
+            return command;
+        }
 
-                    var projectOrDirectory = parentApp.Arguments.First().Value;
-                    if (string.IsNullOrEmpty(projectOrDirectory))
-                    {
-                        projectOrDirectory = PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory());
-                    }
+        public override int Run(string fileOrDirectory)
+        {
+            var msbuildProj = MsbuildProject.FromFileOrDirectory(new ProjectCollection(), fileOrDirectory);
+            if (RemainingArguments.Count == 0)
+            {
+                throw new GracefulException(CommonLocalizableStrings.SpecifyAtLeastOneReferenceToRemove);
+            }
 
-                    var msbuildProj = MsbuildProject.FromFileOrDirectory(new ProjectCollection(), projectOrDirectory);
+            int numberOfRemovedReferences = msbuildProj.RemoveProjectToProjectReferences(
+                _frameworkOption.Value(),
+                RemainingArguments);
 
-                    if (app.RemainingArguments.Count == 0)
-                    {
-                        throw new GracefulException(LocalizableStrings.SpecifyAtLeastOneReferenceToRemove);
-                    }
+            if (numberOfRemovedReferences != 0)
+            {
+                msbuildProj.ProjectRootElement.Save();
+            }
 
-                    List<string> references = app.RemainingArguments;
-
-                    int numberOfRemovedReferences = msbuildProj.RemoveProjectToProjectReferences(
-                        frameworkOption.Value(),
-                        references);
-
-                    if (numberOfRemovedReferences != 0)
-                    {
-                        msbuildProj.ProjectRootElement.Save();
-                    }
-
-                    return 0;
-                }
-                catch (GracefulException e)
-                {
-                    Reporter.Error.WriteLine(e.Message.Red());
-                    app.ShowHelp();
-                    return 1;
-                }
-            });
-
-            return app;
+            return 0;
         }
     }
 }

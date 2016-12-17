@@ -2,21 +2,19 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using FluentAssertions;
-using Microsoft.Build.Construction;
 using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using System;
 using System.IO;
-using System.Linq;
 using Xunit;
 
-namespace Microsoft.DotNet.Cli.Add.Proj.Tests
+namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
 {
-    public class GivenDotnetAddProj : TestBase
+    public class GivenDotnetRemoveProj : TestBase
     {
-        private string HelpText = @".NET Add Project to Solution Command
+        private const string HelpText = @".NET Remove Project from Solution Command
 
-Usage: dotnet add <PROJECT_OR_SOLUTION> project [options] [args]
+Usage: dotnet remove <PROJECT_OR_SOLUTION> project [options] [args]
 
 Arguments:
   <PROJECT_OR_SOLUTION>  The project or solution to operation on. If a file is not specified, the current directory is searched.
@@ -25,7 +23,7 @@ Options:
   -h|--help  Show help information
 
 Args:
-  Projects to add to solution
+  Projects to remove from a solution
 ";
 
         [Theory]
@@ -34,9 +32,19 @@ Args:
         public void WhenHelpOptionIsPassedItPrintsUsage(string helpArg)
         {
             var cmd = new DotnetCommand()
-                .ExecuteWithCapturedOutput($"add project {helpArg}");
+                .ExecuteWithCapturedOutput($"remove project {helpArg}");
             cmd.Should().Pass();
             cmd.StdOut.Should().Be(HelpText);
+        }
+
+        [Fact]
+        public void WhenTooManyArgumentsArePassedItPrintsError()
+        {
+            var cmd = new DotnetCommand()
+                .ExecuteWithCapturedOutput("remove one.sln two.sln three.sln project");
+            cmd.Should().Fail();
+            cmd.StdErr.Should().Be("Unrecognized command or argument 'two.sln'");
+            cmd.StdOut.Should().Be("Specify --help for a list of available options and commands.");
         }
 
         [Theory]
@@ -45,19 +53,9 @@ Args:
         public void WhenNoCommandIsPassedItPrintsError(string commandName)
         {
             var cmd = new DotnetCommand()
-                .ExecuteWithCapturedOutput($"add {commandName}");
+                .ExecuteWithCapturedOutput($"remove {commandName}");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be("Required command was not provided.");
-        }
-
-        [Fact]
-        public void WhenTooManyArgumentsArePassedItPrintsError()
-        {
-            var cmd = new DotnetCommand()
-                .ExecuteWithCapturedOutput("add one.sln two.sln three.sln project");
-            cmd.Should().Fail();
-            cmd.StdErr.Should().Be("Unrecognized command or argument 'two.sln'");
-            cmd.StdOut.Should().Be("Specify --help for a list of available options and commands.");
         }
 
         [Theory]
@@ -69,7 +67,7 @@ Args:
         public void WhenNonExistingSolutionIsPassedItPrintsErrorAndUsage(string solutionName)
         {
             var cmd = new DotnetCommand()
-                .ExecuteWithCapturedOutput($"add {solutionName} project p.csproj");
+                .ExecuteWithCapturedOutput($"remove {solutionName} project p.csproj");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be($"Could not find solution or directory `{solutionName}`.");
             cmd.StdOut.Should().Be(HelpText);
@@ -85,10 +83,10 @@ Args:
                 .Root
                 .FullName;
 
-            var projectToAdd = Path.Combine("Lib", "Lib.csproj");
+            var projectToRemove = Path.Combine("Lib", "Lib.csproj");
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"add InvalidSolution.sln project {projectToAdd}");
+                .ExecuteWithCapturedOutput($"remove InvalidSolution.sln project {projectToRemove}");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be("Invalid solution `InvalidSolution.sln`.");
             cmd.StdOut.Should().Be(HelpText);
@@ -105,10 +103,10 @@ Args:
                 .FullName;
 
             var solutionPath = Path.Combine(projectDirectory, "InvalidSolution.sln");
-            var projectToAdd = Path.Combine("Lib", "Lib.csproj");
+            var projectToRemove = Path.Combine("Lib", "Lib.csproj");
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"add project {projectToAdd}");
+                .ExecuteWithCapturedOutput($"remove project {projectToRemove}");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be($"Invalid solution `{solutionPath}`.");
             cmd.StdOut.Should().Be(HelpText);
@@ -126,9 +124,9 @@ Args:
 
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput(@"add App.sln project");
+                .ExecuteWithCapturedOutput(@"remove App.sln project");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be("You must specify at least one project to add.");
+            cmd.StdErr.Should().Be("You must specify at least one project to remove.");
             cmd.StdOut.Should().Be(HelpText);
         }
 
@@ -145,7 +143,7 @@ Args:
             var solutionPath = Path.Combine(projectDirectory, "App");
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(solutionPath)
-                .ExecuteWithCapturedOutput(@"add project App.csproj");
+                .ExecuteWithCapturedOutput(@"remove project App.csproj");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be($"Specified solution file {solutionPath + Path.DirectorySeparatorChar} does not exist, or there is no solution file in the directory.");
             cmd.StdOut.Should().Be(HelpText);
@@ -161,64 +159,17 @@ Args:
                 .Root
                 .FullName;
 
-            var projectToAdd = Path.Combine("Lib", "Lib.csproj");
+            var projectToRemove = Path.Combine("Lib", "Lib.csproj");
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"add project {projectToAdd}");
+                .ExecuteWithCapturedOutput($"remove project {projectToRemove}");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be($"Found more than one solution file in {projectDirectory + Path.DirectorySeparatorChar}. Please specify which one to use.");
             cmd.StdOut.Should().Be(HelpText);
         }
 
-        [Theory]
-        [InlineData("TestAppWithSlnAndCsprojFiles", "")]
-        [InlineData("TestAppWithSlnAndCsprojProjectGuidFiles", "{84A45D44-B677-492D-A6DA-B3A71135AB8E}")]
-        public void WhenValidProjectIsPassedItGetsNormalizedAndAddedAndSlnBuilds(
-            string testAsset,
-            string projectGuid)
-        {
-            var projectDirectory = TestAssets
-                .Get(testAsset)
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
-
-            var projectToAdd = "Lib/Lib.csproj";
-            var normalizedProjectPath = @"Lib\Lib.csproj";
-            var cmd = new DotnetCommand()
-                .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"add App.sln project {projectToAdd}");
-            cmd.Should().Pass();
-            cmd.StdOut.Should().Be($"Project `{Path.Combine("Lib", "Lib.csproj")}` added to the solution.");
-            cmd.StdErr.Should().BeEmpty();
-
-            var slnFile = SlnFile.Read(Path.Combine(projectDirectory, "App.sln"));
-            var matchingProjects = slnFile.Projects
-                .Where((p) => p.Name == "Lib")
-                .ToList();
-
-            matchingProjects.Count.Should().Be(1);
-            var slnProject = matchingProjects[0];
-            slnProject.FilePath.Should().Be(normalizedProjectPath);
-            slnProject.TypeGuid.Should().Be(ProjectTypeGuids.CPSProjectTypeGuid);
-            if (!string.IsNullOrEmpty(projectGuid))
-            {
-                slnProject.Id.Should().Be(projectGuid);
-            }
-
-            var restoreCmd = new DotnetCommand()
-                .WithWorkingDirectory(projectDirectory)
-                .Execute($"restore {Path.Combine("App", "App.csproj")}");
-
-            var buildCmd = new DotnetCommand()
-                .WithWorkingDirectory(projectDirectory)
-                .Execute("build App.sln");
-            buildCmd.Should().Pass();
-        }
-
         [Fact]
-        public void WhenSolutionAlreadyContainsProjectItDoesntDuplicate()
+        public void WhenPassedAReferenceNotInSlnItPrintsStatus()
         {
             var projectDirectory = TestAssets
                 .Get("TestAppWithSlnAndExistingCsprojReferences")
@@ -228,37 +179,102 @@ Args:
                 .FullName;
 
             var solutionPath = Path.Combine(projectDirectory, "App.sln");
-            var projectToAdd = Path.Combine("Lib", "Lib.csproj");
+            var contentBefore = File.ReadAllText(solutionPath);
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"add App.sln project {projectToAdd}");
+                .ExecuteWithCapturedOutput("remove project referenceDoesNotExistInSln.csproj");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be($"Solution {solutionPath} already contains project {projectToAdd}.");
-            cmd.StdErr.Should().BeEmpty();
+            cmd.StdOut.Should().Be("Project reference `referenceDoesNotExistInSln.csproj` could not be found.");
+            File.ReadAllText(solutionPath)
+                .Should().Be(contentBefore);
         }
 
         [Fact]
-        public void WhenPassedMultipleProjectsAndOneOfthemDoesNotExistItCancelsWholeOperation()
+        public void WhenPassedAReferenceItRemovesTheReferenceButNotOtherReferences()
         {
             var projectDirectory = TestAssets
-                .Get("TestAppWithSlnAndCsprojFiles")
+                .Get("TestAppWithSlnAndExistingCsprojReferences")
                 .CreateInstance()
                 .WithSourceFiles()
                 .Root
                 .FullName;
 
-            var slnFullPath = Path.Combine(projectDirectory, "App.sln");
-            var contentBefore = File.ReadAllText(slnFullPath);
+            var solutionPath = Path.Combine(projectDirectory, "App.sln");
+            SlnFile slnFile = SlnFile.Read(solutionPath);
+            slnFile.Projects.Count.Should().Be(2);
 
-            var projectToAdd = Path.Combine("Lib", "Lib.csproj");
+            var projectToRemove = Path.Combine("Lib", "Lib.csproj");
+            var projectToRemoveNormalized = @"Lib\Lib.csproj";
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"add App.sln project {projectToAdd} idonotexist.csproj");
-            cmd.Should().Fail();
-            cmd.StdErr.Should().Be("Project `idonotexist.csproj` does not exist.");
+                .ExecuteWithCapturedOutput($"remove project {projectToRemove}");
+            cmd.Should().Pass();
+            cmd.StdOut.Should().Be($"Project reference `{projectToRemoveNormalized}` removed.");
 
-            File.ReadAllText(slnFullPath)
-                .Should().BeEquivalentTo(contentBefore);
+            slnFile = SlnFile.Read(solutionPath);
+            slnFile.Projects.Count.Should().Be(1);
+            slnFile.Projects[0].FilePath.Should().Be(@"App\App.csproj");
+        }
+
+        [Fact]
+        public void WhenDuplicateReferencesArePresentItRemovesThemAll()
+        {
+            var projectDirectory = TestAssets
+                .Get("TestAppWithSlnAndDuplicateProjectReferences")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+
+            var solutionPath = Path.Combine(projectDirectory, "App.sln");
+            SlnFile slnFile = SlnFile.Read(solutionPath);
+            slnFile.Projects.Count.Should().Be(3);
+
+            var projectToRemove = Path.Combine("Lib", "Lib.csproj");
+            var projectToRemoveNormalized = @"Lib\Lib.csproj";
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput($"remove project {projectToRemove}");
+            cmd.Should().Pass();
+
+            string outputText = $@"Project reference `{projectToRemoveNormalized}` removed.
+Project reference `{projectToRemoveNormalized}` removed.";
+            cmd.StdOut.Should().Be(outputText);
+
+            slnFile = SlnFile.Read(solutionPath);
+            slnFile.Projects.Count.Should().Be(1);
+            slnFile.Projects[0].FilePath.Should().Be(@"App\App.csproj");
+        }
+
+        [Fact]
+        public void WhenPassedMultipleReferencesAndOneOfThemDoesNotExistItRemovesTheOneThatExists()
+        {
+            var projectDirectory = TestAssets
+                .Get("TestAppWithSlnAndExistingCsprojReferences")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+
+            var solutionPath = Path.Combine(projectDirectory, "App.sln");
+            SlnFile slnFile = SlnFile.Read(solutionPath);
+            slnFile.Projects.Count.Should().Be(2);
+
+            var projectToRemove = Path.Combine("Lib", "Lib.csproj");
+            var projectToRemoveNormalized = @"Lib\Lib.csproj";
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput($"remove project idontexist.csproj {projectToRemove} idontexisteither.csproj");
+            cmd.Should().Pass();
+
+            string outputText = $@"Project reference `idontexist.csproj` could not be found.
+Project reference `{projectToRemoveNormalized}` removed.
+Project reference `idontexisteither.csproj` could not be found.";
+            cmd.StdOut.Should().Be(outputText);
+
+            slnFile = SlnFile.Read(solutionPath);
+            slnFile.Projects.Count.Should().Be(1);
+            slnFile.Projects[0].FilePath.Should().Be(@"App\App.csproj");
         }
     }
 }

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Evaluation;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
@@ -13,111 +14,100 @@ using System.Text;
 
 namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
 {
-    public class AddProjectToProjectReferenceCommand
+    internal class AddProjectToProjectReferenceCommand : DotNetSubCommandBase
     {
-        internal static CommandLineApplication CreateApplication(CommandLineApplication parentApp)
+        private CommandOption _frameworkOption;
+
+        public static DotNetSubCommandBase Create()
         {
-            CommandLineApplication app = parentApp.Command("p2p", throwOnUnexpectedArg: false);
-            app.FullName = LocalizableStrings.AppFullName;
-            app.Description = LocalizableStrings.AppDescription;
-            app.HandleRemainingArguments = true;
-            app.ArgumentSeparatorHelpText = LocalizableStrings.AppHelpText;
-
-            app.HelpOption("-h|--help");
-
-            CommandOption frameworkOption = app.Option(
-                $"-f|--framework <{CommonLocalizableStrings.CmdFramework}>",
-                LocalizableStrings.CmdFrameworkDescription,
-                CommandOptionType.SingleValue);
-
-            app.OnExecute(() =>
+            var command = new AddProjectToProjectReferenceCommand()
             {
-                try
+                Name = "p2p",
+                FullName = LocalizableStrings.AppFullName,
+                Description = LocalizableStrings.AppDescription,
+                HandleRemainingArguments = true,
+                ArgumentSeparatorHelpText = LocalizableStrings.AppHelpText,
+            };
+
+            command.HelpOption("-h|--help");
+
+            command._frameworkOption = command.Option(
+               $"-f|--framework <{CommonLocalizableStrings.CmdFramework}>",
+               LocalizableStrings.CmdFrameworkDescription,
+               CommandOptionType.SingleValue);
+
+            return command;
+        }
+
+        public override int Run(string fileOrDirectory)
+        {
+            var projects = new ProjectCollection();
+            MsbuildProject msbuildProj = MsbuildProject.FromFileOrDirectory(projects, fileOrDirectory);
+
+            if (RemainingArguments.Count == 0)
+            {
+                throw new GracefulException(CommonLocalizableStrings.SpecifyAtLeastOneReferenceToAdd);
+            }
+
+            string frameworkString = _frameworkOption.Value();
+            PathUtility.EnsureAllPathsExist(RemainingArguments, CommonLocalizableStrings.ReferenceDoesNotExist);
+            List<MsbuildProject> refs = RemainingArguments
+                .Select((r) => MsbuildProject.FromFile(projects, r))
+                .ToList();
+
+            if (frameworkString == null)
+            {
+                foreach (var tfm in msbuildProj.GetTargetFrameworks())
                 {
-                    if (!parentApp.Arguments.Any())
+                    foreach (var @ref in refs)
                     {
-                        throw new GracefulException(CommonLocalizableStrings.RequiredArgumentNotPassed, Constants.ProjectOrSolutionArgumentName);
-                    }
-
-                    var projectOrDirectory = parentApp.Arguments.First().Value;
-                    if (string.IsNullOrEmpty(projectOrDirectory))
-                    {
-                        projectOrDirectory = PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory());
-                    }
-
-                    var projects = new ProjectCollection();
-                    var msbuildProj = MsbuildProject.FromFileOrDirectory(projects, projectOrDirectory);
-
-                    if (app.RemainingArguments.Count == 0)
-                    {
-                        throw new GracefulException(CommonLocalizableStrings.SpecifyAtLeastOneReferenceToAdd);
-                    }
-
-                    string frameworkString = frameworkOption.Value();
-                    List<string> references = app.RemainingArguments;
-                    PathUtility.EnsureAllPathsExist(references, CommonLocalizableStrings.ReferenceDoesNotExist);
-                    IEnumerable<MsbuildProject> refs = references.Select((r) => MsbuildProject.FromFile(projects, r));
-
-                    if (frameworkString == null)
-                    {
-                        foreach (var tfm in msbuildProj.GetTargetFrameworks())
+                        if (!@ref.CanWorkOnFramework(tfm))
                         {
-                            foreach (var @ref in refs)
-                            {
-                                if (!@ref.CanWorkOnFramework(tfm))
-                                {
-                                    Reporter.Error.Write(GetProjectNotCompatibleWithFrameworksDisplayString(
-                                            @ref,
-                                            msbuildProj.GetTargetFrameworks().Select((fx) => fx.GetShortFolderName())));
-                                    return 1;
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        var framework = NuGetFramework.Parse(frameworkString);
-                        if (!msbuildProj.IsTargettingFramework(framework))
-                        {
-                            Reporter.Error.WriteLine(string.Format(CommonLocalizableStrings.ProjectDoesNotTargetFramework, msbuildProj.ProjectRootElement.FullPath, frameworkString));
+                            Reporter.Error.Write(GetProjectNotCompatibleWithFrameworksDisplayString(
+                                    @ref,
+                                    msbuildProj.GetTargetFrameworks().Select((fx) => fx.GetShortFolderName())));
                             return 1;
                         }
-
-                        foreach (var @ref in refs)
-                        {
-                            if (!@ref.CanWorkOnFramework(framework))
-                            {
-                                Reporter.Error.Write(GetProjectNotCompatibleWithFrameworksDisplayString(
-                                    @ref,
-                                    new string[] { frameworkString }));
-                                return 1;
-                            }
-                        }
                     }
-
-                    var relativePathReferences = references.Select((r) =>
-                        PathUtility.GetRelativePath(msbuildProj.ProjectDirectory, Path.GetFullPath(r))).ToList();
-
-                    int numberOfAddedReferences = msbuildProj.AddProjectToProjectReferences(
-                        frameworkOption.Value(),
-                        relativePathReferences);
-
-                    if (numberOfAddedReferences != 0)
-                    {
-                        msbuildProj.ProjectRootElement.Save();
-                    }
-
-                    return 0;
                 }
-                catch (GracefulException e)
+            }
+            else
+            {
+                var framework = NuGetFramework.Parse(frameworkString);
+                if (!msbuildProj.IsTargettingFramework(framework))
                 {
-                    Reporter.Error.WriteLine(e.Message.Red());
-                    app.ShowHelp();
+                    Reporter.Error.WriteLine(string.Format(
+                        CommonLocalizableStrings.ProjectDoesNotTargetFramework,
+                        msbuildProj.ProjectRootElement.FullPath,
+                        frameworkString));
                     return 1;
                 }
-            });
 
-            return app;
+                foreach (var @ref in refs)
+                {
+                    if (!@ref.CanWorkOnFramework(framework))
+                    {
+                        Reporter.Error.Write(GetProjectNotCompatibleWithFrameworksDisplayString(
+                            @ref,
+                            new string[] { frameworkString }));
+                        return 1;
+                    }
+                }
+            }
+
+            var relativePathReferences = RemainingArguments.Select((r) =>
+                PathUtility.GetRelativePath(msbuildProj.ProjectDirectory, Path.GetFullPath(r))).ToList();
+
+            int numberOfAddedReferences = msbuildProj.AddProjectToProjectReferences(
+                _frameworkOption.Value(),
+                relativePathReferences);
+
+            if (numberOfAddedReferences != 0)
+            {
+                msbuildProj.ProjectRootElement.Save();
+            }
+
+            return 0;
         }
 
         private static string GetProjectNotCompatibleWithFrameworksDisplayString(MsbuildProject project, IEnumerable<string> frameworksDisplayStrings)

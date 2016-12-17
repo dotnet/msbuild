@@ -2,52 +2,50 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Evaluation;
-using Microsoft.DotNet.Cli.CommandLine;
-using System.Collections.Generic;
-using Microsoft.DotNet.Tools.List;
+using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.Utils;
+using System.Linq;
 
 namespace Microsoft.DotNet.Tools.List.ProjectToProjectReferences
 {
-    public class ListProjectToProjectReferences : IListSubCommand
+    internal class ListProjectToProjectReferencesCommand : DotNetSubCommandBase
     {
-        private string _fileOrDirectory = null;
-        private IList<string> _items = new List<string>();
-
-        public ListProjectToProjectReferences(string fileOrDirectory)
+        public static DotNetSubCommandBase Create()
         {
-            _fileOrDirectory = fileOrDirectory;
+            var command = new ListProjectToProjectReferencesCommand()
+            {
+                Name = "p2ps",
+                FullName = LocalizableStrings.AppFullName,
+                Description = LocalizableStrings.AppDescription,
+            };
+
+            command.HelpOption("-h|--help");
+
+            return command;
+        }
+
+        public override int Run(string fileOrDirectory)
+        {
             var msbuildProj = MsbuildProject.FromFileOrDirectory(new ProjectCollection(), fileOrDirectory);
 
             var p2ps = msbuildProj.GetProjectToProjectReferences();
+            if (!p2ps.Any())
+            {
+                Reporter.Output.WriteLine(string.Format(
+                    CommonLocalizableStrings.NoReferencesFound,
+                    CommonLocalizableStrings.P2P,
+                    fileOrDirectory));
+                return 0;
+            }
+
+            Reporter.Output.WriteLine($"{CommonLocalizableStrings.ProjectReferenceOneOrMore}");
+            Reporter.Output.WriteLine(new string('-', CommonLocalizableStrings.ProjectReferenceOneOrMore.Length));
             foreach (var p2p in p2ps)
             {
-                _items.Add(p2p.Include);
+                Reporter.Output.WriteLine(p2p.Include);
             }
-        }
 
-        public string LocalizedErrorMessageNoItemsFound => string.Format(
-            LocalizableStrings.NoReferencesFound, 
-            CommonLocalizableStrings.P2P,
-            _fileOrDirectory);
-        
-        public IList<string> Items => _items;
-    }
-
-    public class ListProjectToProjectReferencesCommand : ListSubCommandBase
-    {
-        protected override string CommandName => "p2ps";
-        protected override string LocalizedDisplayName => LocalizableStrings.AppFullName;
-        protected override string LocalizedDescription => LocalizableStrings.AppDescription;
-
-        protected override IListSubCommand CreateIListSubCommand(string fileOrDirectory)
-        {
-            return new ListProjectToProjectReferences(fileOrDirectory);
-        }
-
-        internal static CommandLineApplication CreateApplication(CommandLineApplication parentApp)
-        {
-            var command = new ListProjectToProjectReferencesCommand();
-            return command.Create(parentApp);
+            return 0;
         }
     }
 }
