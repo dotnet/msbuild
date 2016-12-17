@@ -29,6 +29,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
         public const string CannotMergeItemsWithoutCommonIncludeError = "Cannot merge items without a common include.";
 
+        public const string PropertyTransformApplicatorWrongElementTypeError = "Expected element to be of type {0}, but got {1}";
+
+        public const string UnexpectedTypeError = "Unexpected type {0}";
+
         public const string MIGRATE1011 = "Deprecated Project";
 
         public const string MIGRATE1012 = "Project not Restored";
@@ -112,5 +116,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         public const string ItemTransformApplicatorMergingItemWithExistingItemsSameChain = "{0}: Merging Item with {1} existing items with the same condition chain.";
 
         public const string ItemTransformApplicatorAddingMergedItem = "{0}: Adding Merged Item {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4} }}";
+
+        public const string MergingProperty = "Merging property, output merged property";
+
+        public const string IgnoringMergedProperty = "Ignoring fully merged property";
+
+        public const string PropertyInfo = "{0}: {message}, {{ Name={1}, Value={2} }}";
     }
 }
