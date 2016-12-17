@@ -125,7 +125,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
 
         private void TracePropertyInfo(string message, ProjectPropertyElement mergedProperty)
         {
-            MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.PropertyInfo, nameof(PropertyTransformApplicator), mergedProperty.Name, mergedProperty.Value));
+            MigrationTrace.Instance.WriteLine(String.Format(
+                LocalizableStrings.PropertyInfo,
+                nameof(PropertyTransformApplicator),
+                message,
+                mergedProperty.Name,
+                mergedProperty.Value));
         }
     }
 }

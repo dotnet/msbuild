@@ -121,6 +121,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
         public const string IgnoringMergedProperty = "Ignoring fully merged property";
 
-        public const string PropertyInfo = "{0}: {message}, {{ Name={1}, Value={2} }}";
+        public const string PropertyInfo = "{0}: {1}, {{ Name={2}, Value={3} }}";
     }
 }

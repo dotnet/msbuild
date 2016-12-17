@@ -239,6 +239,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
             Reporter.Verbose.WriteLine(string.Format(
                 LocalizableStrings.ExpectDepsJsonAt,
+                ProjectToolsCommandResolverName,
                 depsJsonPath));
 
             EnsureToolJsonDepsFileExists(toolLockFile, depsJsonPath, toolLibrary);

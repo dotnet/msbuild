@@ -24,8 +24,8 @@ Arguments:
 Options:
   -h|--help  Show help information
 
-Args:
-  Projects to add to solution
+Additional Arguments:
+ Projects to add to solution
 ";
 
         [Theory]

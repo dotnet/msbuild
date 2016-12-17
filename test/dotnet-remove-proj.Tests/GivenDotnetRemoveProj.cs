@@ -22,8 +22,8 @@ Arguments:
 Options:
   -h|--help  Show help information
 
-Args:
-  Projects to remove from a solution
+Additional Arguments:
+ Projects to remove from a solution
 ";
 
         [Theory]
