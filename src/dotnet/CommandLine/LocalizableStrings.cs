@@ -18,6 +18,8 @@ namespace Microsoft.DotNet.Cli.CommandLine
 
         public const string UsageHeader = "Usage:";
 
+        public const string UsageItemWithoutArgs = " {0}";
+
         public const string UsageItemWithArgs = " {0} {1}";
 
         public const string UsageArgumentsToken = " [arguments]";
@@ -42,14 +44,18 @@ namespace Microsoft.DotNet.Cli.CommandLine
 
         public const string UsageCommandArgs = " [args]";
 
-        public const string UsageCommandAdditionalArgs = " [[--] <arg>...]]";
+        public const string UsageCommandAdditionalArgs = " [[--] <additional arguments>...]]";
 
-        public const string UsageCommandsAdditionalArgsHeader = "Args:";
+        public const string UsageCommandsAdditionalArgsHeader = "Additional Arguments:";
 
         public const string UsageCommandsAdditionalArgsItem = " {0}";
 
         public const string CommandItem = " {0}";
 
         public const string ShortVersionTemplate = "{0} {1}";
+
+        public const string InvalidTemplateError = "Invalid template pattern '{0}'";
+
+        public const string MSBuildAdditionalArgsHelpText = "Any extra options that should be passed to MSBuild. See 'dotnet msbuild -h' for available options.";
     }
 }
