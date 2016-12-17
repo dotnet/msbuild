@@ -56,9 +56,9 @@
 
         public const string NugetDefinition = "Provides additional NuGet commands.";
 
-        public const string MsBuildDefinition = "Builds a project using MSBuild and all of its dependencies.";
+        public const string MsBuildDefinition = "Runs Microsoft Build Engine (MSBuild).";
 
-        public const string VsTestDefinition = "Runs tests from the specified files.";
+        public const string VsTestDefinition = "Runs Microsoft Test Execution Command Line Tool.";
 
         public const string CleanDefinition = "Clean build output(s).";
     }

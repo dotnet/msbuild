@@ -6,11 +6,11 @@
 
         public const string AppDescription = "Command used to run .NET apps";
 
-        public const string CommandOptionConfigurationDescription = "Configuration to use for building the project. Default is \"Debug\".";
+        public const string CommandOptionConfigurationDescription = "Configuration to use for building the project. Default for most projects is \"Debug\".";
 
         public const string CommandOptionFramework = "FRAMEWORK";
 
-        public const string CommandOptionFrameworkDescription = "Build and run the specified framework. The framework has to be specified in the project file. ";
+        public const string CommandOptionFrameworkDescription = "Build and run the app using the specified framework. The framework has to be specified in the project file. ";
 
         public const string CommandOptionProjectDescription = "The path to the project file to run (defaults to the current directory if there is only one project).";
 

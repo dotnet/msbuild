@@ -36,7 +36,7 @@
 
         public const string CmdConfiguration = "CONFIGURATION";
 
-        public const string CmdConfigDescription = "Configuration to use for building the project.  Default is  \"Debug\".";
+        public const string CmdConfigDescription = "Configuration to use for building the project.  Default for most projects is  \"Debug\".";
 
         public const string CmdFramework = "FRAMEWORK";
 

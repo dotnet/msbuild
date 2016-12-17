@@ -12,13 +12,13 @@
 
         public const string CmdNoBuildOptionDescription = "Skip building the project prior to packing. By default, the project will be built.";
 
-        public const string CmdIncludeSymbolsDescription = "Include packages with symbols in addition to assembly (DLL) packages in output directory.";
+        public const string CmdIncludeSymbolsDescription = "Include packages with symbols in addition to regular packages in output directory.";
 
         public const string CmdIncludeSourceDescription  = "Include PDBs and source files. Source files go into the src folder in the resulting nuget package";
 
         public const string CmdConfig = "CONFIGURATION";
 
-        public const string CmdConfigDescription = "Configuration to use for building the project.  Default is  \"Debug\".";
+        public const string CmdConfigDescription = "Configuration to use for building the project.  Default for most projects is  \"Debug\".";
 
         public const string CmdVersionSuffix = "VERSION_SUFFIX";
 

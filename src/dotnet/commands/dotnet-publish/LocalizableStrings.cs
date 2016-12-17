@@ -24,7 +24,7 @@
 
         public const string ConfigurationOption = "CONFIGURATION";
 
-        public const string ConfigurationOptionDescription = "Configuration to use for building the project.  Default is  \"Debug\".";
+        public const string ConfigurationOptionDescription = "Configuration to use for building the project.  Default for most projects is  \"Debug\".";
 
         public const string VersionSuffixOption = "VERSION_SUFFIX";
 
