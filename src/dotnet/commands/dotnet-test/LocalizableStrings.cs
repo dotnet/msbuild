@@ -20,8 +20,11 @@
 
         public const string CmdTestCaseFilterDescription = @"Run tests that match the given expression.
                                         Examples:
-                                        --test-case-filter:""Priority = 1""
-                                        --test-case-filter: ""(FullyQualifiedName~Nightly | Name = MyTestMethod)""";
+                                        Run tests with priority set to 1: --filter ""Priority = 1""
+                                        Run a test with the specified full name: --filter ""FullyQualifiedName=Namespace.ClassName.MethodName""
+                                        Run tests that contain the specified name: --filter ""FullyQualifiedName~Namespace.Class""
+                                        More info on filtering support: https://aka.ms/vstest-filtering
+                                        ";
 
         public const string CmdTestAdapterPathDescription = @"Use custom adapters from the given path in the test run.
                                         Example: --test-adapter-path:<pathToCustomAdapters>";

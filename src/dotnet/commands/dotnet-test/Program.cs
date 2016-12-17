@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Tools.Test
                 CommandOptionType.NoValue);
 
             var testCaseFilterOption = cmd.Option(
-                $"--test-case-filter <{LocalizableStrings.CmdTestCaseFilterExpression}>",
+                $"--filter <{LocalizableStrings.CmdTestCaseFilterExpression}>",
                 LocalizableStrings.CmdTestCaseFilterDescription,
                 CommandOptionType.SingleValue);
 
