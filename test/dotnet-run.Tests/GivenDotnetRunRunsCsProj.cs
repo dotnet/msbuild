@@ -78,7 +78,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         }
  
         [Fact] 
-        public void It_runs_portable_apps_from_a_different_path_after_building() 
+        public void ItRunsPortableAppsFromADifferentPathAfterBuilding() 
         {
             var testInstance = TestAssets.Get("MSBuildTestApp")
                 .CreateInstance()
@@ -98,7 +98,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         } 
  
         [Fact] 
-        public void It_runs_portable_apps_from_a_different_path_without_building() 
+        public void ItRunsPortableAppsFromADifferentPathWithoutBuilding() 
         { 
             var testAppName = "MSBuildTestApp"; 
             var testInstance = TestAssets.Get(testAppName)
@@ -113,6 +113,33 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .ExecuteWithCapturedOutput($"--project {projectFile.FullName}") 
                 .Should().Pass() 
                          .And.HaveStdOutContaining("Hello World!"); 
-        } 
+        }
+
+        [Fact]
+        public void ItRunsAppWhenRestoringToSpecificPackageDirectory()
+        {
+            var rootPath = TestAssetsManager.CreateTestDirectory().Path;
+
+            string dir = "pkgs";
+            string args = $"--packages {dir}";
+
+            new NewCommand()
+                .WithWorkingDirectory(rootPath)
+                .Execute()
+                .Should()
+                .Pass();
+
+            new RestoreCommand()
+                .WithWorkingDirectory(rootPath)
+                .Execute(args)
+                .Should()
+                .Pass();
+
+            new RunCommand()
+                .WithWorkingDirectory(rootPath)
+                .ExecuteWithCapturedOutput()
+                .Should().Pass()
+                         .And.HaveStdOutContaining("Hello World");
+        }
     }
 }

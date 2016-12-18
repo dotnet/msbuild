@@ -207,6 +207,38 @@ namespace Microsoft.DotNet.Tools.Pack.Tests
             Assert.Equal("true", node.Value);
         }
 
+        [Fact]
+        public void ItPacksAppWhenRestoringToSpecificPackageDirectory()
+        {
+            var rootPath = TestAssetsManager.CreateTestDirectory().Path;
+            var rootDir = new DirectoryInfo(rootPath);
+
+            string dir = "pkgs";
+            string args = $"--packages {dir}";
+
+            new NewCommand()
+                .WithWorkingDirectory(rootPath)
+                .Execute()
+                .Should()
+                .Pass();
+
+            new RestoreCommand()
+                .WithWorkingDirectory(rootPath)
+                .Execute(args)
+                .Should()
+                .Pass();
+
+            new PackCommand()
+                .WithWorkingDirectory(rootPath)
+                .ExecuteWithCapturedOutput()
+                .Should()
+                .Pass();
+
+            rootDir
+                .GetDirectory("bin")
+                .Should().HaveFilesMatching("*.nupkg", SearchOption.AllDirectories);
+        }
+
         private void CopyProjectToTempDir(string projectDir, TempDirectory tempDir)
         {
             // copy all the files to temp dir

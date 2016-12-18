@@ -75,5 +75,44 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Should().Pass()
                      .And.HaveStdOutContaining("Hello World");
         }
+
+        [Fact]
+        public void ItPublishesAppWhenRestoringToSpecificPackageDirectory()
+        {
+            var rootPath = TestAssetsManager.CreateTestDirectory().Path;
+            var rootDir = new DirectoryInfo(rootPath);
+
+            string dir = "pkgs";
+            string args = $"--packages {dir}";
+
+            new NewCommand()
+                .WithWorkingDirectory(rootPath)
+                .Execute()
+                .Should()
+                .Pass();
+
+            new RestoreCommand()
+                .WithWorkingDirectory(rootPath)
+                .Execute(args)
+                .Should()
+                .Pass();
+
+            new PublishCommand()
+                .WithWorkingDirectory(rootPath)
+                .ExecuteWithCapturedOutput()
+                .Should().Pass();
+
+            var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
+            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
+
+            var outputProgram = rootDir
+                .GetDirectory("bin", configuration, "netcoreapp1.0", "publish", $"{rootDir.Name}.dll")
+                .FullName;
+
+            new TestCommand(outputProgram)
+                .ExecuteWithCapturedOutput()
+                .Should().Pass()
+                     .And.HaveStdOutContaining("Hello World");
+        }
     }
 }
