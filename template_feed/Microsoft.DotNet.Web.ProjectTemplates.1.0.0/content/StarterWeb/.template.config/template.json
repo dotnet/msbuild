@@ -1,9 +1,9 @@
 {
   "author": "Microsoft",
-  "classifications": ["Visual C#"],
-  "name": "MVC",
+  "classifications": [ "C#", "Web", "MVC" ],
+  "name": "MVC ASP.NET Web Application",
   "groupIdentity": "",
-  "identity": "Microsoft.Standard.QuickStarts.MVC.CSharp",
+  "identity": "Microsoft.Web.MVC.CSharp",
   "shortName": "mvc",
   "tags": {
     "language": "C#"
@@ -33,6 +33,8 @@
   "symbols": {
     "auth": {
       "type": "parameter",
+      "datatype": "choice",
+      "choices": ["None", "Individual"],
       "defaultValue": "None",
       "description": "The type of authentication to use"
     },

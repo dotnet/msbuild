@@ -1,9 +1,9 @@
 {
   "author": "Microsoft",
-  "classifications": [ "Visual C#>>Web" ],
-  "name": "Empty ASP.NET Web Application (.NET Core)",
+  "classifications": [ "C#", "Web", "Empty" ],
+  "name": "Empty ASP.NET Web Application",
   "groupIdentity": "NetCoreEmptyWeb",
-  "identity": "Microsoft.WebAndCloud.QuickStarts.EmptyWeb.CSharp",
+  "identity": "Microsoft.Web.Empty.CSharp",
   "shortName": "emptyweb",
   "tags": {
     "language": "C#"
