@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
+namespace WebApplication1.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("00000000000000_CreateIdentitySchema")]
@@ -125,6 +126,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
                     b.ToTable("AspNetUserTokens");
                 });
 
+            modelBuilder.Entity("WebApplication1.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id");
 
@@ -183,6 +185,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityUserClaim<string>", b =>
                 {
+                    b.HasOne("WebApplication1.Models.ApplicationUser")
                         .WithMany("Claims")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -190,6 +193,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityUserLogin<string>", b =>
                 {
+                    b.HasOne("WebApplication1.Models.ApplicationUser")
                         .WithMany("Logins")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -202,6 +206,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade);
 
+                    b.HasOne("WebApplication1.Models.ApplicationUser")
                         .WithMany("Roles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
