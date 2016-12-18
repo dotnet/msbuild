@@ -1,0 +1,19 @@
+<Project ToolsVersion="15.0">
+  <Import Project="..\Version.props" />
+
+  <PropertyGroup>
+    <PackOutput Condition="'$(PackOutput)' == ''">$(TemplatesFolder)</PackOutput>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <TemplatePack Include="Microsoft.DotNet.Common.ItemTemplates" />
+    <TemplatePack Include="Microsoft.DotNet.Common.ProjectTemplates" />
+    <TemplatePack Include="Microsoft.DotNet.Web.ProjectTemplates" />
+  </ItemGroup>
+
+  <Target Name="Build">
+    <MakeDir Directories="$(TemplatesFolder)" />
+    <MakeDir Directories="$(TemplatesNoTimestampFolder)" />
+    <Exec Command="$(NuGet) pack &quot;$(MSBuildThisFileDirectory)%(TemplatePack.Identity)\Templates.nuspec&quot; -properties &quot;version=$(PackageVersion)&quot;" WorkingDirectory="$(PackOutput)" />
+  </Target>
+</Project>

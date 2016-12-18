@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
-    <id>Microsoft.DotNet.Web.ProjectTemplates</id>
-    <version>1.0.0-beta1</version>
+    <id>Microsoft.DotNet.Common.ProjectTemplates</id>
+    <version>$version$</version>
     <authors>Microsoft</authors>
     <description>.NET Template Pack for Microsoft Template Engine</description>
     <language>en-US</language>

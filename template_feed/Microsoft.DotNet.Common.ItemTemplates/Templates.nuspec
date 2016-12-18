@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>Microsoft.DotNet.Common.ItemTemplates</id>
-    <version>1.0.0-beta1</version>
+    <version>$version$</version>
     <authors>Microsoft</authors>
     <description>Common File Templates for Microsoft Template Engine</description>
     <language>en-US</language>
