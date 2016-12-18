@@ -283,7 +283,7 @@ namespace dotnet_new3
                 }
 
                 // always unless taken
-                string shortName = "-" + PosixNameToShortName(flagFullText);
+                string shortName = GetFreeShortName(flagFullText);
                 if (!IsParameterNameTaken(shortName))
                 {
                     MapTemplateParamToCanonical(shortName, parameter.Name);
@@ -291,26 +291,10 @@ namespace dotnet_new3
                 }
 
                 // only as fallback
-                string singleLetterName = "-" + flagFullText.Substring(0, 1);
-                if (!shortNameFound && !IsParameterNameTaken(singleLetterName))
-                {
-                    MapTemplateParamToCanonical(singleLetterName, parameter.Name);
-                    shortNameFound = true;
-                }
-
-                // only as fallback
-                string qualifiedShortName = "-p:" + PosixNameToShortName(flagFullText);
+                string qualifiedShortName = GetFreeShortName(flagFullText, "p:");
                 if (!shortNameFound && !IsParameterNameTaken(qualifiedShortName))
                 {
                     MapTemplateParamToCanonical(qualifiedShortName, parameter.Name);
-                    shortNameFound = true;
-                }
-
-                // only as fallback
-                string qualifiedSingleLetterName = "-p:" + flagFullText.Substring(0, 1);
-                if (!shortNameFound && !IsParameterNameTaken(qualifiedSingleLetterName))
-                {
-                    MapTemplateParamToCanonical(qualifiedSingleLetterName, parameter.Name);
                     shortNameFound = true;
                 }
 
@@ -331,6 +315,41 @@ namespace dotnet_new3
             }
         }
 
+        private string GetFreeShortName(string name, string prefix = "")
+        {
+            string[] parts = name.Split(new[] { '-' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] buckets = new string[parts.Length];
+
+            for(int i = 0; i < buckets.Length; ++i)
+            {
+                buckets[i] = parts[i].Substring(0, 1);
+            }
+
+            int lastBucket = parts.Length - 1;
+            while(IsParameterNameTaken("-" + prefix + string.Join("", buckets)))
+            {
+                //Find the next thing we can take a character from
+                bool first = true;
+                int end = (lastBucket + 1) % parts.Length;
+                int i = (lastBucket + 1) % parts.Length;
+                for (; first || i != end; first = false, i = (i + 1) % parts.Length)
+                {
+                    if (parts[i].Length > buckets[i].Length)
+                    {
+                        buckets[i] = parts[i].Substring(0, buckets[i].Length + 1);
+                        break;
+                    }
+                }
+
+                if (i == end)
+                {
+                    break;
+                }
+            }
+
+            return "-" + prefix + string.Join("", buckets);
+        }
+
         private void MapTemplateParamToCanonical(string variant, string canonical)
         {
             if (_templateParamCanonicalMapping.TryGetValue(variant, out string existingCanonical))
@@ -342,19 +361,6 @@ namespace dotnet_new3
         }
 
         // Concats the first letter of dash separated word.
-        private static string PosixNameToShortName(string name)
-        {
-            IList<string> wordsInName = name.Split(new char[] { '-' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-            IList<string> firstLetters = new List<string>();
-
-            foreach (string word in wordsInName)
-            {
-                firstLetters.Add(word.Substring(0, 1));
-            }
-
-            return string.Join("", firstLetters);
-        }
-
         private IDictionary<string, IList<string>> _canonicalToVariantsTemplateParamMap;
 
         public IDictionary<string, IList<string>> CanonicalToVariantsTemplateParamMap
