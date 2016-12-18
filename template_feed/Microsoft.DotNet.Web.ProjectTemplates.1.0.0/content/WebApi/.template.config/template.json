@@ -1,0 +1,12 @@
+{
+  "author": "Microsoft",
+  "classifications": [ "C#", "Web", "WebAPI" ],
+  "name": "Web API ASP.NET Web Application",
+  "groupIdentity": "NetCoreWebApi",
+  "identity": "Microsoft.Web.WebApi.CSharp",
+  "shortName": "webapi",
+  "tags": {
+    "language": "C#"
+  },
+  "sourceName": "WebApplication1"
+}
