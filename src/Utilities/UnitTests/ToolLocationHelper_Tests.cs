@@ -31,10 +31,10 @@ namespace Microsoft.Build.UnitTests
     {
         private readonly ITestOutputHelper _output;
 
-#if FEATURE_RUN_EXE_IN_TESTS
-        private const string MSBuildExeName = "MSBuild.exe";
-#else
+#if USE_MSBUILD_DLL_EXTN
         private const string MSBuildExeName = "MSBuild.dll";
+#else
+        private const string MSBuildExeName = "MSBuild.exe";
 #endif
 
         public ToolLocationHelper_Tests(ITestOutputHelper output)
@@ -746,6 +746,7 @@ namespace Microsoft.Build.UnitTests
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/722")]
 #else
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
 #endif
         public void TestGetPathToBuildToolsFile_32Bit()
         {
@@ -4056,6 +4057,7 @@ namespace Microsoft.Build.UnitTests
         /// and make sure we get the expected results.
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void ResolveSDKFromRegistryAndDisk()
         {
             Dictionary<TargetPlatformSDK, TargetPlatformSDK> targetPlatforms = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();

@@ -185,7 +185,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
-    <Reference Include="PresentationFramework" />
+    <Reference Include="PresentationFramework" Condition="'$(OS)' == 'Windows_NT'" />
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>

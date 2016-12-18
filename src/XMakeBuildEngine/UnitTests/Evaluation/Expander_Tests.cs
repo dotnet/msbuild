@@ -2695,7 +2695,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 ObjectModelHelpers.CreateInMemoryProject("<Project><PropertyGroup><foo>$([MSBuild]::GetPathOfFileAbove('foo'))</foo></PropertyGroup></Project>");
             });
 
-            Assert.Equal("The expression \"[MSBuild]::GetPathOfFileAbove(foo, \'\')\" cannot be evaluated. The path is not of a legal form.", exception.Message);
+            Assert.True(exception.Message.StartsWith("The expression \"[MSBuild]::GetPathOfFileAbove(foo, \'\')\" cannot be evaluated."));
         }
 
         /// <summary>

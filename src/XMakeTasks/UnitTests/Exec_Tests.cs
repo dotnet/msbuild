@@ -41,6 +41,7 @@ namespace Microsoft.Build.UnitTests
         /// lying around.
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void NoTempFileLeaks()
         {
             using (var alternativeTemp = new Helpers.AlternativeTempPath())
@@ -384,6 +385,7 @@ namespace Microsoft.Build.UnitTests
 #else
         [Fact]
 #endif
+        [Trait("Category", "mono-osx-failing")]
         public void ExecTaskUtf8NeverWithNonAnsi()
         {
             RunExec(true, EncodingUtilities.CurrentSystemOemEncoding.EncodingName, "Never", false);
@@ -765,6 +767,7 @@ namespace Microsoft.Build.UnitTests
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/623")]
 #else
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
 #endif
         public void CanEncodeTest()
         {

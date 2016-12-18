@@ -206,6 +206,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -268,6 +270,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -281,6 +285,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -527,6 +533,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -588,6 +596,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -677,6 +687,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -733,6 +745,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -810,6 +824,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -1468,6 +1484,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// wait until the task finishes normally (cancellation not supported.)
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void CancelledBuildInTaskHostWithDelay20()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 != null)
@@ -1538,6 +1555,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// cancel the task and exit out after a short period wherein we wait for the task to exit cleanly. 
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void CancelledBuildInTaskHostWithDelay40()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -2040,6 +2058,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -2115,6 +2135,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -2190,6 +2212,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -2577,6 +2601,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -2706,6 +2732,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -2815,6 +2843,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -2954,6 +2984,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -3065,6 +3097,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -3426,6 +3460,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1245")]
 #else
         [Fact]
 #endif
@@ -3532,6 +3568,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
 #else
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
 #endif
         public void Regress265010()
         {

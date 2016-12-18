@@ -692,8 +692,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                   <configSections>
                     <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build"" />
                   </configSections>
-                  <msbuildToolsets default=""14.1"">
-                    <toolset toolsVersion=""14.1"">
+                  <msbuildToolsets default=""" + toolsVersionToUse + @""">
+                    <toolset toolsVersion=""" + toolsVersionToUse + @""">
                       <property name=""MSBuildToolsPath"" value="".""/>
                       <property name=""MSBuildBinPath"" value="".""/>
                       <projectImportSearchPaths>
@@ -759,8 +759,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                   <configSections>
                     <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"" />
                   </configSections>
-                  <msbuildToolsets default=""14.1"">
-                    <toolset toolsVersion=""14.1"">
+                  <msbuildToolsets default=""" + toolsVersionToUse + @""">
+                    <toolset toolsVersion=""" + toolsVersionToUse + @""">
                       <property name=""MSBuildToolsPath"" value="".""/>
                       <property name=""MSBuildBinPath"" value="".""/>
                       <projectImportSearchPaths>
@@ -784,7 +784,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 projectCollection.RegisterLogger(logger);
 
                 Assert.Throws<InvalidProjectFileException>(() => projectCollection.LoadProject(mainProjectPath));
-                logger.AssertLogContains(@"MSB4226: The imported project ""$(UndefinedProperty)\filenotfound.props"" was not found. Also, tried to find");
+                logger.AssertLogContains(@"MSB4226: The imported project """ + Path.Combine("$(UndefinedProperty)", "filenotfound.props")
+                                            + @""" was not found. Also, tried to find");
             }
             finally
             {

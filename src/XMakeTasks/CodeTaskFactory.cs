@@ -651,7 +651,7 @@ namespace Microsoft.Build.Tasks
                         {
                             if (!referenceAssembly.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) || !referenceAssembly.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
                             {
-#pragma warning disable 618
+#pragma warning disable 618, 612
                                 // Unfortunately Assembly.Load is not an alternative to LoadWithPartialName, since
                                 // Assembly.Load requires the full assembly name to be passed to it.
                                 // Therefore we must ignore the deprecated warning.
@@ -677,7 +677,7 @@ namespace Microsoft.Build.Tasks
                                         candidateAssemblyLocation = candidateAssembly.Location;
                                     }
                                 }
-#pragma warning restore 618
+#pragma warning restore 618, 612
                             }
                         }
                         else

@@ -48,6 +48,7 @@ namespace Microsoft.Build.UnitTests
 #else
         [Fact]
 #endif
+        [Trait("Category", "mono-osx-failing")]
         public void Regress172107()
         {
             // Can't embed the 'Ã' directly because the string is Unicode already and the Unicode<-->ANSI transform
@@ -98,6 +99,7 @@ namespace Microsoft.Build.UnitTests
 #else
         [Fact]
 #endif
+        [Trait("Category", "mono-osx-failing")]
         public void Regress249540()
         {
             // Special character is 'Ä' in UTF8: 0xC3 84

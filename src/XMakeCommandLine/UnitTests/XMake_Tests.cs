@@ -24,10 +24,10 @@ namespace Microsoft.Build.UnitTests
 {
     public class XMakeAppTests
     {
-#if FEATURE_RUN_EXE_IN_TESTS
-        private const string MSBuildExeName = "MSBuild.exe";
-#else
+#if USE_MSBUILD_DLL_EXTN
         private const string MSBuildExeName = "MSBuild.dll";
+#else
+        private const string MSBuildExeName = "MSBuild.exe";
 #endif
 
         private const string AutoResponseFileName = "MSBuild.rsp";
@@ -592,8 +592,9 @@ namespace Microsoft.Build.UnitTests
                 Environment.SetEnvironmentVariable("MSBuildOldOM", "");
 
                 startDirectory = CopyMSBuild();
-                var newPathToMSBuildExe = Path.Combine(startDirectory, "msbuild.exe");
-                var pathToConfigFile = Path.Combine(startDirectory, "msbuild.exe.config");
+                var msbuildExeName = Path.GetFileName(RunnerUtilities.PathToCurrentlyRunningMsBuildExe);
+                var newPathToMSBuildExe = Path.Combine(startDirectory, msbuildExeName);
+                var pathToConfigFile = Path.Combine(startDirectory, msbuildExeName + ".config");
 
                 string configContent = @"<?xml version =""1.0""?>
                                             <configuration>
@@ -829,7 +830,15 @@ namespace Microsoft.Build.UnitTests
             Assert.True(File.Exists(_pathToArbitraryBogusFile));
 
             bool successfulExit;
-            string output = RunnerUtilities.ExecMSBuild('"' + RunnerUtilities.PathToCurrentlyRunningMsBuildExe + '"', msbuildParameters, out successfulExit);
+            string pathToMSBuildExe = RunnerUtilities.PathToCurrentlyRunningMsBuildExe;
+            // This @pathToMSBuildExe is used directly with Process, so don't quote it on
+            // Unix
+            if (NativeMethodsShared.IsWindows)
+            {
+                pathToMSBuildExe = "\"" + pathToMSBuildExe + "\"";
+            }
+
+            string output = RunnerUtilities.ExecMSBuild(pathToMSBuildExe, msbuildParameters, out successfulExit);
             Assert.False(successfulExit);
 
             Assert.Contains(RunnerUtilities.PathToCurrentlyRunningMsBuildExe + (NativeMethodsShared.IsWindows ? " /v:diag " : " -v:diag ") + _pathToArbitraryBogusFile, output, StringComparison.OrdinalIgnoreCase);
