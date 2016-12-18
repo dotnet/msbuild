@@ -374,21 +374,33 @@ namespace dotnet_new3
             {
                 string pkg = package.Trim();
                 pkg = Environment.ExpandEnvironmentVariables(pkg);
+                string pattern = null;
+
+                int wildcardIndex = pkg.IndexOfAny(new[] { '*', '?' });
+
+                if(wildcardIndex > -1)
+                {
+                    int lastSlashBeforeWildcard = pkg.LastIndexOfAny(new[] { '\\', '/' });
+                    pattern = pkg.Substring(lastSlashBeforeWildcard + 1);
+                    pkg = pkg.Substring(0, lastSlashBeforeWildcard);
+                }
 
                 try
                 {
-                    if (Directory.Exists(pkg) || File.Exists(pkg))
+                    if (pattern != null)
+                    {
+                        string fullDirectory = new DirectoryInfo(pkg).FullName;
+                        string fullPathGlob = Path.Combine(fullDirectory, pattern);
+                        TemplateCache.Scan(fullPathGlob);
+                    }
+                    else if (Directory.Exists(pkg) || File.Exists(pkg))
                     {
                         string packageLocation = new DirectoryInfo(pkg).FullName;
                         TemplateCache.Scan(packageLocation);
                     }
                     else
                     {
-                        string directory = Path.GetDirectoryName(pkg);
-                        string fileGlob = Path.GetFileName(pkg);
-                        string fullDirectory = new DirectoryInfo(directory).FullName;
-                        string fullPathGlob = Path.Combine(fullDirectory, fileGlob);
-                        TemplateCache.Scan(fullPathGlob);
+                        EngineEnvironmentSettings.Host.OnNonCriticalError("InvalidPackageSpecification", string.Format(LocalizableStrings.BadPackageSpec, pkg), null, 0);
                     }
                 }
                 catch
