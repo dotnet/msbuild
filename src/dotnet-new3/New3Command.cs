@@ -69,7 +69,7 @@ namespace dotnet_new3
             };
 
             // Initial host setup has the current locale. May need to be changed based on inputs.
-            Host = new DefaultTemplateEngineHost(HostIdentifier, HostVersion, CultureInfo.CurrentCulture.Name, null, builtIns.ToList());
+            Host = new DefaultTemplateEngineHost(HostIdentifier, HostVersion, CultureInfo.CurrentCulture.Name, new Dictionary<string, string>(), builtIns.ToList());
             EngineEnvironmentSettings.Host = Host;
 
             ExtendedCommandParser app = new ExtendedCommandParser()
