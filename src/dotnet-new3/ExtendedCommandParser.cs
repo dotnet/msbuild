@@ -56,7 +56,7 @@ namespace dotnet_new3
             _helpDisplayer.ShowHelp();
         }
 
-        public void RemoveOption(CommandOption option)
+        internal void RemoveOption(CommandOption option)
         {
             _app.Options.Remove(option);
         }
@@ -85,7 +85,7 @@ namespace dotnet_new3
             get { return _app.RemainingArguments; }
         }
 
-        public CommandArgument Argument(string parameter, string description)
+        internal CommandArgument Argument(string parameter, string description)
         {
             if (IsParameterNameTaken(parameter))
             {
@@ -100,7 +100,7 @@ namespace dotnet_new3
             return _app.Argument(parameter, description);
         }
 
-        public void InternalOption(string parameterVariants, string canonical, string description, CommandOptionType optionType)
+        internal void InternalOption(string parameterVariants, string canonical, string description, CommandOptionType optionType)
         {
             _helpDisplayer.Option(parameterVariants, description, optionType);
             HiddenInternalOption(parameterVariants, canonical, optionType);
@@ -108,7 +108,7 @@ namespace dotnet_new3
 
         // NOTE: the exceptions here should never happen, this is strictly called by the program
         // Once testing is done, we can probably remove them.
-        public void HiddenInternalOption(string parameterVariants, string canonical, CommandOptionType optionType)
+        internal void HiddenInternalOption(string parameterVariants, string canonical, CommandOptionType optionType)
         {
             string[] parameters = parameterVariants.Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -231,7 +231,7 @@ namespace dotnet_new3
                         {
                             throw new Exception($"Parameter [{param.Key}] ({canonicalName}) must be given a value");
                         }
-                        
+
                         // TODO: allow for multi-valued params
                         _parsedTemplateParams[canonicalName] = param.Value[0];
                     }
@@ -320,13 +320,13 @@ namespace dotnet_new3
             string[] parts = name.Split(new[] { '-' }, StringSplitOptions.RemoveEmptyEntries);
             string[] buckets = new string[parts.Length];
 
-            for(int i = 0; i < buckets.Length; ++i)
+            for (int i = 0; i < buckets.Length; ++i)
             {
                 buckets[i] = parts[i].Substring(0, 1);
             }
 
             int lastBucket = parts.Length - 1;
-            while(IsParameterNameTaken("-" + prefix + string.Join("", buckets)))
+            while (IsParameterNameTaken("-" + prefix + string.Join("", buckets)))
             {
                 //Find the next thing we can take a character from
                 bool first = true;
