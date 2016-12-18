@@ -32,7 +32,7 @@ namespace WebApplication1
             if (env.IsDevelopment())
             {
                 // For more details on using the user secret store see https://go.microsoft.com/fwlink/?LinkID=532709
-                builder.AddUserSecrets("aspnet-WebApplication1-53bc9b9d-9d6a-45d4-8429-2a2761773502");
+                builder.AddUserSecrets<Startup>();
             }
 
 #else
