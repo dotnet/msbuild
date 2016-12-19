@@ -35,6 +35,11 @@ namespace Microsoft.DotNet.Tools.Restore
                     LocalizableStrings.CmdSourceOptionDescription,
                     CommandOptionType.MultipleValue);
 
+            var runtimeOption = cmd.Option(
+                    $"-r|--runtime <{LocalizableStrings.CmdRuntimeOption}>",
+                    LocalizableStrings.CmdRuntimeOptionDescription,
+                    CommandOptionType.MultipleValue);
+
             var packagesOption = cmd.Option(
                     $"--packages <{LocalizableStrings.CmdPackagesOption}>",
                     LocalizableStrings.CmdPackagesOptionDescription,
@@ -79,6 +84,11 @@ namespace Microsoft.DotNet.Tools.Restore
                 if (sourceOption.HasValue())
                 {
                     msbuildArgs.Add($"/p:RestoreSources={string.Join("%3B", sourceOption.Values)}");
+                }
+
+                if (runtimeOption.HasValue())
+                {
+                    msbuildArgs.Add($"/p:RuntimeIdentifiers={string.Join("%3B", runtimeOption.Values)}");
                 }
 
                 if (packagesOption.HasValue())
