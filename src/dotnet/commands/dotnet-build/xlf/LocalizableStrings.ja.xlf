@@ -14,9 +14,9 @@
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>Configuration under which to build</source>
-        <target state="translated">構築する構成</target>
-        <note />
+        <source>Configuration to use for building the project. Default for most projects is  "Debug".</source>
+        <target state="needs-review-translation">構築する構成</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="ConfigurationOptionName">
         <source>CONFIGURATION</source>
@@ -24,9 +24,9 @@
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
-        <source>Compile a specific framework</source>
-        <target state="translated">特定のフレームワークをコンパイルする</target>
-        <note />
+        <source>Target framework to build for. The target framework has to be specified in the project file.</source>
+        <target state="needs-review-translation">特定のフレームワークをコンパイルする</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="FrameworkOptionName">
         <source>FRAMEWORK</source>
@@ -34,19 +34,19 @@
         <note />
       </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">
-        <source>Set this flag to ignore project to project references and only build the root project</source>
-        <target state="translated">project to project 参照を無視して、ルート プロジェクトのみを構築するには、このフラグを設定します</target>
-        <note />
+        <source>Set this flag to ignore project-to-project references and only build the root project</source>
+        <target state="needs-review-translation">project to project 参照を無視して、ルート プロジェクトのみを構築するには、このフラグを設定します</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="NoIncrementialOptionDescription">
-        <source>Set this flag to turn off incremental build</source>
-        <target state="translated">インクリメンタル ビルドを無効にするには、このフラグを設定します</target>
-        <note />
+        <source>Disables incremental build.</source>
+        <target state="needs-review-translation">インクリメンタル ビルドを無効にするには、このフラグを設定します</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
-        <source>Directory in which to place outputs</source>
-        <target state="translated">出力を配置するディレクトリ</target>
-        <note />
+        <source>Output directory in which to place built artifacts.</source>
+        <target state="needs-review-translation">出力を配置するディレクトリ</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="OutputOptionName">
         <source>OUTPUT_DIR</source>

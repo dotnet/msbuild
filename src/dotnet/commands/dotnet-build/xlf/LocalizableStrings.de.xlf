@@ -14,9 +14,9 @@
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>Configuration under which to build</source>
-        <target state="translated">Konfiguration für den Buildvorgang</target>
-        <note />
+        <source>Configuration to use for building the project. Default for most projects is  "Debug".</source>
+        <target state="needs-review-translation">Konfiguration für den Buildvorgang</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="ConfigurationOptionName">
         <source>CONFIGURATION</source>
@@ -24,9 +24,9 @@
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
-        <source>Compile a specific framework</source>
-        <target state="translated">Bestimmtes Framework kompilieren</target>
-        <note />
+        <source>Target framework to build for. The target framework has to be specified in the project file.</source>
+        <target state="needs-review-translation">Bestimmtes Framework kompilieren</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="FrameworkOptionName">
         <source>FRAMEWORK</source>
@@ -34,19 +34,19 @@
         <note />
       </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">
-        <source>Set this flag to ignore project to project references and only build the root project</source>
-        <target state="translated">Legen Sie dieses Flag fest, um Projekt-zu-Projekt-Verweise zu ignorieren und nur das Stammprojekt zu erstellen.</target>
-        <note />
+        <source>Set this flag to ignore project-to-project references and only build the root project</source>
+        <target state="needs-review-translation">Legen Sie dieses Flag fest, um Projekt-zu-Projekt-Verweise zu ignorieren und nur das Stammprojekt zu erstellen.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="NoIncrementialOptionDescription">
-        <source>Set this flag to turn off incremental build</source>
-        <target state="translated">Legen Sie dieses Flag fest, um die inkrementelle Erstellung zu deaktivieren.</target>
-        <note />
+        <source>Disables incremental build.</source>
+        <target state="needs-review-translation">Legen Sie dieses Flag fest, um die inkrementelle Erstellung zu deaktivieren.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
-        <source>Directory in which to place outputs</source>
-        <target state="translated">Verzeichnis für Ausgaben</target>
-        <note />
+        <source>Output directory in which to place built artifacts.</source>
+        <target state="needs-review-translation">Verzeichnis für Ausgaben</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="OutputOptionName">
         <source>OUTPUT_DIR</source>

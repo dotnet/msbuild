@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="it" original="src/Microsoft.DotNet.Cli.Sln.Internal/LocalizableStrings.resx">
+    <body>
+      <group id="src/Microsoft.DotNet.Cli.Sln.Internal/LocalizableStrings.resx" />
+      <trans-unit id="GlobalSectionMoreThanOnceError">
+        <source>Global section specified more than once</source>
+        <target state="new">Global section specified more than once</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="GlobalSectionNotClosedError">
+        <source>Global section not closed</source>
+        <target state="new">Global section not closed</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="FileHeaderMissingError">
+        <source>File header is missing</source>
+        <target state="new">File header is missing</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ProjectSectionNotClosedError">
+        <source>Project section not closed</source>
+        <target state="new">Project section not closed</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="InvalidSectionTypeError">
+        <source>Invalid section type: {0}</source>
+        <target state="new">Invalid section type: {0}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="SectionIdMissingError">
+        <source>Section id missing</source>
+        <target state="new">Section id missing</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ClosingSectionTagNotFoundError">
+        <source>Closing section tag not found</source>
+        <target state="new">Closing section tag not found</target>
+        <note></note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

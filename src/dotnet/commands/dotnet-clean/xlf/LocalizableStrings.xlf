@@ -24,24 +24,24 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
-        <source>Directory in which the build outputs have been placed</source>
-        <note />
+        <source>Directory in which the build outputs have been placed.</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
-        <source>Clean a specific framework</source>
-        <note />
+        <source>Clean a specific framework.</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdConfiguration">
         <source>CONFIGURATION</source>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigurationDescription">
-        <source>Clean a specific configuration</source>
-        <note />
+        <source>Clean a specific configuration.</source>
+        <note></note>
       </trans-unit>
     </body>
   </file>

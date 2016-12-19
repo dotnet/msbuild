@@ -18,11 +18,6 @@
         <target state="translated">Supprimer la référence uniquement en cas de ciblage d'un framework spécifique</target>
         <note />
       </trans-unit>
-      <trans-unit id="SpecifyAtLeastOneReferenceToRemove">
-        <source>You must specify at least one reference to delete. Please run dotnet delete --help for more information.</source>
-        <target state="translated">Vous devez spécifier au moins une référence à supprimer. Exécutez dotnet delete --help pour plus d'informations.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="AppHelpText">
         <source>Project to project references to remove</source>
         <target state="new">Project to project references to remove</target>

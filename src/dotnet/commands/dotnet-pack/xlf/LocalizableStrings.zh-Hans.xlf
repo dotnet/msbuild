@@ -4,9 +4,9 @@
     <body>
       <group id="src/dotnet/commands/dotnet-pack/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
-        <source>pack</source>
-        <target state="translated">包</target>
-        <note />
+        <source>.NET Core NuGet Package Packer</source>
+        <target state="needs-review-translation">包</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>pack for msbuild</source>
@@ -19,19 +19,19 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
-        <source>Directory in which to place outputs</source>
-        <target state="translated">用于放置输出的目录</target>
-        <note />
+        <source>Directory in which to place built packages.</source>
+        <target state="needs-review-translation">用于放置输出的目录</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
-        <source>Do not build project before packing</source>
-        <target state="translated">打包之前不要生成项目</target>
-        <note />
+        <source>Skip building the project prior to packing. By default, the project will be built.</source>
+        <target state="needs-review-translation">打包之前不要生成项目</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdIncludeSymbolsDescription">
-        <source>Include PDBs along with the DLLs in the output folder</source>
-        <target state="translated">输出文件夹中包括 PDB 和 DLL。</target>
-        <note />
+        <source>Include packages with symbols in addition to regular packages in output directory.</source>
+        <target state="needs-review-translation">输出文件夹中包括 PDB 和 DLL。</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdIncludeSourceDescription">
         <source>Include PDBs and source files. Source files go into the src folder in the resulting nuget package</source>
@@ -44,9 +44,9 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
-        <source>Configuration under which to build</source>
-        <target state="translated">在何处生成配置</target>
-        <note />
+        <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
+        <target state="needs-review-translation">在何处生成配置</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdVersionSuffix">
         <source>VERSION_SUFFIX</source>
@@ -54,14 +54,14 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffixDescription">
-        <source>Defines what `*` should be replaced with in version field in project.json</source>
-        <target state="translated">定义 project.json 的版本字段应该替换哪个 “*”。</target>
-        <note />
+        <source>Defines the value for the $(VersionSuffix) property in the project.</source>
+        <target state="needs-review-translation">定义 project.json 的版本字段应该替换哪个 “*”。</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdServiceableDescription">
-        <source>Set the serviceable flag in the package</source>
-        <target state="translated">在包中设置可用标志</target>
-        <note />
+        <source>Set the serviceable flag in the package. For more information, please see https://aka.ms/nupkgservicing.</source>
+        <target state="needs-review-translation">在包中设置可用标志</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdArgumentProject">
         <source>PROJECT</source>

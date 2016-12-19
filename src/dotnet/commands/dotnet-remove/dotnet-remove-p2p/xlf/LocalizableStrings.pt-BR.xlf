@@ -18,11 +18,6 @@
         <target state="translated">Remover referência apenas ao visar uma estrutura específica</target>
         <note />
       </trans-unit>
-      <trans-unit id="SpecifyAtLeastOneReferenceToRemove">
-        <source>You must specify at least one reference to delete. Please run dotnet delete --help for more information.</source>
-        <target state="translated">É necessário especificar pelo menos uma referência para ser excluída. Execute dotnet delete --help para obter mais informações.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="AppHelpText">
         <source>Project to project references to remove</source>
         <target state="new">Project to project references to remove</target>

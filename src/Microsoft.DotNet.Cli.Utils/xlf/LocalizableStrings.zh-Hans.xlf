@@ -1,0 +1,220 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hans" original="src/Microsoft.DotNet.Cli.Utils/LocalizableStrings.resx">
+    <body>
+      <group id="src/Microsoft.DotNet.Cli.Utils/LocalizableStrings.resx" />
+      <trans-unit id="MalformedText">
+        <source>Malformed command text '{0}'</source>
+        <target state="new">Malformed command text '{0}'</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="BuildOutputPathDoesNotExist">
+        <source>outputpathresolver: {0} does not exist</source>
+        <target state="new">outputpathresolver: {0} does not exist</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AttemptingToFindCommand">
+        <source>{0}: attempting to find command {1} in {2}</source>
+        <target state="new">{0}: attempting to find command {1} in {2}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="FailedToFindToolAssembly">
+        <source>{0}: failed to find toolAssembly for {1}</source>
+        <target state="new">{0}: failed to find toolAssembly for {1}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="FailedToFindCommandPath">
+        <source>{0}: failed to find commandPath {1}</source>
+        <target state="new">{0}: failed to find commandPath {1}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="UnableToLocateDotnetMultiplexer">
+        <source>Unable to locate dotnet multiplexer</source>
+        <target state="new">Unable to locate dotnet multiplexer</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="LookingForPreferCliRuntimeFile">
+        <source>{0}: Looking for prefercliruntime file at `{1}`</source>
+        <target state="new">{0}: Looking for prefercliruntime file at `{1}`</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AttemptingToResolve">
+        <source>{0}: attempting to resolve {1}</source>
+        <target state="new">{0}: attempting to resolve {1}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="DidNotFindAMatchingProject">
+        <source>{0}: Did not find a matching project {1}.</source>
+        <target state="new">{0}: Did not find a matching project {1}.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="InvalidCommandResolverArguments">
+        <source>{0}: invalid commandResolverArguments</source>
+        <target state="new">{0}: invalid commandResolverArguments</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="DoesNotExist">
+        <source>{0}: {1} does not exist</source>
+        <target state="new">{0}: {1} does not exist</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AmbiguousCommandName">
+        <source>Ambiguous command name: {0}</source>
+        <target state="new">Ambiguous command name: {0}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ToolLibraryFound">
+        <source>{0}: tool library found {1}</source>
+        <target state="new">{0}: tool library found {1}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MSBuildExePath">
+        <source>{0}: MSBUILD_EXE_PATH = {1}</source>
+        <target state="new">{0}: MSBUILD_EXE_PATH = {1}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MSBuildProjectPath">
+        <source>{0}: MSBuild project path = {1}</source>
+        <target state="new">{0}: MSBuild project path = {1}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="MultipleProjectFilesFound">
+        <source>Specify which project file to use because this '{0}' contains more than one project file.</source>
+        <target state="new">Specify which project file to use because this '{0}' contains more than one project file.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="DidNotFindProject">
+        <source>{0}: ProjectFactory did not find Project.</source>
+        <target state="new">{0}: ProjectFactory did not find Project.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ResolvingCommandSpec">
+        <source>{0}: resolving commandspec from {1} Tool Libraries.</source>
+        <target state="new">{0}: resolving commandspec from {1} Tool Libraries.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="FailedToResolveCommandSpec">
+        <source>{0}: failed to resolve commandspec from library.</source>
+        <target state="new">{0}: failed to resolve commandspec from library.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AttemptingToResolveCommandSpec">
+        <source>{0}: Attempting to resolve command spec from tool {1}</source>
+        <target state="new">{0}: Attempting to resolve command spec from tool {1}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="NuGetPackagesRoot">
+        <source>{0}: nuget packages root:
+{1}</source>
+        <target state="new">{0}: nuget packages root:
+{1}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="FoundToolLockFile">
+        <source>{0}: found tool lockfile at : {1}</source>
+        <target state="new">{0}: found tool lockfile at : {1}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="LibraryNotFoundInLockFile">
+        <source>{0}: library not found in lock file.</source>
+        <target state="new">{0}: library not found in lock file.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AttemptingToCreateCommandSpec">
+        <source>{0}: attempting to create commandspec</source>
+        <target state="new">{0}: attempting to create commandspec</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CommandSpecIsNull">
+        <source>{0}: commandSpec is null.</source>
+        <target state="new">{0}: commandSpec is null.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ExpectDepsJsonAt">
+        <source>{0}: expect deps.json at: {1}</source>
+        <target state="new">{0}: expect deps.json at: {1}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="GeneratingDepsJson">
+        <source>Generating deps.json at: {0}</source>
+        <target state="new">Generating deps.json at: {0}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="UnableToGenerateDepsJson">
+        <source>unable to generate deps.json, it may have been already generated: {0}</source>
+        <target state="new">unable to generate deps.json, it may have been already generated: {0}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="UnableToDeleteTemporaryDepsJson">
+        <source>unable to delete temporary deps.json file: {0}</source>
+        <target state="new">unable to delete temporary deps.json file: {0}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="VersionForPackageCouldNotBeResolved">
+        <source>Version for package `{0}` could not be resolved.</source>
+        <target state="new">Version for package `{0}` could not be resolved.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="FileNotFound">
+        <source>File not found `{0}`.</source>
+        <target state="new">File not found `{0}`.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ProjectNotRestoredOrRestoreFailed">
+        <source>The project may not have been restored or restore failed - run `dotnet restore`</source>
+        <target state="new">The project may not have been restored or restore failed - run `dotnet restore`</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="NoExecutableFoundMatchingCommand">
+        <source>No executable found matching command "{0}"</source>
+        <target state="new">No executable found matching command "{0}"</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="WaitingForDebuggerToAttach">
+        <source>Waiting for debugger to attach. Press ENTER to continue</source>
+        <target state="new">Waiting for debugger to attach. Press ENTER to continue</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ProcessId">
+        <source>Process ID: {0}</source>
+        <target state="new">Process ID: {0}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CouldNotAccessAssetsFile">
+        <source>Could not access assets file.</source>
+        <target state="new">Could not access assets file.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="DotNetCommandLineTools">
+        <source>.NET Command Line Tools</source>
+        <target state="new">.NET Command Line Tools</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="WriteLineForwarderSetPreviously">
+        <source>WriteLine forwarder set previously</source>
+        <target state="new">WriteLine forwarder set previously</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AlreadyCapturingStream">
+        <source>Already capturing stream!</source>
+        <target state="new">Already capturing stream!</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RunningFileNameArguments">
+        <source>Running {0} {1}</source>
+        <target state="new">Running {0} {1}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ProcessExitedWithCode">
+        <source>&lt; {0} exited with {1} in {2} ms.</source>
+        <target state="new">&lt; {0} exited with {1} in {2} ms.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="UnableToInvokeMemberNameAfterCommand">
+        <source>Unable to invoke {0} after the command has been run</source>
+        <target state="new">Unable to invoke {0} after the command has been run</target>
+        <note></note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
