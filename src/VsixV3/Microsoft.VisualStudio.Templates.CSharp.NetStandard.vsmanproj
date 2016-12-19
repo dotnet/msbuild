@@ -17,12 +17,10 @@
 
   <Target Name="BeforeBuild">
     <MSBuild Projects="Microsoft.VisualStudio.Templates.CSharp.NetStandard.swixproj" Targets="Build" />
-    <MSBuild Projects="Microsoft.NET.Sdk.swixproj" Targets="Build" />
   </Target>
 
   <ItemGroup>
     <MergeManifest Include="$(OutputPath)\Microsoft.VisualStudio.Templates.CSharp.NetStandard.json" />
-    <MergeManifest Include="$(OutputPath)\Microsoft.NET.Sdk.json" />
   </ItemGroup>
 
   <Target Name="ValidateManifest" />
