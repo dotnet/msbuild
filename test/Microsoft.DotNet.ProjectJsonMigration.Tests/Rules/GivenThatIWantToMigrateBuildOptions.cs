@@ -553,6 +553,20 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             mockProj.Properties.Count(p => p.Name == "GenerateRuntimeConfigurationFiles").Should().Be(0);
         }
 
+        [Fact]
+        public void MigratingAnAppWithAppConfigAddsItAsNoneToTheCsProj()
+        {
+            var tempDirectory = Temp.CreateDirectory().Path;
+            File.Create(Path.Combine(tempDirectory, "App.config")).Dispose();
+            var mockProj = RunBuildOptionsRuleOnPj(@"
+                {
+                }",
+                tempDirectory);
+
+            mockProj.Items.Count(i => i.ItemType == "None").Should().Be(1);
+            mockProj.Items.First(i => i.ItemType == "None").Include.Should().Be("App.config");
+        }
+
         private static IEnumerable<string> GetDefaultExcludePatterns(string group)
         {
             var defaultExcludePatterns = new List<string>(group == "copyToOutput" ?
