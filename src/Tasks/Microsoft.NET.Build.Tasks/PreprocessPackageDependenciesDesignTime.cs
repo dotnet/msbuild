@@ -40,7 +40,6 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public ITaskItem[] FileDependencies { get; set; }
 
-        [Required]
         public ITaskItem[] InputDiagnosticMessages { get; set; }
 
         [Output]
@@ -69,6 +68,7 @@ namespace Microsoft.NET.Build.Tasks
 
             PopulateAssemblies();
 
+            InputDiagnosticMessages = InputDiagnosticMessages ?? new ITaskItem[] { };
             PopulateDiagnosticsMap();
 
             AddDependenciesToTheWorld(Packages, PackageDependencies);
