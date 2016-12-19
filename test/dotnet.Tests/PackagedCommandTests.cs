@@ -124,6 +124,20 @@ namespace Microsoft.DotNet.Tests
                      .And.Pass();
         }
 
+        [Fact]
+        public void ItShowsErrorWhenToolIsNotRestored()
+        {
+            var testInstance = TestAssets.Get("NonRestoredTestProjects", "AppWithNonExistingToolDependency")
+                .CreateInstance()
+                .WithSourceFiles();
+
+            new TestCommand("dotnet")
+                .WithWorkingDirectory(testInstance.Root)
+                .ExecuteWithCapturedOutput("nonexistingtool")
+                .Should().Fail()
+                    .And.HaveStdErrContaining("Version for package `dotnet-nonexistingtool` could not be resolved.");
+        }
+
         // need conditional theories so we can skip on non-Windows
         //[Theory(Skip="https://github.com/dotnet/cli/issues/4514")]
         //[MemberData("DependencyToolArguments")]

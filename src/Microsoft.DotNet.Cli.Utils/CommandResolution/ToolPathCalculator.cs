@@ -75,6 +75,11 @@ namespace Microsoft.DotNet.Cli.Utils
             var availableVersions = new List<NuGetVersion>();
 
             var toolBase = GetBaseToolPath(packageId);
+            if (!Directory.Exists(toolBase))
+            {
+                return new NuGetVersion[0];
+            }
+            
             var versionDirectories = Directory.EnumerateDirectories(toolBase);
 
             foreach (var versionDirectory in versionDirectories)
