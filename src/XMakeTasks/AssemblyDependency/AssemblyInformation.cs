@@ -457,6 +457,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>The CLR runtime version or empty if the path does not exist.</returns>
         internal static string GetRuntimeVersion(string path)
         {
+#if FEATURE_MSCOREE
             if (NativeMethodsShared.IsWindows)
             {
                 StringBuilder runtimeVersion = null;
@@ -489,6 +490,9 @@ namespace Microsoft.Build.Tasks
             {
                 return ManagedRuntimeVersionReader.GetRuntimeVersion(path);
             }
+#else
+                return ManagedRuntimeVersionReader.GetRuntimeVersion(path);
+#endif
         }
 
 

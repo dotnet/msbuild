@@ -1304,6 +1304,7 @@ typedef enum _tagAssemblyComparisonResult
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool CertFreeCertificateContext(IntPtr CertContext);
 
+#if FEATURE_MSCOREE
         /// <summary>
         /// Get the runtime version for a given file
         /// </summary>
@@ -1314,6 +1315,7 @@ typedef enum _tagAssemblyComparisonResult
         /// <returns>HResult</returns>
         [DllImport(MscoreeDLL, SetLastError = true, CharSet = CharSet.Unicode)]
         internal static extern uint GetFileVersion(String szFullPath, StringBuilder szBuffer, int cchBuffer, out uint dwLength);
+#endif
         #endregion
 
         #region Methods
