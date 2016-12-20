@@ -13,6 +13,9 @@ using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.DotNet.InternalAbstractions;
 using Xunit;
 using Xunit.Abstractions;
+using Microsoft.Build.Construction;
+using System.Linq;
+using Microsoft.Build.Evaluation;
 
 namespace Microsoft.DotNet.Tests
 {
@@ -136,6 +139,52 @@ namespace Microsoft.DotNet.Tests
                 .ExecuteWithCapturedOutput("nonexistingtool")
                 .Should().Fail()
                     .And.HaveStdErrContaining("Version for package `dotnet-nonexistingtool` could not be resolved.");
+        }
+
+        [Fact]
+        public void ItRunsToolRestoredToSpecificPackageDir()
+        {
+            var testInstance = TestAssets.Get("NonRestoredTestProjects", "ToolWithRandomPackageName")
+                .CreateInstance()
+                .WithSourceFiles();
+
+            var appWithDepOnToolDir = testInstance.Root.Sub("AppWithDepOnTool");
+            var toolWithRandPkgNameDir = testInstance.Root.Sub("ToolWithRandomPackageName");
+            var pkgsDir = testInstance.Root.CreateSubdirectory("pkgs");
+
+            string randomPackageName = Guid.NewGuid().ToString();
+
+            // TODO: This is a workround for https://github.com/dotnet/cli/issues/5020
+            SetGeneratedPackageName(appWithDepOnToolDir.GetFile("AppWithDepOnTool.csproj"),
+                                    randomPackageName);
+
+            SetGeneratedPackageName(toolWithRandPkgNameDir.GetFile("ToolWithRandomPackageName.csproj"),
+                                    randomPackageName);
+
+            new RestoreCommand()
+                .WithWorkingDirectory(toolWithRandPkgNameDir)
+                .ExecuteWithCapturedOutput()
+                .Should().Pass()
+                .And.NotHaveStdErr();
+
+            new PackCommand()
+                .WithWorkingDirectory(toolWithRandPkgNameDir)
+                .ExecuteWithCapturedOutput($"-o \"{pkgsDir.FullName}\"")
+                .Should().Pass()
+                .And.NotHaveStdErr();
+
+            new RestoreCommand()
+                .WithWorkingDirectory(appWithDepOnToolDir)
+                .ExecuteWithCapturedOutput($"--packages \"{pkgsDir.FullName}\"")
+                .Should().Pass()
+                .And.NotHaveStdErr();
+
+            new TestCommand("dotnet")
+                .WithWorkingDirectory(appWithDepOnToolDir)
+                .ExecuteWithCapturedOutput("randompackage")
+                .Should().Pass()
+                .And.HaveStdOutContaining("Hello World from tool!")
+                .And.NotHaveStdErr();
         }
 
         // need conditional theories so we can skip on non-Windows
@@ -292,6 +341,14 @@ namespace Microsoft.DotNet.Tests
             stopWatch.Stop();
 
             stopWatch.ElapsedMilliseconds.Should().BeGreaterThan(1000, "Because dotnet should respect the NuGet lock");
+        }
+
+        private void SetGeneratedPackageName(FileInfo project, string packageName)
+        {
+            const string propertyName = "GeneratedPackageId";
+            var p = ProjectRootElement.Open(project.FullName, new ProjectCollection(), true);
+            p.AddProperty(propertyName, packageName);
+            p.Save();
         }
 
         class HelloCommand : TestCommand
