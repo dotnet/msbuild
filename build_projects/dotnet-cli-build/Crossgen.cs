@@ -98,12 +98,12 @@ namespace Microsoft.DotNet.Build.Tasks
 
         private string GetInPath()
         {
-            return $"-in {SourceAssembly}";
+            return $"-in \"{SourceAssembly}\"";
         }
         
         private string GetOutPath()
         {
-            return $"-out {TempOutputPath}";
+            return $"-out \"{TempOutputPath}\"";
         }
 
         private string GetPlatformAssemblyPaths()
