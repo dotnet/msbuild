@@ -153,6 +153,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </MsDeploySourceManifest>
     </ItemGroup>
 
+    <ItemGroup Condition="'@(_EFSQLScripts)' != ''">
+      <MsDeploySourceManifest Include="dbfullsql" >
+        <Path>%(_EFSQLScripts.Identity)</Path>
+      </MsDeploySourceManifest>
+    </ItemGroup>
+
     <CreateManifestFile
       Manifests="@(MsDeploySourceManifest)"
       ManifestFile="$(_MsDeploySourceManifestPath)" />
@@ -182,6 +188,20 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <DefaultValue>$(DeployIisAppPath)</DefaultValue>
         <Value>$(DeployIisAppPath)</Value>
         <Tags>IisApp</Tags>
+        <Priority></Priority>
+        <ExcludeFromSetParameter>false</ExcludeFromSetParameter>
+      </MsDeployDeclareParameters>
+    </ItemGroup>
+
+    <ItemGroup Condition="'@(_EFSQLScripts)' != ''">
+      <MsDeployDeclareParameters Include="%(_EFSQLScripts.DBContext)">
+        <Kind>ProviderPath</Kind>
+        <Scope>dbfullsql</Scope>
+        <Match>^%(_EFSQLScripts.EscapedPath)$</Match>
+        <Description></Description>
+        <DefaultValue>%(_EFSQLScripts.ConnectionString)</DefaultValue>
+        <Value>%(_EFSQLScripts.ConnectionString)</Value>
+        <Tags>dbfullsql</Tags>
         <Priority></Priority>
         <ExcludeFromSetParameter>false</ExcludeFromSetParameter>
       </MsDeployDeclareParameters>

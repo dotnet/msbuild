@@ -46,6 +46,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </ItemGroup>
 
     <Delete Files="@(_PublishTempFiles)" ContinueOnError="true" />
+    <RemoveDir Directories="$(PublishIntermediateOutputPath)" ContinueOnError="true" Condition="Exists('$(PublishIntermediateOutputPath)')" />
     <MakeDir Directories="$(PublishIntermediateOutputPath)" Condition="!Exists('$(PublishIntermediateOutputPath)')"/>
 
   </Target>

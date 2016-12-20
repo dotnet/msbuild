@@ -29,6 +29,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <FileSystemPublishDependsOn>
       $(FileSystemPublishDependsOn);
       _DeleteDestinationFilesIfSpecified;
+      _CopyEntityFrameworkScripts;
       _GatherFilesFromPublishIntermediateOutputPath;
     </FileSystemPublishDependsOn>
   </PropertyGroup>
@@ -73,6 +74,20 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup>
       <_PublishIntermediateOutputPathFiles Include="$(PublishIntermediateOutputPath)**\*.*" />
     </ItemGroup>
+  </Target>
+
+  <!--
+  ***********************************************************************************************
+  TARGET : _CopyEntityFrameworkScripts
+  ***********************************************************************************************
+ -->
+  <Target Name="_CopyEntityFrameworkScripts">
+
+    <Copy
+    Condition="@(_EFSQLScripts) != ''"
+    SourceFiles="@(_EFSQLScripts)"
+    DestinationFiles="@(_EFSQLScripts ->'$(PublishIntermediateOutputPath)$(EFSQLScriptsFolderName)\%(Filename)%(Extension)')" 
+    ContinueOnError="true"/>
   </Target>
   
 </Project>
