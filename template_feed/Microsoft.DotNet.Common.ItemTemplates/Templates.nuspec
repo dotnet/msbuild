@@ -8,6 +8,9 @@
     <language>en-US</language>
     <projectUrl>https://github.com/dotnet/templating</projectUrl>
     <licenseUrl>https://www.microsoft.com/web/webpi/eula/net_library_eula_enu.htm</licenseUrl>
+    <packageTypes>
+      <packageType name="Template" />
+    </packageTypes>
     <!-- dependencies>
       <dependency id="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" version="1.0.0-beta1-*" />
     </dependencies -->
