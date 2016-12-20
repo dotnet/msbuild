@@ -429,57 +429,34 @@ namespace dotnet_new3
             EngineEnvironmentSettings.Host.TryGetHostParamDefault("prefs:language", out string defaultLanguage);
 
             Dictionary<ITemplateInfo, string> templatesVersusLanguages = new Dictionary<ITemplateInfo, string>();
-            
-            foreach(IGrouping<string, ITemplateInfo> grouping in grouped)
-            {
-                using (IEnumerator<ITemplateInfo> enumerator = grouping.GetEnumerator())
-                {
-                    enumerator.MoveNext();
-                    ITemplateInfo key = enumerator.Current;
-                    StringBuilder languages = new StringBuilder();
-                    bool anyLangs = false;
-                    if (enumerator.Current.Tags.TryGetValue("language", out string lang))
-                    {
-                        anyLangs = true;
 
-                        if(string.IsNullOrEmpty(language) && string.Equals(defaultLanguage, lang, StringComparison.OrdinalIgnoreCase))
+            foreach (IGrouping<string, ITemplateInfo> grouping in grouped)
+            {
+                List<string> languages = new List<string>();
+
+                foreach (ITemplateInfo info in grouping)
+                {
+                    if (info.Tags != null && info.Tags.TryGetValue("language", out string lang))
+                    {
+                        if (string.IsNullOrEmpty(language) && string.Equals(defaultLanguage, lang, StringComparison.OrdinalIgnoreCase))
                         {
                             lang = $"[{lang}]";
                         }
 
-                        languages.Append(lang);
+                        languages.Add(lang);
                     }
-
-                    while (enumerator.MoveNext())
-                    {
-                        if (enumerator.Current.Tags.TryGetValue("language", out lang))
-                        {
-                            if (string.IsNullOrEmpty(language) && string.Equals(defaultLanguage, lang, StringComparison.OrdinalIgnoreCase))
-                            {
-                                lang = $"[{lang}]";
-                            }
-
-                            if (!anyLangs)
-                            {
-                                anyLangs = true;
-                                languages.Append(lang);
-                            }
-                            else
-                            {
-                                languages.Append($", {lang}");
-                            }
-                        }
-                    }
-
-                    templatesVersusLanguages[key] = languages.ToString();
                 }
+
+                templatesVersusLanguages[grouping.First()] = string.Join(", ", languages);
             }
 
-            HelpFormatter<KeyValuePair<ITemplateInfo, string>> formatter = new HelpFormatter<KeyValuePair<ITemplateInfo, string>>(templatesVersusLanguages, 6, '-', false);
-            formatter.DefineColumn(t => t.Key.Name, LocalizableStrings.Templates);
-            formatter.DefineColumn(t => $"[{t.Key.ShortName}]", LocalizableStrings.ShortName);
-            formatter.DefineColumn(t => t.Value, LocalizableStrings.Language);
-            formatter.DefineColumn(t => t.Key.Classifications != null ? string.Join("/", t.Key.Classifications) : null, LocalizableStrings.Tags);
+            HelpFormatter<KeyValuePair<ITemplateInfo, string>> formatter = new HelpFormatter<KeyValuePair<ITemplateInfo, string>>(templatesVersusLanguages, 6, '-', false)
+                .DefineColumn(t => t.Key.Name, LocalizableStrings.Templates)
+                .DefineColumn(t => t.Key.ShortName, LocalizableStrings.ShortName)
+                .DefineColumn(t => t.Value, out object languageColumn, LocalizableStrings.Language)
+                .DefineColumn(t => t.Key.Classifications != null ? string.Join("/", t.Key.Classifications) : null, out object tagsColumn, LocalizableStrings.Tags)
+                .OrderByDescending(languageColumn, new NullOrEmptyIsLastStringComparer())
+                .OrderBy(tagsColumn);
             Reporter.Output.WriteLine(formatter.Layout());
 
             if (!app.InternalParamHasValue("--list"))
@@ -592,6 +569,14 @@ namespace dotnet_new3
                 return 0;
             }
 
+            if (string.IsNullOrEmpty(language))
+            {
+                if (EngineEnvironmentSettings.Host.TryGetHostParamDefault("prefs:language", out string l))
+                {
+                    language = l;
+                }
+            }
+
             IReadOnlyCollection<ITemplateInfo> templates = TemplateCreator.List(templateNames, language);
 
             if (templates.Count > 1)
@@ -614,7 +599,15 @@ namespace dotnet_new3
 
         private static int TemplateHelp(ITemplateInfo templateInfo, ExtendedCommandParser app, IReadOnlyDictionary<string, string> userParameters)
         {
-            Reporter.Output.WriteLine(templateInfo.Name);
+            if (templateInfo.Tags != null && templateInfo.Tags.TryGetValue("language", out string templateLang) && !string.IsNullOrWhiteSpace(templateLang))
+            {
+                Reporter.Output.WriteLine($"{templateInfo.Name} ({templateLang})");
+            }
+            else
+            {
+                Reporter.Output.WriteLine(templateInfo.Name);
+            }
+
             if (!string.IsNullOrWhiteSpace(templateInfo.Author))
             {
                 Reporter.Output.WriteLine(string.Format(LocalizableStrings.Author, templateInfo.Author));
