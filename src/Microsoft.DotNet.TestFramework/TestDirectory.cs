@@ -27,9 +27,19 @@ namespace Microsoft.DotNet.TestFramework
 
         private static void EnsureExistsAndEmpty(string path)
         {
-            if (Directory.Exists(path))
+            var testDirectory = new DirectoryInfo(path);
+
+            var migrationBackupDirectory = new DirectoryInfo(
+                System.IO.Path.Combine(testDirectory.Parent.FullName, "backup"));
+
+            if (testDirectory.Exists)
             {
-                Directory.Delete(path, true);
+                testDirectory.Delete(true);
+            } 
+            
+            if (migrationBackupDirectory.Exists)
+            {
+                migrationBackupDirectory.Delete(true);
             }
 
             Directory.CreateDirectory(path);

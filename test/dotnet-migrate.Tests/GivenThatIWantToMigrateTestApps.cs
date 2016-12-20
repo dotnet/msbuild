@@ -210,7 +210,9 @@ namespace Microsoft.DotNet.Migration.Tests
         public void ItMigratesRootProjectAndReferences(string projectName, string expectedProjects)
         {
             var projectDirectory =
-                TestAssetsManager.CreateTestInstance("TestAppDependencyGraph", callingMethod: $"{projectName}.RefsTest").Path;
+                TestAssetsManager.CreateTestInstance(
+                    "TestAppDependencyGraph", 
+                    identifier: $"{projectName}.RefsTest").Path;
 
             MigrateProject(new [] { Path.Combine(projectDirectory, projectName) });
 
@@ -228,7 +230,7 @@ namespace Microsoft.DotNet.Migration.Tests
         public void ItMigratesRootProjectAndSkipsReferences(string projectName)
         {
             var projectDirectory =
-                TestAssetsManager.CreateTestInstance("TestAppDependencyGraph", callingMethod: $"{projectName}.SkipRefsTest").Path;
+                TestAssetsManager.CreateTestInstance("TestAppDependencyGraph", identifier: $"{projectName}.SkipRefsTest").Path;
 
             MigrateProject(new [] { Path.Combine(projectDirectory, projectName), "--skip-project-references" });
 
@@ -421,7 +423,7 @@ namespace Microsoft.DotNet.Migration.Tests
         {
             const string projectName = "ProjectA";
             var solutionDirectory =
-                TestAssetsManager.CreateTestInstance("TestAppDependencyGraph", callingMethod: "p").Path;
+                TestAssetsManager.CreateTestInstance("TestAppDependencyGraph").Path;
             var projectDirectory = Path.Combine(solutionDirectory, projectName);
 
             MigrateProject(new string[] { projectDirectory });
@@ -472,7 +474,7 @@ namespace Microsoft.DotNet.Migration.Tests
         public void ItMigratesAndBuildsLibrary(string projectName)
         {
             var projectDirectory = TestAssetsManager.CreateTestInstance(projectName,
-                callingMethod: $"{nameof(ItMigratesAndBuildsLibrary)}-projectName").Path;
+                identifier: $"{nameof(ItMigratesAndBuildsLibrary)}-{projectName}").Path;
 
             MigrateProject(projectDirectory);
             Restore(projectDirectory, projectName);
@@ -496,8 +498,7 @@ namespace Microsoft.DotNet.Migration.Tests
         public void ItMigratesSln()
         {
             var rootDirectory = TestAssetsManager.CreateTestInstance(
-                "TestAppWithSlnAndMultipleProjects",
-                callingMethod: "a").Path;
+                "TestAppWithSlnAndMultipleProjects").Path;
 
             var testAppProjectDirectory = Path.Combine(rootDirectory, "TestApp");
             var testLibProjectDirectory = Path.Combine(rootDirectory, "TestLibrary");
@@ -670,6 +671,7 @@ namespace Microsoft.DotNet.Migration.Tests
 
             var result = new BuildPJCommand()
                 .WithCapturedOutput()
+                .WithForwardingToConsole()
                 .Execute(projectFile);
 
             result.Should().Pass();
@@ -677,10 +679,11 @@ namespace Microsoft.DotNet.Migration.Tests
 
         private void MigrateProject(params string[] migrateArgs)
         {
-            var result =
-                MigrateCommand.Run(migrateArgs);
-
-            result.Should().Be(0);
+            new TestCommand("dotnet")
+                    .WithForwardingToConsole()
+                    .Execute($"migrate {string.Join(" ", migrateArgs)}")
+                    .Should()
+                    .Pass();
         }
 
         private void RestoreProjectJson(string projectDirectory)
