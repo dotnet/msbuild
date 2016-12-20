@@ -222,6 +222,14 @@ if [ "$target" = "" ]; then
     target=CoreCLR
 fi
 
+if [ "$host" = "Mono" ]; then
+    # check if mono is available
+    if [ "`which mono`" = "" -a "$MONO_BIN_DIR" = "" ]; then
+        echo "** Error: Building with host Mono, requires Mono to be installed."
+        exit 1
+    fi
+fi
+
 case $target in
     CoreCLR)
         CONFIGURATION=Debug-NetCore
