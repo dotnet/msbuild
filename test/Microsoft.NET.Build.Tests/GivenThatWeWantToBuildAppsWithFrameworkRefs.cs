@@ -48,54 +48,21 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppsWithFrameworkReferences")
-                .WithSource()
-                .WithProjectChanges(project =>
-                {
-                    // Some framework references may be provided implicitly.
-                    // Turn off this implicit addition to verify that references are
-                    // provided in this scenario by project assets file
-
-                    var ns = project.Root.Name.Namespace;
-                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").FirstOrDefault();
-                    propertyGroup.Should().NotBeNull();
-
-                    propertyGroup.Add(new XElement(ns + "DisableImplicitFrameworkReferences", "true"));
-                });
-
-            testAsset.Restore("EntityFrameworkApp");
-            testAsset.Restore("StopwatchLib");
-
-            VerifyProjectsBuild(testAsset);
-        }
-
-        [Fact]
-        public void It_builds_the_projects_successfully_twice()
-        {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
-            var testAsset = _testAssetsManager
-                .CopyTestAsset("AppsWithFrameworkReferences")
                 .WithSource();
 
             testAsset.Restore("EntityFrameworkApp");
             testAsset.Restore("StopwatchLib");
 
-            for (int i = 0; i < 2; i++)
-            {
-                VerifyProjectsBuild(testAsset);
-            }
+            VerifyProjectsBuild(testAsset, "/p:DisableImplicitFrameworkReferences=true");
         }
 
-        void VerifyProjectsBuild(TestAsset testAsset)
+        void VerifyProjectsBuild(TestAsset testAsset, params string[] buildArgs)
         {
-            VerifyBuild(testAsset, "StopwatchLib", "net45",
+            VerifyBuild(testAsset, "StopwatchLib", "net45", buildArgs,
                 "StopwatchLib.dll",
                 "StopwatchLib.pdb");
 
-            VerifyBuild(testAsset, "EntityFrameworkApp", "net451",
+            VerifyBuild(testAsset, "EntityFrameworkApp", "net451", buildArgs,
                 "EntityFrameworkApp.exe",
                 "EntityFrameworkApp.pdb",
                 "EntityFrameworkApp.runtimeconfig.dev.json",
@@ -116,6 +83,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         private void VerifyBuild(TestAsset testAsset, string project, string targetFramework, 
+            string [] buildArgs,
             params string [] expectedFiles)
         {
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, project);
@@ -124,7 +92,7 @@ namespace Microsoft.NET.Build.Tests
             var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);
 
             buildCommand
-                .Execute()
+                .Execute(buildArgs)
                 .Should()
                 .Pass();
 

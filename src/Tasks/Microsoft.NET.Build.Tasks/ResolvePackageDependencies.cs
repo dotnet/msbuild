@@ -363,6 +363,7 @@ namespace Microsoft.NET.Build.Tasks
 
                     if (fileGroup == FileGroup.FrameworkAssembly)
                     {
+                        // NOTE: the path provided for framework assemblies is the name of the framework reference
                         item.SetMetadata("FrameworkAssembly", filePath);
                     }
 
