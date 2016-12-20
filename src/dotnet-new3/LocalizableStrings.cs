@@ -26,6 +26,8 @@ namespace dotnet_new3
 
         public const string NameOfOutput = "The name for the output being created. If no name is specified, the name of the current directory is used.";
 
+        public const string OutputPath = "Location to place the generated output.";
+
         public const string CreateDirectoryHelp = "Indicates whether to create a directory for the generated content.";
 
         public const string CreateAliasHelp = "Creates an alias for the specified template.";
@@ -79,6 +81,10 @@ namespace dotnet_new3
         public const string ShortName = "Short Name";
 
         public const string Alias = "Alias";
+
+        public const string Tags = "Tags";
+
+        public const string Language = "Language";
 
         public const string CurrentConfiguration = "Current configuration:";
 

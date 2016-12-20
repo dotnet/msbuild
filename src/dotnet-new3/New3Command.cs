@@ -32,10 +32,10 @@ namespace dotnet_new3
             // visible
             appExt.InternalOption("-l|--list", "--list", LocalizableStrings.ListsTemplates, CommandOptionType.NoValue);
             appExt.InternalOption("-n|--name", "--name", LocalizableStrings.NameOfOutput, CommandOptionType.SingleValue);
+            appExt.InternalOption("-o|--output", "--output", LocalizableStrings.OutputPath, CommandOptionType.SingleValue);
             appExt.InternalOption("-h|--help", "--help", LocalizableStrings.DisplaysHelp, CommandOptionType.NoValue);
 
             // hidden
-            appExt.HiddenInternalOption("-d|--dir", "--dir", CommandOptionType.NoValue);
             appExt.HiddenInternalOption("-a|--alias", "--alias", CommandOptionType.SingleValue);
             appExt.HiddenInternalOption("-x|--extra-args", "--extra-args", CommandOptionType.MultipleValue);
             appExt.HiddenInternalOption("--locale", "--locale", CommandOptionType.SingleValue);
@@ -170,13 +170,13 @@ namespace dotnet_new3
         private static async Task<int> CreateTemplateAsync(ExtendedCommandParser app, string templateName)
         {
             string nameValue = app.InternalParamValue("--name");
-            string fallbackName = new DirectoryInfo(Directory.GetCurrentDirectory()).Name;
-            bool dirValue = app.InternalParamHasValue("--dir");
+            string outputPath = app.InternalParamValue("--output");
+            string fallbackName = new DirectoryInfo(outputPath ?? Directory.GetCurrentDirectory()).Name;
             string aliasName = app.InternalParamValue("--alias");
             bool skipUpdateCheckValue = app.InternalParamHasValue("--skip-update-check");
 
             // TODO: refactor alias creation out of InstantiateAsync()
-            TemplateCreationResult instantiateResult = await TemplateCreator.InstantiateAsync(templateName ?? "", nameValue, fallbackName, dirValue, aliasName, app.AllTemplateParams, skipUpdateCheckValue);
+            TemplateCreationResult instantiateResult = await TemplateCreator.InstantiateAsync(templateName ?? "", nameValue, fallbackName, outputPath, aliasName, app.AllTemplateParams, skipUpdateCheckValue);
 
             string resultTemplateName = string.IsNullOrEmpty(instantiateResult.TemplateFullName) ? templateName : instantiateResult.TemplateFullName;
 
@@ -421,9 +421,17 @@ namespace dotnet_new3
         {
             IEnumerable<ITemplateInfo> results = TemplateCreator.List(templateNames);
             HelpFormatter<ITemplateInfo> formatter = new HelpFormatter<ITemplateInfo>(results, 6, '-', false);
-            formatter.DefineColumn(delegate (ITemplateInfo t) { return t.Name; }, LocalizableStrings.Templates);
-            formatter.DefineColumn(delegate (ITemplateInfo t) { return $"[{t.ShortName}]"; }, LocalizableStrings.ShortName);
-            formatter.DefineColumn(delegate (ITemplateInfo t) { return AliasRegistry.GetAliasForTemplate(t) ?? ""; }, LocalizableStrings.Alias);
+            formatter.DefineColumn(t => t.Name, LocalizableStrings.Templates);
+            formatter.DefineColumn(t => $"[{t.ShortName}]", LocalizableStrings.ShortName);
+            formatter.DefineColumn(t =>
+            {
+                if (t.Tags != null && t.Tags.TryGetValue("language", out string lang))
+                {
+                    return lang;
+                }
+                return string.Empty;
+            }, LocalizableStrings.Language);
+            formatter.DefineColumn(t => t.Classifications != null ? string.Join("/", t.Classifications) : null, LocalizableStrings.Tags);
             Reporter.Output.WriteLine(formatter.Layout());
         }
 

@@ -1,12 +1,13 @@
 {
   "author": "Microsoft",
-  "classifications": [ "C#", "Web", "Empty" ],
+  "classifications": ["Web", "Empty"],
   "name": "Empty ASP.NET Web Application",
-  "groupIdentity": "NetCoreEmptyWeb",
+  "groupIdentity": "Microsoft.Web.Empty",
   "identity": "Microsoft.Web.Empty.CSharp",
-  "shortName": "emptyweb",
+  "shortName": "web",
   "tags": {
     "language": "C#"
   },
-  "sourceName": "WebApplication1"
+  "sourceName": "WebApplication1",
+  "preferNameDirectory": true
 }

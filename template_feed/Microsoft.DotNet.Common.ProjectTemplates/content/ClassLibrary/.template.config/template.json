@@ -1,12 +1,13 @@
 {
   "author": "Microsoft",
-  "classifications": ["Visual C#"],
+  "classifications": ["Common", "Library"],
   "name": "Class library (.NET Standard)",
-  "groupIdentity": "NetCoreClassLib",
-  "identity": "Microsoft.Standard.QuickStarts.ClassLib.CSharp",
+  "groupIdentity": "Microsoft.Common.Library",
+  "identity": "Microsoft.Common.Library.CSharp",
   "shortName": "classlib",
   "tags": {
     "language": "C#"
   },
-  "sourceName": "ClassLibrary1"
+  "sourceName": "ClassLibrary1",
+  "preferNameDirectory": true
 }

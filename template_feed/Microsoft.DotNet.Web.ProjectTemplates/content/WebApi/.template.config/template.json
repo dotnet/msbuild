@@ -1,12 +1,13 @@
 {
   "author": "Microsoft",
-  "classifications": [ "C#", "Web", "WebAPI" ],
+  "classifications": ["Web", "WebAPI"],
   "name": "Web API ASP.NET Web Application",
-  "groupIdentity": "NetCoreWebApi",
+  "groupIdentity": "Microsoft.Web.WebApi",
   "identity": "Microsoft.Web.WebApi.CSharp",
   "shortName": "webapi",
   "tags": {
     "language": "C#"
   },
-  "sourceName": "WebApplication1"
+  "sourceName": "WebApplication1",
+  "preferNameDirectory": true
 }
