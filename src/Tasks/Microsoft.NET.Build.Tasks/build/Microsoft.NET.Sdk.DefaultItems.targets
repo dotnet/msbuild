@@ -38,13 +38,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DefaultRemoves>$(DefaultRemoves);**/*.sln</DefaultRemoves>
     <DefaultRemoves>$(DefaultRemoves);**/*.vssscc</DefaultRemoves>
     
-    <!-- The intent of this pattern is to ignore folders such as .git, but it is matching items included with a relative path outside the
-        project folder, for example: ..\Shared\Shared.cs-->
-    <!--<DefaultRemoves>$(DefaultRemoves);**/.*/**</DefaultRemoves>-->
-
-    <!-- Exclude .git folder explicitly.
-         TODO: Figure out if we can have a glob pattern that matches folder names starting with a '.', but not as a relative path element -->
-    <DefaultRemoves>$(DefaultRemoves);**/.git/**</DefaultRemoves>
+    <!-- This pattern is supposed to ignore folders such as .git and .vs, but it would also match items included with a relative path
+         outside the project folder (for example "..\Shared\Shared.cs").  So instead of using it to remove from the Compile,
+         EmbeddedResource, and Content items in this .targets file, it will be used in the Exclude attribute for the default
+         patterns which include files in these items (which happens in Microsoft.NET.Sdk.DefaultItems.props). -->
+    <DefaultExcludesInProjectFolder>$(DefaultExcludesInProjectFolder);**/.*/**</DefaultExcludesInProjectFolder>
 
     <!-- These should possibly move to Web SDK -->
     <DefaultRemoves>$(DefaultRemoves);node_modules/**</DefaultRemoves>

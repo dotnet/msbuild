@@ -5,6 +5,7 @@
 using FluentAssertions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Commands;
+using Microsoft.NET.TestFramework.Assertions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,6 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 using Xunit;
+using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -214,6 +216,111 @@ namespace Microsoft.NET.Build.Tests
             .ToArray();
 
             embeddedResourceItems.Should().BeEquivalentTo(expectedEmbeddedResourceItems);
+        }
+
+        [Fact]
+        public void It_allows_a_CSharp_file_to_be_used_as_Content()
+        {
+            Action<GetValuesCommand> setup = getValuesCommand =>
+            {
+                WriteFile(Path.Combine(getValuesCommand.ProjectRootPath, "Code", "Class1.cs"),
+                    "public class Class1 {}");
+                WriteFile(Path.Combine(getValuesCommand.ProjectRootPath, "CSharpAsContent.cs"),
+                    "public class CSharpAsContent {}");
+
+                WriteFile(Path.Combine(getValuesCommand.ProjectRootPath, "Content.txt"), "Content file");
+            };
+
+            Action<XDocument> projectChanges = project =>
+            {
+                var ns = project.Root.Name.Namespace;
+
+                XElement propertyGroup = new XElement(ns + "PropertyGroup");
+                project.Root.Add(propertyGroup);
+                propertyGroup.Add(new XElement(ns + "EnableDefaultContentItems", "true"));
+
+                XElement itemGroup = new XElement(ns + "ItemGroup");
+                project.Root.Add(itemGroup);
+                itemGroup.Add(new XElement(ns + "Content", new XAttribute("Include", "CSharpAsContent.cs"),
+                    new XAttribute("CopyToOutputDirectory", "true")));
+                itemGroup.Add(new XElement(ns + "Compile", new XAttribute("Remove", "CSharpAsContent.cs")));
+            };
+
+            var compileItems = GivenThatWeWantToBuildALibrary.GetValuesFromTestLibrary(_testAssetsManager, "Compile", setup, projectChanges: projectChanges);
+
+            RemoveGeneratedCompileItems(compileItems);
+
+            var expectedItems = new[]
+            {
+                "Helper.cs",
+                @"Code\Class1.cs",
+            }
+            .Select(item => item.Replace('\\', Path.DirectorySeparatorChar))
+            .ToArray();
+
+            compileItems.Should().BeEquivalentTo(expectedItems);
+
+
+            var contentItems = GivenThatWeWantToBuildALibrary.GetValuesFromTestLibrary(_testAssetsManager, "Content", setup, projectChanges: projectChanges);
+
+            var expectedContentItems = new[]
+            {
+                "CSharpAsContent.cs",
+                "Content.txt"
+            }
+            .Select(item => item.Replace('\\', Path.DirectorySeparatorChar))
+            .ToArray();
+
+            contentItems.Should().BeEquivalentTo(expectedContentItems);
+        }
+
+        [Fact]
+        public void Content_items_have_the_correct_relative_paths()
+        {
+            Action<XDocument> projectChanges = project =>
+            {
+                var ns = project.Root.Name.Namespace;
+
+                project.Root.Element(ns + "PropertyGroup").Add(
+                    new XElement(ns + "EnableDefaultContentItems", "true"));
+
+                //  Copy all content items to output directory
+                var itemGroup = new XElement(ns + "ItemGroup");
+                project.Root.Add(itemGroup);
+                itemGroup.Add(new XElement(ns + "Content", new XAttribute("Update", "@(Content)"), new XAttribute("CopyToOutputDirectory", "PreserveNewest")));
+            };
+
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("AppWithLibrary")
+                .WithSource()
+                .WithProjectChanges(projectChanges)
+                .Restore(relativePath: "TestLibrary");
+
+            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
+
+            var buildCommand = new BuildCommand(Stage0MSBuild, libraryProjectDirectory);
+
+            WriteFile(Path.Combine(buildCommand.ProjectRootPath, "ProjectRoot.txt"), "ProjectRoot");
+            WriteFile(Path.Combine(buildCommand.ProjectRootPath, "Subfolder", "ProjectSubfolder.txt"), "ProjectSubfolder");
+            WriteFile(Path.Combine(buildCommand.ProjectRootPath, "wwwroot", "wwwroot.txt"), "wwwroot");
+            WriteFile(Path.Combine(buildCommand.ProjectRootPath, "wwwroot", "wwwsubfolder", "wwwsubfolder.txt"), "wwwsubfolder");
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory("netstandard1.5");
+
+            outputDirectory.Should().OnlyHaveFiles(new[] {
+                "TestLibrary.dll",
+                "TestLibrary.pdb",
+                "TestLibrary.deps.json",
+                "ProjectRoot.txt",
+                "Subfolder/ProjectSubfolder.txt",
+                "wwwroot/wwwroot.txt",
+                "wwwroot/wwwsubfolder/wwwsubfolder.txt",
+            });
         }
 
         [Fact]

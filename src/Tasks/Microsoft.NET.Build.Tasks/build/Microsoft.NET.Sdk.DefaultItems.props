@@ -17,11 +17,11 @@ Copyright (c) .NET Foundation. All rights reserved.
 
 
   <ItemGroup Condition=" '$(EnableDefaultItems)' == 'true' ">
-    <Compile Include="**/*$(DefaultLanguageSourceExtension)" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
-    <EmbeddedResource Include="**/*.resx" Condition=" '$(EnableDefaultEmbeddedResourceItems)' == 'true' " />
+    <Compile Include="**/*$(DefaultLanguageSourceExtension)" Exclude="$(DefaultExcludesInProjectFolder)" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
+    <EmbeddedResource Include="**/*.resx" Exclude="$(DefaultExcludesInProjectFolder)" Condition=" '$(EnableDefaultEmbeddedResourceItems)' == 'true' " />
   </ItemGroup>
   <ItemGroup Condition=" '$(EnableDefaultItems)' == 'true' And '$(EnableDefaultContentItems)' == 'true' ">
-    <Content Include="**/*" />
+    <Content Include="**/*" Exclude="$(DefaultExcludesInProjectFolder)" />
     <Content Remove="**/*$(DefaultLanguageSourceExtension)" Condition=" '$(EnableDefaultCompileItems)' == 'true' "/>
     <Content Remove="**/*.resx" Condition=" '$(EnableDefaultEmbeddedResourceItems)' == 'true' "/>
   </ItemGroup>
