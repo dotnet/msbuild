@@ -183,8 +183,7 @@ namespace dotnet_new3
             switch (instantiateResult.Status)
             {
                 case CreationResultStatus.AliasSucceeded:
-                    // TODO: get this localized - in the mean time just list the templates, showing the alias
-                    //EngineEnvironmentSettings.Host.LogMessage(LocalizableStrings.AliasCreated);
+                    EngineEnvironmentSettings.Host.LogMessage(LocalizableStrings.AliasCreated);
                     ListTemplates(templateName);
                     break;
                 case CreationResultStatus.AliasFailed:
@@ -207,6 +206,10 @@ namespace dotnet_new3
                     break;
                 case CreationResultStatus.MissingMandatoryParam:
                     EngineEnvironmentSettings.Host.LogMessage(string.Format(LocalizableStrings.MissingRequiredParameter, instantiateResult.Message, resultTemplateName));
+                    break;
+                case CreationResultStatus.InvalidParamValues:
+                    // DisplayHelp() will figure out the details on the invalid params.
+                    DisplayHelp(templateName, app, app.AllTemplateParams);
                     break;
                 default:
                     break;
@@ -504,15 +507,37 @@ namespace dotnet_new3
             }
 
             ITemplate template = SettingsLoader.LoadTemplate(templateInfo);
-            IParameterSet allParams = TemplateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName);
-            TemplateCreator.ResolveUserParameters(template, allParams, userParameters);
-            ParameterHelp(allParams, app);
+            IParameterSet allParams = TemplateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName, out IList<string> defaultParamsWithInvalidValues);
+            TemplateCreator.ResolveUserParameters(template, allParams, userParameters, out IList<string> userParamsWithInvalidValues);
+
+            string additionalInfo = null;
+            if (userParamsWithInvalidValues.Any())
+            {
+                // Lookup the input param formats - userParamsWithInvalidValues has canonical.
+                IList<string> inputParamFormats = new List<string>();
+                foreach(string canonical in userParamsWithInvalidValues)
+                {
+                    string inputFormat = app.TemplateParamInputFormat(canonical);
+                    inputParamFormats.Add(inputFormat);
+                }
+                string badParams = string.Join(", ", inputParamFormats);
+
+                additionalInfo = string.Format(LocalizableStrings.InvalidParameterValues, badParams, template.Name);
+            }
+
+            ParameterHelp(allParams, app, additionalInfo);
 
             return 0;
         }
 
-        private static void ParameterHelp(IParameterSet allParams, ExtendedCommandParser app)
+        private static void ParameterHelp(IParameterSet allParams, ExtendedCommandParser app, string additionalInfo = null)
         {
+            if (!string.IsNullOrEmpty(additionalInfo))
+            {
+                Reporter.Output.WriteLine(additionalInfo);
+                Reporter.Output.WriteLine();
+            }
+
             IEnumerable<ITemplateParameter> filteredParams = allParams.ParameterDefinitions.Where(x => x.Priority != TemplateParameterPriority.Implicit);
 
             if (filteredParams.Any())
@@ -545,6 +570,8 @@ namespace dotnet_new3
                         displayValue.AppendLine(" - " + param.Priority.ToString());
                     }
 
+                    // display the configured value if there is one
+                    string configuredValue = null;
                     if (allParams.ResolvedValues.TryGetValue(param, out object resolvedValueObject))
                     {
                         string resolvedValue = resolvedValueObject as string;
@@ -553,10 +580,31 @@ namespace dotnet_new3
                             && !string.IsNullOrEmpty(param.DefaultValue)
                             && !string.Equals(param.DefaultValue, resolvedValue))
                         {
-                            displayValue.AppendLine(string.Format(LocalizableStrings.ConfiguredValue, resolvedValue));
+                            configuredValue = resolvedValue;
                         }
                     }
 
+                    if (string.IsNullOrEmpty(configuredValue))
+                    {
+                        // this will catch when the user inputs the default value. The above deliberately skips it on the resolved values.
+                        if (string.Equals(param.DataType, "bool", StringComparison.OrdinalIgnoreCase)
+                            && app.TemplateParamHasValue(param.Name)
+                            && string.IsNullOrEmpty(app.TemplateParamValue(param.Name)))
+                        {
+                            configuredValue = "true";
+                        }
+                        else
+                        {
+                            app.AllTemplateParams.TryGetValue(param.Name, out configuredValue);
+                        }
+                    }
+
+                    if (! string.IsNullOrEmpty(configuredValue))
+                    {
+                        displayValue.AppendLine(string.Format(LocalizableStrings.ConfiguredValue, configuredValue));
+                    }
+
+                    // display the default value if there is one
                     if (!string.IsNullOrEmpty(param.DefaultValue))
                     {
                         displayValue.AppendLine(string.Format(LocalizableStrings.DefaultValue, param.DefaultValue));

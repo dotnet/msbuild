@@ -62,6 +62,8 @@ namespace dotnet_new3
 
         public const string MissingRequiredParameter = "Mandatory parameter {0} missing for template {1}.";
 
+        public const string InvalidParameterValues = "Error: Invalid values for parameter(s) [{0}] for template {1}.";
+
         public const string GettingReady = "Getting ready...";
 
         public const string InvalidInputSwitch = "Invalid input switch:";

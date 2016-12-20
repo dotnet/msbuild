@@ -23,6 +23,8 @@ namespace dotnet_new3
         private IDictionary<string, string> _templateParamCanonicalMapping;
         // Canonical form -> data type
         private IDictionary<string, string> _templateParamDataTypeMapping;
+        // Maps the canonical param to the actual input param format
+        private IDictionary<string, string> _templateCanonicalToInputFormatMapping;
 
         // stores the parsed values
         private IDictionary<string, string> _parsedTemplateParams;
@@ -42,6 +44,7 @@ namespace dotnet_new3
             _hiddenCommandCanonicalMapping = new Dictionary<string, string>();
             _templateParamCanonicalMapping = new Dictionary<string, string>();
             _templateParamDataTypeMapping = new Dictionary<string, string>();
+            _templateCanonicalToInputFormatMapping = new Dictionary<string, string>();
 
             _parsedTemplateParams = new Dictionary<string, string>();
             _parsedInternalParams = new Dictionary<string, IList<string>>();
@@ -136,6 +139,12 @@ namespace dotnet_new3
             return value;
         }
 
+        public string TemplateParamInputFormat(string canonicalName)
+        {
+            _templateCanonicalToInputFormatMapping.TryGetValue(canonicalName, out string inputName);
+            return inputName;
+        }
+
         // returns a copy of the template params
         public IReadOnlyDictionary<string, string> AllTemplateParams
         {
@@ -183,6 +192,7 @@ namespace dotnet_new3
             _parsedTemplateParams = new Dictionary<string, string>();
             _parsedInternalParams = new Dictionary<string, IList<string>>();
             _parsedRemainingParams = new Dictionary<string, IList<string>>();
+            _templateCanonicalToInputFormatMapping = new Dictionary<string, string>();
 
             if (extraArgFileNames == null)
             {
@@ -234,6 +244,7 @@ namespace dotnet_new3
 
                         // TODO: allow for multi-valued params
                         _parsedTemplateParams[canonicalName] = param.Value[0];
+                        _templateCanonicalToInputFormatMapping[canonicalName] = param.Key;
                     }
                 }
                 else
