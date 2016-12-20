@@ -2,8 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using NuGet.Frameworks;
 using NuGet.Versioning;
 
@@ -75,6 +76,11 @@ namespace Microsoft.DotNet.Cli.Utils
             var availableVersions = new List<NuGetVersion>();
 
             var toolBase = GetBaseToolPath(packageId);
+            if (!Directory.Exists(toolBase))
+            {
+                return Enumerable.Empty<NuGetVersion>();
+            }
+            
             var versionDirectories = Directory.EnumerateDirectories(toolBase);
 
             foreach (var versionDirectory in versionDirectories)
