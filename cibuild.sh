@@ -222,6 +222,16 @@ if [ "$target" = "" ]; then
     target=CoreCLR
 fi
 
+if [ "$host" = "Mono" ]; then
+    # check if mono is available
+    echo "debug: which mono: `which mono`"
+    echo "MONO_BIN_DIR: $MONO_BIN_DIR"
+    if [ "`which mono`" = "" -a "$MONO_BIN_DIR" = "" ]; then
+        echo "** Error: Building with host Mono, requires Mono to be installed."
+        exit 1
+    fi
+fi
+
 case $target in
     CoreCLR)
         CONFIGURATION=Debug-NetCore
@@ -231,7 +241,6 @@ case $target in
     Mono)
         setMonoDir
         CONFIGURATION=Debug-MONO
-        CSC_ARGS="/p:CscToolExe=csc.exe /p:CscToolPath=$PACKAGES_DIR/msbuild/ /p:DebugType=portable"
         RUNTIME_HOST_ARGS="--debug"
         MSBUILD_BOOTSTRAPPED_EXE='"'"$THIS_SCRIPT_PATH/bin/Bootstrap/MSBuild.dll"'"'
         ;;
@@ -262,6 +271,12 @@ case $host in
         setMonoDir
         RUNTIME_HOST="${MONO_BIN_DIR}mono"
         MSBUILD_EXE="$PACKAGES_DIR/msbuild/MSBuild.exe"
+        CSC_ARGS="/p:CscToolExe=csc.exe /p:CscToolPath=$PACKAGES_DIR/msbuild/ /p:DebugType=portable"
+
+        if [[ "$MONO_BIN_DIR" != "" ]]; then
+            echo "** Using mono from $RUNTIME_HOST"
+            $RUNTIME_HOST --version
+        fi
 
         downloadMSBuildForMono
         ;;
