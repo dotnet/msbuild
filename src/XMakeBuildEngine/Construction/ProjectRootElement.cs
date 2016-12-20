@@ -1917,7 +1917,8 @@ namespace Microsoft.Build.Construction
                 (path, cache) => CreateProjectFromPath(path, globalProperties, toolsVersion, loggingService, cache, buildEventContext,
                                     preserveFormatting: false),
                 isExplicitlyLoaded,
-                preserveFormatting: false);
+                // don't care about formatting, reuse whatever is there
+                preserveFormatting: null);
 
             return projectRootElement;
         }
