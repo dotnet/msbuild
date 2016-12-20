@@ -272,10 +272,10 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="RunResolvePackageDependencies"
           Returns="_TransitiveProjectReferences">
     <ItemGroup>
-      <ProjectDefs Include="@(PackageDefinitions->WithMetadataValue('Type', 'project'))" />
+      <_ProjectDefinitions Include="@(PackageDefinitions->WithMetadataValue('Type', 'project'))" />
 
-      <_TransitiveProjectReferences Include="%(ProjectDefs.Path)">
-        <ResolvedPath>%(ProjectDefs.ResolvedPath)</ResolvedPath>
+      <_TransitiveProjectReferences Include="%(_ProjectDefinitions.Path)">
+        <ResolvedPath>%(_ProjectDefinitions.ResolvedPath)</ResolvedPath>
       </_TransitiveProjectReferences>
     </ItemGroup>
   </Target>

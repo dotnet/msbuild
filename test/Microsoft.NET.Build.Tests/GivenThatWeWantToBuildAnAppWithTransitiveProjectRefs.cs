@@ -40,23 +40,6 @@ namespace Microsoft.NET.Build.Tests
             VerifyAppBuilds(testAsset);
         }
 
-        [Fact]
-        public void It_builds_the_project_successfully_twice()
-        {
-            var testAsset = _testAssetsManager
-                .CopyTestAsset("AppWithTransitiveProjectRefs")
-                .WithSource();
-
-            testAsset.Restore("TestApp");
-            testAsset.Restore("MainLibrary");
-            testAsset.Restore("AuxLibrary");
-
-            for (int i = 0; i < 2; i++)
-            {
-                VerifyAppBuilds(testAsset);
-            }
-        }
-
         void VerifyAppBuilds(TestAsset testAsset)
         {
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
@@ -90,35 +73,6 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining("This string came from MainLibrary!")
                 .And
                 .HaveStdOutContaining("This string came from AuxLibrary!");
-
-            var appInfo = FileVersionInfo.GetVersionInfo(Path.Combine(outputDirectory.FullName, "TestApp.dll"));
-            appInfo.CompanyName.Should().Be("Test Authors");
-            appInfo.FileVersion.Should().Be("1.2.3.0");
-            appInfo.FileDescription.Should().Be("Test AssemblyTitle");
-            appInfo.LegalCopyright.Should().Be("Copyright (c) Test Authors");
-            appInfo.ProductName.Should().Be("Test Product");
-
-            // This check is blocked from working on non-Windows by https://github.com/dotnet/corefx/issues/11163
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                appInfo.ProductVersion.Should().Be("1.2.3-beta");
-            }
-
-            new List<string> { "MainLibrary", "AuxLibrary" }.ForEach(libName => 
-            {
-                var libInfo = FileVersionInfo.GetVersionInfo(Path.Combine(outputDirectory.FullName, $"{libName}.dll"));
-                libInfo.CompanyName.Trim().Should().Be(libName);
-                libInfo.FileVersion.Should().Be("42.43.44.45");
-                libInfo.FileDescription.Should().Be(libName);
-                libInfo.LegalCopyright.Trim().Should().BeEmpty();
-                libInfo.ProductName.Should().Be(libName);
-
-                // This check is blocked from working on non-Windows by https://github.com/dotnet/corefx/issues/11163
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    libInfo.ProductVersion.Should().Be("42.43.44.45-alpha");
-                }
-            });
         }
 
         [Fact]
