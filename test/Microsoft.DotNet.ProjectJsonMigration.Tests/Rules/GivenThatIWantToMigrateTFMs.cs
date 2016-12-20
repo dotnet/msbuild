@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
     public class GivenThatIWantToMigrateTFMs : TestBase
     {
         [Fact(Skip="Emitting this until x-targetting full support is in")]
-        public void Migrating_netcoreapp_project_Does_not_populate_TargetFrameworkIdentifier_and_TargetFrameworkVersion()
+        public void MigratingNetcoreappProjectDoesNotPopulateTargetFrameworkIdentifierAndTargetFrameworkVersion()
         {
             var testDirectory = Temp.CreateDirectory().Path;
             var testPJ = new ProjectJsonBuilder(TestAssetsManager)
@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Migrating_MultiTFM_project_Populates_TargetFrameworks_with_short_tfms()
+        public void MigratingMultiTFMProjectPopulatesTargetFrameworksWithShortTfms()
         {
             var testDirectory = Temp.CreateDirectory().Path;
             var testPJ = new ProjectJsonBuilder(TestAssetsManager)
@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Migrating_desktop_TFMs_adds_RuntimeIdentifiers()
+        public void MigratingDesktopTFMsAddsAllRuntimeIdentifiersIfTheProjectDoesNothaveAnyAlready()
         {
             var testDirectory = Temp.CreateDirectory().Path;
             var testPJ = new ProjectJsonBuilder(TestAssetsManager)
@@ -94,7 +94,31 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Migrating_Single_TFM_project_Populates_TargetFramework()
+        public void MigrateTFMRuleDoesNotAddRuntimesWhenMigratingDesktopTFMsWithRuntimesAlready()
+        {
+            var testDirectory = Temp.CreateDirectory().Path;
+            var testPJ = new ProjectJsonBuilder(TestAssetsManager)
+                .FromTestAssetBase("TestAppWithMultipleFrameworksAndRuntimes")
+                .SaveToDisk(testDirectory);
+
+            var projectContexts = ProjectContext.CreateContextForEachFramework(testDirectory);
+            var mockProj = ProjectRootElement.Create();
+
+            var migrationSettings =
+                MigrationSettings.CreateMigrationSettingsTestHook(testDirectory, testDirectory, mockProj);
+            var migrationInputs = new MigrationRuleInputs(
+                projectContexts, 
+                mockProj, 
+                mockProj.AddItemGroup(), 
+                mockProj.AddPropertyGroup());
+
+            new MigrateTFMRule().Apply(migrationSettings, migrationInputs);
+
+            mockProj.Properties.Count(p => p.Name == "RuntimeIdentifiers").Should().Be(0);
+        }
+
+        [Fact]
+        public void MigratingSingleTFMProjectPopulatesTargetFramework()
         {
             var testDirectory = Temp.CreateDirectory().Path;
             var testPJ = new ProjectJsonBuilder(TestAssetsManager)

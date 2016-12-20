@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using Microsoft.Build.Construction;
+using Microsoft.DotNet.Internal.ProjectModel;
 using Microsoft.DotNet.ProjectJsonMigration.Transforms;
 using NuGet.Frameworks;
 using System.Collections.Generic;
@@ -42,7 +43,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     mergeExisting: true);
                 _transformApplicator.Execute(
                     FrameworkRuntimeIdentifiersTransform.Transform(
-                        migrationRuleInputs.ProjectContexts.Single().TargetFramework),
+                        migrationRuleInputs.ProjectContexts.Single()),
                     propertyGroup,
                     mergeExisting: true);
             }
@@ -53,9 +54,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                         migrationRuleInputs.ProjectContexts.Select(p => p.TargetFramework)),
                     propertyGroup,
                     mergeExisting: true);
+
+
+                var runtimes = string.Join(",", migrationRuleInputs.ProjectContexts.Select(p => p.RuntimeIdentifier));
+                Console.WriteLine($"Runtimes = {runtimes}");
+
                 _transformApplicator.Execute(
                     FrameworksRuntimeIdentifiersTransform.Transform(
-                        migrationRuleInputs.ProjectContexts.Select(p => p.TargetFramework)),
+                        migrationRuleInputs.ProjectContexts),
                     propertyGroup,
                     mergeExisting: true);
             }
@@ -122,11 +128,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 frameworks => string.Join(";", frameworks.Select(f => f.GetShortFolderName())),
                 frameworks => true);
 
-        private AddPropertyTransform<IEnumerable<NuGetFramework>> FrameworksRuntimeIdentifiersTransform =>
-            new AddPropertyTransform<IEnumerable<NuGetFramework>>(
+        private AddPropertyTransform<IEnumerable<ProjectContext>> FrameworksRuntimeIdentifiersTransform =>
+            new AddPropertyTransform<IEnumerable<ProjectContext>>(
                 "RuntimeIdentifiers",
-                frameworks => RuntimeIdentifiers,
-                frameworks => frameworks.Any(f => !f.IsPackageBased));
+                projectContexts => RuntimeIdentifiers,
+                projectContexts => projectContexts.All(p => !p.ProjectFile.Runtimes.Any()) &&
+                                   projectContexts.Any(p => !p.TargetFramework.IsPackageBased));
 
         private AddPropertyTransform<NuGetFramework> FrameworkTransform =>
             new AddPropertyTransform<NuGetFramework>(
@@ -134,10 +141,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 framework => framework.GetShortFolderName(),
                 framework => true);
 
-        private AddPropertyTransform<NuGetFramework> FrameworkRuntimeIdentifiersTransform =>
-            new AddPropertyTransform<NuGetFramework>(
+        private AddPropertyTransform<ProjectContext> FrameworkRuntimeIdentifiersTransform =>
+            new AddPropertyTransform<ProjectContext>(
                 "RuntimeIdentifiers",
-                framework => RuntimeIdentifiers,
-                framework => !framework.IsPackageBased);
+                projectContext => RuntimeIdentifiers,
+                projectContext => !projectContext.ProjectFile.Runtimes.Any() &&
+                                  !projectContext.TargetFramework.IsPackageBased);
     }
 }
