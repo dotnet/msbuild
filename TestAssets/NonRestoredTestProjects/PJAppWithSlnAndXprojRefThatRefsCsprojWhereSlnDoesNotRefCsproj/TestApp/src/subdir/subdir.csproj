@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard1.5</TargetFramework>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <AssemblyName>subdir</AssemblyName>
+    <PackageId>subdir</PackageId>
+    <ProjectGuid>F8F96F4A-F10C-4C54-867C-A9EFF55494C8</ProjectGuid>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="**\*.cs" />
+    <EmbeddedResource Include="**\*.resx" Exclude="@(EmbeddedResource)" />
+    <EmbeddedResource Include="compiler\resources\**\*" Exclude="@(EmbeddedResource)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NETStandard.Library">
+      <Version>1.6.0</Version>
+    </PackageReference>
+  </ItemGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
+  </PropertyGroup>
+
+</Project>

@@ -31,10 +31,10 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.IO;
 using System.Collections;
-using System.Text.RegularExpressions;
 using System.Globalization;
 using System.Reflection;
 using Microsoft.DotNet.Cli.Sln.Internal.FileManipulation;
+using Microsoft.DotNet.Tools.Common;
 
 namespace Microsoft.DotNet.Cli.Sln.Internal
 {
@@ -254,7 +254,20 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
         public string Id { get; set; }
         public string TypeGuid { get; set; }
         public string Name { get; set; }
-        public string FilePath { get; set; }
+
+        private string _filePath;
+        public string FilePath
+        {
+            get
+            {
+                return _filePath;
+            }
+            set
+            {
+                _filePath = PathUtility.GetPathWithDirectorySeparator(value);
+            }
+        }
+
         public int Line { get; private set; }
         internal bool Processed { get; set; }
 
@@ -337,7 +350,7 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
             writer.Write("\") = \"");
             writer.Write(Name);
             writer.Write("\", \"");
-            writer.Write(FilePath);
+            writer.Write(PathUtility.GetPathWithBackSlashes(FilePath));
             writer.Write("\", \"");
             writer.Write(Id);
             writer.WriteLine("\"");

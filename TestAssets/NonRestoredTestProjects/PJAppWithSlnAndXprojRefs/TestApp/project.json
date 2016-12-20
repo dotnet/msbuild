@@ -9,6 +9,10 @@
       "target": "project",
       "version": "1.0.0-*"
     },
+    "subdir": {
+      "target": "project",
+      "version": "1.0.0-*"
+    },
     "Microsoft.NETCore.App": "1.0.1"
   },
   "frameworks": {
