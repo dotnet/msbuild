@@ -134,7 +134,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             var projectName = migrationRuleInputs.DefaultProjectContext.GetProjectName();
 
             try
-            {                
+            {
                 if (IsMigrated(migrationSettings, migrationRuleInputs))
                 {
                     MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.SkipMigrationAlreadyMigrated, nameof(ProjectMigrator), migrationSettings.ProjectDirectory));
@@ -156,9 +156,34 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
                 return new ProjectMigrationReport(migrationSettings.ProjectDirectory, projectName, error, null);
             }
-            
+
+            List<string> csprojDependencies = null;
+            if (migrationRuleInputs.ProjectXproj != null)
+            {
+                var projectDependencyFinder = new ProjectDependencyFinder();
+                var dependencies = projectDependencyFinder.ResolveXProjProjectDependencies(
+                    migrationRuleInputs.ProjectXproj);
+
+                if (dependencies.Any())
+                {
+                    csprojDependencies = dependencies
+                        .SelectMany(r => r.Includes().Select(p => PathUtility.GetPathWithDirectorySeparator(p)))
+                        .ToList();
+                }
+                else
+                {
+                    csprojDependencies = new List<string>();
+                }
+            }
+
             var outputProject = Path.Combine(migrationSettings.OutputDirectory, projectName + ".csproj");
-            return new ProjectMigrationReport(migrationSettings.ProjectDirectory, projectName, outputProject, null);
+            return new ProjectMigrationReport(
+                migrationSettings.ProjectDirectory,
+                projectName,
+                outputProject,
+                null,
+                null,
+                csprojDependencies);
         }
 
         private MigrationRuleInputs ComputeMigrationRuleInputs(MigrationSettings migrationSettings)

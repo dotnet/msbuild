@@ -185,12 +185,12 @@ Additional Arguments:
                 .FullName;
 
             var projectToAdd = "Lib/Lib.csproj";
-            var normalizedProjectPath = @"Lib\Lib.csproj";
+            var projectPath = Path.Combine("Lib", "Lib.csproj");
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"add App.sln project {projectToAdd}");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be($"Project `{Path.Combine("Lib", "Lib.csproj")}` added to the solution.");
+            cmd.StdOut.Should().Be($"Project `{projectPath}` added to the solution.");
             cmd.StdErr.Should().BeEmpty();
 
             var slnFile = SlnFile.Read(Path.Combine(projectDirectory, "App.sln"));
@@ -200,7 +200,7 @@ Additional Arguments:
 
             matchingProjects.Count.Should().Be(1);
             var slnProject = matchingProjects[0];
-            slnProject.FilePath.Should().Be(normalizedProjectPath);
+            slnProject.FilePath.Should().Be(projectPath);
             slnProject.TypeGuid.Should().Be(ProjectTypeGuids.CPSProjectTypeGuid);
             if (!string.IsNullOrEmpty(projectGuid))
             {

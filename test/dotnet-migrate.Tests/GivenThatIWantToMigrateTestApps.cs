@@ -1,4 +1,7 @@
-﻿using Microsoft.Build.Construction;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.Build.Construction;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using System;
@@ -490,25 +493,6 @@ namespace Microsoft.DotNet.Migration.Tests
             MigrateCommand.Run(new string[] { projectDirectory, "-r", migrationOutputFile, "--format-report-file-json" }).Should().NotBe(0);
             File.Exists(migrationOutputFile).Should().BeTrue();
             File.ReadAllText(migrationOutputFile).Should().Contain("MIGRATE1018");
-        }
-
-        [Fact]
-        public void ItMigratesSln()
-        {
-            var rootDirectory = TestAssetsManager.CreateTestInstance(
-                "TestAppWithSlnAndMultipleProjects",
-                callingMethod: "a").Path;
-
-            var testAppProjectDirectory = Path.Combine(rootDirectory, "TestApp");
-            var testLibProjectDirectory = Path.Combine(rootDirectory, "TestLibrary");
-            string slnPath = Path.Combine(testAppProjectDirectory, "TestApp.sln");
-            
-            CleanBinObj(testAppProjectDirectory);
-            CleanBinObj(testLibProjectDirectory);
-
-            MigrateProject(slnPath);
-            Restore(testAppProjectDirectory, "TestApp.csproj");
-            BuildMSBuild(testAppProjectDirectory, "TestApp.sln", "Release");
         }
 
         private void VerifyAutoInjectedDesktopReferences(string projectDirectory, string projectName, bool shouldBePresent)

@@ -2,16 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Diagnostics;
 
-namespace TestApp
+namespace subdir
 {
-    public class Program
+    public static class Helper
     {
-        public static int Main(string[] args)
+        public static string GetMessage()
         {
-            Console.WriteLine(TestLibrary.Helper.GetMessage());
-            return 100;
+            return "This string came from the subdir test library!";
         }
     }
 }

@@ -17,6 +17,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
         public List<string> Warnings { get; }
 
+        public List<string> PreExistingCsprojDependencies { get; }
+
         public bool Skipped { get; }
 
         public bool Failed => Errors.Any();
@@ -24,22 +26,38 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         public bool Succeeded => !Errors.Any();
 
         public ProjectMigrationReport(string projectDirectory, string projectName, bool skipped)
-            : this(projectDirectory, projectName, null, null, null, skipped: skipped) { }
+            : this(projectDirectory, projectName, null, null, null, null, skipped: skipped) { }
 
-        public ProjectMigrationReport(string projectDirectory, string projectName, List<MigrationError> errors, List<string> warnings)
-            : this(projectDirectory, projectName, null, errors, warnings) { }
+        public ProjectMigrationReport(
+            string projectDirectory,
+            string projectName,
+            List<MigrationError> errors,
+            List<string> warnings)
+            : this(projectDirectory, projectName, null, errors, warnings, null) { }
 
-        public ProjectMigrationReport(string projectDirectory, string projectName, string outputMSBuildProject, List<string> warnings)
-            : this(projectDirectory, projectName, outputMSBuildProject, null, warnings) { }
+        public ProjectMigrationReport(
+            string projectDirectory,
+            string projectName,
+            string outputMSBuildProject,
+            List<string> warnings)
+            : this(projectDirectory, projectName, outputMSBuildProject, null, warnings, null) { }
 
-        private ProjectMigrationReport(string projectDirectory, string projectName, string outputMSBuildProject, List<MigrationError> errors, List<string> warnings, bool skipped=false)
+        public ProjectMigrationReport(
+            string projectDirectory,
+            string projectName,
+            string outputMSBuildProject,
+            List<MigrationError> errors,
+            List<string> warnings,
+            List<string> preExistingCsprojDependencies,
+            bool skipped = false)
         {
             ProjectDirectory = projectDirectory;
             ProjectName = projectName;
             OutputMSBuildProject = outputMSBuildProject;
             Errors = errors ?? new List<MigrationError>();
             Warnings = warnings ?? new List<string>();
-            Skipped=skipped;
+            PreExistingCsprojDependencies = preExistingCsprojDependencies ?? new List<string>();
+            Skipped =skipped;
         }
     }
 }
