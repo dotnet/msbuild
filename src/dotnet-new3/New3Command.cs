@@ -31,6 +31,7 @@ namespace dotnet_new3
         {
             // visible
             appExt.InternalOption("-l|--list", "--list", LocalizableStrings.ListsTemplates, CommandOptionType.NoValue);
+            appExt.InternalOption("-lang|--language", "--language", LocalizableStrings.LanguageParameter, CommandOptionType.SingleValue);
             appExt.InternalOption("-n|--name", "--name", LocalizableStrings.NameOfOutput, CommandOptionType.SingleValue);
             appExt.InternalOption("-o|--output", "--output", LocalizableStrings.OutputPath, CommandOptionType.SingleValue);
             appExt.InternalOption("-h|--help", "--help", LocalizableStrings.DisplaysHelp, CommandOptionType.NoValue);
@@ -69,7 +70,7 @@ namespace dotnet_new3
             };
 
             // Initial host setup has the current locale. May need to be changed based on inputs.
-            Host = new DefaultTemplateEngineHost(HostIdentifier, HostVersion, CultureInfo.CurrentCulture.Name, new Dictionary<string, string>(), builtIns.ToList());
+            Host = new DefaultTemplateEngineHost(HostIdentifier, HostVersion, CultureInfo.CurrentCulture.Name, new Dictionary<string, string> { { "prefs:language", "C#" } }, builtIns.ToList());
             EngineEnvironmentSettings.Host = Host;
 
             ExtendedCommandParser app = new ExtendedCommandParser()
@@ -111,19 +112,20 @@ namespace dotnet_new3
                     return resultCode;
                 }
 
-                resultCode = ParseTemplateArgs(app, templateNames.Value, out shouldExit);
+                string language = app.InternalParamValue("--language");
+                resultCode = ParseTemplateArgs(app, templateNames.Value, language, out shouldExit);
                 if (shouldExit)
                 {
                     return resultCode;
                 }
 
-                resultCode = MaintenanceAndInfo(app, templateNames.Value, out shouldExit);
+                resultCode = MaintenanceAndInfo(app, templateNames.Value, language, out shouldExit);
                 if (shouldExit)
                 {
                     return resultCode;
                 }
 
-                return await CreateTemplateAsync(app, templateNames.Value);
+                return await CreateTemplateAsync(app, templateNames.Value, language);
             });
 
             int result;
@@ -167,7 +169,7 @@ namespace dotnet_new3
             return result;
         }
 
-        private static async Task<int> CreateTemplateAsync(ExtendedCommandParser app, string templateName)
+        private static async Task<int> CreateTemplateAsync(ExtendedCommandParser app, string templateName, string language)
         {
             string nameValue = app.InternalParamValue("--name");
             string outputPath = app.InternalParamValue("--output");
@@ -176,7 +178,7 @@ namespace dotnet_new3
             bool skipUpdateCheckValue = app.InternalParamHasValue("--skip-update-check");
 
             // TODO: refactor alias creation out of InstantiateAsync()
-            TemplateCreationResult instantiateResult = await TemplateCreator.InstantiateAsync(templateName ?? "", nameValue, fallbackName, outputPath, aliasName, app.AllTemplateParams, skipUpdateCheckValue);
+            TemplateCreationResult instantiateResult = await TemplateCreator.InstantiateAsync(templateName ?? "", language, nameValue, fallbackName, outputPath, aliasName, app.AllTemplateParams, skipUpdateCheckValue);
 
             string resultTemplateName = string.IsNullOrEmpty(instantiateResult.TemplateFullName) ? templateName : instantiateResult.TemplateFullName;
 
@@ -184,11 +186,11 @@ namespace dotnet_new3
             {
                 case CreationResultStatus.AliasSucceeded:
                     EngineEnvironmentSettings.Host.LogMessage(LocalizableStrings.AliasCreated);
-                    ListTemplates(templateName, app);
+                    ListTemplates(templateName, app, language);
                     break;
                 case CreationResultStatus.AliasFailed:
                     EngineEnvironmentSettings.Host.LogMessage(string.Format(LocalizableStrings.AliasAlreadyExists, aliasName));
-                    ListTemplates(templateName, app);
+                    ListTemplates(templateName, app, language);
                     break;
                 case CreationResultStatus.CreateSucceeded:
                     EngineEnvironmentSettings.Host.LogMessage(string.Format(LocalizableStrings.CreateSuccessful, resultTemplateName));
@@ -196,7 +198,7 @@ namespace dotnet_new3
                 case CreationResultStatus.CreateFailed:
                 case CreationResultStatus.TemplateNotFound:
                     EngineEnvironmentSettings.Host.LogMessage(string.Format(LocalizableStrings.CreateFailed, resultTemplateName, instantiateResult.Message));
-                    ListTemplates(templateName, app);
+                    ListTemplates(templateName, app, language);
                     break;
                 case CreationResultStatus.InstallSucceeded:
                     EngineEnvironmentSettings.Host.LogMessage(string.Format(LocalizableStrings.InstallSuccessful, resultTemplateName));
@@ -209,7 +211,7 @@ namespace dotnet_new3
                     break;
                 case CreationResultStatus.InvalidParamValues:
                     // DisplayHelp() will figure out the details on the invalid params.
-                    DisplayHelp(templateName, app, app.AllTemplateParams);
+                    DisplayHelp(templateName, language, app, app.AllTemplateParams);
                     break;
                 default:
                     break;
@@ -259,11 +261,11 @@ namespace dotnet_new3
             return 0;
         }
 
-        private static int ParseTemplateArgs(ExtendedCommandParser app, string templateName, out bool shouldExit)
+        private static int ParseTemplateArgs(ExtendedCommandParser app, string templateName, string language, out bool shouldExit)
         {
             try
             {
-                IReadOnlyCollection<ITemplateInfo> templates = TemplateCreator.List(templateName);
+                IReadOnlyCollection<ITemplateInfo> templates = TemplateCreator.List(templateName, language);
                 if (templates.Count == 1)
                 {
                     ITemplateInfo templateInfo = templates.First();
@@ -294,18 +296,18 @@ namespace dotnet_new3
                 }
 
                 shouldExit = true;
-                return DisplayHelp(templateName, app, app.AllTemplateParams);
+                return DisplayHelp(templateName, language, app, app.AllTemplateParams);
             }
 
             shouldExit = false;
             return 0;
         }
 
-        private static int MaintenanceAndInfo(ExtendedCommandParser app, string templateName, out bool shouldExit)
+        private static int MaintenanceAndInfo(ExtendedCommandParser app, string templateName, string language, out bool shouldExit)
         {
             if (app.InternalParamHasValue("--list"))
             {
-                ListTemplates(templateName, app);
+                ListTemplates(templateName, app, language);
                 shouldExit = true;
                 return -1;
             }
@@ -313,7 +315,7 @@ namespace dotnet_new3
             if (app.InternalParamHasValue("--help"))
             {
                 shouldExit = true;
-                return DisplayHelp(templateName, app, app.AllTemplateParams);
+                return DisplayHelp(templateName, language, app, app.AllTemplateParams);
             }
 
             if (app.InternalParamHasValue("--install"))
@@ -325,7 +327,7 @@ namespace dotnet_new3
 
             if (string.IsNullOrEmpty(templateName))
             {
-                ListTemplates(string.Empty, app);
+                ListTemplates(string.Empty, app, language);
                 shouldExit = true;
                 return -1;
             }
@@ -416,25 +418,68 @@ namespace dotnet_new3
 
             if (!quiet)
             {
-                ListTemplates(string.Empty, app);
+                ListTemplates(string.Empty, app, null);
             }
         }
 
-        private static void ListTemplates(string templateNames, ExtendedCommandParser app)
+        private static void ListTemplates(string templateNames, ExtendedCommandParser app, string language)
         {
-            IEnumerable<ITemplateInfo> results = TemplateCreator.List(templateNames);
-            HelpFormatter<ITemplateInfo> formatter = new HelpFormatter<ITemplateInfo>(results, 6, '-', false);
-            formatter.DefineColumn(t => t.Name, LocalizableStrings.Templates);
-            formatter.DefineColumn(t => $"[{t.ShortName}]", LocalizableStrings.ShortName);
-            formatter.DefineColumn(t =>
+            IEnumerable<ITemplateInfo> results = TemplateCreator.List(templateNames, language);
+            IEnumerable<IGrouping<string, ITemplateInfo>> grouped = results.GroupBy(x => x.GroupIdentity);
+            EngineEnvironmentSettings.Host.TryGetHostParamDefault("prefs:language", out string defaultLanguage);
+
+            Dictionary<ITemplateInfo, string> templatesVersusLanguages = new Dictionary<ITemplateInfo, string>();
+            
+            foreach(IGrouping<string, ITemplateInfo> grouping in grouped)
             {
-                if (t.Tags != null && t.Tags.TryGetValue("language", out string lang))
+                using (IEnumerator<ITemplateInfo> enumerator = grouping.GetEnumerator())
                 {
-                    return lang;
+                    enumerator.MoveNext();
+                    ITemplateInfo key = enumerator.Current;
+                    StringBuilder languages = new StringBuilder();
+                    bool anyLangs = false;
+                    if (enumerator.Current.Tags.TryGetValue("language", out string lang))
+                    {
+                        anyLangs = true;
+
+                        if(string.IsNullOrEmpty(language) && string.Equals(defaultLanguage, lang, StringComparison.OrdinalIgnoreCase))
+                        {
+                            lang = $"[{lang}]";
+                        }
+
+                        languages.Append(lang);
+                    }
+
+                    while (enumerator.MoveNext())
+                    {
+                        if (enumerator.Current.Tags.TryGetValue("language", out lang))
+                        {
+                            if (string.IsNullOrEmpty(language) && string.Equals(defaultLanguage, lang, StringComparison.OrdinalIgnoreCase))
+                            {
+                                lang = $"[{lang}]";
+                            }
+
+                            if (!anyLangs)
+                            {
+                                anyLangs = true;
+                                languages.Append(lang);
+                            }
+                            else
+                            {
+                                languages.Append($", {lang}");
+                            }
+                        }
+                    }
+
+                    templatesVersusLanguages[key] = languages.ToString();
                 }
-                return string.Empty;
-            }, LocalizableStrings.Language);
-            formatter.DefineColumn(t => t.Classifications != null ? string.Join("/", t.Classifications) : null, LocalizableStrings.Tags);
+            }
+
+            HelpFormatter<KeyValuePair<ITemplateInfo, string>> formatter = new HelpFormatter<KeyValuePair<ITemplateInfo, string>>(templatesVersusLanguages, 6, '-', false);
+            formatter.DefineColumn(t => t.Key.Name, LocalizableStrings.Templates);
+            formatter.DefineColumn(t => $"[{t.Key.ShortName}]", LocalizableStrings.ShortName);
+            formatter.DefineColumn(t => t.Value, LocalizableStrings.Language);
+            formatter.DefineColumn(t => t.Key.Classifications != null ? string.Join("/", t.Key.Classifications) : null, LocalizableStrings.Tags);
             Reporter.Output.WriteLine(formatter.Layout());
 
             if (!app.InternalParamHasValue("--list"))
@@ -448,7 +493,7 @@ namespace dotnet_new3
             const int ExamplesToShow = 2;
             IReadOnlyList<string> preferredNameList = new List<string>() { "mvc" };
             int numShown = 0;
-            IList<ITemplateInfo> templateList = TemplateCreator.List(string.Empty).ToList();
+            IList<ITemplateInfo> templateList = TemplateCreator.List(string.Empty, null).ToList();
 
             if (templateList.Count == 0)
             {
@@ -539,7 +584,7 @@ namespace dotnet_new3
             });
         }
 
-        private static int DisplayHelp(string templateNames, ExtendedCommandParser app, IReadOnlyDictionary<string, string> userParameters)
+        private static int DisplayHelp(string templateNames, string language, ExtendedCommandParser app, IReadOnlyDictionary<string, string> userParameters)
         {
             if (string.IsNullOrWhiteSpace(templateNames))
             {   // no template specified
@@ -547,11 +592,11 @@ namespace dotnet_new3
                 return 0;
             }
 
-            IReadOnlyCollection<ITemplateInfo> templates = TemplateCreator.List(templateNames);
+            IReadOnlyCollection<ITemplateInfo> templates = TemplateCreator.List(templateNames, language);
 
             if (templates.Count > 1)
             {
-                ListTemplates(templateNames, app);
+                ListTemplates(templateNames, app, language);
                 return -1;
             }
             else if (templates.Count == 1)
@@ -562,7 +607,7 @@ namespace dotnet_new3
             else
             {
                 // TODO: add a message indicating no templates matched the pattern. Requires LOC coordination
-                ListTemplates(string.Empty, app);
+                ListTemplates(string.Empty, app, language);
                 return -1;
             }
         }

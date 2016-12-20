@@ -1,0 +1,13 @@
+{
+  "author": "Microsoft",
+  "classifications": ["Common", "Library"],
+  "name": "Class library (.NET Standard)",
+  "groupIdentity": "Microsoft.Common.Library",
+  "identity": "Microsoft.Common.Library.FSharp",
+  "shortName": "classlib",
+  "tags": {
+    "language": "F#"
+  },
+  "sourceName": "ClassLibrary1",
+  "preferNameDirectory": true
+}

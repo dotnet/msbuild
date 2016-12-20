@@ -1,0 +1,13 @@
+{
+  "author": "Microsoft",
+  "classifications": ["Test", "MSTest"],
+  "name": "Unit Test Project (.NET Core)",
+  "groupIdentity": "Microsoft.Test.MSTest",
+  "identity": "Microsoft.Test.MSTest.CSharp",
+  "shortName": "mstest",
+  "tags": {
+    "language": "C#"
+  },
+  "sourceName": "TestProject1",
+  "preferNameDirectory": true
+}
