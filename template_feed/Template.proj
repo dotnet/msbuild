@@ -9,6 +9,7 @@
     <TemplatePack Include="Microsoft.DotNet.Common.ItemTemplates" />
     <TemplatePack Include="Microsoft.DotNet.Common.ProjectTemplates" />
     <TemplatePack Include="Microsoft.DotNet.Web.ProjectTemplates" />
+    <TemplatePack Include="Microsoft.DotNet.Test.ProjectTemplates" />
   </ItemGroup>
 
   <Target Name="Build">

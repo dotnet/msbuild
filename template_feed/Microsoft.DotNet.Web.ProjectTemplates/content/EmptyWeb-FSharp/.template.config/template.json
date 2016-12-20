@@ -1,0 +1,13 @@
+{
+  "author": "Microsoft",
+  "classifications": ["Web", "Empty"],
+  "name": "Empty ASP.NET Web Application",
+  "groupIdentity": "Microsoft.Web.Empty",
+  "identity": "Microsoft.Web.Empty.FSharp",
+  "shortName": "web",
+  "tags": {
+    "language": "F#"
+  },
+  "sourceName": "WebApplication1",
+  "preferNameDirectory": true
+}

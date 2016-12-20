@@ -88,6 +88,8 @@ namespace dotnet_new3
 
         public const string Language = "Language";
 
+        public const string LanguageParameter = "Specifies the language of the template to create";
+
         public const string CurrentConfiguration = "Current configuration:";
 
         public const string NoItems = "(No Items)";
