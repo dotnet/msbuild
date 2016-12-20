@@ -142,6 +142,9 @@ namespace Microsoft.Build.BackEnd
 
         #endregion
 
+        /// <summary>
+        /// The target names that were requested to execute.
+        /// </summary>
         internal IReadOnlyCollection<string> TargetNames { get; }
 
         /// <summary>
