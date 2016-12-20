@@ -138,7 +138,7 @@ namespace Microsoft.DotNet.Tests
                 .WithWorkingDirectory(testInstance.Root)
                 .ExecuteWithCapturedOutput("nonexistingtool")
                 .Should().Fail()
-                    .And.HaveStdErrContaining("Version for package `dotnet-nonexistingtool` could not be resolved.");
+                    .And.HaveStdErrContaining("No executable found matching command \"dotnet-nonexistingtool\"");
         }
 
         [Fact]

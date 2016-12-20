@@ -201,9 +201,24 @@ namespace Microsoft.DotNet.Cli.Utils
                     yield return packageFolder.Path;
                 }
             }
+        }
 
-            var nuGetPathContext = NuGetPathContext.Create(project.ProjectRoot);
-            yield return nuGetPathContext.UserPackageFolder;
+        private LockFile GetToolLockFile(
+            SingleProjectInfo toolLibrary,
+            IEnumerable<string> possibleNugetPackagesRoot,
+            out string nugetPackagesRoot)
+        {
+            foreach (var packagesRoot in possibleNugetPackagesRoot)
+            {
+                if (TryGetToolLockFile(toolLibrary, packagesRoot, out LockFile lockFile))
+                {
+                    nugetPackagesRoot = packagesRoot;
+                    return lockFile;
+                }
+            }
+
+            nugetPackagesRoot = null;
+            return null;
         }
 
         private bool TryGetToolLockFile(
@@ -231,21 +246,6 @@ namespace Microsoft.DotNet.Cli.Utils
             }
 
             return true;
-        }
-
-        private LockFile GetToolLockFile(SingleProjectInfo toolLibrary, IEnumerable<string> possibleNugetPackagesRoot, out string nugetPackagesRoot)
-        {
-            foreach (var packagesRoot in possibleNugetPackagesRoot)
-            {
-                if (TryGetToolLockFile(toolLibrary, packagesRoot, out LockFile lockFile))
-                {
-                    nugetPackagesRoot = packagesRoot;
-                    return lockFile;
-                }
-            }
-
-            nugetPackagesRoot = null;
-            return null;
         }
 
         private string GetToolLockFilePath(
