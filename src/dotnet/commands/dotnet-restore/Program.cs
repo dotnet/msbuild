@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Tools.Restore
                 Name = "restore",
                 FullName = LocalizableStrings.AppFullName,
                 Description = LocalizableStrings.AppDescription,
-                AllowArgumentSeparator = true,
+                HandleRemainingArguments = true,
                 ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText
             };
 

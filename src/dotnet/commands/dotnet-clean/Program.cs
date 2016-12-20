@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Tools.Clean
                 Name = "dotnet clean",
                 FullName = LocalizableStrings.AppFullName,
                 Description = LocalizableStrings.AppDescription,
-                AllowArgumentSeparator = true,
+                HandleRemainingArguments = true,
                 ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText
             };
             app.HelpOption("-h|--help");
