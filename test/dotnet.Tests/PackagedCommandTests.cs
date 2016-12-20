@@ -152,7 +152,9 @@ namespace Microsoft.DotNet.Tests
             var toolWithRandPkgNameDir = testInstance.Root.Sub("ToolWithRandomPackageName");
             var pkgsDir = testInstance.Root.CreateSubdirectory("pkgs");
 
-            string randomPackageName = Guid.NewGuid().ToString();
+            // 3ebdd4f1-a194-470a-b01a-4515672791d1
+            //                         ^-- index = 24
+            string randomPackageName = Guid.NewGuid().ToString().Substring(24);
 
             // TODO: This is a workround for https://github.com/dotnet/cli/issues/5020
             SetGeneratedPackageName(appWithDepOnToolDir.GetFile("AppWithDepOnTool.csproj"),
@@ -163,21 +165,18 @@ namespace Microsoft.DotNet.Tests
 
             new RestoreCommand()
                 .WithWorkingDirectory(toolWithRandPkgNameDir)
-                .ExecuteWithCapturedOutput()
-                .Should().Pass()
-                .And.NotHaveStdErr();
+                .Execute()
+                .Should().Pass();
 
             new PackCommand()
                 .WithWorkingDirectory(toolWithRandPkgNameDir)
-                .ExecuteWithCapturedOutput($"-o \"{pkgsDir.FullName}\"")
-                .Should().Pass()
-                .And.NotHaveStdErr();
+                .Execute($"-o \"{pkgsDir.FullName}\"")
+                .Should().Pass();
 
             new RestoreCommand()
                 .WithWorkingDirectory(appWithDepOnToolDir)
-                .ExecuteWithCapturedOutput($"--packages \"{pkgsDir.FullName}\"")
-                .Should().Pass()
-                .And.NotHaveStdErr();
+                .Execute($"--packages \"{pkgsDir.FullName}\"")
+                .Should().Pass();
 
             new TestCommand("dotnet")
                 .WithWorkingDirectory(appWithDepOnToolDir)
