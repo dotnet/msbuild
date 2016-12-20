@@ -184,11 +184,11 @@ namespace dotnet_new3
             {
                 case CreationResultStatus.AliasSucceeded:
                     EngineEnvironmentSettings.Host.LogMessage(LocalizableStrings.AliasCreated);
-                    ListTemplates(templateName);
+                    ListTemplates(templateName, app);
                     break;
                 case CreationResultStatus.AliasFailed:
                     EngineEnvironmentSettings.Host.LogMessage(string.Format(LocalizableStrings.AliasAlreadyExists, aliasName));
-                    ListTemplates(templateName);
+                    ListTemplates(templateName, app);
                     break;
                 case CreationResultStatus.CreateSucceeded:
                     EngineEnvironmentSettings.Host.LogMessage(string.Format(LocalizableStrings.CreateSuccessful, resultTemplateName));
@@ -196,7 +196,7 @@ namespace dotnet_new3
                 case CreationResultStatus.CreateFailed:
                 case CreationResultStatus.TemplateNotFound:
                     EngineEnvironmentSettings.Host.LogMessage(string.Format(LocalizableStrings.CreateFailed, resultTemplateName, instantiateResult.Message));
-                    ListTemplates(templateName);
+                    ListTemplates(templateName, app);
                     break;
                 case CreationResultStatus.InstallSucceeded:
                     EngineEnvironmentSettings.Host.LogMessage(string.Format(LocalizableStrings.InstallSuccessful, resultTemplateName));
@@ -244,7 +244,7 @@ namespace dotnet_new3
                     Reporter.Output.WriteLine(LocalizableStrings.GettingReady);
                 }
 
-                ConfigureEnvironment();
+                ConfigureEnvironment(app);
                 Paths.User.FirstRunCookie.WriteAllText("");
             }
 
@@ -305,7 +305,7 @@ namespace dotnet_new3
         {
             if (app.InternalParamHasValue("--list"))
             {
-                ListTemplates(templateName);
+                ListTemplates(templateName, app);
                 shouldExit = true;
                 return -1;
             }
@@ -318,14 +318,14 @@ namespace dotnet_new3
 
             if (app.InternalParamHasValue("--install"))
             {
-                InstallPackages(app.InternalParamValueList("--install").ToList(), app.InternalParamHasValue("--quiet"));
+                InstallPackages(app, app.InternalParamValueList("--install").ToList(), app.InternalParamHasValue("--quiet"));
                 shouldExit = true;
                 return 0;
             }
 
             if (string.IsNullOrEmpty(templateName))
             {
-                ListTemplates(string.Empty);
+                ListTemplates(string.Empty, app);
                 shouldExit = true;
                 return -1;
             }
@@ -346,7 +346,7 @@ namespace dotnet_new3
             return _localeFormatRegex.IsMatch(localeToCheck);
         }
 
-        private static void ConfigureEnvironment()
+        private static void ConfigureEnvironment(ExtendedCommandParser app)
         {
             string[] packageList;
 
@@ -355,7 +355,7 @@ namespace dotnet_new3
                 packageList = Paths.Global.DefaultInstallPackageList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
                 if (packageList.Length > 0)
                 {
-                    InstallPackages(packageList, true);
+                    InstallPackages(app, packageList, true);
                 }
             }
 
@@ -364,12 +364,12 @@ namespace dotnet_new3
                 packageList = Paths.Global.DefaultInstallTemplateList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
                 if (packageList.Length > 0)
                 {
-                    InstallPackages(packageList, true);
+                    InstallPackages(app, packageList, true);
                 }
             }
         }
 
-        private static void InstallPackages(IReadOnlyList<string> packageNames, bool quiet = false)
+        private static void InstallPackages(ExtendedCommandParser app, IReadOnlyList<string> packageNames, bool quiet = false)
         {
             List<string> toInstall = new List<string>();
 
@@ -416,11 +416,11 @@ namespace dotnet_new3
 
             if (!quiet)
             {
-                ListTemplates(string.Empty);
+                ListTemplates(string.Empty, app);
             }
         }
 
-        private static void ListTemplates(string templateNames)
+        private static void ListTemplates(string templateNames, ExtendedCommandParser app)
         {
             IEnumerable<ITemplateInfo> results = TemplateCreator.List(templateNames);
             HelpFormatter<ITemplateInfo> formatter = new HelpFormatter<ITemplateInfo>(results, 6, '-', false);
@@ -436,6 +436,80 @@ namespace dotnet_new3
             }, LocalizableStrings.Language);
             formatter.DefineColumn(t => t.Classifications != null ? string.Join("/", t.Classifications) : null, LocalizableStrings.Tags);
             Reporter.Output.WriteLine(formatter.Layout());
+
+            if (!app.InternalParamHasValue("--list"))
+            {
+                ShowInvocationExamples();
+            }
+        }
+
+        private static void ShowInvocationExamples()
+        {
+            const int ExamplesToShow = 2;
+            IReadOnlyList<string> preferredNameList = new List<string>() { "mvc" };
+            int numShown = 0;
+            IList<ITemplateInfo> templateList = TemplateCreator.List(string.Empty).ToList();
+
+            if (templateList.Count == 0)
+            {
+                return;
+            }
+
+            Reporter.Output.WriteLine("Examples:");
+
+            foreach (string preferredName in preferredNameList)
+            {
+                ITemplateInfo template = templateList.Where(x => string.Equals(x.ShortName, preferredName, StringComparison.OrdinalIgnoreCase)).First();
+                if (template != null)
+                {
+                    GenerateUsageForTemplate(template);
+                    numShown++;
+                }
+
+                templateList.Remove(template);  // remove it so it won't get chosen again
+            }
+
+            // show up to 2 examples (total, including the above)
+            Random rnd = new Random();
+            for (int i = numShown; i < ExamplesToShow && templateList.Any(); i++)
+            {
+                ITemplateInfo template;
+                int index = rnd.Next(0, templateList.Count - 1);
+                template = templateList[index];
+                GenerateUsageForTemplate(template);
+                templateList.Remove(template);  // remove it so it won't get chosen again
+            }
+
+            // show a help example
+            Reporter.Output.WriteLine("    dotnet new3 --help");
+        }
+
+        private static void GenerateUsageForTemplate(ITemplateInfo templateInfo)
+        { 
+            ITemplate template = SettingsLoader.LoadTemplate(templateInfo);
+            IParameterSet allParams = template.Generator.GetParametersForTemplate(template);
+            IReadOnlyDictionary<string, string> parameterNameMap = template.Generator.ParameterMapForTemplate(template);
+
+            Reporter.Output.Write($"    dotnet new3 {template.ShortName}");
+            IEnumerable<ITemplateParameter> filteredParams = FilterParamsForHelp(allParams);
+
+            foreach (ITemplateParameter parameter in filteredParams)
+            {
+                string displayParameter;
+                if (!parameterNameMap.TryGetValue(parameter.Name, out displayParameter))
+                {
+                    displayParameter = parameter.Name;
+                }
+
+                Reporter.Output.Write($" --{displayParameter}");
+
+                if (!string.IsNullOrEmpty(parameter.DefaultValue))
+                {
+                    Reporter.Output.Write($" {parameter.DefaultValue}");
+                }
+            }
+
+            Reporter.Output.WriteLine();
         }
 
         private static void ShowConfig()
@@ -477,7 +551,7 @@ namespace dotnet_new3
 
             if (templates.Count > 1)
             {
-                ListTemplates(templateNames);
+                ListTemplates(templateNames, app);
                 return -1;
             }
             else if (templates.Count == 1)
@@ -488,7 +562,7 @@ namespace dotnet_new3
             else
             {
                 // TODO: add a message indicating no templates matched the pattern. Requires LOC coordination
-                ListTemplates(string.Empty);
+                ListTemplates(string.Empty, app);
                 return -1;
             }
         }
@@ -530,6 +604,12 @@ namespace dotnet_new3
             return 0;
         }
 
+        private static IEnumerable<ITemplateParameter> FilterParamsForHelp(IParameterSet allParams)
+        {
+            IEnumerable<ITemplateParameter> filteredParams = allParams.ParameterDefinitions.Where(x => x.Priority != TemplateParameterPriority.Implicit);
+            return filteredParams;
+        }
+
         private static void ParameterHelp(IParameterSet allParams, ExtendedCommandParser app, string additionalInfo = null)
         {
             if (!string.IsNullOrEmpty(additionalInfo))
@@ -538,7 +618,8 @@ namespace dotnet_new3
                 Reporter.Output.WriteLine();
             }
 
-            IEnumerable<ITemplateParameter> filteredParams = allParams.ParameterDefinitions.Where(x => x.Priority != TemplateParameterPriority.Implicit);
+            //IEnumerable<ITemplateParameter> filteredParams = allParams.ParameterDefinitions.Where(x => x.Priority != TemplateParameterPriority.Implicit);
+            IEnumerable<ITemplateParameter> filteredParams = FilterParamsForHelp(allParams);
 
             if (filteredParams.Any())
             {
