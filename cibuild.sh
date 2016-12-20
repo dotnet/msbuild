@@ -271,6 +271,11 @@ case $host in
         RUNTIME_HOST="${MONO_BIN_DIR}mono"
         MSBUILD_EXE="$PACKAGES_DIR/msbuild/MSBuild.exe"
 
+        if [[ "$MONO_BIN_DIR" != "" ]]; then
+            echo "** Using mono from $RUNTIME_HOST"
+            $RUNTIME_HOST --version
+        fi
+
         downloadMSBuildForMono
         ;;
     *)
