@@ -220,7 +220,7 @@ namespace dotnet_new3
                 {
                     int properMax = Math.Min(maxLength - 1, text.Length - position);
                     lines.Add(text.Substring(position, properMax) + '-');
-                    position += maxLength - 1;
+                    position += properMax;
                 }
             }
         }
