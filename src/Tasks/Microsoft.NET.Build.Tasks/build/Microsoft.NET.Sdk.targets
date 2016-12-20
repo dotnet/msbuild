@@ -186,6 +186,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <Target Name="CoreGenerateSatelliteAssemblies"
+          DependsOnTargets="ResolveAssemblyReferences;GenerateAssemblyInfo"
           Inputs="$(MSBuildAllProjects);@(_SatelliteAssemblyResourceInputs);$(IntermediateOutputPath)$(TargetName)$(TargetExt)"
           Outputs="$(IntermediateOutputPath)%(Culture)\$(TargetName).resources.dll"
           Condition="'@(_SatelliteAssemblyResourceInputs)' != ''  and '$(GenerateSatelliteAssembliesForCore)' == 'true' ">
@@ -211,7 +212,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateSatelliteAssemblies EmbedResources="@(_SatelliteAssemblyResourceInputs)"
                                  AssemblyInfoFile="$(_AssemblyInfoFile)"
                                  OutputAssembly="$(_OutputAssembly)"
-                                 References="@(Reference)">
+                                 References="@(ReferencePath)"
+                                 KeyContainer="$(KeyContainerName)"
+                                 KeyFile="$(KeyOriginatorFile)"
+                                 PublicSign="$(PublicSign)"
+                                 DelaySign="$(DelaySign)">
 
       <Output TaskParameter="OutputAssembly" ItemName="FileWrites"/>
     </GenerateSatelliteAssemblies>
@@ -250,6 +255,12 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(OutputType)' == 'Exe'">
     <ProjectCapability Include="CrossPlatformExecutable" />
+  </ItemGroup>
+
+  <!-- Reference Manager capabilities -->
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
+    <ProjectCapability Remove="ReferenceManagerAssemblies" />
+    <ProjectCapability Remove="ReferenceManagerCOM" />
   </ItemGroup>
 
   <Import Project="$(MSBuildThisFileDirecotry)Microsoft.NET.DisableStandardFrameworkResolution.targets" Condition="'$(DisableStandardFrameworkResolution)' == 'true'" />

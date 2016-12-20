@@ -361,6 +361,12 @@ namespace Microsoft.NET.Build.Tasks
                     item.SetMetadata(MetadataKeys.ParentTarget, targetName); // Foreign Key
                     item.SetMetadata(MetadataKeys.ParentPackage, packageId); // Foreign Key
 
+                    if (fileGroup == FileGroup.FrameworkAssembly)
+                    {
+                        // NOTE: the path provided for framework assemblies is the name of the framework reference
+                        item.SetMetadata("FrameworkAssembly", filePath);
+                    }
+
                     foreach (var property in properties)
                     {
                         item.SetMetadata(property.Key, property.Value);

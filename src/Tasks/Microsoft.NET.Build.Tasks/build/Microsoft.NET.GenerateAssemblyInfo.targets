@@ -68,8 +68,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       <AssemblyAttribute Include="System.Reflection.AssemblyFileVersionAttribute" Condition="'$(FileVersion)' != '' and '$(GenerateAssemblyFileVersionAttribute)' == 'true'">
         <_Parameter1>$(FileVersion)</_Parameter1>
       </AssemblyAttribute>
-      <AssemblyAttribute Include="System.Reflection.AssemblyInformationalVersionAttribute" Condition="'$(Version)' != '' and '$(GenerateAssemblyInformationalVersionAttribute)' == 'true'">
-        <_Parameter1>$(Version)</_Parameter1>
+      <AssemblyAttribute Include="System.Reflection.AssemblyInformationalVersionAttribute" Condition="'$(InformationalVersion)' != '' and '$(GenerateAssemblyInformationalVersionAttribute)' == 'true'">
+        <_Parameter1>$(InformationalVersion)</_Parameter1>
       </AssemblyAttribute>
       <AssemblyAttribute Include="System.Reflection.AssemblyProductAttribute" Condition="'$(Product)' != '' and '$(GenerateAssemblyProductAttribute)' == 'true'">
         <_Parameter1>$(Product)</_Parameter1>
@@ -80,7 +80,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <AssemblyAttribute Include="System.Reflection.AssemblyVersionAttribute" Condition="'$(AssemblyVersion)' != '' and '$(GenerateAssemblyVersionAttribute)' == 'true'">
         <_Parameter1>$(AssemblyVersion)</_Parameter1>
       </AssemblyAttribute>
-      <AssemblyAttribute Include="System.Resources.NeutralResourcesLanguageAttribute" Condition="'$(NeutralLanguage)' != '' and '$(GenerateNeutralResourcesLanguageAttribute)'">
+      <AssemblyAttribute Include="System.Resources.NeutralResourcesLanguageAttribute" Condition="'$(NeutralLanguage)' != '' and '$(GenerateNeutralResourcesLanguageAttribute)' == 'true'">
         <_Parameter1>$(NeutralLanguage)</_Parameter1>
       </AssemblyAttribute>
     </ItemGroup>
@@ -123,6 +123,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     
     <PropertyGroup>
       <FileVersion Condition="'$(FileVersion)' == ''">$(AssemblyVersion)</FileVersion>
+      <InformationalVersion Condition="'$(InformationalVersion)' == ''">$(Version)</InformationalVersion>
     </PropertyGroup>
   </Target>
 

@@ -32,6 +32,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   
   <!-- TODO: Generate error if LanguageTargets property isn't set here.  This would happen, for example if an .fsproj referenced the .NET Sdk 
               but not the FSharp one.  See https://github.com/dotnet/sdk/issues/448 -->
+  <!-- REMARK: Dont remove/rename, the LanguageTargets property is used by F# to hook inside the project's sdk 
+               using Sdk attribute (from .NET Core Sdk 1.0.0-preview4) -->
   <Import Project="$(LanguageTargets)"/>
   
   <Import Project="$(MSBuildThisFileDirectory)..\buildCrossTargeting\Microsoft.NET.Sdk.targets"

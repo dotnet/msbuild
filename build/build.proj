@@ -21,6 +21,8 @@
 
     <VsManProjectFile Include="$(RepositoryRootDirectory)src\VsixV3\Microsoft.VisualStudio.Templates.VisualBasic.NetCore.vsmanproj" />
     <VsManProjectFile Include="$(RepositoryRootDirectory)src\VsixV3\Microsoft.VisualStudio.Templates.CSharp.NetCore.vsmanproj" />
+    <VsManProjectFile Include="$(RepositoryRootDirectory)src\VsixV3\Microsoft.VisualStudio.Templates.CSharp.NetStandard.vsmanproj" />
+    <VsManProjectFile Include="$(RepositoryRootDirectory)src\VsixV3\Microsoft.VisualStudio.Templates.VisualBasic.NetStandard.vsmanproj" />
 
     <!-- TODO: https://github.com/dotnet/sdk/issues/342: convert Dependencies\* from project.json to PackageReference-->
     <DirectoryToNugetRestore Include="$(RepositoryRootDirectory)src\Dependencies" />

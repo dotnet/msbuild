@@ -29,6 +29,14 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public string[] References { get; set; }
 
+        public bool DelaySign { get; set; }
+
+        public bool PublicSign { get; set; }
+
+        public string KeyContainer { get; set; }
+
+        public string KeyFile { get; set; }
+
         [Required]
         public string AssemblyInfoFile { get; set; }
 
@@ -44,9 +52,19 @@ namespace Microsoft.NET.Build.Tasks
                 resourceDescriptions.Add(new ResourceDescription(resourceName, () => fileInfo.OpenRead(), true));
             }
 
+            if (KeyFile != null)
+            {
+                KeyFile = Path.GetFullPath(KeyFile);
+            }
+
             var compilationOptions = new CSharpCompilationOptions(
-                outputKind: OutputKind.DynamicallyLinkedLibrary, 
+                outputKind: OutputKind.DynamicallyLinkedLibrary,
+                cryptoKeyContainer: KeyContainer,
+                cryptoKeyFile: KeyFile,
+                delaySign: DelaySign,
+                publicSign: PublicSign,
                 deterministic: true);
+
             var compilation = CSharpCompilation.Create(OutputAssembly.GetMetadata("Filename"),
                 references: References.Select(reference => MetadataReference.CreateFromFile(reference)),
                 options: compilationOptions);
