@@ -196,11 +196,10 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             if (project.TryGetLockFile(out LockFile lockFile))
             {
-                foreach (var packageFolder in lockFile.PackageFolders)
-                {
-                    yield return packageFolder.Path;
-                }
+                return lockFile.PackageFolders.Select((packageFolder) => packageFolder.Path);
             }
+
+            return Enumerable.Empty<string>();
         }
 
         private LockFile GetToolLockFile(
