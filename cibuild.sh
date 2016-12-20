@@ -224,6 +224,8 @@ fi
 
 if [ "$host" = "Mono" ]; then
     # check if mono is available
+    echo "debug: which mono: `which mono`"
+    echo "MONO_BIN_DIR: $MONO_BIN_DIR"
     if [ "`which mono`" = "" -a "$MONO_BIN_DIR" = "" ]; then
         echo "** Error: Building with host Mono, requires Mono to be installed."
         exit 1
