@@ -1439,6 +1439,207 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 File.Delete(path);
             }
         }
+        
+        /// <summary>
+        /// Adding an import to an existing PRE object and re-valuating should preserve the initial import PRE object
+        /// </summary>
+        [Fact]
+        public void ImportingExistingPREObjectShouldPreserveTheObject()
+        {
+            var importProjectContents = ObjectModelHelpers.CleanupFileContents(
+@"<Project xmlns=`msbuildnamespace`>
+
+  <PropertyGroup>
+    <P>p1</P>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <I Include=`i1`>
+      <M>m1</M>
+    </I>
+  </ItemGroup>
+
+</Project>");
+
+            using (var projectFiles = new Helpers.TestProjectWithFiles("", new[] {"import.proj"}))
+            using (var projectCollection = new ProjectCollection())
+            {
+                var importFile = projectFiles.CreatedFiles.First();
+                ProjectRootElement import =
+                    ProjectRootElement.Create(
+                        XmlReader.Create(new StringReader(importProjectContents)),
+                        projectCollection,
+                        // preserve formatting to simulate IDE usage
+                        preserveFormatting: true);
+
+                // puts the import in the PRE cache
+                import.Save(importFile);
+                Assert.False(import.HasUnsavedChanges);
+
+                Project project = new Project(projectCollection);
+                project.Xml.AddImport(importFile);
+                project.ReevaluateIfNecessary();
+
+                Assert.Same(import, project.Imports.First().ImportedProject);
+            }
+        }
+
+        [Fact]
+        public void ReloadedImportsMarkProjectAsDirty()
+        {
+            var importProjectContents = ObjectModelHelpers.CleanupFileContents(
+@"<Project xmlns=`msbuildnamespace`>
+
+  <PropertyGroup>
+    <P>p1</P>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <I Include=`i1`>
+      <M>m1</M>
+    </I>
+  </ItemGroup>
+
+</Project>");
+
+            var changedImportContents = ObjectModelHelpers.CleanupFileContents(
+@"<Project xmlns=`msbuildnamespace`>
+
+  <PropertyGroup>
+    <P>p2</P>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <I Include=`i2`>
+      <M>m2</M>
+    </I>
+  </ItemGroup>
+
+</Project>");
+
+            Action<string, string, string, Project> assertContents = (p, i, m, project) =>
+            {
+                Assert.Equal(p, project.GetPropertyValue("P"));
+                Assert.Equal(1, project.GetItems("I").Count);
+                Assert.Equal(i, project.GetItems("I").First().EvaluatedInclude);
+                Assert.Equal(m, project.GetItems("I").First().GetMetadataValue("M"));
+            };
+
+            using (var projectFiles = new Helpers.TestProjectWithFiles("", new[] {"import.proj"}))
+            using (var projectCollection = new ProjectCollection())
+            {
+                var importFile = projectFiles.CreatedFiles.First();
+
+                var import = ProjectRootElement.Create(
+                    XmlReader.Create(new StringReader(importProjectContents)),
+                    projectCollection,
+                    // preserve formatting to simulate IDE usage
+                    preserveFormatting: true);
+
+                // add to cache by saving
+                import.Save(importFile);
+                Assert.False(import.HasUnsavedChanges);
+
+                var project = new Project(projectCollection);
+                project.Xml.AddImport(importFile);
+                project.ReevaluateIfNecessary();
+
+                assertContents("p1", "i1", "m1", project);
+                Assert.False(project.IsDirty);
+
+                import.ReloadFrom(XmlReader.Create(new StringReader(changedImportContents)));
+                Assert.True(import.HasUnsavedChanges);
+
+                Assert.True(project.IsDirty);
+                assertContents("p1", "i1", "m1", project);
+
+                project.ReevaluateIfNecessary();
+                Assert.False(project.IsDirty);
+                assertContents("p2", "i2", "m2", project);
+
+                var newProject = new Project(projectCollection);
+                newProject.Xml.AddImport(importFile);
+                newProject.ReevaluateIfNecessary();
+                assertContents("p2", "i2", "m2", newProject);
+
+                Assert.Same(import, project.Imports.First().ImportedProject);
+                Assert.Same(import, newProject.Imports.First().ImportedProject);
+            }
+        }
+
+        [Fact]
+        public void ReloadedProjectRootElementMarksProjectAsDirty()
+        {
+            var projectContents = ObjectModelHelpers.CleanupFileContents(
+@"<Project xmlns=`msbuildnamespace`>
+
+  <PropertyGroup>
+    <P>p1</P>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <I Include=`i1`>
+      <M>m1</M>
+    </I>
+  </ItemGroup>
+
+</Project>");
+
+            var changedProjectContents = ObjectModelHelpers.CleanupFileContents(
+@"<Project xmlns=`msbuildnamespace`>
+
+  <PropertyGroup>
+    <P>p2</P>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <I Include=`i2`>
+      <M>m2</M>
+    </I>
+  </ItemGroup>
+
+</Project>");
+
+            Action<string, string, string, Project> assertContents = (p, i, m, project) =>
+            {
+                Assert.Equal(p, project.GetPropertyValue("P"));
+                Assert.Equal(1, project.GetItems("I").Count);
+                Assert.Equal(i, project.GetItems("I").First().EvaluatedInclude);
+                Assert.Equal(m, project.GetItems("I").First().GetMetadataValue("M"));
+            };
+
+            using (var projectFiles = new Helpers.TestProjectWithFiles("", new[] {"build.proj"}))
+            using (var projectCollection = new ProjectCollection())
+            {
+                var projectFile = projectFiles.CreatedFiles.First();
+
+                var projectRootElement = ProjectRootElement.Create(
+                    XmlReader.Create(new StringReader(projectContents)),
+                    projectCollection,
+                    // preserve formatting to simulate IDE usage
+                    preserveFormatting: true);
+
+                // add to cache by saving
+                projectRootElement.Save(projectFile);
+                Assert.False(projectRootElement.HasUnsavedChanges);
+
+                var project = new Project(projectRootElement, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection);
+                project.ReevaluateIfNecessary();
+
+                assertContents("p1", "i1", "m1", project);
+                Assert.False(project.IsDirty);
+
+                projectRootElement.ReloadFrom(XmlReader.Create(new StringReader(changedProjectContents)));
+                Assert.True(projectRootElement.HasUnsavedChanges);
+
+                Assert.True(project.IsDirty);
+                assertContents("p1", "i1", "m1", project);
+
+                project.ReevaluateIfNecessary();
+                Assert.False(project.IsDirty);
+                assertContents("p2", "i2", "m2", project);
+            }
+        }
 
         /// <summary>
         /// To support certain corner cases, it is possible to explicitly mark a Project
