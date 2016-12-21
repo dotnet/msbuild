@@ -476,8 +476,9 @@ namespace Microsoft.DotNet.Migration.Tests
         [InlineData("LibraryWithNetStandardLibRef")]
         public void ItMigratesAndBuildsLibrary(string projectName)
         {
-            var projectDirectory = TestAssetsManager.CreateTestInstance(projectName,
-                identifier: $"{nameof(ItMigratesAndBuildsLibrary)}-{projectName}").Path;
+            var projectDirectory = TestAssetsManager.CreateTestInstance(
+                projectName,
+                identifier: $"{projectName}").Path;
 
             MigrateProject(projectDirectory);
             Restore(projectDirectory, projectName);
