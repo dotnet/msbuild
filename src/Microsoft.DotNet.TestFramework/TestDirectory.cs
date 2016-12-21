@@ -20,12 +20,12 @@ namespace Microsoft.DotNet.TestFramework
             
             Path = path;
             
-            EnsureExistsAndEmpty(Path);
+            EnsureDirectoryAndBackupDirectoryExistAndAreEmpty(Path);
         }
 
         public string Path { get; private set; }
 
-        private static void EnsureExistsAndEmpty(string path)
+        private static void EnsureDirectoryAndBackupDirectoryExistAndAreEmpty(string path)
         {
             var testDirectory = new DirectoryInfo(path);
 

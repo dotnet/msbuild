@@ -70,14 +70,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         {
             if (globalJson.Exists)
             {
-                PathUtility.EnsureDirectory(RootBackupDirectory.FullName);
+                PathUtility.EnsureDirectoryExists(RootBackupDirectory.FullName);
 
                 globalJson.MoveTo(Path.Combine(
                     ProjectBackupDirectory.Parent.FullName,
                     globalJson.Name));
             }
 
-            PathUtility.EnsureDirectory(ProjectBackupDirectory.FullName);
+            PathUtility.EnsureDirectoryExists(ProjectBackupDirectory.FullName);
 
             foreach (var file in FilesToMove)
             {

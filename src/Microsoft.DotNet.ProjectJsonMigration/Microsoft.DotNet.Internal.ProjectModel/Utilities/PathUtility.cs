@@ -51,14 +51,14 @@ namespace Microsoft.DotNet.Internal.ProjectModel.Utilities
             return path + trailingCharacter;
         }
 
-        public static void EnsureParentDirectory(string filePath)
+        public static void EnsureParentDirectoryExists(string filePath)
         {
             string directory = Path.GetDirectoryName(filePath);
 
-            EnsureDirectory(directory);
+            EnsureDirectoryExists(directory);
         }
         
-        public static void EnsureDirectory(string directoryPath)
+        public static void EnsureDirectoryExists(string directoryPath)
         {
             if (!Directory.Exists(directoryPath))
             {

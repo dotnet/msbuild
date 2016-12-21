@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Cli
         {
             var profileOptimizationRootPath = new MulticoreJitProfilePathCalculator().MulticoreJitProfilePath;
 
-            if (!TryEnsureDirectory(profileOptimizationRootPath))
+            if (!TryEnsureDirectoryExists(profileOptimizationRootPath))
             {
                 return;
             }
@@ -43,11 +43,11 @@ namespace Microsoft.DotNet.Cli
             AssemblyLoadContext.Default.StartProfileOptimization("dotnet");
         }
 
-        private bool TryEnsureDirectory(string directoryPath)
+        private bool TryEnsureDirectoryExists(string directoryPath)
         {
             try
             {
-                PathUtility.EnsureDirectory(directoryPath);
+                PathUtility.EnsureDirectoryExists(directoryPath);
 
                 return true;
             }

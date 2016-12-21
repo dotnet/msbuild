@@ -102,7 +102,7 @@ namespace Microsoft.DotNet.TestFramework
 
                 var newFile = new FileInfo(newPath);
 
-                PathUtility.EnsureDirectory(newFile.Directory.FullName);
+                PathUtility.EnsureDirectoryExists(newFile.Directory.FullName);
 
                 file.CopyTo(newPath);
             }
