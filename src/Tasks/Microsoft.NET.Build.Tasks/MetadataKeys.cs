@@ -12,7 +12,6 @@ namespace Microsoft.NET.Build.Tasks
         public const string FileGroup = "FileGroup";
         public const string Path = "Path";
         public const string ResolvedPath = "ResolvedPath";
-        public const string ProjectFileDependency = "ProjectFileDependency";
 
         // Target Metadata
         public const string RuntimeIdentifier = "RuntimeIdentifier";
@@ -28,5 +27,6 @@ namespace Microsoft.NET.Build.Tasks
         // Tags
         public const string Analyzer = "Analyzer";
         public const string AnalyzerLanguage = "AnalyzerLanguage";
+        public const string TransitiveProjectReference = "TransitiveProjectReference";
     }
 }

@@ -225,9 +225,17 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     ============================================================
-    HELPER: Get File Dependencies matching active TFM and RID
+    HELPERS: Get Package and File Dependencies matching active TFM and RID
     ============================================================
     -->
+
+  <Target Name="_ComputeActiveTFMPackageDependencies"
+          DependsOnTargets="RunResolvePackageDependencies"
+          Returns="_ActiveTFMPackageDependencies">
+    <ItemGroup>
+      <_ActiveTFMPackageDependencies Include="@(PackageDependencies->WithMetadataValue('ParentTarget', '$(_NugetTargetMonikerAndRID)'))" />
+    </ItemGroup>
+  </Target>
 
   <Target Name="_ComputeActiveTFMFileDependencies"
           DependsOnTargets="RunResolvePackageDependencies"
@@ -300,12 +308,15 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
 
   <Target Name="_ComputeTransitiveProjectReferences"
-          DependsOnTargets="RunResolvePackageDependencies"
+          DependsOnTargets="_ComputeActiveTFMPackageDependencies"
           Returns="_TransitiveProjectReferences">
     <ItemGroup>
-      <_ProjectDefinitions Include="@(PackageDefinitions->WithMetadataValue('Type', 'project'))" />
-      <_TransitiveProjectDefinitions Include="@(_ProjectDefinitions->WithMetadataValue('ProjectFileDependency', 'False'))" />
+      <_TransitiveProjectDependencies Include="@(_ActiveTFMPackageDependencies->WithMetadataValue('TransitiveProjectReference', 'true'))" />
 
+      <!-- Get corresponding package definitions -->
+      <__TransitiveProjectDefinitions Include="@(PackageDefinitions)" Exclude="@(_TransitiveProjectDependencies)" />
+      <_TransitiveProjectDefinitions Include="@(PackageDefinitions)" Exclude="@(__TransitiveProjectDefinitions)" />
+      
       <_TransitiveProjectReferences Include="%(_TransitiveProjectDefinitions.Path)">
         <ResolvedPath>%(_TransitiveProjectDefinitions.ResolvedPath)</ResolvedPath>
       </_TransitiveProjectReferences>
