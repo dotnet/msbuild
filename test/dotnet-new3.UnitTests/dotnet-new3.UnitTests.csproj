@@ -1,4 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+  <Import Project="..\..\Version.props" />
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp1.0</TargetFramework>
@@ -12,8 +13,12 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20161123-03" />
     <PackageReference Include="xunit" Version="2.2.0-beta4-build3444" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0-beta4-build1194" />
+    <PackageReference Include="Microsoft.TemplateEngine.Utils" Version="$(PackageVersion)" />
+    <PackageReference Include="Microsoft.TemplateEngine.Abstractions" Version="$(PackageVersion)" />
+    <PackageReference Include="Microsoft.TemplateEngine.Edge" Version="$(PackageVersion)" />
+    <PackageReference Include="Microsoft.TemplateEngine.Mocks" Version="$(PackageVersion)" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\dotnet-new3\dotnet-new3.csproj" />
+    <ProjectReference Include="..\..\src\dotnet-new3\dotnet-new3.csproj" />    
   </ItemGroup>
 </Project>
