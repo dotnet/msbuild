@@ -304,9 +304,10 @@ Copyright (c) .NET Foundation. All rights reserved.
           Returns="_TransitiveProjectReferences">
     <ItemGroup>
       <_ProjectDefinitions Include="@(PackageDefinitions->WithMetadataValue('Type', 'project'))" />
+      <_TransitiveProjectDefinitions Include="@(_ProjectDefinitions->WithMetadataValue('ProjectFileDependency', 'False'))" />
 
-      <_TransitiveProjectReferences Include="%(_ProjectDefinitions.Path)">
-        <ResolvedPath>%(_ProjectDefinitions.ResolvedPath)</ResolvedPath>
+      <_TransitiveProjectReferences Include="%(_TransitiveProjectDefinitions.Path)">
+        <ResolvedPath>%(_TransitiveProjectDefinitions.ResolvedPath)</ResolvedPath>
       </_TransitiveProjectReferences>
     </ItemGroup>
   </Target>

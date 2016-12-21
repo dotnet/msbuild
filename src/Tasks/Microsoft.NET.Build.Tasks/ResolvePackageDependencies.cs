@@ -18,6 +18,7 @@ namespace Microsoft.NET.Build.Tasks
     /// </summary>
     public sealed class ResolvePackageDependencies : TaskBase
     {
+        private const string ProjectTypeKey = "project";
         private readonly Dictionary<string, string> _fileTypes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         private readonly HashSet<string> _projectFileDependencies = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private IPackageResolver _packageResolver;
@@ -189,6 +190,9 @@ namespace Microsoft.NET.Build.Tasks
 
                 string resolvedPackagePath = ResolvePackagePath(package);
                 item.SetMetadata(MetadataKeys.ResolvedPath, resolvedPackagePath ?? string.Empty);
+
+                // mark top level projects and packages
+                item.SetMetadata(MetadataKeys.ProjectFileDependency, _projectFileDependencies.Contains(package.Name).ToString());
 
                 _packageDefinitions.Add(item);
 
@@ -401,7 +405,7 @@ namespace Microsoft.NET.Build.Tasks
 
         private string ResolvePackagePath(LockFileLibrary package)
         {
-            if (package.Type == "project")
+            if (string.Equals(package.Type, ProjectTypeKey, StringComparison.OrdinalIgnoreCase))
             {
                 var relativeMSBuildProjectPath = package.MSBuildProject;
 
