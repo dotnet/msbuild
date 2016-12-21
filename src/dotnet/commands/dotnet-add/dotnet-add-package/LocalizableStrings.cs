@@ -22,5 +22,14 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
         public const string CmdVersionDescription = "Version for the package to be added.";
 
         public const string CmdDGFileException = "Unable to Create Dependency graph file for project '{0}'. Cannot add package reference.";
+
+        public const string CmdVersion = "VERSION";
+
+        public const string CmdFramework = "FRAMEWORK";
+
+        public const string CmdSource = "SOURCE";
+
+        public const string CmdPackageDirectory = "PACKAGE_DIRECTORY";
+
     }
 }

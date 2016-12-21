@@ -40,12 +40,12 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
             command.HelpOption("-h|--help");
 
             command._versionOption = command.Option(
-                "-v|--version",
+                $"-v|--version <{LocalizableStrings.CmdVersion}>",
                 LocalizableStrings.CmdVersionDescription,
                 CommandOptionType.SingleValue);
 
             command._frameworkOption = command.Option(
-               $"-f|--framework <{CommonLocalizableStrings.CmdFramework}>",
+               $"-f|--framework <{LocalizableStrings.CmdFramework}>",
                LocalizableStrings.CmdFrameworkDescription,
                CommandOptionType.SingleValue);
 
@@ -55,12 +55,12 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
                CommandOptionType.NoValue);
 
             command._sourceOption = command.Option(
-                "-s|--source ",
+                $"-s|--source <{LocalizableStrings.CmdSource}>",
                 LocalizableStrings.CmdSourceDescription,
                 CommandOptionType.SingleValue);
 
             command._packageDirectoryOption = command.Option(
-                "--package-directory",
+                $"--package-directory <{LocalizableStrings.CmdPackageDirectory}>",
                 LocalizableStrings.CmdPackageDirectoryDescription,
                 CommandOptionType.SingleValue);
 
@@ -69,14 +69,6 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
 
         public override int Run(string fileOrDirectory)
         {
-            Console.WriteLine("Waiting for debugger to attach.");
-            Console.WriteLine($"Process ID: {Process.GetCurrentProcess().Id}");
-
-            while (!Debugger.IsAttached)
-            {
-                System.Threading.Thread.Sleep(100);
-            }
-            Debugger.Break();
             var projects = new ProjectCollection();
             var msbuildProj = MsbuildProject.FromFileOrDirectory(projects, fileOrDirectory);
 
