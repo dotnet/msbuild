@@ -13,7 +13,7 @@ namespace dotnet_new3
     {
         public static CommandOption Help(this CommandLineApplication app)
         {
-            return app.Option("-h|--help", "Displays help for this command.", CommandOptionType.NoValue);
+            return app.Option("-h|--help", LocalizableStrings.DisplaysHelp, CommandOptionType.NoValue);
         }
 
         public static IReadOnlyDictionary<string, IList<string>> ParseExtraArgs(this CommandLineApplication app, IList<string> extraArgFileNames)
@@ -78,7 +78,7 @@ namespace dotnet_new3
 
                 if (!key.StartsWith("-", StringComparison.Ordinal))
                 {
-                    throw new Exception("Parameter names must start with -- or -");
+                    throw new Exception(LocalizableStrings.ParameterNamePrefixError);
                 }
 
                 // Check the next value. If it doesn't start with a '-' then it's a value for the current param.
