@@ -1,4 +1,4 @@
-<Project ToolsVersion="15.0" Sdk="Microsoft.NET.Sdk">
+﻿<Project ToolsVersion="15.0" Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\Version.props" />
   <PropertyGroup>
     <Description>Template Instantiation Commands for .NET Core CLI.</Description>
@@ -6,21 +6,25 @@
     <OutputType>Exe</OutputType>
     <RuntimeIdentifiers>win7-x64;win7-x86;osx.10.10-x64;osx.10.11-x64;ubuntu.14.04-x64;ubuntu.16.04-x64;centos.7-x64;rhel.7.2-x64;debian.8-x64;fedora.23-x64;opensuse.13.2-x64</RuntimeIdentifiers>
   </PropertyGroup>
+
   <ItemGroup>
     <Compile Include="**\*.cs" />
     <EmbeddedResource Include="**\*.resx" />
     <EmbeddedResource Include="compiler\resources\**\*" />
     <Content Include="**\*.list" CopyToPublishDirectory="Always" />
   </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.TemplateEngine.Utils" Version="$(PackageVersion)" />
     <PackageReference Include="Microsoft.TemplateEngine.Abstractions" Version="$(PackageVersion)" />
     <PackageReference Include="Microsoft.TemplateEngine.Edge" Version="$(PackageVersion)" />
   </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.App" Version="1.0.0" />
     <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="1.0.0-preview2-003121" />
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
   </ItemGroup>
+
 </Project>
