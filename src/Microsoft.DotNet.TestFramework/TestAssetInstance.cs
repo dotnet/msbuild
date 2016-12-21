@@ -16,35 +16,47 @@ namespace Microsoft.DotNet.TestFramework
 {
     public class TestAssetInstance
     {
-        private TestAssetInfo _testAssetInfo;
-
-        private DirectoryInfo _root;
-
-        public DirectoryInfo Root
-        {
-            get
-            {
-                return _root;
-            }
-        }
-        
         public TestAssetInstance(TestAssetInfo testAssetInfo, DirectoryInfo root)
         {
-            _testAssetInfo = testAssetInfo;
-
-            _root = root;
-
-            if (root.Exists)
+            if (testAssetInfo == null)
             {
-                root.Delete(recursive: true);
+                throw new ArgumentException(nameof(testAssetInfo));
+            }
+            
+            if (root == null)
+            {
+                throw new ArgumentException(nameof(root));
             }
 
-            root.Create();
+            TestAssetInfo = testAssetInfo;
+
+            Root = root;
+
+            MigrationBackupRoot = new DirectoryInfo(Path.Combine(root.Parent.FullName, "backup"));
+
+            if (Root.Exists)
+            {
+                Root.Delete(recursive: true);
+            }
+
+            Root.Create();
+
+            if (MigrationBackupRoot.Exists)
+            {
+                MigrationBackupRoot.Delete(recursive: true);
+            }
         }
+
+        public DirectoryInfo MigrationBackupRoot { get; }
+
+        public DirectoryInfo Root { get; }
+
+        public TestAssetInfo TestAssetInfo { get; }
+
 
         public TestAssetInstance WithSourceFiles()
         {
-            var filesToCopy = _testAssetInfo.GetSourceFiles();
+            var filesToCopy = TestAssetInfo.GetSourceFiles();
 
             CopyFiles(filesToCopy);
 
@@ -53,7 +65,7 @@ namespace Microsoft.DotNet.TestFramework
 
         public TestAssetInstance WithRestoreFiles()
         {
-            var filesToCopy = _testAssetInfo.GetRestoreFiles();
+            var filesToCopy = TestAssetInfo.GetRestoreFiles();
 
             CopyFiles(filesToCopy);
 
@@ -62,7 +74,7 @@ namespace Microsoft.DotNet.TestFramework
 
         public TestAssetInstance WithBuildFiles()
         {
-            var filesToCopy = _testAssetInfo.GetBuildFiles();
+            var filesToCopy = TestAssetInfo.GetBuildFiles();
 
             CopyFiles(filesToCopy);
 
@@ -81,7 +93,7 @@ namespace Microsoft.DotNet.TestFramework
               </packageSources>
             </configuration>";
             content = content.Replace("$fullpath$", nugetCache);
-            
+
             using (var newNuGetConfigStream =
                 new FileStream(newNuGetConfig.FullName, FileMode.Create, FileAccess.Write))
             {
@@ -96,7 +108,7 @@ namespace Microsoft.DotNet.TestFramework
         {
             foreach (var file in filesToCopy)
             {
-                var relativePath = file.FullName.Substring(_testAssetInfo.Root.FullName.Length + 1);
+                var relativePath = file.FullName.Substring(TestAssetInfo.Root.FullName.Length + 1);
 
                 var newPath = Path.Combine(Root.FullName, relativePath);
 
