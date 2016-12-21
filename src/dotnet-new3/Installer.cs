@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.TemplateEngine.Edge;
+using Microsoft.TemplateEngine.Edge.Settings;
+using Microsoft.TemplateEngine.Utils;
 
 namespace dotnet_new3
 {

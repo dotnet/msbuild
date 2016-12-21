@@ -5,7 +5,6 @@ using Microsoft.DotNet.Cli.Utils;
 
 namespace dotnet_new3
 {
-
     internal class TableFormatter
     {
         public static void Print<T>(IEnumerable<T> items, string noItemsMessage, string columnPad, char header, Dictionary<string, Func<T, object>> dictionary)
