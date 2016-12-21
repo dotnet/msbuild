@@ -18,5 +18,9 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
         public const string CmdSourceDescription = "Use specific NuGet package sources to use during the restore.";
 
         public const string CmdPackageDirectoryDescription = "Restore the packages to this Directory .";
+
+        public const string CmdVersionDescription = "Version for the package to be added.";
+
+        public const string CmdDGFileException = "Unable to Create Dependency graph file for project '{0}'. Cannot add package reference.";
     }
 }

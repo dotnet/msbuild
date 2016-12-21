@@ -13,16 +13,18 @@ using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.Tools.MSBuild;
+using Microsoft.DotNet.Tools.NuGet;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Tools.Add.PackageReference
 {
     internal class AddPackageReferenceCommand : DotNetSubCommandBase
     {
+        private CommandOption _versionOption;
         private CommandOption _frameworkOption;
-        private CommandOption _noRestore;
-        private CommandOption _source;
-        private CommandOption _packageDirectory;
+        private CommandOption _noRestoreOption;
+        private CommandOption _sourceOption;
+        private CommandOption _packageDirectoryOption;
 
         public static DotNetSubCommandBase Create()
         {
@@ -37,22 +39,27 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
 
             command.HelpOption("-h|--help");
 
+            command._versionOption = command.Option(
+                $"-v|--version",
+                LocalizableStrings.CmdVersionDescription,
+                CommandOptionType.SingleValue);
+
             command._frameworkOption = command.Option(
                $"-f|--framework",
                LocalizableStrings.CmdFrameworkDescription,
                CommandOptionType.SingleValue);
 
-            command._noRestore = command.Option(
+            command._noRestoreOption = command.Option(
                 $"-n|--no-restore ",
                LocalizableStrings.CmdNoRestoreDescription,
                CommandOptionType.NoValue);
 
-            command._source = command.Option(
+            command._sourceOption = command.Option(
                 $"-s|--source ",
                 LocalizableStrings.CmdSourceDescription,
                 CommandOptionType.SingleValue);
 
-            command._packageDirectory = command.Option(
+            command._packageDirectoryOption = command.Option(
                 $"--package-directory",
                 LocalizableStrings.CmdPackageDirectoryDescription,
                 CommandOptionType.SingleValue);
@@ -62,10 +69,10 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
 
         public override int Run(string fileOrDirectory)
         {
-            WaitForDebugger();
             var projects = new ProjectCollection();
             var msbuildProj = MsbuildProject.FromFileOrDirectory(projects, fileOrDirectory);
 
+            var x = this.Arguments;
             if (RemainingArguments.Count == 0)
             {
                 throw new GracefulException(CommonLocalizableStrings.SpecifyAtLeastOneReferenceToAdd);
@@ -73,10 +80,10 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
 
             var tempDgFilePath = CreateTemporaryFile(".dg");
 
-            GetProjectDependencyGraph(msbuildProj.ProjectDirectory, tempDgFilePath);
-
+            GetProjectDependencyGraph(msbuildProj.ProjectRootElement.FullPath, tempDgFilePath);
+            
+            var result = NuGetCommand.Run(TransformArgs(tempDgFilePath, msbuildProj.ProjectRootElement.FullPath));
             DisposeTemporaryFile(tempDgFilePath);
-
             return 0;
         }
 
@@ -84,6 +91,9 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
             string dgFilePath)
         {
             var args = new List<string>();
+
+            // Pass the project file path
+            args.Add(projectFilePath);
 
             // Pass the task as generate restore dg file
             args.Add("/t:GenerateRestoreGraphFile");
@@ -95,7 +105,7 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
 
             if (result != 0)
             {
-                throw new GracefulException("Could not generate dg file");
+                throw new GracefulException(string.Format(LocalizableStrings.CmdDGFileException, projectFilePath));
             }
         }
 
@@ -115,16 +125,44 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
             }
         }
 
-        public void WaitForDebugger()
+        private string[] TransformArgs(string tempDgFilePath, string projectFilePath)
         {
-            Console.WriteLine("Waiting for debugger to attach.");
-            Console.WriteLine($"Process ID: {Process.GetCurrentProcess().Id}");
-
-            while (!Debugger.IsAttached)
+            var args = new List<string>(){
+                "package",
+                "add",
+                "--package",
+                "Newtonsoft.Json",
+                "--project",
+                projectFilePath,
+                "--dg-file",
+                tempDgFilePath
+            };
+            if(_versionOption.HasValue())
             {
-                System.Threading.Thread.Sleep(100);
+                args.Append("--version");
+                args.Append(_versionOption.Value());
             }
-            Debugger.Break();
+            if(_sourceOption.HasValue())
+            {
+                args.Append("--source");
+                args.Append(_sourceOption.Value());
+            }
+            if(_frameworkOption.HasValue())
+            {
+                args.Append("--framework");
+                args.Append(_frameworkOption.Value());
+            }
+            if(_noRestoreOption.HasValue())
+            {
+                args.Append("--no-restore");
+            }
+            if(_packageDirectoryOption.HasValue())
+            {
+                args.Append("--package-directory");
+                args.Append(_packageDirectoryOption.Value());
+            }
+
+            return args.ToArray();
         }
     }
 }
