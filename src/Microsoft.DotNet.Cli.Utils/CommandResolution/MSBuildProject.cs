@@ -129,6 +129,29 @@ namespace Microsoft.DotNet.Cli.Utils
                 .Result;
         }
 
+        public bool TryGetLockFile(out LockFile lockFile)
+        {
+            lockFile = null;
+
+            var lockFilePath = GetLockFilePathFromProjectLockFileProperty() ??
+                GetLockFilePathFromIntermediateBaseOutputPath();
+
+            if (lockFilePath == null)
+            {
+                return false;
+            }
+
+            if (!File.Exists(lockFilePath))
+            {
+                return false;
+            }
+
+            lockFile = new LockFileFormat()
+                .ReadWithLock(lockFilePath)
+                .Result;
+            return true;
+        }
+
         private string GetLockFilePathFromProjectLockFileProperty()
         {
             return _project

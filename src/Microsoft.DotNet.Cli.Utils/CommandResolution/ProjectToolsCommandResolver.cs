@@ -127,16 +127,19 @@ namespace Microsoft.DotNet.Cli.Utils
                 ProjectToolsCommandResolverName,
                 toolLibraryRange.Name));
 
-            var nuGetPathContext = NuGetPathContext.Create(project.ProjectRoot);
-
-            var nugetPackagesRoot = nuGetPathContext.UserPackageFolder;
-
+            var possiblePackageRoots = GetPossiblePackageRoots(project).ToList();
             Reporter.Verbose.WriteLine(string.Format(
                 LocalizableStrings.NuGetPackagesRoot,
                 ProjectToolsCommandResolverName,
-                nugetPackagesRoot));
+                string.Join(Environment.NewLine, possiblePackageRoots.Select((p) => $"- {p}"))));
 
-            var toolLockFile = GetToolLockFile(toolLibraryRange, nugetPackagesRoot);
+            string nugetPackagesRoot;
+            var toolLockFile = GetToolLockFile(toolLibraryRange, possiblePackageRoots, out nugetPackagesRoot);
+
+            if (toolLockFile == null)
+            {
+                return null;
+            }
 
             Reporter.Verbose.WriteLine(string.Format(
                 LocalizableStrings.FoundToolLockFile,
@@ -189,18 +192,46 @@ namespace Microsoft.DotNet.Cli.Utils
             return commandSpec;
         }
 
+        private IEnumerable<string> GetPossiblePackageRoots(IProject project)
+        {
+            if (project.TryGetLockFile(out LockFile lockFile))
+            {
+                return lockFile.PackageFolders.Select((packageFolder) => packageFolder.Path);
+            }
+
+            return Enumerable.Empty<string>();
+        }
+
         private LockFile GetToolLockFile(
             SingleProjectInfo toolLibrary,
-            string nugetPackagesRoot)
+            IEnumerable<string> possibleNugetPackagesRoot,
+            out string nugetPackagesRoot)
         {
+            foreach (var packagesRoot in possibleNugetPackagesRoot)
+            {
+                if (TryGetToolLockFile(toolLibrary, packagesRoot, out LockFile lockFile))
+                {
+                    nugetPackagesRoot = packagesRoot;
+                    return lockFile;
+                }
+            }
+
+            nugetPackagesRoot = null;
+            return null;
+        }
+
+        private bool TryGetToolLockFile(
+            SingleProjectInfo toolLibrary,
+            string nugetPackagesRoot,
+            out LockFile lockFile)
+        {
+            lockFile = null;
             var lockFilePath = GetToolLockFilePath(toolLibrary, nugetPackagesRoot);
 
             if (!File.Exists(lockFilePath))
             {
-                return null;
+                return false;
             }
-
-            LockFile lockFile = null;
 
             try
             {
@@ -213,7 +244,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 throw ex;
             }
 
-            return lockFile;
+            return true;
         }
 
         private string GetToolLockFilePath(
