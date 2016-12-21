@@ -140,7 +140,8 @@ namespace Microsoft.DotNet.Tools.New
                                    new { Name = "Web", isMsBuild = true }, 
                                    new { Name = "Lib", isMsBuild = true },
                                    new { Name = "Mstest", isMsBuild = true },
-                                   new { Name = "Xunittest", isMsBuild = true }
+                                   new { Name = "Xunittest", isMsBuild = true },
+                                   new { Name = "Sln", isMsBuild = true }
                                }
             };
 
@@ -151,7 +152,8 @@ namespace Microsoft.DotNet.Tools.New
                                    new { Name = "Web", isMsBuild = true }, 
                                    new { Name = "Lib", isMsBuild = true },
                                    new { Name = "Mstest", isMsBuild = true },
-                                   new { Name = "Xunittest", isMsBuild = true }
+                                   new { Name = "Xunittest", isMsBuild = true },
+                                   new { Name = "Sln", isMsBuild = true }
                                }
             };
 

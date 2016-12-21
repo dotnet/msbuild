@@ -13,9 +13,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="**\*.cs" Exclude="commands\dotnet-new\CSharp_Console\**;commands\dotnet-new\CSharp_Lib\**;commands\dotnet-new\CSharp_Mstest\**;commands\dotnet-new\CSharp_Web\**;commands\dotnet-new\CSharp_Xunittest\**;bin\**;obj\**;**\*.xproj;packages\**" />
+    <Compile Include="**\*.cs" Exclude="commands\dotnet-new\CSharp_Sln\**;commands\dotnet-new\CSharp_Console\**;commands\dotnet-new\CSharp_Lib\**;commands\dotnet-new\CSharp_Mstest\**;commands\dotnet-new\CSharp_Web\**;commands\dotnet-new\CSharp_Xunittest\**;bin\**;obj\**;**\*.xproj;packages\**" />
     <EmbeddedResource Include="**\*.resx" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
-    <EmbeddedResource Include="commands\dotnet-new\CSharp_Console.zip;commands\dotnet-new\CSharp_Lib.zip;commands\dotnet-new\CSharp_Mstest.zip;commands\dotnet-new\CSharp_Xunittest.zip;commands\dotnet-new\CSharp_Web.zip;compiler\resources\**\*" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
+    <EmbeddedResource Include="commands\dotnet-new\CSharp_Sln.zip;commands\dotnet-new\CSharp_Console.zip;commands\dotnet-new\CSharp_Lib.zip;commands\dotnet-new\CSharp_Mstest.zip;commands\dotnet-new\CSharp_Xunittest.zip;commands\dotnet-new\CSharp_Web.zip;compiler\resources\**\*" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
     <EmbeddedResource Include="commands\dotnet-new\FSharp_Console.zip;commands\dotnet-new\FSharp_Lib.zip;commands\dotnet-new\FSharp_Mstest.zip;commands\dotnet-new\FSharp_Xunittest.zip;commands\dotnet-new\FSharp_Web.zip" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
   </ItemGroup>
 
