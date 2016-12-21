@@ -50,7 +50,7 @@ namespace dotnet_new3
 
         public string Alias => _app.InternalParamValue("--alias");
 
-        public bool DebugAttachHasValue => _app.RemainingArguments.Any(x => x.Equals("--debug:attach", StringComparison.Ordinal));
+        public bool DebugAttachHasValue => _app.InternalParamHasValue("--debug:attach");
 
         public bool ExtraArgsHasValue => _app.InternalParamHasValue("--extra-args");
 
@@ -392,18 +392,44 @@ namespace dotnet_new3
 
         private async Task InstallPackagesAsync(IReadOnlyList<string> packageNames, bool quiet = false)
         {
+            List<string> toInstall = new List<string>();
+
             foreach (string package in packageNames)
             {
                 string pkg = package.Trim();
                 pkg = Environment.ExpandEnvironmentVariables(pkg);
+                string pattern = null;
 
-                if (TemplateInstaller.TryParsePackageAndVersion(pkg, out string name, out string version))
+                int wildcardIndex = pkg.IndexOfAny(new[] { '*', '?' });
+
+                if (wildcardIndex > -1)
                 {
-                    await InstallPackageViaRestore(package, name, version);
+                    int lastSlashBeforeWildcard = pkg.LastIndexOfAny(new[] { '\\', '/' });
+                    pattern = pkg.Substring(lastSlashBeforeWildcard + 1);
+                    pkg = pkg.Substring(0, lastSlashBeforeWildcard);
                 }
-                else
+
+                try
                 {
-                    await InstallLocalPackage(pkg);
+                    if (pattern != null)
+                    {
+                        string fullDirectory = new DirectoryInfo(pkg).FullName;
+                        string fullPathGlob = Path.Combine(fullDirectory, pattern);
+                        TemplateCache.Scan(fullPathGlob);
+                    }
+                    else if (Directory.Exists(pkg) || File.Exists(pkg))
+                    {
+                        string packageLocation = new DirectoryInfo(pkg).FullName;
+                        TemplateCache.Scan(packageLocation);
+                    }
+                    else
+                    {
+                        EngineEnvironmentSettings.Host.OnNonCriticalError("InvalidPackageSpecification", string.Format(LocalizableStrings.BadPackageSpec, pkg), null, 0);
+                    }
+                }
+                catch
+                {
+                    EngineEnvironmentSettings.Host.OnNonCriticalError("InvalidPackageSpecification", string.Format(LocalizableStrings.BadPackageSpec, pkg), null, 0);
                 }
             }
 
@@ -412,68 +438,6 @@ namespace dotnet_new3
             if (!quiet)
             {
                 ListTemplates(string.Empty);
-            }
-        }
-
-        private async Task InstallLocalPackage(string package)
-        {
-            string pattern = null;
-            int wildcardIndex = package.IndexOfAny(new[] { '*', '?' });
-
-            if (wildcardIndex > -1)
-            {
-                int lastSlashBeforeWildcard = package.LastIndexOfAny(new[] { '\\', '/' });
-                pattern = package.Substring(lastSlashBeforeWildcard + 1);
-                package = package.Substring(0, lastSlashBeforeWildcard);
-            }
-
-            try
-            {
-                if (pattern != null)
-                {
-                    string fullDirectory = new DirectoryInfo(package).FullName;
-                    string fullPathGlob = Path.Combine(fullDirectory, pattern);
-                    TemplateCache.Scan(fullPathGlob);
-                }
-                else if (Directory.Exists(package) || File.Exists(package))
-                {
-                    string packageLocation = new DirectoryInfo(package).FullName;
-                    TemplateCache.Scan(packageLocation);
-                }
-                else
-                {
-                    EngineEnvironmentSettings.Host.OnNonCriticalError("InvalidPackageSpecification", string.Format(LocalizableStrings.BadPackageSpec, package), null, 0);
-                }
-            }
-            catch
-            {
-                EngineEnvironmentSettings.Host.OnNonCriticalError("InvalidPackageSpecification", string.Format(LocalizableStrings.BadPackageSpec, package), null, 0);
-            }
-        }
-
-        private async Task InstallPackageViaRestore(string packageFullSpecification, string name, string version)
-        {
-            TemplateInstaller installer = new TemplateInstaller();
-
-            try
-            {
-                CommandResult result = installer.InstallTemplate(name, version);
-
-                if (result.ExitCode != 0)
-                {
-                    EngineEnvironmentSettings.Host.OnNonCriticalError("PackageInstallError", string.Format(LocalizableStrings.PackageInstallError, packageFullSpecification, result.StdErr), null, 0);
-                }
-                else
-                {
-
-                    // now try to install the local package - scan the directory created by the installer
-                    await InstallLocalPackage(installer.TempDir);
-                    installer.Cleanup();
-                }
-            }
-            catch (Exception ex)
-            {
-                EngineEnvironmentSettings.Host.OnNonCriticalError("PackageInstallError", string.Format(LocalizableStrings.PackageInstallError, packageFullSpecification, ex.Message), null, 0);
             }
         }
 
@@ -568,6 +532,7 @@ namespace dotnet_new3
                 Reporter.Output.WriteLine();
             }
 
+            //IEnumerable<ITemplateParameter> filteredParams = allParams.ParameterDefinitions.Where(x => x.Priority != TemplateParameterPriority.Implicit);
             IEnumerable<ITemplateParameter> filteredParams = FilterParamsForHelp(allParams);
 
             if (filteredParams.Any())

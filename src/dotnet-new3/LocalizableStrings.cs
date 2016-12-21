@@ -78,8 +78,6 @@ namespace dotnet_new3
 
         public const string BadPackageSpec = "Package \"{0}\" is not a valid package specification";
 
-        public const string PackageInstallError = "Package \"{0}\" could not be installed. Error = [{1}].";
-
         public const string Templates = "Templates";
 
         public const string ShortName = "Short Name";
