@@ -124,8 +124,14 @@ Copyright (c) .NET Foundation. All rights reserved.
                                        PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                                        UserRuntimeConfig="$(UserRuntimeConfig)">
       
-      <Output TaskParameter="FilesWritten" ItemName="FileWrites" />
     </GenerateRuntimeConfigurationFiles>
+    
+    <ItemGroup>
+      <!-- Do this in an ItemGroup instead of as an output parameter of the GenerateDepsFile task so that it still gets added to the item set
+          during incremental builds when the task is skipped -->
+      <FileWrites Include="$(ProjectRuntimeConfigFilePath)" Condition="Exists('$(ProjectRuntimeConfigFilePath)')"/>
+      <FileWrites Include="$(ProjectRuntimeConfigDevFilePath)" Condition="Exists('$(ProjectRuntimeConfigDevFilePath)')"/>
+    </ItemGroup>
 
   </Target>
 
