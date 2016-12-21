@@ -21,10 +21,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- General Properties -->
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-
-    <!-- Flag PackageDependency Tasks -->
-    <EnableResolvePackageDependencies
-      Condition="'$(EnableResolvePackageDependencies)' == ''">true</EnableResolvePackageDependencies>
   </PropertyGroup>
 
   <!-- Project Assets File -->
@@ -104,7 +100,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
                      ResolvePackageDependenciesForBuild
 
-    Populate items for build...
+    Populate items for build. This is triggered before target 
+    "AssignProjectConfiguration" to ensure ProjectReference items
+    are populated before ResolveProjectReferences is run.
     ============================================================
     -->
   <PropertyGroup>
@@ -112,10 +110,12 @@ Copyright (c) .NET Foundation. All rights reserved.
       ResolveLockFileReferences;
       ResolveLockFileAnalyzers;
       ResolveLockFileCopyLocalProjectDeps;
+      IncludeTransitiveProjectReferences;
     </ResolvePackageDependenciesForBuildDependsOn>
   </PropertyGroup>
   <Target Name="ResolvePackageDependenciesForBuild"
-          Condition="'$(ResolvePackageDependenciesForBuild)' == 'true' and '$(EnableResolvePackageDependencies)' == 'true' and Exists('$(ProjectAssetsFile)')"
+          Condition="'$(ResolvePackageDependenciesForBuild)' == 'true' and Exists('$(ProjectAssetsFile)')"
+          BeforeTargets="AssignProjectConfiguration"
           DependsOnTargets="$(ResolvePackageDependenciesForBuildDependsOn)" />
 
   <!--
@@ -225,9 +225,17 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     ============================================================
-    HELPER: Get File Dependencies matching active TFM and RID
+    HELPERS: Get Package and File Dependencies matching active TFM and RID
     ============================================================
     -->
+
+  <Target Name="_ComputeActiveTFMPackageDependencies"
+          DependsOnTargets="RunResolvePackageDependencies"
+          Returns="_ActiveTFMPackageDependencies">
+    <ItemGroup>
+      <_ActiveTFMPackageDependencies Include="@(PackageDependencies->WithMetadataValue('ParentTarget', '$(_NugetTargetMonikerAndRID)'))" />
+    </ItemGroup>
+  </Target>
 
   <Target Name="_ComputeActiveTFMFileDependencies"
           DependsOnTargets="RunResolvePackageDependencies"
@@ -290,6 +298,39 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
+  <!--
+    ============================================================
+    ProjectReference Targets: Include transitive project references before 
+                              ResolveProjectReferences is called
+    - _ComputeTransitiveProjectReferences
+    - IncludeTransitiveProjectReferences
+    ============================================================
+    -->
+
+  <Target Name="_ComputeTransitiveProjectReferences"
+          DependsOnTargets="_ComputeActiveTFMPackageDependencies"
+          Returns="_TransitiveProjectReferences">
+    <ItemGroup>
+      <_TransitiveProjectDependencies Include="@(_ActiveTFMPackageDependencies->WithMetadataValue('TransitiveProjectReference', 'true'))" />
+
+      <!-- Get corresponding package definitions -->
+      <__TransitiveProjectDefinitions Include="@(PackageDefinitions)" Exclude="@(_TransitiveProjectDependencies)" />
+      <_TransitiveProjectDefinitions Include="@(PackageDefinitions)" Exclude="@(__TransitiveProjectDefinitions)" />
+      
+      <_TransitiveProjectReferences Include="%(_TransitiveProjectDefinitions.Path)">
+        <ResolvedPath>%(_TransitiveProjectDefinitions.ResolvedPath)</ResolvedPath>
+      </_TransitiveProjectReferences>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="IncludeTransitiveProjectReferences"
+          DependsOnTargets="_ComputeTransitiveProjectReferences" >
+    <ItemGroup>
+      <!-- Add the references we computed -->
+      <ProjectReference Include="@(_TransitiveProjectReferences)" />
+    </ItemGroup>
+  </Target>
+  
   <!--
     ============================================================
     Analyzer Targets: For populating Analyzers based on lock file
