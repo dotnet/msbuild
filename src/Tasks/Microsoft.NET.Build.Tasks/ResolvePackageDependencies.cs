@@ -305,7 +305,7 @@ namespace Microsoft.NET.Build.Tasks
                     item = new TaskItem(packageId);
                     item.SetMetadata(MetadataKeys.ParentTarget, target.Name); // Foreign Key
                     item.SetMetadata(MetadataKeys.ParentPackage, string.Empty); // Foreign Key
-                    
+
                     _packageDependencies.Add(item);
                 }
 
