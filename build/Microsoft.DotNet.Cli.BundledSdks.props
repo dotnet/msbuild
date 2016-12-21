@@ -3,7 +3,7 @@
   
   <ItemGroup>
     <BundledSdk Include="NuGet.Build.Tasks.Pack" Version="4.0.0-rc2" />
-    <BundledSdk Include="Microsoft.NET.Sdk" Version="1.0.0-alpha-20161219-1" />
+    <BundledSdk Include="Microsoft.NET.Sdk" Version="$(CLI_NETSDK_Version)" />
     <BundledSdk Include="Microsoft.NET.Sdk.Web" Version="$(CLI_WEBSDK_Version)" />
     <BundledSdk Include="Microsoft.NET.Sdk.Publish" Version="$(CLI_WEBSDK_Version)" />
     <BundledSdk Include="Microsoft.NET.Sdk.Web.ProjectSystem" Version="$(CLI_WEBSDK_Version)" />
