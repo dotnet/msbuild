@@ -390,6 +390,93 @@ namespace dotnet_new3
             return 0;
         }
 
+        private async Task InstallPackagesAsync(IReadOnlyList<string> packageNames, bool quiet = false)
+        {
+            foreach (string package in packageNames)
+            {
+                string pkg = package.Trim();
+                pkg = Environment.ExpandEnvironmentVariables(pkg);
+
+                if (TemplateInstaller.TryParsePackageAndVersion(pkg, out string name, out string version))
+                {
+                    await InstallPackageViaRestore(package, name, version);
+                }
+                else
+                {
+                    await InstallLocalPackage(pkg);
+                }
+            }
+
+            TemplateCache.WriteTemplateCaches();
+
+            if (!quiet)
+            {
+                ListTemplates(string.Empty);
+            }
+        }
+
+        private async Task InstallLocalPackage(string package)
+        {
+            string pattern = null;
+            int wildcardIndex = package.IndexOfAny(new[] { '*', '?' });
+
+            if (wildcardIndex > -1)
+            {
+                int lastSlashBeforeWildcard = package.LastIndexOfAny(new[] { '\\', '/' });
+                pattern = package.Substring(lastSlashBeforeWildcard + 1);
+                package = package.Substring(0, lastSlashBeforeWildcard);
+            }
+
+            try
+            {
+                if (pattern != null)
+                {
+                    string fullDirectory = new DirectoryInfo(package).FullName;
+                    string fullPathGlob = Path.Combine(fullDirectory, pattern);
+                    TemplateCache.Scan(fullPathGlob);
+                }
+                else if (Directory.Exists(package) || File.Exists(package))
+                {
+                    string packageLocation = new DirectoryInfo(package).FullName;
+                    TemplateCache.Scan(packageLocation);
+                }
+                else
+                {
+                    EngineEnvironmentSettings.Host.OnNonCriticalError("InvalidPackageSpecification", string.Format(LocalizableStrings.BadPackageSpec, package), null, 0);
+                }
+            }
+            catch
+            {
+                EngineEnvironmentSettings.Host.OnNonCriticalError("InvalidPackageSpecification", string.Format(LocalizableStrings.BadPackageSpec, package), null, 0);
+            }
+        }
+
+        private async Task InstallPackageViaRestore(string packageFullSpecification, string name, string version)
+        {
+            TemplateInstaller installer = new TemplateInstaller();
+
+            try
+            {
+                CommandResult result = installer.InstallTemplate(name, version);
+
+                if (result.ExitCode != 0)
+                {
+                    EngineEnvironmentSettings.Host.OnNonCriticalError("PackageInstallError", string.Format(LocalizableStrings.PackageInstallError, packageFullSpecification, result.StdErr), null, 0);
+                }
+                else
+                {
+
+                    // now try to install the local package - scan the directory created by the installer
+                    await InstallLocalPackage(installer.TempDir);
+                    installer.Cleanup();
+                }
+            }
+            catch (Exception ex)
+            {
+                EngineEnvironmentSettings.Host.OnNonCriticalError("PackageInstallError", string.Format(LocalizableStrings.PackageInstallError, packageFullSpecification, ex.Message), null, 0);
+            }
+        }
+
         private void ListTemplates(string templateName = null)
         {
             templateName = templateName ?? _templateName.Value;
@@ -481,7 +568,6 @@ namespace dotnet_new3
                 Reporter.Output.WriteLine();
             }
 
-            //IEnumerable<ITemplateParameter> filteredParams = allParams.ParameterDefinitions.Where(x => x.Priority != TemplateParameterPriority.Implicit);
             IEnumerable<ITemplateParameter> filteredParams = FilterParamsForHelp(allParams);
 
             if (filteredParams.Any())
