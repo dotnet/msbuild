@@ -22,7 +22,6 @@ namespace Microsoft.DotNet.Tools.Migrate
     {
         private SlnFile _slnFile;
         private readonly DirectoryInfo _workspaceDirectory;
-        private readonly DirectoryInfo _backupDirectory;
         private readonly string _templateFile;
         private readonly string _projectArg;
         private readonly string _sdkVersion;
@@ -33,21 +32,20 @@ namespace Microsoft.DotNet.Tools.Migrate
         private readonly bool _skipBackup;
 
         public MigrateCommand(
-            string templateFile, 
-            string projectArg, 
-            string sdkVersion, 
-            string xprojFilePath, 
-            string reportFile, 
-            bool skipProjectReferences, 
+            string templateFile,
+            string projectArg,
+            string sdkVersion,
+            string xprojFilePath,
+            string reportFile,
+            bool skipProjectReferences,
             bool reportFormatJson,
             bool skipBackup)
-        {            
+        {
             _templateFile = templateFile;
             _projectArg = projectArg ?? Directory.GetCurrentDirectory();
             _workspaceDirectory = File.Exists(_projectArg)
                 ? new FileInfo(_projectArg).Directory
                 : new DirectoryInfo(_projectArg);
-            _backupDirectory = new DirectoryInfo(Path.Combine(_workspaceDirectory.FullName, "backup"));
             _sdkVersion = sdkVersion;
             _xprojFilePath = xprojFilePath;
             _skipProjectReferences = skipProjectReferences;
@@ -172,60 +170,24 @@ namespace Microsoft.DotNet.Tools.Migrate
             {
                 return;
             }
-            
+
             if (migrationReport.FailedProjectsCount > 0)
             {
                 return;
             }
-            
-            BackupGlobalJson();
 
             BackupProjects(migrationReport);
-            
         }
 
-        private void BackupGlobalJson()
-        {   
-            _backupDirectory.Create();
-
-            var globalJson = Path.Combine(_workspaceDirectory.FullName, GlobalSettings.FileName);
-
-            if (File.Exists(globalJson))
-            {
-                File.Move(globalJson, Path.Combine(_backupDirectory.FullName, GlobalSettings.FileName));
-            }
-        }
-        
         private void BackupProjects(MigrationReport migrationReport)
         {
             foreach (var report in migrationReport.ProjectMigrationReports)
             {
-                MigrateProject(report);
-            }
-        }
+                var backupPlan = new MigrationBackupPlan(
+                    new DirectoryInfo(report.ProjectDirectory),
+                    _workspaceDirectory);
 
-        private void MigrateProject(ProjectMigrationReport report)
-        {
-            var projectDirectory = PathUtility.EnsureTrailingSlash(report.ProjectDirectory);
-            
-            var relativeDirectory = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(_workspaceDirectory.FullName), projectDirectory);
-
-            var targetDirectory = String.IsNullOrEmpty(relativeDirectory)
-                ? _backupDirectory.FullName
-                :  Path.Combine(_backupDirectory.FullName, relativeDirectory);
-
-            PathUtility.EnsureDirectory(PathUtility.EnsureTrailingSlash(targetDirectory));
-
-            var movableFiles = new DirectoryInfo(projectDirectory)
-                .EnumerateFiles()
-                .Where(f => f.Name == Project.FileName 
-                         || f.Extension == ".xproj"
-                         || f.FullName.EndsWith(".xproj.user")
-                         || f.FullName.EndsWith(".lock.json"));
-            
-            foreach (var movableFile in movableFiles)
-            {
-                movableFile.MoveTo(Path.Combine(targetDirectory, movableFile.Name));
+                backupPlan.PerformBackup();
             }
         }
 
@@ -373,8 +335,8 @@ namespace Microsoft.DotNet.Tools.Migrate
             {
                 throw new Exception($"Invalid project argument - '{projectArg}' is not a project.json, global.json, or solution.sln file and a directory named '{projectArg}' doesn't exist.");
             }
-            
-            foreach(var project in projects)
+
+            foreach (var project in projects)
             {
                 yield return GetProjectJsonPath(project);
             }
