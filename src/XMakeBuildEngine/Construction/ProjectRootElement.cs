@@ -266,7 +266,7 @@ namespace Microsoft.Build.Construction
 
         /// <summary>
         /// Initialize a ProjectRootElement instance from an existing document.
-        /// Helper constructor for the <see cref="ReloadFrom(XmlDocumentWithLocation)"/>> which needs to check if the document parses
+        /// Helper constructor for the <see cref="ReloadFrom(string,bool,System.Nullable{bool})"/>> mehtod which needs to check if the document parses
         /// </summary>
         /// <remarks>
         /// Do not make public: we do not wish to expose particular XML API's.
@@ -1873,27 +1873,27 @@ namespace Microsoft.Build.Construction
         /// Reload the existing project root element from its file.
         /// An <see cref="InvalidOperationException"/> is thrown if the project root element is not associated with any file on disk.
         /// 
-        /// See <see cref="ProjectRootElement.ReloadFrom(XmlReader, bool)"/>
+        /// See <see cref="ProjectRootElement.ReloadFrom(XmlReader, bool, bool?)"/>
         /// </summary>
-        public void Reload(bool throwIfUnsavedChanges = true)
+        public void Reload(bool throwIfUnsavedChanges = true, bool? preserveFormatting = null)
         {
             ErrorUtilities.VerifyThrowInvalidOperation(!string.IsNullOrEmpty(FullPath), "ValueNotSet", $"{nameof(ProjectRootElement)}.{nameof(FullPath)}");
 
-            ReloadFrom(FullPath);
+            ReloadFrom(FullPath, throwIfUnsavedChanges, preserveFormatting);
         }
 
         /// <summary>
         /// Reload the existing project root element from the given path
         /// An <see cref="InvalidOperationException"/> is thrown if the path does not exist.
         /// 
-        /// See <see cref="ProjectRootElement.ReloadFrom(XmlReader, bool)"/>
+        /// See <see cref="ProjectRootElement.ReloadFrom(XmlReader, bool, bool?)"/>
         /// </summary>
-        public void ReloadFrom(string path, bool throwIfUnsavedChanges = true)
+        public void ReloadFrom(string path, bool throwIfUnsavedChanges = true, bool? preserveFormatting = null)
         {
             ErrorUtilities.VerifyThrowInvalidOperation(File.Exists(path), "FileToReloadFromDoesNotExist", path);
-            ThrowIfUnsavedChanges(throwIfUnsavedChanges);
 
-            ReloadFrom(LoadDocument(path, PreserveFormatting));
+            Func<bool, XmlDocumentWithLocation> documentProducer = shouldPreserveFormatting => LoadDocument(path, shouldPreserveFormatting);
+            ReloadFrom(documentProducer, throwIfUnsavedChanges, preserveFormatting);
         }
 
         /// <summary>
@@ -1910,15 +1910,21 @@ namespace Microsoft.Build.Construction
         ///   If set to false, the reload operation will discard any unsaved changes.
         ///   Otherwise, an <see cref="InvalidOperationException"/> is thrown when unsaved changes are present.
         /// </param>
-        public void ReloadFrom(XmlReader reader, bool throwIfUnsavedChanges = true)
+        /// <param name="preserveFormatting">
+        ///   Whether the reload should preserve formatting or not. A null value causes the reload to reuse the existing <see cref="PreserveFormatting"/> value.
+        /// </param>
+        public void ReloadFrom(XmlReader reader, bool throwIfUnsavedChanges = true, bool? preserveFormatting = null)
+        {
+            Func<bool, XmlDocumentWithLocation> documentProducer = shouldPreserveFormatting => LoadDocument(reader, shouldPreserveFormatting);
+            ReloadFrom(documentProducer, throwIfUnsavedChanges, preserveFormatting);
+        }
+
+        private void ReloadFrom(Func<bool, XmlDocumentWithLocation> documentProducer, bool throwIfUnsavedChanges, bool? preserveFormatting)
         {
             ThrowIfUnsavedChanges(throwIfUnsavedChanges);
 
-            ReloadFrom(LoadDocument(reader, PreserveFormatting));
-        }
+            XmlDocumentWithLocation document = documentProducer(preserveFormatting ?? PreserveFormatting);
 
-        private void ReloadFrom(XmlDocumentWithLocation document)
-        {
             // Reload should only mutate the state if there are no parse errors.
             ThrowIfDocumentHasParsingErrors(document);
 

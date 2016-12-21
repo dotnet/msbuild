@@ -1319,6 +1319,42 @@ Project(""{";
         }
 
         [Theory]
+        [InlineData(true, false, false)]
+        [InlineData(true, true, true)]
+        [InlineData(false, false, false)]
+        [InlineData(false, true, true)]
+        [InlineData(true, null, true)]
+        [InlineData(false, null, false)]
+        public void ReloadCanSpecifyPreserveFormatting(bool initialPreserveFormatting, bool? reloadShouldPreserveFormatting, bool expectedFormattingAfterReload)
+        {
+            using (var testFiles = new Helpers.TestProjectWithFiles("", new[] { "build.proj" }))
+            {
+                var projectFile = testFiles.CreatedFiles.First();
+
+                var projectElement = ObjectModelHelpers.CreateInMemoryProjectRootElement(SimpleProject, null, initialPreserveFormatting);
+                projectElement.Save(projectFile);
+                Assert.Equal(initialPreserveFormatting, projectElement.PreserveFormatting);
+
+                projectElement.Reload(false, reloadShouldPreserveFormatting);
+                Assert.Equal(expectedFormattingAfterReload, projectElement.PreserveFormatting);
+
+                // reset project to original preserve formatting
+                projectElement.Reload(false, initialPreserveFormatting);
+                Assert.Equal(initialPreserveFormatting, projectElement.PreserveFormatting);
+
+                projectElement.ReloadFrom(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(SimpleProject))), false, reloadShouldPreserveFormatting);
+                Assert.Equal(expectedFormattingAfterReload, projectElement.PreserveFormatting);
+
+                // reset project to original preserve formatting
+                projectElement.Reload(false, initialPreserveFormatting);
+                Assert.Equal(initialPreserveFormatting, projectElement.PreserveFormatting);
+
+                projectElement.ReloadFrom(projectFile, false, reloadShouldPreserveFormatting);
+                Assert.Equal(expectedFormattingAfterReload, projectElement.PreserveFormatting);
+            }
+        }
+
+        [Theory]
 
         // same content should still dirty the project
         [InlineData(
@@ -1551,7 +1587,7 @@ true, true, true)]
 
 </Project>");
 
-            using (var testFiles = new Helpers.TestProjectWithFiles("null", new []{"build.proj"}))
+            using (var testFiles = new Helpers.TestProjectWithFiles("", new []{"build.proj"}))
             using (var projectCollection1 = new ProjectCollection())
             using (var projectCollection2 = new ProjectCollection())
             {
