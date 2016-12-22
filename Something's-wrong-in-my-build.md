@@ -11,3 +11,10 @@ To debug a tricky problem with your build, try these tools in order:
   <Message Importance="High" Text="ItemOfInterest: @(ItemOfInterest)" />
 </Target>
 ```
+
+###Tools
+To get a clearer idea of what's going on in your build, check out [MSBuildStructuredLog](https://github.com/KirillOsenkov/MSBuildStructuredLog). MSBuildStructuredLog is a logger for MSBuild that records and visualizes a structured representation of executed targets, tasks, properties, and item values.
+
+![](https://github.com/KirillOsenkov/MSBuildStructuredLog/blob/master/docs/Screenshot1.png) 
+
+More debugging tools listed [here](https://github.com/KirillOsenkov/MSBuildStructuredLog/wiki/MSBuild-Resources#tools).
