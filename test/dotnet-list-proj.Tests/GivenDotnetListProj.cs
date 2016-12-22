@@ -163,10 +163,10 @@ Options:
         [Fact]
         public void WhenProjectReferencesArePresentInTheSolutionItListsThem()
         {
-            const string OutputText = @"Project reference(s)
+            string OutputText = $@"Project reference(s)
 --------------------
-App\App.csproj
-Lib\Lib.csproj";
+{Path.Combine("App", "App.csproj")}
+{Path.Combine("Lib", "Lib.csproj")}";
 
             var projectDirectory = TestAssets
                 .Get("TestAppWithSlnAndExistingCsprojReferences")

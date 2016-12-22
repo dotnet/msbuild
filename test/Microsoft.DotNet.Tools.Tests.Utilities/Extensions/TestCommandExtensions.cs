@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return subject;
         }
         
-        public static TCommand WithForwardingToConsole<TCommand>(this TCommand subject, Action<string> writeLine) where TCommand : TestCommand
+        public static TCommand WithForwardingToConsole<TCommand>(this TCommand subject) where TCommand : TestCommand
         {
             subject.WithOutputDataReceivedHandler(s => Console.Out.WriteLine(s));
 

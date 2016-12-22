@@ -326,7 +326,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                     continue;
                 }
 
-                foreach (var projectDirectory in directory.EnumerateDirectories())
+                foreach (var projectDirectory in
+                    Enumerable.Repeat(directory, 1).Union(directory.GetDirectories()))
                 {
                     // Create the path to the project.json file.
                     var projectFilePath = Path.Combine(projectDirectory.FullName, "project.json");

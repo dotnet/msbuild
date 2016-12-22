@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToSolution
 
         private void AddProject(SlnFile slnFile, string projectPath)
         {
-            var projectPathNormalized = PathUtility.GetPathWithBackSlashes(projectPath);
+            var projectPathNormalized = PathUtility.GetPathWithDirectorySeparator(projectPath);
 
             if (slnFile.Projects.Any((p) =>
                     string.Equals(p.FilePath, projectPathNormalized, StringComparison.OrdinalIgnoreCase)))

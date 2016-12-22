@@ -130,6 +130,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 project => "true",
                 project => project.GetProjectType() == ProjectType.Test);
 
+        private AddItemTransform<ProjectContext> AppConfigTransform =>
+            new AddItemTransform<ProjectContext>(
+                "None",
+                projectContext => "App.config",
+                projectContext => string.Empty,
+                projectContext => File.Exists(Path.Combine(projectContext.ProjectDirectory, "App.config")));
+
         private Func<CommonCompilerOptions, string, ProjectType, IEnumerable<ProjectItemElement>>CompileFilesTransformExecute =>
             (compilerOptions, projectDirectory, projectType) =>
                     CompileFilesTransform.Transform(GetCompileIncludeContext(compilerOptions, projectDirectory));
@@ -258,6 +265,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             var transformOutput = GenerateRuntimeConfigurationFilesTransform.Transform(
                 migrationRuleInputs.DefaultProjectContext.ProjectFile);
             _transformApplicator.Execute(transformOutput, propertyGroup, mergeExisting: true);
+
+            var appConfigTransformOutput = AppConfigTransform.Transform(migrationRuleInputs.DefaultProjectContext);
+            _transformApplicator.Execute(appConfigTransformOutput, itemGroup, mergeExisting: true);
         }
 
         private void PerformConfigurationPropertyAndItemMappings(

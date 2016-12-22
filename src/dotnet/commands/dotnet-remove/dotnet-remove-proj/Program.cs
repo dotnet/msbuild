@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.Tools.Remove.ProjectFromSolution
 
         private bool RemoveProject(SlnFile slnFile, string projectPath)
         {
-            var projectPathNormalized = PathUtility.GetPathWithBackSlashes(projectPath);
+            var projectPathNormalized = PathUtility.GetPathWithDirectorySeparator(projectPath);
 
             var projectsToRemove = slnFile.Projects.Where((p) =>
                     string.Equals(p.FilePath, projectPathNormalized, StringComparison.OrdinalIgnoreCase)).ToList();

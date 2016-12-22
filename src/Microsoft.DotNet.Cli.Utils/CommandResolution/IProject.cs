@@ -10,6 +10,8 @@ namespace Microsoft.DotNet.Cli.Utils
     {
         LockFile GetLockFile();
 
+        bool TryGetLockFile(out LockFile lockFile);
+
         IEnumerable<SingleProjectInfo> GetTools();
 
         string DepsJsonPath { get; }
