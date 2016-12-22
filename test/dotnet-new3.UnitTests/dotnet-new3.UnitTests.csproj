@@ -19,6 +19,6 @@
     <PackageReference Include="Microsoft.TemplateEngine.Mocks" Version="$(PackageVersion)" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\dotnet-new3\dotnet-new3.csproj" />    
+    <ProjectReference Include="..\..\src\dotnet-new3\dotnet-new3.csproj" />
   </ItemGroup>
 </Project>

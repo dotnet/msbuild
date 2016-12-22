@@ -25,7 +25,7 @@ namespace dotnet_new3
     {
         private const string CommandName = "new3";
         private static readonly string HostIdentifier = "dotnetcli";
-        private static readonly Version HostVersion = typeof(Program).GetTypeInfo().Assembly.GetName().Version;
+        private static readonly string HostVersion = typeof(Program).GetTypeInfo().Assembly.GetName().Version.ToString();
         private static DefaultTemplateEngineHost Host;
 
         public static IInstaller Installer { get; set; } = new Installer();

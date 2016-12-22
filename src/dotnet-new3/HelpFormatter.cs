@@ -24,7 +24,7 @@ namespace dotnet_new3
 
         public HelpFormatter(IEnumerable<T> items, int columnPadding, char? headerSeparator, bool blankLineBetweenRows)
         {
-            _items = items;
+            _items = items ?? Enumerable.Empty<T>();
             _columnPadding = columnPadding;
             _headerSeparator = headerSeparator;
             _blankLineBetweenRows = blankLineBetweenRows;
