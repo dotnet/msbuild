@@ -70,9 +70,10 @@ namespace Microsoft.NET.Build.Tasks
             string targetFrameworkMoniker,
             string packageId)
         {
-            // TODO add targetFrameworkMoniker to itemspec
-            string itemspec = (packageId != null ? string.Empty : $"{packageId}/")
-                + diagnosticCode;
+            string itemspec =
+                (string.IsNullOrEmpty(targetFrameworkMoniker) ? string.Empty : $"{targetFrameworkMoniker}/") +
+                (string.IsNullOrEmpty(packageId) ? string.Empty : $"{packageId}/") + 
+                diagnosticCode;
 
             var diagnostic = new TaskItem(itemspec, new Dictionary<string, string>
             {
