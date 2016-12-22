@@ -5,7 +5,7 @@ MSBuild can be successfully built on Windows, OS X 10.11, and Ubuntu 14.04. Newe
 # Windows #
 ##Build process##
 
-`RebuildWithLocalMSBuild.cmd`: This script uses a .NET core hosted MSBuild to target .NET Core and run the tests.
+`cibuild.cmd --target CoreCLR`: This script uses a .NET core hosted MSBuild to target .NET Core and run the tests.
 
 ##Debugging##
 
