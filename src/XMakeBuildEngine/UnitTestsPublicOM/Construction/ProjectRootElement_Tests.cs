@@ -1648,6 +1648,42 @@ true, true, true)]
         }
 
         [Fact]
+        public void ReloadThrowsForInMemoryProjectsWithoutAPath()
+        {
+            Action<ProjectRootElement, string> act = (p, c) =>
+            {
+                var exception =
+                    Assert.Throws<InvalidOperationException>(
+                        () =>
+                            p.Reload(throwIfUnsavedChanges: false));
+
+                Assert.Contains(@"Value not set:", exception.Message);
+            };
+
+            // reload does not mutate the project element
+            AssertReload(SimpleProject, ComplexProject, false, false, false, act);
+        }
+
+        [Fact]
+        public void ReloadFromAPathThrowsOnMissingPath()
+        {
+            Action<ProjectRootElement, string> act = (p, c) =>
+            {
+                var fullPath = Path.GetFullPath("foo");
+
+                var exception =
+                    Assert.Throws<InvalidOperationException>(
+                        () =>
+                            p.ReloadFrom(fullPath, throwIfUnsavedChanges: false));
+
+                Assert.Contains(@"File to reload from does not exist:", exception.Message);
+            };
+
+            // reload does not mutate the project element
+            AssertReload(SimpleProject, ComplexProject, false, false, false, act);
+        }
+
+        [Fact]
         public void ReloadThrowsOnInvalidMsBuildSyntax()
         {
             var unknownAttribute =
