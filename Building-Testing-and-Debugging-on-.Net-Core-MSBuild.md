@@ -23,12 +23,6 @@ For debugging tests, use the `/d` switch for CoreRun.exe. This prompts the core 
 * [libunwind](http://www.nongnu.org/libunwind/index.html) is required by .NET Core. Install it using `sudo apt-get install libunwind8`
 
 ##Build process##
-Clone the xplat branch:
-```
-git clone git@github.com:Microsoft/msbuild.git --branch xplat 
-```
-
-Navigate to the clone's working directory and run your chosen build script:
 
 Targeting .Net Core: `./cibuild.sh --target CoreCLR`
 
