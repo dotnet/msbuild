@@ -13,6 +13,10 @@ function Log ($a) {
     Write-Host $a.ToString()
 }
 
+function Test-AssemblyStrongNamed($assemblyPath) {
+    [System.Reflection.Assembly]::ReflectionOnlyLoadFrom($assemblyPath).GetName().GetPublicKeyToken().Count -gt 0
+}
+
 class BuildInstance {
     static $languages = @("cs", "de", "en", "es", "fr", "it", "ja", "ko", "pl", "pt-BR", "ru", "tr", "zh-Hans", "zh-Hant")
 
@@ -322,14 +326,20 @@ class FileChecker : Checker{
 
 class RealSignedChecker : Checker {
     [Diagnostic[]] CheckIsSigned([String] $assembly) {
+        if (-Not (Test-Path $assembly)) {
+            return @()
+        }
+
         $signature = Get-AuthenticodeSignature $assembly
 
-        $looksSigned = $signature.Status -eq [System.Management.Automation.SignatureStatus]::Valid
-        $looksSigned = $looksSigned -and ($signature.SignatureType -eq [System.Management.Automation.SignatureType]::Authenticode)
-        $looksSigned = $looksSigned -and ($signature.SignerCertificate.Issuer -match ".*Microsoft.*Redmond.*")
+        $looksRealSigned = $signature.Status -eq [System.Management.Automation.SignatureStatus]::Valid
+        $looksRealSigned = $looksRealSigned -and ($signature.SignatureType -eq [System.Management.Automation.SignatureType]::Authenticode)
+        $looksRealSigned = $looksRealSigned -and ($signature.SignerCertificate.Issuer -match ".*Microsoft.*Redmond.*")
+        $looksRealSigned = $looksRealSigned -and (-not ($signature.SignerCertificate.Issuer -match "Test"))
 
-        if (-Not $looksSigned) {
-            return $this.NewDiagnostic("Assembly not signed: $assembly")
+        if (-Not $looksRealSigned) {
+            $strongNamed = Test-AssemblyStrongNamed($assembly)
+            return $this.NewDiagnostic("Assembly not real signed: $assembly.`nStrong named: $strongNamed; CertificateIssuer: [$($signature.SignerCertificate.Issuer)]")
         }
 
         return @()
