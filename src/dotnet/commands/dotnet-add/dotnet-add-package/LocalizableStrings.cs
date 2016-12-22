@@ -11,6 +11,8 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
 
         public const string AppHelpText = "Package references to add";
 
+        public const string SpecifyExactlyOnePackageReference = "Please specify one package reference to add.";
+
         public const string CmdFrameworkDescription = "Add reference only when targetting a specific framework";
 
         public const string CmdNoRestoreDescription = "Add reference without performing restore preview and compatibility check.";
@@ -30,6 +32,5 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
         public const string CmdSource = "SOURCE";
 
         public const string CmdPackageDirectory = "PACKAGE_DIRECTORY";
-
     }
 }

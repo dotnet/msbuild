@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
 
         public static DotNetSubCommandBase Create()
         {
-            var command = new AddPackageReferenceCommand()
+            var command = new AddPackageReferenceCommand
             {
                 Name = "package",
                 FullName = LocalizableStrings.AppFullName,
@@ -69,29 +69,38 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
 
         public override int Run(string fileOrDirectory)
         {
-            var projects = new ProjectCollection();
-            var msbuildProj = MsbuildProject.FromFileOrDirectory(projects, fileOrDirectory);
-
-            if (RemainingArguments.Count == 0)
+            if (RemainingArguments.Count != 1)
             {
-                throw new GracefulException(CommonLocalizableStrings.SpecifyAtLeastOneReferenceToAdd);
+                throw new GracefulException(LocalizableStrings.SpecifyExactlyOnePackageReference);
+            }
+
+            var projectFilePath = string.Empty;
+
+            if (!File.Exists(fileOrDirectory))
+            {
+                projectFilePath = MsbuildProject.GetProjectFileFromDirectory(fileOrDirectory).FullName;
+            }
+            else
+            {
+                projectFilePath = fileOrDirectory;
             }
 
             var tempDgFilePath = string.Empty;
-            if(!_noRestoreOption.HasValue())
+
+            if (!_noRestoreOption.HasValue())
             {
                 // Create a Dependency Graph file for the project
-                tempDgFilePath = CreateTemporaryFile(".dg");
-                GetProjectDependencyGraph(msbuildProj.ProjectRootElement.FullPath, tempDgFilePath);
+                tempDgFilePath = Path.GetTempFileName();
+                GetProjectDependencyGraph(projectFilePath, tempDgFilePath);
             }
 
-            var result = NuGetCommand.Run(TransformArgs(tempDgFilePath, msbuildProj.ProjectRootElement.FullPath));
+            var result = NuGetCommand.Run(TransformArgs(RemainingArguments.First(), tempDgFilePath, projectFilePath));
             DisposeTemporaryFile(tempDgFilePath);
+
             return result;
         }
 
-        private void GetProjectDependencyGraph(string projectFilePath,
-            string dgFilePath)
+        private void GetProjectDependencyGraph(string projectFilePath, string dgFilePath)
         {
             var args = new List<string>();
 
@@ -102,7 +111,7 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
             args.Add("/t:GenerateRestoreGraphFile");
 
             // Pass Dependency Graph file output path
-            args.Add(string.Format("/p:RestoreGraphOutputPath={0}{1}{2}", '"', dgFilePath, '"'));
+            args.Add($"/p:RestoreGraphOutputPath=\"{dgFilePath}\"");
 
             var result = new MSBuildForwardingApp(args).Execute();
 
@@ -110,14 +119,6 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
             {
                 throw new GracefulException(string.Format(LocalizableStrings.CmdDGFileException, projectFilePath));
             }
-        }
-
-        private string CreateTemporaryFile(string extension)
-        {
-            var tempDirectory = Path.GetTempPath();
-            var tempFile = Path.Combine(tempDirectory, Guid.NewGuid().ToString() + extension);
-            File.Create(tempFile).Dispose();
-            return tempFile;
         }
 
         private void DisposeTemporaryFile(string filePath)
@@ -128,37 +129,38 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
             }
         }
 
-        private string[] TransformArgs(string tempDgFilePath, string projectFilePath)
+        private string[] TransformArgs(string packageId, string tempDgFilePath, string projectFilePath)
         {
             var args = new List<string>(){
                 "package",
                 "add",
                 "--package",
-                "Newtonsoft.Json",
+                packageId,
                 "--project",
                 projectFilePath
             };
-            if(_versionOption.HasValue())
+
+            if (_versionOption.HasValue())
             {
                 args.Add("--version");
                 args.Add(_versionOption.Value());
             }
-            if(_sourceOption.HasValue())
+            if (_sourceOption.HasValue())
             {
                 args.Add("--source");
                 args.Add(_sourceOption.Value());
             }
-            if(_frameworkOption.HasValue())
+            if (_frameworkOption.HasValue())
             {
                 args.Add("--framework");
                 args.Add(_frameworkOption.Value());
             }
-            if(_packageDirectoryOption.HasValue())
+            if (_packageDirectoryOption.HasValue())
             {
                 args.Add("--package-directory");
                 args.Add(_packageDirectoryOption.Value());
             }
-            if(_noRestoreOption.HasValue())
+            if (_noRestoreOption.HasValue())
             {
                 args.Add("--no-restore");
             }
