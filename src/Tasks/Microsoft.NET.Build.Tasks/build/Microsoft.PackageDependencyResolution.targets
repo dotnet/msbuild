@@ -21,10 +21,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- General Properties -->
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-
-    <!-- Flag PackageDependency Tasks -->
-    <EnableResolvePackageDependencies
-      Condition="'$(EnableResolvePackageDependencies)' == ''">true</EnableResolvePackageDependencies>
   </PropertyGroup>
 
   <!-- Project Assets File -->
@@ -112,7 +108,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
                      ResolvePackageDependenciesForBuild
 
-    Populate items for build...
+    Populate items for build. This is triggered before target 
+    "AssignProjectConfiguration" to ensure ProjectReference items
+    are populated before ResolveProjectReferences is run.
     ============================================================
     -->
   <PropertyGroup>
@@ -120,10 +118,12 @@ Copyright (c) .NET Foundation. All rights reserved.
       ResolveLockFileReferences;
       ResolveLockFileAnalyzers;
       ResolveLockFileCopyLocalProjectDeps;
+      IncludeTransitiveProjectReferences;
     </ResolvePackageDependenciesForBuildDependsOn>
   </PropertyGroup>
   <Target Name="ResolvePackageDependenciesForBuild"
-          Condition="'$(ResolvePackageDependenciesForBuild)' == 'true' and '$(EnableResolvePackageDependencies)' == 'true' and Exists('$(ProjectAssetsFile)')"
+          Condition="'$(ResolvePackageDependenciesForBuild)' == 'true' and Exists('$(ProjectAssetsFile)')"
+          BeforeTargets="AssignProjectConfiguration"
           DependsOnTargets="$(ResolvePackageDependenciesForBuildDependsOn)" />
 
   <!--
@@ -235,18 +235,40 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     ============================================================
+    HELPERS: Get Package and File Dependencies matching active TFM and RID
+    ============================================================
+    -->
+
+  <Target Name="_ComputeActiveTFMPackageDependencies"
+          DependsOnTargets="RunResolvePackageDependencies"
+          Returns="_ActiveTFMPackageDependencies">
+    <ItemGroup>
+      <_ActiveTFMPackageDependencies Include="@(PackageDependencies->WithMetadataValue('ParentTarget', '$(_NugetTargetMonikerAndRID)'))" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="_ComputeActiveTFMFileDependencies"
+          DependsOnTargets="RunResolvePackageDependencies"
+          Returns="_ActiveTFMFileDependencies">
+    <ItemGroup>
+      <_ActiveTFMFileDependencies Include="@(FileDependencies->WithMetadataValue('ParentTarget', '$(_NugetTargetMonikerAndRID)'))" />
+    </ItemGroup>
+  </Target>
+
+  <!--
+    ============================================================
     Reference Targets: For populating References based on lock file
     - _ComputeLockFileReferences
+    - _ComputeLockFileFrameworks
     - ResolveLockFileReferences
     ============================================================
     -->
 
   <Target Name="_ComputeLockFileReferences"
-          DependsOnTargets="RunResolvePackageDependencies"
+          DependsOnTargets="_ComputeActiveTFMFileDependencies"
           Returns="ResolvedCompileFileDefinitions">
     <ItemGroup>
-      <TFMFileItems Include="@(FileDependencies->WithMetadataValue('ParentTarget', '$(_NugetTargetMonikerAndRID)'))" />
-      <_CompileFileItems Include="@(TFMFileItems->WithMetadataValue('FileGroup', 'CompileTimeAssembly'))" />
+      <_CompileFileItems Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'CompileTimeAssembly'))" />
 
       <!-- Get corresponding file definitions -->
       <__CompileFileDefinitions Include="@(FileDefinitions)" Exclude="@(_CompileFileItems)" />
@@ -261,14 +283,64 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
-  <Target Name="ResolveLockFileReferences"
-          DependsOnTargets="_ComputeLockFileReferences">
+  <Target Name="_ComputeLockFileFrameworks"
+          Condition="'$(DisableLockFileFrameworks)' != 'true'"
+          DependsOnTargets="_ComputeActiveTFMFileDependencies"
+          Returns="ResolvedFrameworkAssemblies">
     <ItemGroup>
-      <!-- Add the references we computed -->
-      <Reference Include="@(ResolvedCompileFileDefinitions)" />
+      <_FrameworkAssemblies Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'FrameworkAssembly'))" />
+
+      <ResolvedFrameworkAssemblies Include="%(_FrameworkAssemblies.FrameworkAssembly)">
+        <Private>false</Private>
+        <NuGetIsFrameworkReference>true</NuGetIsFrameworkReference>
+        <NuGetSourceType>Package</NuGetSourceType>
+      </ResolvedFrameworkAssemblies>
+
     </ItemGroup>
   </Target>
 
+  <Target Name="ResolveLockFileReferences"
+          DependsOnTargets="_ComputeLockFileReferences;_ComputeLockFileFrameworks">
+    <ItemGroup>
+      <!-- Add the references we computed -->
+      <Reference Include="@(ResolvedCompileFileDefinitions)" />
+      <Reference Include="@(ResolvedFrameworkAssemblies)" />
+    </ItemGroup>
+  </Target>
+
+  <!--
+    ============================================================
+    ProjectReference Targets: Include transitive project references before 
+                              ResolveProjectReferences is called
+    - _ComputeTransitiveProjectReferences
+    - IncludeTransitiveProjectReferences
+    ============================================================
+    -->
+
+  <Target Name="_ComputeTransitiveProjectReferences"
+          DependsOnTargets="_ComputeActiveTFMPackageDependencies"
+          Returns="_TransitiveProjectReferences">
+    <ItemGroup>
+      <_TransitiveProjectDependencies Include="@(_ActiveTFMPackageDependencies->WithMetadataValue('TransitiveProjectReference', 'true'))" />
+
+      <!-- Get corresponding package definitions -->
+      <__TransitiveProjectDefinitions Include="@(PackageDefinitions)" Exclude="@(_TransitiveProjectDependencies)" />
+      <_TransitiveProjectDefinitions Include="@(PackageDefinitions)" Exclude="@(__TransitiveProjectDefinitions)" />
+      
+      <_TransitiveProjectReferences Include="%(_TransitiveProjectDefinitions.Path)">
+        <ResolvedPath>%(_TransitiveProjectDefinitions.ResolvedPath)</ResolvedPath>
+      </_TransitiveProjectReferences>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="IncludeTransitiveProjectReferences"
+          DependsOnTargets="_ComputeTransitiveProjectReferences" >
+    <ItemGroup>
+      <!-- Add the references we computed -->
+      <ProjectReference Include="@(_TransitiveProjectReferences)" />
+    </ItemGroup>
+  </Target>
+  
   <!--
     ============================================================
     Analyzer Targets: For populating Analyzers based on lock file
@@ -305,25 +377,23 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
 
   <Target Name="_ComputeLockFileCopyLocal"
-        DependsOnTargets="RunResolvePackageDependencies;RunProduceContentAssets"
+        DependsOnTargets="_ComputeActiveTFMFileDependencies;RunProduceContentAssets"
         Returns="NativeCopyLocalItems;RuntimeCopyLocalItems;ResourceCopyLocalItems;AllCopyLocalItems">
     <ItemGroup>
-      <TFMFileItems Include="@(FileDependencies->WithMetadataValue('ParentTarget', '$(_NugetTargetMonikerAndRID)'))" />
-
       <!--NativeLibrary-->
-      <_NativeFileItems Include="@(TFMFileItems->WithMetadataValue('FileGroup', 'NativeLibrary'))" />
+      <_NativeFileItems Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'NativeLibrary'))" />
       <__NativeCopyLocalItems Include="@(FileDefinitions)" Exclude="@(_NativeFileItems)" />
       <_NativeCopyLocalItems Include="@(FileDefinitions)" Exclude="@(__NativeCopyLocalItems)" />
       <NativeCopyLocalItems Include="%(_NativeCopyLocalItems.ResolvedPath)" />
 
       <!--RuntimeAssembly-->
-      <_RuntimeFileItems Include="@(TFMFileItems->WithMetadataValue('FileGroup', 'RuntimeAssembly'))" />
+      <_RuntimeFileItems Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'RuntimeAssembly'))" />
       <__RuntimeCopyLocalItems Include="@(FileDefinitions)" Exclude="@(_RuntimeFileItems)" />
       <_RuntimeCopyLocalItems Include="@(FileDefinitions)" Exclude="@(__RuntimeCopyLocalItems)" />
       <RuntimeCopyLocalItems Include="%(_RuntimeCopyLocalItems.ResolvedPath)" />
 
       <!--ResourceAssembly-->
-      <_ResourceFileItems Include="@(TFMFileItems->WithMetadataValue('FileGroup', 'ResourceAssembly'))" />
+      <_ResourceFileItems Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'ResourceAssembly'))" />
       <__ResourceCopyLocalItems Include="@(FileDefinitions)" Exclude="@(_ResourceFileItems)" />
       <_ResourceCopyLocalItems Include="@(FileDefinitions)" Exclude="@(__ResourceCopyLocalItems)" />
       <ResourceCopyLocalItems Include="%(_ResourceCopyLocalItems.ResolvedPath)" />

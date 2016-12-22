@@ -24,7 +24,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!--
     Ensure VS sees two default configurations: Debug|AnyCPU and Release|AnyCPU
 
-    This is temproary until we have designed and implemented a new configuration management scheme,
+    This is temporary until we have designed and implemented a new configuration management scheme,
     which is tracked by https://github.com/dotnet/sdk/issues/350. In the meantime, one consequence of
     defining these defaults here with the old inference-from-usage scheme here is that the user cannot
     remove or rename them.
@@ -68,6 +68,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Exclude GAC, registry, output directory from search paths. -->
     <AssemblySearchPaths>{CandidateAssemblyFiles};{HintPathFromItem};{TargetFrameworkDirectory};{RawFileName}</AssemblySearchPaths>
     <DesignTimeAssemblySearchPaths>$(AssemblySearchPaths)</DesignTimeAssemblySearchPaths>
+
+    <AllowUnsafeBlocks Condition="'$(AllowUnsafeBlocks)'==''">false</AllowUnsafeBlocks>
+    <TreatWarningsAsErrors Condition="'$(TreatWarningsAsErrors)'==''">false</TreatWarningsAsErrors>
+    <Prefer32Bit Condition="'$(Prefer32Bit)'==''">false</Prefer32Bit>
+    <SignAssembly Condition="'$(SignAssembly)'==''">false</SignAssembly>
+    <DelaySign Condition="'$(DelaySign)'==''">false</DelaySign>
+    <GeneratePackageOnBuild Condition="'$(GeneratePackageOnBuild)'==''">false</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance Condition="'$(PackageRequireLicenseAcceptance)'==''">false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <!-- Temporary workarounds -->

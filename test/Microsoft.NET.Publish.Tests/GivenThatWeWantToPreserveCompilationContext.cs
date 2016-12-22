@@ -25,17 +25,7 @@ namespace Microsoft.NET.Publish.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("CompilationContext", "PreserveCompilationContext")
-                .WithSource()
-                .WithProjectChanges(project =>
-                {
-                    //  Workaround for https://github.com/dotnet/sdk/issues/367
-
-                    var ns = project.Root.Name.Namespace;
-                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").FirstOrDefault();
-                    propertyGroup.Should().NotBeNull();
-
-                    propertyGroup.Add(new XElement(ns + "DisableImplicitFrameworkReferences", "true"));
-                });
+                .WithSource();
 
             testAsset.Restore("TestApp");
             testAsset.Restore("TestLibrary");
@@ -52,7 +42,12 @@ namespace Microsoft.NET.Publish.Tests
                 }
 
                 publishCommand
-                    .Execute($"/p:TargetFramework={targetFramework}")
+                    .Execute(
+                        $"/p:TargetFramework={targetFramework}",
+
+                        //  Additional properties to workaround https://github.com/Microsoft/msbuild/issues/1345
+                        "/p:DisableImplicitFrameworkReferences=true",
+                        "/p:DisableLockFileFrameworks=true")
                     .Should()
                     .Pass();
 

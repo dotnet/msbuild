@@ -27,6 +27,7 @@ namespace Microsoft.NET.Build.Tasks
         // Tags
         public const string Analyzer = "Analyzer";
         public const string AnalyzerLanguage = "AnalyzerLanguage";
+        public const string TransitiveProjectReference = "TransitiveProjectReference";
 
         // Diagnostics
         public const string DiagnosticCode = "DiagnosticCode";
