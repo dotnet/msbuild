@@ -88,9 +88,7 @@ namespace Microsoft.NET.Build.Tasks
                 return string.IsNullOrEmpty(fileGroup) || !fileGroup.Equals(CompileTimeAssemblyMetadata);
             });
 
-            AddDependenciesToTheWorld(DiagnosticsMap, InputDiagnosticMessages, (diagnostic) =>
-                diagnostic.GetMetadata(MetadataKeys.ParentPackage) == null ||
-                diagnostic.GetMetadata(MetadataKeys.ParentTarget) == null);
+            AddDependenciesToTheWorld(DiagnosticsMap, InputDiagnosticMessages);
 
             // prepare output collection: add corresponding metadata to ITaskItem based in item type
             DependenciesDesignTime = DependenciesWorld.Select(itemKvp =>
@@ -182,12 +180,6 @@ namespace Microsoft.NET.Build.Tasks
         {
             foreach (var diagnostic in InputDiagnosticMessages)
             {
-                if (diagnostic.GetMetadata(MetadataKeys.ParentPackage) == null ||
-                    diagnostic.GetMetadata(MetadataKeys.ParentTarget) == null)
-                {
-                    continue;
-                }
-
                 // TODO generate unique ID for each diagnostic as target/package/code may not be unique enough
                 var metadata = new DiagnosticMetadata(diagnostic);
                 DiagnosticsMap[diagnostic.ItemSpec] = metadata;
@@ -223,14 +215,14 @@ namespace Microsoft.NET.Build.Tasks
                     continue;
                 }
 
-                var parentTargetId = dependency.GetMetadata(MetadataKeys.ParentTarget);
+                var parentTargetId = dependency.GetMetadata(MetadataKeys.ParentTarget) ?? string.Empty;
                 if (parentTargetId.Contains("/") || !Targets.Keys.Contains(parentTargetId))
                 {
                     // skip "target/rid"s and only consume actual targets and ignore non-existent parent targets
                     continue;
                 }
 
-                var parentPackageId = dependency.GetMetadata(MetadataKeys.ParentPackage);
+                var parentPackageId = dependency.GetMetadata(MetadataKeys.ParentPackage) ?? string.Empty;
                 if (!string.IsNullOrEmpty(parentPackageId) && !Packages.Keys.Contains(parentPackageId))
                 {
                     // ignore non-existent parent packages
