@@ -5,8 +5,8 @@
       <group id="src/dotnet/commands/dotnet-pack/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET Core NuGet Package Packer</source>
-        <target state="needs-review-translation">zabalit</target>
-        <note></note>
+        <target state="translated">Nástroj .NET Core pro balení balíčku NuGet</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>pack for msbuild</source>
@@ -20,18 +20,18 @@
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
         <source>Directory in which to place built packages.</source>
-        <target state="needs-review-translation">Adresář pro ukládání výstupů</target>
-        <note></note>
+        <target state="translated">Adresář, do kterého se umisťují sestavené balíčky.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
         <source>Skip building the project prior to packing. By default, the project will be built.</source>
-        <target state="needs-review-translation">Nesestavujte projekt, dokud ho nezabalíte.</target>
-        <note></note>
+        <target state="translated">Přeskočte sestavení projektu, dokud ho nezabalíte. Projekt bude sestaven automaticky.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSymbolsDescription">
         <source>Include packages with symbols in addition to regular packages in output directory.</source>
-        <target state="needs-review-translation">Zahrnout do výstupní složky soubory PDB a knihovny DLL</target>
-        <note></note>
+        <target state="translated">Zahrne do výstupního adresáře kromě běžných balíčků i balíčky se symboly.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSourceDescription">
         <source>Include PDBs and source files. Source files go into the src folder in the resulting nuget package</source>
@@ -45,8 +45,8 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="needs-review-translation">Konfigurace použitá k sestavení</target>
-        <note></note>
+        <target state="translated">Konfigurace použitá k sestavení projektu. Výchozí možnost u většiny projektů je „Debug“.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffix">
         <source>VERSION_SUFFIX</source>
@@ -55,13 +55,13 @@
       </trans-unit>
       <trans-unit id="CmdVersionSuffixDescription">
         <source>Defines the value for the $(VersionSuffix) property in the project.</source>
-        <target state="needs-review-translation">Definuje, čím nahradit „*“ v poli verze v souboru project.json.</target>
-        <note></note>
+        <target state="translated">Definuje hodnotu vlastnosti $(VersionSuffix) v projektu.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdServiceableDescription">
         <source>Set the serviceable flag in the package. For more information, please see https://aka.ms/nupkgservicing.</source>
-        <target state="needs-review-translation">Nastavit v balíčku příznak obsluhovatelnosti</target>
-        <note></note>
+        <target state="translated">Nastaví v balíčku příznak obsluhovatelnosti. Další informace najdete na adrese https://aka.ms/nupkgservicing.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdArgumentProject">
         <source>PROJECT</source>

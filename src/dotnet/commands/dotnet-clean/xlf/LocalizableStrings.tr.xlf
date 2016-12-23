@@ -30,8 +30,8 @@
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
         <source>Directory in which the build outputs have been placed.</source>
-        <target state="needs-review-translation">Derleme çıktılarının yerleştirildiği dizin</target>
-        <note></note>
+        <target state="translated">Derleme çıkışlarının yerleştirildiği dizin.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
@@ -40,8 +40,8 @@
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Clean a specific framework.</source>
-        <target state="needs-review-translation">Belirli bir çerçeveyi temizler</target>
-        <note></note>
+        <target state="translated">Belirli bir çerçeveyi temizler.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfiguration">
         <source>CONFIGURATION</source>
@@ -50,8 +50,8 @@
       </trans-unit>
       <trans-unit id="CmdConfigurationDescription">
         <source>Clean a specific configuration.</source>
-        <target state="needs-review-translation">Belirli bir yapılandırmayı temizler</target>
-        <note></note>
+        <target state="translated">Belirli bir yapılandırmayı temizler.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

@@ -70,43 +70,43 @@
       </trans-unit>
       <trans-unit id="NewDefinition">
         <source>Initialize .NET projects.</source>
-        <target state="needs-review-translation">Инициализация основного проекта .NET</target>
-        <note></note>
+        <target state="translated">Инициализация проектов .NET.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RestoreDefinition">
         <source>Restore dependencies specified in the .NET project.</source>
-        <target state="needs-review-translation">Восстановить зависимости, указанные в проекте .NET</target>
-        <note></note>
+        <target state="translated">Восстановление зависимостей, указанных в проектах .NET.</target>
+        <note />
       </trans-unit>
       <trans-unit id="BuildDefinition">
         <source>Builds a .NET project.</source>
-        <target state="needs-review-translation">Сборка проекта .NET</target>
-        <note></note>
+        <target state="translated">Сборка проекта .NET.</target>
+        <note />
       </trans-unit>
       <trans-unit id="PublishDefinition">
         <source>Publishes a .NET project for deployment (including the runtime).</source>
-        <target state="needs-review-translation">Публикация проекта .NET для развертывания (включая среду выполнения)</target>
-        <note></note>
+        <target state="translated">Публикация проекта .NET для развертывания (включая среду выполнения).</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunDefinition">
         <source>Compiles and immediately executes a .NET project.</source>
-        <target state="needs-review-translation">Компиляция и немедленное выполнение проекта .NET</target>
-        <note></note>
+        <target state="translated">Компиляция и немедленное выполнение проекта .NET.</target>
+        <note />
       </trans-unit>
       <trans-unit id="TestDefinition">
         <source>Runs unit tests using the test runner specified in the project.</source>
-        <target state="needs-review-translation">Выполнение тестов с помощью средства выполнения тестов, указанного в проекте</target>
-        <note></note>
+        <target state="translated">Выполнение тестов с помощью средства выполнения тестов, указанного в проекте.</target>
+        <note />
       </trans-unit>
       <trans-unit id="PackDefinition">
         <source>Creates a NuGet package.</source>
-        <target state="needs-review-translation">Создание пакета NuGet</target>
-        <note></note>
+        <target state="translated">Создание пакета NuGet.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrateDefinition">
         <source>Migrates a project.json based project to a msbuild based project.</source>
-        <target state="needs-review-translation">Миграция проекта на основе project.json в проект на основе msbuild</target>
-        <note></note>
+        <target state="translated">Миграция проекта на основе project.json в проект на основе msbuild.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectModificationCommands">
         <source>Project modification commands</source>
@@ -115,13 +115,13 @@
       </trans-unit>
       <trans-unit id="AddDefinition">
         <source>Add items to the project.</source>
-        <target state="needs-review-translation">Добавить элементы в проект</target>
-        <note></note>
+        <target state="translated">Добавление элементов в проект.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RemoveDefinition">
         <source>Remove items from the project.</source>
-        <target state="needs-review-translation">Удалить элементы из проекта</target>
-        <note></note>
+        <target state="translated">Удаление элементов из проекта.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AdvancedCommands">
         <source>Advanced Commands</source>
@@ -130,28 +130,28 @@
       </trans-unit>
       <trans-unit id="NugetDefinition">
         <source>Provides additional NuGet commands.</source>
-        <target state="needs-review-translation">Предоставление дополнительных команд NuGet</target>
-        <note></note>
+        <target state="translated">Предоставление дополнительных команд NuGet.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MsBuildDefinition">
         <source>Runs Microsoft Build Engine (MSBuild).</source>
-        <target state="needs-review-translation">Выполнение сборки msbuild проекта и всех его зависимостей</target>
-        <note></note>
+        <target state="translated">Запуск Microsoft Build Engine (MSBuild).</target>
+        <note />
       </trans-unit>
       <trans-unit id="VsTestDefinition">
         <source>Runs Microsoft Test Execution Command Line Tool.</source>
-        <target state="needs-review-translation">Выполнение тестов из указанных файлов</target>
-        <note></note>
+        <target state="translated">Запуск программы командной строки Майкрософт для выполнения тестов.</target>
+        <note />
       </trans-unit>
       <trans-unit id="DiagnosticsDefinition">
         <source>Enable diagnostic output</source>
-        <target state="new">Enable diagnostic output</target>
-        <note></note>
+        <target state="translated">Включить диагностические выходные данные.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CleanDefinition">
         <source>Clean build output(s).</source>
-        <target state="new">Clean build output(s).</target>
-        <note></note>
+        <target state="translated">Очистка выходных данных сборки.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

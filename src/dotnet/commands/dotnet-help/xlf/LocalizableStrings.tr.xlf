@@ -70,43 +70,43 @@
       </trans-unit>
       <trans-unit id="NewDefinition">
         <source>Initialize .NET projects.</source>
-        <target state="needs-review-translation">Temel bir .NET projesi başlatır</target>
-        <note></note>
+        <target state="translated">.NET projelerini başlatır.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RestoreDefinition">
         <source>Restore dependencies specified in the .NET project.</source>
-        <target state="needs-review-translation">.NET projesinde belirtilen bağımlılıkları geri yükler</target>
-        <note></note>
+        <target state="translated">.NET projesinde belirtilen bağımlılıkları geri yükler.</target>
+        <note />
       </trans-unit>
       <trans-unit id="BuildDefinition">
         <source>Builds a .NET project.</source>
-        <target state="needs-review-translation">.NET projesi derler</target>
-        <note></note>
+        <target state="translated">.NET projesi derler.</target>
+        <note />
       </trans-unit>
       <trans-unit id="PublishDefinition">
         <source>Publishes a .NET project for deployment (including the runtime).</source>
-        <target state="needs-review-translation">Dağıtım için bir .NET projesi yayımlar (çalışma zamanı dahil)</target>
-        <note></note>
+        <target state="translated">Dağıtım için bir .NET projesi yayımlar (çalışma zamanı dahil).</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunDefinition">
         <source>Compiles and immediately executes a .NET project.</source>
-        <target state="needs-review-translation">Bir .NET projesini derler ve hemen yürütür</target>
-        <note></note>
+        <target state="translated">Bir .NET projesini derler ve hemen çalıştırır.</target>
+        <note />
       </trans-unit>
       <trans-unit id="TestDefinition">
         <source>Runs unit tests using the test runner specified in the project.</source>
-        <target state="needs-review-translation">Projede belirtilen test çalıştırıcısını kullanarak birim testleri çalıştırır</target>
-        <note></note>
+        <target state="translated">Projede belirtilen test çalıştırıcısını kullanarak birim testleri çalıştırır.</target>
+        <note />
       </trans-unit>
       <trans-unit id="PackDefinition">
         <source>Creates a NuGet package.</source>
-        <target state="needs-review-translation">NuGet paketi oluşturur</target>
-        <note></note>
+        <target state="translated">NuGet paketi oluşturur.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrateDefinition">
         <source>Migrates a project.json based project to a msbuild based project.</source>
-        <target state="needs-review-translation">project.json tabanlı bir projeyi msbuild tabanlı bir projeye geçirir</target>
-        <note></note>
+        <target state="translated">project.json tabanlı bir projeyi msbuild tabanlı bir projeye geçirir.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectModificationCommands">
         <source>Project modification commands</source>
@@ -115,13 +115,13 @@
       </trans-unit>
       <trans-unit id="AddDefinition">
         <source>Add items to the project.</source>
-        <target state="needs-review-translation">Projeye öğe ekler</target>
-        <note></note>
+        <target state="translated">Projeye öğe ekler.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RemoveDefinition">
         <source>Remove items from the project.</source>
-        <target state="needs-review-translation">Projeden öğeleri kaldırır</target>
-        <note></note>
+        <target state="translated">Projeden öğeleri kaldırır.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AdvancedCommands">
         <source>Advanced Commands</source>
@@ -130,28 +130,28 @@
       </trans-unit>
       <trans-unit id="NugetDefinition">
         <source>Provides additional NuGet commands.</source>
-        <target state="needs-review-translation">Ek NuGet komutları sağlar</target>
-        <note></note>
+        <target state="translated">Ek NuGet komutları sağlar.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MsBuildDefinition">
         <source>Runs Microsoft Build Engine (MSBuild).</source>
-        <target state="needs-review-translation">Bir projeyi ve tüm bağımlılıklarını msbuild ile derler</target>
-        <note></note>
+        <target state="translated">Microsoft Build Engine’i (MSBuild) çalıştırır.</target>
+        <note />
       </trans-unit>
       <trans-unit id="VsTestDefinition">
         <source>Runs Microsoft Test Execution Command Line Tool.</source>
-        <target state="needs-review-translation">Belirtilen dosyalardan testleri çalıştırır</target>
-        <note></note>
+        <target state="translated">Microsoft Test Çalıştırması Komut Satırı Aracı’nı çalıştırır.</target>
+        <note />
       </trans-unit>
       <trans-unit id="DiagnosticsDefinition">
         <source>Enable diagnostic output</source>
-        <target state="new">Enable diagnostic output</target>
-        <note></note>
+        <target state="translated">Tanılama çıkışını etkinleştir</target>
+        <note />
       </trans-unit>
       <trans-unit id="CleanDefinition">
         <source>Clean build output(s).</source>
-        <target state="new">Clean build output(s).</target>
-        <note></note>
+        <target state="translated">Derleme çıkışlarını temizler.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

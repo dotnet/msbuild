@@ -5,8 +5,8 @@
       <group id="src/dotnet/commands/dotnet-restore/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET dependency restorer</source>
-        <target state="needs-review-translation">restauração</target>
-        <note></note>
+        <target state="translated">Restaurador de dependência do .NET</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>restore for msbuild</source>
@@ -15,8 +15,8 @@
       </trans-unit>
       <trans-unit id="CmdArgument">
         <source>PROJECT</source>
-        <target state="needs-review-translation">raiz</target>
-        <note></note>
+        <target state="translated">PROJETO</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdArgumentDescription">
         <source>Optional path to a project file or MSBuild arguments.</source>
@@ -25,8 +25,8 @@
       </trans-unit>
       <trans-unit id="CmdSourceOption">
         <source>SOURCE</source>
-        <target state="needs-review-translation">origem</target>
-        <note></note>
+        <target state="translated">ORIGEM</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSourceOptionDescription">
         <source>Specifies a NuGet package source to use during the restore.</source>
@@ -35,8 +35,8 @@
       </trans-unit>
       <trans-unit id="CmdPackagesOption">
         <source>PACKAGES_DIRECTORY</source>
-        <target state="needs-review-translation">packagesDirectory</target>
-        <note></note>
+        <target state="translated">DIRETÓRIO_PACOTES</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOptionDescription">
         <source>Directory to install packages in.</source>
@@ -50,8 +50,8 @@
       </trans-unit>
       <trans-unit id="CmdConfigFileOption">
         <source>FILE</source>
-        <target state="needs-review-translation">arquivo</target>
-        <note></note>
+        <target state="translated">ARQUIVO</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfigFileOptionDescription">
         <source>The NuGet configuration file to use.</source>

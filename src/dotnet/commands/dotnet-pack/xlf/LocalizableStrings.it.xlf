@@ -5,8 +5,8 @@
       <group id="src/dotnet/commands/dotnet-pack/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET Core NuGet Package Packer</source>
-        <target state="needs-review-translation">pack</target>
-        <note></note>
+        <target state="translated">Strumento di creazione pacchetti NuGet di .NET Core</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>pack for msbuild</source>
@@ -20,18 +20,18 @@
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
         <source>Directory in which to place built packages.</source>
-        <target state="needs-review-translation">Directory in cui inserire gli output</target>
-        <note></note>
+        <target state="translated">Directory in cui inserire i pacchetti compilati.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
         <source>Skip building the project prior to packing. By default, the project will be built.</source>
-        <target state="needs-review-translation">Non compila il progetto prima della creazione del pacchetto</target>
-        <note></note>
+        <target state="translated">Consente di ignorare la compilazione del progetto prima di creare il pacchetto. Per impostazione predefinita, il progetto verrà compilato.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSymbolsDescription">
         <source>Include packages with symbols in addition to regular packages in output directory.</source>
-        <target state="needs-review-translation">Include i PDB unitamente alle DLL nella cartella di output</target>
-        <note></note>
+        <target state="translated">Include i pacchetti con simboli in aggiunta a quelli normali nella directory di output.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSourceDescription">
         <source>Include PDBs and source files. Source files go into the src folder in the resulting nuget package</source>
@@ -45,8 +45,8 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="needs-review-translation">Configurazione con cui eseguire la compilazione</target>
-        <note></note>
+        <target state="translated">Configurazione da usare per compilare il progetto. L'impostazione predefinita per la maggior parte dei progetti è "Debug".</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffix">
         <source>VERSION_SUFFIX</source>
@@ -55,13 +55,13 @@
       </trans-unit>
       <trans-unit id="CmdVersionSuffixDescription">
         <source>Defines the value for the $(VersionSuffix) property in the project.</source>
-        <target state="needs-review-translation">Consente di definire con che cosa sostituire `*` nel campo della versione in project.json</target>
-        <note></note>
+        <target state="translated">Consente di definire il valore per la proprietà $(VersionSuffix) nel progetto.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdServiceableDescription">
         <source>Set the serviceable flag in the package. For more information, please see https://aka.ms/nupkgservicing.</source>
-        <target state="needs-review-translation">Imposta il flag serviceable nel pacchetto</target>
-        <note></note>
+        <target state="translated">Imposta il flag serviceable nel pacchetto. Per altre informazioni,vedere https://aka.ms/nupkgservicing.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdArgumentProject">
         <source>PROJECT</source>

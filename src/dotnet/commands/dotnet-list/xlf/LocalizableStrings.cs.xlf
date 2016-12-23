@@ -5,8 +5,8 @@
       <group id="src/dotnet/commands/dotnet-list/LocalizableStrings.resx" />
       <trans-unit id="NetListCommand">
         <source>.NET List Command</source>
-        <target state="new">.NET List Command</target>
-        <note></note>
+        <target state="translated">Příkaz .NET pro zobrazení seznamu</target>
+        <note />
       </trans-unit>
     </body>
   </file>

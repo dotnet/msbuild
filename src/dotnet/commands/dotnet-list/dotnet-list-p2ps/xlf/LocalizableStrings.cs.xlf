@@ -5,20 +5,20 @@
       <group id="src/dotnet/commands/dotnet-list/dotnet-list-p2ps/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET Core Project-to-Project dependency viewer</source>
-        <target state="new">.NET Core Project-to-Project dependency viewer</target>
-        <note></note>
+        <target state="translated">Prohlížeč závislostí mezi projekty .NET Core</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Command to list project to project (p2p) references</source>
-        <target state="new">Command to list project to project (p2p) references</target>
-        <note></note>
+        <target state="translated">Příkaz pro zobrazení seznamu závislostí mezi projekty (p2p)</target>
+        <note />
       </trans-unit>
       <trans-unit id="NoReferencesFound">
         <source>There are no {0} references in project {1}.
 {0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
-        <target state="new">There are no {0} references in project {1}.
-{0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </target>
-        <note></note>
+        <target state="translated">Projekt {1} neobsahuje odkazy na {0}.
+{0} je typ požadované položky (projekt, balíček, p2p) a {1} je používaný objekt (soubor projektu nebo soubor řešení).</target>
+        <note />
       </trans-unit>
     </body>
   </file>

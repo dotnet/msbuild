@@ -17,25 +17,25 @@ You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-te
 Configuring...
 -------------------
 A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</source>
-        <target state="new">Welcome to .NET Core!
+        <target state="translated">Bienvenido a .NET Core
 ---------------------
-Learn more about .NET Core @ https://aka.ms/dotnet-docs. Use dotnet --help to see available commands or go to https://aka.ms/dotnet-cli-docs.
+Obtenga más información sobre .NET Core en https://aka.ms/dotnet-docs. Use dotnet --help para ver los comandos disponibles o vaya a https://aka.ms/dotnet-cli-docs.
 
-Telemetry
+Telemetría
 --------------
-The .NET Core tools collect usage data in order to improve your experience. The data is anonymous and does not include command-line arguments. The data is collected by Microsoft and shared with the community.
-You can opt out of telemetry by setting a DOTNET_CLI_TELEMETRY_OPTOUT environment variable to 1 using your favorite shell.
-You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-telemetry.
+Las herramientas de .NET Core recopilan datos de uso con el fin de mejorar su experiencia. Los datos son anónimos y no incluyen argumentos de la línea de comandos. Microsoft recopila los datos y los comparte con la comunidad.
+Si desea optar por no participar en la telemetría, establezca una variable de entorno DOTNET_CLI_TELEMETRY_OPTOUT en 1 con el shell de su preferencia.
+Puede leer más información sobre la telemetría de las herramientas de .NET Core en https://aka.ms/dotnet-cli-telemetry.
 
-Configuring...
+Configurando...
 -------------------
-A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</target>
-        <note></note>
+Un comando se ejecuta para rellenar inicialmente la caché de paquete local a fin de mejorar la velocidad de restauración y permitir el acceso sin conexión. Este comando demorará hasta un minuto para completarse y solo sucederá una vez.</target>
+        <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">
         <source>Failed to create prime the NuGet cache. {0} failed with: {1}</source>
-        <target state="new">Failed to create prime the NuGet cache. {0} failed with: {1}</target>
-        <note></note>
+        <target state="translated">No se pudo crear la caché de NuGet. Error de {0} con: {1}</target>
+        <note />
       </trans-unit>
     </body>
   </file>

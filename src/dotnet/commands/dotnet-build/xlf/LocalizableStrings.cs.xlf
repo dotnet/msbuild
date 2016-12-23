@@ -15,8 +15,8 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>Configuration to use for building the project. Default for most projects is  "Debug".</source>
-        <target state="needs-review-translation">Konfigurace použitá k sestavení</target>
-        <note></note>
+        <target state="translated">Konfigurace použitá k sestavení projektu. Výchozí možnost u většiny projektů je „Debug“.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionName">
         <source>CONFIGURATION</source>
@@ -25,8 +25,8 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>Target framework to build for. The target framework has to be specified in the project file.</source>
-        <target state="needs-review-translation">Umožňuje kompilovat určitou platformu.</target>
-        <note></note>
+        <target state="translated">Cílová platforma, pro kterou sestavujete projekt. Cílová platforma musí být v souboru projektu zadaná.</target>
+        <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionName">
         <source>FRAMEWORK</source>
@@ -35,18 +35,18 @@
       </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">
         <source>Set this flag to ignore project-to-project references and only build the root project</source>
-        <target state="needs-review-translation">Když nastavíte tento příznak, ignorují se odkazy mezi projekty a sestaví se jenom kořenový projekt.</target>
-        <note></note>
+        <target state="translated">Když nastavíte tento příznak, ignorují se odkazy mezi projekty a sestaví se jenom kořenový projekt.</target>
+        <note />
       </trans-unit>
       <trans-unit id="NoIncrementialOptionDescription">
         <source>Disables incremental build.</source>
-        <target state="needs-review-translation">Když nastavíte tento příznak, vypnete přírůstkové sestavení.</target>
-        <note></note>
+        <target state="translated">Přírůstkové sestavení se vypne.</target>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>Output directory in which to place built artifacts.</source>
-        <target state="needs-review-translation">Adresář pro ukládání výstupů</target>
-        <note></note>
+        <target state="translated">Výstupní adresář, do kterého se ukládají sestavené artefakty.</target>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOptionName">
         <source>OUTPUT_DIR</source>

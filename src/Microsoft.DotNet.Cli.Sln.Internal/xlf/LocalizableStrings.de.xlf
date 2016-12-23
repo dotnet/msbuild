@@ -5,38 +5,38 @@
       <group id="src/Microsoft.DotNet.Cli.Sln.Internal/LocalizableStrings.resx" />
       <trans-unit id="GlobalSectionMoreThanOnceError">
         <source>Global section specified more than once</source>
-        <target state="new">Global section specified more than once</target>
-        <note></note>
+        <target state="translated">Globaler Abschnitt mehrmals angegeben</target>
+        <note />
       </trans-unit>
       <trans-unit id="GlobalSectionNotClosedError">
         <source>Global section not closed</source>
-        <target state="new">Global section not closed</target>
-        <note></note>
+        <target state="translated">Globaler Abschnitt nicht geschlossen</target>
+        <note />
       </trans-unit>
       <trans-unit id="FileHeaderMissingError">
         <source>File header is missing</source>
-        <target state="new">File header is missing</target>
-        <note></note>
+        <target state="translated">Dateiheader fehlt</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectSectionNotClosedError">
         <source>Project section not closed</source>
-        <target state="new">Project section not closed</target>
-        <note></note>
+        <target state="translated">Projektabschnitt nicht geschlossen</target>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidSectionTypeError">
         <source>Invalid section type: {0}</source>
-        <target state="new">Invalid section type: {0}</target>
-        <note></note>
+        <target state="translated">Ungültiger Abschnittstyp: {0}</target>
+        <note />
       </trans-unit>
       <trans-unit id="SectionIdMissingError">
         <source>Section id missing</source>
-        <target state="new">Section id missing</target>
-        <note></note>
+        <target state="translated">Abschnitts-ID fehlt</target>
+        <note />
       </trans-unit>
       <trans-unit id="ClosingSectionTagNotFoundError">
         <source>Closing section tag not found</source>
-        <target state="new">Closing section tag not found</target>
-        <note></note>
+        <target state="translated">Schließendes Abschnittstag nicht gefunden</target>
+        <note />
       </trans-unit>
     </body>
   </file>

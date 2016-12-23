@@ -30,8 +30,8 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="needs-review-translation">Cílová platforma pro publikování</target>
-        <note></note>
+        <target state="translated">Cílová platforma pro publikování. Cílová platforma musí být v souboru projektu zadaná.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeOption">
         <source>RUNTIME_IDENTIFIER</source>
@@ -40,8 +40,8 @@
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependented app.</source>
-        <target state="needs-review-translation">Cílový modul runtime pro publikování. Výchozí možnost je publikovat přenosnou aplikaci.</target>
-        <note></note>
+        <target state="translated">Publikuje projekt pro daný runtime. Používá se k vytvoření samostatného nasazení. Výchozí možnost je publikovat aplikaci závislou na platformě.</target>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
@@ -50,8 +50,8 @@
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>Output directory in which to place the published artifacts.</source>
-        <target state="needs-review-translation">Cesta pro publikování aplikace</target>
-        <note></note>
+        <target state="translated">Výstupní adresář do kterého se umisťují publikované artefakty.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ConfigurationOption">
         <source>CONFIGURATION</source>
@@ -60,8 +60,8 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="needs-review-translation">Konfigurace použitá k sestavení</target>
-        <note></note>
+        <target state="translated">Konfigurace použitá k sestavení projektu. Výchozí možnost u většiny projektů je „Debug“.</target>
+        <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOption">
         <source>VERSION_SUFFIX</source>
@@ -70,8 +70,8 @@
       </trans-unit>
       <trans-unit id="VersionSuffixOptionDescription">
         <source>Defines the value for the $(VersionSuffix) property in the project.</source>
-        <target state="needs-review-translation">Definuje hodnotu vlastnosti $(VersionSuffix) v projektu.</target>
-        <note></note>
+        <target state="translated">Definuje hodnotu vlastnosti $(VersionSuffix) v projektu.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

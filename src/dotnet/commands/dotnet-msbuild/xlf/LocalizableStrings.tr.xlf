@@ -5,8 +5,8 @@
       <group id="src/dotnet/commands/dotnet-msbuild/LocalizableStrings.resx" />
       <trans-unit id="VerbosityOptionDescription">
         <source>Set the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]</source>
-        <target state="new">Set the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]</target>
-        <note></note>
+        <target state="translated">Komutun ayrıntı düzeyini ayarlayın. İzin verilen değerler q[uiet], m[inimal], n[ormal], d[etailed] ve diag[nostic]</target>
+        <note />
       </trans-unit>
     </body>
   </file>

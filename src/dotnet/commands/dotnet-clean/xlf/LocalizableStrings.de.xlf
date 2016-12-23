@@ -30,8 +30,8 @@
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
         <source>Directory in which the build outputs have been placed.</source>
-        <target state="needs-review-translation">Verzeichnis, in dem sich die Buildausgaben befinden</target>
-        <note></note>
+        <target state="translated">Verzeichnis, in dem sich die Buildausgaben befinden.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
@@ -40,8 +40,8 @@
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Clean a specific framework.</source>
-        <target state="needs-review-translation">Bestimmtes Framework bereinigen</target>
-        <note></note>
+        <target state="translated">Bestimmtes Framework bereinigen.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfiguration">
         <source>CONFIGURATION</source>
@@ -50,8 +50,8 @@
       </trans-unit>
       <trans-unit id="CmdConfigurationDescription">
         <source>Clean a specific configuration.</source>
-        <target state="needs-review-translation">Bestimmte Konfiguration bereinigen</target>
-        <note></note>
+        <target state="translated">Bestimmte Konfiguration bereinigen.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

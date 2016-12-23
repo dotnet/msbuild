@@ -5,8 +5,8 @@
       <group id="src/dotnet/commands/dotnet-pack/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET Core NuGet Package Packer</source>
-        <target state="needs-review-translation">팩</target>
-        <note></note>
+        <target state="translated">.NET Core NuGet 패키지 패커</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>pack for msbuild</source>
@@ -20,18 +20,18 @@
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
         <source>Directory in which to place built packages.</source>
-        <target state="needs-review-translation">출력을 배치할 디렉터리입니다.</target>
-        <note></note>
+        <target state="translated">빌드된 패키지를 배치할 디렉터리입니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
         <source>Skip building the project prior to packing. By default, the project will be built.</source>
-        <target state="needs-review-translation">압축하기 전에 프로젝트를 빌드하지 않습니다.</target>
-        <note></note>
+        <target state="translated">압축하기 전에 프로젝트를 빌드하지 않습니다. 기본적으로 프로젝트가 빌드됩니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSymbolsDescription">
         <source>Include packages with symbols in addition to regular packages in output directory.</source>
-        <target state="needs-review-translation">출력 폴더에 DLL과 함께 PDB를 포함합니다.</target>
-        <note></note>
+        <target state="translated">일반 패키지 외에 기호가 포함된 패키지를 출력 디렉터리에 포함합니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSourceDescription">
         <source>Include PDBs and source files. Source files go into the src folder in the resulting nuget package</source>
@@ -45,8 +45,8 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="needs-review-translation">빌드할 구성입니다.</target>
-        <note></note>
+        <target state="translated">프로젝트 빌드에 사용할 구성입니다. 대부분의 프로젝트에서 기본값은 "Debug"입니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffix">
         <source>VERSION_SUFFIX</source>
@@ -55,13 +55,13 @@
       </trans-unit>
       <trans-unit id="CmdVersionSuffixDescription">
         <source>Defines the value for the $(VersionSuffix) property in the project.</source>
-        <target state="needs-review-translation">project.json의 버전 필드에서 `*`를 대체할 항목을 정의합니다.</target>
-        <note></note>
+        <target state="translated">프로젝트에서 $(VersionSuffix) 속성의 값을 정의합니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdServiceableDescription">
         <source>Set the serviceable flag in the package. For more information, please see https://aka.ms/nupkgservicing.</source>
-        <target state="needs-review-translation">패키지에서 서비스 가능 플래그를 설정합니다.</target>
-        <note></note>
+        <target state="translated">패키지에서 서비스 가능 플래그를 설정합니다. 자세한 내용은 https://aka.ms/nupkgservicing을 참조하세요.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdArgumentProject">
         <source>PROJECT</source>

@@ -5,18 +5,18 @@
       <group id="src/dotnet/commands/dotnet-remove/dotnet-remove-proj/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET Remove Project from Solution Command</source>
-        <target state="new">.NET Remove Project from Solution Command</target>
-        <note></note>
+        <target state="translated">Comando de .NET Quitar proyecto de la solución</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Command to remove projects from a solution</source>
-        <target state="new">Command to remove projects from a solution</target>
-        <note></note>
+        <target state="translated">Comando para quitar proyectos de una solución</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppHelpText">
         <source>Projects to remove from a solution</source>
-        <target state="new">Projects to remove from a solution</target>
-        <note></note>
+        <target state="translated">Proyectos que se quitarán de una solución</target>
+        <note />
       </trans-unit>
     </body>
   </file>

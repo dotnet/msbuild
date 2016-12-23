@@ -15,8 +15,8 @@
       </trans-unit>
       <trans-unit id="CommandOptionConfigurationDescription">
         <source>Configuration to use for building the project. Default for most projects is "Debug".</source>
-        <target state="needs-review-translation">Konfiguration für den Buildvorgang</target>
-        <note></note>
+        <target state="translated">Konfiguration für die Erstellung des Projekts. Standard für die meisten Projekte ist „Debug“.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandOptionFramework">
         <source>FRAMEWORK</source>
@@ -25,8 +25,8 @@
       </trans-unit>
       <trans-unit id="CommandOptionFrameworkDescription">
         <source>Build and run the app using the specified framework. The framework has to be specified in the project file. </source>
-        <target state="needs-review-translation">Bestimmtes Framework kompilieren</target>
-        <note></note>
+        <target state="translated">Erstellen und Ausführen der App mit dem angegebenen Framework. Das Framework muss in der Projektdatei angegeben werden. </target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandOptionProjectDescription">
         <source>The path to the project file to run (defaults to the current directory if there is only one project).</source>
@@ -110,8 +110,8 @@
       </trans-unit>
       <trans-unit id="RunCommandAdditionalArgsHelpText">
         <source>Arguments passed to the application that is being run.</source>
-        <target state="new">Arguments passed to the application that is being run.</target>
-        <note></note>
+        <target state="translated">Argumente, die der ausgeführten Anwendung übergeben werden.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

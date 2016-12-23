@@ -30,8 +30,8 @@
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
         <source>Directory in which the build outputs have been placed.</source>
-        <target state="needs-review-translation">Katalog, w którym zostały umieszczone dane wyjściowe kompilacji</target>
-        <note></note>
+        <target state="translated">Katalog, w którym zostały umieszczone dane wyjściowe kompilacji.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
@@ -40,8 +40,8 @@
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Clean a specific framework.</source>
-        <target state="needs-review-translation">Wyczyść określoną platformę</target>
-        <note></note>
+        <target state="translated">Wyczyść określoną platformę.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfiguration">
         <source>CONFIGURATION</source>
@@ -50,8 +50,8 @@
       </trans-unit>
       <trans-unit id="CmdConfigurationDescription">
         <source>Clean a specific configuration.</source>
-        <target state="needs-review-translation">Wyczyść określoną konfigurację</target>
-        <note></note>
+        <target state="translated">Wyczyść określoną konfigurację.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

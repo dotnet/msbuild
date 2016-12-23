@@ -100,8 +100,8 @@
       </trans-unit>
       <trans-unit id="ReferenceDoesNotExist">
         <source>Reference {0} does not exist.</source>
-        <target state="needs-review-translation">{0} 참조가 없습니다. 계속 추가하려면 --force 옵션을 ;사용하세요. 이 경우 프로젝트에 부정적인 영향을 줄 수 있습니다. </target>
-        <note></note>
+        <target state="translated">{0} 참조가 없습니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ReferenceAddedToTheProject">
         <source>Reference `{0}` added to the project.</source>
@@ -370,8 +370,8 @@
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOneReferenceToAdd">
         <source>You must specify at least one reference to add.</source>
-        <target state="needs-review-translation">추가할 참조를 하나 이상 지정해야 합니다. 자세한 정보를 보려면 dotnet add --help를 실행하세요.</target>
-        <note></note>
+        <target state="translated">추가할 참조를 하나 이상 지정해야 합니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAReference">
         <source>Project {0} already has a reference `{1}`.</source>
@@ -390,8 +390,8 @@
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOnePackageReferenceToAdd">
         <source>You must specify at least one package to add.</source>
-        <target state="needs-review-translation">추가할 참조를 하나 이상 지정해야 합니다. 자세한 정보를 보려면 dotnet add --help를 실행하세요.</target>
-        <note></note>
+        <target state="translated">추가할 패키지를 하나 이상 지정해야 합니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="PackageReferenceAddedToTheProject">
         <source>Package reference `{0}` added to the project.</source>
@@ -420,8 +420,8 @@
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOneProjectToAdd">
         <source>You must specify at least one project to add.</source>
-        <target state="needs-review-translation">추가할 프로젝트를 하나 이상 지정해야 합니다. 자세한 정보를 보려면 dotnet add --help를 실행하세요.</target>
-        <note></note>
+        <target state="translated">추가할 프로젝트를 하나 이상 지정해야 합니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectAddedToTheSolution">
         <source>Project `{0}` added to the solution.</source>
@@ -440,8 +440,8 @@
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOneReferenceToRemove">
         <source>You must specify at least one reference to remove.</source>
-        <target state="needs-review-translation">삭제할 참조를 하나 이상 지정해야 합니다. 자세한 정보를 보려면 dotnet delete --help를 실행하세요.</target>
-        <note></note>
+        <target state="translated">제거할 참조를 하나 이상 지정해야 합니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ReferenceDeleted">
         <source>Reference `{0}` deleted.</source>
@@ -460,8 +460,8 @@
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOnePackageReferenceToRemove">
         <source>You must specify at least one package reference to remove.</source>
-        <target state="needs-review-translation">삭제할 참조를 하나 이상 지정해야 합니다. 자세한 정보를 보려면 dotnet delete --help를 실행하세요.</target>
-        <note></note>
+        <target state="translated">제거할 패키지 참조를 하나 이상 지정해야 합니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="PackageReferenceDeleted">
         <source>Package reference `{0}` deleted.</source>
@@ -570,50 +570,50 @@
       </trans-unit>
       <trans-unit id="ProjectReferenceOneOrMore">
         <source>Project reference(s)</source>
-        <target state="new">Project reference(s)</target>
-        <note></note>
+        <target state="translated">프로젝트 참조</target>
+        <note />
       </trans-unit>
       <trans-unit id="RequiredCommandNotPassed">
         <source>Required command was not provided.</source>
-        <target state="new">Required command was not provided.</target>
-        <note></note>
+        <target state="translated">필수 명령을 제공하지 않았습니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MoreThanOneSolutionInDirectory">
         <source>Found more than one solution file in {0}. Please specify which one to use.</source>
-        <target state="new">Found more than one solution file in {0}. Please specify which one to use.</target>
-        <note></note>
+        <target state="translated">{0}에서 솔루션 파일이 두 개 이상 있습니다. 사용할 파일을 지정하세요.</target>
+        <note />
       </trans-unit>
       <trans-unit id="SolutionAlreadyContainsProject">
         <source>Solution {0} already contains project {1}.</source>
-        <target state="new">Solution {0} already contains project {1}.</target>
-        <note></note>
+        <target state="translated">{0} 솔루션에 {1} 프로젝트가 이미 있습니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ArgumentsProjectOrSolutionDescription">
         <source>The project or solution to operation on. If a file is not specified, the current directory is searched.</source>
-        <target state="new">The project or solution to operation on. If a file is not specified, the current directory is searched.</target>
-        <note></note>
+        <target state="translated">작업할 프로젝트 또는 솔루션입니다. 파일을 지정하지 않으면 현재 디렉터리가 검색됩니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
-        <target state="new">FRAMEWORK</target>
-        <note></note>
+        <target state="translated">FRAMEWORK</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectNotCompatibleWithFrameworks">
         <source>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Please review the project you are trying to add and verify that is compatible with the following targets:</source>
-        <target state="new">Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Please review the project you are trying to add and verify that is compatible with the following targets:</target>
-        <note></note>
+        <target state="translated">두 프로젝트 간에 호환되지 않는 대상 프레임워크 때문에 '{0}' 프로젝트를 추가할 수 없습니다. 추가하려는 프로젝트를 검토하고 다음 대상과 호환되는지 확인하세요.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectDoesNotTargetFramework">
         <source>Project `{0}` does not target framework `{1}`.</source>
-        <target state="new">Project `{0}` does not target framework `{1}`.</target>
-        <note></note>
+        <target state="translated">'{0}' 프로젝트의 대상 프레임워크가 '{1}'이(가) 아닙니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectCouldNotBeEvaluated">
         <source>Project `{0}` could not be evaluated. Evaluation failed with following error:
 {1}</source>
-        <target state="new">Project `{0}` could not be evaluated. Evaluation failed with following error:
+        <target state="translated">'{0}' 프로젝트를 평가할 수 없습니다. 다음 오류와 함께 평가가 실패했습니다.
 {1}</target>
-        <note></note>
+        <note />
       </trans-unit>
     </body>
   </file>

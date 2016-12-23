@@ -15,8 +15,8 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>Configuration to use for building the project. Default for most projects is  "Debug".</source>
-        <target state="needs-review-translation">Konfiguracja, przy użyciu której ma zostać przeprowadzona kompilacja</target>
-        <note></note>
+        <target state="translated">Konfiguracja do użycia na potrzeby kompilacji projektu. Opcją domyślną w przypadku większości projektów jest „Debug”.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionName">
         <source>CONFIGURATION</source>
@@ -25,8 +25,8 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>Target framework to build for. The target framework has to be specified in the project file.</source>
-        <target state="needs-review-translation">Skompiluj określoną platformę</target>
-        <note></note>
+        <target state="translated">Docelowa platforma kompilacji. Platforma docelowa musi być określona w pliku projektu.</target>
+        <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionName">
         <source>FRAMEWORK</source>
@@ -35,18 +35,18 @@
       </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">
         <source>Set this flag to ignore project-to-project references and only build the root project</source>
-        <target state="needs-review-translation">Ustaw tę flagę, aby ignorować odwołania między projektami i skompilować tylko projekt główny</target>
-        <note></note>
+        <target state="translated">Ustaw tę flagę, aby ignorować odwołania między projektami i skompilować tylko projekt główny</target>
+        <note />
       </trans-unit>
       <trans-unit id="NoIncrementialOptionDescription">
         <source>Disables incremental build.</source>
-        <target state="needs-review-translation">Ustaw tę flagę, aby wyłączyć kompilację przyrostową</target>
-        <note></note>
+        <target state="translated">Wyłącza kompilację przyrostową.</target>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>Output directory in which to place built artifacts.</source>
-        <target state="needs-review-translation">Katalog, w którym mają zostać umieszczone dane wyjściowe</target>
-        <note></note>
+        <target state="translated">Katalog wyjściowy, w którym mają zostać umieszczone skompilowane artefakty.</target>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOptionName">
         <source>OUTPUT_DIR</source>
