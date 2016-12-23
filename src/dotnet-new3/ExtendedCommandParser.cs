@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.TemplateEngine.Abstractions;
@@ -57,6 +58,30 @@ namespace dotnet_new3
         public void ShowHelp()
         {
             _helpDisplayer.ShowHelp();
+        }
+
+        // note: this is mostly copy-pased from CommandLineApplication.ShowHelp()
+        public string GetOptionsHelp()
+        {
+            StringBuilder optionsBuilder = new StringBuilder();
+
+            if (_helpDisplayer.Options.Any())
+            {
+                var maxOptLen = 0;
+                foreach (var opt in _helpDisplayer.Options)
+                {
+                    maxOptLen = opt.Template.Length > maxOptLen ? opt.Template.Length : maxOptLen;
+                }
+
+                var outputFormat = string.Format("  {{0, -{0}}}{{1}}", maxOptLen + 2);
+                foreach (var opt in _helpDisplayer.Options)
+                {
+                    optionsBuilder.AppendFormat(outputFormat, opt.Template, opt.Description);
+                    optionsBuilder.AppendLine();
+                }
+            }
+
+            return optionsBuilder.ToString();
         }
 
         internal void RemoveOption(CommandOption option)
@@ -411,6 +436,7 @@ namespace dotnet_new3
             set
             {
                 _app.Name = value;
+                _helpDisplayer.Name = value;
             }
         }
 
@@ -423,6 +449,7 @@ namespace dotnet_new3
             set
             {
                 _app.FullName = value;
+                _helpDisplayer.FullName = value;
             }
         }
     }

@@ -230,6 +230,7 @@ namespace dotnet_new3
             else if (templates.Count == 1)
             {
                 ITemplateInfo templateInfo = templates.First();
+                EngineEnvironmentSettings.Host.LogMessage(_app.GetOptionsHelp());
                 return TemplateHelp(templateInfo, _app.AllTemplateParams);
             }
             else
@@ -332,6 +333,12 @@ namespace dotnet_new3
 
             foreach (ITemplateParameter parameter in filteredParams)
             {
+                if (string.Equals(parameter.DataType, "bool", StringComparison.OrdinalIgnoreCase)
+                    && string.Equals(parameter.DefaultValue, "false", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
                 string displayParameter;
                 if (!parameterNameMap.TryGetValue(parameter.Name, out displayParameter))
                 {
@@ -340,7 +347,7 @@ namespace dotnet_new3
 
                 Reporter.Output.Write($" --{displayParameter}");
 
-                if (!string.IsNullOrEmpty(parameter.DefaultValue))
+                if (!string.IsNullOrEmpty(parameter.DefaultValue) && !string.Equals(parameter.DataType, "bool", StringComparison.OrdinalIgnoreCase))
                 {
                     Reporter.Output.Write($" {parameter.DefaultValue}");
                 }
@@ -388,6 +395,57 @@ namespace dotnet_new3
 
             _shouldExit = false;
             return 0;
+        }
+
+        private async Task InstallPackagesAsync(IReadOnlyList<string> packageNames, bool quiet = false)
+        {
+            List<string> toInstall = new List<string>();
+
+            foreach (string package in packageNames)
+            {
+                string pkg = package.Trim();
+                pkg = Environment.ExpandEnvironmentVariables(pkg);
+                string pattern = null;
+
+                int wildcardIndex = pkg.IndexOfAny(new[] { '*', '?' });
+
+                if (wildcardIndex > -1)
+                {
+                    int lastSlashBeforeWildcard = pkg.LastIndexOfAny(new[] { '\\', '/' });
+                    pattern = pkg.Substring(lastSlashBeforeWildcard + 1);
+                    pkg = pkg.Substring(0, lastSlashBeforeWildcard);
+                }
+
+                try
+                {
+                    if (pattern != null)
+                    {
+                        string fullDirectory = new DirectoryInfo(pkg).FullName;
+                        string fullPathGlob = Path.Combine(fullDirectory, pattern);
+                        TemplateCache.Scan(fullPathGlob);
+                    }
+                    else if (Directory.Exists(pkg) || File.Exists(pkg))
+                    {
+                        string packageLocation = new DirectoryInfo(pkg).FullName;
+                        TemplateCache.Scan(packageLocation);
+                    }
+                    else
+                    {
+                        EngineEnvironmentSettings.Host.OnNonCriticalError("InvalidPackageSpecification", string.Format(LocalizableStrings.BadPackageSpec, pkg), null, 0);
+                    }
+                }
+                catch
+                {
+                    EngineEnvironmentSettings.Host.OnNonCriticalError("InvalidPackageSpecification", string.Format(LocalizableStrings.BadPackageSpec, pkg), null, 0);
+                }
+            }
+
+            TemplateCache.WriteTemplateCaches();
+
+            if (!quiet)
+            {
+                ListTemplates(string.Empty);
+            }
         }
 
         private void ListTemplates(string templateName = null)
