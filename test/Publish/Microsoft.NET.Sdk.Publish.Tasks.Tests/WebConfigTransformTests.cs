@@ -7,7 +7,7 @@ using Microsoft.NET.Sdk.Publish.Tasks;
 
 namespace Microsoft.Net.Sdk.Publish.Tasks.Tests
 {
-    public class WebConfigTransformFacts
+    public class WebConfigTransformTests
     {
         private XDocument WebConfigTemplate => XDocument.Parse(
 @"<configuration>

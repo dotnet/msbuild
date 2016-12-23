@@ -14,13 +14,15 @@
     <NuGetContent Include="$(WebSdkRootDir)\bin\$(Configuration)\net46\Microsoft.NET.Sdk.Publish.Tasks.dll" >
       <Destination>tools\net46</Destination>
     </NuGetContent>
+    <NuGetContent Include="$(WebSdkRootDir)\bin\$(Configuration)\net46\Newtonsoft.Json.dll" >
+      <Destination>tools\net46</Destination>
+    </NuGetContent>
 
     <NuGetContent Include="$(WebSdkRootDir)\bin\$(Configuration)\netstandard1.3\Microsoft.NETCore.Sdk.Publish.Tasks.dll" >
       <Destination>tools\netcoreapp1.0</Destination>
     </NuGetContent>
-
-    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\BeforePublishTargets\*.*">
-      <Destination>build\netstandard1.0\BeforePublishTargets</Destination>
+    <NuGetContent Include="$(WebSdkRootDir)\bin\$(Configuration)\net46\Newtonsoft.Json.dll" >
+      <Destination>tools\netcoreapp1.0</Destination>
     </NuGetContent>
     
     <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\ComputeTargets\*.*">

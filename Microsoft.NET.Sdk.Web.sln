@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.25907.1
+VisualStudioVersion = 15.0.26004.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.NET.Sdk.Web.ProjectSystem.Package", "src\Web\Microsoft.NET.Sdk.Web.ProjectSystem.Package\Microsoft.NET.Sdk.Web.ProjectSystem.Package.csproj", "{800AAAB3-AE22-483C-90A8-E1056CF39D5A}"
 EndProject
@@ -86,11 +86,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TransformTargets", "TransformTargets", "{37FCE9FE-671D-4F3E-B3C1-FE90AC4CF822}"
 	ProjectSection(SolutionItems) = preProject
 		src\Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\TransformTargets\Microsoft.NET.Sdk.Publish.TransformFiles.targets = src\Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\TransformTargets\Microsoft.NET.Sdk.Publish.TransformFiles.targets
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BeforePublishTargets", "BeforePublishTargets", "{F89FF685-C6FD-4B21-A57A-E0BB45AFF1E6}"
-	ProjectSection(SolutionItems) = preProject
-		src\Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\BeforePublishTargets\Microsoft.NET.Sdk.BeforePublish.targets = src\Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\BeforePublishTargets\Microsoft.NET.Sdk.BeforePublish.targets
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DotNetCLIToolTargets", "DotNetCLIToolTargets", "{81FA4A9E-2FA0-4146-AF24-E51F5CA83A74}"
@@ -190,7 +185,6 @@ Global
 		{E537A967-65B7-46F5-8574-01F8C08F385F} = {3CA45E5E-50F6-40E7-A0EE-250C5E9E72F0}
 		{66964EC2-712A-451A-AB4F-33F18D8F54F1} = {E537A967-65B7-46F5-8574-01F8C08F385F}
 		{37FCE9FE-671D-4F3E-B3C1-FE90AC4CF822} = {63359275-F3EC-4A0F-AB92-C30F52BFF58A}
-		{F89FF685-C6FD-4B21-A57A-E0BB45AFF1E6} = {63359275-F3EC-4A0F-AB92-C30F52BFF58A}
 		{81FA4A9E-2FA0-4146-AF24-E51F5CA83A74} = {63359275-F3EC-4A0F-AB92-C30F52BFF58A}
 		{63359275-F3EC-4A0F-AB92-C30F52BFF58A} = {569AAC15-FF3C-49CE-9CFF-AD1628E48057}
 		{C7F7D14C-56F2-4FB4-8DC2-2E60882DA108} = {4927120B-89F5-4009-9C8E-43EEFFC566EC}
