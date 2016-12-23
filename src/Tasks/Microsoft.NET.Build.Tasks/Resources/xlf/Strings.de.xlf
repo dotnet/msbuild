@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="de" original="src/Tasks/Microsoft.NET.Build.Tasks/Resources/Strings.resx">
     <body>
@@ -115,72 +115,72 @@
       </trans-unit>
       <trans-unit id="DOTNET1011">
         <source>Framework not installed: {0} in {1}</source>
-        <target state="new">Framework not installed: {0} in {1}</target>
+        <target state="new">Framework nicht installiert: {0} in {1}</target>
         <note></note>
       </trans-unit>
       <trans-unit id="DOTNET1012">
         <source>The reference assemblies directory was not specified. You can set the location using the DOTNET_REFERENCE_ASSEMBLIES_PATH environment variable.</source>
-        <target state="new">The reference assemblies directory was not specified. You can set the location using the DOTNET_REFERENCE_ASSEMBLIES_PATH environment variable.</target>
+        <target state="new">Das Verweisassemblysverzeichnis wurde nicht angegeben. Sie können den Speicherort mit der Umgebungsvariablen DOTNET_REFERENCE_ASSEMBLIES_PATH festlegen.</target>
         <note></note>
       </trans-unit>
       <trans-unit id="DOTNET1013">
         <source>The following dependencies are marked with type 'platform', however only one dependency can have this type: {0}</source>
-        <target state="new">The following dependencies are marked with type 'platform', however only one dependency can have this type: {0}</target>
+        <target state="new">Die folgenden Abhängigkeiten sind mit dem Typ „platform“ gekennzeichnet, doch nur eine Abhängigkeit kann diesen Typ haben: {0}</target>
         <note></note>
       </trans-unit>
       <trans-unit id="DOTNET1014">
         <source>Failed to read lock file</source>
-        <target state="new">Failed to read lock file</target>
+        <target state="new">Fehler beim Lesen der Sperrdatei.</target>
         <note></note>
       </trans-unit>
       <trans-unit id="DOTNET1017">
         <source>Project file does not exist '{0}'.</source>
-        <target state="new">Project file does not exist '{0}'.</target>
+        <target state="new">Die Projektdatei ist nicht vorhanden: „{0}“.</target>
         <note></note>
       </trans-unit>
       <trans-unit id="NU1001">
         <source>The dependency '{0}' could not be resolved.</source>
-        <target state="new">The dependency '{0}' could not be resolved.</target>
+        <target state="new">Die Abhängigkeit „{0}“ konnte nicht aufgelöst werden.</target>
         <note></note>
       </trans-unit>
       <trans-unit id="NU1002">
         <source>The dependency '{0}' in project '{1}' does not support framework '{2}'.</source>
-        <target state="new">The dependency '{0}' in project '{1}' does not support framework '{2}'.</target>
+        <target state="new">Die Abhängigkeit „{0}“ in Projekt „{1}“ unterstützt nicht Framework „{2}“.</target>
         <note></note>
       </trans-unit>
       <trans-unit id="NU1006">
         <source>{0}. Please run 'dotnet restore' to generate a new asset file.</source>
-        <target state="new">{0}. Please run 'dotnet restore' to generate a new asset file.</target>
+        <target state="new">{0}. Bitte führen Sie „dotnet restore“ aus, um eine neue Ressourcendatei zu erzeugen.</target>
         <note></note>
       </trans-unit>
       <trans-unit id="NU1007">
         <source>Dependency specified was '{0}' but ended up with '{1}'.</source>
-        <target state="new">Dependency specified was '{0}' but ended up with '{1}'.</target>
+        <target state="new">Die angegebene Abhängigkeit war „{0}“, aber es endete mit „{1}“.</target>
         <note></note>
       </trans-unit>
       <trans-unit id="NU1008">
         <source>{0} is an unsupported framework.</source>
-        <target state="new">{0} is an unsupported framework.</target>
+        <target state="new">{0} ist ein nicht unterstütztes Framework.</target>
         <note></note>
       </trans-unit>
       <trans-unit id="NU1009">
         <source>The expected asset file does not exist. Please run 'dotnet restore' to generate a new asset file.</source>
-        <target state="new">The expected asset file does not exist. Please run 'dotnet restore' to generate a new asset file.</target>
+        <target state="new">Die erwartete Ressourcendatei ist nicht vorhanden. Bitte führen Sie „dotnet restore“ aus, um eine neue Ressourcendatei zu erzeugen.</target>
         <note></note>
       </trans-unit>
       <trans-unit id="NU1010">
         <source>The dependency type was changed</source>
-        <target state="new">The dependency type was changed</target>
+        <target state="new">Der Abhängigkeitstyp wurde geändert.</target>
         <note></note>
       </trans-unit>
       <trans-unit id="NU1011">
         <source>The dependency target '{0}' is unsupported.</source>
-        <target state="new">The dependency target '{0}' is unsupported.</target>
+        <target state="new">Das Abhängigkeitsziel „{0}“ wird nicht unterstützt.</target>
         <note></note>
       </trans-unit>
       <trans-unit id="NU1012">
         <source>Dependency conflict. '{0}' expected '{1}' but received '{2}'</source>
-        <target state="new">Dependency conflict. '{0}' expected '{1}' but received '{2}'</target>
+        <target state="new">Abhängigkeitskonflikt. „{0}“ erwartete „{1}“, empfing jedoch „{2}“.</target>
         <note></note>
       </trans-unit>
     </body>

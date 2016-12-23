@@ -115,73 +115,73 @@
       </trans-unit>
       <trans-unit id="DOTNET1011">
         <source>Framework not installed: {0} in {1}</source>
-        <target state="new">Framework not installed: {0} in {1}</target>
-        <note></note>
+        <target state="translated">未安装的框架: {1} 中的 {0}</target>
+        <note />
       </trans-unit>
       <trans-unit id="DOTNET1012">
         <source>The reference assemblies directory was not specified. You can set the location using the DOTNET_REFERENCE_ASSEMBLIES_PATH environment variable.</source>
-        <target state="new">The reference assemblies directory was not specified. You can set the location using the DOTNET_REFERENCE_ASSEMBLIES_PATH environment variable.</target>
-        <note></note>
+        <target state="translated">未指定引用程序集目录。可以使用 DOTNET_REFERENCE_ASSEMBLIES_PATH 环境变量设置位置。</target>
+        <note />
       </trans-unit>
       <trans-unit id="DOTNET1013">
         <source>The following dependencies are marked with type 'platform', however only one dependency can have this type: {0}</source>
-        <target state="new">The following dependencies are marked with type 'platform', however only one dependency can have this type: {0}</target>
-        <note></note>
+        <target state="translated">以下依赖项使用类型“platform”标记，但只有一个依赖项可以具有此类型: {0}</target>
+        <note />
       </trans-unit>
       <trans-unit id="DOTNET1014">
         <source>Failed to read lock file</source>
-        <target state="new">Failed to read lock file</target>
-        <note></note>
+        <target state="translated">未能读取锁定文件</target>
+        <note />
       </trans-unit>
       <trans-unit id="DOTNET1017">
         <source>Project file does not exist '{0}'.</source>
-        <target state="new">Project file does not exist '{0}'.</target>
-        <note></note>
+        <target state="translated">项目文件不存在“{0}”。</target>
+        <note />
       </trans-unit>
       <trans-unit id="NU1001">
         <source>The dependency '{0}' could not be resolved.</source>
-        <target state="new">The dependency '{0}' could not be resolved.</target>
-        <note></note>
+        <target state="translated">无法解析依赖项“{0}”。</target>
+        <note />
       </trans-unit>
       <trans-unit id="NU1002">
         <source>The dependency '{0}' in project '{1}' does not support framework '{2}'.</source>
-        <target state="new">The dependency '{0}' in project '{1}' does not support framework '{2}'.</target>
-        <note></note>
+        <target state="translated">项目“{1}”中的依赖项“{0}”不支持框架“{2}”。</target>
+        <note />
       </trans-unit>
       <trans-unit id="NU1006">
         <source>{0}. Please run 'dotnet restore' to generate a new asset file.</source>
-        <target state="new">{0}. Please run 'dotnet restore' to generate a new asset file.</target>
-        <note></note>
+        <target state="translated">{0}。请运行“dotnet restore”以生成新的资产文件。</target>
+        <note />
       </trans-unit>
       <trans-unit id="NU1007">
         <source>Dependency specified was '{0}' but ended up with '{1}'.</source>
-        <target state="new">Dependency specified was '{0}' but ended up with '{1}'.</target>
-        <note></note>
+        <target state="translated">指定的依赖项为“{0}”，但以“'{1}”结尾。</target>
+        <note />
       </trans-unit>
       <trans-unit id="NU1008">
         <source>{0} is an unsupported framework.</source>
-        <target state="new">{0} is an unsupported framework.</target>
-        <note></note>
+        <target state="translated">{0} 是不受支持的框架。</target>
+        <note />
       </trans-unit>
       <trans-unit id="NU1009">
         <source>The expected asset file does not exist. Please run 'dotnet restore' to generate a new asset file.</source>
-        <target state="new">The expected asset file does not exist. Please run 'dotnet restore' to generate a new asset file.</target>
-        <note></note>
+        <target state="translated">预期资产文件不存在。请运行“dotnet restore”以生成新的资产文件。</target>
+        <note />
       </trans-unit>
       <trans-unit id="NU1010">
         <source>The dependency type was changed</source>
-        <target state="new">The dependency type was changed</target>
-        <note></note>
+        <target state="translated">依赖项类型已更改</target>
+        <note />
       </trans-unit>
       <trans-unit id="NU1011">
         <source>The dependency target '{0}' is unsupported.</source>
-        <target state="new">The dependency target '{0}' is unsupported.</target>
-        <note></note>
+        <target state="translated">不支持依赖项目标“{0}”。</target>
+        <note />
       </trans-unit>
       <trans-unit id="NU1012">
         <source>Dependency conflict. '{0}' expected '{1}' but received '{2}'</source>
-        <target state="new">Dependency conflict. '{0}' expected '{1}' but received '{2}'</target>
-        <note></note>
+        <target state="translated">依赖项冲突。“{0}”预期“'{1}”，但接收到“{2}”</target>
+        <note />
       </trans-unit>
     </body>
   </file>

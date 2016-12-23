@@ -115,73 +115,73 @@
       </trans-unit>
       <trans-unit id="DOTNET1011">
         <source>Framework not installed: {0} in {1}</source>
-        <target state="new">Framework not installed: {0} in {1}</target>
-        <note></note>
+        <target state="translated">{0} 프레임워크가 {1}에 설치되지 않았습니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="DOTNET1012">
         <source>The reference assemblies directory was not specified. You can set the location using the DOTNET_REFERENCE_ASSEMBLIES_PATH environment variable.</source>
-        <target state="new">The reference assemblies directory was not specified. You can set the location using the DOTNET_REFERENCE_ASSEMBLIES_PATH environment variable.</target>
-        <note></note>
+        <target state="translated">참조 어셈블리 디렉터리가 지정되지 않았습니다. DOTNET_REFERENCE_ASSEMBLIES_PATH 환경 변수를 사용하여 위치를 설정할 수 있습니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="DOTNET1013">
         <source>The following dependencies are marked with type 'platform', however only one dependency can have this type: {0}</source>
-        <target state="new">The following dependencies are marked with type 'platform', however only one dependency can have this type: {0}</target>
-        <note></note>
+        <target state="translated">다음 종속성이 '플랫폼' 유형으로 표시되었지만, 하나의 종속성만 이 유형을 가질 수 있습니다. {0}</target>
+        <note />
       </trans-unit>
       <trans-unit id="DOTNET1014">
         <source>Failed to read lock file</source>
-        <target state="new">Failed to read lock file</target>
-        <note></note>
+        <target state="translated">잠금 파일 읽기 실패</target>
+        <note />
       </trans-unit>
       <trans-unit id="DOTNET1017">
         <source>Project file does not exist '{0}'.</source>
-        <target state="new">Project file does not exist '{0}'.</target>
-        <note></note>
+        <target state="translated">프로젝트 파일에 '{0}'이(가) 없습니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="NU1001">
         <source>The dependency '{0}' could not be resolved.</source>
-        <target state="new">The dependency '{0}' could not be resolved.</target>
-        <note></note>
+        <target state="translated">'{0}' 종속성을 확인할 수 없습니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="NU1002">
         <source>The dependency '{0}' in project '{1}' does not support framework '{2}'.</source>
-        <target state="new">The dependency '{0}' in project '{1}' does not support framework '{2}'.</target>
-        <note></note>
+        <target state="translated">'{1}' 프로젝트의 '{0}' 종속성이 '{2}' 프레임워크를 지원하지 않습니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="NU1006">
         <source>{0}. Please run 'dotnet restore' to generate a new asset file.</source>
-        <target state="new">{0}. Please run 'dotnet restore' to generate a new asset file.</target>
-        <note></note>
+        <target state="translated">{0}. 새 자산 파일을 생성하려면 'dotnet restore'를 실행하세요.</target>
+        <note />
       </trans-unit>
       <trans-unit id="NU1007">
         <source>Dependency specified was '{0}' but ended up with '{1}'.</source>
-        <target state="new">Dependency specified was '{0}' but ended up with '{1}'.</target>
-        <note></note>
+        <target state="translated">지정된 종속성은 '{0}'인데 '{1}'(으)로 끝납니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="NU1008">
         <source>{0} is an unsupported framework.</source>
-        <target state="new">{0} is an unsupported framework.</target>
-        <note></note>
+        <target state="translated">{0}은(는) 지원되지 않는 프레임워크입니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="NU1009">
         <source>The expected asset file does not exist. Please run 'dotnet restore' to generate a new asset file.</source>
-        <target state="new">The expected asset file does not exist. Please run 'dotnet restore' to generate a new asset file.</target>
-        <note></note>
+        <target state="translated">예상되는 자산 파일이 없습니다. 새 자산 파일을 생성하려면 'dotnet restore'를 실행하세요.</target>
+        <note />
       </trans-unit>
       <trans-unit id="NU1010">
         <source>The dependency type was changed</source>
-        <target state="new">The dependency type was changed</target>
-        <note></note>
+        <target state="translated">종속성 유형이 변경되었습니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="NU1011">
         <source>The dependency target '{0}' is unsupported.</source>
-        <target state="new">The dependency target '{0}' is unsupported.</target>
-        <note></note>
+        <target state="translated">'{0}' 종속성 대상은 지원되지 않습니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="NU1012">
         <source>Dependency conflict. '{0}' expected '{1}' but received '{2}'</source>
-        <target state="new">Dependency conflict. '{0}' expected '{1}' but received '{2}'</target>
-        <note></note>
+        <target state="translated">종속성 충돌. '{0}'에서 '{1}'을(를) 예상했지만 '{2}'을(를) 수신했습니다.</target>
+        <note />
       </trans-unit>
     </body>
   </file>
