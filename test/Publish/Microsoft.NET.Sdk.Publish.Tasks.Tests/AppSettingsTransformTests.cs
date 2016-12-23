@@ -12,8 +12,6 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
         [Fact]
         public void GenerateDefaultAppSettingsJsonFile_CreatesCorrectDefaultFile()
         {
-            // Arrange
-
             // Act 
             string resultFile = AppSettingsTransform.GenerateDefaultAppSettingsJsonFile();
 
