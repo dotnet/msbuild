@@ -50,7 +50,7 @@ namespace dotnet_new3
 
         public string Alias => _app.InternalParamValue("--alias");
 
-        public bool DebugAttachHasValue => _app.InternalParamHasValue("--debug:attach");
+        public bool DebugAttachHasValue => _app.RemainingArguments.Any(x => x.Equals("--debug:attach", StringComparison.Ordinal));
 
         public bool ExtraArgsHasValue => _app.InternalParamHasValue("--extra-args");
 
@@ -230,6 +230,7 @@ namespace dotnet_new3
             else if (templates.Count == 1)
             {
                 ITemplateInfo templateInfo = templates.First();
+                EngineEnvironmentSettings.Host.LogMessage(_app.GetOptionsHelp());
                 return TemplateHelp(templateInfo, _app.AllTemplateParams);
             }
             else
@@ -332,6 +333,12 @@ namespace dotnet_new3
 
             foreach (ITemplateParameter parameter in filteredParams)
             {
+                if (string.Equals(parameter.DataType, "bool", StringComparison.OrdinalIgnoreCase)
+                    && string.Equals(parameter.DefaultValue, "false", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
                 string displayParameter;
                 if (!parameterNameMap.TryGetValue(parameter.Name, out displayParameter))
                 {
@@ -340,7 +347,7 @@ namespace dotnet_new3
 
                 Reporter.Output.Write($" --{displayParameter}");
 
-                if (!string.IsNullOrEmpty(parameter.DefaultValue))
+                if (!string.IsNullOrEmpty(parameter.DefaultValue) && !string.Equals(parameter.DataType, "bool", StringComparison.OrdinalIgnoreCase))
                 {
                     Reporter.Output.Write($" {parameter.DefaultValue}");
                 }
