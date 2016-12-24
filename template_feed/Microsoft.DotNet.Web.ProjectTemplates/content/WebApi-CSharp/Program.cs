@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 
-namespace WebApplication1
+namespace Company.WebApplication1
 {
     public class Program
     {

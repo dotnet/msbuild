@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ClassLibrary1
+namespace Company.ClassLibrary1
 {
     public class Class1
     {

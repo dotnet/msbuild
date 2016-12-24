@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 
-namespace WebApplication1
+namespace Company.WebApplication1
 {
     public class Program
     {
