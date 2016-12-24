@@ -12,12 +12,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 #if (IndividualAuth)
-using WebApplication1.Data;
-using WebApplication1.Models;
-using WebApplication1.Services;
+using Company.WebApplication1.Data;
+using Company.WebApplication1.Models;
+using Company.WebApplication1.Services;
 #endif
 
-namespace WebApplication1
+namespace Company.WebApplication1
 {
     public class Startup
     {
