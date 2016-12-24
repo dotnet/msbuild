@@ -16,7 +16,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "WebApplication1": {
+    "Company.WebApplication1": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "api/values",
