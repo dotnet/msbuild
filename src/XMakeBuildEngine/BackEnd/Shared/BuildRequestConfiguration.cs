@@ -7,7 +7,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Text;
 using Microsoft.Build.Construction;
@@ -19,7 +18,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Xml;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Evaluation;
