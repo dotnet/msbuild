@@ -19,11 +19,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <EnableDefaultItems Condition=" '$(EnableDefaultItems)' == '' ">true</EnableDefaultItems>
     <EnableDefaultCompileItems Condition=" '$(EnableDefaultCompileItems)' == '' ">true</EnableDefaultCompileItems>
     <EnableDefaultEmbeddedResourceItems Condition=" '$(EnableDefaultEmbeddedResourceItems)' == '' ">true</EnableDefaultEmbeddedResourceItems>
-
-    <!-- The Web SDK would default this to true in a .props file.  That way the .NET SDK and the Web SDK can have different defaults but in either
-         case will be overridden by a value in the project file itself.
-         TODO: Investigate whether it makes sense to have the .NET SDK also default this to true -->
-    <EnableDefaultContentItems Condition=" '$(EnableDefaultContentItems)' == '' ">false</EnableDefaultContentItems>
+    <EnableDefaultContentItems Condition=" '$(EnableDefaultContentItems)' == '' ">true</EnableDefaultContentItems>
   </PropertyGroup>
 
   <PropertyGroup>

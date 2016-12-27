@@ -235,10 +235,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 var ns = project.Root.Name.Namespace;
 
-                XElement propertyGroup = new XElement(ns + "PropertyGroup");
-                project.Root.Add(propertyGroup);
-                propertyGroup.Add(new XElement(ns + "EnableDefaultContentItems", "true"));
-
                 XElement itemGroup = new XElement(ns + "ItemGroup");
                 project.Root.Add(itemGroup);
                 itemGroup.Add(new XElement(ns + "Content", new XAttribute("Include", "CSharpAsContent.cs"),
@@ -280,9 +276,6 @@ namespace Microsoft.NET.Build.Tests
             Action<XDocument> projectChanges = project =>
             {
                 var ns = project.Root.Name.Namespace;
-
-                project.Root.Element(ns + "PropertyGroup").Add(
-                    new XElement(ns + "EnableDefaultContentItems", "true"));
 
                 //  Copy all content items to output directory
                 var itemGroup = new XElement(ns + "ItemGroup");
