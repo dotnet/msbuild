@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Tools.Add.PackageReference;
 using Microsoft.DotNet.Tools.Add.ProjectToProjectReference;
 using Microsoft.DotNet.Tools.Add.ProjectToSolution;
 
@@ -18,6 +19,7 @@ namespace Microsoft.DotNet.Tools.Add
             {
                 AddProjectToSolutionCommand.Create,
                 AddProjectToProjectReferenceCommand.Create,
+                AddPackageReferenceCommand.Create
             };
 
         public static int Run(string[] args)
