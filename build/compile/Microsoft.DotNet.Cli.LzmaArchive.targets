@@ -21,7 +21,7 @@
 
       <ItemGroup>
         <NuGetPackagesArchiveToUpload>
-          <RelativeBlobPath>$(CoreSetupChannel)/Binaries/$(NuGetPackagesArchiveVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
+          <RelativeBlobPath>$(CoreSetupChannel)/Binaries/$(SharedFrameworkVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
         </NuGetPackagesArchiveToUpload>
       </ItemGroup>
 
