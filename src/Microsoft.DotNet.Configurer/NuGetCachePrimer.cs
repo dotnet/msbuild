@@ -90,7 +90,10 @@ namespace Microsoft.DotNet.Configurer
 
         private bool CreateTemporaryProject(string workingDirectory)
         {
-            return RunCommand("new", Enumerable.Empty<string>(), workingDirectory);
+            return RunCommand(
+                "new",
+                new[] { "-t", "Web" },
+                workingDirectory);
         }
 
         private bool RestoreTemporaryProject(string extractedPackagesArchiveDirectory, string workingDirectory)

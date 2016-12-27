@@ -127,6 +127,16 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return new AndConstraint<DirectoryInfoAssertions>(new DirectoryInfoAssertions(dir));
         }
 
+        public AndConstraint<DirectoryInfoAssertions> HaveDirectories(IEnumerable<string> expectedDirs)
+        {
+            foreach (var expectedDir in expectedDirs)
+            {
+                HaveDirectory(expectedDir);
+            }
+
+            return new AndConstraint<DirectoryInfoAssertions>(this);
+        }
+
         public AndConstraint<DirectoryInfoAssertions> OnlyHaveFiles(IEnumerable<string> expectedFiles)
         {
             var actualFiles = _dirInfo.EnumerateFiles("*", SearchOption.TopDirectoryOnly).Select(f => f.Name);

@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             _dotnetNewCommandMock = new Mock<ICommand>();
             SetupCommandMock(_dotnetNewCommandMock);
             commandFactoryMock
-                .Setup(c => c.Create("new", Enumerable.Empty<string>(), null, Constants.DefaultConfiguration))
+                .Setup(c => c.Create("new", new[] { "-t", "Web" }, null, Constants.DefaultConfiguration))
                 .Returns(_dotnetNewCommandMock.Object);
 
             _dotnetRestoreCommandMock = new Mock<ICommand>();

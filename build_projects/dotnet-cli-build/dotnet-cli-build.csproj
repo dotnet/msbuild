@@ -16,6 +16,9 @@
     <PackageReference Include="Microsoft.NETCore.Runtime.CoreCLR">
       <Version>1.0.4</Version>
     </PackageReference>
+    <PackageReference Include="Microsoft.Build">
+      <Version>$(CLI_MSBuild_Version)</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.CSharp">
       <Version>4.0.1</Version>
     </PackageReference>

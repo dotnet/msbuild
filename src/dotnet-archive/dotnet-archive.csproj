@@ -7,7 +7,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="**\*.cs" />
-    <Compile Include="..\dotnet\CommandLine\*.cs" />
+    <Compile Include="..\dotnet\CommandLine\*.cs;..\dotnet\CommonLocalizableStrings.cs;" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.DotNet.Archive\Microsoft.DotNet.Archive.csproj" />

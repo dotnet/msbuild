@@ -21,7 +21,7 @@
 
       <ItemGroup>
         <NuGetPackagesArchiveToUpload>
-          <RelativeBlobPath>$(CoreSetupChannel)/Binaries/$(SharedFrameworkVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
+          <RelativeBlobPath>$(CoreSetupChannel)/Binaries/$(NuGetPackagesArchiveVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
         </NuGetPackagesArchiveToUpload>
       </ItemGroup>
 
@@ -61,6 +61,7 @@
       <MakeDir Directories="$(NuGetPackagesArchiveProject);$(NuGetPackagesArchiveFolder)"/>
 
       <DotNetNew ToolPath="$(Stage2Directory)"
+                 TemplateType="Web"
                  WorkingDirectory="$(NuGetPackagesArchiveProject)" />
 
       <DotNetRestore ToolPath="$(Stage2Directory)"
@@ -83,7 +84,7 @@
     <Target Name="SetupNuGetPackagesArchiveInputsOutputs"
             DependsOnTargets="Prepare;SetupStage">
       <PropertyGroup>
-        <NugetPackagesArchiveName>nuGetPackagesArchive.$(SharedFrameworkVersion).lzma</NugetPackagesArchiveName>
+        <NugetPackagesArchiveName>nuGetPackagesArchive.$(NuGetPackagesArchiveVersion).lzma</NugetPackagesArchiveName>
         <NuGetPackagesArchiveProject>$(IntermediateDirectory)/NuGetPackagesArchiveProject</NuGetPackagesArchiveProject>
         <NuGetPackagesArchiveFolder>$(IntermediateDirectory)/NuGetPackagesArchiveFolder</NuGetPackagesArchiveFolder>
         <ArchiverDll>$(ToolsOutputDirectory)/Archiver.dll</ArchiverDll>
