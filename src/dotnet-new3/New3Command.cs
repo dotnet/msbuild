@@ -220,16 +220,17 @@ namespace dotnet_new3
                 }
             }
 
-            IReadOnlyCollection<ITemplateInfo> templates = TemplateCreator.List(_templateName.Value, language);
+            IReadOnlyCollection<IFilteredTemplateInfo> templates = TemplateCreator.List(_templateName.Value, language);
+            IList<IFilteredTemplateInfo> matchedTemplates = templates.Where(x => FilteredTemplateInfo.IsAnyMatchType(x.MatchDisposition)).ToList();
 
-            if (templates.Count > 1)
+            if (matchedTemplates.Count > 1)
             {
                 ListTemplates();
                 return -1;
             }
-            else if (templates.Count == 1)
+            else if (matchedTemplates.Count == 1)
             {
-                ITemplateInfo templateInfo = templates.First();
+                ITemplateInfo templateInfo = matchedTemplates.First().Info;
                 EngineEnvironmentSettings.Host.LogMessage(_app.GetOptionsHelp());
                 return TemplateHelp(templateInfo, _app.AllTemplateParams);
             }
@@ -293,14 +294,15 @@ namespace dotnet_new3
                 }
             }
 
-            IReadOnlyList<ITemplateInfo> results = TemplateCreator.List(_templateName.Value, language).ToList();
+            IReadOnlyList<IFilteredTemplateInfo> allResults = TemplateCreator.List(_templateName.Value, language).ToList();
+            IReadOnlyList<IFilteredTemplateInfo> matchingResults = allResults.Where(x => FilteredTemplateInfo.IsAnyMatchType(x.MatchDisposition)).ToList();
 
-            if (results.Count == 0)
+            if (matchingResults.Count == 0)
             {
                 EngineEnvironmentSettings.Host.LogMessage(string.Format(LocalizableStrings.CreateFailed, _templateName.Value, "Not Found"));
                 return -1;
             }
-            else if(results.Count > 1)
+            else if(matchingResults.Count > 1)
             {
                 EngineEnvironmentSettings.Host.LogMessage(string.Format(LocalizableStrings.CreateFailed, _templateName.Value, "Multiple matches"));
                 ListTemplates();
@@ -309,11 +311,11 @@ namespace dotnet_new3
 
             if (Alias != null)
             {
-                AliasRegistry.SetTemplateAlias(Alias, results[0]);
+                AliasRegistry.SetTemplateAlias(Alias, matchingResults[0].Info);
+                // TODO: consider returning here, after creating the alias. Otherwise both the alias and the template get created.
             }
 
-
-            return await CreateTemplateAsync(results[0]).ConfigureAwait(false);
+            return await CreateTemplateAsync(matchingResults[0].Info).ConfigureAwait(false);
         }
 
         private static IEnumerable<ITemplateParameter> FilterParamsForHelp(IParameterSet allParams)
@@ -451,7 +453,9 @@ namespace dotnet_new3
         private void ListTemplates(string templateName = null)
         {
             templateName = templateName ?? _templateName.Value;
-            IEnumerable<ITemplateInfo> results = TemplateCreator.List(templateName, Language);
+            IEnumerable<IFilteredTemplateInfo> allResults = TemplateCreator.List(templateName, Language);
+            IEnumerable<ITemplateInfo> results = allResults.Where(x => FilteredTemplateInfo.IsAnyMatchType(x.MatchDisposition)).Select(x => x.Info);
+
             IEnumerable<IGrouping<string, ITemplateInfo>> grouped = results.GroupBy(x => x.GroupIdentity);
             EngineEnvironmentSettings.Host.TryGetHostParamDefault("prefs:language", out string defaultLanguage);
 
@@ -629,7 +633,9 @@ namespace dotnet_new3
         {
             try
             {
-                IReadOnlyCollection<ITemplateInfo> templates = TemplateCreator.List(_templateName.Value, language);
+                IReadOnlyCollection<IFilteredTemplateInfo> matchingTemplates = TemplateCreator.List(_templateName.Value, language);
+                IReadOnlyCollection<ITemplateInfo> templates = matchingTemplates.Where(x => FilteredTemplateInfo.IsAnyMatchType(x.MatchDisposition)).Select(x => x.Info).ToList();
+
                 if (templates.Count == 1)
                 {
                     ITemplateInfo templateInfo = templates.First();
@@ -721,7 +727,7 @@ namespace dotnet_new3
             const int ExamplesToShow = 2;
             IReadOnlyList<string> preferredNameList = new List<string>() { "mvc" };
             int numShown = 0;
-            IList<ITemplateInfo> templateList = TemplateCreator.List(string.Empty, null).ToList();
+            IList<ITemplateInfo> templateList = TemplateCreator.List(string.Empty, null).Select(x => x.Info).ToList();
 
             if (templateList.Count == 0)
             {
