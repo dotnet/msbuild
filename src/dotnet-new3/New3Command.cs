@@ -350,7 +350,17 @@ namespace dotnet_new3
 
             if (matchingResults.Count > 1)
             {
-                matchingResults = matchingResults.Where(x => x.Info.Tags != null && x.Info.Tags.TryGetValue("language", out string lang) && (string.IsNullOrEmpty(lang) || string.Equals(lang, language))).ToList();
+                matchingResults = matchingResults.Where(x => x.Info.Tags != null && x.Info.Tags.TryGetValue("language", out string lang) && (string.IsNullOrEmpty(lang) || string.Equals(lang, language, StringComparison.OrdinalIgnoreCase))).ToList();
+            }
+
+            if (matchingResults.Count > 1)
+            {
+                IReadOnlyList<IFilteredTemplateInfo> exactMatches = matchingResults.Where(x => x.MatchDisposition.Any(y => (y.Location == MatchLocation.Name || y.Location == MatchLocation.ShortName) && y.Kind == MatchKind.Exact)).ToList();
+
+                if (exactMatches.Count > 0)
+                {
+                    matchingResults = exactMatches.ToList();
+                }
             }
 
             if (matchingResults.Count == 0)

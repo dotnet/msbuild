@@ -1,7 +1,7 @@
 {
   "author": "Microsoft",
   "classifications": ["Common", "Console"],
-  "name": "Console App",
+  "name": "Console Application",
   "groupIdentity": "Microsoft.Common.Console",
   "identity": "Microsoft.Common.Console.FSharp",
   "shortName": "console",
