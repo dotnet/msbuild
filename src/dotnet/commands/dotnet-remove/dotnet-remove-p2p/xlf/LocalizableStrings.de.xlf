@@ -20,8 +20,8 @@
       </trans-unit>
       <trans-unit id="AppHelpText">
         <source>Project to project references to remove</source>
-        <target state="new">Project to project references to remove</target>
-        <note></note>
+        <target state="translated">Zu entfernende Interprojektverweise</target>
+        <note />
       </trans-unit>
     </body>
   </file>

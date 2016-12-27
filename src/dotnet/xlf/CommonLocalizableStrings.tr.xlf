@@ -100,8 +100,8 @@
       </trans-unit>
       <trans-unit id="ReferenceDoesNotExist">
         <source>Reference {0} does not exist.</source>
-        <target state="needs-review-translation">{0} başvurusu yok. Yine de eklemek istiyorsanız lütfen --force seçeneğini kullanın. Bunun yapılması projeyi olumsuz yönde etkileyebilir. </target>
-        <note></note>
+        <target state="translated">{0} başvurusu yok.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ReferenceAddedToTheProject">
         <source>Reference `{0}` added to the project.</source>
@@ -370,8 +370,8 @@
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOneReferenceToAdd">
         <source>You must specify at least one reference to add.</source>
-        <target state="needs-review-translation">Eklemek için en az bir başvuru belirtmeniz gerekir. Daha fazla bilgi için lütfen dotnet add --help komutunu çalıştırın.</target>
-        <note></note>
+        <target state="translated">Eklemek için en az bir başvuru belirtmeniz gerekir.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAReference">
         <source>Project {0} already has a reference `{1}`.</source>
@@ -390,8 +390,8 @@
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOnePackageReferenceToAdd">
         <source>You must specify at least one package to add.</source>
-        <target state="needs-review-translation">Eklemek için en az bir başvuru belirtmeniz gerekir. Daha fazla bilgi için lütfen dotnet add --help komutunu çalıştırın.</target>
-        <note></note>
+        <target state="translated">Eklemek için en az bir paket belirtmeniz gerekir.</target>
+        <note />
       </trans-unit>
       <trans-unit id="PackageReferenceAddedToTheProject">
         <source>Package reference `{0}` added to the project.</source>
@@ -420,8 +420,8 @@
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOneProjectToAdd">
         <source>You must specify at least one project to add.</source>
-        <target state="needs-review-translation">Eklemek için en az bir proje belirtmeniz gerekir. Daha fazla bilgi için lütfen dotnet add --help komutunu çalıştırın.</target>
-        <note></note>
+        <target state="translated">Eklemek için en az bir proje belirtmeniz gerekir.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectAddedToTheSolution">
         <source>Project `{0}` added to the solution.</source>
@@ -440,8 +440,8 @@
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOneReferenceToRemove">
         <source>You must specify at least one reference to remove.</source>
-        <target state="needs-review-translation">Silmek için en az bir başvuru belirtmeniz gerekir. Daha fazla bilgi için lütfen dotnet delete --help komutunu çalıştırın.</target>
-        <note></note>
+        <target state="translated">Kaldırmak için en az bir başvuru belirtmeniz gerekir.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ReferenceDeleted">
         <source>Reference `{0}` deleted.</source>
@@ -460,8 +460,8 @@
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOnePackageReferenceToRemove">
         <source>You must specify at least one package reference to remove.</source>
-        <target state="needs-review-translation">Silmek için en az bir başvuru belirtmeniz gerekir. Daha fazla bilgi için lütfen dotnet delete --help komutunu çalıştırın.</target>
-        <note></note>
+        <target state="translated">Kaldırmak için en az bir paket başvurusu belirtmeniz gerekir.</target>
+        <note />
       </trans-unit>
       <trans-unit id="PackageReferenceDeleted">
         <source>Package reference `{0}` deleted.</source>
@@ -570,50 +570,50 @@
       </trans-unit>
       <trans-unit id="ProjectReferenceOneOrMore">
         <source>Project reference(s)</source>
-        <target state="new">Project reference(s)</target>
-        <note></note>
+        <target state="translated">Proje başvuruları</target>
+        <note />
       </trans-unit>
       <trans-unit id="RequiredCommandNotPassed">
         <source>Required command was not provided.</source>
-        <target state="new">Required command was not provided.</target>
-        <note></note>
+        <target state="translated">Gerekli komut sağlanmadı.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MoreThanOneSolutionInDirectory">
         <source>Found more than one solution file in {0}. Please specify which one to use.</source>
-        <target state="new">Found more than one solution file in {0}. Please specify which one to use.</target>
-        <note></note>
+        <target state="translated">{0} içinde birden fazla çözüm dosyası bulundu. Lütfen hangisinin kullanılacağını belirtin.</target>
+        <note />
       </trans-unit>
       <trans-unit id="SolutionAlreadyContainsProject">
         <source>Solution {0} already contains project {1}.</source>
-        <target state="new">Solution {0} already contains project {1}.</target>
-        <note></note>
+        <target state="translated">{0} çözümü zaten {1} projesini içeriyor.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ArgumentsProjectOrSolutionDescription">
         <source>The project or solution to operation on. If a file is not specified, the current directory is searched.</source>
-        <target state="new">The project or solution to operation on. If a file is not specified, the current directory is searched.</target>
-        <note></note>
+        <target state="translated">İşlem yapılacak proje veya çözüm. Bir dosya belirtilmezse, geçerli dizin aranır.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
-        <target state="new">FRAMEWORK</target>
-        <note></note>
+        <target state="translated">FRAMEWORK</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectNotCompatibleWithFrameworks">
         <source>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Please review the project you are trying to add and verify that is compatible with the following targets:</source>
-        <target state="new">Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Please review the project you are trying to add and verify that is compatible with the following targets:</target>
-        <note></note>
+        <target state="translated">`{0}` projesi, iki projede hedeflenen çerçevelerin birbiriyle uyumsuz olması nedeniyle eklenemiyor. Lütfen eklemeye çalıştığınız projeyi inceleyin ve aşağıdaki hedeflerle uyumlu olduğunu doğrulayın:</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectDoesNotTargetFramework">
         <source>Project `{0}` does not target framework `{1}`.</source>
-        <target state="new">Project `{0}` does not target framework `{1}`.</target>
-        <note></note>
+        <target state="translated">`{0}` projesi `{1}` çerçevesini hedeflemiyor.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectCouldNotBeEvaluated">
         <source>Project `{0}` could not be evaluated. Evaluation failed with following error:
 {1}</source>
-        <target state="new">Project `{0}` could not be evaluated. Evaluation failed with following error:
+        <target state="translated">`{0}` projesi değerlendirilemedi. Değerlendirme, aşağıdaki hatayla başarısız oldu:
 {1}</target>
-        <note></note>
+        <note />
       </trans-unit>
     </body>
   </file>

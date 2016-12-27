@@ -30,8 +30,8 @@
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
         <source>Directory in which the build outputs have been placed.</source>
-        <target state="needs-review-translation">已放置建置輸出的目錄</target>
-        <note></note>
+        <target state="translated">已放置建置輸出的目錄。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
@@ -40,8 +40,8 @@
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Clean a specific framework.</source>
-        <target state="needs-review-translation">清除特定架構</target>
-        <note></note>
+        <target state="translated">清除特定架構。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfiguration">
         <source>CONFIGURATION</source>
@@ -50,8 +50,8 @@
       </trans-unit>
       <trans-unit id="CmdConfigurationDescription">
         <source>Clean a specific configuration.</source>
-        <target state="needs-review-translation">清除特定組態</target>
-        <note></note>
+        <target state="translated">清除特定組態。</target>
+        <note />
       </trans-unit>
     </body>
   </file>

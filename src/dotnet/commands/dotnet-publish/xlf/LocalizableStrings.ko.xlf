@@ -30,8 +30,8 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="needs-review-translation">게시할 대상 프레임워크입니다.</target>
-        <note></note>
+        <target state="translated">게시할 대상 프레임워크입니다. 대상 프레임워크는 프로젝트 파일에서 지정해야 합니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeOption">
         <source>RUNTIME_IDENTIFIER</source>
@@ -40,8 +40,8 @@
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependented app.</source>
-        <target state="needs-review-translation">게시할 대상 런타임입니다. 기본값은 이식 가능한 응용 프로그램을 게시하는 것입니다.</target>
-        <note></note>
+        <target state="translated">지정된 런타임 동안 프로젝트를 게시합니다. 자체 포함 배포를 만들 때 사용됩니다. 기본값은 프레임워크 종속 앱을 게시하는 것입니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
@@ -50,8 +50,8 @@
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>Output directory in which to place the published artifacts.</source>
-        <target state="needs-review-translation">앱을 게시할 경로입니다.</target>
-        <note></note>
+        <target state="translated">게시할 아티팩트를 배치할 출력 디렉터리입니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ConfigurationOption">
         <source>CONFIGURATION</source>
@@ -60,8 +60,8 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="needs-review-translation">빌드할 구성입니다.</target>
-        <note></note>
+        <target state="translated">프로젝트 빌드에 사용할 구성입니다. 대부분의 프로젝트에서 기본값은 "Debug"입니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOption">
         <source>VERSION_SUFFIX</source>
@@ -70,8 +70,8 @@
       </trans-unit>
       <trans-unit id="VersionSuffixOptionDescription">
         <source>Defines the value for the $(VersionSuffix) property in the project.</source>
-        <target state="needs-review-translation">프로젝트에서 $(VersionSuffix) 속성의 값을 정의합니다.</target>
-        <note></note>
+        <target state="translated">프로젝트에서 $(VersionSuffix) 속성의 값을 정의합니다.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

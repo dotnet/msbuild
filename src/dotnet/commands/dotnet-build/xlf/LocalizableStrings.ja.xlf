@@ -15,8 +15,8 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>Configuration to use for building the project. Default for most projects is  "Debug".</source>
-        <target state="needs-review-translation">構築する構成</target>
-        <note></note>
+        <target state="translated">プロジェクトの構築に使用する構成。ほとんどのプロジェクトの場合、既定は "デバッグ" です。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionName">
         <source>CONFIGURATION</source>
@@ -25,8 +25,8 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>Target framework to build for. The target framework has to be specified in the project file.</source>
-        <target state="needs-review-translation">特定のフレームワークをコンパイルする</target>
-        <note></note>
+        <target state="translated">構築用のターゲット フレームワーク。ターゲット フレームワークはプロジェクト ファイルで指定する必要があります。</target>
+        <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionName">
         <source>FRAMEWORK</source>
@@ -35,18 +35,18 @@
       </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">
         <source>Set this flag to ignore project-to-project references and only build the root project</source>
-        <target state="needs-review-translation">project to project 参照を無視して、ルート プロジェクトのみを構築するには、このフラグを設定します</target>
-        <note></note>
+        <target state="translated">プロジェクト間参照を無視して、ルート プロジェクトのみを構築するには、このフラグを設定します</target>
+        <note />
       </trans-unit>
       <trans-unit id="NoIncrementialOptionDescription">
         <source>Disables incremental build.</source>
-        <target state="needs-review-translation">インクリメンタル ビルドを無効にするには、このフラグを設定します</target>
-        <note></note>
+        <target state="translated">インクリメンタル ビルドを無効にします。</target>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>Output directory in which to place built artifacts.</source>
-        <target state="needs-review-translation">出力を配置するディレクトリ</target>
-        <note></note>
+        <target state="translated">ビルド成果物を配置する出力ディレクトリ。</target>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOptionName">
         <source>OUTPUT_DIR</source>

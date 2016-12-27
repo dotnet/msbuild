@@ -17,25 +17,25 @@ You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-te
 Configuring...
 -------------------
 A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</source>
-        <target state="new">Welcome to .NET Core!
+        <target state="translated">欢迎使用 .NET Core！
 ---------------------
-Learn more about .NET Core @ https://aka.ms/dotnet-docs. Use dotnet --help to see available commands or go to https://aka.ms/dotnet-cli-docs.
+访问 https://aka.ms/dotnet-docs，可了解有关 .NET Core 的详细信息。使用 dotnet --help 查看可用命令，或转到 https://aka.ms/dotnet-cli-docs。
 
-Telemetry
+遥测
 --------------
-The .NET Core tools collect usage data in order to improve your experience. The data is anonymous and does not include command-line arguments. The data is collected by Microsoft and shared with the community.
-You can opt out of telemetry by setting a DOTNET_CLI_TELEMETRY_OPTOUT environment variable to 1 using your favorite shell.
-You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-telemetry.
+.NET Core 工具收集使用数据以改善用户体验。数据是匿名的，不包括命令行参数。数据由 Microsoft 收集并与社区共享。
+可使用你青睐的 shell 将 DOTNET_CLI_TELEMETRY_OPTOUT 环境变量设置为 1，选择停止遥测。
+可访问 https://aka.ms/dotnet-cli-telemetry，阅读有关 .NET Core 工具遥测的详细信息。
 
-Configuring...
+正在配置...
 -------------------
-A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</target>
-        <note></note>
+正在运行命令以初始填充本地软件包缓存、提高还原速度并启用脱机访问。此命令将需要一分钟时间完成，只会运行一次。</target>
+        <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">
         <source>Failed to create prime the NuGet cache. {0} failed with: {1}</source>
-        <target state="new">Failed to create prime the NuGet cache. {0} failed with: {1}</target>
-        <note></note>
+        <target state="translated">未能创建主要 NuGet 缓存。{0} 失败，错误为: {1}</target>
+        <note />
       </trans-unit>
     </body>
   </file>

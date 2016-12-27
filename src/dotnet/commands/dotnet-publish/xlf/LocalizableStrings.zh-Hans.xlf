@@ -30,8 +30,8 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="needs-review-translation">要发布的目标框架</target>
-        <note></note>
+        <target state="translated">发布的目标框架。必须在项目文件中指定目标框架。</target>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeOption">
         <source>RUNTIME_IDENTIFIER</source>
@@ -40,8 +40,8 @@
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependented app.</source>
-        <target state="needs-review-translation">要发布的目标运行时默认为发布可移植的应用程序。</target>
-        <note></note>
+        <target state="translated">针对给定运行时发布项目。创建自包含部署时使用此项。默认操作是发布依赖框架的应用。</target>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
@@ -50,8 +50,8 @@
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>Output directory in which to place the published artifacts.</source>
-        <target state="needs-review-translation">在其中发布应用的路径</target>
-        <note></note>
+        <target state="translated">用于放置已发布项的输出目录。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ConfigurationOption">
         <source>CONFIGURATION</source>
@@ -60,8 +60,8 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="needs-review-translation">在何处生成配置</target>
-        <note></note>
+        <target state="translated">用于生成项目的配置。大多数项目的默认值为“Debug”。</target>
+        <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOption">
         <source>VERSION_SUFFIX</source>
@@ -70,8 +70,8 @@
       </trans-unit>
       <trans-unit id="VersionSuffixOptionDescription">
         <source>Defines the value for the $(VersionSuffix) property in the project.</source>
-        <target state="needs-review-translation">定义项目中 $(VersionSuffix)属性的值</target>
-        <note></note>
+        <target state="translated">定义项目中 $(VersionSuffix) 属性的值。</target>
+        <note />
       </trans-unit>
     </body>
   </file>

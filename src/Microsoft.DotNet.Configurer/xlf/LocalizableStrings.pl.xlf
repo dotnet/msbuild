@@ -17,25 +17,25 @@ You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-te
 Configuring...
 -------------------
 A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</source>
-        <target state="new">Welcome to .NET Core!
+        <target state="translated">.NET Core — Zapraszamy!
 ---------------------
-Learn more about .NET Core @ https://aka.ms/dotnet-docs. Use dotnet --help to see available commands or go to https://aka.ms/dotnet-cli-docs.
+Więcej informacji o programie .NET Core znajdziesz na stronie https://aka.ms/dotnet-docs. Aby wyświetlić dostępne polecenia, użyj polecenia dotnet --help lub przejdź na stronę https://aka.ms/dotnet-cli-docs.
 
-Telemetry
+Telemetria
 --------------
-The .NET Core tools collect usage data in order to improve your experience. The data is anonymous and does not include command-line arguments. The data is collected by Microsoft and shared with the community.
-You can opt out of telemetry by setting a DOTNET_CLI_TELEMETRY_OPTOUT environment variable to 1 using your favorite shell.
-You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-telemetry.
+Narzędzia programu .NET Core zbierają dane dotyczące użycia w celu ulepszenia Twojego środowiska pracy. Dane te są anonimowe i nie obejmują argumentów wiersza polecenia. Zbiera je firma Microsoft i udostępnia społeczności.
+Z telemetrii można zrezygnować, ustawiając zmienną środowiskową DOTNET_CLI_TELEMETRY_OPTOUT na wartość 1 przy użyciu ulubionej powłoki.
+Więcej informacji na temat telemetrii narzędzi programu .NET Core możesz znaleźć na stronie https://aka.ms/dotnet-cli-telemetry.
 
-Configuring...
+Trwa konfigurowanie…
 -------------------
-A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</target>
-        <note></note>
+Wykonywane jest polecenie w celu wstępnego wypełnienia lokalnej pamięci podręcznej pakietów, poprawy szybkości przywracania i włączenia dostępu offline. Wykonanie tego polecenia jest jednorazowe i zajmie maksymalnie minutę.</target>
+        <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">
         <source>Failed to create prime the NuGet cache. {0} failed with: {1}</source>
-        <target state="new">Failed to create prime the NuGet cache. {0} failed with: {1}</target>
-        <note></note>
+        <target state="translated">Nie udało się utworzyć głównej pamięci podręcznej NuGet. Operacja {0} zakończyła się niepowodzeniem: {1}</target>
+        <note />
       </trans-unit>
     </body>
   </file>

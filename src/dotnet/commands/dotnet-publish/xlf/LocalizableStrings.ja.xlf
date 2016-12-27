@@ -30,8 +30,8 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="needs-review-translation">発行用のターゲット フレームワーク</target>
-        <note></note>
+        <target state="translated">発行用のターゲット フレームワーク。ターゲット フレームワークはプロジェクト ファイルで指定する必要があります。</target>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeOption">
         <source>RUNTIME_IDENTIFIER</source>
@@ -40,8 +40,8 @@
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependented app.</source>
-        <target state="needs-review-translation">発行用のターゲット ランタイム既定では、ポータブル アプリケーションを発行します。</target>
-        <note></note>
+        <target state="translated">指定したランタイムのプロジェクトを発行します。これは、自己完結型の開発を作成する際に使用します。既定では、フレームワーク依存アプリを発行します。</target>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
@@ -50,8 +50,8 @@
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>Output directory in which to place the published artifacts.</source>
-        <target state="needs-review-translation">アプリを発行するパス</target>
-        <note></note>
+        <target state="translated">発行された成果物を配置する出力ディレクトリ。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ConfigurationOption">
         <source>CONFIGURATION</source>
@@ -60,8 +60,8 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="needs-review-translation">構築する構成</target>
-        <note></note>
+        <target state="translated">プロジェクトの構築に使用する構成。ほとんどのプロジェクトの場合、既定は "デバッグ" です。</target>
+        <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOption">
         <source>VERSION_SUFFIX</source>
@@ -70,8 +70,8 @@
       </trans-unit>
       <trans-unit id="VersionSuffixOptionDescription">
         <source>Defines the value for the $(VersionSuffix) property in the project.</source>
-        <target state="needs-review-translation">プロジェクトの $(VersionSuffix) プロパティの値を定義します。</target>
-        <note></note>
+        <target state="translated">プロジェクトの $(VersionSuffix) プロパティの値を定義します。</target>
+        <note />
       </trans-unit>
     </body>
   </file>

@@ -5,20 +5,20 @@
       <group id="src/dotnet/commands/dotnet-list/dotnet-list-p2ps/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET Core Project-to-Project dependency viewer</source>
-        <target state="new">.NET Core Project-to-Project dependency viewer</target>
-        <note></note>
+        <target state="translated">.NET Core プロジェクト間の依存関係ビューアー</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Command to list project to project (p2p) references</source>
-        <target state="new">Command to list project to project (p2p) references</target>
-        <note></note>
+        <target state="translated">プロジェクト間 (p2p) 参照を一覧表示するコマンド</target>
+        <note />
       </trans-unit>
       <trans-unit id="NoReferencesFound">
         <source>There are no {0} references in project {1}.
 {0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
-        <target state="new">There are no {0} references in project {1}.
-{0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </target>
-        <note></note>
+        <target state="translated">プロジェクト {1} 内に {0} 参照がありません。
+{0} は要求中のアイテムの種類 (プロジェクト、パッケージ、p2p) であり、{1} は操作対象のオブジェクト (プロジェクト ファイルまたはソリューション ファイル) です。 </target>
+        <note />
       </trans-unit>
     </body>
   </file>

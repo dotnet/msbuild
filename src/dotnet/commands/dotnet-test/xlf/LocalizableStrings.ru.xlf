@@ -25,8 +25,8 @@
       </trans-unit>
       <trans-unit id="CmdSettingsFile">
         <source>SETTINGS_FILE</source>
-        <target state="needs-review-translation">SettingsFile</target>
-        <note></note>
+        <target state="translated">SETTINGS_FILE</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSettingsDescription">
         <source>Settings to use when running tests.</source>
@@ -40,8 +40,8 @@
       </trans-unit>
       <trans-unit id="CmdTestCaseFilterExpression">
         <source>EXPRESSION</source>
-        <target state="needs-review-translation">Expression</target>
-        <note></note>
+        <target state="translated">EXPRESSION</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdTestCaseFilterDescription">
         <source>Run tests that match the given expression.
@@ -51,18 +51,21 @@
                                         Run tests that contain the specified name: --filter "FullyQualifiedName~Namespace.Class"
                                         More info on filtering support: https://aka.ms/vstest-filtering
                                         </source>
-        <target state="needs-review-translation">Выполнение тестов, соответствующих данному выражению.
+        <target state="translated">Выполнение тестов, соответствующих данному выражению.
                                         Примеры:
-                                        --testCaseFilter:"Priority = 1"
-                                        --testCaseFilter: "(FullyQualifiedName~Nightly | Name = MyTestMethod)"</target>
-        <note></note>
+                                        Запуск тестов с приоритетом 1: --filter "Priority = 1"
+                                        Запуск теста с указанным полным именем: --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
+                                        Запуск тестов, содержащих указанное имя: --filter "FullyQualifiedName~Namespace.Class"
+                                        Дополнительные сведения о поддержке фильтрации: https://aka.ms/vstest-filtering
+                                        </target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdTestAdapterPathDescription">
         <source>Use custom adapters from the given path in the test run.
                                         Example: --test-adapter-path &lt;PATH_TO_ADAPTER&gt;</source>
-        <target state="needs-review-translation">Использование настраиваемых адаптеров по заданному пути в тестовом запуске.
-                                        Пример: --testAdapterPath:&lt;путь_к_настраиваемым_адаптерам&gt;</target>
-        <note></note>
+        <target state="translated">Использование настраиваемых адаптеров по заданному пути в тестовом запуске.
+                                        Пример: --test-adapter-path &lt;PATH_TO_ADAPTER&gt;</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdLoggerOption">
         <source>LoggerUri/FriendlyName</source>
@@ -78,18 +81,18 @@
       </trans-unit>
       <trans-unit id="CmdConfiguration">
         <source>CONFIGURATION</source>
-        <target state="needs-review-translation">configuration</target>
-        <note></note>
+        <target state="translated">CONFIGURATION</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="needs-review-translation">Конфигурация, в которой выполняется сборка, например "Отладка"/"Выпуск"</target>
-        <note></note>
+        <target state="translated">Конфигурация, используемая при сборке проекта. По умолчанию для большинства проектов используется "Отладка".</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
-        <target state="needs-review-translation">FrameworkVersion</target>
-        <note></note>
+        <target state="translated">FRAMEWORK</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Looks for test binaries for a specific framework</source>
@@ -98,8 +101,8 @@
       </trans-unit>
       <trans-unit id="CmdOutputDir">
         <source>OUTPUT_DIR</source>
-        <target state="needs-review-translation">OutputDir</target>
-        <note></note>
+        <target state="translated">OUTPUT_DIR</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdOutputDescription">
         <source>Directory in which to find the binaries to be run</source>
@@ -108,8 +111,8 @@
       </trans-unit>
       <trans-unit id="CmdPathToLogFile">
         <source>PATH_TO_FILE</source>
-        <target state="needs-review-translation">PathToLogFile</target>
-        <note></note>
+        <target state="translated">PATH_TO_FILE</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPathTologFileDescription">
         <source>Enable verbose logs for test platform.

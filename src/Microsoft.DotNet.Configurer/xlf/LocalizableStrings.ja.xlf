@@ -17,25 +17,25 @@ You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-te
 Configuring...
 -------------------
 A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</source>
-        <target state="new">Welcome to .NET Core!
+        <target state="translated">.NET Core へようこそ!
 ---------------------
-Learn more about .NET Core @ https://aka.ms/dotnet-docs. Use dotnet --help to see available commands or go to https://aka.ms/dotnet-cli-docs.
+.NET Core の詳細については、https://aka.ms/dotnet-docs を参照してください。利用可能なコマンドを参照するには、dotnet --help を使用するか、https://aka.ms/dotnet-cli-docs にアクセスしてください。
 
-Telemetry
+テレメトリ
 --------------
-The .NET Core tools collect usage data in order to improve your experience. The data is anonymous and does not include command-line arguments. The data is collected by Microsoft and shared with the community.
-You can opt out of telemetry by setting a DOTNET_CLI_TELEMETRY_OPTOUT environment variable to 1 using your favorite shell.
-You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-telemetry.
+.NET Core ツールは、お客様のエクスペリエンス向上のために利用状況データを収集します。データは匿名であり、コマンドライン引数は含まれません。データは Microsoft によって収集され、コミュニティと共有されます。
+お好きなシェルを使用して DOTNET_CLI_TELEMETRY_OPTOUT 環境変数を 1 に設定すると、テレメトリを解除できます。
+.NET Core ツールのテレメトリの詳細については、https://aka.ms/dotnet-cli-telemetry でお読みいただけます。
 
-Configuring...
+構成...
 -------------------
-A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</target>
-        <note></note>
+復元の高速化とオフライン アクセスの有効化のため、コマンドを実行してローカル パッケージ キャッシュを最初に設定しています。このコマンドは完了までに 1 分ほどかかりますが、設定が必要なのは最初の1回のみです。</target>
+        <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">
         <source>Failed to create prime the NuGet cache. {0} failed with: {1}</source>
-        <target state="new">Failed to create prime the NuGet cache. {0} failed with: {1}</target>
-        <note></note>
+        <target state="translated">プライム NuGet キャッシュを作成できませんでした。{0} は {1} で失敗しました</target>
+        <note />
       </trans-unit>
     </body>
   </file>

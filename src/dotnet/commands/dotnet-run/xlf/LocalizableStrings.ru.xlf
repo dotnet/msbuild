@@ -15,8 +15,8 @@
       </trans-unit>
       <trans-unit id="CommandOptionConfigurationDescription">
         <source>Configuration to use for building the project. Default for most projects is "Debug".</source>
-        <target state="needs-review-translation">Конфигурация, в которой выполняется сборка</target>
-        <note></note>
+        <target state="translated">Конфигурация, используемая для сборки проекта. По умолчанию для большинства сборок используется "Отладка".</target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandOptionFramework">
         <source>FRAMEWORK</source>
@@ -25,8 +25,8 @@
       </trans-unit>
       <trans-unit id="CommandOptionFrameworkDescription">
         <source>Build and run the app using the specified framework. The framework has to be specified in the project file. </source>
-        <target state="needs-review-translation">Компиляция определенной платформы</target>
-        <note></note>
+        <target state="translated">Сборка и выполнение приложения с использованием определенной платформы. Платформа должна быть указана в файле проекта. </target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandOptionProjectDescription">
         <source>The path to the project file to run (defaults to the current directory if there is only one project).</source>
@@ -110,8 +110,8 @@
       </trans-unit>
       <trans-unit id="RunCommandAdditionalArgsHelpText">
         <source>Arguments passed to the application that is being run.</source>
-        <target state="new">Arguments passed to the application that is being run.</target>
-        <note></note>
+        <target state="translated">Аргументы переданы в выполняемое приложение.</target>
+        <note />
       </trans-unit>
     </body>
   </file>
