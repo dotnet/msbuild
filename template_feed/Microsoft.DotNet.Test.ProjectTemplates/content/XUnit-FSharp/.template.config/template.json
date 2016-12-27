@@ -1,12 +1,13 @@
 {
   "author": "Microsoft",
   "classifications": ["Test", "xUnit"],
-  "name": "xUnit Test Project (.NET Core)",
+  "name": "xUnit Test Project",
   "groupIdentity": "Microsoft.Test.xUnit",
   "identity": "Microsoft.Test.xUnit.FSharp",
   "shortName": "xunit",
   "tags": {
-    "language": "F#"
+    "language": "F#",
+    "type": "project"
   },
   "sourceName": "Company.TestProject1",
   "preferNameDirectory": true

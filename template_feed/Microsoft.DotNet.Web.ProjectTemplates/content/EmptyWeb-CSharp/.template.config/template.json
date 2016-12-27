@@ -6,7 +6,8 @@
   "identity": "Microsoft.Web.Empty.CSharp",
   "shortName": "web",
   "tags": {
-    "language": "C#"
+    "language": "C#",
+    "type": "project"
   },
   "sourceName": "Company.WebApplication1",
   "preferNameDirectory": true

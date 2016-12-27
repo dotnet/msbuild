@@ -1,12 +1,13 @@
 {
   "author": "Microsoft",
   "classifications": ["Common", "Console"],
-  "name": "Console App (.NET Core)",
+  "name": "Console Application",
   "groupIdentity": "Microsoft.Common.Console",
   "identity": "Microsoft.Common.Console.CSharp",
   "shortName": "console",
   "tags": {
-    "language": "C#"
+    "language": "C#",
+    "type": "project"
   },
   "sourceName": "Company.ConsoleApplication1",
   "preferNameDirectory": true

@@ -1,3 +1,6 @@
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,7 +26,7 @@ namespace dotnet_new3
             // Note: If the same param is specified multiple times across the files, last-in-wins
             // TODO: consider another course of action.
             if (extraArgFileNames.Count > 0)
-            { 
+            {
                 foreach (string argFile in extraArgFileNames)
                 {
                     using (Stream s = File.OpenRead(argFile))
@@ -34,7 +37,7 @@ namespace dotnet_new3
 
                         foreach (JProperty property in obj.Properties())
                         {
-                            if(property.Value.Type == JTokenType.String)
+                            if (property.Value.Type == JTokenType.String)
                             {
                                 IList<string> values = new List<string>
                                 {
