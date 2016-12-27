@@ -1,0 +1,14 @@
+{
+  "author": "Microsoft",
+  "classifications": ["Web", "MVC"],
+  "name": "MVC ASP.NET Web Application",
+  "groupIdentity": "Microsoft.Web.Mvc",
+  "identity": "Microsoft.Web.Mvc.FSharp",
+  "shortName": "mvc",
+  "tags": {
+    "language": "F#",
+    "type": "project"
+  },
+  "sourceName": "Company.WebApplication1",
+  "preferNameDirectory": true
+}

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -60,7 +63,6 @@ namespace dotnet_new3
             _helpDisplayer.ShowHelp();
         }
 
-        // note: this is mostly copy-pased from CommandLineApplication.ShowHelp()
         public string GetOptionsHelp()
         {
             StringBuilder optionsBuilder = new StringBuilder();
@@ -227,8 +229,7 @@ namespace dotnet_new3
 
             foreach (KeyValuePair<string, IList<string>> param in allParameters)
             {
-                string canonicalName;
-                if (_hiddenCommandCanonicalMapping.TryGetValue(param.Key, out canonicalName))
+                if (_hiddenCommandCanonicalMapping.TryGetValue(param.Key, out string canonicalName))
                 {
                     CommandOptionType optionType = _hiddenCommandOptions[canonicalName];
 
@@ -293,8 +294,7 @@ namespace dotnet_new3
                     continue;
                 }
 
-                string flagFullText;
-                if (parameterNameMap == null || !parameterNameMap.TryGetValue(parameter.Name, out flagFullText))
+                if (parameterNameMap == null || !parameterNameMap.TryGetValue(parameter.Name, out string flagFullText))
                 {
                     flagFullText = parameter.Name;
                 }
@@ -411,9 +411,7 @@ namespace dotnet_new3
                     {
                         string variant = variantToCanonical.Key;
                         string canonical = variantToCanonical.Value;
-
-                        IList<string> variantList;
-                        if (!_canonicalToVariantsTemplateParamMap.TryGetValue(canonical, out variantList))
+                        if (!_canonicalToVariantsTemplateParamMap.TryGetValue(canonical, out IList<string> variantList))
                         {
                             variantList = new List<string>();
                             _canonicalToVariantsTemplateParamMap.Add(canonical, variantList);
