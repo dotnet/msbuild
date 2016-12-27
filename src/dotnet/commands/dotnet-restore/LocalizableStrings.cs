@@ -14,6 +14,10 @@
 
         public const string CmdSourceOptionDescription = "Specifies a NuGet package source to use during the restore.";
 
+        public const string CmdRuntimeOption = "RUNTIME_IDENTIFIER";
+
+        public const string CmdRuntimeOptionDescription = "Target runtime to restore packages for.";
+
         public const string CmdPackagesOption = "PACKAGES_DIRECTORY";
 
         public const string CmdPackagesOptionDescription = "Directory to install packages in.";
