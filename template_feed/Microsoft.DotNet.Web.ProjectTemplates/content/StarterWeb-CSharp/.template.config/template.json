@@ -53,6 +53,12 @@
       "datatype": "bool",
       "defaultValue": "false",
       "description": "Whether or not to setup a local DB"
+    },    
+    "IncludeApplicationInsights": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Whether or not to include Application Insights in the project"
     }
   }
 }

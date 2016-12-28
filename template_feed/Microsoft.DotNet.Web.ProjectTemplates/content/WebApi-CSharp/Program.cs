@@ -17,7 +17,9 @@ namespace Company.WebApplication1
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
                 .UseStartup<Startup>()
+#if (IncludeApplicationInsights)
                 .UseApplicationInsights()
+#endif
                 .Build();
 
             host.Run();

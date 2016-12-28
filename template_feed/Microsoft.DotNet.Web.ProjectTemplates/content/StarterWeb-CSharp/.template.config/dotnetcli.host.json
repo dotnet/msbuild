@@ -1,4 +1,7 @@
 {
+  "HiddenParameters": [
+    "IncludeApplicationInsights"
+  ],
   "ParameterMap": {
     "UseLocalDB": "use-local-db"
   }

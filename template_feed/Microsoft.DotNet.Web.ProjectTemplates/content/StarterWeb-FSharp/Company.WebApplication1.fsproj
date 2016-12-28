@@ -1,4 +1,4 @@
-<Project ToolsVersion="15.0" Sdk="FSharp.NET.Sdk;Microsoft.NET.Sdk.Web">
+<Project ToolsVersion="15.0" Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -27,25 +27,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App" Version="1.0.1" />
-    <PackageReference Include="Microsoft.FSharp.Core.netcore" Version="1.0.0-alpha-161023" />
     <PackageReference Include="FSharp.NET.Sdk" Version="1.0.0-beta-*">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics" Version="1.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="1.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Razor.Tools" Version="1.0.0-preview2-final" />
-    <PackageReference Include="Microsoft.AspNetCore.Routing" Version="1.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Server.IISIntegration" Version="1.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" Version="1.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="1.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="1.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="1.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="1.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="1.0.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink.Loader" Version="14.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="1.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="1.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="1.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.0.1" />
+    <PackageReference Include="Microsoft.FSharp.Core.netcore" Version="1.0.0-alpha-161023" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
