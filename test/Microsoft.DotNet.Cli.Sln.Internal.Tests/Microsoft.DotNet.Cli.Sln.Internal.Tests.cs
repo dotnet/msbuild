@@ -13,65 +13,282 @@ namespace Microsoft.DotNet.Cli.Sln.Internal.Tests
 {
     public class GivenAnSlnFile : TestBase
     {
+        private const string SolutionModified = @"
+Microsoft Visual Studio Solution File, Format Version 14.00
+# Visual Studio 16
+VisualStudioVersion = 16.0.26006.2
+MinimumVisualStudioVersion = 11.0.40219.1
+Project(""{7072A694-548F-4CAE-A58F-12D257D5F486}"") = ""AppModified"", ""AppModified\AppModified.csproj"", ""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}""
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Debug|x64.ActiveCfg = Debug|x64
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Debug|x64.Build.0 = Debug|x64
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Debug|x86.ActiveCfg = Debug|x86
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Debug|x86.Build.0 = Debug|x86
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|x64.ActiveCfg = Release|x64
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|x64.Build.0 = Release|x64
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|x86.ActiveCfg = Release|x86
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = TRUE
+	EndGlobalSection
+EndGlobal
+";
+
+        private const string SolutionWithAppAndLibProjects = @"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26006.2
+MinimumVisualStudioVersion = 10.0.40219.1
+Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""App"", ""App\App.csproj"", ""{7072A694-548F-4CAE-A58F-12D257D5F486}""
+EndProject
+Project(""{13B669BE-BB05-4DDF-9536-439F39A36129}"") = ""Lib"", ""..\Lib\Lib.csproj"", ""{21D9159F-60E6-4F65-BC6B-D01B71B15FFC}""
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Debug|x64.ActiveCfg = Debug|x64
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Debug|x64.Build.0 = Debug|x64
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Debug|x86.ActiveCfg = Debug|x86
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Debug|x86.Build.0 = Debug|x86
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|x64.ActiveCfg = Release|x64
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|x64.Build.0 = Release|x64
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|x86.ActiveCfg = Release|x86
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|x86.Build.0 = Release|x86
+		{21D9159F-60E6-4F65-BC6B-D01B71B15FFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21D9159F-60E6-4F65-BC6B-D01B71B15FFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21D9159F-60E6-4F65-BC6B-D01B71B15FFC}.Debug|x64.ActiveCfg = Debug|x64
+		{21D9159F-60E6-4F65-BC6B-D01B71B15FFC}.Debug|x64.Build.0 = Debug|x64
+		{21D9159F-60E6-4F65-BC6B-D01B71B15FFC}.Debug|x86.ActiveCfg = Debug|x86
+		{21D9159F-60E6-4F65-BC6B-D01B71B15FFC}.Debug|x86.Build.0 = Debug|x86
+		{21D9159F-60E6-4F65-BC6B-D01B71B15FFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21D9159F-60E6-4F65-BC6B-D01B71B15FFC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21D9159F-60E6-4F65-BC6B-D01B71B15FFC}.Release|x64.ActiveCfg = Release|x64
+		{21D9159F-60E6-4F65-BC6B-D01B71B15FFC}.Release|x64.Build.0 = Release|x64
+		{21D9159F-60E6-4F65-BC6B-D01B71B15FFC}.Release|x86.ActiveCfg = Release|x86
+		{21D9159F-60E6-4F65-BC6B-D01B71B15FFC}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
+";
+
         [Fact]
-        public void WhenGivenAValidPathItReadsAnSlnFile()
+        public void WhenGivenAValidSlnFileItReadsAndVerifiesContents()
         {
-            var solutionDirectory =
-                TestAssetsManager.CreateTestInstance("TestAppWithSln", callingMethod: "p").Path;
+            var tmpFile = Temp.CreateFile();
+            tmpFile.WriteAllText(SolutionWithAppAndLibProjects);
 
-            var solutionFullPath = Path.Combine(solutionDirectory, "TestAppWithSln.sln");
-
-            var slnFile = SlnFile.Read(solutionFullPath);
+            SlnFile slnFile = SlnFile.Read(tmpFile.Path);
 
             slnFile.FormatVersion.Should().Be("12.00");
-            slnFile.ProductDescription.Should().Be("Visual Studio 14");
-            slnFile.VisualStudioVersion.Should().Be("14.0.25420.1");
+            slnFile.ProductDescription.Should().Be("Visual Studio 15");
+            slnFile.VisualStudioVersion.Should().Be("15.0.26006.2");
             slnFile.MinimumVisualStudioVersion.Should().Be("10.0.40219.1");
-            slnFile.BaseDirectory.Should().Be(solutionDirectory);
-            slnFile.FullPath.Should().Be(solutionFullPath);
+            slnFile.BaseDirectory.Should().Be(Path.GetDirectoryName(tmpFile.Path));
+            slnFile.FullPath.Should().Be(tmpFile.Path);
 
-            slnFile.Projects.Count.Should().Be(1);
+            slnFile.Projects.Count.Should().Be(2);
             var project = slnFile.Projects[0];
-            project.Id.Should().Be("{0138CB8F-4AA9-4029-A21E-C07C30F425BA}");
-            project.TypeGuid.Should().Be("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}");
-            project.Name.Should().Be("TestAppWithSln");
-            project.FilePath.Should().Be("TestAppWithSln.xproj");
+            project.Id.Should().Be("{7072A694-548F-4CAE-A58F-12D257D5F486}");
+            project.TypeGuid.Should().Be("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}");
+            project.Name.Should().Be("App");
+            project.FilePath.Should().Be(Path.Combine("App", "App.csproj"));
+            project = slnFile.Projects[1];
+            project.Id.Should().Be("{21D9159F-60E6-4F65-BC6B-D01B71B15FFC}");
+            project.TypeGuid.Should().Be("{13B669BE-BB05-4DDF-9536-439F39A36129}");
+            project.Name.Should().Be("Lib");
+            project.FilePath.Should().Be(Path.Combine("..", "Lib", "Lib.csproj"));
+
+            slnFile.SolutionConfigurationsSection.Count.Should().Be(6);
+            slnFile.SolutionConfigurationsSection
+                .GetValue("Debug|Any CPU", string.Empty)
+                .Should().Be("Debug|Any CPU");
+            slnFile.SolutionConfigurationsSection
+                .GetValue("Debug|x64", string.Empty)
+                .Should().Be("Debug|x64");
+            slnFile.SolutionConfigurationsSection
+                .GetValue("Debug|x86", string.Empty)
+                .Should().Be("Debug|x86");
+            slnFile.SolutionConfigurationsSection
+                .GetValue("Release|Any CPU", string.Empty)
+                .Should().Be("Release|Any CPU");
+            slnFile.SolutionConfigurationsSection
+                .GetValue("Release|x64", string.Empty)
+                .Should().Be("Release|x64");
+            slnFile.SolutionConfigurationsSection
+                .GetValue("Release|x86", string.Empty)
+                .Should().Be("Release|x86");
+
+            slnFile.ProjectConfigurationsSection.Count.Should().Be(2);
+            var projectConfigSection = slnFile
+                .ProjectConfigurationsSection
+                .GetPropertySet("{7072A694-548F-4CAE-A58F-12D257D5F486}");
+            projectConfigSection.Count.Should().Be(12);
+            projectConfigSection
+                .GetValue("Debug|Any CPU.ActiveCfg", string.Empty)
+                .Should().Be("Debug|Any CPU");
+            projectConfigSection
+                .GetValue("Debug|Any CPU.Build.0", string.Empty)
+                .Should().Be("Debug|Any CPU");
+            projectConfigSection
+                .GetValue("Debug|x64.ActiveCfg", string.Empty)
+                .Should().Be("Debug|x64");
+            projectConfigSection
+                .GetValue("Debug|x64.Build.0", string.Empty)
+                .Should().Be("Debug|x64");
+            projectConfigSection
+                .GetValue("Debug|x86.ActiveCfg", string.Empty)
+                .Should().Be("Debug|x86");
+            projectConfigSection
+                .GetValue("Debug|x86.Build.0", string.Empty)
+                .Should().Be("Debug|x86");
+            projectConfigSection
+                .GetValue("Release|Any CPU.ActiveCfg", string.Empty)
+                .Should().Be("Release|Any CPU");
+            projectConfigSection
+                .GetValue("Release|Any CPU.Build.0", string.Empty)
+                .Should().Be("Release|Any CPU");
+            projectConfigSection
+                .GetValue("Release|x64.ActiveCfg", string.Empty)
+                .Should().Be("Release|x64");
+            projectConfigSection
+                .GetValue("Release|x64.Build.0", string.Empty)
+                .Should().Be("Release|x64");
+            projectConfigSection
+                .GetValue("Release|x86.ActiveCfg", string.Empty)
+                .Should().Be("Release|x86");
+            projectConfigSection
+                .GetValue("Release|x86.Build.0", string.Empty)
+                .Should().Be("Release|x86");
+            projectConfigSection = slnFile
+                .ProjectConfigurationsSection
+                .GetPropertySet("{21D9159F-60E6-4F65-BC6B-D01B71B15FFC}");
+            projectConfigSection.Count.Should().Be(12);
+            projectConfigSection
+                .GetValue("Debug|Any CPU.ActiveCfg", string.Empty)
+                .Should().Be("Debug|Any CPU");
+            projectConfigSection
+                .GetValue("Debug|Any CPU.Build.0", string.Empty)
+                .Should().Be("Debug|Any CPU");
+            projectConfigSection
+                .GetValue("Debug|x64.ActiveCfg", string.Empty)
+                .Should().Be("Debug|x64");
+            projectConfigSection
+                .GetValue("Debug|x64.Build.0", string.Empty)
+                .Should().Be("Debug|x64");
+            projectConfigSection
+                .GetValue("Debug|x86.ActiveCfg", string.Empty)
+                .Should().Be("Debug|x86");
+            projectConfigSection
+                .GetValue("Debug|x86.Build.0", string.Empty)
+                .Should().Be("Debug|x86");
+            projectConfigSection
+                .GetValue("Release|Any CPU.ActiveCfg", string.Empty)
+                .Should().Be("Release|Any CPU");
+            projectConfigSection
+                .GetValue("Release|Any CPU.Build.0", string.Empty)
+                .Should().Be("Release|Any CPU");
+            projectConfigSection
+                .GetValue("Release|x64.ActiveCfg", string.Empty)
+                .Should().Be("Release|x64");
+            projectConfigSection
+                .GetValue("Release|x64.Build.0", string.Empty)
+                .Should().Be("Release|x64");
+            projectConfigSection
+                .GetValue("Release|x86.ActiveCfg", string.Empty)
+                .Should().Be("Release|x86");
+            projectConfigSection
+                .GetValue("Release|x86.Build.0", string.Empty)
+                .Should().Be("Release|x86");
+
+            slnFile.Sections.Count.Should().Be(3);
+            var solutionPropertiesSection = slnFile.Sections.GetSection("SolutionProperties");
+            solutionPropertiesSection.Properties.Count.Should().Be(1);
+            solutionPropertiesSection.Properties
+                .GetValue("HideSolutionNode", string.Empty)
+                .Should().Be("FALSE");
         }
 
         [Fact]
-        public void WhenGivenAValidPathItReadsModifiesThenWritesAnSln()
+        public void WhenGivenAValidSlnFileItModifiesSavesAndVerifiesContents()
         {
-            var solutionDirectory =
-                TestAssetsManager.CreateTestInstance("TestAppWithSln", callingMethod: "p").Path;
+            var tmpFile = Temp.CreateFile();
+            tmpFile.WriteAllText(SolutionWithAppAndLibProjects);
 
-            var solutionFullPath = Path.Combine(solutionDirectory, "TestAppWithSln.sln");
+            SlnFile slnFile = SlnFile.Read(tmpFile.Path);
 
-            var slnFile = SlnFile.Read(solutionFullPath);
-            slnFile.FullPath.Should().Be(solutionFullPath);
+            slnFile.FormatVersion = "14.00";
+            slnFile.ProductDescription = "Visual Studio 16";
+            slnFile.VisualStudioVersion = "16.0.26006.2";
+            slnFile.MinimumVisualStudioVersion = "11.0.40219.1";
 
-            slnFile.Projects.Count.Should().Be(1);
+            slnFile.Projects.Count.Should().Be(2);
             var project = slnFile.Projects[0];
-            project.Name.Should().Be("TestAppWithSln");
-            project.Name = "New Project Name";
-            project.FilePath.Should().Be("TestAppWithSln.xproj");
-            project.FilePath = "New File Path";
+            project.Id = "{9A19103F-16F7-4668-BE54-9A1E7A4F7556}";
+            project.TypeGuid = "{7072A694-548F-4CAE-A58F-12D257D5F486}";
+            project.Name = "AppModified";
+            project.FilePath = Path.Combine("AppModified", "AppModified.csproj");
+            slnFile.Projects.Remove(slnFile.Projects[1]);
 
-            var newSolutionFullPath = Path.Combine(solutionDirectory, "TestAppWithSln_modified.sln");
-            slnFile.Write(newSolutionFullPath);
+            slnFile.SolutionConfigurationsSection.Count.Should().Be(6);
+            slnFile.SolutionConfigurationsSection.Remove("Release|Any CPU");
+            slnFile.SolutionConfigurationsSection.Remove("Release|x64");
+            slnFile.SolutionConfigurationsSection.Remove("Release|x86");
 
-            slnFile = SlnFile.Read(newSolutionFullPath);
-            slnFile.FormatVersion.Should().Be("12.00");
-            slnFile.ProductDescription.Should().Be("Visual Studio 14");
-            slnFile.VisualStudioVersion.Should().Be("14.0.25420.1");
-            slnFile.MinimumVisualStudioVersion.Should().Be("10.0.40219.1");
-            slnFile.BaseDirectory.Should().Be(solutionDirectory);
-            slnFile.FullPath.Should().Be(newSolutionFullPath);
-            slnFile.Projects.Count.Should().Be(1);
-            project = slnFile.Projects[0];
-            project.Id.Should().Be("{0138CB8F-4AA9-4029-A21E-C07C30F425BA}");
-            project.TypeGuid.Should().Be("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}");
-            project.Name.Should().Be("New Project Name");
-            project.FilePath.Should().Be("New File Path");
+            slnFile.ProjectConfigurationsSection.Count.Should().Be(2);
+            var projectConfigSection = slnFile
+                .ProjectConfigurationsSection
+                .GetPropertySet("{21D9159F-60E6-4F65-BC6B-D01B71B15FFC}");
+            slnFile.ProjectConfigurationsSection.Remove(projectConfigSection);
+
+            slnFile.Sections.Count.Should().Be(3);
+            var solutionPropertiesSection = slnFile.Sections.GetSection("SolutionProperties");
+            solutionPropertiesSection.Properties.Count.Should().Be(1);
+            solutionPropertiesSection.Properties.SetValue("HideSolutionNode", "TRUE");
+
+            slnFile.Write();
+
+            File.ReadAllText(tmpFile.Path)
+                .Should().Be(SolutionModified);
+        }
+
+        [Fact]
+        public void WhenGivenAnSolutionWithMissingHeaderItThrows()
+        {
+            var tmpFile = Temp.CreateFile();
+            tmpFile.WriteAllText("Invalid Solution");
+
+            Action action = () =>
+            {
+                SlnFile.Read(tmpFile.Path);
+            };
+
+            action.ShouldThrow<InvalidSolutionFormatException>()
+                .WithMessage("Invalid format in line 1: File header is missing");
         }
     }
 }

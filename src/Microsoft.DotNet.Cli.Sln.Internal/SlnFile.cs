@@ -1139,7 +1139,7 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
         }
     }
 
-    class InvalidSolutionFormatException : Exception
+    public class InvalidSolutionFormatException : Exception
     {
         public InvalidSolutionFormatException(int line) : base("Invalid format in line " + line)
         {
