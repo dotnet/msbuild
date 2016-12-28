@@ -43,13 +43,20 @@
                     ContinueOnError="WarnAndContinue" />
     </Target>
 
+    <PropertyGroup>
+      <UploadNuGetPackagesArchiveToAzure>false</UploadNuGetPackagesArchiveToAzure>
+    </PropertyGroup>
+
     <Target Name="GenerateNuGetPackagesArchive"
             DependsOnTargets="SetupNuGetPackagesArchiveInputsOutputs"
             Inputs="$(IntermediateArchive)"
             Outputs="$(IntermediateArchive)">
-      <PropertyGroup>
-        <UploadNuGetPackagesArchiveToAzure>true</UploadNuGetPackagesArchiveToAzure>
-      </PropertyGroup>
+
+      <!-- I need to use the CreateProperty task in conjunction with the ValueSetByTask TaskParameter -->
+      <!-- to ensure that the property only gets set when the parent target is run. -->
+      <CreateProperty Value="true">
+        <Output TaskParameter="ValueSetByTask" PropertyName="UploadNuGetPackagesArchiveToAzure" />
+      </CreateProperty>
 
       <ItemGroup>
         <FilesToClean Include="$(NuGetPackagesArchiveProject)/**/*" />
