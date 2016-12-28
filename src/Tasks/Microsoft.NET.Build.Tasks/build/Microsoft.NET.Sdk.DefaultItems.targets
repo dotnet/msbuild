@@ -19,6 +19,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <EnableDefaultItems Condition=" '$(EnableDefaultItems)' == '' ">true</EnableDefaultItems>
     <EnableDefaultCompileItems Condition=" '$(EnableDefaultCompileItems)' == '' ">true</EnableDefaultCompileItems>
     <EnableDefaultEmbeddedResourceItems Condition=" '$(EnableDefaultEmbeddedResourceItems)' == '' ">true</EnableDefaultEmbeddedResourceItems>
+    <EnableDefaultNoneItems Condition=" '$(EnableDefaultNoneItems)' == '' ">true</EnableDefaultNoneItems>
+    
+    <!-- This would be defined in the Web SDK -->
     <EnableDefaultContentItems Condition=" '$(EnableDefaultContentItems)' == '' ">true</EnableDefaultContentItems>
   </PropertyGroup>
 
@@ -53,13 +56,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <ItemGroup Condition="'$(DisableDefaultRemoves)' != 'true'">
     <Compile Remove="$(DefaultRemoves)" />
     <EmbeddedResource Remove="$(DefaultRemoves)" />
+    <None Remove="$(DefaultRemoves)" />
     <Content Remove="$(DefaultRemoves)" />
-  </ItemGroup>
-  
-  <!-- This would go in the Web SDK -->
-  <ItemGroup Condition="'$(DisableDefaultRemoves)' != 'true'">
-    <Compile Remove="wwwroot/**" />
-    <EmbeddedResource Remove="wwwroot/**" />
   </ItemGroup>
 
 </Project>

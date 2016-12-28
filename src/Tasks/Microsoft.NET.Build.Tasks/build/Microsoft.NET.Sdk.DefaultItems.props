@@ -20,20 +20,25 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Compile Include="**/*$(DefaultLanguageSourceExtension)" Exclude="$(DefaultExcludesInProjectFolder)" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
     <EmbeddedResource Include="**/*.resx" Exclude="$(DefaultExcludesInProjectFolder)" Condition=" '$(EnableDefaultEmbeddedResourceItems)' == 'true' " />
   </ItemGroup>
-  <ItemGroup Condition=" '$(EnableDefaultItems)' == 'true' And '$(EnableDefaultContentItems)' == 'true' ">
-    <Content Include="**/*" Exclude="$(DefaultExcludesInProjectFolder)" />
-    <Content Remove="**/*$(DefaultLanguageSourceExtension)" Condition=" '$(EnableDefaultCompileItems)' == 'true' "/>
-    <Content Remove="**/*.resx" Condition=" '$(EnableDefaultEmbeddedResourceItems)' == 'true' "/>
+  <ItemGroup Condition=" '$(EnableDefaultItems)' == 'true' And '$(EnableDefaultNoneItems)' == 'true' ">
+    <None Include="**/*" Exclude="$(DefaultExcludesInProjectFolder)" />
+    <None Remove="**/*$(DefaultLanguageSourceExtension)" Condition=" '$(EnableDefaultCompileItems)' == 'true' "/>
+    <None Remove="**/*.resx" Condition=" '$(EnableDefaultEmbeddedResourceItems)' == 'true' "/>
   </ItemGroup>
 
   <!-- This would go in the Web SDK -->
   <ItemGroup Condition=" '$(EnableDefaultItems)' == 'true' And '$(EnableDefaultContentItems)' == 'true' ">
-    <!-- Update wwwroot, .json, .config, and .cshtml files to be published -->
     <!-- TODO: How are app.config, web.config, and related files handled?
         app.config and web.*.config should probably be excluded -->
-    <Content Update="wwwroot/**;**/*.json;**/*.config;**/*.cshtml" CopyToPublishDirectory="PreserveNewest" />
-    <!-- Exclude AppDesignerFolder ("Properties", by default) to avoid publishing launchSettings.json -->
+    <Content Include="wwwroot/**;**/*.json;**/*.config;**/*.cshtml" CopyToPublishDirectory="PreserveNewest" />
+
+    <!-- Set CopyToPublishDirectory to Never for items under AppDesignerFolder ("Properties", by default) to avoid publishing launchSettings.json -->
     <Content Update="$(AppDesignerFolder)/**" CopyToPublishDirectory="Never" Condition="'$(AppDesignerFolder)' != ''"/>
+    
+    <!-- Remove Content items from other item types (in a way that CPS understands) -->
+    <None Remove="wwwroot/**;**/*.json;**/*.config;**/*.cshtml" />
+    <Compile Remove="wwwroot/**" />
+    <EmbeddedResource Remove="wwwroot/**" />
   </ItemGroup>
  
 </Project>

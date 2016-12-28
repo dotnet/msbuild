@@ -228,7 +228,7 @@ namespace Microsoft.NET.Build.Tests
                 WriteFile(Path.Combine(getValuesCommand.ProjectRootPath, "CSharpAsContent.cs"),
                     "public class CSharpAsContent {}");
 
-                WriteFile(Path.Combine(getValuesCommand.ProjectRootPath, "Content.txt"), "Content file");
+                WriteFile(Path.Combine(getValuesCommand.ProjectRootPath, "None.txt"), "Content file");
             };
 
             Action<XDocument> projectChanges = project =>
@@ -262,25 +262,39 @@ namespace Microsoft.NET.Build.Tests
             var expectedContentItems = new[]
             {
                 "CSharpAsContent.cs",
-                "Content.txt"
             }
             .Select(item => item.Replace('\\', Path.DirectorySeparatorChar))
             .ToArray();
 
             contentItems.Should().BeEquivalentTo(expectedContentItems);
+
+            var noneItems = GivenThatWeWantToBuildALibrary.GetValuesFromTestLibrary(_testAssetsManager, "None", setup, projectChanges: projectChanges);
+
+            var expectedNoneItems = new[]
+            {
+                "None.txt"
+            }
+            .Select(item => item.Replace('\\', Path.DirectorySeparatorChar))
+            .ToArray();
+
+            noneItems.Should().BeEquivalentTo(expectedNoneItems);
         }
 
         [Fact]
-        public void Content_items_have_the_correct_relative_paths()
+        public void Default_items_have_the_correct_relative_paths()
         {
             Action<XDocument> projectChanges = project =>
             {
                 var ns = project.Root.Name.Namespace;
 
-                //  Copy all content items to output directory
+                var propertyGroup = new XElement(ns + "PropertyGroup");
+                project.Root.Add(propertyGroup);
+                propertyGroup.Add(new XElement(ns + "EnableDefaultContentItems", "false"));
+
+                //  Copy all None items to output directory
                 var itemGroup = new XElement(ns + "ItemGroup");
                 project.Root.Add(itemGroup);
-                itemGroup.Add(new XElement(ns + "Content", new XAttribute("Update", "@(Content)"), new XAttribute("CopyToOutputDirectory", "PreserveNewest")));
+                itemGroup.Add(new XElement(ns + "None", new XAttribute("Update", "@(None)"), new XAttribute("CopyToOutputDirectory", "PreserveNewest")));
             };
 
             var testAsset = _testAssetsManager
