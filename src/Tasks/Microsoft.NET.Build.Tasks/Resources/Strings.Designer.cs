@@ -12,7 +12,7 @@ namespace Microsoft.NET.Build.Tasks {
     using System;
     using System.Reflection;
 
-
+        
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -152,6 +152,51 @@ namespace Microsoft.NET.Build.Tasks {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Framework not installed: {0} in {1}.
+        /// </summary>
+        internal static string DOTNET1011 {
+            get {
+                return ResourceManager.GetString("DOTNET1011", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The reference assemblies directory was not specified. You can set the location using the DOTNET_REFERENCE_ASSEMBLIES_PATH environment variable..
+        /// </summary>
+        internal static string DOTNET1012 {
+            get {
+                return ResourceManager.GetString("DOTNET1012", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The following dependencies are marked with type &apos;platform&apos;, however only one dependency can have this type: {0}.
+        /// </summary>
+        internal static string DOTNET1013 {
+            get {
+                return ResourceManager.GetString("DOTNET1013", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to read lock file.
+        /// </summary>
+        internal static string DOTNET1014 {
+            get {
+                return ResourceManager.GetString("DOTNET1014", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Project file does not exist &apos;{0}&apos;..
+        /// </summary>
+        internal static string DOTNET1017 {
+            get {
+                return ResourceManager.GetString("DOTNET1017", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The preprocessor token &apos;{0}&apos; has been given more than one value. Choosing &apos;{1}&apos; as the value..
         /// </summary>
         internal static string DuplicatePreprocessorToken {
@@ -202,6 +247,87 @@ namespace Microsoft.NET.Build.Tasks {
         internal static string NoCompatibleTargetFramework {
             get {
                 return ResourceManager.GetString("NoCompatibleTargetFramework", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The dependency &apos;{0}&apos; could not be resolved..
+        /// </summary>
+        internal static string NU1001 {
+            get {
+                return ResourceManager.GetString("NU1001", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The dependency &apos;{0}&apos; in project &apos;{1}&apos; does not support framework &apos;{2}&apos;..
+        /// </summary>
+        internal static string NU1002 {
+            get {
+                return ResourceManager.GetString("NU1002", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0}. Please run &apos;dotnet restore&apos; to generate a new asset file..
+        /// </summary>
+        internal static string NU1006 {
+            get {
+                return ResourceManager.GetString("NU1006", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Dependency specified was &apos;{0}&apos; but ended up with &apos;{1}&apos;..
+        /// </summary>
+        internal static string NU1007 {
+            get {
+                return ResourceManager.GetString("NU1007", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} is an unsupported framework..
+        /// </summary>
+        internal static string NU1008 {
+            get {
+                return ResourceManager.GetString("NU1008", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The expected asset file does not exist. Please run &apos;dotnet restore&apos; to generate a new asset file..
+        /// </summary>
+        internal static string NU1009 {
+            get {
+                return ResourceManager.GetString("NU1009", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The dependency type was changed.
+        /// </summary>
+        internal static string NU1010 {
+            get {
+                return ResourceManager.GetString("NU1010", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The dependency target &apos;{0}&apos; is unsupported..
+        /// </summary>
+        internal static string NU1011 {
+            get {
+                return ResourceManager.GetString("NU1011", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Dependency conflict. &apos;{0}&apos; expected &apos;{1}&apos; but received &apos;{2}&apos;.
+        /// </summary>
+        internal static string NU1012 {
+            get {
+                return ResourceManager.GetString("NU1012", resourceCulture);
             }
         }
         

@@ -693,6 +693,76 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 .First().Should().Be("Dep.Lib.Chi/4.1.0");
         }
 
+        [Fact]
+        public void ItMarksTransitiveProjectReferences()
+        {
+            // --------------------------------------------------------------------------
+            // Given the following layout, only ProjC and ProjE are transitive references 
+            // (ProjB and ProjD are direct references, and ProjF is declared private in ProjC):
+            //
+            //     TestProject (i.e. current project assets file)
+            //        -> ProjB 
+            //           -> ProjC
+            //              -> ProjD 
+            //              -> ProjE 
+            //              -> ProjF (PrivateAssets=Compile)
+            //        -> ProjD
+            // --------------------------------------------------------------------------
+
+            var target = CreateTarget(".NETCoreApp,Version=v1.0",
+
+                CreateTargetLibrary("ProjB/1.0.0", "project",
+                    dependencies: new string[] { "\"ProjC\": \"1.0.0\"" }),
+
+                CreateTargetLibrary("ProjC/1.0.0", "project",
+                    dependencies: new string[] {
+                        "\"ProjD\": \"1.0.0\"", "\"ProjE\": \"1.0.0\"", "\"ProjF\": \"1.0.0\""
+                    }),
+
+                CreateTargetLibrary("ProjD/1.0.0", "project"),
+
+                CreateTargetLibrary("ProjE/1.0.0", "project"),
+
+                CreateTargetLibrary("ProjF/1.0.0", "project",
+                    compile: new string[] { CreateFileItem("bin/Debug/_._") })
+            );
+
+            var libraries = new string[]
+            {
+                "ProjB", "ProjC", "ProjD", "ProjE", "ProjF"
+            }
+            .Select(
+                proj => CreateProjectLibrary($"{proj}/1.0.0",
+                    path: $"../{proj}/{proj}.csproj",
+                    msbuildProject: $"../{proj}/{proj}.csproj"))
+            .ToArray();
+
+            string lockFileContent = CreateLockFileSnippet(
+                targets: new string[] { target },
+                libraries: libraries,
+                projectFileDependencyGroups: new string[] 
+                {
+                    CreateProjectFileDependencyGroup(".NETCoreApp,Version=v1.0", "ProjB", "ProjD")
+                }
+            );
+
+            var task = GetExecutedTaskFromContents(lockFileContent, out var lockFile);
+
+            task.PackageDependencies.Count().Should().Be(6);
+
+            var transitivePkgs = task.PackageDependencies
+                .Where(t => t.GetMetadata(MetadataKeys.TransitiveProjectReference) == "true");
+            transitivePkgs.Count().Should().Be(2);
+            transitivePkgs.Select(t => t.ItemSpec)
+                .Should().Contain(new string[] { "ProjC/1.0.0", "ProjE/1.0.0" });
+
+            var others = task.PackageDependencies.Except(transitivePkgs);
+            others.Count().Should().Be(4);
+            others.Where(t => t.ItemSpec == "ProjB/1.0.0").Count().Should().Be(1);
+            others.Where(t => t.ItemSpec == "ProjD/1.0.0").Count().Should().Be(2);
+            others.Where(t => t.ItemSpec == "ProjF/1.0.0").Count().Should().Be(1);
+        }
+
         private ResolvePackageDependencies GetExecutedTaskFromPrefix(string lockFilePrefix)
         {
             LockFile lockFile;

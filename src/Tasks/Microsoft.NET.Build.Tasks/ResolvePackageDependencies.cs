@@ -18,6 +18,7 @@ namespace Microsoft.NET.Build.Tasks
     /// </summary>
     public sealed class ResolvePackageDependencies : TaskBase
     {
+        private const string ProjectTypeKey = "project";
         private readonly Dictionary<string, string> _fileTypes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         private readonly HashSet<string> _projectFileDependencies = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private IPackageResolver _packageResolver;
@@ -288,6 +289,12 @@ namespace Microsoft.NET.Build.Tasks
             var resolvedPackageVersions = target.Libraries
                 .ToDictionary(pkg => pkg.Name, pkg => pkg.Version.ToNormalizedString(), StringComparer.OrdinalIgnoreCase);
 
+            var transitiveProjectRefs = new HashSet<string>(
+                target.Libraries
+                    .Where(lib => IsTransitiveProjectReference(lib))
+                    .Select(pkg => pkg.Name), 
+                StringComparer.OrdinalIgnoreCase);
+            
             TaskItem item;
             foreach (var package in target.Libraries)
             {
@@ -303,17 +310,25 @@ namespace Microsoft.NET.Build.Tasks
                 }
 
                 // get sub package dependencies
-                GetPackageDependencies(package, target.Name, resolvedPackageVersions);
+                GetPackageDependencies(package, target.Name, resolvedPackageVersions, transitiveProjectRefs);
 
                 // get file dependencies on this package
                 GetFileDependencies(package, target.Name);
             }
         }
 
+        // A package is a TransitiveProjectReference if it is a project, is not directly referenced,
+        // and does not contain a placeholder compile time assembly
+        private bool IsTransitiveProjectReference(LockFileTargetLibrary package) =>
+            string.Equals(package.Type, ProjectTypeKey, StringComparison.OrdinalIgnoreCase) &&
+            !_projectFileDependencies.Contains(package.Name) &&
+            package.CompileTimeAssemblies.FirstOrDefault(f => NuGetUtils.IsPlaceholderFile(f.Path)) == null;
+
         private void GetPackageDependencies(
             LockFileTargetLibrary package, 
             string targetName, 
-            Dictionary<string, string> resolvedPackageVersions)
+            Dictionary<string, string> resolvedPackageVersions,
+            HashSet<string> transitiveProjectRefs)
         {
             string packageId = $"{package.Name}/{package.Version.ToNormalizedString()}";
             TaskItem item;
@@ -332,6 +347,11 @@ namespace Microsoft.NET.Build.Tasks
                 item.SetMetadata(MetadataKeys.ParentTarget, targetName); // Foreign Key
                 item.SetMetadata(MetadataKeys.ParentPackage, packageId); // Foreign Key
 
+                if (transitiveProjectRefs.Contains(deps.Id))
+                {
+                    item.SetMetadata(MetadataKeys.TransitiveProjectReference, "true");
+                }
+
                 _packageDependencies.Add(item);
             }
         }
@@ -339,7 +359,6 @@ namespace Microsoft.NET.Build.Tasks
         private void GetFileDependencies(LockFileTargetLibrary package, string targetName)
         {
             string packageId = $"{package.Name}/{package.Version.ToNormalizedString()}";
-            TaskItem item;
 
             // for each type of file group
             foreach (var fileGroup in (FileGroup[])Enum.GetValues(typeof(FileGroup)))
@@ -356,10 +375,16 @@ namespace Microsoft.NET.Build.Tasks
                     }
 
                     var fileKey = $"{packageId}/{filePath}";
-                    item = new TaskItem(fileKey);
+                    var item = new TaskItem(fileKey);
                     item.SetMetadata(MetadataKeys.FileGroup, fileGroup.ToString());
                     item.SetMetadata(MetadataKeys.ParentTarget, targetName); // Foreign Key
                     item.SetMetadata(MetadataKeys.ParentPackage, packageId); // Foreign Key
+
+                    if (fileGroup == FileGroup.FrameworkAssembly)
+                    {
+                        // NOTE: the path provided for framework assemblies is the name of the framework reference
+                        item.SetMetadata("FrameworkAssembly", filePath);
+                    }
 
                     foreach (var property in properties)
                     {
@@ -395,7 +420,7 @@ namespace Microsoft.NET.Build.Tasks
 
         private string ResolvePackagePath(LockFileLibrary package)
         {
-            if (package.Type == "project")
+            if (string.Equals(package.Type, ProjectTypeKey, StringComparison.OrdinalIgnoreCase))
             {
                 var relativeMSBuildProjectPath = package.MSBuildProject;
 
