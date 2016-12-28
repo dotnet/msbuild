@@ -73,6 +73,16 @@
         <target state="translated">Ustaw tę flagę, aby ignorować odwołania między projektami i przywrócić tylko projekt główny</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdRuntimeOption">
+        <source>RUNTIME_IDENTIFIER</source>
+        <target state="new">RUNTIME_IDENTIFIER</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdRuntimeOptionDescription">
+        <source>Target runtime to restore packages for.</source>
+        <target state="new">Target runtime to restore packages for.</target>
+        <note></note>
+      </trans-unit>
     </body>
   </file>
 </xliff>
