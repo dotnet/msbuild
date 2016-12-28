@@ -73,6 +73,16 @@
         <target state="translated">將此旗標設定為略過專案對專案參考並僅還原根專案</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdRuntimeOption">
+        <source>RUNTIME_IDENTIFIER</source>
+        <target state="new">RUNTIME_IDENTIFIER</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdRuntimeOptionDescription">
+        <source>Target runtime to restore packages for.</source>
+        <target state="new">Target runtime to restore packages for.</target>
+        <note></note>
+      </trans-unit>
     </body>
   </file>
 </xliff>

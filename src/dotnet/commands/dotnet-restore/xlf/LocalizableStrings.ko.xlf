@@ -73,6 +73,16 @@
         <target state="translated">프로젝트 간 참조를 무시하고 루트 프로젝트만 복원하려면 이 플래그를 설정합니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdRuntimeOption">
+        <source>RUNTIME_IDENTIFIER</source>
+        <target state="new">RUNTIME_IDENTIFIER</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdRuntimeOptionDescription">
+        <source>Target runtime to restore packages for.</source>
+        <target state="new">Target runtime to restore packages for.</target>
+        <note></note>
+      </trans-unit>
     </body>
   </file>
 </xliff>

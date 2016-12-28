@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ja" original="src/dotnet/commands/dotnet-add/dotnet-add-package/LocalizableStrings.resx">
+    <body>
+      <group id="src/dotnet/commands/dotnet-add/dotnet-add-package/LocalizableStrings.resx" />
+      <trans-unit id="AppFullName">
+        <source>.NET Add Package reference Command</source>
+        <target state="new">.NET Add Package reference Command</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Command to add package reference</source>
+        <target state="new">Command to add package reference</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AppHelpText">
+        <source>Package references to add</source>
+        <target state="new">Package references to add</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="SpecifyExactlyOnePackageReference">
+        <source>Please specify one package reference to add.</source>
+        <target state="new">Please specify one package reference to add.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdFrameworkDescription">
+        <source>Add reference only when targetting a specific framework</source>
+        <target state="new">Add reference only when targetting a specific framework</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdNoRestoreDescription">
+        <source>Add reference without performing restore preview and compatibility check.</source>
+        <target state="new">Add reference without performing restore preview and compatibility check.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdSourceDescription">
+        <source>Use specific NuGet package sources to use during the restore.</source>
+        <target state="new">Use specific NuGet package sources to use during the restore.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdPackageDirectoryDescription">
+        <source>Restore the packages to this Directory .</source>
+        <target state="new">Restore the packages to this Directory .</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdVersionDescription">
+        <source>Version for the package to be added.</source>
+        <target state="new">Version for the package to be added.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdDGFileException">
+        <source>Unable to Create Dependency graph file for project '{0}'. Cannot add package reference.</source>
+        <target state="new">Unable to Create Dependency graph file for project '{0}'. Cannot add package reference.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdVersion">
+        <source>VERSION</source>
+        <target state="new">VERSION</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdFramework">
+        <source>FRAMEWORK</source>
+        <target state="new">FRAMEWORK</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdSource">
+        <source>SOURCE</source>
+        <target state="new">SOURCE</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdPackageDirectory">
+        <source>PACKAGE_DIRECTORY</source>
+        <target state="new">PACKAGE_DIRECTORY</target>
+        <note></note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

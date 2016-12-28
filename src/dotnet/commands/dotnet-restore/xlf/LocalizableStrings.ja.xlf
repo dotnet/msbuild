@@ -73,6 +73,16 @@
         <target state="translated">project to project 参照を無視して、ルート プロジェクトのみを復元するには、このフラグを設定します</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdRuntimeOption">
+        <source>RUNTIME_IDENTIFIER</source>
+        <target state="new">RUNTIME_IDENTIFIER</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdRuntimeOptionDescription">
+        <source>Target runtime to restore packages for.</source>
+        <target state="new">Target runtime to restore packages for.</target>
+        <note></note>
+      </trans-unit>
     </body>
   </file>
 </xliff>
