@@ -36,7 +36,7 @@ Additional Arguments:
             var cmd = new DotnetCommand()
                 .ExecuteWithCapturedOutput($"add project {helpArg}");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
         [Theory]
@@ -72,7 +72,7 @@ Additional Arguments:
                 .ExecuteWithCapturedOutput($"add {solutionName} project p.csproj");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be($"Could not find solution or directory `{solutionName}`.");
-            cmd.StdOut.Should().Be(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
         [Fact]
@@ -91,7 +91,7 @@ Additional Arguments:
                 .ExecuteWithCapturedOutput($"add InvalidSolution.sln project {projectToAdd}");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be("Invalid solution `InvalidSolution.sln`.");
-            cmd.StdOut.Should().Be(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
         [Fact]
@@ -111,7 +111,7 @@ Additional Arguments:
                 .ExecuteWithCapturedOutput($"add project {projectToAdd}");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be($"Invalid solution `{solutionPath}`.");
-            cmd.StdOut.Should().Be(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
         [Fact]
@@ -129,7 +129,7 @@ Additional Arguments:
                 .ExecuteWithCapturedOutput(@"add App.sln project");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be("You must specify at least one project to add.");
-            cmd.StdOut.Should().Be(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
         [Fact]
@@ -148,7 +148,7 @@ Additional Arguments:
                 .ExecuteWithCapturedOutput(@"add project App.csproj");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be($"Specified solution file {solutionPath + Path.DirectorySeparatorChar} does not exist, or there is no solution file in the directory.");
-            cmd.StdOut.Should().Be(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
         [Fact]
@@ -167,7 +167,7 @@ Additional Arguments:
                 .ExecuteWithCapturedOutput($"add project {projectToAdd}");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be($"Found more than one solution file in {projectDirectory + Path.DirectorySeparatorChar}. Please specify which one to use.");
-            cmd.StdOut.Should().Be(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
         [Theory]

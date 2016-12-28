@@ -24,5 +24,15 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
             return new AndConstraint<StringAssertions>(assertions);
         }
+
+        public static AndConstraint<StringAssertions> ContainVisuallySameFragment(this StringAssertions assertions, string expected, string because = "", params object[] becauseArgs)
+        {
+            Execute.Assertion
+                .ForCondition(NormalizeLineEndings(assertions.Subject).Contains(NormalizeLineEndings(expected)))
+                .BecauseOf(because, becauseArgs)
+                .FailWith($"String \"{assertions.Subject}\" does not contain visually same fragment string \"{expected}\".");
+
+            return new AndConstraint<StringAssertions>(assertions);
+        }
     }
 }

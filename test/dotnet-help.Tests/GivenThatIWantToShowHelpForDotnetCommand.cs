@@ -59,7 +59,8 @@ Advanced Commands:
         {
             var cmd = new DotnetCommand()
                 .ExecuteWithCapturedOutput($"{helpArg}");
-            cmd.Should().Pass().And.HaveStdOutContaining(HelpText);
+            cmd.Should().Pass();
+            cmd.StdOut.Should().ContainVisuallySameFragment(HelpText);
         }
     }
 }
