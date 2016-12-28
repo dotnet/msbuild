@@ -33,6 +33,7 @@
     <ProjectToDotnetRestore Include="$(RepositoryRootDirectory)test\Microsoft.NET.Build.Tests\Microsoft.NET.Build.Tests.csproj" />
     <ProjectToDotnetRestore Include="$(RepositoryRootDirectory)test\Microsoft.NET.Pack.Tests\Microsoft.NET.Pack.Tests.csproj" />
     <ProjectToDotnetRestore Include="$(RepositoryRootDirectory)test\Microsoft.NET.Publish.Tests\Microsoft.NET.Publish.Tests.csproj" />
+    <TemplatesProjectToDotnetRestore Include="$(RepositoryRootDirectory)test\Templates.UnitTests\Templates.UnitTests.csproj" />
   </ItemGroup>
   <Target Name="RestorePackages">
 
@@ -53,6 +54,10 @@
     <!-- work around https://github.com/dotnet/sdk/issues/203 by passing in /p:SkipInvalidConfigurations=true /p:_InvalidConfigurationWarning=false -->
     <Exec Command="$(__SetNuget_Packages)$(__NewLine)$(DotNetTool) restore %(ProjectToDotnetRestore.Identity) /v:minimal /p:SkipInvalidConfigurations=true /p:_InvalidConfigurationWarning=false"
           Condition="'$(BuildTemplates)' != 'true'"
+          WorkingDirectory="$(RepositoryRootDirectory)"
+          />
+    <Exec Command="$(__SetNuget_Packages)$(__NewLine)$(DotNetTool) restore %(TemplatesProjectToDotnetRestore.Identity) /v:minimal /p:SkipInvalidConfigurations=true /p:_InvalidConfigurationWarning=false"
+          Condition="'$(BuildTemplates)' == 'true'"
           WorkingDirectory="$(RepositoryRootDirectory)"
           />
   </Target>
@@ -153,14 +158,18 @@
     
   </Target>
 
-  <Target Name="Test" Condition="'$(BuildTemplates)' != 'true'">
+  <Target Name="Test">
 
-    <ItemGroup>
-      <TestAssembly Include="$(TestsDirectory)*Tests.dll" />
+    <ItemGroup Condition="'$(BuildTemplates)' != 'true'">
+      <TestAssembly Include="$(TestsDirectory)*Tests.dll" Exclude="$(TestsDirectory)Templates.UnitTests.dll" />
       <XmlTestFile Include="$(TestsDirectory)TestResults.xml" />
     </ItemGroup>
+    <ItemGroup Condition="'$(BuildTemplates)' == 'true'">
+      <TestAssembly Include="$(TestsDirectory)Templates.UnitTests.dll" />
+      <XmlTestFile Include="$(TestsDirectory)TemplatesTestResults.xml" />
+    </ItemGroup>
 
-    <ItemGroup>
+    <ItemGroup Condition="'$(BuildTemplates)' != 'true'">
       <NetCoreAppProductAssets Include="$(PackagesLayoutToolsNetCoreAppDir)\*" />
     </ItemGroup>
 
@@ -169,6 +178,7 @@
     <!-- Copy all the 'netcore1.0' product assemblies to the test directory, so the tests can load them. -->
     <Copy SourceFiles="@(NetCoreAppProductAssets)"
           DestinationFolder="$(TestsDirectory)"
+          Condition="'$(BuildTemplates)' != 'true'"
           />
 
     <Exec Command="$(DotNetTool) &quot;$(TestsDirectory)\xunit.console.netcore.exe&quot; &quot;@(TestAssembly, '&quot; &quot;')&quot; -xml &quot;@(XmlTestFile)&quot;"

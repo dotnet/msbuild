@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), 'Common.props'))\Common.props" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
+    <ProjectGuid>{7A328A78-533E-43F8-9AF8-9332A3331418}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <TargetFramework>netstandard1.6</TargetFramework>
+    <PackageTargetFallback>dotnet5.4;portable-net451+win8</PackageTargetFallback>
+    <OutDir>$(OutDir)Tests\</OutDir>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <NonShipping>true</NonShipping>
+    <StartAction>Program</StartAction>
+    <StartProgram>$(DotNetTool).exe</StartProgram>
+    <StartArguments>"$(OutDir)xunit.console.netcore.exe" "$(OutDir)$(AssemblyName).dll" -xml "$(OutDir)TemplatesTestResults.xml" -wait</StartArguments>
+    <StartWorkingDirectory>$(OutDir)</StartWorkingDirectory>
+    <DebugEngines>{2E36F1D4-B23C-435D-AB41-18E608940038}</DebugEngines>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Sdk">
+      <Version>$(SdkStage0Version)</Version>
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.DotNet.Cli.Utils">
+      <Version>$(DotNetCliUtilsVersion)</Version>
+    </PackageReference>
+    <PackageReference Include="FluentAssertions">
+      <Version>$(FluentAssertionsVersion)</Version>
+    </PackageReference>
+    <PackageReference Include="System.Diagnostics.FileVersionInfo">
+      <Version>4.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="xunit">
+      <Version>$(xunitVersion)</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="**\*.cs" Exclude="$(GlobalExclude)" />
+    <EmbeddedResource Include="**\*.resx" Exclude="$(GlobalExclude)" />
+  </ItemGroup>
+  <Import Project="..\..\build\Targets\Templates.Imports.targets" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

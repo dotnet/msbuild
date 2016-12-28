@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Templates.UnitTests": {
+      "commandName": "Executable",
+      "executablePath": "$(RunCommand)",
+      "commandLineArgs": "\"$(OutDir)xunit.console.netcore.exe\" \"$(OutDir)$(AssemblyName).dll\" -wait",
+      "workingDirectory": "$(OutDir)"
+    }
+  }
+}

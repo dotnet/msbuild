@@ -104,5 +104,5 @@ if (!(Test-Path $nuget))
 & $nuget restore $RepoRoot\sdk-templates.sln
 if($LASTEXITCODE -ne 0) { throw "Failed to restore nuget packages for templates" }
 
-msbuild $commonBuildArgs /nr:false /p:BuildTemplates=true /flp1:Summary`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildSummaryLog /flp2:WarningsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildWarningLog /flp3:ErrorsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildFailureLog
+dotnet msbuild $commonBuildArgs /p:BuildTemplates=true /flp1:Summary`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildSummaryLog /flp2:WarningsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildWarningLog /flp3:ErrorsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildFailureLog
 if($LASTEXITCODE -ne 0) { throw "Failed to build templates" }
