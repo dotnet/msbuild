@@ -49,15 +49,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DefaultRemoves>$(DefaultRemoves);packages/**</DefaultRemoves>
     
   </PropertyGroup>
+  
   <ItemGroup Condition="'$(DisableDefaultRemoves)' != 'true'">
     <Compile Remove="$(DefaultRemoves)" />
     <EmbeddedResource Remove="$(DefaultRemoves)" />
     <Content Remove="$(DefaultRemoves)" />
-
-    <!-- The project system in VS doesn't understand removes referring to items, but this will help the build behavior to be correct
-         if the globs have been modified, even if some operations in the IDE may add unnecessary entries to the project file. -->
-    <Content Remove="@(Compile)" />
-    <Content Remove="@(EmbeddedResource)" />
   </ItemGroup>
   
   <!-- This would go in the Web SDK -->
