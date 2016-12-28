@@ -22,6 +22,8 @@ using Microsoft.TemplateEngine.Edge.Template;
 //using Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Config;
 //using Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Macros;
 using Microsoft.TemplateEngine.Utils;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace dotnet_new3
 {
@@ -30,22 +32,21 @@ namespace dotnet_new3
         private const string CommandName = "new3";
         private static readonly string HostIdentifier = "dotnetcli";
         private static readonly string HostVersion = typeof(Program).GetTypeInfo().Assembly.GetName().Version.ToString();
+        private static readonly IReadOnlyCollection<MatchLocation> NameFields = new HashSet<MatchLocation> { MatchLocation.Name, MatchLocation.ShortName, MatchLocation.Alias };
         private static DefaultTemplateEngineHost Host;
-
-        public static IInstaller Installer { get; set; } = new Installer();
+        private ExtendedCommandParser _app;
+        private HostSpecificTemplateData _hostSpecificTemplateData;
+        private IReadOnlyList<IFilteredTemplateInfo> _matchedTemplates;
+        private CommandArgument _templateName;
+        private ITemplateInfo _unambiguousTemplateToUse;
 
         private static readonly Regex LocaleFormatRegex = new Regex(@"
-            ^
-                [a-z]{2}
-                (?:-[A-Z]{2})?
-            $"
+                    ^
+                        [a-z]{2}
+                        (?:-[A-Z]{2})?
+                    $"
             , RegexOptions.IgnorePatternWhitespace);
-
-        private ExtendedCommandParser _app;
-
-        private bool _shouldExit;
-        private CommandArgument _templateName;
-        private IReadOnlyCollection<IFilteredTemplateInfo> _allResults;
+        private bool _forceAmbiguousFlow;
 
         public New3Command(ExtendedCommandParser app, CommandArgument templateNames)
         {
@@ -61,15 +62,17 @@ namespace dotnet_new3
 
         public IList<string> Install => _app.InternalParamValueList("--install");
 
+        public static IInstaller Installer { get; set; } = new Installer();
+
         public bool InstallHasValue => _app.InternalParamHasValue("--install");
 
         public bool IsHelpFlagSpecified => _app.InternalParamHasValue("--help");
 
-        public bool IsShowAllFlagSpecified => _app.InternalParamHasValue("--show-all");
-
         public bool IsListFlagSpecified => _app.InternalParamHasValue("--list");
 
         public bool IsQuietFlagSpecified => _app.InternalParamHasValue("--quiet");
+
+        public bool IsShowAllFlagSpecified => _app.InternalParamHasValue("--show-all");
 
         public string Language => _app.InternalParamValue("--language");
 
@@ -83,36 +86,61 @@ namespace dotnet_new3
 
         public bool SkipUpdateCheck => _app.InternalParamHasValue("--skip-update-check");
 
+        public ITemplateInfo UnambiguousTemplateToUse
+        {
+            get
+            {
+                if (_unambiguousTemplateToUse != null)
+                {
+                    return _unambiguousTemplateToUse;
+                }
+
+                if (_forceAmbiguousFlow || _matchedTemplates == null || _matchedTemplates.Count == 0)
+                {
+                    return null;
+                }
+
+                if (_matchedTemplates.Count == 1)
+                {
+                    return _unambiguousTemplateToUse = _matchedTemplates.First().Info;
+                }
+
+                if (EngineEnvironmentSettings.Host.TryGetHostParamDefault("prefs:language", out string defaultLanguage))
+                {
+                    IFilteredTemplateInfo match = null;
+
+                    foreach(IFilteredTemplateInfo info in _matchedTemplates)
+                    {
+                        if (info.Info.Tags == null || info.Info.Tags.TryGetValue("language", out string specificLanguage) && string.Equals(specificLanguage, defaultLanguage, StringComparison.OrdinalIgnoreCase))
+                        {
+                            if(match == null)
+                            {
+                                match = info;
+                            }
+                            else
+                            {
+                                return null;
+                            }
+                        }
+                    }
+
+                    return _unambiguousTemplateToUse = match?.Info;
+                }
+
+                return null;
+            }
+        }
+
         public static int Run(string[] args)
         {
-            Dictionary<Guid, Func<Type>> builtIns = new Dictionary<Guid, Func<Type>>
-            {
-                //{ new Guid("0C434DF7-E2CB-4DEE-B216-D7C58C8EB4B3"), () => typeof(RunnableProjectGenerator) },
-                //{ new Guid("3147965A-08E5-4523-B869-02C8E9A8AAA1"), () => typeof(BalancedNestingConfig) },
-                //{ new Guid("3E8BCBF0-D631-45BA-A12D-FBF1DE03AA38"), () => typeof(ConditionalConfig) },
-                //{ new Guid("A1E27A4B-9608-47F1-B3B8-F70DF62DC521"), () => typeof(FlagsConfig) },
-                //{ new Guid("3FAE1942-7257-4247-B44D-2DDE07CB4A4A"), () => typeof(IncludeConfig) },
-                //{ new Guid("3D33B3BF-F40E-43EB-A14D-F40516F880CD"), () => typeof(RegionConfig) },
-                //{ new Guid("62DB7F1F-A10E-46F0-953F-A28A03A81CD1"), () => typeof(ReplacementConfig) },
-                //{ new Guid("370996FE-2943-4AED-B2F6-EC03F0B75B4A"), () => typeof(ConstantMacro) },
-                //{ new Guid("BB625F71-6404-4550-98AF-B2E546F46C5F"), () => typeof(EvaluateMacro) },
-                //{ new Guid("10919008-4E13-4FA8-825C-3B4DA855578E"), () => typeof(GuidMacro) },
-                //{ new Guid("F2B423D7-3C23-4489-816A-41D8D2A98596"), () => typeof(NowMacro) },
-                //{ new Guid("011E8DC1-8544-4360-9B40-65FD916049B7"), () => typeof(RandomMacro) },
-                //{ new Guid("8A4D4937-E23F-426D-8398-3BDBD1873ADB"), () => typeof(RegexMacro) },
-                //{ new Guid("B57D64E0-9B4F-4ABE-9366-711170FD5294"), () => typeof(SwitchMacro) }
-            };
-
-            // Initial host setup has the current locale. May need to be changed based on inputs.
-            Host = new DefaultTemplateEngineHost(HostIdentifier, HostVersion, CultureInfo.CurrentCulture.Name, new Dictionary<string, string> { { "prefs:language", "C#" } }, builtIns.ToList());
-            EngineEnvironmentSettings.Host = Host;
-
+            ConfigureHost();
             ExtendedCommandParser app = new ExtendedCommandParser()
             {
                 Name = "dotnet new",
                 FullName = LocalizableStrings.CommandDescription
             };
             SetupInternalCommands(app);
+
             CommandArgument templateName = app.Argument("template", LocalizableStrings.TemplateArgumentHelp);
             New3Command instance = new New3Command(app, templateName);
 
@@ -190,6 +218,30 @@ namespace dotnet_new3
             }
         }
 
+        private static void ConfigureHost()
+        {
+            Dictionary<Guid, Func<Type>> builtIns = new Dictionary<Guid, Func<Type>>
+            {
+                //{ new Guid("0C434DF7-E2CB-4DEE-B216-D7C58C8EB4B3"), () => typeof(RunnableProjectGenerator) },
+                //{ new Guid("3147965A-08E5-4523-B869-02C8E9A8AAA1"), () => typeof(BalancedNestingConfig) },
+                //{ new Guid("3E8BCBF0-D631-45BA-A12D-FBF1DE03AA38"), () => typeof(ConditionalConfig) },
+                //{ new Guid("A1E27A4B-9608-47F1-B3B8-F70DF62DC521"), () => typeof(FlagsConfig) },
+                //{ new Guid("3FAE1942-7257-4247-B44D-2DDE07CB4A4A"), () => typeof(IncludeConfig) },
+                //{ new Guid("3D33B3BF-F40E-43EB-A14D-F40516F880CD"), () => typeof(RegionConfig) },
+                //{ new Guid("62DB7F1F-A10E-46F0-953F-A28A03A81CD1"), () => typeof(ReplacementConfig) },
+                //{ new Guid("370996FE-2943-4AED-B2F6-EC03F0B75B4A"), () => typeof(ConstantMacro) },
+                //{ new Guid("BB625F71-6404-4550-98AF-B2E546F46C5F"), () => typeof(EvaluateMacro) },
+                //{ new Guid("10919008-4E13-4FA8-825C-3B4DA855578E"), () => typeof(GuidMacro) },
+                //{ new Guid("F2B423D7-3C23-4489-816A-41D8D2A98596"), () => typeof(NowMacro) },
+                //{ new Guid("011E8DC1-8544-4360-9B40-65FD916049B7"), () => typeof(RandomMacro) },
+                //{ new Guid("8A4D4937-E23F-426D-8398-3BDBD1873ADB"), () => typeof(RegexMacro) },
+                //{ new Guid("B57D64E0-9B4F-4ABE-9366-711170FD5294"), () => typeof(SwitchMacro) }
+            };
+
+            Host = new DefaultTemplateEngineHost(HostIdentifier, HostVersion, CultureInfo.CurrentCulture.Name, new Dictionary<string, string> { { "prefs:language", "C#" } }, builtIns.ToList());
+            EngineEnvironmentSettings.Host = Host;
+        }
+
         private async Task<int> CreateTemplateAsync(ITemplateInfo template)
         {
             string fallbackName = new DirectoryInfo(OutputPath ?? Directory.GetCurrentDirectory()).Name;
@@ -199,16 +251,15 @@ namespace dotnet_new3
             switch (instantiateResult.Status)
             {
                 case CreationResultStatus.CreateSucceeded:
-                    EngineEnvironmentSettings.Host.LogMessage(string.Format(LocalizableStrings.CreateSuccessful, resultTemplateName));
+                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.CreateSuccessful, resultTemplateName));
                     break;
                 case CreationResultStatus.CreateFailed:
                     break;
                 case CreationResultStatus.MissingMandatoryParam:
-                    EngineEnvironmentSettings.Host.LogMessage(string.Format(LocalizableStrings.MissingRequiredParameter, instantiateResult.Message, resultTemplateName));
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingRequiredParameter, instantiateResult.Message, resultTemplateName).Bold().Red());
                     break;
                 case CreationResultStatus.InvalidParamValues:
-                    // DisplayHelp() will figure out the details on the invalid params.
-                    DisplayHelp();
+                    ShowTemplateHelp();
                     break;
                 default:
                     break;
@@ -217,309 +268,9 @@ namespace dotnet_new3
             return instantiateResult.ResultCode;
         }
 
-        private int DisplayHelp()
+        private void DisplayTemplateList()
         {
-            if (string.IsNullOrWhiteSpace(_templateName.Value))
-            {   // no template specified
-                _app.ShowHelp();
-                return 0;
-            }
-
-            string language = Language;
-            if (string.IsNullOrEmpty(language))
-            {
-                if (EngineEnvironmentSettings.Host.TryGetHostParamDefault("prefs:language", out string l))
-                {
-                    language = l;
-                }
-            }
-
-            IReadOnlyCollection<IFilteredTemplateInfo> templates = TemplateCreator.List
-                (
-                false,
-                WellKnownSearchFilters.AliasFilter(_templateName.Value),
-                WellKnownSearchFilters.NameFilter(_templateName.Value),
-                WellKnownSearchFilters.ClassificationsFilter(_templateName.Value),
-                WellKnownSearchFilters.LanguageFilter(language)
-                );
-
-            IList<IFilteredTemplateInfo> matchedTemplates = templates.Where(x => x.IsMatch).ToList();
-
-            if (matchedTemplates.Count == 0)
-            {
-                matchedTemplates = templates.Where(x => x.IsMatch).ToList();
-            }
-
-            if (matchedTemplates.Count > 1)
-            {
-                ListTemplates();
-                return -1;
-            }
-            else if (matchedTemplates.Count == 1)
-            {
-                ITemplateInfo templateInfo = matchedTemplates.First().Info;
-                EngineEnvironmentSettings.Host.LogMessage(_app.GetOptionsHelp());
-                return TemplateHelp(templateInfo, _app.AllTemplateParams);
-            }
-            else
-            {
-                // TODO: add a message indicating no templates matched the pattern. Requires LOC coordination
-                ListTemplates(string.Empty);
-                return -1;
-            }
-        }
-
-        private async Task<int> ExecuteAsync()
-        {
-            _app.ParseArgs();
-            if (ExtraArgsHasValue)
-            {
-                _app.ParseArgs(_app.InternalParamValueList("--extra-args"));
-            }
-
-            if (DebugAttachHasValue)
-            {
-                Console.ReadLine();
-            }
-
-            if (LocaleHasValue)
-            {
-                string newLocale = Locale;
-                if (!ValidateLocaleFormat(newLocale))
-                {
-                    EngineEnvironmentSettings.Host.LogMessage(string.Format(LocalizableStrings.BadLocaleError, newLocale));
-                    return -1;
-                }
-
-                Host.UpdateLocale(newLocale);
-            }
-
-            int resultCode = InitializationAndDebugging();
-            if (_shouldExit)
-            {
-                return resultCode;
-            }
-
-            string language = Language;
-            string outputPath = OutputPath ?? Host.FileSystem.GetCurrentDirectory();
-
-            string context = null;
-            if (!IsShowAllFlagSpecified)
-            {
-                if (Host.FileSystem.DirectoryExists(outputPath) && Host.FileSystem.EnumerateFiles(outputPath, "*.*proj", SearchOption.TopDirectoryOnly).Any())
-                {
-                    context = "item";
-                }
-                else
-                {
-                    context = "project";
-                }
-            }
-
-            _allResults = TemplateCreator.List
-            (
-                false,
-                WellKnownSearchFilters.AliasFilter(_templateName.Value),
-                WellKnownSearchFilters.NameFilter(_templateName.Value),
-                WellKnownSearchFilters.ClassificationsFilter(_templateName.Value),
-                WellKnownSearchFilters.LanguageFilter(language),
-                WellKnownSearchFilters.ContextFilter(context)
-            );
-
-            if (string.IsNullOrEmpty(language))
-            {
-                if (EngineEnvironmentSettings.Host.TryGetHostParamDefault("prefs:language", out string l))
-                {
-                    language = l;
-                }
-            }
-
-            resultCode = ParseTemplateArgs(language);
-            if (_shouldExit)
-            {
-                return resultCode;
-            }
-
-            resultCode = MaintenanceAndInfo();
-            if (_shouldExit)
-            {
-                return resultCode;
-            }
-
-            IReadOnlyList<IFilteredTemplateInfo> matchingResults = _allResults.Where(x => x.IsMatch).ToList();
-
-            if (matchingResults.Count > 1)
-            {
-                matchingResults = matchingResults.Where(x => x.Info.Tags != null && x.Info.Tags.TryGetValue("language", out string lang) && (string.IsNullOrEmpty(lang) || string.Equals(lang, language, StringComparison.OrdinalIgnoreCase))).ToList();
-            }
-
-            if (matchingResults.Count > 1)
-            {
-                IReadOnlyList<IFilteredTemplateInfo> exactMatches = matchingResults.Where(x => x.MatchDisposition.Any(y => (y.Location == MatchLocation.Name || y.Location == MatchLocation.ShortName) && y.Kind == MatchKind.Exact)).ToList();
-
-                if (exactMatches.Count > 0)
-                {
-                    matchingResults = exactMatches.ToList();
-                }
-            }
-
-            if (matchingResults.Count == 0)
-            {
-                EngineEnvironmentSettings.Host.LogMessage(string.Format(LocalizableStrings.CreateFailed, _templateName.Value, "Not Found"));
-                return -1;
-            }
-            else if (matchingResults.Count > 1)
-            {
-                EngineEnvironmentSettings.Host.LogMessage(string.Format(LocalizableStrings.CreateFailed, _templateName.Value, "Multiple matches"));
-                ListTemplates();
-                return -1;
-            }
-
-            if (Alias != null)
-            {
-                AliasRegistry.SetTemplateAlias(Alias, matchingResults[0].Info);
-                return 0;
-            }
-
-            return await CreateTemplateAsync(matchingResults[0].Info).ConfigureAwait(false);
-        }
-
-        private static IEnumerable<ITemplateParameter> FilterParamsForHelp(IParameterSet allParams)
-        {
-            IEnumerable<ITemplateParameter> filteredParams = allParams.ParameterDefinitions.Where(x => x.Priority != TemplateParameterPriority.Implicit);
-            return filteredParams;
-        }
-
-        private static void GenerateUsageForTemplate(ITemplateInfo templateInfo)
-        {
-            ITemplate template = SettingsLoader.LoadTemplate(templateInfo);
-            IParameterSet allParams = template.Generator.GetParametersForTemplate(template);
-            IReadOnlyDictionary<string, string> parameterNameMap = template.Generator.ParameterMapForTemplate(template);
-
-            Reporter.Output.Write($"    dotnet {CommandName} {template.ShortName}");
-            IEnumerable<ITemplateParameter> filteredParams = FilterParamsForHelp(allParams);
-
-            foreach (ITemplateParameter parameter in filteredParams)
-            {
-                if (string.Equals(parameter.DataType, "bool", StringComparison.OrdinalIgnoreCase)
-                    && string.Equals(parameter.DefaultValue, "false", StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-
-                string displayParameter;
-                if (!parameterNameMap.TryGetValue(parameter.Name, out displayParameter))
-                {
-                    displayParameter = parameter.Name;
-                }
-
-                Reporter.Output.Write($" --{displayParameter}");
-
-                if (!string.IsNullOrEmpty(parameter.DefaultValue) && !string.Equals(parameter.DataType, "bool", StringComparison.OrdinalIgnoreCase))
-                {
-                    Reporter.Output.Write($" {parameter.DefaultValue}");
-                }
-            }
-
-            Reporter.Output.WriteLine();
-        }
-
-        private int InitializationAndDebugging()
-        {
-            bool reinitFlag = _app.RemainingArguments.Any(x => x == "--debug:reinit");
-            if (reinitFlag)
-            {
-                Paths.User.FirstRunCookie.Delete();
-            }
-
-            // Note: this leaves things in a weird state. Might be related to the localized caches.
-            // not sure, need to look into it.
-            if (reinitFlag || _app.RemainingArguments.Any(x => x == "--debug:reset-config"))
-            {
-                Paths.User.AliasesFile.Delete();
-                Paths.User.SettingsFile.Delete();
-                TemplateCache.DeleteAllLocaleCacheFiles();
-                _shouldExit = true;
-                return 0;
-            }
-
-            if (!Paths.User.BaseDir.Exists() || !Paths.User.FirstRunCookie.Exists())
-            {
-                if (!IsQuietFlagSpecified)
-                {
-                    Reporter.Output.WriteLine(LocalizableStrings.GettingReady);
-                }
-
-                ConfigureEnvironment();
-                Paths.User.FirstRunCookie.WriteAllText("");
-            }
-
-            if (_app.RemainingArguments.Any(x => x == "--debug:showconfig"))
-            {
-                ShowConfig();
-                _shouldExit = true;
-                return 0;
-            }
-
-            _shouldExit = false;
-            return 0;
-        }
-
-        private async Task InstallPackagesAsync(IReadOnlyList<string> packageNames, bool quiet = false)
-        {
-            List<string> toInstall = new List<string>();
-
-            foreach (string package in packageNames)
-            {
-                string pkg = package.Trim();
-                pkg = Environment.ExpandEnvironmentVariables(pkg);
-                string pattern = null;
-
-                int wildcardIndex = pkg.IndexOfAny(new[] { '*', '?' });
-
-                if (wildcardIndex > -1)
-                {
-                    int lastSlashBeforeWildcard = pkg.LastIndexOfAny(new[] { '\\', '/' });
-                    pattern = pkg.Substring(lastSlashBeforeWildcard + 1);
-                    pkg = pkg.Substring(0, lastSlashBeforeWildcard);
-                }
-
-                try
-                {
-                    if (pattern != null)
-                    {
-                        string fullDirectory = new DirectoryInfo(pkg).FullName;
-                        string fullPathGlob = Path.Combine(fullDirectory, pattern);
-                        TemplateCache.Scan(fullPathGlob);
-                    }
-                    else if (Directory.Exists(pkg) || File.Exists(pkg))
-                    {
-                        string packageLocation = new DirectoryInfo(pkg).FullName;
-                        TemplateCache.Scan(packageLocation);
-                    }
-                    else
-                    {
-                        EngineEnvironmentSettings.Host.OnNonCriticalError("InvalidPackageSpecification", string.Format(LocalizableStrings.BadPackageSpec, pkg), null, 0);
-                    }
-                }
-                catch
-                {
-                    EngineEnvironmentSettings.Host.OnNonCriticalError("InvalidPackageSpecification", string.Format(LocalizableStrings.BadPackageSpec, pkg), null, 0);
-                }
-            }
-
-            TemplateCache.WriteTemplateCaches();
-
-            if (!quiet)
-            {
-                ListTemplates(string.Empty);
-            }
-        }
-
-        private void ListTemplates(string templateName = null)
-        {
-            templateName = templateName ?? _templateName.Value;
-            IEnumerable<ITemplateInfo> results = _allResults.Where(x => x.IsMatch).Select(x => x.Info);
+            IEnumerable<ITemplateInfo> results = _matchedTemplates.Where(x => x.IsMatch).Select(x => x.Info);
 
             IEnumerable<IGrouping<string, ITemplateInfo>> grouped = results.GroupBy(x => x.GroupIdentity);
             EngineEnvironmentSettings.Host.TryGetHostParamDefault("prefs:language", out string defaultLanguage);
@@ -561,55 +312,262 @@ namespace dotnet_new3
             }
         }
 
-        private int MaintenanceAndInfo()
+        private Task<int> EnterAmbiguousTemplateManipulationFlowAsync()
         {
-            if (IsListFlagSpecified)
+            if (!ValidateRemainingParameters())
             {
-                ListTemplates();
-                _shouldExit = true;
-                return -1;
+                ShowUsageHelp();
+                return Task.FromResult(-1);
+            }    
+
+            if (!string.IsNullOrWhiteSpace(Alias))
+            {
+                Reporter.Error.WriteLine(LocalizableStrings.InvalidInputSwitch.Bold().Red());
+                Reporter.Error.WriteLine("  " + _app.TemplateParamInputFormat("--alias").Bold().Red());
+                return Task.FromResult(-1);
             }
 
             if (IsHelpFlagSpecified)
             {
-                _shouldExit = true;
-                return DisplayHelp();
+                ShowUsageHelp();
+                DisplayTemplateList();
+                return Task.FromResult(0);
+            }
+            else
+            {
+                DisplayTemplateList();
+
+                //If we're showing the list because we were asked to, exit with success, otherwise, exit with failure
+                if (IsListFlagSpecified)
+                {
+                    return Task.FromResult(0);
+                }
+                else
+                {
+                    return Task.FromResult(-1);
+                }
+            }
+        }
+
+        private Task<int> EnterInstallFlowAsync()
+        {
+            Installer.InstallPackages(Install.ToList());
+            //TODO: When an installer that directly calls into NuGet is available,
+            //  return a more accurate representation of the outcome of the operation
+            return Task.FromResult(0);
+        }
+
+        private async Task<int> EnterMaintenanceFlowAsync()
+        {
+            if (!ValidateRemainingParameters())
+            {
+                ShowUsageHelp();
+                return -1;
             }
 
             if (InstallHasValue)
             {
-                Installer.InstallPackages(Install.ToList());
+                int installResult = await EnterInstallFlowAsync().ConfigureAwait(false);
 
-                if (!IsQuietFlagSpecified)
-                {
-                    ListTemplates(string.Empty);
+                if(installResult == 0)
+                {                    
+                    await PerformCoreTemplateQueryAsync().ConfigureAwait(false);
+                    DisplayTemplateList();
                 }
 
-                _shouldExit = true;
-                return 0;
+                return installResult;
             }
 
-            if (string.IsNullOrEmpty(_templateName.Value))
-            {
-                ListTemplates(string.Empty);
-                _shouldExit = true;
-                return -1;
-            }
+            //No other cases specified, we've fallen through to "Usage help + List"
+            ShowUsageHelp();
+            await PerformCoreTemplateQueryAsync().ConfigureAwait(false);
+            DisplayTemplateList();
 
-            _shouldExit = false;
             return 0;
         }
 
-        private static void ParameterHelp(IParameterSet allParams, ExtendedCommandParser app, string additionalInfo = null)
+        private async Task<int> EnterSingularTemplateManipulationFlowAsync()
+        {
+            if (!string.IsNullOrWhiteSpace(Alias))
+            {
+                if (!ValidateRemainingParameters())
+                {
+                    ShowUsageHelp();
+                    return -1;
+                }
+
+                AliasRegistry.SetTemplateAlias(Alias, UnambiguousTemplateToUse);
+                Reporter.Output.WriteLine(LocalizableStrings.AliasCreated);
+                return 0;
+            }
+            else if(IsListFlagSpecified)
+            {
+                if (!ValidateRemainingParameters())
+                {
+                    ShowUsageHelp();
+                    return -1;
+                }
+
+                DisplayTemplateList();
+                return 0;
+            }
+            
+            //If we've made it here, we need the actual template's args
+            ParseTemplateArgs(UnambiguousTemplateToUse);
+            bool argsError = !ValidateRemainingParameters();
+
+            if (argsError || IsHelpFlagSpecified)
+            {
+                ShowUsageHelp();
+                ShowTemplateHelp();
+                return argsError ? -1 : 0;
+            }
+            else
+            {
+                return await CreateTemplateAsync(UnambiguousTemplateToUse).ConfigureAwait(false);
+            }
+        }
+
+        private async Task<int> EnterTemplateManipulationFlowAsync()
+        {
+            await PerformCoreTemplateQueryAsync().ConfigureAwait(false);
+
+            if (UnambiguousTemplateToUse != null)
+            {
+                return await EnterSingularTemplateManipulationFlowAsync().ConfigureAwait(false);
+            }
+
+            return await EnterAmbiguousTemplateManipulationFlowAsync().ConfigureAwait(false);
+        }
+
+        private async Task<int> ExecuteAsync()
+        {
+            //Parse non-template specific arguments
+            _app.ParseArgs();
+            if (ExtraArgsHasValue)
+            {
+                _app.ParseArgs(_app.InternalParamValueList("--extra-args"));
+            }
+
+            if (DebugAttachHasValue)
+            {
+                Console.ReadLine();
+            }
+
+            ConfigureLocale();
+            Initialize();
+
+            if (string.IsNullOrWhiteSpace(_templateName.Value))
+            {
+                return await EnterMaintenanceFlowAsync().ConfigureAwait(false);
+            }
+
+            return await EnterTemplateManipulationFlowAsync().ConfigureAwait(false);
+        }
+
+        private void ConfigureLocale()
+        {
+            if (LocaleHasValue)
+            {
+                string newLocale = Locale;
+                if (!ValidateLocaleFormat(newLocale))
+                {
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.BadLocaleError, newLocale).Bold().Red());
+                }
+
+                Host.UpdateLocale(newLocale);
+            }
+        }
+
+        private IEnumerable<ITemplateParameter> FilterParamsForHelp(IParameterSet allParams, HashSet<string> hiddenParams)
+        {
+            IEnumerable<ITemplateParameter> filteredParams = allParams.ParameterDefinitions
+                .Where(x => x.Priority != TemplateParameterPriority.Implicit && !hiddenParams.Contains(x.Name));
+            return filteredParams;
+        }
+
+        private void GenerateUsageForTemplate(ITemplateInfo templateInfo)
+        {
+            ITemplate template = SettingsLoader.LoadTemplate(templateInfo);
+            IParameterSet allParams = template.Generator.GetParametersForTemplate(template);
+            HostSpecificTemplateData hostTemplateData = ReadHostSpecificTemplateData(template);
+            IReadOnlyDictionary<string, string> parameterNameMap = hostTemplateData.ParameterMap;
+
+            Reporter.Output.Write($"    dotnet {CommandName} {template.ShortName}");
+            IEnumerable<ITemplateParameter> filteredParams = FilterParamsForHelp(allParams, hostTemplateData.HiddenParameters);
+
+            foreach (ITemplateParameter parameter in filteredParams)
+            {
+                if (string.Equals(parameter.DataType, "bool", StringComparison.OrdinalIgnoreCase)
+                    && string.Equals(parameter.DefaultValue, "false", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                string displayParameter;
+                if (!parameterNameMap.TryGetValue(parameter.Name, out displayParameter))
+                {
+                    displayParameter = parameter.Name;
+                }
+
+                Reporter.Output.Write($" --{displayParameter}");
+
+                if (!string.IsNullOrEmpty(parameter.DefaultValue) && !string.Equals(parameter.DataType, "bool", StringComparison.OrdinalIgnoreCase))
+                {
+                    Reporter.Output.Write($" {parameter.DefaultValue}");
+                }
+            }
+
+            Reporter.Output.WriteLine();
+        }
+
+        private bool Initialize()
+        {
+            bool reinitFlag = _app.RemainingArguments.Any(x => x == "--debug:reinit");
+            if (reinitFlag)
+            {
+                Paths.User.FirstRunCookie.Delete();
+            }
+
+            // Note: this leaves things in a weird state. Might be related to the localized caches.
+            // not sure, need to look into it.
+            if (reinitFlag || _app.RemainingArguments.Any(x => x == "--debug:reset-config"))
+            {
+                Paths.User.AliasesFile.Delete();
+                Paths.User.SettingsFile.Delete();
+                TemplateCache.DeleteAllLocaleCacheFiles();
+                return false;
+            }
+
+            if (!Paths.User.BaseDir.Exists() || !Paths.User.FirstRunCookie.Exists())
+            {
+                if (!IsQuietFlagSpecified)
+                {
+                    Reporter.Output.WriteLine(LocalizableStrings.GettingReady);
+                }
+
+                ConfigureEnvironment();
+                Paths.User.FirstRunCookie.WriteAllText("");
+            }
+
+            if (_app.RemainingArguments.Any(x => x == "--debug:showconfig"))
+            {
+                ShowConfig();
+                return false;
+            }
+
+            return true;
+        }
+
+        private void ParameterHelp(IParameterSet allParams, string additionalInfo, HashSet<string> hiddenParams)
         {
             if (!string.IsNullOrEmpty(additionalInfo))
             {
-                Reporter.Output.WriteLine(additionalInfo);
+                Reporter.Error.WriteLine(additionalInfo.Bold().Red());
                 Reporter.Output.WriteLine();
             }
 
-            //IEnumerable<ITemplateParameter> filteredParams = allParams.ParameterDefinitions.Where(x => x.Priority != TemplateParameterPriority.Implicit);
-            IEnumerable<ITemplateParameter> filteredParams = FilterParamsForHelp(allParams);
+            IEnumerable<ITemplateParameter> filteredParams = FilterParamsForHelp(allParams, hiddenParams);
 
             if (filteredParams.Any())
             {
@@ -619,7 +577,7 @@ namespace dotnet_new3
                     param =>
                     {
                         // the key is guaranteed to exist
-                        IList<string> variants = app.CanonicalToVariantsTemplateParamMap[param.Name];
+                        IList<string> variants = _app.CanonicalToVariantsTemplateParamMap[param.Name];
                         string options = string.Join("|", variants.Reverse());
                         return "  " + options;
                     },
@@ -659,14 +617,14 @@ namespace dotnet_new3
                     {
                         // this will catch when the user inputs the default value. The above deliberately skips it on the resolved values.
                         if (string.Equals(param.DataType, "bool", StringComparison.OrdinalIgnoreCase)
-                            && app.TemplateParamHasValue(param.Name)
-                            && string.IsNullOrEmpty(app.TemplateParamValue(param.Name)))
+                            && _app.TemplateParamHasValue(param.Name)
+                            && string.IsNullOrEmpty(_app.TemplateParamValue(param.Name)))
                         {
                             configuredValue = "true";
                         }
                         else
                         {
-                            app.AllTemplateParams.TryGetValue(param.Name, out configuredValue);
+                            _app.AllTemplateParams.TryGetValue(param.Name, out configuredValue);
                         }
                     }
 
@@ -682,9 +640,7 @@ namespace dotnet_new3
                     }
 
                     return displayValue.ToString();
-                },
-                    string.Empty
-                );
+                }, string.Empty);
 
                 Reporter.Output.WriteLine(formatter.Layout());
             }
@@ -694,52 +650,84 @@ namespace dotnet_new3
             }
         }
 
-        private int ParseTemplateArgs(string language)
+        private void ParseTemplateArgs(ITemplateInfo templateInfo)
         {
-            try
+            ITemplate template = SettingsLoader.LoadTemplate(templateInfo);
+            IParameterSet allParams = template.Generator.GetParametersForTemplate(template);
+            _hostSpecificTemplateData = ReadHostSpecificTemplateData(template);
+            IReadOnlyDictionary<string, string> parameterNameMap = _hostSpecificTemplateData.ParameterMap;
+            _app.SetupTemplateParameters(allParams, parameterNameMap);
+
+            // re-parse after setting up the template params
+            _app.ParseArgs(_app.InternalParamValueList("--extra-args"));
+        }
+
+        private Task PerformCoreTemplateQueryAsync()
+        {
+            string outputPath = OutputPath ?? Host.FileSystem.GetCurrentDirectory();
+
+            string context = null;
+            if (!IsShowAllFlagSpecified)
             {
-                IReadOnlyCollection<ITemplateInfo> templates = _allResults.Where(x => x.IsMatch).Select(x => x.Info).ToList();
-
-                if (templates.Count > 1)
+                if (Host.FileSystem.DirectoryExists(outputPath) && Host.FileSystem.EnumerateFiles(outputPath, "*.*proj", SearchOption.TopDirectoryOnly).Any())
                 {
-                    templates = templates.Where(x => x.Tags != null && x.Tags.TryGetValue("language", out string lang) && (string.IsNullOrEmpty(lang) || string.Equals(lang, language))).ToList();
+                    context = "item";
                 }
-
-                if (templates.Count == 1)
+                else
                 {
-                    ITemplateInfo templateInfo = templates.First();
-
-                    ITemplate template = SettingsLoader.LoadTemplate(templateInfo);
-                    IParameterSet allParams = template.Generator.GetParametersForTemplate(template);
-                    IReadOnlyDictionary<string, string> parameterNameMap = template.Generator.ParameterMapForTemplate(template);
-                    _app.SetupTemplateParameters(allParams, parameterNameMap);
+                    context = "project";
                 }
-
-                // re-parse after setting up the template params
-                _app.ParseArgs(_app.InternalParamValueList("--extra-args"));
-            }
-            catch (Exception ex)
-            {
-                Reporter.Error.WriteLine(ex.Message.Red().Bold());
-                _app.ShowHelp();
-                _shouldExit = true;
-                return -1;
             }
 
-            if (_app.RemainingParameters.Any(x => !x.Key.StartsWith("--debug:")))
-            {
-                EngineEnvironmentSettings.Host.LogMessage(LocalizableStrings.InvalidInputSwitch);
-                foreach (string flag in _app.RemainingParameters.Keys)
-                {
-                    EngineEnvironmentSettings.Host.LogMessage($"\t{flag}");
-                }
+            //Perform the core query to search for templates
+            IReadOnlyCollection<IFilteredTemplateInfo> templates = TemplateCreator.List
+            (
+                false,
+                WellKnownSearchFilters.AliasFilter(_templateName.Value),
+                WellKnownSearchFilters.NameFilter(_templateName.Value),
+                WellKnownSearchFilters.ClassificationsFilter(_templateName.Value),
+                WellKnownSearchFilters.LanguageFilter(Language),
+                WellKnownSearchFilters.ContextFilter(context)
+            );
 
-                _shouldExit = true;
-                return DisplayHelp();
+            IReadOnlyList<IFilteredTemplateInfo> matchedTemplates = templates.Where(x => x.IsMatch).ToList();
+
+            if (matchedTemplates.Count == 0)
+            {
+                matchedTemplates = templates.Where(x => x.IsPartialMatch).ToList();
+                _forceAmbiguousFlow = true;
+            }
+            else
+            {
+                IReadOnlyList<IFilteredTemplateInfo> matchesWithExactDispositionsInNameFields = matchedTemplates.Where(x => x.MatchDisposition.Any(y => NameFields.Contains(y.Location) && y.Kind == MatchKind.Exact)).ToList();
+
+                if (matchesWithExactDispositionsInNameFields.Count > 0)
+                {
+                    matchedTemplates = matchesWithExactDispositionsInNameFields;
+                }
             }
 
-            _shouldExit = false;
-            return 0;
+            _matchedTemplates = matchedTemplates;
+
+            return Task.FromResult(true);
+        }
+
+        private static HostSpecificTemplateData ReadHostSpecificTemplateData(ITemplate templateInfo)
+        {
+            if (SettingsLoader.TryGetFileFromIdAndPath(templateInfo.HostConfigMountPointId, templateInfo.HostConfigPlace, out IFile file))
+            {
+                JObject jsonData;
+                using (Stream s = file.OpenRead())
+                using (TextReader tr = new StreamReader(s, true))
+                using (JsonReader r = new JsonTextReader(tr))
+                {
+                    jsonData = JObject.Load(r);
+                }
+
+                return jsonData.ToObject<HostSpecificTemplateData>();
+            }
+
+            return HostSpecificTemplateData.Default;
         }
 
         private static void SetupInternalCommands(ExtendedCommandParser appExt)
@@ -792,18 +780,18 @@ namespace dotnet_new3
             });
         }
 
-        private static void ShowInvocationExamples()
+        private void ShowInvocationExamples()
         {
             const int ExamplesToShow = 2;
             IReadOnlyList<string> preferredNameList = new List<string>() { "mvc" };
             int numShown = 0;
-            IList<ITemplateInfo> templateList = TemplateCreator.List(false).Select(x => x.Info).ToList();
 
-            if (templateList.Count == 0)
+            if (_matchedTemplates.Count == 0)
             {
                 return;
             }
 
+            List<ITemplateInfo> templateList = _matchedTemplates.Select(x => x.Info).ToList();
             Reporter.Output.WriteLine("Examples:");
 
             foreach (string preferredName in preferredNameList)
@@ -832,30 +820,30 @@ namespace dotnet_new3
             Reporter.Output.WriteLine($"    dotnet {CommandName} --help");
         }
 
-        private int TemplateHelp(ITemplateInfo templateInfo, IReadOnlyDictionary<string, string> userParameters)
+        private void ShowTemplateHelp()
         {
-            if (templateInfo.Tags != null && templateInfo.Tags.TryGetValue("language", out string templateLang) && !string.IsNullOrWhiteSpace(templateLang))
+            if (UnambiguousTemplateToUse.Tags != null && UnambiguousTemplateToUse.Tags.TryGetValue("language", out string templateLang) && !string.IsNullOrWhiteSpace(templateLang))
             {
-                Reporter.Output.WriteLine($"{templateInfo.Name} ({templateLang})");
+                Reporter.Output.WriteLine($"{UnambiguousTemplateToUse.Name} ({templateLang})");
             }
             else
             {
-                Reporter.Output.WriteLine(templateInfo.Name);
+                Reporter.Output.WriteLine(UnambiguousTemplateToUse.Name);
             }
 
-            if (!string.IsNullOrWhiteSpace(templateInfo.Author))
+            if (!string.IsNullOrWhiteSpace(UnambiguousTemplateToUse.Author))
             {
-                Reporter.Output.WriteLine(string.Format(LocalizableStrings.Author, templateInfo.Author));
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.Author, UnambiguousTemplateToUse.Author));
             }
 
-            if (!string.IsNullOrWhiteSpace(templateInfo.Description))
+            if (!string.IsNullOrWhiteSpace(UnambiguousTemplateToUse.Description))
             {
-                Reporter.Output.WriteLine(string.Format(LocalizableStrings.Description, templateInfo.Description));
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.Description, UnambiguousTemplateToUse.Description));
             }
 
-            ITemplate template = SettingsLoader.LoadTemplate(templateInfo);
+            ITemplate template = SettingsLoader.LoadTemplate(UnambiguousTemplateToUse);
             IParameterSet allParams = TemplateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName, out IList<string> defaultParamsWithInvalidValues);
-            TemplateCreator.ResolveUserParameters(template, allParams, userParameters, out IList<string> userParamsWithInvalidValues);
+            TemplateCreator.ResolveUserParameters(template, allParams, _app.AllTemplateParams, out IList<string> userParamsWithInvalidValues);
 
             string additionalInfo = null;
             if (userParamsWithInvalidValues.Any())
@@ -872,9 +860,29 @@ namespace dotnet_new3
                 additionalInfo = string.Format(LocalizableStrings.InvalidParameterValues, badParams, template.Name);
             }
 
-            ParameterHelp(allParams, _app, additionalInfo);
+            ParameterHelp(allParams, additionalInfo, _hostSpecificTemplateData.HiddenParameters);
+        }
 
-            return 0;
+        private void ShowUsageHelp()
+        {
+            _app.ShowHelp();
+            Reporter.Output.WriteLine();
+        }
+
+        private bool ValidateRemainingParameters()
+        {
+            if (_app.RemainingParameters.Any(x => !x.Key.StartsWith("--debug:")))
+            {
+                Reporter.Error.WriteLine(LocalizableStrings.InvalidInputSwitch.Bold().Red());
+                foreach (string flag in _app.RemainingParameters.Keys)
+                {
+                    Reporter.Error.WriteLine($"  {flag}".Bold().Red());
+                }
+
+                return false;
+            }
+
+            return true;
         }
 
         private static bool ValidateLocaleFormat(string localeToCheck)
