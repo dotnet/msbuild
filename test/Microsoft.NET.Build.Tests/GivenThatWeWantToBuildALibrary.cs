@@ -472,6 +472,28 @@ namespace Microsoft.NET.Build.Tests
                 .Fail();
         }
 
+        [Fact]
+        public void Restore_succeeds_even_if_the_project_extension_is_for_a_different_language()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("AppWithLibrary")
+                .WithSource();
+
+            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
+
+            var oldProjectFile = Path.Combine(libraryProjectDirectory, "TestLibrary.csproj");
+            var newProjectFile = Path.Combine(libraryProjectDirectory, "TestLibrary.fsproj");
+
+            File.Move(oldProjectFile, newProjectFile);
+
+            var restoreCommand = new RestoreCommand(Stage0MSBuild, libraryProjectDirectory, "TestLibrary.fsproj");
+
+            restoreCommand
+                .Execute()
+                .Should()
+                .Pass();
+        }
+
         [Theory]
         [InlineData(".NETStandard,Version=v1.0", new[] { "NETSTANDARD1_0" }, false)]
         [InlineData("netstandard1.3", new[] { "NETSTANDARD1_3" }, false)]
