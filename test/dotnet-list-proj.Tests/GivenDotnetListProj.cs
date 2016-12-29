@@ -83,7 +83,7 @@ Options:
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput("list InvalidSolution.sln projects");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be("Invalid solution `InvalidSolution.sln`.");
+            cmd.StdErr.Should().Be("Invalid solution `InvalidSolution.sln`. Invalid format in line 1: File header is missing");
             cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
@@ -102,7 +102,7 @@ Options:
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput("list projects");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be($"Invalid solution `{solutionFullPath}`.");
+            cmd.StdErr.Should().Be($"Invalid solution `{solutionFullPath}`. Invalid format in line 1: File header is missing");
             cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 

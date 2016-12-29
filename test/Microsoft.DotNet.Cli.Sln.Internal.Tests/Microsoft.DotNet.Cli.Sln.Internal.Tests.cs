@@ -276,11 +276,13 @@ EndGlobal
                 .Should().Be(SolutionModified);
         }
 
-        [Fact]
-        public void WhenGivenAnSolutionWithMissingHeaderItThrows()
+        [Theory]
+        [InlineData("Invalid Solution")]
+        [InlineData("Microsoft Visual Studio Solution File, Format Version ")]
+        public void WhenGivenASolutionWithMissingHeaderItThrows(string fileContents)
         {
             var tmpFile = Temp.CreateFile();
-            tmpFile.WriteAllText("Invalid Solution");
+            tmpFile.WriteAllText(fileContents);
 
             Action action = () =>
             {
@@ -289,6 +291,181 @@ EndGlobal
 
             action.ShouldThrow<InvalidSolutionFormatException>()
                 .WithMessage("Invalid format in line 1: File header is missing");
+        }
+
+        [Fact]
+        public void WhenGivenASolutionWithMultipleGlobalSectionsItThrows()
+        {
+            const string SolutionFile = @"
+Microsoft Visual Studio Solution File, Format Version 12.00
+Global
+EndGlobal
+Global
+EndGlobal
+";
+            var tmpFile = Temp.CreateFile();
+            tmpFile.WriteAllText(SolutionFile);
+
+            Action action = () =>
+            {
+                SlnFile.Read(tmpFile.Path);
+            };
+
+            action.ShouldThrow<InvalidSolutionFormatException>()
+                .WithMessage("Invalid format in line 5: Global section specified more than once");
+        }
+
+        [Fact]
+        public void WhenGivenASolutionWithGlobalSectionNotClosedItThrows()
+        {
+            const string SolutionFile = @"
+Microsoft Visual Studio Solution File, Format Version 12.00
+Global
+";
+            var tmpFile = Temp.CreateFile();
+            tmpFile.WriteAllText(SolutionFile);
+
+            Action action = () =>
+            {
+                SlnFile.Read(tmpFile.Path);
+            };
+
+            action.ShouldThrow<InvalidSolutionFormatException>()
+                .WithMessage("Invalid format in line 3: Global section not closed");
+        }
+
+        [Fact]
+        public void WhenGivenASolutionWithProjectSectionNotClosedItThrows()
+        {
+            const string SolutionFile = @"
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""App"", ""App\App.csproj"", ""{7072A694-548F-4CAE-A58F-12D257D5F486}""
+";
+            var tmpFile = Temp.CreateFile();
+            tmpFile.WriteAllText(SolutionFile);
+
+            Action action = () =>
+            {
+                SlnFile.Read(tmpFile.Path);
+            };
+
+            action.ShouldThrow<InvalidSolutionFormatException>()
+                .WithMessage("Invalid format in line 3: Project section not closed");
+        }
+
+        [Fact]
+        public void WhenGivenASolutionWithInvalidProjectSectionItThrows()
+        {
+            const string SolutionFile = @"
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""App"", ""App\App.csproj"", ""{7072A694-548F-4CAE-A58F-12D257D5F486}""
+EndProject
+";
+
+            var tmpFile = Temp.CreateFile();
+            tmpFile.WriteAllText(SolutionFile);
+
+            Action action = () =>
+            {
+                SlnFile.Read(tmpFile.Path);
+            };
+
+            action.ShouldThrow<InvalidSolutionFormatException>()
+                .WithMessage("Invalid format in line 3: Project section is missing '(' when parsing the line starting at position 0");
+        }
+
+        [Fact]
+        public void WhenGivenASolutionWithInvalidSectionTypeItThrows()
+        {
+            const string SolutionFile = @"
+Microsoft Visual Studio Solution File, Format Version 12.00
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = thisIsUnknown
+	EndGlobalSection
+EndGlobal
+";
+            var tmpFile = Temp.CreateFile();
+            tmpFile.WriteAllText(SolutionFile);
+
+            Action action = () =>
+            {
+                SlnFile.Read(tmpFile.Path);
+            };
+
+            action.ShouldThrow<InvalidSolutionFormatException>()
+                .WithMessage("Invalid format in line 4: Invalid section type: thisIsUnknown");
+        }
+
+        [Fact]
+        public void WhenGivenASolutionWithMissingSectionIdTypeItThrows()
+        {
+            const string SolutionFile = @"
+Microsoft Visual Studio Solution File, Format Version 12.00
+Global
+	GlobalSection = preSolution
+	EndGlobalSection
+EndGlobal
+";
+            var tmpFile = Temp.CreateFile();
+            tmpFile.WriteAllText(SolutionFile);
+
+            Action action = () =>
+            {
+                SlnFile.Read(tmpFile.Path);
+            };
+
+            action.ShouldThrow<InvalidSolutionFormatException>()
+                .WithMessage("Invalid format in line 4: Section id missing");
+        }
+
+        [Fact]
+        public void WhenGivenASolutionWithSectionNotClosedItThrows()
+        {
+            const string SolutionFile = @"
+Microsoft Visual Studio Solution File, Format Version 12.00
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+EndGlobal
+";
+            var tmpFile = Temp.CreateFile();
+            tmpFile.WriteAllText(SolutionFile);
+
+            Action action = () =>
+            {
+                SlnFile.Read(tmpFile.Path);
+            };
+
+            action.ShouldThrow<InvalidSolutionFormatException>()
+                .WithMessage("Invalid format in line 6: Closing section tag not found");
+        }
+
+        [Fact]
+        public void WhenGivenASolutionWithInvalidPropertySetItThrows()
+        {
+            const string SolutionFile = @"
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project(""{7072A694-548F-4CAE-A58F-12D257D5F486}"") = ""AppModified"", ""AppModified\AppModified.csproj"", ""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}""
+EndProject
+Global
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7072A694-548F-4CAE-A58F-12D257D5F486} Debug|Any CPU ActiveCfg = Debug|Any CPU
+	EndGlobalSection
+EndGlobal
+";
+            var tmpFile = Temp.CreateFile();
+            tmpFile.WriteAllText(SolutionFile);
+
+            Action action = () =>
+            {
+                var slnFile = SlnFile.Read(tmpFile.Path);
+                if (slnFile.ProjectConfigurationsSection.Count == 0)
+                {
+                    // Need to force loading of nested property sets
+                }
+            };
+
+            action.ShouldThrow<InvalidSolutionFormatException>()
+                .WithMessage("Invalid format in line 7: Property set is missing '.'");
         }
     }
 }

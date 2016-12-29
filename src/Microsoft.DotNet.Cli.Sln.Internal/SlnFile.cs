@@ -120,6 +120,8 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
 
         private void Read(TextReader reader)
         {
+            const string HeaderPrefix = "Microsoft Visual Studio Solution File, Format Version ";
+
             string line;
             int curLineNum = 0;
             bool globalFound = false;
@@ -129,14 +131,16 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
             {
                 curLineNum++;
                 line = line.Trim();
-                if (line.StartsWith("Microsoft Visual Studio Solution File", StringComparison.Ordinal))
+                if (line.StartsWith(HeaderPrefix, StringComparison.Ordinal))
                 {
-                    int i = line.LastIndexOf(' ');
-                    if (i == -1)
+                    if (line.Length <= HeaderPrefix.Length)
                     {
-                        throw new InvalidSolutionFormatException(curLineNum);
+                        throw new InvalidSolutionFormatException(
+                            curLineNum,
+                            LocalizableStrings.FileHeaderMissingError);
                     }
-                    FormatVersion = line.Substring(i + 1);
+
+                    FormatVersion = line.Substring(HeaderPrefix.Length);
                     _prefixBlankLines = curLineNum - 1;
                 }
                 if (line.StartsWith("# ", StringComparison.Ordinal))
@@ -157,7 +161,9 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
                 {
                     if (globalFound)
                     {
-                        throw new InvalidSolutionFormatException(curLineNum, LocalizableStrings.GlobalSectionMoreThanOnceError);
+                        throw new InvalidSolutionFormatException(
+                            curLineNum,
+                            LocalizableStrings.GlobalSectionMoreThanOnceError);
                     }
                     globalFound = true;
                     while ((line = reader.ReadLine()) != null)
@@ -181,7 +187,9 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
                     }
                     if (line == null)
                     {
-                        throw new InvalidSolutionFormatException(curLineNum, LocalizableStrings.GlobalSectionNotClosedError);
+                        throw new InvalidSolutionFormatException(
+                            curLineNum,
+                            LocalizableStrings.GlobalSectionNotClosedError);
                     }
                 }
                 else if (line.IndexOf('=') != -1)
@@ -191,7 +199,9 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
             }
             if (FormatVersion == null)
             {
-                throw new InvalidSolutionFormatException(curLineNum, LocalizableStrings.FileHeaderMissingError);
+                throw new InvalidSolutionFormatException(
+                    curLineNum,
+                    LocalizableStrings.FileHeaderMissingError);
             }
         }
 
@@ -331,15 +341,20 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
                 }
             }
 
-            throw new InvalidSolutionFormatException(curLineNum, LocalizableStrings.ProjectSectionNotClosedError);
+            throw new InvalidSolutionFormatException(
+                curLineNum,
+                LocalizableStrings.ProjectSectionNotClosedError);
         }
 
         private void FindNext(int ln, string line, ref int i, char c)
         {
+            var inputIndex = i;
             i = line.IndexOf(c, i);
             if (i == -1)
             {
-                throw new InvalidSolutionFormatException(ln);
+                throw new InvalidSolutionFormatException(
+                    ln,
+                    string.Format(LocalizableStrings.ProjectParsingErrorFormatString, c, inputIndex));
             }
         }
 
@@ -481,7 +496,9 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
             {
                 return SlnSectionType.PostProcess;
             }
-            throw new InvalidSolutionFormatException(curLineNum, String.Format(LocalizableStrings.InvalidSectionTypeError, s));
+            throw new InvalidSolutionFormatException(
+                curLineNum, 
+                String.Format(LocalizableStrings.InvalidSectionTypeError, s));
         }
 
         private string FromSectionType(bool isProjectSection, SlnSectionType type)
@@ -502,13 +519,17 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
             int k = line.IndexOf('(');
             if (k == -1)
             {
-                throw new InvalidSolutionFormatException(curLineNum, LocalizableStrings.SectionIdMissingError);
+                throw new InvalidSolutionFormatException(
+                    curLineNum,
+                    LocalizableStrings.SectionIdMissingError);
             }
             var tag = line.Substring(0, k).Trim();
             var k2 = line.IndexOf(')', k);
             if (k2 == -1)
             {
-                throw new InvalidSolutionFormatException(curLineNum);
+                throw new InvalidSolutionFormatException(
+                    curLineNum,
+                    LocalizableStrings.SectionIdMissingError);
             }
             Id = line.Substring(k + 1, k2 - k - 1);
 
@@ -531,7 +552,9 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
             }
             if (line == null)
             {
-                throw new InvalidSolutionFormatException(curLineNum, LocalizableStrings.ClosingSectionTagNotFoundError);
+                throw new InvalidSolutionFormatException(
+                    curLineNum,
+                    LocalizableStrings.ClosingSectionTagNotFoundError);
             }
         }
 
@@ -550,7 +573,9 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
                     var i = line.IndexOf('.');
                     if (i == -1)
                     {
-                        throw new InvalidSolutionFormatException(_baseIndex + n);
+                        throw new InvalidSolutionFormatException(
+                            _baseIndex + n,
+                            string.Format(LocalizableStrings.InvalidPropertySetFormatString, '.'));
                     }
                     var id = line.Substring(0, i);
                     if (curSet == null || id != curSet.Id)
@@ -1141,12 +1166,8 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
 
     public class InvalidSolutionFormatException : Exception
     {
-        public InvalidSolutionFormatException(int line) : base("Invalid format in line " + line)
-        {
-        }
-
-        public InvalidSolutionFormatException(int line, string msg) 
-            : base("Invalid format in line " + line + ": " + msg)
+        public InvalidSolutionFormatException(int line, string details)
+            : base(string.Format(LocalizableStrings.ErrorMessageFormatString, line, details))
         {
         }
     }

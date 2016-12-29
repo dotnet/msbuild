@@ -90,7 +90,7 @@ Additional Arguments:
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"add InvalidSolution.sln project {projectToAdd}");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be("Invalid solution `InvalidSolution.sln`.");
+            cmd.StdErr.Should().Be("Invalid solution `InvalidSolution.sln`. Invalid format in line 1: File header is missing");
             cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
@@ -110,7 +110,7 @@ Additional Arguments:
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"add project {projectToAdd}");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be($"Invalid solution `{solutionPath}`.");
+            cmd.StdErr.Should().Be($"Invalid solution `{solutionPath}`. Invalid format in line 1: File header is missing");
             cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 

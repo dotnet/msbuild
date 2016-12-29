@@ -105,7 +105,7 @@ namespace Microsoft.DotNet.Tools
         public const string CouldNotFindSolutionIn = "Specified solution file {0} does not exist, or there is no solution file in the directory.";
         public const string CouldNotFindSolutionOrDirectory = "Could not find solution or directory `{0}`.";
         public const string MoreThanOneSolutionInDirectory = "Found more than one solution file in {0}. Please specify which one to use.";
-        public const string InvalidSolution = "Invalid solution `{0}`.";
+        public const string InvalidSolutionFormatString = "Invalid solution `{0}`. {1}"; // {0} is the solution path, {1} is already localized details on the failure
         public const string SolutionDoesNotExist = "Specified solution file {0} does not exist, or there is no solution file in the directory.";
         
         /// add p2p
