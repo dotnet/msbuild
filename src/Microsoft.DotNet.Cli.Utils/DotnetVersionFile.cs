@@ -6,7 +6,7 @@ using System.IO;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
-    internal class DotnetVersionFile
+    public class DotnetVersionFile
     {
         public bool Exists { get; set; }
 
