@@ -31,7 +31,7 @@ Options:
             var cmd = new DotnetCommand()
                 .ExecuteWithCapturedOutput($"list projects {helpArg}");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
         [Theory]
@@ -66,7 +66,7 @@ Options:
                 .ExecuteWithCapturedOutput($"list {solutionName} projects");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be($"Could not find solution or directory `{solutionName}`.");
-            cmd.StdOut.Should().Be(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
         [Fact]
@@ -84,7 +84,7 @@ Options:
                 .ExecuteWithCapturedOutput("list InvalidSolution.sln projects");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be("Invalid solution `InvalidSolution.sln`.");
-            cmd.StdOut.Should().Be(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
         [Fact]
@@ -103,7 +103,7 @@ Options:
                 .ExecuteWithCapturedOutput("list projects");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be($"Invalid solution `{solutionFullPath}`.");
-            cmd.StdOut.Should().Be(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
         [Fact]
@@ -122,7 +122,7 @@ Options:
                 .ExecuteWithCapturedOutput("list projects");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be($"Specified solution file {solutionDir + Path.DirectorySeparatorChar} does not exist, or there is no solution file in the directory.");
-            cmd.StdOut.Should().Be(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
         [Fact]
@@ -140,7 +140,7 @@ Options:
                 .ExecuteWithCapturedOutput("list projects");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be($"Found more than one solution file in {projectDirectory + Path.DirectorySeparatorChar}. Please specify which one to use.");
-            cmd.StdOut.Should().Be(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
         [Fact]
@@ -179,7 +179,7 @@ Options:
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput("list projects");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be(OutputText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(OutputText);
         }
     }
 }

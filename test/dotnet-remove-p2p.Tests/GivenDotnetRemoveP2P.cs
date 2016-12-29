@@ -118,7 +118,7 @@ Additional Arguments:
         {
             var cmd = new RemoveP2PCommand().Execute(helpArg);
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
         [Theory]
@@ -156,7 +156,7 @@ Additional Arguments:
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be($"Could not find project or directory `{projName}`.");
-            cmd.StdOut.Should().Be(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
         [Fact]
@@ -171,7 +171,7 @@ Additional Arguments:
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be("Project `Broken/Broken.csproj` is invalid.");
-            cmd.StdOut.Should().Be(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
         [Fact]
@@ -185,7 +185,7 @@ Additional Arguments:
                     .Execute($"\"{setup.ValidRefCsprojRelToOtherProjPath}\"");
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be($"Found more than one project in `{workingDir + Path.DirectorySeparatorChar}`. Please specify which one to use.");
-            cmd.StdOut.Should().Be(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
         [Fact]
@@ -198,7 +198,7 @@ Additional Arguments:
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be($"Could not find any project in `{setup.TestRoot + Path.DirectorySeparatorChar}`.");
-            cmd.StdOut.Should().Be(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
         [Fact]
@@ -384,7 +384,7 @@ Project reference `{setup.LibCsprojRelPath}` removed.";
                 .WithProject(proj.CsProjPath)
                 .Execute($"\"{libref.CsProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be(removedText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(removedText);
 
             var csproj = proj.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore - 1);
@@ -465,7 +465,7 @@ Project reference `{Path.Combine(TestSetup.ProjectName, setup.ValidRefCsprojRelP
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{libref.CsProjPath}\" \"{validref.CsProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be(outputText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(outputText);
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore - 1);
             csproj.NumberOfProjectReferencesWithIncludeContaining(libref.Name).Should().Be(0);
@@ -489,7 +489,7 @@ Project reference `{Path.Combine(TestSetup.ProjectName, setup.ValidRefCsprojRelP
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{libref.CsProjPath}\" \"{validref.CsProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be(OutputText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(OutputText);
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore - 1);
             csproj.NumberOfProjectReferencesWithIncludeContaining(validref.Name).Should().Be(0);

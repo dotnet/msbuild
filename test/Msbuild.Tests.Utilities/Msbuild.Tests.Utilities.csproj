@@ -6,16 +6,9 @@
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <AssemblyName>Msbuild.Tests.Utilities</AssemblyName>
     <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">$(PackageTargetFallback);dotnet5.4;portable-net451+win8</PackageTargetFallback>
-    <DefineConstants>$(DefineConstants);DISABLE_TRACE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="**\*.cs" />
-    <Compile Include="..\..\src\Microsoft.DotNet.ProjectJsonMigration\MSBuildExtensions.cs">
-        <Link>src\Microsoft.DotNet.ProjectJsonMigration\MSBuildExtensions.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Microsoft.DotNet.ProjectJsonMigration\LocalizableStrings.cs">
-        <Link>src\Microsoft.DotNet.ProjectJsonMigration\LocalizableStrings.cs</Link>
-    </Compile>
     <EmbeddedResource Include="**\*.resx" />
     <EmbeddedResource Include="compiler\resources\**\*" />
   </ItemGroup>
@@ -24,6 +17,8 @@
     <ProjectReference Include="..\..\src\Microsoft.DotNet.TestFramework\Microsoft.DotNet.TestFramework.csproj">
       <FromP2P>true</FromP2P>
     </ProjectReference>
+    <ProjectReference Include="..\..\src\Microsoft.DotNet.ProjectJsonMigration\Microsoft.DotNet.ProjectJsonMigration.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.DotNet.Cli.Sln.Internal\Microsoft.DotNet.Cli.Sln.Internal.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj">
       <FromP2P>true</FromP2P>
     </ProjectReference>

@@ -35,7 +35,7 @@ Options:
         {
             var cmd = new ListP2PsCommand().Execute(helpArg);
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
         [Theory]
@@ -72,7 +72,7 @@ Options:
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be($"Could not find project or directory `{projName}`.");
-            cmd.StdOut.Should().Be(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
         [Fact]
@@ -87,7 +87,7 @@ Options:
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be("Project `Broken/Broken.csproj` is invalid.");
-            cmd.StdOut.Should().Be(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
         [Fact]
@@ -101,7 +101,7 @@ Options:
                     .Execute($"\"{setup.ValidRefCsprojRelToOtherProjPath}\"");
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be($"Found more than one project in `{workingDir + Path.DirectorySeparatorChar}`. Please specify which one to use.");
-            cmd.StdOut.Should().Be(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
         [Fact]
@@ -114,7 +114,7 @@ Options:
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be($"Could not find any project in `{setup.TestRoot + Path.DirectorySeparatorChar}`.");
-            cmd.StdOut.Should().Be(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
         [Fact]
@@ -144,7 +144,7 @@ Options:
                 .WithProject(lib.CsProjPath)
                 .Execute();
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be(OutputText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(OutputText);
         }
 
         [Fact]
@@ -169,7 +169,7 @@ Options:
                 .WithProject(lib.CsProjPath)
                 .Execute();
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be(OutputText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(OutputText);
         }
 
         private TestSetup Setup([System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(Setup), string identifier = "")
