@@ -20,9 +20,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <EnableDefaultCompileItems Condition=" '$(EnableDefaultCompileItems)' == '' ">true</EnableDefaultCompileItems>
     <EnableDefaultEmbeddedResourceItems Condition=" '$(EnableDefaultEmbeddedResourceItems)' == '' ">true</EnableDefaultEmbeddedResourceItems>
     <EnableDefaultNoneItems Condition=" '$(EnableDefaultNoneItems)' == '' ">true</EnableDefaultNoneItems>
-    
-    <!-- This would be defined in the Web SDK -->
-    <EnableDefaultContentItems Condition=" '$(EnableDefaultContentItems)' == '' ">true</EnableDefaultContentItems>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -43,11 +40,6 @@ Copyright (c) .NET Foundation. All rights reserved.
          patterns which include files in these items (which happens in Microsoft.NET.Sdk.DefaultItems.props). -->
     <DefaultExcludesInProjectFolder>$(DefaultExcludesInProjectFolder);**/.*/**</DefaultExcludesInProjectFolder>
 
-    <!-- These should possibly move to Web SDK -->
-    <DefaultRemoves>$(DefaultRemoves);node_modules/**</DefaultRemoves>
-    <DefaultRemoves>$(DefaultRemoves);jspm_packages/**</DefaultRemoves>
-    <DefaultRemoves>$(DefaultRemoves);bower_components/**</DefaultRemoves>
-    
     <!-- TODO: Verify why this was originally added and whether we really need it -->
     <DefaultRemoves>$(DefaultRemoves);packages/**</DefaultRemoves>
     

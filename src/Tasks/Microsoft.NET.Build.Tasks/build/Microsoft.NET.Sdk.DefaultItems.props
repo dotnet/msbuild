@@ -26,19 +26,4 @@ Copyright (c) .NET Foundation. All rights reserved.
     <None Remove="**/*.resx" Condition=" '$(EnableDefaultEmbeddedResourceItems)' == 'true' "/>
   </ItemGroup>
 
-  <!-- This would go in the Web SDK -->
-  <ItemGroup Condition=" '$(EnableDefaultItems)' == 'true' And '$(EnableDefaultContentItems)' == 'true' ">
-    <!-- TODO: How are app.config, web.config, and related files handled?
-        app.config and web.*.config should probably be excluded -->
-    <Content Include="wwwroot/**;**/*.json;**/*.config;**/*.cshtml" CopyToPublishDirectory="PreserveNewest" />
-
-    <!-- Set CopyToPublishDirectory to Never for items under AppDesignerFolder ("Properties", by default) to avoid publishing launchSettings.json -->
-    <Content Update="$(AppDesignerFolder)/**" CopyToPublishDirectory="Never" Condition="'$(AppDesignerFolder)' != ''"/>
-    
-    <!-- Remove Content items from other item types (in a way that CPS understands) -->
-    <None Remove="wwwroot/**;**/*.json;**/*.config;**/*.cshtml" />
-    <Compile Remove="wwwroot/**" />
-    <EmbeddedResource Remove="wwwroot/**" />
-  </ItemGroup>
- 
 </Project>
