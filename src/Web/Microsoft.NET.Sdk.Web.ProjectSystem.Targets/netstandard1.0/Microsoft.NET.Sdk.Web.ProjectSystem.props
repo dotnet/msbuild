@@ -12,14 +12,15 @@ Copyright (c) .NET Foundation. All rights reserved.
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <OutputType Condition="'$(OutputType)' == ''">Exe</OutputType>
+    <OutputType>Exe</OutputType>
     <PreserveCompilationContext Condition="'$(PreserveCompilationContext)' == ''">True</PreserveCompilationContext>
-    <GlobalExclude>$(GlobalExclude);$(BaseOutputPath)\**;$(BaseIntermediateOutputPath)\**;node_modules\**;jspm_packages\**;bower_components\**;**\*.user;**\*.*proj;**\*.sln;**\*.vssscc;**\.*\**</GlobalExclude>
+    <GlobalExclude>$(GlobalExclude);$(BaseOutputPath)\**;$(BaseIntermediateOutputPath)\**;node_modules\**;jspm_packages\**;bower_components\**;**\*.user;**\*.*proj;**\*.sln;**\*.vssscc;**\.*\**;bin\**;obj\**</GlobalExclude>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(OverrideWebDefaultGlobs)' != 'True' ">
     <Content Include="**\*" Exclude="$(GlobalExclude);**\*.cs;**\*.resx" Condition=" '$(OverrideWebDefaultContentGlobs)' != 'True' " />
     <Content Update="wwwroot\**;**\*.json;**\*.config;**\*.cshtml" CopyToPublishDirectory="PreserveNewest" Condition=" '$(OverrideWebDefaultContentGlobs)' != 'True' AND '$(OverrideWebDefaultPublishGlobs)' != 'True' " />
+    <Content Update="**\*.runtimeconfig.*.json" CopyToOutputDirectory="Always" />
     <Content Update="$(AppDesignerFolder)\**" CopyToPublishDirectory="Never" Condition=" '$(OverrideWebDefaultContentGlobs)' != 'True' AND '$(AppDesignerFolder)' != '' " />
     <Content Update="**\_references.js" CopyToPublishDirectory="Never" Condition=" '$(OverrideWebDefaultContentGlobs)' != 'True' " />
     <Compile Include="**\*.cs" Exclude="$(GlobalExclude);wwwroot\**" Condition=" '$(OverrideWebDefaultCompileGlobs)' != 'True' " />
