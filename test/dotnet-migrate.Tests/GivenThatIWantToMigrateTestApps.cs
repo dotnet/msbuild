@@ -136,6 +136,8 @@ namespace Microsoft.DotNet.Migration.Tests
                 .WithSourceFiles();
 
             var projectDirectory = testInstance.Root.FullName;
+            
+            File.Copy("NuGet.tempaspnetpatch.config", Path.Combine(projectDirectory, "NuGet.Config"));
 
             MigrateProject(new [] { projectDirectory });
 
