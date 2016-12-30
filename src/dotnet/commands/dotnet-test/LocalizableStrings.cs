@@ -52,5 +52,7 @@
                                         Logs are written to the provided file.";
 
         public const string CmdNoBuildDescription = @"Do not build project before testing.";
+
+        public const string RunSettingsArgsHelpText = @"Any extra options that should be passed to MSBuild or adapter. See 'dotnet msbuild -h' and 'dotnet vstest --help' for available options.";
     }
 }

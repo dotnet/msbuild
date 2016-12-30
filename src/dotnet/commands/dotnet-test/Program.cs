@@ -23,7 +23,8 @@ namespace Microsoft.DotNet.Tools.Test
                 FullName = LocalizableStrings.AppFullName,
                 Description = LocalizableStrings.AppDescription,
                 HandleRemainingArguments = true,
-                ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText
+                ArgumentSeparatorHelpText = LocalizableStrings.RunSettingsArgsHelpText,
+                AllowArgumentSeparator = true
             };
 
             cmd.HelpOption("-h|--help");
@@ -165,12 +166,15 @@ namespace Microsoft.DotNet.Tools.Test
                     msbuildArgs.Add(argRoot.Value);
                 }
 
-                // Add remaining arguments that the parser did not understand,
+                // Get runsetings options specified after -- 
                 if (cmd.RemainingArguments != null && cmd.RemainingArguments.Count > 0)
                 {
-                    var arr = GetSemiColonEscapedArgs(cmd.RemainingArguments);
-                    msbuildArgs.Add(string.Format("/p:VSTestCLIRunSettings=\"{0}\"", string.Join(";", arr)));
+                    var runSettingsOptions = GetRunSettingsOptions(cmd.RemainingArguments);
+                    msbuildArgs.Add(string.Format("/p:VSTestCLIRunSettings=\"{0}\"", string.Join(";", runSettingsOptions)));
                 }
+
+                // Add remaining arguments that the parser did not understand,
+                msbuildArgs.AddRange(cmd.RemainingArguments);
 
                 return new MSBuildForwardingApp(msbuildArgs).Execute();
             });
@@ -247,26 +251,34 @@ namespace Microsoft.DotNet.Tools.Test
             return projectFiles[0];
         }
 
-        private static string[] GetSemiColonEscapedArgs(List<string> args)
+        private static string[] GetRunSettingsOptions(List<string> remainingArgs)
         {
             int counter = 0;
-            string[] array = new string[args.Count];
+            List<string> runsettingsArgs = new List<string>();
+            List<string> argsToRemove = new List<string>();
 
-            foreach (string arg in args)
+            foreach (string arg in remainingArgs)
             {
-                if (arg.IndexOf(";") != -1)
+                // MSBuild args starts with /, runsettings args starts with letter.
+                if (char.IsLetter(arg[0]))
                 {
-                    array[counter] = arg.Replace(";", "%3b");
+                    runsettingsArgs.Add(GetSemiColonEsacpedstring(arg));
+                    argsToRemove.Add(arg);
                 }
-                else
-                {
-                    array[counter] = arg;
-                }
-
-                counter++;
             }
 
-            return array;
+            foreach (string arg in argsToRemove)
+            {
+                remainingArgs.Remove(arg);
+            }
+
+            return runsettingsArgs.ToArray();
         }
+
+        private static string GetSemiColonEsacpedstring(string arg)
+        {
+            return string.IsNullOrEmpty(arg) ? arg : arg.Replace(";", "%3b");
+        }
+
     }
 }
