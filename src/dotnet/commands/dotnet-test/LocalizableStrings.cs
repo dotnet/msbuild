@@ -32,7 +32,7 @@
         public const string CmdLoggerOption = "LoggerUri/FriendlyName";
 
         public const string CmdLoggerDescription = @"Specify a logger for test results. 
-                                        Example: --logger:trx";
+                                        Example: --logger ""trx[;LogFileName=<Defaults to unique file name>]""";
 
         public const string CmdConfiguration = "CONFIGURATION";
 

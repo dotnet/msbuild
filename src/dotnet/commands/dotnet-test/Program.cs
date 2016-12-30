@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Tools.Test
                 FullName = LocalizableStrings.AppFullName,
                 Description = LocalizableStrings.AppDescription,
                 HandleRemainingArguments = true,
-                ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText                
+                ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText
             };
 
             cmd.HelpOption("-h|--help");
@@ -116,7 +116,7 @@ namespace Microsoft.DotNet.Tools.Test
 
                 if (loggerOption.HasValue())
                 {
-                    msbuildArgs.Add($"/p:VSTestLogger={string.Join(";", loggerOption.Values)}");
+                    msbuildArgs.Add($"/p:VSTestLogger={string.Join(";", GetSemiColonEscapedArgs(loggerOption.Values))}");
                 }
 
                 if (configurationOption.HasValue())
@@ -155,7 +155,7 @@ namespace Microsoft.DotNet.Tools.Test
 
                 string defaultproject = GetSingleTestProjectToRunTestIfNotProvided(argRoot.Value, cmd.RemainingArguments);
 
-                if(!string.IsNullOrEmpty(defaultproject))
+                if (!string.IsNullOrEmpty(defaultproject))
                 {
                     msbuildArgs.Add(defaultproject);
                 }
@@ -166,7 +166,11 @@ namespace Microsoft.DotNet.Tools.Test
                 }
 
                 // Add remaining arguments that the parser did not understand,
-                msbuildArgs.AddRange(cmd.RemainingArguments);
+                if (cmd.RemainingArguments != null && cmd.RemainingArguments.Count > 0)
+                {
+                    var arr = GetSemiColonEscapedArgs(cmd.RemainingArguments);
+                    msbuildArgs.Add(string.Format("/p:VSTestCLIRunSettings=\"{0}\"", string.Join(";", arr)));
+                }
 
                 return new MSBuildForwardingApp(msbuildArgs).Execute();
             });
@@ -241,6 +245,28 @@ namespace Microsoft.DotNet.Tools.Test
             }
 
             return projectFiles[0];
+        }
+
+        private static string[] GetSemiColonEscapedArgs(List<string> args)
+        {
+            int counter = 0;
+            string[] array = new string[args.Count];
+
+            foreach (string arg in args)
+            {
+                if (arg.IndexOf(";") != -1)
+                {
+                    array[counter] = arg.Replace(";", "%3b");
+                }
+                else
+                {
+                    array[counter] = arg;
+                }
+
+                counter++;
+            }
+
+            return array;
         }
     }
 }

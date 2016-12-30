@@ -250,7 +250,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             mockProj.Items.Should().ContainSingle(
                 i => (i.Include == "Microsoft.NET.Test.Sdk" &&
                       i.ItemType == "PackageReference" &&
-                      i.GetMetadataWithName("Version").Value == "15.0.0-preview-20161024-02" &&
+                      i.GetMetadataWithName("Version").Value == "15.0.0-preview-20161227-02" &&
                       i.GetMetadataWithName("Version").ExpressedAsAttribute));
 
             mockProj.Items.Should().NotContain(
@@ -283,7 +283,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             mockProj.Items.Should().ContainSingle(
                 i => (i.Include == "Microsoft.NET.Test.Sdk" && 
                       i.ItemType == "PackageReference" &&
-                      i.GetMetadataWithName("Version").Value == "15.0.0-preview-20161024-02") &&
+                      i.GetMetadataWithName("Version").Value == "15.0.0-preview-20161227-02") &&
                       i.GetMetadataWithName("Version").ExpressedAsAttribute);
 
             mockProj.Items.Should().ContainSingle(
@@ -325,7 +325,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             mockProj.Items.Should().ContainSingle(
                 i => (i.Include == "Microsoft.NET.Test.Sdk" &&
                       i.ItemType == "PackageReference" &&
-                      i.GetMetadataWithName("Version").Value == "15.0.0-preview-20161024-02" &&
+                      i.GetMetadataWithName("Version").Value == "15.0.0-preview-20161227-02" &&
                       i.GetMetadataWithName("Version").ExpressedAsAttribute));
 
             mockProj.Items.Should().ContainSingle(
@@ -364,7 +364,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             mockProj.Items.Should().ContainSingle(
                 i => (i.Include == "Microsoft.NET.Test.Sdk" &&
                       i.ItemType == "PackageReference" &&
-                      i.GetMetadataWithName("Version").Value == "15.0.0-preview-20161024-02" &&
+                      i.GetMetadataWithName("Version").Value == "15.0.0-preview-20161227-02" &&
                       i.GetMetadataWithName("Version").ExpressedAsAttribute));
 
             mockProj.Items.Should().ContainSingle(
