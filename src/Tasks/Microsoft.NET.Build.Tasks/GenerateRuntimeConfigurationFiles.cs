@@ -36,6 +36,12 @@ namespace Microsoft.NET.Build.Tasks
 
         public string PlatformLibraryName { get; set; }
 
+        /// <summary>
+        /// The version of the shared framework that should be used.  If not specified, it will
+        /// be the package version of the <see cref="PlatformLibraryName"/> package.
+        /// </summary>
+        public string RuntimeFrameworkVersion { get; set; }
+
         public string UserRuntimeConfig { get; set; }
 
         List<ITaskItem> _filesWritten = new List<ITaskItem>();
@@ -83,7 +89,14 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     RuntimeConfigFramework framework = new RuntimeConfigFramework();
                     framework.Name = platformLibrary.Name;
-                    framework.Version = platformLibrary.Version.ToNormalizedString();
+                    if (!string.IsNullOrEmpty(RuntimeFrameworkVersion))
+                    {
+                        framework.Version = RuntimeFrameworkVersion;
+                    }
+                    else
+                    {
+                        framework.Version = platformLibrary.Version.ToNormalizedString();
+                    }
 
                     runtimeOptions.Framework = framework;
                 }
