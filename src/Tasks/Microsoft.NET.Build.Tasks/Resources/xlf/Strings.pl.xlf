@@ -115,73 +115,73 @@
       </trans-unit>
       <trans-unit id="DOTNET1011">
         <source>Framework not installed: {0} in {1}</source>
-        <target state="new">Framework not installed: {0} in {1}</target>
-        <note></note>
+        <target state="translated">Nie zainstalowano platformy: {0} w lokalizacji {1}</target>
+        <note />
       </trans-unit>
       <trans-unit id="DOTNET1012">
         <source>The reference assemblies directory was not specified. You can set the location using the DOTNET_REFERENCE_ASSEMBLIES_PATH environment variable.</source>
-        <target state="new">The reference assemblies directory was not specified. You can set the location using the DOTNET_REFERENCE_ASSEMBLIES_PATH environment variable.</target>
-        <note></note>
+        <target state="translated">Nie określono katalogu zestawów referencyjnych. Aby ustawić jego lokalizację, użyj zmiennej środowiskowej DOTNET_REFERENCE_ASSEMBLIES_PATH.</target>
+        <note />
       </trans-unit>
       <trans-unit id="DOTNET1013">
         <source>The following dependencies are marked with type 'platform', however only one dependency can have this type: {0}</source>
-        <target state="new">The following dependencies are marked with type 'platform', however only one dependency can have this type: {0}</target>
-        <note></note>
+        <target state="translated">Następujące zależności oznaczono za pomocą typu „platform”, jednak tylko jedna zależność może mieć ten typ: {0}</target>
+        <note />
       </trans-unit>
       <trans-unit id="DOTNET1014">
         <source>Failed to read lock file</source>
-        <target state="new">Failed to read lock file</target>
-        <note></note>
+        <target state="translated">Nie można odczytać pliku blokady</target>
+        <note />
       </trans-unit>
       <trans-unit id="DOTNET1017">
         <source>Project file does not exist '{0}'.</source>
-        <target state="new">Project file does not exist '{0}'.</target>
-        <note></note>
+        <target state="translated">Plik projektu nie istnieje „{0}”.</target>
+        <note />
       </trans-unit>
       <trans-unit id="NU1001">
         <source>The dependency '{0}' could not be resolved.</source>
-        <target state="new">The dependency '{0}' could not be resolved.</target>
-        <note></note>
+        <target state="translated">Nie można rozpoznać zależności „{0}”.</target>
+        <note />
       </trans-unit>
       <trans-unit id="NU1002">
         <source>The dependency '{0}' in project '{1}' does not support framework '{2}'.</source>
-        <target state="new">The dependency '{0}' in project '{1}' does not support framework '{2}'.</target>
-        <note></note>
+        <target state="translated">Zależność „{0}” w projekcie „{1}” nie obsługuje platformy „{2}”.</target>
+        <note />
       </trans-unit>
       <trans-unit id="NU1006">
         <source>{0}. Please run 'dotnet restore' to generate a new asset file.</source>
-        <target state="new">{0}. Please run 'dotnet restore' to generate a new asset file.</target>
-        <note></note>
+        <target state="translated">{0}. Uruchom polecenie „dotnet restore”, aby wygenerować nowy plik zasobów.</target>
+        <note />
       </trans-unit>
       <trans-unit id="NU1007">
         <source>Dependency specified was '{0}' but ended up with '{1}'.</source>
-        <target state="new">Dependency specified was '{0}' but ended up with '{1}'.</target>
-        <note></note>
+        <target state="translated">Określono zależność „{0}”, ale ostatecznie otrzymano zależność „{1}”.</target>
+        <note />
       </trans-unit>
       <trans-unit id="NU1008">
         <source>{0} is an unsupported framework.</source>
-        <target state="new">{0} is an unsupported framework.</target>
-        <note></note>
+        <target state="translated">{0} to nieobsługiwana platforma.</target>
+        <note />
       </trans-unit>
       <trans-unit id="NU1009">
         <source>The expected asset file does not exist. Please run 'dotnet restore' to generate a new asset file.</source>
-        <target state="new">The expected asset file does not exist. Please run 'dotnet restore' to generate a new asset file.</target>
-        <note></note>
+        <target state="translated">Oczekiwany plik zasobów nie istnieje. Uruchom polecenie „dotnet restore”, aby wygenerować nowy plik zasobów.</target>
+        <note />
       </trans-unit>
       <trans-unit id="NU1010">
         <source>The dependency type was changed</source>
-        <target state="new">The dependency type was changed</target>
-        <note></note>
+        <target state="translated">Zmieniono typ zależności</target>
+        <note />
       </trans-unit>
       <trans-unit id="NU1011">
         <source>The dependency target '{0}' is unsupported.</source>
-        <target state="new">The dependency target '{0}' is unsupported.</target>
-        <note></note>
+        <target state="translated">Element docelowy zależności „{0}” jest nieobsługiwany.</target>
+        <note />
       </trans-unit>
       <trans-unit id="NU1012">
         <source>Dependency conflict. '{0}' expected '{1}' but received '{2}'</source>
-        <target state="new">Dependency conflict. '{0}' expected '{1}' but received '{2}'</target>
-        <note></note>
+        <target state="translated">Konflikt zależności. Element „{0}” oczekiwał elementu „{1}”, ale otrzymał element „{2}”</target>
+        <note />
       </trans-unit>
     </body>
   </file>
