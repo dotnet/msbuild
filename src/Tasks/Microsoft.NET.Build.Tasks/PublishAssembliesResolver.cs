@@ -13,6 +13,7 @@ namespace Microsoft.NET.Build.Tasks
     {
         private readonly IPackageResolver _packageResolver;
         private IEnumerable<string> _privateAssetPackageIds;
+        private bool _preserveCacheLayout;
 
         public PublishAssembliesResolver(IPackageResolver packageResolver)
         {
@@ -24,6 +25,11 @@ namespace Microsoft.NET.Build.Tasks
             _privateAssetPackageIds = privateAssetPackageIds;
             return this;
         }
+        public PublishAssembliesResolver WithPreserveCacheLayout(bool preserveCacheLayout)
+        {
+            _preserveCacheLayout = preserveCacheLayout;
+            return this;
+        }
 
         public IEnumerable<ResolvedFile> Resolve(ProjectContext projectContext)
         {
@@ -31,48 +37,63 @@ namespace Microsoft.NET.Build.Tasks
 
             foreach (LockFileTargetLibrary targetLibrary in projectContext.GetRuntimeLibraries(_privateAssetPackageIds))
             {
-                string libraryPath = _packageResolver.GetPackageDirectory(targetLibrary.Name, targetLibrary.Version);
+                string pkgRoot;
+                string libraryPath = _packageResolver.GetPackageDirectory(targetLibrary.Name, targetLibrary.Version, out pkgRoot);
 
-                results.AddRange(GetResolvedFiles(targetLibrary.RuntimeAssemblies, libraryPath));
-                results.AddRange(GetResolvedFiles(targetLibrary.NativeLibraries, libraryPath));
+                results.AddRange(GetResolvedFiles(targetLibrary.RuntimeAssemblies, libraryPath, pkgRoot, AssetType.Runtime));
+                results.AddRange(GetResolvedFiles(targetLibrary.NativeLibraries, libraryPath, pkgRoot, AssetType.Native));
 
                 foreach (LockFileRuntimeTarget runtimeTarget in targetLibrary.RuntimeTargets.FilterPlaceHolderFiles())
                 {
                     if (string.Equals(runtimeTarget.AssetType, "native", StringComparison.OrdinalIgnoreCase) ||
                         string.Equals(runtimeTarget.AssetType, "runtime", StringComparison.OrdinalIgnoreCase))
                     {
+                        string sourcePath = Path.Combine(libraryPath, runtimeTarget.Path);
+                        AssetType _assetType = AssetType.None;
+                        Enum.TryParse<AssetType>(runtimeTarget.AssetType, true, out _assetType);
+
                         results.Add(
                             new ResolvedFile(
-                                sourcePath: Path.Combine(libraryPath, runtimeTarget.Path),
-                                destinationSubDirectory: GetRuntimeTargetDestinationSubDirectory(runtimeTarget)));
+                                sourcePath: sourcePath,
+                                destinationSubDirectory: GetDestinationSubDirectory(sourcePath,
+                                                                                    pkgRoot,
+                                                                                    GetRuntimeTargetDestinationSubDirectory(runtimeTarget)),
+                                assetType: _assetType));
                     }
                 }
 
                 foreach (LockFileItem resourceAssembly in targetLibrary.ResourceAssemblies.FilterPlaceHolderFiles())
                 {
                     string locale;
+                    string sourcePath = Path.Combine(libraryPath, resourceAssembly.Path);
                     if (!resourceAssembly.Properties.TryGetValue("locale", out locale))
                     {
                         locale = null;
                     }
 
+                    locale = GetDestinationSubDirectory(sourcePath, pkgRoot, locale);
+
                     results.Add(
                         new ResolvedFile(
-                            sourcePath: Path.Combine(libraryPath, resourceAssembly.Path),
-                            destinationSubDirectory: locale));
+                            sourcePath: sourcePath,
+                            destinationSubDirectory: locale,
+                            assetType: AssetType.Resources));
                 }
             }
 
             return results;
         }
 
-        private static IEnumerable<ResolvedFile> GetResolvedFiles(IEnumerable<LockFileItem> items, string libraryPath)
+        private IEnumerable<ResolvedFile> GetResolvedFiles(IEnumerable<LockFileItem> items, string libraryPath, string pkgRoot, AssetType assetType)
         {
             foreach (LockFileItem item in items.FilterPlaceHolderFiles())
             {
+                string srcpath = Path.Combine(libraryPath, item.Path);
+
                 yield return new ResolvedFile(
-                    sourcePath: Path.Combine(libraryPath, item.Path),
-                    destinationSubDirectory: null);
+                    sourcePath: srcpath,
+                    destinationSubDirectory: GetDestinationSubDirectory(srcpath, pkgRoot),
+                    assetType: assetType);
             }
         }
 
@@ -84,6 +105,20 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             return null;
+        }
+
+        private string GetDestinationSubDirectory(string libraryPath, string pkgRoot, string destpath = null)
+        {
+            if (_preserveCacheLayout && pkgRoot != null)
+            {
+                if (! libraryPath.StartsWith(pkgRoot))
+                {
+                    throw new BuildErrorException(Strings.IncorrectPackageRoot, pkgRoot, libraryPath);
+                }
+
+                destpath = Path.GetDirectoryName(libraryPath.Substring(pkgRoot.Length));
+            }
+            return destpath;
         }
     }
 }

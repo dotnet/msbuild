@@ -126,6 +126,9 @@
     <None Include="build\Microsoft.NET.Publish.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="build\Microsoft.NET.ComposeCache.targets">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="build\Microsoft.NET.TargetFrameworkInference.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
