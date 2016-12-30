@@ -253,7 +253,6 @@ namespace Microsoft.DotNet.Tools.Test
 
         private static string[] GetRunSettingsOptions(List<string> remainingArgs)
         {
-            int counter = 0;
             List<string> runsettingsArgs = new List<string>();
             List<string> argsToRemove = new List<string>();
 
@@ -280,5 +279,26 @@ namespace Microsoft.DotNet.Tools.Test
             return string.IsNullOrEmpty(arg) ? arg : arg.Replace(";", "%3b");
         }
 
+        private static string[] GetSemiColonEscapedArgs(List<string> args)
+        {
+            int counter = 0;
+            string[] array = new string[args.Count];
+
+            foreach (string arg in args)
+            {
+                if (arg.IndexOf(";") != -1)
+                {
+                    array[counter] = arg.Replace(";", "%3b");
+                }
+                else
+                {
+                    array[counter] = arg;
+                }
+
+                counter++;
+            }
+
+            return array;
+        }
     }
 }

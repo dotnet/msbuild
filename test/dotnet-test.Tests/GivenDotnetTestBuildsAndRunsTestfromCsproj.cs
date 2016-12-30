@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
         [Fact]
         public void TestWillCreateTrxLogger()
-        {                
+        {
             // Copy VSTestDotNetCore project in output directory of project dotnet-vstest.Tests
             string testAppName = "VSTestDotNetCore";
             TestInstance testInstance = TestAssetsManager.CreateTestInstance(testAppName);
@@ -170,7 +170,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                                        .ExecuteWithCapturedOutput("--logger \"trx;logfilename=custom.trx\" -- RunConfiguration.ResultsDirectory=" + trxLoggerDirectory);
 
             // Verify
-            String[] trxFiles = Directory.GetFiles(trxLoggerDirectory, "*.trx");
+            String[] trxFiles = Directory.GetFiles(trxLoggerDirectory, "custom.trx");
             Assert.Equal(1, trxFiles.Length);
             result.StdOut.Should().Contain(trxFiles[0]);
 
