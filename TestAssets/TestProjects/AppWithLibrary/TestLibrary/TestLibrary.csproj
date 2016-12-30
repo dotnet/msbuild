@@ -4,8 +4,4 @@
     <OutputType>Library</OutputType>
     <TargetFramework>netstandard1.5</TargetFramework>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="**\*.cs" />
-    <EmbeddedResource Include="**\*.resx" />
-  </ItemGroup>
 </Project>

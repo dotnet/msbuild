@@ -77,7 +77,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GeneratePackageOnBuild Condition="'$(GeneratePackageOnBuild)'==''">false</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance Condition="'$(PackageRequireLicenseAcceptance)'==''">false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
-
+  
+  <!-- Default glob settings -->
+  <Import Project="Microsoft.NET.Sdk.DefaultItems.props" />
+  
   <!-- Automatically reference NETStandard.Library or Microsoft.NETCore.App package if targeting the corresponding target framework.
       We can refer here in the .props file to properties set in the .targets files because items and their conditions are
       evaluated in the second pass of evaluation, after all properties have been evaluated. -->

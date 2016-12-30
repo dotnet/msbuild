@@ -7,10 +7,6 @@
     <DefineConstants>NETCOREAPP;$(DefineConstants)</DefineConstants>
     <PackageTargetFallback>dnxcore50</PackageTargetFallback>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="**\*.cs" />
-    <EmbeddedResource Include="**\*.resx" />
-  </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp1.0'">
     <PackageReference Include="Newtonsoft.Json" Version="7.0.1" />
   </ItemGroup>

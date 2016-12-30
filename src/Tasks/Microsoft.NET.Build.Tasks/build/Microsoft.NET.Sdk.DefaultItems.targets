@@ -1,0 +1,55 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.DefaultItems.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved. 
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <EnableDefaultItems Condition=" '$(EnableDefaultItems)' == '' ">true</EnableDefaultItems>
+    <EnableDefaultCompileItems Condition=" '$(EnableDefaultCompileItems)' == '' ">true</EnableDefaultCompileItems>
+    <EnableDefaultEmbeddedResourceItems Condition=" '$(EnableDefaultEmbeddedResourceItems)' == '' ">true</EnableDefaultEmbeddedResourceItems>
+    <EnableDefaultNoneItems Condition=" '$(EnableDefaultNoneItems)' == '' ">true</EnableDefaultNoneItems>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- bin folder, by default -->
+    <DefaultRemoves>$(DefaultRemoves);$(BaseOutputPath)/**</DefaultRemoves>
+    <!-- obj folder, by default -->
+    <DefaultRemoves>$(DefaultRemoves);$(BaseIntermediateOutputPath)/**</DefaultRemoves>
+
+    <!-- Various files that should generally always be ignored -->
+    <DefaultRemoves>$(DefaultRemoves);**/*.user</DefaultRemoves>
+    <DefaultRemoves>$(DefaultRemoves);**/*.*proj</DefaultRemoves>
+    <DefaultRemoves>$(DefaultRemoves);**/*.sln</DefaultRemoves>
+    <DefaultRemoves>$(DefaultRemoves);**/*.vssscc</DefaultRemoves>
+    
+    <!-- This pattern is supposed to ignore folders such as .git and .vs, but it would also match items included with a relative path
+         outside the project folder (for example "..\Shared\Shared.cs").  So instead of using it to remove from the Compile,
+         EmbeddedResource, and Content items in this .targets file, it will be used in the Exclude attribute for the default
+         patterns which include files in these items (which happens in Microsoft.NET.Sdk.DefaultItems.props). -->
+    <DefaultExcludesInProjectFolder>$(DefaultExcludesInProjectFolder);**/.*/**</DefaultExcludesInProjectFolder>
+
+    <!-- TODO: Verify why this was originally added and whether we really need it -->
+    <DefaultRemoves>$(DefaultRemoves);packages/**</DefaultRemoves>
+    
+  </PropertyGroup>
+  
+  <ItemGroup Condition="'$(DisableDefaultRemoves)' != 'true'">
+    <Compile Remove="$(DefaultRemoves)" />
+    <EmbeddedResource Remove="$(DefaultRemoves)" />
+    <None Remove="$(DefaultRemoves)" />
+    <Content Remove="$(DefaultRemoves)" />
+  </ItemGroup>
+
+</Project>
