@@ -77,7 +77,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GeneratePackageOnBuild Condition="'$(GeneratePackageOnBuild)'==''">false</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance Condition="'$(PackageRequireLicenseAcceptance)'==''">false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
-
+  
+  <!-- Default glob settings -->
+  <Import Project="Microsoft.NET.Sdk.DefaultItems.props" />
+  
   <!-- Temporary workarounds -->
   <PropertyGroup>
     <!-- Workaround: https://github.com/dotnet/roslyn/issues/12167 -->

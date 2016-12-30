@@ -91,6 +91,12 @@
     <None Include="build\Microsoft.NET.Sdk.BeforeCommonCrossTargeting.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="build\Microsoft.NET.Sdk.DefaultItems.props">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="build\Microsoft.NET.Sdk.DefaultItems.targets">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="build\Microsoft.NET.Sdk.VisualBasic.props">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

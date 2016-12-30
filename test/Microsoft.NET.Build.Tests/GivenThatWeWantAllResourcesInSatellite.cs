@@ -11,6 +11,8 @@ using Microsoft.NET.TestFramework.Commands;
 using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using Microsoft.DotNet.Cli.Utils;
+using System.Xml.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -21,12 +23,29 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_retrieves_strings_successfully()
         {
+            TestSatelliteResources();
+        }
+
+        public void TestSatelliteResources(Action<XDocument> projectChanges = null, Action<BuildCommand> setup = null, [CallerMemberName] string callingMethod = null)
+        {
             var testAsset = _testAssetsManager
-                .CopyTestAsset("AllResourcesInSatellite")
-                .WithSource()
-                .Restore();
+                .CopyTestAsset("AllResourcesInSatellite", callingMethod)
+                .WithSource();
+
+            if (projectChanges != null)
+            {
+                testAsset = testAsset.WithProjectChanges(projectChanges);
+            }
+
+            testAsset = testAsset.Restore();
 
             var buildCommand = new BuildCommand(Stage0MSBuild, testAsset.TestRoot);
+
+            if (setup != null)
+            {
+                setup(buildCommand);
+            }
+
             buildCommand
                 .Execute()
                 .Should()
