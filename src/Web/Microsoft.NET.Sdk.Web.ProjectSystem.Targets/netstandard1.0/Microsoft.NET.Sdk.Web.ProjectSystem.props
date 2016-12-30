@@ -15,7 +15,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DefaultRemoves>$(DefaultRemoves);node_modules/**</DefaultRemoves>
     <DefaultRemoves>$(DefaultRemoves);jspm_packages/**</DefaultRemoves>
     <DefaultRemoves>$(DefaultRemoves);bower_components/**</DefaultRemoves>
-    <DefaultRemoves>$(DefaultRemoves);packages/**</DefaultRemoves>
 
     <OutputType>Exe</OutputType>
     <PreserveCompilationContext Condition="'$(PreserveCompilationContext)' == ''">True</PreserveCompilationContext>
@@ -29,17 +28,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Content Update="$(AppDesignerFolder)/**" CopyToPublishDirectory="Never" Condition="'$(AppDesignerFolder)' != ''"/>
     
     <!-- Remove Content items from other item types (in a way that CPS understands) -->
-    <None Remove="wwwroot/**;**/*.json;**/*.config;**/*.cshtml" />
+    <None Remove="wwwroot/**;**/*.json;**/web.config;**/*.cshtml" />
     <Compile Remove="wwwroot/**" />
     <EmbeddedResource Remove="wwwroot/**" />
 
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(DisableDefaultRemoves)' != 'true'">
-    <Compile Remove="$(DefaultRemoves)" />
-    <EmbeddedResource Remove="$(DefaultRemoves)" />
-    <None Remove="$(DefaultRemoves)" />
-    <Content Remove="$(DefaultRemoves)" />
   </ItemGroup>
 
 </Project>
