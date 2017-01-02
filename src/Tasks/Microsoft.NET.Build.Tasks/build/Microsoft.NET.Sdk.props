@@ -88,10 +88,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PackageReference Include="NETStandard.Library" Version="$(NetStandardDefaultPackageVersion)"/>
   </ItemGroup>
 
-  <!-- The reference to the Microsoft.NETCore.App should generally not be surfaced to developers.  So mark it as
-       ReadOnly so it won't show updates to the package in the package manager UI, and don't allow disabling it
-       with the DisableImplicitFrameworkReferences property. -->
-  <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
+  <!-- The reference to the Microsoft.NETCore.App currently needs to match the target framework version.  So mark it as
+       ReadOnly so it won't show updates to the package in the package manager UI. -->
+  <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
     <PackageReference Include="Microsoft.NETCore.App" Version="$(NetCoreAppDefaultPackageVersion)" ReadOnly="true" />
   </ItemGroup>
 
