@@ -23,8 +23,7 @@ namespace Microsoft.DotNet.Tools.Test
                 FullName = LocalizableStrings.AppFullName,
                 Description = LocalizableStrings.AppDescription,
                 HandleRemainingArguments = true,
-                ArgumentSeparatorHelpText = LocalizableStrings.RunSettingsArgsHelpText,
-                AllowArgumentSeparator = true
+                ArgumentSeparatorHelpText = LocalizableStrings.RunSettingsArgsHelpText
             };
 
             cmd.HelpOption("-h|--help");
@@ -256,14 +255,22 @@ namespace Microsoft.DotNet.Tools.Test
             List<string> runsettingsArgs = new List<string>();
             List<string> argsToRemove = new List<string>();
 
+            bool readRunSettings = false;
             foreach (string arg in remainingArgs)
             {
-                // MSBuild args starts with /, runsettings args starts with letter.
-                if (char.IsLetter(arg[0]))
+                if (!readRunSettings)
                 {
-                    runsettingsArgs.Add(GetSemiColonEsacpedstring(arg));
-                    argsToRemove.Add(arg);
+                    if (arg.Equals("--"))
+                    {
+                        readRunSettings = true;
+                        argsToRemove.Add(arg);
+                    }
+
+                    continue;
                 }
+
+                runsettingsArgs.Add(GetSemiColonEsacpedstring(arg));
+                argsToRemove.Add(arg);
             }
 
             foreach (string arg in argsToRemove)
