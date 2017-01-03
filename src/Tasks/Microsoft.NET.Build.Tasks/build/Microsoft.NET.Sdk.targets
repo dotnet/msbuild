@@ -263,6 +263,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ProjectCapability Remove="ReferenceManagerCOM" />
   </ItemGroup>
 
+  <!-- Publish capabilities -->
+  <ItemGroup>
+    <ProjectCapability Include="FolderPublish" />
+  </ItemGroup>
+
   <Import Project="$(MSBuildThisFileDirecotry)Microsoft.NET.DisableStandardFrameworkResolution.targets" Condition="'$(DisableStandardFrameworkResolution)' == 'true'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.GenerateAssemblyInfo.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Publish.targets" />
