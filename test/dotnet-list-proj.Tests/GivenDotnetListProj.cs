@@ -147,7 +147,7 @@ Options:
         public void WhenNoProjectReferencesArePresentInTheSolutionItPrintsANoProjectMessage()
         {
             var projectDirectory = TestAssets
-                .Get("SlnFileWithNoProjectReferences")
+                .Get("TestAppWithEmptySln")
                 .CreateInstance()
                 .WithSourceFiles()
                 .Root
