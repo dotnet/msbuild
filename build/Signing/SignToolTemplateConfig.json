@@ -5,7 +5,9 @@
             "strongName": null,
             "values": [
                 "Microsoft.VisualStudio.ProjectSystem.CSharp.Templates.vsix",
-                "Microsoft.VisualStudio.ProjectSystem.VisualBasic.Templates.vsix"
+                "Microsoft.VisualStudio.ProjectSystem.CSharp.NetStandard.Templates.vsix",
+                "Microsoft.VisualStudio.ProjectSystem.VisualBasic.Templates.vsix",
+                "Microsoft.VisualStudio.ProjectSystem.VisualBasic.NetStandard.Templates.vsix"
             ]
         }
     ]
