@@ -317,10 +317,11 @@ EndGlobal
             cmd.StdErr.Should().BeEmpty();
         }
 
-        [Theory]
-        [InlineData("TestAppWithSlnAndCsprojFiles")]
-        [InlineData("TestAppWithSlnAndCsprojProjectGuidFiles")]
-        [InlineData("TestAppWithEmptySln")]
+        //ISSUE: https://github.com/dotnet/sdk/issues/545
+        //[Theory]
+        //[InlineData("TestAppWithSlnAndCsprojFiles")]
+        //[InlineData("TestAppWithSlnAndCsprojProjectGuidFiles")]
+        //[InlineData("TestAppWithEmptySln")]
         public void WhenValidProjectIsPassedTheSlnBuilds(string testAsset)
         {
             var projectDirectory = TestAssets

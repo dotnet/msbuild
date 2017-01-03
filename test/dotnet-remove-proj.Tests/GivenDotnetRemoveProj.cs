@@ -341,7 +341,8 @@ Project reference `idontexisteither.csproj` could not be found.";
                 .Should().BeVisuallyEquivalentTo(ExpectedSlnContentsAfterRemove);
         }
 
-        [Fact]
+        //ISSUE: https://github.com/dotnet/sdk/issues/545
+        //[Fact]
         public void WhenReferenceIsRemovedSlnBuilds()
         {
             var projectDirectory = TestAssets
