@@ -13,10 +13,8 @@ using Microsoft.NET.TestFramework.ProjectConstruction;
 
 namespace Microsoft.NET.Build.Tests
 {
-    public class GivenThatWeWantToBuildADesktopExe
+    public class GivenThatWeWantToBuildADesktopExe : SdkTest
     {
-        private TestAssetsManager _testAssetsManager = TestAssetsManager.TestProjectsAssetsManager;
-
         [Fact]
         public void It_fails_to_build_if_no_rid_is_set()
         {

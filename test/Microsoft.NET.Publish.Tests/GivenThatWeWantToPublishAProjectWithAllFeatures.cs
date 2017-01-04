@@ -15,10 +15,8 @@ using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 
 namespace Microsoft.NET.Publish.Tests
 {
-    public class GivenThatWeWantToPublishAProjectWithAllFeatures
+    public class GivenThatWeWantToPublishAProjectWithAllFeatures : SdkTest
     {
-        private TestAssetsManager _testAssetsManager = TestAssetsManager.TestProjectsAssetsManager;
-
         [Fact]
         public void It_publishes_the_project_correctly()
         {

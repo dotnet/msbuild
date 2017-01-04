@@ -13,15 +13,8 @@ using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 
 namespace Microsoft.NET.Publish.Tests
 {
-    public class GivenThatWeWantToPublishAHelloWorldProject
+    public class GivenThatWeWantToPublishAHelloWorldProject : SdkTest
     {
-        private TestAssetsManager _testAssetsManager;
-
-        public GivenThatWeWantToPublishAHelloWorldProject()
-        {
-            _testAssetsManager = TestAssetsManager.TestProjectsAssetsManager;
-        }
-
         [Fact]
         public void It_publishes_portable_apps_to_the_publish_folder_and_the_app_should_run()
         {

@@ -18,10 +18,8 @@ using System.Runtime.CompilerServices;
 
 namespace Microsoft.NET.Build.Tests
 {
-    public class GivenThatWeWantToBuildALibrary
+    public class GivenThatWeWantToBuildALibrary : SdkTest
     {
-        private TestAssetsManager _testAssetsManager = TestAssetsManager.TestProjectsAssetsManager;
-
        [Fact]
         public void It_builds_the_library_successfully()
         {

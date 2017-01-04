@@ -12,15 +12,8 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.NET.Publish.Tests
 {
-    public class GivenThatWeWantToPublishAProjectWithDependencies
+    public class GivenThatWeWantToPublishAProjectWithDependencies : SdkTest
     {
-        private TestAssetsManager _testAssetsManager;
-
-        public GivenThatWeWantToPublishAProjectWithDependencies()
-        {
-            _testAssetsManager = TestAssetsManager.TestProjectsAssetsManager;
-        }
-
         [Fact]
         public void It_publishes_projects_with_simple_dependencies()
         {

@@ -12,10 +12,8 @@ using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 
 namespace Microsoft.NET.Build.Tests
 {
-    public class GivenThatWeWantToControlGeneratedAssemblyInfo
+    public class GivenThatWeWantToControlGeneratedAssemblyInfo : SdkTest
     {
-        private TestAssetsManager _testAssetsManager = TestAssetsManager.TestProjectsAssetsManager;
-
         [Theory]
         [InlineData("AssemblyInformationVersionAttribute")]
         [InlineData("AssemblyFileVersionAttribute")]

@@ -17,10 +17,8 @@ using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 
 namespace Microsoft.NET.Build.Tests
 {
-    public class GivenThereAreDefaultItems
+    public class GivenThereAreDefaultItems : SdkTest
     {
-        private TestAssetsManager _testAssetsManager = TestAssetsManager.TestProjectsAssetsManager;
-
         [Fact]
         public void It_ignores_excluded_folders()
         {
@@ -351,8 +349,7 @@ namespace Microsoft.NET.Build.Tests
                     "!InvalidCSharp!");
             };
 
-            new GivenThatWeWantAllResourcesInSatellite()
-                .TestSatelliteResources(projectChanges, setup);
+            GivenThatWeWantAllResourcesInSatellite.TestSatelliteResources(_testAssetsManager, projectChanges, setup, "ExplicitCompileDefaultEmbeddedResource");
         }
 
         void RemoveGeneratedCompileItems(List<string> compileItems)
