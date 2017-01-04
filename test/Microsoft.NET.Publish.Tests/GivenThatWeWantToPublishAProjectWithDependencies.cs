@@ -88,5 +88,26 @@ namespace Microsoft.NET.Publish.Tests
                 "DesktopNeedsBindingRedirects.exe.config"
             });
         }
+
+        [Fact]
+        public void It_publishes_projects_targeting_netcoreapp11_with_p2p_targeting_netcoreapp11()
+        {
+            // Microsoft.NETCore.App 1.1.0 added a dependency on Microsoft.DiaSymReader.Native.
+            // Microsoft.DiaSymReader.Native package adds a "Content" item for its native assemblies,
+            // which means an App project will get duplicate "Content" items for each P2P it references
+            // that targets netcoreapp1.1.  Ensure Publish works correctly with these duplicate Content items.
+
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("NetCoreApp11WithP2P")
+                .WithSource()
+                .Restore("App");
+
+            var appProjectDirectory = Path.Combine(testAsset.TestRoot, "App");
+            PublishCommand publishCommand = new PublishCommand(Stage0MSBuild, appProjectDirectory);
+            publishCommand
+                .Execute()
+                .Should()
+                .Pass();
+        }
     }
 }
