@@ -24,7 +24,6 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         private readonly string _sdkPropsPath;
         private readonly string _sdkTargetsPath;
 
-
         public ProjectSdkImplicitImport_Tests()
         {
             _testSdkRoot = Path.Combine(ObjectModelHelpers.TempProjectDir, Guid.NewGuid().ToString("N"));
@@ -44,7 +43,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             using (new Helpers.TemporaryEnvironment("MSBuildSDKsPath", _testSdkRoot))
             {
                 string content = $@"
-                    <Project Sdk='{SdkName}'>
+                    <Project Sdk=""{SdkName}"">
                         <PropertyGroup>
                             <UsedToTestIfImplicitImportsAreInTheCorrectLocation>null</UsedToTestIfImplicitImportsAreInTheCorrectLocation>
                         </PropertyGroup>
@@ -148,6 +147,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
         }
 
+        /// <summary>
+        /// Verifies that an error occurs when an SDK name is not in the correct format.
+        /// </summary>
         [Fact]
         public void ProjectWithInvalidSdkName()
         {
@@ -158,7 +160,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 using (new Helpers.TemporaryEnvironment("MSBuildSDKsPath", _testSdkRoot))
                 {
                     string content = $@"
-                    <Project Sdk='{invalidSdkName}'>
+                    <Project Sdk=""{invalidSdkName}"">
                         <PropertyGroup>
                             <UsedToTestIfImplicitImportsAreInTheCorrectLocation>null</UsedToTestIfImplicitImportsAreInTheCorrectLocation>
                         </PropertyGroup>
@@ -171,20 +173,51 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Equal("MSB4229", exception.ErrorCode);
         }
 
+        /// <summary>
+        /// Verifies that an empty SDK attribute works and nothing is imported.
+        /// </summary>
         [Fact]
         public void ProjectWithEmptySdkName()
         {
             using (new Helpers.TemporaryEnvironment("MSBuildSDKsPath", _testSdkRoot))
             {
                 string content = @"
-                    <Project Sdk=''>
+                    <Project Sdk="""">
                         <PropertyGroup>
                             <UsedToTestIfImplicitImportsAreInTheCorrectLocation>null</UsedToTestIfImplicitImportsAreInTheCorrectLocation>
                         </PropertyGroup>
                     </Project>";
 
                 Project project = new Project(ProjectRootElement.Create(XmlReader.Create(new StringReader(content))));
+
+                Assert.Equal(0, project.Imports.Count);
             }
+        }
+
+        /// <summary>
+        /// Verifies that an error occurs when one or more SDK names are empty.
+        /// </summary>
+        [Fact]
+        public void ProjectWithEmptySdkNameInValidList()
+        {
+            const string invalidSdkName = "foo;  ;bar";
+
+            InvalidProjectFileException exception = Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                using (new Helpers.TemporaryEnvironment("MSBuildSDKsPath", _testSdkRoot))
+                {
+                    string content = $@"
+                    <Project Sdk=""{invalidSdkName}"">
+                        <PropertyGroup>
+                            <UsedToTestIfImplicitImportsAreInTheCorrectLocation>null</UsedToTestIfImplicitImportsAreInTheCorrectLocation>
+                        </PropertyGroup>
+                    </Project>";
+
+                    Project project = new Project(ProjectRootElement.Create(XmlReader.Create(new StringReader(content))));
+                }
+            });
+
+            Assert.Equal("MSB4229", exception.ErrorCode);
         }
 
         public void Dispose()

@@ -993,10 +993,13 @@ namespace Microsoft.Build.Evaluation
             {
                 // SDK imports are added implicitly where they are evaluated at the top and bottom as if they are in the XML
                 //
-                foreach (string sdk in currentProjectOrImport.Sdk.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
-                                                                    .Select(i => i.Trim())
-                                                                    .Where(i => !String.IsNullOrWhiteSpace(i)))
+                foreach (string sdk in currentProjectOrImport.Sdk.Split(';').Select(i => i.Trim()))
                 {
+                    if (String.IsNullOrWhiteSpace(sdk))
+                    {
+                        ProjectErrorUtilities.ThrowInvalidProject(currentProjectOrImport.SdkLocation, "InvalidSdkFormat", currentProjectOrImport.Sdk);
+                    }
+
                     int slashIndex = sdk.LastIndexOf("/", StringComparison.Ordinal);
                     string sdkName = slashIndex > 0 ? sdk.Substring(0, slashIndex) : sdk;
 
