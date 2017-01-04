@@ -45,9 +45,6 @@
     <ProjectReference Include="../TestLibrary/TestLibrary.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.1</Version>
-    </PackageReference>
 	<!-- 
 	  The TestLibrary has a hard dependency on Newtonsoft.Json.
 	  The TestApp has a PrivateAssets=All dependency on Microsoft.Extensions.DependencyModel.

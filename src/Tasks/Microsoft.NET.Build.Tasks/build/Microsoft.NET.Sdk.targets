@@ -116,6 +116,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                        RuntimeConfigDevPath="$(ProjectRuntimeConfigDevFilePath)"
                                        RuntimeIdentifier="$(RuntimeIdentifier)"
                                        PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
+                                       RuntimeFrameworkVersion="$(RuntimeFrameworkVersion)"
                                        UserRuntimeConfig="$(UserRuntimeConfig)">
       
     </GenerateRuntimeConfigurationFiles>

@@ -22,11 +22,4 @@
     <RuntimeIdentifier>win7-x86</RuntimeIdentifier>
   </PropertyGroup>
   
-  <ItemGroup>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp1.0'">
-    <PackageReference Include="Microsoft.NETCore.App" Version="1.0.1" />
-  </ItemGroup>
-  
 </Project>
