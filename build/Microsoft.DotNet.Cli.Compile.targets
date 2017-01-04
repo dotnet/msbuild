@@ -81,10 +81,16 @@
         <SharedFramework Remove="*" />
         <SharedFramework Include="$(SharedFrameworkPublishDirectory)/**/*" />
 
-        <AssetsToRemoveFromDeps Remove="*" />
-        <AssetsToRemoveFromDeps Include="csc" />
-        <AssetsToRemoveFromDeps Include="vbc" />
-        <AssetsToRemoveFromDeps Include="MSBuild" />
+        <RuntimeTargetsAssetsToRemoveFromDeps Remove="*" />
+        <RuntimeTargetsAssetsToRemoveFromDeps Include="csc" />
+        <RuntimeTargetsAssetsToRemoveFromDeps Include="vbc" />
+        <RuntimeTargetsAssetsToRemoveFromDeps Include="MSBuild" />
+
+        <RuntimeAssetsToRemoveFromDeps Remove="*" />
+        <RuntimeAssetsToRemoveFromDeps Include="redist" />
+        <RuntimeAssetsToRemoveFromDeps Include="tool_csc" />
+        <RuntimeAssetsToRemoveFromDeps Include="tool_msbuild" />
+        <RuntimeAssetsToRemoveFromDeps Include="tool_nuget" />
       </ItemGroup>
 
       <Delete Files="@(BinObj)" />
@@ -146,7 +152,11 @@
 
       <RemoveAssetFromDepsPackages DepsFile="$(SdkOutputDirectory)/redist.deps.json"
                                    SectionName="runtimeTargets"
-                                   AssetPath="$(BinaryToCorehostifyRelDir)/%(AssetsToRemoveFromDeps.Identity).exe" />
+                                   AssetPath="$(BinaryToCorehostifyRelDir)/%(RuntimeTargetsAssetsToRemoveFromDeps.Identity).exe" />
+
+      <RemoveAssetFromDepsPackages DepsFile="$(SdkOutputDirectory)/redist.deps.json"
+                                   SectionName="runtime"
+                                   AssetPath="%(RuntimeAssetsToRemoveFromDeps.Identity).dll" />
 
       <Copy SourceFiles="$(SdkOutputDirectory)/redist.deps.json"
             DestinationFiles="$(SdkOutputDirectory)/%(BundledTools.Identity).deps.json" />
@@ -160,7 +170,9 @@
 
       <!-- cleanup project output we don't need -->
       <Delete Files="$(SdkOutputDirectory)/redist%(PublishOutputExtensions.Identity)" />
+      <Delete Files="$(SdkOutputDirectory)/tool_csc%(PublishOutputExtensions.Identity)" />
       <Delete Files="$(SdkOutputDirectory)/tool_msbuild%(PublishOutputExtensions.Identity)" />
+      <Delete Files="$(SdkOutputDirectory)/tool_nuget%(PublishOutputExtensions.Identity)" />
 
       <!-- Copy Host to SDK Directory -->
       <Copy SourceFiles="$(SharedFrameworkNameVersionPath)/$(DotnetHostBaseName)"
