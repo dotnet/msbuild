@@ -53,6 +53,7 @@
 
         public const string CmdNoBuildDescription = @"Do not build project before testing.";
 
-        public const string RunSettingsArgsHelpText = @"Any extra options that should be passed to MSBuild or adapter. See 'dotnet msbuild -h' and 'dotnet vstest --help' for available options.";
+        public const string RunSettingsArgsHelpText = @"Any extra commandline runsettings arguments that should be passed to vstest. See 'dotnet vstest --help' for available options.
+                                        Example: -- RunConfiguration.ResultsDirectory=""C:\users\user\desktop\Results Directory"" MSTest.DeploymentEnabled=false";
     }
 }
