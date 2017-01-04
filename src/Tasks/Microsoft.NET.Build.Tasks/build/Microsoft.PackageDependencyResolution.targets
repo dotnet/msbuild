@@ -69,12 +69,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     </PrepareResourcesDependsOn>
   </PropertyGroup>
 
-  <!-- List of targets that emit DiagnosticMessages items -->
+  <!-- List of targets that emit Dependency DiagnosticMessages items -->
   <PropertyGroup>
-    <EmitsDiagnosticMessages>
+    <EmitsDependencyDiagnosticMessages>
       RunResolvePackageDependencies;
-      $(EmitsDiagnosticMessages)
-    </EmitsDiagnosticMessages>
+      $(EmitsDependencyDiagnosticMessages)
+    </EmitsDependencyDiagnosticMessages>
   </PropertyGroup>
 
   <!-- Common tokens used in preprocessed content files -->
@@ -179,7 +179,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   
   <Target Name="ResolvePackageDependenciesDesignTime"
           Returns="@(_DependenciesDesignTime)"
-          DependsOnTargets="ResolveAssemblyReferencesDesignTime;RunResolvePackageDependencies;$(EmitsDiagnosticMessages)">
+          DependsOnTargets="ResolveAssemblyReferencesDesignTime;RunResolvePackageDependencies;$(EmitsDependencyDiagnosticMessages)">
 
     <PreprocessPackageDependenciesDesignTime
           TargetDefinitions="@(TargetDefinitions)"
