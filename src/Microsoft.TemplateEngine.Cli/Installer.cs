@@ -10,7 +10,7 @@ using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Utils;
 
-namespace dotnet_new3
+namespace Microsoft.TemplateEngine.Cli
 {
     internal class Installer : IInstaller
     {

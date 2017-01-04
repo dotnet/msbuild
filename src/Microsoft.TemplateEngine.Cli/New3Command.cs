@@ -3,14 +3,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.TemplateEngine.Abstractions;
@@ -18,22 +16,17 @@ using Microsoft.TemplateEngine.Abstractions.Mount;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Edge.Template;
-//using Microsoft.TemplateEngine.Orchestrator.RunnableProjects;
-//using Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Config;
-//using Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Macros;
 using Microsoft.TemplateEngine.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using static Microsoft.TemplateEngine.Utils.EngineEnvironmentSettings;
+using Paths = Microsoft.TemplateEngine.Edge.Paths;
 
-namespace dotnet_new3
+namespace Microsoft.TemplateEngine.Cli
 {
-    internal class New3Command
+    public class New3Command
     {
-        private const string CommandName = "new3";
-        private static readonly string HostIdentifier = "dotnetcli";
-        private static readonly string HostVersion = typeof(Program).GetTypeInfo().Assembly.GetName().Version.ToString();
         private static readonly IReadOnlyCollection<MatchLocation> NameFields = new HashSet<MatchLocation> { MatchLocation.Name, MatchLocation.ShortName, MatchLocation.Alias };
-        private static DefaultTemplateEngineHost Host;
         private ExtendedCommandParser _app;
         private HostSpecificTemplateData _hostSpecificTemplateData;
         private IReadOnlyList<IFilteredTemplateInfo> _matchedTemplates;
@@ -47,11 +40,15 @@ namespace dotnet_new3
                     $"
             , RegexOptions.IgnorePatternWhitespace);
         private bool _forceAmbiguousFlow;
+        private readonly Action<ITemplateEngineHost, IInstaller> _onFirstRun;
 
-        public New3Command(ExtendedCommandParser app, CommandArgument templateNames)
+        public New3Command(string commandName, ITemplateEngineHost host, Action<ITemplateEngineHost, IInstaller> onFirstRun, ExtendedCommandParser app, CommandArgument templateNames)
         {
+            Host = host;
+            CommandName = commandName;
             _app = app;
             _templateName = templateNames;
+            _onFirstRun = onFirstRun;
         }
 
         public string Alias => _app.InternalParamValue("--alias");
@@ -59,6 +56,8 @@ namespace dotnet_new3
         public bool DebugAttachHasValue => _app.RemainingArguments.Any(x => x.Equals("--debug:attach", StringComparison.Ordinal));
 
         public bool ExtraArgsHasValue => _app.InternalParamHasValue("--extra-args");
+
+        public string CommandName { get; }
 
         public IList<string> Install => _app.InternalParamValueList("--install");
 
@@ -131,18 +130,17 @@ namespace dotnet_new3
             }
         }
 
-        public static int Run(string[] args)
+        public static int Run(string commandName, ITemplateEngineHost host, Action<ITemplateEngineHost, IInstaller> onFirstRun, string[] args)
         {
-            ConfigureHost();
             ExtendedCommandParser app = new ExtendedCommandParser()
             {
-                Name = "dotnet new",
+                Name = $"dotnet {commandName}",
                 FullName = LocalizableStrings.CommandDescription
             };
             SetupInternalCommands(app);
 
             CommandArgument templateName = app.Argument("template", LocalizableStrings.TemplateArgumentHelp);
-            New3Command instance = new New3Command(app, templateName);
+            New3Command instance = new New3Command(commandName, host, onFirstRun, app, templateName);
 
             app.OnExecute(instance.ExecuteAsync);
 
@@ -189,58 +187,7 @@ namespace dotnet_new3
 
         private void ConfigureEnvironment()
         {
-            string[] packageList;
-
-            if (Paths.Global.DefaultInstallPackageList.FileExists())
-            {
-                packageList = Paths.Global.DefaultInstallPackageList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                if (packageList.Length > 0)
-                {
-                    Installer.InstallPackages(packageList);
-                }
-            }
-
-            if (Paths.Global.DefaultInstallTemplateList.FileExists())
-            {
-                packageList = Paths.Global.DefaultInstallTemplateList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                if (packageList.Length > 0)
-                {
-                    Installer.InstallPackages(packageList);
-                }
-            }
-
-            string templatesDir = Path.Combine(Paths.Global.BaseDir, "Templates");
-
-            if (templatesDir.Exists())
-            {
-                IEnumerable<string> layoutIncludedPackages = Host.FileSystem.EnumerateFiles(templatesDir, "*.nupkg", SearchOption.TopDirectoryOnly);
-                Installer.InstallPackages(layoutIncludedPackages);
-            }
-        }
-
-        private static void ConfigureHost()
-        {
-            Dictionary<Guid, Func<Type>> builtIns = new Dictionary<Guid, Func<Type>>
-            {
-                //{ new Guid("0C434DF7-E2CB-4DEE-B216-D7C58C8EB4B3"), () => typeof(RunnableProjectGenerator) },
-                //{ new Guid("3147965A-08E5-4523-B869-02C8E9A8AAA1"), () => typeof(BalancedNestingConfig) },
-                //{ new Guid("3E8BCBF0-D631-45BA-A12D-FBF1DE03AA38"), () => typeof(ConditionalConfig) },
-                //{ new Guid("A1E27A4B-9608-47F1-B3B8-F70DF62DC521"), () => typeof(FlagsConfig) },
-                //{ new Guid("3FAE1942-7257-4247-B44D-2DDE07CB4A4A"), () => typeof(IncludeConfig) },
-                //{ new Guid("3D33B3BF-F40E-43EB-A14D-F40516F880CD"), () => typeof(RegionConfig) },
-                //{ new Guid("62DB7F1F-A10E-46F0-953F-A28A03A81CD1"), () => typeof(ReplacementConfig) },
-                //{ new Guid("370996FE-2943-4AED-B2F6-EC03F0B75B4A"), () => typeof(ConstantMacro) },
-                //{ new Guid("BB625F71-6404-4550-98AF-B2E546F46C5F"), () => typeof(EvaluateMacro) },
-                //{ new Guid("10919008-4E13-4FA8-825C-3B4DA855578E"), () => typeof(GuidMacro) },
-                //{ new Guid("F2B423D7-3C23-4489-816A-41D8D2A98596"), () => typeof(NowMacro) },
-                //{ new Guid("011E8DC1-8544-4360-9B40-65FD916049B7"), () => typeof(RandomMacro) },
-                //{ new Guid("8A4D4937-E23F-426D-8398-3BDBD1873ADB"), () => typeof(RegexMacro) },
-                //{ new Guid("B57D64E0-9B4F-4ABE-9366-711170FD5294"), () => typeof(SwitchMacro) },
-                //{ new Guid("10919118-4E13-4FA9-825C-3B4DA855578E"), () => typeof(CaseChangeMacro) }
-            };
-
-            Host = new DefaultTemplateEngineHost(HostIdentifier, HostVersion, CultureInfo.CurrentCulture.Name, new Dictionary<string, string> { { "prefs:language", "C#" } }, builtIns.ToList());
-            EngineEnvironmentSettings.Host = Host;
+            _onFirstRun?.Invoke(Host, Installer);
         }
 
         private async Task<int> CreateTemplateAsync(ITemplateInfo template)
@@ -492,9 +439,10 @@ namespace dotnet_new3
             ITemplate template = SettingsLoader.LoadTemplate(templateInfo);
             IParameterSet allParams = template.Generator.GetParametersForTemplate(template);
             HostSpecificTemplateData hostTemplateData = ReadHostSpecificTemplateData(template);
+            IReadOnlyDictionary<string, string> parameterNameMap = hostTemplateData.ParameterMap;
 
             Reporter.Output.Write($"    dotnet {CommandName} {template.ShortName}");
-            IEnumerable<ITemplateParameter> filteredParams = FilterParamsForHelp(allParams, hostTemplateData.HiddenParameterNames);
+            IEnumerable<ITemplateParameter> filteredParams = FilterParamsForHelp(allParams, hostTemplateData.HiddenParameters);
 
             foreach (ITemplateParameter parameter in filteredParams)
             {
@@ -504,7 +452,11 @@ namespace dotnet_new3
                     continue;
                 }
 
-                string displayParameter = hostTemplateData.DisplayNameForParameter(parameter.Name);
+                string displayParameter;
+                if (!parameterNameMap.TryGetValue(parameter.Name, out displayParameter))
+                {
+                    displayParameter = parameter.Name;
+                }
 
                 Reporter.Output.Write($" --{displayParameter}");
 
@@ -651,7 +603,8 @@ namespace dotnet_new3
             ITemplate template = SettingsLoader.LoadTemplate(templateInfo);
             IParameterSet allParams = template.Generator.GetParametersForTemplate(template);
             _hostSpecificTemplateData = ReadHostSpecificTemplateData(template);
-            _app.SetupTemplateParameters(allParams, _hostSpecificTemplateData.LongNameOverrides, _hostSpecificTemplateData.ShortNameOverrides);
+            IReadOnlyDictionary<string, string> parameterNameMap = _hostSpecificTemplateData.ParameterMap;
+            _app.SetupTemplateParameters(allParams, parameterNameMap);
 
             // re-parse after setting up the template params
             _app.ParseArgs(_app.InternalParamValueList("--extra-args"));
@@ -855,7 +808,7 @@ namespace dotnet_new3
                 additionalInfo = string.Format(LocalizableStrings.InvalidParameterValues, badParams, template.Name);
             }
 
-            ParameterHelp(allParams, additionalInfo, _hostSpecificTemplateData.HiddenParameterNames);
+            ParameterHelp(allParams, additionalInfo, _hostSpecificTemplateData.HiddenParameters);
         }
 
         private void ShowUsageHelp()

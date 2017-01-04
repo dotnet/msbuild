@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace dotnet_new3
+namespace Microsoft.TemplateEngine.Cli
 {
     public interface IInstaller
     {

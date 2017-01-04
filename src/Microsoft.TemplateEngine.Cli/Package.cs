@@ -3,7 +3,7 @@
 
 using System;
 
-namespace dotnet_new3
+namespace Microsoft.TemplateEngine.Cli
 {
     internal class Package
     {
