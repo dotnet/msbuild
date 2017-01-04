@@ -1,10 +1,10 @@
 {
   "symbolInfo": {
     "IncludeApplicationInsights": {
-	  "isHidden": "true"
-	},
-	"UseLocalDB": {
-	  "longName": "use-local-db"
-	}
+      "isHidden": "true"
+    },
+    "UseLocalDB": {
+      "longName": "use-local-db"
+    }
   }
 }
