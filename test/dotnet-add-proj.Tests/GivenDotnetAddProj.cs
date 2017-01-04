@@ -28,6 +28,89 @@ Additional Arguments:
  Projects to add to solution
 ";
 
+        private const string ExpectedSlnFileAfterAddingLibProj = @"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26006.2
+MinimumVisualStudioVersion = 10.0.40219.1
+Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""App"", ""App\App.csproj"", ""{7072A694-548F-4CAE-A58F-12D257D5F486}""
+EndProject
+Project(""{13B669BE-BB05-4DDF-9536-439F39A36129}"") = ""Lib"", ""Lib\Lib.csproj"", ""__PROJECTGUID__""
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Debug|x64.ActiveCfg = Debug|x64
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Debug|x64.Build.0 = Debug|x64
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Debug|x86.ActiveCfg = Debug|x86
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Debug|x86.Build.0 = Debug|x86
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|x64.ActiveCfg = Release|x64
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|x64.Build.0 = Release|x64
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|x86.ActiveCfg = Release|x86
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|x86.Build.0 = Release|x86
+		__PROJECTGUID__.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		__PROJECTGUID__.Debug|Any CPU.Build.0 = Debug|Any CPU
+		__PROJECTGUID__.Debug|x64.ActiveCfg = Debug|x64
+		__PROJECTGUID__.Debug|x64.Build.0 = Debug|x64
+		__PROJECTGUID__.Debug|x86.ActiveCfg = Debug|x86
+		__PROJECTGUID__.Debug|x86.Build.0 = Debug|x86
+		__PROJECTGUID__.Release|Any CPU.ActiveCfg = Release|Any CPU
+		__PROJECTGUID__.Release|Any CPU.Build.0 = Release|Any CPU
+		__PROJECTGUID__.Release|x64.ActiveCfg = Release|x64
+		__PROJECTGUID__.Release|x64.Build.0 = Release|x64
+		__PROJECTGUID__.Release|x86.ActiveCfg = Release|x86
+		__PROJECTGUID__.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
+";
+
+        private const string ExpectedSlnFileAfterAddingLibProjToEmptySln = @"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26006.2
+MinimumVisualStudioVersion = 10.0.40219.1
+Project(""{13B669BE-BB05-4DDF-9536-439F39A36129}"") = ""Lib"", ""Lib\Lib.csproj"", ""__PROJECTGUID__""
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		__PROJECTGUID__.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		__PROJECTGUID__.Debug|Any CPU.Build.0 = Debug|Any CPU
+		__PROJECTGUID__.Debug|x64.ActiveCfg = Debug|x64
+		__PROJECTGUID__.Debug|x64.Build.0 = Debug|x64
+		__PROJECTGUID__.Debug|x86.ActiveCfg = Debug|x86
+		__PROJECTGUID__.Debug|x86.Build.0 = Debug|x86
+		__PROJECTGUID__.Release|Any CPU.ActiveCfg = Release|Any CPU
+		__PROJECTGUID__.Release|Any CPU.Build.0 = Release|Any CPU
+		__PROJECTGUID__.Release|x64.ActiveCfg = Release|x64
+		__PROJECTGUID__.Release|x64.Build.0 = Release|x64
+		__PROJECTGUID__.Release|x86.ActiveCfg = Release|x86
+		__PROJECTGUID__.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+EndGlobal
+";
+
         [Theory]
         [InlineData("--help")]
         [InlineData("-h")]
@@ -171,11 +254,51 @@ Additional Arguments:
         }
 
         [Theory]
-        [InlineData("TestAppWithSlnAndCsprojFiles", "")]
-        [InlineData("TestAppWithSlnAndCsprojProjectGuidFiles", "{84A45D44-B677-492D-A6DA-B3A71135AB8E}")]
-        public void WhenValidProjectIsPassedItGetsNormalizedAndAddedAndSlnBuilds(
+        [InlineData("TestAppWithSlnAndCsprojFiles", ExpectedSlnFileAfterAddingLibProj, "")]
+        [InlineData("TestAppWithSlnAndCsprojProjectGuidFiles", ExpectedSlnFileAfterAddingLibProj, "{84A45D44-B677-492D-A6DA-B3A71135AB8E}")]
+        [InlineData("TestAppWithEmptySln", ExpectedSlnFileAfterAddingLibProjToEmptySln, "")]
+        public void WhenValidProjectIsPassedBuildConfigsAreAdded(
             string testAsset,
-            string projectGuid)
+            string expectedSlnContentsTemplate,
+            string expectedProjectGuid)
+        {
+            var projectDirectory = TestAssets
+                .Get(testAsset)
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+
+            var projectToAdd = "Lib/Lib.csproj";
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput($"add App.sln project {projectToAdd}");
+            cmd.Should().Pass();
+
+            var slnPath = Path.Combine(projectDirectory, "App.sln");
+
+            if (string.IsNullOrEmpty(expectedProjectGuid))
+            {
+                var slnFile = SlnFile.Read(slnPath);
+                var matchingProjects = slnFile.Projects
+                    .Where((p) => p.Name == "Lib")
+                    .ToList();
+
+                matchingProjects.Count.Should().Be(1);
+                var slnProject = matchingProjects[0];
+                expectedProjectGuid = slnProject.Id;
+            }
+
+            var expectedSlnContents = expectedSlnContentsTemplate.Replace("__PROJECTGUID__", expectedProjectGuid);
+            File.ReadAllText(slnPath)
+                .Should().BeVisuallyEquivalentTo(expectedSlnContents);
+        }
+
+        [Theory]
+        [InlineData("TestAppWithSlnAndCsprojFiles")]
+        [InlineData("TestAppWithSlnAndCsprojProjectGuidFiles")]
+        [InlineData("TestAppWithEmptySln")]
+        public void WhenValidProjectIsPassedItGetsAdded(string testAsset)
         {
             var projectDirectory = TestAssets
                 .Get(testAsset)
@@ -192,29 +315,56 @@ Additional Arguments:
             cmd.Should().Pass();
             cmd.StdOut.Should().Be($"Project `{projectPath}` added to the solution.");
             cmd.StdErr.Should().BeEmpty();
+        }
 
-            var slnFile = SlnFile.Read(Path.Combine(projectDirectory, "App.sln"));
-            var matchingProjects = slnFile.Projects
-                .Where((p) => p.Name == "Lib")
-                .ToList();
+        //ISSUE: https://github.com/dotnet/sdk/issues/545
+        //[Theory]
+        //[InlineData("TestAppWithSlnAndCsprojFiles")]
+        //[InlineData("TestAppWithSlnAndCsprojProjectGuidFiles")]
+        //[InlineData("TestAppWithEmptySln")]
+        public void WhenValidProjectIsPassedTheSlnBuilds(string testAsset)
+        {
+            var projectDirectory = TestAssets
+                .Get(testAsset)
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
 
-            matchingProjects.Count.Should().Be(1);
-            var slnProject = matchingProjects[0];
-            slnProject.FilePath.Should().Be(projectPath);
-            slnProject.TypeGuid.Should().Be(ProjectTypeGuids.CPSProjectTypeGuid);
-            if (!string.IsNullOrEmpty(projectGuid))
-            {
-                slnProject.Id.Should().Be(projectGuid);
-            }
-
-            var restoreCmd = new DotnetCommand()
+            var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .Execute($"restore {Path.Combine("App", "App.csproj")}");
+                .ExecuteWithCapturedOutput(@"add App.sln project App/App.csproj Lib/Lib.csproj");
+            cmd.Should().Pass();
 
-            var buildCmd = new DotnetCommand()
+            var slnPath = Path.Combine(projectDirectory, "App.sln");
+
+            new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .Execute("build App.sln");
-            buildCmd.Should().Pass();
+                .Execute($"restore App.sln")
+                .Should().Pass();
+
+            new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .Execute("build App.sln --configuration Release")
+                .Should().Pass();
+
+            var reasonString = "should be built in release mode, otherwise it means build configurations are missing from the sln file";
+
+            var appReleaseDirectory = Directory.EnumerateDirectories(
+                Path.Combine(projectDirectory, "App", "bin"),
+                "Release",
+                SearchOption.AllDirectories);
+            appReleaseDirectory.Count().Should().Be(1, $"App {reasonString}");
+            Directory.EnumerateFiles(appReleaseDirectory.Single(), "App.dll", SearchOption.AllDirectories)
+                .Count().Should().Be(1, $"App {reasonString}");
+
+            var libReleaseDirectory = Directory.EnumerateDirectories(
+                Path.Combine(projectDirectory, "Lib", "bin"),
+                "Release",
+                SearchOption.AllDirectories);
+            libReleaseDirectory.Count().Should().Be(1, $"Lib {reasonString}");
+            Directory.EnumerateFiles(libReleaseDirectory.Single(), "Lib.dll", SearchOption.AllDirectories)
+                .Count().Should().Be(1, $"Lib {reasonString}");
         }
 
         [Fact]
@@ -258,7 +408,7 @@ Additional Arguments:
             cmd.StdErr.Should().Be("Project `idonotexist.csproj` does not exist.");
 
             File.ReadAllText(slnFullPath)
-                .Should().BeEquivalentTo(contentBefore);
+                .Should().BeVisuallyEquivalentTo(contentBefore);
         }
     }
 }

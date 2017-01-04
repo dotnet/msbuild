@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Migration.Tests
 
             new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .Execute($"restore \"{Path.Combine("TestApp", "TestApp.csproj")}\"")
+                .Execute($"restore \"{solutionRelPath}\"")
                 .Should().Pass();
 
             //ISSUE: https://github.com/dotnet/sdk/issues/545
