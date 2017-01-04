@@ -39,11 +39,11 @@
       "choices": [
         {
           "choice": "None",
-          "description": "No authorization"
+          "description": "No authentication"
         },
         {
           "choice": "Individual",
-          "description": "Individual Authorization"
+          "description": "Individual authentication"
         }
       ],
       "defaultValue": "None",
