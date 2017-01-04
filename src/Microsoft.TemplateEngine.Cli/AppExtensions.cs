@@ -10,7 +10,7 @@ using Microsoft.Extensions.CommandLineUtils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace dotnet_new3
+namespace Microsoft.TemplateEngine.Cli
 {
     internal static class AppExtensions
     {

@@ -1,4 +1,13 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Cli;
+using Microsoft.TemplateEngine.Edge;
+using Microsoft.TemplateEngine.Utils;
 
 [assembly:InternalsVisibleTo("dotnet-new3.UnitTests, PublicKey=0024000004800000940000000602000000240000525341310004000001000100f33a29044fa9d740c9b3213a93e57c84b472c84e0b8a0e1ae48e67a9f8f6de9d5f7f3d52ac23e48ac51801f1dc950abe901da34d2a9e3baadb141a17c77ef3c565dd5ee5054b91cf63bb3c6ab83f72ab3aafe93d0fc3c2348b764fafb0b1c0733de51459aeab46580384bf9d74c4e28164b7cde247f891ba07891c9d872ad2bb")]
 
@@ -6,9 +15,73 @@ namespace dotnet_new3
 {
     public class Program
     {
+        private const string HostIdentifier = "dotnet";
+        private const string HostVersion = "1.0.0";
+        private const string CommandName = "new3";
+
         public static int Main(string[] args)
         {
-            return New3Command.Run(args);
+            return New3Command.Run(CommandName, CreateHost(), FirstRun, args);
+        }
+
+        private static ITemplateEngineHost CreateHost()
+        {
+            var builtIns = new Dictionary<Guid, Func<Type>>
+            {
+                //{ new Guid("0C434DF7-E2CB-4DEE-B216-D7C58C8EB4B3"), () => typeof(RunnableProjectGenerator) },
+                //{ new Guid("3147965A-08E5-4523-B869-02C8E9A8AAA1"), () => typeof(BalancedNestingConfig) },
+                //{ new Guid("3E8BCBF0-D631-45BA-A12D-FBF1DE03AA38"), () => typeof(ConditionalConfig) },
+                //{ new Guid("A1E27A4B-9608-47F1-B3B8-F70DF62DC521"), () => typeof(FlagsConfig) },
+                //{ new Guid("3FAE1942-7257-4247-B44D-2DDE07CB4A4A"), () => typeof(IncludeConfig) },
+                //{ new Guid("3D33B3BF-F40E-43EB-A14D-F40516F880CD"), () => typeof(RegionConfig) },
+                //{ new Guid("62DB7F1F-A10E-46F0-953F-A28A03A81CD1"), () => typeof(ReplacementConfig) },
+                //{ new Guid("370996FE-2943-4AED-B2F6-EC03F0B75B4A"), () => typeof(ConstantMacro) },
+                //{ new Guid("BB625F71-6404-4550-98AF-B2E546F46C5F"), () => typeof(EvaluateMacro) },
+                //{ new Guid("10919008-4E13-4FA8-825C-3B4DA855578E"), () => typeof(GuidMacro) },
+                //{ new Guid("F2B423D7-3C23-4489-816A-41D8D2A98596"), () => typeof(NowMacro) },
+                //{ new Guid("011E8DC1-8544-4360-9B40-65FD916049B7"), () => typeof(RandomMacro) },
+                //{ new Guid("8A4D4937-E23F-426D-8398-3BDBD1873ADB"), () => typeof(RegexMacro) },
+                //{ new Guid("B57D64E0-9B4F-4ABE-9366-711170FD5294"), () => typeof(SwitchMacro) },
+                //{ new Guid("10919118-4E13-4FA9-825C-3B4DA855578E"), () => typeof(CaseChangeMacro) }
+            }.ToList();
+
+            var preferences = new Dictionary<string, string>
+            {
+                { "prefs:language", "C#" }
+            };
+
+            return new DefaultTemplateEngineHost(HostIdentifier, HostVersion, CultureInfo.CurrentCulture.Name, preferences, builtIns);
+        }
+
+        private static void FirstRun(ITemplateEngineHost host, IInstaller installer)
+        { 
+            string[] packageList;
+
+            if (Paths.Global.DefaultInstallPackageList.FileExists())
+            {
+                packageList = Paths.Global.DefaultInstallPackageList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                if (packageList.Length > 0)
+                {
+                    installer.InstallPackages(packageList);
+                }
+            }
+
+            if (Paths.Global.DefaultInstallTemplateList.FileExists())
+            {
+                packageList = Paths.Global.DefaultInstallTemplateList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                if (packageList.Length > 0)
+                {
+                    installer.InstallPackages(packageList);
+                }
+            }
+
+            var templatesDir = Path.Combine(Paths.Global.BaseDir, "Templates");
+
+            if (templatesDir.Exists())
+            {
+                var layoutIncludedPackages = host.FileSystem.EnumerateFiles(templatesDir, "*.nupkg", SearchOption.TopDirectoryOnly);
+                installer.InstallPackages(layoutIncludedPackages);
+            }
         }
     }
 }

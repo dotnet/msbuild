@@ -77,5 +77,9 @@ namespace Microsoft.TemplateEngine.TestHelper
         {
             MessageReceived?.Invoke(message);
         }
+
+        public void UpdateLocale(string newLocale)
+        {
+        }
     }
 }

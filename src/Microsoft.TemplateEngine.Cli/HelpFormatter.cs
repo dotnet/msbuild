@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace dotnet_new3
+namespace Microsoft.TemplateEngine.Cli
 {
     public class HelpFormatter
     {

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 
-namespace dotnet_new3
+namespace Microsoft.TemplateEngine.Cli
 {
     internal class TableFormatter
     {
