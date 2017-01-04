@@ -16,19 +16,17 @@ using System.Runtime.CompilerServices;
 
 namespace Microsoft.NET.Build.Tests
 {
-    public class GivenThatWeWantAllResourcesInSatellite
+    public class GivenThatWeWantAllResourcesInSatellite : SdkTest
     {
-        private TestAssetsManager _testAssetsManager = TestAssetsManager.TestProjectsAssetsManager;
-
         [Fact]
         public void It_retrieves_strings_successfully()
         {
-            TestSatelliteResources();
+            TestSatelliteResources(_testAssetsManager);
         }
 
-        public void TestSatelliteResources(Action<XDocument> projectChanges = null, Action<BuildCommand> setup = null, [CallerMemberName] string callingMethod = null)
+        public static void TestSatelliteResources(TestAssetsManager testAssetsManager, Action<XDocument> projectChanges = null, Action<BuildCommand> setup = null, [CallerMemberName] string callingMethod = null)
         {
-            var testAsset = _testAssetsManager
+            var testAsset = testAssetsManager
                 .CopyTestAsset("AllResourcesInSatellite", callingMethod)
                 .WithSource();
 

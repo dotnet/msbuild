@@ -14,10 +14,8 @@ using System.Linq;
 
 namespace Microsoft.NET.Build.Tests
 {
-    public class GivenThatWeWantToReferenceAProject
+    public class GivenThatWeWantToReferenceAProject : SdkTest
     {
-        private TestAssetsManager _testAssetsManager = TestAssetsManager.TestProjectsAssetsManager;
-
         //  Different types of projects which should form the test matrix:
 
         //  Desktop (non-SDK) project

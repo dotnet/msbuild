@@ -16,10 +16,8 @@ using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 
 namespace Microsoft.NET.Build.Tests
 {
-    public class GivenThatWeWantToBuildAppsWithFrameworkRefs
+    public class GivenThatWeWantToBuildAppsWithFrameworkRefs : SdkTest
     {
-        private TestAssetsManager _testAssetsManager = TestAssetsManager.TestProjectsAssetsManager;
-
         [Fact]
         public void It_builds_the_projects_successfully()
         {

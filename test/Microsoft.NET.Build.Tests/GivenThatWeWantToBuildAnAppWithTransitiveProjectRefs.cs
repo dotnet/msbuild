@@ -18,10 +18,8 @@ using System;
 
 namespace Microsoft.NET.Build.Tests
 {
-    public class GivenThatWeWantToBuildAnAppWithTransitiveProjectRefs
+    public class GivenThatWeWantToBuildAnAppWithTransitiveProjectRefs : SdkTest
     {
-        private TestAssetsManager _testAssetsManager = TestAssetsManager.TestProjectsAssetsManager;
-
         [Fact]
         public void It_builds_the_project_successfully()
         {

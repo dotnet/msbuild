@@ -11,10 +11,8 @@ using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 
 namespace Microsoft.NET.Build.Tests
 {
-    public class GivenThatWeWantToBuildACrossTargetedLibrary
+    public class GivenThatWeWantToBuildACrossTargetedLibrary : SdkTest
     {
-        private TestAssetsManager _testAssetsManager = TestAssetsManager.TestProjectsAssetsManager;
-
         [Fact]
         public void It_builds_nondesktop_library_successfully_on_all_platforms()
         {

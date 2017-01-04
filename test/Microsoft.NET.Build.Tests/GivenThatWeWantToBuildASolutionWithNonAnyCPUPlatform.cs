@@ -11,10 +11,8 @@ using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 
 namespace Microsoft.NET.Build.Tests
 {
-    public class GivenThatWeWantToBuildASolutionWithNonAnyCPUPlatform
+    public class GivenThatWeWantToBuildASolutionWithNonAnyCPUPlatform : SdkTest
     {
-        private TestAssetsManager _testAssetsManager = TestAssetsManager.TestProjectsAssetsManager;
-
         [Fact]
         public void It_builds_solusuccessfully()
         {
