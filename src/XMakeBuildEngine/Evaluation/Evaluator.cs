@@ -1004,18 +1004,12 @@ namespace Microsoft.Build.Evaluation
 
                     if (sdkName.Contains("/"))
                     {
-                        ProjectErrorUtilities.ThrowInvalidProject(currentProjectOrImport.SdkLocation, "InvalidSdkFormat");
+                        ProjectErrorUtilities.ThrowInvalidProject(currentProjectOrImport.SdkLocation, "InvalidSdkFormat", currentProjectOrImport.Sdk);
                     }
 
-                    ProjectImportElement initialImport = ProjectImportElement.CreateDisconnected("Sdk.props", currentProjectOrImport);
-                    initialImport.Sdk = sdkName;
-                    initialImport.ImplicitImportLocation = ImplicitImportLocation.Top;
-                    implicitImports.Add(initialImport);
-
-                    ProjectImportElement finalImport = ProjectImportElement.CreateDisconnected("Sdk.targets", currentProjectOrImport);
-                    finalImport.Sdk = sdkName;
-                    finalImport.ImplicitImportLocation = ImplicitImportLocation.Bottom;
-                    implicitImports.Add(finalImport);
+                    implicitImports.Add(ProjectImportElement.CreateImplicit("Sdk.props", currentProjectOrImport, ImplicitImportLocation.Top, sdkName));
+                    
+                    implicitImports.Add(ProjectImportElement.CreateImplicit("Sdk.targets", currentProjectOrImport, ImplicitImportLocation.Bottom, sdkName));
                 }
             }
 

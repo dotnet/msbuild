@@ -87,9 +87,11 @@ namespace Microsoft.Build.Construction
         public ElementLocation SdkLocation => XmlElement.GetAttributeLocation(XMakeAttributes.sdk);
 
         /// <summary>
-        /// Gets or sets the <see cref="ImplicitImportLocation"/> of the import.
+        /// Gets the <see cref="ImplicitImportLocation"/> of the import.  This indicates if the import was implicitly
+        /// added because of the <see cref="ProjectRootElement.Sdk"/> attribute and the location where the project was
+        /// imported.
         /// </summary>
-        internal ImplicitImportLocation ImplicitImportLocation { get; set; } = ImplicitImportLocation.None;
+        public ImplicitImportLocation ImplicitImportLocation { get; internal set; } = ImplicitImportLocation.None;
 
         /// <summary>
         /// Creates an unparented ProjectImportElement, wrapping an unparented XmlElement.
@@ -108,6 +110,21 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
+        /// Creates an implicit ProjectImportElement as if it was in the project.
+        /// </summary>
+        /// <returns></returns>
+        internal static ProjectImportElement CreateImplicit(string project, ProjectRootElement containingProject, ImplicitImportLocation implicitImportLocation, string sdkName)
+        {
+            ProjectImportElement import = CreateDisconnected(project, containingProject);
+
+            import.ImplicitImportLocation = implicitImportLocation;
+
+            import.Sdk = sdkName;
+
+            return import;
+        }
+
+        /// <summary>
         /// Overridden to verify that the potential parent and siblings
         /// are acceptable. Throws InvalidOperationException if they are not.
         /// </summary>
@@ -121,24 +138,5 @@ namespace Microsoft.Build.Construction
         {
             return owner.CreateImportElement(this.Project);
         }
-    }
-
-    /// <summary>
-    /// Represents the location of an implicit import.
-    /// </summary>
-    internal enum ImplicitImportLocation
-    {
-        /// <summary>
-        /// The import is not implicit.
-        /// </summary>
-        None,
-        /// <summary>
-        /// The import should be at the top.
-        /// </summary>
-        Top,
-        /// <summary>
-        /// The import should be at the bottom.
-        /// </summary>
-        Bottom
     }
 }

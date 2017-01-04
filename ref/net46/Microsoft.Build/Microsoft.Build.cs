@@ -14,6 +14,12 @@ namespace Microsoft.Build.Construction
         public override int GetHashCode() { throw null; }
         public override string ToString() { throw null; }
     }
+    public enum ImplicitImportLocation
+    {
+        Bottom = 2,
+        None = 0,
+        Top = 1,
+    }
     [System.Diagnostics.DebuggerDisplayAttribute("ProjectChooseElement (#Children={Count} HasOtherwise={OtherwiseElement != null})")]
     public partial class ProjectChooseElement : Microsoft.Build.Construction.ProjectElementContainer
     {
@@ -83,6 +89,7 @@ namespace Microsoft.Build.Construction
     public partial class ProjectImportElement : Microsoft.Build.Construction.ProjectElement
     {
         internal ProjectImportElement() { }
+        public Microsoft.Build.Construction.ImplicitImportLocation ImplicitImportLocation { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public string Project { get { throw null; } set { } }
         public Microsoft.Build.Construction.ElementLocation ProjectLocation { get { throw null; } }
         public string Sdk { get { throw null; } set { } }

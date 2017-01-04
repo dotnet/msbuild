@@ -2,11 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
+using System;
 using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Exceptions;
 using Microsoft.Build.Shared;
 using Xunit;
 
@@ -15,83 +16,80 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// <summary>
     /// Tests for the ProjectImportElement class when imports are implicit through an Sdk specification.
     /// </summary>
-    public class ProjectSdkImplicitImport_Tests
+    public class ProjectSdkImplicitImport_Tests : IDisposable
     {
+        private const string SdkName = "MSBuildUnitTestSdk";
+        private readonly string _testSdkRoot;
+        private readonly string _testSdkDirectory;
+        private readonly string _sdkPropsPath;
+        private readonly string _sdkTargetsPath;
+
+
+        public ProjectSdkImplicitImport_Tests()
+        {
+            _testSdkRoot = Path.Combine(ObjectModelHelpers.TempProjectDir, Guid.NewGuid().ToString("N"));
+            _testSdkDirectory = Path.Combine(_testSdkRoot, SdkName, "Sdk");
+            _sdkPropsPath = Path.Combine(_testSdkDirectory, "Sdk.props");
+            _sdkTargetsPath = Path.Combine(_testSdkDirectory, "Sdk.targets");
+
+            Directory.CreateDirectory(_testSdkDirectory);
+        }
+
         [Fact]
         public void SdkImportsAreInImportList()
         {
-            var testSdkRoot = Path.Combine(Path.GetTempPath(), "MSBuildUnitTest");
-            var testSdkDirectory = Path.Combine(testSdkRoot, "MSBuildUnitTestSdk", "Sdk");
+            File.WriteAllText(_sdkPropsPath, "<Project><PropertyGroup><InitialImportProperty>Hello</InitialImportProperty></PropertyGroup></Project>");
+            File.WriteAllText(_sdkTargetsPath, "<Project><PropertyGroup><FinalImportProperty>World</FinalImportProperty></PropertyGroup></Project>");
 
-            try
+            using (new Helpers.TemporaryEnvironment("MSBuildSDKsPath", _testSdkRoot))
             {
-                Directory.CreateDirectory(testSdkDirectory);
-
-                string sdkPropsPath = Path.Combine(testSdkDirectory, "Sdk.props");
-                string sdkTargetsPath = Path.Combine(testSdkDirectory, "Sdk.targets");
-
-                File.WriteAllText(sdkPropsPath, "<Project><PropertyGroup><InitialImportProperty>Hello</InitialImportProperty></PropertyGroup></Project>");
-                File.WriteAllText(sdkTargetsPath, "<Project><PropertyGroup><FinalImportProperty>World</FinalImportProperty></PropertyGroup></Project>");
-
-                using (new Helpers.TemporaryEnvironment("MSBuildSDKsPath", testSdkRoot))
-                {
-                    string content = @"
-                    <Project Sdk='MSBuildUnitTestSdk'>
+                string content = $@"
+                    <Project Sdk='{SdkName}'>
                         <PropertyGroup>
                             <UsedToTestIfImplicitImportsAreInTheCorrectLocation>null</UsedToTestIfImplicitImportsAreInTheCorrectLocation>
                         </PropertyGroup>
                     </Project>";
 
-                    ProjectRootElement projectRootElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement projectRootElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
 
-                    Project project = new Project(projectRootElement);
+                Project project = new Project(projectRootElement);
 
-                    List<ProjectImportElement> imports = Helpers.MakeList(projectRootElement.Imports);
+                // The XML representation of the project should indicate there are no imports
+                Assert.Equal(0, projectRootElement.Imports.Count);
 
-                    Assert.Equal(0, imports.Count);
-                    //Assert.Equal(sdkPropsPath, imports[0].Project);
-                    //Assert.True(imports[0].IsImplicit);
-                    //Assert.Equal(sdkTargetsPath, imports[1].Project);
-                    //Assert.True(imports[1].IsImplicit);
+                // The project representation should have imports
+                Assert.Equal(2, project.Imports.Count);
 
-                    Assert.Equal(2, project.Imports.Count);
+                ResolvedImport initialResolvedImport = project.Imports[0];
+                Assert.Equal(_sdkPropsPath, initialResolvedImport.ImportedProject.FullPath);
 
-                    Assert.Equal(sdkPropsPath, project.Imports[0].ImportedProject.FullPath);
-                    Assert.Equal(sdkTargetsPath, project.Imports[1].ImportedProject.FullPath);
 
-                    // TODO: Check the location of the import, maybe it should point to the location of the SDK attribute?
-                }
-            }
-            finally
-            {
-                if (Directory.Exists(testSdkRoot))
-                {
-                    FileUtilities.DeleteWithoutTrailingBackslash(testSdkDirectory, true);
-                }
+                ResolvedImport finalResolvedImport = project.Imports[1];
+                Assert.Equal(_sdkTargetsPath, finalResolvedImport.ImportedProject.FullPath);
+
+                ProjectProperty initialImportProperty = project.GetProperty("InitialImportProperty");
+                Assert.Equal(_sdkPropsPath, initialImportProperty.Xml.ContainingProject.FullPath);
+                Assert.True(initialImportProperty.IsImported);
+
+                ProjectProperty finalImportProperty = project.GetProperty("FinalImportProperty");
+                Assert.Equal(_sdkTargetsPath, finalImportProperty.Xml.ContainingProject.FullPath);
+                Assert.True(finalImportProperty.IsImported);
+
+                // TODO: Check the location of the import, maybe it should point to the location of the SDK attribute?
             }
         }
 
         [Fact]
         public void ProjectWithSdkImportsIsCloneable()
         {
-            var testSdkRoot = Path.Combine(Path.GetTempPath(), "MSBuildUnitTest");
-            var testSdkDirectory = Path.Combine(testSdkRoot, "MSBuildUnitTestSdk", "Sdk");
+            File.WriteAllText(_sdkPropsPath, "<Project />");
+            File.WriteAllText(_sdkTargetsPath, "<Project />");
 
-            try
+            using (new Helpers.TemporaryEnvironment("MSBuildSDKsPath", _testSdkRoot))
             {
-                Directory.CreateDirectory(testSdkDirectory);
-
-                string sdkPropsPath = Path.Combine(testSdkDirectory, "Sdk.props");
-                string sdkTargetsPath = Path.Combine(testSdkDirectory, "Sdk.targets");
-
-                File.WriteAllText(sdkPropsPath, "<Project />");
-                File.WriteAllText(sdkTargetsPath, "<Project />");
-
-                using (new Helpers.TemporaryEnvironment("MSBuildSDKsPath", testSdkRoot))
-                {
-                    // Based on the new-console-project CLI template (but not matching exactly
-                    // should not be a deal-breaker).
-                    string content = @"<Project Sdk=""Microsoft.NET.Sdk"" ToolsVersion=""15.0"">
+                // Based on the new-console-project CLI template (but not matching exactly
+                // should not be a deal-breaker).
+                string content = @"<Project Sdk=""Microsoft.NET.Sdk"" ToolsVersion=""15.0"">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp1.0</TargetFramework>
@@ -108,41 +106,23 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
 </Project>";
 
-                    ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
 
-                    var clone = project.DeepClone();
-                }
-            }
-            finally
-            {
-                if (Directory.Exists(testSdkRoot))
-                {
-                    FileUtilities.DeleteWithoutTrailingBackslash(testSdkDirectory, true);
-                }
+                project.DeepClone();
             }
         }
 
         [Fact]
         public void ProjectWithSdkImportsIsRemoveable()
         {
-            var testSdkRoot = Path.Combine(Path.GetTempPath(), "MSBuildUnitTest");
-            var testSdkDirectory = Path.Combine(testSdkRoot, "MSBuildUnitTestSdk", "Sdk");
+            File.WriteAllText(_sdkPropsPath, "<Project />");
+            File.WriteAllText(_sdkTargetsPath, "<Project />");
 
-            try
+            using (new Helpers.TemporaryEnvironment("MSBuildSDKsPath", _testSdkRoot))
             {
-                Directory.CreateDirectory(testSdkDirectory);
-
-                string sdkPropsPath = Path.Combine(testSdkDirectory, "Sdk.props");
-                string sdkTargetsPath = Path.Combine(testSdkDirectory, "Sdk.targets");
-
-                File.WriteAllText(sdkPropsPath, "<Project />");
-                File.WriteAllText(sdkTargetsPath, "<Project />");
-
-                using (new Helpers.TemporaryEnvironment("MSBuildSDKsPath", testSdkRoot))
-                {
-                    // Based on the new-console-project CLI template (but not matching exactly
-                    // should not be a deal-breaker).
-                    string content = @"<Project Sdk=""Microsoft.NET.Sdk"" ToolsVersion=""15.0"">
+                // Based on the new-console-project CLI template (but not matching exactly
+                // should not be a deal-breaker).
+                string content = @"<Project Sdk=""Microsoft.NET.Sdk"" ToolsVersion=""15.0"">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp1.0</TargetFramework>
@@ -159,22 +139,60 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
 </Project>";
 
-                    ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-                    ProjectRootElement clone = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement clone = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
 
-                    clone.DeepCopyFrom(project);
+                clone.DeepCopyFrom(project);
 
-                    clone.RemoveAllChildren();
-                }
-            }
-            finally
-            {
-                if (Directory.Exists(testSdkRoot))
-                {
-                    FileUtilities.DeleteWithoutTrailingBackslash(testSdkDirectory, true);
-                }
+                clone.RemoveAllChildren();
             }
         }
 
+        [Fact]
+        public void ProjectWithInvalidSdkName()
+        {
+            const string invalidSdkName = "SdkWithExtra/Slash/1.0.0";
+
+            InvalidProjectFileException exception = Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                using (new Helpers.TemporaryEnvironment("MSBuildSDKsPath", _testSdkRoot))
+                {
+                    string content = $@"
+                    <Project Sdk='{invalidSdkName}'>
+                        <PropertyGroup>
+                            <UsedToTestIfImplicitImportsAreInTheCorrectLocation>null</UsedToTestIfImplicitImportsAreInTheCorrectLocation>
+                        </PropertyGroup>
+                    </Project>";
+
+                    Project project = new Project(ProjectRootElement.Create(XmlReader.Create(new StringReader(content))));
+                }
+            });
+            
+            Assert.Equal("MSB4229", exception.ErrorCode);
+        }
+
+        [Fact]
+        public void ProjectWithEmptySdkName()
+        {
+            using (new Helpers.TemporaryEnvironment("MSBuildSDKsPath", _testSdkRoot))
+            {
+                string content = @"
+                    <Project Sdk=''>
+                        <PropertyGroup>
+                            <UsedToTestIfImplicitImportsAreInTheCorrectLocation>null</UsedToTestIfImplicitImportsAreInTheCorrectLocation>
+                        </PropertyGroup>
+                    </Project>";
+
+                Project project = new Project(ProjectRootElement.Create(XmlReader.Create(new StringReader(content))));
+            }
+        }
+
+        public void Dispose()
+        {
+            if (Directory.Exists(_testSdkDirectory))
+            {
+                FileUtilities.DeleteWithoutTrailingBackslash(_testSdkDirectory, true);
+            }
+        }
     }
 }
