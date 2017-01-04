@@ -416,6 +416,36 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
+        [InlineData("Debug", "DEBUG")]
+        [InlineData("Release", "RELEASE")]
+        [InlineData("CustomConfiguration", "CUSTOMCONFIGURATION")]
+        [InlineData("Debug-NetCore", "DEBUG_NETCORE")]
+        public void It_implicitly_defines_compilation_constants_for_the_configuration(string configuration, string expectedDefine)
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("AppWithLibrary", "ImplicitConfigurationConstants", configuration)
+                .WithSource()
+                .Restore(relativePath: "TestLibrary");
+
+            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
+
+            var getValuesCommand = new GetValuesCommand(Stage0MSBuild, libraryProjectDirectory,
+                "netstandard1.5", "DefineConstants");
+
+            getValuesCommand.ShouldCompile = true;
+            getValuesCommand.Configuration = configuration;
+
+            getValuesCommand
+                .Execute("/p:Configuration=" + configuration)
+                .Should()
+                .Pass();
+
+            var definedConstants = getValuesCommand.GetValues();
+
+            definedConstants.Should().BeEquivalentTo(new[] { expectedDefine, "TRACE", "NETSTANDARD1_5" });
+        }
+
+        [Theory]
         [InlineData(".NETStandard,Version=v1.0", new[] { "NETSTANDARD1_0" }, false)]
         [InlineData("netstandard1.3", new[] { "NETSTANDARD1_3" }, false)]
         [InlineData("netstandard1.6", new[] { "NETSTANDARD1_6" }, false)]
