@@ -267,6 +267,86 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         }
 
         [Fact]
+        public void ItCanOutputOnlyPreprocessedItems()
+        {
+            // sample data
+            string package = "LibA/1.2.3";
+            string[] contentFiles = new string[]
+            {
+                Path.Combine("contentFiles", "any", "samplepp1.txt"),
+                Path.Combine("contentFiles", "any", "samplepp2.pp"),
+                Path.Combine("contentFiles", "any", "image.png"),
+                Path.Combine("contentFiles", "any", "plain.txt"),
+            };
+            string inputText = "This is the $rootnamespace$ of $filename$";
+            string rootNamespace = "LibA.Test";
+            string fileName = "B.cs";
+            var preprocessorValues = new Dictionary<string, string>()
+            {
+                { "rootnamespace", rootNamespace },
+                { "filename", fileName },
+            };
+
+            // mock preprocessor
+            var assetPreprocessor = new MockContentAssetPreprocessor((s) => false);
+            assetPreprocessor.MockReadContent = inputText;
+
+            // input items
+            var contentPreprocessorValues = GetPreprocessorValueItems(preprocessorValues);
+            var contentFileDefinitions = contentFiles
+                .Select(c => GetFileDef(package, c)).ToArray();
+            var contentFileDependencies = new ITaskItem[]
+            {
+                GetFileDep(package, contentFiles[0], buildAction: "Content", copyToOutput: true, 
+                    ppOutputPath: "samplepp1.output.txt"),
+                GetFileDep(package, contentFiles[0], buildAction: "Content", copyToOutput: true,
+                    ppOutputPath: "samplepp2.output.txt"),
+                GetFileDep(package, contentFiles[2], buildAction: "Content", copyToOutput: true,
+                    outputPath: Path.Combine("output", contentFiles[2])),
+                GetFileDep(package, contentFiles[3], buildAction: "Content", copyToOutput: true,
+                    outputPath: Path.Combine("output", contentFiles[3])),
+            };
+
+            // execute task
+            var task = new ProduceContentAssets(assetPreprocessor)
+            {
+                ContentFileDefinitions = contentFileDefinitions,
+                ContentFileDependencies = contentFileDependencies,
+                ContentPreprocessorValues = contentPreprocessorValues,
+                ContentPreprocessorOutputDirectory = ContentOutputDirectory,
+                ProduceOnlyPreprocessorFiles = true,
+                ProjectLanguage = null,
+            };
+            task.Execute().Should().BeTrue();
+
+            // Asserts
+            string[] assetWritePaths = new string[] 
+            {
+                Path.Combine(ContentOutputDirectory, "test", "LibA", "1.2.3", "samplepp1.output.txt"),
+                Path.Combine(ContentOutputDirectory, "test", "LibA", "1.2.3", "samplepp2.output.txt")
+            };
+
+            task.FileWrites.Count().Should().Be(2);
+            task.FileWrites.Select(t => t.ItemSpec).Should().Contain(assetWritePaths);
+
+            // only 2 of 4 content files should be processed
+            var processedContentItems = task.ProcessedContentItems;
+            processedContentItems.Count().Should().Be(2);
+            processedContentItems.Where(t => t.ItemSpec.EndsWith(assetWritePaths[0])).Should().NotBeEmpty();
+            processedContentItems.Where(t => t.ItemSpec.EndsWith(assetWritePaths[1])).Should().NotBeEmpty();
+            processedContentItems.Where(t => t.ItemSpec.EndsWith(contentFiles[2])).Should().BeEmpty();
+            processedContentItems.Where(t => t.ItemSpec.EndsWith(contentFiles[3])).Should().BeEmpty();
+
+            // only 2 of 4 content files should be copied
+            var copyLocalItems = task.CopyLocalItems;
+            copyLocalItems.Count().Should().Be(2);
+            copyLocalItems.Where(t => t.ItemSpec.EndsWith(assetWritePaths[0])).Should().NotBeEmpty();
+            copyLocalItems.Where(t => t.ItemSpec.EndsWith(assetWritePaths[1])).Should().NotBeEmpty();
+            copyLocalItems.Where(t => t.ItemSpec.EndsWith(contentFiles[2])).Should().BeEmpty();
+            copyLocalItems.Where(t => t.ItemSpec.EndsWith(contentFiles[3])).Should().BeEmpty();
+        }
+
+        [Fact]
         public void ItIgnoresProjectLanguageIfCodeLanguageIsOnlyAny()
         {
             // sample data
