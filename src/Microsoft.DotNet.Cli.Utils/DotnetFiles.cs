@@ -9,7 +9,7 @@ using Microsoft.DotNet.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Cli
 {
-    public static class DotnetFiles
+    internal static class DotnetFiles
     {
         private static string SdkRootFolder => Path.Combine(typeof(DotnetFiles).GetTypeInfo().Assembly.Location, "..");
 
@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Cli
         /// </summary>
         public static string VersionFile => Path.GetFullPath(Path.Combine(SdkRootFolder, ".version"));
 
-        public static DotnetVersionFile VersionFileObject
+        internal static DotnetVersionFile VersionFileObject
         {
             get { return s_versionFileObject.Value; }
         }
