@@ -282,7 +282,7 @@ namespace dotnet_new3
         }
 
         // Canonical is the template param name without any dashes. The things mapped to it all have dashes, including the param name itself.
-        public void SetupTemplateParameters(IParameterSet allParams, IReadOnlyDictionary<string, string> parameterNameMap)
+        public void SetupTemplateParameters(IParameterSet allParams, IReadOnlyDictionary<string, string> longNameOverrides, IReadOnlyDictionary<string, string> shortNameOverrides)
         {
             HashSet<string> invalidParams = new HashSet<string>();
 
@@ -294,7 +294,7 @@ namespace dotnet_new3
                     continue;
                 }
 
-                if (parameterNameMap == null || !parameterNameMap.TryGetValue(parameter.Name, out string flagFullText))
+                if (longNameOverrides == null || !longNameOverrides.TryGetValue(parameter.Name, out string flagFullText))
                 {
                     flagFullText = parameter.Name;
                 }
@@ -318,20 +318,40 @@ namespace dotnet_new3
                     longNameFound = true;
                 }
 
-                // always unless taken
-                string shortName = GetFreeShortName(flagFullText);
-                if (!IsParameterNameTaken(shortName))
-                {
-                    MapTemplateParamToCanonical(shortName, parameter.Name);
-                    shortNameFound = true;
-                }
+                if (shortNameOverrides != null && shortNameOverrides.TryGetValue(parameter.Name, out string shortNameOverride))
+                {   // short name starting point was explicitly specified
+                    string fullShortNameOverride = "-" + shortNameOverride;
+                    if (!IsParameterNameTaken(shortNameOverride))
+                    {
+                        MapTemplateParamToCanonical(fullShortNameOverride, parameter.Name);
+                        shortNameFound = true;
+                    }
 
-                // only as fallback
-                string qualifiedShortName = GetFreeShortName(flagFullText, "p:");
-                if (!shortNameFound && !IsParameterNameTaken(qualifiedShortName))
-                {
-                    MapTemplateParamToCanonical(qualifiedShortName, parameter.Name);
-                    shortNameFound = true;
+                    string qualifiedShortNameOverride = "-p:" + shortNameOverride;
+                    if (!shortNameFound && !IsParameterNameTaken(qualifiedShortNameOverride))
+                    {
+                        MapTemplateParamToCanonical(qualifiedShortNameOverride, parameter.Name);
+                        shortNameFound = true;
+                    }
+                }
+                else
+                {   // no explicit short name specification, try generating one
+
+                    // always unless taken
+                    string shortName = GetFreeShortName(flagFullText);
+                    if (!IsParameterNameTaken(shortName))
+                    {
+                        MapTemplateParamToCanonical(shortName, parameter.Name);
+                        shortNameFound = true;
+                    }
+
+                    // only as fallback
+                    string qualifiedShortName = GetFreeShortName(flagFullText, "p:");
+                    if (!shortNameFound && !IsParameterNameTaken(qualifiedShortName))
+                    {
+                        MapTemplateParamToCanonical(qualifiedShortName, parameter.Name);
+                        shortNameFound = true;
+                    }
                 }
 
                 if (!shortNameFound && !longNameFound)

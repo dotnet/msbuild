@@ -1,8 +1,10 @@
 {
-  "HiddenParameters": [
-    "IncludeApplicationInsights"
-  ],
-  "ParameterMap": {
-    "UseLocalDB": "use-local-db"
+  "symbolInfo": {
+    "IncludeApplicationInsights": {
+	  "isHidden": "true"
+	},
+	"UseLocalDB": {
+	  "longName": "use-local-db"
+	}
   }
 }

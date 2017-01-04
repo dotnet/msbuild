@@ -492,10 +492,9 @@ namespace dotnet_new3
             ITemplate template = SettingsLoader.LoadTemplate(templateInfo);
             IParameterSet allParams = template.Generator.GetParametersForTemplate(template);
             HostSpecificTemplateData hostTemplateData = ReadHostSpecificTemplateData(template);
-            IReadOnlyDictionary<string, string> parameterNameMap = hostTemplateData.ParameterMap;
 
             Reporter.Output.Write($"    dotnet {CommandName} {template.ShortName}");
-            IEnumerable<ITemplateParameter> filteredParams = FilterParamsForHelp(allParams, hostTemplateData.HiddenParameters);
+            IEnumerable<ITemplateParameter> filteredParams = FilterParamsForHelp(allParams, hostTemplateData.HiddenParameterNames);
 
             foreach (ITemplateParameter parameter in filteredParams)
             {
@@ -505,11 +504,7 @@ namespace dotnet_new3
                     continue;
                 }
 
-                string displayParameter;
-                if (!parameterNameMap.TryGetValue(parameter.Name, out displayParameter))
-                {
-                    displayParameter = parameter.Name;
-                }
+                string displayParameter = hostTemplateData.DisplayNameForParameter(parameter.Name);
 
                 Reporter.Output.Write($" --{displayParameter}");
 
@@ -656,8 +651,7 @@ namespace dotnet_new3
             ITemplate template = SettingsLoader.LoadTemplate(templateInfo);
             IParameterSet allParams = template.Generator.GetParametersForTemplate(template);
             _hostSpecificTemplateData = ReadHostSpecificTemplateData(template);
-            IReadOnlyDictionary<string, string> parameterNameMap = _hostSpecificTemplateData.ParameterMap;
-            _app.SetupTemplateParameters(allParams, parameterNameMap);
+            _app.SetupTemplateParameters(allParams, _hostSpecificTemplateData.LongNameOverrides, _hostSpecificTemplateData.ShortNameOverrides);
 
             // re-parse after setting up the template params
             _app.ParseArgs(_app.InternalParamValueList("--extra-args"));
@@ -861,7 +855,7 @@ namespace dotnet_new3
                 additionalInfo = string.Format(LocalizableStrings.InvalidParameterValues, badParams, template.Name);
             }
 
-            ParameterHelp(allParams, additionalInfo, _hostSpecificTemplateData.HiddenParameters);
+            ParameterHelp(allParams, additionalInfo, _hostSpecificTemplateData.HiddenParameterNames);
         }
 
         private void ShowUsageHelp()
