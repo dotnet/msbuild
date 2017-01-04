@@ -59,8 +59,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             foreach (var targetFramework in targetFrameworks)
             {
                 MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.MigratingFramework, targetFramework.FrameworkName.GetShortFolderName()));
-                
-                MigrateImports(migrationRuleInputs.CommonPropertyGroup, targetFramework);
+
+                MigrateImports(
+                    migrationRuleInputs.CommonPropertyGroup,
+                    targetFramework,
+                    migrationRuleInputs.ProjectContexts.Count() > 1);
 
                 MigrateDependencies(
                     project,
@@ -161,13 +164,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
         private void MigrateImports(
             ProjectPropertyGroupElement commonPropertyGroup,
-            TargetFrameworkInformation targetFramework)
+            TargetFrameworkInformation targetFramework,
+            bool isMultiTFM)
         {
             var transform = ImportsTransformation.Transform(targetFramework);
 
             if (transform != null)
             {
-                transform.Condition = targetFramework.FrameworkName.GetMSBuildCondition();
+                transform.Condition = isMultiTFM ? targetFramework.FrameworkName.GetMSBuildCondition() : null;
                 _transformApplicator.Execute(transform, commonPropertyGroup, mergeExisting: true);
             }
             else

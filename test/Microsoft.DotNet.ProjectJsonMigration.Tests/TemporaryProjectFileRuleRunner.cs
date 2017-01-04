@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectJsonMigration.Rules;
 using Microsoft.DotNet.Internal.ProjectModel;
@@ -8,28 +9,48 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 {
     internal class TemporaryProjectFileRuleRunner
     {
-        public static ProjectRootElement RunRules(IEnumerable<IMigrationRule> rules, string projectJson,
-            string testDirectory, ProjectRootElement xproj=null)
+        public static ProjectRootElement RunRules(
+            IEnumerable<IMigrationRule> rules,
+            string projectJson,
+            string testDirectory,
+            ProjectRootElement xproj=null)
         {
-            var projectContext = GenerateProjectContextFromString(testDirectory, projectJson);
-            return RunMigrationRulesOnGeneratedProject(rules, projectContext, testDirectory, xproj);
+            var projectContexts = GenerateProjectContextsFromString(testDirectory, projectJson);
+            return RunMigrationRulesOnGeneratedProject(rules, projectContexts, testDirectory, xproj);
         }
 
-        private static ProjectContext GenerateProjectContextFromString(string projectDirectory, string json)
+        private static IEnumerable<ProjectContext> GenerateProjectContextsFromString(
+            string projectDirectory,
+            string json)
         {
             var testPj = new ProjectJsonBuilder(null)
                 .FromStringBase(json)
                 .SaveToDisk(projectDirectory);
 
-            return ProjectContext.Create(testPj, FrameworkConstants.CommonFrameworks.NetCoreApp10);
+            var projectContexts = ProjectContext.CreateContextForEachFramework(projectDirectory);
+
+            if (projectContexts.Count() == 0)
+            {
+                projectContexts = new []
+                { 
+                    ProjectContext.Create(testPj, FrameworkConstants.CommonFrameworks.NetCoreApp10)
+                };
+            }
+
+            return projectContexts;
         }
 
-        private static ProjectRootElement RunMigrationRulesOnGeneratedProject(IEnumerable<IMigrationRule> rules,
-            ProjectContext projectContext, string testDirectory, ProjectRootElement xproj)
+        private static ProjectRootElement RunMigrationRulesOnGeneratedProject(
+            IEnumerable<IMigrationRule> rules,
+            IEnumerable<ProjectContext> projectContexts,
+            string testDirectory,
+            ProjectRootElement xproj)
         {
             var project = ProjectRootElement.Create();
             var testSettings = MigrationSettings.CreateMigrationSettingsTestHook(testDirectory, testDirectory, project);
-            var testInputs = new MigrationRuleInputs(new[] {projectContext}, project,
+            var testInputs = new MigrationRuleInputs(
+                projectContexts,
+                project,
                 project.AddItemGroup(),
                 project.AddPropertyGroup(),
                 xproj);
