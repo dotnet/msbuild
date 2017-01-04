@@ -587,7 +587,13 @@ namespace dotnet_new3
 
                     if (string.Equals(param.DataType, "choice", StringComparison.OrdinalIgnoreCase))
                     {
-                        displayValue.AppendLine(string.Join(", ", param.Choices));
+                        int longestChoiceLength = param.Choices.Keys.Max(x => x.Length);
+
+                        foreach (KeyValuePair<string, string> choiceInfo in param.Choices)
+                        {
+                            displayValue.Append("    " + choiceInfo.Key.PadRight(longestChoiceLength + 4));
+                            displayValue.AppendLine("- " + choiceInfo.Value);
+                        }
                     }
                     else
                     {
