@@ -45,7 +45,8 @@ namespace Microsoft.NET.Build.Tasks
             int startLine,
             int startColumn,
             string targetFrameworkMoniker,
-            string packageId)
+            string packageId,
+            bool logToMSBuild = true)
             => Add(
                 diagnosticCode,
                 message,
@@ -56,7 +57,8 @@ namespace Microsoft.NET.Build.Tasks
                 endLine: startLine,
                 endColumn: startColumn,
                 targetFrameworkMoniker: targetFrameworkMoniker,
-                packageId: packageId);
+                packageId: packageId,
+                logToMSBuild: logToMSBuild);
 
         public ITaskItem Add(
             string diagnosticCode,
@@ -68,7 +70,8 @@ namespace Microsoft.NET.Build.Tasks
             int endLine,
             int endColumn,
             string targetFrameworkMoniker,
-            string packageId)
+            string packageId,
+            bool logToMSBuild = true)
         {
             string itemspec =
                 (string.IsNullOrEmpty(targetFrameworkMoniker) ? string.Empty : $"{targetFrameworkMoniker}/") +
@@ -93,7 +96,10 @@ namespace Microsoft.NET.Build.Tasks
 
             _diagnosticMessages.Add(diagnostic);
 
-            LogToMSBuild(diagnosticCode, message, filePath, severity, startLine, startColumn, endLine, endColumn);
+            if (logToMSBuild)
+            {
+                LogToMSBuild(diagnosticCode, message, filePath, severity, startLine, startColumn, endLine, endColumn);
+            }
 
             return diagnostic;
         }

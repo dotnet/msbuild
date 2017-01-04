@@ -383,7 +383,7 @@ namespace Microsoft.NET.Build.Tasks
             {
                 return new Dictionary<string, string>
                 {
-                    { MetadataKeys.Name, $"{DiagnosticCode}: {Message}" },
+                    { MetadataKeys.Name, Message },
                     { MetadataKeys.DiagnosticCode, DiagnosticCode },
                     { MetadataKeys.Message, Message },
                     { MetadataKeys.FilePath, FilePath },

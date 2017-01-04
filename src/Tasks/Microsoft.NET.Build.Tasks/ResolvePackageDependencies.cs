@@ -418,22 +418,15 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     string packageId = $"{dep.Key}/{dep.Value}";
 
-                    // Add unresolved package definition item
-                    var item = new TaskItem(packageId);
-                    item.SetMetadata(MetadataKeys.Name, dep.Key);
-                    item.SetMetadata(MetadataKeys.Type, PackageTypeKey);
-                    item.SetMetadata(MetadataKeys.Version, dep.Value);
-                    item.SetMetadata(MetadataKeys.Path, string.Empty);
-                    item.SetMetadata(MetadataKeys.ResolvedPath, string.Empty);
-                    _packageDefinitions.Add(item);
-
                     Diagnostics.Add(nameof(Strings.NU1001),
                         string.Format(CultureInfo.CurrentCulture, Strings.NU1001, dep),
                         ProjectPath,
                         DiagnosticMessageSeverity.Warning,
                         1, 0,
                         target.Name,
-                        packageId);
+                        packageId,
+                        logToMSBuild: false // Temporarily suppress MSBuild logging because this diagnostic is also reported by NuGet
+                        );
                 }
 
                 // report diagnostic if project dependency version does not match library version
@@ -452,7 +445,9 @@ namespace Microsoft.NET.Build.Tasks
                             DiagnosticMessageSeverity.Warning,
                             1, 0,
                             target.Name,
-                            $"{library.Name}/{libraryVersion}");
+                            $"{library.Name}/{libraryVersion}", 
+                            logToMSBuild: false // Temporarily suppress MSBuild logging because this diagnostic is also reported by NuGet
+                            );
                     }
                 }
             }
