@@ -201,7 +201,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void ItDoesNotConditionToPackageTargetFallBackWhenMigratingASingleTFM()
+        public void ItDoesNotAddConditionToPackageTargetFallBackWhenMigratingASingleTFM()
         {
             var importPropertyName = "PackageTargetFallback";
 

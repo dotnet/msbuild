@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     csproj,
                     scriptSet.Value,
                     scriptSet.Key,
-                    migrationRuleInputs.ProjectContexts.Count() > 1);
+                    migrationRuleInputs.IsMultiTFM);
             }
         }
 

@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 MigrateImports(
                     migrationRuleInputs.CommonPropertyGroup,
                     targetFramework,
-                    migrationRuleInputs.ProjectContexts.Count() > 1);
+                    migrationRuleInputs.IsMultiTFM);
 
                 MigrateDependencies(
                     project,
