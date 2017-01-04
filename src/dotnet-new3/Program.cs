@@ -15,7 +15,7 @@ namespace dotnet_new3
 {
     public class Program
     {
-        private const string HostIdentifier = "dotnet";
+        private const string HostIdentifier = "dotnetcli";
         private const string HostVersion = "1.0.0";
         private const string CommandName = "new3";
 
