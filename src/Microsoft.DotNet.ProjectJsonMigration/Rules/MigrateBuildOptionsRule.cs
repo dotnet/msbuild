@@ -111,10 +111,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     compilerOptions => compilerOptions.OutputName != null);
 
         private IncludeContextTransform CompileFilesTransform =>
-            new IncludeContextTransform("Compile", transformMappings: false);
+            new IncludeContextTransform("Compile", false, ic => ic != null);
 
         private IncludeContextTransform EmbedFilesTransform =>
-            new IncludeContextTransform("EmbeddedResource", transformMappings: false);
+            new IncludeContextTransform("EmbeddedResource", false, ic => ic != null);
 
         private IncludeContextTransform CopyToOutputFilesTransform =>
             new IncludeContextTransform("Content", transformMappings: true)
@@ -139,11 +139,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
         private Func<CommonCompilerOptions, string, ProjectType, IEnumerable<ProjectItemElement>>CompileFilesTransformExecute =>
             (compilerOptions, projectDirectory, projectType) =>
-                    CompileFilesTransform.Transform(GetCompileIncludeContext(compilerOptions, projectDirectory));
+                    CompileFilesTransform.Transform(compilerOptions.CompileInclude);
 
         private Func<CommonCompilerOptions, string, ProjectType, IEnumerable<ProjectItemElement>> EmbedFilesTransformExecute =>
             (compilerOptions, projectDirectory, projectType) =>
-                    EmbedFilesTransform.Transform(GetEmbedIncludeContext(compilerOptions, projectDirectory));
+                    EmbedFilesTransform.Transform(GetEmbedIncludeContext(compilerOptions));
 
         private Func<CommonCompilerOptions, string, ProjectType, IEnumerable<ProjectItemElement>> CopyToOutputFilesTransformExecute =>
             (compilerOptions, projectDirectory, projectType) =>
@@ -298,12 +298,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 var configurationOutput =
                     includeContextTransformExecute(configurationCompilerOptions, projectDirectory, projectType);
 
-                configurationOutput = RemoveDefaultCompileAndEmbeddedResourceForWebProjects(
-                    configurationOutput,
-                    projectType,
-                    csproj);
 
-                transformApplicator.Execute(configurationOutput, itemGroup, mergeExisting: true);
+                if (configurationOutput != null)
+                {
+                    transformApplicator.Execute(configurationOutput, itemGroup, mergeExisting: true);
+                }
             }
         }
 
@@ -353,37 +352,15 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             foreach (var includeContextTransformExecute in _includeContextTransformExecutes)
             {
                 var transform = includeContextTransformExecute(compilerOptions, projectDirectory, projectType);
-                
-                transform = RemoveDefaultCompileAndEmbeddedResourceForWebProjects(
-                    transform,
-                    projectType,
-                    csproj);
 
-                transformApplicator.Execute(
-                    transform,
-                    itemGroup,
-                    mergeExisting: true);
+                if (transform != null)
+                {
+                    transformApplicator.Execute(
+                        transform,
+                        itemGroup,
+                        mergeExisting: true);
+                }
             }
-        }
-
-        private IEnumerable<ProjectItemElement> RemoveDefaultCompileAndEmbeddedResourceForWebProjects(
-            IEnumerable<ProjectItemElement> transform,
-            ProjectType projectType,
-            ProjectRootElement csproj)
-        {
-            if(projectType == ProjectType.Web)
-            {
-                var itemsToRemove = transform.Where(p => 
-                        p != null && 
-                        p.Include.Contains("**\\*") &&
-                        (p.ItemType == "Compile" || p.ItemType == "EmbeddedResource"));
-
-                CleanExistingItems(csproj, new [] {"Compile", "EmbeddedResource"});
-
-                transform = transform.Where(p => !itemsToRemove.Contains(p));
-            }
-
-            return transform;
         }
 
         private void CleanExistingProperties(ProjectRootElement csproj)
@@ -401,43 +378,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             }
         }
 
-        private void CleanExistingItems(ProjectRootElement csproj, IEnumerable<string> itemsToRemove)
+        private IncludeContext GetEmbedIncludeContext(CommonCompilerOptions compilerOptions)
         {
-            foreach (var itemName in itemsToRemove)
-            {
-                var items = csproj.Items.Where(i => i.ItemType == itemName);
+            var embedIncludeContext = compilerOptions.EmbedInclude;
 
-                foreach (var item in items)
-                {
-                    item.Parent.RemoveChild(item);
-                }
-            }
-        }
-
-        private IncludeContext GetCompileIncludeContext(CommonCompilerOptions compilerOptions, string projectDirectory)
-        {
-            // Defaults from src/Microsoft.DotNet.ProjectModel/ProjectReader.cs #L596
-            return compilerOptions.CompileInclude ??
-                new IncludeContext(
-                    projectDirectory,
-                    "compile",
-                    new JObject(),
-                    ProjectFilesCollection.DefaultCompileBuiltInPatterns,
-                    DefaultEmptyExcludeOption);
-        }
-
-        private IncludeContext GetEmbedIncludeContext(CommonCompilerOptions compilerOptions, string projectDirectory)
-        {
-            // Defaults from src/Microsoft.DotNet.ProjectModel/ProjectReader.cs #L602
-            var embedIncludeContext = compilerOptions.EmbedInclude ??
-                new IncludeContext(
-                    projectDirectory,
-                    "embed",
-                    new JObject(),
-                    ProjectFilesCollection.DefaultResourcesBuiltInPatterns,
-                    DefaultEmptyExcludeOption);
-
-            embedIncludeContext.BuiltInsExclude.Add("@(EmbeddedResource)");
+            embedIncludeContext?.BuiltInsExclude.Add("@(EmbeddedResource)");
 
             return embedIncludeContext;
         }

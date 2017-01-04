@@ -4,11 +4,7 @@
     <OutputType>Library</OutputType>
     <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netstandard1.6' ">$(PackageTargetFallback);portable-net45+win8;dnxcore50;netcoreapp1.0</PackageTargetFallback>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="**\*.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
-    <EmbeddedResource Include="**\*.resx" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
-    <EmbeddedResource Include="compiler\resources\**\*" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
-  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="dotnet-desktop-and-portable">
       <Version>1.0.0-*</Version>

@@ -6,10 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="**\*.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="NETStandard.Library" Version="1.6" />
   </ItemGroup>
 
