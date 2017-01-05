@@ -94,7 +94,7 @@
       <!-- Run E2E -->
       <DotNetTest ProjectPath="$(EndToEndTestProject)"
                   EnvironmentVariables="@(TestSdkDebTaskEnvironmentVariables)"
-                  ToolPath="$(Stage2Directory)" />
+                  ToolPath="$(Stage0Directory)" />
 
       <!-- Clean up Packages -->
       <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" />
