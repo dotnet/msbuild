@@ -214,7 +214,7 @@ namespace Microsoft.NET.Build.Tasks
         }
 
         private bool IsPreprocessorFile(ITaskItem contentFile) =>
-            contentFile.GetMetadata(PPOutputPathKey) != null;
+            !string.IsNullOrEmpty(contentFile.GetMetadata(PPOutputPathKey));
 
         private void ProduceContentAsset(ITaskItem contentFile)
         {
@@ -229,7 +229,7 @@ namespace Microsoft.NET.Build.Tasks
             string ppOutputPath = contentFile.GetMetadata(PPOutputPathKey);
             string parentPackage = contentFile.GetMetadata(MetadataKeys.ParentPackage);
 
-            if (ppOutputPath != null)
+            if (!string.IsNullOrEmpty(ppOutputPath))
             {
                 if (string.IsNullOrEmpty(ContentPreprocessorOutputDirectory))
                 {
@@ -251,9 +251,10 @@ namespace Microsoft.NET.Build.Tasks
 
             if (contentFile.GetBooleanMetadata("copyToOutput") == true)
             {
-                string outputPath = contentFile.GetMetadata("outputPath") ?? ppOutputPath;
+                string outputPath = contentFile.GetMetadata("outputPath");
+                outputPath = string.IsNullOrEmpty(outputPath) ? ppOutputPath : outputPath;
 
-                if (outputPath != null)
+                if (!string.IsNullOrEmpty(outputPath))
                 {
                     var item = new TaskItem(pathToFinalAsset);
                     item.SetMetadata("TargetPath", outputPath);
