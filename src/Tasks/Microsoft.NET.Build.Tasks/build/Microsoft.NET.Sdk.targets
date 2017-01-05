@@ -275,4 +275,48 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PreserveCompilationContext.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.CSharp.targets" Condition="'$(Language)' == 'C#'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.VisualBasic.targets" Condition="'$(Language)' == 'VB'" />
+
+  <!--
+  ============================================================
+                                         Temporary Workarounds
+  ============================================================
+  -->
+  
+  <!-- Override the ImplicitlyExpandDesignTimeFacades target with a fix for https://github.com/Microsoft/msbuild/issues/1345 until
+       the issue is fixed in MSBuild -->
+  
+  <!-- Implicitly references all portable design-time facades if the user is referencing a System.Runtime-based portable library -->
+  <Target Name="ImplicitlyExpandDesignTimeFacades" Condition="'$(ImplicitlyExpandDesignTimeFacades)' == 'true'" DependsOnTargets="$(ImplicitlyExpandDesignTimeFacadesDependsOn)">
+
+    <PropertyGroup>
+      <!-- Does one of our dependencies reference a System.Runtime-based portable library? -->
+      <_HasReferenceToSystemRuntime Condition="'$(DependsOnSystemRuntime)' == 'true' or '%(_ResolvedProjectReferencePaths.TargetPlatformIdentifier)' == 'Portable'">true</_HasReferenceToSystemRuntime>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(_HasReferenceToSystemRuntime)' == 'true'">
+      <_DesignTimeFacadeAssemblies Include="%(DesignTimeFacadeDirectories.Identity)*.dll"/>
+
+      <_DesignTimeFacadeAssemblies_Names Include="@(_DesignTimeFacadeAssemblies->'%(FileName)')">
+        <OriginalIdentity>%(_DesignTimeFacadeAssemblies.Identity)</OriginalIdentity>
+      </_DesignTimeFacadeAssemblies_Names>
+
+      <_ReferencePath_Names Include="@(ReferencePath->'%(FileName)')">
+        <OriginalIdentity>%(ReferencePath.Identity)</OriginalIdentity>
+      </_ReferencePath_Names>
+
+      <_DesignTimeFacadeAssemblies_Names Remove="@(_ReferencePath_Names)"/>
+
+      <ReferencePath Include="@(_DesignTimeFacadeAssemblies_Names->'%(OriginalIdentity)')">
+        <WinMDFile>false</WinMDFile>
+        <CopyLocal>false</CopyLocal>
+        <ResolvedFrom>ImplicitlyExpandDesignTimeFacades</ResolvedFrom>
+      </ReferencePath>
+
+      <_ResolveAssemblyReferenceResolvedFiles Include="@(ReferencePath)" Condition="'%(ReferencePath.ResolvedFrom)' == 'ImplicitlyExpandDesignTimeFacades'" />
+    </ItemGroup>
+
+    <Message Importance="Low" Text="Including @(ReferencePath)" Condition="'%(ReferencePath.ResolvedFrom)' == 'ImplicitlyExpandDesignTimeFacades'" />
+
+  </Target>
+  
 </Project>

@@ -40,12 +40,7 @@ namespace Microsoft.NET.Publish.Tests
                 }
 
                 publishCommand
-                    .Execute(
-                        $"/p:TargetFramework={targetFramework}",
-
-                        //  Additional properties to workaround https://github.com/Microsoft/msbuild/issues/1345
-                        "/p:DisableImplicitFrameworkReferences=true",
-                        "/p:DisableLockFileFrameworks=true")
+                    .Execute($"/p:TargetFramework={targetFramework}")
                     .Should()
                     .Pass();
 
@@ -117,7 +112,16 @@ namespace Microsoft.NET.Publish.Tests
 
         string[] Net46CompileLibraryNames = @"testapp
 mscorlib
+system.componentmodel.composition
 system.core
+system.data
+system
+system.drawing
+system.io.compression.filesystem
+system.numerics
+system.runtime.serialization
+system.xml
+system.xml.linq
 microsoft.netcore.platforms
 microsoft.win32.primitives
 netstandard.library
