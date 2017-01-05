@@ -28,6 +28,26 @@ namespace Microsoft.DotNet.Migration.Tests
         [InlineData("TestAppWithEmbeddedResources")]
         public void ItMigratesApps(string projectName)
         {
+            var projectDirectory = MigrateApps(projectName);
+
+            VerifyAllMSBuildOutputsRunnable(projectDirectory);
+
+            var outputCsProj = Path.Combine(projectDirectory, projectName + ".csproj");
+            var csproj = File.ReadAllText(outputCsProj);
+            csproj.EndsWith("\n").Should().Be(true);
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData("TestAppWithMultipleFrameworksAndRuntimes")]
+        [InlineData("TestAppWithMultipleFrameworksAndNoRuntimes")]
+        [InlineData("TestAppWithMultipleFrameworksOnly")]
+        public void ItMigratesAppsWithFullFramework(string projectName)
+        {
+            MigrateApps(projectName);
+        }
+
+        private string MigrateApps(string projectName)
+        {
             var projectDirectory = TestAssetsManager.CreateTestInstance(projectName, identifier: projectName)
                                                     .WithLockFiles()
                                                     .Path;
@@ -46,11 +66,7 @@ namespace Microsoft.DotNet.Migration.Tests
 
             outputsIdentical.Should().BeTrue();
 
-            VerifyAllMSBuildOutputsRunnable(projectDirectory);
-
-            var outputCsProj = Path.Combine(projectDirectory, projectName + ".csproj");
-            var csproj = File.ReadAllText(outputCsProj);
-            csproj.EndsWith("\n").Should().Be(true);
+            return projectDirectory;
         }
 
         [Fact]

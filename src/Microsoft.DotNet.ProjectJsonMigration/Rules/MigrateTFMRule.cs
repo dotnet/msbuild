@@ -41,16 +41,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                         migrationRuleInputs.ProjectContexts.Select(p => p.TargetFramework)),
                     propertyGroup,
                     mergeExisting: true);
-
-
-                var runtimes = string.Join(",", migrationRuleInputs.ProjectContexts.Select(p => p.RuntimeIdentifier));
-                Console.WriteLine($"Runtimes = {runtimes}");
-
-                _transformApplicator.Execute(
-                    FrameworksRuntimeIdentifiersTransform.Transform(
-                        migrationRuleInputs.ProjectContexts),
-                    propertyGroup,
-                    mergeExisting: true);
             }
             else
             {
@@ -59,12 +49,16 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                         migrationRuleInputs.ProjectContexts.Single().TargetFramework),
                     propertyGroup,
                     mergeExisting: true);
-                _transformApplicator.Execute(
-                    FrameworkRuntimeIdentifiersTransform.Transform(
-                        migrationRuleInputs.ProjectContexts.Single()),
+            }
+
+            _transformApplicator.Execute(
+                    RuntimeIdentifiersTransform.Transform(migrationRuleInputs.ProjectContexts),
                     propertyGroup,
                     mergeExisting: true);
-            }
+            _transformApplicator.Execute(
+                    RuntimeIdentifierTransform.Transform(migrationRuleInputs.ProjectContexts),
+                    propertyGroup,
+                    mergeExisting: true);
         }
 
         private void CleanExistingProperties(ProjectRootElement csproj)
@@ -128,24 +122,36 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 frameworks => string.Join(";", frameworks.Select(f => f.GetShortFolderName())),
                 frameworks => true);
 
-        private AddPropertyTransform<IEnumerable<ProjectContext>> FrameworksRuntimeIdentifiersTransform =>
-            new AddPropertyTransform<IEnumerable<ProjectContext>>(
-                "RuntimeIdentifiers",
-                projectContexts => RuntimeIdentifiers,
-                projectContexts => projectContexts.All(p => !p.ProjectFile.Runtimes.Any()) &&
-                                   projectContexts.Any(p => !p.TargetFramework.IsPackageBased));
-
         private AddPropertyTransform<NuGetFramework> FrameworkTransform =>
             new AddPropertyTransform<NuGetFramework>(
                 "TargetFramework",
                 framework => framework.GetShortFolderName(),
                 framework => true);
 
-        private AddPropertyTransform<ProjectContext> FrameworkRuntimeIdentifiersTransform =>
-            new AddPropertyTransform<ProjectContext>(
+        private AddPropertyTransform<IEnumerable<ProjectContext>> RuntimeIdentifiersTransform =>
+            new AddPropertyTransform<IEnumerable<ProjectContext>>(
                 "RuntimeIdentifiers",
-                projectContext => RuntimeIdentifiers,
-                projectContext => !projectContext.ProjectFile.Runtimes.Any() &&
-                                  !projectContext.TargetFramework.IsPackageBased);
+                projectContexts => RuntimeIdentifiers,
+                projectContexts => !projectContexts.HasRuntimes() &&
+                                    projectContexts.HasBothCoreAndFullFrameworkTFMs());
+
+        private AddPropertyTransform<IEnumerable<ProjectContext>> RuntimeIdentifierTransform =>
+            new AddPropertyTransform<IEnumerable<ProjectContext>>(
+                "RuntimeIdentifier",
+                projectContexts => "win7-x86",
+                projectContexts => !projectContexts.HasRuntimes() && projectContexts.HasFullFrameworkTFM())
+            .WithMSBuildCondition(projectContexts =>
+                {
+                    string msBuildCondition = null;
+                    if (projectContexts.HasBothCoreAndFullFrameworkTFMs())
+                    {
+                        msBuildCondition = string.Join(
+                            " OR ",
+                            projectContexts.Where(p => p.IsFullFramework()).Select(
+                                p => $"'$(TargetFramework)' == '{p.TargetFramework.GetShortFolderName()}'"));
+                    }
+
+                    return $" {msBuildCondition} ";
+                });
     }
 }
