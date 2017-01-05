@@ -283,7 +283,12 @@ namespace Microsoft.DotNet.Tools.Test
 
         private static string GetSemiColonEsacpedstring(string arg)
         {
-            return string.IsNullOrEmpty(arg) ? arg : arg.Replace(";", "%3b");
+            if (arg.IndexOf(";") != -1)
+            {
+                return arg.Replace(";", "%3b");
+            }
+
+            return arg;
         }
 
         private static string[] GetSemiColonEscapedArgs(List<string> args)
@@ -293,16 +298,7 @@ namespace Microsoft.DotNet.Tools.Test
 
             foreach (string arg in args)
             {
-                if (arg.IndexOf(";") != -1)
-                {
-                    array[counter] = arg.Replace(";", "%3b");
-                }
-                else
-                {
-                    array[counter] = arg;
-                }
-
-                counter++;
+                array[counter++] = GetSemiColonEsacpedstring(arg);
             }
 
             return array;
