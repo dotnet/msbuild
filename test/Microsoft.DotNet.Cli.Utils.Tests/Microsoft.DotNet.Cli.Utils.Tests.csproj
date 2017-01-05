@@ -13,7 +13,6 @@
 
   <ItemGroup>
     <Compile Include="**\*.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
-    <Compile Include="..\..\src\dotnet\DotnetFiles.cs" />
     <EmbeddedResource Include="**\*.resx" />
     <EmbeddedResource Include="compiler\resources\**\*" />
     <Content Include="..\..\artifacts\*\stage2\sdk\*\.version">
