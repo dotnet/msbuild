@@ -42,7 +42,7 @@
           TestProject=%(TestProjects.ProjectPath);
           TestProjectName=%(TestProjects.OutputName);
           TestResultXmlDir=$(TestResultXmlDir);
-          ToolPath=$(Stage0Directory);
+          ToolPath=$(Stage2Directory);
           WorkingDirectory=%(TestProjects.ProjectDir)
         </Properties>
       </ProjectsToTest>
@@ -79,7 +79,7 @@
           Outputs="%(TestProjects.BuildOutput)">
     <DotNetBuild  Configuration="$(Configuration)"
                   Framework="%(TestProjects.Framework)"
-                  ToolPath="$(Stage0Directory)"
+                  ToolPath="$(Stage2Directory)"
                   ProjectPath="%(TestProjects.ProjectPath)" />
   </Target>
 
@@ -91,7 +91,7 @@
           Outputs="@(RestoreTestsInputs->'%(RelativeDir)/obj/project.assets.json');@(RestoreTestsInputs->'%(RelativeDir)/obj/%(Filename).csproj.nuget.g.props');@(RestoreTestsInputs->'%(RelativeDir)/obj/%(Filename).csproj.nuget.g.targets')">
     <CallTarget Targets="CleanTestProjectsLockFiles"/>
 
-    <DotNetRestore ToolPath="$(Stage0Directory)"
+    <DotNetRestore ToolPath="$(Stage2Directory)"
                    ProjectPath="&quot;%(RestoreTestsInputs.FullPath)&quot;" />
   </Target>
 
@@ -217,7 +217,7 @@
     <DotNetPack NoBuild="True"
                 Output="$(TestPackagesDir)"
                 ProjectPath="%(TestPackageProject.ProjectPath)"
-                ToolPath="$(Stage0Directory)"
+                ToolPath="$(Stage2Directory)"
                 VersionSuffix="%(TestPackageProject.VersionSuffix)"
                 MsbuildArgs="$(DotNetPackMsbuildArgs) /p:SdkNuGetVersion=$(SdkNugetVersion)" />
   </Target>
@@ -231,7 +231,7 @@
     <DotNetBuild Framework="%(TestPackageProject.Framework)"
                  Runtime="%(TestPackageProject.Runtime)"
                  ProjectPath="%(TestPackageProject.ProjectPath)"
-                 ToolPath="$(Stage0Directory)" />
+                 ToolPath="$(Stage2Directory)" />
   </Target>
 
   <Target Name="RestoreTestAssetPackageProjects"
