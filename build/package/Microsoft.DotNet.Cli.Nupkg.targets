@@ -25,7 +25,7 @@
     <DotNetPack NoBuild="True"
                 Output="$(NupkgOutputDirectory)"
                 ProjectPath="%(ProjectsToPack.Identity)/%(ProjectsToPack.ProjectName).csproj"
-                ToolPath="$(Stage0Directory)"
+                ToolPath="$(Stage2Directory)"
                 VersionSuffix="preview5-$(NupkgVersionSuffix)"
                 Configuration="$(Configuration)" />
   </Target>
@@ -36,7 +36,7 @@
 
     <MakeDir Directories="$(PackagingBuildBasePath)" />
 
-    <DotNetBuild ToolPath="$(Stage0Directory)"
+    <DotNetBuild ToolPath="$(Stage2Directory)"
                  Configuration="$(Configuration)"
                  ProjectPath="%(ProjectsToPack.Identity)/%(ProjectsToPack.ProjectName).csproj" />
   </Target>

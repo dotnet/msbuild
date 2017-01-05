@@ -28,16 +28,21 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
             foreach (var scriptSet in scripts)
             {
-                MigrateScriptSet(csproj, migrationRuleInputs.CommonPropertyGroup, scriptSet.Value, scriptSet.Key);
+                MigrateScriptSet(
+                    csproj,
+                    scriptSet.Value,
+                    scriptSet.Key,
+                    migrationRuleInputs.IsMultiTFM);
             }
         }
 
-        public ProjectTargetElement MigrateScriptSet(ProjectRootElement csproj,
-            ProjectPropertyGroupElement propertyGroup,
+        public ProjectTargetElement MigrateScriptSet(
+            ProjectRootElement csproj,
             IEnumerable<string> scriptCommands,
-            string scriptSetName)
+            string scriptSetName,
+            bool isMultiTFM)
         {
-            var target = CreateTarget(csproj, scriptSetName);
+            var target = CreateTarget(csproj, scriptSetName, isMultiTFM);
             foreach (var scriptCommand in scriptCommands)
             {
                 if (CommandIsNotNeededInMSBuild(scriptCommand))
@@ -94,7 +99,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             return path.StartsWith("/") || path.Substring(1).StartsWith(":\\");
         }
 
-        private ProjectTargetElement CreateTarget(ProjectRootElement csproj, string scriptSetName)
+        private ProjectTargetElement CreateTarget(ProjectRootElement csproj, string scriptSetName, bool isMultiTFM)
         {
             var targetName = $"{scriptSetName[0].ToString().ToUpper()}{string.Concat(scriptSetName.Skip(1))}Script";
 
@@ -117,10 +122,17 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 target.AfterTargets = targetHookInfo.TargetName;
             }
 
-            // Run Scripts After each inner build
-            target.Condition = " '$(IsCrossTargetingBuild)' != 'true' ";
+            if (isMultiTFM)
+            {
+                ConditionTargetToRunScriptsAfterEachInnerBuild(target);
+            }
 
             return target;
+        }
+
+        private void ConditionTargetToRunScriptsAfterEachInnerBuild(ProjectTargetElement target)
+        {
+            target.Condition = " '$(IsCrossTargetingBuild)' != 'true' ";
         }
 
         private void AddExec(ProjectTargetElement target, string command)

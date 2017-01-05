@@ -15,6 +15,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 {
     public class GivenThatIWantToMigrateScripts : TestBase
     {
+        private const bool IsMultiTFM = true;
+
         [Theory]
         [InlineData("compile:TargetFramework", "$(TargetFramework)")]
         [InlineData("publish:TargetFramework", "$(TargetFramework)")]
@@ -65,9 +67,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var target = scriptMigrationRule.MigrateScriptSet(
                 mockProj,
-                mockProj.AddPropertyGroup(),
                 commands,
-                scriptName);
+                scriptName,
+                IsMultiTFM);
 
             target.BeforeTargets.Should().Be(targetName);
         }
@@ -85,9 +87,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var target = scriptMigrationRule.MigrateScriptSet(
                 mockProj,
-                mockProj.AddPropertyGroup(),
                 commands,
-                scriptName);
+                scriptName,
+                IsMultiTFM);
 
             target.AfterTargets.Should().Be(targetName);
         }
@@ -107,9 +109,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var target = scriptMigrationRule.MigrateScriptSet(
                 mockProj,
-                mockProj.AddPropertyGroup(),
                 commands,
-                scriptName);
+                scriptName,
+                IsMultiTFM);
 
             foreach (var task in target.Tasks)
             {
@@ -143,9 +145,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var target = scriptMigrationRule.MigrateScriptSet(
                 mockProj,
-                mockProj.AddPropertyGroup(),
                 commands,
-                scriptName);
+                scriptName,
+                IsMultiTFM);
+
             target.Tasks.Count().Should().Be(commands.Length);
 
             foreach (var task in target.Tasks)
@@ -172,9 +175,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var target = scriptMigrationRule.MigrateScriptSet(
                 mockProj,
-                mockProj.AddPropertyGroup(),
                 commands,
-                "postpublish");
+                "postpublish",
+                IsMultiTFM);
             target.Tasks.Should().BeEmpty();
         }
 
@@ -186,7 +189,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void MigratingScriptsCreatesTargetWithIsCrossTargettingBuildNotEqualTrueCondition()
+        public void MigratingScriptsWithMultiTFMCreatesTargetWithIsCrossTargettingBuildNotEqualTrueCondition()
         {
             var scriptMigrationRule = new MigrateScriptsRule();
             ProjectRootElement mockProj = ProjectRootElement.Create();
@@ -195,10 +198,26 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var target = scriptMigrationRule.MigrateScriptSet(
                 mockProj,
-                mockProj.AddPropertyGroup(),
                 commands,
-                "prepublish");
+                "prepublish",
+                IsMultiTFM);
             target.Condition.Should().Be(" '$(IsCrossTargetingBuild)' != 'true' ");
+        }
+
+        [Fact]
+        public void MigratingScriptsWithSingleTFMDoesNotCreateTargetWithIsCrossTargettingBuild()
+        {
+            var scriptMigrationRule = new MigrateScriptsRule();
+            ProjectRootElement mockProj = ProjectRootElement.Create();
+
+            var commands = new[] { "compile:FullTargetFramework", "compile:Configuration"};
+
+            var target = scriptMigrationRule.MigrateScriptSet(
+                mockProj,
+                commands,
+                "prepublish",
+                false);
+            target.Condition.Should().BeEmpty();
         }
 
         [Fact]
@@ -211,9 +230,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             Action action = () => scriptMigrationRule.MigrateScriptSet(
                 mockProj,
-                mockProj.AddPropertyGroup(),
                 commands,
-                "invalidScriptSet");
+                "invalidScriptSet",
+                IsMultiTFM);
 
             action.ShouldThrow<MigrationException>()
                 .WithMessage("MIGRATE1019::Unsupported Script Event Hook: invalidScriptSet is an unsupported script event hook for project migration");
