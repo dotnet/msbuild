@@ -55,6 +55,15 @@
       <MsiPackage SourceFile="$(var.SharedHostMsiSourcePath)">
         <MsiProperty Name="DOTNETHOME" Value="[DOTNETHOME]" />
       </MsiPackage>
+      <MsiPackage SourceFile="$(var.AdditionalSharedFXMsiSourcePath)">
+        <MsiProperty Name="DOTNETHOME" Value="[DOTNETHOME]" />
+      </MsiPackage>
+      <MsiPackage SourceFile="$(var.AdditionalHostFXRMsiSourcePath)">
+        <MsiProperty Name="DOTNETHOME" Value="[DOTNETHOME]" />
+      </MsiPackage>
+      <MsiPackage SourceFile="$(var.AdditionalSharedHostMsiSourcePath)">
+        <MsiProperty Name="DOTNETHOME" Value="[DOTNETHOME]" />
+      </MsiPackage>
     </Chain>
   </Bundle>
 

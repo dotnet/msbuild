@@ -124,6 +124,27 @@
       <CombinedFrameworkHostCompressedFileName>dotnet-$(ProductMonikerRid).$(SharedFrameworkVersion)$(ArchiveExtension)</CombinedFrameworkHostCompressedFileName>
     </PropertyGroup>
 
+    <!-- Additional Shared Framework to be installed -->
+    <PropertyGroup>
+      <AdditionalCoreSetupChannel>release/1.1.0</AdditionalCoreSetupChannel>
+      <AdditionalSharedFrameworkVersion>1.1.0</AdditionalSharedFrameworkVersion>
+      <AdditionalSharedHostVersion>1.1.0</AdditionalSharedHostVersion>
+      <AdditionalHostFxrVersion>1.1.0</AdditionalHostFxrVersion>
+
+      <!-- Additional Downloaded Installers + Archives -->
+      <AdditionalDownloadedSharedHostInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-host-$(ProductMonikerRid).$(AdditionalSharedHostVersion)$(InstallerExtension)</AdditionalDownloadedSharedHostInstallerFileName>
+      <AdditionalDownloadedSharedHostInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(AdditionalDownloadedSharedHostInstallerFileName)</AdditionalDownloadedSharedHostInstallerFile>
+
+      <AdditionalDownloadedHostFxrInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-hostfxr-$(ProductMonikerRid).$(AdditionalHostFxrVersion)$(InstallerExtension)</AdditionalDownloadedHostFxrInstallerFileName>
+      <AdditionalDownloadedHostFxrInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(AdditionalDownloadedHostFxrInstallerFileName)</AdditionalDownloadedHostFxrInstallerFile>
+
+      <AdditionalDownloadedSharedFrameworkInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-sharedframework-$(ProductMonikerRid).$(AdditionalSharedFrameworkVersion)$(InstallerExtension)</AdditionalDownloadedSharedFrameworkInstallerFileName>
+      <AdditionalDownloadedSharedFrameworkInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(AdditionalDownloadedSharedFrameworkInstallerFileName)</AdditionalDownloadedSharedFrameworkInstallerFile>
+
+      <AdditionalCombinedFrameworkHostCompressedFileName>dotnet-$(ProductMonikerRid).$(AdditionalSharedFrameworkVersion)$(ArchiveExtension)</AdditionalCombinedFrameworkHostCompressedFileName>
+    </PropertyGroup>
+
+
     <!-- SetTelemetryProfile -->
     <SetEnvVar Name="DOTNET_CLI_TELEMETRY_PROFILE" Value="$(DOTNET_CLI_TELEMETRY_PROFILE);https://github.com/dotnet/cli;$(CommitHash)" />
   </Target>
@@ -170,28 +191,11 @@
 
     <!-- Additional Shared Framework to be installed -->
     <PropertyGroup>
-      <AdditionalCoreSetupChannel>release/1.1.0</AdditionalCoreSetupChannel>
-      <AdditionalSharedFrameworkVersion>1.1.0</AdditionalSharedFrameworkVersion>
-      <AdditionalSharedHostVersion>1.1.0</AdditionalSharedHostVersion>
-      <AdditionalHostFxrVersion>1.1.0</AdditionalHostFxrVersion>
-
       <AdditionalCoreSetupBlobRootUrlWithChannel>$(CoreSetupBlobRootUrl)$(AdditionalCoreSetupChannel)</AdditionalCoreSetupBlobRootUrlWithChannel>
       <AdditionalSharedFrameworkArchiveBlobRootUrl>$(AdditionalCoreSetupBlobRootUrlWithChannel)/Binaries/$(AdditionalSharedFrameworkVersion)</AdditionalSharedFrameworkArchiveBlobRootUrl>
       <AdditionalCoreSetupInstallerBlobRootUrl>$(AdditionalCoreSetupBlobRootUrlWithChannel)/Installers</AdditionalCoreSetupInstallerBlobRootUrl>
       <AdditionalCoreSetupDownloadDirectory>$(IntermediateDirectory)/coreSetupDownload/$(AdditionalSharedFrameworkVersion)</AdditionalCoreSetupDownloadDirectory>
       <AdditionalCombinedSharedHostAndFrameworkArchive>$(AdditionalCoreSetupDownloadDirectory)/combinedSharedHostAndFrameworkArchive</AdditionalCombinedSharedHostAndFrameworkArchive>
-
-      <!-- Additional Downloaded Installers + Archives -->
-      <AdditionalDownloadedSharedHostInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-host-$(ProductMonikerRid).$(AdditionalSharedHostVersion)$(InstallerExtension)</AdditionalDownloadedSharedHostInstallerFileName>
-      <AdditionalDownloadedSharedHostInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(AdditionalDownloadedSharedHostInstallerFileName)</AdditionalDownloadedSharedHostInstallerFile>
-
-      <AdditionalDownloadedHostFxrInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-hostfxr-$(ProductMonikerRid).$(AdditionalHostFxrVersion)$(InstallerExtension)</AdditionalDownloadedHostFxrInstallerFileName>
-      <AdditionalDownloadedHostFxrInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(AdditionalDownloadedHostFxrInstallerFileName)</AdditionalDownloadedHostFxrInstallerFile>
-
-      <AdditionalDownloadedSharedFrameworkInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-sharedframework-$(ProductMonikerRid).$(AdditionalSharedFrameworkVersion)$(InstallerExtension)</AdditionalDownloadedSharedFrameworkInstallerFileName>
-      <AdditionalDownloadedSharedFrameworkInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(AdditionalDownloadedSharedFrameworkInstallerFileName)</AdditionalDownloadedSharedFrameworkInstallerFile>
-
-      <AdditionalCombinedFrameworkHostCompressedFileName>dotnet-$(ProductMonikerRid).$(AdditionalSharedFrameworkVersion)$(ArchiveExtension)</AdditionalCombinedFrameworkHostCompressedFileName>
     </PropertyGroup>
 
     <ItemGroup>
