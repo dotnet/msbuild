@@ -6,6 +6,7 @@ using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -51,6 +52,8 @@ namespace Microsoft.DotNet.Tools.Remove.ProjectFromSolution
 
             RemoveEmptyConfigurationSections(slnFile);
 
+            RemoveEmptySolutionFolders(slnFile);
+
             if (slnChanged)
             {
                 slnFile.Write();
@@ -82,6 +85,15 @@ namespace Microsoft.DotNet.Tools.Remove.ProjectFromSolution
                     {
                         slnFile.ProjectConfigurationsSection.Remove(buildConfigsToRemove);
                     }
+
+                    var nestedProjectsSection = slnFile.Sections.GetSection(
+                        "NestedProjects",
+                        SlnSectionType.PreProcess);
+                    if (nestedProjectsSection != null && nestedProjectsSection.Properties.ContainsKey(slnProject.Id))
+                    {
+                        nestedProjectsSection.Properties.Remove(slnProject.Id);
+                    }
+
                     slnFile.Projects.Remove(slnProject);
                     Reporter.Output.WriteLine(
                         string.Format(CommonLocalizableStrings.ProjectReferenceRemoved, slnProject.FilePath));
@@ -107,6 +119,36 @@ namespace Microsoft.DotNet.Tools.Remove.ProjectFromSolution
                 if (projectConfigs != null)
                 {
                     slnFile.Sections.Remove(projectConfigs);
+                }
+            }
+        }
+
+        private void RemoveEmptySolutionFolders(SlnFile slnFile)
+        {
+            var referencedSolutionFolders = slnFile.Projects.GetReferencedSolutionFolders();
+
+            var solutionFolderProjects = slnFile.Projects
+                .Where(p => p.TypeGuid == ProjectTypeGuids.SolutionFolderGuid)
+                .ToList();
+
+            if (solutionFolderProjects.Any())
+            {
+                var nestedProjectsSection = slnFile.Sections.GetSection(
+                    "NestedProjects",
+                    SlnSectionType.PreProcess);
+
+                foreach (var solutionFolderProject in solutionFolderProjects)
+                {
+                    if (!referencedSolutionFolders.Contains(solutionFolderProject.Name))
+                    {
+                        slnFile.Projects.Remove(solutionFolderProject);
+                        nestedProjectsSection.Properties.Remove(solutionFolderProject.Id);
+                    }
+                }
+
+                if (nestedProjectsSection.IsEmpty)
+                {
+                    slnFile.Sections.Remove(nestedProjectsSection);
                 }
             }
         }

@@ -106,6 +106,8 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToSolution
 
                 AddDefaultBuildConfigurations(slnFile, slnProject);
 
+                AddSolutionFolders(slnFile, slnProject);
+
                 slnFile.Projects.Add(slnProject);
 
                 Reporter.Output.WriteLine(
@@ -166,6 +168,40 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToSolution
                 {
                     projectConfigs[build0Key] = config;
                 }
+            }
+        }
+
+        private void AddSolutionFolders(SlnFile slnFile, SlnProject slnProject)
+        {
+            var solutionFolders = slnProject.GetSolutionFoldersFromProject();
+
+            if (solutionFolders.Any())
+            {
+                var nestedProjectsSection = slnFile.Sections.GetOrCreateSection(
+                    "NestedProjects",
+                    SlnSectionType.PreProcess);
+
+                string parentDirGuid = null;
+                foreach (var dir in solutionFolders)
+                {
+                    var solutionFolder = new SlnProject
+                    {
+                        Id = Guid.NewGuid().ToString("B").ToUpper(),
+                        TypeGuid = ProjectTypeGuids.SolutionFolderGuid,
+                        Name = dir,
+                        FilePath = dir
+                    };
+
+                    slnFile.Projects.Add(solutionFolder);
+
+                    if (parentDirGuid != null)
+                    {
+                        nestedProjectsSection.Properties[solutionFolder.Id] = parentDirGuid;
+                    }
+                    parentDirGuid = solutionFolder.Id;
+                }
+
+                nestedProjectsSection.Properties[slnProject.Id] = parentDirGuid;
             }
         }
     }

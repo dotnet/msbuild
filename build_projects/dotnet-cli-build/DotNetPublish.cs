@@ -77,7 +77,7 @@ namespace Microsoft.DotNet.Cli.Build
         {
             if (!string.IsNullOrEmpty(MSBuildArgs))
             {
-                return $"-- {MSBuildArgs}";
+                return $"{MSBuildArgs}";
             }
 
             return null;
