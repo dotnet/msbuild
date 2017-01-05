@@ -38,6 +38,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <CopyLocalLockFileAssemblies Condition="'$(CopyLocalLockFileAssemblies)' == ''">true</CopyLocalLockFileAssemblies>
 
     <ContentPreprocessorOutputDirectory Condition="'$(ContentPreprocessorOutputDirectory)' == ''">$(IntermediateOutputPath)NuGet\</ContentPreprocessorOutputDirectory>
+    <ProduceOnlyPreprocessorFilesInBuildTask Condition="'$(ProduceOnlyPreprocessorFilesInBuildTask)' == ''">true</ProduceOnlyPreprocessorFilesInBuildTask>
 
     <UseTargetPlatformAsNuGetTargetMoniker Condition="'$(UseTargetPlatformAsNuGetTargetMoniker)' == '' AND '$(TargetFrameworkMoniker)' == '.NETCore,Version=v5.0'">true</UseTargetPlatformAsNuGetTargetMoniker>
     <NuGetTargetMoniker Condition="'$(NuGetTargetMoniker)' == '' AND '$(UseTargetPlatformAsNuGetTargetMoniker)' == 'true'">$(TargetPlatformIdentifier),Version=v$([System.Version]::Parse('$(TargetPlatformMinVersion)').ToString(3))</NuGetTargetMoniker>
@@ -209,6 +210,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       ContentFileDependencies="@(_ContentFileDeps)"
       ContentPreprocessorValues="@(PreprocessorValue)"
       ContentPreprocessorOutputDirectory="$(ContentPreprocessorOutputDirectory)"
+      ProduceOnlyPreprocessorFiles="$(ProduceOnlyPreprocessorFilesInBuildTask)"
       ProjectLanguage="$(Language)">
 
       <Output TaskParameter="CopyLocalItems" ItemName="_ContentCopyLocalItems" />
