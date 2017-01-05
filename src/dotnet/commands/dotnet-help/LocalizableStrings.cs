@@ -61,5 +61,7 @@
         public const string VsTestDefinition = "Runs Microsoft Test Execution Command Line Tool.";
 
         public const string CleanDefinition = "Clean build output(s).";
+
+        public const string SlnDefinition = "Modify solution (SLN) files.";
     }
 }

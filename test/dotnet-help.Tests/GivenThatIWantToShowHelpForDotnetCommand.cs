@@ -41,6 +41,7 @@ Commands:
   pack          Creates a NuGet package.
   migrate       Migrates a project.json based project to a msbuild based project.
   clean         Clean build output(s).
+  sln           Modify solution (SLN) files.
 
 Project modification commands:
   add           Add items to the project
