@@ -28,5 +28,15 @@ namespace Microsoft.NET.Build.Tasks
         public const string Analyzer = "Analyzer";
         public const string AnalyzerLanguage = "AnalyzerLanguage";
         public const string TransitiveProjectReference = "TransitiveProjectReference";
+
+        // Diagnostics
+        public const string DiagnosticCode = "DiagnosticCode";
+        public const string Message = "Message";
+        public const string FilePath = "FilePath";
+        public const string Severity = "Severity";
+        public const string StartLine = "StartLine";
+        public const string StartColumn = "StartColumn";
+        public const string EndLine = "EndLine";
+        public const string EndColumn = "EndColumn";
     }
 }

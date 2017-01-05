@@ -5,8 +5,10 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using NuGet.Configuration;
 using NuGet.ProjectModel;
+using NuGet.Versioning;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 
@@ -19,6 +21,7 @@ namespace Microsoft.NET.Build.Tasks
     public sealed class ResolvePackageDependencies : TaskBase
     {
         private const string ProjectTypeKey = "project";
+        private const string PackageTypeKey = "package";
         private readonly Dictionary<string, string> _fileTypes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         private readonly HashSet<string> _projectFileDependencies = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private IPackageResolver _packageResolver;
@@ -160,6 +163,7 @@ namespace Microsoft.NET.Build.Tasks
             ReadProjectFileDependencies();
             RaiseLockFileTargets();
             GetPackageAndFileDefinitions();
+            GetDependencyDiagnostics();
         }
 
         private void ReadProjectFileDependencies()
@@ -399,6 +403,64 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
+        private void GetDependencyDiagnostics()
+        {
+            Dictionary<string, string> projectDeps = LockFile.GetProjectFileDependencies();
+
+            // Temporarily suppress MSBuild logging because these diagnostics are also 
+            // reported by NuGet. This will no longer be necessary when NuGet moves 
+            // these diagnostics into the lockfile: 
+            // - https://github.com/NuGet/Home/issues/1599
+            // - https://github.com/dotnet/sdk/issues/585
+            bool logToMsBuild = false;
+
+            // if a project dependency is not in the list of libs, then it is an unresolved reference
+            var unresolvedDeps = projectDeps.Where(dep =>
+                null == LockFile.Libraries.FirstOrDefault(lib =>
+                    string.Equals(lib.Name, dep.Key, StringComparison.OrdinalIgnoreCase)));
+
+            foreach (var target in LockFile.Targets)
+            {
+                foreach (var dep in unresolvedDeps)
+                {
+                    string packageId = dep.Key;
+                    packageId += dep.Value == null ? string.Empty : $"/{dep.Value}";
+
+                    Diagnostics.Add(nameof(Strings.NU1001),
+                        string.Format(CultureInfo.CurrentCulture, Strings.NU1001, packageId),
+                        ProjectPath,
+                        DiagnosticMessageSeverity.Warning,
+                        1, 0,
+                        target.Name,
+                        packageId,
+                        logToMSBuild: logToMsBuild
+                        );
+                }
+
+                // report diagnostic if project dependency version does not match library version
+                foreach (var dep in projectDeps)
+                {
+                    var library = target.Libraries.FirstOrDefault(lib =>
+                        string.Equals(lib.Name, dep.Key, StringComparison.OrdinalIgnoreCase));
+                    var libraryVersion = library?.Version?.ToNormalizedString();
+
+                    if (libraryVersion != null && dep.Value != null &&
+                        !string.Equals(libraryVersion, dep.Value, StringComparison.OrdinalIgnoreCase))
+                    {
+                        Diagnostics.Add(nameof(Strings.NU1012),
+                            string.Format(CultureInfo.CurrentCulture, Strings.NU1012, library.Name, dep.Value, libraryVersion),
+                            ProjectPath,
+                            DiagnosticMessageSeverity.Warning,
+                            1, 0,
+                            target.Name,
+                            $"{library.Name}/{libraryVersion}", 
+                            logToMSBuild: logToMsBuild
+                            );
+                    }
+                }
+            }
+        }
+
         // save file type metadata based on the group the file appears in
         private void SaveFileKeyType(string fileKey, FileGroup fileGroup)
         {
@@ -416,7 +478,6 @@ namespace Microsoft.NET.Build.Tasks
                 }
             }
         }
-
 
         private string ResolvePackagePath(LockFileLibrary package)
         {
