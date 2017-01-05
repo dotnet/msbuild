@@ -111,10 +111,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     compilerOptions => compilerOptions.OutputName != null);
 
         private IncludeContextTransform CompileFilesTransform =>
-            new IncludeContextTransform("Compile", false, ic => ic != null);
+            new IncludeContextTransform("Compile", transformMappings: false, condition: ic => ic != null);
 
         private IncludeContextTransform EmbedFilesTransform =>
-            new IncludeContextTransform("EmbeddedResource", false, ic => ic != null);
+            new IncludeContextTransform("EmbeddedResource", transformMappings: false, condition: ic => ic != null);
 
         private IncludeContextTransform CopyToOutputFilesTransform =>
             new IncludeContextTransform("Content", transformMappings: true)
