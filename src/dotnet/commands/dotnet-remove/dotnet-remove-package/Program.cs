@@ -1,12 +1,6 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
 using Microsoft.Build.Evaluation;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
@@ -15,6 +9,12 @@ using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.NuGet;
 using NuGet.Frameworks;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace Microsoft.DotNet.Tools.Remove.PackageReference
 {
@@ -55,7 +55,8 @@ namespace Microsoft.DotNet.Tools.Remove.PackageReference
                 projectFilePath = fileOrDirectory;
             }
 
-            var result = NuGetCommand.Run(TransformArgs(RemainingArguments.First(), projectFilePath));
+            var packageToRemove = RemainingArguments.First();
+            var result = NuGetCommand.Run(TransformArgs(packageToRemove, projectFilePath));
 
             return result;
         }
