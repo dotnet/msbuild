@@ -18,8 +18,7 @@ namespace Microsoft.DotNet.Migration.Tests
         {
             MigrateAndBuild(
                 "NonRestoredTestProjects",
-                "PJAppWithSlnAndXprojRefs",
-                ProjectTypeGuids.CSharpProjectTypeGuid);
+                "PJAppWithSlnAndXprojRefs");
         }
 
         [Fact]
@@ -27,8 +26,7 @@ namespace Microsoft.DotNet.Migration.Tests
         {
             MigrateAndBuild(
                 "NonRestoredTestProjects",
-                "PJAppWithSlnAndXprojRefsAndUnrelatedCsproj",
-                ProjectTypeGuids.CSharpProjectTypeGuid);
+                "PJAppWithSlnAndXprojRefsAndUnrelatedCsproj");
         }
 
         [Fact]
@@ -36,11 +34,10 @@ namespace Microsoft.DotNet.Migration.Tests
         {
             MigrateAndBuild(
                 "NonRestoredTestProjects",
-                "PJAppWithSlnAndXprojRefThatRefsCsprojWhereSlnDoesNotRefCsproj",
-                ProjectTypeGuids.CPSProjectTypeGuid);
+                "PJAppWithSlnAndXprojRefThatRefsCsprojWhereSlnDoesNotRefCsproj");
         }
 
-        private void MigrateAndBuild(string groupName, string projectName, string subdirProjectTypeGuid)
+        private void MigrateAndBuild(string groupName, string projectName)
         {
             var projectDirectory = TestAssets
                 .Get(groupName, projectName)
@@ -81,7 +78,9 @@ namespace Microsoft.DotNet.Migration.Tests
             slnProject.FilePath.Should().Be(Path.Combine("..", "TestLibrary", "TestLibrary.csproj"));
 
             slnProject = nonSolutionFolderProjects.Where((p) => p.Name == "subdir").Single();
-            slnProject.TypeGuid.Should().Be(subdirProjectTypeGuid);
+            //ISSUE: https://github.com/dotnet/sdk/issues/522
+            //Once we have that change migrate will always burn in the C# guid
+            //slnProject.TypeGuid.Should().Be(ProjectTypeGuids.CSharpProjectTypeGuid);
             slnProject.FilePath.Should().Be(Path.Combine("src", "subdir", "subdir.csproj"));
         }
     }

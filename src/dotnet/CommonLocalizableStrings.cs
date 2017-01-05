@@ -5,6 +5,7 @@ namespace Microsoft.DotNet.Tools
 {
     internal class CommonLocalizableStrings
     {
+        public const string UnsupportedProjectType = "Unsupported project type. Please check with your sdk provider.";
         public const string ProjectAlreadyHasAreference = "Project already has a reference to `{0}`.";
         public const string ProjectReferenceCouldNotBeFound = "Project reference `{0}` could not be found.";
         public const string ProjectReferenceRemoved = "Project reference `{0}` removed.";

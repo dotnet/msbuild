@@ -493,6 +493,66 @@ EndGlobal
                 .Should().BeVisuallyEquivalentTo(contentBefore);
         }
 
+        //ISSUE: https://github.com/dotnet/sdk/issues/522
+        //[Fact]
+        public void WhenPassedAnUnknownProjectTypeItFails()
+        {
+            var projectDirectory = TestAssets
+                .Get("SlnFileWithNoProjectReferencesAndUnknownProject")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+
+            var slnFullPath = Path.Combine(projectDirectory, "App.sln");
+            var contentBefore = File.ReadAllText(slnFullPath);
+
+            var projectToAdd = Path.Combine("UnknownProject", "UnknownProject.unknownproj");
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput($"add App.sln project {projectToAdd}");
+            cmd.Should().Fail();
+            cmd.StdErr.Should().BeVisuallyEquivalentTo("Unsupported project type. Please check with your sdk provider.");
+
+            File.ReadAllText(slnFullPath)
+                .Should().BeVisuallyEquivalentTo(contentBefore);
+        }
+
+        [Theory]
+        //ISSUE: https://github.com/dotnet/sdk/issues/522
+        //[InlineData("SlnFileWithNoProjectReferencesAndCSharpProject", "CSharpProject", "CSharpProject.csproj", ProjectTypeGuids.CSharpProjectTypeGuid)]
+        //[InlineData("SlnFileWithNoProjectReferencesAndFSharpProject", "FSharpProject", "FSharpProject.fsproj", "{F2A71F9B-5D33-465A-A702-920D77279786}")]
+        //[InlineData("SlnFileWithNoProjectReferencesAndVBProject", "VBProject", "VBProject.vbproj", "{F184B08F-C81C-45F6-A57F-5ABD9991F28F}")]
+        [InlineData("SlnFileWithNoProjectReferencesAndUnknownProjectWithSingleProjectTypeGuid", "UnknownProject", "UnknownProject.unknownproj", "{130159A9-F047-44B3-88CF-0CF7F02ED50F}")]
+        [InlineData("SlnFileWithNoProjectReferencesAndUnknownProjectWithMultipleProjectTypeGuids", "UnknownProject", "UnknownProject.unknownproj", "{130159A9-F047-44B3-88CF-0CF7F02ED50F}")]
+        public void WhenPassedAProjectItAddsCorrectProjectTypeGuid(
+            string testAsset,
+            string projectDir,
+            string projectName,
+            string expectedTypeGuid)
+        {
+            var projectDirectory = TestAssets
+                .Get(testAsset)
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+
+            var projectToAdd = Path.Combine(projectDir, projectName);
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput($"add App.sln project {projectToAdd}");
+            cmd.Should().Pass();
+            cmd.StdOut.Should().Be($"Project `{projectToAdd}` added to the solution.");
+            cmd.StdErr.Should().BeEmpty();
+
+            var slnFile = SlnFile.Read(Path.Combine(projectDirectory, "App.sln"));
+            var nonSolutionFolderProjects = slnFile.Projects.Where(
+                p => p.TypeGuid != ProjectTypeGuids.SolutionFolderGuid);
+            nonSolutionFolderProjects.Count().Should().Be(1);
+            nonSolutionFolderProjects.Single().TypeGuid.Should().Be(expectedTypeGuid);
+        }
+
         private string GetExpectedSlnContents(
             string slnPath,
             string slnTemplate,

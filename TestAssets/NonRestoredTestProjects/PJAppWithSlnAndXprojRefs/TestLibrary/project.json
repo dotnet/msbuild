@@ -1,13 +1,6 @@
 {
   "version": "1.0.0-*",
-  "buildOptions": {
-    "nowarn": [
-      "CS1591"
-    ],
-    "additionalArguments": [
-      "-highentropyva+"
-    ]
-  },"dependencies": {
+  "dependencies": {
     "NETStandard.Library": "1.6.0"
   },
   "frameworks": {
