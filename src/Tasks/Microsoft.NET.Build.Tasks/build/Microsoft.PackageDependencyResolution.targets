@@ -208,9 +208,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="RunProduceContentAssets"
           Returns="_ContentCopyLocalItems;FileWrites"
-          DependsOnTargets="RunResolvePackageDependencies">
+          DependsOnTargets="_ComputeActiveTFMFileDependencies">
     <ItemGroup>
-      <_ContentFileDeps Include="@(FileDependencies->WithMetadataValue('FileGroup', 'ContentFile'))" />
+      <_ContentFileDeps Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'ContentFile'))" />
       <__ContentFileDefs Include="@(FileDefinitions)" Exclude="@(_ContentFileDeps)" />
       <_ContentFileDefs Include="@(FileDefinitions)" Exclude="@(__ContentFileDefs)" />
     </ItemGroup>
