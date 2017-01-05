@@ -18,6 +18,7 @@ namespace Microsoft.NET.Build.Tasks
     /// </summary>
     public sealed class ProduceContentAssets : TaskBase
     {
+        private const string PPOutputPathKey = "ppOutputPath";
         private readonly Dictionary<string, string> _resolvedPaths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         private readonly List<ITaskItem> _contentItems = new List<ITaskItem>();
         private readonly List<ITaskItem> _fileWrites = new List<ITaskItem>();
@@ -84,6 +85,14 @@ namespace Microsoft.NET.Build.Tasks
         /// Optional the Project Language (E.g. C#, VB)
         /// </summary>
         public string ProjectLanguage
+        {
+            get; set;
+        }
+
+        /// <summary>
+        /// Optionally filter the operation of this task to just preprocessor files
+        /// </summary>
+        public bool ProduceOnlyPreprocessorFiles
         {
             get; set;
         }
@@ -161,7 +170,9 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             var contentFileDeps = ContentFileDependencies ?? Enumerable.Empty<ITaskItem>();
-            var contentFileGroups = contentFileDeps.GroupBy(t => t.GetMetadata(MetadataKeys.ParentPackage));
+            var contentFileGroups = contentFileDeps
+                .Where(f => !ProduceOnlyPreprocessorFiles || IsPreprocessorFile(f))
+                .GroupBy(t => t.GetMetadata(MetadataKeys.ParentPackage));
             foreach (var grouping in contentFileGroups)
             {
                 // Is there an asset with our exact language? If so, we use that. Otherwise we'll simply collect "any" assets.
@@ -202,6 +213,9 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
+        private bool IsPreprocessorFile(ITaskItem contentFile) =>
+            !string.IsNullOrEmpty(contentFile.GetMetadata(PPOutputPathKey));
+
         private void ProduceContentAsset(ITaskItem contentFile)
         {
             string resolvedPath;
@@ -212,10 +226,10 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             string pathToFinalAsset = resolvedPath;
-            string ppOutputPath = contentFile.GetMetadata("ppOutputPath");
+            string ppOutputPath = contentFile.GetMetadata(PPOutputPathKey);
             string parentPackage = contentFile.GetMetadata(MetadataKeys.ParentPackage);
 
-            if (ppOutputPath != null)
+            if (!string.IsNullOrEmpty(ppOutputPath))
             {
                 if (string.IsNullOrEmpty(ContentPreprocessorOutputDirectory))
                 {
@@ -237,9 +251,10 @@ namespace Microsoft.NET.Build.Tasks
 
             if (contentFile.GetBooleanMetadata("copyToOutput") == true)
             {
-                string outputPath = contentFile.GetMetadata("outputPath") ?? ppOutputPath;
+                string outputPath = contentFile.GetMetadata("outputPath");
+                outputPath = string.IsNullOrEmpty(outputPath) ? ppOutputPath : outputPath;
 
-                if (outputPath != null)
+                if (!string.IsNullOrEmpty(outputPath))
                 {
                     var item = new TaskItem(pathToFinalAsset);
                     item.SetMetadata("TargetPath", outputPath);
@@ -249,7 +264,7 @@ namespace Microsoft.NET.Build.Tasks
                 }
                 else
                 {
-                    Log.LogWarning(Strings.ContentItemDoesNotProvideOutputPath, pathToFinalAsset, "copyToOutput", "outputPath", "ppOutputPath");
+                    Log.LogWarning(Strings.ContentItemDoesNotProvideOutputPath, pathToFinalAsset, "copyToOutput", "outputPath", PPOutputPathKey);
                 }
             }
 

@@ -38,6 +38,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <CopyLocalLockFileAssemblies Condition="'$(CopyLocalLockFileAssemblies)' == ''">true</CopyLocalLockFileAssemblies>
 
     <ContentPreprocessorOutputDirectory Condition="'$(ContentPreprocessorOutputDirectory)' == ''">$(IntermediateOutputPath)NuGet\</ContentPreprocessorOutputDirectory>
+    <ProduceOnlyPreprocessorFilesInBuildTask Condition="'$(ProduceOnlyPreprocessorFilesInBuildTask)' == ''">true</ProduceOnlyPreprocessorFilesInBuildTask>
 
     <UseTargetPlatformAsNuGetTargetMoniker Condition="'$(UseTargetPlatformAsNuGetTargetMoniker)' == '' AND '$(TargetFrameworkMoniker)' == '.NETCore,Version=v5.0'">true</UseTargetPlatformAsNuGetTargetMoniker>
     <NuGetTargetMoniker Condition="'$(NuGetTargetMoniker)' == '' AND '$(UseTargetPlatformAsNuGetTargetMoniker)' == 'true'">$(TargetPlatformIdentifier),Version=v$([System.Version]::Parse('$(TargetPlatformMinVersion)').ToString(3))</NuGetTargetMoniker>
@@ -67,6 +68,14 @@ Copyright (c) .NET Foundation. All rights reserved.
       ResolvePackageDependenciesForBuild;
       $(PrepareResourcesDependsOn)
     </PrepareResourcesDependsOn>
+  </PropertyGroup>
+
+  <!-- List of targets that emit Dependency DiagnosticMessages items -->
+  <PropertyGroup>
+    <EmitsDependencyDiagnosticMessages>
+      RunResolvePackageDependencies;
+      $(EmitsDependencyDiagnosticMessages)
+    </EmitsDependencyDiagnosticMessages>
   </PropertyGroup>
 
   <!-- Common tokens used in preprocessed content files -->
@@ -152,6 +161,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="FileDefinitions" ItemName="FileDefinitions" />
       <Output TaskParameter="PackageDependencies" ItemName="PackageDependencies" />
       <Output TaskParameter="FileDependencies" ItemName="FileDependencies" />
+      <Output TaskParameter="DiagnosticMessages" ItemName="DiagnosticMessages" />
     </ResolvePackageDependencies>
 
   </Target>
@@ -170,14 +180,15 @@ Copyright (c) .NET Foundation. All rights reserved.
   
   <Target Name="ResolvePackageDependenciesDesignTime"
           Returns="@(_DependenciesDesignTime)"
-          DependsOnTargets="ResolveAssemblyReferencesDesignTime;RunResolvePackageDependencies">
+          DependsOnTargets="ResolveAssemblyReferencesDesignTime;$(EmitsDependencyDiagnosticMessages)">
 
     <PreprocessPackageDependenciesDesignTime
           TargetDefinitions="@(TargetDefinitions)"
           PackageDefinitions="@(PackageDefinitions)"
           FileDefinitions="@(FileDefinitions)"
           PackageDependencies="@(PackageDependencies)"
-          FileDependencies="@(FileDependencies)">
+          FileDependencies="@(FileDependencies)"
+          InputDiagnosticMessages="@(DiagnosticMessages)">
 
       <Output TaskParameter="DependenciesDesignTime" ItemName="_DependenciesDesignTime" />
     </PreprocessPackageDependenciesDesignTime>
@@ -197,9 +208,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="RunProduceContentAssets"
           Returns="_ContentCopyLocalItems;FileWrites"
-          DependsOnTargets="RunResolvePackageDependencies">
+          DependsOnTargets="_ComputeActiveTFMFileDependencies">
     <ItemGroup>
-      <_ContentFileDeps Include="@(FileDependencies->WithMetadataValue('FileGroup', 'ContentFile'))" />
+      <_ContentFileDeps Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'ContentFile'))" />
       <__ContentFileDefs Include="@(FileDefinitions)" Exclude="@(_ContentFileDeps)" />
       <_ContentFileDefs Include="@(FileDefinitions)" Exclude="@(__ContentFileDefs)" />
     </ItemGroup>
@@ -209,6 +220,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       ContentFileDependencies="@(_ContentFileDeps)"
       ContentPreprocessorValues="@(PreprocessorValue)"
       ContentPreprocessorOutputDirectory="$(ContentPreprocessorOutputDirectory)"
+      ProduceOnlyPreprocessorFiles="$(ProduceOnlyPreprocessorFilesInBuildTask)"
       ProjectLanguage="$(Language)">
 
       <Output TaskParameter="CopyLocalItems" ItemName="_ContentCopyLocalItems" />

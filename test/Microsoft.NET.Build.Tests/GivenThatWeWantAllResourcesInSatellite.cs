@@ -18,7 +18,7 @@ namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantAllResourcesInSatellite : SdkTest
     {
-        [Fact]
+        //[Fact]
         public void It_retrieves_strings_successfully()
         {
             TestSatelliteResources(_testAssetsManager);

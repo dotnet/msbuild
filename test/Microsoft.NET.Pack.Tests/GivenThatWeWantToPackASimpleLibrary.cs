@@ -15,7 +15,7 @@ namespace Microsoft.NET.Pack.Tests
 {
     public class GivenThatWeWantToPackASimpleLibrary : SdkTest
     {
-        [Fact]
+        //[Fact]
         public void It_packs_successfully()
         {
             var testAsset = _testAssetsManager

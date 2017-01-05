@@ -15,7 +15,7 @@ namespace Microsoft.NET.Publish.Tests
 {
     public class GivenThatWeWantToPublishAHelloWorldProject : SdkTest
     {
-        [Fact]
+        //[Fact]
         public void It_publishes_portable_apps_to_the_publish_folder_and_the_app_should_run()
         {
             var helloWorldAsset = _testAssetsManager
@@ -46,7 +46,7 @@ namespace Microsoft.NET.Publish.Tests
                 .HaveStdOutContaining("Hello World!");
         }
 
-        [Fact]
+        //[Fact]
         public void It_publishes_self_contained_apps_to_the_publish_folder_and_the_app_should_run()
         {
             var rid = RuntimeEnvironment.GetRuntimeIdentifier();
@@ -88,7 +88,7 @@ namespace Microsoft.NET.Publish.Tests
                 .HaveStdOutContaining("Hello World!");
         }
 
-        [Fact]
+        //[Fact]
         public void A_deployment_project_can_reference_the_hello_world_project()
         {
             var rid = RuntimeEnvironment.GetRuntimeIdentifier();

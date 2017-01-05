@@ -11,7 +11,7 @@
     <authors>dotnet</authors>
     <projectUrl>http://dot.net</projectUrl>
     <dependencies>
-        <dependency id="Nuget.Build.Tasks.Pack" version="4.0.0-rc2" />
+        <dependency id="Nuget.Build.Tasks.Pack" version="4.0.0-rc3" />
     </dependencies>
   </metadata>
   <files>

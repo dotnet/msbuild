@@ -19,7 +19,7 @@ namespace Microsoft.NET.Build.Tests
 {
     public class GivenThereAreDefaultItems : SdkTest
     {
-        [Fact]
+        //[Fact]
         public void It_ignores_excluded_folders()
         {
             Action<GetValuesCommand> setup = getValuesCommand =>
@@ -49,7 +49,7 @@ namespace Microsoft.NET.Build.Tests
             compileItems.Should().BeEquivalentTo(expectedItems);
         }
 
-        [Fact]
+        //[Fact]
         public void It_allows_excluded_folders_to_be_overridden()
         {
             Action<GetValuesCommand> setup = getValuesCommand =>
@@ -95,7 +95,7 @@ namespace Microsoft.NET.Build.Tests
             compileItems.Should().BeEquivalentTo(expectedItems);
         }
 
-        [Fact]
+        //[Fact]
         public void It_allows_items_outside_project_root_to_be_included()
         {
             Action<GetValuesCommand> setup = getValuesCommand =>
@@ -133,7 +133,7 @@ namespace Microsoft.NET.Build.Tests
             compileItems.Should().BeEquivalentTo(expectedItems);
         }
 
-        [Fact]
+        //[Fact]
         public void It_allows_a_project_subfolder_to_be_excluded()
         {
             Action<GetValuesCommand> setup = getValuesCommand =>
@@ -168,7 +168,7 @@ namespace Microsoft.NET.Build.Tests
             compileItems.Should().BeEquivalentTo(expectedItems);
         }
 
-        [Fact]
+        //[Fact]
         public void It_allows_a_CSharp_file_to_be_used_as_an_EmbeddedResource()
         {
             Action<GetValuesCommand> setup = getValuesCommand =>
@@ -216,7 +216,7 @@ namespace Microsoft.NET.Build.Tests
             embeddedResourceItems.Should().BeEquivalentTo(expectedEmbeddedResourceItems);
         }
 
-        [Fact]
+        //[Fact]
         public void It_allows_a_CSharp_file_to_be_used_as_Content()
         {
             Action<GetValuesCommand> setup = getValuesCommand =>
@@ -278,7 +278,7 @@ namespace Microsoft.NET.Build.Tests
             noneItems.Should().BeEquivalentTo(expectedNoneItems);
         }
 
-        [Fact]
+        //[Fact]
         public void Default_items_have_the_correct_relative_paths()
         {
             Action<XDocument> projectChanges = project =>
@@ -328,7 +328,7 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
-        [Fact]
+        //[Fact]
         public void Compile_items_can_be_explicitly_specified_while_default_EmbeddedResource_items_are_used()
         {
             Action<XDocument> projectChanges = project =>
