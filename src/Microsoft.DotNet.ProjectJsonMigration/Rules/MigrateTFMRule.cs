@@ -34,20 +34,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             CleanExistingProperties(csproj);
             CleanExistingPackageReferences(csproj);
 
-            if(migrationRuleInputs.ProjectContexts.Count() == 1)
-            {
-                _transformApplicator.Execute(
-                    FrameworkTransform.Transform(
-                        migrationRuleInputs.ProjectContexts.Single().TargetFramework),
-                    propertyGroup,
-                    mergeExisting: true);
-                _transformApplicator.Execute(
-                    FrameworkRuntimeIdentifiersTransform.Transform(
-                        migrationRuleInputs.ProjectContexts.Single()),
-                    propertyGroup,
-                    mergeExisting: true);
-            }
-            else
+            if(migrationRuleInputs.IsMultiTFM)
             {
                 _transformApplicator.Execute(
                     FrameworksTransform.Transform(
@@ -62,6 +49,19 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 _transformApplicator.Execute(
                     FrameworksRuntimeIdentifiersTransform.Transform(
                         migrationRuleInputs.ProjectContexts),
+                    propertyGroup,
+                    mergeExisting: true);
+            }
+            else
+            {
+                _transformApplicator.Execute(
+                    FrameworkTransform.Transform(
+                        migrationRuleInputs.ProjectContexts.Single().TargetFramework),
+                    propertyGroup,
+                    mergeExisting: true);
+                _transformApplicator.Execute(
+                    FrameworkRuntimeIdentifiersTransform.Transform(
+                        migrationRuleInputs.ProjectContexts.Single()),
                     propertyGroup,
                     mergeExisting: true);
             }
