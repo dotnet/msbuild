@@ -1,19 +1,16 @@
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
+<Project  Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net46;netcoreapp1.0</TargetFrameworks>
+    <RuntimeIdentifiers>win7-x86</RuntimeIdentifiers>
+    <RuntimeIdentifier Condition=" '$(TargetFramework)' == 'net46' ">win7-x86</RuntimeIdentifier>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net46'">
     <DefineConstants>DESKTOP;$(DefineConstants)</DefineConstants>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Include="**\*.cs" />
-  </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp1.0'">
     <PackageReference Include="Microsoft.NETCore.App">
@@ -21,12 +18,7 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Sdk">
-      <!-- Should be $(CLI_NETSDK_Version) but https://github.com/dotnet/cli/issues/4892 -->
-      <Version>1.0.0-alpha-20161026-2</Version>
-      <PrivateAssets>All</PrivateAssets>
-    </PackageReference>
+  <ItemGroup>    
     <PackageReference Include="Microsoft.NET.Test.Sdk">
       <Version>$(CLI_TestPlatform_Version)</Version>
     </PackageReference>
@@ -37,6 +29,4 @@
       <Version>2.2.0-beta4-build1194</Version>
     </PackageReference>
   </ItemGroup>
-
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

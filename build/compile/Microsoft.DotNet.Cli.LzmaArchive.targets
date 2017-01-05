@@ -80,12 +80,12 @@
 
       <Message Text="Publishing Archiver" />
 
-      <DotNetPublish ToolPath="$(Stage2Directory)"
+      <DotNetPublish ToolPath="$(Stage0Directory)"
                      WorkingDirectory="$(RepoRoot)/tools/Archiver"
                      Output="$(ToolsOutputDirectory)"
                      Configuration="$(Configuration)" />
 
-      <Exec Command="$(DotnetStage2) $(ArchiverDll) -a $(IntermediateArchive) $(NuGetPackagesArchiveFolder)" />
+      <Exec Command="$(DotnetStage0) $(ArchiverDll) -a $(IntermediateArchive) $(NuGetPackagesArchiveFolder)" />
     </Target>
 
     <Target Name="SetupNuGetPackagesArchiveInputsOutputs"

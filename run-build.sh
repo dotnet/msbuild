@@ -163,8 +163,8 @@ if [ $? != 0 ]; then
 fi
 
 # now execute the script
-echo "installing CLI: $dotnetInstallPath --version \"latest\" --install-dir $DOTNET_INSTALL_DIR --architecture \"$ARCHITECTURE\""
-$dotnetInstallPath --version "latest" --install-dir $DOTNET_INSTALL_DIR --architecture "$ARCHITECTURE"
+echo "installing CLI: $dotnetInstallPath --version \"1.0.0-preview5-004392\" --install-dir $DOTNET_INSTALL_DIR --architecture \"$ARCHITECTURE\""
+$dotnetInstallPath --version "1.0.0-preview5-004392" --install-dir $DOTNET_INSTALL_DIR --architecture "$ARCHITECTURE"
 if [ $? != 0 ]; then
     echo "run-build: Error: Boot-strapping post-PJ stage0 with exit code $?." >&2
     exit $?

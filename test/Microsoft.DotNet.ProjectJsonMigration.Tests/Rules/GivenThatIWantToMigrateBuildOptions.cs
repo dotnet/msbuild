@@ -49,18 +49,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void MigratingEmptyBuildOptionsPopulatesOnlyCompileAndEmbeddedResource()
+        public void MigratingEmptyBuildOptionsGeneratesAnEmptyCSProj()
         {
             var mockProj = RunBuildOptionsRuleOnPj(@"
                 {
                     ""buildOptions"": { }
                 }");
 
-            mockProj.Items.Count().Should().Be(2);
-            mockProj.Items.First(i => i.ItemType == "Compile").Include.Should().Be(@"**\*.cs");
-            mockProj.Items.First(i => i.ItemType == "Compile").Exclude.Should().BeEmpty();
-            mockProj.Items.First(i => i.ItemType == "EmbeddedResource").Include.Should().Be(@"compiler\resources\**\*;**\*.resx");
-            mockProj.Items.First(i => i.ItemType == "EmbeddedResource").Exclude.Should().Be("@(EmbeddedResource)");
+            mockProj.Items.Count().Should().Be(0);
         }
 
         [Fact]
@@ -75,6 +71,22 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                         ""Microsoft.AspNetCore.Mvc"" : {
                             ""version"": ""1.0.0""
                         }
+                    },
+                    ""frameworks"": {
+                        ""netcoreapp1.0"": {}
+                    }
+                }");
+
+            mockProj.Items.Count().Should().Be(0);
+        }
+
+        [Fact]
+        public void MigratingConsoleProjectWithoutCustomSourcesOrResourcesDoesNotEmitCompileAndEmbeddedResource()
+        {
+            var mockProj = RunBuildOptionsRuleOnPj(@"
+                {
+                    ""buildOptions"": {
+                        ""emitEntryPoint"": true
                     },
                     ""frameworks"": {
                         ""netcoreapp1.0"": {}
