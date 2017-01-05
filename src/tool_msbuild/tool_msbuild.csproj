@@ -12,17 +12,5 @@
     <PackageReference Include="Microsoft.Build.Runtime">
       <Version>$(CLI_MSBuild_Version)</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.Net.Compilers.netcore">
-      <Version>2.0.0-beta6-60922-08</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.Build.Tasks">
-      <Version>2.0.0-beta6-60922-08</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Cci">
-      <Version>4.0.0-rc3-24128-00</Version>
-    </PackageReference>
   </ItemGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
-  </PropertyGroup>
 </Project>

@@ -23,12 +23,6 @@
       <Output TaskParameter="Architecture" PropertyName="Architecture" />
       <Output TaskParameter="OSName" PropertyName="OSName" />
     </GetCurrentRuntimeInformation>
-
-    <!-- NuGet Information -->
-    <PropertyGroup>
-      <NuGetPackagesDir>$(NUGET_PACKAGES)</NuGetPackagesDir>
-      <NuGetPackagesDir Condition=" '$(NuGetPackagesDir)' == '' ">$(RepoRoot)/.nuget/packages</NuGetPackagesDir>
-    </PropertyGroup>
     
     <!-- Common Properties -->
     <PropertyGroup>
