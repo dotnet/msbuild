@@ -13,7 +13,7 @@
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
     <ProjectReference Include="..\..\src\dotnet\dotnet.csproj" />
     <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.1</Version>
+      <Version>1.0.3</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Build.Runtime">
       <Version>$(CLI_MSBuild_Version)</Version>
