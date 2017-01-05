@@ -19,11 +19,16 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
             var testAppName = "VSTestDotNetCore";
             var testRoot = TestAssets.Get(testAppName)
                 .CreateInstance()
+                .WithSourceFiles()
                 .WithRestoreFiles()
-                .WithBuildFiles()
                 .Root;
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
+
+            new BuildCommand()
+                .WithWorkingDirectory(testRoot)
+                .Execute()
+                .Should().Pass();
 
             var outputDll = testRoot
                 .GetDirectory("bin", configuration, "netcoreapp1.0")
