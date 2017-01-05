@@ -12,17 +12,29 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
+using System.Xml.Linq;
 
 namespace Microsoft.NET.Publish.Tests
 {
     public class GivenThatWeWantToPublishAProjectWithAllFeatures : SdkTest
     {
-        [Fact]
-        public void It_publishes_the_project_correctly()
+        [Theory]
+        [MemberData("PublishData")]
+        public void It_publishes_the_project_correctly(string targetFramework, string [] expectedPublishFiles)
         {
             TestAsset testAsset = _testAssetsManager
-                .CopyTestAsset("KitchenSink")
-                .WithSource();
+                .CopyTestAsset("KitchenSink", nameof(It_publishes_the_project_correctly), targetFramework)
+                .WithSource()
+                .WithProjectChanges((path, project) =>
+                {
+                    if (Path.GetFileName(path).Equals("TestApp.csproj", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var ns = project.Root.Name.Namespace;
+
+                        var targetFrameworkElement = project.Root.Elements(ns + "PropertyGroup").Elements(ns + "TargetFramework").Single();
+                        targetFrameworkElement.SetValue(targetFramework);
+                    }
+                });
 
             testAsset.Restore("TestApp");
             testAsset.Restore("TestLibrary");
@@ -35,41 +47,9 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            DirectoryInfo publishDirectory = publishCommand.GetOutputDirectory();
+            DirectoryInfo publishDirectory = publishCommand.GetOutputDirectory(targetFramework);
 
-            publishDirectory.Should().OnlyHaveFiles(new[] {
-                "TestApp.dll",
-                "TestApp.pdb",
-                "TestApp.deps.json",
-                "TestApp.runtimeconfig.json",
-                "TestLibrary.dll",
-                "TestLibrary.pdb",
-                "Newtonsoft.Json.dll",
-                "System.Runtime.Serialization.Primitives.dll",
-                "CompileCopyToOutput.cs",
-                "Resource1.resx",
-                "ContentAlways.txt",
-                "ContentPreserveNewest.txt",
-                "NoneCopyOutputAlways.txt",
-                "NoneCopyOutputPreserveNewest.txt",
-                "CopyToOutputFromProjectReference.txt",
-                "da/TestApp.resources.dll",
-                "da/TestLibrary.resources.dll",
-                "de/TestApp.resources.dll",
-                "de/TestLibrary.resources.dll",
-                "fr/TestApp.resources.dll",
-                "fr/TestLibrary.resources.dll",
-                "System.Spatial.dll",
-                "de/System.Spatial.resources.dll",
-                "es/System.Spatial.resources.dll",
-                "fr/System.Spatial.resources.dll",
-                "it/System.Spatial.resources.dll",
-                "ja/System.Spatial.resources.dll",
-                "ko/System.Spatial.resources.dll",
-                "ru/System.Spatial.resources.dll",
-                "zh-Hans/System.Spatial.resources.dll",
-                "zh-Hant/System.Spatial.resources.dll"
-            });
+            publishDirectory.Should().OnlyHaveFiles(expectedPublishFiles);
 
             using (var depsJsonFileStream = File.OpenRead(Path.Combine(publishDirectory.FullName, "TestApp.deps.json")))
             {
@@ -114,5 +94,50 @@ namespace Microsoft.NET.Publish.Tests
                    .NotBeNull();
             }
         }
+
+        public static IEnumerable<object[]> PublishData
+        {
+            get
+            {
+                yield return new object[] {
+                    "netcoreapp1.0",
+                    new string[]
+                    {
+                        "TestApp.dll",
+                        "TestApp.pdb",
+                        "TestApp.deps.json",
+                        "TestApp.runtimeconfig.json",
+                        "TestLibrary.dll",
+                        "TestLibrary.pdb",
+                        "Newtonsoft.Json.dll",
+                        "System.Runtime.Serialization.Primitives.dll",
+                        "CompileCopyToOutput.cs",
+                        "Resource1.resx",
+                        "ContentAlways.txt",
+                        "ContentPreserveNewest.txt",
+                        "NoneCopyOutputAlways.txt",
+                        "NoneCopyOutputPreserveNewest.txt",
+                        "CopyToOutputFromProjectReference.txt",
+                        "da/TestApp.resources.dll",
+                        "da/TestLibrary.resources.dll",
+                        "de/TestApp.resources.dll",
+                        "de/TestLibrary.resources.dll",
+                        "fr/TestApp.resources.dll",
+                        "fr/TestLibrary.resources.dll",
+                        "System.Spatial.dll",
+                        "de/System.Spatial.resources.dll",
+                        "es/System.Spatial.resources.dll",
+                        "fr/System.Spatial.resources.dll",
+                        "it/System.Spatial.resources.dll",
+                        "ja/System.Spatial.resources.dll",
+                        "ko/System.Spatial.resources.dll",
+                        "ru/System.Spatial.resources.dll",
+                        "zh-Hans/System.Spatial.resources.dll",
+                        "zh-Hant/System.Spatial.resources.dll"
+                    }
+                };
+            }
+        }
+
     }
 }
