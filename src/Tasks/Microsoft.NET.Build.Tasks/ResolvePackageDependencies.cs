@@ -423,10 +423,11 @@ namespace Microsoft.NET.Build.Tasks
             {
                 foreach (var dep in unresolvedDeps)
                 {
-                    string packageId = $"{dep.Key}/{dep.Value}";
+                    string packageId = dep.Key;
+                    packageId += dep.Value == null ? string.Empty : $"/{dep.Value}";
 
                     Diagnostics.Add(nameof(Strings.NU1001),
-                        string.Format(CultureInfo.CurrentCulture, Strings.NU1001, dep),
+                        string.Format(CultureInfo.CurrentCulture, Strings.NU1001, packageId),
                         ProjectPath,
                         DiagnosticMessageSeverity.Warning,
                         1, 0,
