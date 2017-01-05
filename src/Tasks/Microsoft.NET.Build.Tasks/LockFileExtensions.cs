@@ -58,7 +58,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public static Dictionary<string, string> GetProjectFileDependencies(this LockFile lockFile)
         {
-            Dictionary<string, string> projectDeps = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var projectDeps = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var group in lockFile.ProjectFileDependencyGroups)
             {

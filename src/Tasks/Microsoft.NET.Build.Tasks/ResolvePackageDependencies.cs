@@ -407,6 +407,13 @@ namespace Microsoft.NET.Build.Tasks
         {
             Dictionary<string, string> projectDeps = LockFile.GetProjectFileDependencies();
 
+            // Temporarily suppress MSBuild logging because these diagnostics are also 
+            // reported by NuGet. This will no longer be necessary when NuGet moves 
+            // these diagnostics into the lockfile: 
+            // - https://github.com/NuGet/Home/issues/1599
+            // - https://github.com/dotnet/sdk/issues/585
+            bool logToMsBuild = false;
+
             // if a project dependency is not in the list of libs, then it is an unresolved reference
             var unresolvedDeps = projectDeps.Where(dep =>
                 null == LockFile.Libraries.FirstOrDefault(lib =>
@@ -425,7 +432,7 @@ namespace Microsoft.NET.Build.Tasks
                         1, 0,
                         target.Name,
                         packageId,
-                        logToMSBuild: false // Temporarily suppress MSBuild logging because this diagnostic is also reported by NuGet
+                        logToMSBuild: logToMsBuild
                         );
                 }
 
@@ -446,7 +453,7 @@ namespace Microsoft.NET.Build.Tasks
                             1, 0,
                             target.Name,
                             $"{library.Name}/{libraryVersion}", 
-                            logToMSBuild: false // Temporarily suppress MSBuild logging because this diagnostic is also reported by NuGet
+                            logToMSBuild: logToMsBuild
                             );
                     }
                 }

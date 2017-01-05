@@ -179,7 +179,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   
   <Target Name="ResolvePackageDependenciesDesignTime"
           Returns="@(_DependenciesDesignTime)"
-          DependsOnTargets="ResolveAssemblyReferencesDesignTime;RunResolvePackageDependencies;$(EmitsDependencyDiagnosticMessages)">
+          DependsOnTargets="ResolveAssemblyReferencesDesignTime;$(EmitsDependencyDiagnosticMessages)">
 
     <PreprocessPackageDependenciesDesignTime
           TargetDefinitions="@(TargetDefinitions)"

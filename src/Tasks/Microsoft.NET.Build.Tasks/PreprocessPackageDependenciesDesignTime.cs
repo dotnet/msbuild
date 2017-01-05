@@ -16,8 +16,6 @@ namespace Microsoft.NET.Build.Tasks
     /// dependency graph.
     /// If any changes are made here, make sure corresponding changes are made to NuGetDependenciesSubTreeProvider
     /// in roslyn-project-system repo and corresponding tests.
-    /// 
-    /// TODO: Add support for diagnostics, related issue https://github.com/dotnet/sdk/issues/26
     /// </summary>
     public class PreprocessPackageDependenciesDesignTime : TaskBase
     {
@@ -68,7 +66,7 @@ namespace Microsoft.NET.Build.Tasks
 
             PopulateAssemblies();
 
-            InputDiagnosticMessages = InputDiagnosticMessages ?? new ITaskItem[] { };
+            InputDiagnosticMessages = InputDiagnosticMessages ?? Array.Empty<ITaskItem>();
             PopulateDiagnosticsMap();
 
             AddDependenciesToTheWorld(Packages, PackageDependencies);
@@ -180,7 +178,6 @@ namespace Microsoft.NET.Build.Tasks
         {
             foreach (var diagnostic in InputDiagnosticMessages)
             {
-                // TODO generate unique ID for each diagnostic as target/package/code may not be unique enough
                 var metadata = new DiagnosticMetadata(diagnostic);
                 DiagnosticsMap[diagnostic.ItemSpec] = metadata;
             }
@@ -355,7 +352,7 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
-        private class DiagnosticMetadata : ItemMetadata
+        private sealed class DiagnosticMetadata : ItemMetadata
         {
             public DiagnosticMetadata(ITaskItem item)
                 : base(DependencyType.Diagnostic)

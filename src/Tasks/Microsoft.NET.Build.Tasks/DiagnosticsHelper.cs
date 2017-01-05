@@ -11,7 +11,7 @@ namespace Microsoft.NET.Build.Tasks
     /// Writes diagnostic messages to the task log and creates diagnostic task items 
     /// that can be returned from a task
     /// </summary>
-    public class DiagnosticsHelper
+    public sealed class DiagnosticsHelper
     {
         private readonly List<ITaskItem> _diagnosticMessages = new List<ITaskItem>();
         private readonly TaskLoggingHelper _log;
@@ -110,42 +110,42 @@ namespace Microsoft.NET.Build.Tasks
             {
                 case DiagnosticMessageSeverity.Error:
                     _log.LogError(
-                        subcategory     : null,
-                        errorCode       : diagnosticCode,
-                        helpKeyword     : null,
-                        file            : filePath, 
-                        lineNumber      : startLine,
-                        columnNumber    : startColumn,
-                        endLineNumber   : endLine,
-                        endColumnNumber : endColumn, 
-                        message         : message);
+                        subcategory: null,
+                        errorCode: diagnosticCode,
+                        helpKeyword: null,
+                        file: filePath,
+                        lineNumber: startLine,
+                        columnNumber: startColumn,
+                        endLineNumber: endLine,
+                        endColumnNumber: endColumn,
+                        message: message);
                     break;
 
                 case DiagnosticMessageSeverity.Warning:
                     _log.LogWarning(
-                        subcategory     : null,
-                        warningCode     : diagnosticCode,
-                        helpKeyword     : null,
-                        file            : filePath, 
-                        lineNumber      : startLine,
-                        columnNumber    : startColumn,
-                        endLineNumber   : endLine,
-                        endColumnNumber : endColumn, 
-                        message         : message);
+                        subcategory: null,
+                        warningCode: diagnosticCode,
+                        helpKeyword: null,
+                        file: filePath,
+                        lineNumber: startLine,
+                        columnNumber: startColumn,
+                        endLineNumber: endLine,
+                        endColumnNumber: endColumn,
+                        message: message);
                     break;
 
                 case DiagnosticMessageSeverity.Info:
                     _log.LogMessage(
-                        subcategory     : null,
-                        code            : diagnosticCode,
-                        helpKeyword     : null,
-                        file            : filePath, 
-                        lineNumber      : startLine,
-                        columnNumber    : startColumn,
-                        endLineNumber   : endLine,
-                        endColumnNumber : endColumn,
-                        importance      : MessageImportance.Normal, 
-                        message         : message);
+                        subcategory: null,
+                        code: diagnosticCode,
+                        helpKeyword: null,
+                        file: filePath,
+                        lineNumber: startLine,
+                        columnNumber: startColumn,
+                        endLineNumber: endLine,
+                        endColumnNumber: endColumn,
+                        importance: MessageImportance.Normal,
+                        message: message);
                     break;
             }
         }
