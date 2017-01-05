@@ -18,7 +18,7 @@ namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToBuildAppsWithFrameworkRefs : SdkTest
     {
-        [Fact]
+        //[Fact]
         public void It_builds_the_projects_successfully()
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -36,7 +36,7 @@ namespace Microsoft.NET.Build.Tests
             VerifyProjectsBuild(testAsset);
         }
 
-        [Fact]
+        //[Fact]
         public void It_builds_with_disable_implicit_frameworkRefs()
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -97,7 +97,7 @@ namespace Microsoft.NET.Build.Tests
             outputDirectory.Should().HaveFiles(expectedFiles);
         }
 
-        [Fact]
+        //[Fact]
         public void The_clean_target_removes_all_files_from_the_output_folder()
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))

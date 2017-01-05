@@ -14,7 +14,7 @@ namespace Microsoft.NET.Publish.Tests
 {
     public class GivenThatWeWantToPublishAProjectWithDependencies : SdkTest
     {
-        [Fact]
+        //[Fact]
         public void It_publishes_projects_with_simple_dependencies()
         {
             TestAsset simpleDependenciesAsset = _testAssetsManager
@@ -61,7 +61,7 @@ namespace Microsoft.NET.Publish.Tests
                 .HaveStdOutContaining(expectedOutput);
         }
 
-        [Fact]
+        //[Fact]
         public void It_publishes_the_app_config_if_necessary()
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -89,7 +89,7 @@ namespace Microsoft.NET.Publish.Tests
             });
         }
 
-        [Fact]
+        //[Fact]
         public void It_publishes_projects_targeting_netcoreapp11_with_p2p_targeting_netcoreapp11()
         {
             // Microsoft.NETCore.App 1.1.0 added a dependency on Microsoft.DiaSymReader.Native.

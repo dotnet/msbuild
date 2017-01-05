@@ -20,7 +20,7 @@ namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToBuildAnAppWithTransitiveProjectRefs : SdkTest
     {
-        [Fact]
+        //[Fact]
         public void It_builds_the_project_successfully()
         {
             // NOTE the project dependencies in AppWithTransitiveProjectRefs:
@@ -73,7 +73,7 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining("This string came from AuxLibrary!");
         }
 
-        [Fact]
+        //[Fact]
         public void The_clean_target_removes_all_files_from_the_output_folder()
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))

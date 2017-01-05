@@ -15,7 +15,7 @@ namespace Microsoft.NET.Pack.Tests
 {
     public class GivenThatWeWantToPackACrossTargetedLibrary : SdkTest
     {
-        [Fact]
+        //[Fact]
         public void It_packs_nondesktop_library_successfully_on_all_platforms()
         {
             var testAsset = _testAssetsManager

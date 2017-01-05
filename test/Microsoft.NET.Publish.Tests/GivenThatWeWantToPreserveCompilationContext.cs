@@ -18,7 +18,7 @@ namespace Microsoft.NET.Publish.Tests
 {
     public class GivenThatWeWantToPreserveCompilationContext : SdkTest
     {
-        [Fact]
+        //[Fact]
         public void It_publishes_the_project_with_a_refs_folder_and_correct_deps_file()
         {
             var testAsset = _testAssetsManager

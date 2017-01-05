@@ -20,7 +20,7 @@ namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToBuildAnAppWithLibrary : SdkTest
     {
-        [Fact]
+        //[Fact]
         public void It_builds_the_project_successfully()
         {
             var testAsset = _testAssetsManager
@@ -33,7 +33,7 @@ namespace Microsoft.NET.Build.Tests
             VerifyAppBuilds(testAsset);
         }
 
-        [Fact]
+        //[Fact]
         public void It_builds_the_project_successfully_twice()
         {
             var testAsset = _testAssetsManager
@@ -107,7 +107,7 @@ namespace Microsoft.NET.Build.Tests
             }
         }
 
-        [Fact]
+        //[Fact]
         public void It_generates_satellite_assemblies()
         {
             var testAsset = _testAssetsManager
@@ -157,7 +157,7 @@ namespace Microsoft.NET.Build.Tests
                 commandResult.Should().HaveStdOutContaining(val);
             }
         }
-        [Fact]
+        //[Fact]
         public void The_clean_target_removes_all_files_from_the_output_folder()
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))

@@ -17,7 +17,7 @@ namespace Microsoft.NET.Publish.Tests
 {
     public class GivenThatWeWantToPublishAProjectWithAllFeatures : SdkTest
     {
-        [Fact]
+        //[Fact]
         public void It_publishes_the_project_correctly()
         {
             TestAsset testAsset = _testAssetsManager

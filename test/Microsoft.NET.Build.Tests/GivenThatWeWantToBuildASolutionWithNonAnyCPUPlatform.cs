@@ -13,7 +13,7 @@ namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToBuildASolutionWithNonAnyCPUPlatform : SdkTest
     {
-        [Fact]
+        //[Fact]
         public void It_builds_solusuccessfully()
         {
             var testAsset = _testAssetsManager
