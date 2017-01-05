@@ -5,13 +5,13 @@ namespace Microsoft.DotNet.Tools.Remove.PackageReference
 {
     internal class LocalizableStrings
     {
-        public const string AppFullName = ".NET Remove Package reference Command";
+        public const string AppFullName = ".NET Remove Package reference Command.";
 
-        public const string AppDescription = "Command to remove package reference";
+        public const string AppDescription = "Command to remove package reference.";
 
-        public const string AppHelpText = "Package references to remove";
+        public const string AppHelpText = "Package reference to remove.";
 
-        public const string SpecifyExactlyOnePackageReference = "Please specify one package reference to remove";
+        public const string SpecifyExactlyOnePackageReference = "Please specify only one package reference to remove.";
 
     }
 }
