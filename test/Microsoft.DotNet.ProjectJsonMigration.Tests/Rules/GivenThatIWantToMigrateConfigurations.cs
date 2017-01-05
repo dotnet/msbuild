@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
     public class GivenThatIWantToMigrateConfigurations : TestBase
     {
         [Fact]
-        public void Configuration_buildOptions_produce_expected_properties_in_a_group_with_a_condition()
+        public void ConfigurationBuildOptionsProduceExpectedPropertiesInAGroupWithACondition()
         {
             var mockProj = RunConfigurationsRuleOnPj(@"
                 {
@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Frameworks_buildOptions_produce_expected_properties_in_a_group_with_a_condition()
+        public void FrameworksBuildOptionsProduceExpectedPropertiesInAGroupWithACondition()
         {
             var mockProj = RunConfigurationsRuleOnPj(@"
                 {
@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void It_does_not_add_a_define_for_the_framework()
+        public void ItDoesNotAddADefineForTheFramework()
         {
             var mockProj = RunConfigurationsRuleOnPj(@"
                 {
@@ -74,11 +74,53 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 }");
 
             mockProj.Properties.Count(
-                prop => prop.Name == "DefineConstants" && prop.Value.Contains("NETCOREAPP1_0")).Should().Be(0);
+                prop => prop.Name == "DefineConstants" && prop.Value.Contains("NETCOREAPP10")).Should().Be(0);
         }
 
         [Fact]
-        public void Configuration_buildOptions_properties_are_not_written_when_they_overlap_with_buildOptions()
+        public void ItDoesNotAddADefineForReleaseConfiguration()
+        {
+            var mockProj = RunRulesOnPj(@"
+                {
+                    ""frameworks"": {
+                        ""netcoreapp1.0"": {
+                        }
+                    }
+                }",
+                new IMigrationRule[]
+                {
+                    new AddDefaultsToProjectRule(),
+                    new MigrateConfigurationsRule(),
+                    new RemoveDefaultsFromProjectRule()
+                });
+
+            mockProj.Properties.Count(
+                prop => prop.Name == "DefineConstants" && prop.Value.Contains("Release")).Should().Be(0);
+        }
+
+        [Fact]
+        public void ItDoesNotAddADefineForDebugConfiguration()
+        {
+            var mockProj = RunRulesOnPj(@"
+                {
+                    ""frameworks"": {
+                        ""netcoreapp1.0"": {
+                        }
+                    }
+                }",
+                new IMigrationRule[]
+                {
+                    new AddDefaultsToProjectRule(),
+                    new MigrateConfigurationsRule(),
+                    new RemoveDefaultsFromProjectRule()
+                });
+
+            mockProj.Properties.Count(
+                prop => prop.Name == "DefineConstants" && prop.Value.Contains("Debug")).Should().Be(0);
+        }
+
+        [Fact]
+        public void ConfigurationBuildOptionsPropertiesAreNotWrittenWhenTheyOverlapWithBuildOptions()
         {
             var mockProj = RunConfigurationsAndBuildOptionsRuleOnPj(@"
                 {
@@ -108,7 +150,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Configuration_buildOptions_includes_and_Remove_are_written_when_they_differ_from_base_buildOptions()
+        public void ConfigurationBuildOptionsIncludesAndRemoveAreWrittenWhenTheyDifferFromBaseBuildOptions()
         {
             var mockProj = RunConfigurationsAndBuildOptionsRuleOnPj(@"
                 {
@@ -156,7 +198,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Configuration_buildOptions_which_have_different_excludes_than_buildOptions_overwrites()
+        public void ConfigurationBuildOptionsWhichHaveDifferentExcludesThanBuildOptionsOverwrites()
         {
             var mockProj = RunConfigurationsAndBuildOptionsRuleOnPj(@"
                 {
@@ -216,7 +258,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Configuration_buildOptions_which_have_mappings_to_directory_add_link_metadata_with_item_metadata()
+        public void ConfigurationBuildOptionsWhichHaveMappingsToDirectoryAddLinkMetadataWithItemMetadata()
         {
             var mockProj = RunConfigurationsAndBuildOptionsRuleOnPj(@"
                 {
@@ -272,7 +314,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Configuration_buildOptions_which_have_mappings_overlapping_with_includes_in_same_configuration_merged_items_have_Link_metadata()
+        public void ConfigurationBuildOptionsWhichHaveMappingsOverlappingWithIncludesInSameConfigurationMergedItemsHaveLinkMetadata()
         {
             var mockProj = RunConfigurationsAndBuildOptionsRuleOnPj(@"
                 {
@@ -340,7 +382,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
         
         [Fact]
-        public void Configuration_buildOptions_which_have_mappings_overlapping_with_includes_in_root_buildoptions_has_remove()
+        public void ConfigurationBuildOptionsWhichHaveMappingsOverlappingWithIncludesInRootBuildoptionsHasRemove()
         {
             var mockProj = RunConfigurationsAndBuildOptionsRuleOnPj(@"
                 {
@@ -403,7 +445,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Configuration_buildOptions_which_have_mappings_overlapping_with_includes_in_same_configuration_and_root_buildOptions_have_removes_and_Link_metadata_and_encompassed_items_are_merged()
+        public void ConfigurationBuildOptionsWhichHaveMappingsOverlappingWithIncludesInSameConfigurationAndRootBuildOptionsHaveRemovesAndLinkMetadataAndEncompassedItemsAreMerged()
         {
             var mockProj = RunConfigurationsAndBuildOptionsRuleOnPj(@"
                 {
@@ -486,17 +528,25 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         private ProjectRootElement RunConfigurationsRuleOnPj(string s, string testDirectory = null)
         {
             testDirectory = testDirectory ?? Temp.CreateDirectory().Path;
-            return TemporaryProjectFileRuleRunner.RunRules(new[] {new MigrateConfigurationsRule()}, s, testDirectory);
+            return RunRulesOnPj(s, new[] { new MigrateConfigurationsRule() }, testDirectory);
         }
 
         private ProjectRootElement RunConfigurationsAndBuildOptionsRuleOnPj(string s, string testDirectory = null)
         {
-            testDirectory = testDirectory ?? Temp.CreateDirectory().Path;
-            return TemporaryProjectFileRuleRunner.RunRules(new IMigrationRule[]
+            return RunRulesOnPj(
+                s, 
+                new IMigrationRule[]
                 {
                     new MigrateBuildOptionsRule(),
                     new MigrateConfigurationsRule()
-                }, s, testDirectory);
+                },
+                testDirectory);
+        }
+
+        private ProjectRootElement RunRulesOnPj(string s, IMigrationRule[] migrationRules, string testDirectory = null)
+        {
+            testDirectory = testDirectory ?? Temp.CreateDirectory().Path;
+            return TemporaryProjectFileRuleRunner.RunRules(migrationRules, s, testDirectory);
         }
     }
 }
