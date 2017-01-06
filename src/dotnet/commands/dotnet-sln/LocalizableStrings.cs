@@ -23,12 +23,5 @@ namespace Microsoft.DotNet.Tools.Sln
         public const string CreateAppFullName = ".NET Create a solution file Command";
         public const string CreateSubcommandHelpText = "Create a solution file.";
 
-        public const string MultipleSlnFilesError = "The current directory contains more than one solution file. Please specify the solution file to use.";
-
-        public const string ProjectFileNotFoundError = "The specified project {0} was not found.";
-
-        public const string SolutionFileNotFoundError = "The specified solution file {0} was not found.";
-
-        public const string NoSolutionFileError = "The current directory does not contain a solution file. Please specify a solution file to use.";
     }
 }
