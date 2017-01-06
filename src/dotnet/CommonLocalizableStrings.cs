@@ -159,6 +159,7 @@ namespace Microsoft.DotNet.Tools
         public const string ArgumentsProjectDescription = "The project file to operate on. If a file is not specified, the command will search the current directory for one.";
         public const string ArgumentsSolutionDescription = "Solution file to operate on. If not specified, the command will search the current directory for one.";
         public const string CmdSlnFile = "<SLN_FILE>";
+        public const string CmdProjectFile = "<PROJECT>"
 
         /// commands
         public const string CmdFramework = "FRAMEWORK";

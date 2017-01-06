@@ -9,15 +9,13 @@ namespace Microsoft.DotNet.Tools.Sln
 
         public const string AppDescription = "Command to add, remove, and list projects from the solution (SLN) file.";
 
-        public const string AppHelpText = "Projects to add to the solution.";
+        public const string AppHelpText = "Projects to add or to remove from the solution.";
 
-        public const string CmdSlnFile = "<SLN_FILE>";
-        
-        public const string AddAppFullName = ".NET Add project to a solution file Command";
-        public const string AddSubcommandHelpText = "Add a specified project to the solution.";
+        public const string AddAppFullName = ".NET Add project(s) to a solution file Command";
+        public const string AddSubcommandHelpText = "Add a specified project(s) to the solution.";
 
-        public const string RemoveAppFullName = ".NET Remove project from a solution file Command";
-        public const string RemoveSubcommandHelpText = "Remove the specified project from the solution. The project is not impacted.";
+        public const string RemoveAppFullName = ".NET Remove project(s) from a solution file Command";
+        public const string RemoveSubcommandHelpText = "Remove the specified project(s) from the solution. The project is not impacted.";
         
         public const string ListAppFullName = ".NET List project(s) in a solution file Command";
         public const string ListSubcommandHelpText = "List all projects in the solution.";
