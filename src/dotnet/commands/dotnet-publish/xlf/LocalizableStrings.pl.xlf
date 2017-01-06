@@ -60,7 +60,7 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="translated">Konfiguracja do użycia na potrzeby kompilacji projektu. Opcją domyślną w przypadku większości projektów jest „Debug”.</target>
+        <target state="translated">Konfiguracja do użycia na potrzeby kompilacji projektu.  Opcją domyślną w przypadku większości projektów jest „Debug”.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOption">

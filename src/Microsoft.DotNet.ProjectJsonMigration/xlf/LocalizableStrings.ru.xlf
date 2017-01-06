@@ -15,12 +15,12 @@
       </trans-unit>
       <trans-unit id="NoXprojFileGivenError">
         <source>{0}: No xproj file given.</source>
-        <target state="translated">{0}: не указан файл XPROJ.</target>
+        <target state="translated">{0}: {0}: не указан XPROJ-файл.</target>
         <note />
       </trans-unit>
       <trans-unit id="MultipleXprojFilesError">
         <source>Multiple xproj files found in {0}, please specify which to use</source>
-        <target state="translated">В {0} найдено несколько файлов XPROJ, выберите один из них.</target>
+        <target state="translated">В {0} найдено несколько XPROJ-файлов, выберите один из них.</target>
         <note />
       </trans-unit>
       <trans-unit id="NullMSBuildProjectTemplateError">
@@ -45,7 +45,7 @@
       </trans-unit>
       <trans-unit id="NullDestinationElementError">
         <source>expected destinationElement to not be null</source>
-        <target state="translated">ожидается отличное от NULL значение destinationElement</target>
+        <target state="translated">Ожидается отличное от NULL значение destinationElement</target>
         <note />
       </trans-unit>
       <trans-unit id="DiagnosticMessageTemplate">
@@ -220,7 +220,7 @@
       </trans-unit>
       <trans-unit id="ImportsTransformNullFor">
         <source>{0}: imports transform null for {1}</source>
-        <target state="translated">{0}: импорты преобразуют значение NULL для {1}.</target>
+        <target state="translated">{0}: импорты преобразуют значение NULL для {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="MigratingCountXprojToCsprojReferences">
@@ -245,7 +245,7 @@
       </trans-unit>
       <trans-unit id="ItemTransformAppliatorItemCompletelyMerged">
         <source>{0}: Item completely merged</source>
-        <target state="translated">{0}: элемент полностью объединен.</target>
+        <target state="translated">{0}: элемент полностью объединен</target>
         <note />
       </trans-unit>
       <trans-unit id="ItemTransformApplicatorAddItemHeader">

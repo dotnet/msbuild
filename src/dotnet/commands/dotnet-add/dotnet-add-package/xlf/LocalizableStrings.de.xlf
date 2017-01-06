@@ -5,73 +5,73 @@
       <group id="src/dotnet/commands/dotnet-add/dotnet-add-package/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET Add Package reference Command</source>
-        <target state="new">.NET Add Package reference Command</target>
-        <note></note>
+        <target state="translated">.NET Add-Befehl für Paketverweise</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Command to add package reference</source>
-        <target state="new">Command to add package reference</target>
-        <note></note>
+        <target state="translated">Befehl zum Hinzufügen eines Paketverweises</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppHelpText">
         <source>Package references to add</source>
-        <target state="new">Package references to add</target>
-        <note></note>
+        <target state="translated">Hinzuzufügende Paketverweise</target>
+        <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageReference">
         <source>Please specify one package reference to add.</source>
-        <target state="new">Please specify one package reference to add.</target>
-        <note></note>
+        <target state="translated">Geben Sie einen Paketverweis an, der hinzugefügt werden soll.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Add reference only when targetting a specific framework</source>
-        <target state="new">Add reference only when targetting a specific framework</target>
-        <note></note>
+        <target state="translated">Verweis nur bei Verwendung eines bestimmten Zielframeworks hinzufügen</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdNoRestoreDescription">
         <source>Add reference without performing restore preview and compatibility check.</source>
-        <target state="new">Add reference without performing restore preview and compatibility check.</target>
-        <note></note>
+        <target state="translated">Fügt einen Verweis hinzu, ohne dass eine Wiederherstellungsvorschau oder eine Kompatibilitätsprüfung durchgeführt wird.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
         <source>Use specific NuGet package sources to use during the restore.</source>
-        <target state="new">Use specific NuGet package sources to use during the restore.</target>
-        <note></note>
+        <target state="translated">Gibt spezifische NuGet-Paketquellen für die Wiederherstellung an.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPackageDirectoryDescription">
         <source>Restore the packages to this Directory .</source>
-        <target state="new">Restore the packages to this Directory .</target>
-        <note></note>
+        <target state="translated">Stellt die Pakete in diesem Verzeichnis wieder her.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>Version for the package to be added.</source>
-        <target state="new">Version for the package to be added.</target>
-        <note></note>
+        <target state="translated">Version für das Paket, das hinzugefügt werden soll.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdDGFileException">
         <source>Unable to Create Dependency graph file for project '{0}'. Cannot add package reference.</source>
-        <target state="new">Unable to Create Dependency graph file for project '{0}'. Cannot add package reference.</target>
-        <note></note>
+        <target state="translated">Die Abhängigkeitsdiagrammdatei für das Projekt "{0}" konnte nicht wiederhergestellt werden. Der Paketverweis kann nicht hinzugefügt werden.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdVersion">
         <source>VERSION</source>
-        <target state="new">VERSION</target>
-        <note></note>
+        <target state="translated">VERSION</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
-        <target state="new">FRAMEWORK</target>
-        <note></note>
+        <target state="translated">FRAMEWORK</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSource">
         <source>SOURCE</source>
-        <target state="new">SOURCE</target>
-        <note></note>
+        <target state="translated">SOURCE</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPackageDirectory">
         <source>PACKAGE_DIRECTORY</source>
-        <target state="new">PACKAGE_DIRECTORY</target>
-        <note></note>
+        <target state="translated">PACKAGE_DIRECTORY</target>
+        <note />
       </trans-unit>
     </body>
   </file>

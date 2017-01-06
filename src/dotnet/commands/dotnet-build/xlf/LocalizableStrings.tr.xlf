@@ -15,7 +15,7 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>Configuration to use for building the project. Default for most projects is  "Debug".</source>
-        <target state="translated">Projeyi derlemek için kullanılacak yapılandırma.  Çoğu proje için varsayılan, "Hata Ayıklama" seçeneğidir.</target>
+        <target state="translated">Projeyi derlemek için kullanılacak yapılandırma. Çoğu proje için varsayılan: "Debug".</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionName">

@@ -30,7 +30,7 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="translated">Zielframework der Veröffentlichung. Das Zielframework muss in der Projektdatei angegeben werden.</target>
+        <target state="translated">Zielframework für die Veröffentlichung. Das Zielframework muss in der Projektdatei angegeben werden.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOption">
@@ -40,7 +40,7 @@
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependented app.</source>
-        <target state="translated">Veröffentlichung des Projekts für eine bestimmte Laufzeit. Wird zum Erstellen einer eigenständigen Bereitstellung verwendet. Standardmäßig wird eine Framework-abhängige App veröffentlicht.</target>
+        <target state="translated">Veröffentlicht das Projekt für eine angegebene Laufzeit. Wird zum Erstellen einer eigenständigen Bereitstellung verwendet. Standardmäßig wird eine Framework-abhängige App veröffentlicht.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -60,7 +60,7 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="translated">Konfiguration für die Erstellung des Projekts. Standard für die meisten Projekte ist „Debug“.</target>
+        <target state="translated">Konfiguration für die Erstellung des Projekts.  Standard für die meisten Projekte ist "Debug".</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOption">
@@ -70,7 +70,7 @@
       </trans-unit>
       <trans-unit id="VersionSuffixOptionDescription">
         <source>Defines the value for the $(VersionSuffix) property in the project.</source>
-        <target state="translated">Definiert den Wert für die Eigenschaft „$(VersionSuffix)“ im Projekt.</target>
+        <target state="translated">Definiert den Wert für die Eigenschaft "$(VersionSuffix)" im Projekt.</target>
         <note />
       </trans-unit>
     </body>

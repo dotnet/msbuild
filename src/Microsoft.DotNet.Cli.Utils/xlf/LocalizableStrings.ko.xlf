@@ -65,7 +65,7 @@
       </trans-unit>
       <trans-unit id="ToolLibraryFound">
         <source>{0}: tool library found {1}</source>
-        <target state="translated">{0}: {1} 도구 라이브러리가 발견됨</target>
+        <target state="translated">{0}: 도구 라이브러리가 발견됨({1})</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildExePath">
@@ -172,7 +172,7 @@
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
         <source>Waiting for debugger to attach. Press ENTER to continue</source>
-        <target state="translated">연결할 디버거를 대기 중입니다. 계속하려면 ENTER 키를 누르세요.</target>
+        <target state="translated">디버거가 연결될 때까지 대기하는 중입니다. 계속하려면 &lt;Enter&gt; 키를 누르세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProcessId">

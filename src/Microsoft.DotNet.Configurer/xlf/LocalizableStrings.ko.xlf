@@ -17,7 +17,7 @@ You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-te
 Configuring...
 -------------------
 A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</source>
-        <target state="translated">.NET Core를 시작합니다!
+        <target state="translated">NET Core를 시작합니다!
 ---------------------
 .NET Core에 대한 자세한 내용은 https://aka.ms/dotnet-docs를 참조하세요. 사용 가능한 명령을 보려면 dotnet --help를 사용하거나 https://aka.ms/dotnet-cli-docs를 방문하세요.
 
@@ -29,7 +29,7 @@ A command is running to initially populate your local package cache, to improve 
 
 구성 중...
 -------------------
-초기에 로컬 패키지 캐시를 채우고, 복원 속도를 개선하고, 오프라인 액세스를 사용하도록 설정하기 위한 명령을 실행 중입니다. 완료하는 데 1분 정도 소요되며 한 번만 실행됩니다.</target>
+초기에 로컬 패키지 캐시를 채우고, 복원 속도를 개선하고, 오프라인 액세스를 사용하도록 설정하기 위한 명령을 실행 중입니다. 완료하는 데 최대 1분이 소요되며 한 번만 실행됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">

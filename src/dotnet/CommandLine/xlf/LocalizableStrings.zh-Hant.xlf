@@ -5,12 +5,12 @@
       <group id="src/dotnet/CommandLine/LocalizableStrings.resx" />
       <trans-unit id="LastArgumentMultiValueError">
         <source>The last argument '{0}' accepts multiple values. No more argument can be added.</source>
-        <target state="translated">最後一個引數 '{0}' 接受多個值。無法再新增更多引數。</target>
+        <target state="translated">最後一個引數 '{0}' 接受多個值。無法新增其他值。</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedValueForOptionError">
         <source>Unexpected value '{0}' for option '{1}'</source>
-        <target state="translated">選項 '{1}' 有未預期的值 '{0}'</target>
+        <target state="translated">選項 '{1}' 有非預期的值 '{0}'</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedArgumentError">
@@ -105,7 +105,7 @@
       </trans-unit>
       <trans-unit id="UsageCommandArgs">
         <source> [args]</source>
-        <target state="translated"> [args]</target>
+        <target state="translated"> [引數]</target>
         <note />
       </trans-unit>
       <trans-unit id="UsageCommandAdditionalArgs">
@@ -140,7 +140,7 @@
       </trans-unit>
       <trans-unit id="MSBuildAdditionalArgsHelpText">
         <source>Any extra options that should be passed to MSBuild. See 'dotnet msbuild -h' for available options.</source>
-        <target state="translated">應傳遞至 MSBuild 的任何其他選項。如需可用的選項，請參閱 'dotnet msbuild -h'。</target>
+        <target state="translated">任何應傳遞給 MSBuild 的額外選項。查看 'dotnet msbuild -h' 以得知可用的選項。</target>
         <note />
       </trans-unit>
     </body>

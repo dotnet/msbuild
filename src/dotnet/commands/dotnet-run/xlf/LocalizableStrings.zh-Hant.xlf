@@ -10,12 +10,12 @@
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Command used to run .NET apps</source>
-        <target state="translated">用來執行 .NET 應用程式的命令</target>
+        <target state="translated">用以執行 .NET 應用程式的命令</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionConfigurationDescription">
         <source>Configuration to use for building the project. Default for most projects is "Debug".</source>
-        <target state="translated">建置專案用的組態。多數專案預設為 "Debug"。</target>
+        <target state="translated">要用於建置專案的組態。多數專案的預設為 "Debug"。</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionFramework">
@@ -25,7 +25,7 @@
       </trans-unit>
       <trans-unit id="CommandOptionFrameworkDescription">
         <source>Build and run the app using the specified framework. The framework has to be specified in the project file. </source>
-        <target state="translated">使用指定的架構建置及執行應用程式。架構必須在專案檔中指定。</target>
+        <target state="translated">使用指定的架構建置及執行應用程式。架構必須在專案檔中指定。 </target>
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionProjectDescription">

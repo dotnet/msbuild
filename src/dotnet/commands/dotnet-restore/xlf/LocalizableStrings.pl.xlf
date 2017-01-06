@@ -75,13 +75,13 @@
       </trans-unit>
       <trans-unit id="CmdRuntimeOption">
         <source>RUNTIME_IDENTIFIER</source>
-        <target state="new">RUNTIME_IDENTIFIER</target>
-        <note></note>
+        <target state="translated">IDENTYFIKATOR_ŚRODOWISKA_URUCHOMIENIOWEGO</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdRuntimeOptionDescription">
         <source>Target runtime to restore packages for.</source>
-        <target state="new">Target runtime to restore packages for.</target>
-        <note></note>
+        <target state="translated">Docelowe środowisko uruchomieniowe, dla którego mają zostać przywrócone pakiety.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

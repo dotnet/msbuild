@@ -40,7 +40,7 @@
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependented app.</source>
-        <target state="translated">Publiez le projet pour un runtime donné. S'utilise pour la création d'un déploiement autonome. L'action par défaut consiste à publier une application dépendant d'un framework.</target>
+        <target state="translated">Publie le projet pour un runtime donné. Utilisé lors de la création d'un déploiement autonome. Le comportement par défaut consiste à publier une application dépendante du framework.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -60,7 +60,7 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="translated">Configuration à utiliser pour la génération du projet. La valeur par défaut pour la plupart des projets est "Debug".</target>
+        <target state="translated">Configuration à utiliser pour la génération du projet.  La valeur par défaut pour la plupart des projets est "Debug".</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOption">

@@ -75,13 +75,13 @@
       </trans-unit>
       <trans-unit id="CmdRuntimeOption">
         <source>RUNTIME_IDENTIFIER</source>
-        <target state="new">RUNTIME_IDENTIFIER</target>
-        <note></note>
+        <target state="translated">ÇALIŞMA_ZAMANI_TANIMLAYICISI</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdRuntimeOptionDescription">
         <source>Target runtime to restore packages for.</source>
-        <target state="new">Target runtime to restore packages for.</target>
-        <note></note>
+        <target state="translated">Paketlerin geri yükleneceği hedef çalışma zamanı.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

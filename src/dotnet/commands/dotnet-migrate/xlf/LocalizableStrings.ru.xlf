@@ -25,11 +25,11 @@
     - a solution.sln file, it will migrate the projects referenced in the solution.
     - a directory to migrate, it will recursively search for project.json files to migrate.
 Defaults to current directory if nothing is specified.</source>
-        <target state="translated">Путь к:
-    — переносимому файлу project.json;
-    — файлу global.json, выполняется миграция папок, указанных в файле global.json;
-    — файлу solution.sln, выполняется миграция проектов, на которые ссылается решение;
-    — переносимому каталогу, выполняется рекурсивный поиск файлов project.json для миграции.
+        <target state="translated">Путь:
+    — к переносимому файлу project.json;
+    — файлу global.json; выполняется миграция папок, указанных в файле global.json;
+    — файлу solution.sln, перенос которого приведет к переносу проектов, указанных по ссылкам в решении;
+    — переносимому каталогу; выполняется рекурсивный поиск файлов project.json для миграции.
 По умолчанию применяется текущий каталог, если не указана другая папка.</target>
         <note />
       </trans-unit>

@@ -40,7 +40,7 @@
       </trans-unit>
       <trans-unit id="ProjAlreadyExistsError">
         <source>{0} already exists. Has migration already been run?</source>
-        <target state="translated">{0} ist bereits vorhanden. Wurde die Migration bereits ausgeführt?</target>
+        <target state="translated">"{0}" ist bereits vorhanden. Wurde die Migration bereits ausgeführt?</target>
         <note />
       </trans-unit>
       <trans-unit id="NullDestinationElementError">
@@ -60,7 +60,7 @@
       </trans-unit>
       <trans-unit id="CannotMergeItemsWithoutCommonIncludeError">
         <source>Cannot merge items without a common include.</source>
-        <target state="translated">Zusammenführen von Elementen ohne gemeinsames „Include“ nicht möglich.</target>
+        <target state="translated">Zusammenführen von Elementen ohne gemeinsames "Include" nicht möglich.</target>
         <note />
       </trans-unit>
       <trans-unit id="PropertyTransformApplicatorWrongElementTypeError">
@@ -90,7 +90,7 @@
       </trans-unit>
       <trans-unit id="MIGRATE1013Arg">
         <source>The project.json specifies no target frameworks in {0}</source>
-        <target state="translated">Die „project.json“ gibt keine Zielframeworks in {0} an.</target>
+        <target state="translated">Die "project.json" gibt keine Zielframeworks in {0} an.</target>
         <note />
       </trans-unit>
       <trans-unit id="MIGRATE1014">
@@ -220,7 +220,7 @@
       </trans-unit>
       <trans-unit id="ImportsTransformNullFor">
         <source>{0}: imports transform null for {1}</source>
-        <target state="translated">{0}: Importiert „Transform NULL“ für {1}.</target>
+        <target state="translated">{0}: Importiert "Transform NULL" für {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="MigratingCountXprojToCsprojReferences">

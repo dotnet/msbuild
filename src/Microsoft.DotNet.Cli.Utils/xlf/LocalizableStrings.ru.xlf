@@ -30,12 +30,12 @@
       </trans-unit>
       <trans-unit id="UnableToLocateDotnetMultiplexer">
         <source>Unable to locate dotnet multiplexer</source>
-        <target state="translated">Не удается найти мультиплексор dotnet.</target>
+        <target state="translated">Не удалось найти мультиплексор dotnet</target>
         <note />
       </trans-unit>
       <trans-unit id="LookingForPreferCliRuntimeFile">
         <source>{0}: Looking for prefercliruntime file at `{1}`</source>
-        <target state="translated">{0}: поиск файла prefercliruntime в "{1}"</target>
+        <target state="translated">{0}: Поиск файла prefercliruntime "{1}"</target>
         <note />
       </trans-unit>
       <trans-unit id="AttemptingToResolve">
@@ -45,12 +45,12 @@
       </trans-unit>
       <trans-unit id="DidNotFindAMatchingProject">
         <source>{0}: Did not find a matching project {1}.</source>
-        <target state="translated">{0}: не найден подходящий проект {1}.</target>
+        <target state="translated">{0}: Не найден соответствующий проект {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidCommandResolverArguments">
         <source>{0}: invalid commandResolverArguments</source>
-        <target state="translated">{0}: недопустимый commandResolverArguments</target>
+        <target state="translated">{0}: недопустимое значение commandResolverArguments</target>
         <note />
       </trans-unit>
       <trans-unit id="DoesNotExist">
@@ -65,7 +65,7 @@
       </trans-unit>
       <trans-unit id="ToolLibraryFound">
         <source>{0}: tool library found {1}</source>
-        <target state="translated">{0}: найдена библиотека средств {1}.</target>
+        <target state="translated">{0}: найдена библиотека средств {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildExePath">
@@ -75,7 +75,7 @@
       </trans-unit>
       <trans-unit id="MSBuildProjectPath">
         <source>{0}: MSBuild project path = {1}</source>
-        <target state="translated">{0}: путь проекта MSBuild — {1}</target>
+        <target state="translated">{0}: путь проекта MSBuild = {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="MultipleProjectFilesFound">
@@ -85,7 +85,7 @@
       </trans-unit>
       <trans-unit id="DidNotFindProject">
         <source>{0}: ProjectFactory did not find Project.</source>
-        <target state="translated">{0}: фабрика проектов не нашла проект.</target>
+        <target state="translated">{0}: Фабрика проектов не нашла проект.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolvingCommandSpec">
@@ -172,7 +172,7 @@
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
         <source>Waiting for debugger to attach. Press ENTER to continue</source>
-        <target state="translated">Ожидание подключения отладчика. Для продолжения нажмите клавишу ВВОД.</target>
+        <target state="translated">Ожидание подключения отладчика. Нажмите ВВОД, чтобы продолжить</target>
         <note />
       </trans-unit>
       <trans-unit id="ProcessId">

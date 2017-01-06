@@ -5,7 +5,7 @@
       <group id="src/dotnet/CommandLine/LocalizableStrings.resx" />
       <trans-unit id="LastArgumentMultiValueError">
         <source>The last argument '{0}' accepts multiple values. No more argument can be added.</source>
-        <target state="translated">Son bağımsız değişken ('{0}') birden çok değer kabul ediyor. Daha fazla bağımsız değişken eklenemez.</target>
+        <target state="translated">Son bağımsız değişken ('{0}') birden çok değer kabul eder. Daha fazla bağımsız değişken eklenemez.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedValueForOptionError">
@@ -140,7 +140,7 @@
       </trans-unit>
       <trans-unit id="MSBuildAdditionalArgsHelpText">
         <source>Any extra options that should be passed to MSBuild. See 'dotnet msbuild -h' for available options.</source>
-        <target state="translated">MSBuild’e geçirilmesi gereken ek seçenekler. Kullanılabilir seçenekler için bkz. 'dotnet msbuild -h'.</target>
+        <target state="translated">MSBuild’e geçirilmesi gereken ek seçenekler. Kullanılabilir seçenekler için 'dotnet msbuild -h' komutunu kullanın.</target>
         <note />
       </trans-unit>
     </body>

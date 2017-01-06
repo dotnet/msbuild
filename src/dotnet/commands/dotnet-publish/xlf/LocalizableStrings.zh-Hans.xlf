@@ -30,7 +30,7 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="translated">发布的目标框架。必须在项目文件中指定目标框架。</target>
+        <target state="translated">要发布的目标框架。目标框架必须在项目文件中指定。</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOption">
@@ -40,7 +40,7 @@
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependented app.</source>
-        <target state="translated">针对给定运行时发布项目。创建自包含部署时使用此项。默认操作是发布依赖框架的应用。</target>
+        <target state="translated">针对给定运行时发布项目。创建自包含部署时使用此项。默认操作为发布依赖框架的应用。</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -60,7 +60,7 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="translated">用于生成项目的配置。大多数项目的默认值为“Debug”。</target>
+        <target state="translated">用于生成项目的配置。对大多数项目的默认值是 "Debug"。</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOption">

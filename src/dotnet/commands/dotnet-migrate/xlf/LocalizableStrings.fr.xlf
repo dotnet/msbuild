@@ -25,12 +25,12 @@
     - a solution.sln file, it will migrate the projects referenced in the solution.
     - a directory to migrate, it will recursively search for project.json files to migrate.
 Defaults to current directory if nothing is specified.</source>
-        <target state="translated">Chemin de l'un des éléments suivants :
-    - fichier project.json à faire migrer ;
-    - fichier global.json qui effectue la migration des dossiers spécifiés dans global.json ;
-    - fichier solution.sln qui effectue la migration des projets référencés dans la solution ;
-    - répertoire à faire migrer, où est effectuée une recherche récursive des fichiers project.json à faire migrer.
-La valeur par défaut correspond au répertoire actif, si rien n'est spécifié.</target>
+        <target state="translated">Chemin vers l'une des valeurs suivantes :
+    - un fichier project.json à migrer.
+    - un fichier global.json (migre les dossiers spécifiés dans global.json).
+    - un fichier solution.sln (migre les projets référencés dans la solution).
+    - un répertoire à migrer (recherche de manière récursive les fichiers project.json à migrer).
+Sélectionne par défaut le répertoire actif si rien n'est spécifié.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTemplateDescription">

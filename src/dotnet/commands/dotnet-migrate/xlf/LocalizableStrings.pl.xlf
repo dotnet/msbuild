@@ -29,7 +29,7 @@ Defaults to current directory if nothing is specified.</source>
     — Plik project.json, który ma zostać zmigrowany.
     — Plik global.json — zostaną zmigrowane foldery podane w tym pliku.
     — Plik solution.sln — zostaną zmigrowane projekty, do których istnieją odwołania w rozwiązaniu.
-    — katalog, który ma zostać zmigrowany — zostaną rekursywnie wyszukane pliki project.json do zmigrowania.
+    — Katalog, który ma zostać zmigrowany — zostaną rekursywnie wyszukane pliki project.json do zmigrowania.
 W przypadku braku podanej wartości domyślnie jest to bieżący katalog.</target>
         <note />
       </trans-unit>

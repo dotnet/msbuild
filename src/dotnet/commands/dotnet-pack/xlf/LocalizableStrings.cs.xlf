@@ -25,7 +25,7 @@
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
         <source>Skip building the project prior to packing. By default, the project will be built.</source>
-        <target state="translated">Přeskočte sestavení projektu, dokud ho nezabalíte. Projekt bude sestaven automaticky.</target>
+        <target state="translated">Přeskočí sestavení projektu, dokud ho nezabalíte. Projekt se sestaví automaticky.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSymbolsDescription">
@@ -45,7 +45,7 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="translated">Konfigurace použitá k sestavení projektu. Výchozí možnost u většiny projektů je „Debug“.</target>
+        <target state="translated">Konfigurace použitá k sestavení projektu.  Výchozí možnost u většiny projektů je „Debug“.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffix">

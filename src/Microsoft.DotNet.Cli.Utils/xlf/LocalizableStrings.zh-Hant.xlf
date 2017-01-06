@@ -30,12 +30,12 @@
       </trans-unit>
       <trans-unit id="UnableToLocateDotnetMultiplexer">
         <source>Unable to locate dotnet multiplexer</source>
-        <target state="translated">找不到 dotnet multiplexer</target>
+        <target state="translated">找不到 dotnet 多工器</target>
         <note />
       </trans-unit>
       <trans-unit id="LookingForPreferCliRuntimeFile">
         <source>{0}: Looking for prefercliruntime file at `{1}`</source>
-        <target state="translated">{0}: 正在於 `{1}` 尋找 prefercliruntime 檔</target>
+        <target state="translated">{0}:正於 `{1}` 尋找 prefercliruntime 檔案</target>
         <note />
       </trans-unit>
       <trans-unit id="AttemptingToResolve">
@@ -45,7 +45,7 @@
       </trans-unit>
       <trans-unit id="DidNotFindAMatchingProject">
         <source>{0}: Did not find a matching project {1}.</source>
-        <target state="translated">{0}: 未找到相符的專案 {1}。</target>
+        <target state="translated">{0}:未找到相符的專案 {1}。</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidCommandResolverArguments">
@@ -70,22 +70,22 @@
       </trans-unit>
       <trans-unit id="MSBuildExePath">
         <source>{0}: MSBUILD_EXE_PATH = {1}</source>
-        <target state="translated">{0}: MSBUILD_EXE_PATH = {1}</target>
+        <target state="translated">{0}:MSBUILD_EXE_PATH = {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildProjectPath">
         <source>{0}: MSBuild project path = {1}</source>
-        <target state="translated">{0}: MSBuild 專案路徑 = {1}</target>
+        <target state="translated">{0}:MSBuild 專案路徑 = {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="MultipleProjectFilesFound">
         <source>Specify which project file to use because this '{0}' contains more than one project file.</source>
-        <target state="translated">指定要使用的專案檔，因為這個 '{0}' 包含多個專案檔。</target>
+        <target state="translated">因為這個 '{0}' 包含多個專案檔，所以請指定要使用的專案檔。</target>
         <note />
       </trans-unit>
       <trans-unit id="DidNotFindProject">
         <source>{0}: ProjectFactory did not find Project.</source>
-        <target state="translated">{0}: ProjectFactory 未找到專案。</target>
+        <target state="translated">{0}:ProjectFactory 未找到專案。</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolvingCommandSpec">
@@ -100,7 +100,7 @@
       </trans-unit>
       <trans-unit id="AttemptingToResolveCommandSpec">
         <source>{0}: Attempting to resolve command spec from tool {1}</source>
-        <target state="translated">{0}: 正在嘗試從工具 {1} 解析 command spec</target>
+        <target state="translated">{0}:正在嘗試從工具 {1} 解析 command spec</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetPackagesRoot">
@@ -167,12 +167,12 @@
       </trans-unit>
       <trans-unit id="NoExecutableFoundMatchingCommand">
         <source>No executable found matching command "{0}"</source>
-        <target state="translated">沒有與命令 "{0}" 相符的可執行檔</target>
+        <target state="translated">未找到與命令 "{0}" 相符的可執行檔</target>
         <note />
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
         <source>Waiting for debugger to attach. Press ENTER to continue</source>
-        <target state="translated">正在等候附加偵錯工具。按 ENTER 繼續進行</target>
+        <target state="translated">正在等候偵錯工具進行連結。按 ENTER 繼續</target>
         <note />
       </trans-unit>
       <trans-unit id="ProcessId">

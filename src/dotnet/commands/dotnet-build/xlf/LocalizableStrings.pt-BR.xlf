@@ -15,7 +15,7 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>Configuration to use for building the project. Default for most projects is  "Debug".</source>
-        <target state="translated">Configuração a ser usada para compilar o projeto. O padrão para a maioria dos projetos é "Debug".</target>
+        <target state="translated">A configuração a ser usada para criar o projeto. O padrão para a maioria dos projetos é “Depurar”.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionName">
@@ -25,7 +25,7 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>Target framework to build for. The target framework has to be specified in the project file.</source>
-        <target state="translated">Estrutura de destino na qual compilar. A estrutura de destino deve ser especificada no arquivo de projeto.</target>
+        <target state="translated">A estrutura de destino para a qual compilar. A estrutura de destino deve ser especificada no arquivo de projeto.</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionName">

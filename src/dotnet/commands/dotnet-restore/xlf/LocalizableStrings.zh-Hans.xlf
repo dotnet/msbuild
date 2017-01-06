@@ -75,13 +75,13 @@
       </trans-unit>
       <trans-unit id="CmdRuntimeOption">
         <source>RUNTIME_IDENTIFIER</source>
-        <target state="new">RUNTIME_IDENTIFIER</target>
-        <note></note>
+        <target state="translated">RUNTIME_IDENTIFIER</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdRuntimeOptionDescription">
         <source>Target runtime to restore packages for.</source>
-        <target state="new">Target runtime to restore packages for.</target>
-        <note></note>
+        <target state="translated">要还原包的目标运行时。</target>
+        <note />
       </trans-unit>
     </body>
   </file>

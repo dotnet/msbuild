@@ -10,14 +10,14 @@
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Command to list project to project (p2p) references</source>
-        <target state="translated">命令，用以列出專案對專案 (p2p) 參考</target>
+        <target state="translated">用以列出專案對專案 (p2p) 參考的命令</target>
         <note />
       </trans-unit>
       <trans-unit id="NoReferencesFound">
         <source>There are no {0} references in project {1}.
 {0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
-        <target state="translated">專案 {1} 中沒有任何 {0} 參考。
-{0} 是所要求項目的類型 (專案、套件、p2p)，而 {1} 是操作的物件 (專案檔或方案檔)。</target>
+        <target state="translated">專案 {1} 中沒有 {0} 參考。
+{0} 是所要求項目的類型 (專案、套件、p2p)，而 {1} 是操作的物件 (專案檔或方案檔)。 </target>
         <note />
       </trans-unit>
     </body>

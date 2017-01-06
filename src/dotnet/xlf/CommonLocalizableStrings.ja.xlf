@@ -575,7 +575,7 @@
       </trans-unit>
       <trans-unit id="MoreThanOneSolutionInDirectory">
         <source>Found more than one solution file in {0}. Please specify which one to use.</source>
-        <target state="translated">{0} に複数のソリューションが見つかりました。使用するプロジェクトを指定してください。</target>
+        <target state="translated">{0} に複数のソリューション ファイルが見つかりました。使用するものを 1 つ指定してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionAlreadyContainsProject">
@@ -595,7 +595,7 @@
       </trans-unit>
       <trans-unit id="ProjectNotCompatibleWithFrameworks">
         <source>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Please review the project you are trying to add and verify that is compatible with the following targets:</source>
-        <target state="translated">2 つのプロジェクト間のターゲット フレームワークに互換性がないため、プロジェクト `{0}` を追加できません。追加しようとしているプロジェクトを確認し、次のターゲットと互換性があることを確認してください:</target>
+        <target state="translated">2 つのプロジェクト間のターゲット フレームワークに互換性がないため、プロジェクト `{0}` を追加できません。追加しようとしているプロジェクトを確認し、次のターゲットと互換性があることを確認してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectDoesNotTargetFramework">
@@ -606,7 +606,7 @@
       <trans-unit id="ProjectCouldNotBeEvaluated">
         <source>Project `{0}` could not be evaluated. Evaluation failed with following error:
 {1}</source>
-        <target state="translated">プロジェクト `{0}` を評価できませんでした。評価は次のエラーで失敗しました:
+        <target state="translated">プロジェクト `{0}` を評価できませんでした。評価は次のエラーにより失敗しました:
 {1}</target>
         <note />
       </trans-unit>

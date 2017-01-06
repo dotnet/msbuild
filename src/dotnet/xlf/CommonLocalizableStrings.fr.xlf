@@ -575,7 +575,7 @@
       </trans-unit>
       <trans-unit id="MoreThanOneSolutionInDirectory">
         <source>Found more than one solution file in {0}. Please specify which one to use.</source>
-        <target state="translated">Plusieurs fichiers solution trouvés dans {0}. Spécifiez celui qui doit être utilisé.</target>
+        <target state="translated">Plusieurs fichiers solution trouvés dans {0}. Spécifiez celui à utiliser.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionAlreadyContainsProject">
@@ -606,7 +606,7 @@
       <trans-unit id="ProjectCouldNotBeEvaluated">
         <source>Project `{0}` could not be evaluated. Evaluation failed with following error:
 {1}</source>
-        <target state="translated">Impossible d'évaluer le projet '{0}'. Échec de l'évaluation en raison de l'erreur suivante :
+        <target state="translated">Impossible d'évaluer le projet '{0}'. L'évaluation a échoué avec l'erreur suivante :
 {1}</target>
         <note />
       </trans-unit>

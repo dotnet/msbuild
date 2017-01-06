@@ -25,7 +25,7 @@
     - a solution.sln file, it will migrate the projects referenced in the solution.
     - a directory to migrate, it will recursively search for project.json files to migrate.
 Defaults to current directory if nothing is specified.</source>
-        <target state="translated">다음 중 하나의 경로입니다. 
+        <target state="translated">다음 중 하나의 경로입니다.
     - 마이그레이션할 project.json 파일
     - global.json 파일. global.json에 지정된 폴더를 마이그레이션합니다.
     - solution.sln 파일. 솔루션에서 참조된 프로젝트를 마이그레이션합니다.

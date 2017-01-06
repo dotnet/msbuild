@@ -15,7 +15,7 @@
       </trans-unit>
       <trans-unit id="CmdProjectArgument">
         <source>PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</source>
-        <target state="translated">PROJECT_JSON/GLOBAL_JSON/PROJECT_DIR</target>
+        <target state="translated">PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdProjectArgumentDescription">
@@ -25,11 +25,11 @@
     - a solution.sln file, it will migrate the projects referenced in the solution.
     - a directory to migrate, it will recursively search for project.json files to migrate.
 Defaults to current directory if nothing is specified.</source>
-        <target state="translated">次のいずれかへのパス:
+        <target state="translated">次のいずれかへのパスです。
    - 移行する project.json ファイル。
    - global.json ファイル。global.json に指定されているフォルダーを移行します。
    - solution.sln ファイル。ソリューションで参照されているプロジェクトを移行します。
-    - 移行するディレクトリ。移行する project.json ファイルを再帰的に検索します。
+   - 移行するディレクトリ。移行する project.json ファイルを再帰的に検索します。
 何も指定しない場合、既定は現在のディレクトリです。</target>
         <note />
       </trans-unit>

@@ -485,7 +485,7 @@
       </trans-unit>
       <trans-unit id="NoReferencesFound">
         <source>There are no {0} references in project {1}. ;; {0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
-        <target state="translated">Non ci sono riferimenti a {0} nel progetto {1}. ;; {0} è il tipo dell'elemento richiesto (progetto, pacchetto o P2P) e {1} è l'oggetto su cui si interviene (file di progetto o di soluzione).</target>
+        <target state="translated">Non ci sono riferimenti a {0} nel progetto {1}. ;; {0} è il tipo dell'elemento richiesto (progetto, pacchetto o P2P) e {1} è l'oggetto su cui si interviene (file di progetto o di soluzione). </target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsFound">
@@ -550,12 +550,12 @@
       </trans-unit>
       <trans-unit id="SpecifiedNameExists">
         <source>Specified name {0} already exists. Please specify a different name.</source>
-        <target state="translated">Il nome specificato {0} esiste già. Specificarne uno diverso.</target>
+        <target state="translated">Il nome specificato {0} esiste già. Specificare un nome diverso.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifiedAliasExists">
         <source>Specified alias {0} already exists. Please specify a different alias.</source>
-        <target state="translated">L'alias specificato {0} esiste già. Specificarne uno diverso.</target>
+        <target state="translated">L'alias specificato {0} esiste già. Specificare un alias diverso.</target>
         <note />
       </trans-unit>
       <trans-unit id="MandatoryParameterMissing">
