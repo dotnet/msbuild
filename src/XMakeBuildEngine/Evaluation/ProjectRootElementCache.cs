@@ -206,8 +206,8 @@ namespace Microsoft.Build.Evaluation
 
                 if (preserveFormatting != null && projectRootElement != null && projectRootElement.XmlDocument.PreserveWhitespace != preserveFormatting)
                 {
-                    //  Cached project doesn't match preserveFormatting setting, so don't use it
-                    projectRootElement = null;
+                    //  Cached project doesn't match preserveFormatting setting, so reload it
+                    projectRootElement.Reload(true, preserveFormatting);
                 }
 
                 if (projectRootElement != null && _autoReloadFromDisk)
@@ -218,7 +218,7 @@ namespace Microsoft.Build.Evaluation
                     // It's an in-memory project that hasn't been saved yet.
                     if (fileInfo != null)
                     {
-                        bool forgetEntry = false;
+                        bool reloadEntry = false;
 
                         if (fileInfo.LastWriteTime != projectRootElement.LastWriteTimeWhenRead)
                         {
@@ -228,7 +228,7 @@ namespace Microsoft.Build.Evaluation
                             // to force a load from disk. There might then exist more than one ProjectRootElement with the same path,
                             // but clients ought not get themselves into such a state - and unless they save them to disk,
                             // it may not be a problem.  
-                            forgetEntry = true;
+                            reloadEntry = true;
                         }
                         else if (!String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDCACHECHECKFILECONTENT")))
                         {
@@ -248,16 +248,14 @@ namespace Microsoft.Build.Evaluation
 
                             if (diskContent != cacheContent)
                             {
-                                forgetEntry = true;
+                                reloadEntry = true;
                             }
                         }
 
-                        if (forgetEntry)
+                        if (reloadEntry)
                         {
-                            ForgetEntry(projectRootElement);
-
-                            DebugTraceCache("Out of date dropped from XML cache: ", projectFile);
-                            projectRootElement = null;
+                            DebugTraceCache("Out of date, reloaded: ", projectFile);
+                            projectRootElement.Reload(true, null);
                         }
                     }
                 }

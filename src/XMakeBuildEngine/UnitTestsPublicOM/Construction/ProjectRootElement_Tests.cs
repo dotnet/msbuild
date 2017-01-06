@@ -1306,16 +1306,33 @@ Project(""{";
 <Project xmlns = 'msbuildnamespace'>
 </Project>";
 
-            var collection = new ProjectCollection();
-            var projectXml = ProjectRootElement.Create(
-                XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(project))),
-                collection,
-                preserveFormatting: true);
+            using (var projectFiles = new Helpers.TestProjectWithFiles("", new[] {"build.proj"}))
+            using (var projectCollection = new ProjectCollection())
+            {
+                var projectFile = projectFiles.CreatedFiles.First();
 
-            projectXml.Save(FileUtilities.GetTemporaryFile());
+                var projectXml = ProjectRootElement.Create(
+                    XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(project))),
+                    projectCollection,
+                    preserveFormatting: true);
 
-            Assert.NotNull(ProjectRootElement.TryOpen(projectXml.FullPath, collection, preserveFormatting: true));
-            Assert.Null(ProjectRootElement.TryOpen(projectXml.FullPath, collection, preserveFormatting: false));
+                projectXml.Save(projectFile);
+
+                var xml0 = ProjectRootElement.TryOpen(projectXml.FullPath, projectCollection, preserveFormatting: true);
+                Assert.True(xml0.PreserveFormatting);
+
+                var xml1 = ProjectRootElement.TryOpen(projectXml.FullPath, projectCollection, preserveFormatting: false);
+                Assert.False(xml1.PreserveFormatting);
+
+                var xml2 = ProjectRootElement.TryOpen(projectXml.FullPath, projectCollection, preserveFormatting: null);
+                // reuses existing setting
+                Assert.False(xml2.PreserveFormatting);
+
+                Assert.NotNull(xml0);
+                
+                Assert.Same(xml0, xml1);
+                Assert.Same(xml0, xml2);
+            }
         }
 
         [Theory]
