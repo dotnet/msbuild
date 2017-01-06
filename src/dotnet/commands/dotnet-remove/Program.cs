@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Tools.Remove.PackageReference;
 using Microsoft.DotNet.Tools.Remove.ProjectFromSolution;
 using Microsoft.DotNet.Tools.Remove.ProjectToProjectReference;
 
@@ -18,6 +19,7 @@ namespace Microsoft.DotNet.Tools.Remove
             {
                 RemoveProjectFromSolutionCommand.Create,
                 RemoveProjectToProjectReferenceCommand.Create,
+                RemovePackageReferenceCommand.Create
             };
 
         public static int Run(string[] args)
