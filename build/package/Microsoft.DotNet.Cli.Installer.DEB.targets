@@ -42,6 +42,13 @@
       <HostFxrDebianPackageName>dotnet-hostfxr-$(HostFxrDebianPackageVersion)</HostFxrDebianPackageName>
       <HostFxrDebianPackageName>$(HostFxrDebianPackageName.ToLower())</HostFxrDebianPackageName>
       <HostDebianPackageName>dotnet-host</HostDebianPackageName>
+
+      <AdditionalSharedFxDebianPackageVersion>$(AdditionalSharedFrameworkVersion)</AdditionalSharedFxDebianPackageVersion>
+      <AdditionalSharedFxDebianPackageName>dotnet-sharedframework-$(SharedFrameworkName)-$(AdditionalSharedFxDebianPackageVersion)</AdditionalSharedFxDebianPackageName>
+      <AdditionalSharedFxDebianPackageName>$(AdditionalSharedFxDebianPackageName.ToLower())</AdditionalSharedFxDebianPackageName>
+      <AdditionalHostFxrDebianPackageVersion>$(AdditionalHostFxrVersion)</AdditionalHostFxrDebianPackageVersion>
+      <AdditionalHostFxrDebianPackageName>dotnet-hostfxr-$(AdditionalHostFxrDebianPackageVersion)</AdditionalHostFxrDebianPackageName>
+      <AdditionalHostFxrDebianPackageName>$(AdditionalHostFxrDebianPackageName.ToLower())</AdditionalHostFxrDebianPackageName>
     </PropertyGroup>
 
     <!-- Inputs -->
@@ -86,14 +93,8 @@
       <DebianConfigTokenValues Include="%SHARED_FRAMEWORK_DEBIAN_PACKAGE_NAME%">
         <ReplacementString>$(SharedFxDebianPackageName)</ReplacementString>
       </DebianConfigTokenValues>
-      <DebianConfigTokenValues Include="%SHARED_FRAMEWORK_NUGET_NAME%">
-        <ReplacementString>$(SharedFrameworkName)</ReplacementString>
-      </DebianConfigTokenValues>
-      <DebianConfigTokenValues Include="%SHARED_FRAMEWORK_NUGET_VERSION%">
-        <ReplacementString>$(SharedFrameworkVersion)</ReplacementString>
-      </DebianConfigTokenValues>
-      <DebianConfigTokenValues Include="%SHARED_FRAMEWORK_BRAND_NAME%">
-        <ReplacementString>$(SharedFrameworkBrandName)</ReplacementString>
+      <DebianConfigTokenValues Include="%SHARED_FRAMEWORK_DEBIAN_PACKAGE_NAME_ADDITIONAL%">
+        <ReplacementString>$(AdditionalSharedFxDebianPackageName)</ReplacementString>
       </DebianConfigTokenValues>
       <DebianConfigTokenValues Include="%SDK_NUGET_VERSION%">
         <ReplacementString>$(SdkVersion)</ReplacementString>

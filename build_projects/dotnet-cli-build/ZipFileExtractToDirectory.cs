@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Build.Tasks
         public string DestinationDirectory { get; set; }
 
         /// <summary>
-        /// Indicates if the destination archive should be overwritten if it already exists.
+        /// Indicates if the destination directory should be cleaned if it already exists.
         /// </summary>
         public bool OverwriteDestination { get; set; }
 
@@ -40,17 +40,37 @@ namespace Microsoft.DotNet.Build.Tasks
                         Log.LogMessage(MessageImportance.Low, "'{0}' already exists, trying to delete before unzipping...", DestinationDirectory);
                         Directory.Delete(DestinationDirectory, recursive: true);
                     }
-                    else
-                    {
-                        Log.LogWarning("'{0}' already exists. Did you forget to set '{1}' to true?", DestinationDirectory, nameof(OverwriteDestination));
-                    }
                 }
 
                 Log.LogMessage(MessageImportance.High, "Decompressing '{0}' into '{1}'...", SourceArchive, DestinationDirectory);
                 if (!Directory.Exists(Path.GetDirectoryName(DestinationDirectory)))
                     Directory.CreateDirectory(Path.GetDirectoryName(DestinationDirectory));
 
-                ZipFile.ExtractToDirectory(SourceArchive, DestinationDirectory);
+                // match tar default behavior to overwrite by default
+                // Replace this code with ZipFile.ExtractToDirectory when https://github.com/dotnet/corefx/pull/14806 is available
+                using (ZipArchive archive = ZipFile.Open(SourceArchive, ZipArchiveMode.Read))
+                {
+                    DirectoryInfo di = Directory.CreateDirectory(DestinationDirectory);
+                    string destinationDirectoryFullPath = di.FullName;
+
+                    foreach (ZipArchiveEntry entry in archive.Entries)
+                    {
+                        string fileDestinationPath = Path.GetFullPath(Path.Combine(destinationDirectoryFullPath, entry.FullName));
+
+                        if (Path.GetFileName(fileDestinationPath).Length == 0)
+                        {
+                            // If it is a directory:
+                            Directory.CreateDirectory(fileDestinationPath);
+                        }
+                        else
+                        {
+                            // If it is a file:
+                            // Create containing directory:
+                            Directory.CreateDirectory(Path.GetDirectoryName(fileDestinationPath));
+                            entry.ExtractToFile(fileDestinationPath, overwrite: true);
+                        }
+                    }
+                }
             }
             catch (Exception e)
             {

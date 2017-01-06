@@ -6,6 +6,9 @@ param(
     [Parameter(Mandatory=$true)][string]$SharedFxMSIFile,
     [Parameter(Mandatory=$true)][string]$HostFxrMSIFile,
     [Parameter(Mandatory=$true)][string]$SharedHostMSIFile,
+    [Parameter(Mandatory=$true)][string]$AdditionalSharedFxMSIFile,
+    [Parameter(Mandatory=$true)][string]$AdditionalHostFxrMSIFile,
+    [Parameter(Mandatory=$true)][string]$AdditionalSharedHostMSIFile,
     [Parameter(Mandatory=$true)][string]$DotnetBundleOutput,
     [Parameter(Mandatory=$true)][string]$WixRoot,
     [Parameter(Mandatory=$true)][string]$ProductMoniker,
@@ -39,6 +42,9 @@ function RunCandleForBundle
         -dSharedFXMsiSourcePath="$SharedFxMSIFile" `
         -dHostFXRMsiSourcePath="$HostFxrMSIFile" `
         -dSharedHostMsiSourcePath="$SharedHostMSIFile" `
+        -dAdditionalSharedFXMsiSourcePath="$AdditionalSharedFxMSIFile" `
+        -dAdditionalHostFXRMsiSourcePath="$AdditionalHostFxrMSIFile" `
+        -dAdditionalSharedHostMsiSourcePath="$AdditionalSharedHostMSIFile" `
         -arch "$Architecture" `
         -ext WixBalExtension.dll `
         -ext WixUtilExtension.dll `
