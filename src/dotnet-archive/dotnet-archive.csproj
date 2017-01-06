@@ -6,7 +6,6 @@
     <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="**\*.cs" />
     <Compile Include="..\dotnet\CommandLine\*.cs;..\dotnet\CommonLocalizableStrings.cs;" />
   </ItemGroup>
   <ItemGroup>
