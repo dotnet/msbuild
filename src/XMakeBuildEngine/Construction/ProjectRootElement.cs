@@ -1099,7 +1099,7 @@ namespace Microsoft.Build.Construction
         /// Initialize a ProjectRootElement instance by loading from the specified file path.
         /// Uses the specified project collection and preserves the formatting of the document if specified.
         /// </summary>
-        public static ProjectRootElement Open(string path, ProjectCollection projectCollection, bool preserveFormatting)
+        public static ProjectRootElement Open(string path, ProjectCollection projectCollection, bool? preserveFormatting)
         {
             ErrorUtilities.VerifyThrowArgumentLength(path, "path");
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection, "projectCollection");
@@ -1156,7 +1156,7 @@ namespace Microsoft.Build.Construction
         /// It is possible for ProjectRootElements to be brought into memory and discarded due to memory pressure. Therefore
         /// this method returning false does not indicate that it has never been loaded, only that it is not currently in memory.
         /// </remarks>
-        public static ProjectRootElement TryOpen(string path, ProjectCollection projectCollection, bool preserveFormatting)
+        public static ProjectRootElement TryOpen(string path, ProjectCollection projectCollection, bool? preserveFormatting)
         {
             ErrorUtilities.VerifyThrowArgumentLength(path, "path");
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection, "projectCollection");
@@ -1968,12 +1968,12 @@ namespace Microsoft.Build.Construction
         /// May throw InvalidProjectFileException.
         /// </summary>
         internal static ProjectRootElement Open(string path, ProjectRootElementCache projectRootElementCache, bool isExplicitlyLoaded,
-            bool preserveFormatting)
+            bool? preserveFormatting)
         {
             ErrorUtilities.VerifyThrowInternalRooted(path);
 
             ProjectRootElement projectRootElement = projectRootElementCache.Get(path,
-                preserveFormatting ? s_openLoaderPreserveFormattingDelegate : s_openLoaderDelegate,
+                preserveFormatting ?? false ? s_openLoaderPreserveFormattingDelegate : s_openLoaderDelegate,
                 isExplicitlyLoaded, preserveFormatting);
 
             return projectRootElement;

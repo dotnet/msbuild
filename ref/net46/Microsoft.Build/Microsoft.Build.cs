@@ -311,7 +311,7 @@ namespace Microsoft.Build.Construction
         public Microsoft.Build.Construction.ProjectRootElement DeepClone() { throw null; }
         public static Microsoft.Build.Construction.ProjectRootElement Open(string path) { throw null; }
         public static Microsoft.Build.Construction.ProjectRootElement Open(string path, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { throw null; }
-        public static Microsoft.Build.Construction.ProjectRootElement Open(string path, Microsoft.Build.Evaluation.ProjectCollection projectCollection, bool preserveFormatting) { throw null; }
+        public static Microsoft.Build.Construction.ProjectRootElement Open(string path, Microsoft.Build.Evaluation.ProjectCollection projectCollection, System.Nullable<bool> preserveFormatting) { throw null; }
         public void Reload(bool throwIfUnsavedChanges=true, System.Nullable<bool> preserveFormatting=null) { }
         public void ReloadFrom(string path, bool throwIfUnsavedChanges=true, System.Nullable<bool> preserveFormatting=null) { }
         public void ReloadFrom(System.Xml.XmlReader reader, bool throwIfUnsavedChanges=true, System.Nullable<bool> preserveFormatting=null) { }
@@ -322,7 +322,7 @@ namespace Microsoft.Build.Construction
         public void Save(System.Text.Encoding saveEncoding) { }
         public static Microsoft.Build.Construction.ProjectRootElement TryOpen(string path) { throw null; }
         public static Microsoft.Build.Construction.ProjectRootElement TryOpen(string path, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { throw null; }
-        public static Microsoft.Build.Construction.ProjectRootElement TryOpen(string path, Microsoft.Build.Evaluation.ProjectCollection projectCollection, bool preserveFormatting) { throw null; }
+        public static Microsoft.Build.Construction.ProjectRootElement TryOpen(string path, Microsoft.Build.Evaluation.ProjectCollection projectCollection, System.Nullable<bool> preserveFormatting) { throw null; }
     }
     [System.Diagnostics.DebuggerDisplayAttribute("Name={Name} #Children={Count} Condition={Condition}")]
     public partial class ProjectTargetElement : Microsoft.Build.Construction.ProjectElementContainer
