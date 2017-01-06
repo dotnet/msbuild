@@ -21,7 +21,7 @@
       </trans-unit>
       <trans-unit id="CmdSettingsFile">
         <source>SETTINGS_FILE</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSettingsDescription">
         <source>Settings to use when running tests.</source>
@@ -33,7 +33,7 @@
       </trans-unit>
       <trans-unit id="CmdTestCaseFilterExpression">
         <source>EXPRESSION</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CmdTestCaseFilterDescription">
         <source>Run tests that match the given expression.
@@ -43,12 +43,12 @@
                                         Run tests that contain the specified name: --filter "FullyQualifiedName~Namespace.Class"
                                         More info on filtering support: https://aka.ms/vstest-filtering
                                         </source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CmdTestAdapterPathDescription">
         <source>Use custom adapters from the given path in the test run.
                                         Example: --test-adapter-path &lt;PATH_TO_ADAPTER&gt;</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CmdLoggerOption">
         <source>LoggerUri/FriendlyName</source>
@@ -56,20 +56,20 @@
       </trans-unit>
       <trans-unit id="CmdLoggerDescription">
         <source>Specify a logger for test results. 
-                                        Example: --logger:trx</source>
-        <note />
+                                        Example: --logger "trx[;LogFileName=&lt;Defaults to unique file name&gt;]"</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdConfiguration">
         <source>CONFIGURATION</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Looks for test binaries for a specific framework</source>
@@ -77,7 +77,7 @@
       </trans-unit>
       <trans-unit id="CmdOutputDir">
         <source>OUTPUT_DIR</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CmdOutputDescription">
         <source>Directory in which to find the binaries to be run</source>
@@ -85,7 +85,7 @@
       </trans-unit>
       <trans-unit id="CmdPathToLogFile">
         <source>PATH_TO_FILE</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPathTologFileDescription">
         <source>Enable verbose logs for test platform.
@@ -95,6 +95,11 @@
       <trans-unit id="CmdNoBuildDescription">
         <source>Do not build project before testing.</source>
         <note />
+      </trans-unit>
+      <trans-unit id="RunSettingsArgsHelpText">
+        <source>Any extra commandline runsettings arguments that should be passed to vstest. See 'dotnet vstest --help' for available options.
+                                        Example: -- RunConfiguration.ResultsDirectory="C:\users\user\desktop\Results Directory" MSTest.DeploymentEnabled=false</source>
+        <note></note>
       </trans-unit>
     </body>
   </file>

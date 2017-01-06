@@ -17,7 +17,7 @@
       </trans-unit>
       <trans-unit id="AppHelpText">
         <source>Project to project references to remove</source>
-        <note></note>
+        <note />
       </trans-unit>
     </body>
   </file>

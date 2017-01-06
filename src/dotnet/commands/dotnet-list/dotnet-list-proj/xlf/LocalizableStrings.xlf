@@ -5,11 +5,11 @@
       <group id="src/dotnet/commands/dotnet-list/dotnet-list-proj/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET Projects in Solution viewer</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Command to list projects in a solution</source>
-        <note></note>
+        <note />
       </trans-unit>
     </body>
   </file>

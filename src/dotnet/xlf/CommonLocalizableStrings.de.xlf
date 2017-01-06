@@ -353,11 +353,6 @@
         <target state="translated">Die Projektmappe oder das Verzeichnis "{0}" wurde nicht gefunden.</target>
         <note />
       </trans-unit>
-      <trans-unit id="InvalidSolution">
-        <source>Invalid solution `{0}`.</source>
-        <target state="translated">Ungültige Projektmappe "{0}".</target>
-        <note />
-      </trans-unit>
       <trans-unit id="SolutionDoesNotExist">
         <source>Specified solution file {0} does not exist, or there is no solution file in the directory.</source>
         <target state="translated">Die angegebene Projektmappendatei "{0}" ist nicht vorhanden, oder das Verzeichnis enthält keine Projektmappendatei.</target>
@@ -614,6 +609,36 @@
         <target state="translated">Das Projekt "{0}" konnte nicht ausgewertet werden. Fehler bei der Auswertung:
 {1}</target>
         <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedProjectType">
+        <source>Unsupported project type. Please check with your sdk provider.</source>
+        <target state="new">Unsupported project type. Please check with your sdk provider.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="InvalidSolutionFormatString">
+        <source>Invalid solution `{0}`. {1}</source>
+        <target state="new">Invalid solution `{0}`. {1}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ArgumentsProjectDescription">
+        <source>The project file to operate on. If a file is not specified, the command will search the current directory for one.</source>
+        <target state="new">The project file to operate on. If a file is not specified, the command will search the current directory for one.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ArgumentsSolutionDescription">
+        <source>Solution file to operate on. If not specified, the command will search the current directory for one.</source>
+        <target state="new">Solution file to operate on. If not specified, the command will search the current directory for one.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdSlnFile">
+        <source>&lt;SLN_FILE&gt;</source>
+        <target state="new">&lt;SLN_FILE&gt;</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdProjectFile">
+        <source>&lt;PROJECT&gt;</source>
+        <target state="new">&lt;PROJECT&gt;</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>

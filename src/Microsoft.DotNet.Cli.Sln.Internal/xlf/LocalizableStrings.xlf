@@ -5,30 +5,42 @@
       <group id="src/Microsoft.DotNet.Cli.Sln.Internal/LocalizableStrings.resx" />
       <trans-unit id="GlobalSectionMoreThanOnceError">
         <source>Global section specified more than once</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="GlobalSectionNotClosedError">
         <source>Global section not closed</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="FileHeaderMissingError">
         <source>File header is missing</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectSectionNotClosedError">
         <source>Project section not closed</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidSectionTypeError">
         <source>Invalid section type: {0}</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="SectionIdMissingError">
         <source>Section id missing</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="ClosingSectionTagNotFoundError">
         <source>Closing section tag not found</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorMessageFormatString">
+        <source>Invalid format in line {0}: {1}</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ProjectParsingErrorFormatString">
+        <source>Project section is missing '{0}' when parsing the line starting at position {1}</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="InvalidPropertySetFormatString">
+        <source>Property set is missing '{0}'</source>
         <note></note>
       </trans-unit>
     </body>
