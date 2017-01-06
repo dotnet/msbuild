@@ -237,91 +237,90 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="e">event arguments</param>
         public override void BuildFinishedHandler(object sender, BuildFinishedEventArgs e)
         {
-            if (!showOnlyErrors && !showOnlyWarnings)
+            // If for some reason we have deferred messages at the end of the build they should be displayed
+            // so that the reason why they are still buffered can be determined.
+            if (!showOnlyErrors && !showOnlyWarnings && _deferredMessages.Count > 0)
             {
-                // If for some reason we have deferred messages at the end of the build they should be displayed
-                // so that the reason why they are still buffered can be determined
-                if (_deferredMessages.Count > 0)
-                {
-                    if (IsVerbosityAtLeast(LoggerVerbosity.Normal))
-                    {
-                        // Print out all of the deferred messages
-                        WriteLinePrettyFromResource("DeferredMessages");
-                        foreach (List<BuildMessageEventArgs> messageList in _deferredMessages.Values)
-                        {
-                            foreach (BuildMessageEventArgs message in messageList)
-                            {
-                                PrintMessage(message, false);
-                            }
-                        }
-                    }
-                }
-
-                // Show the performance summary iff the verbosity is diagnostic or the user specifically asked for it
-                // with a logger parameter.
-                if (this.showPerfSummary)
-                {
-                    ShowPerfSummary();
-                }
-
-                // if verbosity is normal, detailed or diagnostic
                 if (IsVerbosityAtLeast(LoggerVerbosity.Normal))
                 {
-                    if (e.Succeeded)
+                    // Print out all of the deferred messages
+                    WriteLinePrettyFromResource("DeferredMessages");
+                    foreach (List<BuildMessageEventArgs> messageList in _deferredMessages.Values)
                     {
-                        setColor(ConsoleColor.Green);
+                        foreach (BuildMessageEventArgs message in messageList)
+                        {
+                            PrintMessage(message, false);
+                        }
                     }
-
-                    // Write the "Build Finished" event.
-                    WriteNewLine();
-                    WriteLinePretty(e.Message);
-                    resetColor();
                 }
+            }
 
-                // The decision whether or not to show a summary at this verbosity
-                // was made during initalization. We just do what we're told.
-                if (ShowSummary)
+            // Show the performance summary if the verbosity is diagnostic or the user specifically asked for it
+            // with a logger parameter.
+            if (this.showPerfSummary)
+            {
+                ShowPerfSummary();
+            }
+
+            // Write the "Build Finished" event if verbosity is normal, detailed or diagnostic or the user
+            // specified to show the summary.
+            if (IsVerbosityAtLeast(LoggerVerbosity.Normal) || ShowSummary)
+            {
+                if (e.Succeeded)
                 {
-                    // We can't display a nice nested summary unless we're at Normal or above,
-                    // since we need to have gotten TargetStarted events, which aren't forwarded otherwise.
-                    if (IsVerbosityAtLeast(LoggerVerbosity.Normal))
-                    {
-                        ShowNestedErrorWarningSummary();
-
-                        // Emit text like:
-                        //     1 Warning(s)
-                        //     0 Error(s)
-                        // Don't color the line if it's zero. (Per Whidbey behavior.)
-                        if (warningCount > 0)
-                        {
-                            setColor(ConsoleColor.Yellow);
-                        }
-                        WriteLinePrettyFromResource(2, "WarningCount", warningCount);
-                        resetColor();
-
-                        if (errorCount > 0)
-                        {
-                            setColor(ConsoleColor.Red);
-                        }
-                        WriteLinePrettyFromResource(2, "ErrorCount", errorCount);
-                        resetColor();
-                    }
-                    else
-                    {
-                        ShowFlatErrorWarningSummary();
-                    }
+                    setColor(ConsoleColor.Green);
                 }
 
-                // if verbosity is normal, detailed or diagnostic
+                // Write the "Build Finished" event.
+                WriteNewLine();
+                WriteLinePretty(e.Message);
+                resetColor();
+            }
+
+            // The decision whether or not to show a summary at this verbosity
+            // was made during initialization. We just do what we're told.
+            if (ShowSummary)
+            {
+                // We can't display a nice nested summary unless we're at Normal or above,
+                // since we need to have gotten TargetStarted events, which aren't forwarded otherwise.
                 if (IsVerbosityAtLeast(LoggerVerbosity.Normal))
                 {
-                    // The time elapsed is the difference between when the BuildStartedEventArg 
-                    // was created and when the BuildFinishedEventArg was created
-                    string timeElapsed = LogFormatter.FormatTimeSpan(e.Timestamp - buildStarted);
-
-                    WriteNewLine();
-                    WriteLinePrettyFromResource("TimeElapsed", timeElapsed);
+                    ShowNestedErrorWarningSummary();
                 }
+                else
+                {
+                    ShowFlatErrorWarningSummary();
+                }
+
+                // Emit text like:
+                //     1 Warning(s)
+                //     0 Error(s)
+                // Don't color the line if it's zero. (Per Whidbey behavior.)
+                if (warningCount > 0)
+                {
+                    setColor(ConsoleColor.Yellow);
+                }
+                WriteLinePrettyFromResource(2, "WarningCount", warningCount);
+                resetColor();
+
+                if (errorCount > 0)
+                {
+                    setColor(ConsoleColor.Red);
+                }
+                WriteLinePrettyFromResource(2, "ErrorCount", errorCount);
+                resetColor();
+            }
+
+            // Show build time if verbosity is normal, detailed or diagnostic or the user specified to
+            // show the summary.
+            if (IsVerbosityAtLeast(LoggerVerbosity.Normal) || ShowSummary)
+            {
+                // The time elapsed is the difference between when the BuildStartedEventArg
+                // was created and when the BuildFinishedEventArg was created
+                string timeElapsed = LogFormatter.FormatTimeSpan(e.Timestamp - buildStarted);
+
+                WriteNewLine();
+                WriteLinePrettyFromResource("TimeElapsed", timeElapsed);
             }
 
             ResetConsoleLoggerState();

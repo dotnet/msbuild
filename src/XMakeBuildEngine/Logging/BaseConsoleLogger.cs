@@ -1020,7 +1020,13 @@ namespace Microsoft.Build.BackEnd.Logging
 
             if (showOnlyWarnings || showOnlyErrors)
             {
-                _showSummary = false;
+                if (!_showSummary.HasValue)
+                {
+                    // By default don't show the summary when the showOnlyWarnings / showOnlyErrors is specified.
+                    // However, if the user explicitly specified summary or nosummary, use that.
+                    _showSummary = false;
+                }
+
                 this.showPerfSummary = false;
             }
 
