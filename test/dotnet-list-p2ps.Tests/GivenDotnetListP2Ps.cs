@@ -52,7 +52,7 @@ Options:
         [Fact]
         public void WhenTooManyArgumentsArePassedItPrintsError()
         {
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                     .WithProject("one two three")
                     .Execute("proj.csproj");
             cmd.ExitCode.Should().NotBe(0);
@@ -208,7 +208,7 @@ Options:
 
         private void AddValidRef(string path, ProjDir proj)
         {
-            new AddP2PCommand()
+            new AddReferenceCommand()
                 .WithProject(proj.CsProjPath)
                 .Execute($"\"{path}\"")
                 .Should().Pass();

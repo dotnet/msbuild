@@ -90,7 +90,7 @@ Additional Arguments:
         private ProjDir AddLibRef(TestSetup setup, ProjDir proj, string additionalArgs = "")
         {
             var ret = GetLibRef(setup);
-            new AddP2PCommand()
+            new AddReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(proj.CsProjPath)
                 .Execute($"{additionalArgs} \"{ret.CsProjPath}\"")
@@ -102,7 +102,7 @@ Additional Arguments:
         private ProjDir AddValidRef(TestSetup setup, ProjDir proj, string frameworkArg = "")
         {
             var ret = new ProjDir(setup.ValidRefDir);
-            new AddP2PCommand()
+            new AddReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(proj.CsProjPath)
                 .Execute($"{frameworkArg} \"{ret.CsProjPath}\"")
@@ -135,7 +135,7 @@ Additional Arguments:
         [Fact]
         public void WhenTooManyArgumentsArePassedItPrintsError()
         {
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                     .WithProject("one two three")
                     .Execute("proj.csproj");
             cmd.ExitCode.Should().NotBe(0);
