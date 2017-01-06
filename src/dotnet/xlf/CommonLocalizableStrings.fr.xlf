@@ -353,11 +353,6 @@
         <target state="translated">La solution ou le répertoire '{0}' est introuvable.</target>
         <note />
       </trans-unit>
-      <trans-unit id="InvalidSolution">
-        <source>Invalid solution `{0}`.</source>
-        <target state="translated">Solution non valide '{0}'.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="SolutionDoesNotExist">
         <source>Specified solution file {0} does not exist, or there is no solution file in the directory.</source>
         <target state="translated">Le fichier solution spécifié {0} n'existe pas ou il n'y a pas de fichier solution dans le répertoire.</target>
@@ -614,6 +609,36 @@
         <target state="translated">Impossible d'évaluer le projet '{0}'. Échec de l'évaluation en raison de l'erreur suivante :
 {1}</target>
         <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedProjectType">
+        <source>Unsupported project type. Please check with your sdk provider.</source>
+        <target state="new">Unsupported project type. Please check with your sdk provider.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="InvalidSolutionFormatString">
+        <source>Invalid solution `{0}`. {1}</source>
+        <target state="new">Invalid solution `{0}`. {1}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ArgumentsProjectDescription">
+        <source>The project file to operate on. If a file is not specified, the command will search the current directory for one.</source>
+        <target state="new">The project file to operate on. If a file is not specified, the command will search the current directory for one.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ArgumentsSolutionDescription">
+        <source>Solution file to operate on. If not specified, the command will search the current directory for one.</source>
+        <target state="new">Solution file to operate on. If not specified, the command will search the current directory for one.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdSlnFile">
+        <source>&lt;SLN_FILE&gt;</source>
+        <target state="new">&lt;SLN_FILE&gt;</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdProjectFile">
+        <source>&lt;PROJECT&gt;</source>
+        <target state="new">&lt;PROJECT&gt;</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>

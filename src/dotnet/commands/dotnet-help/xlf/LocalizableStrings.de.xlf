@@ -153,6 +153,11 @@
         <target state="translated">Buildausgabe(n) bereinigen.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SlnDefinition">
+        <source>Modify solution (SLN) files.</source>
+        <target state="new">Modify solution (SLN) files.</target>
+        <note></note>
+      </trans-unit>
     </body>
   </file>
 </xliff>
