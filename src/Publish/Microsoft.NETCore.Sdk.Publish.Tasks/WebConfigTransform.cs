@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
@@ -137,6 +138,41 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
 
                 aspNetCoreElement.SetAttributeValue("arguments", arguments.Trim());
             }
+        }
+
+        public static XDocument AddProjectGuidToWebConfig(XDocument document, string projectGuid, bool ignoreProjectGuid)
+        {
+            try
+            {
+                if (document != null && !string.IsNullOrEmpty(projectGuid))
+                {
+                    IEnumerable<XComment> comments = document.DescendantNodes().OfType<XComment>();
+                    projectGuid =  projectGuid.Trim('{', '}', '(', ')').Trim();
+                    string projectGuidValue = string.Format("ProjectGuid: {0}", projectGuid);
+                    XComment projectGuidComment = comments.FirstOrDefault(comment => string.Equals(comment.Value, projectGuidValue, StringComparison.OrdinalIgnoreCase));
+                    if (projectGuidComment != null)
+                    {
+                        if (ignoreProjectGuid)
+                        {
+                            projectGuidComment.Remove();
+                        }
+
+                        return document;
+                    }
+
+                    if (!ignoreProjectGuid)
+                    {
+                        document.LastNode.AddAfterSelf(new XComment(projectGuidValue));
+                        return document;
+                    }
+                }
+            }
+            catch
+            {
+                // This code path is only used for telemetry.
+            }
+
+            return document;
         }
     }
 }

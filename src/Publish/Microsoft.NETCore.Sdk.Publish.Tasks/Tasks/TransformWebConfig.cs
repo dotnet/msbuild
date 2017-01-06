@@ -34,13 +34,23 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
         /// </summary>
         /// <returns></returns>
         public bool IsAzure { get; set; }
+        
+        /// <summary>
+        /// ProjectGuid that uniquely identifies the project. Used for Telemetry
+        /// </summary>
+        public string ProjectGuid { get; set; }
+        
+        /// <summary>
+        /// Flag that determines whether the publish telemtry needs to be disabled. 
+        /// </summary>
+        public bool IgnoreProjectGuid { get; set; }
 
         public override bool Execute()
         {
             Log.LogMessage(MessageImportance.Low, $"Configuring the following project for use with IIS: '{PublishDir}'");
 
             XDocument webConfigXml = null;
-            var webConfigPath = Path.Combine(PublishDir, "web.config");
+            string webConfigPath = Path.Combine(PublishDir, "web.config");
             if (File.Exists(webConfigPath))
             {
                 Log.LogMessage($"Updating web.config at '{webConfigPath}'");
@@ -61,10 +71,13 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
                 Log.LogMessage("Configuring web.config for deployment to Azure");
             }
 
-            var outputFile = Path.GetFileName(TargetPath);
-            var transformedConfig = WebConfigTransform.Transform(webConfigXml, outputFile, IsAzure, IsPortable);
+            string outputFile = Path.GetFileName(TargetPath);
+            XDocument transformedConfig = WebConfigTransform.Transform(webConfigXml, outputFile, IsAzure, IsPortable);
 
-            using (var f = new FileStream(webConfigPath, FileMode.Create))
+            // Add the projectGuid to web.config if it is not present.
+            transformedConfig = WebConfigTransform.AddProjectGuidToWebConfig(transformedConfig, ProjectGuid, IgnoreProjectGuid);
+
+            using (FileStream f = new FileStream(webConfigPath, FileMode.Create))
             {
                 transformedConfig.Save(f);
             }
