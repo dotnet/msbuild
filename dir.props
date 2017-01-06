@@ -10,5 +10,7 @@
 
     <CLIBuildDll>$(RepoRoot)/build_projects/dotnet-cli-build/bin/dotnet-cli-build.dll</CLIBuildDll>
 
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+
   </PropertyGroup>
 </Project>

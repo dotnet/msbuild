@@ -13,9 +13,7 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>git://github.com/dotnet/cli</RepositoryUrl>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="**\*.cs" />
-  </ItemGroup>
+  
   <ItemGroup>
     <PackageReference Include="NETStandard.Library">
       <Version>1.6.0</Version>
