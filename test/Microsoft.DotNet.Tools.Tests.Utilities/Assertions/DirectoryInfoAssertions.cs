@@ -42,7 +42,11 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return new AndConstraint<DirectoryInfoAssertions>(this);
         }
 
-        public AndConstraint<DirectoryInfoAssertions> HaveTextFile(string expectedFile, string expectedContents, string because = "", params object[] reasonArgs)
+        public AndConstraint<DirectoryInfoAssertions> HaveTextFile(
+            string expectedFile,
+            string expectedContents,
+            string because = "",
+            params object[] reasonArgs)
         {
             this.HaveFile(expectedFile, because, reasonArgs);
 
@@ -58,10 +62,15 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return new AndConstraint<DirectoryInfoAssertions>(this);
         }
 
-        public AndConstraint<DirectoryInfoAssertions> NotHaveFile(string expectedFile)
+        public AndConstraint<DirectoryInfoAssertions> NotHaveFile(
+            string expectedFile, 
+            string because = "", 
+            params object [] reasonArgs)
         {
             var file = _dirInfo.EnumerateFiles(expectedFile, SearchOption.TopDirectoryOnly).SingleOrDefault();
-            Execute.Assertion.ForCondition(file == null)
+            Execute.Assertion
+                .ForCondition(file == null)
+                .BecauseOf(because, reasonArgs)
                 .FailWith("File {0} should not be found in directory {1}.", expectedFile, _dirInfo.FullName);
             return new AndConstraint<DirectoryInfoAssertions>(this);
         }
@@ -76,7 +85,10 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return new AndConstraint<DirectoryInfoAssertions>(this);
         }
 
-        public AndConstraint<DirectoryInfoAssertions> HaveTextFiles(IDictionary<string, string> expectedFiles, string because = "", params object[] reasonArgs)
+        public AndConstraint<DirectoryInfoAssertions> HaveTextFiles(
+            IDictionary<string, string> expectedFiles, 
+            string because = "", 
+            params object[] reasonArgs)
         {
             foreach (var expectedFile in expectedFiles)
             {
@@ -86,7 +98,11 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return new AndConstraint<DirectoryInfoAssertions>(this);
         }
 
-        public AndConstraint<DirectoryInfoAssertions> HaveFilesMatching(string expectedFilesSearchPattern, SearchOption searchOption, string because = "", params object[] reasonArgs)
+        public AndConstraint<DirectoryInfoAssertions> HaveFilesMatching(
+            string expectedFilesSearchPattern, 
+            SearchOption searchOption, 
+            string because = "", 
+            params object[] reasonArgs)
         {
             var matchingFileExists = _dirInfo.EnumerateFiles(expectedFilesSearchPattern, searchOption).Any();
 
@@ -99,11 +115,14 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return new AndConstraint<DirectoryInfoAssertions>(this);
         }
 
-        public AndConstraint<DirectoryInfoAssertions> NotHaveFiles(IEnumerable<string> expectedFiles)
+        public AndConstraint<DirectoryInfoAssertions> NotHaveFiles(
+            IEnumerable<string> expectedFiles, 
+            string because = "", 
+            params object [] reasonArgs)
         {
             foreach (var expectedFile in expectedFiles)
             {
-                NotHaveFile(expectedFile);
+                NotHaveFile(expectedFile, because, reasonArgs);
             }
 
             return new AndConstraint<DirectoryInfoAssertions>(this);

@@ -16,5 +16,7 @@ namespace Microsoft.DotNet.TestFramework
         public static string DesktopTestProjects = "DesktopTestProjects";
         
         public static string TestProjects = "TestProjects";
+
+        public static string NonRestoredTestProjects = "NonRestoredTestProjects";
     }
 }
