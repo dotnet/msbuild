@@ -5,7 +5,7 @@
       <group id="src/dotnet/commands/dotnet-msbuild/LocalizableStrings.resx" />
       <trans-unit id="VerbosityOptionDescription">
         <source>Set the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]</source>
-        <target state="translated">명령의 세부 정보 수준을 설정합니다. 허용되는 값은 q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]입니다.</target>
+        <target state="translated">명령의 세부 정보 표시 수준을 설정합니다. 허용되는 값은 q[uiet], m[inimal], n[ormal], d[etailed] 및 diag[nostic]입니다.</target>
         <note />
       </trans-unit>
     </body>

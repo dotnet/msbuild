@@ -16,8 +16,8 @@
       <trans-unit id="NoReferencesFound">
         <source>There are no {0} references in project {1}.
 {0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
-        <target state="translated">Il n'existe aucune référence {0} dans le projet {1}.
-{0} est le type de l'élément demandé (projet, package, p2p) et {1} est l'objet utilisé (fichier projet ou fichier solution). </target>
+        <target state="translated">Il n'y a pas de références {0} dans le projet {1}.
+{0} est le type de l'élément demandé (projet, package, p2p) et {1} est l'objet utilisé (un fichier projet ou un fichier solution). </target>
         <note />
       </trans-unit>
     </body>

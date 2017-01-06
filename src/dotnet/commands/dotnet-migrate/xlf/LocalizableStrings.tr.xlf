@@ -25,10 +25,10 @@
     - a solution.sln file, it will migrate the projects referenced in the solution.
     - a directory to migrate, it will recursively search for project.json files to migrate.
 Defaults to current directory if nothing is specified.</source>
-        <target state="translated">Aşağıdakilerden birinin yolu: 
+        <target state="translated">Aşağıdakilerden birinin yoludur:
     - geçirilecek project.json dosyası.
     - bir global.json dosyası; global.json içinde belirtilen klasörleri geçirir.
-    -bir solution.sln dosyası; çözümde başvurulan projeleri geçirir.
+    - bir solution.sln dosyası; çözümde başvurulan projeleri geçirir.
     - geçirilecek dizin; geçirilecek project.json dosyalarını yinelemeli olarak arar.
 Bir seçenek belirtilmezse, geçerli dizin varsayılan olarak kullanılır.</target>
         <note />

@@ -45,7 +45,7 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="translated">Конфигурация, используемая при сборке проекта. По умолчанию для большинства проектов используется "Отладка".</target>
+        <target state="translated">Конфигурация, используемая для сборки проекта.  Значение по умолчанию для большинства проектов — "Debug".</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffix">
@@ -60,7 +60,7 @@
       </trans-unit>
       <trans-unit id="CmdServiceableDescription">
         <source>Set the serviceable flag in the package. For more information, please see https://aka.ms/nupkgservicing.</source>
-        <target state="translated">Установка флага "подлежит обслуживанию" в пакете. Дополнительные сведения см. на странице https://aka.ms/nupkgservicing.</target>
+        <target state="translated">Задать флаг "подлежит обслуживанию" в пакете. Дополнительные сведения: https://aka.ms/nupkgservicing.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgumentProject">

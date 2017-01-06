@@ -5,7 +5,7 @@
       <group id="src/Microsoft.DotNet.Cli.Utils/LocalizableStrings.resx" />
       <trans-unit id="MalformedText">
         <source>Malformed command text '{0}'</source>
-        <target state="translated">Fehlerhafter Befehlstext '{0}'</target>
+        <target state="translated">Fehlerhafter Befehlstext "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildOutputPathDoesNotExist">
@@ -35,7 +35,7 @@
       </trans-unit>
       <trans-unit id="LookingForPreferCliRuntimeFile">
         <source>{0}: Looking for prefercliruntime file at `{1}`</source>
-        <target state="translated">{0}: Suche nach prefercliruntime-Datei unter `{1}`</target>
+        <target state="translated">{0}: Suche nach prefercliruntime-Datei unter {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="AttemptingToResolve">
@@ -80,7 +80,7 @@
       </trans-unit>
       <trans-unit id="MultipleProjectFilesFound">
         <source>Specify which project file to use because this '{0}' contains more than one project file.</source>
-        <target state="translated">Geben Sie an, welche Projektdatei verwendet werden soll, weil '{0}' mehrere Projektdateien enthält.</target>
+        <target state="translated">Geben Sie an, welche Projektdatei verwendet werden soll, weil "{0}" mehrere Projektdateien enthält.</target>
         <note />
       </trans-unit>
       <trans-unit id="DidNotFindProject">
@@ -90,23 +90,23 @@
       </trans-unit>
       <trans-unit id="ResolvingCommandSpec">
         <source>{0}: resolving commandspec from {1} Tool Libraries.</source>
-        <target state="translated">{0}: commandSpec aus {1} Toolbibliotheken wird aufgelöst.</target>
+        <target state="translated">{0}: commandspec aus {1} Toolbibliotheken wird aufgelöst.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToResolveCommandSpec">
         <source>{0}: failed to resolve commandspec from library.</source>
-        <target state="translated">{0}: commandSpec aus Bibliothek konnte nicht aufgelöst werden.</target>
+        <target state="translated">{0}: commandspec aus Bibliothek konnte nicht aufgelöst werden.</target>
         <note />
       </trans-unit>
       <trans-unit id="AttemptingToResolveCommandSpec">
         <source>{0}: Attempting to resolve command spec from tool {1}</source>
-        <target state="translated">{0}: Versuch, commandSpec aus Tool {1} aufzulösen</target>
+        <target state="translated">{0}: Versuch, commandspec aus Tool {1} aufzulösen.</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetPackagesRoot">
         <source>{0}: nuget packages root:
 {1}</source>
-        <target state="translated">{0}: NuGet-Paketestamm:
+        <target state="translated">{0}: NuGet-Paketstamm:
 {1}</target>
         <note />
       </trans-unit>
@@ -122,27 +122,27 @@
       </trans-unit>
       <trans-unit id="AttemptingToCreateCommandSpec">
         <source>{0}: attempting to create commandspec</source>
-        <target state="translated">{0}: Versuch, commandSpec zu erstellen</target>
+        <target state="translated">{0}: Versuch, commandspec zu erstellen</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandSpecIsNull">
         <source>{0}: commandSpec is null.</source>
-        <target state="translated">{0}: commandSpec ist NULL.</target>
+        <target state="translated">{0}: commandspec ist NULL.</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectDepsJsonAt">
         <source>{0}: expect deps.json at: {1}</source>
-        <target state="translated">{0}: „deps.json“ vermutet unter: {1}</target>
+        <target state="translated">{0}: "deps.json" vermutet unter: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="GeneratingDepsJson">
         <source>Generating deps.json at: {0}</source>
-        <target state="translated">„deps.json“ wird erzeugt unter: {0}</target>
+        <target state="translated">"deps.json" wird erzeugt unter: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToGenerateDepsJson">
         <source>unable to generate deps.json, it may have been already generated: {0}</source>
-        <target state="translated">„deps.json“ kann nicht erzeugt werden; sie wurde vielleicht bereits erzeugt: {0}</target>
+        <target state="translated">"deps.json" kann nicht erzeugt werden; sie wurde vielleicht bereits erzeugt: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToDeleteTemporaryDepsJson">
@@ -152,12 +152,12 @@
       </trans-unit>
       <trans-unit id="VersionForPackageCouldNotBeResolved">
         <source>Version for package `{0}` could not be resolved.</source>
-        <target state="translated">Version für Paket `{0}` konnte nicht aufgelöst werden.</target>
+        <target state="translated">Version für Paket "{0}" konnte nicht aufgelöst werden.</target>
         <note />
       </trans-unit>
       <trans-unit id="FileNotFound">
         <source>File not found `{0}`.</source>
-        <target state="translated">Datei nicht gefunden: `{0}`.</target>
+        <target state="translated">Datei nicht gefunden: "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectNotRestoredOrRestoreFailed">
@@ -167,12 +167,12 @@
       </trans-unit>
       <trans-unit id="NoExecutableFoundMatchingCommand">
         <source>No executable found matching command "{0}"</source>
-        <target state="translated">Keine ausführbare Datei zum Befehl „{0}“ gefunden.</target>
+        <target state="translated">Keine ausführbare Datei zum Befehl "{0}" gefunden.</target>
         <note />
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
         <source>Waiting for debugger to attach. Press ENTER to continue</source>
-        <target state="translated">Warten auf Anhängen des Debuggers. EINGABE drücken, um fortzufahren.</target>
+        <target state="translated">Auf das Anfügen des Debuggers wird gewartet. Drücken Sie zum Fortsetzen die EINGABETASTE.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProcessId">

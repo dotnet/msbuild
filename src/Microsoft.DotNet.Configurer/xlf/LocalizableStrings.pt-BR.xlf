@@ -19,17 +19,17 @@ Configuring...
 A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</source>
         <target state="translated">Bem-vindo ao .NET Core!
 ---------------------
-Saiba mais sobre o .NET Core em https://aka.ms/dotnet-docs. Use dotnet --help para ver os comandos disponíveis ou acesse https://aka.ms/dotnet-cli-docs.
+Saiba mais sobre o .NET Core @ https://aka.ms/dotnet-docs. Use o dotnet --help para ver comandos disponíveis ou ir para https://aka.ms/dotnet-cli-docs.
 
 Telemetria
 --------------
-As ferramentas do .NET Core coletam dados de uso para melhorar sua experiência. Os dados são anônimos e não incluem argumentos de linha de comando. Os dados são coletados pela Microsoft e compartilhados com a comunidade.
-É possível recusar a telemetria definindo uma variável de ambiente DOTNET_CLI_TELEMETRY_OPTOUT como 1 usando seu shell favorito.
-Leia mais sobre a telemetria das ferramentas do .NET Core em https://aka.ms/dotnet-cli-telemetry.
+As ferramentas do .NET Core coletam dados de uso para melhorar sua experiência. Os dados são anônimos e não incluem argumentos da linha de comando. Os dados são coletados pela Microsoft e compartilhados com a comunidade.
+Você pode sair da telemetria configurando uma variável de ambiente DOTNET_CLI_TELEMETRY_OPTOUT para 1 usando seu shell favorito.
+Você pode ler mais sobre a telemeria de ferramentas do .NET Core em https://aka.ms/dotnet-cli-telemetry.
 
 Configurando...
 -------------------
-Um comando está sendo executado para popular inicialmente o cache do pacote local, a fim de melhorar a velocidade de restauração e habilitar o acesso offline. Esse comando levará até um minuto para ser concluído e só ocorrerá uma vez.</target>
+Um comando está sendo executado para preencher inicialmente seu cache de pacote local, para melhorar a velocidade de restauração e permitir acesso offline. Esse comando levará um minuto para ser concluído e acontecerá somente uma vez.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">

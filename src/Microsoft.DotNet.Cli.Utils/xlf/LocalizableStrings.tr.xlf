@@ -100,7 +100,7 @@
       </trans-unit>
       <trans-unit id="AttemptingToResolveCommandSpec">
         <source>{0}: Attempting to resolve command spec from tool {1}</source>
-        <target state="translated">{0}: {1} aracından commandspec çözümlenmeye çalışılıyor</target>
+        <target state="translated">{0}: {1} aracından command.spec çözümlenmeye çalışılıyor</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetPackagesRoot">
@@ -172,7 +172,7 @@
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
         <source>Waiting for debugger to attach. Press ENTER to continue</source>
-        <target state="translated">Hata ayıklayıcının eklenmesi bekleniyor. Devam etmek için ENTER tuşuna basın</target>
+        <target state="translated">Hata ayıklayıcısının eklenmesi bekleniyor. Devam etmek için ENTER’a basın</target>
         <note />
       </trans-unit>
       <trans-unit id="ProcessId">

@@ -56,8 +56,7 @@
                                         Uruchom testy z priorytetem ustawionym na wartość 1: --filter "Priority = 1"
                                         Uruchom test o określonej pełnej nazwie: --filter "WPełniKwalifikowanaNazwa=PrzestrzeńNazw.NazwaKlasy.NazwaMetody"
                                         Uruchom testy zawierające określoną nazwę: --filter "WPełniKwalifikowanaNazwa~PrzestrzeńNazw.Klasa"
-                                        Więcej informacji o obsłudze filtrowania: https://aka.ms/vstest-filtering
-                                        </target>
+                                        Więcej informacji o obsłudze filtrowania: https://aka.ms/vstest-filtering</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTestAdapterPathDescription">
@@ -86,7 +85,7 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="translated">Konfiguracja do użycia na potrzeby kompilacji projektu. Opcją domyślną w przypadku większości projektów jest „Debug”.</target>
+        <target state="translated">Konfiguracja do użycia na potrzeby kompilacji projektu.  Opcją domyślną w przypadku większości projektów jest „Debug”.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">

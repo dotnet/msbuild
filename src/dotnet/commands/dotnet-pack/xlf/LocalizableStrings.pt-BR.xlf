@@ -25,7 +25,7 @@
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
         <source>Skip building the project prior to packing. By default, the project will be built.</source>
-        <target state="translated">Ignorar a compilação do projeto antes do empacotamento. Por padrão, o projeto será compilado.</target>
+        <target state="translated">Ignorar a compilação do projeto antes do pacote. Por padrão o nome do projeto será criado.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSymbolsDescription">
@@ -45,7 +45,7 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="translated">Configuração a ser usada para compilar o projeto. O padrão para a maioria dos projetos é "Debug".</target>
+        <target state="translated">A configuração a ser usada para criar o projeto.  O padrão para a maioria dos projetos é “Depurar”.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffix">
@@ -60,7 +60,7 @@
       </trans-unit>
       <trans-unit id="CmdServiceableDescription">
         <source>Set the serviceable flag in the package. For more information, please see https://aka.ms/nupkgservicing.</source>
-        <target state="translated">Defina o sinalizador operacional no pacote. Para obter mais informações, consulte https://aka.ms/nupkgservicing.</target>
+        <target state="translated">Definir o sinalizador operacional no pacote. Para obter mais informações, consulte https://aka.ms/nupkgservicing.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgumentProject">

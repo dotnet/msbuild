@@ -140,7 +140,7 @@
       </trans-unit>
       <trans-unit id="MSBuildAdditionalArgsHelpText">
         <source>Any extra options that should be passed to MSBuild. See 'dotnet msbuild -h' for available options.</source>
-        <target state="translated">MSBuild に渡す必要があるすべての追加オプション。利用可能なオプションについては、'dotnet msbuild -h' を参照してください。</target>
+        <target state="translated">MSBuild に渡す必要があるすべての追加オプション。利用可能なオプションについては、'dotnet msbuild -h' をご覧ください。</target>
         <note />
       </trans-unit>
     </body>

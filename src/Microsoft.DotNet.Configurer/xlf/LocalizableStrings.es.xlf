@@ -17,19 +17,19 @@ You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-te
 Configuring...
 -------------------
 A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</source>
-        <target state="translated">Bienvenido a .NET Core
+        <target state="translated">Esto es .NET Core
 ---------------------
-Obtenga más información sobre .NET Core en https://aka.ms/dotnet-docs. Use dotnet --help para ver los comandos disponibles o vaya a https://aka.ms/dotnet-cli-docs.
+Más información sobre .NET Core en https://aka.ms/dotnet-docs. Use dotnet --help para ver los comandos disponibles o vaya a https://aka.ms/dotnet-cli-docs.
 
 Telemetría
 --------------
-Las herramientas de .NET Core recopilan datos de uso con el fin de mejorar su experiencia. Los datos son anónimos y no incluyen argumentos de la línea de comandos. Microsoft recopila los datos y los comparte con la comunidad.
-Si desea optar por no participar en la telemetría, establezca una variable de entorno DOTNET_CLI_TELEMETRY_OPTOUT en 1 con el shell de su preferencia.
-Puede leer más información sobre la telemetría de las herramientas de .NET Core en https://aka.ms/dotnet-cli-telemetry.
+Las herramientas de .NET Core recopilan datos de uso para mejorar su experiencia. Los datos son anónimos y no incluyen los argumentos de la línea de comandos. Microsoft recopila y comparte los datos con la comunidad.
+Puede desactivar la telemetría estableciendo una variable de entorno DOTNET_CLI_TELEMETRY_OPTOUT en 1 utilizando su shell favorito.
+Puede leer más sobre la telemetría de las herramientas de .NET Core en https://aka.ms/dotnet-cli-telemetry.
 
 Configurando...
 -------------------
-Un comando se ejecuta para rellenar inicialmente la caché de paquete local a fin de mejorar la velocidad de restauración y permitir el acceso sin conexión. Este comando demorará hasta un minuto para completarse y solo sucederá una vez.</target>
+Se está ejecutando un comando para rellenar inicialmente la memoria caché de paquetes local, para mejorar la velocidad de restauración y habilitar el acceso sin conexión. Este comando tardará hasta un minuto en completarse y solo ocurrirá una vez.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">

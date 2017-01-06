@@ -19,17 +19,17 @@ Configuring...
 A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</source>
         <target state="translated">.NET Core へようこそ!
 ---------------------
-.NET Core の詳細については、https://aka.ms/dotnet-docs を参照してください。利用可能なコマンドを参照するには、dotnet --help を使用するか、https://aka.ms/dotnet-cli-docs にアクセスしてください。
+.NET Core について詳しくは、https://aka.ms/dotnet-docs をご覧ください。dotnet --help を使って使用可能なコマンドを確認するか、https://aka.ms/dotnet-cli-docs をご覧ください。
 
 テレメトリ
 --------------
-.NET Core ツールは、お客様のエクスペリエンス向上のために利用状況データを収集します。データは匿名であり、コマンドライン引数は含まれません。データは Microsoft によって収集され、コミュニティと共有されます。
-お好きなシェルを使用して DOTNET_CLI_TELEMETRY_OPTOUT 環境変数を 1 に設定すると、テレメトリを解除できます。
-.NET Core ツールのテレメトリの詳細については、https://aka.ms/dotnet-cli-telemetry でお読みいただけます。
+.NET Core ツールは、操作性を向上させるために利用状況データを収集します。データは匿名で、コマンドライン引数が含まれません。データは Microsoft によって収集され、コミュニティと共有されます。
+テレメトリを無効にするには、お好きなシェルを使用して、DOTNET_CLI_TELEMETRY_OPTOUT 環境変数を 1 に設定します。
+.NET Core ツールのテレメトリについて詳しくは、https://aka.ms/dotnet-cli-telemetry をお読みください。
 
-構成...
+構成中...
 -------------------
-復元の高速化とオフライン アクセスの有効化のため、コマンドを実行してローカル パッケージ キャッシュを最初に設定しています。このコマンドは完了までに 1 分ほどかかりますが、設定が必要なのは最初の1回のみです。</target>
+ローカル パッケージ キャッシュを最初に設定し、復元速度を向上させ、オフライン アクセスを可能にするため、コマンドを実行しています。このコマンドは 1 回だけ実行され、最大 1 分かかる場合があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">

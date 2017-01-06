@@ -10,7 +10,7 @@
       </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
         <source>Found more than one project in `{0}`. Please specify which one to use.</source>
-        <target state="translated">`{0}`에서 프로젝트를 두 개 이상 찾았습니다. 사용할 프로젝트를 지정하세요.</target>
+        <target state="translated">`{0}`에서 프로젝트를 두 개 이상 찾았습니다. 사용할 파일을 지정하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">
@@ -580,7 +580,7 @@
       </trans-unit>
       <trans-unit id="MoreThanOneSolutionInDirectory">
         <source>Found more than one solution file in {0}. Please specify which one to use.</source>
-        <target state="translated">{0}에서 솔루션 파일이 두 개 이상 있습니다. 사용할 파일을 지정하세요.</target>
+        <target state="translated">{0}에서 솔루션 파일을 두 개 이상 찾았습니다. 사용할 파일을 지정하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionAlreadyContainsProject">
@@ -600,7 +600,7 @@
       </trans-unit>
       <trans-unit id="ProjectNotCompatibleWithFrameworks">
         <source>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Please review the project you are trying to add and verify that is compatible with the following targets:</source>
-        <target state="translated">두 프로젝트 간에 호환되지 않는 대상 프레임워크 때문에 '{0}' 프로젝트를 추가할 수 없습니다. 추가하려는 프로젝트를 검토하고 다음 대상과 호환되는지 확인하세요.</target>
+        <target state="translated">두 프로젝트 간에 호환되지 않는 대상 프레임워크 때문에 `{0}` 프로젝트를 추가할 수 없습니다. 추가하려는 프로젝트를 검토하고 다음 대상과 호환되는지 확인하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectDoesNotTargetFramework">
@@ -611,7 +611,7 @@
       <trans-unit id="ProjectCouldNotBeEvaluated">
         <source>Project `{0}` could not be evaluated. Evaluation failed with following error:
 {1}</source>
-        <target state="translated">'{0}' 프로젝트를 평가할 수 없습니다. 다음 오류와 함께 평가가 실패했습니다.
+        <target state="translated">‘{0}’ 프로젝트를 평가할 수 없습니다. 다음 오류와 함께 평가가 실패했습니다.
 {1}</target>
         <note />
       </trans-unit>

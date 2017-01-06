@@ -75,13 +75,13 @@
       </trans-unit>
       <trans-unit id="CmdRuntimeOption">
         <source>RUNTIME_IDENTIFIER</source>
-        <target state="new">RUNTIME_IDENTIFIER</target>
-        <note></note>
+        <target state="translated">ID_DEL_ENTORNO_DE_TIEMPO_DE_EJECUCIÓN</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdRuntimeOptionDescription">
         <source>Target runtime to restore packages for.</source>
-        <target state="new">Target runtime to restore packages for.</target>
-        <note></note>
+        <target state="translated">Runtime de destino para el que restaurar los paquetes.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

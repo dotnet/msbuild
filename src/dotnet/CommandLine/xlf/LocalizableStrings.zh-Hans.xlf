@@ -5,7 +5,7 @@
       <group id="src/dotnet/CommandLine/LocalizableStrings.resx" />
       <trans-unit id="LastArgumentMultiValueError">
         <source>The last argument '{0}' accepts multiple values. No more argument can be added.</source>
-        <target state="translated">最后一个参数“{0}”接受多个值。不能再添加任何参数。</target>
+        <target state="translated">最后一个参数“{0}”接受多个值。无法再添加其他参数。</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedValueForOptionError">
@@ -40,7 +40,7 @@
       </trans-unit>
       <trans-unit id="UsageHeader">
         <source>Usage:</source>
-        <target state="translated">使用情况:</target>
+        <target state="translated">使用情况: </target>
         <note />
       </trans-unit>
       <trans-unit id="UsageItemWithoutArgs">
@@ -60,7 +60,7 @@
       </trans-unit>
       <trans-unit id="UsageArgumentsHeader">
         <source>Arguments:</source>
-        <target state="translated">参数:</target>
+        <target state="translated">参数: </target>
         <note />
       </trans-unit>
       <trans-unit id="UsageArgumentItem">
@@ -75,7 +75,7 @@
       </trans-unit>
       <trans-unit id="UsageOptionsHeader">
         <source>Options:</source>
-        <target state="translated">选项:</target>
+        <target state="translated">选项: </target>
         <note />
       </trans-unit>
       <trans-unit id="UsageOptionsItem">
@@ -90,7 +90,7 @@
       </trans-unit>
       <trans-unit id="UsageCommandsHeader">
         <source>Commands:</source>
-        <target state="translated">命令:</target>
+        <target state="translated">命令: </target>
         <note />
       </trans-unit>
       <trans-unit id="UsageCommandsItem">
@@ -115,7 +115,7 @@
       </trans-unit>
       <trans-unit id="UsageCommandsAdditionalArgsHeader">
         <source>Additional Arguments:</source>
-        <target state="translated">附加参数:</target>
+        <target state="translated">附加参数: </target>
         <note />
       </trans-unit>
       <trans-unit id="UsageCommandsAdditionalArgsItem">
@@ -140,7 +140,7 @@
       </trans-unit>
       <trans-unit id="MSBuildAdditionalArgsHelpText">
         <source>Any extra options that should be passed to MSBuild. See 'dotnet msbuild -h' for available options.</source>
-        <target state="translated">应传递到 MSBuild 的任何额外选项。请参阅“dotnet msbuild -h”以了解可用选项。</target>
+        <target state="translated">任何应该传递给 MSBuild 的额外选项。有关可用的选项，请参阅“dotnet msbuild -h”。</target>
         <note />
       </trans-unit>
     </body>

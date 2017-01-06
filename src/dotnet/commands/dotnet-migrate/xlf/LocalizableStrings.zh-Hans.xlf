@@ -25,11 +25,11 @@
     - a solution.sln file, it will migrate the projects referenced in the solution.
     - a directory to migrate, it will recursively search for project.json files to migrate.
 Defaults to current directory if nothing is specified.</source>
-        <target state="translated">以下其中一项的路径:
+        <target state="translated">以下文件之一的路径: 
    - 要迁移的 project.json 文件的路径。
-   - global.json 文件，它将迁移 global.json 中指定的文件夹。
-   - solution.sln 文件，它将迁移解决方案中引用的项目。
-    - 要迁移的目录，它将递归搜索要迁移的 project.json文件。
+   - global.json 文件的路径，它将迁移 global.json 中指定的文件夹。
+   - solution.sln 文件的路径，它将迁移解决方案中引用的项目。
+   - 要迁移的目录的路径，它将递归搜索要迁移的 project.json 文件。
 如果未指定，则默认使用当前目录。</target>
         <note />
       </trans-unit>

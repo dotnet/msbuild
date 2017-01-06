@@ -35,12 +35,12 @@
       </trans-unit>
       <trans-unit id="LookingForPreferCliRuntimeFile">
         <source>{0}: Looking for prefercliruntime file at `{1}`</source>
-        <target state="translated">{0}: hledání souboru prefercliruntime v {1}</target>
+        <target state="translated">{0}: Hledání souboru prefercliruntime v {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="AttemptingToResolve">
         <source>{0}: attempting to resolve {1}</source>
-        <target state="translated">{0}: pokus o vyřešení {1}</target>
+        <target state="translated">{0}: Pokus o vyřešení {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="DidNotFindAMatchingProject">
@@ -50,7 +50,7 @@
       </trans-unit>
       <trans-unit id="InvalidCommandResolverArguments">
         <source>{0}: invalid commandResolverArguments</source>
-        <target state="translated">{0}: neplatné hodnoty commandResolverArguments</target>
+        <target state="translated">{0}: Neplatné hodnoty commandResolverArguments</target>
         <note />
       </trans-unit>
       <trans-unit id="DoesNotExist">
@@ -65,7 +65,7 @@
       </trans-unit>
       <trans-unit id="ToolLibraryFound">
         <source>{0}: tool library found {1}</source>
-        <target state="translated">{0}: nalezena knihovna nástrojů {1}</target>
+        <target state="translated">{0}: Nalezena knihovna nástrojů {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildExePath">
@@ -75,7 +75,7 @@
       </trans-unit>
       <trans-unit id="MSBuildProjectPath">
         <source>{0}: MSBuild project path = {1}</source>
-        <target state="translated">{0}: cesta k projektu MSBuildu = {1}</target>
+        <target state="translated">{0}: Cesta k projektu MSBuildu = {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="MultipleProjectFilesFound">
@@ -100,19 +100,19 @@
       </trans-unit>
       <trans-unit id="AttemptingToResolveCommandSpec">
         <source>{0}: Attempting to resolve command spec from tool {1}</source>
-        <target state="translated">{0}: pokus o vyřešení specifikace příkazu nástroje {1}</target>
+        <target state="translated">{0}: Pokus o vyřešení specifikace příkazu nástroje {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetPackagesRoot">
         <source>{0}: nuget packages root:
 {1}</source>
-        <target state="translated">{0}: kořen balíčků NuGet:
+        <target state="translated">{0}: Kořen balíčků NuGet:
 {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="FoundToolLockFile">
         <source>{0}: found tool lockfile at : {1}</source>
-        <target state="translated">{0}: zjištěný lockfile nástroje na: {1}</target>
+        <target state="translated">{0}: Zjištěný lockfile nástroje na: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="LibraryNotFoundInLockFile">
@@ -172,7 +172,7 @@
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
         <source>Waiting for debugger to attach. Press ENTER to continue</source>
-        <target state="translated">Čeká se na připojení ladicího programu. Pokračujte stisknutím tlačítka ENTER.</target>
+        <target state="translated">Čeká se na připojení ladicího programu. Pokračujte stisknutím ENTER.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProcessId">

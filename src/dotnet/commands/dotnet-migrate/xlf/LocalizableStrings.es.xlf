@@ -25,10 +25,10 @@
     - a solution.sln file, it will migrate the projects referenced in the solution.
     - a directory to migrate, it will recursively search for project.json files to migrate.
 Defaults to current directory if nothing is specified.</source>
-        <target state="translated">La ruta de acceso a cada uno de los siguientes elementos:
-    - un archivo project.json para migrarlo,
-    - un archivo global.json; migra las carpetas especificadas en global.json,
-    - un archivo solution.sln; migra los proyectos a los que se hace referencia en la solución,
+        <target state="translated">Ruta de acceso a uno de los siguientes valores:
+    - un archivo project.json para migrarlo;
+    - un archivo global.json; migra las carpetas especificadas en global.json;
+    - un archivo solution.sln; migra los proyectos a los que se hace referencia en la solución;
     - un directorio para migrar; busca archivos project.json de forma recursiva para migrarlos.
 Si no se especifica ninguno, usa el directorio actual de forma predeterminada.</target>
         <note />

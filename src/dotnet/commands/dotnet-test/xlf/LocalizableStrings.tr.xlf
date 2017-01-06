@@ -53,18 +53,17 @@
                                         </source>
         <target state="translated">Belirtilen ifadeyle eşleşen testleri çalıştırır.
                                         Örnekler:
-                                        Önceliği 1: --filter "Priority = 1" olarak ayarlanmış testleri çalıştırır
-                                        Belirtilen tam ada sahip bir test çalıştırır: --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
-                                        Belirtilen adı içeren testleri çalıştırır: --filter "FullyQualifiedName~Namespace.Class"
-                                        Filtreleme desteği hakkında daha fazla bilgi: https://aka.ms/vstest-filtering
-                                        </target>
+                                        Testleri, önceliği 1 olarak ayarlayarak çalıştırmak için: --filter "Priority = 1"
+                                        Belirtilen tam ada sahip testi çalıştırmak için: --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
+                                        Belirtilen tam adı içeren testleri çalıştırmak için: --filter "FullyQualifiedName~Namespace.Class"
+                                        Filtreleme desteği hakkında daha fazla bilgi için bkz. https://aka.ms/vstest-filtering</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTestAdapterPathDescription">
         <source>Use custom adapters from the given path in the test run.
                                         Example: --test-adapter-path &lt;PATH_TO_ADAPTER&gt;</source>
         <target state="translated">Test çalıştırmasında, belirtilen yoldaki özel bağdaştırıcıları kullanır.
-                                        Örnek: --test-adapter-path &lt;BAĞDAŞTIRICI_YOLU&gt;</target>
+                                        Örnek: --test-adapter-path &lt;PATH_TO_ADAPTER&gt;</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdLoggerOption">
@@ -81,17 +80,17 @@
       </trans-unit>
       <trans-unit id="CmdConfiguration">
         <source>CONFIGURATION</source>
-        <target state="translated">CONFIGURATION</target>
+        <target state="translated">YAPILANDIRMA</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="translated">Projeyi derlemek için kullanılacak yapılandırma. Çoğu proje için varsayılan, "Hata Ayıklama" seçeneğidir.</target>
+        <target state="translated">Projeyi derlemek için kullanılacak yapılandırma.  Çoğu proje için varsayılan: "Debug".</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
-        <target state="translated">FRAMEWORK</target>
+        <target state="translated">ÇERÇEVE</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">

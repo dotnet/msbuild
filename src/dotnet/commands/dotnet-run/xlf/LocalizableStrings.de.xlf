@@ -15,7 +15,7 @@
       </trans-unit>
       <trans-unit id="CommandOptionConfigurationDescription">
         <source>Configuration to use for building the project. Default for most projects is "Debug".</source>
-        <target state="translated">Konfiguration für die Erstellung des Projekts. Standard für die meisten Projekte ist „Debug“.</target>
+        <target state="translated">Konfiguration für die Erstellung des Projekts. Standard für die meisten Projekte ist "Debug".</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionFramework">
@@ -25,7 +25,7 @@
       </trans-unit>
       <trans-unit id="CommandOptionFrameworkDescription">
         <source>Build and run the app using the specified framework. The framework has to be specified in the project file. </source>
-        <target state="translated">Erstellen und Ausführen der App mit dem angegebenen Framework. Das Framework muss in der Projektdatei angegeben werden. </target>
+        <target state="translated">Erstellt die App mit dem angegebenen Framework und führt sie aus. Das Framework muss in der Projektdatei angegeben werden. </target>
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionProjectDescription">

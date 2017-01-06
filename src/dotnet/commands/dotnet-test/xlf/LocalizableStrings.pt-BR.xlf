@@ -51,20 +51,19 @@
                                         Run tests that contain the specified name: --filter "FullyQualifiedName~Namespace.Class"
                                         More info on filtering support: https://aka.ms/vstest-filtering
                                         </source>
-        <target state="translated">Executa testes que correspondem a determinada expressão.
+        <target state="translated">Execute testes que correspondam à expressão especificada.
                                         Exemplos:
-                                        Executar testes com a prioridade definida como 1: --filter "Priority = 1"
-                                        Executar um teste com o nome completo especificado: --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
-                                        Executar testes que contêm o nome especificado: --filter "FullyQualifiedName~Namespace.Class"
-                                        Mais informações sobre o suporte à filtragem: https://aka.ms/vstest-filtering
-                                        </target>
+                                        Execute testes com a prioridade definida para 1: --filter "Priority = 1"
+                                        Execute um teste com o nome completo especificado: --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
+                                        Execute testes que contém o nome especificado: --filter "FullyQualifiedName~Namespace.Class"
+                                        Para obter mais informações sobre suporte à filtragem: https://aka.ms/vstest-filtering</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTestAdapterPathDescription">
         <source>Use custom adapters from the given path in the test run.
                                         Example: --test-adapter-path &lt;PATH_TO_ADAPTER&gt;</source>
-        <target state="translated">Usar adaptadores personalizados do caminho especificado na execução de teste.
-                                        Exemplo: --test-adapter-path &lt;CAMINHO_PARA_ADAPTADOR&gt;</target>
+        <target state="translated">Use adaptadores personalizados do caminho especificado na execução de teste.
+                                        Exemplo: --test-adapter-path &lt;PATH_TO_ADAPTER&gt;</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdLoggerOption">
@@ -86,7 +85,7 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="translated">Configuração a ser usada para compilar o projeto. O padrão para a maioria dos projetos é "Debug".</target>
+        <target state="translated">A configuração a ser usada para criar o projeto.  O padrão para a maioria dos projetos é “Depurar”.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">

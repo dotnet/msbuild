@@ -35,7 +35,7 @@
       </trans-unit>
       <trans-unit id="LookingForPreferCliRuntimeFile">
         <source>{0}: Looking for prefercliruntime file at `{1}`</source>
-        <target state="translated">{0}: `{1}` で prefercliruntime ファイルを検索しています</target>
+        <target state="translated">{0}:`{1}` で prefercliruntime ファイルを検索しています</target>
         <note />
       </trans-unit>
       <trans-unit id="AttemptingToResolve">
@@ -45,7 +45,7 @@
       </trans-unit>
       <trans-unit id="DidNotFindAMatchingProject">
         <source>{0}: Did not find a matching project {1}.</source>
-        <target state="translated">{0}: 一致するプロジェクト {1}.が見つかりませんでした。</target>
+        <target state="translated">{0}:一致するプロジェクト {1}.が見つかりませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidCommandResolverArguments">
@@ -70,12 +70,12 @@
       </trans-unit>
       <trans-unit id="MSBuildExePath">
         <source>{0}: MSBUILD_EXE_PATH = {1}</source>
-        <target state="translated">{0}: MSBUILD_EXE_PATH = {1}</target>
+        <target state="translated">{0}:MSBUILD_EXE_PATH = {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildProjectPath">
         <source>{0}: MSBuild project path = {1}</source>
-        <target state="translated">{0}: MSBuild プロジェクト パス = {1}</target>
+        <target state="translated">{0}:MSBuild project path = {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="MultipleProjectFilesFound">
@@ -85,7 +85,7 @@
       </trans-unit>
       <trans-unit id="DidNotFindProject">
         <source>{0}: ProjectFactory did not find Project.</source>
-        <target state="translated">{0}: ProjectFactory でプロジェクトが見つかりませんでした。</target>
+        <target state="translated">{0}:ProjectFactory でプロジェクトが見つかりませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolvingCommandSpec">
@@ -100,7 +100,7 @@
       </trans-unit>
       <trans-unit id="AttemptingToResolveCommandSpec">
         <source>{0}: Attempting to resolve command spec from tool {1}</source>
-        <target state="translated">{0}: ツール {1} から commandspec を解決しようとしています</target>
+        <target state="translated">{0}:ツール {1} から commandspec を解決しようとしています</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetPackagesRoot">
@@ -172,7 +172,7 @@
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
         <source>Waiting for debugger to attach. Press ENTER to continue</source>
-        <target state="translated">デバッガーのアタッチを待機しています。続行するには Enter キーを押してください</target>
+        <target state="translated">デバッガーのアタッチを待っています...続行するには、ENTER キーを押してください</target>
         <note />
       </trans-unit>
       <trans-unit id="ProcessId">

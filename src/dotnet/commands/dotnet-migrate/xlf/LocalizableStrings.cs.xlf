@@ -25,12 +25,12 @@
     - a solution.sln file, it will migrate the projects referenced in the solution.
     - a directory to migrate, it will recursively search for project.json files to migrate.
 Defaults to current directory if nothing is specified.</source>
-        <target state="translated">Cesta k:
-    - Migrovanému souboru project.json
-    - Souboru global.json (Migrovat se budou složky zadané v souboru global.json.)
-    - Souboru solution.sln (Migrovat se budou projekty, na které odkazuje řešení.)
-    - Migrovanému adresáři (Rekurzivně vyhledá migrované soubory project.json.)
-Výchozí hodnotou je aktuální adresář (pokud není zadaný jiný adresář).</target>
+        <target state="translated">Cesta k jednomu z následujících umístění:
+    - k migrovanému souboru project.json
+    - k souboru global.json (Migrovat se budou složky zadané v souboru global.json.)
+    - k souboru solution.sln (Migrovat se budou projekty odkazované v řešení.)
+    - k migrovanému adresáři (Rekurzivně vyhledá migrované soubory project.json.)
+Výchozí hodnota je aktuální adresář (pokud není zadaný jiný adresář).</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTemplateDescription">

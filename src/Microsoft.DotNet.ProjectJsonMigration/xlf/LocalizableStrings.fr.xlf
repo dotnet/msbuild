@@ -15,7 +15,7 @@
       </trans-unit>
       <trans-unit id="NoXprojFileGivenError">
         <source>{0}: No xproj file given.</source>
-        <target state="translated">{0} : aucun fichier xproj fourni.</target>
+        <target state="translated">{0} : Aucun fichier xproj fourni.</target>
         <note />
       </trans-unit>
       <trans-unit id="MultipleXprojFilesError">

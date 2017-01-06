@@ -53,11 +53,10 @@
                                         </source>
         <target state="translated">Esegue i test corrispondenti all'espressione specificata.
                                         Esempi:
-                                        Consente di eseguire test con priorità impostata su 1: --filter "Priority = 1"
-                                        Consente di eseguire un test con il nome completo specificato: --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
-                                        Consente di eseguire test che contengono il nome specificato: --filter "FullyQualifiedName~Namespace.Class"
-                                        Altre informazioni sul supporto dei filtri: https://aka.ms/vstest-filtering
-                                        </target>
+                                        Esegue i test con priorità impostata su 1: --filter "Priority = 1"
+                                        Esegue un test con il nome completo specificato: --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
+                                        Esegue i test che contengono il nome specificato: --filter "FullyQualifiedName~Namespace.Class"
+                                        Altre informazioni sul supporto dei filtri: https://aka.ms/vstest-filtering</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTestAdapterPathDescription">
@@ -75,7 +74,7 @@
       <trans-unit id="CmdLoggerDescription">
         <source>Specify a logger for test results. 
                                         Example: --logger:trx</source>
-        <target state="translated">Consente di specificare un logger per i risultati dei test.
+        <target state="translated">Consente di specificare un logger per i risultati dei test. 
                                         Esempio: --logger:trx</target>
         <note />
       </trans-unit>
@@ -86,7 +85,7 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="translated">Configurazione da usare per compilare il progetto. L'impostazione predefinita per la maggior parte dei progetti è "Debug".</target>
+        <target state="translated">Configurazione da usare per compilare il progetto.  L'impostazione predefinita per la maggior parte dei progetti è "Debug".</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">

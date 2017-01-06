@@ -90,7 +90,7 @@
       </trans-unit>
       <trans-unit id="ResolvingCommandSpec">
         <source>{0}: resolving commandspec from {1} Tool Libraries.</source>
-        <target state="translated">{0}: Rozpoznawanie elementu commandspec z bibliotek narzędzia {1}.</target>
+        <target state="translated">{0}: Rozpoznawanie elementu commandspec z bibliotek narzędzi {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToResolveCommandSpec">
@@ -172,7 +172,7 @@
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
         <source>Waiting for debugger to attach. Press ENTER to continue</source>
-        <target state="translated">Oczekiwanie na dołączenie debugera. Naciśnij klawisz ENTER, aby kontynuować</target>
+        <target state="translated">Trwa oczekiwanie na dołączenie debugera. Naciśnij klawisz ENTER, aby kontynuować</target>
         <note />
       </trans-unit>
       <trans-unit id="ProcessId">

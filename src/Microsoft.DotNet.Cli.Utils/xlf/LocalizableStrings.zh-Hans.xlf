@@ -65,7 +65,7 @@
       </trans-unit>
       <trans-unit id="ToolLibraryFound">
         <source>{0}: tool library found {1}</source>
-        <target state="translated">{0}: 找到的工具库 {1}</target>
+        <target state="translated">{0}: 找到工具库 {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildExePath">
@@ -90,7 +90,7 @@
       </trans-unit>
       <trans-unit id="ResolvingCommandSpec">
         <source>{0}: resolving commandspec from {1} Tool Libraries.</source>
-        <target state="translated">{0}: 从 {1} 工具库解析 commandspec。</target>
+        <target state="translated">{0}: 正在从 {1} 工具库解析 commandspec。</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToResolveCommandSpec">
@@ -100,13 +100,13 @@
       </trans-unit>
       <trans-unit id="AttemptingToResolveCommandSpec">
         <source>{0}: Attempting to resolve command spec from tool {1}</source>
-        <target state="translated">{0}: 尝试从工具 {1} 解析命令 spec</target>
+        <target state="translated">{0}: 正在尝试从工具 {1} 解析命令 spec</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetPackagesRoot">
         <source>{0}: nuget packages root:
 {1}</source>
-        <target state="translated">{0}: nuget 包根目录:
+        <target state="translated">{0}: nuget 包根目录: 
 {1}</target>
         <note />
       </trans-unit>
@@ -172,7 +172,7 @@
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
         <source>Waiting for debugger to attach. Press ENTER to continue</source>
-        <target state="translated">等待附加调试器。按 Enter 继续</target>
+        <target state="translated">正在等待调试程序附加。按 Enter 继续操作</target>
         <note />
       </trans-unit>
       <trans-unit id="ProcessId">

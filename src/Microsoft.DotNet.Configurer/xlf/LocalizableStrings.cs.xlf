@@ -17,19 +17,19 @@ You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-te
 Configuring...
 -------------------
 A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</source>
-        <target state="translated">Vítejte v .NET Core!
+        <target state="translated">Vítá vás .NET Core!
 ---------------------
-Další informace o .NET Core najdete na adrese https://aka.ms/dotnet-docs. K zobrazení dostupných příkazů použijte příkaz dotnet --help nebo přejděte na https://aka.ms/dotnet-cli-docs.
+Další informace o .NET Core najdete na https://aka.ms/dotnet-docs. Dostupné příkazy si zobrazíte pomocí dotnet --help, případně přejděte na https://aka.ms/dotnet-cli-docs.
 
 Telemetrie
 --------------
-Nástroje .NET Core shromažďují data o využití, která pomáhají zlepšit vaši práci. Tato data jsou anonymní a nezahrnují argumenty příkazového řádku. Data shromažďuje Microsoft a sdílí je s komunitou uživatelů.
-Pokud chcete telemetrii vypnout, nastavte proměnnou prostředí DOTNET_CLI_TELEMETRY_OPTOUT na 1. Můžete k tomu použít své oblíbené prostředí.
-Další informace o telemetrických nástrojích .NET Core najdete na adrese https://aka.ms/dotnet-cli-telemetry.
+Nástroje .NET Core shromažďují data o využití s cílem vylepšit vaše prostředí. Data jsou anonymní a nezahrnují argumenty příkazového řádku. Data shromažďuje Microsoft, který je sdílí s komunitou.
+S telemetrií můžete vyjádřit výslovný nesouhlas, a to nastavením proměnné prostředí DOTNET_CLI_TELEMETRY_OPTOUT na 1 prostřednictvím vašeho oblíbeného rozhraní.
+Další informace o telemetrii nástrojů .NET Core si můžete přečíst na webu https://aka.ms/dotnet-cli-telemetry.
 
-Konfigurace...
+Probíhá konfigurace...
 -------------------
-Je spuštěný příkaz, který na začátku naplní mezipaměť místního balíčku, zlepší rychlost obnovení a umožní offline přístup. Dokončení příkazu zabere necelou minutu a stačí ho spustit jen jednou.</target>
+Běží příkaz pro počáteční naplnění vaší místní mezipaměti balíčků, aby se vylepšila rychlost obnovování a umožnil se offline přístup. Provádění tohoto příkazu může trvat až minutu a proběhne jen jednou.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">

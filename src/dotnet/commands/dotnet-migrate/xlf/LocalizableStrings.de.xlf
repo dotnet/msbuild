@@ -26,10 +26,10 @@
     - a directory to migrate, it will recursively search for project.json files to migrate.
 Defaults to current directory if nothing is specified.</source>
         <target state="translated">Der Pfad zu einem der folgenden Elemente:
-    - einer zu migrierenden Datei vom Typ „project.json“.
-    - einer Datei vom Typ „global.json“. (Hierbei werden die in „global.json“ angegebenen Ordner migriert.)
-    - einer Datei vom Typ „solution.sln“. (Hierbei werden die Projekte migriert, auf die die Projektmappe verweist.)
-    - einem zu migrierenden Verzeichnis. (Hierbei wird rekursiv nach zu migrierenden Dateien vom Typ „project.json“ gesucht.)
+    – Datei vom Typ "project.json", die migriert werden soll
+    – Datei vom Typ "global.json", mit der die in "global.json" angegebenen Ordner migriert werden
+    – Datei vom Typ "solution.sln", mit der die in der Projektmappe referenzierten Projekte migriert werden
+    – Verzeichnis für die Migration, es wird rekursiv nach zu migrierenden Dateien vom Typ "project.json" gesucht
 Ohne Angabe wird standardmäßig das aktuelle Verzeichnis verwendet.</target>
         <note />
       </trans-unit>
