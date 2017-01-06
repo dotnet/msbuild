@@ -36,7 +36,16 @@
     "auth": {
       "type": "parameter",
       "datatype": "choice",
-      "choices": ["None", "Individual"],
+      "choices": [
+        {
+          "choice": "None",
+          "description": "No authentication"
+        },
+        {
+          "choice": "Individual",
+          "description": "Individual authentication"
+        }
+      ],
       "defaultValue": "None",
       "description": "The type of authentication to use"
     },
