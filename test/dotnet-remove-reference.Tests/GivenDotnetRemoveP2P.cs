@@ -9,13 +9,13 @@ using System;
 using System.IO;
 using Xunit;
 
-namespace Microsoft.DotNet.Cli.Remove.P2P.Tests
+namespace Microsoft.DotNet.Cli.Remove.Reference.Tests
 {
-    public class GivenDotnetRemoveP2P : TestBase
+    public class GivenDotnetRemoveReference : TestBase
     {
-        private const string HelpText = @".NET Remove Project to Project (p2p) reference Command
+        private const string HelpText = @".NET Remove Project to Project reference Command
 
-Usage: dotnet remove <PROJECT> p2p [options] [args]
+Usage: dotnet remove <PROJECT> reference [options] [args]
 
 Arguments:
   <PROJECT>  The project file to operate on. If a file is not specified, the command will search the current directory for one.
@@ -116,7 +116,7 @@ Additional Arguments:
         [InlineData("-h")]
         public void WhenHelpOptionIsPassedItPrintsUsage(string helpArg)
         {
-            var cmd = new RemoveP2PCommand().Execute(helpArg);
+            var cmd = new RemoveReferenceCommand().Execute(helpArg);
             cmd.Should().Pass();
             cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
@@ -150,7 +150,7 @@ Additional Arguments:
         {
             var setup = Setup();
 
-            var cmd = new RemoveP2PCommand()
+            var cmd = new RemoveReferenceCommand()
                     .WithWorkingDirectory(setup.TestRoot)
                     .WithProject(projName)
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
@@ -165,7 +165,7 @@ Additional Arguments:
             string projName = "Broken/Broken.csproj";
             var setup = Setup();
 
-            var cmd = new RemoveP2PCommand()
+            var cmd = new RemoveReferenceCommand()
                     .WithWorkingDirectory(setup.TestRoot)
                     .WithProject(projName)
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
@@ -180,7 +180,7 @@ Additional Arguments:
             var setup = Setup();
 
             var workingDir = Path.Combine(setup.TestRoot, "MoreThanOne");
-            var cmd = new RemoveP2PCommand()
+            var cmd = new RemoveReferenceCommand()
                     .WithWorkingDirectory(workingDir)
                     .Execute($"\"{setup.ValidRefCsprojRelToOtherProjPath}\"");
             cmd.ExitCode.Should().NotBe(0);
@@ -193,7 +193,7 @@ Additional Arguments:
         {
             var setup = Setup();
 
-            var cmd = new RemoveP2PCommand()
+            var cmd = new RemoveReferenceCommand()
                     .WithWorkingDirectory(setup.TestRoot)
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
@@ -209,7 +209,7 @@ Additional Arguments:
             var libref = AddLibRef(setup, lib);
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
-            var cmd = new RemoveP2PCommand()
+            var cmd = new RemoveReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{libref.CsProjPath}\"");
@@ -228,7 +228,7 @@ Additional Arguments:
             var libref = AddLibRef(setup, lib, FrameworkNet451Arg);
 
             int condBefore = lib.CsProj().NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451);
-            var cmd = new RemoveP2PCommand()
+            var cmd = new RemoveReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg} \"{libref.CsProjPath}\"");
@@ -248,7 +248,7 @@ Additional Arguments:
             var validref = AddValidRef(setup, lib);
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
-            var cmd = new RemoveP2PCommand()
+            var cmd = new RemoveReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{libref.CsProjPath}\"");
@@ -267,7 +267,7 @@ Additional Arguments:
             var libref = GetLibRef(setup);
 
             string csprojContetntBefore = lib.CsProjContent();
-            var cmd = new RemoveP2PCommand()
+            var cmd = new RemoveReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{libref.CsProjPath}\"");
@@ -284,7 +284,7 @@ Additional Arguments:
             var libref = GetLibRef(setup);
 
             string csprojContetntBefore = lib.CsProjContent();
-            var cmd = new RemoveP2PCommand()
+            var cmd = new RemoveReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg} \"{libref.CsProjPath}\"");
@@ -304,7 +304,7 @@ Additional Arguments:
             var csprojBefore = lib.CsProj();
             int noCondBefore = csprojBefore.NumberOfItemGroupsWithoutCondition();
             int condBefore = csprojBefore.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451);
-            var cmd = new RemoveP2PCommand()
+            var cmd = new RemoveReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{librefNoCond.CsProjPath}\"");
@@ -329,7 +329,7 @@ Additional Arguments:
             var csprojBefore = lib.CsProj();
             int noCondBefore = csprojBefore.NumberOfItemGroupsWithoutCondition();
             int condBefore = csprojBefore.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451);
-            var cmd = new RemoveP2PCommand()
+            var cmd = new RemoveReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg} \"{librefCond.CsProjPath}\"");
@@ -354,7 +354,7 @@ Additional Arguments:
             var csprojBefore = lib.CsProj();
             int condNet451Before = csprojBefore.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451);
             int condNetCoreApp10Before = csprojBefore.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNetCoreApp10);
-            var cmd = new RemoveP2PCommand()
+            var cmd = new RemoveReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg} \"{librefCondNet451.CsProjPath}\"");
@@ -379,7 +379,7 @@ Additional Arguments:
 Project reference `{setup.LibCsprojRelPath}` removed.";
 
             int noCondBefore = proj.CsProj().NumberOfItemGroupsWithoutCondition();
-            var cmd = new RemoveP2PCommand()
+            var cmd = new RemoveReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(proj.CsProjPath)
                 .Execute($"\"{libref.CsProjPath}\"");
@@ -399,7 +399,7 @@ Project reference `{setup.LibCsprojRelPath}` removed.";
             var libref = AddValidRef(setup, lib);
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
-            var cmd = new RemoveP2PCommand()
+            var cmd = new RemoveReferenceCommand()
                 .WithWorkingDirectory(lib.Path)
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{setup.ValidRefCsprojRelToOtherProjPath}\"");
@@ -418,7 +418,7 @@ Project reference `{setup.LibCsprojRelPath}` removed.";
             var libref = AddValidRef(setup, lib);
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
-            var cmd = new RemoveP2PCommand()
+            var cmd = new RemoveReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{setup.ValidRefCsprojRelToOtherProjPath}\"");
@@ -437,7 +437,7 @@ Project reference `{setup.LibCsprojRelPath}` removed.";
             var libref = AddValidRef(setup, lib);
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
-            var cmd = new RemoveP2PCommand()
+            var cmd = new RemoveReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{setup.ValidRefCsprojPath}\"");
@@ -460,7 +460,7 @@ Project reference `{setup.LibCsprojRelPath}` removed.";
 Project reference `{Path.Combine(TestSetup.ProjectName, setup.ValidRefCsprojRelPath)}` removed.";
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
-            var cmd = new RemoveP2PCommand()
+            var cmd = new RemoveReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{libref.CsProjPath}\" \"{validref.CsProjPath}\"");
@@ -484,7 +484,7 @@ Project reference `{Path.Combine(TestSetup.ProjectName, setup.ValidRefCsprojRelP
 Project reference `{Path.Combine(TestSetup.ProjectName, setup.ValidRefCsprojRelPath)}` removed.";
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
-            var cmd = new RemoveP2PCommand()
+            var cmd = new RemoveReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{libref.CsProjPath}\" \"{validref.CsProjPath}\"");

@@ -5,9 +5,9 @@ namespace Microsoft.DotNet.Tools.Remove.ProjectToProjectReference
 {
     internal class LocalizableStrings
     {
-        public const string AppFullName = ".NET Remove Project to Project (p2p) reference Command";
+        public const string AppFullName = ".NET Remove Project to Project reference Command";
 
-        public const string AppDescription = "Command to remove project to project (p2p) reference";
+        public const string AppDescription = "Command to remove project to project reference";
 
         public const string AppHelpText = "Project to project references to remove";
 

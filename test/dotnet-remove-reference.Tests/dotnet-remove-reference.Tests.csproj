@@ -4,7 +4,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp1.0</TargetFramework>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
-    <AssemblyName>dotnet-remove-p2p.Tests</AssemblyName>
+    <AssemblyName>dotnet-remove-reference.Tests</AssemblyName>
     <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">$(PackageTargetFallback);dotnet5.4;portable-net451+win8</PackageTargetFallback>
   </PropertyGroup>
 
