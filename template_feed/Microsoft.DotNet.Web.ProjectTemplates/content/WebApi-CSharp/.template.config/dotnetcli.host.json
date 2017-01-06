@@ -1,5 +1,10 @@
 {
-  "HiddenParameters": [
-    "IncludeApplicationInsights"
-  ]
+  "symbolInfo": {
+    "IncludeApplicationInsights": {
+      "isHidden": "true"
+    },
+    "Framework": {
+      "longName": "framework"
+    }
+  }
 }

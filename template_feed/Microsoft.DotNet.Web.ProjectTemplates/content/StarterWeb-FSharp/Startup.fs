@@ -1,4 +1,4 @@
-﻿namespace MvcApp
+﻿namespace Company.WebApplication1
 
 open System
 open System.Collections.Generic
