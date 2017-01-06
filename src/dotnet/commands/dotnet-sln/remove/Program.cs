@@ -5,12 +5,13 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
+using Microsoft.DotNet.Tools.Sln;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace Microsoft.DotNet.Tools.Remove.ProjectFromSolution
+namespace Microsoft.DotNet.Tools.Sln.Remove
 {
     internal class RemoveProjectFromSolutionCommand : DotNetSubCommandBase
     {
@@ -18,11 +19,11 @@ namespace Microsoft.DotNet.Tools.Remove.ProjectFromSolution
         {
             var command = new RemoveProjectFromSolutionCommand()
             {
-                Name = "project",
-                FullName = LocalizableStrings.AppFullName,
-                Description = LocalizableStrings.AppDescription,
+                Name = "remove",
+                FullName = LocalizableStrings.RemoveAppFullName,
+                Description = LocalizableStrings.RemoveSubcommandHelpText,
                 HandleRemainingArguments = true,
-                ArgumentSeparatorHelpText = LocalizableStrings.AppHelpText,
+                ArgumentSeparatorHelpText = LocalizableStrings.RemoveSubcommandHelpText,
             };
 
             command.HelpOption("-h|--help");

@@ -16,6 +16,8 @@ namespace Microsoft.DotNet.Cli
     {
         protected abstract string CommandName { get; }
         protected abstract string FullCommandNameLocalized { get; }
+        protected abstract string ArgumentName { get; }
+        protected abstract string ArgumentDescriptionLocalized { get; }
         internal abstract List<Func<DotNetSubCommandBase>> SubCommands { get; }
 
         public int RunCommand(string[] args)
@@ -30,9 +32,7 @@ namespace Microsoft.DotNet.Cli
 
             command.HelpOption("-h|--help");
 
-            command.Argument(
-                Constants.ProjectOrSolutionArgumentName,
-                CommonLocalizableStrings.ArgumentsProjectOrSolutionDescription);
+            command.Argument(ArgumentName, ArgumentDescriptionLocalized);
 
             foreach (var subCommandCreator in SubCommands)
             {
@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Cli
                     {
                         if (!command.Arguments.Any())
                         {
-                            throw new GracefulException(CommonLocalizableStrings.RequiredArgumentNotPassed, Constants.ProjectOrSolutionArgumentName);
+                            throw new GracefulException(CommonLocalizableStrings.RequiredArgumentNotPassed, ArgumentDescriptionLocalized);
                         }
 
                         var projectOrDirectory = command.Arguments.First().Value;

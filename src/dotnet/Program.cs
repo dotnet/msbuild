@@ -23,6 +23,7 @@ using Microsoft.DotNet.Tools.Remove;
 using Microsoft.DotNet.Tools.Restore;
 using Microsoft.DotNet.Tools.RestoreProjectJson;
 using Microsoft.DotNet.Tools.Run;
+using Microsoft.DotNet.Tools.Sln;
 using Microsoft.DotNet.Tools.Test;
 using Microsoft.DotNet.Tools.VSTest;
 using NuGet.Frameworks;
@@ -48,6 +49,7 @@ namespace Microsoft.DotNet.Cli
             ["restore"] = RestoreCommand.Run,
             ["restore-projectjson"] = RestoreProjectJsonCommand.Run,
             ["run"] = RunCommand.Run,
+            ["sln"] = SlnCommand.Run,
             ["test"] = TestCommand.Run,
             ["vstest"] = VSTestCommand.Run,
         };

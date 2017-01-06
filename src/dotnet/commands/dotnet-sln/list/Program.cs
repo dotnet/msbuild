@@ -5,8 +5,9 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
+using Microsoft.DotNet.Tools.Sln;
 
-namespace Microsoft.DotNet.Tools.List.ProjectsInSolution
+namespace Microsoft.DotNet.Tools.Sln.List
 {
     internal class ListProjectsInSolutionCommand : DotNetSubCommandBase
     {
@@ -14,9 +15,9 @@ namespace Microsoft.DotNet.Tools.List.ProjectsInSolution
         {
             var command = new ListProjectsInSolutionCommand()
             {
-                Name = "projects",
-                FullName = LocalizableStrings.AppFullName,
-                Description = LocalizableStrings.AppDescription,
+                Name = "list",
+                FullName = LocalizableStrings.ListAppFullName,
+                Description = LocalizableStrings.ListSubcommandHelpText,
             };
 
             command.HelpOption("-h|--help");

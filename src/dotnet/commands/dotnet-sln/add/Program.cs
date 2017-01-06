@@ -8,12 +8,13 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
+using Microsoft.DotNet.Tools.Sln;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace Microsoft.DotNet.Tools.Add.ProjectToSolution
+namespace Microsoft.DotNet.Tools.Sln.Add
 {
     internal class AddProjectToSolutionCommand : DotNetSubCommandBase
     {
@@ -21,11 +22,11 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToSolution
         {
             var command = new AddProjectToSolutionCommand()
             {
-                Name = "project",
-                FullName = LocalizableStrings.AppFullName,
-                Description = LocalizableStrings.AppDescription,
+                Name = "add",
+                FullName = LocalizableStrings.AddAppFullName,
+                Description = LocalizableStrings.AddSubcommandHelpText,
                 HandleRemainingArguments = true,
-                ArgumentSeparatorHelpText = LocalizableStrings.AppHelpText,
+                ArgumentSeparatorHelpText = LocalizableStrings.AddSubcommandHelpText,
             };
 
             command.HelpOption("-h|--help");

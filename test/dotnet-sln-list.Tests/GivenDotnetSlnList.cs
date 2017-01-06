@@ -9,16 +9,16 @@ using System.IO;
 using System.Linq;
 using Xunit;
 
-namespace Microsoft.DotNet.Cli.List.Proj.Tests
+namespace Microsoft.DotNet.Cli.Sln.List.Tests
 {
-    public class GivenDotnetListProj : TestBase
+    public class GivenDotnetSlnList : TestBase
     {
-        private const string HelpText = @".NET Projects in Solution viewer
+        private const string HelpText = @".NET List project(s) in a solution file Command
 
-Usage: dotnet list <PROJECT_OR_SOLUTION> projects [options]
+Usage: dotnet sln <SLN_FILE> list [options]
 
 Arguments:
-  <PROJECT_OR_SOLUTION>  The project or solution to operation on. If a file is not specified, the current directory is searched.
+  <SLN_FILE>  Solution file to operate on. If not specified, the command will search the current directory for one.
 
 Options:
   -h|--help  Show help information";
@@ -29,7 +29,7 @@ Options:
         public void WhenHelpOptionIsPassedItPrintsUsage(string helpArg)
         {
             var cmd = new DotnetCommand()
-                .ExecuteWithCapturedOutput($"list projects {helpArg}");
+                .ExecuteWithCapturedOutput($"sln list {helpArg}");
             cmd.Should().Pass();
             cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
@@ -40,7 +40,7 @@ Options:
         public void WhenNoCommandIsPassedItPrintsError(string commandName)
         {
             var cmd = new DotnetCommand()
-                .ExecuteWithCapturedOutput($"list {commandName}");
+                .ExecuteWithCapturedOutput($"sln {commandName}");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be("Required command was not provided.");
         }
@@ -49,7 +49,7 @@ Options:
         public void WhenTooManyArgumentsArePassedItPrintsError()
         {
             var cmd = new DotnetCommand()
-                .ExecuteWithCapturedOutput("list one.sln two.sln three.sln projects");
+                .ExecuteWithCapturedOutput("sln one.sln two.sln three.sln list");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be("Unrecognized command or argument 'two.sln'");
         }
@@ -63,7 +63,7 @@ Options:
         public void WhenNonExistingSolutionIsPassedItPrintsErrorAndUsage(string solutionName)
         {
             var cmd = new DotnetCommand()
-                .ExecuteWithCapturedOutput($"list {solutionName} projects");
+                .ExecuteWithCapturedOutput($"sln {solutionName} list");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be($"Could not find solution or directory `{solutionName}`.");
             cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
@@ -81,7 +81,7 @@ Options:
             
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput("list InvalidSolution.sln projects");
+                .ExecuteWithCapturedOutput("sln InvalidSolution.sln list");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be("Invalid solution `InvalidSolution.sln`. Invalid format in line 1: File header is missing");
             cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
@@ -100,7 +100,7 @@ Options:
             var solutionFullPath = Path.Combine(projectDirectory, "InvalidSolution.sln");
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput("list projects");
+                .ExecuteWithCapturedOutput("sln list");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be($"Invalid solution `{solutionFullPath}`. Invalid format in line 1: File header is missing");
             cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
@@ -119,7 +119,7 @@ Options:
             var solutionDir = Path.Combine(projectDirectory, "App");
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(solutionDir)
-                .ExecuteWithCapturedOutput("list projects");
+                .ExecuteWithCapturedOutput("sln list");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be($"Specified solution file {solutionDir + Path.DirectorySeparatorChar} does not exist, or there is no solution file in the directory.");
             cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
@@ -137,7 +137,7 @@ Options:
 
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput("list projects");
+                .ExecuteWithCapturedOutput("sln list");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be($"Found more than one solution file in {projectDirectory + Path.DirectorySeparatorChar}. Please specify which one to use.");
             cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
@@ -155,7 +155,7 @@ Options:
 
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput("list projects");
+                .ExecuteWithCapturedOutput("sln list");
             cmd.Should().Pass();
             cmd.StdOut.Should().Be("No projects found in the solution.");
         }
@@ -177,7 +177,7 @@ Options:
 
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput("list projects");
+                .ExecuteWithCapturedOutput("sln list");
             cmd.Should().Pass();
             cmd.StdOut.Should().BeVisuallyEquivalentTo(OutputText);
         }

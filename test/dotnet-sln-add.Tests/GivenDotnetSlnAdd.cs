@@ -10,22 +10,22 @@ using System.IO;
 using System.Linq;
 using Xunit;
 
-namespace Microsoft.DotNet.Cli.Add.Proj.Tests
+namespace Microsoft.DotNet.Cli.Sln.Add.Tests
 {
-    public class GivenDotnetAddProj : TestBase
+    public class GivenDotnetSlnAdd : TestBase
     {
-        private string HelpText = @".NET Add Project to Solution Command
+        private string HelpText = @".NET Add project(s) to a solution file Command
 
-Usage: dotnet add <PROJECT_OR_SOLUTION> project [options] [args]
+Usage: dotnet sln <SLN_FILE> add [options] [args]
 
 Arguments:
-  <PROJECT_OR_SOLUTION>  The project or solution to operation on. If a file is not specified, the current directory is searched.
+  <SLN_FILE>  Solution file to operate on. If not specified, the command will search the current directory for one.
 
 Options:
   -h|--help  Show help information
 
 Additional Arguments:
- Projects to add to solution
+ Add a specified project(s) to the solution.
 ";
 
         private const string ExpectedSlnFileAfterAddingLibProj = @"
@@ -185,7 +185,7 @@ EndGlobal
         public void WhenHelpOptionIsPassedItPrintsUsage(string helpArg)
         {
             var cmd = new DotnetCommand()
-                .ExecuteWithCapturedOutput($"add project {helpArg}");
+                .ExecuteWithCapturedOutput($"sln add {helpArg}");
             cmd.Should().Pass();
             cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
@@ -196,7 +196,7 @@ EndGlobal
         public void WhenNoCommandIsPassedItPrintsError(string commandName)
         {
             var cmd = new DotnetCommand()
-                .ExecuteWithCapturedOutput($"add {commandName}");
+                .ExecuteWithCapturedOutput($"sln {commandName}");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be("Required command was not provided.");
         }
@@ -205,7 +205,7 @@ EndGlobal
         public void WhenTooManyArgumentsArePassedItPrintsError()
         {
             var cmd = new DotnetCommand()
-                .ExecuteWithCapturedOutput("add one.sln two.sln three.sln project");
+                .ExecuteWithCapturedOutput("sln one.sln two.sln three.sln add");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be("Unrecognized command or argument 'two.sln'");
             cmd.StdOut.Should().Be("Specify --help for a list of available options and commands.");
@@ -220,7 +220,7 @@ EndGlobal
         public void WhenNonExistingSolutionIsPassedItPrintsErrorAndUsage(string solutionName)
         {
             var cmd = new DotnetCommand()
-                .ExecuteWithCapturedOutput($"add {solutionName} project p.csproj");
+                .ExecuteWithCapturedOutput($"sln {solutionName} add p.csproj");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be($"Could not find solution or directory `{solutionName}`.");
             cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
@@ -239,7 +239,7 @@ EndGlobal
             var projectToAdd = Path.Combine("Lib", "Lib.csproj");
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"add InvalidSolution.sln project {projectToAdd}");
+                .ExecuteWithCapturedOutput($"sln InvalidSolution.sln add {projectToAdd}");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be("Invalid solution `InvalidSolution.sln`. Invalid format in line 1: File header is missing");
             cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
@@ -259,7 +259,7 @@ EndGlobal
             var projectToAdd = Path.Combine("Lib", "Lib.csproj");
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"add project {projectToAdd}");
+                .ExecuteWithCapturedOutput($"sln add {projectToAdd}");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be($"Invalid solution `{solutionPath}`. Invalid format in line 1: File header is missing");
             cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
@@ -277,7 +277,7 @@ EndGlobal
 
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput(@"add App.sln project");
+                .ExecuteWithCapturedOutput(@"sln App.sln add");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be("You must specify at least one project to add.");
             cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
@@ -296,7 +296,7 @@ EndGlobal
             var solutionPath = Path.Combine(projectDirectory, "App");
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(solutionPath)
-                .ExecuteWithCapturedOutput(@"add project App.csproj");
+                .ExecuteWithCapturedOutput(@"sln add App.csproj");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be($"Specified solution file {solutionPath + Path.DirectorySeparatorChar} does not exist, or there is no solution file in the directory.");
             cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
@@ -315,7 +315,7 @@ EndGlobal
             var projectToAdd = Path.Combine("Lib", "Lib.csproj");
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"add project {projectToAdd}");
+                .ExecuteWithCapturedOutput($"sln add {projectToAdd}");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be($"Found more than one solution file in {projectDirectory + Path.DirectorySeparatorChar}. Please specify which one to use.");
             cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
@@ -334,7 +334,7 @@ EndGlobal
             var projectToAdd = Path.Combine("src", "Lib", "Lib.csproj");
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"add App.sln project {projectToAdd}");
+                .ExecuteWithCapturedOutput($"sln App.sln add {projectToAdd}");
             cmd.Should().Pass();
 
             var slnPath = Path.Combine(projectDirectory, "App.sln");
@@ -362,7 +362,7 @@ EndGlobal
             var projectToAdd = "Lib/Lib.csproj";
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"add App.sln project {projectToAdd}");
+                .ExecuteWithCapturedOutput($"sln App.sln add {projectToAdd}");
             cmd.Should().Pass();
 
             var slnPath = Path.Combine(projectDirectory, "App.sln");
@@ -393,7 +393,7 @@ EndGlobal
             var projectPath = Path.Combine("Lib", "Lib.csproj");
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"add App.sln project {projectToAdd}");
+                .ExecuteWithCapturedOutput($"sln App.sln add {projectToAdd}");
             cmd.Should().Pass();
             cmd.StdOut.Should().Be($"Project `{projectPath}` added to the solution.");
             cmd.StdErr.Should().BeEmpty();
@@ -415,7 +415,7 @@ EndGlobal
 
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput(@"add App.sln project App/App.csproj Lib/Lib.csproj");
+                .ExecuteWithCapturedOutput(@"sln App.sln add App/App.csproj Lib/Lib.csproj");
             cmd.Should().Pass();
 
             var slnPath = Path.Combine(projectDirectory, "App.sln");
@@ -463,7 +463,7 @@ EndGlobal
             var projectToAdd = Path.Combine("Lib", "Lib.csproj");
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"add App.sln project {projectToAdd}");
+                .ExecuteWithCapturedOutput($"sln App.sln add {projectToAdd}");
             cmd.Should().Pass();
             cmd.StdOut.Should().Be($"Solution {solutionPath} already contains project {projectToAdd}.");
             cmd.StdErr.Should().BeEmpty();
@@ -485,7 +485,7 @@ EndGlobal
             var projectToAdd = Path.Combine("Lib", "Lib.csproj");
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"add App.sln project {projectToAdd} idonotexist.csproj");
+                .ExecuteWithCapturedOutput($"sln App.sln add {projectToAdd} idonotexist.csproj");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be("Project `idonotexist.csproj` does not exist.");
 
@@ -510,7 +510,7 @@ EndGlobal
             var projectToAdd = Path.Combine("UnknownProject", "UnknownProject.unknownproj");
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"add App.sln project {projectToAdd}");
+                .ExecuteWithCapturedOutput($"sln App.sln add {projectToAdd}");
             cmd.Should().Fail();
             cmd.StdErr.Should().BeVisuallyEquivalentTo("Unsupported project type. Please check with your sdk provider.");
 
@@ -541,7 +541,7 @@ EndGlobal
             var projectToAdd = Path.Combine(projectDir, projectName);
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"add App.sln project {projectToAdd}");
+                .ExecuteWithCapturedOutput($"sln App.sln add {projectToAdd}");
             cmd.Should().Pass();
             cmd.StdOut.Should().Be($"Project `{projectToAdd}` added to the solution.");
             cmd.StdErr.Should().BeEmpty();
