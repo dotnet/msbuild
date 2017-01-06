@@ -10,5 +10,22 @@
     "type": "project"
   },
   "sourceName": "Company.WebApplication1",
-  "preferNameDirectory": true
+  "preferNameDirectory": true,
+  "symbols":{    
+    "Framework": {
+      "type": "parameter",
+      "datatype": "choice",
+      "choices": [
+        {
+          "choice": "1.0",
+          "description": "Target netcoreapp1.0"
+        },
+        {
+          "choice": "1.1",
+          "description": "Target netcoreapp1.1"
+        }
+      ],
+      "defaultValue": "1.0"
+    }
+  }
 }

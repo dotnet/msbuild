@@ -17,6 +17,21 @@
       "datatype": "bool",
       "defaultValue": "false",
       "description": "Whether or not to include Application Insights in the project"
+    },
+    "Framework": {
+      "type": "parameter",
+      "datatype": "choice",
+      "choices": [
+        {
+          "choice": "1.0",
+          "description": "Target netcoreapp1.0"
+        },
+        {
+          "choice": "1.1",
+          "description": "Target netcoreapp1.1"
+        }
+      ],
+      "defaultValue": "1.0"
     }
   }
 }

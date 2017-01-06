@@ -5,6 +5,9 @@
     },
     "UseLocalDB": {
       "longName": "use-local-db"
+    },
+    "Framework": {
+      "longName": "framework"
     }
   }
 }

@@ -1,7 +1,9 @@
 ﻿using System;
+#if (UseLocalDB)
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+#endif
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -16,8 +18,12 @@ namespace Company.WebApplication1.Data.Migrations
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
+#if (UseLocalDB)
                 .HasAnnotation("ProductVersion", "1.0.0-rc3")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+#else
+                .HasAnnotation("ProductVersion", "1.0.2");
+#endif
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityRole", b =>
                 {
@@ -27,10 +33,18 @@ namespace Company.WebApplication1.Data.Migrations
                         .IsConcurrencyToken();
 
                     b.Property<string>("Name")
+#if (UseLocalDB)
                         .HasAnnotation("MaxLength", 256);
+#else
+                        .HasMaxLength(256);
+#endif
 
                     b.Property<string>("NormalizedName")
+#if (UseLocalDB)
                         .HasAnnotation("MaxLength", 256);
+#else
+                        .HasMaxLength(256);
+#endif
 
                     b.HasKey("Id");
 
@@ -136,7 +150,11 @@ namespace Company.WebApplication1.Data.Migrations
                         .IsConcurrencyToken();
 
                     b.Property<string>("Email")
+#if (UseLocalDB)
                         .HasAnnotation("MaxLength", 256);
+#else
+                        .HasMaxLength(256);
+#endif
 
                     b.Property<bool>("EmailConfirmed");
 
@@ -145,10 +163,18 @@ namespace Company.WebApplication1.Data.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd");
 
                     b.Property<string>("NormalizedEmail")
+#if (UseLocalDB)
                         .HasAnnotation("MaxLength", 256);
+#else
+                        .HasMaxLength(256);
+#endif
 
                     b.Property<string>("NormalizedUserName")
+#if (UseLocalDB)
                         .HasAnnotation("MaxLength", 256);
+#else
+                        .HasMaxLength(256);
+#endif
 
                     b.Property<string>("PasswordHash");
 
@@ -161,7 +187,11 @@ namespace Company.WebApplication1.Data.Migrations
                     b.Property<bool>("TwoFactorEnabled");
 
                     b.Property<string>("UserName")
+#if (UseLocalDB)
                         .HasAnnotation("MaxLength", 256);
+#else
+                        .HasMaxLength(256);
+#endif
 
                     b.HasKey("Id");
 

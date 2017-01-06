@@ -28,6 +28,12 @@
             "Views/Shared/_LoginPartial.cshtml",
             "Views/Shared/_ValidationScriptsPartial.cshtml"
           ]
+        },
+        {
+          "condition": "(UseLocalDB)",
+          "exclude": [
+            "*.db"
+          ]
         }
       ]
     }
@@ -61,13 +67,28 @@
       "type": "parameter",
       "datatype": "bool",
       "defaultValue": "false",
-      "description": "Whether or not to setup a local DB"
+      "description": "Whether or not to use LocalDB instead of SQLite"
     },    
     "IncludeApplicationInsights": {
       "type": "parameter",
       "datatype": "bool",
       "defaultValue": "false",
       "description": "Whether or not to include Application Insights in the project"
+    },
+    "Framework": {
+      "type": "parameter",
+      "datatype": "choice",
+      "choices": [
+        {
+          "choice": "1.0",
+          "description": "Target netcoreapp1.0"
+        },
+        {
+          "choice": "1.1",
+          "description": "Target netcoreapp1.1"
+        }
+      ],
+      "defaultValue": "1.0"
     }
   }
 }

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+#if (UseLocalDB)
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Metadata;
+#endif
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Company.WebApplication1.Data.Migrations
@@ -69,7 +71,11 @@ namespace Company.WebApplication1.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
+#if (UseLocalDB)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+#else
+                        .Annotation("Autoincrement", true),
+#endif
                     ClaimType = table.Column<string>(nullable: true),
                     ClaimValue = table.Column<string>(nullable: true),
                     RoleId = table.Column<string>(nullable: false)
@@ -90,7 +96,11 @@ namespace Company.WebApplication1.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
+#if (UseLocalDB)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+#else
+                        .Annotation("Autoincrement", true),
+#endif
                     ClaimType = table.Column<string>(nullable: true),
                     ClaimValue = table.Column<string>(nullable: true),
                     UserId = table.Column<string>(nullable: false)
