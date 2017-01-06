@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         private string _configuration;
 
-        private NuGetFramework _framework;
+        private string _framework;
 
         private string _runtime;
 
@@ -72,6 +72,13 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         }
 
         public BuildCommand WithFramework(NuGetFramework framework)
+        {
+            _framework = framework.GetShortFolderName();
+
+            return this;
+        }
+
+        public BuildCommand WithFramework(string framework)
         {
             _framework = framework;
 
@@ -137,7 +144,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 return null;
             }
 
-            return $"--framework {_framework.GetShortFolderName()}";
+            return $"--framework {_framework}";
         }
 
         private string GetRuntime()
