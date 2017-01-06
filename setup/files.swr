@@ -136,8 +136,8 @@ folder InstallDir:\MSBuild\15.0\Bin\zh-Hant
   file source=$(X86BinPath)zh-Hant\MSBuildTaskHost.resources.dll vs.file.ngen=yes
 
 folder InstallDir:\MSBuild\15.0\Bin\amd64
-  file source=$(X64BinPath)MSBuild.exe vs.file.ngen=yes
-  file source=$(X64BinPath)MSBuildTaskHost.exe vs.file.ngen=yes
+  file source=$(X64BinPath)MSBuild.exe vs.file.ngen=yes vs.file.ngenArchitecture=x64
+  file source=$(X64BinPath)MSBuildTaskHost.exe vs.file.ngen=yes vs.file.ngenArchitecture=x64
   file source=$(X64BinPath)MSBuild.exe.config
   file source=$(X64BinPath)MSBuildTaskHost.exe.config
 
