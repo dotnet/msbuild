@@ -66,7 +66,7 @@ namespace Microsoft.DotNet.Cli.Build
         {
             string url = CalculateRelativePathForFile(file, product, version);
             CloudBlockBlob blob = _blobContainer.GetBlockBlobReference(url);
-            blob.UploadFromFileAsync(file, FileMode.Open).Wait();
+            blob.UploadFromFileAsync(file).Wait();
             SetBlobPropertiesBasedOnFileType(blob);
             return url;
         }
