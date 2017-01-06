@@ -1441,7 +1441,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
         
         /// <summary>
-        /// Adding an import to an existing PRE object and re-valuating should preserve the initial import PRE object
+        /// Adding an import to an existing PRE object and re-evaluating should preserve the initial import PRE object
         /// </summary>
         [Fact]
         public void ImportingExistingPREObjectShouldPreserveTheObject()
