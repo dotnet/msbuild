@@ -5,22 +5,24 @@ namespace Microsoft.DotNet.Tools.Sln
 {
     internal class LocalizableStrings
     {
-        public const string AppFullName = ".NET modify solution file(s) command";
+        public const string AppFullName = ".NET modify solution file command";
 
-        public const string AppDescription = "Command to add, remove and list projects from the solution (SLN) file.";
+        public const string AppDescription = "Command to add, remove, and list projects from the solution (SLN) file.";
 
         public const string AppHelpText = "Projects to add to the solution.";
 
         public const string CmdSlnFile = "<SLN_FILE>";
-
-        public const string CmdSlnFileText = "Solution file to operate on. If not specified, the command will search the current directory for one.";
-
+        
+        public const string AddAppFullName = ".NET Add project to a solution file Command";
         public const string AddSubcommandHelpText = "Add a specified project to the solution.";
 
+        public const string RemoveAppFullName = ".NET Remove project from a solution file Command";
         public const string RemoveSubcommandHelpText = "Remove the specified project from the solution. The project is not impacted.";
         
+        public const string ListAppFullName = ".NET List project(s) in a solution file Command";
         public const string ListSubcommandHelpText = "List all projects in the solution.";
 
+        public const string CreateAppFullName = ".NET Create a solution file Command";
         public const string CreateSubcommandHelpText = "Create a solution file.";
 
         public const string MultipleSlnFilesError = "The current directory contains more than one solution file. Please specify the solution file to use.";
