@@ -140,6 +140,47 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             }
         }
 
+        [Fact]
+        public void ItCreatesTrxReportInTheSpecifiedResultsDirectory()
+        {
+            // Copy VSTestDotNetCore project in output directory of project dotnet-vstest.Tests
+            string testAppName = "VSTestDotNetCore";
+            TestInstance testInstance = TestAssetsManager.CreateTestInstance(testAppName);
+
+            string testProjectDirectory = testInstance.TestRoot;
+
+            // Restore project VSTestDotNetCore
+            new RestoreCommand()
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute()
+                .Should()
+                .Pass();
+
+            string trxLoggerDirectory = Path.Combine(testProjectDirectory, "ResultsDirectory");
+
+            // Delete trxLoggerDirectory if it exist
+            if (Directory.Exists(trxLoggerDirectory))
+            {
+                Directory.Delete(trxLoggerDirectory, true);
+            }
+
+            // Call test with logger enable
+            CommandResult result = new DotnetTestCommand()
+                                       .WithWorkingDirectory(testProjectDirectory)
+                                       .ExecuteWithCapturedOutput("--logger \"trx;logfilename=custom.trx\" -- RunConfiguration.ResultsDirectory=" + trxLoggerDirectory);
+
+            // Verify
+            String[] trxFiles = Directory.GetFiles(trxLoggerDirectory, "custom.trx");
+            Assert.Equal(1, trxFiles.Length);
+            result.StdOut.Should().Contain(trxFiles[0]);
+
+            // Cleanup trxLoggerDirectory if it exist
+            if (Directory.Exists(trxLoggerDirectory))
+            {
+                Directory.Delete(trxLoggerDirectory, true);
+            }
+        }
+
         [Fact(Skip = "https://github.com/dotnet/cli/issues/5035")]
         public void ItBuildsAndTestsAppWhenRestoringToSpecificDirectory()
         {

@@ -24,8 +24,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                         ""BPackage"" : ""1.0.0""
                     }
                 }");
-            
-            EmitsPackageReferences(mockProj, Tuple.Create("APackage", "1.0.0-preview", ""), Tuple.Create("BPackage", "1.0.0", ""));            
+
+            EmitsPackageReferences(mockProj, Tuple.Create("APackage", "1.0.0-preview", ""), Tuple.Create("BPackage", "1.0.0", ""));
         }
 
         [Fact]
@@ -158,8 +158,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                         ""BPackage"" : ""1.0.0""
                     }
                 }");
-            
-            EmitsToolReferences(mockProj, Tuple.Create("APackage", "1.0.0-preview"), Tuple.Create("BPackage", "1.0.0"));            
+
+            EmitsToolReferences(mockProj, Tuple.Create("APackage", "1.0.0-preview"), Tuple.Create("BPackage", "1.0.0"));
         }
 
         [Fact]
@@ -301,19 +301,19 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 }");
 
             mockProj.Items.Should().ContainSingle(
-                i => (i.Include == "Microsoft.NET.Test.Sdk" && 
+                i => (i.Include == "Microsoft.NET.Test.Sdk" &&
                       i.ItemType == "PackageReference" &&
                       i.GetMetadataWithName("Version").Value == "15.0.0-preview-20161227-02") &&
                       i.GetMetadataWithName("Version").ExpressedAsAttribute);
 
             mockProj.Items.Should().ContainSingle(
-                i => (i.Include == "xunit" && 
+                i => (i.Include == "xunit" &&
                       i.ItemType == "PackageReference" &&
                       i.GetMetadataWithName("Version").Value == "2.2.0-beta4-build3444" &&
                       i.GetMetadataWithName("Version").ExpressedAsAttribute));
 
             mockProj.Items.Should().ContainSingle(
-                i => (i.Include == "xunit.runner.visualstudio" && 
+                i => (i.Include == "xunit.runner.visualstudio" &&
                       i.ItemType == "PackageReference" &&
                       i.GetMetadataWithName("Version").Value == "2.2.0-beta4-build1194" &&
                       i.GetMetadataWithName("Version").ExpressedAsAttribute));
