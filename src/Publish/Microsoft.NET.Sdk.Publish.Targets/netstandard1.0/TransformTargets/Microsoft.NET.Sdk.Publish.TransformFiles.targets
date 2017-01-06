@@ -56,7 +56,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         TargetPath="$(TargetPath)"
         PublishDir="$(PublishIntermediateOutputPath)"
         IsPortable="$(_IsPortable)"
-        IsAzure="$(_TransformWebConfigForAzure)" />
+        IsAzure="$(_TransformWebConfigForAzure)"
+        ProjectGuid="$(ProjectGuid)"
+        IgnoreProjectGuid="$(IgnoreProjectGuid)"/>
   </Target>
 
   <!--

@@ -19,6 +19,17 @@ namespace Microsoft.Net.Sdk.Publish.Tasks.Tests
   </system.webServer>
 </configuration>");
 
+        private XDocument WebConfigTemplateWithProjectGuid => XDocument.Parse(
+@"<configuration>
+  <system.webServer>
+    <handlers>
+      <add name=""aspNetCore"" path=""*"" verb=""*"" modules=""AspNetCoreModule"" resourceType=""Unspecified""/>
+    </handlers>
+    <aspNetCore processPath="".\test.exe"" stdoutLogEnabled=""false"" stdoutLogFile="".\logs\stdout"" />
+  </system.webServer>
+</configuration>
+<!--ProjectGuid: A535E3E2-737D-422D-A529-D79D43FB4F5E-->");
+
         [Fact]
         public void WebConfigTransform_creates_new_config_if_one_does_not_exist()
         {
@@ -255,6 +266,65 @@ namespace Microsoft.Net.Sdk.Publish.Tasks.Tests
 
             return XNode.DeepEquals(WebConfigTemplate,
                 WebConfigTransform.Transform(input, "test.exe", configureForAzure: false, isPortable: false));
+        }
+
+        [Theory]
+        [InlineData("A535E3E2-737D-422D-A529-D79D43FB4F5E")]
+        [InlineData("  A535E3E2-737D-422D-A529-D79D43FB4F5E  ")]
+        [InlineData("{ A535E3E2-737D-422D-A529-D79D43FB4F5E }")]
+        [InlineData("{A535E3E2-737D-422D-A529-D79D43FB4F5E}")]
+        [InlineData("( A535E3E2-737D-422D-A529-D79D43FB4F5E )")]
+        [InlineData("(A535E3E2-737D-422D-A529-D79D43FB4F5E)")]
+
+        public void WebConfigTransform_Adds_ProjectGuid_IfNotPresent(string projectGuid)
+        {
+            // Arrange
+            XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.exe", configureForAzure: false, isPortable: false);
+            Assert.True(XNode.DeepEquals(WebConfigTemplate, transformedWebConfig));
+
+            // Act
+            XDocument transformedWebConfigWithGuid = WebConfigTransform.AddProjectGuidToWebConfig(transformedWebConfig, projectGuid, false);
+
+            // Assert
+            Assert.True(XNode.DeepEquals(WebConfigTemplateWithProjectGuid, transformedWebConfigWithGuid));
+        }
+
+        [Theory]
+        [InlineData("A535E3E2-737D-422D-A529-D79D43FB4F5E")]
+        [InlineData(" A535E3E2-737D-422D-A529-D79D43FB4F5E ")]
+        [InlineData("{ A535E3E2-737D-422D-A529-D79D43FB4F5E }")]
+        [InlineData("{A535E3E2-737D-422D-A529-D79D43FB4F5E}")]
+        [InlineData("( A535E3E2-737D-422D-A529-D79D43FB4F5E )")]
+        [InlineData("(A535E3E2-737D-422D-A529-D79D43FB4F5E)")]
+
+        public void WebConfigTransform_Removes_ProjectGuid_IfIgnorePropertyIsSet(string projectGuid)
+        {
+            // Arrange
+            XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.exe", configureForAzure: false, isPortable: false);
+            Assert.True(XNode.DeepEquals(WebConfigTemplate, transformedWebConfig));
+            XDocument transformedWebConfigWithGuid = WebConfigTransform.AddProjectGuidToWebConfig(transformedWebConfig, projectGuid, false);
+            Assert.True(XNode.DeepEquals(WebConfigTemplateWithProjectGuid, transformedWebConfigWithGuid));
+
+            // Act
+            transformedWebConfigWithGuid = WebConfigTransform.AddProjectGuidToWebConfig(transformedWebConfig, projectGuid, true);
+
+            //Assert
+            Assert.True(XNode.DeepEquals(WebConfigTemplate, transformedWebConfigWithGuid));
+
+        }
+
+        [Fact]
+        public void WebConfigTransform_DoesNothingWithProjectGuid_IfAbsent()
+        {
+            // Arrange
+            XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.exe", configureForAzure: false, isPortable: false);
+            Assert.True(XNode.DeepEquals(WebConfigTemplate, transformedWebConfig));
+
+            // Act
+            XDocument transformedWebConfigWithGuid = WebConfigTransform.AddProjectGuidToWebConfig(transformedWebConfig, null, false);
+
+            // Assert
+            Assert.True(XNode.DeepEquals(WebConfigTemplate, transformedWebConfigWithGuid));
         }
     }
 }
