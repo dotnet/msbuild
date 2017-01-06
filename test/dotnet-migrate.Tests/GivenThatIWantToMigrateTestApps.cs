@@ -28,26 +28,6 @@ namespace Microsoft.DotNet.Migration.Tests
         [InlineData("TestAppWithEmbeddedResources")]
         public void ItMigratesApps(string projectName)
         {
-            var projectDirectory = MigrateApps(projectName);
-
-            VerifyAllMSBuildOutputsRunnable(projectDirectory);
-
-            var outputCsProj = Path.Combine(projectDirectory, projectName + ".csproj");
-            var csproj = File.ReadAllText(outputCsProj);
-            csproj.EndsWith("\n").Should().Be(true);
-        }
-
-        [WindowsOnlyTheory]
-        [InlineData("TestAppWithMultipleFrameworksAndRuntimes")]
-        [InlineData("TestAppWithMultipleFrameworksAndNoRuntimes")]
-        [InlineData("TestAppWithMultipleFrameworksOnly")]
-        public void ItMigratesAppsWithFullFramework(string projectName)
-        {
-            MigrateApps(projectName);
-        }
-
-        private string MigrateApps(string projectName)
-        {
             var projectDirectory = TestAssetsManager.CreateTestInstance(projectName, identifier: projectName)
                                                     .WithLockFiles()
                                                     .Path;
@@ -66,7 +46,29 @@ namespace Microsoft.DotNet.Migration.Tests
 
             outputsIdentical.Should().BeTrue();
 
-            return projectDirectory;
+            VerifyAllMSBuildOutputsRunnable(projectDirectory);
+
+            var outputCsProj = Path.Combine(projectDirectory, projectName + ".csproj");
+            var csproj = File.ReadAllText(outputCsProj);
+            csproj.EndsWith("\n").Should().Be(true);
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData("TestAppWithMultipleFrameworksAndNoRuntimes", null)]
+        [InlineData("TestAppWithMultipleFullFrameworksOnly", "net461")]
+        public void ItMigratesAppsWithFullFramework(string projectName, string framework)
+        {
+            var projectDirectory = TestAssetsManager.CreateTestInstance(
+                projectName,
+                identifier: projectName).WithLockFiles().Path;
+
+            CleanBinObj(projectDirectory);
+
+            MigrateProject(new [] { projectDirectory });
+
+            Restore(projectDirectory);
+
+            BuildMSBuild(projectDirectory, projectName, framework: framework);
         }
 
         [Fact]
@@ -711,7 +713,8 @@ namespace Microsoft.DotNet.Migration.Tests
             string projectDirectory,
             string projectName,
             string configuration="Debug",
-            string runtime=null)
+            string runtime=null,
+            string framework=null)
         {
             if (projectName != null && !Path.HasExtension(projectName))
             {
@@ -723,6 +726,7 @@ namespace Microsoft.DotNet.Migration.Tests
             var result = new BuildCommand()
                 .WithWorkingDirectory(projectDirectory)
                 .WithRuntime(runtime)
+                .WithFramework(framework)
                 .ExecuteWithCapturedOutput($"{projectName} /p:Configuration={configuration}");
 
             result

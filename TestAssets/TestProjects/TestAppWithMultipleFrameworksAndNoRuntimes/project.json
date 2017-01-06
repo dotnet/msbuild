@@ -5,21 +5,6 @@
   },
   "dependencies": {},
   "frameworks": {
-    "net20": {
-      "frameworkAssemblies": {
-        "System.Xml": {}
-      }
-    },
-    "net35": {
-      "frameworkAssemblies": {
-        "System.Xml": {}
-      }
-    },
-    "net40": {
-      "frameworkAssemblies": {
-        "System.Xml": {}
-      }
-    },
     "net461": {
       "frameworkAssemblies": {
         "System.Xml": {}
@@ -27,7 +12,10 @@
     },
     "netcoreapp1.0": {
       "dependencies": {
-        "Microsoft.NetCore.App": "1.0.1"
+        "Microsoft.NetCore.App": {
+          "version": "1.0.1",
+          "type": "platform"
+        }
       }
     }
   }

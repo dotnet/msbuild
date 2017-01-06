@@ -149,9 +149,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                             " OR ",
                             projectContexts.Where(p => p.IsFullFramework()).Select(
                                 p => $"'$(TargetFramework)' == '{p.TargetFramework.GetShortFolderName()}'"));
+
+                        msBuildCondition = $" {msBuildCondition} ";
                     }
 
-                    return $" {msBuildCondition} ";
+                    return msBuildCondition;
                 });
     }
 }
