@@ -74,10 +74,11 @@
       <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(HostDebianPackageName)" />
 
       <Exec Command="sudo dpkg -r $(AdditionalSharedFxDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(AdditionalHostFxrDebianPackageName)" />
+
+      <Exec Command="sudo dpkg -r $(HostDebianPackageName)" />
   </Target>
 
   <Target Name="TestSdkDeb"
@@ -93,6 +94,7 @@
       <Exec Command="sudo dpkg -i $(DownloadedHostFxrInstallerFile)" />
       <Exec Command="sudo dpkg -i $(DownloadedSharedFrameworkInstallerFile)" />
 
+      <Exec Command="sudo dpkg -i $(AdditionalDownloadedSharedHostInstallerFile)" />
       <Exec Command="sudo dpkg -i $(AdditionalDownloadedHostFxrInstallerFile)" />
       <Exec Command="sudo dpkg -i $(AdditionalDownloadedSharedFrameworkInstallerFile)" />
 
@@ -107,10 +109,11 @@
       <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(HostDebianPackageName)" />
 
       <Exec Command="sudo dpkg -r $(AdditionalSharedFxDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(AdditionalHostFxrDebianPackageName)" />
+
+      <Exec Command="sudo dpkg -r $(HostDebianPackageName)" />
   </Target>
 
   <Target Name="PrepareDotnetDebDirectories">
