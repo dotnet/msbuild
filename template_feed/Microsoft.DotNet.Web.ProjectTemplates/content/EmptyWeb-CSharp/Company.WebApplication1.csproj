@@ -12,9 +12,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.0.0-beta1" Condition="'$(IncludeApplicationInsights)' == 'True'" />
     <PackageReference Include="Microsoft.AspNetCore" Version="1.0.3" Condition="'$(Framework)' != '1.1'" />
-    <PackageReference Include="Microsoft.NETCore.App" Version="1.0.3" Condition="'$(Framework)' != '1.1'" />
     <PackageReference Include="Microsoft.AspNetCore" Version="1.1.0" Condition="'$(Framework)' == '1.1'" />
-    <PackageReference Include="Microsoft.NETCore.App" Version="1.1.0" Condition="'$(Framework)' == '1.1'" />
   </ItemGroup>
 
 </Project>
