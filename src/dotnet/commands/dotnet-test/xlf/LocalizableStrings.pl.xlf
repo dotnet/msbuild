@@ -74,10 +74,10 @@
       </trans-unit>
       <trans-unit id="CmdLoggerDescription">
         <source>Specify a logger for test results. 
-                                        Example: --logger:trx</source>
-        <target state="translated">Określ rejestratora wyników testów. 
+                                        Example: --logger "trx[;LogFileName=&lt;Defaults to unique file name&gt;]"</source>
+        <target state="needs-review-translation">Określ rejestratora wyników testów. 
                                         Przykład: --logger:trx</target>
-        <note />
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdConfiguration">
         <source>CONFIGURATION</source>
@@ -125,6 +125,13 @@
         <source>Do not build project before testing.</source>
         <target state="translated">Nie kompiluj projektu przed przeprowadzeniem testów.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="RunSettingsArgsHelpText">
+        <source>Any extra commandline runsettings arguments that should be passed to vstest. See 'dotnet vstest --help' for available options.
+                                        Example: -- RunConfiguration.ResultsDirectory="C:\users\user\desktop\Results Directory" MSTest.DeploymentEnabled=false</source>
+        <target state="new">Any extra commandline runsettings arguments that should be passed to vstest. See 'dotnet vstest --help' for available options.
+                                        Example: -- RunConfiguration.ResultsDirectory="C:\users\user\desktop\Results Directory" MSTest.DeploymentEnabled=false</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>
