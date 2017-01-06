@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 using Microsoft.Extensions.CommandLineUtils;
+using Microsoft.TemplateEngine.Cli;
 
 namespace dotnet_new3.UnitTests
 {

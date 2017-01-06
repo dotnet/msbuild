@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.TemplateEngine.Abstractions;
 
-namespace dotnet_new3
+namespace Microsoft.TemplateEngine.Cli
 {
     public class ExtendedCommandParser
     {

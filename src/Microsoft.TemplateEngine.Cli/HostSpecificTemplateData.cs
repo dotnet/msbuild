@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace dotnet_new3
+namespace Microsoft.TemplateEngine.Cli
 {
     internal class HostSpecificTemplateData
     {
