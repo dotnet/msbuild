@@ -27,7 +27,7 @@
     },
     "netcoreapp1.0": {
       "dependencies": {
-        "Microsoft.NetCore.App": "1.0.1"
+        "Microsoft.NetCore.App": "1.0.3"
       }
     }
   },
