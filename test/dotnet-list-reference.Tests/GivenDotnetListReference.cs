@@ -9,13 +9,13 @@ using System;
 using System.IO;
 using Xunit;
 
-namespace Microsoft.DotNet.Cli.List.P2P.Tests
+namespace Microsoft.DotNet.Cli.List.Reference.Tests
 {
-    public class GivenDotnetListP2Ps : TestBase
+    public class GivenDotnetListReference : TestBase
     {
         private const string HelpText = @".NET Core Project-to-Project dependency viewer
 
-Usage: dotnet list <PROJECT> p2ps [options]
+Usage: dotnet list <PROJECT> reference [options]
 
 Arguments:
   <PROJECT>  The project file to operate on. If a file is not specified, the command will search the current directory for one.
@@ -33,7 +33,7 @@ Options:
         [InlineData("-h")]
         public void WhenHelpOptionIsPassedItPrintsUsage(string helpArg)
         {
-            var cmd = new ListP2PsCommand().Execute(helpArg);
+            var cmd = new ListReferenceCommand().Execute(helpArg);
             cmd.Should().Pass();
             cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
@@ -66,7 +66,7 @@ Options:
         {
             var setup = Setup();
 
-            var cmd = new ListP2PsCommand()
+            var cmd = new ListReferenceCommand()
                     .WithWorkingDirectory(setup.TestRoot)
                     .WithProject(projName)
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
@@ -81,7 +81,7 @@ Options:
             string projName = "Broken/Broken.csproj";
             var setup = Setup();
 
-            var cmd = new ListP2PsCommand()
+            var cmd = new ListReferenceCommand()
                     .WithWorkingDirectory(setup.TestRoot)
                     .WithProject(projName)
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
@@ -96,7 +96,7 @@ Options:
             var setup = Setup();
 
             var workingDir = Path.Combine(setup.TestRoot, "MoreThanOne");
-            var cmd = new ListP2PsCommand()
+            var cmd = new ListReferenceCommand()
                     .WithWorkingDirectory(workingDir)
                     .Execute($"\"{setup.ValidRefCsprojRelToOtherProjPath}\"");
             cmd.ExitCode.Should().NotBe(0);
@@ -109,7 +109,7 @@ Options:
         {
             var setup = Setup();
 
-            var cmd = new ListP2PsCommand()
+            var cmd = new ListReferenceCommand()
                     .WithWorkingDirectory(setup.TestRoot)
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
@@ -122,7 +122,7 @@ Options:
         {
             var lib = NewLib();
 
-            var cmd = new ListP2PsCommand()
+            var cmd = new ListReferenceCommand()
                 .WithProject(lib.CsProjPath)
                 .Execute();
             cmd.Should().Pass();
@@ -140,7 +140,7 @@ Options:
             string ref1 = NewLib("ItPrintsSingleReference", "ref").CsProjPath;
             AddValidRef(ref1, lib);
 
-            var cmd = new ListP2PsCommand()
+            var cmd = new ListReferenceCommand()
                 .WithProject(lib.CsProjPath)
                 .Execute();
             cmd.Should().Pass();
@@ -165,7 +165,7 @@ Options:
             AddValidRef(ref2, lib);
             AddValidRef(ref3, lib);
 
-            var cmd = new ListP2PsCommand()
+            var cmd = new ListReferenceCommand()
                 .WithProject(lib.CsProjPath)
                 .Execute();
             cmd.Should().Pass();

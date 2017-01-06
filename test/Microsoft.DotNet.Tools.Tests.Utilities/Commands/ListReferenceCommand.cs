@@ -5,22 +5,22 @@ using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
-    public sealed class ListP2PsCommand : TestCommand
+    public sealed class ListReferenceCommand : TestCommand
     {
         private string _projectName = null;
 
-        public ListP2PsCommand()
+        public ListReferenceCommand()
             : base("dotnet")
         {
         }
 
         public override CommandResult Execute(string args = "")
         {
-            args = $"list {_projectName} p2ps {args}";
+            args = $"list {_projectName} reference {args}";
             return base.ExecuteWithCapturedOutput(args);
         }
 
-        public ListP2PsCommand WithProject(string projectName)
+        public ListReferenceCommand WithProject(string projectName)
         {
             _projectName = projectName;
             return this;
