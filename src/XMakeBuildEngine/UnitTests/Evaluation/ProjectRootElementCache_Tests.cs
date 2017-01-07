@@ -129,16 +129,21 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
 
                 ProjectRootElement xml0 = ProjectRootElement.Create(path);
                 xml0.Save();
+                var version0 = xml0.Version;
 
                 cache.AddEntry(xml0);
 
                 ProjectRootElement xml1 = cache.TryGet(path);
-                Assert.Equal(true, Object.ReferenceEquals(xml0, xml1));
+                var version1 = xml1.Version;
+                Assert.Same(xml0, xml1);
+                Assert.Equal(version0, version1);
 
                 File.SetLastWriteTime(path, DateTime.Now + new TimeSpan(1, 0, 0));
 
                 ProjectRootElement xml2 = cache.TryGet(path);
-                Assert.Equal(false, Object.ReferenceEquals(xml0, xml2));
+                var version2 = xml2.Version;
+                Assert.Same(xml0, xml2);
+                Assert.NotEqual(version0, version2);
             }
             finally
             {
@@ -163,16 +168,21 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
 
                 ProjectRootElement xml0 = ProjectRootElement.Create(path);
                 xml0.Save();
+                var version0 = xml0.Version;
 
                 cache.AddEntry(xml0);
 
                 ProjectRootElement xml1 = cache.TryGet(path);
-                Assert.Equal(true, Object.ReferenceEquals(xml0, xml1));
+                var version1 = xml1.Version;
+                Assert.Same(xml0, xml1);
+                Assert.Equal(version0, version1);
 
                 File.SetLastWriteTime(path, DateTime.Now + new TimeSpan(1, 0, 0));
 
                 ProjectRootElement xml2 = cache.TryGet(path);
-                Assert.Equal(true, Object.ReferenceEquals(xml0, xml2));
+                var version2 = xml2.Version;
+                Assert.Same(xml0, xml1);
+                Assert.Equal(version0, version2);
             }
             finally
             {

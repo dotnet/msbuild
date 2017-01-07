@@ -535,6 +535,16 @@ namespace Microsoft.Build.UnitTests
             return projectFilePath;
         }
 
+        internal static ProjectRootElement CreateInMemoryProjectRootElement(string projectContents, ProjectCollection collection = null, bool preserveFormatting = true)
+        {
+            var cleanedProject = ObjectModelHelpers.CleanupFileContents(projectContents);
+
+            return ProjectRootElement.Create(
+                XmlReader.Create(new StringReader(cleanedProject)),
+                collection ?? new ProjectCollection(),
+                preserveFormatting);
+        }
+
         /// <summary>
         /// Create a project in memory. Load up the given XML.
         /// </summary>

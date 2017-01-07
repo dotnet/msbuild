@@ -2439,7 +2439,8 @@ namespace Microsoft.Build.Evaluation
                             _buildEventContext,
                             explicitlyLoaded),
                         explicitlyLoaded,
-                        preserveFormatting: false);
+                        // don't care about formatting, reuse whatever is there
+                        preserveFormatting: null);
 
                     if (duplicateImport)
                     {

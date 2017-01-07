@@ -194,7 +194,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="preserveFormatting"><code>true</code> to the project was loaded with the formated preserved, otherwise <code>false</code>.</param>
         /// <returns>The ProjectRootElement instance if one exists.  Null otherwise.</returns>
         internal ProjectRootElement Get(string projectFile, OpenProjectRootElement openProjectRootElement, bool isExplicitlyLoaded,
-            bool preserveFormatting)
+            bool? preserveFormatting)
         {
             // Should already have been canonicalized
             ErrorUtilities.VerifyThrowInternalRooted(projectFile);
@@ -204,10 +204,10 @@ namespace Microsoft.Build.Evaluation
                 ProjectRootElement projectRootElement;
                 _weakCache.TryGetValue(projectFile, out projectRootElement);
 
-                if (projectRootElement != null && projectRootElement.XmlDocument.PreserveWhitespace != preserveFormatting)
+                if (preserveFormatting != null && projectRootElement != null && projectRootElement.XmlDocument.PreserveWhitespace != preserveFormatting)
                 {
-                    //  Cached project doesn't match preserveFormatting setting, so don't use it
-                    projectRootElement = null;
+                    //  Cached project doesn't match preserveFormatting setting, so reload it
+                    projectRootElement.Reload(true, preserveFormatting);
                 }
 
                 if (projectRootElement != null && _autoReloadFromDisk)
@@ -218,7 +218,7 @@ namespace Microsoft.Build.Evaluation
                     // It's an in-memory project that hasn't been saved yet.
                     if (fileInfo != null)
                     {
-                        bool forgetEntry = false;
+                        bool reloadEntry = false;
 
                         if (fileInfo.LastWriteTime != projectRootElement.LastWriteTimeWhenRead)
                         {
@@ -228,7 +228,7 @@ namespace Microsoft.Build.Evaluation
                             // to force a load from disk. There might then exist more than one ProjectRootElement with the same path,
                             // but clients ought not get themselves into such a state - and unless they save them to disk,
                             // it may not be a problem.  
-                            forgetEntry = true;
+                            reloadEntry = true;
                         }
                         else if (!String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDCACHECHECKFILECONTENT")))
                         {
@@ -248,16 +248,14 @@ namespace Microsoft.Build.Evaluation
 
                             if (diskContent != cacheContent)
                             {
-                                forgetEntry = true;
+                                reloadEntry = true;
                             }
                         }
 
-                        if (forgetEntry)
+                        if (reloadEntry)
                         {
-                            ForgetEntry(projectRootElement);
-
-                            DebugTraceCache("Out of date dropped from XML cache: ", projectFile);
-                            projectRootElement = null;
+                            DebugTraceCache("Out of date, reloaded: ", projectFile);
+                            projectRootElement.Reload(true, null);
                         }
                     }
                 }
@@ -346,14 +344,14 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal ProjectRootElement TryGet(string projectFile)
         {
-            return TryGet(projectFile, preserveFormatting: false);
+            return TryGet(projectFile, preserveFormatting: null);
         }
 
         /// <summary>
         /// Returns any a ProjectRootElement in the cache with the provided full path,
         /// otherwise null.
         /// </summary>
-        internal ProjectRootElement TryGet(string projectFile, bool preserveFormatting)
+        internal ProjectRootElement TryGet(string projectFile, bool? preserveFormatting)
         {
             ProjectRootElement result = Get(
                 projectFile,

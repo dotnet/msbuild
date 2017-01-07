@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Xml;
@@ -260,6 +261,19 @@ namespace Microsoft.Build.Construction
             _directory = NativeMethodsShared.GetCurrentDirectory();
             IncrementVersion();
 
+            ProjectParser.Parse(document, this);
+        }
+
+        /// <summary>
+        /// Initialize a ProjectRootElement instance from an existing document.
+        /// Helper constructor for the <see cref="ReloadFrom(string,bool,System.Nullable{bool})"/>> mehtod which needs to check if the document parses
+        /// </summary>
+        /// <remarks>
+        /// Do not make public: we do not wish to expose particular XML API's.
+        /// </remarks>
+        private ProjectRootElement(XmlDocumentWithLocation document)
+            : base()
+        {
             ProjectParser.Parse(document, this);
         }
 
@@ -1085,7 +1099,7 @@ namespace Microsoft.Build.Construction
         /// Initialize a ProjectRootElement instance by loading from the specified file path.
         /// Uses the specified project collection and preserves the formatting of the document if specified.
         /// </summary>
-        public static ProjectRootElement Open(string path, ProjectCollection projectCollection, bool preserveFormatting)
+        public static ProjectRootElement Open(string path, ProjectCollection projectCollection, bool? preserveFormatting)
         {
             ErrorUtilities.VerifyThrowArgumentLength(path, "path");
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection, "projectCollection");
@@ -1142,7 +1156,7 @@ namespace Microsoft.Build.Construction
         /// It is possible for ProjectRootElements to be brought into memory and discarded due to memory pressure. Therefore
         /// this method returning false does not indicate that it has never been loaded, only that it is not currently in memory.
         /// </remarks>
-        public static ProjectRootElement TryOpen(string path, ProjectCollection projectCollection, bool preserveFormatting)
+        public static ProjectRootElement TryOpen(string path, ProjectCollection projectCollection, bool? preserveFormatting)
         {
             ErrorUtilities.VerifyThrowArgumentLength(path, "path");
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection, "projectCollection");
@@ -1856,6 +1870,84 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
+        /// Reload the existing project root element from its file.
+        /// An <see cref="InvalidOperationException"/> is thrown if the project root element is not associated with any file on disk.
+        /// 
+        /// See <see cref="ProjectRootElement.ReloadFrom(XmlReader, bool, bool?)"/>
+        /// </summary>
+        public void Reload(bool throwIfUnsavedChanges = true, bool? preserveFormatting = null)
+        {
+            ErrorUtilities.VerifyThrowInvalidOperation(!string.IsNullOrEmpty(FullPath), "ValueNotSet", $"{nameof(ProjectRootElement)}.{nameof(FullPath)}");
+
+            ReloadFrom(FullPath, throwIfUnsavedChanges, preserveFormatting);
+        }
+
+        /// <summary>
+        /// Reload the existing project root element from the given path
+        /// An <see cref="InvalidOperationException"/> is thrown if the path does not exist.
+        /// 
+        /// See <see cref="ProjectRootElement.ReloadFrom(XmlReader, bool, bool?)"/>
+        /// </summary>
+        public void ReloadFrom(string path, bool throwIfUnsavedChanges = true, bool? preserveFormatting = null)
+        {
+            ErrorUtilities.VerifyThrowInvalidOperation(File.Exists(path), "FileToReloadFromDoesNotExist", path);
+
+            Func<bool, XmlDocumentWithLocation> documentProducer = shouldPreserveFormatting => LoadDocument(path, shouldPreserveFormatting);
+            ReloadFrom(documentProducer, throwIfUnsavedChanges, preserveFormatting);
+        }
+
+        /// <summary>
+        /// Reload the existing project root element from the given <paramref name="reader"/>
+        /// A reload operation completely replaces the state of this <see cref="ProjectRootElement"/> object. This operation marks the 
+        /// object as dirty (see <see cref="ProjectRootElement.MarkDirty"/> for side effects). 
+        /// 
+        /// If the new state has invalid XML or MSBuild syntax, then this method throws an <see cref="InvalidProjectFileException"/>.
+        /// When this happens, the state of this object does not change.
+        /// 
+        /// </summary>
+        /// <param name="reader">Reader to read from</param>
+        /// <param name="throwIfUnsavedChanges">
+        ///   If set to false, the reload operation will discard any unsaved changes.
+        ///   Otherwise, an <see cref="InvalidOperationException"/> is thrown when unsaved changes are present.
+        /// </param>
+        /// <param name="preserveFormatting">
+        ///   Whether the reload should preserve formatting or not. A null value causes the reload to reuse the existing <see cref="PreserveFormatting"/> value.
+        /// </param>
+        public void ReloadFrom(XmlReader reader, bool throwIfUnsavedChanges = true, bool? preserveFormatting = null)
+        {
+            Func<bool, XmlDocumentWithLocation> documentProducer = shouldPreserveFormatting => LoadDocument(reader, shouldPreserveFormatting);
+            ReloadFrom(documentProducer, throwIfUnsavedChanges, preserveFormatting);
+        }
+
+        private void ReloadFrom(Func<bool, XmlDocumentWithLocation> documentProducer, bool throwIfUnsavedChanges, bool? preserveFormatting)
+        {
+            ThrowIfUnsavedChanges(throwIfUnsavedChanges);
+
+            XmlDocumentWithLocation document = documentProducer(preserveFormatting ?? PreserveFormatting);
+
+            // Reload should only mutate the state if there are no parse errors.
+            ThrowIfDocumentHasParsingErrors(document);
+
+            // Do not clear the string cache.
+            // Based on the assumption that Projects are reloaded repeatedly from their file with small increments,
+            // and thus most strings would get reused
+            //this.XmlDocument.ClearAnyCachedStrings();
+
+            this.RemoveAllChildren();
+
+            ProjectParser.Parse(document, this);
+
+            MarkDirty("Project reloaded", null);
+        }
+
+        [MethodImpl(MethodImplOptions.NoOptimization)]
+        private static void ThrowIfDocumentHasParsingErrors(XmlDocumentWithLocation document)
+        {
+            // todo: rather than throw away, copy over the parse results
+            var throwaway = new ProjectRootElement(document);
+        }
+
+        /// <summary>
         /// Initialize an in-memory, empty ProjectRootElement instance that can be saved later.
         /// Uses the specified project root element cache.
         /// </summary>
@@ -1876,12 +1968,12 @@ namespace Microsoft.Build.Construction
         /// May throw InvalidProjectFileException.
         /// </summary>
         internal static ProjectRootElement Open(string path, ProjectRootElementCache projectRootElementCache, bool isExplicitlyLoaded,
-            bool preserveFormatting)
+            bool? preserveFormatting)
         {
             ErrorUtilities.VerifyThrowInternalRooted(path);
 
             ProjectRootElement projectRootElement = projectRootElementCache.Get(path,
-                preserveFormatting ? s_openLoaderPreserveFormattingDelegate : s_openLoaderDelegate,
+                preserveFormatting ?? false ? s_openLoaderPreserveFormattingDelegate : s_openLoaderDelegate,
                 isExplicitlyLoaded, preserveFormatting);
 
             return projectRootElement;
@@ -1917,7 +2009,8 @@ namespace Microsoft.Build.Construction
                 (path, cache) => CreateProjectFromPath(path, globalProperties, toolsVersion, loggingService, cache, buildEventContext,
                                     preserveFormatting: false),
                 isExplicitlyLoaded,
-                preserveFormatting: false);
+                // don't care about formatting, reuse whatever is there
+                preserveFormatting: null);
 
             return projectRootElement;
         }
@@ -2182,6 +2275,14 @@ namespace Microsoft.Build.Construction
         private void IncrementVersion()
         {
             _version = Interlocked.Increment(ref s_globalVersionCounter);
+        }
+
+        private void ThrowIfUnsavedChanges(bool throwIfUnsavedChanges)
+        {
+            if (HasUnsavedChanges && throwIfUnsavedChanges)
+            {
+                ErrorUtilities.ThrowInvalidOperation("NoReloadOnUnsavedChanges", null);
+            }
         }
     }
 }
