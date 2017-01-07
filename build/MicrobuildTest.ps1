@@ -14,7 +14,18 @@ function Log ($a) {
 }
 
 function Test-AssemblyStrongNamed($assemblyPath) {
-    [System.Reflection.Assembly]::ReflectionOnlyLoadFrom($assemblyPath).GetName().GetPublicKeyToken().Count -gt 0
+    $hasPublicKey = $true
+
+    try {
+        $hasPublicKey = [System.Reflection.Assembly]::ReflectionOnlyLoadFrom($assemblyPath).GetName().GetPublicKeyToken().Count -gt 0
+    }
+    catch {
+        if (-Not $_.Exception.Message.Contains("It cannot be loaded from a new location within the same appdomain")) {
+            throw
+        }
+    }
+
+    return $hasPublicKey
 }
 
 class BuildInstance {
@@ -172,12 +183,12 @@ class Layout {
         $root = $env:BUILD_REPOSITORY_LOCALPATH
 
         $layout = [Layout]::new(
-            (CombineAndNormalize @($root, $env:FFBinPath86)),
-            (CombineAndNormalize @($root, $env:FFBinPath64)),
-            (CombineAndNormalize @($root, $env:BinPath)),
-            (CombineAndNormalize @($root, $env:BinPathNetCore)),
-            (CombineAndNormalize @($root, $env:NugetPackagePathPath)),
-            (CombineAndNormalize @($root, $env:SetupLayoutPath)))
+            (CombineAndNormalize @($root, $env:FFBINPATH86)),
+            (CombineAndNormalize @($root, $env:FFBINPATH64)),
+            (CombineAndNormalize @($root, $env:BINPATH)),
+            (CombineAndNormalize @($root, $env:BINPATHNETCORE)),
+            (CombineAndNormalize @($root, $env:NUGETPACKAGESPATH)),
+            (CombineAndNormalize @($root, $env:SETUPLAYOUTPATH)))
 
         return $layout
     }
@@ -411,5 +422,5 @@ if ($diagnosticCount -eq 0) {
     Log "No failed checks"
 }
 else {
-    Log "$diagnosticCount failed checks"
+    Throw "$diagnosticCount failed checks"
 }
