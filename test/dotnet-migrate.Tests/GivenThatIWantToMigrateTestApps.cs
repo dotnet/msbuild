@@ -53,6 +53,24 @@ namespace Microsoft.DotNet.Migration.Tests
             csproj.EndsWith("\n").Should().Be(true);
         }
 
+        [WindowsOnlyTheory]
+        [InlineData("TestAppMultipleFrameworksNoRuntimes", null)]
+        [InlineData("TestAppWithMultipleFullFrameworksOnly", "net461")]
+        public void ItMigratesAppsWithFullFramework(string projectName, string framework)
+        {
+            var projectDirectory = TestAssetsManager.CreateTestInstance(
+                projectName,
+                identifier: projectName).WithLockFiles().Path;
+
+            CleanBinObj(projectDirectory);
+
+            MigrateProject(new [] { projectDirectory });
+
+            Restore(projectDirectory);
+
+            BuildMSBuild(projectDirectory, projectName, framework: framework);
+        }
+
         [Fact]
         public void ItMigratesSignedApps()
         {
@@ -663,9 +681,9 @@ namespace Microsoft.DotNet.Migration.Tests
 
         private void RestoreProjectJson(string projectDirectory)
         {
-            new TestCommand("dotnet")
-                .WithWorkingDirectory(projectDirectory)
-                .Execute("restore-projectjson")
+            var projectFile = "\"" + Path.Combine(projectDirectory, "project.json") + "\"";
+            new RestoreProjectJsonCommand()
+                .Execute(projectFile)
                 .Should().Pass();
         }
 
@@ -695,7 +713,8 @@ namespace Microsoft.DotNet.Migration.Tests
             string projectDirectory,
             string projectName,
             string configuration="Debug",
-            string runtime=null)
+            string runtime=null,
+            string framework=null)
         {
             if (projectName != null && !Path.HasExtension(projectName))
             {
@@ -707,6 +726,7 @@ namespace Microsoft.DotNet.Migration.Tests
             var result = new BuildCommand()
                 .WithWorkingDirectory(projectDirectory)
                 .WithRuntime(runtime)
+                .WithFramework(framework)
                 .ExecuteWithCapturedOutput($"{projectName} /p:Configuration={configuration}");
 
             result

@@ -30,7 +30,7 @@
       </trans-unit>
       <trans-unit id="CmdIncludeSymbolsDescription">
         <source>Include packages with symbols in addition to regular packages in output directory.</source>
-        <target state="translated">Dołącz pakiety z symbolami oprócz regularnych pakietów w folderze wyjściowym.</target>
+        <target state="translated">Dołącz pakiety z symbolami oprócz regularnych pakietów w katalogu wyjściowym.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSourceDescription">
@@ -45,7 +45,7 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="translated">Konfiguracja do użycia na potrzeby kompilacji projektu. Opcją domyślną w przypadku większości projektów jest „Debug”.</target>
+        <target state="translated">Konfiguracja do użycia na potrzeby kompilacji projektu.  Opcją domyślną w przypadku większości projektów jest „Debug”.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffix">

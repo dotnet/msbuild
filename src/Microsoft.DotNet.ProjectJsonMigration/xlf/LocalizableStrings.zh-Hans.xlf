@@ -40,7 +40,7 @@
       </trans-unit>
       <trans-unit id="ProjAlreadyExistsError">
         <source>{0} already exists. Has migration already been run?</source>
-        <target state="translated">{0} 已存在。是否已运行迁移？</target>
+        <target state="translated">{0} 已存在。是否已运行迁移?</target>
         <note />
       </trans-unit>
       <trans-unit id="NullDestinationElementError">
@@ -185,7 +185,7 @@
       </trans-unit>
       <trans-unit id="MetadataHasAnotherValue">
         <source>{0}.{1} metadata has another value {{ {2} {3} {4} }}</source>
-        <target state="translated">{0}.{1} 元数据具有另外一个值 {{ {2} {3} {4} }}</target>
+        <target state="translated">{0}.{1} 元数据具有另一个值 {{ {2} {3} {4} }}</target>
         <note />
       </trans-unit>
       <trans-unit id="AddingMetadataToItem">
@@ -195,7 +195,7 @@
       </trans-unit>
       <trans-unit id="SkipMigrationAlreadyMigrated">
         <source>{0}: Skip migrating {1}, it is already migrated.</source>
-        <target state="translated">{0}: 跳过迁移 {1}，已迁移该项。</target>
+        <target state="translated">{0}: 跳过迁移 {1}，因为该项已经迁移。</target>
         <note />
       </trans-unit>
       <trans-unit id="ExecutingRule">
@@ -235,7 +235,7 @@
       </trans-unit>
       <trans-unit id="ItemTransformApplicatorHeader">
         <source>{0}: Item {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4}, Update: {5} }}</source>
-        <target state="translated">{0}: Item {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4}, Update: {5} }}</target>
+        <target state="translated">{0}: 项 {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4}, Update: {5} }}</target>
         <note />
       </trans-unit>
       <trans-unit id="ItemTransformApplicatorItemGroup">
@@ -245,7 +245,7 @@
       </trans-unit>
       <trans-unit id="ItemTransformAppliatorItemCompletelyMerged">
         <source>{0}: Item completely merged</source>
-        <target state="translated">{0}: 完全合并的项</target>
+        <target state="translated">{0}: 已完全合并项</target>
         <note />
       </trans-unit>
       <trans-unit id="ItemTransformApplicatorAddItemHeader">
@@ -265,12 +265,12 @@
       </trans-unit>
       <trans-unit id="ItemTransformApplicatorRemovingItem">
         <source>{0}: Removing Item {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4} }}</source>
-        <target state="translated">{0}: Removing Item {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4} }}</target>
+        <target state="translated">{0}: 删除项 {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4} }}</target>
         <note />
       </trans-unit>
       <trans-unit id="ItemTransformApplicatorIgnoringItem">
         <source>{0}: Ignoring Item {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4} }}</source>
-        <target state="translated">{0}: Ignoring Item {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4} }}</target>
+        <target state="translated">{0}: 忽略项 {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4} }}</target>
         <note />
       </trans-unit>
       <trans-unit id="ItemTransformApplicatorMergingItemWithExistingItemsSameChain">
@@ -280,12 +280,12 @@
       </trans-unit>
       <trans-unit id="ItemTransformApplicatorAddingMergedItem">
         <source>{0}: Adding Merged Item {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4} }}</source>
-        <target state="translated">{0}: Adding Merged Item {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4} }}</target>
+        <target state="translated">{0}: 添加合并的项 {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4} }}</target>
         <note />
       </trans-unit>
       <trans-unit id="MergingProperty">
         <source>Merging property, output merged property</source>
-        <target state="translated">将合并属性，输出合并的属性</target>
+        <target state="translated">合并属性，输出合并的属性</target>
         <note />
       </trans-unit>
       <trans-unit id="IgnoringMergedProperty">

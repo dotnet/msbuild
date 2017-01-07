@@ -10,12 +10,12 @@
       </trans-unit>
       <trans-unit id="AppFullName">
         <source>.NET Builder</source>
-        <target state="translated">.NET Builder</target>
+        <target state="translated">.NET ビルダー</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>Configuration to use for building the project. Default for most projects is  "Debug".</source>
-        <target state="translated">プロジェクトの構築に使用する構成。ほとんどのプロジェクトの場合、既定は "デバッグ" です。</target>
+        <target state="translated">プロジェクトの構築に使用する構成。ほとんどのプロジェクトで既定は "デバッグ" です。</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionName">

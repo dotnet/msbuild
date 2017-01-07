@@ -25,7 +25,7 @@
       </trans-unit>
       <trans-unit id="CommandOptionFrameworkDescription">
         <source>Build and run the app using the specified framework. The framework has to be specified in the project file. </source>
-        <target state="translated">K sestavení a spuštění aplikace se použije určená platforma, která musí být zadaná v souboru projektu.</target>
+        <target state="translated">K sestavení a spuštění aplikace se použije určená platforma. Tato platforma musí být zadaná v souboru projektu. </target>
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionProjectDescription">

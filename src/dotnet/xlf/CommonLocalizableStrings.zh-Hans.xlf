@@ -485,7 +485,7 @@
       </trans-unit>
       <trans-unit id="NoReferencesFound">
         <source>There are no {0} references in project {1}. ;; {0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
-        <target state="translated">项目 {1} 中没有 {0} 引用。;; {0} 是正在请求的项类型(项目、包、p2p)且 {1} 是项目文件或解决方案文件上操作的对象。 </target>
+        <target state="translated">项目 {1} 中没有 {0} 引用。;; {0} 是正在请求的项类型(项目、包、p2p)且 {1} 是在其上进行操作的对象(项目文件或解决方案文件)。 </target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsFound">
@@ -575,7 +575,7 @@
       </trans-unit>
       <trans-unit id="MoreThanOneSolutionInDirectory">
         <source>Found more than one solution file in {0}. Please specify which one to use.</source>
-        <target state="translated">在 {0} 中找到多个解决方案文件。请指定使用哪一个。</target>
+        <target state="translated">{0} 中找到多个解决方案文件。请指定使用哪一个。</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionAlreadyContainsProject">
@@ -595,7 +595,7 @@
       </trans-unit>
       <trans-unit id="ProjectNotCompatibleWithFrameworks">
         <source>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Please review the project you are trying to add and verify that is compatible with the following targets:</source>
-        <target state="translated">由于两个项目之间的目标框架不兼容，无法添加项目“{0}”。请检查要添加的项目，并验证是否与以下目标兼容:</target>
+        <target state="translated">由于两个项目之间的目标框架不兼容，因此无法添加项目“{0}”。请审阅正在尝试添加的项目，验证其是否与以下目标兼容: </target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectDoesNotTargetFramework">
@@ -606,7 +606,7 @@
       <trans-unit id="ProjectCouldNotBeEvaluated">
         <source>Project `{0}` could not be evaluated. Evaluation failed with following error:
 {1}</source>
-        <target state="translated">无法评估项目“{0}”。评估失败，出现以下错误:
+        <target state="translated">无法评估项目“{0}”。评估失败，出现以下错误: 
 {1}</target>
         <note />
       </trans-unit>

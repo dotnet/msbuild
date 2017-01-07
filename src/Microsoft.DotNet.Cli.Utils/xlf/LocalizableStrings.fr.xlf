@@ -100,7 +100,7 @@
       </trans-unit>
       <trans-unit id="AttemptingToResolveCommandSpec">
         <source>{0}: Attempting to resolve command spec from tool {1}</source>
-        <target state="translated">{0} : tentative de résolution de la spécification de commande à partir de l'outil {1}</target>
+        <target state="translated">{0} : Tentative de résolution de la spécification de commande à partir de l'outil {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetPackagesRoot">
@@ -172,7 +172,7 @@
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
         <source>Waiting for debugger to attach. Press ENTER to continue</source>
-        <target state="translated">En attente d'attachement du débogueur. Appuyez sur ENTRÉE pour continuer</target>
+        <target state="translated">En attente de l'attachement du débogueur. Appuyez sur Entrée pour continuer</target>
         <note />
       </trans-unit>
       <trans-unit id="ProcessId">

@@ -575,7 +575,7 @@
       </trans-unit>
       <trans-unit id="MoreThanOneSolutionInDirectory">
         <source>Found more than one solution file in {0}. Please specify which one to use.</source>
-        <target state="translated">Se encontraron varios archivos de solución en {0}. Especifique el que debe usarse.</target>
+        <target state="translated">Se han encontrado varios archivos de solución en {0}. Especifique el que debe usarse.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionAlreadyContainsProject">
@@ -585,7 +585,7 @@
       </trans-unit>
       <trans-unit id="ArgumentsProjectOrSolutionDescription">
         <source>The project or solution to operation on. If a file is not specified, the current directory is searched.</source>
-        <target state="translated">El proyecto o la solución donde realizar la operación. Si no se especifica un archivo, se buscará en el directorio actual.</target>
+        <target state="translated">El proyecto o la solución donde realizar la operación. Si no se especifica un archivo, se busca en el directorio actual.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
@@ -595,7 +595,7 @@
       </trans-unit>
       <trans-unit id="ProjectNotCompatibleWithFrameworks">
         <source>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Please review the project you are trying to add and verify that is compatible with the following targets:</source>
-        <target state="translated">El proyecto "{0}" no se puede agregar debido a que hay plataformas de destino no compatibles entre los dos proyectos. Revise el proyecto que intenta agregar y compruebe que sea compatible con las plataformas siguientes:</target>
+        <target state="translated">El proyecto `{0}` no se puede agregar debido a plataformas de destino incompatibles entre los dos proyectos. Revise el proyecto que está intentando agregar y compruebe que es compatible con los siguientes destinos:</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectDoesNotTargetFramework">
@@ -606,7 +606,7 @@
       <trans-unit id="ProjectCouldNotBeEvaluated">
         <source>Project `{0}` could not be evaluated. Evaluation failed with following error:
 {1}</source>
-        <target state="translated">No se pudo evaluar el proyecto "{0}". Error de evaluación con el error siguiente:
+        <target state="translated">El proyecto "{0}" no se puede evaluar. Se produjo el siguiente error en la evaluación:
 {1}</target>
         <note />
       </trans-unit>

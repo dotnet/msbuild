@@ -27,10 +27,10 @@
 Defaults to current directory if nothing is specified.</source>
         <target state="translated">O caminho para um dos seguintes:
     – um arquivo project.json a ser migrado.
-    – um arquivo global.json; ele migrará as pastas especificadas em global.json.
-    – um arquivo solution.sln; ele migrará os projetos referenciados na solução.
-    – um diretório a ser migrado; ele pesquisará recursivamente os arquivos project.json a serem migrados.
-Usará o diretório atual como padrão se nenhuma opção for especificada.</target>
+    – um arquivo global.json, ele migrará as pastas especificadas em global.json.
+    - um arquivo solution.sln, ele migrará os projetos referenciados na solução.
+    – um diretório para migrar, ele pesquisará recursivamente os arquivos project.json para migrar.
+Usará como padrão o diretório atual se nada for especificado.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTemplateDescription">

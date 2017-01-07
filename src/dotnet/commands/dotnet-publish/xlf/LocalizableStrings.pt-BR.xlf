@@ -30,7 +30,7 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="translated">Estrutura de destino na qual publicar. A estrutura de destino deve ser especificada no arquivo de projeto.</target>
+        <target state="translated">A estrutura de destino para a qual publicar. A estrutura de destino deve ser especificada no arquivo de projeto.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOption">
@@ -40,7 +40,7 @@
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependented app.</source>
-        <target state="translated">Publica o projeto em um tempo de execução específico. Usado durante a criação da implantação independente. O padrão é publicar um aplicativo dependente de estrutura.</target>
+        <target state="translated">Publique o projeto para um tempo de execução fornecido. Isso é usado ao criar uma implantação autocontida. O padrão é publicar um aplicativo dependente de estrutura.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -60,7 +60,7 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="translated">Configuração a ser usada para compilar o projeto. O padrão para a maioria dos projetos é "Debug".</target>
+        <target state="translated">A configuração a ser usada para criar o projeto.  O padrão para a maioria dos projetos é “Depurar”.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOption">

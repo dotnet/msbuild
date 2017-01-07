@@ -10,7 +10,7 @@
       </trans-unit>
       <trans-unit id="CannotMergeMetadataError">
         <source>Cannot merge metadata with the same name and different values</source>
-        <target state="translated">Metadata se stejným názvem ale různými hodnotami nejdou sloučit.</target>
+        <target state="translated">Metadata se stejným názvem, ale různými hodnotami nejdou sloučit.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoXprojFileGivenError">

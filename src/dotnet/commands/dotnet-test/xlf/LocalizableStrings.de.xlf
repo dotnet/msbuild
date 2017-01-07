@@ -53,18 +53,17 @@
                                         </source>
         <target state="translated">Führen Sie Tests aus, die dem angegebenen Ausdruck entsprechen.
                                         Beispiele:
-                                        Führen Sie Tests aus, bei denen die Priorität auf 1 festgelegt ist: --filter "Priority = 1"
+                                        Führen Sie Tests aus, für die die Priorität 1 festgelegt ist: --filter "Priority = 1"
                                         Führen Sie einen Test mit dem angegebenen vollständigen Namen aus: --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
-                                        Führen Sie Tests aus, die den angegebenen Namen enthalten: --filter "FullyQualifiedName~Namespace.Class"
-                                        Weitere Infos zur Unterstützung der Filterung finden Sie unter: https://aka.ms/vstest-filtering
-                                        </target>
+                                        Führen Sie Tests aus, die den angegeben Namen enthalten: --filter "FullyQualifiedName~Namespace.Class"
+                                        Weitere Informationen zur Filterunterstützung: https://aka.ms/vstest-filtering</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTestAdapterPathDescription">
         <source>Use custom adapters from the given path in the test run.
                                         Example: --test-adapter-path &lt;PATH_TO_ADAPTER&gt;</source>
         <target state="translated">Verwenden Sie im Testlauf benutzerdefinierte Adapter aus dem angegebenen Pfad.
-                                        Beispiel: --test-adapter-path &lt;PFAD_ZUM_ADAPTER&gt;</target>
+                                        Beispiel: --test-adapter-path &lt;PFAD_ZU_ADAPTER&gt;</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdLoggerOption">
@@ -86,7 +85,7 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="translated">Konfiguration für die Erstellung des Projekts. Standard für die meisten Projekte ist „Debug“.</target>
+        <target state="translated">Konfiguration für die Erstellung des Projekts.  Standard für die meisten Projekte ist "Debug".</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">

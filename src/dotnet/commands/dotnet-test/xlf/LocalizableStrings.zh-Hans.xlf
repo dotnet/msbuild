@@ -52,18 +52,17 @@
                                         More info on filtering support: https://aka.ms/vstest-filtering
                                         </source>
         <target state="translated">运行与给定表达式匹配的测试。
-                                       示例:
-                                       -运行优先级设置为 1 的测试: --filter "Priority = 1"
-                                        运行指定全名的测试:  --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
-                                        运行包含指定名称的测试:  --filter "FullyQualifiedName~Namespace.Class"
-                                        有关筛选支持的详细信息: https://aka.ms/vstest-filtering
-                                        </target>
+                                       示例: 
+                                       运行优先级设为 1 的测试: --筛选 "Priority = 1"
+                                       运行具有指定完整名称的测试: --筛选 "FullyQualifiedName=Namespace.ClassName.MethodName"
+                                       运行包含指定名称的测试: --筛选 "FullyQualifiedName~Namespace.Class"
+                                       有关筛选支持的详细信息，请访问: https://aka.ms/vstest-filtering</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTestAdapterPathDescription">
         <source>Use custom adapters from the given path in the test run.
                                         Example: --test-adapter-path &lt;PATH_TO_ADAPTER&gt;</source>
-        <target state="translated">在测试运行中从给定路径使用自定义适配器。
+        <target state="translated">在测试运行中使用给定路径中的自定义适配器。
                                        示例: --test-adapter-path &lt;PATH_TO_ADAPTER&gt;</target>
         <note />
       </trans-unit>
@@ -86,7 +85,7 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="translated">用于生成项目的配置。大多数项目的默认值为“Debug”。</target>
+        <target state="translated">用于生成项目的配置。对大多数项目的默认值是 "Debug"。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">

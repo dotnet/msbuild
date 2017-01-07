@@ -15,7 +15,7 @@
       </trans-unit>
       <trans-unit id="NoXprojFileGivenError">
         <source>{0}: No xproj file given.</source>
-        <target state="translated">{0}: no se proporcionó archivo xproj.</target>
+        <target state="translated">{0}: No se proporcionó archivo xproj.</target>
         <note />
       </trans-unit>
       <trans-unit id="MultipleXprojFilesError">
@@ -40,7 +40,7 @@
       </trans-unit>
       <trans-unit id="ProjAlreadyExistsError">
         <source>{0} already exists. Has migration already been run?</source>
-        <target state="translated">{0} ya existe. ¿Ya se ejecutó la migración?</target>
+        <target state="translated">'{0}' ya existe. ¿Ya se ejecutó la migración?</target>
         <note />
       </trans-unit>
       <trans-unit id="NullDestinationElementError">

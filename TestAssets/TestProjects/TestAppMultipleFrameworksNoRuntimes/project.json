@@ -1,0 +1,22 @@
+{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "emitEntryPoint": true
+  },
+  "dependencies": {},
+  "frameworks": {
+    "net461": {
+      "frameworkAssemblies": {
+        "System.Xml": {}
+      }
+    },
+    "netcoreapp1.0": {
+      "dependencies": {
+        "Microsoft.NetCore.App": {
+          "version": "1.0.3",
+          "type": "platform"
+        }
+      }
+    }
+  }
+}

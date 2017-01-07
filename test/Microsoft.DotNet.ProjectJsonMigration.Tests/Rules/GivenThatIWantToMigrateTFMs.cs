@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void MigratingDesktopTFMsAddsAllRuntimeIdentifiersIfTheProjectDoesNothaveAnyAlready()
+        public void MigratingCoreAndDesktopTFMsAddsAllRuntimeIdentifiersIfTheProjectDoesNothaveAnyAlready()
         {
             var testDirectory = Temp.CreateDirectory().Path;
             var testPJ = new ProjectJsonBuilder(TestAssetsManager)
@@ -94,6 +94,32 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
+        public void MigratingCoreAndDesktopTFMsAddsRuntimeIdentifierWithWin7x86ConditionOnAllFullFrameworksWhenNoRuntimesExistAlready()
+        {
+            var testDirectory = Temp.CreateDirectory().Path;
+            var testPJ = new ProjectJsonBuilder(TestAssetsManager)
+                .FromTestAssetBase("TestLibraryWithMultipleFrameworks")
+                .SaveToDisk(testDirectory);
+
+            var projectContexts = ProjectContext.CreateContextForEachFramework(testDirectory);
+            var mockProj = ProjectRootElement.Create();
+
+            var migrationSettings = MigrationSettings.CreateMigrationSettingsTestHook(testDirectory, testDirectory, mockProj);
+            var migrationInputs = new MigrationRuleInputs(
+                projectContexts, 
+                mockProj, 
+                mockProj.AddItemGroup(), 
+                mockProj.AddPropertyGroup());
+
+            new MigrateTFMRule().Apply(migrationSettings, migrationInputs);
+
+            mockProj.Properties.Count(p => p.Name == "RuntimeIdentifier").Should().Be(1);
+            var runtimeIdentifier = mockProj.Properties.First(p => p.Name == "RuntimeIdentifier");
+            runtimeIdentifier.Value.Should().Be("win7-x86");
+            runtimeIdentifier.Condition.Should().Be(" '$(TargetFramework)' == 'net20' OR '$(TargetFramework)' == 'net35' OR '$(TargetFramework)' == 'net40' OR '$(TargetFramework)' == 'net461' ");
+        }
+
+        [Fact]
         public void MigrateTFMRuleDoesNotAddRuntimesWhenMigratingDesktopTFMsWithRuntimesAlready()
         {
             var testDirectory = Temp.CreateDirectory().Path;
@@ -115,6 +141,32 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             new MigrateTFMRule().Apply(migrationSettings, migrationInputs);
 
             mockProj.Properties.Count(p => p.Name == "RuntimeIdentifiers").Should().Be(0);
+        }
+
+        [Fact]
+        public void MigratingProjectWithFullFrameworkTFMsOnlyAddsARuntimeIdentifierWin7x86WhenNoRuntimesExistAlready()
+        {
+            var testDirectory = Temp.CreateDirectory().Path;
+            var testPJ = new ProjectJsonBuilder(TestAssetsManager)
+                .FromTestAssetBase("TestAppWithMultipleFullFrameworksOnly")
+                .SaveToDisk(testDirectory);
+
+            var projectContexts = ProjectContext.CreateContextForEachFramework(testDirectory);
+            var mockProj = ProjectRootElement.Create();
+
+            var migrationSettings =
+                MigrationSettings.CreateMigrationSettingsTestHook(testDirectory, testDirectory, mockProj);
+            var migrationInputs = new MigrationRuleInputs(
+                projectContexts, 
+                mockProj, 
+                mockProj.AddItemGroup(), 
+                mockProj.AddPropertyGroup());
+
+            new MigrateTFMRule().Apply(migrationSettings, migrationInputs);
+
+            mockProj.Properties.Count(p => p.Name == "RuntimeIdentifiers").Should().Be(0);
+            mockProj.Properties.Where(p => p.Name == "RuntimeIdentifier").Should().HaveCount(1);
+            mockProj.Properties.Single(p => p.Name == "RuntimeIdentifier").Value.Should().Be("win7-x86");
         }
 
         [Fact]

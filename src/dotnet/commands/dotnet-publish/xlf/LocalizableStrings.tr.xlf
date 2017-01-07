@@ -40,7 +40,7 @@
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependented app.</source>
-        <target state="translated">Projeyi belirli bir çalışma zamanı için yayımlayın. Bu, kendi içinde dağıtımlar oluşturulurken kullanılır. Varsayılan seçenek, çerçeveye bağımlı bir proje yayımlamaktır.</target>
+        <target state="translated">Projeyi belirli bir çalışma zamanı için yayımlar. Bu, kendi içinde dağıtım oluştururken kullanılır. Varsayılan seçenek, çerçeveye bağlı bir uygulama yayımlamaktır.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -60,7 +60,7 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="translated">Projeyi derlemek için kullanılacak yapılandırma.  Çoğu proje için varsayılan, "Hata Ayıklama" seçeneğidir.</target>
+        <target state="translated">Projeyi derlemek için kullanılacak yapılandırma.  Çoğu proje için varsayılan: "Debug".</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOption">

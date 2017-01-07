@@ -45,7 +45,7 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="translated">用于生成项目的配置。大多数项目的默认值为“Debug”。</target>
+        <target state="translated">用于生成项目的配置。对大多数项目的默认值是 "Debug"。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffix">

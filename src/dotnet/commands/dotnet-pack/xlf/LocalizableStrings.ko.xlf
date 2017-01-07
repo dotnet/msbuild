@@ -45,7 +45,7 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="translated">프로젝트 빌드에 사용할 구성입니다. 대부분의 프로젝트에서 기본값은 "Debug"입니다.</target>
+        <target state="translated">프로젝트 빌드에 사용할 구성입니다.  대부분의 프로젝트에서 기본값은 "Debug"입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffix">

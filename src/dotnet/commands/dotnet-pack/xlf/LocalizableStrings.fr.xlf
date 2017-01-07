@@ -45,7 +45,7 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="translated">Configuration à utiliser pour la génération du projet. La valeur par défaut pour la plupart des projets est "Debug".</target>
+        <target state="translated">Configuration à utiliser pour la génération du projet.  La valeur par défaut pour la plupart des projets est "Debug".</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffix">

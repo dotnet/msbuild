@@ -19,22 +19,22 @@ Configuring...
 A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</source>
         <target state="translated">歡迎使用 .NET Core!
 ---------------------
-深入了解 .NET Core @ https://aka.ms/dotnet-docs。使用 dotnet --help 查看可用的命令，或前往 https://aka.ms/dotnet-cli-docs。
+前往 https://aka.ms/dotnet-docs 深入了解 .NET Core。使用 dotnet --help 查看可用的命令，或前往 https://aka.ms/dotnet-cli-docs。
 
 遙測
 --------------
-.NET Core 工具會收集使用方式資料以改善您的體驗。資料為匿名且不含命令列引數。資料由 Microsoft 收集並與社群共用。
-您可選擇退出遙測，方法是使用您慣用的殼層將 DOTNET_CLI_TELEMETRY_OPTOUT 環境變數設為 1。
-您可深入閱讀 .NET Core 工具遙測 @ https://aka.ms/dotnet-cli-telemetry。
+.NET Core 工具會收集使用方式資料，以改進您的體驗。資料為匿名性質，而且不會包含命令列引數。資料由 Microsoft 收集，並與社群共用。
+您可以退出宣告遙測，方法是使用您慣用的殼層，將 DOTNET_CLI_TELEMETRY_OPTOUT 環境變數設為 1。
+前往 https://aka.ms/dotnet-cli-telemetry 可以深入了解 .NET Core 工具遙測。
 
 正在設定...
 -------------------
-正在執行命令以初始將您的本機套件快取填入，進而改善還原速度並啟用離線存取。此命令最多需要一分鐘完成，且只會進行一次。</target>
+正在執行命令以初步填入您的本機套件快取，從而提升還原速度並允許離線存取。此命令最多需要一分鐘的時間完成，而且只會發生一次。</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">
         <source>Failed to create prime the NuGet cache. {0} failed with: {1}</source>
-        <target state="translated">無法建立主要 NuGet 快取。{0} 失敗: {1}</target>
+        <target state="translated">無法建立主要 NuGet 快取。{0} 失敗，發生: {1}</target>
         <note />
       </trans-unit>
     </body>

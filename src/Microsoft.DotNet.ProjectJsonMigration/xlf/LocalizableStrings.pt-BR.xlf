@@ -40,7 +40,7 @@
       </trans-unit>
       <trans-unit id="ProjAlreadyExistsError">
         <source>{0} already exists. Has migration already been run?</source>
-        <target state="translated">{0} já existe. A migração já foi executada?</target>
+        <target state="translated">O {0} já existe. A migração já foi executada?</target>
         <note />
       </trans-unit>
       <trans-unit id="NullDestinationElementError">
@@ -265,12 +265,12 @@
       </trans-unit>
       <trans-unit id="ItemTransformApplicatorRemovingItem">
         <source>{0}: Removing Item {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4} }}</source>
-        <target state="translated">{0}: Removendo Item {{ ItemType: {1}, Condição: {2}, Incluir: {3}, Excluir: {4} }}</target>
+        <target state="translated">{0}: Removendo Item {{ ItemType: {1}, Condição {2\}, Incluir: {3}, Excluir: {4} }}</target>
         <note />
       </trans-unit>
       <trans-unit id="ItemTransformApplicatorIgnoringItem">
         <source>{0}: Ignoring Item {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4} }}</source>
-        <target state="translated">{0}: Ignorando Item {{ ItemType: {1}, Condição: {2}, Incluir: {3}, Excluir: {4} }}</target>
+        <target state="translated">{0}: Ignorando Item {{ ItemType: {1}, Condição {2\}, Incluir: {3}, Excluir: {4} }}</target>
         <note />
       </trans-unit>
       <trans-unit id="ItemTransformApplicatorMergingItemWithExistingItemsSameChain">
@@ -280,7 +280,7 @@
       </trans-unit>
       <trans-unit id="ItemTransformApplicatorAddingMergedItem">
         <source>{0}: Adding Merged Item {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4} }}</source>
-        <target state="translated">{0}: Adicionando Item Mesclado {{ ItemType: {1}, Condição: {2}, Incluir: {3}, Excluir: {4} }}</target>
+        <target state="translated">{0}: Adicionando Item Mesclado {{ ItemType: {1}, Condição {2\}, Incluir: {3}, Excluir: {4} }}</target>
         <note />
       </trans-unit>
       <trans-unit id="MergingProperty">

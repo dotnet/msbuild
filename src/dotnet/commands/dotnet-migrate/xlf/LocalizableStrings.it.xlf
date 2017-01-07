@@ -26,10 +26,10 @@
     - a directory to migrate, it will recursively search for project.json files to migrate.
 Defaults to current directory if nothing is specified.</source>
         <target state="translated">Percorso di uno degli elementi seguenti:
-    - file project.json di cui eseguire la migrazione.
-    - file global.json; verrà eseguita la migrazione delle cartelle specificate in global.json.
+    - un file project.json di cui eseguire la migrazione.
+    - un file global.json. Verrà eseguita la migrazione delle cartelle specificate in global.json.
     - file solution.sln; verrà eseguita la migrazione dei progetti cui viene fatto riferimento nella soluzione.
-    - directory di cui eseguire la migrazione; verrà eseguita la ricerca ricorsiva dei file project.json di cui eseguire la migrazione.
+    - una directory di cui eseguire la migrazione. Verrà eseguita la ricerca ricorsiva dei file project.json di cui eseguire la migrazione.
 Se non si specifica un valore, per impostazione predefinita, verrà usata la directory corrente.</target>
         <note />
       </trans-unit>

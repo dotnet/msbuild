@@ -35,7 +35,7 @@
       </trans-unit>
       <trans-unit id="LookingForPreferCliRuntimeFile">
         <source>{0}: Looking for prefercliruntime file at `{1}`</source>
-        <target state="translated">{0}: procurando o arquivo prefercliruntime em '{1}'</target>
+        <target state="translated">{0}: Procurando o arquivo prefercliruntime em '{1}'</target>
         <note />
       </trans-unit>
       <trans-unit id="AttemptingToResolve">
@@ -45,7 +45,7 @@
       </trans-unit>
       <trans-unit id="DidNotFindAMatchingProject">
         <source>{0}: Did not find a matching project {1}.</source>
-        <target state="translated">{0}: não encontrou um projeto {1} correspondente.</target>
+        <target state="translated">{0}: Não encontrou um projeto {1} correspondente.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidCommandResolverArguments">
@@ -75,7 +75,7 @@
       </trans-unit>
       <trans-unit id="MSBuildProjectPath">
         <source>{0}: MSBuild project path = {1}</source>
-        <target state="translated">{0}: caminho de projeto do MSBuild = {1}</target>
+        <target state="translated">{0}: Caminho de projeto do MSBuild = {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="MultipleProjectFilesFound">
@@ -85,7 +85,7 @@
       </trans-unit>
       <trans-unit id="DidNotFindProject">
         <source>{0}: ProjectFactory did not find Project.</source>
-        <target state="translated">{0}: ProjectFactory não encontrou o Projeto.</target>
+        <target state="translated">{0}: O ProjectFactory não encontrou o Projeto.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolvingCommandSpec">
@@ -95,18 +95,18 @@
       </trans-unit>
       <trans-unit id="FailedToResolveCommandSpec">
         <source>{0}: failed to resolve commandspec from library.</source>
-        <target state="translated">{0}: falha ao resolver commandspec por meio da biblioteca.</target>
+        <target state="translated">{0}: falha ao resolver commandspec da biblioteca.</target>
         <note />
       </trans-unit>
       <trans-unit id="AttemptingToResolveCommandSpec">
         <source>{0}: Attempting to resolve command spec from tool {1}</source>
-        <target state="translated">{0}: tentando resolver commandspec por meio da ferramenta {1}</target>
+        <target state="translated">{0}: Tentando resolver a especificação de comando da ferramenta {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetPackagesRoot">
         <source>{0}: nuget packages root:
 {1}</source>
-        <target state="translated">{0}: raiz de pacotes NuGet:
+        <target state="translated">{0}: raiz de pacores nuget:
 {1}</target>
         <note />
       </trans-unit>
@@ -172,7 +172,7 @@
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
         <source>Waiting for debugger to attach. Press ENTER to continue</source>
-        <target state="translated">Aguardando o depurador anexar. Pressione ENTER para continuar</target>
+        <target state="translated">Esperando o depurador se conectar. Pressione ENTER para continuar</target>
         <note />
       </trans-unit>
       <trans-unit id="ProcessId">

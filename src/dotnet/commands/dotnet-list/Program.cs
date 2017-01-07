@@ -4,8 +4,8 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.List.ProjectToProjectReferences;
-using Microsoft.DotNet.Tools.List.ProjectsInSolution;
 
 namespace Microsoft.DotNet.Tools.List
 {
@@ -13,10 +13,11 @@ namespace Microsoft.DotNet.Tools.List
     {
         protected override string CommandName => "list";
         protected override string FullCommandNameLocalized => LocalizableStrings.NetListCommand;
+        protected override string ArgumentName => Constants.ProjectArgumentName;
+        protected override string ArgumentDescriptionLocalized => CommonLocalizableStrings.ArgumentsProjectDescription;
         internal override List<Func<DotNetSubCommandBase>> SubCommands =>
             new List<Func<DotNetSubCommandBase>>
             {
-                ListProjectsInSolutionCommand.Create,
                 ListProjectToProjectReferencesCommand.Create,
             };
 
