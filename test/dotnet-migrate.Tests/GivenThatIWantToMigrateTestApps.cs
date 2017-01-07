@@ -681,9 +681,9 @@ namespace Microsoft.DotNet.Migration.Tests
 
         private void RestoreProjectJson(string projectDirectory)
         {
-            new TestCommand("dotnet")
-                .WithWorkingDirectory(projectDirectory)
-                .Execute("restore-projectjson")
+            var projectFile = "\"" + Path.Combine(projectDirectory, "project.json") + "\"";
+            new RestoreProjectJsonCommand()
+                .Execute(projectFile)
                 .Should().Pass();
         }
 
