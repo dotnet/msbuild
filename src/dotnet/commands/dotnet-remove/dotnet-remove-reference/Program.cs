@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Tools.Remove.ProjectToProjectReference
         {
             var command = new RemoveProjectToProjectReferenceCommand()
             {
-                Name = "p2p",
+                Name = "reference",
                 FullName = LocalizableStrings.AppFullName,
                 Description = LocalizableStrings.AppDescription,
                 HandleRemainingArguments = true,

@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Tools.List.ProjectToProjectReferences
         {
             var command = new ListProjectToProjectReferencesCommand()
             {
-                Name = "p2ps",
+                Name = "reference",
                 FullName = LocalizableStrings.AppFullName,
                 Description = LocalizableStrings.AppDescription,
             };

@@ -5,22 +5,22 @@ using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
-    public sealed class ListP2PsCommand : TestCommand
+    public sealed class RemoveReferenceCommand : TestCommand
     {
         private string _projectName = null;
 
-        public ListP2PsCommand()
+        public RemoveReferenceCommand()
             : base("dotnet")
         {
         }
 
         public override CommandResult Execute(string args = "")
         {
-            args = $"list {_projectName} p2ps {args}";
+            args = $"remove {_projectName} reference {args}";
             return base.ExecuteWithCapturedOutput(args);
         }
 
-        public ListP2PsCommand WithProject(string projectName)
+        public RemoveReferenceCommand WithProject(string projectName)
         {
             _projectName = projectName;
             return this;

@@ -10,13 +10,13 @@ using System.IO;
 using System.Linq;
 using Xunit;
 
-namespace Microsoft.DotNet.Cli.Add.P2P.Tests
+namespace Microsoft.DotNet.Cli.Add.Reference.Tests
 {
-    public class GivenDotnetAddP2P : TestBase
+    public class GivenDotnetAddReference : TestBase
     {
-        private const string HelpText = @".NET Add Project to Project (p2p) reference Command
+        private const string HelpText = @".NET Add Project to Project reference Command
 
-Usage: dotnet add <PROJECT> p2p [options] [args]
+Usage: dotnet add <PROJECT> reference [options] [args]
 
 Arguments:
   <PROJECT>  The project file to operate on. If a file is not specified, the command will search the current directory for one.
@@ -90,7 +90,7 @@ Additional Arguments:
         [InlineData("-h")]
         public void WhenHelpOptionIsPassedItPrintsUsage(string helpArg)
         {
-            var cmd = new AddP2PCommand().Execute(helpArg);
+            var cmd = new AddReferenceCommand().Execute(helpArg);
             cmd.Should().Pass();
             cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
@@ -109,7 +109,7 @@ Additional Arguments:
         [Fact]
         public void WhenTooManyArgumentsArePassedItPrintsError()
         {
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                     .WithProject("one two three")
                     .Execute("proj.csproj");
             cmd.ExitCode.Should().NotBe(0);
@@ -124,7 +124,7 @@ Additional Arguments:
         {
             var setup = Setup();
 
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                     .WithWorkingDirectory(setup.TestRoot)
                     .WithProject(projName)
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
@@ -139,7 +139,7 @@ Additional Arguments:
             string projName = "Broken/Broken.csproj";
             var setup = Setup();
 
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                     .WithWorkingDirectory(setup.TestRoot)
                     .WithProject(projName)
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
@@ -154,7 +154,7 @@ Additional Arguments:
             var setup = Setup();
 
             var workingDir = Path.Combine(setup.TestRoot, "MoreThanOne");
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                     .WithWorkingDirectory(workingDir)
                     .Execute($"\"{setup.ValidRefCsprojRelToOtherProjPath}\"");
             cmd.ExitCode.Should().NotBe(0);
@@ -167,7 +167,7 @@ Additional Arguments:
         {
             var setup = Setup();
 
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                     .WithWorkingDirectory(setup.TestRoot)
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
@@ -182,7 +182,7 @@ Additional Arguments:
             var setup = Setup();
             
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{setup.ValidRefCsprojPath}\"");
@@ -201,7 +201,7 @@ Additional Arguments:
             var setup = Setup();
 
             int condBefore = lib.CsProj().NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451);
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg} \"{setup.ValidRefCsprojPath}\"");
@@ -219,14 +219,14 @@ Additional Arguments:
             var lib = NewLibWithFrameworks();
             var setup = Setup();
 
-            new AddP2PCommand()
+            new AddReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{setup.LibCsprojPath}\"")
                 .Should().Pass();
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                 .WithWorkingDirectory(lib.Path)
                 .WithProject(lib.CsProjName)
                 .Execute($"\"{setup.ValidRefCsprojPath}\"");
@@ -243,14 +243,14 @@ Additional Arguments:
             var lib = NewLibWithFrameworks();
             var setup = Setup();
 
-            new AddP2PCommand()
+            new AddReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg} \"{setup.LibCsprojPath}\"")
                 .Should().Pass();
 
             int condBefore = lib.CsProj().NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451);
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg} \"{setup.ValidRefCsprojPath}\"");
@@ -267,14 +267,14 @@ Additional Arguments:
             var lib = NewLibWithFrameworks();
             var setup = Setup();
 
-            new AddP2PCommand()
+            new AddReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNetCoreApp10Arg} \"{setup.ValidRefCsprojPath}\"")
                 .Should().Pass();
 
             int condBefore = lib.CsProj().NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451);
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg} \"{setup.ValidRefCsprojPath}\"");
@@ -291,14 +291,14 @@ Additional Arguments:
             var lib = NewLibWithFrameworks();
             var setup = Setup();
 
-            new AddP2PCommand()
+            new AddReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg} \"{setup.LibCsprojPath}\"")
                 .Should().Pass();
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{setup.ValidRefCsprojPath}\"");
@@ -315,14 +315,14 @@ Additional Arguments:
             var lib = NewLibWithFrameworks();
             var setup = Setup();
 
-            new AddP2PCommand()
+            new AddReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{setup.ValidRefCsprojPath}\"")
                 .Should().Pass();
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                 .WithWorkingDirectory(lib.Path)
                 .WithProject(lib.CsProjName)
                 .Execute($"\"{setup.ValidRefCsprojPath}\"");
@@ -341,7 +341,7 @@ Additional Arguments:
             var proj = new ProjDir(Path.Combine(setup.TestRoot, "WithExistingRefCondOnItem"));
 
             string contentBefore = proj.CsProjContent();
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                     .WithWorkingDirectory(proj.Path)
                     .WithProject(proj.CsProjPath)
                     .Execute($"{FrameworkNet451Arg} \"{setup.LibCsprojRelPath}\"");
@@ -356,14 +356,14 @@ Additional Arguments:
             var lib = NewLibWithFrameworks();
             var setup = Setup();
 
-            new AddP2PCommand()
+            new AddReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg} \"{setup.ValidRefCsprojPath}\"")
                 .Should().Pass();
 
             var csprojContentBefore = lib.CsProjContent();
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg} \"{setup.ValidRefCsprojPath}\"");
@@ -379,7 +379,7 @@ Additional Arguments:
             var proj = new ProjDir(Path.Combine(setup.TestRoot, "WithExistingRefCondWhitespaces"));
 
             string contentBefore = proj.CsProjContent();
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                     .WithWorkingDirectory(proj.Path)
                     .WithProject(proj.CsProjName)
                     .Execute($"{FrameworkNet451Arg} \"{setup.LibCsprojRelPath}\"");
@@ -395,7 +395,7 @@ Additional Arguments:
             var proj = new ProjDir(Path.Combine(setup.TestRoot, "WithRefNoCondNonUniform"));
 
             string contentBefore = proj.CsProjContent();
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                     .WithWorkingDirectory(proj.Path)
                     .WithProject(proj.CsProjName)
                     .Execute($"\"{setup.LibCsprojRelPath}\"");
@@ -411,7 +411,7 @@ Additional Arguments:
             var proj = new ProjDir(Path.Combine(setup.TestRoot, "WithRefNoCondNonUniform"));
 
             int noCondBefore = proj.CsProj().NumberOfItemGroupsWithoutCondition();
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                     .WithWorkingDirectory(setup.TestRoot)
                     .WithProject(proj.CsProjPath)
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
@@ -429,7 +429,7 @@ Additional Arguments:
             var proj = new ProjDir(Path.Combine(setup.TestRoot, "WithRefCondNonUniform"));
 
             string contentBefore = proj.CsProjContent();
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                     .WithWorkingDirectory(proj.Path)
                     .WithProject(proj.CsProjName)
                     .Execute($"{FrameworkNet451Arg} \"{setup.LibCsprojRelPath}\"");
@@ -445,7 +445,7 @@ Additional Arguments:
             var proj = new ProjDir(Path.Combine(setup.TestRoot, "WithRefCondNonUniform"));
 
             int condBefore = proj.CsProj().NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451);
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                     .WithWorkingDirectory(setup.TestRoot)
                     .WithProject(proj.CsProjPath)
                     .Execute($"{FrameworkNet451Arg} \"{setup.ValidRefCsprojPath}\"");
@@ -463,7 +463,7 @@ Additional Arguments:
             var proj = new ProjDir(Path.Combine(setup.TestRoot, "EmptyItemGroup"));
 
             int noCondBefore = proj.CsProj().NumberOfItemGroupsWithoutCondition();
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                     .WithWorkingDirectory(setup.TestRoot)
                     .WithProject(proj.CsProjPath)
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
@@ -484,7 +484,7 @@ Reference `DotnetAddP2PProjects\ValidRef\ValidRef.csproj` added to the project."
             var setup = Setup();
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{setup.LibCsprojPath}\" \"{setup.ValidRefCsprojPath}\"");
@@ -506,7 +506,7 @@ Reference `DotnetAddP2PProjects\ValidRef\ValidRef.csproj` added to the project."
             var setup = Setup();
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451);
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg}  \"{setup.LibCsprojPath}\" \"{setup.ValidRefCsprojPath}\"");
@@ -525,7 +525,7 @@ Reference `DotnetAddP2PProjects\ValidRef\ValidRef.csproj` added to the project."
             var setup = Setup();
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                 .WithWorkingDirectory(lib.Path)
                 .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
@@ -542,7 +542,7 @@ Reference `DotnetAddP2PProjects\ValidRef\ValidRef.csproj` added to the project."
             var lib = NewLibWithFrameworks();
             var setup = Setup();
 
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                 .WithWorkingDirectory(lib.Path)
                 .WithProject(lib.CsProjName)
                 .Execute($"\"{setup.ValidRefCsprojPath}\"");
@@ -587,7 +587,7 @@ Reference `DotnetAddP2PProjects\ValidRef\ValidRef.csproj` added to the project."
             var lib = NewLibWithFrameworks();
 
             var contentBefore = lib.CsProjContent();
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                 .WithWorkingDirectory(lib.Path)
                 .WithProject(lib.CsProjName)
                 .Execute("\"IDoNotExist.csproj\"");
@@ -603,7 +603,7 @@ Reference `DotnetAddP2PProjects\ValidRef\ValidRef.csproj` added to the project."
             var setup = Setup();
 
             var contentBefore = lib.CsProjContent();
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{setup.ValidRefCsprojPath}\" \"IDoNotExist.csproj\"");
@@ -619,7 +619,7 @@ Reference `DotnetAddP2PProjects\ValidRef\ValidRef.csproj` added to the project."
             var setup = Setup();
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                 .WithWorkingDirectory(lib.Path)
                 .WithProject(lib.CsProjName)
                 .Execute($"\"{setup.ValidRefCsprojPath.Replace('\\', '/')}\"");
@@ -638,7 +638,7 @@ Reference `DotnetAddP2PProjects\ValidRef\ValidRef.csproj` added to the project."
             var proj = new ProjDir(setup.LibDir);
 
             int noCondBefore = proj.CsProj().NumberOfItemGroupsWithoutCondition();
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
                 .WithProject(setup.LibCsprojPath)
                 .Execute($"\"{setup.ValidRefCsprojRelPath}\"");
@@ -658,7 +658,7 @@ Reference `DotnetAddP2PProjects\ValidRef\ValidRef.csproj` added to the project."
             var net45lib = new ProjDir(Path.Combine(setup.TestRoot, "Net45Lib"));
 
             int condBefore = lib.CsProj().NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451);
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                     .WithProject(lib.CsProjPath)
                     .Execute($"{FrameworkNet451Arg} \"{net45lib.CsProjPath}\"");
             cmd.Should().Pass();
@@ -676,7 +676,7 @@ Reference `DotnetAddP2PProjects\ValidRef\ValidRef.csproj` added to the project."
             var net452netcoreapp10lib = new ProjDir(Path.Combine(setup.TestRoot, "Net452AndNetCoreApp10Lib"));
 
             int noCondBefore = net452netcoreapp10lib.CsProj().NumberOfItemGroupsWithoutCondition();
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                     .WithProject(net452netcoreapp10lib.CsProjPath)
                     .Execute($"\"{lib.CsProjPath}\"");
             cmd.Should().Pass();
@@ -698,7 +698,7 @@ Reference `DotnetAddP2PProjects\ValidRef\ValidRef.csproj` added to the project."
             var net45lib = new ProjDir(Path.Combine(setup.TestRoot, "Net45Lib"));
 
             var csProjContent = lib.CsProjContent();
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                     .WithProject(lib.CsProjPath)
                     .Execute($"-f {framework} \"{net45lib.CsProjPath}\"");
             cmd.Should().Fail();
@@ -717,7 +717,7 @@ Reference `DotnetAddP2PProjects\ValidRef\ValidRef.csproj` added to the project."
             var net45lib = new ProjDir(Path.Combine(setup.TestRoot, "Net45Lib"));
 
             var csProjContent = net45lib.CsProjContent();
-            var cmd = new AddP2PCommand()
+            var cmd = new AddReferenceCommand()
                     .WithProject(net45lib.CsProjPath)
                     .Execute($"{frameworkArg} \"{lib.CsProjPath}\"");
             cmd.Should().Fail();

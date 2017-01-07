@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
         {
             var command = new AddProjectToProjectReferenceCommand()
             {
-                Name = "p2p",
+                Name = "reference",
                 FullName = LocalizableStrings.AppFullName,
                 Description = LocalizableStrings.AppDescription,
                 HandleRemainingArguments = true,
