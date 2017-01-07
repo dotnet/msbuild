@@ -6,7 +6,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
     internal class ConstantPackageVersions
     {
         public const string AspNetToolsVersion = "1.0.0-msbuild3-final";
-        public const string TestSdkPackageVersion = "15.0.0-preview-20161227-02";
+        public const string TestSdkPackageVersion = "15.0.0-preview-20170106-08";
         public const string XUnitPackageVersion = "2.2.0-beta4-build3444";
         public const string XUnitRunnerPackageVersion = "2.2.0-beta4-build1194";
         public const string MstestTestAdapterVersion = "1.1.8-rc";

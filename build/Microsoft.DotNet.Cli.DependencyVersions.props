@@ -5,7 +5,7 @@
     <CLI_Roslyn_Version>2.0.0-rc3-61212-03</CLI_Roslyn_Version>
     <CLI_NETSDK_Version>1.0.0-alpha-20170105-5</CLI_NETSDK_Version>
     <CLI_WEBSDK_Version>1.0.0-alpha-20170106-1-203</CLI_WEBSDK_Version>
-    <CLI_TestPlatform_Version>15.0.0-preview-20161227-02</CLI_TestPlatform_Version>
+    <CLI_TestPlatform_Version>15.0.0-preview-20170106-08</CLI_TestPlatform_Version>
     <TemplateEngineVersion>1.0.0-beta1-20170106-79</TemplateEngineVersion>
   </PropertyGroup>
 </Project>

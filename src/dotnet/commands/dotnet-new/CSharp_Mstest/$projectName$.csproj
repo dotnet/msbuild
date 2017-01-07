@@ -1,13 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
+  <PropertyGroup>    
     <TargetFramework>netcoreapp1.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.App" Version="1.0.3" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20161227-02" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20170106-08" />
     <PackageReference Include="MSTest.TestAdapter" Version="1.1.8-rc" />
     <PackageReference Include="MSTest.TestFramework" Version="1.0.8-rc" />
   </ItemGroup>
