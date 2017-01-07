@@ -90,9 +90,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PublishIntermediateTempPath Condition="'$(PublishIntermediateTempPath)' == ''">$([System.IO.Path]::GetFullPath($(BaseIntermediateOutputPath)$(_PublishConfigurationPath)$(_PublishFrameworkPath)$(_RuntimeIdentifierPath)PublishTemp\))</PublishIntermediateTempPath>
     <PublishIntermediateOutputPath Condition="'$(PublishIntermediateOutputPath)' == ''">$(PublishIntermediateTempPath)PublishOutput\</PublishIntermediateOutputPath>
 
-    <EFSQLScriptsFolderName Condition="$(EFSQLScriptsFolderName) == ''">EFSQLScripts</EFSQLScriptsFolderName>
-    <!-- Temporary work-around for Docker -->
     <PublishIntermediateOutputPath Condition="'$(DockerPublish)' == 'true'">obj/Docker/publish/</PublishIntermediateOutputPath>
+    
+    <EFSQLScriptsFolderName Condition="$(EFSQLScriptsFolderName) == ''">EFSQLScripts</EFSQLScriptsFolderName>
   </PropertyGroup>
 
   <!--
@@ -177,15 +177,5 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Target Name="CorePublish" 
           DependsOnTargets="$(CorePublishDependsOn)"/>
-
-
-  <!-- Temporary work-around to disable docker targets during publishing -->
-  <Target Name="SuppressDockerTargetsDuringPublish"
-          BeforeTargets="Build"
-          Condition=" '$(DeployOnBuild)' == 'true'">
-    <PropertyGroup>
-      <SuppressDockerTargets>true</SuppressDockerTargets>
-    </PropertyGroup>
-  </Target>
   
 </Project>
