@@ -139,14 +139,17 @@ namespace Microsoft.Build.UnitTests
         {
 
             using (var testProject = new Helpers.TestProjectWithFiles(projectContents, inputFiles))
+            using (var collection = new ProjectCollection())
             {
+                var evaluatedItems = new Project(testProject.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, collection).Items.ToList();
+
                 if (expectedMetadataPerItem == null)
                 {
-                    ObjectModelHelpers.AssertItems(expectedInclude, new Project(testProject.ProjectFile).Items.ToList(), expectedDirectMetadata: null, normalizeSlashes: normalizeSlashes);
+                    ObjectModelHelpers.AssertItems(expectedInclude, evaluatedItems, expectedDirectMetadata: null, normalizeSlashes: normalizeSlashes);
                 }
                 else
                 {
-                    ObjectModelHelpers.AssertItems(expectedInclude, new Project(testProject.ProjectFile).Items.ToList(), expectedMetadataPerItem, normalizeSlashes);
+                    ObjectModelHelpers.AssertItems(expectedInclude, evaluatedItems, expectedMetadataPerItem, normalizeSlashes);
                 }
             }
         }
