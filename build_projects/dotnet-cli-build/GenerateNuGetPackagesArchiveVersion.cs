@@ -24,29 +24,39 @@ namespace Microsoft.DotNet.Cli.Build
         [Output]
         public String Version { get; set; }
 
+        private static string[] s_TemplatesToArchive = new string[]
+        {
+            "CSharp_Web",
+            "CSharp_Web1.1",
+        };
+
         public override bool Execute()
         {
-            var webTemplatePath = Path.Combine(
-                RepoRoot,
-                "src",
-                "dotnet",
-                "commands",
-                "dotnet-new",
-                "CSharp_Web",
-                "$projectName$.csproj");
-
-            var rootElement = ProjectRootElement.Open(webTemplatePath);
-            var packageRefs = rootElement.Items.Where(i => i.ItemType == "PackageReference").ToList();
-
             var dataToHash = string.Empty;
-            foreach (var packageRef in packageRefs)
+
+            foreach (string templateToArchive in s_TemplatesToArchive)
             {
-                dataToHash += $"{packageRef.Include},";
-                if (packageRef.HasMetadata)
+                var templatePath = Path.Combine(
+                    RepoRoot,
+                    "src",
+                    "dotnet",
+                    "commands",
+                    "dotnet-new",
+                    templateToArchive,
+                    "$projectName$.csproj");
+
+                var rootElement = ProjectRootElement.Open(templatePath);
+                var packageRefs = rootElement.Items.Where(i => i.ItemType == "PackageReference").ToList();
+
+                foreach (var packageRef in packageRefs)
                 {
-                    foreach (var metadata in packageRef.Metadata)
+                    dataToHash += $"{packageRef.Include},";
+                    if (packageRef.HasMetadata)
                     {
-                        dataToHash += $"{metadata.Name}={metadata.Value};";
+                        foreach (var metadata in packageRef.Metadata)
+                        {
+                            dataToHash += $"{metadata.Name}={metadata.Value};";
+                        }
                     }
                 }
             }
