@@ -129,8 +129,6 @@ namespace Microsoft.NET.Build.Tests
             var expectedOtherProjects = expectedAllProjects
                 .Except(expectedBuiltinProjects)
                 .Except(expectedIntermediateProjects)
-                //  TODO: Remove this when https://github.com/NuGet/Home/issues/3851 is fixed
-                .Where(project => !Path.GetFileName(project).Equals("NuGet.Build.Tasks.Pack.targets", StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
             var builtinProjectsFromProperty = allProjectsFromProperty.Where(project => project.StartsWith(dotnetRoot, StringComparison.OrdinalIgnoreCase)).ToList();

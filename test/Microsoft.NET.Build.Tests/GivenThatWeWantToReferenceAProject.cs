@@ -58,6 +58,8 @@ namespace Microsoft.NET.Build.Tests
             bool restoreSucceeds, bool buildSucceeds)
         {
             string identifier = referencerTarget.ToString() + " " + dependencyTarget.ToString();
+            //  MSBuild isn't happy with semicolons in the path when doing file exists checks
+            identifier = identifier.Replace(';', '_');
 
             TestProject referencerProject = GetTestProject("Referencer", referencerTarget, referencerIsSdkProject);
             TestProject dependencyProject = GetTestProject("Dependency", dependencyTarget, dependencyIsSdkProject);
