@@ -89,7 +89,7 @@ namespace Microsoft.NET.Publish.Tests
             });
         }
 
-        [Fact]
+        //[Fact]
         public void It_publishes_projects_targeting_netcoreapp11_with_p2p_targeting_netcoreapp11()
         {
             // Microsoft.NETCore.App 1.1.0 added a dependency on Microsoft.DiaSymReader.Native.
