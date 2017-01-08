@@ -29,10 +29,21 @@
           Outputs="@(NuSpec->'%(NuPkgOutput)')">
 
     <PropertyGroup>
-      <NuGetTool>$(RepositoryRootDirectory).nuget\nuget.exe</NuGetTool>
+      <NuGetExeVersion>3.4.4</NuGetExeVersion>
+      <NuGetTool>$(RepositoryRootDirectory).nuget\$(NuGetExeVersion)\nuget.exe</NuGetTool>
+      <NuGetDownloadUrl>https://dist.nuget.org/win-x86-commandline/v$(NuGetExeVersion)/NuGet.exe</NuGetDownloadUrl>
+      <NuGetDownloadCommand>powershell -noprofile -nologo -command "(new-object System.Net.WebClient).DownloadFile('$(NugetDownloadURL)', '$(NuGetTool)')"</NuGetDownloadCommand>
     </PropertyGroup>
 
     <MakeDir Directories="$(NuGetOutDir)" />
+
+    <MakeDir Directories="$(RepositoryRootDirectory).nuget\$(NuGetExeVersion)"
+             Condition="'$(OS)' == 'Windows_NT'"/>
+
+    <Exec
+      Condition="!Exists('$(NuGetTool)') And '$(OS)' == 'Windows_NT'"
+      Command="$(NuGetDownloadCommand)"
+      />
 
     <Exec Command="$(NuGetTool) Pack &quot;$(MSBuildProjectDirectory)\%(NuSpec.Identity)&quot; -verbosity quiet -basepath &quot;$(OutDir.TrimEnd('\'))&quot; -outputdirectory &quot;$(NuGetOutDir.TrimEnd('\'))&quot; %(NuSpec.NuGetArguments)" 
           Condition="'$(OS)' == 'Windows_NT'"/>
