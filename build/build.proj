@@ -24,8 +24,7 @@
     <VsManProjectFile Include="$(RepositoryRootDirectory)src\VsixV3\Microsoft.VisualStudio.Templates.CSharp.NetStandard.vsmanproj" />
     <VsManProjectFile Include="$(RepositoryRootDirectory)src\VsixV3\Microsoft.VisualStudio.Templates.VisualBasic.NetStandard.vsmanproj" />
 
-    <!-- TODO: https://github.com/dotnet/sdk/issues/342: convert Dependencies\* from project.json to PackageReference-->
-    <DirectoryToNugetRestore Include="$(RepositoryRootDirectory)src\Dependencies" />
+    <ProjectToDotnetRestore Include="$(RepositoryRootDirectory)src\Dependencies\**\*.csproj" />
 
     <ProjectToDotnetRestore Include="$(RepositoryRootDirectory)src\Tasks\Microsoft.NET.Build.Tasks\Microsoft.NET.Build.Tasks.csproj" />
     <ProjectToDotnetRestore Include="$(RepositoryRootDirectory)src\Tasks\Microsoft.NET.Build.Tasks.UnitTests\Microsoft.NET.Build.Tasks.UnitTests.csproj" />
@@ -44,11 +43,6 @@
         <__SetNuget_Packages Condition="'$(OS)' == 'Windows_NT'">set NUGET_PACKAGES=$(NuGet_Packages)</__SetNuget_Packages>
         <__SetNuget_Packages Condition="'$(OS)' != 'Windows_NT'">export NUGET_PACKAGES=$(NuGet_Packages)</__SetNuget_Packages>
     </PropertyGroup>
-
-    <Exec Command="$(__SetNuget_Packages)$(__NewLine)$(DotNetTool) nuget restore %(DirectoryToNugetRestore.Identity) --legacy-packages-directory --verbosity Minimal"
-          WorkingDirectory="$(RepositoryRootDirectory)"
-          />
-
 
     <Exec Command="$(__SetNuget_Packages)$(__NewLine)$(DotNetTool) restore %(ProjectToDotnetRestore.Identity) /v:minimal"
           Condition="'$(BuildTemplates)' != 'true'"
