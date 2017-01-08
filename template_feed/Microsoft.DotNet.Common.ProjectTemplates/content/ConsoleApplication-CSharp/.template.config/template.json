@@ -10,5 +10,12 @@
     "type": "project"
   },
   "sourceName": "Company.ConsoleApplication1",
-  "preferNameDirectory": true
+  "preferNameDirectory": true,
+  "symbols": {
+    "sdkVersion": {
+      "type": "bind",
+      "binding": "dotnet-cli-version",
+      "replaces": "1.0.0-preview5-004445"
+    }
+  }
 }

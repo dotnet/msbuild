@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli
 {
@@ -202,14 +203,14 @@ namespace Microsoft.TemplateEngine.Cli
 
                 while (position < text.Length)
                 {
-                    int newline = text.IndexOf(Environment.NewLine, position, StringComparison.Ordinal);
+                    int newline = text.IndexOf(EngineEnvironmentSettings.Environment.NewLine, position, StringComparison.Ordinal);
 
                     if (newline > -1)
                     {
                         if (newline - position <= maxWidth)
                         {
                             lines.Add(text.Substring(position, newline - position).TrimEnd());
-                            position = newline + Environment.NewLine.Length;
+                            position = newline + EngineEnvironmentSettings.Environment.NewLine.Length;
                         }
                         else
                         {

@@ -15,6 +15,6 @@
   <Target Name="Build">
     <MakeDir Directories="$(TemplatesFolder)" />
     <MakeDir Directories="$(TemplatesNoTimestampFolder)" />
-    <Exec Command="$(NuGet) pack &quot;$(MSBuildThisFileDirectory)%(TemplatePack.Identity)\Templates.nuspec&quot; -properties &quot;version=$(PackageVersion)&quot;" WorkingDirectory="$(PackOutput)" />
+    <Exec Command="$(NuGet) pack &quot;$(MSBuildThisFileDirectory)%(TemplatePack.Identity)\Templates.nuspec&quot; -properties &quot;version=$(PackageVersion)&quot; -NoDefaultExcludes" WorkingDirectory="$(PackOutput)" />
   </Target>
 </Project>

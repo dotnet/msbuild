@@ -104,7 +104,7 @@ namespace Microsoft.TemplateEngine.Cli
                     return _unambiguousTemplateToUse = _matchedTemplates.First().Info;
                 }
 
-                if (EngineEnvironmentSettings.Host.TryGetHostParamDefault("prefs:language", out string defaultLanguage))
+                if (Host.TryGetHostParamDefault("prefs:language", out string defaultLanguage))
                 {
                     IFilteredTemplateInfo match = null;
 
@@ -221,7 +221,7 @@ namespace Microsoft.TemplateEngine.Cli
             IEnumerable<ITemplateInfo> results = _matchedTemplates.Where(x => x.IsMatch).Select(x => x.Info);
 
             IEnumerable<IGrouping<string, ITemplateInfo>> grouped = results.GroupBy(x => x.GroupIdentity);
-            EngineEnvironmentSettings.Host.TryGetHostParamDefault("prefs:language", out string defaultLanguage);
+            Host.TryGetHostParamDefault("prefs:language", out string defaultLanguage);
 
             Dictionary<ITemplateInfo, string> templatesVersusLanguages = new Dictionary<ITemplateInfo, string>();
 

@@ -90,7 +90,7 @@ namespace Microsoft.TemplateEngine.Cli
             foreach (string package in packageNames)
             {
                 string pkg = package.Trim();
-                pkg = Environment.ExpandEnvironmentVariables(pkg);
+                pkg = EngineEnvironmentSettings.Environment.ExpandEnvironmentVariables(pkg);
                 string pattern = null;
 
                 int wildcardIndex = pkg.IndexOfAny(new[] { '*', '?' });
