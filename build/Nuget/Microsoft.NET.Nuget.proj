@@ -34,7 +34,8 @@
 
     <MakeDir Directories="$(NuGetOutDir)" />
 
-    <Exec Command="$(NuGetTool) Pack &quot;$(MSBuildProjectDirectory)\%(NuSpec.Identity)&quot; -verbosity quiet -basepath &quot;$(OutDir.TrimEnd('\'))&quot; -outputdirectory &quot;$(NuGetOutDir.TrimEnd('\'))&quot; %(NuSpec.NuGetArguments)" />
+    <Exec Command="$(NuGetTool) Pack &quot;$(MSBuildProjectDirectory)\%(NuSpec.Identity)&quot; -verbosity quiet -basepath &quot;$(OutDir.TrimEnd('\'))&quot; -outputdirectory &quot;$(NuGetOutDir.TrimEnd('\'))&quot; %(NuSpec.NuGetArguments)" 
+          Condition="'$(OS)' == 'Windows_NT'"/>
   </Target>
 
   <!-- Invalidate the packages that we are building from the cache every time we build a new one.
