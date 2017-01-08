@@ -89,6 +89,19 @@
         }
       ],
       "defaultValue": "1.0"
+    },
+    "sdkVersion": {
+      "type": "bind",
+      "binding": "dotnet-cli-version",
+      "replaces": "1.0.0-preview5-004445"
+    },
+    "copyrightYear": {
+      "type": "generated",
+      "generator": "now",
+      "replaces": "2016",
+      "parameters": {
+        "format": "yyyy"
+      }
     }
   }
 }
