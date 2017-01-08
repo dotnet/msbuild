@@ -50,8 +50,7 @@
           />
 
 
-    <!-- work around https://github.com/dotnet/sdk/issues/203 by passing in /p:SkipInvalidConfigurations=true /p:_InvalidConfigurationWarning=false -->
-    <Exec Command="$(__SetNuget_Packages)$(__NewLine)$(DotNetTool) restore %(ProjectToDotnetRestore.Identity) /v:minimal /p:SkipInvalidConfigurations=true /p:_InvalidConfigurationWarning=false"
+    <Exec Command="$(__SetNuget_Packages)$(__NewLine)$(DotNetTool) restore %(ProjectToDotnetRestore.Identity) /v:minimal"
           Condition="'$(BuildTemplates)' != 'true'"
           WorkingDirectory="$(RepositoryRootDirectory)"
           />
