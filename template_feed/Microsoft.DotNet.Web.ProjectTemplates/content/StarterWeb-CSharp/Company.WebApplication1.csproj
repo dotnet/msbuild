@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Update="Company.WebApplication1.db" CopyToOutputDirectory="CopyIfNewer" />
+    <None Update="Company.WebApplication1.db" CopyToOutputDirectory="CopyIfNewer" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' != 'True' " />
   </ItemGroup>
 
   <ItemGroup Condition="'$(Framework)' != '1.1'">
