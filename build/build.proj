@@ -81,7 +81,7 @@
              />
   </Target>
 
-  <Target Name="BuildNuGetPackages" DependsOnTargets="SignPackages" Condition="'$(BuildTemplates)' != 'true'">
+  <Target Name="BuildNuGetPackages" DependsOnTargets="SignPackages" Condition="'$(BuildTemplates)' != 'true' And '$(OS)' == 'Windows_NT'">
 
     <MSBuild BuildInParallel="true"
              Projects="@(NuGetProjectFile)"
@@ -91,7 +91,7 @@
 
   </Target>
 
-  <Target Name="RebuildNuGetPackages" DependsOnTargets="SignPackages" Condition="'$(BuildTemplates)' != 'true'">
+  <Target Name="RebuildNuGetPackages" DependsOnTargets="SignPackages" Condition="'$(BuildTemplates)' != 'true' And '$(OS)' == 'Windows_NT'">
 
     <MSBuild BuildInParallel="true"
              Projects="@(NuGetProjectFile)"

@@ -9,7 +9,7 @@
   <ItemGroup>
     <NuSpec Include="Microsoft.NET.Sdk.nuspec">
       <NuPkgOutput>$(NuGetOutDir)%(FileName).$(Version).nupkg</NuPkgOutput>
-      <NuGetArguments>--version "$(Version)"</NuGetArguments>
+      <NuGetArguments>-version "$(Version)"</NuGetArguments>
       <LayoutTargetName>LayoutSdkPackage</LayoutTargetName>
     </NuSpec>
 
@@ -28,18 +28,13 @@
           Inputs="@(NuSpec);@(PackageAssets)"
           Outputs="@(NuSpec->'%(NuPkgOutput)')">
 
-    <ReadLinesFromFile File="$(RepositoryRootDirectory)DotnetCLIVersion.txt">
-      <Output TaskParameter="Lines" ItemName="CLIVersion" />
-    </ReadLinesFromFile>
-
     <PropertyGroup>
-      <DotNetSdkPath>$(DotNet_Install_Dir)\sdk\@(CLIVersion)\</DotNetSdkPath>
-      <NuGetTool>$(DotNetTool) exec --runtimeconfig $(DotNetSdkPath)\dotnet.runtimeconfig.json --depsfile $(DotNetSdkPath)\dotnet.deps.json $(DotNetSdkPath)\NuGet.CommandLine.XPlat.dll</NuGetTool>
+      <NuGetTool>$(RepositoryRootDirectory).nuget\nuget.exe</NuGetTool>
     </PropertyGroup>
 
     <MakeDir Directories="$(NuGetOutDir)" />
 
-    <Exec Command="$(NuGetTool) Pack &quot;$(MSBuildProjectDirectory)\%(NuSpec.Identity)&quot; --verbosity quiet --base-path &quot;$(OutDir.TrimEnd('\'))&quot; --output-directory &quot;$(NuGetOutDir.TrimEnd('\'))&quot; %(NuSpec.NuGetArguments)" />
+    <Exec Command="$(NuGetTool) Pack &quot;$(MSBuildProjectDirectory)\%(NuSpec.Identity)&quot; -verbosity quiet -basepath &quot;$(OutDir.TrimEnd('\'))&quot; -outputdirectory &quot;$(NuGetOutDir.TrimEnd('\'))&quot; %(NuSpec.NuGetArguments)" />
   </Target>
 
   <!-- Invalidate the packages that we are building from the cache every time we build a new one.
