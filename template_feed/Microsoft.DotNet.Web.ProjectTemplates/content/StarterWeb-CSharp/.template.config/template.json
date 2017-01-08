@@ -30,7 +30,7 @@
           ]
         },
         {
-          "condition": "(UseLocalDB)",
+          "condition": "(UseLocalDB || NoAuth)",
           "exclude": [
             "*.db"
           ]
@@ -98,7 +98,7 @@
     "copyrightYear": {
       "type": "generated",
       "generator": "now",
-      "replaces": "2016",
+      "replaces": "1975",
       "parameters": {
         "format": "yyyy"
       }
