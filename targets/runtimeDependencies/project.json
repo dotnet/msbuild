@@ -24,7 +24,7 @@
     },
     "netcoreapp1.0": {
       "dependencies": {
-        "System.Security.Cryptography.X509Certificates": "4.1.0",
+        "System.Security.Cryptography.X509Certificates": "4.3.0",
         "System.Net.NetworkInformation": "4.1.0",
         "Microsoft.NETCore": "5.0.1",
         "Microsoft.NETCore.Portable.Compatibility": "1.0.1",
