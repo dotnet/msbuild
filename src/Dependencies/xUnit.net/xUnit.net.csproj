@@ -1,24 +1,22 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <Import Project="..\..\..\build\Targets\ProducesNoOutput.Settings.props" />
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <Import Project="..\..\Tasks\Microsoft.NET.Build.Tasks\build\Microsoft.NET.Sdk.props" />
   <PropertyGroup>
     <ProjectGuid>{94F9B889-635A-48A7-A0CB-BAE5D6C9A91A}</ProjectGuid>
     <ProjectTypeGuids>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutDir>$(OutDir)Tests\</OutDir>
+    <PackageTargetFallback>dotnet5.4;portable-net451+win8</PackageTargetFallback>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="project.json" />
+    <PackageReference Include="xunit.console.netcore" Version="1.0.3-prerelease-00607-01" />
+    <PackageReference Include="xunit.runner.reporters" Version="2.1.0" />
+    <PackageReference Include="system.text.regularexpressions" Version="4.1.0" />
     <!-- Write a runtimeconfig.json file for xunit.console.netcore.exe, so it runs against the shared framework. -->
     <None Include="xunit.console.netcore.runtimeconfig.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <Import Project="..\..\..\build\Targets\ProducesNoOutput.Imports.props" />
-  <Import Project="..\..\Tasks\Microsoft.NET.Build.Tasks\build\Microsoft.NET.Sdk.targets" />
 
-  <Target Name="AfterBuild">
+  <Target Name="MyAfterBuild" AfterTargets="AfterBuild">
     <PropertyGroup>
       <XUnitVersion>2.1.0</XUnitVersion>
     </PropertyGroup>
@@ -56,4 +54,7 @@
 
     <Copy SourceFiles="%(TestCopyLocalAssembly.FullPath)" DestinationFolder="$(OutDir)" />
   </Target>
+
+  <Import Project="..\..\..\build\Targets\ProducesNoOutput.Imports.props" />
+
 </Project>

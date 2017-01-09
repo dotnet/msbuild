@@ -9,7 +9,7 @@
   <ItemGroup>
     <NuSpec Include="Microsoft.NET.Sdk.nuspec">
       <NuPkgOutput>$(NuGetOutDir)%(FileName).$(Version).nupkg</NuPkgOutput>
-      <NuGetArguments>--version "$(Version)"</NuGetArguments>
+      <NuGetArguments>-version "$(Version)"</NuGetArguments>
       <LayoutTargetName>LayoutSdkPackage</LayoutTargetName>
     </NuSpec>
 
@@ -28,18 +28,25 @@
           Inputs="@(NuSpec);@(PackageAssets)"
           Outputs="@(NuSpec->'%(NuPkgOutput)')">
 
-    <ReadLinesFromFile File="$(RepositoryRootDirectory)DotnetCLIVersion.txt">
-      <Output TaskParameter="Lines" ItemName="CLIVersion" />
-    </ReadLinesFromFile>
-
     <PropertyGroup>
-      <DotNetSdkPath>$(DotNet_Install_Dir)\sdk\@(CLIVersion)\</DotNetSdkPath>
-      <NuGetTool>$(DotNetTool) exec --runtimeconfig $(DotNetSdkPath)\dotnet.runtimeconfig.json --depsfile $(DotNetSdkPath)\dotnet.deps.json $(DotNetSdkPath)\NuGet.CommandLine.XPlat.dll</NuGetTool>
+      <NuGetExeVersion>3.4.4</NuGetExeVersion>
+      <NuGetTool>$(RepositoryRootDirectory).nuget\$(NuGetExeVersion)\nuget.exe</NuGetTool>
+      <NuGetDownloadUrl>https://dist.nuget.org/win-x86-commandline/v$(NuGetExeVersion)/NuGet.exe</NuGetDownloadUrl>
+      <NuGetDownloadCommand>powershell -noprofile -nologo -command "(new-object System.Net.WebClient).DownloadFile('$(NugetDownloadURL)', '$(NuGetTool)')"</NuGetDownloadCommand>
     </PropertyGroup>
 
     <MakeDir Directories="$(NuGetOutDir)" />
 
-    <Exec Command="$(NuGetTool) Pack &quot;$(MSBuildProjectDirectory)\%(NuSpec.Identity)&quot; --verbosity quiet --base-path &quot;$(OutDir.TrimEnd('\'))&quot; --output-directory &quot;$(NuGetOutDir.TrimEnd('\'))&quot; %(NuSpec.NuGetArguments)" />
+    <MakeDir Directories="$(RepositoryRootDirectory).nuget\$(NuGetExeVersion)"
+             Condition="'$(OS)' == 'Windows_NT'"/>
+
+    <Exec
+      Condition="!Exists('$(NuGetTool)') And '$(OS)' == 'Windows_NT'"
+      Command="$(NuGetDownloadCommand)"
+      />
+
+    <Exec Command="$(NuGetTool) Pack &quot;$(MSBuildProjectDirectory)\%(NuSpec.Identity)&quot; -verbosity quiet -basepath &quot;$(OutDir.TrimEnd('\'))&quot; -outputdirectory &quot;$(NuGetOutDir.TrimEnd('\'))&quot; %(NuSpec.NuGetArguments)" 
+          Condition="'$(OS)' == 'Windows_NT'"/>
   </Target>
 
   <!-- Invalidate the packages that we are building from the cache every time we build a new one.

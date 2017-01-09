@@ -223,14 +223,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     </GenerateSatelliteAssemblies>
   </Target>
 
-  <!-- TODO: Remove this target and put the property in a .props file once https://github.com/NuGet/Home/issues/4046 is fixed
-      The value may also change as a result of https://github.com/NuGet/Home/issues/4047 -->
-  <Target Name="OverrideProjectRestoreType" AfterTargets="_GetProjectRestoreType">
-    <PropertyGroup>
-      <_ProjectRestoreType>NETCore</_ProjectRestoreType>
-    </PropertyGroup>
-  </Target>
-
   <!--
   ============================================================
                            _DefaultMicrosoftNETPlatformLibrary
