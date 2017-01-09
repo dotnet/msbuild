@@ -64,7 +64,12 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- This will turn off the base UWP-specific 'ResolveNuGetPackages' target -->
     <ResolveNuGetPackages>false</ResolveNuGetPackages>
-
+    
+    <!-- NuGet should always restore .NET SDK projects with "PackageReference" style restore.  Setting this property will
+         cause the right thing to happen even if there aren't any PackageReference items in the project, such as when
+         a project targets .NET Framework and doesn't have any direct package dependencies. -->
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+    
     <!-- Exclude GAC, registry, output directory from search paths. -->
     <AssemblySearchPaths>{CandidateAssemblyFiles};{HintPathFromItem};{TargetFrameworkDirectory};{RawFileName}</AssemblySearchPaths>
     <DesignTimeAssemblySearchPaths>$(AssemblySearchPaths)</DesignTimeAssemblySearchPaths>
