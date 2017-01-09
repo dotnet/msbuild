@@ -14,7 +14,7 @@ namespace Microsoft.NET.Publish.Tests
 {
     public class GivenThatWeWantToPublishAProjectWithDependencies : SdkTest
     {
-        //[Fact]
+        [Fact]
         public void It_publishes_projects_with_simple_dependencies()
         {
             TestAsset simpleDependenciesAsset = _testAssetsManager
@@ -61,7 +61,7 @@ namespace Microsoft.NET.Publish.Tests
                 .HaveStdOutContaining(expectedOutput);
         }
 
-        //[Fact]
+        [Fact]
         public void It_publishes_the_app_config_if_necessary()
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
