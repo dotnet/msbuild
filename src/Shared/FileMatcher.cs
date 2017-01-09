@@ -1476,6 +1476,9 @@ namespace Microsoft.Build.Shared
                 foreach (string excludeSpec in excludeSpecsUnescaped)
                 {
 
+                    // Try a path equality check first to:
+                    // - avoid the expensive regex
+                    // - maintain legacy behaviour where an illegal filespec is treated as a normal string
                     if (FileUtilities.PathsEqual(filespecUnescaped, excludeSpec))
                     {
                         return new string[0];
