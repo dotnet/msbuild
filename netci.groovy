@@ -4,6 +4,12 @@ import jobs.generation.Utilities;
 // Defines a the new of the repo, used elsewhere in the file
 def project = GithubProject
 
+// What this repo is using for its machine images at the current time
+def imageVersionMap = ['Windows_NT':'latest-or-auto',
+                       'OSX':'latest-or-auto',
+                       'Ubuntu14.04':'20170109',
+                       'Ubuntu16.04':'20170109']
+
 // Generate the builds for branches: xplat, master and PRs (which aren't branch specific)
 ['*/master', '*/xplat', 'pr'].each { branch ->
     ['Windows_NT', 'OSX', 'Ubuntu14.04', 'Ubuntu16.04'].each {osName ->
@@ -78,7 +84,8 @@ def project = GithubProject
 
             // Add xunit result archiving. Skip if no results found.
             Utilities.addXUnitDotNETResults(newJob, 'bin/**/*_TestResults.xml', skipTestsWhenResultsNotFound)
-            Utilities.setMachineAffinity(newJob, osName, 'latest-or-auto')
+            def imageVersion = imageVersionMap[osName];
+            Utilities.setMachineAffinity(newJob, osName, imageVersion)
             Utilities.standardJobSetup(newJob, project, isPR, branch)
             // Add archiving of logs (even if the build failed)
             Utilities.addArchival(newJob,
