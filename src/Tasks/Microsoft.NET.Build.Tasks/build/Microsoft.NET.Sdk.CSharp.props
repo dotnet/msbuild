@@ -16,10 +16,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <WarningLevel>4</WarningLevel>
     <NoWarn>1701;1702;1705</NoWarn>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+  <PropertyGroup>
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
 

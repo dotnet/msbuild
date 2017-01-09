@@ -16,8 +16,6 @@ namespace Microsoft.NET.Build.Tasks
     /// dependency graph.
     /// If any changes are made here, make sure corresponding changes are made to NuGetDependenciesSubTreeProvider
     /// in roslyn-project-system repo and corresponding tests.
-    /// 
-    /// TODO: Add support for diagnostics, related issue https://github.com/dotnet/sdk/issues/26
     /// </summary>
     public class PreprocessPackageDependenciesDesignTime : TaskBase
     {
@@ -40,6 +38,8 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public ITaskItem[] FileDependencies { get; set; }
 
+        public ITaskItem[] InputDiagnosticMessages { get; set; }
+
         [Output]
         public ITaskItem[] DependenciesDesignTime { get; set; }
 
@@ -52,6 +52,9 @@ namespace Microsoft.NET.Build.Tasks
         private Dictionary<string, ItemMetadata> Assemblies { get; set; }
                     = new Dictionary<string, ItemMetadata>(StringComparer.OrdinalIgnoreCase);
 
+        private Dictionary<string, ItemMetadata> DiagnosticsMap { get; set; }
+                    = new Dictionary<string, ItemMetadata>(StringComparer.OrdinalIgnoreCase);
+
         private Dictionary<string, ItemMetadata> DependenciesWorld { get; set; }
                     = new Dictionary<string, ItemMetadata>(StringComparer.OrdinalIgnoreCase);
 
@@ -62,6 +65,9 @@ namespace Microsoft.NET.Build.Tasks
             PopulatePackages();
 
             PopulateAssemblies();
+
+            InputDiagnosticMessages = InputDiagnosticMessages ?? Array.Empty<ITaskItem>();
+            PopulateDiagnosticsMap();
 
             AddDependenciesToTheWorld(Packages, PackageDependencies);
 
@@ -79,6 +85,8 @@ namespace Microsoft.NET.Build.Tasks
                 var fileGroup = item.GetMetadata(MetadataKeys.FileGroup);
                 return string.IsNullOrEmpty(fileGroup) || !fileGroup.Equals(CompileTimeAssemblyMetadata);
             });
+
+            AddDependenciesToTheWorld(DiagnosticsMap, InputDiagnosticMessages);
 
             // prepare output collection: add corresponding metadata to ITaskItem based in item type
             DependenciesDesignTime = DependenciesWorld.Select(itemKvp =>
@@ -166,6 +174,15 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
+        private void PopulateDiagnosticsMap()
+        {
+            foreach (var diagnostic in InputDiagnosticMessages)
+            {
+                var metadata = new DiagnosticMetadata(diagnostic);
+                DiagnosticsMap[diagnostic.ItemSpec] = metadata;
+            }
+        }
+
         private DependencyType GetDependencyType(string dependencyTypeString)
         {
             var dependencyType = DependencyType.Unknown;
@@ -195,14 +212,14 @@ namespace Microsoft.NET.Build.Tasks
                     continue;
                 }
 
-                var parentTargetId = dependency.GetMetadata(MetadataKeys.ParentTarget);
+                var parentTargetId = dependency.GetMetadata(MetadataKeys.ParentTarget) ?? string.Empty;
                 if (parentTargetId.Contains("/") || !Targets.Keys.Contains(parentTargetId))
                 {
                     // skip "target/rid"s and only consume actual targets and ignore non-existent parent targets
                     continue;
                 }
 
-                var parentPackageId = dependency.GetMetadata(MetadataKeys.ParentPackage);
+                var parentPackageId = dependency.GetMetadata(MetadataKeys.ParentPackage) ?? string.Empty;
                 if (!string.IsNullOrEmpty(parentPackageId) && !Packages.Keys.Contains(parentPackageId))
                 {
                     // ignore non-existent parent packages
@@ -332,6 +349,49 @@ namespace Microsoft.NET.Build.Tasks
             {
                 Name = name ?? string.Empty;
                 Type = type;
+            }
+        }
+
+        private sealed class DiagnosticMetadata : ItemMetadata
+        {
+            public DiagnosticMetadata(ITaskItem item)
+                : base(DependencyType.Diagnostic)
+            {
+                DiagnosticCode = item.GetMetadata(MetadataKeys.DiagnosticCode) ?? string.Empty;
+                Message = item.GetMetadata(MetadataKeys.Message) ?? string.Empty;
+                FilePath = item.GetMetadata(MetadataKeys.FilePath) ?? string.Empty;
+                Severity = item.GetMetadata(MetadataKeys.Severity) ?? string.Empty;
+                StartLine = item.GetMetadata(MetadataKeys.StartLine) ?? string.Empty;
+                StartColumn = item.GetMetadata(MetadataKeys.StartColumn) ?? string.Empty;
+                EndLine = item.GetMetadata(MetadataKeys.EndLine) ?? string.Empty;
+                EndColumn = item.GetMetadata(MetadataKeys.EndColumn) ?? string.Empty;
+            }
+
+            public string DiagnosticCode { get; }
+            public string Message { get; }
+            public string FilePath { get; }
+            public string Severity { get; }
+            public string StartLine { get; }
+            public string StartColumn { get; }
+            public string EndLine { get; }
+            public string EndColumn { get; }
+
+            public override IDictionary<string, string> ToDictionary()
+            {
+                return new Dictionary<string, string>
+                {
+                    { MetadataKeys.Name, Message },
+                    { MetadataKeys.DiagnosticCode, DiagnosticCode },
+                    { MetadataKeys.Message, Message },
+                    { MetadataKeys.FilePath, FilePath },
+                    { MetadataKeys.Severity, Severity },
+                    { MetadataKeys.StartLine, StartLine },
+                    { MetadataKeys.StartColumn, StartColumn },
+                    { MetadataKeys.EndLine, EndLine },
+                    { MetadataKeys.EndColumn, EndColumn },
+                    { MetadataKeys.Type, Type.ToString() },
+                    { DependenciesMetadata, string.Join(";", Dependencies) }
+                };
             }
         }
     }

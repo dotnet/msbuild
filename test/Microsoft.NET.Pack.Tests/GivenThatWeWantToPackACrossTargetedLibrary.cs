@@ -13,10 +13,8 @@ using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 
 namespace Microsoft.NET.Pack.Tests
 {
-    public class GivenThatWeWantToPackACrossTargetedLibrary
+    public class GivenThatWeWantToPackACrossTargetedLibrary : SdkTest
     {
-        private TestAssetsManager _testAssetsManager = TestAssetsManager.TestProjectsAssetsManager;
-
         [Fact]
         public void It_packs_nondesktop_library_successfully_on_all_platforms()
         {

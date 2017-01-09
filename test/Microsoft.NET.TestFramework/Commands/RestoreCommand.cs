@@ -14,8 +14,8 @@ namespace Microsoft.NET.TestFramework.Commands
         private List<string> _sources = new List<string>();
         private bool _captureStdOut;
 
-        public RestoreCommand(MSBuildTest msbuild, string projectPath)
-            : base(msbuild, projectPath)
+        public RestoreCommand(MSBuildTest msbuild, string projectPath, string relativePathToProject = null)
+            : base(msbuild, projectPath, relativePathToProject)
         {
         }
 

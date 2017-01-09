@@ -21,13 +21,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Import Project="$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolution.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolution.targets')" />
   </ImportGroup>
 
-  <PropertyGroup>
-    <DefaultRemoves>bin\**;obj\**;packages\**</DefaultRemoves>
-  </PropertyGroup>
-  <ItemGroup Condition="'$(DisableDefaultRemoves)' != 'true'">
-    <Compile Remove="$(DefaultRemoves)" />
-    <EmbeddedResource Remove="$(DefaultRemoves)" />
-  </ItemGroup>
+  <Import Project="Microsoft.NET.Sdk.DefaultItems.targets" />
   
   <UsingTask TaskName="GenerateDepsFile" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="GenerateRuntimeConfigurationFiles" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
@@ -122,10 +116,17 @@ Copyright (c) .NET Foundation. All rights reserved.
                                        RuntimeConfigDevPath="$(ProjectRuntimeConfigDevFilePath)"
                                        RuntimeIdentifier="$(RuntimeIdentifier)"
                                        PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
+                                       RuntimeFrameworkVersion="$(RuntimeFrameworkVersion)"
                                        UserRuntimeConfig="$(UserRuntimeConfig)">
       
-      <Output TaskParameter="FilesWritten" ItemName="FileWrites" />
     </GenerateRuntimeConfigurationFiles>
+    
+    <ItemGroup>
+      <!-- Do this in an ItemGroup instead of as an output parameter of the GenerateDepsFile task so that it still gets added to the item set
+          during incremental builds when the task is skipped -->
+      <FileWrites Include="$(ProjectRuntimeConfigFilePath)" Condition="Exists('$(ProjectRuntimeConfigFilePath)')"/>
+      <FileWrites Include="$(ProjectRuntimeConfigDevFilePath)" Condition="Exists('$(ProjectRuntimeConfigDevFilePath)')"/>
+    </ItemGroup>
 
   </Target>
 
@@ -186,6 +187,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <Target Name="CoreGenerateSatelliteAssemblies"
+          DependsOnTargets="ResolveAssemblyReferences;GenerateAssemblyInfo"
           Inputs="$(MSBuildAllProjects);@(_SatelliteAssemblyResourceInputs);$(IntermediateOutputPath)$(TargetName)$(TargetExt)"
           Outputs="$(IntermediateOutputPath)%(Culture)\$(TargetName).resources.dll"
           Condition="'@(_SatelliteAssemblyResourceInputs)' != ''  and '$(GenerateSatelliteAssembliesForCore)' == 'true' ">
@@ -211,7 +213,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateSatelliteAssemblies EmbedResources="@(_SatelliteAssemblyResourceInputs)"
                                  AssemblyInfoFile="$(_AssemblyInfoFile)"
                                  OutputAssembly="$(_OutputAssembly)"
-                                 References="@(Reference)">
+                                 References="@(ReferencePath)"
+                                 KeyContainer="$(KeyContainerName)"
+                                 KeyFile="$(KeyOriginatorFile)"
+                                 PublicSign="$(PublicSign)"
+                                 DelaySign="$(DelaySign)">
 
       <Output TaskParameter="OutputAssembly" ItemName="FileWrites"/>
     </GenerateSatelliteAssemblies>
@@ -252,10 +258,65 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ProjectCapability Include="CrossPlatformExecutable" />
   </ItemGroup>
 
-  <Import Project="$(MSBuildThisFileDirecotry)Microsoft.NET.DisableStandardFrameworkResolution.targets" Condition="'$(DisableStandardFrameworkResolution)' == 'true'" />
+  <!-- Reference Manager capabilities -->
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
+    <ProjectCapability Remove="ReferenceManagerAssemblies" />
+    <ProjectCapability Remove="ReferenceManagerCOM" />
+  </ItemGroup>
+
+  <!-- Publish capabilities -->
+  <ItemGroup>
+    <ProjectCapability Include="FolderPublish" />
+  </ItemGroup>
+
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DisableStandardFrameworkResolution.targets" Condition="'$(DisableStandardFrameworkResolution)' == 'true'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.GenerateAssemblyInfo.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Publish.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PreserveCompilationContext.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.CSharp.targets" Condition="'$(Language)' == 'C#'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.VisualBasic.targets" Condition="'$(Language)' == 'VB'" />
+
+  <!--
+  ============================================================
+                                         Temporary Workarounds
+  ============================================================
+  -->
+  
+  <!-- Override the ImplicitlyExpandDesignTimeFacades target with a fix for https://github.com/Microsoft/msbuild/issues/1345 until
+       the issue is fixed in MSBuild -->
+  
+  <!-- Implicitly references all portable design-time facades if the user is referencing a System.Runtime-based portable library -->
+  <Target Name="ImplicitlyExpandDesignTimeFacades" Condition="'$(ImplicitlyExpandDesignTimeFacades)' == 'true'" DependsOnTargets="$(ImplicitlyExpandDesignTimeFacadesDependsOn)">
+
+    <PropertyGroup>
+      <!-- Does one of our dependencies reference a System.Runtime-based portable library? -->
+      <_HasReferenceToSystemRuntime Condition="'$(DependsOnSystemRuntime)' == 'true' or '%(_ResolvedProjectReferencePaths.TargetPlatformIdentifier)' == 'Portable'">true</_HasReferenceToSystemRuntime>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(_HasReferenceToSystemRuntime)' == 'true'">
+      <_DesignTimeFacadeAssemblies Include="%(DesignTimeFacadeDirectories.Identity)*.dll"/>
+
+      <_DesignTimeFacadeAssemblies_Names Include="@(_DesignTimeFacadeAssemblies->'%(FileName)')">
+        <OriginalIdentity>%(_DesignTimeFacadeAssemblies.Identity)</OriginalIdentity>
+      </_DesignTimeFacadeAssemblies_Names>
+
+      <_ReferencePath_Names Include="@(ReferencePath->'%(FileName)')">
+        <OriginalIdentity>%(ReferencePath.Identity)</OriginalIdentity>
+      </_ReferencePath_Names>
+
+      <_DesignTimeFacadeAssemblies_Names Remove="@(_ReferencePath_Names)"/>
+
+      <ReferencePath Include="@(_DesignTimeFacadeAssemblies_Names->'%(OriginalIdentity)')">
+        <WinMDFile>false</WinMDFile>
+        <CopyLocal>false</CopyLocal>
+        <ResolvedFrom>ImplicitlyExpandDesignTimeFacades</ResolvedFrom>
+      </ReferencePath>
+
+      <_ResolveAssemblyReferenceResolvedFiles Include="@(ReferencePath)" Condition="'%(ReferencePath.ResolvedFrom)' == 'ImplicitlyExpandDesignTimeFacades'" />
+    </ItemGroup>
+
+    <Message Importance="Low" Text="Including @(ReferencePath)" Condition="'%(ReferencePath.ResolvedFrom)' == 'ImplicitlyExpandDesignTimeFacades'" />
+
+  </Target>
+  
 </Project>

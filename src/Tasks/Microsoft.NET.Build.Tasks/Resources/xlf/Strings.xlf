@@ -5,90 +5,146 @@
       <group id="src/Tasks/Microsoft.NET.Build.Tasks/Resources/Strings.resx" />
       <trans-unit id="AtLeastOneTargetFrameworkMustBeSpecified">
         <source>At least one possible target framework must be specified.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="NoCompatibleTargetFramework">
         <source>Project '{0}' has no target framework compatible with '{1}'.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidFrameworkName">
         <source>Invalid framework name: '{0}'.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="AssetsFileNotFound">
         <source>Assets file '{0}' not found. Run a NuGet package restore to generate this file.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="AssetsFileMissingTarget">
         <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have restored this project for TargetFramework='{2}' and RuntimeIdentifier='{3}'.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="AssetsFilePathNotRooted">
         <source>Assets file path '{0}' is not rooted. Only full paths are supported.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CannotFindProjectInfo">
         <source>Cannot find project info for '{0}'. This can indicate a missing project reference.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="ContentFileDoesNotContainExpectedParentPackageInformation">
         <source>Content file '{0}' does not contain expected parent package information.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="MissingItemMetadata">
         <source>Missing '{0}' metadata on '{1}' item '{2}'.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="UnrecognizedPreprocessorToken">
         <source>Unrecognized preprocessor token '{0}' in '{1}'.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="ContentPreproccessorParameterRequired">
         <source>The '{0}' task must be given a value for parameter '{1}' in order to consume preprocessed content.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">
         <source>Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="UnexpectedFileType">
         <source>Unexpected file type for '{0}'. Type is both '{1}' and '{2}'.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CannotInferTargetFrameworkIdentiferAndVersion">
         <source>Cannot infer TargetFrameworkIdentifier and/or TargetFrameworkVersion from TargetFramework='{0}'. They must be specified explicitly.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="ContentItemDoesNotProvideOutputPath">
         <source>Content item for '{0}' sets '{1}', but does not provide  '{2}' or '{3}'.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="DuplicatePreprocessorToken">
         <source>The preprocessor token '{0}' has been given more than one value. Choosing '{1}' as the value.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="ErrorsOccurredWhenEmittingSatelliteAssembly">
         <source>Errors occured when emitting satellite assembly '{0}'.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="UnableToFindResolvedPath">
         <source>Unable to find resolved path for '{0}'.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="UnexpectedDependencyWithNoVersionNumber">
         <source>Unexpected dependency '{0}' with no version number.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeIdentifierMustBeSetForNETFramework">
         <source>RuntimeIdentifier must be set for .NETFramework executables. Consider RuntimeIdentifier=win7-x86 or RuntimeIdentifier=win7-x64.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="AssetPreprocessorMustBeConfigured">
         <source>Asset preprocessor must be configured before assets are processed.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidNuGetVersionString">
         <source>Invalid NuGet version string: '{0}'.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="DOTNET1011">
+        <source>Framework not installed: {0} in {1}</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="DOTNET1012">
+        <source>The reference assemblies directory was not specified. You can set the location using the DOTNET_REFERENCE_ASSEMBLIES_PATH environment variable.</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="DOTNET1013">
+        <source>The following dependencies are marked with type 'platform', however only one dependency can have this type: {0}</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="DOTNET1014">
+        <source>Failed to read lock file</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="DOTNET1017">
+        <source>Project file does not exist '{0}'.</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="NU1001">
+        <source>The dependency '{0}' could not be resolved.</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="NU1002">
+        <source>The dependency '{0}' in project '{1}' does not support framework '{2}'.</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="NU1006">
+        <source>{0}. Please run 'dotnet restore' to generate a new asset file.</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="NU1007">
+        <source>Dependency specified was '{0}' but ended up with '{1}'.</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="NU1008">
+        <source>{0} is an unsupported framework.</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="NU1009">
+        <source>The expected asset file does not exist. Please run 'dotnet restore' to generate a new asset file.</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="NU1010">
+        <source>The dependency type was changed</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="NU1011">
+        <source>The dependency target '{0}' is unsupported.</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="NU1012">
+        <source>Dependency conflict. '{0}' expected '{1}' but received '{2}'</source>
         <note></note>
       </trans-unit>
     </body>

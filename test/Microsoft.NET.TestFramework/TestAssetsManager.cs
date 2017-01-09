@@ -11,47 +11,35 @@ namespace Microsoft.NET.TestFramework
 {
     public class TestAssetsManager
     {
-        private static TestAssetsManager _testProjectsAssetsManager;
-
-        public static TestAssetsManager TestProjectsAssetsManager
-        {
-            get
-            {
-                if (_testProjectsAssetsManager == null)
-                {
-                    var testAssetsDirectory = Path.Combine(RepoInfo.RepoRoot, "TestAssets");
-                    var testProjectsDirectory = Path.Combine(testAssetsDirectory, "TestProjects");
-                    _testProjectsAssetsManager = new TestAssetsManager(testAssetsDirectory, testProjectsDirectory);
-                }
-
-                return _testProjectsAssetsManager;
-            }
-        }
-
         public string ProjectsRoot { get; private set; }
 
 
         private string BuildVersion { get; set; }
 
-        public TestAssetsManager(string assetsRoot, string projectRoot)
+        private List<String> TestDestinationDirectories { get; } = new List<string>();
+
+        public TestAssetsManager()
         {
-            if (!Directory.Exists(assetsRoot))
+            var testAssetsDirectory = Path.Combine(RepoInfo.RepoRoot, "TestAssets");
+            var testProjectsDirectory = Path.Combine(testAssetsDirectory, "TestProjects");
+            
+            if (!Directory.Exists(testAssetsDirectory))
             {
-                throw new DirectoryNotFoundException($"Directory not found: '{assetsRoot}'");
+                throw new DirectoryNotFoundException($"Directory not found: '{testAssetsDirectory}'");
             }
 
-            if (!Directory.Exists(projectRoot))
+            if (!Directory.Exists(testProjectsDirectory))
             {
-                throw new DirectoryNotFoundException($"Directory not found: '{projectRoot}'");
+                throw new DirectoryNotFoundException($"Directory not found: '{testProjectsDirectory}'");
             }
 
-            var buildVersion = Path.Combine(assetsRoot, "buildVersion.txt");
+            var buildVersion = Path.Combine(testAssetsDirectory, "buildVersion.txt");
             if (!File.Exists(buildVersion))
             {
                 throw new FileNotFoundException($"File not found: {buildVersion}");
             }
 
-            ProjectsRoot = projectRoot;
+            ProjectsRoot = testProjectsDirectory;
             BuildVersion = File.ReadAllText(buildVersion).Trim();
         }
 
@@ -123,7 +111,43 @@ namespace Microsoft.NET.TestFramework
 #else
             string baseDirectory = AppContext.BaseDirectory;
 #endif
-            return Path.Combine(baseDirectory, callingMethod + identifier, testProjectName);
+            string ret = Path.Combine(baseDirectory, callingMethod + identifier, testProjectName);
+
+            TestDestinationDirectories.Add(ret);
+
+            return ret;
+        }
+
+        const int MAX_PATH = 260;
+
+        //  Drop root for signed build is 73 characters, then add 6 for "\Tests"
+        const int MAX_TESTROOT_LENGTH = 79;
+
+        //  1 space subtracted for path separator between base path and relative file path
+        const int AVAILABLE_TEST_PATH_LENGTH = MAX_PATH - MAX_TESTROOT_LENGTH - 1;
+
+        void ValidateDestinationDirectory(string path)
+        {
+            var files = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories);
+            foreach (var file in files)
+            {
+                string relativeFilePath = file.Replace(AppContext.BaseDirectory, "")
+                    //  Remove path separator
+                    .Substring(1);
+
+                if (relativeFilePath.Length > AVAILABLE_TEST_PATH_LENGTH)
+                {
+                    throw new PathTooLongException("Test path may be too long: " + relativeFilePath);
+                }
+            }
+        }
+
+        public void ValidateDestinationDirectories()
+        {
+            foreach (var path in TestDestinationDirectories)
+            {
+                ValidateDestinationDirectory(path);
+            }
         }
     }
 }

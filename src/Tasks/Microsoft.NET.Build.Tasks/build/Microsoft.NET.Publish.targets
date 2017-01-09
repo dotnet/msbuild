@@ -98,7 +98,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         one of these files and not have an incremental build replace it.
         -->
     <Copy SourceFiles = "@(_ResolvedFileToPublishPreserveNewest)"
-          DestinationFiles="$(PublishDir)%(_ResolvedFileToPublishPreserveNewest.RelativePath)"
+          DestinationFiles="@(_ResolvedFileToPublishPreserveNewest->'$(PublishDir)%(RelativePath)')"
           OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
           Retries="$(CopyRetryCount)"
           RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
@@ -126,7 +126,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         one of these files and not have an incremental build replace it.
         -->
     <Copy SourceFiles = "@(_ResolvedFileToPublishAlways)"
-          DestinationFiles="$(PublishDir)%(_ResolvedFileToPublishAlways.RelativePath)"
+          DestinationFiles="@(_ResolvedFileToPublishAlways->'$(PublishDir)%(RelativePath)')"
           OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
           Retries="$(CopyRetryCount)"
           RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
@@ -501,6 +501,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                        RuntimeConfigPath="$(PublishRuntimeConfigFilePath)"
                                        RuntimeIdentifier="$(RuntimeIdentifier)"
                                        PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
+                                       RuntimeFrameworkVersion="$(RuntimeFrameworkVersion)"
                                        UserRuntimeConfig="$(UserRuntimeConfig)" />
 
   </Target>

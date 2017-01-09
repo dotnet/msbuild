@@ -24,6 +24,8 @@ namespace Microsoft.NET.TestFramework.Commands
 
         public bool ShouldCompile { get; set; } = true;
 
+        public string Configuration { get; set; }
+
         public GetValuesCommand(MSBuildTest msbuild, string projectPath, string targetFramework,
             string valueName, ValueType valueType = ValueType.Property)
             : base(msbuild, projectPath)
@@ -81,7 +83,7 @@ namespace Microsoft.NET.TestFramework.Commands
         public List<string> GetValues()
         {
             string outputFilename = $"{_valueName}Values.txt";
-            var outputDirectory = GetOutputDirectory(_targetFramework);
+            var outputDirectory = GetOutputDirectory(_targetFramework, Configuration ?? "Debug");
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 outputFilename,

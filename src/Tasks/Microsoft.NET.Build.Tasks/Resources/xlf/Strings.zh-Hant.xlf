@@ -5,113 +5,183 @@
       <group id="src/Tasks/Microsoft.NET.Build.Tasks/Resources/Strings.resx" />
       <trans-unit id="AtLeastOneTargetFrameworkMustBeSpecified">
         <source>At least one possible target framework must be specified.</source>
-        <target state="new">At least one possible target framework must be specified.</target>
-        <note></note>
+        <target state="translated">必須指定至少一個可能的目標 Framework。</target>
+        <note />
       </trans-unit>
       <trans-unit id="NoCompatibleTargetFramework">
         <source>Project '{0}' has no target framework compatible with '{1}'.</source>
-        <target state="new">Project '{0}' has no target framework compatible with '{1}'.</target>
-        <note></note>
+        <target state="translated">專案 '{0}' 沒有與 '{1}' 相容的目標 Framework。</target>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidFrameworkName">
         <source>Invalid framework name: '{0}'.</source>
-        <target state="new">Invalid framework name: '{0}'.</target>
-        <note></note>
+        <target state="translated">無效的架構名稱: '{0}'。</target>
+        <note />
       </trans-unit>
       <trans-unit id="AssetsFileNotFound">
         <source>Assets file '{0}' not found. Run a NuGet package restore to generate this file.</source>
-        <target state="new">Assets file '{0}' not found. Run a NuGet package restore to generate this file.</target>
-        <note></note>
+        <target state="translated">找不到資產檔案 '{0}'。執行 NuGet 套件還原以產生此檔案。</target>
+        <note />
       </trans-unit>
       <trans-unit id="AssetsFileMissingTarget">
         <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have restored this project for TargetFramework='{2}' and RuntimeIdentifier='{3}'.</source>
-        <target state="new">Assets file '{0}' doesn't have a target for '{1}'. Ensure you have restored this project for TargetFramework='{2}' and RuntimeIdentifier='{3}'.</target>
-        <note></note>
+        <target state="translated">資產檔案 '{0}' 沒有 '{1}' 的目標。請確定您已還原此專案 (TargetFramework='{2}' 且 RuntimeIdentifier='{3}')。</target>
+        <note />
       </trans-unit>
       <trans-unit id="AssetsFilePathNotRooted">
         <source>Assets file path '{0}' is not rooted. Only full paths are supported.</source>
-        <target state="new">Assets file path '{0}' is not rooted. Only full paths are supported.</target>
-        <note></note>
+        <target state="translated">資產檔案路徑 '{0}' 不是根目錄。僅支援完整路徑。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CannotFindProjectInfo">
         <source>Cannot find project info for '{0}'. This can indicate a missing project reference.</source>
-        <target state="new">Cannot find project info for '{0}'. This can indicate a missing project reference.</target>
-        <note></note>
+        <target state="translated">找不到 '{0}' 的專案資訊。這可能表示遺漏專案參考。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ContentFileDoesNotContainExpectedParentPackageInformation">
         <source>Content file '{0}' does not contain expected parent package information.</source>
-        <target state="new">Content file '{0}' does not contain expected parent package information.</target>
-        <note></note>
+        <target state="translated">內容檔案 '{0}' 未包含必要的父套件資訊。</target>
+        <note />
       </trans-unit>
       <trans-unit id="MissingItemMetadata">
         <source>Missing '{0}' metadata on '{1}' item '{2}'.</source>
-        <target state="new">Missing '{0}' metadata on '{1}' item '{2}'.</target>
-        <note></note>
+        <target state="translated">'{1}' 項目 '{2}' 上遺漏 '{0}' 中繼資料。</target>
+        <note />
       </trans-unit>
       <trans-unit id="UnrecognizedPreprocessorToken">
         <source>Unrecognized preprocessor token '{0}' in '{1}'.</source>
-        <target state="new">Unrecognized preprocessor token '{0}' in '{1}'.</target>
-        <note></note>
+        <target state="translated">'{1}' 中的前置處理器 Token '{0}' 無法辨識。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ContentPreproccessorParameterRequired">
         <source>The '{0}' task must be given a value for parameter '{1}' in order to consume preprocessed content.</source>
-        <target state="new">The '{0}' task must be given a value for parameter '{1}' in order to consume preprocessed content.</target>
-        <note></note>
+        <target state="translated">必須為 '{0}' 工作指定參數 '{1}' 的值，才能取用前置處理過的內容。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">
         <source>Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</source>
-        <target state="new">Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</target>
-        <note></note>
+        <target state="translated">已從專案 '{0}' 取用資產，但在 '{1}' 中找不到對應的 MSBuild 專案路徑。</target>
+        <note />
       </trans-unit>
       <trans-unit id="UnexpectedFileType">
         <source>Unexpected file type for '{0}'. Type is both '{1}' and '{2}'.</source>
-        <target state="new">Unexpected file type for '{0}'. Type is both '{1}' and '{2}'.</target>
-        <note></note>
+        <target state="translated">'{0}' 屬於未預期的檔案類型類型同時為 '{1}' 和 '{2}'。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CannotInferTargetFrameworkIdentiferAndVersion">
         <source>Cannot infer TargetFrameworkIdentifier and/or TargetFrameworkVersion from TargetFramework='{0}'. They must be specified explicitly.</source>
-        <target state="new">Cannot infer TargetFrameworkIdentifier and/or TargetFrameworkVersion from TargetFramework='{0}'. They must be specified explicitly.</target>
-        <note></note>
+        <target state="translated">無法從 TargetFramework='{0}' 推斷 TargetFrameworkIdentifier 及/或 TargetFrameworkVersion。您必須明確加以指定。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ContentItemDoesNotProvideOutputPath">
         <source>Content item for '{0}' sets '{1}', but does not provide  '{2}' or '{3}'.</source>
-        <target state="new">Content item for '{0}' sets '{1}', but does not provide  '{2}' or '{3}'.</target>
-        <note></note>
+        <target state="translated">'{0}' 的內容項目設定 '{1}'，但未提供 '{2}' 或 '{3}'。</target>
+        <note />
       </trans-unit>
       <trans-unit id="DuplicatePreprocessorToken">
         <source>The preprocessor token '{0}' has been given more than one value. Choosing '{1}' as the value.</source>
-        <target state="new">The preprocessor token '{0}' has been given more than one value. Choosing '{1}' as the value.</target>
-        <note></note>
+        <target state="translated">已為前置處理器 Token '{0}' 指定多個值。正在選擇 '{1}' 作為值。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ErrorsOccurredWhenEmittingSatelliteAssembly">
         <source>Errors occured when emitting satellite assembly '{0}'.</source>
-        <target state="new">Errors occured when emitting satellite assembly '{0}'.</target>
-        <note></note>
+        <target state="translated">發出附屬組件 '{0}' 時發生錯誤。</target>
+        <note />
       </trans-unit>
       <trans-unit id="UnableToFindResolvedPath">
         <source>Unable to find resolved path for '{0}'.</source>
-        <target state="new">Unable to find resolved path for '{0}'.</target>
-        <note></note>
+        <target state="translated">找不到 '{0}' 的解析路徑。</target>
+        <note />
       </trans-unit>
       <trans-unit id="UnexpectedDependencyWithNoVersionNumber">
         <source>Unexpected dependency '{0}' with no version number.</source>
-        <target state="new">Unexpected dependency '{0}' with no version number.</target>
-        <note></note>
+        <target state="translated">未預期的相依性 '{0}'，沒有版本號碼。</target>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeIdentifierMustBeSetForNETFramework">
         <source>RuntimeIdentifier must be set for .NETFramework executables. Consider RuntimeIdentifier=win7-x86 or RuntimeIdentifier=win7-x64.</source>
-        <target state="new">RuntimeIdentifier must be set for .NETFramework executables. Consider RuntimeIdentifier=win7-x86 or RuntimeIdentifier=win7-x64.</target>
-        <note></note>
+        <target state="translated">必須為 .NETFramework 可執行檔設定 RuntimeIdentifier。請考慮使用 RuntimeIdentifier=win7-x86 或 RuntimeIdentifier=win7-x64。</target>
+        <note />
       </trans-unit>
       <trans-unit id="AssetPreprocessorMustBeConfigured">
         <source>Asset preprocessor must be configured before assets are processed.</source>
-        <target state="new">Asset preprocessor must be configured before assets are processed.</target>
-        <note></note>
+        <target state="translated">必須設定資產前置處理器，才能處理資產。</target>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidNuGetVersionString">
         <source>Invalid NuGet version string: '{0}'.</source>
-        <target state="new">Invalid NuGet version string: '{0}'.</target>
-        <note></note>
+        <target state="translated">無效的 NuGet 版本字串: '{0}'。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DOTNET1011">
+        <source>Framework not installed: {0} in {1}</source>
+        <target state="translated">未安裝架構: {0} (在 {1} 中)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DOTNET1012">
+        <source>The reference assemblies directory was not specified. You can set the location using the DOTNET_REFERENCE_ASSEMBLIES_PATH environment variable.</source>
+        <target state="translated">未指定參考組件目錄。您可使用 DOTNET_REFERENCE_ASSEMBLIES_PATH 環境變數設定位置。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DOTNET1013">
+        <source>The following dependencies are marked with type 'platform', however only one dependency can have this type: {0}</source>
+        <target state="translated">下列相依性以類型 'platform' 標記，但只有一個相依性可具備此類型: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DOTNET1014">
+        <source>Failed to read lock file</source>
+        <target state="translated">無法讀取鎖定檔案</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DOTNET1017">
+        <source>Project file does not exist '{0}'.</source>
+        <target state="translated">專案檔不存在 '{0}'。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NU1001">
+        <source>The dependency '{0}' could not be resolved.</source>
+        <target state="translated">無法解析相依性 '{0}'。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NU1002">
+        <source>The dependency '{0}' in project '{1}' does not support framework '{2}'.</source>
+        <target state="translated">專案 '{1}' 中的相依性 '{0}' 不支援架構 '{2}'。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NU1006">
+        <source>{0}. Please run 'dotnet restore' to generate a new asset file.</source>
+        <target state="translated">{0}。請執行 'dotnet restore' 產生新的資產檔案。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NU1007">
+        <source>Dependency specified was '{0}' but ended up with '{1}'.</source>
+        <target state="translated">指定的相依性為 '{0}' 但最終為 '{1}'。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NU1008">
+        <source>{0} is an unsupported framework.</source>
+        <target state="translated">{0} 為不受支援的架構。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NU1009">
+        <source>The expected asset file does not exist. Please run 'dotnet restore' to generate a new asset file.</source>
+        <target state="translated">所需的資產檔案不存在。請執行 'dotnet restore' 產生新的資產檔案。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NU1010">
+        <source>The dependency type was changed</source>
+        <target state="translated">相依性類型已變更</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NU1011">
+        <source>The dependency target '{0}' is unsupported.</source>
+        <target state="translated">相依性目標 '{0}' 不受支援。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NU1012">
+        <source>Dependency conflict. '{0}' expected '{1}' but received '{2}'</source>
+        <target state="translated">相依性衝突。'{0}' 需要 '{1}' 但收到 '{2}'</target>
+        <note />
       </trans-unit>
     </body>
   </file>

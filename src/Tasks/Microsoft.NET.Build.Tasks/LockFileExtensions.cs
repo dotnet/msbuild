@@ -54,6 +54,29 @@ namespace Microsoft.NET.Build.Tasks
                 .FirstOrDefault(e => e.Name.Equals(libraryName, StringComparison.OrdinalIgnoreCase));
         }
 
+        private static readonly char[] DependencySeparators = new char[] { '<', '=', '>' };
+
+        public static Dictionary<string, string> GetProjectFileDependencies(this LockFile lockFile)
+        {
+            var projectDeps = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var group in lockFile.ProjectFileDependencyGroups)
+            {
+                foreach (var dep in group.Dependencies)
+                {
+                    var parts = dep.Split(DependencySeparators, StringSplitOptions.RemoveEmptyEntries);
+                    var packageName = parts[0].Trim();
+
+                    if (!projectDeps.ContainsKey(packageName))
+                    {
+                        projectDeps.Add(packageName, parts.Length == 2 ? parts[1].Trim() : null);
+                    }
+                }
+            }
+
+            return projectDeps;
+        }
+
         public static HashSet<string> GetPlatformExclusionList(
             this LockFileTarget lockFileTarget,
             LockFileTargetLibrary platformLibrary,

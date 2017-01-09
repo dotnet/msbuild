@@ -31,7 +31,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Company Condition=" '$(Company)'=='' ">$(Authors)</Company>
     <AssemblyTitle Condition="'$(AssemblyTitle)' == ''">$(AssemblyName)</AssemblyTitle>
     <Product Condition="'$(Product)' == ''">$(AssemblyName)</Product>
-    <NeutralLanguage Condition="'$(NeutralLanguage)' == ''">en</NeutralLanguage>
   </PropertyGroup>
 
   <UsingTask TaskName="GetNearestTargetFramework" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />

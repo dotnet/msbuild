@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp1.0</TargetFrameworks>
+    <RuntimeIdentifiers>win7-x86</RuntimeIdentifiers>
+    <OutputType>Exe</OutputType>
+    <AssemblyOriginatorKeyFile>TestPublicKeyOnly.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <PublicSign>true</PublicSign>
+  </PropertyGroup>
+
+  <!-- 
+    Also target desktop on Windows to get more test coverage:
+      * Desktop requires satellites to have same public key as parent whereas coreclr does not. 
+      * Reference path handling of satellite assembly generation used to be incorrect for desktop.
+   -->
+  <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
+    <TargetFrameworks>$(TargetFrameworks);net46</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net46'">
+    <RuntimeIdentifier>win7-x86</RuntimeIdentifier>
+  </PropertyGroup>
+  
+</Project>

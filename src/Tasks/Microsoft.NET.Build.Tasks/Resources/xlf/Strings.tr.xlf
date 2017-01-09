@@ -5,113 +5,183 @@
       <group id="src/Tasks/Microsoft.NET.Build.Tasks/Resources/Strings.resx" />
       <trans-unit id="AtLeastOneTargetFrameworkMustBeSpecified">
         <source>At least one possible target framework must be specified.</source>
-        <target state="new">At least one possible target framework must be specified.</target>
-        <note></note>
+        <target state="translated">En az bir olası hedef çerçeve belirtilmelidir.</target>
+        <note />
       </trans-unit>
       <trans-unit id="NoCompatibleTargetFramework">
         <source>Project '{0}' has no target framework compatible with '{1}'.</source>
-        <target state="new">Project '{0}' has no target framework compatible with '{1}'.</target>
-        <note></note>
+        <target state="translated">'{0}' projesinde '{1}' ile uyumlu bir hedef çerçeve yok.</target>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidFrameworkName">
         <source>Invalid framework name: '{0}'.</source>
-        <target state="new">Invalid framework name: '{0}'.</target>
-        <note></note>
+        <target state="translated">Geçersiz çerçeve adı: '{0}'.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AssetsFileNotFound">
         <source>Assets file '{0}' not found. Run a NuGet package restore to generate this file.</source>
-        <target state="new">Assets file '{0}' not found. Run a NuGet package restore to generate this file.</target>
-        <note></note>
+        <target state="translated">'{0}' varlık dosyası bulunamadı. Bu dosyayı oluşturmak için, NuGet paketi geri yükleme işlemi gerçekleştirin.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AssetsFileMissingTarget">
         <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure you have restored this project for TargetFramework='{2}' and RuntimeIdentifier='{3}'.</source>
-        <target state="new">Assets file '{0}' doesn't have a target for '{1}'. Ensure you have restored this project for TargetFramework='{2}' and RuntimeIdentifier='{3}'.</target>
-        <note></note>
+        <target state="translated">'{0}' varlık dosyasında '{1}' için hedef yok. TargetFramework='{2}' ve RuntimeIdentifier='{3}' için bu projeyi geri yüklediğinizden emin olun.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AssetsFilePathNotRooted">
         <source>Assets file path '{0}' is not rooted. Only full paths are supported.</source>
-        <target state="new">Assets file path '{0}' is not rooted. Only full paths are supported.</target>
-        <note></note>
+        <target state="translated">'{0}' varlık dosya yolunun kökü belirtilmemiş. Yalnızca tam yollar desteklenir.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CannotFindProjectInfo">
         <source>Cannot find project info for '{0}'. This can indicate a missing project reference.</source>
-        <target state="new">Cannot find project info for '{0}'. This can indicate a missing project reference.</target>
-        <note></note>
+        <target state="translated">'{0}' için proje bilgisi bulunamıyor. Bu durum, eksik bir proje başvurusu olduğunu gösteriyor olabilie.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ContentFileDoesNotContainExpectedParentPackageInformation">
         <source>Content file '{0}' does not contain expected parent package information.</source>
-        <target state="new">Content file '{0}' does not contain expected parent package information.</target>
-        <note></note>
+        <target state="translated">'{0}' içerik dosyası beklenen üst paket bilgilerini içermiyor.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MissingItemMetadata">
         <source>Missing '{0}' metadata on '{1}' item '{2}'.</source>
-        <target state="new">Missing '{0}' metadata on '{1}' item '{2}'.</target>
-        <note></note>
+        <target state="translated">'{1}' öğesi '{2}' üzerinde '{0}' meta verileri eksik.</target>
+        <note />
       </trans-unit>
       <trans-unit id="UnrecognizedPreprocessorToken">
         <source>Unrecognized preprocessor token '{0}' in '{1}'.</source>
-        <target state="new">Unrecognized preprocessor token '{0}' in '{1}'.</target>
-        <note></note>
+        <target state="translated">'{1}' içinde tanınmayan ön işlemci belirteci: '{0}'.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ContentPreproccessorParameterRequired">
         <source>The '{0}' task must be given a value for parameter '{1}' in order to consume preprocessed content.</source>
-        <target state="new">The '{0}' task must be given a value for parameter '{1}' in order to consume preprocessed content.</target>
-        <note></note>
+        <target state="translated">Önceden işlenen içeriği kullanabilmesi için '{0}' görevine, '{1}' parametresine ilişkin bir değer verilmelidir.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">
         <source>Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</source>
-        <target state="new">Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</target>
-        <note></note>
+        <target state="translated">'{0}' projesindeki varlıklar kullanılıyor, ancak '{1}' içinde karşılık gelen bir MSBuild projesi bulunamadı.</target>
+        <note />
       </trans-unit>
       <trans-unit id="UnexpectedFileType">
         <source>Unexpected file type for '{0}'. Type is both '{1}' and '{2}'.</source>
-        <target state="new">Unexpected file type for '{0}'. Type is both '{1}' and '{2}'.</target>
-        <note></note>
+        <target state="translated">'{0}' için beklenmeyen dosya türü. Tür, hem '{1}' hem de '{2}'.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CannotInferTargetFrameworkIdentiferAndVersion">
         <source>Cannot infer TargetFrameworkIdentifier and/or TargetFrameworkVersion from TargetFramework='{0}'. They must be specified explicitly.</source>
-        <target state="new">Cannot infer TargetFrameworkIdentifier and/or TargetFrameworkVersion from TargetFramework='{0}'. They must be specified explicitly.</target>
-        <note></note>
+        <target state="translated">TargetFrameworkIdentifier ve/veya TargetFrameworkVersion, TargetFramework='{0}' içinden çıkarsanamıyor. Bunlar açıkça belirtilmelidir.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ContentItemDoesNotProvideOutputPath">
         <source>Content item for '{0}' sets '{1}', but does not provide  '{2}' or '{3}'.</source>
-        <target state="new">Content item for '{0}' sets '{1}', but does not provide  '{2}' or '{3}'.</target>
-        <note></note>
+        <target state="translated">'{0}' için içerik öğesi, '{1}' değerini ayarlıyor ancak '{2}' veya '{3}' sağlamıyor.</target>
+        <note />
       </trans-unit>
       <trans-unit id="DuplicatePreprocessorToken">
         <source>The preprocessor token '{0}' has been given more than one value. Choosing '{1}' as the value.</source>
-        <target state="new">The preprocessor token '{0}' has been given more than one value. Choosing '{1}' as the value.</target>
-        <note></note>
+        <target state="translated">'{0}' ön işlemci belirtecine birden fazla değer verildi. Değer olarak '{1}' seçiliyor.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ErrorsOccurredWhenEmittingSatelliteAssembly">
         <source>Errors occured when emitting satellite assembly '{0}'.</source>
-        <target state="new">Errors occured when emitting satellite assembly '{0}'.</target>
-        <note></note>
+        <target state="translated">'{0}' uydu bütünleştirilmiş kodu yayılırken hatalar oluştu.</target>
+        <note />
       </trans-unit>
       <trans-unit id="UnableToFindResolvedPath">
         <source>Unable to find resolved path for '{0}'.</source>
-        <target state="new">Unable to find resolved path for '{0}'.</target>
-        <note></note>
+        <target state="translated">'{0}' için çözümlenmiş yol bulunamıyor.</target>
+        <note />
       </trans-unit>
       <trans-unit id="UnexpectedDependencyWithNoVersionNumber">
         <source>Unexpected dependency '{0}' with no version number.</source>
-        <target state="new">Unexpected dependency '{0}' with no version number.</target>
-        <note></note>
+        <target state="translated">Sürüm numarası olmayan, beklenmeyen bağımlılık: '{0}'.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeIdentifierMustBeSetForNETFramework">
         <source>RuntimeIdentifier must be set for .NETFramework executables. Consider RuntimeIdentifier=win7-x86 or RuntimeIdentifier=win7-x64.</source>
-        <target state="new">RuntimeIdentifier must be set for .NETFramework executables. Consider RuntimeIdentifier=win7-x86 or RuntimeIdentifier=win7-x64.</target>
-        <note></note>
+        <target state="translated">.NETFramework yürütülebilir dosyaları için RuntimeIdentifier ayarlanmalıdır. RuntimeIdentifier=win7-x86 veya RuntimeIdentifier=win7-x64 ayarlanabilir.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AssetPreprocessorMustBeConfigured">
         <source>Asset preprocessor must be configured before assets are processed.</source>
-        <target state="new">Asset preprocessor must be configured before assets are processed.</target>
-        <note></note>
+        <target state="translated">Varlıkların işlenebilmesi için varlık ön işlemcisi yapılandırılmalıdır.</target>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidNuGetVersionString">
         <source>Invalid NuGet version string: '{0}'.</source>
-        <target state="new">Invalid NuGet version string: '{0}'.</target>
-        <note></note>
+        <target state="translated">Geçersiz NuGet sürüm dizesi: '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DOTNET1011">
+        <source>Framework not installed: {0} in {1}</source>
+        <target state="translated">Çerçeve yüklenmedi: {1} içinde {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DOTNET1012">
+        <source>The reference assemblies directory was not specified. You can set the location using the DOTNET_REFERENCE_ASSEMBLIES_PATH environment variable.</source>
+        <target state="translated">Başvuru bütünleştirilmiş kodları dizini belirtilmedi. DOTNET_REFERENCE_ASSEMBLIES_PATH ortam değişkenini kullanarak konumu ayarlayabilirsiniz.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DOTNET1013">
+        <source>The following dependencies are marked with type 'platform', however only one dependency can have this type: {0}</source>
+        <target state="translated">Aşağıdaki bağımlılıklar 'platform' türüyle işaretlendi ancak yalnızca bir bağımlılık bu türe sahip olabilir: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DOTNET1014">
+        <source>Failed to read lock file</source>
+        <target state="translated">Kilit dosyası okunamadı</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DOTNET1017">
+        <source>Project file does not exist '{0}'.</source>
+        <target state="translated">Proje dosyası yok: '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NU1001">
+        <source>The dependency '{0}' could not be resolved.</source>
+        <target state="translated">'{0}' bağımlılığı çözülemedi.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NU1002">
+        <source>The dependency '{0}' in project '{1}' does not support framework '{2}'.</source>
+        <target state="translated">'{1}' projesi içindeki '{0}' bağımlılığı '{2}' çerçevesini desteklemiyor.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NU1006">
+        <source>{0}. Please run 'dotnet restore' to generate a new asset file.</source>
+        <target state="translated">{0}. Yeni bir varlık dosyası oluşturmak için 'dotnet restore' çalıştırın.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NU1007">
+        <source>Dependency specified was '{0}' but ended up with '{1}'.</source>
+        <target state="translated">Belirtilen bağımlılık '{0}' ancak '{1}' alındı.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NU1008">
+        <source>{0} is an unsupported framework.</source>
+        <target state="translated">{0} çerçevesi desteklenmiyor.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NU1009">
+        <source>The expected asset file does not exist. Please run 'dotnet restore' to generate a new asset file.</source>
+        <target state="translated">Beklenen varlık dosyası yok.Yeni bir varlık dosyası oluşturmak için 'dotnet restore' çalıştırın.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NU1010">
+        <source>The dependency type was changed</source>
+        <target state="translated">Bağımlılık türü değiştirildi</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NU1011">
+        <source>The dependency target '{0}' is unsupported.</source>
+        <target state="translated">Bağımlılık hedefi ('{0}') desteklenmiyor.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NU1012">
+        <source>Dependency conflict. '{0}' expected '{1}' but received '{2}'</source>
+        <target state="translated">Bağımlılık çakışması. '{0}' '{1}' bekliyordu ancak '{2}' alındı</target>
+        <note />
       </trans-unit>
     </body>
   </file>

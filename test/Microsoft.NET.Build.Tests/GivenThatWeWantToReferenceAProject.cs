@@ -14,10 +14,8 @@ using System.Linq;
 
 namespace Microsoft.NET.Build.Tests
 {
-    public class GivenThatWeWantToReferenceAProject
+    public class GivenThatWeWantToReferenceAProject : SdkTest
     {
-        private TestAssetsManager _testAssetsManager = TestAssetsManager.TestProjectsAssetsManager;
-
         //  Different types of projects which should form the test matrix:
 
         //  Desktop (non-SDK) project
@@ -60,6 +58,8 @@ namespace Microsoft.NET.Build.Tests
             bool restoreSucceeds, bool buildSucceeds)
         {
             string identifier = referencerTarget.ToString() + " " + dependencyTarget.ToString();
+            //  MSBuild isn't happy with semicolons in the path when doing file exists checks
+            identifier = identifier.Replace(';', '_');
 
             TestProject referencerProject = GetTestProject("Referencer", referencerTarget, referencerIsSdkProject);
             TestProject dependencyProject = GetTestProject("Dependency", dependencyTarget, dependencyIsSdkProject);
@@ -115,12 +115,6 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new BuildCommand(Stage0MSBuild, appProjectDirectory);
 
             if (!buildSucceeds)
-            {
-                buildCommand = buildCommand.CaptureStdOut();
-            }
-
-            //  Suppress ResolveAssemblyReference warning output due to https://github.com/Microsoft/msbuild/issues/1329
-            if (buildSucceeds && referencerProject.IsExe && referencerProject.ShortTargetFrameworkIdentifiers.Contains("net"))
             {
                 buildCommand = buildCommand.CaptureStdOut();
             }

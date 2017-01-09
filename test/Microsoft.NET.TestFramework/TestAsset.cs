@@ -100,6 +100,11 @@ namespace Microsoft.NET.TestFramework
 
         public TestAsset WithProjectChanges(Action<XDocument> xmlAction)
         {
+            return WithProjectChanges((path, project) => xmlAction(project));
+        }
+
+        public TestAsset WithProjectChanges(Action<string, XDocument> xmlAction)
+        {
             if (_projectFiles == null)
             {
                 FindProjectFiles();
@@ -109,7 +114,7 @@ namespace Microsoft.NET.TestFramework
             {
                 var project = XDocument.Load(projectFile);
 
-                xmlAction(project);
+                xmlAction(projectFile, project);
 
                 using (var file = File.CreateText(projectFile))
                 {

@@ -28,10 +28,15 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(LanguageTargets)' == ''">
     <LanguageTargets Condition="'$(MSBuildProjectExtension)' == '.csproj'">$(MSBuildToolsPath)\Microsoft.CSharp.targets</LanguageTargets>
     <LanguageTargets Condition="'$(MSBuildProjectExtension)' == '.vbproj'">$(MSBuildToolsPath)\Microsoft.VisualBasic.targets</LanguageTargets>
+    
+    <!-- If LanguageTargets isn't otherwise set, then just import the common targets.  This should allow the restore target to run,
+         which could bring in NuGet packages that set the LanguageTargets to something else.  This means support for different
+         languages could either be supplied via an SDK or via a NuGet package. -->
+    <LanguageTargets Condition="'$(LanguageTargets)' == ''">$(MSBuildToolsPath)\Microsoft.Common.CurrentVersion.targets</LanguageTargets>
   </PropertyGroup>
-  
-  <!-- TODO: Generate error if LanguageTargets property isn't set here.  This would happen, for example if an .fsproj referenced the .NET Sdk 
-              but not the FSharp one.  See https://github.com/dotnet/sdk/issues/448 -->
+
+  <!-- REMARK: Dont remove/rename, the LanguageTargets property is used by F# to hook inside the project's sdk 
+               using Sdk attribute (from .NET Core Sdk 1.0.0-preview4) -->
   <Import Project="$(LanguageTargets)"/>
   
   <Import Project="$(MSBuildThisFileDirectory)..\buildCrossTargeting\Microsoft.NET.Sdk.targets"

@@ -77,20 +77,49 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
   
   <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETFramework'">
+
     <Reference Include="System"/>
-    <Reference Include="System.Core"/>
     <Reference Include="System.Data"/>
     <Reference Include="System.Drawing"/>
+    <Reference Include="System.Xml"/>
+
     <!-- When doing greater than/less than comparisons between strings, MSBuild will try to parse the strings as Version objects and compare them as
          such if the parse succeeds. -->
-    <Reference Include="System.IO.Compression.FileSystem" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>
-    <Reference Include="System.IO.Compression" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>
-    <Reference Include="System.Net.Http" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>
+    
+    <!-- Framework assemblies introduced in .NET 3.5 -->
+    <Reference Include="System.Core" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '3.5' "/>
+    <Reference Include="System.Runtime.Serialization" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '3.5' "/>
+    <Reference Include="System.Xml.Linq" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '3.5' "/>
+
+    <!-- Framework assemblies introduced in .NET 4.0 -->
     <Reference Include="System.Numerics" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.0' "/>
-    <Reference Include="System.Runtime.Serialization"/>
-    <Reference Include="System.Xml.Linq"/>
-    <Reference Include="System.Xml"/>
+
+    <!-- Framework assemblies introduced in .NET 4.5 -->
+    <Reference Include="System.IO.Compression.FileSystem" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>
+    
+    <!-- Don't automatically reference System.IO.Compression or System.Net.Http to help avoid hitting https://github.com/Microsoft/msbuild/issues/1329. -->
+    <!--<Reference Include="System.IO.Compression" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>
+    <Reference Include="System.Net.Http" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>-->
+
   </ItemGroup>
+
+  <!-- Set the default versions of the NETStandard.Library or Microsoft.NETCore.App packages to reference.
+       The implicit package references themselves are defined in Microsoft.NET.Sdk.props, so that they can be overridden
+       in the project file. -->
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' And '$(NetStandardImplicitPackageVersion)' == ''">
+    <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(NetCoreAppImplicitPackageVersion)' == ''" >
+    
+    <!-- For Microsoft.NETCore.App, default to using the version of the package that matches the target framework version -->
+    <NetCoreAppImplicitPackageVersion>$(_TargetFrameworkVersionWithoutV)</NetCoreAppImplicitPackageVersion>
+    
+    <!-- When the TFM is .NET Core 1.0, use version 1.0.1 of the Microsoft.NETCore.App package -->
+    <NetCoreAppImplicitPackageVersion Condition=" '$(_TargetFrameworkVersionWithoutV)' == '1.0' ">1.0.1</NetCoreAppImplicitPackageVersion>
+    
+  </PropertyGroup>
+
 
   <!-- Add conditional compilation symbols for the target framework (for example NET461, NETSTANDARD2_0, NETCOREAPP1_0) -->
   <PropertyGroup Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' and '$(TargetFrameworkIdentifier)' != '.NETPortable'">
