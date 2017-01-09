@@ -172,7 +172,7 @@ namespace Microsoft.NET.Build.Tasks
             {
                 foreach (var dep in group.Dependencies)
                 {
-                    // Get package name from e.g. Microsoft.VSSDK.BuildTools >= 15.0.25604-Preview4
+                    // Get package name from e.g. Microsoft.VSSDK.BuildTools >= 15.0.25929-RC2
                     _projectFileDependencies.Add(dep.Split()[0].Trim());
                 }
             }

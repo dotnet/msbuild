@@ -12,6 +12,9 @@
     <InstallationTarget Version="[15.0,]" Id="Microsoft.VisualStudio.VWDExpress" />
     <InstallationTarget Version="[15.0,]" Id="Microsoft.VisualStudio.VSWinExpress" />
   </Installation>
+  <Prerequisites>
+    <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[15.0,16.0)" DisplayName="Visual Studio core editor" />
+  </Prerequisites>
   <Dependencies>
     <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.6,)" />
   </Dependencies>
