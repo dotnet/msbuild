@@ -185,7 +185,7 @@
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledDependencyWasModifiedAt">
         <source>{0} will be compiled as {1} was modified at {2}.</source>
-        <target state="translated">{0} wird als {1} kompiliert, wurde geändert bei {2}.</target>
+        <target state="translated">{0} wird als {1} kompiliert. Letzte Änderung: {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiled">
