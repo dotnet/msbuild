@@ -61,11 +61,11 @@
       </trans-unit>
       <trans-unit id="CmdRuntimeOption">
         <source>RUNTIME_IDENTIFIER</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CmdRuntimeOptionDescription">
         <source>Target runtime to restore packages for.</source>
-        <note></note>
+        <note />
       </trans-unit>
     </body>
   </file>

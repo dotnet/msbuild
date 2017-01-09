@@ -9,9 +9,9 @@
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
-        <source>Command to list project to project (p2p) references</source>
-        <target state="translated">p2p(프로젝트 간) 참조를 나열하기 위한 명령입니다.</target>
-        <note />
+        <source>Command to list project to project references</source>
+        <target state="needs-review-translation">p2p(프로젝트 간) 참조를 나열하기 위한 명령입니다.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="NoReferencesFound">
         <source>There are no {0} references in project {1}.
