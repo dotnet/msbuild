@@ -21,7 +21,7 @@
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="1.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="1.0.2" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="1.0.2" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' != 'True' " />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Design" Version="1.0.2" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' != 'True' " />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Design" Version="1.0.2" PrivateAssets="All" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' != 'True' " />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="1.0.2" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' == 'True' " />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.Design" Version="1.0.2" PrivateAssets="All" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' == 'True' " />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="1.0.0-msbuild3-final" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
@@ -39,11 +39,11 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.ViewCompilation" Version="1.0.0-*" PrivateAssets="All" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="1.1.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="1.1.0" Condition="'$(IndividualAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="1.1.0" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' != 'True' " />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="1.1.0" PrivateAssets="All" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' != 'True' " />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Design" Version="1.1.0" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' != 'True' " />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="1.1.0" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' == 'True' " />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.Design" Version="1.1.0" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' == 'True' " />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="1.0.0-msbuild3-final" Condition="'$(IndividualAuth)' == 'True'" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.Design" Version="1.1.0" PrivateAssets="All" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' == 'True' " />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="1.0.0-msbuild3-final" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="1.1.0" Condition="'$(IndividualAuth)' == 'True'" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.1.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="1.1.0" />
