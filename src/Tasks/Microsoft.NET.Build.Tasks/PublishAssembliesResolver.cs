@@ -31,7 +31,7 @@ namespace Microsoft.NET.Build.Tasks
 
             foreach (LockFileTargetLibrary targetLibrary in projectContext.GetRuntimeLibraries(_privateAssetPackageIds))
             {
-                if (targetLibrary.Type == "project")
+                if (targetLibrary.Type != "package")
                 {
                     continue;
                 }
