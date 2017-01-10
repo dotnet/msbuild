@@ -80,6 +80,7 @@
     <Compile Include="ProjectExtensionsTargetsImportTest.cs" />
     <Compile Include="PropertyParser_Tests.cs" />
     <Compile Include="ReadLinesFromFile_Tests.cs" />
+    <Compile Include="RegressionTests.cs" />
     <Compile Include="RemoveDir_Tests.cs" />
     <Compile Include="RemoveDuplicates_Tests.cs" />
     <Compile Include="ResolveCodeAnalysisRuleSet_Tests.cs" />
