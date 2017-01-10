@@ -689,6 +689,77 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Verifies that if a directory with the same name of the tool exists that the tool task correctly
+        /// ignores the directory.
+        /// </summary>
+        [Fact]
+        public void ToolPathIsFoundWhenDirectoryExistsWithNameOfTool()
+        {
+            string toolName = NativeMethodsShared.IsWindows ? "cmd" : "sh";
+
+            string savedCurrentDirectory = Directory.GetCurrentDirectory();
+
+            string tempDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"))).FullName;
+
+            try
+            {
+                Directory.SetCurrentDirectory(tempDirectory);
+
+                string directoryNamedSameAsTool = Directory.CreateDirectory(Path.Combine(tempDirectory, toolName)).FullName;
+
+                MyTool task = new MyTool
+                {
+                    BuildEngine = new MockEngine(),
+                    FullToolName = toolName,
+                };
+                bool result = task.Execute();
+
+                Assert.NotEqual(directoryNamedSameAsTool, task.PathToToolUsed);
+
+                Assert.True(result);
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(savedCurrentDirectory);
+
+                FileUtilities.DeleteDirectoryNoThrow(tempDirectory, recursive: true);
+            }
+        }
+
+        /// <summary>
+        /// Confirms we can find a file on the PATH.
+        /// </summary>
+        [Fact]
+        public void FindOnPathSucceeds()
+        {
+            string expectedCmdPath;
+            string shellName;
+            if (NativeMethodsShared.IsWindows)
+            {
+#if FEATURE_SPECIAL_FOLDERS
+                expectedCmdPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe");
+#else
+                expectedCmdPath = Path.Combine(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.System), "cmd.exe");
+#endif
+                shellName = "cmd.exe";
+            }
+            else
+            {
+                expectedCmdPath = "/bin/sh";
+                shellName = "sh";
+            }
+
+            string cmdPath = ToolTask.FindOnPath(shellName);
+            Assert.NotNull(cmdPath);
+
+            // for the NUnit "Standard Out" tab
+            Console.WriteLine("Expected location of \"" + shellName + "\": " + expectedCmdPath);
+            Console.WriteLine("Found \"" + shellName + "\" here: " + cmdPath);
+
+            Assert.Equal(0, String.Compare(cmdPath, expectedCmdPath, StringComparison.OrdinalIgnoreCase));
+        }
+
+        /// <summary>
         /// Equals sign in value
         /// </summary>
         [Fact]

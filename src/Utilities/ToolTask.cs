@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.IO;
 using System.Text;
 using System.Resources;
@@ -644,7 +645,7 @@ namespace Microsoft.Build.Utilities
                 else
                 {
                     // if we just have the file name, search for the file on the system path
-                    string actualPathToTool = NativeMethodsShared.FindOnPath(pathToTool);
+                    string actualPathToTool = ToolTask.FindOnPath(pathToTool);
 
                     // if we find the file
                     if (actualPathToTool != null)
@@ -1420,6 +1421,32 @@ namespace Microsoft.Build.Utilities
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Looks for the given file in the system path i.e. all locations in the %PATH% environment variable.
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <returns>The location of the file, or null if file not found.</returns>
+        internal static string FindOnPath(string filename)
+        {
+            // Get path from the environment and split path separator
+            return Environment.GetEnvironmentVariable("PATH")?
+                .Split(Path.PathSeparator)?
+                .Where(path =>
+                {
+                    try
+                    {
+                        // The PATH can contain anything, including bad characters
+                        return Directory.Exists(path);
+                    }
+                    catch (Exception)
+                    {
+                        return false;
+                    }
+                })
+                .Select(folderPath => Path.Combine(folderPath, filename))
+                .FirstOrDefault(fullPath => !String.IsNullOrEmpty(fullPath) && File.Exists(fullPath));
         }
 
         #endregion
