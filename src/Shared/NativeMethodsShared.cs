@@ -456,8 +456,9 @@ namespace Microsoft.Build.Shared
 
         static NativeMethodsShared()
         {
-            // VS has potentially expensive TypeResolve events, so cache IsMono
-            IsMono = Type.GetType("Mono.Runtime") != null;
+            // There could be potentially expensive TypeResolve events, so cache IsMono.
+            // Also, VS does not host Mono runtimes, so turn IsMono off when msbuild is running under VS
+            IsMono = !BuildEnvironmentHelper.Instance.RunningInVisualStudio && Type.GetType("Mono.Runtime") != null;
         }
 
         /// <summary>
