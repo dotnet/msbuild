@@ -1,4 +1,4 @@
-namespace Library
+namespace Company.ClassLibrary1
  
 module Say =
     let hello name =
