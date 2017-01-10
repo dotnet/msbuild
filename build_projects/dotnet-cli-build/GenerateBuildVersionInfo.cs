@@ -12,20 +12,20 @@ namespace Microsoft.DotNet.Cli.Build
         [Required]
         public string RepoRoot { get; set; }
 
-        [Output]
+        [Required]
         public int VersionMajor { get; set; }
 
-        [Output]
+        [Required]
         public int VersionMinor { get; set; }
 
-        [Output]
+        [Required]
         public int VersionPatch { get; set; }
+
+        [Required]
+        public string ReleaseSuffix { get; set; }
 
         [Output]
         public string CommitCount { get; set; }
-
-        [Output]
-        public string ReleaseSuffix { get; set; }
 
         [Output]
         public string VersionSuffix { get; set; }
@@ -42,41 +42,27 @@ namespace Microsoft.DotNet.Cli.Build
         [Output]
         public string VersionBadgeMoniker { get; set; }
 
-        [Output]
-        public string Channel { get; set; }
-
-        [Output]
-        public string BranchName { get; set; }
-
         private int _commitCount;
 
         public override bool Execute()
         {
             base.Execute();
 
-            var branchInfo = new BranchInfo(RepoRoot);
-
             var buildVersion = new BuildVersion()
             {
-                Major = int.Parse(branchInfo.Entries["MAJOR_VERSION"]),
-                Minor = int.Parse(branchInfo.Entries["MINOR_VERSION"]),
-                Patch = int.Parse(branchInfo.Entries["PATCH_VERSION"]),
-                ReleaseSuffix = branchInfo.Entries["RELEASE_SUFFIX"],
+                Major = VersionMajor,
+                Minor = VersionMinor,
+                Patch = VersionPatch,
+                ReleaseSuffix = ReleaseSuffix,
                 CommitCount = _commitCount
             };
 
-            VersionMajor = buildVersion.Major;
-            VersionMinor = buildVersion.Minor;
-            VersionPatch = buildVersion.Patch;
             CommitCount = buildVersion.CommitCountString;
-            ReleaseSuffix = buildVersion.ReleaseSuffix;
             VersionSuffix = buildVersion.VersionSuffix;
             SimpleVersion = buildVersion.SimpleVersion;
             NugetVersion = buildVersion.NuGetVersion;
             MsiVersion = buildVersion.GenerateMsiVersion();
             VersionBadgeMoniker = Monikers.GetBadgeMoniker();
-            Channel = branchInfo.Entries["CHANNEL"];
-            BranchName= branchInfo.Entries["BRANCH_NAME"];
 
             return true;
         }

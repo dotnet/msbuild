@@ -120,14 +120,6 @@ done
 temp="${args[@]}"
 args=($temp)
 
-# Load Branch Info
-while read line; do
-    if [[ $line != \#* ]]; then
-        IFS='=' read -ra splat <<< "$line"
-        export ${splat[0]}="${splat[1]}"
-    fi
-done < "$REPOROOT/branchinfo.txt"
-
 # Use a repo-local install directory (but not the artifacts directory because that gets cleaned a lot
 [ -z "$DOTNET_INSTALL_DIR_PJ" ] && export DOTNET_INSTALL_DIR_PJ=$REPOROOT/.dotnet_stage0PJ/$ARCHITECTURE
 [ -d "$DOTNET_INSTALL_DIR_PJ" ] || mkdir -p $DOTNET_INSTALL_DIR_PJ

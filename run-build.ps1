@@ -40,14 +40,6 @@ else
     $env:DOTNET_BUILD_SKIP_PACKAGING=0
 }
 
-# Load Branch Info
-cat "$RepoRoot\branchinfo.txt" | ForEach-Object {
-    if(!$_.StartsWith("#") -and ![String]::IsNullOrWhiteSpace($_)) {
-        $splat = $_.Split([char[]]@("="), 2)
-        Set-Content "env:\$($splat[0])" -Value $splat[1]
-    }
-}
-
 # Use a repo-local install directory (but not the artifacts directory because that gets cleaned a lot
 if (!$env:DOTNET_INSTALL_DIR_PJ)
 {
