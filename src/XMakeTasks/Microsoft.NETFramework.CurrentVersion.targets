@@ -108,7 +108,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
       <_DesignTimeFacadeAssemblies_Names Remove="@(_ReferencePath_Names)"/>
 
-      <ReferencePath Include="@(_DesignTimeFacadeAssemblies_Names->%(OriginalIdentity))">
+      <ReferencePath Include="@(_DesignTimeFacadeAssemblies_Names->'%(OriginalIdentity)')">
         <WinMDFile>false</WinMDFile>
         <CopyLocal>false</CopyLocal>
         <ResolvedFrom>ImplicitlyExpandDesignTimeFacades</ResolvedFrom>
