@@ -766,4 +766,17 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" Condition="!$(Configuration.EndsWith('MONO'))"/>
   -->
   <Import Project="..\dir.targets" />
+  <Target Name="CopyImmutableLocal"
+          BeforeTargets="ResolveAssemblyReferences">
+    <!-- The VSIX installer manifest references System.Collections.Immutable from the Output folder,
+         but it won't be placed there by default because NuGet references come in as CopyLocal false.
+
+         Work around this by munging the reference after NuGet emits it but before RAR.
+    -->
+    <ItemGroup>
+      <Reference Condition="'%(Reference.NuGetPackageId)' == 'System.Collections.Immutable'">
+        <Private>true</Private>
+      </Reference>
+    </ItemGroup>
+  </Target>
 </Project>
