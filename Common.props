@@ -19,8 +19,6 @@
     <PackagesLayoutToolsNet46Dir>$(PackagesLayoutToolsDir)net46\</PackagesLayoutToolsNet46Dir>
     <PackagesLayoutToolsNetCoreAppDir>$(PackagesLayoutToolsDir)netcoreapp1.0\</PackagesLayoutToolsNetCoreAppDir>
     
-    <VersionPrefix Condition="'$(VersionPrefix)' == ''">1.0.0</VersionPrefix>
-    <VersionPrereleasePrefix Condition="'$(VersionPrereleasePrefix)' == ''">alpha</VersionPrereleasePrefix>
     <!-- When running on VSO (for official builds) use a real number. -->
     <BuildNumber Condition="'$(BuildNumber)' == ''">$(BUILD_BUILDNUMBER)</BuildNumber>
     <!-- Split the build parts out from the BuildNumber which is given to us by MicroBuild in the format of yyyymmdd.nn
@@ -33,8 +31,11 @@
          we will continue the month counting instead: the build after 61231 is 61301. -->
     <BuildNumberFiveDigitDateStamp Condition="'$(BuildNumber)' != ''">$([MSBuild]::Subtract($(BuildNumber.Split('.')[0].Substring(3).Trim()), 8800))</BuildNumberFiveDigitDateStamp>
     <BuildNumberBuildOfTheDayPadded Condition="('$(BuildNumber)' != '') AND ($(BuildNumber.Split('.').Length) == 2)">$(BuildNumber.Split('.')[1].PadLeft(2,'0'))</BuildNumberBuildOfTheDayPadded>
-    <VersionSuffix Condition="'$(VersionSuffix)' == ''">$(VersionPrereleasePrefix)-$(BuildNumber)</VersionSuffix>
+
+    <VersionPrefix Condition="'$(VersionPrefix)' == ''">1.0.0</VersionPrefix>
+    <VersionSuffix Condition="'$(VersionSuffix)' == ''">alpha</VersionSuffix>
     <Version Condition="'$(Version)' == ''">$(VersionPrefix)-$(VersionSuffix)</Version>
+    <Version Condition="'$(BuildNumberFiveDigitDateStamp)' != '' AND '$(BuildNumberBuildOfTheDayPadded)' != ''">$(Version)-$(BuildNumberFiveDigitDateStamp.Trim())-$(BuildNumberBuildOfTheDayPadded.Trim())</Version>
   </PropertyGroup>
   
   <!-- Prepare Version number used in template builds -->
@@ -45,6 +46,7 @@
         day-to-day upgrades don't break assembly references to other installed apps. -->
       <PropertyGroup>
         <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
+        <VsixVersion>$(BuildVersion)</VsixVersion>
       </PropertyGroup>
     </When>
 
@@ -53,7 +55,7 @@
       <PropertyGroup>
         <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
         <BuildVersion>$(VersionPrefix).$(BuildNumberFiveDigitDateStamp)</BuildVersion>
-        <VsixVersion>$(VersionPrefix).$(BuildNumberFiveDigitDateStamp)-$(BuildNumberBuildOfTheDayPadded)</VsixVersion>
+        <VsixVersion>$(VersionPrefix).$(BuildNumberFiveDigitDateStamp)$(BuildNumberBuildOfTheDayPadded)</VsixVersion>
       </PropertyGroup>
     </When>
 
@@ -63,7 +65,7 @@
       <PropertyGroup>
         <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
         <BuildVersion>$(VersionPrefix).$(BuildNumberFiveDigitDateStamp)</BuildVersion>
-        <VsixVersion>$(VersionPrefix).$(BuildNumberFiveDigitDateStamp)-$(BuildNumberBuildOfTheDayPadded)</VsixVersion>
+        <VsixVersion>$(VersionPrefix).$(BuildNumberFiveDigitDateStamp)$(BuildNumberBuildOfTheDayPadded)</VsixVersion>
       </PropertyGroup>
     </When>
 
@@ -73,8 +75,8 @@
         have a build with an actual number installed, but then build and F5 a build with
         this number.  -->
       <PropertyGroup>
-        <BuildVersion>42.42.42.42</BuildVersion>
         <AssemblyVersion>42.42.42.42</AssemblyVersion>
+        <BuildVersion>42.42.42.42</BuildVersion>
         <VsixVersion>42.42.42.42</VsixVersion>
       </PropertyGroup>
     </Otherwise>
@@ -88,7 +90,7 @@
          number. This conforms to the dependencies specified in the ManagedDesktop workload [2.0.0.0,3.0.0.0).
          We can get rid of this, and references to it, when we bump Microsoft.NET.Sdk version to 2.0.0.
       -->
-    <ProjectSystemVsixVersion Condition="'$(ProjectSystemVsixVersion)' == ''">2.0.0.$(BuildNumberFiveDigitDateStamp)</ProjectSystemVsixVersion>
+    <ProjectSystemVsixVersion Condition="'$(ProjectSystemVsixVersion)' == ''">2.0.0.$(BuildNumberFiveDigitDateStamp)$(BuildNumberBuildOfTheDayPadded)</ProjectSystemVsixVersion>
 
     <DotNet_Install_Dir Condition=" '$(DotNet_Install_Dir)' == ''">$(RepositoryRootDirectory).dotnet_cli\</DotNet_Install_Dir>
     <DotNetTool>$(DotNet_Install_Dir)\dotnet</DotNetTool>
