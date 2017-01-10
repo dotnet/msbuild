@@ -10,7 +10,7 @@
       <Version>1.0.3</Version>
     </PackageReference>
     <PackageReference Include="NuGet.CommandLine.XPlat">
-      <Version>4.0.0-rc3</Version>
+      <Version>$(CLI_NuGet_Version)</Version>
     </PackageReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
