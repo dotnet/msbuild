@@ -454,6 +454,12 @@ namespace Microsoft.Build.Shared
 
         #region Member data
 
+        static NativeMethodsShared()
+        {
+            // VS has potentially expensive TypeResolve events, so cache IsMono
+            IsMono = Type.GetType("Mono.Runtime") != null;
+        }
+
         /// <summary>
         /// Default buffer size to use when dealing with the Windows API.
         /// </summary>
@@ -497,13 +503,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Gets a flag indicating if we are running under MONO
         /// </summary>
-        internal static bool IsMono
-        {
-            get
-            {
-                return Type.GetType("Mono.Runtime") != null;
-            }
-        }
+        internal static bool IsMono { get; private set; }
 
         /// <summary>
         /// Gets a flag indicating if we are running under some version of Windows
