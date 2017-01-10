@@ -70,6 +70,8 @@
       <TestDirectory>$(RepoRoot)/test/</TestDirectory>
       <DotnetUnderTest>$(Stage2Directory)</DotnetUnderTest>
     </PropertyGroup>
+
+    <MakeDir Directories="$(TestPackagesDir)" Condition="!Exists('$(TestPackagesDir)')"/>
   </Target>
 
   <Target Name="BuildTests"
@@ -213,9 +215,10 @@
       <DotNetPackMsbuildArgs Condition=" '$(IsDesktopAvailable)' == 'True' And '%(TestPackageProject.PackRuntime)' != '' ">/p:RuntimeIdentifier=%(TestPackageProject.PackRuntime)</DotNetPackMsbuildArgs>
     </PropertyGroup>
 
-    <DotNetRestore ToolPath="$(Stage2Directory)"
+    <DotNetRestore ToolPath="$(Stage0Directory)"
                    Source="$(TestPackagesDir)"
-                   WorkingDirectory="%(TestPackageProject.FullPath)" />
+                   ConfigFile="$(RepoRoot)\NuGet.Config"
+                   ProjectPath="%(TestPackageProject.ProjectPath)" />
 
     <DotNetBuild Framework="%(TestPackageProject.Framework)"
                  Runtime="%(TestPackageProject.Runtime)"
