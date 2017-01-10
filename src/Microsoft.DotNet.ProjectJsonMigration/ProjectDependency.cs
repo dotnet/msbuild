@@ -7,13 +7,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration
     {
         public string Name { get; }
         public string ProjectFilePath { get; }
-        public bool Hoisted { get; }
 
-        public ProjectDependency(string name, string projectFilePath, bool hoisted)
+        public ProjectDependency(string name, string projectFilePath)
         {
             Name = name;
             ProjectFilePath = System.IO.Path.GetFullPath(projectFilePath);
-            Hoisted = hoisted;
         }
 
         public override bool Equals(object obj)

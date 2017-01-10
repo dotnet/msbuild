@@ -69,43 +69,43 @@
         <note />
       </trans-unit>
       <trans-unit id="NewDefinition">
-        <source>Initialize a basic .NET project</source>
-        <target state="translated">Inicializovat základní projekt .NET</target>
+        <source>Initialize .NET projects.</source>
+        <target state="translated">Inicializuje projekty .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="RestoreDefinition">
-        <source>Restore dependencies specified in the .NET project</source>
-        <target state="needs-review-translation">Obnovit závislosti zadané v projektu .NET</target>
-        <note></note>
+        <source>Restore dependencies specified in the .NET project.</source>
+        <target state="translated">Obnoví závislosti zadané v projektu .NET.</target>
+        <note />
       </trans-unit>
       <trans-unit id="BuildDefinition">
-        <source>Builds a .NET project</source>
-        <target state="translated">Sestaví projekt .NET</target>
+        <source>Builds a .NET project.</source>
+        <target state="translated">Sestaví projekt .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="PublishDefinition">
-        <source>Publishes a .NET project for deployment (including the runtime)</source>
-        <target state="translated">Publikuje projekt .NET pro nasazení (včetně modulu runtime)</target>
+        <source>Publishes a .NET project for deployment (including the runtime).</source>
+        <target state="translated">Publikuje projekt .NET pro nasazení (včetně modulu runtime).</target>
         <note />
       </trans-unit>
       <trans-unit id="RunDefinition">
-        <source>Compiles and immediately executes a .NET project</source>
-        <target state="needs-review-translation">Kompiluje a hned spustí projekt .NET</target>
-        <note></note>
+        <source>Compiles and immediately executes a .NET project.</source>
+        <target state="translated">Zkompiluje a hned spustí projekt .NET.</target>
+        <note />
       </trans-unit>
       <trans-unit id="TestDefinition">
-        <source>Runs unit tests using the test runner specified in the project</source>
-        <target state="translated">Spustí testy jednotek v nástroji Test Runner zadaném v projektu</target>
+        <source>Runs unit tests using the test runner specified in the project.</source>
+        <target state="translated">Spustí testy jednotek v nástroji Test Runner zadaném v projektu.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackDefinition">
-        <source>Creates a NuGet package</source>
-        <target state="translated">Vytvoří balíček NuGet</target>
+        <source>Creates a NuGet package.</source>
+        <target state="translated">Vytvoří balíček NuGet.</target>
         <note />
       </trans-unit>
       <trans-unit id="MigrateDefinition">
-        <source>Migrates a project.json based project to a msbuild based project</source>
-        <target state="translated">Na základě projektu migruje soubor project.json na projekt založený na nástroji MSBuild</target>
+        <source>Migrates a project.json based project to a msbuild based project.</source>
+        <target state="translated">Na základě projektu migruje soubor project.json na projekt založený na nástroji MSBuild.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectModificationCommands">
@@ -114,13 +114,13 @@
         <note />
       </trans-unit>
       <trans-unit id="AddDefinition">
-        <source>Add items to the project</source>
-        <target state="translated">Přidá položky do projektu</target>
+        <source>Add items to the project.</source>
+        <target state="translated">Přidá položky do projektu.</target>
         <note />
       </trans-unit>
       <trans-unit id="RemoveDefinition">
-        <source>Remove items from the project</source>
-        <target state="translated">Odebere položky z projektu</target>
+        <source>Remove items from the project.</source>
+        <target state="translated">Odebere položky z projektu.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdvancedCommands">
@@ -129,19 +129,34 @@
         <note />
       </trans-unit>
       <trans-unit id="NugetDefinition">
-        <source>Provides additional NuGet commands</source>
-        <target state="translated">Nabízí další příkazy NuGet</target>
+        <source>Provides additional NuGet commands.</source>
+        <target state="translated">Nabízí další příkazy NuGet.</target>
         <note />
       </trans-unit>
       <trans-unit id="MsBuildDefinition">
-        <source>msbuilds a project and all of its dependencies</source>
-        <target state="translated">Vytvoří projekt nástrojem MSBuild i všechny jeho závislosti</target>
+        <source>Runs Microsoft Build Engine (MSBuild).</source>
+        <target state="translated">Spustí Microsoft Build Engine (MSBuild).</target>
         <note />
       </trans-unit>
       <trans-unit id="VsTestDefinition">
-        <source>Runs tests from the specified files</source>
-        <target state="translated">Spustí testy ze zadaných souborů</target>
+        <source>Runs Microsoft Test Execution Command Line Tool.</source>
+        <target state="translated">Spustí nástroj příkazového řádku od Microsoftu, který testuje spuštění.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="DiagnosticsDefinition">
+        <source>Enable diagnostic output</source>
+        <target state="translated">Povolit diagnostický výstup</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CleanDefinition">
+        <source>Clean build output(s).</source>
+        <target state="translated">Smaže výstupy sestavení.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SlnDefinition">
+        <source>Modify solution (SLN) files.</source>
+        <target state="new">Modify solution (SLN) files.</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>

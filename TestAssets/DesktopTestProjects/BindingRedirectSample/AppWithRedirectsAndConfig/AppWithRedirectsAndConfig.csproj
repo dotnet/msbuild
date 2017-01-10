@@ -1,7 +1,4 @@
-﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <TargetFramework>net46</TargetFramework>
     <AssemblyName>AppWithRedirectsAndConfig</AssemblyName>
@@ -10,17 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="**\*.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
     <Compile Include="..\src\*.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
-    <EmbeddedResource Include="**\*.resx" />
-    <EmbeddedResource Include="compiler\resources\**\*" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Sdk">
-      <Version>$(CLI_NETSDK_Version)</Version>
-      <PrivateAssets>All</PrivateAssets>
-    </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>8.0.3</Version>
     </PackageReference>
@@ -49,6 +39,4 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
   </PropertyGroup>
-
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -4,8 +4,8 @@
     <body>
       <group id="src/dotnet/commands/dotnet-pack/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
-        <source>pack</source>
-        <target state="translated">compresser</target>
+        <source>.NET Core NuGet Package Packer</source>
+        <target state="translated">Compresseur de package NuGet .NET Core</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
@@ -19,18 +19,18 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
-        <source>Directory in which to place outputs</source>
-        <target state="translated">Répertoire dans lequel placer les sorties</target>
+        <source>Directory in which to place built packages.</source>
+        <target state="translated">Répertoire dans lequel placer les packages générés</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
-        <source>Do not build project before packing</source>
-        <target state="translated">Ne pas générer le projet avant la compression</target>
+        <source>Skip building the project prior to packing. By default, the project will be built.</source>
+        <target state="translated">Ignorez la génération du projet avant la compression. Par défaut, le projet est généré.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSymbolsDescription">
-        <source>Include PDBs along with the DLLs in the output folder</source>
-        <target state="translated">Inclure les PDB avec les DLL dans le dossier de sortie</target>
+        <source>Include packages with symbols in addition to regular packages in output directory.</source>
+        <target state="translated">Incluez les packages avec des symboles en plus des packages classiques dans le répertoire de sortie.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSourceDescription">
@@ -44,8 +44,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
-        <source>Configuration under which to build</source>
-        <target state="translated">Configuration sous laquelle générer la build</target>
+        <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
+        <target state="translated">Configuration à utiliser pour la génération du projet.  La valeur par défaut pour la plupart des projets est "Debug".</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffix">
@@ -54,13 +54,13 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffixDescription">
-        <source>Defines what `*` should be replaced with in version field in project.json</source>
-        <target state="translated">Définit par quoi remplacer '*' dans le champ version dans project.json</target>
+        <source>Defines the value for the $(VersionSuffix) property in the project.</source>
+        <target state="translated">Définit la valeur de la propriété $(VersionSuffix) dans le projet.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdServiceableDescription">
-        <source>Set the serviceable flag in the package</source>
-        <target state="translated">Définir l'indicateur de maintenance dans le package</target>
+        <source>Set the serviceable flag in the package. For more information, please see https://aka.ms/nupkgservicing.</source>
+        <target state="translated">Définissez l'indicateur de maintenance dans le package. Pour plus d'informations, consultez https://aka.ms/nupkgservicing.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgumentProject">

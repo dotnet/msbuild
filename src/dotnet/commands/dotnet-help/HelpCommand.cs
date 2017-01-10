@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Tools.Help
   -h|--help             {LocalizableStrings.HelpDefinition} 
 
 {LocalizableStrings.HostOptions}:
-  -v|--verbose          {LocalizableStrings.VerboseDefinition}
+  -d|--diagnostics      {LocalizableStrings.DiagnosticsDefinition}
   --version             {LocalizableStrings.VersionDescription}
   --info                {LocalizableStrings.InfoDescription}
 
@@ -34,6 +34,8 @@ namespace Microsoft.DotNet.Tools.Help
   test          {LocalizableStrings.TestDefinition}
   pack          {LocalizableStrings.PackDefinition}
   migrate       {LocalizableStrings.MigrateDefinition}
+  clean         {LocalizableStrings.CleanDefinition}
+  sln           {LocalizableStrings.SlnDefinition}
 
 Project modification commands:
   add           Add items to the project

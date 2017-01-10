@@ -14,8 +14,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>Configuration under which to build</source>
-        <target state="translated">在何处生成配置</target>
+        <source>Configuration to use for building the project. Default for most projects is  "Debug".</source>
+        <target state="translated">用于生成项目的配置。对大多数项目的默认值是 "Debug"。</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionName">
@@ -24,8 +24,8 @@
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
-        <source>Compile a specific framework</source>
-        <target state="translated">编译特定的框架</target>
+        <source>Target framework to build for. The target framework has to be specified in the project file.</source>
+        <target state="translated">要生成的目标框架。目标框架必须在项目文件中指定。</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionName">
@@ -34,18 +34,18 @@
         <note />
       </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">
-        <source>Set this flag to ignore project to project references and only build the root project</source>
-        <target state="translated">设置此标志以忽略项目到项目引用，并仅生成根项目。</target>
+        <source>Set this flag to ignore project-to-project references and only build the root project</source>
+        <target state="translated">设置此标志以忽略项目到项目引用，仅生成根项目</target>
         <note />
       </trans-unit>
       <trans-unit id="NoIncrementialOptionDescription">
-        <source>Set this flag to turn off incremental build</source>
-        <target state="translated">设置此标志以关闭增量生成</target>
+        <source>Disables incremental build.</source>
+        <target state="translated">禁用增量生成。</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
-        <source>Directory in which to place outputs</source>
-        <target state="translated">用于放置输出的目录</target>
+        <source>Output directory in which to place built artifacts.</source>
+        <target state="translated">用于放置生成项目的输出目录。</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionName">

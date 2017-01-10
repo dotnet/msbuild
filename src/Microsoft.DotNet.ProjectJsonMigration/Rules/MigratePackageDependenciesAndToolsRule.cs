@@ -55,12 +55,15 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 migrationSettings.SolutionFile,
                 itemGroup: noFrameworkPackageReferenceItemGroup);
             
-            MigrationTrace.Instance.WriteLine($"Migrating {targetFrameworks.Count()} target frameworks");
+            MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.MigratingCountTargetFrameworks, targetFrameworks.Count()));
             foreach (var targetFramework in targetFrameworks)
             {
-                MigrationTrace.Instance.WriteLine($"Migrating framework {targetFramework.FrameworkName.GetShortFolderName()}");
-                
-                MigrateImports(migrationRuleInputs.CommonPropertyGroup, targetFramework);
+                MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.MigratingFramework, targetFramework.FrameworkName.GetShortFolderName()));
+
+                MigrateImports(
+                    migrationRuleInputs.CommonPropertyGroup,
+                    targetFramework,
+                    migrationRuleInputs.IsMultiTFM);
 
                 MigrateDependencies(
                     project,
@@ -161,18 +164,19 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
         private void MigrateImports(
             ProjectPropertyGroupElement commonPropertyGroup,
-            TargetFrameworkInformation targetFramework)
+            TargetFrameworkInformation targetFramework,
+            bool isMultiTFM)
         {
             var transform = ImportsTransformation.Transform(targetFramework);
 
             if (transform != null)
             {
-                transform.Condition = targetFramework.FrameworkName.GetMSBuildCondition();
+                transform.Condition = isMultiTFM ? targetFramework.FrameworkName.GetMSBuildCondition() : null;
                 _transformApplicator.Execute(transform, commonPropertyGroup, mergeExisting: true);
             }
             else
             {
-                MigrationTrace.Instance.WriteLine($"{nameof(MigratePackageDependenciesAndToolsRule)}: imports transform null for {targetFramework.FrameworkName.GetShortFolderName()}");
+                MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.ImportsTransformNullFor, nameof(MigratePackageDependenciesAndToolsRule), targetFramework.FrameworkName.GetShortFolderName()));
             }
         }
 
@@ -394,7 +398,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 dep => dep.Name,
                 dep => "",
                 dep => dep != null)
-                .WithMetadata("Version", r => r.Version);
+                .WithMetadata("Version", r => r.Version, expressedAsAttribute: true);
 
         private AddItemTransform<PackageDependencyInfo> SdkPackageDependencyTransform => 
             PackageDependencyInfoTransform()
@@ -406,7 +410,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 dep => dep.Name,
                 dep => "",
                 dep => dep != null)
-                .WithMetadata("Version", r => r.Version);
+                .WithMetadata("Version", r => r.Version, expressedAsAttribute: true);
 
         private AddPropertyTransform<TargetFrameworkInformation> ImportsTransformation => 
             new AddPropertyTransform<TargetFrameworkInformation>(

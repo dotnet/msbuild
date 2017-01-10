@@ -15,14 +15,51 @@ namespace Microsoft.DotNet.TestFramework
     {
         private DirectoryInfo _root;
 
-        public TestAssets(DirectoryInfo assetsRoot)
+        private FileInfo _dotnetCsprojExe;
+
+        private FileInfo _dotnetProjectJsonExe;
+
+        private const string ProjectJsonSearchPattern = "project.json";
+
+        private const string CsprojSearchPattern = "*.csproj";
+
+        public TestAssets(DirectoryInfo assetsRoot, FileInfo dotnetCsprojExe, FileInfo dotnetProjectJsonExe)
         {
+            if (assetsRoot == null)
+            {
+                throw new ArgumentNullException(nameof(assetsRoot));
+            }
+
+            if (dotnetCsprojExe == null)
+            {
+                throw new ArgumentNullException(nameof(dotnetCsprojExe));
+            }
+
+            if (dotnetProjectJsonExe == null)
+            {
+                throw new ArgumentNullException(nameof(dotnetProjectJsonExe));
+            }
+            
             if (!assetsRoot.Exists)
             {
                 throw new DirectoryNotFoundException($"Directory not found at '{assetsRoot}'");
             }
 
+            if (!dotnetCsprojExe.Exists)
+            {
+                throw new FileNotFoundException("Csproj dotnet executable must exist", dotnetCsprojExe.FullName);
+            }
+
+            if (!dotnetProjectJsonExe.Exists)
+            {
+                throw new FileNotFoundException("project.json dotnet executable must exist", dotnetProjectJsonExe.FullName);
+            }
+
             _root = assetsRoot;
+
+            _dotnetCsprojExe = dotnetCsprojExe;
+
+            _dotnetProjectJsonExe = dotnetProjectJsonExe;
         }
 
         public TestAssetInfo Get(string name)
@@ -34,7 +71,48 @@ namespace Microsoft.DotNet.TestFramework
         {
             var assetDirectory = new DirectoryInfo(Path.Combine(_root.FullName, kind, name));
 
-            return new TestAssetInfo(assetDirectory, name);
+            return new TestAssetInfo(
+                assetDirectory, 
+                name, 
+                _dotnetCsprojExe,
+                CsprojSearchPattern);
+        }
+
+        public TestAssetInfo GetProjectJson(string name)
+        {
+            return GetProjectJson(TestAssetKinds.TestProjects, name);
+        }
+
+        public TestAssetInfo GetProjectJson(string kind, string name)
+        {
+            var assetDirectory = new DirectoryInfo(Path.Combine(_root.FullName, kind, name));
+
+            return new TestAssetInfo(
+                assetDirectory, 
+                name, 
+                _dotnetProjectJsonExe,
+                ProjectJsonSearchPattern);
+        }
+
+        public DirectoryInfo CreateTestDirectory([CallerMemberName] string callingMethod = "", string identifier = "")
+        {
+            var testDestination = GetTestDestinationDirectoryPath("temp", callingMethod, identifier);
+
+            var testDirectory = new DirectoryInfo(testDestination);
+
+            testDirectory.EnsureExistsAndEmpty();
+
+            return testDirectory;
+        }
+
+        private string GetTestDestinationDirectoryPath(string testProjectName, string callingMethod, string identifier)
+        {
+#if NET451
+            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+#else
+            string baseDirectory = AppContext.BaseDirectory;
+#endif
+            return Path.Combine(baseDirectory, callingMethod + identifier, testProjectName);
         }
     }
 }

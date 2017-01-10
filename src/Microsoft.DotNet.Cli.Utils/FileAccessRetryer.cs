@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Cli.Utils
             {
                 if (attemptsLeft < 1)
                 {
-                    throw new InvalidOperationException("Could not access assets file.");
+                    throw new InvalidOperationException(LocalizableStrings.CouldNotAccessAssetsFile);
                 }
 
                 attemptsLeft--;

@@ -56,10 +56,9 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData("pack", true)]
         [InlineData("publish", true)]
         [InlineData("restore", true)]
-        [InlineData("run", true)]
         public void When_help_is_invoked_Then_MSBuild_extra_options_text_is_included_in_output(string commandName, bool isMSBuildCommand)
         {
-            const string MSBuildHelpText = "  Any extra options that should be passed to MSBuild. See 'dotnet msbuild -h' for available options.";
+            const string MSBuildHelpText = " Any extra options that should be passed to MSBuild. See 'dotnet msbuild -h' for available options.";
 
             var projectDirectory = TestAssetsManager.CreateTestDirectory("ItContainsMSBuildHelpText");
             var result = new TestCommand("dotnet")
@@ -75,6 +74,20 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             {
                 result.StdOut.Should().NotContain(MSBuildHelpText);
             }
+        }
+
+        [Fact]
+        public void WhenDotnetRunHelpIsInvokedAppArgumentsTextIsIncludedInOutput()
+        {
+            const string AppArgumentsText = "Arguments passed to the application that is being run.";
+
+            var projectDirectory = TestAssetsManager.CreateTestDirectory("RunContainsAppArgumentsText");
+            var result = new TestCommand("dotnet")
+                .WithWorkingDirectory(projectDirectory.Path)
+                .ExecuteWithCapturedOutput("run --help");
+            
+            result.ExitCode.Should().Be(0);
+            result.StdOut.Should().Contain(AppArgumentsText);
         }
 
         [Fact]

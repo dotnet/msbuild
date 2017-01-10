@@ -29,8 +29,8 @@
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
-        <source>Target framework to publish for</source>
-        <target state="translated">Cílová platforma pro publikování</target>
+        <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
+        <target state="translated">Cílová platforma pro publikování. Cílová platforma musí být v souboru projektu zadaná.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOption">
@@ -39,8 +39,8 @@
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
-        <source>Target runtime to publish for. The default is to publish a portable application.</source>
-        <target state="translated">Cílový modul runtime pro publikování. Výchozí možnost je publikovat přenosnou aplikaci.</target>
+        <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependented app.</source>
+        <target state="translated">Publikuje projekt pro daný modul runtime. Používá se při vytváření nezávislého nasazení. Výchozí možnost je publikování aplikace závislé na platformě.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -49,8 +49,8 @@
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
-        <source>Path in which to publish the app</source>
-        <target state="translated">Cesta pro publikování aplikace</target>
+        <source>Output directory in which to place the published artifacts.</source>
+        <target state="translated">Výstupní adresář do kterého se umisťují publikované artefakty.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOption">
@@ -59,8 +59,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>Configuration under which to build</source>
-        <target state="translated">Konfigurace použitá k sestavení</target>
+        <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
+        <target state="translated">Konfigurace použitá k sestavení projektu.  Výchozí možnost u většiny projektů je „Debug“.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOption">
@@ -69,7 +69,7 @@
         <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOptionDescription">
-        <source>Defines the value for the $(VersionSuffix) property in the project</source>
+        <source>Defines the value for the $(VersionSuffix) property in the project.</source>
         <target state="translated">Definuje hodnotu vlastnosti $(VersionSuffix) v projektu.</target>
         <note />
       </trans-unit>

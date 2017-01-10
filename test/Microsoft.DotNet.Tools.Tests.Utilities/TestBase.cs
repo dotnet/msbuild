@@ -53,7 +53,10 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 {
                     var assetsRoot = Path.Combine(RepoRoot, "TestAssets");
 
-                    s_testAssets = new TestAssets(new DirectoryInfo(assetsRoot)); 
+                    s_testAssets = new TestAssets(
+                        new DirectoryInfo(assetsRoot),
+                        new FileInfo(new EnvironmentProvider().GetCommandPath("dotnet")),
+                        new FileInfo(new RepoDirectoriesProvider().PjDotnet)); 
                 }
 
                 return s_testAssets;

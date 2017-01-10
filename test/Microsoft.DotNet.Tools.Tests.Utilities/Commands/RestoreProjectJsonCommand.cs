@@ -8,21 +8,20 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
     public sealed class RestoreProjectJsonCommand : TestCommand
     {
         public RestoreProjectJsonCommand()
-            : base("dotnet")
+            : base(new RepoDirectoriesProvider().PjDotnet)
         {
-
         }
 
         public override CommandResult Execute(string args="")
         {
-            args = $"restore-projectjson {args}";
+            args = $"restore {args}";
 
             return base.Execute(args);
         }
 
         public override CommandResult ExecuteWithCapturedOutput(string args = "")
         {
-            args = $"restore-projectjson {args}";
+            args = $"restore {args}";
             return base.ExecuteWithCapturedOutput(args);
         }
     }

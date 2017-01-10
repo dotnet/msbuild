@@ -24,7 +24,7 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
-        <source>Directory in which the build outputs have been placed</source>
+        <source>Directory in which the build outputs have been placed.</source>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
@@ -32,7 +32,7 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
-        <source>Clean a specific framework</source>
+        <source>Clean a specific framework.</source>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfiguration">
@@ -40,7 +40,7 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigurationDescription">
-        <source>Clean a specific configuration</source>
+        <source>Clean a specific configuration.</source>
         <note />
       </trans-unit>
     </body>

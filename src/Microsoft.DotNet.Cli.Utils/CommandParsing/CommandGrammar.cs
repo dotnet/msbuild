@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Cli.Utils.CommandParsing
 {
@@ -54,7 +55,7 @@ namespace Microsoft.DotNet.Cli.Utils.CommandParsing
             var result = grammar.Parse(cursor);
             if (!result.Remainder.IsEnd)
             {
-                throw new ArgumentException($"Malformed command text '{text}'", nameof(text));
+                throw new ArgumentException(string.Format(LocalizableStrings.MalformedText, nameof(text)));
             }
             return result.Value.ToArray();
         }

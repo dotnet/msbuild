@@ -25,5 +25,10 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         {
             return new FileInfoNuGetLock(subject);
         }
+
+        public static string ReadAllText(this FileInfo subject)
+        {
+            return File.ReadAllText(subject.FullName);
+        }
     }
 }

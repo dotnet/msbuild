@@ -5,18 +5,18 @@
       <group id="src/dotnet/commands/dotnet-add/dotnet-add-proj/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET Add Project to Solution Command</source>
-        <target state="new">.NET Add Project to Solution Command</target>
-        <note></note>
+        <target state="translated">Команда "Добавить проект в решение" .NET</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Command to add project to solution</source>
-        <target state="new">Command to add project to solution</target>
-        <note></note>
+        <target state="translated">Команда для добавления проекта в решение</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppHelpText">
         <source>Projects to add to solution</source>
-        <target state="new">Projects to add to solution</target>
-        <note></note>
+        <target state="translated">Проекты, добавляемые в решение</target>
+        <note />
       </trans-unit>
     </body>
   </file>

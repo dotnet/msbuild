@@ -1,5 +1,4 @@
-﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   
   <PropertyGroup>
@@ -13,10 +12,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="**\*.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
-    <Compile Include="..\..\src\dotnet\DotnetFiles.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
-    <EmbeddedResource Include="**\*.resx" />
-    <EmbeddedResource Include="compiler\resources\**\*" />
     <Content Include="..\..\artifacts\*\stage2\sdk\*\.version">
       <Link>.version</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -46,10 +41,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Sdk">
-      <Version>$(CLI_NETSDK_Version)</Version>
-      <PrivateAssets>All</PrivateAssets>
-    </PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk">
       <Version>15.0.0-preview-20161024-02</Version>
     </PackageReference>
@@ -57,7 +48,7 @@
       <Version>2.2.0-beta4-build1194</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.1</Version>
+      <Version>1.0.3</Version>
     </PackageReference>
     <PackageReference Include="System.Diagnostics.TraceSource">
       <Version>4.0.0</Version>
@@ -66,16 +57,16 @@
       <Version>4.1.1</Version>
     </PackageReference>
     <PackageReference Include="NuGet.Versioning">
-      <Version>4.0.0-rc2</Version>
+      <Version>4.0.0-rc3</Version>
     </PackageReference>
     <PackageReference Include="NuGet.Packaging">
-      <Version>4.0.0-rc2</Version>
+      <Version>4.0.0-rc3</Version>
     </PackageReference>
     <PackageReference Include="NuGet.Frameworks">
-      <Version>4.0.0-rc2</Version>
+      <Version>4.0.0-rc3</Version>
     </PackageReference>
     <PackageReference Include="NuGet.ProjectModel">
-      <Version>4.0.0-rc2</Version>
+      <Version>4.0.0-rc3</Version>
     </PackageReference>
     <PackageReference Include="moq.netcore">
       <Version>4.4.0-beta8</Version>
@@ -94,6 +85,4 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
   </PropertyGroup>
-  
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

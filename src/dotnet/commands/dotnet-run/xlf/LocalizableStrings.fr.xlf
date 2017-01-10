@@ -14,8 +14,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionConfigurationDescription">
-        <source>Configuration under which to build</source>
-        <target state="translated">Configuration sous laquelle générer la build</target>
+        <source>Configuration to use for building the project. Default for most projects is "Debug".</source>
+        <target state="translated">Configuration à utiliser pour la génération du projet. La valeur par défaut pour la plupart des projets est "Debug".</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionFramework">
@@ -24,8 +24,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionFrameworkDescription">
-        <source>Compile a specific framework</source>
-        <target state="translated">Compiler un framework spécifique</target>
+        <source>Build and run the app using the specified framework. The framework has to be specified in the project file. </source>
+        <target state="translated">Générez et exécutez l'application à l'aide du framework spécifié. Le framework doit être spécifié dans le fichier projet. </target>
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionProjectDescription">
@@ -106,6 +106,11 @@
       <trans-unit id="RunCommandInvalidOperationException4">
         <source>contains more than one project file.</source>
         <target state="translated">contient plusieurs fichiers projet.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandAdditionalArgsHelpText">
+        <source>Arguments passed to the application that is being run.</source>
+        <target state="translated">Arguments passés à l'application exécutée.</target>
         <note />
       </trans-unit>
     </body>

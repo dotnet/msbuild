@@ -4,8 +4,8 @@
     <body>
       <group id="src/dotnet/commands/dotnet-pack/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
-        <source>pack</source>
-        <target state="translated">pack</target>
+        <source>.NET Core NuGet Package Packer</source>
+        <target state="translated">.NET Core NuGet Paketi Paketleyicisi</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
@@ -19,18 +19,18 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
-        <source>Directory in which to place outputs</source>
-        <target state="translated">Çıkışların yerleştirileceği dizin</target>
+        <source>Directory in which to place built packages.</source>
+        <target state="translated">Derlenen paketlerin yerleştirileceği dizin.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
-        <source>Do not build project before packing</source>
-        <target state="translated">Projeyi derlemeden önce paketleyin</target>
+        <source>Skip building the project prior to packing. By default, the project will be built.</source>
+        <target state="translated">Paketlemeden önce projeyi derlemeyi atlayın. Varsayılan olarak, proje derlenir.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSymbolsDescription">
-        <source>Include PDBs along with the DLLs in the output folder</source>
-        <target state="translated">Çıkış klasörüne DLL’ler ile birlikte PDB’leri ekleyin</target>
+        <source>Include packages with symbols in addition to regular packages in output directory.</source>
+        <target state="translated">Çıkış dizinine, normal paketlere ek olarak sembol içeren paketler ekleyin.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSourceDescription">
@@ -44,8 +44,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
-        <source>Configuration under which to build</source>
-        <target state="translated">Derlemenin gerçekleştirileceği yapılandırma</target>
+        <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
+        <target state="translated">Projeyi derlemek için kullanılacak yapılandırma.  Çoğu proje için varsayılan: "Debug".</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffix">
@@ -54,13 +54,13 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffixDescription">
-        <source>Defines what `*` should be replaced with in version field in project.json</source>
-        <target state="translated">Project.json dosyasındaki sürüm alanında `*` simgesinin neyle değiştirileceğini tanımlar</target>
+        <source>Defines the value for the $(VersionSuffix) property in the project.</source>
+        <target state="translated">Projedeki $(VersionSuffix) özelliğinin değerini tanımlar.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdServiceableDescription">
-        <source>Set the serviceable flag in the package</source>
-        <target state="translated">Pakette serviceable bayrağını ayarlayın</target>
+        <source>Set the serviceable flag in the package. For more information, please see https://aka.ms/nupkgservicing.</source>
+        <target state="translated">Paketteki serviceable bayrağını ayarlayın. Daha fazla bilgi için bkz. https://aka.ms/nupkgservicing.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgumentProject">

@@ -24,7 +24,7 @@
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
-        <source>Target framework to publish for</source>
+        <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOption">
@@ -32,7 +32,7 @@
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
-        <source>Target runtime to publish for. The default is to publish a portable application.</source>
+        <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependented app.</source>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -40,7 +40,7 @@
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
-        <source>Path in which to publish the app</source>
+        <source>Output directory in which to place the published artifacts.</source>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOption">
@@ -48,7 +48,7 @@
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>Configuration under which to build</source>
+        <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
         <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOption">
@@ -56,7 +56,7 @@
         <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOptionDescription">
-        <source>Defines the value for the $(VersionSuffix) property in the project</source>
+        <source>Defines the value for the $(VersionSuffix) property in the project.</source>
         <note />
       </trans-unit>
     </body>

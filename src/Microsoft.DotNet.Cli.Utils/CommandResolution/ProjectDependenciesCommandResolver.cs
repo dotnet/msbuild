@@ -10,6 +10,8 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public class ProjectDependenciesCommandResolver : ICommandResolver
     {
+        private const string ProjectDependenciesCommandResolverName = "projectdependenciescommandresolver";
+
         private static readonly CommandResolutionStrategy s_commandResolutionStrategy =
             CommandResolutionStrategy.ProjectDependenciesPackage;
 
@@ -36,14 +38,19 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public CommandSpec Resolve(CommandResolverArguments commandResolverArguments)
         {
-            Reporter.Verbose.WriteLine($"projectdependenciescommandresolver: attempting to resolve {commandResolverArguments.CommandName}");
+            Reporter.Verbose.WriteLine(string.Format(
+                LocalizableStrings.AttemptingToResolve,
+                ProjectDependenciesCommandResolverName,
+                commandResolverArguments.CommandName));
 
             if (commandResolverArguments.Framework == null
                 || commandResolverArguments.ProjectDirectory == null
                 || commandResolverArguments.Configuration == null
                 || commandResolverArguments.CommandName == null)
             {
-                Reporter.Verbose.WriteLine($"projectdependenciescommandresolver: invalid commandResolverArguments");
+                Reporter.Verbose.WriteLine(string.Format(
+                    LocalizableStrings.InvalidCommandResolverArguments,
+                    ProjectDependenciesCommandResolverName));
 
                 return null;
             }
@@ -79,7 +86,10 @@ namespace Microsoft.DotNet.Cli.Utils
 
             if (project == null)
             {
-                Reporter.Verbose.WriteLine($"projectdependenciescommandresolver: Didn't find a matching project {projectDirectory}.");
+                Reporter.Verbose.WriteLine(string.Format(
+                    LocalizableStrings.DidNotFindAMatchingProject,
+                    ProjectDependenciesCommandResolverName,
+                    projectDirectory));
                 return null;
             }
 
@@ -87,7 +97,10 @@ namespace Microsoft.DotNet.Cli.Utils
 
             if (!File.Exists(depsFilePath))
             {
-                Reporter.Verbose.WriteLine($"projectdependenciescommandresolver: {depsFilePath} does not exist");
+                Reporter.Verbose.WriteLine(string.Format(
+                    LocalizableStrings.DoesNotExist,
+                    ProjectDependenciesCommandResolverName,
+                    depsFilePath));
                 return null;
             }
 
@@ -95,7 +108,10 @@ namespace Microsoft.DotNet.Cli.Utils
 
             if (!File.Exists(runtimeConfigPath))
             {
-                Reporter.Verbose.WriteLine($"projectdependenciescommandresolver: {runtimeConfigPath} does not exist");
+                Reporter.Verbose.WriteLine(string.Format(
+                    LocalizableStrings.DoesNotExist,
+                    ProjectDependenciesCommandResolverName,
+                    runtimeConfigPath));
                 return null;
             }
 
@@ -130,10 +146,15 @@ namespace Microsoft.DotNet.Cli.Utils
 
             if (toolLibraries?.Count() > 1)
             {
-                throw new InvalidOperationException($"Ambiguous command name: {commandName}");
+                throw new InvalidOperationException(string.Format(
+                    LocalizableStrings.AmbiguousCommandName,
+                    commandName));
             }
 
-            Reporter.Verbose.WriteLine($"projectdependenciescommandresolver: tool library found {toolLibraries?.Count() > 0}");
+            Reporter.Verbose.WriteLine(string.Format(
+                LocalizableStrings.ToolLibraryFound,
+                ProjectDependenciesCommandResolverName,
+                toolLibraries?.Count() > 0));
 
             return toolLibraries?.FirstOrDefault();
         }

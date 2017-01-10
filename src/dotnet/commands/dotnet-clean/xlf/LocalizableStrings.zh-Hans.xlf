@@ -29,8 +29,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
-        <source>Directory in which the build outputs have been placed</source>
-        <target state="translated">放置生成输出的目录</target>
+        <source>Directory in which the build outputs have been placed.</source>
+        <target state="translated">放置了生成输出的目录。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
@@ -39,8 +39,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
-        <source>Clean a specific framework</source>
-        <target state="translated">清理特定的框架</target>
+        <source>Clean a specific framework.</source>
+        <target state="translated">清理特定的框架。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfiguration">
@@ -49,8 +49,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigurationDescription">
-        <source>Clean a specific configuration</source>
-        <target state="translated">清理特定的配置</target>
+        <source>Clean a specific configuration.</source>
+        <target state="translated">清理特定的配置。</target>
         <note />
       </trans-unit>
     </body>

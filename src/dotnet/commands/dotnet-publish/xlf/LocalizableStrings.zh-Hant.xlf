@@ -29,8 +29,8 @@
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
-        <source>Target framework to publish for</source>
-        <target state="translated">要對其發行的目標 Framework</target>
+        <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
+        <target state="translated">要對其發行的目標 Framework。目標 Framework 必須在專案檔中指定。</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOption">
@@ -39,8 +39,8 @@
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
-        <source>Target runtime to publish for. The default is to publish a portable application.</source>
-        <target state="translated">要對其發行的目標執行階段。預設為發行可攜式應用程式。</target>
+        <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependented app.</source>
+        <target state="translated">為指定的執行階段發行專案。這在建立獨立部署時會用到。預設為發行相依於架構的應用程式。</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -49,8 +49,8 @@
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
-        <source>Path in which to publish the app</source>
-        <target state="translated">要發行應用程式的路徑</target>
+        <source>Output directory in which to place the published artifacts.</source>
+        <target state="translated">要放置發行之成品的輸出目錄。</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOption">
@@ -59,8 +59,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>Configuration under which to build</source>
-        <target state="translated">作為建置依據的組態</target>
+        <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
+        <target state="translated">要用於建置專案的組態。多數專案的預設為 "Debug"。</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOption">
@@ -69,8 +69,8 @@
         <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOptionDescription">
-        <source>Defines the value for the $(VersionSuffix) property in the project</source>
-        <target state="translated">定義專案中 $(VersionSuffix) 屬性的值</target>
+        <source>Defines the value for the $(VersionSuffix) property in the project.</source>
+        <target state="translated">在專案中定義 $(VersionSuffix) 屬性的值。</target>
         <note />
       </trans-unit>
     </body>

@@ -3,6 +3,7 @@
   <Import Project="Microsoft.DotNet.Cli.tasks" />
   <Import Project="prepare/CheckPrereqs.targets" />
   <Import Project="Microsoft.DotNet.Cli.BundledSdks.props" />
+  <Import Project="Microsoft.DotNet.Cli.BundledTemplates.props" />
   <Import Project="Microsoft.DotNet.Cli.DependencyVersions.props" />
 
   <Target Name="Prepare"
@@ -23,12 +24,6 @@
       <Output TaskParameter="Architecture" PropertyName="Architecture" />
       <Output TaskParameter="OSName" PropertyName="OSName" />
     </GetCurrentRuntimeInformation>
-
-    <!-- NuGet Information -->
-    <PropertyGroup>
-      <NuGetPackagesDir>$(NUGET_PACKAGES)</NuGetPackagesDir>
-      <NuGetPackagesDir Condition=" '$(NuGetPackagesDir)' == '' ">$(RepoRoot)/.nuget/packages</NuGetPackagesDir>
-    </PropertyGroup>
     
     <!-- Common Properties -->
     <PropertyGroup>
@@ -68,6 +63,10 @@
       <Output TaskParameter="Channel" PropertyName="Channel" />
       <Output TaskParameter="BranchName" PropertyName="BranchName" />
     </GenerateBuildVersionInfo>
+
+    <GenerateNuGetPackagesArchiveVersion RepoRoot="$(RepoRoot)">
+      <Output TaskParameter="Version" PropertyName="NuGetPackagesArchiveVersion"/>
+    </GenerateNuGetPackagesArchiveVersion>
 
     <PropertyGroup>
       <VersionBadge>$(BaseOutputDirectory)/$(VersionBadgeMoniker)_$(Configuration)_version_badge.svg</VersionBadge>
@@ -120,16 +119,37 @@
       <CombinedFrameworkHostCompressedFileName>dotnet-$(ProductMonikerRid).$(SharedFrameworkVersion)$(ArchiveExtension)</CombinedFrameworkHostCompressedFileName>
     </PropertyGroup>
 
+    <!-- Additional Shared Framework to be installed -->
+    <PropertyGroup>
+      <AdditionalCoreSetupChannel>release/1.1.0</AdditionalCoreSetupChannel>
+      <AdditionalSharedFrameworkVersion>1.1.0</AdditionalSharedFrameworkVersion>
+      <AdditionalSharedHostVersion>1.1.0</AdditionalSharedHostVersion>
+      <AdditionalHostFxrVersion>1.1.0</AdditionalHostFxrVersion>
+
+      <!-- Additional Downloaded Installers + Archives -->
+      <AdditionalDownloadedSharedHostInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-host-$(ProductMonikerRid).$(AdditionalSharedHostVersion)$(InstallerExtension)</AdditionalDownloadedSharedHostInstallerFileName>
+      <AdditionalDownloadedSharedHostInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(AdditionalDownloadedSharedHostInstallerFileName)</AdditionalDownloadedSharedHostInstallerFile>
+
+      <AdditionalDownloadedHostFxrInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-hostfxr-$(ProductMonikerRid).$(AdditionalHostFxrVersion)$(InstallerExtension)</AdditionalDownloadedHostFxrInstallerFileName>
+      <AdditionalDownloadedHostFxrInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(AdditionalDownloadedHostFxrInstallerFileName)</AdditionalDownloadedHostFxrInstallerFile>
+
+      <AdditionalDownloadedSharedFrameworkInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-sharedframework-$(ProductMonikerRid).$(AdditionalSharedFrameworkVersion)$(InstallerExtension)</AdditionalDownloadedSharedFrameworkInstallerFileName>
+      <AdditionalDownloadedSharedFrameworkInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(AdditionalDownloadedSharedFrameworkInstallerFileName)</AdditionalDownloadedSharedFrameworkInstallerFile>
+
+      <AdditionalCombinedFrameworkHostCompressedFileName>dotnet-$(ProductMonikerRid).$(AdditionalSharedFrameworkVersion)$(ArchiveExtension)</AdditionalCombinedFrameworkHostCompressedFileName>
+    </PropertyGroup>
+
+
     <!-- SetTelemetryProfile -->
     <SetEnvVar Name="DOTNET_CLI_TELEMETRY_PROFILE" Value="$(DOTNET_CLI_TELEMETRY_PROFILE);https://github.com/dotnet/cli;$(CommitHash)" />
   </Target>
 
   <Target Name="SetupDownloadHostAndSharedFxInputsOutputs" DependsOnTargets="Init">
     <PropertyGroup>
-      <CoreSetupBlobRootUrl>https://dotnetcli.azureedge.net/dotnet/$(CoreSetupChannel)</CoreSetupBlobRootUrl>
-      <SharedFrameworkArchiveBlobRootUrl>$(CoreSetupBlobRootUrl)/Binaries/$(SharedFrameworkVersion)</SharedFrameworkArchiveBlobRootUrl>
-      <CoreSetupInstallerBlobRootUrl>$(CoreSetupBlobRootUrl)/Installers</CoreSetupInstallerBlobRootUrl>
-
+      <CoreSetupBlobRootUrl>https://dotnetcli.azureedge.net/dotnet/</CoreSetupBlobRootUrl>
+      <CoreSetupBlobRootUrlWithChannel>$(CoreSetupBlobRootUrl)$(CoreSetupChannel)</CoreSetupBlobRootUrlWithChannel>
+      <SharedFrameworkArchiveBlobRootUrl>$(CoreSetupBlobRootUrlWithChannel)/Binaries/$(SharedFrameworkVersion)</SharedFrameworkArchiveBlobRootUrl>
+      <CoreSetupInstallerBlobRootUrl>$(CoreSetupBlobRootUrlWithChannel)/Installers</CoreSetupInstallerBlobRootUrl>
       <CoreSetupDownloadDirectory>$(IntermediateDirectory)/coreSetupDownload/$(SharedFrameworkVersion)</CoreSetupDownloadDirectory>
       <CombinedSharedHostAndFrameworkArchive>$(CoreSetupDownloadDirectory)/combinedSharedHostAndFrameworkArchive</CombinedSharedHostAndFrameworkArchive>
     </PropertyGroup>
@@ -163,11 +183,57 @@
         <ExtractDestintation></ExtractDestintation>
       </_DownloadAndExtractItem>
     </ItemGroup>
+
+    <!-- Additional Shared Framework to be installed -->
+    <PropertyGroup>
+      <AdditionalCoreSetupBlobRootUrlWithChannel>$(CoreSetupBlobRootUrl)$(AdditionalCoreSetupChannel)</AdditionalCoreSetupBlobRootUrlWithChannel>
+      <AdditionalSharedFrameworkArchiveBlobRootUrl>$(AdditionalCoreSetupBlobRootUrlWithChannel)/Binaries/$(AdditionalSharedFrameworkVersion)</AdditionalSharedFrameworkArchiveBlobRootUrl>
+      <AdditionalCoreSetupInstallerBlobRootUrl>$(AdditionalCoreSetupBlobRootUrlWithChannel)/Installers</AdditionalCoreSetupInstallerBlobRootUrl>
+      <AdditionalCoreSetupDownloadDirectory>$(IntermediateDirectory)/coreSetupDownload/$(AdditionalSharedFrameworkVersion)</AdditionalCoreSetupDownloadDirectory>
+      <AdditionalCombinedSharedHostAndFrameworkArchive>$(AdditionalCoreSetupDownloadDirectory)/combinedSharedHostAndFrameworkArchive</AdditionalCombinedSharedHostAndFrameworkArchive>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_DownloadAndExtractItem Include="AdditionalCombinedSharedHostAndFrameworkArchive"
+                               Condition="!Exists('$(AdditionalCombinedSharedHostAndFrameworkArchive)')">
+        <Url>$(AdditionalSharedFrameworkArchiveBlobRootUrl)/$(AdditionalCombinedFrameworkHostCompressedFileName)</Url>
+        <DownloadFileName>$(AdditionalCombinedSharedHostAndFrameworkArchive)</DownloadFileName>
+        <ExtractDestination>$(SharedFrameworkPublishDirectory)</ExtractDestination>
+        <!-- don't overwrite the destination because both shared fx's need to be combined -->
+        <OverwriteDestination>False</OverwriteDestination>
+      </_DownloadAndExtractItem>
+
+      <_DownloadAndExtractItem Include="AdditionalDownloadedSharedFrameworkInstallerFile"
+                               Condition="!Exists('$(AdditionalDownloadedSharedFrameworkInstallerFile)') And '$(InstallerExtension)' != ''">
+        <Url>$(AdditionalCoreSetupInstallerBlobRootUrl)/$(AdditionalSharedFrameworkVersion)/$(AdditionalDownloadedSharedFrameworkInstallerFileName)</Url>
+        <DownloadFileName>$(AdditionalDownloadedSharedFrameworkInstallerFile)</DownloadFileName>
+        <ExtractDestination></ExtractDestination>
+      </_DownloadAndExtractItem>
+
+      <_DownloadAndExtractItem Include="AdditionalDownloadedSharedHostInstallerFile"
+                               Condition="!Exists('$(AdditionalDownloadedSharedHostInstallerFile)') And '$(InstallerExtension)' != ''">
+        <Url>$(AdditionalCoreSetupInstallerBlobRootUrl)/$(AdditionalSharedHostVersion)/$(AdditionalDownloadedSharedHostInstallerFileName)</Url>
+        <DownloadFileName>$(AdditionalDownloadedSharedHostInstallerFile)</DownloadFileName>
+        <ExtractDestintation></ExtractDestintation>
+      </_DownloadAndExtractItem>
+
+      <_DownloadAndExtractItem Include="AdditionalDownloadedHostFxrInstallerFile"
+                               Condition="!Exists('$(AdditionalDownloadedHostFxrInstallerFile)') And '$(InstallerExtension)' != ''">
+        <Url>$(AdditionalCoreSetupInstallerBlobRootUrl)/$(AdditionalHostFxrVersion)/$(AdditionalDownloadedHostFxrInstallerFileName)</Url>
+        <DownloadFileName>$(AdditionalDownloadedHostFxrInstallerFile)</DownloadFileName>
+        <ExtractDestintation></ExtractDestintation>
+      </_DownloadAndExtractItem>
+    </ItemGroup>
   </Target>
 
   <Target Name="DownloadHostAndSharedFxArtifacts"
           DependsOnTargets="SetupDownloadHostAndSharedFxInputsOutputs">
 
+    <PropertyGroup>
+      <OverwriteExtractionDestination>%(_DownloadAndExtractItem.OverwriteDestination)</OverwriteExtractionDestination>
+      <OverwriteExtractionDestination Condition="'$(OverwriteExtractionDestination)' == ''">True</OverwriteExtractionDestination>
+    </PropertyGroup>
+    
     <DownloadFile Condition=" '@(_DownloadAndExtractItem)' != '' "
                   Uri="%(_DownloadAndExtractItem.Url)"
                   DestinationPath="%(_DownloadAndExtractItem.DownloadFileName)" />
@@ -175,12 +241,12 @@
     <ZipFileExtractToDirectory Condition=" '%(_DownloadAndExtractItem.ExtractDestination)' != '' AND '$(OSName)' == 'win' "
                                SourceArchive="%(_DownloadAndExtractItem.DownloadFileName)"
                                DestinationDirectory="%(_DownloadAndExtractItem.ExtractDestination)"
-                               OverwriteDestination="True" />
+                               OverwriteDestination="$(OverwriteExtractionDestination)" />
 
     <TarGzFileExtractToDirectory Condition=" '%(_DownloadAndExtractItem.ExtractDestination)' != '' AND '$(OSName)' != 'win' "
                                SourceArchive="%(_DownloadAndExtractItem.DownloadFileName)"
                                DestinationDirectory="%(_DownloadAndExtractItem.ExtractDestination)"
-                               OverwriteDestination="True" />
+                               OverwriteDestination="$(OverwriteExtractionDestination)" />
   </Target>
 
   <Target Name="RestoreSrcPackages"
@@ -215,7 +281,7 @@
 
     <CallTarget Targets="CleanToolsLockFiles" />
 
-    <DotNetRestore ToolPath="$(DotNetPath)" 
+    <DotNetRestore ToolPath="$(DotNetPath)"
                    ProjectPath="&quot;%(RestoreToolsPackagesInput.FullPath)&quot;" />
 
   </Target>

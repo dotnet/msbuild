@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" original="src/dotnet/commands/dotnet-add/dotnet-add-package/LocalizableStrings.resx">
+    <body>
+      <group id="src/dotnet/commands/dotnet-add/dotnet-add-package/LocalizableStrings.resx" />
+      <trans-unit id="AppFullName">
+        <source>.NET Add Package reference Command</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Command to add package reference</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppHelpText">
+        <source>Package references to add</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyExactlyOnePackageReference">
+        <source>Please specify one package reference to add.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdFrameworkDescription">
+        <source>Add reference only when targetting a specific framework</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoRestoreDescription">
+        <source>Add reference without performing restore preview and compatibility check.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdSourceDescription">
+        <source>Use specific NuGet package sources to use during the restore.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdPackageDirectoryDescription">
+        <source>Restore the packages to this Directory .</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdVersionDescription">
+        <source>Version for the package to be added.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdDGFileException">
+        <source>Unable to Create Dependency graph file for project '{0}'. Cannot add package reference.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdVersion">
+        <source>VERSION</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdFramework">
+        <source>FRAMEWORK</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdSource">
+        <source>SOURCE</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdPackageDirectory">
+        <source>PACKAGE_DIRECTORY</source>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

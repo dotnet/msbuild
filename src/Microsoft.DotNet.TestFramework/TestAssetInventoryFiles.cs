@@ -72,5 +72,18 @@ namespace Microsoft.DotNet.TestFramework
 
             Build = new FileInfo(Path.Combine(inventoryFileDirectory.FullName, "build.txt"));
         }
+
+        public IEnumerable<FileInfo> AllInventoryFiles
+        {
+            get
+            {
+                return new List<FileInfo>
+                {
+                    Source,
+                    Restore,
+                    Build
+                };
+            }
+        }
     }
 }

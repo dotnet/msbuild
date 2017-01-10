@@ -6,19 +6,19 @@
 
         public const string AppFullName = ".NET Builder";
 
-        public const string ConfigurationOptionDescription = "Configuration under which to build";
+        public const string ConfigurationOptionDescription = "Configuration to use for building the project. Default for most projects is  \"Debug\".";
 
         public const string ConfigurationOptionName = "CONFIGURATION";
 
-        public const string FrameworkOptionDescription = "Compile a specific framework";
+        public const string FrameworkOptionDescription = "Target framework to build for. The target framework has to be specified in the project file.";
 
         public const string FrameworkOptionName = "FRAMEWORK";
 
-        public const string NoDependenciesOptionDescription = "Set this flag to ignore project to project references and only build the root project";
+        public const string NoDependenciesOptionDescription = "Set this flag to ignore project-to-project references and only build the root project";
 
-        public const string NoIncrementialOptionDescription = "Set this flag to turn off incremental build";
+        public const string NoIncrementialOptionDescription = "Disables incremental build.";
 
-        public const string OutputOptionDescription = "Directory in which to place outputs";
+        public const string OutputOptionDescription = "Output directory in which to place built artifacts.";
 
         public const string OutputOptionName = "OUTPUT_DIR";
 

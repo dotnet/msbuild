@@ -95,18 +95,29 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
             _excludeValue = excludeValue;
         }
 
-        public AddItemTransform<T> WithMetadata(string metadataName, string metadataValue)
+        public AddItemTransform<T> WithMetadata(
+            string metadataName,
+            string metadataValue,
+            bool expressedAsAttribute = false)
         {
-            _metadata.Add(new ItemMetadataValue<T>(metadataName, metadataValue));
+            _metadata.Add(new ItemMetadataValue<T>(
+                metadataName,
+                metadataValue,
+                expressedAsAttribute: expressedAsAttribute));
             return this;
         }
 
         public AddItemTransform<T> WithMetadata(
             string metadataName, 
             Func<T, string> metadataValueFunc, 
-            Func<T, bool> writeMetadataConditionFunc = null)
+            Func<T, bool> writeMetadataConditionFunc = null,
+            bool expressedAsAttribute = false)
         {
-            _metadata.Add(new ItemMetadataValue<T>(metadataName, metadataValueFunc, writeMetadataConditionFunc));
+            _metadata.Add(new ItemMetadataValue<T>(
+                metadataName,
+                metadataValueFunc,
+                writeMetadataConditionFunc,
+                expressedAsAttribute: expressedAsAttribute));
             return this;
         }
 
@@ -133,6 +144,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
                 {
                     var metametadata = item.AddMetadata(metadata.MetadataName, metadata.GetMetadataValue(source));
                     metametadata.Condition = metadata.Condition;
+                    metametadata.ExpressedAsAttribute = metadata.ExpressedAsAttribute;
                 }
             }
 

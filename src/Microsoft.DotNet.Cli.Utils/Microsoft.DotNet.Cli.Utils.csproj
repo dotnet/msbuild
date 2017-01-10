@@ -1,5 +1,4 @@
-﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   
   <PropertyGroup>
@@ -10,14 +9,8 @@
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
   </PropertyGroup>
+  
   <ItemGroup>
-    <Compile Include="**\*.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Sdk">
-      <Version>$(CLI_NETSDK_Version)</Version>
-      <PrivateAssets>All</PrivateAssets>
-    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyModel">
       <Version>1.0.1-beta-000933</Version>
     </PackageReference>
@@ -25,16 +18,16 @@
       <Version>1.0.1-beta-000933</Version>
     </PackageReference>
     <PackageReference Include="NuGet.Versioning">
-      <Version>4.0.0-rc2</Version>
+      <Version>4.0.0-rc3</Version>
     </PackageReference>
     <PackageReference Include="NuGet.Packaging">
-      <Version>4.0.0-rc2</Version>
+      <Version>4.0.0-rc3</Version>
     </PackageReference>
     <PackageReference Include="NuGet.Frameworks">
-      <Version>4.0.0-rc2</Version>
+      <Version>4.0.0-rc3</Version>
     </PackageReference>
     <PackageReference Include="NuGet.ProjectModel">
-      <Version>4.0.0-rc2</Version>
+      <Version>4.0.0-rc3</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Build">
       <Version>$(CLI_MSBuild_Version)</Version>
@@ -53,14 +46,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
-    <DefineConstants>$(DefineConstants);NETSTANDARD1_5</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net46' ">
-    <DefineConstants>$(DefineConstants);NET46</DefineConstants>
-  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
   </PropertyGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

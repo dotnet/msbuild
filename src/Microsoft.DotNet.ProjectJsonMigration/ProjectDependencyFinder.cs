@@ -66,7 +66,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 if (!File.Exists(project.ProjectFilePath))
                 {
                     MigrationErrorCodes
-                        .MIGRATE1018($"Dependency project not found ({project.ProjectFilePath})").Throw();
+                        .MIGRATE1018(String.Format(LocalizableStrings.MIGRATE1018Arg, project.ProjectFilePath)).Throw();
                 }
 
                 var projectContext =
@@ -80,34 +80,23 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                     projectContext.ProjectFile,
                     framework,
                     preResolvedProjects,
-                    solutionFile,
-                    HoistDependenciesThatAreNotDirectDependencies(projectToResolve, project)
+                    solutionFile
                 );
-                projects.AddRange(dependencies);
                 allDependencies.UnionWith(dependencies);
             }
 
             return allDependencies;
         }
 
-        private bool HoistDependenciesThatAreNotDirectDependencies(
-            ProjectDependency originalProject,
-            ProjectDependency dependenciesOwner)
-        {
-            return originalProject != dependenciesOwner;
-        }
-
         public IEnumerable<ProjectDependency> ResolveDirectProjectDependenciesForFramework(
             Project project, 
             NuGetFramework framework, 
             IEnumerable<string> preResolvedProjects=null,
-            SlnFile solutionFile = null,
-            bool hoistedDependencies = false)
+            SlnFile solutionFile = null)
         {
             preResolvedProjects = preResolvedProjects ?? new HashSet<string>();
 
-            var possibleProjectDependencies = 
-                FindPossibleProjectDependencies(solutionFile, project.ProjectFilePath, hoistedDependencies);
+            var possibleProjectDependencies = FindPossibleProjectDependencies(solutionFile, project.ProjectFilePath);
 
             var projectDependencies = new List<ProjectDependency>();
 
@@ -140,7 +129,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                     if (projectFileDependency.LibraryRange.TypeConstraint == LibraryDependencyTarget.Project)
                     {
                         MigrationErrorCodes
-                            .MIGRATE1014($"Unresolved project dependency ({dependencyName})").Throw();
+                            .MIGRATE1014(String.Format(LocalizableStrings.MIGRATE1014Arg, dependencyName)).Throw();
                     }
                     else
                     {
@@ -158,7 +147,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         {
             if (xproj == null)
             {
-                MigrationTrace.Instance.WriteLine($"{nameof(ProjectDependencyFinder)}: No xproj file given.");
+                MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.NoXprojFileGivenError, nameof(ProjectDependencyFinder)));
                 return Enumerable.Empty<ProjectItemElement>();
             }
 
@@ -175,7 +164,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             if (allXprojFiles.Count() > 1)
             {
                 MigrationErrorCodes
-                    .MIGRATE1017($"Multiple xproj files found in {projectDirectory}, please specify which to use")
+                    .MIGRATE1017(String.Format(LocalizableStrings.MultipleXprojFilesError, projectDirectory))
                     .Throw();
             }
 
@@ -210,7 +199,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                     if (projectExport.Library.Identity.Type.Equals(LibraryType.Project))
                     {
                         MigrationErrorCodes
-                            .MIGRATE1014($"Unresolved project dependency ({projectExportName})").Throw();
+                            .MIGRATE1014(String.Format(LocalizableStrings.MIGRATE1014Arg, projectExportName)).Throw();
                     }
                     else
                     {
@@ -233,8 +222,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
         private Dictionary<string, ProjectDependency> FindPossibleProjectDependencies(
             SlnFile slnFile,
-            string projectJsonFilePath,
-            bool hoistedDependencies = false)
+            string projectJsonFilePath)
         {
             var projectRootDirectory = GetRootFromProjectJson(projectJsonFilePath);
 
@@ -249,7 +237,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
             var projects = new Dictionary<string, ProjectDependency>(StringComparer.Ordinal);
 
-            foreach (var project in GetPotentialProjects(projectSearchPaths, hoistedDependencies))
+            foreach (var project in GetPotentialProjects(projectSearchPaths))
             {
                 if (projects.ContainsKey(project.Name))
                 {
@@ -311,8 +299,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         /// Create the list of potential projects from the search paths.
         /// </summary>
         private static List<ProjectDependency> GetPotentialProjects(
-            IEnumerable<string> searchPaths,
-            bool hoistedDependencies = false)
+            IEnumerable<string> searchPaths)
         {
             var projects = new List<ProjectDependency>();
 
@@ -326,7 +313,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                     continue;
                 }
 
-                foreach (var projectDirectory in directory.EnumerateDirectories())
+                foreach (var projectDirectory in
+                    Enumerable.Repeat(directory, 1).Union(directory.GetDirectories()))
                 {
                     // Create the path to the project.json file.
                     var projectFilePath = Path.Combine(projectDirectory.FullName, "project.json");
@@ -337,8 +325,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                     // Check if we've already added this, just in case it was pre-loaded into the cache
                     var project = new ProjectDependency(
                         projectDirectory.Name,
-                        projectFilePath,
-                        hoistedDependencies);
+                        projectFilePath);
 
                     projects.Add(project);
                 }

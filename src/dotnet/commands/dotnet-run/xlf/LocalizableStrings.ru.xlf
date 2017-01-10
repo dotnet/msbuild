@@ -14,8 +14,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionConfigurationDescription">
-        <source>Configuration under which to build</source>
-        <target state="translated">Конфигурация, в которой выполняется сборка</target>
+        <source>Configuration to use for building the project. Default for most projects is "Debug".</source>
+        <target state="translated">Конфигурация, используемая для сборки проекта. Значение по умолчанию для большинства проектов — "Debug".</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionFramework">
@@ -24,8 +24,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionFrameworkDescription">
-        <source>Compile a specific framework</source>
-        <target state="translated">Компиляция определенной платформы</target>
+        <source>Build and run the app using the specified framework. The framework has to be specified in the project file. </source>
+        <target state="translated">Сборка и запуск приложения на указанной платформе. Платформа должна быть указана в файле проекта. </target>
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionProjectDescription">
@@ -105,7 +105,12 @@
       </trans-unit>
       <trans-unit id="RunCommandInvalidOperationException4">
         <source>contains more than one project file.</source>
-        <target state="translated">содержит несколько файлов проектов.</target>
+        <target state="translated">здесь задано несколько файлов проектов.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandAdditionalArgsHelpText">
+        <source>Arguments passed to the application that is being run.</source>
+        <target state="translated">Аргументы переданы в выполняемое приложение.</target>
         <note />
       </trans-unit>
     </body>

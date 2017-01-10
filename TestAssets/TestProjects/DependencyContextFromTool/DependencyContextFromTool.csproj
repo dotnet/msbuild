@@ -1,8 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <VersionPrefix>1.0.0</VersionPrefix>
     <TargetFrameworks>netcoreapp1.0</TargetFrameworks>
@@ -11,18 +7,10 @@
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">$(PackageTargetFallback);dnxcore50;portable-net45+win8</PackageTargetFallback>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="**\*.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
-    <EmbeddedResource Include="**\*.resx" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
-    <EmbeddedResource Include="compiler\resources\**\*" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
-    <PackageReference Include="Microsoft.NET.Sdk">
-      <Version>$(CLI_NETSDK_Version)</Version>
-      <PrivateAssets>All</PrivateAssets>
-    </PackageReference>
-  </ItemGroup>
+
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
     <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.1</Version>
+      <Version>1.0.3</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
@@ -30,15 +18,8 @@
       <Version>1.0.0-*</Version>
     </DotNetCliToolReference>
   </ItemGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
-    <DefineConstants>$(DefineConstants);NETCOREAPP1_0</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <DefineConstants>$(DefineConstants);DEBUG;TRACE</DefineConstants>
-  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DefineConstants>$(DefineConstants);RELEASE;TRACE</DefineConstants>
     <Optimize>true</Optimize>
   </PropertyGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

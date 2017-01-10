@@ -49,6 +49,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public static readonly string MSBUILD_EXE_PATH = "MSBUILD_EXE_PATH";
 
-        public static readonly string ProjectOrSolutionArgumentName = "<PROJECT_OR_SOLUTION>";
+        public static readonly string ProjectArgumentName = "<PROJECT>";
+        public static readonly string SolutionArgumentName = "<SLN_FILE>";
     }
 }

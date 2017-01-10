@@ -1,0 +1,303 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="it" original="src/Microsoft.DotNet.ProjectJsonMigration/LocalizableStrings.resx">
+    <body>
+      <group id="src/Microsoft.DotNet.ProjectJsonMigration/LocalizableStrings.resx" />
+      <trans-unit id="DoubleMigrationError">
+        <source>Detected double project migration: {0}</source>
+        <target state="translated">È stata rilevata una doppia migrazione del progetto: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotMergeMetadataError">
+        <source>Cannot merge metadata with the same name and different values</source>
+        <target state="translated">Non è possibile unire i metadati con lo stesso nome e valori diversi</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoXprojFileGivenError">
+        <source>{0}: No xproj file given.</source>
+        <target state="translated">{0}: il file xproj non è stato specificato.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MultipleXprojFilesError">
+        <source>Multiple xproj files found in {0}, please specify which to use</source>
+        <target state="translated">In {0} sono stati trovati più file xproj. Specificare quello da usare</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NullMSBuildProjectTemplateError">
+        <source>Expected non-null MSBuildProjectTemplate in MigrationSettings</source>
+        <target state="translated">In MigrationSettings è previsto un elemento MSBuildProjectTemplate non Null</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotMigrateProjectWithCompilerError">
+        <source>Cannot migrate project {0} using compiler {1}</source>
+        <target state="translated">Non è possibile eseguire la migrazione del progetto {0} con il compilatore {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ExpectedElementToBeOfTypeNotTypeError">
+        <source>Expected element to be of type {0}, but got {1}</source>
+        <target state="translated">L'elemento doveva essere di tipo {0}, ma è stato ottenuto {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjAlreadyExistsError">
+        <source>{0} already exists. Has migration already been run?</source>
+        <target state="translated">{0} esiste già. La migrazione è già stata eseguita?</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NullDestinationElementError">
+        <source>expected destinationElement to not be null</source>
+        <target state="translated">l'elemento destinationElement non deve essere Null</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DiagnosticMessageTemplate">
+        <source>{0} (line: {1}, file: {2})</source>
+        <target state="translated">{0} (riga: {1}, file: {2})</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotMergeItemsOfDifferentTypesError">
+        <source>Cannot merge items of different types.</source>
+        <target state="translated">Non è possibile unire elementi di tipi diversi.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotMergeItemsWithoutCommonIncludeError">
+        <source>Cannot merge items without a common include.</source>
+        <target state="translated">Non è possibile unire elementi senza un elemento include comune.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PropertyTransformApplicatorWrongElementTypeError">
+        <source>Expected element to be of type {0}, but got {1}</source>
+        <target state="translated">L'elemento doveva essere di tipo {0}, ma è stato ottenuto {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnexpectedTypeError">
+        <source>Unexpected type {0}</source>
+        <target state="translated">Tipo imprevisto: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MIGRATE1011">
+        <source>Deprecated Project</source>
+        <target state="translated">Progetto deprecato</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MIGRATE1012">
+        <source>Project not Restored</source>
+        <target state="translated">Progetto non ripristinato</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MIGRATE1013">
+        <source>No Project</source>
+        <target state="translated">Nessun progetto</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MIGRATE1013Arg">
+        <source>The project.json specifies no target frameworks in {0}</source>
+        <target state="translated">Il file project.json non specifica alcun framework di destinazione in {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MIGRATE1014">
+        <source>Unresolved Dependency</source>
+        <target state="translated">Dipendenza non risolta</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MIGRATE1014Arg">
+        <source>Unresolved project dependency ({0})</source>
+        <target state="translated">Dipendenza del progetto non risolta ({0})</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MIGRATE1015">
+        <source>File Overwrite</source>
+        <target state="translated">Sovrascrittura file</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MIGRATE1016">
+        <source>Unsupported Script Variable</source>
+        <target state="translated">Variabile script non supportata</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MIGRATE1016Arg">
+        <source>{0} is currently an unsupported script variable for project migration</source>
+        <target state="translated">{0} è attualmente una variabile script non supportata per la migrazione del progetto</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MIGRATE1017">
+        <source>Multiple Xproj Files</source>
+        <target state="translated">Più file xproj</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MIGRATE1018">
+        <source>Dependency Project not found</source>
+        <target state="translated">Progetto della dipendenza non trovato</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MIGRATE1018Arg">
+        <source>Dependency project not found ({0})</source>
+        <target state="translated">Progetto della dipendenza non trovato ({0})</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MIGRATE1019">
+        <source>Unsupported Script Event Hook</source>
+        <target state="translated">Hook di evento script non supportato</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MIGRATE1019Arg">
+        <source>{0} is an unsupported script event hook for project migration</source>
+        <target state="translated">{0} è un hook di evento script non supportato per la migrazione del progetto</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MIGRATE20011">
+        <source>Multi-TFM</source>
+        <target state="translated">TFM multiplo</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MIGRATE20012">
+        <source>Configuration Exclude</source>
+        <target state="translated">Esclusione configurazione</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MIGRATE20013">
+        <source>Non-Csharp App</source>
+        <target state="translated">App non Csharp</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MIGRATE20018">
+        <source>Files specified under PackOptions</source>
+        <target state="translated">File specificati in PackOptions</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IncludesNotEquivalent">
+        <source>{0}.{1} includes not equivalent.</source>
+        <target state="translated">{0}.{1} include elementi non equivalenti.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ExcludesNotEquivalent">
+        <source>{0}.{1} excludes not equivalent.</source>
+        <target state="translated">{0}.{1} esclude elementi non equivalenti.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RemovesNotEquivalent">
+        <source>{0}.{1} removes not equivalent.</source>
+        <target state="translated">{0}.{1} rimuove elementi non equivalenti.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MetadataDoesntExist">
+        <source>{0}.{1} metadata doesn't exist {{ {2} {3} }}</source>
+        <target state="translated">I metadati di {0}.{1} non esistono {{ {2} {3} }}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MetadataHasAnotherValue">
+        <source>{0}.{1} metadata has another value {{ {2} {3} {4} }}</source>
+        <target state="translated">Il valore dei metadati di {0}.{1} è diverso {{ {2} {3} {4} }}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddingMetadataToItem">
+        <source>{0}: Adding metadata to {1} item: {{ {2}, {3}, {4} }}</source>
+        <target state="translated">{0}: aggiunta di metadati all'elemento {1}: {{ {2}, {3}, {4} }}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipMigrationAlreadyMigrated">
+        <source>{0}: Skip migrating {1}, it is already migrated.</source>
+        <target state="translated">{0}: la migrazione di {1} verrà ignorata perché è già stata eseguita.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ExecutingRule">
+        <source>Executing rule: {0}</source>
+        <target state="translated">Esecuzione della regola: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoConfigurationOrFrameworkFoundInProject">
+        <source>{0}: No configuration or framework build options found in project</source>
+        <target state="translated">{0}: nel progetto non sono state trovate opzioni di configurazione o creazione del framework</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MigratingCountTargetFrameworks">
+        <source>Migrating {0} target frameworks</source>
+        <target state="translated">Migrazione di {0} framework di destinazione</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MigratingFramework">
+        <source>Migrating framework {0}</source>
+        <target state="translated">Migrazione del framework {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ImportsTransformNullFor">
+        <source>{0}: imports transform null for {1}</source>
+        <target state="translated">{0}: importa il valore Null della trasformazione per {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MigratingCountXprojToCsprojReferences">
+        <source>{0}: Migrating {1} xproj to csproj references</source>
+        <target state="translated">{0}: migrazione di {1} riferimenti da xproj a csproj</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ExecutingMigrationRule">
+        <source>{0}: Executing migration rule {1}</source>
+        <target state="translated">{0}: esecuzione della regola di migrazione {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ItemTransformApplicatorHeader">
+        <source>{0}: Item {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4}, Update: {5} }}</source>
+        <target state="translated">{0}: elemento {{ Tipo di elemento: {1}. Condizione: {2}. Includi: {3}. Escludi: {4}. Aggiorna: {5} }}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ItemTransformApplicatorItemGroup">
+        <source>{0}: ItemGroup {{ Condition: {1} }}</source>
+        <target state="translated">{0}: ItemGroup {{ Condizione: {1} }}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ItemTransformAppliatorItemCompletelyMerged">
+        <source>{0}: Item completely merged</source>
+        <target state="translated">{0}: elemento completamente unito</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ItemTransformApplicatorAddItemHeader">
+        <source>{0}: AddItemToItemGroup {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4}, Update: {5} }}</source>
+        <target state="translated">{0}: AddItemToItemGroup {{ Tipo di elemento: {1}. Condizione: {2}. Includi: {3}. Escludi: {4}. Aggiorna: {5} }}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ItemTransformApplicatorMergingItemWithExistingItems">
+        <source>{0}: Merging Item with {1} existing items with a different condition chain.</source>
+        <target state="translated">{0}: unione dell'elemento con {1} elementi esistenti e una catena di condizioni diversa.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ItemTransformApplicatorEncompassedIncludes">
+        <source>{0}: encompassed includes {1}</source>
+        <target state="translated">{0}: incluso include {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ItemTransformApplicatorRemovingItem">
+        <source>{0}: Removing Item {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4} }}</source>
+        <target state="translated">{0}: rimozione dell'elemento {{ Tipo di elemento: {1}. Condizione: {2}. Includi: {3}. Escludi: {4} }}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ItemTransformApplicatorIgnoringItem">
+        <source>{0}: Ignoring Item {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4} }}</source>
+        <target state="translated">{0}: elemento ignorato {{ Tipo di elemento: {1}. Condizione: {2}. Includi: {3}. Escludi: {4} }}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ItemTransformApplicatorMergingItemWithExistingItemsSameChain">
+        <source>{0}: Merging Item with {1} existing items with the same condition chain.</source>
+        <target state="translated">{0}: unione dell'elemento con {1} elementi esistenti e la stessa catena di condizioni.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ItemTransformApplicatorAddingMergedItem">
+        <source>{0}: Adding Merged Item {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4} }}</source>
+        <target state="translated">{0}: aggiunta dell'elemento unito {{ Tipo di elemento: {1}. Condizione: {2}. Includi: {3}. Escludi: {4} }}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MergingProperty">
+        <source>Merging property, output merged property</source>
+        <target state="translated">Unione della proprietà. Proprietà unita di output</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IgnoringMergedProperty">
+        <source>Ignoring fully merged property</source>
+        <target state="translated">La proprietà completamente unita verrà ignorata</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PropertyInfo">
+        <source>{0}: {1}, {{ Name={2}, Value={3} }}</source>
+        <target state="translated">{0}: {1}, {{ Nome={2}. Valore={3} }}</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -124,7 +124,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNet.TestFramew
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "redist", "src\redist\redist.csproj", "{098D9321-1201-4974-A75E-F58EBCD98ACF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tool_csc", "src\tool_csc\tool_csc.csproj", "{A0670C63-BA7A-4C1B-B9A7-1CA26A7F235C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tool_roslyn", "src\tool_roslyn\tool_roslyn.csproj", "{A0670C63-BA7A-4C1B-B9A7-1CA26A7F235C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tool_msbuild", "src\tool_msbuild\tool_msbuild.csproj", "{D82A3246-9831-4024-A9B2-1932EEF3D56F}"
 EndProject

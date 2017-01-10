@@ -14,8 +14,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionConfigurationDescription">
-        <source>Configuration under which to build</source>
-        <target state="translated">Derlemenin gerçekleştirileceği yapılandırma</target>
+        <source>Configuration to use for building the project. Default for most projects is "Debug".</source>
+        <target state="translated">Projeyi derlemek için kullanılacak yapılandırma. Çoğu proje için varsayılan: "Debug".</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionFramework">
@@ -24,8 +24,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionFrameworkDescription">
-        <source>Compile a specific framework</source>
-        <target state="translated">Belirli bir çerçeveyi derler</target>
+        <source>Build and run the app using the specified framework. The framework has to be specified in the project file. </source>
+        <target state="translated">Uygulamayı belirtilen çerçeve için derler ve çalıştırır. Çerçevenin proje dosyasında belirtilmesi gerekir. </target>
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionProjectDescription">
@@ -106,6 +106,11 @@
       <trans-unit id="RunCommandInvalidOperationException4">
         <source>contains more than one project file.</source>
         <target state="translated">hangi proje dosyasının kullanılacağını belirtmeniz gerekiyor.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandAdditionalArgsHelpText">
+        <source>Arguments passed to the application that is being run.</source>
+        <target state="translated">Çalıştırılan uygulamaya geçirilen bağımsız değişkenler.</target>
         <note />
       </trans-unit>
     </body>

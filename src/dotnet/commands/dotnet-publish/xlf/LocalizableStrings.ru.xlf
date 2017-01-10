@@ -29,8 +29,8 @@
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
-        <source>Target framework to publish for</source>
-        <target state="translated">Целевая платформа публикации</target>
+        <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
+        <target state="translated">Целевая платформа публикации. Целевая платформа должна быть указана в файле проекта.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOption">
@@ -39,8 +39,8 @@
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
-        <source>Target runtime to publish for. The default is to publish a portable application.</source>
-        <target state="translated">Целевая среда выполнения публикации По умолчанию выполняется публикация переносимого приложения.</target>
+        <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependented app.</source>
+        <target state="translated">Публикует проект для указанной среды выполнения. Используется при создании автономного развертывания. По умолчанию публикуется зависимое от платформы приложение.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -49,8 +49,8 @@
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
-        <source>Path in which to publish the app</source>
-        <target state="translated">Путь для публикации приложения</target>
+        <source>Output directory in which to place the published artifacts.</source>
+        <target state="translated">Выходной каталог для размещения опубликованных артефактов.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOption">
@@ -59,8 +59,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>Configuration under which to build</source>
-        <target state="translated">Конфигурация, в которой выполняется сборка</target>
+        <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
+        <target state="translated">Конфигурация, используемая для сборки проекта.  Значение по умолчанию для большинства проектов — "Debug".</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOption">
@@ -69,8 +69,8 @@
         <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOptionDescription">
-        <source>Defines the value for the $(VersionSuffix) property in the project</source>
-        <target state="translated">Определяет значение для свойства $(VersionSuffix) в проекте</target>
+        <source>Defines the value for the $(VersionSuffix) property in the project.</source>
+        <target state="translated">Определяет значение для свойства $(VersionSuffix) в проекте.</target>
         <note />
       </trans-unit>
     </body>

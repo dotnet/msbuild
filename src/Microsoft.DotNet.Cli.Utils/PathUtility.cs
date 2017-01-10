@@ -73,19 +73,31 @@ namespace Microsoft.DotNet.Tools.Common
             return path;
         }
 
-        public static void EnsureParentDirectory(string filePath)
+        public static void EnsureParentDirectoryExists(string filePath)
         {
             string directory = Path.GetDirectoryName(filePath);
 
-            EnsureDirectory(directory);
+            EnsureDirectoryExists(directory);
         }
         
-        public static void EnsureDirectory(string directoryPath)
+        public static void EnsureDirectoryExists(string directoryPath)
         {
             if (!Directory.Exists(directoryPath))
             {
                 Directory.CreateDirectory(directoryPath);
             }
+        }
+
+        /// <summary>
+        /// Returns childItem relative to directory, with Path.DirectorySeparatorChar as separator
+        /// </summary>
+        public static string GetRelativePath(DirectoryInfo directory, FileSystemInfo childItem)
+        {
+            var path1 = EnsureTrailingSlash(directory.FullName);
+
+            var path2 = childItem.FullName;
+
+            return GetRelativePath(path1, path2, Path.DirectorySeparatorChar, true);
         }
 
         /// <summary>

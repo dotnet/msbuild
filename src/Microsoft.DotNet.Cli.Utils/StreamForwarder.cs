@@ -118,7 +118,7 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             if (_writeLine != null)
             {
-                throw new InvalidOperationException("WriteLine forwarder set previously");
+                throw new InvalidOperationException(LocalizableStrings.WriteLineForwarderSetPreviously);
             }
         }
 
@@ -126,7 +126,7 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             if (_capture != null)
             {
-                throw new InvalidOperationException("Already capturing stream!");
+                throw new InvalidOperationException(LocalizableStrings.AlreadyCapturingStream);
             }
         }
     }

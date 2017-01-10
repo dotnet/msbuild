@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hans" original="src/dotnet/commands/dotnet-list/dotnet-list-p2ps/LocalizableStrings.resx">
+    <body>
+      <group id="src/dotnet/commands/dotnet-list/dotnet-list-p2ps/LocalizableStrings.resx" />
+      <trans-unit id="AppFullName">
+        <source>.NET Core Project-to-Project dependency viewer</source>
+        <target state="translated">.NET Core 项目到项目的依赖项查看器</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Command to list project to project references</source>
+        <target state="needs-review-translation">用于列出项目到项目 (p2p) 引用的命令</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="NoReferencesFound">
+        <source>There are no {0} references in project {1}.
+{0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
+        <target state="translated">项目 {1} 中没有 {0} 引用。
+{0} 是正在请求的项类型(项目、包、p2p)且 {1} 是在其上进行操作的对象(项目文件或解决方案文件)。 </target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

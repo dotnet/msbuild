@@ -1,7 +1,5 @@
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
+<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net46;netcoreapp1.0</TargetFrameworks>
@@ -11,21 +9,13 @@
     <DefineConstants>DESKTOP;$(DefineConstants)</DefineConstants>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Include="**\*.cs" />
-  </ItemGroup>
-
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp1.0'">
     <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.1</Version>
+      <Version>1.0.3</Version>
     </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Sdk">
-      <Version>$(CLI_NETSDK_Version)</Version>
-      <PrivateAssets>All</PrivateAssets>
-    </PackageReference>
     <PackageReference Include="MSTest.TestFramework">
       <Version>1.0.6-preview</Version>
     </PackageReference>
@@ -33,8 +23,7 @@
       <Version>1.1.5-preview</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk">
-      <Version>15.0.0-preview-20161123-03</Version>
+      <Version>$(CLI_TestPlatform_Version)</Version>
     </PackageReference>
   </ItemGroup>
-  <Import Project="$(MSBuildExtensionsPath)\Microsoft.CSharp.targets" />
 </Project>

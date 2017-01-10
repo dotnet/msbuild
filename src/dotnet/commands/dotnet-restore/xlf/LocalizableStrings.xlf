@@ -4,7 +4,7 @@
     <body>
       <group id="src/dotnet/commands/dotnet-restore/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
-        <source>restore</source>
+        <source>.NET dependency restorer</source>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
@@ -12,7 +12,7 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdArgument">
-        <source>root</source>
+        <source>PROJECT</source>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgumentDescription">
@@ -20,7 +20,7 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceOption">
-        <source>source</source>
+        <source>SOURCE</source>
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceOptionDescription">
@@ -28,7 +28,7 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOption">
-        <source>packagesDirectory</source>
+        <source>PACKAGES_DIRECTORY</source>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOptionDescription">
@@ -40,7 +40,7 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigFileOption">
-        <source>file</source>
+        <source>FILE</source>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigFileOptionDescription">
@@ -57,6 +57,14 @@
       </trans-unit>
       <trans-unit id="CmdNoDependenciesOptionDescription">
         <source>Set this flag to ignore project to project references and only restore the root project</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdRuntimeOption">
+        <source>RUNTIME_IDENTIFIER</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdRuntimeOptionDescription">
+        <source>Target runtime to restore packages for.</source>
         <note />
       </trans-unit>
     </body>

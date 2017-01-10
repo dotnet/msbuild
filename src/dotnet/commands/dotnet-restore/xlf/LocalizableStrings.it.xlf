@@ -4,8 +4,8 @@
     <body>
       <group id="src/dotnet/commands/dotnet-restore/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
-        <source>restore</source>
-        <target state="translated">restore</target>
+        <source>.NET dependency restorer</source>
+        <target state="translated">Utilità di ripristino dipendenze .NET</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
@@ -14,8 +14,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdArgument">
-        <source>root</source>
-        <target state="translated">radice</target>
+        <source>PROJECT</source>
+        <target state="translated">PROGETTO</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgumentDescription">
@@ -24,8 +24,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceOption">
-        <source>source</source>
-        <target state="translated">origine</target>
+        <source>SOURCE</source>
+        <target state="translated">ORIGINE</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceOptionDescription">
@@ -34,8 +34,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOption">
-        <source>packagesDirectory</source>
-        <target state="translated">packagesDirectory</target>
+        <source>PACKAGES_DIRECTORY</source>
+        <target state="translated">DIRECTORY_PACCHETTI</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOptionDescription">
@@ -49,8 +49,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigFileOption">
-        <source>file</source>
-        <target state="translated">file</target>
+        <source>FILE</source>
+        <target state="translated">FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigFileOptionDescription">
@@ -71,6 +71,16 @@
       <trans-unit id="CmdNoDependenciesOptionDescription">
         <source>Set this flag to ignore project to project references and only restore the root project</source>
         <target state="translated">Impostare questo flag per ignorare i riferimenti P2P (da progetto a progetto) e ripristinare solo il progetto radice</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdRuntimeOption">
+        <source>RUNTIME_IDENTIFIER</source>
+        <target state="translated">IDENTIFICATORE_RUNTIME</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdRuntimeOptionDescription">
+        <source>Target runtime to restore packages for.</source>
+        <target state="translated">Runtime di destinazione per cui ripristinare i pacchetti.</target>
         <note />
       </trans-unit>
     </body>

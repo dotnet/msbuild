@@ -14,8 +14,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>Configuration under which to build</source>
-        <target state="translated">Configuration sous laquelle générer la build</target>
+        <source>Configuration to use for building the project. Default for most projects is  "Debug".</source>
+        <target state="translated">Configuration à utiliser pour la génération du projet. La valeur par défaut pour la plupart des projets est "Debug".</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionName">
@@ -24,8 +24,8 @@
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
-        <source>Compile a specific framework</source>
-        <target state="translated">Compiler un framework spécifique</target>
+        <source>Target framework to build for. The target framework has to be specified in the project file.</source>
+        <target state="translated">Framework cible de la build. Le framework cible doit être spécifié dans le fichier projet.</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionName">
@@ -34,18 +34,18 @@
         <note />
       </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">
-        <source>Set this flag to ignore project to project references and only build the root project</source>
-        <target state="translated">Définir cet indicateur pour ignorer les références projet à projet et générer uniquement le projet racine</target>
+        <source>Set this flag to ignore project-to-project references and only build the root project</source>
+        <target state="translated">Définir cet indicateur pour ignorer les références de projet à projet et générer uniquement le projet racine</target>
         <note />
       </trans-unit>
       <trans-unit id="NoIncrementialOptionDescription">
-        <source>Set this flag to turn off incremental build</source>
-        <target state="translated">Définir cet indicateur pour désactiver la génération incrémentielle</target>
+        <source>Disables incremental build.</source>
+        <target state="translated">Désactive la build incrémentielle.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
-        <source>Directory in which to place outputs</source>
-        <target state="translated">Répertoire dans lequel placer les sorties</target>
+        <source>Output directory in which to place built artifacts.</source>
+        <target state="translated">Répertoire de sortie dans lequel placer les artefacts de build.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionName">

@@ -15,27 +15,23 @@
       </trans-unit>
       <trans-unit id="CmdProjectArgument">
         <source>PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</source>
-        <target state="needs-review-translation">PROJECT_JSON/GLOBAL_JSON/DIR_PROGETTO</target>
-        <note></note>
+        <target state="translated">PROJECT_JSON/GLOBAL_JSON/FILE_SOLUZIONE/DIR_PROGETTO</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdProjectArgumentDescription">
-        <source>The path to 
+        <source>The path to one of the following:
     - a project.json file to migrate.
-or
     - a global.json file, it will migrate the folders specified in global.json.
-or
     - a solution.sln file, it will migrate the projects referenced in the solution.
-or
     - a directory to migrate, it will recursively search for project.json files to migrate.
 Defaults to current directory if nothing is specified.</source>
-        <target state="needs-review-translation">Percorso di 
+        <target state="translated">Percorso di uno degli elementi seguenti:
     - un file project.json di cui eseguire la migrazione.
-oppure
     - un file global.json. Verrà eseguita la migrazione delle cartelle specificate in global.json.
-oppure
+    - file solution.sln; verrà eseguita la migrazione dei progetti cui viene fatto riferimento nella soluzione.
     - una directory di cui eseguire la migrazione. Verrà eseguita la ricerca ricorsiva dei file project.json di cui eseguire la migrazione.
 Se non si specifica un valore, per impostazione predefinita, verrà usata la directory corrente.</target>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CmdTemplateDescription">
         <source>Base MSBuild template to use for migrated app. The default is the project included in dotnet new.</source>

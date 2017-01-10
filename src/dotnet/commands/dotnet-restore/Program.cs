@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Tools.Restore
                 Name = "restore",
                 FullName = LocalizableStrings.AppFullName,
                 Description = LocalizableStrings.AppDescription,
-                AllowArgumentSeparator = true,
+                HandleRemainingArguments = true,
                 ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText
             };
 
@@ -33,6 +33,11 @@ namespace Microsoft.DotNet.Tools.Restore
             var sourceOption = cmd.Option(
                     $"-s|--source <{LocalizableStrings.CmdSourceOption}>",
                     LocalizableStrings.CmdSourceOptionDescription,
+                    CommandOptionType.MultipleValue);
+
+            var runtimeOption = cmd.Option(
+                    $"-r|--runtime <{LocalizableStrings.CmdRuntimeOption}>",
+                    LocalizableStrings.CmdRuntimeOptionDescription,
                     CommandOptionType.MultipleValue);
 
             var packagesOption = cmd.Option(
@@ -79,6 +84,11 @@ namespace Microsoft.DotNet.Tools.Restore
                 if (sourceOption.HasValue())
                 {
                     msbuildArgs.Add($"/p:RestoreSources={string.Join("%3B", sourceOption.Values)}");
+                }
+
+                if (runtimeOption.HasValue())
+                {
+                    msbuildArgs.Add($"/p:RuntimeIdentifiers={string.Join("%3B", runtimeOption.Values)}");
                 }
 
                 if (packagesOption.HasValue())

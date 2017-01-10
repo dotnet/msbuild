@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Tools.Pack
                 Name = "pack",
                 FullName = LocalizableStrings.AppFullName,
                 Description = LocalizableStrings.AppDescription,
-                AllowArgumentSeparator = true,
+                HandleRemainingArguments = true,
                 ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText
             };
 

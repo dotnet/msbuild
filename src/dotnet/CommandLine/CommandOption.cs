@@ -45,13 +45,13 @@ namespace Microsoft.DotNet.Cli.CommandLine
                 }
                 else
                 { 
-                    throw new ArgumentException($"Invalid template pattern '{template}'", nameof(template));
+                    throw new ArgumentException(String.Format(LocalizableStrings.InvalidTemplateError, nameof(template)));
                 }
             }
 
             if (string.IsNullOrEmpty(LongName) && string.IsNullOrEmpty(ShortName) && string.IsNullOrEmpty(SymbolName))
             {
-                throw new ArgumentException($"Invalid template pattern '{template}'", nameof(template));
+                throw new ArgumentException(LocalizableStrings.InvalidTemplateError, nameof(template));
             }
         }
 

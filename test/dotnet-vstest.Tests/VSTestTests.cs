@@ -19,11 +19,16 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
             var testAppName = "VSTestDotNetCore";
             var testRoot = TestAssets.Get(testAppName)
                 .CreateInstance()
+                .WithSourceFiles()
                 .WithRestoreFiles()
-                .WithBuildFiles()
                 .Root;
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
+
+            new BuildCommand()
+                .WithWorkingDirectory(testRoot)
+                .Execute()
+                .Should().Pass();
 
             var outputDll = testRoot
                 .GetDirectory("bin", configuration, "netcoreapp1.0")
@@ -32,12 +37,12 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
             var argsForVstest = $"\"{outputDll.FullName}\"";
 
             // Call vstest
-            new VSTestCommand()
-                .ExecuteWithCapturedOutput(argsForVstest)
-                .StdOut
+            var result = new VSTestCommand().ExecuteWithCapturedOutput(argsForVstest);
+            result.StdOut
                 .Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.")
-                     .And.Contain("Passed   TestNamespace.VSTestTests.VSTestPassTest")
-                     .And.Contain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
+                .And.Contain("Passed   TestNamespace.VSTestTests.VSTestPassTest")
+                .And.Contain("Failed   TestNamespace.VSTestTests.VSTestFailTest");
+            result.ExitCode.Should().Be(1);
         }
     }
 }

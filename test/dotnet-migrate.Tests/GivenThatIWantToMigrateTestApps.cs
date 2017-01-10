@@ -1,4 +1,7 @@
-﻿using Microsoft.Build.Construction;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.Build.Construction;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using System;
@@ -48,6 +51,24 @@ namespace Microsoft.DotNet.Migration.Tests
             var outputCsProj = Path.Combine(projectDirectory, projectName + ".csproj");
             var csproj = File.ReadAllText(outputCsProj);
             csproj.EndsWith("\n").Should().Be(true);
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData("TestAppMultipleFrameworksNoRuntimes", null)]
+        [InlineData("TestAppWithMultipleFullFrameworksOnly", "net461")]
+        public void ItMigratesAppsWithFullFramework(string projectName, string framework)
+        {
+            var projectDirectory = TestAssetsManager.CreateTestInstance(
+                projectName,
+                identifier: projectName).WithLockFiles().Path;
+
+            CleanBinObj(projectDirectory);
+
+            MigrateProject(new [] { projectDirectory });
+
+            Restore(projectDirectory);
+
+            BuildMSBuild(projectDirectory, projectName, framework: framework);
         }
 
         [Fact]
@@ -133,6 +154,8 @@ namespace Microsoft.DotNet.Migration.Tests
                 .WithSourceFiles();
 
             var projectDirectory = testInstance.Root.FullName;
+            
+            File.Copy("NuGet.tempaspnetpatch.config", Path.Combine(projectDirectory, "NuGet.Config"));
 
             MigrateProject(new [] { projectDirectory });
 
@@ -210,7 +233,9 @@ namespace Microsoft.DotNet.Migration.Tests
         public void ItMigratesRootProjectAndReferences(string projectName, string expectedProjects)
         {
             var projectDirectory =
-                TestAssetsManager.CreateTestInstance("TestAppDependencyGraph", callingMethod: $"{projectName}.RefsTest").Path;
+                TestAssetsManager.CreateTestInstance(
+                    "TestAppDependencyGraph", 
+                    identifier: $"{projectName}.RefsTest").Path;
 
             MigrateProject(new [] { Path.Combine(projectDirectory, projectName) });
 
@@ -228,7 +253,7 @@ namespace Microsoft.DotNet.Migration.Tests
         public void ItMigratesRootProjectAndSkipsReferences(string projectName)
         {
             var projectDirectory =
-                TestAssetsManager.CreateTestInstance("TestAppDependencyGraph", callingMethod: $"{projectName}.SkipRefsTest").Path;
+                TestAssetsManager.CreateTestInstance("TestAppDependencyGraph", identifier: $"{projectName}.SkipRefsTest").Path;
 
             MigrateProject(new [] { Path.Combine(projectDirectory, projectName), "--skip-project-references" });
 
@@ -421,7 +446,7 @@ namespace Microsoft.DotNet.Migration.Tests
         {
             const string projectName = "ProjectA";
             var solutionDirectory =
-                TestAssetsManager.CreateTestInstance("TestAppDependencyGraph", callingMethod: "p").Path;
+                TestAssetsManager.CreateTestInstance("TestAppDependencyGraph").Path;
             var projectDirectory = Path.Combine(solutionDirectory, projectName);
 
             MigrateProject(new string[] { projectDirectory });
@@ -471,46 +496,15 @@ namespace Microsoft.DotNet.Migration.Tests
         [InlineData("LibraryWithNetStandardLibRef")]
         public void ItMigratesAndBuildsLibrary(string projectName)
         {
-            var projectDirectory = TestAssetsManager.CreateTestInstance(projectName,
-                callingMethod: $"{nameof(ItMigratesAndBuildsLibrary)}-projectName").Path;
+            var projectDirectory = TestAssetsManager.CreateTestInstance(
+                projectName,
+                identifier: $"{projectName}").Path;
 
             MigrateProject(projectDirectory);
             Restore(projectDirectory, projectName);
             BuildMSBuild(projectDirectory, projectName);
         }
-
-        [Fact]
-        public void ItFailsGracefullyWhenMigratingAppWithMissingDependency()
-        {
-            string projectName = "MigrateAppWithMissingDep";
-            var projectDirectory = Path.Combine(GetTestGroupTestAssetsManager("NonRestoredTestProjects").CreateTestInstance(projectName).Path, "MyApp");
-
-            string migrationOutputFile = Path.Combine(projectDirectory, "migration-output.json");
-            File.Exists(migrationOutputFile).Should().BeFalse();
-            MigrateCommand.Run(new string[] { projectDirectory, "-r", migrationOutputFile, "--format-report-file-json" }).Should().NotBe(0);
-            File.Exists(migrationOutputFile).Should().BeTrue();
-            File.ReadAllText(migrationOutputFile).Should().Contain("MIGRATE1018");
-        }
-
-        [Fact]
-        public void ItMigratesSln()
-        {
-            var rootDirectory = TestAssetsManager.CreateTestInstance(
-                "TestAppWithSlnAndMultipleProjects",
-                callingMethod: "a").Path;
-
-            var testAppProjectDirectory = Path.Combine(rootDirectory, "TestApp");
-            var testLibProjectDirectory = Path.Combine(rootDirectory, "TestLibrary");
-            string slnPath = Path.Combine(testAppProjectDirectory, "TestApp.sln");
-            
-            CleanBinObj(testAppProjectDirectory);
-            CleanBinObj(testLibProjectDirectory);
-
-            MigrateProject(slnPath);
-            Restore(testAppProjectDirectory, "TestApp.csproj");
-            BuildMSBuild(testAppProjectDirectory, "TestApp.sln", "Release");
-        }
-
+        
         private void VerifyAutoInjectedDesktopReferences(string projectDirectory, string projectName, bool shouldBePresent)
         {
             if (projectName != null)
@@ -670,6 +664,7 @@ namespace Microsoft.DotNet.Migration.Tests
 
             var result = new BuildPJCommand()
                 .WithCapturedOutput()
+                .WithForwardingToConsole()
                 .Execute(projectFile);
 
             result.Should().Pass();
@@ -677,17 +672,18 @@ namespace Microsoft.DotNet.Migration.Tests
 
         private void MigrateProject(params string[] migrateArgs)
         {
-            var result =
-                MigrateCommand.Run(migrateArgs);
-
-            result.Should().Be(0);
+            new TestCommand("dotnet")
+                    .WithForwardingToConsole()
+                    .Execute($"migrate {string.Join(" ", migrateArgs)}")
+                    .Should()
+                    .Pass();
         }
 
         private void RestoreProjectJson(string projectDirectory)
         {
-            new TestCommand("dotnet")
-                .WithWorkingDirectory(projectDirectory)
-                .Execute("restore-projectjson")
+            var projectFile = "\"" + Path.Combine(projectDirectory, "project.json") + "\"";
+            new RestoreProjectJsonCommand()
+                .Execute(projectFile)
                 .Should().Pass();
         }
 
@@ -717,7 +713,8 @@ namespace Microsoft.DotNet.Migration.Tests
             string projectDirectory,
             string projectName,
             string configuration="Debug",
-            string runtime=null)
+            string runtime=null,
+            string framework=null)
         {
             if (projectName != null && !Path.HasExtension(projectName))
             {
@@ -729,6 +726,7 @@ namespace Microsoft.DotNet.Migration.Tests
             var result = new BuildCommand()
                 .WithWorkingDirectory(projectDirectory)
                 .WithRuntime(runtime)
+                .WithFramework(framework)
                 .ExecuteWithCapturedOutput($"{projectName} /p:Configuration={configuration}");
 
             result

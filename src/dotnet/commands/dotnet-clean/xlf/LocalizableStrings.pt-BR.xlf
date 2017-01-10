@@ -29,8 +29,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
-        <source>Directory in which the build outputs have been placed</source>
-        <target state="translated">O diretório no qual as saídas de build foram colocadas</target>
+        <source>Directory in which the build outputs have been placed.</source>
+        <target state="translated">O diretório no qual as saídas do build foram colocadas.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
@@ -39,8 +39,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
-        <source>Clean a specific framework</source>
-        <target state="translated">Limpar uma estrutura específica</target>
+        <source>Clean a specific framework.</source>
+        <target state="translated">Limpa uma estrutura específica.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfiguration">
@@ -49,8 +49,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigurationDescription">
-        <source>Clean a specific configuration</source>
-        <target state="translated">Limpar uma configuração específica</target>
+        <source>Clean a specific configuration.</source>
+        <target state="translated">Limpa uma configuração específica.</target>
         <note />
       </trans-unit>
     </body>

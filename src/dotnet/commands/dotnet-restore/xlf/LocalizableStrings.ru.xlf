@@ -4,8 +4,8 @@
     <body>
       <group id="src/dotnet/commands/dotnet-restore/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
-        <source>restore</source>
-        <target state="translated">restore</target>
+        <source>.NET dependency restorer</source>
+        <target state="translated">Восстановитель зависимостей .NET</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
@@ -14,8 +14,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdArgument">
-        <source>root</source>
-        <target state="translated">root</target>
+        <source>PROJECT</source>
+        <target state="translated">PROJECT</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgumentDescription">
@@ -24,8 +24,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceOption">
-        <source>source</source>
-        <target state="translated">source</target>
+        <source>SOURCE</source>
+        <target state="translated">SOURCE</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceOptionDescription">
@@ -34,8 +34,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOption">
-        <source>packagesDirectory</source>
-        <target state="translated">packagesDirectory</target>
+        <source>PACKAGES_DIRECTORY</source>
+        <target state="translated">PACKAGES_DIRECTORY</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOptionDescription">
@@ -49,8 +49,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigFileOption">
-        <source>file</source>
-        <target state="translated">file</target>
+        <source>FILE</source>
+        <target state="translated">FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigFileOptionDescription">
@@ -71,6 +71,16 @@
       <trans-unit id="CmdNoDependenciesOptionDescription">
         <source>Set this flag to ignore project to project references and only restore the root project</source>
         <target state="translated">Задайте этот флаг, чтобы пропускать ссылки проектов на проекты и выполнять восстановление только корневого проекта.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdRuntimeOption">
+        <source>RUNTIME_IDENTIFIER</source>
+        <target state="translated">RUNTIME_IDENTIFIER</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdRuntimeOptionDescription">
+        <source>Target runtime to restore packages for.</source>
+        <target state="translated">Целевая среда выполнения для восстановления пакетов.</target>
         <note />
       </trans-unit>
     </body>

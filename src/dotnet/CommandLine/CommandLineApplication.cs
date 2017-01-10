@@ -56,15 +56,34 @@ namespace Microsoft.DotNet.Cli.CommandLine
         public bool HandleRemainingArguments { get; set; }
         public string ArgumentSeparatorHelpText { get; set; }
 
-        public CommandLineApplication Command(string name, bool throwOnUnexpectedArg = true)
+        public CommandLineApplication AddCommand(string name, bool throwOnUnexpectedArg = true)
         {
-            return Command(name, _ => { }, throwOnUnexpectedArg);
+            return AddCommand(name, _ => { }, throwOnUnexpectedArg);
         }
 
-        public CommandLineApplication Command(string name, Action<CommandLineApplication> configuration,
+        public CommandLineApplication AddCommand(string name, Action<CommandLineApplication> configuration,
             bool throwOnUnexpectedArg = true)
         {
-            var command = new CommandLineApplication(throwOnUnexpectedArg) { Name = name, Parent = this };
+            var command = new CommandLineApplication(throwOnUnexpectedArg) { Name = name };
+            return AddCommand(command, configuration, throwOnUnexpectedArg);
+        }
+
+        public CommandLineApplication AddCommand(CommandLineApplication command, bool throwOnUnexpectedArg = true)
+        {
+            return AddCommand(command, _ => { }, throwOnUnexpectedArg);
+        }
+
+        public CommandLineApplication AddCommand(
+            CommandLineApplication command,
+            Action<CommandLineApplication> configuration,
+            bool throwOnUnexpectedArg = true)
+        {
+            if (command == null || configuration == null)
+            {
+                throw new NullReferenceException();
+            }
+
+            command.Parent = this;
             Commands.Add(command);
             configuration(command);
             return command;
@@ -93,7 +112,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
             var lastArg = Arguments.LastOrDefault();
             if (lastArg != null && lastArg.MultipleValues)
             {
-                var message = string.Format("The last argument '{0}' accepts multiple values. No more argument can be added.",
+                var message = string.Format(LocalizableStrings.LastArgumentMultiValueError,
                     lastArg.Name);
                 throw new InvalidOperationException(message);
             }
@@ -247,7 +266,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
                     {
                         command.ShowHint();
                         throw new CommandParsingException(command,
-                            $"Unexpected value '{optionComponents[1]}' for option '{optionName}'");
+                            String.Format(LocalizableStrings.UnexpectedValueForOptionError, optionComponents[1], optionName));
                     }
                 }
                 else
@@ -265,7 +284,9 @@ namespace Microsoft.DotNet.Cli.CommandLine
                         if (!option.TryParse(arg))
                         {
                             command.ShowHint();
-                            throw new CommandParsingException(command, $"Unexpected value '{arg}' for option '{optionName}'");
+                            throw new CommandParsingException(
+                                command,
+                                String.Format(LocalizableStrings.UnexpectedValueForOptionError, arg, optionName));
 
                         }
                     }
@@ -293,7 +314,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
         {
             // Help option is special because we stop parsing once we see it
             // So we store it separately for further use
-            OptionHelp = Option(template, "Show help information", CommandOptionType.NoValue);
+            OptionHelp = Option(template, LocalizableStrings.ShowHelpInfo, CommandOptionType.NoValue);
 
             return OptionHelp;
         }
@@ -319,7 +340,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
         {
             // Version option is special because we stop parsing once we see it
             // So we store it separately for further use
-            OptionVersion = Option(template, "Show version information", CommandOptionType.NoValue);
+            OptionVersion = Option(template, LocalizableStrings.ShowVersionInfo, CommandOptionType.NoValue);
             ShortVersionGetter = shortFormVersionGetter;
             LongVersionGetter = longFormVersionGetter ?? shortFormVersionGetter;
 
@@ -331,14 +352,14 @@ namespace Microsoft.DotNet.Cli.CommandLine
         {
             if (OptionHelp != null)
             {
-                Console.WriteLine(string.Format("Specify --{0} for a list of available options and commands.", OptionHelp.LongName));
+                Console.WriteLine(string.Format(LocalizableStrings.ShowHintInfo, OptionHelp.LongName));
             }
         }
 
         // Show full help
         public void ShowHelp(string commandName = null)
         {
-            var headerBuilder = new StringBuilder("Usage:");
+            var headerBuilder = new StringBuilder(LocalizableStrings.UsageHeader);
             var usagePrefixLength = headerBuilder.Length;
             for (var cmd = this; cmd != null; cmd = cmd.Parent)
             {
@@ -346,11 +367,11 @@ namespace Microsoft.DotNet.Cli.CommandLine
                 if (cmd != this && cmd.Arguments.Any())
                 {
                     var args = string.Join(" ", cmd.Arguments.Select(arg => arg.Name));
-                    headerBuilder.Insert(usagePrefixLength, string.Format(" {0} {1}", cmd.Name, args));
+                    headerBuilder.Insert(usagePrefixLength, string.Format(LocalizableStrings.UsageItemWithArgs, cmd.Name, args));
                 }
                 else
                 {
-                    headerBuilder.Insert(usagePrefixLength, string.Format(" {0}", cmd.Name));
+                    headerBuilder.Insert(usagePrefixLength, string.Format(LocalizableStrings.UsageItemWithoutArgs, cmd.Name));
                 }
             }
 
@@ -366,7 +387,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
 
                 if (target != null)
                 {
-                    headerBuilder.AppendFormat(" {0}", commandName);
+                    headerBuilder.AppendFormat(LocalizableStrings.CommandItem, commandName);
                 }
                 else
                 {
@@ -388,13 +409,13 @@ namespace Microsoft.DotNet.Cli.CommandLine
                 {
                     if (cmd == target)
                     {
-                        headerBuilder.Append(" [arguments]");
+                        headerBuilder.Append(LocalizableStrings.UsageArgumentsToken);
                     }
 
                     if (argumentsBuilder.Length == 0)
                     {
                         argumentsBuilder.AppendLine();
-                        argumentsBuilder.AppendLine("Arguments:");
+                        argumentsBuilder.AppendLine(LocalizableStrings.UsageArgumentsHeader);
                     }
 
                     maxArgLen = Math.Max(maxArgLen, MaxArgumentLength(cmd.Arguments));
@@ -405,7 +426,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
             {
                 if (cmd.Arguments.Any())
                 {
-                    var outputFormat = "  {0}{1}";
+                    var outputFormat = LocalizableStrings.UsageArgumentItem;
                     foreach (var arg in cmd.Arguments)
                     {
                         argumentsBuilder.AppendFormat(
@@ -419,12 +440,12 @@ namespace Microsoft.DotNet.Cli.CommandLine
 
             if (target.Options.Any())
             {
-                headerBuilder.Append(" [options]");
+                headerBuilder.Append(LocalizableStrings.UsageOptionsToken);
 
                 optionsBuilder.AppendLine();
-                optionsBuilder.AppendLine("Options:");
+                optionsBuilder.AppendLine(LocalizableStrings.UsageOptionsHeader);
                 var maxOptLen = MaxOptionTemplateLength(target.Options);
-                var outputFormat = string.Format("  {{0, -{0}}}{{1}}", maxOptLen + 2);
+                var outputFormat = string.Format(LocalizableStrings.UsageOptionsItem, maxOptLen + 2);
                 foreach (var opt in target.Options)
                 {
                     optionsBuilder.AppendFormat(outputFormat, opt.Template, opt.Description);
@@ -434,12 +455,12 @@ namespace Microsoft.DotNet.Cli.CommandLine
 
             if (target.Commands.Any())
             {
-                headerBuilder.Append(" [command]");
+                headerBuilder.Append(LocalizableStrings.UsageCommandToken);
 
                 commandsBuilder.AppendLine();
-                commandsBuilder.AppendLine("Commands:");
+                commandsBuilder.AppendLine(LocalizableStrings.UsageCommandsHeader);
                 var maxCmdLen = MaxCommandLength(target.Commands);
-                var outputFormat = string.Format("  {{0, -{0}}}{{1}}", maxCmdLen + 2);
+                var outputFormat = string.Format(LocalizableStrings.UsageCommandsItem, maxCmdLen + 2);
                 foreach (var cmd in target.Commands.OrderBy(c => c.Name))
                 {
                     commandsBuilder.AppendFormat(outputFormat, cmd.Name, cmd.Description);
@@ -449,7 +470,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
                 if (OptionHelp != null)
                 {
                     commandsBuilder.AppendLine();
-                    commandsBuilder.AppendFormat("Use \"{0} [command] --help\" for more information about a command.", Name);
+                    commandsBuilder.AppendFormat(LocalizableStrings.UsageCommandsDetailHelp, Name);
                     commandsBuilder.AppendLine();
                 }
             }
@@ -458,18 +479,18 @@ namespace Microsoft.DotNet.Cli.CommandLine
             {
                 if (target.AllowArgumentSeparator)
                 {
-                    headerBuilder.Append(" [[--] <arg>...]]");
+                    headerBuilder.Append(LocalizableStrings.UsageCommandAdditionalArgs);
                 }
                 else
                 {
-                    headerBuilder.Append(" [args]");
+                    headerBuilder.Append(LocalizableStrings.UsageCommandArgs);
                 }
 
                 if (!string.IsNullOrEmpty(target.ArgumentSeparatorHelpText))
                 {
                     argumentSeparatorBuilder.AppendLine();
-                    argumentSeparatorBuilder.AppendLine("Args:");
-                    argumentSeparatorBuilder.AppendLine($"  {target.ArgumentSeparatorHelpText}");
+                    argumentSeparatorBuilder.AppendLine(LocalizableStrings.UsageCommandsAdditionalArgsHeader);
+                    argumentSeparatorBuilder.AppendLine(String.Format(LocalizableStrings.UsageCommandsAdditionalArgsItem, target.ArgumentSeparatorHelpText));
                     argumentSeparatorBuilder.AppendLine();
                 }
             }
@@ -496,7 +517,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
 
         public string GetFullNameAndVersion()
         {
-            return ShortVersionGetter == null ? FullName : string.Format("{0} {1}", FullName, ShortVersionGetter());
+            return ShortVersionGetter == null ? FullName : string.Format(LocalizableStrings.ShortVersionTemplate, FullName, ShortVersionGetter());
         }
 
         public void ShowRootCommandFullNameAndVersion()
@@ -546,7 +567,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
             if (command._throwOnUnexpectedArg)
             {
                 command.ShowHint();
-                throw new CommandParsingException(command, $"Unrecognized {argTypeName} '{args[index]}'");
+                throw new CommandParsingException(command, String.Format(LocalizableStrings.UnexpectedArgumentError, argTypeName, args[index]));
             }
             else
             {
@@ -593,7 +614,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
 
             if (!File.Exists(fileName))
             {
-                throw new InvalidOperationException($"Response file '{fileName}' doesn't exist.");
+                throw new InvalidOperationException(String.Format(LocalizableStrings.ResponseFileNotFoundError, fileName));
             }
 
             return File.ReadLines(fileName);

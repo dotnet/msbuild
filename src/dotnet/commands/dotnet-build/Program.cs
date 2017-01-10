@@ -18,8 +18,8 @@ namespace Microsoft.DotNet.Tools.Build
             app.Name = "dotnet build";
             app.FullName = LocalizableStrings.AppFullName;
             app.Description = LocalizableStrings.AppDescription;
-            app.AllowArgumentSeparator = true;
             app.ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText;
+            app.HandleRemainingArguments = true;            
             app.HelpOption("-h|--help");
 
             CommandArgument projectArgument = app.Argument($"<{LocalizableStrings.ProjectArgumentValueName}>", LocalizableStrings.ProjectArgumentDescription);

@@ -30,9 +30,12 @@ namespace Microsoft.DotNet.Tools.Common
             {
                 slnFile = SlnFile.Read(solutionPath);
             }
-            catch
+            catch (InvalidSolutionFormatException e)
             {
-                throw new GracefulException(CommonLocalizableStrings.InvalidSolution, solutionPath);
+                throw new GracefulException(
+                    CommonLocalizableStrings.InvalidSolutionFormatString,
+                    solutionPath,
+                    e.Message);
             }
             return slnFile;
         }

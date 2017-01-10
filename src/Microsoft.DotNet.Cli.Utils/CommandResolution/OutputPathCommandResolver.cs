@@ -59,7 +59,8 @@ namespace Microsoft.DotNet.Cli.Utils
 
             if (!Directory.Exists(buildOutputPath))
             {
-                Reporter.Verbose.WriteLine($"outputpathresolver: {buildOutputPath} does not exist");
+                Reporter.Verbose.WriteLine(
+                    string.Format(LocalizableStrings.BuildOutputPathDoesNotExist, buildOutputPath));
                 return null;
             }
 

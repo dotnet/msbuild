@@ -1,0 +1,10 @@
+<Project ToolsVersion="15.0">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  
+  <ItemGroup>
+    <BundledTemplate Include="Microsoft.DotNet.Common.ItemTemplates" Version="$(TemplateEngineVersion)" />
+    <BundledTemplate Include="Microsoft.DotNet.Common.ProjectTemplates" Version="$(TemplateEngineVersion)" />
+    <BundledTemplate Include="Microsoft.DotNet.Test.ProjectTemplates" Version="$(TemplateEngineVersion)" />
+    <BundledTemplate Include="Microsoft.DotNet.Web.ProjectTemplates" Version="$(TemplateEngineVersion)" />
+  </ItemGroup>
+</Project>

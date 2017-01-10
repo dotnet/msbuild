@@ -4,23 +4,23 @@
 
 This repo contains the source code for cross-platform [.NET Core](http://github.com/dotnet/core) command line toolchain. It contains the implementation of each command, the native packages for various supported platforms as well as documentation. 
 
-RTM and Preview 2 bits
----------------------
-To get the latest released bits (RTM for .NET Core and Preview 2 for tooling), 
-check out our [Getting started page](http://go.microsoft.com/fwlink/?LinkID=798306&clcid=0x409).
+Preview 4 release - MSBuild based tools
+---------------------------------------
+As was outlined in the ["Changes to project.json" blog post](https://blogs.msdn.microsoft.com/dotnet/2016/05/23/changes-to-project-json/), we have started work to move away from project.json to csproj and MSBuild. All the new `latest` releases from this repo (from `rel/1.0.0` branch) are MSBuild-enabled tools. 
 
-Also, don't forget to check out [the documentation](https://aka.ms/dotnet-cli-docs). 
+The current official release of the csproj-enabled CLI tools is **CLI Preview 4**. 
 
-Changes in issue triaging
--------------------------
-We are making significant changes to the CLI tooling by supporting MSBuild as the build engine and `csproj` as the project format. You can read ["Changes to project.json" blog post](https://blogs.msdn.microsoft.com/dotnet/2016/05/23/changes-to-project-json/) for more context. We've realized that this also means that many of the shortcomings of the current tooling will be solved by this move so we've decided to introduce two new labels to indicate that in the issues: 
+There are a couple of things to keep in mind:
 
-* `msbuild-mitigated` - this label indicates the issue will be mitigated via move to MSBuild. 
-* `msbuild-notapplicable` - this label indicates the issue will not be applicable after moving to MSBuild.
+* Preview 4 CLI bits are still **in development** so some rough edges are to be expected. 
+* Preview 4 bits **do not support** project.json so you will have to either keep Preview 2 tools around or migrate your project. You can find more information on this using the [project.json to csproj instructions](https://github.com/dotnet/cli/blob/rel/1.0.0/Documentation/ProjectJsonToCSProj.md). 
+* Preview 4 refers to the **CLI tools only** and does not cover Visual Studio, VS Code or Visual Studio for Mac. 
+* We welcome any and all issues that relate to MSBuild-based tools, so feel free to try them out and leave comments and file any bugs/problems.
 
-We will close issues that are labelled with one of these labels. Proactive triaging will help us reduce the number of issues and enable us to focus on issues that require fixing independent of the move to msbuild.
+### Download links
 
-Please feel free to re-open and comment on any issue that you believe was triaged incorrectly.
+* Instructions and links for download:  [Preview 4 download links](https://github.com/dotnet/core/blob/master/release-notes/preview4-download.md). 
+* Directory for future Preview release notes: [.NET Core release notes](https://github.com/dotnet/core/tree/master/release-notes).
 
 Found an issue?
 ---------------
@@ -47,7 +47,7 @@ You can download .NET Core as either an installer (MSI, PKG) or a zip (zip, gzip
 - .NET Core SDK - .NET Core + CLI tools
 
 > **Note:** please be aware that below installers are the **latest bits**. If you 
-> want to install the latest released versions, please check out the [section above](#rtm-and-preview-2-bits).)
+> want to install the latest released versions, please check out the [section above](#download-links).)
 
 |  | Version | .NET Core Installer | .NET Core SDK Installer | .NET Core Binaries | .NET Core SDK Binaries |
 |----------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|

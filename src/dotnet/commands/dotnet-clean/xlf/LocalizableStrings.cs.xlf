@@ -29,7 +29,7 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
-        <source>Directory in which the build outputs have been placed</source>
+        <source>Directory in which the build outputs have been placed.</source>
         <target state="translated">Adresář, do kterého byly umístěny výstupy buildu.</target>
         <note />
       </trans-unit>
@@ -39,7 +39,7 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
-        <source>Clean a specific framework</source>
+        <source>Clean a specific framework.</source>
         <target state="translated">Umožňuje vyčistit určitou platformu.</target>
         <note />
       </trans-unit>
@@ -49,7 +49,7 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigurationDescription">
-        <source>Clean a specific configuration</source>
+        <source>Clean a specific configuration.</source>
         <target state="translated">Umožňuje vyčistit určitou konfiguraci.</target>
         <note />
       </trans-unit>

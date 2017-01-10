@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.IO;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Rules
@@ -20,7 +21,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 if (File.Exists(outputRuntimeOptionsFile))
                 {
                     MigrationErrorCodes.MIGRATE1015(
-                        $"{outputRuntimeOptionsFile} already exists. Has migration already been run?").Throw();
+                        String.Format(LocalizableStrings.ProjAlreadyExistsError, outputRuntimeOptionsFile)).Throw();
                 }
 
                 File.WriteAllText(outputRuntimeOptionsFile, raw);

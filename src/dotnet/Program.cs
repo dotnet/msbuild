@@ -24,6 +24,7 @@ using Microsoft.DotNet.Tools.Remove;
 using Microsoft.DotNet.Tools.Restore;
 using Microsoft.DotNet.Tools.RestoreProjectJson;
 using Microsoft.DotNet.Tools.Run;
+using Microsoft.DotNet.Tools.Sln;
 using Microsoft.DotNet.Tools.Test;
 using Microsoft.DotNet.Tools.VSTest;
 using NuGet.Frameworks;
@@ -42,7 +43,7 @@ namespace Microsoft.DotNet.Cli
             ["migrate"] = MigrateCommand.Run,
             ["msbuild"] = MSBuildCommand.Run,
             ["new"] = NewCommand.Run,
-            ["new3"] = New3Command.Run,
+            ["new3"] = New3CommandShim.Run,
             ["nuget"] = NuGetCommand.Run,
             ["pack"] = PackCommand.Run,
             ["publish"] = PublishCommand.Run,
@@ -50,6 +51,7 @@ namespace Microsoft.DotNet.Cli
             ["restore"] = RestoreCommand.Run,
             ["restore-projectjson"] = RestoreProjectJsonCommand.Run,
             ["run"] = RunCommand.Run,
+            ["sln"] = SlnCommand.Run,
             ["test"] = TestCommand.Run,
             ["vstest"] = VSTestCommand.Run,
         };
@@ -118,7 +120,7 @@ namespace Microsoft.DotNet.Cli
             {
                 for (; lastArg < args.Length; lastArg++)
                 {
-                    if (IsArg(args[lastArg], "v", "verbose"))
+                    if (IsArg(args[lastArg], "d", "diagnostics"))
                     {
                         verbose = true;
                     }

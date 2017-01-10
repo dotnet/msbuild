@@ -74,7 +74,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
 
         internal static CommandOption AddVerbosityOption(CommandLineApplication app)
         {
-            return app.Option("-v|--verbosity", "Set the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]", CommandOptionType.SingleValue);
+            return app.Option("-v|--verbosity", LocalizableStrings.VerbosityOptionDescription, CommandOptionType.SingleValue);
         }
 
         private static string GetMSBuildExePath()
@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
         private static string GetRunCscPath()
         {
             var scriptExtension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".cmd" : ".sh";
-            return Path.Combine(AppContext.BaseDirectory, $"RunCsc{scriptExtension}");
+            return Path.Combine(AppContext.BaseDirectory, "Roslyn", $"RunCsc{scriptExtension}");
         }
     }
 }

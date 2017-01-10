@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using Microsoft.Build.Construction;
+using Microsoft.DotNet.Internal.ProjectModel;
 using Microsoft.DotNet.ProjectJsonMigration.Transforms;
 using NuGet.Frameworks;
 using System.Collections.Generic;
@@ -33,32 +34,31 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             CleanExistingProperties(csproj);
             CleanExistingPackageReferences(csproj);
 
-            if(migrationRuleInputs.ProjectContexts.Count() == 1)
-            {
-                _transformApplicator.Execute(
-                    FrameworkTransform.Transform(
-                        migrationRuleInputs.ProjectContexts.Single().TargetFramework),
-                    propertyGroup,
-                    mergeExisting: true);
-                _transformApplicator.Execute(
-                    FrameworkRuntimeIdentifiersTransform.Transform(
-                        migrationRuleInputs.ProjectContexts.Single().TargetFramework),
-                    propertyGroup,
-                    mergeExisting: true);
-            }
-            else
+            if(migrationRuleInputs.IsMultiTFM)
             {
                 _transformApplicator.Execute(
                     FrameworksTransform.Transform(
                         migrationRuleInputs.ProjectContexts.Select(p => p.TargetFramework)),
                     propertyGroup,
                     mergeExisting: true);
+            }
+            else
+            {
                 _transformApplicator.Execute(
-                    FrameworksRuntimeIdentifiersTransform.Transform(
-                        migrationRuleInputs.ProjectContexts.Select(p => p.TargetFramework)),
+                    FrameworkTransform.Transform(
+                        migrationRuleInputs.ProjectContexts.Single().TargetFramework),
                     propertyGroup,
                     mergeExisting: true);
             }
+
+            _transformApplicator.Execute(
+                    RuntimeIdentifiersTransform.Transform(migrationRuleInputs.ProjectContexts),
+                    propertyGroup,
+                    mergeExisting: true);
+            _transformApplicator.Execute(
+                    RuntimeIdentifierTransform.Transform(migrationRuleInputs.ProjectContexts),
+                    propertyGroup,
+                    mergeExisting: true);
         }
 
         private void CleanExistingProperties(ProjectRootElement csproj)
@@ -122,22 +122,38 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 frameworks => string.Join(";", frameworks.Select(f => f.GetShortFolderName())),
                 frameworks => true);
 
-        private AddPropertyTransform<IEnumerable<NuGetFramework>> FrameworksRuntimeIdentifiersTransform =>
-            new AddPropertyTransform<IEnumerable<NuGetFramework>>(
-                "RuntimeIdentifiers",
-                frameworks => RuntimeIdentifiers,
-                frameworks => frameworks.Any(f => !f.IsPackageBased));
-
         private AddPropertyTransform<NuGetFramework> FrameworkTransform =>
             new AddPropertyTransform<NuGetFramework>(
                 "TargetFramework",
                 framework => framework.GetShortFolderName(),
                 framework => true);
 
-        private AddPropertyTransform<NuGetFramework> FrameworkRuntimeIdentifiersTransform =>
-            new AddPropertyTransform<NuGetFramework>(
+        private AddPropertyTransform<IEnumerable<ProjectContext>> RuntimeIdentifiersTransform =>
+            new AddPropertyTransform<IEnumerable<ProjectContext>>(
                 "RuntimeIdentifiers",
-                framework => RuntimeIdentifiers,
-                framework => !framework.IsPackageBased);
+                projectContexts => RuntimeIdentifiers,
+                projectContexts => !projectContexts.HasRuntimes() &&
+                                    projectContexts.HasBothCoreAndFullFrameworkTFMs());
+
+        private AddPropertyTransform<IEnumerable<ProjectContext>> RuntimeIdentifierTransform =>
+            new AddPropertyTransform<IEnumerable<ProjectContext>>(
+                "RuntimeIdentifier",
+                projectContexts => "win7-x86",
+                projectContexts => !projectContexts.HasRuntimes() && projectContexts.HasFullFrameworkTFM())
+            .WithMSBuildCondition(projectContexts =>
+                {
+                    string msBuildCondition = null;
+                    if (projectContexts.HasBothCoreAndFullFrameworkTFMs())
+                    {
+                        msBuildCondition = string.Join(
+                            " OR ",
+                            projectContexts.Where(p => p.IsFullFramework()).Select(
+                                p => $"'$(TargetFramework)' == '{p.TargetFramework.GetShortFolderName()}'"));
+
+                        msBuildCondition = $" {msBuildCondition} ";
+                    }
+
+                    return msBuildCondition;
+                });
     }
 }

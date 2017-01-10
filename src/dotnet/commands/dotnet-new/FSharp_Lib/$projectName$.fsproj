@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard1.6</TargetFramework>
     <Version>1.0.0-alpha</Version>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
 
   <ItemGroup>

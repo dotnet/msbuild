@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Internal.ProjectModel.Utilities
             return candidate.StartsWith(dir, StringComparison.OrdinalIgnoreCase);
         }
 
-        public static string EnsureTrailingSlash(string path)
+        public static string EnsureTrailingSlash(this string path)
         {
             return EnsureTrailingCharacter(path, Path.DirectorySeparatorChar);
         }
@@ -51,12 +51,18 @@ namespace Microsoft.DotNet.Internal.ProjectModel.Utilities
             return path + trailingCharacter;
         }
 
-        public static void EnsureParentDirectory(string filePath)
+        public static void EnsureParentDirectoryExists(string filePath)
         {
             string directory = Path.GetDirectoryName(filePath);
-            if (!Directory.Exists(directory))
+
+            EnsureDirectoryExists(directory);
+        }
+        
+        public static void EnsureDirectoryExists(string directoryPath)
+        {
+            if (!Directory.Exists(directoryPath))
             {
-                Directory.CreateDirectory(directory);
+                Directory.CreateDirectory(directoryPath);
             }
         }
 

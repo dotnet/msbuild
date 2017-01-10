@@ -4,9 +4,9 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools.Add.PackageReference;
 using Microsoft.DotNet.Tools.Add.ProjectToProjectReference;
-using Microsoft.DotNet.Tools.Add.ProjectToSolution;
 
 namespace Microsoft.DotNet.Tools.Add
 {
@@ -14,11 +14,13 @@ namespace Microsoft.DotNet.Tools.Add
     {
         protected override string CommandName => "add";
         protected override string FullCommandNameLocalized => LocalizableStrings.NetAddCommand;
-        internal override List<Func<CommandLineApplication, CommandLineApplication>> SubCommands =>
-            new List<Func<CommandLineApplication, CommandLineApplication>>
+        protected override string ArgumentName => Constants.ProjectArgumentName;
+        protected override string ArgumentDescriptionLocalized => CommonLocalizableStrings.ArgumentsProjectDescription;
+        internal override List<Func<DotNetSubCommandBase>> SubCommands =>
+            new List<Func<DotNetSubCommandBase>>
             {
-                AddProjectToSolutionCommand.CreateApplication,
-                AddProjectToProjectReferenceCommand.CreateApplication,
+                AddProjectToProjectReferenceCommand.Create,
+                AddPackageReferenceCommand.Create,
             };
 
         public static int Run(string[] args)

@@ -5,6 +5,7 @@ namespace Microsoft.DotNet.Tools
 {
     internal class CommonLocalizableStrings
     {
+        public const string UnsupportedProjectType = "Unsupported project type. Please check with your sdk provider.";
         public const string ProjectAlreadyHasAreference = "Project already has a reference to `{0}`.";
         public const string ProjectReferenceCouldNotBeFound = "Project reference `{0}` could not be found.";
         public const string ProjectReferenceRemoved = "Project reference `{0}` removed.";
@@ -105,7 +106,7 @@ namespace Microsoft.DotNet.Tools
         public const string CouldNotFindSolutionIn = "Specified solution file {0} does not exist, or there is no solution file in the directory.";
         public const string CouldNotFindSolutionOrDirectory = "Could not find solution or directory `{0}`.";
         public const string MoreThanOneSolutionInDirectory = "Found more than one solution file in {0}. Please specify which one to use.";
-        public const string InvalidSolution = "Invalid solution `{0}`.";
+        public const string InvalidSolutionFormatString = "Invalid solution `{0}`. {1}"; // {0} is the solution path, {1} is already localized details on the failure
         public const string SolutionDoesNotExist = "Specified solution file {0} does not exist, or there is no solution file in the directory.";
         
         /// add p2p
@@ -153,6 +154,12 @@ namespace Microsoft.DotNet.Tools
 
         /// arguments
         public const string ArgumentsProjectOrSolutionDescription = "The project or solution to operation on. If a file is not specified, the current directory is searched.";
+
+        /// sln
+        public const string ArgumentsProjectDescription = "The project file to operate on. If a file is not specified, the command will search the current directory for one.";
+        public const string ArgumentsSolutionDescription = "Solution file to operate on. If not specified, the command will search the current directory for one.";
+        public const string CmdSlnFile = "<SLN_FILE>";
+        public const string CmdProjectFile = "<PROJECT>";
 
         /// commands
         public const string CmdFramework = "FRAMEWORK";

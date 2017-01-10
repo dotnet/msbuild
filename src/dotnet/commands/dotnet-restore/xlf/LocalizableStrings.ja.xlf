@@ -4,8 +4,8 @@
     <body>
       <group id="src/dotnet/commands/dotnet-restore/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
-        <source>restore</source>
-        <target state="translated">復元</target>
+        <source>.NET dependency restorer</source>
+        <target state="translated">.NET 依存関係リストアラー</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
@@ -14,8 +14,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdArgument">
-        <source>root</source>
-        <target state="translated">ルート</target>
+        <source>PROJECT</source>
+        <target state="translated">PROJECT</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgumentDescription">
@@ -24,8 +24,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceOption">
-        <source>source</source>
-        <target state="translated">ソース</target>
+        <source>SOURCE</source>
+        <target state="translated">SOURCE</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceOptionDescription">
@@ -34,8 +34,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOption">
-        <source>packagesDirectory</source>
-        <target state="translated">packagesDirectory</target>
+        <source>PACKAGES_DIRECTORY</source>
+        <target state="translated">PACKAGES_DIRECTORY</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOptionDescription">
@@ -49,8 +49,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigFileOption">
-        <source>file</source>
-        <target state="translated">ファイル</target>
+        <source>FILE</source>
+        <target state="translated">FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigFileOptionDescription">
@@ -70,7 +70,17 @@
       </trans-unit>
       <trans-unit id="CmdNoDependenciesOptionDescription">
         <source>Set this flag to ignore project to project references and only restore the root project</source>
-        <target state="translated">project to project 参照を無視して、ルート プロジェクトのみを復元するには、このフラグを設定します</target>
+        <target state="translated">プロジェクト間参照を無視して、ルート プロジェクトのみを復元するには、このフラグを設定します</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdRuntimeOption">
+        <source>RUNTIME_IDENTIFIER</source>
+        <target state="translated">RUNTIME_IDENTIFIER</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdRuntimeOptionDescription">
+        <source>Target runtime to restore packages for.</source>
+        <target state="translated">パッケージ復元用のターゲット ランタイム。</target>
         <note />
       </trans-unit>
     </body>

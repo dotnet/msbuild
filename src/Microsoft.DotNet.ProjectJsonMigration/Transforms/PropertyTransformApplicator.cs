@@ -20,12 +20,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
         {
             if (typeof(T) != typeof(ProjectPropertyElement))
             {
-                throw new ArgumentException($"Expected element to be of type {nameof(ProjectPropertyElement)}, but got {nameof(T)}");
+                throw new ArgumentException(String.Format(LocalizableStrings.PropertyTransformApplicatorWrongElementTypeError, nameof(ProjectPropertyElement), nameof(T)));
             }
 
             if (typeof(U) != typeof(ProjectPropertyGroupElement))
             {
-                throw new ArgumentException($"Expected element to be of type {nameof(ProjectPropertyGroupElement)}, but got {nameof(U)}");
+                throw new ArgumentException(String.Format(LocalizableStrings.PropertyTransformApplicatorWrongElementTypeError, nameof(ProjectPropertyGroupElement), nameof(U)));
             }
 
             if (element == null)
@@ -41,12 +41,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
                 var mergedProperty = MergePropertyWithProject(property, destinationPropertyGroup);
                 if (mergedProperty != null && !string.IsNullOrEmpty(mergedProperty.Value))
                 {
-                    TracePropertyInfo("Merging property, output merged property", mergedProperty);
+                    TracePropertyInfo(LocalizableStrings.MergingProperty, mergedProperty);
                     AddPropertyToPropertyGroup(mergedProperty, destinationPropertyGroup);
                 }
                 else
                 {
-                    TracePropertyInfo("Ignoring fully merged property", property);
+                    TracePropertyInfo(LocalizableStrings.IgnoringMergedProperty, property);
                 }
             }
             else
@@ -125,7 +125,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
 
         private void TracePropertyInfo(string message, ProjectPropertyElement mergedProperty)
         {
-            MigrationTrace.Instance.WriteLine($"{nameof(PropertyTransformApplicator)}: {message}, {{ Name={mergedProperty.Name}, Value={mergedProperty.Value} }}");
+            MigrationTrace.Instance.WriteLine(String.Format(
+                LocalizableStrings.PropertyInfo,
+                nameof(PropertyTransformApplicator),
+                message,
+                mergedProperty.Name,
+                mergedProperty.Value));
         }
     }
 }

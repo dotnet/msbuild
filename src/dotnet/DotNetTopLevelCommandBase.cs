@@ -3,10 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
-using Microsoft.DotNet.Tools.Add.ProjectToProjectReference;
+using Microsoft.DotNet.Tools.Common;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -14,46 +16,67 @@ namespace Microsoft.DotNet.Cli
     {
         protected abstract string CommandName { get; }
         protected abstract string FullCommandNameLocalized { get; }
-        internal abstract List<Func<CommandLineApplication, CommandLineApplication>> SubCommands { get; }
+        protected abstract string ArgumentName { get; }
+        protected abstract string ArgumentDescriptionLocalized { get; }
+        internal abstract List<Func<DotNetSubCommandBase>> SubCommands { get; }
 
         public int RunCommand(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            CommandLineApplication app = new CommandLineApplication(throwOnUnexpectedArg: true)
+            CommandLineApplication command = new CommandLineApplication(throwOnUnexpectedArg: true)
             {
                 Name = $"dotnet {CommandName}",
                 FullName = FullCommandNameLocalized,
             };
 
-            app.HelpOption("-h|--help");
+            command.HelpOption("-h|--help");
 
-            app.Argument(
-                Constants.ProjectOrSolutionArgumentName,
-                CommonLocalizableStrings.ArgumentsProjectOrSolutionDescription);
+            command.Argument(ArgumentName, ArgumentDescriptionLocalized);
 
             foreach (var subCommandCreator in SubCommands)
             {
-                subCommandCreator(app);
+                var subCommand = subCommandCreator();
+                command.AddCommand(subCommand);
+
+                subCommand.OnExecute(() => {
+                    try
+                    {
+                        if (!command.Arguments.Any())
+                        {
+                            throw new GracefulException(CommonLocalizableStrings.RequiredArgumentNotPassed, ArgumentDescriptionLocalized);
+                        }
+
+                        var projectOrDirectory = command.Arguments.First().Value;
+                        if (string.IsNullOrEmpty(projectOrDirectory))
+                        {
+                            projectOrDirectory = PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory());
+                        }
+
+                        return subCommand.Run(projectOrDirectory);
+                    }
+                    catch (GracefulException e)
+                    {
+                        Reporter.Error.WriteLine(e.Message.Red());
+                        subCommand.ShowHelp();
+                        return 1;
+                    }
+                });
             }
 
             try
             {
-                return app.Execute(args);
+                return command.Execute(args);
             }
             catch (GracefulException e)
             {
                 Reporter.Error.WriteLine(e.Message.Red());
-                app.ShowHelp();
+                command.ShowHelp();
                 return 1;
             }
             catch (CommandParsingException e)
             {
-                string errorMessage = e.IsRequireSubCommandMissing
-                    ? CommonLocalizableStrings.RequiredCommandNotPassed
-                    : e.Message;
-
-                Reporter.Error.WriteLine(errorMessage.Red());
+                Reporter.Error.WriteLine(e.Message.Red());
                 return 1;
             }
         }

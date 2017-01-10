@@ -2,8 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using NuGet.Frameworks;
 using NuGet.Versioning;
 
@@ -35,7 +36,9 @@ namespace Microsoft.DotNet.Cli.Utils
             var bestVersion = versionRange.FindBestMatch(availableToolVersions);
             if (bestVersion == null)
             {
-                throw new GracefulException($"Version for package `{packageId}` could not be resolved.");
+                throw new GracefulException(string.Format(
+                    LocalizableStrings.VersionForPackageCouldNotBeResolved,
+                    packageId));
             }
 
             return GetLockFilePath(packageId, bestVersion, framework);
@@ -73,6 +76,11 @@ namespace Microsoft.DotNet.Cli.Utils
             var availableVersions = new List<NuGetVersion>();
 
             var toolBase = GetBaseToolPath(packageId);
+            if (!Directory.Exists(toolBase))
+            {
+                return Enumerable.Empty<NuGetVersion>();
+            }
+            
             var versionDirectories = Directory.EnumerateDirectories(toolBase);
 
             foreach (var versionDirectory in versionDirectories)

@@ -5,6 +5,6 @@ namespace Microsoft.DotNet.Cli.CommandLine
 {
     internal class HelpMessageStrings
     {
-        internal const string MSBuildAdditionalArgsHelpText = "Any extra options that should be passed to MSBuild. See 'dotnet msbuild -h' for available options.";
+        internal const string MSBuildAdditionalArgsHelpText = LocalizableStrings.MSBuildAdditionalArgsHelpText;
     }
 }

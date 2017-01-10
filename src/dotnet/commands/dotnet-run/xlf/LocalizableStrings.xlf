@@ -12,7 +12,7 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionConfigurationDescription">
-        <source>Configuration under which to build</source>
+        <source>Configuration to use for building the project. Default for most projects is "Debug".</source>
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionFramework">
@@ -20,7 +20,7 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionFrameworkDescription">
-        <source>Compile a specific framework</source>
+        <source>Build and run the app using the specified framework. The framework has to be specified in the project file. </source>
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionProjectDescription">
@@ -85,6 +85,10 @@
       </trans-unit>
       <trans-unit id="RunCommandInvalidOperationException4">
         <source>contains more than one project file.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandAdditionalArgsHelpText">
+        <source>Arguments passed to the application that is being run.</source>
         <note />
       </trans-unit>
     </body>

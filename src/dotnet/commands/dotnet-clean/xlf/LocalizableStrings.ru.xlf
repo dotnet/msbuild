@@ -29,7 +29,7 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
-        <source>Directory in which the build outputs have been placed</source>
+        <source>Directory in which the build outputs have been placed.</source>
         <target state="translated">Каталог, в котором размещаются выходные данные сборки.</target>
         <note />
       </trans-unit>
@@ -39,8 +39,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
-        <source>Clean a specific framework</source>
-        <target state="translated">Очистка определенной платформы</target>
+        <source>Clean a specific framework.</source>
+        <target state="translated">Очистка определенной платформы.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfiguration">
@@ -49,8 +49,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigurationDescription">
-        <source>Clean a specific configuration</source>
-        <target state="translated">Очистка определенной конфигурации</target>
+        <source>Clean a specific configuration.</source>
+        <target state="translated">Очистка определенной конфигурации.</target>
         <note />
       </trans-unit>
     </body>

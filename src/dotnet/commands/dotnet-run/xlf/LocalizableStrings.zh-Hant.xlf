@@ -10,12 +10,12 @@
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Command used to run .NET apps</source>
-        <target state="translated">用來執行 .NET 應用程式的命令</target>
+        <target state="translated">用以執行 .NET 應用程式的命令</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionConfigurationDescription">
-        <source>Configuration under which to build</source>
-        <target state="translated">作為建置依據的組態</target>
+        <source>Configuration to use for building the project. Default for most projects is "Debug".</source>
+        <target state="translated">要用於建置專案的組態。多數專案的預設為 "Debug"。</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionFramework">
@@ -24,8 +24,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionFrameworkDescription">
-        <source>Compile a specific framework</source>
-        <target state="translated">編譯特定架構</target>
+        <source>Build and run the app using the specified framework. The framework has to be specified in the project file. </source>
+        <target state="translated">使用指定的架構建置及執行應用程式。架構必須在專案檔中指定。 </target>
         <note />
       </trans-unit>
       <trans-unit id="CommandOptionProjectDescription">
@@ -106,6 +106,11 @@
       <trans-unit id="RunCommandInvalidOperationException4">
         <source>contains more than one project file.</source>
         <target state="translated">包含多個專案檔。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandAdditionalArgsHelpText">
+        <source>Arguments passed to the application that is being run.</source>
+        <target state="translated">傳遞至正在執行之應用程式的引數。</target>
         <note />
       </trans-unit>
     </body>

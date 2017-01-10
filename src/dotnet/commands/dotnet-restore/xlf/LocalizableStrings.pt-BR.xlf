@@ -4,8 +4,8 @@
     <body>
       <group id="src/dotnet/commands/dotnet-restore/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
-        <source>restore</source>
-        <target state="translated">restauração</target>
+        <source>.NET dependency restorer</source>
+        <target state="translated">Restaurador de dependência do .NET</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
@@ -14,8 +14,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdArgument">
-        <source>root</source>
-        <target state="translated">raiz</target>
+        <source>PROJECT</source>
+        <target state="translated">PROJETO</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgumentDescription">
@@ -24,8 +24,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceOption">
-        <source>source</source>
-        <target state="translated">origem</target>
+        <source>SOURCE</source>
+        <target state="translated">ORIGEM</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceOptionDescription">
@@ -34,8 +34,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOption">
-        <source>packagesDirectory</source>
-        <target state="translated">packagesDirectory</target>
+        <source>PACKAGES_DIRECTORY</source>
+        <target state="translated">DIRETÓRIO_PACOTES</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOptionDescription">
@@ -49,8 +49,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigFileOption">
-        <source>file</source>
-        <target state="translated">arquivo</target>
+        <source>FILE</source>
+        <target state="translated">ARQUIVO</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigFileOptionDescription">
@@ -71,6 +71,16 @@
       <trans-unit id="CmdNoDependenciesOptionDescription">
         <source>Set this flag to ignore project to project references and only restore the root project</source>
         <target state="translated">Definir esse sinalizador para ignorar referências de projeto para projeto e restaurar apenas o projeto raiz</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdRuntimeOption">
+        <source>RUNTIME_IDENTIFIER</source>
+        <target state="translated">RUNTIME_IDENTIFIER</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdRuntimeOptionDescription">
+        <source>Target runtime to restore packages for.</source>
+        <target state="translated">O tempo de execução de destino para o qual restaurar pacotes.</target>
         <note />
       </trans-unit>
     </body>

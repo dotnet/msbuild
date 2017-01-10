@@ -29,8 +29,8 @@
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
-        <source>Target framework to publish for</source>
-        <target state="translated">発行用のターゲット フレームワーク</target>
+        <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
+        <target state="translated">発行用のターゲット フレームワーク。ターゲット フレームワークはプロジェクト ファイルで指定する必要があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOption">
@@ -39,8 +39,8 @@
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
-        <source>Target runtime to publish for. The default is to publish a portable application.</source>
-        <target state="translated">発行用のターゲット ランタイム既定では、ポータブル アプリケーションを発行します。</target>
+        <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependented app.</source>
+        <target state="translated">指定されたランタイムのプロジェクトを発行します。これは、自己完結型の展開を作成する際に使用します。既定では、フレームワーク依存アプリを発行します。</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -49,8 +49,8 @@
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
-        <source>Path in which to publish the app</source>
-        <target state="translated">アプリを発行するパス</target>
+        <source>Output directory in which to place the published artifacts.</source>
+        <target state="translated">発行された成果物を配置する出力ディレクトリ。</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOption">
@@ -59,8 +59,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>Configuration under which to build</source>
-        <target state="translated">構築する構成</target>
+        <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
+        <target state="translated">プロジェクトの構築に使用する構成。ほとんどのプロジェクトで既定は "デバッグ" です。</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOption">
@@ -69,7 +69,7 @@
         <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOptionDescription">
-        <source>Defines the value for the $(VersionSuffix) property in the project</source>
+        <source>Defines the value for the $(VersionSuffix) property in the project.</source>
         <target state="translated">プロジェクトの $(VersionSuffix) プロパティの値を定義します。</target>
         <note />
       </trans-unit>

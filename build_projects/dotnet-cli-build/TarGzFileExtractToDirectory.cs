@@ -42,12 +42,6 @@ namespace Microsoft.DotNet.Build.Tasks
                     Log.LogMessage(MessageImportance.Low, "'{0}' already exists, trying to delete before unzipping...", DestinationDirectory);
                     Directory.Delete(DestinationDirectory, recursive: true);
                 }
-                else
-                {
-                    Log.LogWarning("'{0}' already exists. Did you forget to set '{1}' to true?", DestinationDirectory, nameof(OverwriteDestination));
-
-                    retVal = false;
-                }
             }
 
             if (!File.Exists(SourceArchive))

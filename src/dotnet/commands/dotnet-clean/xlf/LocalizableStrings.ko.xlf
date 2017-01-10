@@ -29,7 +29,7 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
-        <source>Directory in which the build outputs have been placed</source>
+        <source>Directory in which the build outputs have been placed.</source>
         <target state="translated">빌드 출력이 배치된 디렉터리입니다.</target>
         <note />
       </trans-unit>
@@ -39,7 +39,7 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
-        <source>Clean a specific framework</source>
+        <source>Clean a specific framework.</source>
         <target state="translated">특정 프레임워크를 정리합니다.</target>
         <note />
       </trans-unit>
@@ -49,7 +49,7 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigurationDescription">
-        <source>Clean a specific configuration</source>
+        <source>Clean a specific configuration.</source>
         <target state="translated">특정 구성을 정리합니다.</target>
         <note />
       </trans-unit>

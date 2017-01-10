@@ -15,27 +15,23 @@
       </trans-unit>
       <trans-unit id="CmdProjectArgument">
         <source>PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</source>
-        <target state="needs-review-translation">PROJECT_JSON/GLOBAL_JSON/PROJECT_DIR</target>
-        <note></note>
+        <target state="translated">PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdProjectArgumentDescription">
-        <source>The path to 
+        <source>The path to one of the following:
     - a project.json file to migrate.
-or
     - a global.json file, it will migrate the folders specified in global.json.
-or
     - a solution.sln file, it will migrate the projects referenced in the solution.
-or
     - a directory to migrate, it will recursively search for project.json files to migrate.
 Defaults to current directory if nothing is specified.</source>
-        <target state="needs-review-translation">Cesta k 
-    - migrovanému souboru project.json.
-nebo
-    - souboru global.json – migrovat se budou složky zadané v souboru global.json.
-nebo
-    - migrovaný adresář – rekurzivně vyhledá migrované soubory project.json.
+        <target state="translated">Cesta k jednomu z následujících umístění:
+    - k migrovanému souboru project.json
+    - k souboru global.json (Migrovat se budou složky zadané v souboru global.json.)
+    - k souboru solution.sln (Migrovat se budou projekty odkazované v řešení.)
+    - k migrovanému adresáři (Rekurzivně vyhledá migrované soubory project.json.)
 Výchozí hodnota je aktuální adresář (pokud není zadaný jiný adresář).</target>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CmdTemplateDescription">
         <source>Base MSBuild template to use for migrated app. The default is the project included in dotnet new.</source>

@@ -29,8 +29,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
-        <source>Directory in which the build outputs have been placed</source>
-        <target state="translated">ビルド出力が配置されているディレクトリ</target>
+        <source>Directory in which the build outputs have been placed.</source>
+        <target state="translated">ビルド出力が配置されているディレクトリ。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
@@ -39,8 +39,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
-        <source>Clean a specific framework</source>
-        <target state="translated">特定のフレームワークを消去する</target>
+        <source>Clean a specific framework.</source>
+        <target state="translated">特定のフレームワークを消去します。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfiguration">
@@ -49,8 +49,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigurationDescription">
-        <source>Clean a specific configuration</source>
-        <target state="translated">特定の構成を消去する</target>
+        <source>Clean a specific configuration.</source>
+        <target state="translated">特定の構成を消去します。</target>
         <note />
       </trans-unit>
     </body>

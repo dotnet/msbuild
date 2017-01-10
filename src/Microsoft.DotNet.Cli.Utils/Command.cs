@@ -118,7 +118,10 @@ namespace Microsoft.DotNet.Cli.Utils
         public CommandResult Execute()
         {
 
-            Reporter.Verbose.WriteLine($"Running {_process.StartInfo.FileName} {_process.StartInfo.Arguments}");
+            Reporter.Verbose.WriteLine(string.Format(
+                LocalizableStrings.RunningFileNameArguments,
+                _process.StartInfo.FileName,
+                _process.StartInfo.Arguments));
 
             ThrowIfRunning();
 
@@ -135,7 +138,9 @@ namespace Microsoft.DotNet.Cli.Utils
             {
                 _process.Start();
 
-                Reporter.Verbose.WriteLine($"Process ID: {_process.Id}");
+                Reporter.Verbose.WriteLine(string.Format(
+                    LocalizableStrings.ProcessId,
+                    _process.Id));
 
                 var taskOut = _stdOut?.BeginRead(_process.StandardOutput);
                 var taskErr = _stdErr?.BeginRead(_process.StandardError);
@@ -148,7 +153,11 @@ namespace Microsoft.DotNet.Cli.Utils
             var exitCode = _process.ExitCode;
 
 #if DEBUG
-            var message = $"< {FormatProcessInfo(_process.StartInfo)} exited with {exitCode} in {sw.ElapsedMilliseconds} ms.";
+            var message = string.Format(
+                LocalizableStrings.ProcessExitedWithCode,
+                FormatProcessInfo(_process.StartInfo),
+                exitCode,
+                sw.ElapsedMilliseconds);
             if (exitCode == 0)
             {
                 Reporter.Verbose.WriteLine(message.Green());
@@ -288,7 +297,9 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             if (_running)
             {
-                throw new InvalidOperationException($"Unable to invoke {memberName} after the command has been run");
+                throw new InvalidOperationException(string.Format(
+                    LocalizableStrings.UnableToInvokeMemberNameAfterCommand,
+                    memberName));
             }
         }
     }

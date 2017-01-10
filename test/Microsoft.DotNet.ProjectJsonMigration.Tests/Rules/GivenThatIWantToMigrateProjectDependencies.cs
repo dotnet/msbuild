@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
     public class GivenThatIWantToMigrateProjectDependencies : TestBase
     {
         [Fact]
-        public void Project_dependencies_are_migrated_to_ProjectReference()
+        public void ProjectDependenciesAreMigratedToProjectReference()
         {
             var solutionDirectory =
                 TestAssetsManager.CreateTestInstance("TestAppWithLibrary", callingMethod: "p").Path;
@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void It_does_not_migrate_a_dependency_with_target_package_that_has_a_matching_project_as_a_ProjectReference()
+        public void ItDoesNotMigrateADependencyWithTargetPackageThatHasAMatchingProjectAsAProjectReference()
         {
             var testAssetsManager = GetTestGroupTestAssetsManager("NonRestoredTestProjects");
             var solutionDirectory =
@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void TFM_specific_Project_dependencies_are_migrated_to_ProjectReference_under_condition_ItemGroup()
+        public void TFMSpecificProjectDependenciesAreMigratedToProjectReferenceUnderConditionItemGroup()
         {
             var solutionDirectory =
                 TestAssetsManager.CreateTestInstance("TestAppWithLibraryUnderTFM", callingMethod: "p").Path;
@@ -85,7 +85,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void It_throws_when_project_dependency_is_unresolved()
+        public void ItThrowsWhenProjectDependencyIsUnresolved()
         {
             // No Lock file => unresolved
             var solutionDirectory =
@@ -108,7 +108,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [Theory]
         [InlineData(@"some/path/to.cSproj", new [] { @"some/path/to.cSproj" })]
         [InlineData(@"to.CSPROJ",new [] { @"to.CSPROJ" })]
-        public void It_migrates_csproj_ProjectReference_in_xproj(string projectReference, string[] expectedMigratedReferences)
+        public void ItMigratesCsprojProjectReferenceInXproj(string projectReference, string[] expectedMigratedReferences)
         {
             var xproj = ProjectRootElement.Create();
             xproj.AddItem("ProjectReference", projectReference);
@@ -137,7 +137,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void It_migrates_csproj_ProjectReference_in_xproj_including_condition_on_ProjectReference()
+        public void ItMigratesCsprojProjectReferenceInXprojIncludingConditionOnProjectReference()
         {
             var projectReference = "some/to.csproj";
             var xproj = ProjectRootElement.Create();
@@ -171,7 +171,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void It_migrates_csproj_ProjectReference_in_xproj_including_condition_on_ProjectReference_parent()
+        public void ItMigratesCsprojProjectReferenceInXprojIncludingConditionOnProjectReferenceParent()
         {
             var projectReference = "some/to.csproj";
             var xproj = ProjectRootElement.Create();
@@ -205,7 +205,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void It_migrates_csproj_ProjectReference_in_xproj_including_condition_on_ProjectReference_parent_and_item()
+        public void ItMigratesCsprojProjectReferenceInXprojIncludingConditionOnProjectReferenceParentAndItem()
         {
             var projectReference = "some/to.csproj";
             var xproj = ProjectRootElement.Create();
@@ -240,17 +240,17 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void It_promotes_P2P_references_up_in_the_dependency_chain()
+        public void ItDoesNotPromoteP2PReferencesUpInTheDependencyChain()
         {
             var mockProj = MigrateProject("TestAppDependencyGraph", "ProjectA");
 
             var projectReferences = mockProj.Items.Where(
                 item => item.ItemType.Equals("ProjectReference", StringComparison.Ordinal));
-            projectReferences.Count().Should().Be(7);
+            projectReferences.Count().Should().Be(2);
         }
 
         [Fact]
-        public void It_promotes_FrameworkAssemblies_from_P2P_references_up_in_the_dependency_chain()
+        public void ItDoesNotPromoteFrameworkAssembliesFromP2PReferencesUpInTheDependencyChain()
         {
             var solutionDirectory = TestAssets.Get(TestAssetKinds.DesktopTestProjects, "TestAppWithFrameworkAssemblies")
                 .CreateInstance()
@@ -269,32 +269,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 item => item.ItemType == "Reference" &&
                 item.Include == "System.ComponentModel.DataAnnotations" &&
                 item.Parent.Condition == " '$(TargetFramework)' == 'net451' ");
-            frameworkAssemblyReferences.Count().Should().Be(1);
+            frameworkAssemblyReferences.Count().Should().Be(0);
         }
 
         [Fact]
-        public void All_promoted_P2P_references_are_marked_with_a_FromP2P_attribute()
-        {
-            var expectedHoistedProjectReferences = new [] {
-                Path.Combine("..", "ProjectD", "ProjectD.csproj"),
-                Path.Combine("..", "ProjectE", "ProjectE.csproj"),
-                Path.Combine("..", "CsprojLibrary1", "CsprojLibrary1.csproj"),
-                Path.Combine("..", "CsprojLibrary2", "CsprojLibrary2.csproj"),
-                Path.Combine("..", "CsprojLibrary3", "CsprojLibrary3.csproj")
-            };
-
-            var mockProj = MigrateProject("TestAppDependencyGraph", "ProjectA");
-
-            var projectReferences = mockProj.Items
-                .Where(item =>
-                    item.ItemType == "ProjectReference" && item.GetMetadataWithName("FromP2P") != null)
-                .Select(i => i.Include);
-
-            projectReferences.Should().BeEquivalentTo(expectedHoistedProjectReferences);
-        }
-
-        [Fact]
-        public void All_non_promoted_P2P_references_are_not_marked_with_a_FromP2P_attribute()
+        public void NoP2PReferenceIsMarkedWithAFromP2PAttribute()
         {
             var expectedNonHoistedProjectReferences = new [] {
                 Path.Combine("..", "ProjectB", "ProjectB.csproj"),
@@ -305,14 +284,16 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var projectReferences = mockProj.Items
                 .Where(item =>
-                    item.ItemType == "ProjectReference" && item.GetMetadataWithName("FromP2P") == null)
-                .Select(i => i.Include);
+                    item.ItemType == "ProjectReference");
 
-            projectReferences.Should().BeEquivalentTo(expectedNonHoistedProjectReferences);
+            projectReferences.Should().HaveCount(c => c ==  2)
+                .And.OnlyContain(item => item.GetMetadataWithName("FromP2P") == null);
+
+            projectReferences.Select(i => i.Include).Should().BeEquivalentTo(expectedNonHoistedProjectReferences);
         }
 
         [Fact]
-        public void It_migrates_unqualified_dependencies_as_ProjectReference_when_a_matching_project_is_found()
+        public void ItMigratesUnqualifiedDependenciesAsProjectReferenceWhenAMatchingProjectIsFound()
         {
             var mockProj = MigrateProject("TestAppWithUnqualifiedDependencies", "ProjectA");
             var projectReferenceInclude = Path.Combine("..", "ProjectB", "ProjectB.csproj");            

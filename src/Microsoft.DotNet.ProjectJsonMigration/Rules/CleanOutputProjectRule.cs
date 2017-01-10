@@ -22,19 +22,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             CleanEmptyPropertiesAndItems(outputProject);
             CleanPropertiesThatDontChangeValue(outputProject);
             CleanEmptyPropertyAndItemGroups(outputProject);
+            CleanEmptyTargets(outputProject);
         }
 
         private void CleanEmptyPropertyAndItemGroups(ProjectRootElement msbuildProject)
         {
-            foreach (var propertyGroup in msbuildProject.PropertyGroups)
-            {
-                propertyGroup.RemoveIfEmpty();
-            }
-
-            foreach (var itemGroup in msbuildProject.ItemGroups)
-            {
-                itemGroup.RemoveIfEmpty();
-            }
+            CleanEmptyProjectElementContainers(msbuildProject.PropertyGroups);
+            CleanEmptyProjectElementContainers(msbuildProject.ItemGroups);
         }
 
         private void CleanEmptyPropertiesAndItems(ProjectRootElement msbuildProject)
@@ -67,6 +61,19 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 {
                     property.Parent.RemoveChild(property);
                 }
+            }
+        }
+
+        private void CleanEmptyTargets(ProjectRootElement msbuildProject)
+        {
+            CleanEmptyProjectElementContainers(msbuildProject.Targets);
+        }
+
+        private void CleanEmptyProjectElementContainers(IEnumerable<ProjectElementContainer> containers)
+        {
+            foreach (var container in containers)
+            {
+                container.RemoveIfEmpty();
             }
         }
     }

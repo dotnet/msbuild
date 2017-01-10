@@ -20,7 +20,7 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdSettingsFile">
-        <source>SettingsFile</source>
+        <source>SETTINGS_FILE</source>
         <note />
       </trans-unit>
       <trans-unit id="CmdSettingsDescription">
@@ -32,20 +32,23 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdTestCaseFilterExpression">
-        <source>Expression</source>
+        <source>EXPRESSION</source>
         <note />
       </trans-unit>
       <trans-unit id="CmdTestCaseFilterDescription">
         <source>Run tests that match the given expression.
                                         Examples:
-                                        --test-case-filter:"Priority = 1"
-                                        --test-case-filter: "(FullyQualifiedName~Nightly | Name = MyTestMethod)"</source>
-        <note></note>
+                                        Run tests with priority set to 1: --filter "Priority = 1"
+                                        Run a test with the specified full name: --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
+                                        Run tests that contain the specified name: --filter "FullyQualifiedName~Namespace.Class"
+                                        More info on filtering support: https://aka.ms/vstest-filtering
+                                        </source>
+        <note />
       </trans-unit>
       <trans-unit id="CmdTestAdapterPathDescription">
         <source>Use custom adapters from the given path in the test run.
-                                        Example: --test-adapter-path:&lt;pathToCustomAdapters&gt;</source>
-        <note></note>
+                                        Example: --test-adapter-path &lt;PATH_TO_ADAPTER&gt;</source>
+        <note />
       </trans-unit>
       <trans-unit id="CmdLoggerOption">
         <source>LoggerUri/FriendlyName</source>
@@ -53,19 +56,19 @@
       </trans-unit>
       <trans-unit id="CmdLoggerDescription">
         <source>Specify a logger for test results. 
-                                        Example: --logger:trx</source>
-        <note />
+                                        Example: --logger "trx[;LogFileName=&lt;Defaults to unique file name&gt;]"</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdConfiguration">
-        <source>configuration</source>
+        <source>CONFIGURATION</source>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
-        <source>Configuration under which to build, i.e. Debug/Release</source>
+        <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
-        <source>FrameworkVersion</source>
+        <source>FRAMEWORK</source>
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
@@ -73,7 +76,7 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDir">
-        <source>OutputDir</source>
+        <source>OUTPUT_DIR</source>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDescription">
@@ -81,7 +84,7 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdPathToLogFile">
-        <source>PathToLogFile</source>
+        <source>PATH_TO_FILE</source>
         <note />
       </trans-unit>
       <trans-unit id="CmdPathTologFileDescription">
@@ -92,6 +95,11 @@
       <trans-unit id="CmdNoBuildDescription">
         <source>Do not build project before testing.</source>
         <note />
+      </trans-unit>
+      <trans-unit id="RunSettingsArgsHelpText">
+        <source>Any extra commandline runsettings arguments that should be passed to vstest. See 'dotnet vstest --help' for available options.
+                                        Example: -- RunConfiguration.ResultsDirectory="C:\users\user\desktop\Results Directory" MSTest.DeploymentEnabled=false</source>
+        <note></note>
       </trans-unit>
     </body>
   </file>
