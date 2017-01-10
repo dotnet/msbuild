@@ -6,6 +6,7 @@
     <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
     <ProjectGuid>{DF7D2697-B3B4-45C2-8297-27245F528A99}</ProjectGuid>
     <OutputType>Library</OutputType>
+    <OutDir>$(RawOutDir)</OutDir>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Microsoft.NET.Build.Tasks</RootNamespace>
     <AssemblyName>Microsoft.NET.Build.Tasks</AssemblyName>
