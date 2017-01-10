@@ -63,8 +63,7 @@
   <Target Name="GetBuildVersion" Outputs="$(VsixVersion)" />
 
   <PropertyGroup>
-    <DeployExtension Condition="'$(DeployExtension)' == ''">true</DeployExtension>
-    <VSSDKTargetPlatformRegRootSuffix Condition="'$(VSSDKTargetPlatformRegRootSuffix)' == '' And '$(DeployExtension)' == 'true'">RoslynDev</VSSDKTargetPlatformRegRootSuffix>
+    <DeployExtension>false</DeployExtension>
     <NoWarn>$(NoWarn);2008</NoWarn>
   </PropertyGroup>
 

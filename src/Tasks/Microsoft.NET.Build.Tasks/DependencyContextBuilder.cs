@@ -32,7 +32,7 @@ namespace Microsoft.NET.Build.Tasks
             _projectContext = projectContext;
 
             // This resolver is only used for building file names, so that base path is not required.
-            _versionFolderPathResolver = new VersionFolderPathResolver(path: null);
+            _versionFolderPathResolver = new VersionFolderPathResolver(rootPath: null);
         }
 
         public DependencyContextBuilder WithFrameworkReferences(IEnumerable<ReferenceInfo> frameworkReferences)
