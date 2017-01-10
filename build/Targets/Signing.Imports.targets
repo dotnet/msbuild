@@ -76,5 +76,21 @@
       <DelaySign>true</DelaySign>
     </PropertyGroup>
   </Target>
+  
+   <!--
+    Workaround https://github.com/Microsoft/msbuild/issues/1490 (lack of support for public-signing satellites) by 
+    delay-signing satellite assemblies when main assembly is public-signed.
+   -->
+  <Target Name="PrepareToDelaySignSatelliteAssemblies" BeforeTargets="GenerateSatelliteAssemblies">
+    <PropertyGroup>
+      <_DelaySignMainAssembly>$(DelaySign)</_DelaySignMainAssembly>
+      <DelaySign Condition="'$(PublicSign)' == 'true'">true</DelaySign>
+    </PropertyGroup>
+  </Target>
+  <Target Name="CleanupAfterDelaySigningSatelliteAssemblies" AfterTargets="GenerateSatelliteAssemblies">
+    <PropertyGroup>
+      <DelaySign>$(_DelaySignMainAssembly)</DelaySign>
+    </PropertyGroup>
+  </Target>
 
 </Project>
