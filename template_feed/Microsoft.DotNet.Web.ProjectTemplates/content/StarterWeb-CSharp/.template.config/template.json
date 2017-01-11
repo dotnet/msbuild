@@ -68,7 +68,7 @@
       "datatype": "bool",
       "defaultValue": "false",
       "description": "Whether or not to use LocalDB instead of SQLite"
-    },    
+    },
     "IncludeApplicationInsights": {
       "type": "parameter",
       "datatype": "bool",
