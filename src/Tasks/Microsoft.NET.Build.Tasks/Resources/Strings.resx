@@ -225,4 +225,19 @@
   <data name="NU1012" xml:space="preserve">
     <value>Dependency conflict. '{0}' expected '{1}' but received '{2}'</value>
   </data>
+  <data name="DuplicateItemsDefaultExplanation" xml:space="preserve">
+    <value> The .NET SDK includes {0} items from your project directory by default.</value>
+  </data>
+  <data name="DuplicateItemsError" xml:space="preserve">
+    <value>Duplicate {0} items were included.{1}  The duplicate items were: {2}</value>
+  </data>
+  <data name="DuplicateItemsHowToFix" xml:space="preserve">
+    <value> You can either remove these items from your project file, or set the '{0}' property to '{1}' if you want to explicitly include them in your project file.{2}</value>
+  </data>
+  <data name="DuplicatePackageReferenceDefaultExplanation" xml:space="preserve">
+    <value> The .NET SDK includes default PackageReference items based on the project's target framework.</value>
+  </data>
+  <data name="ForMoreInformation" xml:space="preserve">
+    <value> For more information, see {0}</value>
+  </data>
 </root>

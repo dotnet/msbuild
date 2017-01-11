@@ -14,6 +14,7 @@ using System.Text;
 using System.Xml.Linq;
 using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
+using Microsoft.NET.TestFramework.ProjectConstruction;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -350,6 +351,160 @@ namespace Microsoft.NET.Build.Tests
             };
 
             GivenThatWeWantAllResourcesInSatellite.TestSatelliteResources(_testAssetsManager, projectChanges, setup, "ExplicitCompileDefaultEmbeddedResource");
+        }
+
+        [Fact]
+        public void It_gives_an_error_message_if_duplicate_compile_items_are_included()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DuplicateCompileItems",
+                TargetFrameworks = "netstandard1.6",
+                IsSdkProject = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    project.Root.Add(itemGroup);
+                    itemGroup.Add(new XElement(ns + "Compile", new XAttribute("Include", @"**\*.cs")));
+                })
+                .Restore(testProject.Name);
+
+            var buildCommand = new BuildCommand(Stage0MSBuild, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            WriteFile(Path.Combine(buildCommand.ProjectRootPath, "Class1.cs"), "public class Class1 {}");
+
+            buildCommand
+                .CaptureStdOut()
+                .Execute()
+                .Should()
+                .Fail()
+                .And.HaveStdOutContaining("DuplicateCompileItems.cs")
+                .And.HaveStdOutContaining("Class1.cs")
+                .And.HaveStdOutContaining("EnableDefaultCompileItems");
+        }
+
+        [Fact]
+        public void It_gives_the_correct_error_if_duplicate_compile_items_are_included_and_default_items_are_disabled()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DuplicateCompileItems",
+                TargetFrameworks = "netstandard1.6",
+                IsSdkProject = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, "DuplicateCompileItemsWithDefaultItemsDisabled")
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+
+                    project.Root.Element(ns + "PropertyGroup").Add(
+                        new XElement(ns + "EnableDefaultCompileItems", "false"));
+
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    project.Root.Add(itemGroup);
+                    itemGroup.Add(new XElement(ns + "Compile", new XAttribute("Include", @"**\*.cs")));
+                    itemGroup.Add(new XElement(ns + "Compile", new XAttribute("Include", @"DuplicateCompileItems.cs")));
+                })
+                .Restore(testProject.Name);
+
+            var buildCommand = new BuildCommand(Stage0MSBuild, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            WriteFile(Path.Combine(buildCommand.ProjectRootPath, "Class1.cs"), "public class Class1 {}");
+
+            buildCommand
+                .CaptureStdOut()
+                .Execute()
+                .Should()
+                .Fail()
+                .And.HaveStdOutContaining("DuplicateCompileItems.cs")
+                //  Class1.cs wasn't included multiple times, so it shouldn't be mentioned
+                .And.NotHaveStdOutMatching("Class1.cs")
+                //  Default items weren't enabled, so the message shouldn't include the information about default compile items
+                .And.NotHaveStdOutMatching("EnableDefaultCompileItems");
+        }
+
+        [Fact]
+        public void It_gives_an_error_message_if_duplicate_packagereference_items_are_included()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DuplicatePackageReferenceItems",
+                TargetFrameworks = "netstandard1.6",
+                IsSdkProject = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, "DuplicatePackageReference")
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    project.Root.Add(itemGroup);
+                    itemGroup.Add(new XElement(ns + "PackageReference",
+                        new XAttribute("Include", "NETStandard.Library"), new XAttribute("Version", "1.6.1")));
+
+                    itemGroup.Add(new XElement(ns + "PackageReference",
+                        new XAttribute("Include", "NewtonSoft.Json"), new XAttribute("Version", "9.0.1")));
+                })
+                .Restore(testProject.Name);
+
+            var buildCommand = new BuildCommand(Stage0MSBuild, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .CaptureStdOut()
+                .Execute()
+                .Should()
+                .Fail()
+                .And.HaveStdOutContaining("NETStandard.Library")
+                .And.HaveStdOutContaining("DisableImplicitFrameworkReferences")
+                .And.NotHaveStdOutMatching("NewtonSoft.Json");
+        }
+
+        [Fact]
+        public void It_gives_an_error_message_if_duplicate_packagereference_items_are_included_and_implicit_framework_references_are_disabled()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DuplicatePackageReferenceItems",
+                TargetFrameworks = "netstandard1.6",
+                IsSdkProject = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, "DuplicatePackageReferenceWithImplicitReferencesDisabled")
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    project.Root.Add(itemGroup);
+                    itemGroup.Add(new XElement(ns + "PackageReference",
+                        new XAttribute("Include", "NETStandard.Library"), new XAttribute("Version", "1.6.1")));
+
+                    itemGroup.Add(new XElement(ns + "PackageReference",
+                        new XAttribute("Include", "NewtonSoft.Json"), new XAttribute("Version", "9.0.1")));
+
+                    itemGroup.Add(new XElement(ns + "PackageReference",
+                        new XAttribute("Include", "NewtonSoft.Json"), new XAttribute("Version", "7.0.1")));
+
+                    project.Root.Element(ns + "PropertyGroup").Add(
+                        new XElement(ns + "DisableImplicitFrameworkReferences", "true"));
+                })
+                .Restore(testProject.Name);
+
+            var buildCommand = new BuildCommand(Stage0MSBuild, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .CaptureStdOut()
+                .Execute()
+                .Should()
+                .Fail()
+                .And.HaveStdOutContaining("NewtonSoft.Json")
+                .And.NotHaveStdOutMatching("NETStandard.Library")
+                .And.NotHaveStdOutMatching("DisableImplicitFrameworkReferences");
+                
         }
 
         void RemoveGeneratedCompileItems(List<string> compileItems)

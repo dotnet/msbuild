@@ -35,6 +35,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CheckForDuplicateItems.cs" />
     <Compile Include="DiagnosticMessageSeverity.cs" />
     <Compile Include="DiagnosticsHelper.cs" />
     <Compile Include="NETSdkError.cs" />

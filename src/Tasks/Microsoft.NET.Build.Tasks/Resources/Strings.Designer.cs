@@ -197,6 +197,42 @@ namespace Microsoft.NET.Build.Tasks {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to  The .NET SDK includes {0} items from your project directory by default..
+        /// </summary>
+        internal static string DuplicateItemsDefaultExplanation {
+            get {
+                return ResourceManager.GetString("DuplicateItemsDefaultExplanation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Duplicate {0} items were included.{1}  The duplicate items were: {2}.
+        /// </summary>
+        internal static string DuplicateItemsError {
+            get {
+                return ResourceManager.GetString("DuplicateItemsError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to  You can either remove these items from your project file, or set the &apos;{0}&apos; property to &apos;{1}&apos; if you want to explicitly include them in your project file.{2}.
+        /// </summary>
+        internal static string DuplicateItemsHowToFix {
+            get {
+                return ResourceManager.GetString("DuplicateItemsHowToFix", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to  The .NET SDK includes default PackageReference items based on the project&apos;s target framework..
+        /// </summary>
+        internal static string DuplicatePackageReferenceDefaultExplanation {
+            get {
+                return ResourceManager.GetString("DuplicatePackageReferenceDefaultExplanation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The preprocessor token &apos;{0}&apos; has been given more than one value. Choosing &apos;{1}&apos; as the value..
         /// </summary>
         internal static string DuplicatePreprocessorToken {
@@ -211,6 +247,15 @@ namespace Microsoft.NET.Build.Tasks {
         internal static string ErrorsOccurredWhenEmittingSatelliteAssembly {
             get {
                 return ResourceManager.GetString("ErrorsOccurredWhenEmittingSatelliteAssembly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to  For more information, see {0}.
+        /// </summary>
+        internal static string ForMoreInformation {
+            get {
+                return ResourceManager.GetString("ForMoreInformation", resourceCulture);
             }
         }
         
