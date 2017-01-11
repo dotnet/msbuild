@@ -70,6 +70,11 @@
         <TFM>net46</TFM>
         <DestinationTFM>net46</DestinationTFM>
       </CopyLocalAssembly>
+      <CopyLocalAssembly Include="System.IO.FileSystem">
+        <Version>4.0.1</Version>
+        <TFM>net46</TFM>
+        <DestinationTFM>net46</DestinationTFM>
+      </CopyLocalAssembly>
 
       <CopyLocalAssembly>
         <PackageRelativePath>$([System.String]::Copy('%(Identity)\%(Version)').ToLowerInvariant())</PackageRelativePath>
