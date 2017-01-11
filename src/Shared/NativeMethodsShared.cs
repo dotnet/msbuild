@@ -494,19 +494,33 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        private static readonly Lazy<bool> _isMonoLazy = new Lazy<bool>(
-            () =>
-            {
-                // There could be potentially expensive TypeResolve events, so cache IsMono.
-                // Also, VS does not host Mono runtimes, so turn IsMono off when msbuild is running under VS
-                return !BuildEnvironmentHelper.Instance.RunningInVisualStudio && Type.GetType("Mono.Runtime") != null;
-            },
-            true);
+        private static readonly object IsMonoLock = new object();
+
+        private static bool? _isMono;
 
         /// <summary>
         /// Gets a flag indicating if we are running under MONO
         /// </summary>
-        internal static bool IsMono => _isMonoLazy.Value;
+        internal static bool IsMono
+        {
+            get
+            {
+                if (_isMono != null) return _isMono.Value;
+
+                lock (IsMonoLock)
+                {
+                    if (_isMono == null)
+                    {
+                        // There could be potentially expensive TypeResolve events, so cache IsMono.
+                        // Also, VS does not host Mono runtimes, so turn IsMono off when msbuild is running under VS
+                        _isMono = !BuildEnvironmentHelper.Instance.RunningInVisualStudio &&
+                                  Type.GetType("Mono.Runtime") != null;
+                    }
+                }
+
+                return _isMono.Value;
+            }
+        }
 
         /// <summary>
         /// Gets a flag indicating if we are running under some version of Windows
