@@ -26,7 +26,7 @@
       <Version>1.0.3</Version>
     </PackageReference>
     <PackageReference Include="NuGet.Frameworks">
-      <Version>4.0.0-rc3</Version>
+      <Version>$(CLI_NuGet_Version)</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.DotNet.Cli.Utils">
       <Version>$(SdkNugetVersion)</Version>
