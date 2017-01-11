@@ -1577,6 +1577,34 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <source>The requested operation needs to split the item element at location {0} into individual elements but item element splitting is disabled with {1}.</source>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidSdkFormat">
+        <source>MSB4229: The value "{0}" is not valid for an Sdk specification. The attribute should be a semicolon-delimited list of Sdk-name/minimum-version pairs, separated by a forward slash.</source>
+        <note>{StrBegin="MSB4229: "}</note>
+      </trans-unit>
+      <trans-unit id="TaskFactoryNotSupportedFailure">
+        <source>MSB4801: The task factory "{0}" could not be loaded because this version of MSBuild does not support it.</source>
+        <note>{StrBegin="MSB4801: "}</note>
+      </trans-unit>
+      <trans-unit id="TaskInstantiationFailureNotSupported">
+        <source>MSB4802: The "{0}" task could not be instantiated from "{1}". This version of MSBuild does not support {2}.</source>
+        <note>{StrBegin="MSB4802: "}</note>
+      </trans-unit>
+      <trans-unit id="InvalidGetPathOfFileAboveParameter">
+        <source>The parameter '{0}' can only be a file name and cannot include a directory.</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="FileToReloadFromDoesNotExist">
+        <source>MSB4229: File to reload from does not exist: {0}</source>
+        <note>{StrBegin="MSB4229: "}</note>
+      </trans-unit>
+      <trans-unit id="ValueNotSet">
+        <source>MSB4230: Value not set: {0}</source>
+        <note>{StrBegin="MSB4230: "}</note>
+      </trans-unit>
+      <trans-unit id="NoReloadOnUnsavedChanges">
+        <source>MSB4231: ProjectRootElement can't reload if it contains unsaved changes.</source>
+        <note>{StrBegin="MSB4231: "}</note>
+      </trans-unit>
     </body>
   </file>
 </xliff>
