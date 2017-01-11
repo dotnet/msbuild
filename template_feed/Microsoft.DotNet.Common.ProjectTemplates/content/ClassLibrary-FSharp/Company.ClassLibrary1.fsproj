@@ -14,7 +14,6 @@
   <ItemGroup>
     <PackageReference Include="FSharp.NET.Sdk" Version="1.0.0-beta-*" PrivateAssets="All" />
     <PackageReference Include="Microsoft.FSharp.Core.netcore" Version="1.0.0-alpha-161023" />
-    <PackageReference Include="NETStandard.Library" Version="1.6.1" />
   </ItemGroup>
 
   <ItemGroup>
