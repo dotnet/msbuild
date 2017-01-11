@@ -76,7 +76,7 @@
         <IsTool>True</IsTool>
         <IsApplicable>True</IsApplicable>
         <VersionPrefix>$(CliVersionPrefix)-</VersionPrefix>
-        <VersionSuffix>rc3-$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <VersionSuffix>preview5-$(TestPackageBuildVersionSuffix)</VersionSuffix>
         <Clean>False</Clean>
         <Frameworks>netstandard1.5</Frameworks>
       </BaseTestPackageProject>
