@@ -454,13 +454,6 @@ namespace Microsoft.Build.Shared
 
         #region Member data
 
-        static NativeMethodsShared()
-        {
-            // There could be potentially expensive TypeResolve events, so cache IsMono.
-            // Also, VS does not host Mono runtimes, so turn IsMono off when msbuild is running under VS
-            IsMono = !BuildEnvironmentHelper.Instance.RunningInVisualStudio && Type.GetType("Mono.Runtime") != null;
-        }
-
         /// <summary>
         /// Default buffer size to use when dealing with the Windows API.
         /// </summary>
@@ -501,10 +494,19 @@ namespace Microsoft.Build.Shared
             }
         }
 
+        private static readonly Lazy<bool> _isMonoLazy = new Lazy<bool>(
+            () =>
+            {
+                // There could be potentially expensive TypeResolve events, so cache IsMono.
+                // Also, VS does not host Mono runtimes, so turn IsMono off when msbuild is running under VS
+                return !BuildEnvironmentHelper.Instance.RunningInVisualStudio && Type.GetType("Mono.Runtime") != null;
+            },
+            true);
+
         /// <summary>
         /// Gets a flag indicating if we are running under MONO
         /// </summary>
-        internal static bool IsMono { get; private set; }
+        internal static bool IsMono => _isMonoLazy.Value;
 
         /// <summary>
         /// Gets a flag indicating if we are running under some version of Windows
