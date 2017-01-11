@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
 using FluentAssertions;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.New.Tests
 {

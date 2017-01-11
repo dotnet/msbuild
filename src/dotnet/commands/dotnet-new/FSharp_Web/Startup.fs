@@ -19,7 +19,7 @@ type Startup private () =
         let builder = 
             ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional = true, reloadOnChange = true)
+                .AddJsonFile("appsettings.json", optional = false, reloadOnChange = true)
                 .AddJsonFile((sprintf "appsettings.%s.json" (env.EnvironmentName)), optional = true)
                 .AddEnvironmentVariables()
 

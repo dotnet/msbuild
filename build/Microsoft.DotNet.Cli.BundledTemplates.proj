@@ -1,9 +1,6 @@
 <Project ToolsVersion="15.0" DefaultTargets="CopyTemplateToOutput">
-  <!-- workaround for https://github.com/Microsoft/msbuild/issues/885 -->
-  <!-- renaming the property because the original property is a global property and therefore
-       cannot be redefined at runtime. -->
-
-  <Import Project="Microsoft.DotNet.Cli.tasks" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.tasks))\dir.tasks" />
 
   <Target Name="CopyTemplateToOutput"
           DependsOnTargets="PrepareBundledTemplateProps;
