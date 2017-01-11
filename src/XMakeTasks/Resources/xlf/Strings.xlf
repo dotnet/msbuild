@@ -2391,6 +2391,22 @@
         <source>MSB3891: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</source>
         <note />
       </trans-unit>
+      <trans-unit id="WriteLinesToFile.ErrorReadingFile">
+        <source>MSB3492: Could not read existing file "{0}" to determine whether its contents are up to date. Overwriting it.</source>
+        <note>{StrBegin="MSB3491: "}</note>
+      </trans-unit>
+      <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
+        <source>MSB3493: </source>
+        <note>{StrBegin="Skipping write to file "{0}" because content would not change."}</note>
+      </trans-unit>
+      <trans-unit id="Telemetry.IllegalEventDataString">
+        <source>The property "{0}" in the telemetry event data property list "{1}" is malformed.  Please only pass in a semicolon-delimited list of constant string values separated by "=", e.g., "Property1=Value1;Property2=Value2".</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ErrorAndWarning.EmptyMessage">
+        <source>(No message specified)</source>
+        <note></note>
+      </trans-unit>
     </body>
   </file>
 </xliff>
