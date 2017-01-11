@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <CLI_MSBuild_Version>15.1.0-preview-000503-01</CLI_MSBuild_Version>
+    <CLI_MSBuild_Version>15.1.0-preview-000509-03</CLI_MSBuild_Version>
     <CLI_Roslyn_Version>2.0.0-rc3-61212-03</CLI_Roslyn_Version>
     <CLI_NETSDK_Version>1.0.0-alpha-20170105-5</CLI_NETSDK_Version>
     <CLI_WEBSDK_Version>1.0.0-alpha-20170106-1-203</CLI_WEBSDK_Version>
