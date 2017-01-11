@@ -70,6 +70,26 @@
 
   <Target Name="SetupTestPackageProjectBaseData">
     <ItemGroup>
+      <BaseTestPackageProject Include="src/Microsoft.DotNet.Cli.Utils">
+        <Name>Microsoft.DotNet.Cli.Utils</Name>
+        <ProjectName>Microsoft.DotNet.Cli.Utils.csproj</ProjectName>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionPrefix>$(CliVersionPrefix)-</VersionPrefix>
+        <VersionSuffix>$(ReleaseSuffix)-$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>False</Clean>
+        <Frameworks>netstandard1.5</Frameworks>
+      </BaseTestPackageProject>
+      <BaseTestPackageProject Include="src/Microsoft.DotNet.InternalAbstractions">
+        <Name>Microsoft.DotNet.InternalAbstractions</Name>
+        <ProjectName>Microsoft.DotNet.InternalAbstractions.csproj</ProjectName>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionPrefix>2.0.0-beta-</VersionPrefix>
+        <VersionSuffix>beta-$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>False</Clean>
+        <Frameworks>netstandard1.3</Frameworks>
+      </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/PackageWithFakeNativeDep">
         <Name>PackageWithFakeNativeDep</Name>
         <ProjectName>PackageWithFakeNativeDep.csproj</ProjectName>
@@ -175,26 +195,6 @@
         <VersionSuffix></VersionSuffix>
         <Clean>True</Clean>
         <Frameworks>netcoreapp1.0</Frameworks>
-      </BaseTestPackageProject>
-      <BaseTestPackageProject Include="src/Microsoft.DotNet.Cli.Utils">
-        <Name>Microsoft.DotNet.Cli.Utils</Name>
-        <ProjectName>Microsoft.DotNet.Cli.Utils.csproj</ProjectName>
-        <IsTool>True</IsTool>
-        <IsApplicable>True</IsApplicable>
-        <VersionPrefix>1.0.0-preview5-</VersionPrefix>
-        <VersionSuffix>preview5-$(TestPackageBuildVersionSuffix)</VersionSuffix>
-        <Clean>False</Clean>
-        <Frameworks>netstandard1.5</Frameworks>
-      </BaseTestPackageProject>
-      <BaseTestPackageProject Include="src/Microsoft.DotNet.InternalAbstractions">
-        <Name>Microsoft.DotNet.InternalAbstractions</Name>
-        <ProjectName>Microsoft.DotNet.InternalAbstractions.csproj</ProjectName>
-        <IsTool>True</IsTool>
-        <IsApplicable>True</IsApplicable>
-        <VersionPrefix>2.0.0-beta-</VersionPrefix>
-        <VersionSuffix>beta-$(TestPackageBuildVersionSuffix)</VersionSuffix>
-        <Clean>False</Clean>
-        <Frameworks>netstandard1.3</Frameworks>
       </BaseTestPackageProject>
 
       <TestPackageProjectFrameworksExcludes Condition=" '$(IsDesktopAvailable)' != 'True' " Include="net45" />
