@@ -110,8 +110,19 @@
         <RelativePath>Sdk\%(RecursiveDir)</RelativePath>
       </CopyLocalSdkFile>
 
+      <CopyLocalSatelliteAssembly Include="$(OutDir)\**\Microsoft.NET.Build.Tasks.resources.dll">
+        <RelativePath>tools\net46\</RelativePath>
+      </CopyLocalSatelliteAssembly>
+      <CopyLocalSatelliteAssembly  Include="$(OutDir)\**\Microsoft.NET.Build.Tasks.resources.dll">
+        <RelativePath>tools\netcoreapp1.0\</RelativePath>
+      </CopyLocalSatelliteAssembly>
+      <CopyLocalSatelliteAssembly>
+        <RelativePath>%(RelativePath)%(RecursiveDir)</RelativePath>
+      </CopyLocalSatelliteAssembly>
+
       <CopyLocalBuildFile Include="@(CopyLocalBuildCrossTargetingFile)" />
       <CopyLocalBuildFile Include="@(CopyLocalSdkFile)" />
+      <CopyLocalBuildFile Include="@(CopyLocalSatelliteAssembly)" />
     </ItemGroup>
 
     <Copy SourceFiles="%(Net46CopyLocalAssembly.FullFilePath)"

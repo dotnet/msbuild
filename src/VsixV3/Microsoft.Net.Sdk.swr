@@ -60,6 +60,45 @@ folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\net46"
   file source="$(OutputPath)PackagesLayout\tools\net46\System.Security.Cryptography.Primitives.dll"
   file source="$(OutputPath)PackagesLayout\tools\net46\System.Threading.Thread.dll"
   file source="$(OutputPath)PackagesLayout\tools\net46\System.IO.FileSystem.dll"
+  
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\net46\cs"  
+  file source="$(OutputPath)PackagesLayout\tools\net46\cs\Microsoft.NET.Build.Tasks.resources.dll"
+
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\net46\de"  
+  file source="$(OutputPath)PackagesLayout\tools\net46\de\Microsoft.NET.Build.Tasks.resources.dll"
+
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\net46\es"  
+  file source="$(OutputPath)PackagesLayout\tools\net46\es\Microsoft.NET.Build.Tasks.resources.dll"  
+
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\net46\fr"  
+  file source="$(OutputPath)PackagesLayout\tools\net46\fr\Microsoft.NET.Build.Tasks.resources.dll"
+  
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\net46\it"  
+  file source="$(OutputPath)PackagesLayout\tools\net46\it\Microsoft.NET.Build.Tasks.resources.dll"
+
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\net46\ja"  
+  file source="$(OutputPath)PackagesLayout\tools\net46\ja\Microsoft.NET.Build.Tasks.resources.dll"
+
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\net46\ko"  
+  file source="$(OutputPath)PackagesLayout\tools\net46\ko\Microsoft.NET.Build.Tasks.resources.dll"
+
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\net46\pl"  
+  file source="$(OutputPath)PackagesLayout\tools\net46\pl\Microsoft.NET.Build.Tasks.resources.dll"
+
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\net46\pt-BR"  
+  file source="$(OutputPath)PackagesLayout\tools\net46\pt-BR\Microsoft.NET.Build.Tasks.resources.dll"
+
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\net46\ru"  
+  file source="$(OutputPath)PackagesLayout\tools\net46\ru\Microsoft.NET.Build.Tasks.resources.dll"
+
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\net46\tr"  
+  file source="$(OutputPath)PackagesLayout\tools\net46\tr\Microsoft.NET.Build.Tasks.resources.dll"
+
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\net46\zh-Hans"  
+  file source="$(OutputPath)PackagesLayout\tools\net46\zh-Hans\Microsoft.NET.Build.Tasks.resources.dll"
+  
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\net46\zh-Hant"  
+  file source="$(OutputPath)PackagesLayout\tools\net46\zh-Hant\Microsoft.NET.Build.Tasks.resources.dll"
 
 folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\netcoreapp1.0"
   file source="$(OutputPath)PackagesLayout\tools\netcoreapp1.0\Microsoft.DotNet.PlatformAbstractions.dll"
@@ -81,3 +120,42 @@ folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\netcoreapp1.0"
   file source="$(OutputPath)PackagesLayout\tools\netcoreapp1.0\NuGet.RuntimeModel.dll"
   file source="$(OutputPath)PackagesLayout\tools\netcoreapp1.0\NuGet.Versioning.dll"
   file source="$(OutputPath)PackagesLayout\tools\netcoreapp1.0\System.Runtime.Serialization.Primitives.dll"
+
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\netcoreapp1.0\cs"  
+  file source="$(OutputPath)PackagesLayout\tools\netcoreapp1.0\cs\Microsoft.NET.Build.Tasks.resources.dll"
+
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\netcoreapp1.0\de"  
+  file source="$(OutputPath)PackagesLayout\tools\netcoreapp1.0\de\Microsoft.NET.Build.Tasks.resources.dll"
+
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\netcoreapp1.0\es"  
+  file source="$(OutputPath)PackagesLayout\tools\netcoreapp1.0\es\Microsoft.NET.Build.Tasks.resources.dll"  
+
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\netcoreapp1.0\fr"  
+  file source="$(OutputPath)PackagesLayout\tools\netcoreapp1.0\fr\Microsoft.NET.Build.Tasks.resources.dll"
+  
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\netcoreapp1.0\it"  
+  file source="$(OutputPath)PackagesLayout\tools\netcoreapp1.0\it\Microsoft.NET.Build.Tasks.resources.dll"
+
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\netcoreapp1.0\ja"  
+  file source="$(OutputPath)PackagesLayout\tools\netcoreapp1.0\ja\Microsoft.NET.Build.Tasks.resources.dll"
+
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\netcoreapp1.0\ko"  
+  file source="$(OutputPath)PackagesLayout\tools\netcoreapp1.0\ko\Microsoft.NET.Build.Tasks.resources.dll"
+
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\netcoreapp1.0\pl"  
+  file source="$(OutputPath)PackagesLayout\tools\netcoreapp1.0\pl\Microsoft.NET.Build.Tasks.resources.dll"
+
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\netcoreapp1.0\pt-BR"  
+  file source="$(OutputPath)PackagesLayout\tools\netcoreapp1.0\pt-BR\Microsoft.NET.Build.Tasks.resources.dll"
+
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\netcoreapp1.0\ru"  
+  file source="$(OutputPath)PackagesLayout\tools\netcoreapp1.0\ru\Microsoft.NET.Build.Tasks.resources.dll"
+
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\netcoreapp1.0\tr"  
+  file source="$(OutputPath)PackagesLayout\tools\netcoreapp1.0\tr\Microsoft.NET.Build.Tasks.resources.dll"
+
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\netcoreapp1.0\zh-Hans"  
+  file source="$(OutputPath)PackagesLayout\tools\netcoreapp1.0\zh-Hans\Microsoft.NET.Build.Tasks.resources.dll"
+  
+folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\netcoreapp1.0\zh-Hant"  
+  file source="$(OutputPath)PackagesLayout\tools\netcoreapp1.0\zh-Hant\Microsoft.NET.Build.Tasks.resources.dll"

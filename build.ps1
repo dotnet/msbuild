@@ -72,7 +72,7 @@ if ($SkipTests) {
     $buildTarget = 'BuildWithoutTesting'
 }
 
-$commonBuildArgs = echo $RepoRoot\build\build.proj /t:$buildTarget /m /nologo /p:Configuration=$Configuration /p:Platform=$Platform /p:SignType=$signType /verbosity:$Verbosity
+$commonBuildArgs = echo $RepoRoot\build\build.proj /t:$buildTarget /m:1 /nologo /p:Configuration=$Configuration /p:Platform=$Platform /p:SignType=$signType /verbosity:$Verbosity
 
 # NET Core Build 
 $msbuildSummaryLog = Join-Path -path $logPath -childPath "sdk.log"
