@@ -28,7 +28,7 @@ namespace Microsoft.NET.Build.Tests
             // (TestApp transitively depends on AuxLibrary)
 
             var testAsset = _testAssetsManager
-                .CopyTestAsset("AppWithTransitiveProjectRefs")
+                .CopyTestAsset("AppWithTransitiveProjectRefs", "BuildAppWithTransitiveProjectRef")
                 .WithSource();
 
             testAsset.Restore("TestApp");

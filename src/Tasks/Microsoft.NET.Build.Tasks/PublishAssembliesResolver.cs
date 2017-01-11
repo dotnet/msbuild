@@ -31,6 +31,11 @@ namespace Microsoft.NET.Build.Tasks
 
             foreach (LockFileTargetLibrary targetLibrary in projectContext.GetRuntimeLibraries(_privateAssetPackageIds))
             {
+                if (targetLibrary.Type != "package")
+                {
+                    continue;
+                }
+
                 string libraryPath = _packageResolver.GetPackageDirectory(targetLibrary.Name, targetLibrary.Version);
 
                 results.AddRange(GetResolvedFiles(targetLibrary.RuntimeAssemblies, libraryPath));
