@@ -44,7 +44,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         public New3Command(string commandName, ITemplateEngineHost host, Action<ITemplateEngineHost, IInstaller> onFirstRun, ExtendedCommandParser app, CommandArgument templateNames)
         {
-            Host = host;
+            Host = new ExtendedTemplateEngineHost(host, this);
             CommandName = commandName;
             _app = app;
             _templateName = templateNames;

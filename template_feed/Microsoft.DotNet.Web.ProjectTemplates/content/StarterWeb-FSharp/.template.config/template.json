@@ -11,6 +11,18 @@
   },
   "sourceName": "Company.WebApplication1",
   "preferNameDirectory": true,
+  "sources" : [
+    {
+      "modifiers": [
+        {
+          "condition": "(foundGlobalJson)",
+          "exclude": [
+            "global.json"
+          ]
+        }
+      ]
+    }
+  ],
   "symbols":{    
     "Framework": {
       "type": "parameter",
@@ -39,6 +51,10 @@
       "parameters": {
         "format": "yyyy"
       }
+    },
+    "foundGlobalJson": {
+      "type": "bind",
+      "binding": "GlobalJsonExists"
     }
   }
 }
