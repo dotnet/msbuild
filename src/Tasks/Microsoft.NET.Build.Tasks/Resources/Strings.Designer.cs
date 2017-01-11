@@ -224,15 +224,6 @@ namespace Microsoft.NET.Build.Tasks {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to  The .NET SDK includes default PackageReference items based on the project&apos;s target framework..
-        /// </summary>
-        internal static string DuplicatePackageReferenceDefaultExplanation {
-            get {
-                return ResourceManager.GetString("DuplicatePackageReferenceDefaultExplanation", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The preprocessor token &apos;{0}&apos; has been given more than one value. Choosing &apos;{1}&apos; as the value..
         /// </summary>
         internal static string DuplicatePreprocessorToken {

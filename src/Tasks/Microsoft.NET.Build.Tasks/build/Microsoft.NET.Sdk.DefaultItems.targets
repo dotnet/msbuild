@@ -90,17 +90,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       PropertyNameToDisableDefaultItems="EnableDefaultContentItems"
       MoreInformationLink="$(DefaultItemsMoreInformationLink)"
       />
-
-    <!-- TODO: Should the PackageReference check happen before restore?  If so, then this needs to go in a separate target. -->
-    <CheckForDuplicateItems
-      Items="@(PackageReference)"
-      ItemName="PackageReference"
-      DefaultItemsEnabled="$(DefaultPackageReferencesEnabled)"
-      DefaultItemsOfThisTypeEnabled="$(DefaultPackageReferencesEnabled)"
-      PropertyNameToDisableDefaultItems="DisableImplicitFrameworkReferences"
-      PropertyValueToDisableDefaultItems="true"
-      MoreInformationLink="$(DefaultItemsMoreInformationLink)"
-      />
     
   </Target>
   

@@ -41,14 +41,7 @@ namespace Microsoft.NET.Build.Tasks
                         moreInformation = string.Format(CultureInfo.CurrentCulture, Strings.ForMoreInformation, MoreInformationLink);
                     }
 
-                    if (ItemName.Equals("PackageReference", StringComparison.OrdinalIgnoreCase))
-                    {
-                        defaultExplanation = Strings.DuplicatePackageReferenceDefaultExplanation;
-                    }
-                    else
-                    {
-                        defaultExplanation = string.Format(CultureInfo.CurrentCulture, Strings.DuplicateItemsDefaultExplanation, ItemName);
-                    }
+                    defaultExplanation = string.Format(CultureInfo.CurrentCulture, Strings.DuplicateItemsDefaultExplanation, ItemName);
 
                     defaultExplanation += string.Format(CultureInfo.CurrentCulture, Strings.DuplicateItemsHowToFix,
                         PropertyNameToDisableDefaultItems,

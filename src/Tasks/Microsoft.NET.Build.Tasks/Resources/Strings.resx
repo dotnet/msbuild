@@ -234,9 +234,6 @@
   <data name="DuplicateItemsHowToFix" xml:space="preserve">
     <value> You can either remove these items from your project file, or set the '{0}' property to '{1}' if you want to explicitly include them in your project file.{2}</value>
   </data>
-  <data name="DuplicatePackageReferenceDefaultExplanation" xml:space="preserve">
-    <value> The .NET SDK includes default PackageReference items based on the project's target framework.</value>
-  </data>
   <data name="ForMoreInformation" xml:space="preserve">
     <value> For more information, see {0}</value>
   </data>
