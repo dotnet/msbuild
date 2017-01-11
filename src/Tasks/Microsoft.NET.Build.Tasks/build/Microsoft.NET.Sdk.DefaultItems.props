@@ -17,11 +17,11 @@ Copyright (c) .NET Foundation. All rights reserved.
 
 
   <ItemGroup Condition=" '$(EnableDefaultItems)' == 'true' ">
-    <Compile Include="**/*$(DefaultLanguageSourceExtension)" Exclude="$(DefaultExcludesInProjectFolder)" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
-    <EmbeddedResource Include="**/*.resx" Exclude="$(DefaultExcludesInProjectFolder)" Condition=" '$(EnableDefaultEmbeddedResourceItems)' == 'true' " />
+    <Compile Include="**/*$(DefaultLanguageSourceExtension)" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
+    <EmbeddedResource Include="**/*.resx" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" Condition=" '$(EnableDefaultEmbeddedResourceItems)' == 'true' " />
   </ItemGroup>
   <ItemGroup Condition=" '$(EnableDefaultItems)' == 'true' And '$(EnableDefaultNoneItems)' == 'true' ">
-    <None Include="**/*" Exclude="$(DefaultExcludesInProjectFolder)" />
+    <None Include="**/*" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
     <None Remove="**/*$(DefaultLanguageSourceExtension)" Condition=" '$(EnableDefaultCompileItems)' == 'true' "/>
     <None Remove="**/*.resx" Condition=" '$(EnableDefaultEmbeddedResourceItems)' == 'true' "/>
   </ItemGroup>
