@@ -11,7 +11,7 @@
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
     <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.1</Version>
+      <Version>1.0.3</Version>
     </PackageReference>
   </ItemGroup>
 
@@ -21,8 +21,4 @@
     </DotNetCliToolReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Include="**\*.cs" />
-    <EmbeddedResource Include="**\*.resx" />
-  </ItemGroup>
 </Project>

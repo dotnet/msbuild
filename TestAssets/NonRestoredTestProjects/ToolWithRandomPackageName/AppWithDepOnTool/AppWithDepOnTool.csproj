@@ -7,12 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="**\*.cs" />
-    <EmbeddedResource Include="**\*.resx" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App" Version="1.0.1" />
+    <PackageReference Include="Microsoft.NETCore.App" Version="1.0.3" />
     <DotNetCliToolReference Include="$(GeneratedPackageId)">
       <Version>1.0.0</Version>
     </DotNetCliToolReference>

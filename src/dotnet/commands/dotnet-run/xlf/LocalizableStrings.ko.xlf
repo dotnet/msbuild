@@ -15,8 +15,8 @@
       </trans-unit>
       <trans-unit id="CommandOptionConfigurationDescription">
         <source>Configuration to use for building the project. Default for most projects is "Debug".</source>
-        <target state="needs-review-translation">빌드할 구성입니다.</target>
-        <note></note>
+        <target state="translated">프로젝트 빌드에 사용할 구성입니다. 대부분의 프로젝트에서 기본값은 "Debug"입니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandOptionFramework">
         <source>FRAMEWORK</source>
@@ -25,8 +25,8 @@
       </trans-unit>
       <trans-unit id="CommandOptionFrameworkDescription">
         <source>Build and run the app using the specified framework. The framework has to be specified in the project file. </source>
-        <target state="needs-review-translation">특정 프레임워크를 컴파일합니다.</target>
-        <note></note>
+        <target state="translated">지정된 프레임워크를 사용하여 앱을 빌드 및 실행합니다. 프로젝트 파일에서 프레임워크를 지정해야 합니다. </target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandOptionProjectDescription">
         <source>The path to the project file to run (defaults to the current directory if there is only one project).</source>
@@ -110,8 +110,8 @@
       </trans-unit>
       <trans-unit id="RunCommandAdditionalArgsHelpText">
         <source>Arguments passed to the application that is being run.</source>
-        <target state="new">Arguments passed to the application that is being run.</target>
-        <note></note>
+        <target state="translated">실행 중인 응용 프로그램에 전달되는 인수입니다.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

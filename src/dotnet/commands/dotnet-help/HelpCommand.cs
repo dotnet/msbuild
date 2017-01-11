@@ -35,6 +35,7 @@ namespace Microsoft.DotNet.Tools.Help
   pack          {LocalizableStrings.PackDefinition}
   migrate       {LocalizableStrings.MigrateDefinition}
   clean         {LocalizableStrings.CleanDefinition}
+  sln           {LocalizableStrings.SlnDefinition}
 
 Project modification commands:
   add           Add items to the project

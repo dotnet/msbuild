@@ -25,8 +25,8 @@
       </trans-unit>
       <trans-unit id="CmdSettingsFile">
         <source>SETTINGS_FILE</source>
-        <target state="needs-review-translation">SettingsFile</target>
-        <note></note>
+        <target state="translated">FICHIER_PARAMÈTRES</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSettingsDescription">
         <source>Settings to use when running tests.</source>
@@ -40,8 +40,8 @@
       </trans-unit>
       <trans-unit id="CmdTestCaseFilterExpression">
         <source>EXPRESSION</source>
-        <target state="needs-review-translation">Expression</target>
-        <note></note>
+        <target state="translated">EXPRESSION</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdTestCaseFilterDescription">
         <source>Run tests that match the given expression.
@@ -51,18 +51,20 @@
                                         Run tests that contain the specified name: --filter "FullyQualifiedName~Namespace.Class"
                                         More info on filtering support: https://aka.ms/vstest-filtering
                                         </source>
-        <target state="needs-review-translation">Exécutez les tests qui correspondent à l'expression donnée.
+        <target state="translated">Exécutez les tests qui correspondent à l'expression donnée.
                                         Exemples :
-                                        --testCaseFilter:"Priority = 1"
-                                        --testCaseFilter: "(FullyQualifiedName~Nightly | Name = MyTestMethod)"</target>
-        <note></note>
+                                        Exécutez des tests avec la priorité définie sur 1 : --filter "Priority = 1"
+                                        Exécutez un test avec le nom complet spécifié : --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
+                                        Exécutez des tests contenant le nom spécifié : --filter "FullyQualifiedName~Namespace.Class"
+                                        Informations supplémentaires disponibles dans la page de support sur le filtrage : https://aka.ms/vstest-filtering</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdTestAdapterPathDescription">
         <source>Use custom adapters from the given path in the test run.
                                         Example: --test-adapter-path &lt;PATH_TO_ADAPTER&gt;</source>
-        <target state="needs-review-translation">Utilisez des adaptateurs personnalisés à partir du chemin donné dans la série de tests.
-                                        Exemple : --testAdapterPath:&lt;cheminAdaptateursPersonnalisés&gt;</target>
-        <note></note>
+        <target state="translated">Utilisez des adaptateurs personnalisés à partir du chemin donné dans la série de tests.
+                                        Exemple : --test-adapter-path &lt;PATH_TO_ADAPTER&gt;</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdLoggerOption">
         <source>LoggerUri/FriendlyName</source>
@@ -71,25 +73,25 @@
       </trans-unit>
       <trans-unit id="CmdLoggerDescription">
         <source>Specify a logger for test results. 
-                                        Example: --logger:trx</source>
-        <target state="translated">Spécifiez un enregistreur pour les résultats des tests. 
+                                        Example: --logger "trx[;LogFileName=&lt;Defaults to unique file name&gt;]"</source>
+        <target state="needs-review-translation">Spécifiez un enregistreur pour les résultats des tests. 
                                         Exemple : --logger:trx</target>
-        <note />
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdConfiguration">
         <source>CONFIGURATION</source>
-        <target state="needs-review-translation">configuration</target>
-        <note></note>
+        <target state="translated">CONFIGURATION</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="needs-review-translation">Configuration sous laquelle générer la build (Debug/Release)</target>
-        <note></note>
+        <target state="translated">Configuration à utiliser pour la génération du projet.  La valeur par défaut pour la plupart des projets est "Debug".</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
-        <target state="needs-review-translation">FrameworkVersion</target>
-        <note></note>
+        <target state="translated">FRAMEWORK</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Looks for test binaries for a specific framework</source>
@@ -98,8 +100,8 @@
       </trans-unit>
       <trans-unit id="CmdOutputDir">
         <source>OUTPUT_DIR</source>
-        <target state="needs-review-translation">OutputDir</target>
-        <note></note>
+        <target state="translated">RÉP_SORTIE</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdOutputDescription">
         <source>Directory in which to find the binaries to be run</source>
@@ -108,8 +110,8 @@
       </trans-unit>
       <trans-unit id="CmdPathToLogFile">
         <source>PATH_TO_FILE</source>
-        <target state="needs-review-translation">PathToLogFile</target>
-        <note></note>
+        <target state="translated">CHEMIN_FICHIER</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPathTologFileDescription">
         <source>Enable verbose logs for test platform.
@@ -122,6 +124,13 @@
         <source>Do not build project before testing.</source>
         <target state="translated">Ne générez pas le projet avant les tests.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="RunSettingsArgsHelpText">
+        <source>Any extra commandline runsettings arguments that should be passed to vstest. See 'dotnet vstest --help' for available options.
+                                        Example: -- RunConfiguration.ResultsDirectory="C:\users\user\desktop\Results Directory" MSTest.DeploymentEnabled=false</source>
+        <target state="new">Any extra commandline runsettings arguments that should be passed to vstest. See 'dotnet vstest --help' for available options.
+                                        Example: -- RunConfiguration.ResultsDirectory="C:\users\user\desktop\Results Directory" MSTest.DeploymentEnabled=false</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>

@@ -5,37 +5,52 @@
       <group id="src/Microsoft.DotNet.Cli.Sln.Internal/LocalizableStrings.resx" />
       <trans-unit id="GlobalSectionMoreThanOnceError">
         <source>Global section specified more than once</source>
-        <target state="new">Global section specified more than once</target>
-        <note></note>
+        <target state="translated">Sección global especificada más de una vez</target>
+        <note />
       </trans-unit>
       <trans-unit id="GlobalSectionNotClosedError">
         <source>Global section not closed</source>
-        <target state="new">Global section not closed</target>
-        <note></note>
+        <target state="translated">Sección global no cerrada</target>
+        <note />
       </trans-unit>
       <trans-unit id="FileHeaderMissingError">
         <source>File header is missing</source>
-        <target state="new">File header is missing</target>
-        <note></note>
+        <target state="translated">Encabezado de archivo omitido</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectSectionNotClosedError">
         <source>Project section not closed</source>
-        <target state="new">Project section not closed</target>
-        <note></note>
+        <target state="translated">Sección de proyecto no cerrada</target>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidSectionTypeError">
         <source>Invalid section type: {0}</source>
-        <target state="new">Invalid section type: {0}</target>
-        <note></note>
+        <target state="translated">Tipo de sección no válido: {0}</target>
+        <note />
       </trans-unit>
       <trans-unit id="SectionIdMissingError">
         <source>Section id missing</source>
-        <target state="new">Section id missing</target>
-        <note></note>
+        <target state="translated">Id. de sección omitido</target>
+        <note />
       </trans-unit>
       <trans-unit id="ClosingSectionTagNotFoundError">
         <source>Closing section tag not found</source>
-        <target state="new">Closing section tag not found</target>
+        <target state="translated">No se encuentra la etiqueta de cierre de la sección</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorMessageFormatString">
+        <source>Invalid format in line {0}: {1}</source>
+        <target state="new">Invalid format in line {0}: {1}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ProjectParsingErrorFormatString">
+        <source>Project section is missing '{0}' when parsing the line starting at position {1}</source>
+        <target state="new">Project section is missing '{0}' when parsing the line starting at position {1}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="InvalidPropertySetFormatString">
+        <source>Property set is missing '{0}'</source>
+        <target state="new">Property set is missing '{0}'</target>
         <note></note>
       </trans-unit>
     </body>

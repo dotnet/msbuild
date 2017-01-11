@@ -1,8 +1,8 @@
 <Project Sdk="FSharp.NET.Sdk;Microsoft.NET.Sdk" ToolsVersion="15.0">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp1.0</TargetFramework>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,9 +11,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App" Version="1.0.1" />
+    <PackageReference Include="Microsoft.NETCore.App" Version="1.0.3" />
     <PackageReference Include="Microsoft.FSharp.Core.netcore" Version="1.0.0-alpha-161023" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20161123-03" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20170106-08" />
     <PackageReference Include="MSTest.TestAdapter" Version="1.1.8-rc" />
     <PackageReference Include="MSTest.TestFramework" Version="1.0.8-rc" />
     <PackageReference Include="FSharp.NET.Sdk" Version="1.0.0-beta-*">

@@ -15,96 +15,44 @@ namespace Microsoft.DotNet.Tools.New
 {
     public class NewCommand
     {
-        private static string GetFileNameFromResourceName(string s)
+        public int CreateEmptyProject(string languageName, string templateName)
         {
-            // A.B.C.D.filename.extension
-            string[] parts = s.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length < 2)
-            {
-                return null;
-            }
-
-            // filename.extension
-            return parts[parts.Length - 2] + "." + parts[parts.Length - 1];
-        }
-
-        public int CreateEmptyProject(string languageName, string templateDir, bool isMsBuild)
-        {
-            // Check if project.json exists in the folder
-            if (File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "project.json")) && !isMsBuild)
-            {
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.ProjectExistsError, languageName));
-                
-                return 1;
-            }
-
             var thisAssembly = typeof(NewCommand).GetTypeInfo().Assembly;
-            var resources = from resourceName in thisAssembly.GetManifestResourceNames()
-                            where resourceName.Contains(templateDir)
-                            select resourceName;
 
-            var resourceNameToFileName = new Dictionary<string, string>();
-            bool hasFilesToOverride = false;
-            foreach (string resourceName in resources)
+            using (var resource = thisAssembly.GetManifestResourceStream($"dotnet.commands.dotnet_new.{templateName}.zip"))
             {
-                string fileName = GetFileNameFromResourceName(resourceName);
+                var archive = new ZipArchive(resource);
 
-                using (var resource = thisAssembly.GetManifestResourceStream(resourceName))
+                try
                 {
-                    var archive = new ZipArchive(resource);
-
-                    try
+                    // Check if other files from the template exists already, before extraction
+                    IEnumerable<string> fileNames = archive.Entries.Select(e => e.FullName);
+                    foreach (var entry in fileNames)
                     {
-                        // Check if other files from the template exists already, before extraction
-                        IEnumerable<string> fileNames = archive.Entries.Select(e => e.FullName);
-                        foreach (var entry in fileNames)
+                        if (File.Exists(Path.Combine(Directory.GetCurrentDirectory(), entry)))
                         {
-                            if (File.Exists(Path.Combine(Directory.GetCurrentDirectory(), entry)))
-                            {
-                                Reporter.Error.WriteLine(string.Format(LocalizableStrings.ProjectContainsError, languageName, entry));
-                                return 1;
-                            }
-                        }
-
-                        string projectDirectory = Directory.GetCurrentDirectory();
-
-                        archive.ExtractToDirectory(projectDirectory);
-
-                        ReplaceFileTemplateNames(projectDirectory);
-
-                        if (!isMsBuild)
-                        {
-                            ReplaceProjectJsonTemplateValues(projectDirectory);
+                            Reporter.Error.WriteLine(string.Format(LocalizableStrings.ProjectContainsError, languageName, entry));
+                            return 1;
                         }
                     }
-                    catch (IOException ex)
-                    {
-                        Reporter.Error.WriteLine(ex.Message);
-                        hasFilesToOverride = true;
-                    }
+
+                    string projectDirectory = Directory.GetCurrentDirectory();
+
+                    archive.ExtractToDirectory(projectDirectory);
+
+                    ReplaceFileTemplateNames(projectDirectory);
                 }
-            }
-
-            if (hasFilesToOverride)
-            {
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.ProjectFailedError, languageName));
-                return 1;
+                catch (IOException ex)
+                {
+                    Reporter.Error.WriteLine(ex.Message);
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.ProjectFailedError, languageName));
+                    return 1;
+                }
             }
 
             Reporter.Output.WriteLine(string.Format(LocalizableStrings.CreatedNewProject, languageName, Directory.GetCurrentDirectory()));
 
             return 0;
-        }
-
-        private static void ReplaceProjectJsonTemplateValues(string projectDirectory)
-        {
-            string projectJsonFile = Path.Combine(projectDirectory, "project.json");
-            string projectJsonTemplateFile = Path.Combine(projectDirectory, "project.json.template");
-
-            if(File.Exists(projectJsonTemplateFile))
-            {
-                File.Move(projectJsonTemplateFile, projectJsonFile);
-            }
         }
 
         private static void ReplaceFileTemplateNames(string projectDirectory)
@@ -136,22 +84,24 @@ namespace Microsoft.DotNet.Tools.New
             var csharp = new { Name = "C#", Alias = new[] { "c#", "cs", "csharp" }, TemplatePrefix = "CSharp", 
                                Templates = new[] 
                                { 
-                                   new { Name = "Console", isMsBuild = true }, 
-                                   new { Name = "Web", isMsBuild = true }, 
-                                   new { Name = "Lib", isMsBuild = true },
-                                   new { Name = "Mstest", isMsBuild = true },
-                                   new { Name = "Xunittest", isMsBuild = true }
+                                   new { Name = "Console" }, 
+                                   new { Name = "Console1.1" }, 
+                                   new { Name = "Web" }, 
+                                   new { Name = "Web1.1" },
+                                   new { Name = "Lib" },
+                                   new { Name = "Mstest" },
+                                   new { Name = "Xunittest" }
                                }
             };
 
             var fsharp = new { Name = "F#", Alias = new[] { "f#", "fs", "fsharp" }, TemplatePrefix = "FSharp", 
                                Templates = new[] 
                                { 
-                                   new { Name = "Console", isMsBuild = true }, 
-                                   new { Name = "Web", isMsBuild = true }, 
-                                   new { Name = "Lib", isMsBuild = true },
-                                   new { Name = "Mstest", isMsBuild = true },
-                                   new { Name = "Xunittest", isMsBuild = true }
+                                   new { Name = "Console" }, 
+                                   new { Name = "Web" }, 
+                                   new { Name = "Lib" },
+                                   new { Name = "Mstest" },
+                                   new { Name = "Xunittest" }
                                }
             };
 
@@ -201,9 +151,9 @@ namespace Microsoft.DotNet.Tools.New
                     return -1;
                 }
 
-                string templateDir = $"{language.TemplatePrefix}_{template.Name}";
+                string fullTemplateName = $"{language.TemplatePrefix}_{template.Name}";
 
-                return dotnetNew.CreateEmptyProject(language.Name, templateDir, template.isMsBuild);
+                return dotnetNew.CreateEmptyProject(language.Name, fullTemplateName);
             });
 
             try

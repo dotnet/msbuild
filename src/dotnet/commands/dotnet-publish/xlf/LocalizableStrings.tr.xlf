@@ -30,8 +30,8 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="needs-review-translation">Yayımlamanın yapılacağı hedef çerçeve</target>
-        <note></note>
+        <target state="translated">Yayımlamanın yapılacağı hedef çerçeve. Hedef çerçevenin proje dosyasında belirtilmesi gerekir.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeOption">
         <source>RUNTIME_IDENTIFIER</source>
@@ -40,8 +40,8 @@
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependented app.</source>
-        <target state="needs-review-translation">Yayımlamanın yapılacağı hedef çalışma zamanı. Varsayılan değer, taşınabilir bir uygulama yayımlanmasıdır.</target>
-        <note></note>
+        <target state="translated">Projeyi belirli bir çalışma zamanı için yayımlar. Bu, kendi içinde dağıtım oluştururken kullanılır. Varsayılan seçenek, çerçeveye bağlı bir uygulama yayımlamaktır.</target>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
@@ -50,8 +50,8 @@
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>Output directory in which to place the published artifacts.</source>
-        <target state="needs-review-translation">Uygulamanın yayımlanacağı yol</target>
-        <note></note>
+        <target state="translated">Yayımlanan yapıtların yerleştirileceği çıkış dizini.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ConfigurationOption">
         <source>CONFIGURATION</source>
@@ -60,8 +60,8 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="needs-review-translation">Derlemenin gerçekleştirileceği yapılandırma</target>
-        <note></note>
+        <target state="translated">Projeyi derlemek için kullanılacak yapılandırma.  Çoğu proje için varsayılan: "Debug".</target>
+        <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOption">
         <source>VERSION_SUFFIX</source>
@@ -70,8 +70,8 @@
       </trans-unit>
       <trans-unit id="VersionSuffixOptionDescription">
         <source>Defines the value for the $(VersionSuffix) property in the project.</source>
-        <target state="needs-review-translation">Projedeki $(VersionSuffix) özelliğinin değerini tanımlar</target>
-        <note></note>
+        <target state="translated">Projedeki $(VersionSuffix) özelliğinin değerini tanımlar.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

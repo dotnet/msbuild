@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
     public class GivenThatIWantToMigratePackageDependencies : PackageDependenciesTestBase
     {
         [Fact]
-        public void It_migrates_basic_PackageReference()
+        public void ItMigratesBasicPackageReference()
         {
             var mockProj = RunPackageDependenciesRuleOnPj(@"                
                 {
@@ -24,12 +24,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                         ""BPackage"" : ""1.0.0""
                     }
                 }");
-            
-            EmitsPackageReferences(mockProj, Tuple.Create("APackage", "1.0.0-preview", ""), Tuple.Create("BPackage", "1.0.0", ""));            
+
+            EmitsPackageReferences(mockProj, Tuple.Create("APackage", "1.0.0-preview", ""), Tuple.Create("BPackage", "1.0.0", ""));
         }
 
         [Fact]
-        public void It_migrates_type_build_to_PrivateAssets()
+        public void ItMigratesTypeBuildToPrivateAssets()
         {
             var mockProj = RunPackageDependenciesRuleOnPj(@"                
                 {
@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void It_migrates_suppress_parent_array_to_PrivateAssets()
+        public void ItMigratesSuppressParentArrayToPrivateAssets()
         {
             var mockProj = RunPackageDependenciesRuleOnPj(@"                
                 {
@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void It_migrates_suppress_parent_string_to_PrivateAssets()
+        public void ItMigratesSuppressParentStringToPrivateAssets()
         {
             var mockProj = RunPackageDependenciesRuleOnPj(@"                
                 {
@@ -88,7 +88,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void It_migrates_include_exclude_arrays_to_IncludeAssets()
+        public void ItMigratesIncludeExcludeArraysToIncludeAssets()
         {
             var mockProj = RunPackageDependenciesRuleOnPj(@"                
                 {
@@ -108,7 +108,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void It_migrates_include_string_to_IncludeAssets()
+        public void ItMigratesIncludeStringToIncludeAssets()
         {
             var mockProj = RunPackageDependenciesRuleOnPj(@"                
                 {
@@ -128,7 +128,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void It_migrates_include_exclude_overlapping_strings_to_IncludeAssets()
+        public void ItMigratesIncludeExcludeOverlappingStringsToIncludeAssets()
         {
             var mockProj = RunPackageDependenciesRuleOnPj(@"                
                 {
@@ -149,7 +149,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
 
         [Fact]
-        public void It_migrates_Tools()
+        public void ItMigratesTools()
         {
             var mockProj = RunPackageDependenciesRuleOnPj(@"                
                 {
@@ -158,12 +158,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                         ""BPackage"" : ""1.0.0""
                     }
                 }");
-            
-            EmitsToolReferences(mockProj, Tuple.Create("APackage", "1.0.0-preview"), Tuple.Create("BPackage", "1.0.0"));            
+
+            EmitsToolReferences(mockProj, Tuple.Create("APackage", "1.0.0-preview"), Tuple.Create("BPackage", "1.0.0"));
         }
 
         [Fact]
-        public void It_migrates_imports_per_framework()
+        public void ItMigratesImportsPerFramework()
         {
             var importPropertyName = "PackageTargetFallback";
 
@@ -201,7 +201,27 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void It_auto_add_desktop_references_during_migrate()
+        public void ItDoesNotAddConditionToPackageTargetFallBackWhenMigratingASingleTFM()
+        {
+            var importPropertyName = "PackageTargetFallback";
+
+            var mockProj = RunPackageDependenciesRuleOnPj(@"                
+                {
+                    ""frameworks"": {
+                        ""netcoreapp1.0"" : {
+                            ""imports"": [""netstandard1.3"", ""net451""]
+                        }
+                    }
+                }");
+
+            var imports = mockProj.Properties.Where(p => p.Name == importPropertyName);
+            imports.Should().HaveCount(1);
+
+            imports.Single().Condition.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void ItAutoAddDesktopReferencesDuringMigrate()
         {
             var mockProj = RunPackageDependenciesRuleOnPj(@"                
                 {
@@ -234,7 +254,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void It_migrates_test_projects_to_have_test_sdk()
+        public void ItMigratesTestProjectsToHaveTestSdk()
         {
             var mockProj = RunPackageDependenciesRuleOnPj(@"
                 {
@@ -250,7 +270,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             mockProj.Items.Should().ContainSingle(
                 i => (i.Include == "Microsoft.NET.Test.Sdk" &&
                       i.ItemType == "PackageReference" &&
-                      i.GetMetadataWithName("Version").Value == "15.0.0-preview-20161024-02" &&
+                      i.GetMetadataWithName("Version").Value == "15.0.0-preview-20170106-08" &&
                       i.GetMetadataWithName("Version").ExpressedAsAttribute));
 
             mockProj.Items.Should().NotContain(
@@ -267,7 +287,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void It_migrates_test_projects_to_have_test_sdk_and_xunit_packagedependencies()
+        public void ItMigratesTestProjectsToHaveTestSdkAndXunitPackagedependencies()
         {
             var mockProj = RunPackageDependenciesRuleOnPj(@"
                 {
@@ -281,19 +301,19 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 }");
 
             mockProj.Items.Should().ContainSingle(
-                i => (i.Include == "Microsoft.NET.Test.Sdk" && 
+                i => (i.Include == "Microsoft.NET.Test.Sdk" &&
                       i.ItemType == "PackageReference" &&
-                      i.GetMetadataWithName("Version").Value == "15.0.0-preview-20161024-02") &&
+                      i.GetMetadataWithName("Version").Value == "15.0.0-preview-20170106-08") &&
                       i.GetMetadataWithName("Version").ExpressedAsAttribute);
 
             mockProj.Items.Should().ContainSingle(
-                i => (i.Include == "xunit" && 
+                i => (i.Include == "xunit" &&
                       i.ItemType == "PackageReference" &&
                       i.GetMetadataWithName("Version").Value == "2.2.0-beta4-build3444" &&
                       i.GetMetadataWithName("Version").ExpressedAsAttribute));
 
             mockProj.Items.Should().ContainSingle(
-                i => (i.Include == "xunit.runner.visualstudio" && 
+                i => (i.Include == "xunit.runner.visualstudio" &&
                       i.ItemType == "PackageReference" &&
                       i.GetMetadataWithName("Version").Value == "2.2.0-beta4-build1194" &&
                       i.GetMetadataWithName("Version").ExpressedAsAttribute));
@@ -306,7 +326,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void It_migrates_test_projects_to_have_test_sdk_and_xunit_packagedependencies_overwrite_existing_packagedependencies()
+        public void ItMigratesTestProjectsToHaveTestSdkAndXunitPackagedependenciesOverwriteExistingPackagedependencies()
         {
             var mockProj = RunPackageDependenciesRuleOnPj(@"
                 {
@@ -325,7 +345,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             mockProj.Items.Should().ContainSingle(
                 i => (i.Include == "Microsoft.NET.Test.Sdk" &&
                       i.ItemType == "PackageReference" &&
-                      i.GetMetadataWithName("Version").Value == "15.0.0-preview-20161024-02" &&
+                      i.GetMetadataWithName("Version").Value == "15.0.0-preview-20170106-08" &&
                       i.GetMetadataWithName("Version").ExpressedAsAttribute));
 
             mockProj.Items.Should().ContainSingle(
@@ -348,7 +368,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void It_migrates_test_projects_to_have_test_sdk_and_mstest_packagedependencies()
+        public void ItMigratesTestProjectsToHaveTestSdkAndMstestPackagedependencies()
         {
             var mockProj = RunPackageDependenciesRuleOnPj(@"
                 {
@@ -364,19 +384,19 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             mockProj.Items.Should().ContainSingle(
                 i => (i.Include == "Microsoft.NET.Test.Sdk" &&
                       i.ItemType == "PackageReference" &&
-                      i.GetMetadataWithName("Version").Value == "15.0.0-preview-20161024-02" &&
+                      i.GetMetadataWithName("Version").Value == "15.0.0-preview-20170106-08" &&
                       i.GetMetadataWithName("Version").ExpressedAsAttribute));
 
             mockProj.Items.Should().ContainSingle(
                 i => (i.Include == "MSTest.TestAdapter" &&
                       i.ItemType == "PackageReference" &&
-                      i.GetMetadataWithName("Version").Value == "1.1.3-preview" &&
+                      i.GetMetadataWithName("Version").Value == "1.1.8-rc" &&
                       i.GetMetadataWithName("Version").ExpressedAsAttribute));
 
             mockProj.Items.Should().ContainSingle(
                 i => (i.Include == "MSTest.TestFramework" &&
                       i.ItemType == "PackageReference" &&
-                      i.GetMetadataWithName("Version").Value == "1.0.4-preview" &&
+                      i.GetMetadataWithName("Version").Value == "1.0.8-rc" &&
                       i.GetMetadataWithName("Version").ExpressedAsAttribute));
 
             mockProj.Items.Should().NotContain(
@@ -408,7 +428,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 }
               }
             }")]
-        public void It_migrates_library_and_does_not_double_netstandard_ref(string pjContent)
+        public void ItMigratesLibraryAndDoesNotDoubleNetstandardRef(string pjContent)
         {
             var mockProj = RunPackageDependenciesRuleOnPj(pjContent);
 

@@ -5,8 +5,8 @@
       <group id="src/dotnet/commands/dotnet-restore/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET dependency restorer</source>
-        <target state="needs-review-translation">obnovit</target>
-        <note></note>
+        <target state="translated">Nástroj .NET pro obnovení závislostí</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>restore for msbuild</source>
@@ -15,8 +15,8 @@
       </trans-unit>
       <trans-unit id="CmdArgument">
         <source>PROJECT</source>
-        <target state="needs-review-translation">kořen</target>
-        <note></note>
+        <target state="translated">PROJECT</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdArgumentDescription">
         <source>Optional path to a project file or MSBuild arguments.</source>
@@ -25,8 +25,8 @@
       </trans-unit>
       <trans-unit id="CmdSourceOption">
         <source>SOURCE</source>
-        <target state="needs-review-translation">zdroj</target>
-        <note></note>
+        <target state="translated">SOURCE</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSourceOptionDescription">
         <source>Specifies a NuGet package source to use during the restore.</source>
@@ -35,8 +35,8 @@
       </trans-unit>
       <trans-unit id="CmdPackagesOption">
         <source>PACKAGES_DIRECTORY</source>
-        <target state="needs-review-translation">packagesDirectory</target>
-        <note></note>
+        <target state="translated">PACKAGES_DIRECTORY</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOptionDescription">
         <source>Directory to install packages in.</source>
@@ -50,8 +50,8 @@
       </trans-unit>
       <trans-unit id="CmdConfigFileOption">
         <source>FILE</source>
-        <target state="needs-review-translation">soubor</target>
-        <note></note>
+        <target state="translated">FILE</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfigFileOptionDescription">
         <source>The NuGet configuration file to use.</source>
@@ -71,6 +71,16 @@
       <trans-unit id="CmdNoDependenciesOptionDescription">
         <source>Set this flag to ignore project to project references and only restore the root project</source>
         <target state="translated">Když tento příznak nastavíte, ignorují se odkazy mezi projekty a obnoví se jenom kořenový projekt.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdRuntimeOption">
+        <source>RUNTIME_IDENTIFIER</source>
+        <target state="translated">RUNTIME_IDENTIFIER</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdRuntimeOptionDescription">
+        <source>Target runtime to restore packages for.</source>
+        <target state="translated">Cílový modul runtime pro obnovení balíčků.</target>
         <note />
       </trans-unit>
     </body>

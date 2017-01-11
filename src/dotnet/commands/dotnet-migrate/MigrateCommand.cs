@@ -153,9 +153,9 @@ namespace Microsoft.DotNet.Tools.Migrate
         {
             List<string> args = new List<string>()
                 {
-                    "add",
+                    "sln",
                     slnPath,
-                    "project",
+                    "add",
                     csprojPath,
                 };
 

@@ -30,8 +30,8 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="needs-review-translation">Целевая платформа публикации</target>
-        <note></note>
+        <target state="translated">Целевая платформа публикации. Целевая платформа должна быть указана в файле проекта.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeOption">
         <source>RUNTIME_IDENTIFIER</source>
@@ -40,8 +40,8 @@
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependented app.</source>
-        <target state="needs-review-translation">Целевая среда выполнения публикации По умолчанию выполняется публикация переносимого приложения.</target>
-        <note></note>
+        <target state="translated">Публикует проект для указанной среды выполнения. Используется при создании автономного развертывания. По умолчанию публикуется зависимое от платформы приложение.</target>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
@@ -50,8 +50,8 @@
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>Output directory in which to place the published artifacts.</source>
-        <target state="needs-review-translation">Путь для публикации приложения</target>
-        <note></note>
+        <target state="translated">Выходной каталог для размещения опубликованных артефактов.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ConfigurationOption">
         <source>CONFIGURATION</source>
@@ -60,8 +60,8 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="needs-review-translation">Конфигурация, в которой выполняется сборка</target>
-        <note></note>
+        <target state="translated">Конфигурация, используемая для сборки проекта.  Значение по умолчанию для большинства проектов — "Debug".</target>
+        <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOption">
         <source>VERSION_SUFFIX</source>
@@ -70,8 +70,8 @@
       </trans-unit>
       <trans-unit id="VersionSuffixOptionDescription">
         <source>Defines the value for the $(VersionSuffix) property in the project.</source>
-        <target state="needs-review-translation">Определяет значение для свойства $(VersionSuffix) в проекте</target>
-        <note></note>
+        <target state="translated">Определяет значение для свойства $(VersionSuffix) в проекте.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

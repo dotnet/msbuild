@@ -78,7 +78,7 @@ A command is running to initially populate your local package cache, to improve 
         }
 
     	[Fact]
-    	public void ItRestoresTheNuGetPackagesToTheNuGetCacheFolder()
+    	public void ItCreatesASentinelFileUnderTheNuGetCacheFolder()
     	{
             _nugetCacheFolder
                 .Should()
@@ -86,14 +86,41 @@ A command is running to initially populate your local package cache, to improve 
     	}
 
         [Fact]
-        public void ItCreatesASentinelFileUnderTheNuGetCacheFolder()
+        public void ItRestoresTheNuGetPackagesToTheNuGetCacheFolder()
         {
+            List<string> expectedDirectories = new List<string>()
+            {
+                "microsoft.netcore.app",
+                "microsoft.aspnetcore.diagnostics",
+                "microsoft.aspnetcore.mvc",
+                "microsoft.aspnetcore.razor.tools",
+                "microsoft.aspnetcore.routing",
+                "microsoft.aspnetcore.server.iisintegration",
+                "microsoft.aspnetcore.server.kestrel",
+                "microsoft.aspnetcore.staticfiles",
+                "microsoft.extensions.configuration.environmentvariables",
+                "microsoft.extensions.configuration.json",
+                "microsoft.extensions.logging",
+                "microsoft.extensions.logging.console",
+                "microsoft.extensions.logging.debug",
+                "microsoft.extensions.options.configurationextensions",
+                "microsoft.visualstudio.web.browserlink.loader",
+            };
+
             _nugetCacheFolder
                 .Should()
-                .HaveDirectory("microsoft.netcore.app");
+                .HaveDirectories(expectedDirectories);
+
+            _nugetCacheFolder
+                .GetDirectory("system.runtime")
+                .Should().HaveDirectories(new string[] { "4.1.0", "4.3.0" });
+
+            _nugetCacheFolder
+                .GetDirectory("microsoft.aspnetcore.mvc")
+                .Should().HaveDirectories(new string[] { "1.0.1", "1.1.0" });
         }
 
-    	private string GetDotnetVersion()
+        private string GetDotnetVersion()
     	{
     		return new DotnetCommand().ExecuteWithCapturedOutput("--version").StdOut
     			.TrimEnd(Environment.NewLine.ToCharArray());

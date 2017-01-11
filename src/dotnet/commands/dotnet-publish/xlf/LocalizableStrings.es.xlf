@@ -30,8 +30,8 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="needs-review-translation">Plataforma de destino para la que se publica</target>
-        <note></note>
+        <target state="translated">Plataforma de destino para la que se publica. La plataforma de destino se debe especificar en el archivo de proyecto.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RuntimeOption">
         <source>RUNTIME_IDENTIFIER</source>
@@ -40,8 +40,8 @@
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependented app.</source>
-        <target state="needs-review-translation">Entorno en tiempo de ejecución para el que se publica. El valor predeterminado es publicar una aplicación móvil.</target>
-        <note></note>
+        <target state="translated">Publica el proyecto para un runtime determinado. Se usa cuando se crea la implementación independiente. La opción predeterminada es publicar una aplicación dependiente de la plataforma.</target>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
@@ -50,8 +50,8 @@
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>Output directory in which to place the published artifacts.</source>
-        <target state="needs-review-translation">Ruta de acceso donde se publica la aplicación</target>
-        <note></note>
+        <target state="translated">Directorio de salida en el que se ubicarán los artefactos publicados.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ConfigurationOption">
         <source>CONFIGURATION</source>
@@ -60,8 +60,8 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="needs-review-translation">Configuración para la compilación</target>
-        <note></note>
+        <target state="translated">Configuración para usar para crear el proyecto.  El valor predeterminado para la mayoría de los proyectos es "Depurar".</target>
+        <note />
       </trans-unit>
       <trans-unit id="VersionSuffixOption">
         <source>VERSION_SUFFIX</source>
@@ -70,8 +70,8 @@
       </trans-unit>
       <trans-unit id="VersionSuffixOptionDescription">
         <source>Defines the value for the $(VersionSuffix) property in the project.</source>
-        <target state="needs-review-translation">Define el valor para la propiedad $(VersionSuffix) del proyecto</target>
-        <note></note>
+        <target state="translated">Define el valor para la propiedad $(VersionSuffix) del proyecto.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

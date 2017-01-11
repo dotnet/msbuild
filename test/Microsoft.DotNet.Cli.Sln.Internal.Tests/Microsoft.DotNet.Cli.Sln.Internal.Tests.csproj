@@ -12,11 +12,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="**\*.cs" />
-    <EmbeddedResource Include="**\*.resx" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Microsoft.DotNet.Tools.Tests.Utilities\Microsoft.DotNet.Tools.Tests.Utilities.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.DotNet.Cli.Sln.Internal\Microsoft.DotNet.Cli.Sln.Internal.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />
@@ -26,10 +21,10 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.1</Version>
+      <Version>1.0.3</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk">
-      <Version>15.0.0-preview-20161123-03</Version>
+      <Version>$(CLI_TestPlatform_Version)</Version>
     </PackageReference>
     <PackageReference Include="xunit">
       <Version>2.2.0-beta4-build3444</Version>

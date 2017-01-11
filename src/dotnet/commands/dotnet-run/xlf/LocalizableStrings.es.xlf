@@ -15,8 +15,8 @@
       </trans-unit>
       <trans-unit id="CommandOptionConfigurationDescription">
         <source>Configuration to use for building the project. Default for most projects is "Debug".</source>
-        <target state="needs-review-translation">Configuración para la compilación</target>
-        <note></note>
+        <target state="translated">Configuración para usar para crear el proyecto. El valor predeterminado para la mayoría de los proyectos es "Depurar".</target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandOptionFramework">
         <source>FRAMEWORK</source>
@@ -25,8 +25,8 @@
       </trans-unit>
       <trans-unit id="CommandOptionFrameworkDescription">
         <source>Build and run the app using the specified framework. The framework has to be specified in the project file. </source>
-        <target state="needs-review-translation">Compilar una plataforma específica</target>
-        <note></note>
+        <target state="translated">Crea y ejecuta la aplicación mediante la plataforma especificada. La plataforma se debe especificar en el archivo de proyecto. </target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandOptionProjectDescription">
         <source>The path to the project file to run (defaults to the current directory if there is only one project).</source>
@@ -110,8 +110,8 @@
       </trans-unit>
       <trans-unit id="RunCommandAdditionalArgsHelpText">
         <source>Arguments passed to the application that is being run.</source>
-        <target state="new">Arguments passed to the application that is being run.</target>
-        <note></note>
+        <target state="translated">Argumentos que se pasan a la aplicación en ejecución.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

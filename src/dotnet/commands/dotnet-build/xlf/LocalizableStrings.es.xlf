@@ -15,8 +15,8 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>Configuration to use for building the project. Default for most projects is  "Debug".</source>
-        <target state="needs-review-translation">Configuración para la compilación</target>
-        <note></note>
+        <target state="translated">Configuración para usar para crear el proyecto. El valor predeterminado para la mayoría de los proyectos es "Depurar".</target>
+        <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionName">
         <source>CONFIGURATION</source>
@@ -25,8 +25,8 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>Target framework to build for. The target framework has to be specified in the project file.</source>
-        <target state="needs-review-translation">Compilar una plataforma específica</target>
-        <note></note>
+        <target state="translated">Plataforma de destino para la que se compila. La plataforma de destino se debe especificar en el archivo de proyecto.</target>
+        <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionName">
         <source>FRAMEWORK</source>
@@ -35,18 +35,18 @@
       </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">
         <source>Set this flag to ignore project-to-project references and only build the root project</source>
-        <target state="needs-review-translation">Establezca esta marca para omitir las referencias de proyecto a proyecto y compilar solo el proyecto raíz</target>
-        <note></note>
+        <target state="translated">Establezca esta marca para omitir las referencias de proyecto a proyecto y compilar solo el proyecto raíz</target>
+        <note />
       </trans-unit>
       <trans-unit id="NoIncrementialOptionDescription">
         <source>Disables incremental build.</source>
-        <target state="needs-review-translation">Establezca esta marca para desactivar una compilación incremental</target>
-        <note></note>
+        <target state="translated">Deshabilita la compilación incremental.</target>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>Output directory in which to place built artifacts.</source>
-        <target state="needs-review-translation">Directorio donde se ponen los archivos de salida</target>
-        <note></note>
+        <target state="translated">Directorio de salida en el que se ubicarán los artefactos compilados.</target>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOptionName">
         <source>OUTPUT_DIR</source>

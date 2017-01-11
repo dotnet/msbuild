@@ -5,8 +5,8 @@
       <group id="src/dotnet/commands/dotnet-pack/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET Core NuGet Package Packer</source>
-        <target state="needs-review-translation">套件</target>
-        <note></note>
+        <target state="translated">.NET Core NuGet 套件封裝器</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>pack for msbuild</source>
@@ -20,18 +20,18 @@
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
         <source>Directory in which to place built packages.</source>
-        <target state="needs-review-translation">要放置輸出的目錄</target>
-        <note></note>
+        <target state="translated">要放置建置套件的目錄。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
         <source>Skip building the project prior to packing. By default, the project will be built.</source>
-        <target state="needs-review-translation">請勿在封裝前建置專案</target>
-        <note></note>
+        <target state="translated">跳過在封裝前建置專案。根據預設，會建置專案。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSymbolsDescription">
         <source>Include packages with symbols in addition to regular packages in output directory.</source>
-        <target state="needs-review-translation">將 PDB 和 DLL 包含在輸出資料夾中</target>
-        <note></note>
+        <target state="translated">將具符號的套件及一般套件包含在輸出目錄中。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSourceDescription">
         <source>Include PDBs and source files. Source files go into the src folder in the resulting nuget package</source>
@@ -45,8 +45,8 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="needs-review-translation">作為建置依據的組態</target>
-        <note></note>
+        <target state="translated">要用於建置專案的組態。多數專案的預設為 "Debug"。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffix">
         <source>VERSION_SUFFIX</source>
@@ -55,13 +55,13 @@
       </trans-unit>
       <trans-unit id="CmdVersionSuffixDescription">
         <source>Defines the value for the $(VersionSuffix) property in the project.</source>
-        <target state="needs-review-translation">在 project.json 的版本欄位中定義 `*` 的取代項目</target>
-        <note></note>
+        <target state="translated">定義 $(VersionSuffix) 屬性在專案中的值。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdServiceableDescription">
         <source>Set the serviceable flag in the package. For more information, please see https://aka.ms/nupkgservicing.</source>
-        <target state="needs-review-translation">設定套件中提供服務的旗標</target>
-        <note></note>
+        <target state="translated">設定套件中提供服務的旗標。如需詳細資訊，請參閱 https://aka.ms/nupkgservicing。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdArgumentProject">
         <source>PROJECT</source>

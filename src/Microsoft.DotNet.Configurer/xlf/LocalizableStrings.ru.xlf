@@ -17,25 +17,25 @@ You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-te
 Configuring...
 -------------------
 A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</source>
-        <target state="new">Welcome to .NET Core!
+        <target state="translated">Вас приветствует .NET Core!
 ---------------------
-Learn more about .NET Core @ https://aka.ms/dotnet-docs. Use dotnet --help to see available commands or go to https://aka.ms/dotnet-cli-docs.
+Дополнительные сведения о .NET Core: https://aka.ms/dotnet-docs. Используйте dotnet --help, чтобы просмотреть доступные команды, или перейдите на сайт https://aka.ms/dotnet-cli-docs.
 
-Telemetry
+Телеметрия
 --------------
-The .NET Core tools collect usage data in order to improve your experience. The data is anonymous and does not include command-line arguments. The data is collected by Microsoft and shared with the community.
-You can opt out of telemetry by setting a DOTNET_CLI_TELEMETRY_OPTOUT environment variable to 1 using your favorite shell.
-You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-telemetry.
+Средства .NET Core собирают данные об использовании для повышения качества взаимодействия. Данные анонимны и не включают аргументы командной строки. Данные собирает корпорация Майкрософт и предоставляет их сообществу.
+Вы можете отказаться от телеметрии, задав переменную среды DOTNET_CLI_TELEMETRY_OPTOUT равной 1, используя предпочитаемую оболочку.
+Вы можете подробнее ознакомиться со средствами сбора телеметрии .NET Core: https://aka.ms/dotnet-cli-telemetry.
 
-Configuring...
+Идет настройка...
 -------------------
-A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</target>
-        <note></note>
+Выполняется команда начального заполнения локального кэша пакетов для повышения скорости восстановления и обеспечения автономного доступа. Это займет около минуты; команда выполняется только один раз.</target>
+        <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">
         <source>Failed to create prime the NuGet cache. {0} failed with: {1}</source>
-        <target state="new">Failed to create prime the NuGet cache. {0} failed with: {1}</target>
-        <note></note>
+        <target state="translated">Не удалось изначально создать кэш NuGet. {0} завершился с ошибкой: {1}</target>
+        <note />
       </trans-unit>
     </body>
   </file>

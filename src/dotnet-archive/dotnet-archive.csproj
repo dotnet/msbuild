@@ -6,15 +6,14 @@
     <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="**\*.cs" />
-    <Compile Include="..\dotnet\CommandLine\*.cs" />
+    <Compile Include="..\dotnet\CommandLine\*.cs;..\dotnet\CommonLocalizableStrings.cs;" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.DotNet.Archive\Microsoft.DotNet.Archive.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.1</Version>
+      <Version>1.0.3</Version>
     </PackageReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">

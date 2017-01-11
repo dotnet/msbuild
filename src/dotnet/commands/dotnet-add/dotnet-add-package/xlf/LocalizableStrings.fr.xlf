@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="fr" original="src/dotnet/commands/dotnet-add/dotnet-add-package/LocalizableStrings.resx">
+    <body>
+      <group id="src/dotnet/commands/dotnet-add/dotnet-add-package/LocalizableStrings.resx" />
+      <trans-unit id="AppFullName">
+        <source>.NET Add Package reference Command</source>
+        <target state="translated">Commande Ajouter une référence de package .NET</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Command to add package reference</source>
+        <target state="translated">Commande permettant d'ajouter une référence de package</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppHelpText">
+        <source>Package references to add</source>
+        <target state="translated">Références de package à ajouter</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyExactlyOnePackageReference">
+        <source>Please specify one package reference to add.</source>
+        <target state="translated">Spécifiez au moins une référence de package à ajouter.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdFrameworkDescription">
+        <source>Add reference only when targetting a specific framework</source>
+        <target state="translated">Ajouter une référence uniquement en cas de ciblage d'un framework spécifique</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoRestoreDescription">
+        <source>Add reference without performing restore preview and compatibility check.</source>
+        <target state="translated">Ajoutez une référence sans effectuer de prévisualisation de la restauration et de vérification de la compatibilité.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdSourceDescription">
+        <source>Use specific NuGet package sources to use during the restore.</source>
+        <target state="translated">Utilisez les sources de package NuGet spécifiques pendant la restauration.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdPackageDirectoryDescription">
+        <source>Restore the packages to this Directory .</source>
+        <target state="translated">Restaurez les packages dans ce répertoire.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdVersionDescription">
+        <source>Version for the package to be added.</source>
+        <target state="translated">Version du package à ajouter.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdDGFileException">
+        <source>Unable to Create Dependency graph file for project '{0}'. Cannot add package reference.</source>
+        <target state="translated">Impossible de créer le fichier de graphique de dépendance pour le projet '{0}'. Impossible d'ajouter une référence de package.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdVersion">
+        <source>VERSION</source>
+        <target state="translated">VERSION</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdFramework">
+        <source>FRAMEWORK</source>
+        <target state="translated">FRAMEWORK</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdSource">
+        <source>SOURCE</source>
+        <target state="translated">SOURCE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdPackageDirectory">
+        <source>PACKAGE_DIRECTORY</source>
+        <target state="translated">PACKAGE_DIRECTORY</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

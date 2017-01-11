@@ -91,7 +91,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
             MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.ItemTransformApplicatorAddItemHeader, nameof(ItemTransformApplicator), outputItem.ItemType, outputItem.Condition, outputItem.Include, outputItem.Exclude, outputItem.Update));
 
             itemGroup.AppendChild(outputItem);
-            outputItem.AddMetadata(item.Metadata);
+            outputItem.AddMetadata(item.Metadata, MigrationTrace.Instance);
         }
 
         private ProjectItemElement MergeWithExistingItemsWithACondition(ProjectItemElement item, ProjectItemGroupElement destinationItemGroup)
@@ -110,7 +110,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
             foreach (var existingItem in existingItemsWithACondition)
             {
                 // If this item is encompassing items in a condition, remove the encompassed includes from the existing item
-                var encompassedIncludes = item.GetEncompassedIncludes(existingItem);
+                var encompassedIncludes = item.GetEncompassedIncludes(existingItem, MigrationTrace.Instance);
                 if (encompassedIncludes.Any())
                 {
                     MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.ItemTransformApplicatorEncompassedIncludes, nameof(ItemTransformApplicator), string.Join(", ", encompassedIncludes)));
@@ -179,7 +179,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
             // conditionless item
             foreach (var existingItem in existingItemsWithNoCondition)
             {
-                var encompassedIncludes = existingItem.GetEncompassedIncludes(item);
+                var encompassedIncludes = existingItem.GetEncompassedIncludes(item, MigrationTrace.Instance);
                 if (encompassedIncludes.Any())
                 {
                     MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.ItemTransformApplicatorEncompassedIncludes, nameof(ItemTransformApplicator), string.Join(", ", encompassedIncludes)));
@@ -280,7 +280,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
             mergedItem.UnionExcludes(existingItem.Excludes());
             mergedItem.UnionExcludes(item.Excludes());
 
-            mergedItem.AddMetadata(MergeMetadata(existingItem.Metadata, item.Metadata));
+            mergedItem.AddMetadata(MergeMetadata(existingItem.Metadata, item.Metadata), MigrationTrace.Instance);
 
             item.RemoveIncludes(commonIncludes);
             existingItem.RemoveIncludes(commonIncludes);

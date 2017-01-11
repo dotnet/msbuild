@@ -15,8 +15,8 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>Configuration to use for building the project. Default for most projects is  "Debug".</source>
-        <target state="needs-review-translation">作為建置依據的組態</target>
-        <note></note>
+        <target state="translated">要用於建置專案的組態。多數專案的預設為 "Debug"。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionName">
         <source>CONFIGURATION</source>
@@ -25,8 +25,8 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>Target framework to build for. The target framework has to be specified in the project file.</source>
-        <target state="needs-review-translation">編譯特定架構</target>
-        <note></note>
+        <target state="translated">要對其建置的目標 Framework。目標 Framework 必須在專案檔中指定。</target>
+        <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionName">
         <source>FRAMEWORK</source>
@@ -35,18 +35,18 @@
       </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">
         <source>Set this flag to ignore project-to-project references and only build the root project</source>
-        <target state="needs-review-translation">將此旗標設定為略過專案對專案參考並僅建置根專案</target>
-        <note></note>
+        <target state="translated">將此旗標設定為略過專案對專案參考並僅建置根專案</target>
+        <note />
       </trans-unit>
       <trans-unit id="NoIncrementialOptionDescription">
         <source>Disables incremental build.</source>
-        <target state="needs-review-translation">將此旗標設定為關閉累加建置</target>
-        <note></note>
+        <target state="translated">停用累加建置。</target>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>Output directory in which to place built artifacts.</source>
-        <target state="needs-review-translation">要放置輸出的目錄</target>
-        <note></note>
+        <target state="translated">要放置建置成品的輸出目錄。</target>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOptionName">
         <source>OUTPUT_DIR</source>

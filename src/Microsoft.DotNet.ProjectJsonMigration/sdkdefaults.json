@@ -128,7 +128,7 @@
     },
     {
       "Name": "DefineConstants",
-      "Value": "TRACE",
+      "Value": "RELEASE;TRACE",
       "Condition": "",
       "ParentCondition": " '$(Configuration)' == 'Release' "
     },

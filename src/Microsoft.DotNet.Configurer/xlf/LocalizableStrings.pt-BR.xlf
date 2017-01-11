@@ -17,25 +17,25 @@ You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-te
 Configuring...
 -------------------
 A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</source>
-        <target state="new">Welcome to .NET Core!
+        <target state="translated">Bem-vindo ao .NET Core!
 ---------------------
-Learn more about .NET Core @ https://aka.ms/dotnet-docs. Use dotnet --help to see available commands or go to https://aka.ms/dotnet-cli-docs.
+Saiba mais sobre o .NET Core @ https://aka.ms/dotnet-docs. Use o dotnet --help para ver comandos disponíveis ou ir para https://aka.ms/dotnet-cli-docs.
 
-Telemetry
+Telemetria
 --------------
-The .NET Core tools collect usage data in order to improve your experience. The data is anonymous and does not include command-line arguments. The data is collected by Microsoft and shared with the community.
-You can opt out of telemetry by setting a DOTNET_CLI_TELEMETRY_OPTOUT environment variable to 1 using your favorite shell.
-You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-telemetry.
+As ferramentas do .NET Core coletam dados de uso para melhorar sua experiência. Os dados são anônimos e não incluem argumentos da linha de comando. Os dados são coletados pela Microsoft e compartilhados com a comunidade.
+Você pode sair da telemetria configurando uma variável de ambiente DOTNET_CLI_TELEMETRY_OPTOUT para 1 usando seu shell favorito.
+Você pode ler mais sobre a telemeria de ferramentas do .NET Core em https://aka.ms/dotnet-cli-telemetry.
 
-Configuring...
+Configurando...
 -------------------
-A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</target>
-        <note></note>
+Um comando está sendo executado para preencher inicialmente seu cache de pacote local, para melhorar a velocidade de restauração e permitir acesso offline. Esse comando levará um minuto para ser concluído e acontecerá somente uma vez.</target>
+        <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">
         <source>Failed to create prime the NuGet cache. {0} failed with: {1}</source>
-        <target state="new">Failed to create prime the NuGet cache. {0} failed with: {1}</target>
-        <note></note>
+        <target state="translated">Falha ao criar principal do cache do NuGet. {0} falhou com: {1}</target>
+        <note />
       </trans-unit>
     </body>
   </file>

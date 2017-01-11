@@ -70,43 +70,43 @@
       </trans-unit>
       <trans-unit id="NewDefinition">
         <source>Initialize .NET projects.</source>
-        <target state="needs-review-translation">기본 .NET 프로젝트를 초기화합니다.</target>
-        <note></note>
+        <target state="translated">.NET 프로젝트를 초기화합니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RestoreDefinition">
         <source>Restore dependencies specified in the .NET project.</source>
-        <target state="needs-review-translation">.NET 프로젝트에 지정된 종속성을 복원합니다.</target>
-        <note></note>
+        <target state="translated">.NET 프로젝트에 지정된 종속성을 복원합니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="BuildDefinition">
         <source>Builds a .NET project.</source>
-        <target state="needs-review-translation">.NET 프로젝트를 빌드합니다.</target>
-        <note></note>
+        <target state="translated">.NET 프로젝트를 빌드합니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="PublishDefinition">
         <source>Publishes a .NET project for deployment (including the runtime).</source>
-        <target state="needs-review-translation">배포하기 위해 .NET 프로젝트를 게시합니다(런타임 포함).</target>
-        <note></note>
+        <target state="translated">배포할 .NET 프로젝트를 게시합니다(런타임 포함).</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunDefinition">
         <source>Compiles and immediately executes a .NET project.</source>
-        <target state="needs-review-translation">.NET 프로젝트를 컴파일하고 즉시 실행합니다.</target>
-        <note></note>
+        <target state="translated">.NET 프로젝트를 컴파일하고 즉시 실행합니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="TestDefinition">
         <source>Runs unit tests using the test runner specified in the project.</source>
-        <target state="needs-review-translation">프로젝트에 지정된 Test Runner를 사용하여 유닛 테스트를 실행합니다.</target>
-        <note></note>
+        <target state="translated">프로젝트에 지정된 Test Runner를 사용하여 유닛 테스트를 실행합니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="PackDefinition">
         <source>Creates a NuGet package.</source>
-        <target state="needs-review-translation">NuGet 패키지를 만듭니다.</target>
-        <note></note>
+        <target state="translated">NuGet 패키지를 만듭니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrateDefinition">
         <source>Migrates a project.json based project to a msbuild based project.</source>
-        <target state="needs-review-translation">project.json 기반 프로젝트를 msbuild 빌드 기반 프로젝트로 마이그레이션합니다.</target>
-        <note></note>
+        <target state="translated">project.json 기반 프로젝트를 msbuild 기반 프로젝트로 마이그레이션합니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectModificationCommands">
         <source>Project modification commands</source>
@@ -115,13 +115,13 @@
       </trans-unit>
       <trans-unit id="AddDefinition">
         <source>Add items to the project.</source>
-        <target state="needs-review-translation">프로젝트에 항목을 추가합니다.</target>
-        <note></note>
+        <target state="translated">프로젝트에 항목을 추가합니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RemoveDefinition">
         <source>Remove items from the project.</source>
-        <target state="needs-review-translation">프로젝트에서 항목을 제거합니다.</target>
-        <note></note>
+        <target state="translated">프로젝트에서 항목을 제거합니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AdvancedCommands">
         <source>Advanced Commands</source>
@@ -130,27 +130,32 @@
       </trans-unit>
       <trans-unit id="NugetDefinition">
         <source>Provides additional NuGet commands.</source>
-        <target state="needs-review-translation">추가 NuGet 명령을 제공합니다.</target>
-        <note></note>
+        <target state="translated">추가 NuGet 명령을 제공합니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MsBuildDefinition">
         <source>Runs Microsoft Build Engine (MSBuild).</source>
-        <target state="needs-review-translation">프로젝트 및 프로젝트의 모든 종속성을 msbuild합니다.</target>
-        <note></note>
+        <target state="translated">Microsoft Build Engine(MSBuild)을 실행합니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="VsTestDefinition">
         <source>Runs Microsoft Test Execution Command Line Tool.</source>
-        <target state="needs-review-translation">지정한 파일에서 테스트를 실행합니다.</target>
-        <note></note>
+        <target state="translated">Microsoft Test Execution 명령줄 도구를 실행합니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="DiagnosticsDefinition">
         <source>Enable diagnostic output</source>
-        <target state="new">Enable diagnostic output</target>
-        <note></note>
+        <target state="translated">진단 출력을 사용합니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CleanDefinition">
         <source>Clean build output(s).</source>
-        <target state="new">Clean build output(s).</target>
+        <target state="translated">빌드 출력을 정리합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SlnDefinition">
+        <source>Modify solution (SLN) files.</source>
+        <target state="new">Modify solution (SLN) files.</target>
         <note></note>
       </trans-unit>
     </body>

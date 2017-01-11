@@ -17,6 +17,9 @@
         <line choice="{SharedFxComponentId}.pkg" />
         <line choice="{HostFxrComponentId}.pkg" />
         <line choice="{SharedHostComponentId}.pkg" />
+        <line choice="{AdditionalSharedFxComponentId}.pkg" />
+        <line choice="{AdditionalHostFxrComponentId}.pkg" />
+        <line choice="{AdditionalSharedHostComponentId}.pkg" />
         <line choice="{CLISdkComponentId}.pkg"/>
     </choices-outline>
     <choice id="{SharedFxComponentId}.pkg" visible="true" title="{SharedFxBrandName} (x64)" description="The .NET Core Shared Framework">
@@ -28,11 +31,23 @@
     <choice id="{SharedHostComponentId}.pkg" visible="true" title="{SharedHostBrandName} (x64)" description="The .NET Core Shared Host." >
         <pkg-ref id="{SharedHostComponentId}.pkg" />
     </choice>
+    <choice id="{AdditionalSharedFxComponentId}.pkg" visible="true" title="{AdditionalSharedFxBrandName} (x64)" description="The .NET Core Shared Framework">
+        <pkg-ref id="{AdditionalSharedFxComponentId}.pkg" />
+    </choice>
+    <choice id="{AdditionalHostFxrComponentId}.pkg" visible="true" title="{AdditionalHostFxrBrandName} (x64)" description="The .NET Core Host FX Resolver">
+        <pkg-ref id="{AdditionalHostFxrComponentId}.pkg" />
+    </choice>
+    <choice id="{AdditionalSharedHostComponentId}.pkg" visible="true" title="{AdditionalSharedHostBrandName} (x64)" description="The .NET Core Shared Host." >
+        <pkg-ref id="{AdditionalSharedHostComponentId}.pkg" />
+    </choice>
     <choice id="{CLISdkComponentId}.pkg" visible="true" title="{CLISdkBrandName} (x64)" description="The .NET Core SDK">
         <pkg-ref id="{CLISdkComponentId}.pkg"/>
     </choice>
     <pkg-ref id="{SharedFxComponentId}.pkg">{SharedFxComponentId}.pkg</pkg-ref>
     <pkg-ref id="{HostFxrComponentId}.pkg">{HostFxrComponentId}.pkg</pkg-ref>
     <pkg-ref id="{SharedHostComponentId}.pkg">{SharedHostComponentId}.pkg</pkg-ref>
+    <pkg-ref id="{AdditionalSharedFxComponentId}.pkg">{AdditionalSharedFxComponentId}.pkg</pkg-ref>
+    <pkg-ref id="{AdditionalHostFxrComponentId}.pkg">{AdditionalHostFxrComponentId}.pkg</pkg-ref>
+    <pkg-ref id="{AdditionalSharedHostComponentId}.pkg">{AdditionalSharedHostComponentId}.pkg</pkg-ref>
     <pkg-ref id="{CLISdkComponentId}.pkg">{CLISdkComponentId}.pkg</pkg-ref>
 </installer-gui-script>

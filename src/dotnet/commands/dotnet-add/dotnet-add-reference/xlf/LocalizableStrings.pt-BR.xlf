@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="pt-BR" original="src/dotnet/commands/dotnet-add/dotnet-add-p2p/LocalizableStrings.resx">
+    <body>
+      <group id="src/dotnet/commands/dotnet-add/dotnet-add-p2p/LocalizableStrings.resx" />
+      <trans-unit id="AppFullName">
+        <source>.NET Add Project to Project reference Command</source>
+        <target state="needs-review-translation">Comando Add Project to Project (p2p) reference do .NET</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Command to add project to project reference</source>
+        <target state="needs-review-translation">Comando para adicionar a referência p2p (projeto para projeto)</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AppHelpText">
+        <source>Project to project references to add</source>
+        <target state="translated">Referências de projeto para projeto a serem adicionadas</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdFrameworkDescription">
+        <source>Add reference only when targetting a specific framework</source>
+        <target state="translated">Adicionar referência apenas ao visar uma estrutura específica</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -15,8 +15,8 @@
       </trans-unit>
       <trans-unit id="CmdProjectArgument">
         <source>PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</source>
-        <target state="needs-review-translation">PROJECT_JSON/GLOBAL_JSON/PROJECT_DIR</target>
-        <note></note>
+        <target state="translated">PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdProjectArgumentDescription">
         <source>The path to one of the following:
@@ -25,14 +25,13 @@
     - a solution.sln file, it will migrate the projects referenced in the solution.
     - a directory to migrate, it will recursively search for project.json files to migrate.
 Defaults to current directory if nothing is specified.</source>
-        <target state="needs-review-translation">路徑連到
+        <target state="translated">以下其中一項的路徑:
    - 要移轉的 project.json 檔案。
-或
    - global.json 檔案，將會移轉 global.json 中指定的資料夾。
-或
-   - 要移轉的目錄，將會遞迴搜尋要移轉的 project.json 檔案。
+   - solution.sln 檔案，將會移轉解決方案中參考的專案。
+   - 要移轉的目錄，將會以遞迴方式搜尋要移轉的 project.json 檔案。
 如果未指定任何項目，預設為目前的目錄。</target>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CmdTemplateDescription">
         <source>Base MSBuild template to use for migrated app. The default is the project included in dotnet new.</source>

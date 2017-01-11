@@ -15,8 +15,8 @@
       </trans-unit>
       <trans-unit id="CmdProjectArgument">
         <source>PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</source>
-        <target state="needs-review-translation">PROJECT_JSON/GLOBAL_JSON/PROJECT_DIR</target>
-        <note></note>
+        <target state="translated">PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdProjectArgumentDescription">
         <source>The path to one of the following:
@@ -25,14 +25,13 @@
     - a solution.sln file, it will migrate the projects referenced in the solution.
     - a directory to migrate, it will recursively search for project.json files to migrate.
 Defaults to current directory if nothing is specified.</source>
-        <target state="needs-review-translation">다음 파일의 경로입니다. 
+        <target state="translated">다음 중 하나의 경로입니다.
     - 마이그레이션할 project.json 파일
-또는
     - global.json 파일. global.json에 지정된 폴더를 마이그레이션합니다.
-또는
+    - solution.sln 파일. 솔루션에서 참조된 프로젝트를 마이그레이션합니다.
     - 마이그레이션할 디렉터리. 마이그레이션할 project.json 파일을 재귀적으로 검색합니다.
 지정하지 않는 경우 현재 디렉터리로 기본 설정됩니다.</target>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CmdTemplateDescription">
         <source>Base MSBuild template to use for migrated app. The default is the project included in dotnet new.</source>

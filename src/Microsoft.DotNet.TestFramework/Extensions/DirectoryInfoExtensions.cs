@@ -21,5 +21,15 @@ namespace Microsoft.DotNet.TestFramework
         {
             return new FileInfo(Path.Combine(subject.FullName, fileName));
         }
+
+        public static void EnsureExistsAndEmpty(this DirectoryInfo subject)
+        {
+            if (subject.Exists)
+            {
+                subject.Delete(true);
+            }
+
+            subject.Create();
+        }
     }
 }

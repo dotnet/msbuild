@@ -3,13 +3,10 @@
     <OutputType>Library</OutputType>
     <TargetFrameworks>net451;netcoreapp1.0</TargetFrameworks>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="**\*.cs" />
-    <EmbeddedResource Include="**\*.resx" />
-  </ItemGroup>
+
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
     <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.1</Version>
+      <Version>1.0.3</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>

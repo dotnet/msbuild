@@ -12,23 +12,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="**\*.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
     <Compile Include="..\..\..\src\dotnet\CommandLine\*.cs;..\..\..\src\dotnet\CommonLocalizableStrings.cs;" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
-    <EmbeddedResource Include="**\*.resx" />
-    <EmbeddedResource Include="compiler\resources\**\*" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="$(OutputPath)\$(AssemblyName).runtimeconfig.json">
-      <Pack>true</Pack>
-      <PackagePath>lib\$(TargetFramework)</PackagePath>
-    </Content>
+    <BuiltProjectOutputGroupOutput Include="$(ProjectRuntimeConfigFilePath)">
+      <FinalOutputPath>$(ProjectRuntimeConfigFilePath)</FinalOutputPath>
+    </BuiltProjectOutputGroupOutput>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.1</Version>
+      <Version>1.0.3</Version>
     </PackageReference>
     <PackageReference Include="NuGet.Frameworks">
-      <Version>4.0.0-rc2</Version>
+      <Version>4.0.0-rc3</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.DotNet.Cli.Utils">
       <Version>$(SdkNugetVersion)</Version>

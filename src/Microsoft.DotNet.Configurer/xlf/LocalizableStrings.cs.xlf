@@ -17,25 +17,25 @@ You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-te
 Configuring...
 -------------------
 A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</source>
-        <target state="new">Welcome to .NET Core!
+        <target state="translated">Vítá vás .NET Core!
 ---------------------
-Learn more about .NET Core @ https://aka.ms/dotnet-docs. Use dotnet --help to see available commands or go to https://aka.ms/dotnet-cli-docs.
+Další informace o .NET Core najdete na https://aka.ms/dotnet-docs. Dostupné příkazy si zobrazíte pomocí dotnet --help, případně přejděte na https://aka.ms/dotnet-cli-docs.
 
-Telemetry
+Telemetrie
 --------------
-The .NET Core tools collect usage data in order to improve your experience. The data is anonymous and does not include command-line arguments. The data is collected by Microsoft and shared with the community.
-You can opt out of telemetry by setting a DOTNET_CLI_TELEMETRY_OPTOUT environment variable to 1 using your favorite shell.
-You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-telemetry.
+Nástroje .NET Core shromažďují data o využití s cílem vylepšit vaše prostředí. Data jsou anonymní a nezahrnují argumenty příkazového řádku. Data shromažďuje Microsoft, který je sdílí s komunitou.
+S telemetrií můžete vyjádřit výslovný nesouhlas, a to nastavením proměnné prostředí DOTNET_CLI_TELEMETRY_OPTOUT na 1 prostřednictvím vašeho oblíbeného rozhraní.
+Další informace o telemetrii nástrojů .NET Core si můžete přečíst na webu https://aka.ms/dotnet-cli-telemetry.
 
-Configuring...
+Probíhá konfigurace...
 -------------------
-A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</target>
-        <note></note>
+Běží příkaz pro počáteční naplnění vaší místní mezipaměti balíčků, aby se vylepšila rychlost obnovování a umožnil se offline přístup. Provádění tohoto příkazu může trvat až minutu a proběhne jen jednou.</target>
+        <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">
         <source>Failed to create prime the NuGet cache. {0} failed with: {1}</source>
-        <target state="new">Failed to create prime the NuGet cache. {0} failed with: {1}</target>
-        <note></note>
+        <target state="translated">Nepodařilo se vytvořit primární mezipaměť balíčku NuGet. {0} selhalo s: {1}</target>
+        <note />
       </trans-unit>
     </body>
   </file>

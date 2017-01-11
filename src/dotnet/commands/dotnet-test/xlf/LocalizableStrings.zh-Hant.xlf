@@ -25,8 +25,8 @@
       </trans-unit>
       <trans-unit id="CmdSettingsFile">
         <source>SETTINGS_FILE</source>
-        <target state="needs-review-translation">SettingsFile</target>
-        <note></note>
+        <target state="translated">SETTINGS_FILE</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSettingsDescription">
         <source>Settings to use when running tests.</source>
@@ -40,8 +40,8 @@
       </trans-unit>
       <trans-unit id="CmdTestCaseFilterExpression">
         <source>EXPRESSION</source>
-        <target state="needs-review-translation">運算式</target>
-        <note></note>
+        <target state="translated">EXPRESSION</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdTestCaseFilterDescription">
         <source>Run tests that match the given expression.
@@ -51,18 +51,20 @@
                                         Run tests that contain the specified name: --filter "FullyQualifiedName~Namespace.Class"
                                         More info on filtering support: https://aka.ms/vstest-filtering
                                         </source>
-        <target state="needs-review-translation">執行符合指定運算式的測試。
+        <target state="translated">執行符合指定運算式的測試。
                                        範例:
-                                       --testCaseFilter:"Priority = 1"
-                                       --testCaseFilter: "(FullyQualifiedName~Nightly | Name = MyTestMethod)"</target>
-        <note></note>
+                                       執行優先順序設為 1 的測試: --filter "Priority = 1"
+                                       執行具有指定完整名稱的測試: --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
+                                       執行包含指定名稱的測試: --filter "FullyQualifiedName~Namespace.Class"
+                                       篩選支援的詳細資訊: https://aka.ms/vstest-filtering</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdTestAdapterPathDescription">
         <source>Use custom adapters from the given path in the test run.
                                         Example: --test-adapter-path &lt;PATH_TO_ADAPTER&gt;</source>
-        <target state="needs-review-translation">從測試回合中的指定路徑使用自訂配接器。
-                                       範例: --testAdapterPath:&lt;自訂配接器路徑&gt;</target>
-        <note></note>
+        <target state="translated">在測試回合中使用來自指定路徑的自訂配接器。
+                                       範例: --test-adapter-path &lt;配接器路徑&gt;</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdLoggerOption">
         <source>LoggerUri/FriendlyName</source>
@@ -71,25 +73,25 @@
       </trans-unit>
       <trans-unit id="CmdLoggerDescription">
         <source>Specify a logger for test results. 
-                                        Example: --logger:trx</source>
-        <target state="translated">指定測試結果的記錄器。
+                                        Example: --logger "trx[;LogFileName=&lt;Defaults to unique file name&gt;]"</source>
+        <target state="needs-review-translation">指定測試結果的記錄器。
                                        範例: --logger:trx</target>
-        <note />
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdConfiguration">
         <source>CONFIGURATION</source>
-        <target state="needs-review-translation">組態</target>
-        <note></note>
+        <target state="translated">組態</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="needs-review-translation">作為建置依據的組態，亦即 Debug/Release</target>
-        <note></note>
+        <target state="translated">要用於建置專案的組態。多數專案的預設為 "Debug"。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
-        <target state="needs-review-translation">FrameworkVersion</target>
-        <note></note>
+        <target state="translated">FRAMEWORK</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Looks for test binaries for a specific framework</source>
@@ -98,8 +100,8 @@
       </trans-unit>
       <trans-unit id="CmdOutputDir">
         <source>OUTPUT_DIR</source>
-        <target state="needs-review-translation">OutputDir</target>
-        <note></note>
+        <target state="translated">OUTPUT_DIR</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdOutputDescription">
         <source>Directory in which to find the binaries to be run</source>
@@ -108,8 +110,8 @@
       </trans-unit>
       <trans-unit id="CmdPathToLogFile">
         <source>PATH_TO_FILE</source>
-        <target state="needs-review-translation">PathToLogFile</target>
-        <note></note>
+        <target state="translated">PATH_TO_FILE</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPathTologFileDescription">
         <source>Enable verbose logs for test platform.
@@ -122,6 +124,13 @@
         <source>Do not build project before testing.</source>
         <target state="translated">請勿在測試前建置專案。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="RunSettingsArgsHelpText">
+        <source>Any extra commandline runsettings arguments that should be passed to vstest. See 'dotnet vstest --help' for available options.
+                                        Example: -- RunConfiguration.ResultsDirectory="C:\users\user\desktop\Results Directory" MSTest.DeploymentEnabled=false</source>
+        <target state="new">Any extra commandline runsettings arguments that should be passed to vstest. See 'dotnet vstest --help' for available options.
+                                        Example: -- RunConfiguration.ResultsDirectory="C:\users\user\desktop\Results Directory" MSTest.DeploymentEnabled=false</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>

@@ -8,21 +8,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="**\*.cs" />
-    <EmbeddedResource Include="**\*.resx" />
-    <EmbeddedResource Include="compiler\resources\**\*" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="$(OutputPath)\$(AssemblyName).runtimeconfig.json">
-      <Pack>true</Pack>
-      <PackagePath>lib\$(TargetFramework)</PackagePath>
-    </Content>
+    <BuiltProjectOutputGroupOutput Include="$(ProjectRuntimeConfigFilePath)">
+      <FinalOutputPath>$(ProjectRuntimeConfigFilePath)</FinalOutputPath>
+    </BuiltProjectOutputGroupOutput>
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.1</Version>
+      <Version>1.0.3</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyModel">
       <Version>1.0.1-beta-000933</Version>

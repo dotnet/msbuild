@@ -16,6 +16,7 @@ using Microsoft.DotNet.Tools.List;
 using Microsoft.DotNet.Tools.Migrate;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.New;
+using Microsoft.DotNet.Tools.New3;
 using Microsoft.DotNet.Tools.NuGet;
 using Microsoft.DotNet.Tools.Pack;
 using Microsoft.DotNet.Tools.Publish;
@@ -23,6 +24,7 @@ using Microsoft.DotNet.Tools.Remove;
 using Microsoft.DotNet.Tools.Restore;
 using Microsoft.DotNet.Tools.RestoreProjectJson;
 using Microsoft.DotNet.Tools.Run;
+using Microsoft.DotNet.Tools.Sln;
 using Microsoft.DotNet.Tools.Test;
 using Microsoft.DotNet.Tools.VSTest;
 using NuGet.Frameworks;
@@ -41,6 +43,7 @@ namespace Microsoft.DotNet.Cli
             ["migrate"] = MigrateCommand.Run,
             ["msbuild"] = MSBuildCommand.Run,
             ["new"] = NewCommand.Run,
+            ["new3"] = New3CommandShim.Run,
             ["nuget"] = NuGetCommand.Run,
             ["pack"] = PackCommand.Run,
             ["publish"] = PublishCommand.Run,
@@ -48,6 +51,7 @@ namespace Microsoft.DotNet.Cli
             ["restore"] = RestoreCommand.Run,
             ["restore-projectjson"] = RestoreProjectJsonCommand.Run,
             ["run"] = RunCommand.Run,
+            ["sln"] = SlnCommand.Run,
             ["test"] = TestCommand.Run,
             ["vstest"] = VSTestCommand.Run,
         };

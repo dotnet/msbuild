@@ -70,43 +70,43 @@
       </trans-unit>
       <trans-unit id="NewDefinition">
         <source>Initialize .NET projects.</source>
-        <target state="needs-review-translation">基本的な .NET プロジェクトを初期化する</target>
-        <note></note>
+        <target state="translated">.NET プロジェクトを初期化します。</target>
+        <note />
       </trans-unit>
       <trans-unit id="RestoreDefinition">
         <source>Restore dependencies specified in the .NET project.</source>
-        <target state="needs-review-translation">.NET プロジェクトに指定されている依存関係を復元する</target>
-        <note></note>
+        <target state="translated">.NET プロジェクトに指定されている依存関係を復元します。</target>
+        <note />
       </trans-unit>
       <trans-unit id="BuildDefinition">
         <source>Builds a .NET project.</source>
-        <target state="needs-review-translation">.NET プロジェクトを構築する</target>
-        <note></note>
+        <target state="translated">.NET プロジェクトを構築します。</target>
+        <note />
       </trans-unit>
       <trans-unit id="PublishDefinition">
         <source>Publishes a .NET project for deployment (including the runtime).</source>
-        <target state="needs-review-translation">展開用の .NET プロジェクトを発行する (ランタイムを含む)</target>
-        <note></note>
+        <target state="translated">展開用の .NET プロジェクトを発行します (ランタイムを含む)。</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunDefinition">
         <source>Compiles and immediately executes a .NET project.</source>
-        <target state="needs-review-translation">.NET プロジェクトをコンパイルして、直ちに実行する</target>
-        <note></note>
+        <target state="translated">.NET プロジェクトをコンパイルして、直ちに実行します。</target>
+        <note />
       </trans-unit>
       <trans-unit id="TestDefinition">
         <source>Runs unit tests using the test runner specified in the project.</source>
-        <target state="needs-review-translation">プロジェクトに指定されているテスト ランナーを使用して、単体テストを実行する</target>
-        <note></note>
+        <target state="translated">プロジェクトに指定されているテスト ランナーを使用して、単体テストを実行します。</target>
+        <note />
       </trans-unit>
       <trans-unit id="PackDefinition">
         <source>Creates a NuGet package.</source>
-        <target state="needs-review-translation">NuGet パッケージを作成する</target>
-        <note></note>
+        <target state="translated">NuGet パッケージを作成します。</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrateDefinition">
         <source>Migrates a project.json based project to a msbuild based project.</source>
-        <target state="needs-review-translation">project.json ベースのプロジェクトを msbuild ベースのプロジェクトに移行する</target>
-        <note></note>
+        <target state="translated">project.json ベースのプロジェクトを msbuild ベースのプロジェクトに移行します。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectModificationCommands">
         <source>Project modification commands</source>
@@ -115,13 +115,13 @@
       </trans-unit>
       <trans-unit id="AddDefinition">
         <source>Add items to the project.</source>
-        <target state="needs-review-translation">項目をプロジェクトに追加する</target>
-        <note></note>
+        <target state="translated">項目をプロジェクトに追加します。</target>
+        <note />
       </trans-unit>
       <trans-unit id="RemoveDefinition">
         <source>Remove items from the project.</source>
-        <target state="needs-review-translation">項目をプロジェクトから削除する</target>
-        <note></note>
+        <target state="translated">項目をプロジェクトから削除します。</target>
+        <note />
       </trans-unit>
       <trans-unit id="AdvancedCommands">
         <source>Advanced Commands</source>
@@ -130,27 +130,32 @@
       </trans-unit>
       <trans-unit id="NugetDefinition">
         <source>Provides additional NuGet commands.</source>
-        <target state="needs-review-translation">追加の NuGet コマンドを提供する</target>
-        <note></note>
+        <target state="translated">追加の NuGet コマンドを提供します。</target>
+        <note />
       </trans-unit>
       <trans-unit id="MsBuildDefinition">
         <source>Runs Microsoft Build Engine (MSBuild).</source>
-        <target state="needs-review-translation">プロジェクトとそのすべての依存関係を msbuild で構築する</target>
-        <note></note>
+        <target state="translated">Microsoft Build Engine (MSBuild) を実行します。</target>
+        <note />
       </trans-unit>
       <trans-unit id="VsTestDefinition">
         <source>Runs Microsoft Test Execution Command Line Tool.</source>
-        <target state="needs-review-translation">指定されたファイルからテストを実行する</target>
-        <note></note>
+        <target state="translated">Microsoft Test Execution Command Line Tool を実行します。</target>
+        <note />
       </trans-unit>
       <trans-unit id="DiagnosticsDefinition">
         <source>Enable diagnostic output</source>
-        <target state="new">Enable diagnostic output</target>
-        <note></note>
+        <target state="translated">診断出力を有効にする</target>
+        <note />
       </trans-unit>
       <trans-unit id="CleanDefinition">
         <source>Clean build output(s).</source>
-        <target state="new">Clean build output(s).</target>
+        <target state="translated">ビルド出力を消去します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SlnDefinition">
+        <source>Modify solution (SLN) files.</source>
+        <target state="new">Modify solution (SLN) files.</target>
         <note></note>
       </trans-unit>
     </body>

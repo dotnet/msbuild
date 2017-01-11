@@ -5,7 +5,7 @@
       <group id="src/dotnet/commands/dotnet-list/LocalizableStrings.resx" />
       <trans-unit id="NetListCommand">
         <source>.NET List Command</source>
-        <note></note>
+        <note />
       </trans-unit>
     </body>
   </file>

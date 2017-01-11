@@ -15,8 +15,8 @@
       </trans-unit>
       <trans-unit id="CommandOptionConfigurationDescription">
         <source>Configuration to use for building the project. Default for most projects is "Debug".</source>
-        <target state="needs-review-translation">構築する構成</target>
-        <note></note>
+        <target state="translated">プロジェクトの構築に使用する構成。ほとんどのプロジェクトで既定は "デバッグ" です。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandOptionFramework">
         <source>FRAMEWORK</source>
@@ -25,12 +25,12 @@
       </trans-unit>
       <trans-unit id="CommandOptionFrameworkDescription">
         <source>Build and run the app using the specified framework. The framework has to be specified in the project file. </source>
-        <target state="needs-review-translation">特定のフレームワークをコンパイルする</target>
-        <note></note>
+        <target state="translated">指定されたフレームワークを使用して、アプリを構築して実行します。フレームワークはプロジェクト ファイルで指定する必要があります。 </target>
+        <note />
       </trans-unit>
       <trans-unit id="CommandOptionProjectDescription">
         <source>The path to the project file to run (defaults to the current directory if there is only one project).</source>
-        <target state="translated">実行するプロジェクト ファイルへのパス (プロジェクトが 1 つのみの場合、既定現在のディレクトリになります)。</target>
+        <target state="translated">実行するプロジェクト ファイルへのパス (プロジェクトが 1 つのみの場合、既定は現在のディレクトリです)。</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandException">
@@ -105,13 +105,13 @@
       </trans-unit>
       <trans-unit id="RunCommandInvalidOperationException4">
         <source>contains more than one project file.</source>
-        <target state="translated"></target>
+        <target state="translated">複数のプロジェクト ファイルが含まれます。</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandAdditionalArgsHelpText">
         <source>Arguments passed to the application that is being run.</source>
-        <target state="new">Arguments passed to the application that is being run.</target>
-        <note></note>
+        <target state="translated">実行中のアプリケーションに渡される引数。</target>
+        <note />
       </trans-unit>
     </body>
   </file>

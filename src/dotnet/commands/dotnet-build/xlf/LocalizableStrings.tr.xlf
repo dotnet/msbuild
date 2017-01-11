@@ -15,8 +15,8 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>Configuration to use for building the project. Default for most projects is  "Debug".</source>
-        <target state="needs-review-translation">Derlemenin gerçekleştirileceği yapılandırma</target>
-        <note></note>
+        <target state="translated">Projeyi derlemek için kullanılacak yapılandırma. Çoğu proje için varsayılan: "Debug".</target>
+        <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionName">
         <source>CONFIGURATION</source>
@@ -25,8 +25,8 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>Target framework to build for. The target framework has to be specified in the project file.</source>
-        <target state="needs-review-translation">Belirli bir çerçeveyi derler</target>
-        <note></note>
+        <target state="translated">Derlemenin yapılacağı hedef çerçeve. Hedef çerçevenin proje dosyasında belirtilmesi gerekir.</target>
+        <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionName">
         <source>FRAMEWORK</source>
@@ -35,18 +35,18 @@
       </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">
         <source>Set this flag to ignore project-to-project references and only build the root project</source>
-        <target state="needs-review-translation">Projeden projeye başvuruları yoksaymak ve yalnızca kök projeyi derlemek için bu bayrağı ayarlayın</target>
-        <note></note>
+        <target state="translated">Projeden projeye başvuruları yoksaymak ve yalnızca kök projeyi derlemek için bu bayrağı ayarlayın</target>
+        <note />
       </trans-unit>
       <trans-unit id="NoIncrementialOptionDescription">
         <source>Disables incremental build.</source>
-        <target state="needs-review-translation">Artımlı derlemeyi kapatmak için bu bayrağı ayarlayın</target>
-        <note></note>
+        <target state="translated">Artımlı derlemeyi devre dışı bırakır.</target>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>Output directory in which to place built artifacts.</source>
-        <target state="needs-review-translation">Çıkışların yerleştirileceği dizin</target>
-        <note></note>
+        <target state="translated">Derlenen yapıtların yerleştirileceği çıkış dizini.</target>
+        <note />
       </trans-unit>
       <trans-unit id="OutputOptionName">
         <source>OUTPUT_DIR</source>

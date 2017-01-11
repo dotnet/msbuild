@@ -89,6 +89,18 @@ namespace Microsoft.DotNet.Tools.Common
         }
 
         /// <summary>
+        /// Returns childItem relative to directory, with Path.DirectorySeparatorChar as separator
+        /// </summary>
+        public static string GetRelativePath(DirectoryInfo directory, FileSystemInfo childItem)
+        {
+            var path1 = EnsureTrailingSlash(directory.FullName);
+
+            var path2 = childItem.FullName;
+
+            return GetRelativePath(path1, path2, Path.DirectorySeparatorChar, true);
+        }
+
+        /// <summary>
         /// Returns path2 relative to path1, with Path.DirectorySeparatorChar as separator
         /// </summary>
         public static string GetRelativePath(string path1, string path2)

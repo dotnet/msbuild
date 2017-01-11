@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
         private static string GetRunCscPath()
         {
             var scriptExtension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".cmd" : ".sh";
-            return Path.Combine(AppContext.BaseDirectory, $"RunCsc{scriptExtension}");
+            return Path.Combine(AppContext.BaseDirectory, "Roslyn", $"RunCsc{scriptExtension}");
         }
     }
 }

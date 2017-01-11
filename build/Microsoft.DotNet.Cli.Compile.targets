@@ -10,15 +10,15 @@
 
   <ItemGroup>
     <PublishOutputExtensions Include="$(ExeExtension);.dll;.pdb;.deps.json;.runtimeconfig.json" />
-    <FilesToMove Include="$(BinaryToCorehostifyRelDir)/csc.exe;" />
-    <BundledTools Include="csc;MSBuild;NuGet.CommandLine.XPlat;dotnet" />
-    <MSBuildImportsContent Include="$(MSBuildImportsDir)/**/*" />
+    <BundledTools Include="MSBuild;NuGet.CommandLine.XPlat;dotnet" />
+    <MSBuildImportsContent Include="$(MSBuildImportsDir)/**/*" /> 
   </ItemGroup>
 
   <Target Name="Compile" DependsOnTargets="Prepare;
                                            SetupStage;
                                            CompileStage;
                                            PublishSdks;
+                                           PublishTemplates;
                                            BuildProjectsForNuGetPackages;
                                            GetNuGetPackagesArchive;" />
 
@@ -98,18 +98,25 @@
 
     <!-- Workaround for https://github.com/dotnet/sdk/issues/115 -->
     <ItemGroup>
-      <HackFilesToCopy Include="$(NuGetPackagesDir)\microsoft.build.runtime\$(CLI_MSBuild_Version)\contentFiles\any\netcoreapp1.0\**;$(NuGetPackagesDir)\microsoft.codeanalysis.build.tasks\2.0.0-beta6-60922-08\contentFiles\any\any\**;$(NuGetPackagesDir)\microsoft.testplatform.cli\15.0.0-preview-20161123-03\contentFiles\any\any\**" />
+      <HackFilesToCopy Include="$(NuGetPackagesDir)\microsoft.build.runtime\$(CLI_MSBuild_Version)\contentFiles\any\netcoreapp1.0\**;$(NuGetPackagesDir)\microsoft.codeanalysis.build.tasks\2.0.0-beta6-60922-08\contentFiles\any\any\**;$(NuGetPackagesDir)\microsoft.testplatform.cli\$(CLI_TestPlatform_Version)\contentFiles\any\any\**" />
     </ItemGroup>
     <Copy SourceFiles="@(HackFilesToCopy)"
           DestinationFiles="@(HackFilesToCopy->'$(SdkOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
     
-      <!-- Publish DotNet -->
+    <!-- Publish DotNet -->
     <DotNetPublish ToolPath="%(Stage.DotnetDir)"
-                                Output="$(SdkOutputDirectory)"
-                                Configuration="$(Configuration)"
-                                VersionSuffix="$(CommitCount)"
-                                ProjectPath="$(SrcDirectory)/redist/redist.csproj"
-                                MSBuildArgs="/p:GenerateRuntimeConfigurationFiles=true"/>
+                   Output="$(SdkOutputDirectory)"
+                   Configuration="$(Configuration)"
+                   VersionSuffix="$(CommitCount)"
+                   ProjectPath="$(SrcDirectory)/redist/redist.csproj"
+                   MSBuildArgs="/p:GenerateRuntimeConfigurationFiles=true" />
+
+    <!-- Publish DotNet -->
+    <DotNetPublish ToolPath="%(Stage.DotnetDir)"
+                   Output="$(SdkOutputDirectory)/Roslyn"
+                   Configuration="$(Configuration)"
+                   VersionSuffix="$(CommitCount)"
+                   ProjectPath="$(SrcDirectory)/tool_roslyn/tool_roslyn.csproj" />
 
       <!-- Corehostify Binaries -->
       <ItemGroup Condition=" '$(OSName)' != 'win' ">
@@ -140,13 +147,6 @@
       <RemoveAssetFromDepsPackages DepsFile="$(SdkOutputDirectory)/redist.deps.json"
                                    SectionName="runtimeTargets"
                                    AssetPath="$(BinaryToCorehostifyRelDir)/%(AssetsToRemoveFromDeps.Identity).exe" />
-
-      <Copy SourceFiles="$(SdkOutputDirectory)/%(FilesToMove.Identity)"
-            DestinationFiles="$(SdkOutputDirectory)/%(FilesToMove.Filename).dll" />
-
-      <!-- MSBuild needs csc.exe to be in the SdkOutputDirectory, or else it can't invoke it -->
-      <Move SourceFiles="$(BinaryToCorehostifyOutDir)/csc.exe"
-            DestinationFiles="$(SdkOutputDirectory)/csc.exe" />
 
       <Copy SourceFiles="$(SdkOutputDirectory)/redist.deps.json"
             DestinationFiles="$(SdkOutputDirectory)/%(BundledTools.Identity).deps.json" />
@@ -262,6 +262,27 @@
     <MSBuild
       BuildInParallel="False"
       Projects="@(SdksToBundle)">
+    </MSBuild>
+  </Target>
+
+  <Target Name="PublishTemplates"
+          DependsOnTargets="Prepare">
+    <ItemGroup>
+      <TemplatesToBundle Include="build/Microsoft.DotNet.Cli.BundledTemplates.proj">
+        <Properties>
+          CLIBuildDll=$(CLIBuildDll);
+          NuGetPackagesDir=$(NuGetPackagesDir);
+          TemplateLayoutDirectory=$(SdkOutputDirectory)/Templates;
+          TemplatePackageName=%(BundledTemplate.Identity);
+          TemplatePackageVersion=%(BundledTemplate.Version);
+          Stage0Directory=$(Stage0Directory)
+        </Properties>
+      </TemplatesToBundle>
+    </ItemGroup>
+
+    <MSBuild
+      BuildInParallel="False"
+      Projects="@(TemplatesToBundle)">
     </MSBuild>
   </Target>
 </Project>

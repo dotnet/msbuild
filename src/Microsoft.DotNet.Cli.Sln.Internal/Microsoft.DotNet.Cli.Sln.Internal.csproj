@@ -13,10 +13,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="**\*.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="../Microsoft.DotNet.Cli.Utils/Microsoft.DotNet.Cli.Utils.csproj" />
   </ItemGroup>
 

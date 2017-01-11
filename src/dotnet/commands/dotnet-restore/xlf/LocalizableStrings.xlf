@@ -5,7 +5,7 @@
       <group id="src/dotnet/commands/dotnet-restore/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET dependency restorer</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>restore for msbuild</source>
@@ -13,7 +13,7 @@
       </trans-unit>
       <trans-unit id="CmdArgument">
         <source>PROJECT</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CmdArgumentDescription">
         <source>Optional path to a project file or MSBuild arguments.</source>
@@ -21,7 +21,7 @@
       </trans-unit>
       <trans-unit id="CmdSourceOption">
         <source>SOURCE</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSourceOptionDescription">
         <source>Specifies a NuGet package source to use during the restore.</source>
@@ -29,7 +29,7 @@
       </trans-unit>
       <trans-unit id="CmdPackagesOption">
         <source>PACKAGES_DIRECTORY</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOptionDescription">
         <source>Directory to install packages in.</source>
@@ -41,7 +41,7 @@
       </trans-unit>
       <trans-unit id="CmdConfigFileOption">
         <source>FILE</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfigFileOptionDescription">
         <source>The NuGet configuration file to use.</source>
@@ -57,6 +57,14 @@
       </trans-unit>
       <trans-unit id="CmdNoDependenciesOptionDescription">
         <source>Set this flag to ignore project to project references and only restore the root project</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdRuntimeOption">
+        <source>RUNTIME_IDENTIFIER</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdRuntimeOptionDescription">
+        <source>Target runtime to restore packages for.</source>
         <note />
       </trans-unit>
     </body>

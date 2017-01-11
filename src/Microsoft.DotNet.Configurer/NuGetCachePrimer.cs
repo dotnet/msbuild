@@ -10,6 +10,12 @@ namespace Microsoft.DotNet.Configurer
 {
     public class NuGetCachePrimer : INuGetCachePrimer
     {
+        private static string[] s_TemplatesUsedToPrimeCache = new string[]
+        {
+            "Web",
+            "Web1.1"
+        };
+
         private readonly ICommandFactory _commandFactory;
 
         private readonly IDirectory _directory;
@@ -52,7 +58,7 @@ namespace Microsoft.DotNet.Configurer
 
         public void PrimeCache()
         {
-            if(SkipPrimingTheCache())
+            if (SkipPrimingTheCache())
             {
                 return;
             }
@@ -69,42 +75,52 @@ namespace Microsoft.DotNet.Configurer
 
         private void PrimeCacheUsingArchive(string extractedPackagesArchiveDirectory)
         {
-            using (var temporaryDotnetNewDirectory = _directory.CreateTemporaryDirectory())
+            bool succeeded = true;
+
+            foreach (string template in s_TemplatesUsedToPrimeCache)
             {
-                var workingDirectory = temporaryDotnetNewDirectory.DirectoryPath;
-
-                var createProjectSucceeded = CreateTemporaryProject(workingDirectory);
-
-                if (createProjectSucceeded)
+                if (succeeded)
                 {
-                    var restoreProjectSucceeded =
-                        RestoreTemporaryProject(extractedPackagesArchiveDirectory, workingDirectory);
-
-                    if (restoreProjectSucceeded)
+                    using (var temporaryDotnetNewDirectory = _directory.CreateTemporaryDirectory())
                     {
-                        _nuGetCacheSentinel.CreateIfNotExists();
+                        var workingDirectory = temporaryDotnetNewDirectory.DirectoryPath;
+
+                        succeeded &= CreateTemporaryProject(workingDirectory, template);
+
+                        if (succeeded)
+                        {
+                            succeeded &= RestoreTemporaryProject(extractedPackagesArchiveDirectory, workingDirectory);
+                        }
                     }
                 }
             }
+
+            if (succeeded)
+            {
+                _nuGetCacheSentinel.CreateIfNotExists();
+            }
         }
 
-        private bool CreateTemporaryProject(string workingDirectory)
+        private bool CreateTemporaryProject(string workingDirectory, string templateName)
         {
-            return RunCommand("new", Enumerable.Empty<string>(), workingDirectory);
+            return RunCommand(
+                "new",
+                new[] { "-t", templateName },
+                workingDirectory);
         }
 
         private bool RestoreTemporaryProject(string extractedPackagesArchiveDirectory, string workingDirectory)
         {
             return RunCommand(
                 "restore",
-                new[] {"-s", extractedPackagesArchiveDirectory},
+                new[] { "-s", extractedPackagesArchiveDirectory },
                 workingDirectory);
         }
 
         private bool RunCommand(string commandToExecute, IEnumerable<string> args, string workingDirectory)
         {
-            var command = _commandFactory 
-                .Create(commandToExecute, args) 
+            var command = _commandFactory
+                .Create(commandToExecute, args)
                 .WorkingDirectory(workingDirectory)
                 .CaptureStdOut()
                 .CaptureStdErr();

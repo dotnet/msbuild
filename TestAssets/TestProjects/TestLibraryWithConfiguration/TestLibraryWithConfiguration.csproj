@@ -4,11 +4,7 @@
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="**\*.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
-    <EmbeddedResource Include="**\*.resx" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
-    <EmbeddedResource Include="compiler\resources\**\*" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
-  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="NETStandard.Library">
       <Version>1.6.0</Version>

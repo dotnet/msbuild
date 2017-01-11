@@ -28,6 +28,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             }
         }
 
+        public bool IsMultiTFM => ProjectContexts.Count() > 1;
+
         public MigrationRuleInputs(
             IEnumerable<ProjectContext> projectContexts, 
             ProjectRootElement outputMSBuildProject,

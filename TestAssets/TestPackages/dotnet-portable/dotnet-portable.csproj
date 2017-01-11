@@ -6,21 +6,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="**\*.cs" />
-    <EmbeddedResource Include="**\*.resx" />
-    <EmbeddedResource Include="compiler\resources\**\*" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="$(OutputPath)\$(AssemblyName).runtimeconfig.json">
-      <Pack>true</Pack>
-      <PackagePath>lib\$(TargetFramework)</PackagePath>
-    </Content>
+    <BuiltProjectOutputGroupOutput Include="$(ProjectRuntimeConfigFilePath)">
+      <FinalOutputPath>$(ProjectRuntimeConfigFilePath)</FinalOutputPath>
+    </BuiltProjectOutputGroupOutput>
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
     <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.1</Version>
+      <Version>1.0.3</Version>
     </PackageReference>
   </ItemGroup>
 

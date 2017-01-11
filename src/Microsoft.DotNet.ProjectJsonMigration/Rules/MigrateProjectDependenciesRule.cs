@@ -113,16 +113,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             ProjectRootElement outputMSBuildProject)
         {
             var projectDependencies = _projectDependencyFinder.ResolveAllProjectDependenciesForFramework(
-                    new ProjectDependency(project.Name, project.ProjectFilePath, false),
+                    new ProjectDependency(project.Name, project.ProjectFilePath),
                     framework,
                     migratedXProjDependencyNames,
                     solutionFile);
 
             var projectDependencyTransformResults = 
-                projectDependencies.Select(p => 
-                    p.Hoisted ? 
-                        HoistedDependencyTransform.Transform(p) :
-                        ProjectDependencyTransform.Transform(p));
+                projectDependencies.Select(p => ProjectDependencyTransform.Transform(p));
             
             if (projectDependencyTransformResults.Any())
             {
@@ -130,56 +127,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     outputMSBuildProject.AddItemGroup(), 
                     projectDependencyTransformResults, 
                     framework);
-            }
-
-            HoistFrameworkAssembliesForProjectDependencies(projectDependencies, outputMSBuildProject);
-        }
-
-        private void HoistFrameworkAssembliesForProjectDependencies(
-            IEnumerable<ProjectDependency> projectDependencies,
-            ProjectRootElement outputMSBuildProject)
-        {
-            foreach (var projectDependency in projectDependencies)
-            {
-                HoistFrameworkAssembliesForDesktopFrameworks(projectDependency, outputMSBuildProject);
-            }
-        }
-
-        private void HoistFrameworkAssembliesForDesktopFrameworks(
-            ProjectDependency projectDependency,
-            ProjectRootElement outputMSBuildProject)
-        {
-            var targetFrameworks = ProjectReader
-                    .GetProject(projectDependency.ProjectFilePath)
-                    .GetTargetFrameworks().Where(p => !p.FrameworkName.IsPackageBased);
-
-            foreach (var targetFramework in targetFrameworks)
-            {
-                HoistFrameworkAssemblies(targetFramework, outputMSBuildProject);
-            }
-        }
-
-        private void HoistFrameworkAssemblies(
-            TargetFrameworkInformation targetFramework,
-            ProjectRootElement outputMSBuildProject)
-        {
-            var frameworkAssemblies = targetFramework.Dependencies.Where(d =>
-                    d.LibraryRange.TypeConstraint == LibraryDependencyTarget.Reference);
-            if(frameworkAssemblies.Any())
-            {
-                var condition = targetFramework.FrameworkName.GetMSBuildCondition();
-                var itemGroup =
-                    outputMSBuildProject.ItemGroups.FirstOrDefault(i => i.Condition == condition) ??
-                    outputMSBuildProject.AddItemGroup();
-                itemGroup.Condition = condition;
-
-                foreach (var frameworkAssembly in frameworkAssemblies)
-                {
-                    _transformApplicator.Execute(
-                        FrameworkDependencyTransform.Transform(frameworkAssembly),
-                        itemGroup,
-                        mergeExisting: true);
-                }
             }
         }
 
@@ -202,10 +149,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         private AddItemTransform<ProjectDependency> ProjectDependencyTransform => 
             GetProjectDependencyTransfrom();
 
-        private AddItemTransform<ProjectDependency> HoistedDependencyTransform =>
-            GetProjectDependencyTransfrom()
-            .WithMetadata("FromP2P", "true");
-
         private Func<AddItemTransform<ProjectDependency>> GetProjectDependencyTransfrom => 
             () => new AddItemTransform<ProjectDependency>(
                 "ProjectReference",
@@ -225,13 +168,5 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             path => path,
             path => "",
             path => true);
-
-        private AddItemTransform<ProjectLibraryDependency> FrameworkDependencyTransform =>
-            new AddItemTransform<ProjectLibraryDependency>(
-                "Reference",
-                dep => dep.Name,
-                dep => "",
-                dep => true)
-            .WithMetadata("FromP2P", "true");
     }
 }

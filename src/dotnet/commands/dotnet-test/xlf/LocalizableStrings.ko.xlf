@@ -25,8 +25,8 @@
       </trans-unit>
       <trans-unit id="CmdSettingsFile">
         <source>SETTINGS_FILE</source>
-        <target state="needs-review-translation">SettingsFile</target>
-        <note></note>
+        <target state="translated">SETTINGS_FILE</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSettingsDescription">
         <source>Settings to use when running tests.</source>
@@ -40,8 +40,8 @@
       </trans-unit>
       <trans-unit id="CmdTestCaseFilterExpression">
         <source>EXPRESSION</source>
-        <target state="needs-review-translation">Expression</target>
-        <note></note>
+        <target state="translated">EXPRESSION</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdTestCaseFilterDescription">
         <source>Run tests that match the given expression.
@@ -51,18 +51,20 @@
                                         Run tests that contain the specified name: --filter "FullyQualifiedName~Namespace.Class"
                                         More info on filtering support: https://aka.ms/vstest-filtering
                                         </source>
-        <target state="needs-review-translation">지정된 식과 일치하는 테스트를 실행합니다.
+        <target state="translated">지정된 식과 일치하는 테스트를 실행합니다.
                                         예:
-                                        --testCaseFilter:"Priority = 1"
-                                        --testCaseFilter: "(FullyQualifiedName~Nightly | Name = MyTestMethod)"</target>
-        <note></note>
+                                        우선 순위를 1로 설정하여 테스트 실행: --filter "Priority = 1"
+                                        지정된 전체 이름으로 테스트 실행: --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
+                                        지정된 이름을 포함하는 테스트 실행: --filter "FullyQualifiedName~Namespace.Class"
+                                        필터링 지원에 대한 추가 정보: https://aka.ms/vstest-filtering</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdTestAdapterPathDescription">
         <source>Use custom adapters from the given path in the test run.
                                         Example: --test-adapter-path &lt;PATH_TO_ADAPTER&gt;</source>
-        <target state="needs-review-translation">테스트 실행에서 지정된 경로에 있는 사용자 지정 어댑터를 사용합니다.
-                                        예: --testAdapterPath:&lt;pathToCustomAdapters&gt;</target>
-        <note></note>
+        <target state="translated">테스트 실행에서 지정된 경로에 있는 사용자 지정 어댑터를 사용합니다.
+                                        예: --test-adapter-path &lt;PATH_TO_ADAPTER&gt;</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdLoggerOption">
         <source>LoggerUri/FriendlyName</source>
@@ -71,25 +73,25 @@
       </trans-unit>
       <trans-unit id="CmdLoggerDescription">
         <source>Specify a logger for test results. 
-                                        Example: --logger:trx</source>
-        <target state="translated">테스트 결과에 대해 로거를 지정합니다. 
+                                        Example: --logger "trx[;LogFileName=&lt;Defaults to unique file name&gt;]"</source>
+        <target state="needs-review-translation">테스트 결과에 대해 로거를 지정합니다. 
                                         예: --logger:trx</target>
-        <note />
+        <note></note>
       </trans-unit>
       <trans-unit id="CmdConfiguration">
         <source>CONFIGURATION</source>
-        <target state="needs-review-translation">configuration</target>
-        <note></note>
+        <target state="translated">CONFIGURATION</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="needs-review-translation">빌드할 구성입니다(예: Debug/Release).</target>
-        <note></note>
+        <target state="translated">프로젝트 빌드에 사용할 구성입니다.  대부분의 프로젝트에서 기본값은 "Debug"입니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
-        <target state="needs-review-translation">FrameworkVersion</target>
-        <note></note>
+        <target state="translated">FRAMEWORK</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Looks for test binaries for a specific framework</source>
@@ -98,8 +100,8 @@
       </trans-unit>
       <trans-unit id="CmdOutputDir">
         <source>OUTPUT_DIR</source>
-        <target state="needs-review-translation">OutputDir</target>
-        <note></note>
+        <target state="translated">OUTPUT_DIR</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdOutputDescription">
         <source>Directory in which to find the binaries to be run</source>
@@ -108,8 +110,8 @@
       </trans-unit>
       <trans-unit id="CmdPathToLogFile">
         <source>PATH_TO_FILE</source>
-        <target state="needs-review-translation">PathToLogFile</target>
-        <note></note>
+        <target state="translated">PATH_TO_FILE</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdPathTologFileDescription">
         <source>Enable verbose logs for test platform.
@@ -122,6 +124,13 @@
         <source>Do not build project before testing.</source>
         <target state="translated">테스트하기 전에 프로젝트를 빌드하지 않습니다.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="RunSettingsArgsHelpText">
+        <source>Any extra commandline runsettings arguments that should be passed to vstest. See 'dotnet vstest --help' for available options.
+                                        Example: -- RunConfiguration.ResultsDirectory="C:\users\user\desktop\Results Directory" MSTest.DeploymentEnabled=false</source>
+        <target state="new">Any extra commandline runsettings arguments that should be passed to vstest. See 'dotnet vstest --help' for available options.
+                                        Example: -- RunConfiguration.ResultsDirectory="C:\users\user\desktop\Results Directory" MSTest.DeploymentEnabled=false</target>
+        <note></note>
       </trans-unit>
     </body>
   </file>

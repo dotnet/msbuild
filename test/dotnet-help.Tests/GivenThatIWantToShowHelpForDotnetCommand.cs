@@ -41,6 +41,7 @@ Commands:
   pack          Creates a NuGet package.
   migrate       Migrates a project.json based project to a msbuild based project.
   clean         Clean build output(s).
+  sln           Modify solution (SLN) files.
 
 Project modification commands:
   add           Add items to the project
@@ -59,7 +60,8 @@ Advanced Commands:
         {
             var cmd = new DotnetCommand()
                 .ExecuteWithCapturedOutput($"{helpArg}");
-            cmd.Should().Pass().And.HaveStdOutContaining(HelpText);
+            cmd.Should().Pass();
+            cmd.StdOut.Should().ContainVisuallySameFragment(HelpText);
         }
     }
 }

@@ -70,43 +70,43 @@
       </trans-unit>
       <trans-unit id="NewDefinition">
         <source>Initialize .NET projects.</source>
-        <target state="needs-review-translation">Einfaches .NET-Projekt initialisieren</target>
-        <note></note>
+        <target state="translated">.NET-Projekte initialisieren.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RestoreDefinition">
         <source>Restore dependencies specified in the .NET project.</source>
-        <target state="needs-review-translation">Im .NET-Projekt angegebene Abhängigkeiten wiederherstellen</target>
-        <note></note>
+        <target state="translated">Im .NET-Projekt angegebene Abhängigkeiten wiederherstellen.</target>
+        <note />
       </trans-unit>
       <trans-unit id="BuildDefinition">
         <source>Builds a .NET project.</source>
-        <target state="needs-review-translation">Erstellt ein .NET-Projekt.</target>
-        <note></note>
+        <target state="translated">Erstellt ein .NET-Projekt.</target>
+        <note />
       </trans-unit>
       <trans-unit id="PublishDefinition">
         <source>Publishes a .NET project for deployment (including the runtime).</source>
-        <target state="needs-review-translation">Veröffentlicht ein .NET-Projekt für die Bereitstellung (einschließlich Laufzeit).</target>
-        <note></note>
+        <target state="translated">Veröffentlicht ein .NET-Projekt für die Bereitstellung (einschließlich Laufzeit).</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunDefinition">
         <source>Compiles and immediately executes a .NET project.</source>
-        <target state="needs-review-translation">Kompiliert ein .NET-Projekt und führt es umgehend aus.</target>
-        <note></note>
+        <target state="translated">Kompiliert ein .NET-Projekt und führt es umgehend aus.</target>
+        <note />
       </trans-unit>
       <trans-unit id="TestDefinition">
         <source>Runs unit tests using the test runner specified in the project.</source>
-        <target state="needs-review-translation">Führt mithilfe des im Projekt angegebenen Test Runners Komponententests aus.</target>
-        <note></note>
+        <target state="translated">Führt mithilfe des im Projekt angegebenen Test Runners Komponententests aus.</target>
+        <note />
       </trans-unit>
       <trans-unit id="PackDefinition">
         <source>Creates a NuGet package.</source>
-        <target state="needs-review-translation">Erstellt ein NuGet-Paket.</target>
-        <note></note>
+        <target state="translated">Erstellt ein NuGet-Paket.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrateDefinition">
         <source>Migrates a project.json based project to a msbuild based project.</source>
-        <target state="needs-review-translation">Migriert ein auf "project.json" basierendes Projekt zu einem MSBuild-basierten Projekt.</target>
-        <note></note>
+        <target state="translated">Migriert ein auf „project.json“ basierendes Projekt zu einem MSBuild-basierten Projekt.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectModificationCommands">
         <source>Project modification commands</source>
@@ -115,13 +115,13 @@
       </trans-unit>
       <trans-unit id="AddDefinition">
         <source>Add items to the project.</source>
-        <target state="needs-review-translation">Elemente zum Projekt hinzufügen</target>
-        <note></note>
+        <target state="translated">Elemente zum Projekt hinzufügen.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RemoveDefinition">
         <source>Remove items from the project.</source>
-        <target state="needs-review-translation">Elemente aus dem Projekt entfernen</target>
-        <note></note>
+        <target state="translated">Elemente aus dem Projekt entfernen.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AdvancedCommands">
         <source>Advanced Commands</source>
@@ -130,27 +130,32 @@
       </trans-unit>
       <trans-unit id="NugetDefinition">
         <source>Provides additional NuGet commands.</source>
-        <target state="needs-review-translation">Stellt zusätzliche NuGet-Befehle bereit.</target>
-        <note></note>
+        <target state="translated">Stellt zusätzliche NuGet-Befehle bereit.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MsBuildDefinition">
         <source>Runs Microsoft Build Engine (MSBuild).</source>
-        <target state="needs-review-translation">Erstellt ein Projekt und alle dazugehörigen Abhängigkeiten mithilfe von MSBuild.</target>
-        <note></note>
+        <target state="translated">Führt Microsoft-Buildmodul (MSBuild) aus.</target>
+        <note />
       </trans-unit>
       <trans-unit id="VsTestDefinition">
         <source>Runs Microsoft Test Execution Command Line Tool.</source>
-        <target state="needs-review-translation">Führt Tests auf der Grundlage der angegebenen Dateien aus.</target>
-        <note></note>
+        <target state="translated">Führt Microsoft Testausführungs-Befehlszeilentool aus.</target>
+        <note />
       </trans-unit>
       <trans-unit id="DiagnosticsDefinition">
         <source>Enable diagnostic output</source>
-        <target state="new">Enable diagnostic output</target>
-        <note></note>
+        <target state="translated">Diagnoseausgabe aktivieren.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CleanDefinition">
         <source>Clean build output(s).</source>
-        <target state="new">Clean build output(s).</target>
+        <target state="translated">Buildausgabe(n) bereinigen.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SlnDefinition">
+        <source>Modify solution (SLN) files.</source>
+        <target state="new">Modify solution (SLN) files.</target>
         <note></note>
       </trans-unit>
     </body>

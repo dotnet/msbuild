@@ -17,25 +17,25 @@ You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-te
 Configuring...
 -------------------
 A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</source>
-        <target state="new">Welcome to .NET Core!
+        <target state="translated">欢迎使用 .NET Core!
 ---------------------
-Learn more about .NET Core @ https://aka.ms/dotnet-docs. Use dotnet --help to see available commands or go to https://aka.ms/dotnet-cli-docs.
+若要详细了解 .NET Core，请访问 https://aka.ms/dotnet-docs。使用 dotnet --help 查看可用的命令或转到 https://aka.ms/dotnet-cli-docs。
 
-Telemetry
+遥测
 --------------
-The .NET Core tools collect usage data in order to improve your experience. The data is anonymous and does not include command-line arguments. The data is collected by Microsoft and shared with the community.
-You can opt out of telemetry by setting a DOTNET_CLI_TELEMETRY_OPTOUT environment variable to 1 using your favorite shell.
-You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-telemetry.
+.NET Core 收集使用情况数据，以便改善用户体验。数据是匿名的且不包含命令行参数。数据由 Microsoft 收集，并与社区共享。
+可选择使用你最喜爱的 shell 将 DOTNET_CLI_TELEMETRY_OPTOUT 环境变量设置为 1，从而退出遥测。
+若要深入了解 .NET Core 工具遥测，请访问 https://aka.ms/dotnet-cli-telemetry。
 
-Configuring...
+正在配置...
 -------------------
-A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</target>
-        <note></note>
+正在运行一项命令，以初步填充本地包缓存，从而提高还原速度并启用脱机访问。此命令最长需要一分钟才能完成，且仅可运行一次。</target>
+        <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">
         <source>Failed to create prime the NuGet cache. {0} failed with: {1}</source>
-        <target state="new">Failed to create prime the NuGet cache. {0} failed with: {1}</target>
-        <note></note>
+        <target state="translated">未能创建主要 NuGet 缓存。{0} 失败，错误为: {1}</target>
+        <note />
       </trans-unit>
     </body>
   </file>

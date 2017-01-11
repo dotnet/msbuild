@@ -9,9 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="**\*.cs" />
-    <EmbeddedResource Include="**\*.resx" />
-    <EmbeddedResource Include="compiler\resources\**\*" />
     <Content Include="MSBuild.exe;MSBuild.exe.config;NuGet.tempaspnetpatch.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -51,7 +48,7 @@
       <Version>2.2.0-beta4-build1194</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.1</Version>
+      <Version>1.0.3</Version>
     </PackageReference>
     <PackageReference Include="xunit">
       <Version>2.2.0-beta4-build3444</Version>

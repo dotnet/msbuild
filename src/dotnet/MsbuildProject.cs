@@ -1,6 +1,10 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
@@ -8,10 +12,6 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.Tools.ProjectExtensions;
 using NuGet.Frameworks;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 
 namespace Microsoft.DotNet.Tools
 {
@@ -62,6 +62,19 @@ namespace Microsoft.DotNet.Tools
 
         public static MsbuildProject FromDirectory(ProjectCollection projects, string projectDirectory)
         {
+            FileInfo projectFile = GetProjectFileFromDirectory(projectDirectory);
+
+            var project = TryOpenProject(projects, projectFile.FullName);
+            if (project == null)
+            {
+                throw new GracefulException(CommonLocalizableStrings.FoundInvalidProject, projectFile.FullName);
+            }
+
+            return new MsbuildProject(projects, project);
+        }
+
+        public static FileInfo GetProjectFileFromDirectory(string projectDirectory)
+        {
             DirectoryInfo dir;
             try
             {
@@ -90,22 +103,7 @@ namespace Microsoft.DotNet.Tools
                 throw new GracefulException(CommonLocalizableStrings.MoreThanOneProjectInDirectory, projectDirectory);
             }
 
-            FileInfo projectFile = files.First();
-
-            if (!projectFile.Exists)
-            {
-                throw new GracefulException(
-                    CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory,
-                    projectDirectory);
-            }
-
-            var project = TryOpenProject(projects, projectFile.FullName);
-            if (project == null)
-            {
-                throw new GracefulException(CommonLocalizableStrings.FoundInvalidProject, projectFile.FullName);
-            }
-
-            return new MsbuildProject(projects, project);
+            return files.First();
         }
 
         public int AddProjectToProjectReferences(string framework, IEnumerable<string> refs)
@@ -120,7 +118,7 @@ namespace Microsoft.DotNet.Tools
                 if (ProjectRootElement.HasExistingItemWithCondition(framework, @ref))
                 {
                     Reporter.Output.WriteLine(string.Format(
-                        CommonLocalizableStrings.ProjectAlreadyHasAreference, 
+                        CommonLocalizableStrings.ProjectAlreadyHasAreference,
                         @ref));
                     continue;
                 }

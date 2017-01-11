@@ -12,10 +12,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="**\*.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
-    <Compile Include="..\..\src\dotnet\DotnetFiles.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
-    <EmbeddedResource Include="**\*.resx" />
-    <EmbeddedResource Include="compiler\resources\**\*" />
     <Content Include="..\..\artifacts\*\stage2\sdk\*\.version">
       <Link>.version</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -52,7 +48,7 @@
       <Version>2.2.0-beta4-build1194</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.1</Version>
+      <Version>1.0.3</Version>
     </PackageReference>
     <PackageReference Include="System.Diagnostics.TraceSource">
       <Version>4.0.0</Version>
@@ -61,16 +57,16 @@
       <Version>4.1.1</Version>
     </PackageReference>
     <PackageReference Include="NuGet.Versioning">
-      <Version>4.0.0-rc2</Version>
+      <Version>4.0.0-rc3</Version>
     </PackageReference>
     <PackageReference Include="NuGet.Packaging">
-      <Version>4.0.0-rc2</Version>
+      <Version>4.0.0-rc3</Version>
     </PackageReference>
     <PackageReference Include="NuGet.Frameworks">
-      <Version>4.0.0-rc2</Version>
+      <Version>4.0.0-rc3</Version>
     </PackageReference>
     <PackageReference Include="NuGet.ProjectModel">
-      <Version>4.0.0-rc2</Version>
+      <Version>4.0.0-rc3</Version>
     </PackageReference>
     <PackageReference Include="moq.netcore">
       <Version>4.4.0-beta8</Version>

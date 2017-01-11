@@ -13,10 +13,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="**\*.cs" Exclude="commands\dotnet-new\CSharp_Console\**;commands\dotnet-new\CSharp_Lib\**;commands\dotnet-new\CSharp_Mstest\**;commands\dotnet-new\CSharp_Web\**;commands\dotnet-new\CSharp_Xunittest\**;bin\**;obj\**;**\*.xproj;packages\**" />
-    <EmbeddedResource Include="**\*.resx" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
-    <EmbeddedResource Include="commands\dotnet-new\CSharp_Console.zip;commands\dotnet-new\CSharp_Lib.zip;commands\dotnet-new\CSharp_Mstest.zip;commands\dotnet-new\CSharp_Xunittest.zip;commands\dotnet-new\CSharp_Web.zip;compiler\resources\**\*" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
-    <EmbeddedResource Include="commands\dotnet-new\FSharp_Console.zip;commands\dotnet-new\FSharp_Lib.zip;commands\dotnet-new\FSharp_Mstest.zip;commands\dotnet-new\FSharp_Xunittest.zip;commands\dotnet-new\FSharp_Web.zip" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
+    <Compile Remove="commands\dotnet-new\**" />
+    <Compile Include="commands\dotnet-new\*.cs" />
+    <EmbeddedResource Include="commands\dotnet-new\*.zip" />
   </ItemGroup>
 
   <ItemGroup>
@@ -42,7 +41,7 @@
       <Version>2.0.0</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.1</Version>
+      <Version>1.0.3</Version>
     </PackageReference>
     <PackageReference Include="System.Diagnostics.TraceSource">
       <Version>4.0.0</Version>
@@ -69,12 +68,11 @@
     <PackageReference Include="Microsoft.Build">
       <Version>$(CLI_MSBuild_Version)</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp">
-      <Version>2.0.0-beta6-60922-08</Version>
-    </PackageReference>
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions">
       <Version>1.0.1-beta-000933</Version>
     </PackageReference>
+    <PackageReference Include="Microsoft.TemplateEngine.Cli" Version="$(TemplateEngineVersion)" />
+    <PackageReference Include="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="$(TemplateEngineVersion)" />
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">

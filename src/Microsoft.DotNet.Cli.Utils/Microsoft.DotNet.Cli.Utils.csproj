@@ -9,9 +9,7 @@
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="**\*.cs" />
-  </ItemGroup>
+  
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyModel">
       <Version>1.0.1-beta-000933</Version>
@@ -20,16 +18,16 @@
       <Version>1.0.1-beta-000933</Version>
     </PackageReference>
     <PackageReference Include="NuGet.Versioning">
-      <Version>4.0.0-rc2</Version>
+      <Version>4.0.0-rc3</Version>
     </PackageReference>
     <PackageReference Include="NuGet.Packaging">
-      <Version>4.0.0-rc2</Version>
+      <Version>4.0.0-rc3</Version>
     </PackageReference>
     <PackageReference Include="NuGet.Frameworks">
-      <Version>4.0.0-rc2</Version>
+      <Version>4.0.0-rc3</Version>
     </PackageReference>
     <PackageReference Include="NuGet.ProjectModel">
-      <Version>4.0.0-rc2</Version>
+      <Version>4.0.0-rc3</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Build">
       <Version>$(CLI_MSBuild_Version)</Version>

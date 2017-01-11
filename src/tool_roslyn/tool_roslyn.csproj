@@ -1,0 +1,63 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.tasks" />
+
+  <PropertyGroup>
+    <VersionPrefix>1.0.0-preview5</VersionPrefix>
+    <TargetFramework>netcoreapp1.0</TargetFramework>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NetCore.App" Version="1.0.3" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(CLI_Roslyn_Version)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Build.Tasks" Version="$(CLI_Roslyn_Version)" />
+    <PackageReference Include="Microsoft.Net.Compilers.netcore" Version="$(CLI_Roslyn_Version)" />
+    <PackageReference Include="Microsoft.DiaSymReader.Native" Version="1.4.0-rc2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="RunCsc.sh;RunCsc.cmd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+  
+  <Target Name="AddHackFilesToPublish" 
+          AfterTargets="ComputeFilesToPublish">
+    <ItemGroup>
+      <!-- Workaround for https://github.com/dotnet/sdk/issues/115 -->
+      <HackFilesToCopy Include="$(NuGetPackagesDir)\microsoft.codeanalysis.build.tasks\$(CLI_Roslyn_Version)\contentFiles\any\any\**;" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(HackFilesToCopy)"
+        DestinationFiles="@(HackFilesToCopy->'$(PublishDir)/%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
+  <Target Name="MakeCscRunnableAndMoveToPublishDir"
+          AfterTargets="Publish"
+          BeforeTargets="RemoveFilesAfterPublish">
+    <ItemGroup>
+      <AssetsToRemoveFromDeps Include="csc" />
+      <AssetsToRemoveFromDeps Include="vbc" />
+    </ItemGroup>
+    
+    <RemoveAssetFromDepsPackages DepsFile="$(PublishDir)/$(TargetName).deps.json"
+                                 SectionName="runtimeTargets"
+                                 AssetPath="runtimes/any/native/%(AssetsToRemoveFromDeps.Identity).exe" />
+
+    <Copy SourceFiles="$(PublishDir)/runtimes/any/native/csc.exe;
+                       $(PublishDir)/$(TargetName).runtimeconfig.json;
+                       $(PublishDir)/$(TargetName).deps.json;"
+          DestinationFiles="$(PublishDir)/csc.exe;
+                            $(PublishDir)/csc.runtimeconfig.json;
+                            $(PublishDir)/csc.deps.json;" />
+  </Target>
+
+  <Target Name="RemoveFilesAfterPublish"
+          AfterTargets="Publish">
+    <Delete Files="$(PublishDir)/$(TargetName).dll" />
+    <Delete Files="$(PublishDir)/$(TargetName).pdb" />
+    <Delete Files="$(PublishDir)/$(TargetName).runtimeconfig.json" />
+    <Delete Files="$(PublishDir)/$(TargetName).deps.json" />
+  </Target>
+</Project>

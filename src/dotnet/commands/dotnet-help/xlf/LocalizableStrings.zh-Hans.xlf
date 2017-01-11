@@ -70,43 +70,43 @@
       </trans-unit>
       <trans-unit id="NewDefinition">
         <source>Initialize .NET projects.</source>
-        <target state="needs-review-translation">初始化基础 .NET 项目</target>
-        <note></note>
+        <target state="translated">初始化 .NET 项目。</target>
+        <note />
       </trans-unit>
       <trans-unit id="RestoreDefinition">
         <source>Restore dependencies specified in the .NET project.</source>
-        <target state="needs-review-translation">还原 .NET 项目中指定的依赖项</target>
-        <note></note>
+        <target state="translated">还原 .NET 项目中指定的依赖项。</target>
+        <note />
       </trans-unit>
       <trans-unit id="BuildDefinition">
         <source>Builds a .NET project.</source>
-        <target state="needs-review-translation">生成 .NET 项目</target>
-        <note></note>
+        <target state="translated">生成 .NET 项目。</target>
+        <note />
       </trans-unit>
       <trans-unit id="PublishDefinition">
         <source>Publishes a .NET project for deployment (including the runtime).</source>
-        <target state="needs-review-translation">发布 .NET 项目以进行部署(包括运行时)</target>
-        <note></note>
+        <target state="translated">发布 .NET 项目以进行部署(包括运行时)。</target>
+        <note />
       </trans-unit>
       <trans-unit id="RunDefinition">
         <source>Compiles and immediately executes a .NET project.</source>
-        <target state="needs-review-translation">编译并立即执行 .NET 项目</target>
-        <note></note>
+        <target state="translated">编译并立即执行 .NET 项目。</target>
+        <note />
       </trans-unit>
       <trans-unit id="TestDefinition">
         <source>Runs unit tests using the test runner specified in the project.</source>
-        <target state="needs-review-translation">使用项目中指定的测试运行程序运行单元测试</target>
-        <note></note>
+        <target state="translated">使用项目中指定的测试运行程序运行单元测试。</target>
+        <note />
       </trans-unit>
       <trans-unit id="PackDefinition">
         <source>Creates a NuGet package.</source>
-        <target state="needs-review-translation">创建 NuGet 包</target>
-        <note></note>
+        <target state="translated">创建 NuGet 包。</target>
+        <note />
       </trans-unit>
       <trans-unit id="MigrateDefinition">
         <source>Migrates a project.json based project to a msbuild based project.</source>
-        <target state="needs-review-translation">将基于 project.json 的项目迁移到基于 MSBuild 的项目</target>
-        <note></note>
+        <target state="translated">将基于 project.json 的项目迁移到基于 MSBuild 的项目。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectModificationCommands">
         <source>Project modification commands</source>
@@ -115,13 +115,13 @@
       </trans-unit>
       <trans-unit id="AddDefinition">
         <source>Add items to the project.</source>
-        <target state="needs-review-translation">将项添加到项目中</target>
-        <note></note>
+        <target state="translated">将项添加到项目中。</target>
+        <note />
       </trans-unit>
       <trans-unit id="RemoveDefinition">
         <source>Remove items from the project.</source>
-        <target state="needs-review-translation">从项目中删除项</target>
-        <note></note>
+        <target state="translated">从项目中删除项。</target>
+        <note />
       </trans-unit>
       <trans-unit id="AdvancedCommands">
         <source>Advanced Commands</source>
@@ -130,27 +130,32 @@
       </trans-unit>
       <trans-unit id="NugetDefinition">
         <source>Provides additional NuGet commands.</source>
-        <target state="needs-review-translation">提供其他 NuGet命令</target>
-        <note></note>
+        <target state="translated">提供其他 NuGet 命令。</target>
+        <note />
       </trans-unit>
       <trans-unit id="MsBuildDefinition">
         <source>Runs Microsoft Build Engine (MSBuild).</source>
-        <target state="needs-review-translation">通过 MSBuild 生成一个项目以及该项目的所有依赖项</target>
-        <note></note>
+        <target state="translated">运行 Microsoft 生成引擎 (MSBuild)。</target>
+        <note />
       </trans-unit>
       <trans-unit id="VsTestDefinition">
         <source>Runs Microsoft Test Execution Command Line Tool.</source>
-        <target state="needs-review-translation">从指定的文件运行测试</target>
-        <note></note>
+        <target state="translated">运行 Microsoft 测试执行命令行工具。</target>
+        <note />
       </trans-unit>
       <trans-unit id="DiagnosticsDefinition">
         <source>Enable diagnostic output</source>
-        <target state="new">Enable diagnostic output</target>
-        <note></note>
+        <target state="translated">启用诊断输出</target>
+        <note />
       </trans-unit>
       <trans-unit id="CleanDefinition">
         <source>Clean build output(s).</source>
-        <target state="new">Clean build output(s).</target>
+        <target state="translated">清除生成输出。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SlnDefinition">
+        <source>Modify solution (SLN) files.</source>
+        <target state="new">Modify solution (SLN) files.</target>
         <note></note>
       </trans-unit>
     </body>
