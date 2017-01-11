@@ -16,12 +16,6 @@
     {
       "modifiers": [
         {
-          "condition": "(foundGlobalJson)",
-          "exclude": [
-            "global.json"
-          ]
-        },
-        {
           "condition": "(NoAuth)",
           "exclude": [
             "Data/**",
@@ -108,10 +102,6 @@
       "parameters": {
         "format": "yyyy"
       }
-    },
-    "foundGlobalJson": {
-      "type": "bind",
-      "binding": "GlobalJsonExists"
     }
   }
 }

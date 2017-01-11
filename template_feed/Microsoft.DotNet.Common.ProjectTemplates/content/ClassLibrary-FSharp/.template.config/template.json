@@ -11,27 +11,11 @@
   },
   "sourceName": "Company.ClassLibrary1",
   "preferNameDirectory": true,
-  "sources" : [
-    {
-      "modifiers": [
-        {
-          "condition": "(foundGlobalJson)",
-          "exclude": [
-            "global.json"
-          ]
-        }
-      ]
-    }
-  ],
   "symbols": {
     "sdkVersion": {
       "type": "bind",
       "binding": "dotnet-cli-version",
       "replaces": "1.0.0-preview5-004445"
-    },
-    "foundGlobalJson": {
-      "type": "bind",
-      "binding": "GlobalJsonExists"
     }
   }
 }
