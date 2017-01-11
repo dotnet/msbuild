@@ -11,7 +11,7 @@ module Program =
 
     [<EntryPoint>]
     let main args =
-        let host = 
+        let host =
             WebHostBuilder()
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
@@ -20,5 +20,5 @@ module Program =
                 .Build()
 
         host.Run()
-        
+
         0

@@ -11,7 +11,7 @@
   },
   "sourceName": "Company.WebApplication1",
   "preferNameDirectory": true,
-  "symbols": {    
+  "symbols": {
     "IncludeApplicationInsights": {
       "type": "parameter",
       "datatype": "bool",

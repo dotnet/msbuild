@@ -13,10 +13,10 @@ open Microsoft.Extensions.Logging
 
 type Startup private () =
 
-    new (env: IHostingEnvironment) as this = 
-        Startup() then 
+    new (env: IHostingEnvironment) as this =
+        Startup() then
 
-        let builder = 
+        let builder =
             ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json", optional = false, reloadOnChange = true)
