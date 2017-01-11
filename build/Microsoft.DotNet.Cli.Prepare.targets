@@ -72,7 +72,7 @@
       <VersionBadge>$(BaseOutputDirectory)/$(VersionBadgeMoniker)_$(Configuration)_version_badge.svg</VersionBadge>
       <SdkVersion>$(NugetVersion)</SdkVersion>
 
-      <SdkNugetVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)-preview5-$(CommitCount)</SdkNugetVersion>
+      <SdkNugetVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)-rc3-$(CommitCount)</SdkNugetVersion>
       <ProjectModelNugetVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)-rc4-$(CommitCount)</ProjectModelNugetVersion>
       <DependencyModelAndInternalAbstractionsNugetVersion>$(VersionMajor).$(VersionMinor).1-beta-$(CommitCount)</DependencyModelAndInternalAbstractionsNugetVersion>
 
