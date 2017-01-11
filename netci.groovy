@@ -4,7 +4,6 @@
 // Import the utility functionality.
 
 import jobs.generation.Utilities;
-import jobs.generation.InternalUtilities;
 
 def project = GithubProject
 def branch = GithubBranchName
@@ -45,8 +44,14 @@ osList.each { os ->
             }
         }
 
-        Utilities.setMachineAffinity(newJob, os, 'latest-or-auto-internal')
-        InternalUtilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
+        def archiveSettings = new ArchivalSettings()
+        archiveSettings.addFiles("bin/**/*")
+        archiveSettings.excludeFiles("bin/obj/*")
+        archiveSettings.setFailIfNothingArchived()
+        archiveSettings.setArchiveOnFailure()
+        Utilities.addArchival(newJob, archiveSettings)
+        Utilities.setMachineAffinity(newJob, os, 'latest-or-auto')
+        Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
         Utilities.addXUnitDotNETResults(newJob, "bin/$config/Tests/TestResults.xml", false)
         Utilities.addGithubPRTriggerForBranch(newJob, branch, "$os $config")
     }
