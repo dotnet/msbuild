@@ -1701,6 +1701,61 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                         Version = "4.0.0"
                     }
                 },
+                {
+                    new PackageDependencyInfo
+                    {
+                        Name = "Microsoft.Extensions.Logging",
+                        Version = "[,1.0.1)"
+                    },
+                    new PackageDependencyInfo {
+                        Name = "Microsoft.Extensions.Logging",
+                        Version =ConstantPackageVersions.AspNet101PackagesVersion
+                    }
+                },
+                {
+                    new PackageDependencyInfo
+                    {
+                        Name = "Microsoft.Extensions.Logging.Console",
+                        Version = "[,1.0.1)"
+                    },
+                    new PackageDependencyInfo {
+                        Name = "Microsoft.Extensions.Logging.Console",
+                        Version =ConstantPackageVersions.AspNet101PackagesVersion
+                    }
+                },
+                {
+                    new PackageDependencyInfo
+                    {
+                        Name = "Microsoft.Extensions.Logging.Debug",
+                        Version = "[,1.0.1)"
+                    },
+                    new PackageDependencyInfo {
+                        Name = "Microsoft.Extensions.Logging.Debug",
+                        Version =ConstantPackageVersions.AspNet101PackagesVersion
+                    }
+                },
+                {
+                    new PackageDependencyInfo
+                    {
+                        Name = "Microsoft.Extensions.Configuration.Json",
+                        Version = "[,1.0.1)"
+                    },
+                    new PackageDependencyInfo {
+                        Name = "Microsoft.Extensions.Configuration.Json",
+                        Version =ConstantPackageVersions.AspNet101PackagesVersion
+                    }
+                },
+                {
+                    new PackageDependencyInfo
+                    {
+                        Name = "Microsoft.Extensions.Configuration.UserSecrets",
+                        Version = "[,1.0.1)"
+                    },
+                    new PackageDependencyInfo {
+                        Name = "Microsoft.Extensions.Configuration.UserSecrets",
+                        Version =ConstantPackageVersions.AspNet101PackagesVersion
+                    }
+                },
         };
 
         public static readonly IDictionary<PackageDependencyInfo, PackageDependencyInfo> ProjectToolPackages =
