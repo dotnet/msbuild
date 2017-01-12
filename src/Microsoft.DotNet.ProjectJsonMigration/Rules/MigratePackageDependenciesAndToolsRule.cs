@@ -279,13 +279,22 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         {
             var name = dependency.Name;
             var version = dependency.LibraryRange?.VersionRange?.OriginalString;
+            var minRange = dependency.LibraryRange?.VersionRange?.ToNonSnapshotRange().MinVersion;
 
-            var possibleMappings = dependencyToVersionMap.Where(c => c.Key.Name == name);
-            if (possibleMappings.Any())
+            var possibleMappings =
+                dependencyToVersionMap.Where(c => c.Key.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            if (possibleMappings.Any() && !string.IsNullOrEmpty(version))
             {
                 var possibleVersions = possibleMappings.Select(p => VersionRange.Parse(p.Key.Version));
-                var bestMatchVersion = possibleVersions.First(p => p.Satisfies(dependency.LibraryRange?.VersionRange?.ToNonSnapshotRange().MinVersion));
-                var dependencyInfo = possibleMappings.First(c => c.Key.Version == bestMatchVersion.OriginalString).Value;
+                var matchVersion = possibleVersions.FirstOrDefault(p => p.Satisfies(minRange));
+                if (matchVersion == null)
+                {
+                    return null;
+                }
+
+                var dependencyInfo = possibleMappings.First(c =>
+                    c.Key.Version.Equals(matchVersion.OriginalString, StringComparison.OrdinalIgnoreCase)).Value;
+
                 if (dependencyInfo == null)
                 {
                     return null;
