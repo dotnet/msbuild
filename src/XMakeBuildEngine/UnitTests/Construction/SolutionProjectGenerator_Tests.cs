@@ -2081,7 +2081,7 @@ EndGlobal
         }
 
         /// <summary>
-        /// Verifies that illegal target names don't crash the SolutionProjectGenerator
+        /// Verifies that illegal user target names (the ones already used internally) don't crash the SolutionProjectGenerator
         /// </summary>
         [Fact]
         public void IllegalUserTargetNamesDoNotThrow()
@@ -2106,7 +2106,8 @@ EndGlobal
                 EndGlobal
             ");
 
-            var illegalTargetNamesForCsproj = SolutionProjectGenerator._illegaUserTargetNames.Union(new []{"ClassLibrary1"}).Except(new []{ "GetFrameworkPathAndRedistList" }).ToList();
+            // "GetFrameworkPathAndRedistList" is for web projects only
+            var illegalTargetNamesForCsproj = SolutionProjectGenerator._solutionGeneratedTargetNames.Union(new []{"ClassLibrary1"}).Except(new []{ "GetFrameworkPathAndRedistList" }).ToList();
             ProjectInstance[]  instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, null, illegalTargetNamesForCsproj);
 
             foreach (var illegalTargetName in illegalTargetNamesForCsproj)
