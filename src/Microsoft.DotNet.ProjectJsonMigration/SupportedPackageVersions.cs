@@ -54,6 +54,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 {
                     new PackageDependencyInfo
                     {
+                        Name = "Microsoft.AspNetCore.Mvc.Razor.ViewCompilation.Tools",
+                        Version = "[1.0.0-*,)"
+                    },
+                    null
+                },
+                {
+                    new PackageDependencyInfo
+                    {
                         Name = "Microsoft.VisualStudio.Web.CodeGeneration.Tools",
                         Version = "[1.0.0-*,)"
                     },
@@ -157,6 +165,17 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                         {
                             Name = "Microsoft.VisualStudio.Web.CodeGeneration.Design",
                             Version = ConstantPackageVersions.AspNetToolsVersion
+                        }
+                    },
+                    {
+                        new PackageDependencyInfo
+                        {
+                            Name = "Microsoft.AspNetCore.Mvc.Razor.ViewCompilation.Design",
+                            Version = "[1.0.0-*,)"
+                        },
+                        new PackageDependencyInfo {
+                            Name = "Microsoft.AspNetCore.Mvc.Razor.ViewCompilation",
+                            Version = ConstantPackageVersions.AspNet110ToolsVersion
                         }
                     },
                     {
