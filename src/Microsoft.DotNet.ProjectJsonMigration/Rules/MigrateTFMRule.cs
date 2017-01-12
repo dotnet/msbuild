@@ -133,13 +133,16 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 "RuntimeIdentifiers",
                 projectContexts => RuntimeIdentifiers,
                 projectContexts => !projectContexts.HasRuntimes() &&
+                                   !projectContexts.HasLibraryOutput() &&
                                     projectContexts.HasBothCoreAndFullFrameworkTFMs());
 
         private AddPropertyTransform<IEnumerable<ProjectContext>> RuntimeIdentifierTransform =>
             new AddPropertyTransform<IEnumerable<ProjectContext>>(
                 "RuntimeIdentifier",
                 projectContexts => "win7-x86",
-                projectContexts => !projectContexts.HasRuntimes() && projectContexts.HasFullFrameworkTFM())
+                projectContexts => !projectContexts.HasRuntimes() &&
+                                   !projectContexts.HasLibraryOutput() && 
+                                    projectContexts.HasFullFrameworkTFM())
             .WithMSBuildCondition(projectContexts =>
                 {
                     string msBuildCondition = null;

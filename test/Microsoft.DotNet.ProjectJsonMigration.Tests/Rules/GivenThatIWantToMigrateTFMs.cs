@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         {
             var testDirectory = Temp.CreateDirectory().Path;
             var testPJ = new ProjectJsonBuilder(TestAssetsManager)
-                .FromTestAssetBase("TestLibraryWithMultipleFrameworks")
+                .FromTestAssetBase("PJAppWithMultipleFrameworks")
                 .SaveToDisk(testDirectory);
 
             var projectContexts = ProjectContext.CreateContextForEachFramework(testDirectory);
@@ -98,7 +98,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         {
             var testDirectory = Temp.CreateDirectory().Path;
             var testPJ = new ProjectJsonBuilder(TestAssetsManager)
-                .FromTestAssetBase("TestLibraryWithMultipleFrameworks")
+                .FromTestAssetBase("PJAppWithMultipleFrameworks")
                 .SaveToDisk(testDirectory);
 
             var projectContexts = ProjectContext.CreateContextForEachFramework(testDirectory);
@@ -196,6 +196,32 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             Console.WriteLine(mockProj.RawXml);
 
             mockProj.Properties.Count(p => p.Name == "TargetFramework").Should().Be(1);
+        }
+
+        [Fact]
+        public void MigratingLibWithMultipleTFMsDoesNotAddRuntimes()
+        {
+            var testDirectory = Temp.CreateDirectory().Path;
+            var testPJ = new ProjectJsonBuilder(TestAssetsManager)
+                .FromTestAssetBase("PJLibWithMultipleFrameworks")
+                .SaveToDisk(testDirectory);
+
+            var projectContexts = ProjectContext.CreateContextForEachFramework(testDirectory);
+            var mockProj = ProjectRootElement.Create();
+
+            var migrationSettings =
+                MigrationSettings.CreateMigrationSettingsTestHook(testDirectory, testDirectory, mockProj);
+            var migrationInputs = new MigrationRuleInputs(
+                projectContexts,
+                mockProj,
+                mockProj.AddItemGroup(),
+                mockProj.AddPropertyGroup());
+
+            new MigrateTFMRule().Apply(migrationSettings, migrationInputs);
+
+            var reason = "Should not add runtime identifiers for libraries";
+            mockProj.Properties.Count(p => p.Name == "RuntimeIdentifiers").Should().Be(0, reason);
+            mockProj.Properties.Count(p => p.Name == "RuntimeIdentifier").Should().Be(0, reason);
         }
     }
 }

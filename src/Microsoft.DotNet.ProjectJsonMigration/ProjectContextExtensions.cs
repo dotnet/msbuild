@@ -38,9 +38,31 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             return projectContexts.Any(p => p.IsFullFramework());
         }
 
+        public static bool HasExeOutput(this IEnumerable<ProjectContext> projectContexts)
+        {
+            return projectContexts.Any(p => p.IsExe());
+        }
+
+        public static bool HasLibraryOutput(this IEnumerable<ProjectContext> projectContexts)
+        {
+            return projectContexts.Any(p => p.IsLibrary());
+        }
+
         public static bool IsFullFramework(this ProjectContext projectContext)
         {
             return !projectContext.TargetFramework.IsPackageBased;
+        }
+
+        public static bool IsExe(this ProjectContext projectContext)
+        {
+            var compilerOptions = projectContext.ProjectFile.GetCompilerOptions(null, null);
+            return (compilerOptions.EmitEntryPoint != null && compilerOptions.EmitEntryPoint.Value);
+        }
+
+        public static bool IsLibrary(this ProjectContext projectContext)
+        {
+            var compilerOptions = projectContext.ProjectFile.GetCompilerOptions(null, null);
+            return (compilerOptions.EmitEntryPoint == null || !compilerOptions.EmitEntryPoint.Value);
         }
     }
 }
