@@ -13,6 +13,7 @@ using Microsoft.DotNet.Internal.ProjectModel;
 using Microsoft.DotNet.Tools.Common;
 using NuGet.Frameworks;
 using NuGet.LibraryModel;
+using NuGet.Versioning;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
@@ -274,14 +275,17 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
         private PackageDependencyInfo ToPackageDependencyInfo(
             ProjectLibraryDependency dependency,
-            IDictionary<string, PackageDependencyInfo> dependencyToVersionMap)
+            IDictionary<PackageDependencyInfo, PackageDependencyInfo> dependencyToVersionMap)
         {
             var name = dependency.Name;
             var version = dependency.LibraryRange?.VersionRange?.OriginalString;
 
-            if (dependencyToVersionMap.ContainsKey(name))
+            var possibleMappings = dependencyToVersionMap.Where(c => c.Key.Name == name);
+            if (possibleMappings.Any())
             {
-                var dependencyInfo = dependencyToVersionMap[name];
+                var possibleVersions = possibleMappings.Select(p => VersionRange.Parse(p.Key.Version));
+                var bestMatchVersion = possibleVersions.First(p => p.Satisfies(dependency.LibraryRange?.VersionRange?.ToNonSnapshotRange().MinVersion));
+                var dependencyInfo = possibleMappings.First(c => c.Key.Version == bestMatchVersion.OriginalString).Value;
                 if (dependencyInfo == null)
                 {
                     return null;
