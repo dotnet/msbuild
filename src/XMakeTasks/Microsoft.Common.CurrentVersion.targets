@@ -4221,6 +4221,35 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!--
     ============================================================
+                                        GetCopyToPublishDirectoryItems
+
+    Default implementation of GetCopyToPublishDirectoryItems for projects that do not 
+    use Microsoft.NET.Sdk. It simply returns whatever GetCopyToOutputDirectoryItems 
+    does with CopyToPublishDirectory implied  by CopyToOutputDirectory, which is the 
+    same as Microsoft.NET.Sdk default when its CopyToPublishDirectory is not used. 
+
+    Microsoft.NET.Sdk projects  will override this to allow the publish output to be
+    customized independently from the build output.
+
+    Having a default implementation here allows the Microsoft.NET.Sdk Publish target
+    to work when a Microsoft.NET.Sdk-based project references a non-Microsoft.NET.Sdk-based
+    project.
+    ============================================================
+    -->
+    <Target
+      Name="GetCopyToPublishDirectoryItems" 
+      DependsOnTargets="GetCopyToOutputDirectoryItems"
+      Returns="@(AllPublishItemsFullPathWithTargetPath)">
+
+    <ItemGroup>
+      <AllPublishItemsFullPathWithTargetPath Include="@(AllItemsFullPathWithTargetPath)">
+        <CopyToPublishDirectory>%(CopyToOutputDirectory)</CopyToPublishDirectory>
+      </AllPublishItemsFullPathWithTargetPath>
+    </ItemGroup>
+  </Target>
+
+  <!--
+    ============================================================
                                         _CopyOutOfDateSourceItemsToOutputDirectory
 
     Copy files that have the CopyToOutputDirectory attribute set to 'PreserveNewest'.
