@@ -3,6 +3,7 @@
 
 // Import the utility functionality.
 
+import jobs.generation.ArchivalSettings;
 import jobs.generation.Utilities;
 
 def project = GithubProject
