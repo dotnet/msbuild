@@ -4,20 +4,7 @@
             "certificate": "Microsoft402",
             "strongName": "MsSharedLib72",
             "values": [
-                "Raw/Microsoft.NET.Build.Tasks.dll",
-                "Raw/cs/Microsoft.NET.Build.Tasks.resources.dll",
-                "Raw/de/Microsoft.NET.Build.Tasks.resources.dll",
-                "Raw/es/Microsoft.NET.Build.Tasks.resources.dll",
-                "Raw/fr/Microsoft.NET.Build.Tasks.resources.dll",
-                "Raw/it/Microsoft.NET.Build.Tasks.resources.dll",
-                "Raw/ja/Microsoft.NET.Build.Tasks.resources.dll",
-                "Raw/ko/Microsoft.NET.Build.Tasks.resources.dll",
-                "Raw/pl/Microsoft.NET.Build.Tasks.resources.dll",
-                "Raw/pt-BR/Microsoft.NET.Build.Tasks.resources.dll",
-                "Raw/ru/Microsoft.NET.Build.Tasks.resources.dll",
-                "Raw/tr/Microsoft.NET.Build.Tasks.resources.dll",
-                "Raw/zh-Hans/Microsoft.NET.Build.Tasks.resources.dll",
-                "Raw/zh-Hant/Microsoft.NET.Build.Tasks.resources.dll"
+                "Microsoft.NET.Build.Tasks.dll"
             ]
         }
     ]

@@ -4,7 +4,6 @@
 
   <PropertyGroup>
     <NuGetOutDir>$(OutDir)Packages\</NuGetOutDir>
-    <OutDir>$(OutDir)Raw\</OutDir>
   </PropertyGroup>
 
   <ItemGroup>
@@ -46,7 +45,7 @@
       Command="$(NuGetDownloadCommand)"
       />
 
-    <Exec Command="$(NuGetTool) Pack &quot;$(MSBuildProjectDirectory)\%(NuSpec.Identity)&quot; -verbosity quiet -basepath &quot;$(RootOutDir.TrimEnd('\'))&quot; -outputdirectory &quot;$(NuGetOutDir.TrimEnd('\'))&quot; %(NuSpec.NuGetArguments)" 
+    <Exec Command="$(NuGetTool) Pack &quot;$(MSBuildProjectDirectory)\%(NuSpec.Identity)&quot; -verbosity quiet -basepath &quot;$(OutDir.TrimEnd('\'))&quot; -outputdirectory &quot;$(NuGetOutDir.TrimEnd('\'))&quot; %(NuSpec.NuGetArguments)" 
           Condition="'$(OS)' == 'Windows_NT'"/>
   </Target>
 

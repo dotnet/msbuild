@@ -13,9 +13,7 @@
 
     <OutputPath>$([System.IO.Path]::GetFullPath('$(RepositoryRootDirectory)bin\$(Configuration)'))\</OutputPath>
     <OutDir>$(OutputPath)</OutDir>
-    <RootOutDir>$(OutDir)</RootOutDir>
-    <BaseIntermediateOutputPath>$([System.IO.Path]::GetFullPath('$(RepositoryRootDirectory)bin\obj\$(MSBuildProjectName)'))\</BaseIntermediateOutputPath>
-    <RawOutDir>$(OutDir)Raw\</RawOutDir>
+    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' == ''">$([System.IO.Path]::GetFullPath('$(RepositoryRootDirectory)bin\obj\$(MSBuildProjectName)'))\</BaseIntermediateOutputPath>
     <PackagesLayoutDir>$(OutDir)PackagesLayout\</PackagesLayoutDir>
     <PackagesLayoutToolsDir>$(PackagesLayoutDir)tools\</PackagesLayoutToolsDir>
     <PackagesLayoutToolsNet46Dir>$(PackagesLayoutToolsDir)net46\</PackagesLayoutToolsNet46Dir>
