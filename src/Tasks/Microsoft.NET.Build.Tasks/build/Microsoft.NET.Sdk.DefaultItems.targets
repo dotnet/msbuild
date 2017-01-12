@@ -57,10 +57,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="CheckForDuplicateItems" BeforeTargets="_CheckForInvalidConfigurationAndPlatform">
 
     <PropertyGroup>
-      <!-- TODO: Create a fwlink for this -->
-      <DefaultItemsMoreInformationLink>https://github.com/dotnet/sdk</DefaultItemsMoreInformationLink>
-
-      <DefaultPackageReferencesEnabled Condition="'$(DisableImplicitFrameworkReferences)' != 'true'">true</DefaultPackageReferencesEnabled>
+      <DefaultItemsMoreInformationLink>https://aka.ms/sdkimplicititems</DefaultItemsMoreInformationLink>
     </PropertyGroup>
 
     <CheckForDuplicateItems
