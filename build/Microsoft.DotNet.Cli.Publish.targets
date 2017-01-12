@@ -28,8 +28,10 @@
     <PropertyGroup>
       <Product>Sdk</Product>
       <ArtifactContainerName>$(ARTIFACT_STORAGE_CONTAINER)</ArtifactContainerName>
+      <ArtifactContainerName Condition="'$(ArtifactContainerName)' == ''">dotnet</ArtifactContainerName>
       <ArtifactCloudDropAccessToken>$(ARTIFACT_STORAGE_KEY)</ArtifactCloudDropAccessToken>
       <ArtifactCloudDropAccountName>$(ARTIFACT_STORAGE_ACCOUNT)</ArtifactCloudDropAccountName>
+      <ArtifactCloudDropAccountName Condition="'$(ArtifactCloudDropAccountName)' == ''">dotnetcli</ArtifactCloudDropAccountName>
       <DotnetBlobRootUrl>https://$(ArtifactCloudDropAccountName).blob.core.windows.net/$(ArtifactContainerName)</DotnetBlobRootUrl>
       <ChecksumContainerName>$(CHECKSUM_STORAGE_CONTAINER)</ChecksumContainerName>
       <ChecksumCloudDropAccessToken>$(CHECKSUM_STORAGE_KEY)</ChecksumCloudDropAccessToken>
