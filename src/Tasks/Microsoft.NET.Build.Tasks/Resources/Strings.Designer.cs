@@ -341,6 +341,15 @@ namespace Microsoft.NET.Build.Tasks {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A PackageReference for &apos;{0}&apos; was included in your project. This package is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}.
+        /// </summary>
+        internal static string PackageReferenceOverrideWarning {
+            get {
+                return ResourceManager.GetString("PackageReferenceOverrideWarning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Assets are consumed from project &apos;{0}&apos;, but no corresponding MSBuild project path was  found in &apos;{1}&apos;..
         /// </summary>
         internal static string ProjectAssetsConsumedWithoutMSBuildProjectPath {

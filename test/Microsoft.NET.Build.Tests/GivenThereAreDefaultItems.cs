@@ -434,12 +434,13 @@ namespace Microsoft.NET.Build.Tests
         {
             var testProject = new TestProject()
             {
-                Name = "DeduplicatePackageReference",
+                //  Underscore is in the project name so we can verify that the warning message output contained "PackageReference"
+                Name = "DeduplicatePackage_Reference",
                 TargetFrameworks = "netstandard1.6",
                 IsSdkProject = true
             };
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, "DeduplicatePackageReference")
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, "DeduplicatePackage_Reference")
                 .WithProjectChanges(project =>
                 {
                     var ns = project.Root.Name.Namespace;
@@ -453,17 +454,18 @@ namespace Microsoft.NET.Build.Tests
                     project.Root.Add(itemGroup);
                     itemGroup.Add(new XElement(ns + "PackageReference",
                         new XAttribute("Include", "NETStandard.Library"), new XAttribute("Version", "1.6.1")));
-                    itemGroup.Add(new XElement(ns + "PackageReference",
-                        new XAttribute("Include", "NewtonSoft.Json"), new XAttribute("Version", "9.0.1")));
                 })
                 .Restore(testProject.Name);
 
             var buildCommand = new BuildCommand(Stage0MSBuild, Path.Combine(testAsset.TestRoot, testProject.Name));
 
             buildCommand
+                .CaptureStdOut()
                 .Execute()
                 .Should()
-                .Pass();
+                .Pass()
+                .And.HaveStdOutContaining("PackageReference")
+                .And.HaveStdOutContaining("'NETStandard.Library'");
         }
         
         void RemoveGeneratedCompileItems(List<string> compileItems)

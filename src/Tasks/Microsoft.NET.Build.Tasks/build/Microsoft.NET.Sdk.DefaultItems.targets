@@ -52,15 +52,20 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Content Remove="$(DefaultRemoves)" />
   </ItemGroup>
 
-  <UsingTask TaskName="CheckForDuplicateItemsToRemove" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <UsingTask TaskName="CheckForImplicitPackageReferenceOverrides" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   
   <!-- Remove package references with metadata IsImplicitlyDefined = true, if there are other PackageReference items with the same identity -->
-  <Target Name="RemoveOverriddenImplicitPackageReferences" BeforeTargets="_GetRestoreProjectStyle;_CheckForInvalidConfigurationAndPlatform">
-    <CheckForDuplicateItemsToRemove
-        Items="@(PackageReference)"
-        MetadataKeyForItemsToRemove="IsImplicitlyDefined">
+  <Target Name="CheckForImplicitPackageReferenceOverrides" BeforeTargets="_GetRestoreProjectStyle;_CheckForInvalidConfigurationAndPlatform">
+    <PropertyGroup>
+      <!-- TODO: Create a fwlink for this -->
+      <ImplicitPackageReferenceInformationLink>https://github.com/dotnet/sdk</ImplicitPackageReferenceInformationLink>
+    </PropertyGroup>
+    
+    <CheckForImplicitPackageReferenceOverrides
+        PackageReferenceItems="@(PackageReference)"
+        MoreInformationLink="$(ImplicitPackageReferenceInformationLink)">
       <Output TaskParameter="ItemsToRemove" ItemName="_PackageReferenceToRemove" />
-    </CheckForDuplicateItemsToRemove>
+    </CheckForImplicitPackageReferenceOverrides>
 
     <ItemGroup>
       <!-- Note that the condition here is important, otherwise the Remove will operate based just on item identity and remove all items
