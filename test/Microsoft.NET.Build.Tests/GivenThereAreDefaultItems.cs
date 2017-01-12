@@ -429,6 +429,43 @@ namespace Microsoft.NET.Build.Tests
                 .And.NotHaveStdOutMatching("EnableDefaultCompileItems");
         }
 
+        [Fact]
+        public void Implicit_package_references_are_overridden_by_PackageReference_includes_in_the_project_file()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DeduplicatePackageReference",
+                TargetFrameworks = "netstandard1.6",
+                IsSdkProject = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, "DeduplicatePackageReference")
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+
+                    //  Set the implicit package reference version to something that doesn't exist to verify that the Include
+                    //  in the project file overrides the implicit one
+                    project.Root.Element(ns + "PropertyGroup").Add(
+                        new XElement(ns + "NetStandardImplicitPackageVersion", "0.1.0-does-not-exist"));
+
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    project.Root.Add(itemGroup);
+                    itemGroup.Add(new XElement(ns + "PackageReference",
+                        new XAttribute("Include", "NETStandard.Library"), new XAttribute("Version", "1.6.1")));
+                    itemGroup.Add(new XElement(ns + "PackageReference",
+                        new XAttribute("Include", "NewtonSoft.Json"), new XAttribute("Version", "9.0.1")));
+                })
+                .Restore(testProject.Name);
+
+            var buildCommand = new BuildCommand(Stage0MSBuild, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+        }
+        
         void RemoveGeneratedCompileItems(List<string> compileItems)
         {
             //  Remove auto-generated compile items.

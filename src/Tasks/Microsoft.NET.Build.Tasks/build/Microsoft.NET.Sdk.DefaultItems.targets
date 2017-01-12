@@ -52,6 +52,24 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Content Remove="$(DefaultRemoves)" />
   </ItemGroup>
 
+  <UsingTask TaskName="CheckForDuplicateItemsToRemove" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  
+  <!-- Remove package references with metadata IsImplicitlyDefined = true, if there are other PackageReference items with the same identity -->
+  <Target Name="RemoveOverriddenImplicitPackageReferences" BeforeTargets="_GetRestoreProjectStyle;_CheckForInvalidConfigurationAndPlatform">
+    <CheckForDuplicateItemsToRemove
+        Items="@(PackageReference)"
+        MetadataKeyForItemsToRemove="IsImplicitlyDefined">
+      <Output TaskParameter="ItemsToRemove" ItemName="_PackageReferenceToRemove" />
+    </CheckForDuplicateItemsToRemove>
+
+    <ItemGroup>
+      <!-- Note that the condition here is important, otherwise the Remove will operate based just on item identity and remove all items
+           that had duplicates, instead of leaving the ones without IsImplicitlyDefined set to true. -->
+      <PackageReference Remove="@(_PackageReferenceToRemove)" Condition="'%(PackageReference.IsImplicitlyDefined)' == 'true' "/>
+    </ItemGroup>
+    
+  </Target>
+
   <UsingTask TaskName="CheckForDuplicateItems" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <Target Name="CheckForDuplicateItems" BeforeTargets="_CheckForInvalidConfigurationAndPlatform">

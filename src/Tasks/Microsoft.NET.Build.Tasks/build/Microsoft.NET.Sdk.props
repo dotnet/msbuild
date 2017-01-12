@@ -90,13 +90,13 @@ Copyright (c) .NET Foundation. All rights reserved.
       We can refer here in the .props file to properties set in the .targets files because items and their conditions are
       evaluated in the second pass of evaluation, after all properties have been evaluated. -->
   <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETStandard'">
-    <PackageReference Include="NETStandard.Library" Version="$(NetStandardImplicitPackageVersion)"/>
+    <PackageReference Include="NETStandard.Library" Version="$(NetStandardImplicitPackageVersion)" IsImplicitlyDefined="true"/>
   </ItemGroup>
 
   <!-- The reference to the Microsoft.NETCore.App currently needs to match the target framework version.  So mark it as
        ReadOnly so it won't show updates to the package in the package manager UI. -->
   <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
-    <PackageReference Include="Microsoft.NETCore.App" Version="$(NetCoreAppImplicitPackageVersion)" ReadOnly="true" />
+    <PackageReference Include="Microsoft.NETCore.App" Version="$(NetCoreAppImplicitPackageVersion)" IsImplicitlyDefined="true" />
   </ItemGroup>
 
   <!-- Temporary workarounds -->
