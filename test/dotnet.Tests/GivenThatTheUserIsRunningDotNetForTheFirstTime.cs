@@ -93,7 +93,6 @@ A command is running to initially populate your local package cache, to improve 
                 "microsoft.netcore.app",
                 "microsoft.aspnetcore.diagnostics",
                 "microsoft.aspnetcore.mvc",
-                "microsoft.aspnetcore.razor.tools",
                 "microsoft.aspnetcore.routing",
                 "microsoft.aspnetcore.server.iisintegration",
                 "microsoft.aspnetcore.server.kestrel",
@@ -104,7 +103,7 @@ A command is running to initially populate your local package cache, to improve 
                 "microsoft.extensions.logging.console",
                 "microsoft.extensions.logging.debug",
                 "microsoft.extensions.options.configurationextensions",
-                "microsoft.visualstudio.web.browserlink.loader",
+                "microsoft.visualstudio.web.browserlink",
             };
 
             _nugetCacheFolder
@@ -117,7 +116,7 @@ A command is running to initially populate your local package cache, to improve 
 
             _nugetCacheFolder
                 .GetDirectory("microsoft.aspnetcore.mvc")
-                .Should().HaveDirectories(new string[] { "1.0.1", "1.1.0" });
+                .Should().HaveDirectories(new string[] { "1.0.2", "1.1.0" });
         }
 
         private string GetDotnetVersion()
