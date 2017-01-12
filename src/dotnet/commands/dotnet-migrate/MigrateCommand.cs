@@ -309,7 +309,7 @@ namespace Microsoft.DotNet.Tools.Migrate
 
                 if (!projects.Any())
                 {
-                    throw new Exception("Unable to find any projects in global.json");
+                    throw new GracefulException("Unable to find any projects in global.json");
                 }
             }
             else if (File.Exists(projectArg) && 
@@ -319,7 +319,7 @@ namespace Microsoft.DotNet.Tools.Migrate
 
                 if (!projects.Any())
                 {
-                    throw new Exception($"Unable to find any projects in {projectArg}");
+                    throw new GracefulException($"Unable to find any projects in {projectArg}");
                 }
             }
             else if (Directory.Exists(projectArg))
@@ -328,12 +328,12 @@ namespace Microsoft.DotNet.Tools.Migrate
 
                 if (!projects.Any())
                 {
-                    throw new Exception($"No project.json file found in '{projectArg}'");
+                    throw new GracefulException($"No project.json file found in '{projectArg}'");
                 }
             }
             else
             {
-                throw new Exception($"Invalid project argument - '{projectArg}' is not a project.json, global.json, or solution.sln file and a directory named '{projectArg}' doesn't exist.");
+                throw new GracefulException($"Invalid project argument - '{projectArg}' is not a project.json, global.json, or solution.sln file and a directory named '{projectArg}' doesn't exist.");
             }
 
             foreach (var project in projects)
@@ -346,7 +346,7 @@ namespace Microsoft.DotNet.Tools.Migrate
         {
             if (variable == null)
             {
-                throw new Exception(message);
+                throw new GracefulException(message);
             }
         }
 
@@ -359,14 +359,14 @@ namespace Microsoft.DotNet.Tools.Migrate
                 return projectJson;
             }
 
-            throw new Exception($"Unable to find project file at {projectJson}");
+            throw new GracefulException($"Unable to find project file at {projectJson}");
         }
 
         private IEnumerable<string> GetProjectsFromGlobalJson(string globalJson)
         {
             if (!File.Exists(globalJson))
             {
-                throw new Exception($"Unable to find global settings file at {globalJson}");
+                throw new GracefulException($"Unable to find global settings file at {globalJson}");
             }
 
             var searchPaths = ProjectDependencyFinder.GetGlobalPaths(Path.GetDirectoryName(globalJson));
@@ -396,7 +396,7 @@ namespace Microsoft.DotNet.Tools.Migrate
         {
             if (!File.Exists(slnPath))
             {
-                throw new Exception($"Unable to find the solution file at {slnPath}");
+                throw new GracefulException($"Unable to find the solution file at {slnPath}");
             }
 
             _slnFile = SlnFile.Read(slnPath);

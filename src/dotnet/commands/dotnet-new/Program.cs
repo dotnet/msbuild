@@ -155,19 +155,7 @@ namespace Microsoft.DotNet.Tools.New
                 return dotnetNew.CreateEmptyProject(language.Name, fullTemplateName);
             });
 
-            try
-            {
-                return app.Execute(args);
-            }
-            catch (Exception ex)
-            {
-#if DEBUG
-                Reporter.Error.WriteLine(ex.ToString());
-#else
-                Reporter.Error.WriteLine(ex.Message);
-#endif
-                return 1;
-            }
+            return app.Execute(args);
         }
     }
 }

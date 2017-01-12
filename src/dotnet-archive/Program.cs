@@ -90,21 +90,7 @@ namespace Microsoft.DotNet.Tools.Archive
                 return 0;
             });
 
-            try
-            {
-                return app.Execute(args);
-            }
-            catch (Exception ex)
-            {
-#if DEBUG
-                //Reporter.Error.WriteLine(ex.ToString());
-                Console.WriteLine(ex.ToString());
-#else
-                // Reporter.Error.WriteLine(ex.Message);
-                Console.WriteLine(ex.Message);
-#endif
-                return 1;
-            }
+            return app.Execute(args);
         }        
     }
 }

@@ -78,15 +78,16 @@ namespace Microsoft.DotNet.Tools.Migrate
             {
                 return app.Execute(args);
             }
-            catch (Exception ex)
+            catch (GracefulException e)
             {
-#if DEBUG
-                Reporter.Error.WriteLine(ex.ToString());
-#else
-                Reporter.Error.WriteLine(ex.Message);
-#endif
+                Reporter.Error.WriteLine(e.Message);
                 Reporter.Error.WriteLine(LocalizableStrings.MigrationFailedError);
                 return 1;
+            }
+            catch (Exception e)
+            {
+                Reporter.Error.WriteLine(LocalizableStrings.MigrationFailedError);
+                throw e;
             }
         }
     }
