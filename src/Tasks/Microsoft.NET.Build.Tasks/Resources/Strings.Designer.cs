@@ -197,29 +197,11 @@ namespace Microsoft.NET.Build.Tasks {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to  The .NET SDK includes {0} items from your project directory by default..
-        /// </summary>
-        internal static string DuplicateItemsDefaultExplanation {
-            get {
-                return ResourceManager.GetString("DuplicateItemsDefaultExplanation", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Duplicate {0} items were included.{1}  The duplicate items were: {2}.
+        ///   Looks up a localized string similar to Duplicate {0} items were included. The .NET SDK includes {0} items from your project directory by default. You can either remove these items from your project file, or set the &apos;{1}&apos; property to &apos;{2}&apos; if you want to explicitly include them in your project file. The duplicate items were: {3}.
         /// </summary>
         internal static string DuplicateItemsError {
             get {
                 return ResourceManager.GetString("DuplicateItemsError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to  You can either remove these items from your project file, or set the &apos;{0}&apos; property to &apos;{1}&apos; if you want to explicitly include them in your project file.{2}.
-        /// </summary>
-        internal static string DuplicateItemsHowToFix {
-            get {
-                return ResourceManager.GetString("DuplicateItemsHowToFix", resourceCulture);
             }
         }
         
@@ -238,15 +220,6 @@ namespace Microsoft.NET.Build.Tasks {
         internal static string ErrorsOccurredWhenEmittingSatelliteAssembly {
             get {
                 return ResourceManager.GetString("ErrorsOccurredWhenEmittingSatelliteAssembly", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to  For more information, see {0}.
-        /// </summary>
-        internal static string ForMoreInformation {
-            get {
-                return ResourceManager.GetString("ForMoreInformation", resourceCulture);
             }
         }
         

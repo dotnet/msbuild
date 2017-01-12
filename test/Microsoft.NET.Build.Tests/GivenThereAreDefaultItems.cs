@@ -424,7 +424,8 @@ namespace Microsoft.NET.Build.Tests
                 .And.HaveStdOutContaining("DuplicateCompileItems.cs")
                 //  Class1.cs wasn't included multiple times, so it shouldn't be mentioned
                 .And.NotHaveStdOutMatching("Class1.cs")
-                //  Default items weren't enabled, so the message shouldn't include the information about default compile items
+                //  Default items weren't enabled, so the error message should come from the C# compiler and shouldn't include the information about default compile items
+                .And.HaveStdOutContaining("MSB3105")
                 .And.NotHaveStdOutMatching("EnableDefaultCompileItems");
         }
 

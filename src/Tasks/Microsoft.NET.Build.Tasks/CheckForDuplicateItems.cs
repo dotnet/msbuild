@@ -19,45 +19,31 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool DefaultItemsOfThisTypeEnabled { get; set; }
 
-        public bool DefaultItemsWereIncluded { get; set; }
-
+        [Required]
         public string PropertyNameToDisableDefaultItems { get; set; }
 
         public string PropertyValueToDisableDefaultItems { get; set; } = "false";
 
+        [Required]
         public string MoreInformationLink { get; set; }
 
         protected override void ExecuteCore()
         {
-            var duplicateItems = Items.GroupBy(i => i.ItemSpec).Where(g => g.Count() > 1).ToList();
-            if (duplicateItems.Any())
+            if (DefaultItemsEnabled && DefaultItemsOfThisTypeEnabled)
             {
-                string defaultExplanation = "";
-                if (DefaultItemsEnabled && DefaultItemsOfThisTypeEnabled)
+                var duplicateItems = Items.GroupBy(i => i.ItemSpec).Where(g => g.Count() > 1).ToList();
+                if (duplicateItems.Any())
                 {
-                    string moreInformation = "";
-                    if (!string.IsNullOrEmpty(MoreInformationLink))
-                    {
-                        moreInformation = string.Format(CultureInfo.CurrentCulture, Strings.ForMoreInformation, MoreInformationLink);
-                    }
+                    string duplicateItemsFormatted = string.Join("; ", duplicateItems.Select(d => $"'{d.Key}'"));
 
-                    defaultExplanation = string.Format(CultureInfo.CurrentCulture, Strings.DuplicateItemsDefaultExplanation, ItemName);
-
-                    defaultExplanation += string.Format(CultureInfo.CurrentCulture, Strings.DuplicateItemsHowToFix,
+                    string message = string.Format(CultureInfo.CurrentCulture, Strings.DuplicateItemsError,
+                        ItemName,
                         PropertyNameToDisableDefaultItems,
                         PropertyValueToDisableDefaultItems,
-                        moreInformation);
+                        duplicateItemsFormatted);
+
+                    Log.LogError(message);
                 }
-
-                //  TODO: Does quoting and the separator between items in the list need to be localized?
-                string duplicateItemsFormatted = string.Join(", ", duplicateItems.Select(d => $"'{d.Key}'"));
-
-                string message = string.Format(CultureInfo.CurrentCulture, Strings.DuplicateItemsError,
-                    ItemName,
-                    defaultExplanation,
-                    duplicateItemsFormatted);
-
-                Log.LogError(message);
             }
         }
     }
