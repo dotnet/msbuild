@@ -25,25 +25,25 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Theory]
-        [InlineData("Microsoft.AspNetCore.Antiforgery", "1.0.0", "Microsoft.AspNetCore.Antiforgery", ConstantPackageVersions.AspNet101PackagesVersion)]
-        [InlineData("Microsoft.AspNetCore.Mvc", "1.0.0", "Microsoft.AspNetCore.Mvc", ConstantPackageVersions.AspNet101PackagesVersion)]
-        [InlineData("Microsoft.AspNetCore.Mvc.Abstractions", "1.0.0", "Microsoft.AspNetCore.Mvc.Abstractions", ConstantPackageVersions.AspNet101PackagesVersion)]
-        [InlineData("Microsoft.AspNetCore.Mvc.ApiExplorer", "1.0.0", "Microsoft.AspNetCore.Mvc.ApiExplorer", ConstantPackageVersions.AspNet101PackagesVersion)]
-        [InlineData("Microsoft.AspNetCore.Mvc.Core", "1.0.0", "Microsoft.AspNetCore.Mvc.Core", ConstantPackageVersions.AspNet101PackagesVersion)]
-        [InlineData("Microsoft.AspNetCore.Mvc.Cors", "1.0.0", "Microsoft.AspNetCore.Mvc.Cors", ConstantPackageVersions.AspNet101PackagesVersion)]
-        [InlineData("Microsoft.AspNetCore.Mvc.DataAnnotations", "1.0.0", "Microsoft.AspNetCore.Mvc.DataAnnotations", ConstantPackageVersions.AspNet101PackagesVersion)]
-        [InlineData("Microsoft.AspNetCore.Mvc.Formatters.Json", "1.0.0", "Microsoft.AspNetCore.Mvc.Formatters.Json", ConstantPackageVersions.AspNet101PackagesVersion)]
-        [InlineData("Microsoft.AspNetCore.Mvc.Formatters.Xml", "1.0.0", "Microsoft.AspNetCore.Mvc.Formatters.Xml", ConstantPackageVersions.AspNet101PackagesVersion)]
-        [InlineData("Microsoft.AspNetCore.Mvc.Localization", "1.0.0", "Microsoft.AspNetCore.Mvc.Localization", ConstantPackageVersions.AspNet101PackagesVersion)]
-        [InlineData("Microsoft.AspNetCore.Mvc.Razor", "1.0.0", "Microsoft.AspNetCore.Mvc.Razor", ConstantPackageVersions.AspNet101PackagesVersion)]
-        [InlineData("Microsoft.AspNetCore.Mvc.Razor.Host", "1.0.0", "Microsoft.AspNetCore.Mvc.Razor.Host", ConstantPackageVersions.AspNet101PackagesVersion)]
-        [InlineData("Microsoft.AspNetCore.Mvc.TagHelpers", "1.0.0", "Microsoft.AspNetCore.Mvc.TagHelpers", ConstantPackageVersions.AspNet101PackagesVersion)]
-        [InlineData("Microsoft.AspNetCore.Mvc.ViewFeatures", "1.0.0", "Microsoft.AspNetCore.Mvc.ViewFeatures", ConstantPackageVersions.AspNet101PackagesVersion)]
-        [InlineData("Microsoft.AspNetCore.Mvc.WebApiCompatShim", "1.0.0", "Microsoft.AspNetCore.Mvc.WebApiCompatShim", ConstantPackageVersions.AspNet101PackagesVersion)]
-        [InlineData("Microsoft.AspNetCore.Routing", "1.0.0", "Microsoft.AspNetCore.Routing", ConstantPackageVersions.AspNet101PackagesVersion)]
-        [InlineData("Microsoft.AspNetCore.Routing.Abstractions", "1.0.0", "Microsoft.AspNetCore.Routing.Abstractions", ConstantPackageVersions.AspNet101PackagesVersion)]
-        [InlineData("Microsoft.AspNetCore.Server.Kestrel", "1.0.0", "Microsoft.AspNetCore.Server.Kestrel", ConstantPackageVersions.AspNet101PackagesVersion)]
-        [InlineData("Microsoft.AspNetCore.Server.Kestrel.Https", "1.0.0", "Microsoft.AspNetCore.Server.Kestrel.Https", ConstantPackageVersions.AspNet101PackagesVersion)]
+        [InlineData("Microsoft.AspNetCore.Antiforgery", "1.0.0", "Microsoft.AspNetCore.Antiforgery", ConstantPackageVersions.AspNetLTSPackagesVersion)]
+        [InlineData("Microsoft.AspNetCore.Mvc", "1.0.0", "Microsoft.AspNetCore.Mvc", ConstantPackageVersions.AspNetLTSPackagesVersion)]
+        [InlineData("Microsoft.AspNetCore.Mvc.Abstractions", "1.0.0", "Microsoft.AspNetCore.Mvc.Abstractions", ConstantPackageVersions.AspNetLTSPackagesVersion)]
+        [InlineData("Microsoft.AspNetCore.Mvc.ApiExplorer", "1.0.0", "Microsoft.AspNetCore.Mvc.ApiExplorer", ConstantPackageVersions.AspNetLTSPackagesVersion)]
+        [InlineData("Microsoft.AspNetCore.Mvc.Core", "1.0.0", "Microsoft.AspNetCore.Mvc.Core", ConstantPackageVersions.AspNetLTSPackagesVersion)]
+        [InlineData("Microsoft.AspNetCore.Mvc.Cors", "1.0.0", "Microsoft.AspNetCore.Mvc.Cors", ConstantPackageVersions.AspNetLTSPackagesVersion)]
+        [InlineData("Microsoft.AspNetCore.Mvc.DataAnnotations", "1.0.0", "Microsoft.AspNetCore.Mvc.DataAnnotations", ConstantPackageVersions.AspNetLTSPackagesVersion)]
+        [InlineData("Microsoft.AspNetCore.Mvc.Formatters.Json", "1.0.0", "Microsoft.AspNetCore.Mvc.Formatters.Json", ConstantPackageVersions.AspNetLTSPackagesVersion)]
+        [InlineData("Microsoft.AspNetCore.Mvc.Formatters.Xml", "1.0.0", "Microsoft.AspNetCore.Mvc.Formatters.Xml", ConstantPackageVersions.AspNetLTSPackagesVersion)]
+        [InlineData("Microsoft.AspNetCore.Mvc.Localization", "1.0.0", "Microsoft.AspNetCore.Mvc.Localization", ConstantPackageVersions.AspNetLTSPackagesVersion)]
+        [InlineData("Microsoft.AspNetCore.Mvc.Razor", "1.0.0", "Microsoft.AspNetCore.Mvc.Razor", ConstantPackageVersions.AspNetLTSPackagesVersion)]
+        [InlineData("Microsoft.AspNetCore.Mvc.Razor.Host", "1.0.0", "Microsoft.AspNetCore.Mvc.Razor.Host", ConstantPackageVersions.AspNetLTSPackagesVersion)]
+        [InlineData("Microsoft.AspNetCore.Mvc.TagHelpers", "1.0.0", "Microsoft.AspNetCore.Mvc.TagHelpers", ConstantPackageVersions.AspNetLTSPackagesVersion)]
+        [InlineData("Microsoft.AspNetCore.Mvc.ViewFeatures", "1.0.0", "Microsoft.AspNetCore.Mvc.ViewFeatures", ConstantPackageVersions.AspNetLTSPackagesVersion)]
+        [InlineData("Microsoft.AspNetCore.Mvc.WebApiCompatShim", "1.0.0", "Microsoft.AspNetCore.Mvc.WebApiCompatShim", ConstantPackageVersions.AspNetLTSPackagesVersion)]
+        [InlineData("Microsoft.AspNetCore.Routing", "1.0.0", "Microsoft.AspNetCore.Routing", ConstantPackageVersions.AspNetLTSPackagesVersion)]
+        [InlineData("Microsoft.AspNetCore.Routing.Abstractions", "1.0.0", "Microsoft.AspNetCore.Routing.Abstractions", ConstantPackageVersions.AspNetLTSPackagesVersion)]
+        [InlineData("Microsoft.AspNetCore.Server.Kestrel", "1.0.0", "Microsoft.AspNetCore.Server.Kestrel", ConstantPackageVersions.AspNetLTSPackagesVersion)]
+        [InlineData("Microsoft.AspNetCore.Server.Kestrel.Https", "1.0.0", "Microsoft.AspNetCore.Server.Kestrel.Https", ConstantPackageVersions.AspNetLTSPackagesVersion)]
         public void ItUpliftsAspNetCorePackages(
             string sourcePackageName,
             string sourceVersion,
@@ -54,17 +54,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Theory]
-        [InlineData("Microsoft.EntityFrameworkCore", "1.0.0", "Microsoft.EntityFrameworkCore", ConstantPackageVersions.EntityFramework101PackagesVersion)]
-        [InlineData("Microsoft.EntityFrameworkCore.InMemory", "1.0.0", "Microsoft.EntityFrameworkCore.InMemory", ConstantPackageVersions.EntityFramework101PackagesVersion)]
-        [InlineData("Microsoft.EntityFrameworkCore.Relational", "1.0.0", "Microsoft.EntityFrameworkCore.Relational", ConstantPackageVersions.EntityFramework101PackagesVersion)]
-        [InlineData("Microsoft.EntityFrameworkCore.Relational.Design", "1.0.0", "Microsoft.EntityFrameworkCore.Relational.Design", ConstantPackageVersions.EntityFramework101PackagesVersion)]
-        [InlineData("Microsoft.EntityFrameworkCore.Relational.Design.Specification.Tests", "1.0.0", "Microsoft.EntityFrameworkCore.Relational.Design.Specification.Tests", ConstantPackageVersions.EntityFramework101PackagesVersion)]
-        [InlineData("Microsoft.EntityFrameworkCore.Relational.Specification.Tests", "1.0.0", "Microsoft.EntityFrameworkCore.Relational.Specification.Tests", ConstantPackageVersions.EntityFramework101PackagesVersion)]
-        [InlineData("Microsoft.EntityFrameworkCore.Specification.Tests", "1.0.0", "Microsoft.EntityFrameworkCore.Specification.Tests", ConstantPackageVersions.EntityFramework101PackagesVersion)]
-        [InlineData("Microsoft.EntityFrameworkCore.Sqlite", "1.0.0", "Microsoft.EntityFrameworkCore.Sqlite", ConstantPackageVersions.EntityFramework101PackagesVersion)]
-        [InlineData("Microsoft.EntityFrameworkCore.Sqlite.Design", "1.0.0", "Microsoft.EntityFrameworkCore.Sqlite.Design", ConstantPackageVersions.EntityFramework101PackagesVersion)]
-        [InlineData("Microsoft.EntityFrameworkCore.SqlServer", "1.0.0", "Microsoft.EntityFrameworkCore.SqlServer", ConstantPackageVersions.EntityFramework101PackagesVersion)]
-        [InlineData("Microsoft.EntityFrameworkCore.SqlServer.Design", "1.0.0", "Microsoft.EntityFrameworkCore.SqlServer.Design", ConstantPackageVersions.EntityFramework101PackagesVersion)]
+        [InlineData("Microsoft.EntityFrameworkCore", "1.0.0", "Microsoft.EntityFrameworkCore", ConstantPackageVersions.EntityFrameworkLTSPackagesVersion)]
+        [InlineData("Microsoft.EntityFrameworkCore.InMemory", "1.0.0", "Microsoft.EntityFrameworkCore.InMemory", ConstantPackageVersions.EntityFrameworkLTSPackagesVersion)]
+        [InlineData("Microsoft.EntityFrameworkCore.Relational", "1.0.0", "Microsoft.EntityFrameworkCore.Relational", ConstantPackageVersions.EntityFrameworkLTSPackagesVersion)]
+        [InlineData("Microsoft.EntityFrameworkCore.Relational.Design", "1.0.0", "Microsoft.EntityFrameworkCore.Relational.Design", ConstantPackageVersions.EntityFrameworkLTSPackagesVersion)]
+        [InlineData("Microsoft.EntityFrameworkCore.Sqlite", "1.0.0", "Microsoft.EntityFrameworkCore.Sqlite", ConstantPackageVersions.EntityFrameworkLTSPackagesVersion)]
+        [InlineData("Microsoft.EntityFrameworkCore.Sqlite.Design", "1.0.0", "Microsoft.EntityFrameworkCore.Sqlite.Design", ConstantPackageVersions.EntityFrameworkLTSPackagesVersion)]
+        [InlineData("Microsoft.EntityFrameworkCore.SqlServer", "1.0.0", "Microsoft.EntityFrameworkCore.SqlServer", ConstantPackageVersions.EntityFrameworkLTSPackagesVersion)]
+        [InlineData("Microsoft.EntityFrameworkCore.SqlServer.Design", "1.0.0", "Microsoft.EntityFrameworkCore.SqlServer.Design", ConstantPackageVersions.EntityFrameworkLTSPackagesVersion)]
         public void ItUpliftsEntityFrameworkCorePackages(
             string sourcePackageName,
             string sourceVersion,
@@ -75,7 +72,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Theory]
-        [InlineData("Microsoft.NETCore.JIT", "1.0.0", "Microsoft.NETCore.JIT", "1.0.5")]
+        [InlineData("Microsoft.NETCore.Jit", "1.0.0", "Microsoft.NETCore.Jit", "1.0.5")]
         [InlineData("Microsoft.NETCore.Runtime.CoreCLR", "1.0.0", "Microsoft.NETCore.Runtime.CoreCLR", "1.0.5")]
         [InlineData("Microsoft.NETCore.DotNetHost", "1.0.0", "Microsoft.NETCore.DotNetHost", "1.0.1")]
         [InlineData("Microsoft.NETCore.DotNetHostPolicy", "1.0.0", "Microsoft.NETCore.DotNetHostPolicy", "1.0.3")]
@@ -100,7 +97,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [InlineData("System.Collections.Concurrent", "1.0.0", "System.Collections.Concurrent", "4.0.12")]
         [InlineData("System.Collections.Immutable", "1.0.0", "System.Collections.Immutable", "1.2.0")]
         [InlineData("System.ComponentModel", "1.0.0", "System.ComponentModel", "4.0.1")]
-        [InlineData("System.ComponentModel.Annotations", "1.0.0", "System.ComponentModel.Annotations", "4.0.1")]
         [InlineData("System.Console", "1.0.0", "System.Console", "4.0.0")]
         [InlineData("System.Diagnostics.Debug", "1.0.0", "System.Diagnostics.Debug", "4.0.11")]
         [InlineData("System.Diagnostics.DiagnosticSource", "1.0.0", "System.Diagnostics.DiagnosticSource", "4.0.0")]
@@ -175,7 +171,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [InlineData("System.Xml.XDocument", "1.0.0", "System.Xml.XDocument", "4.0.11")]
         [InlineData("System.Xml.XmlDocument", "1.0.0", "System.Xml.XmlDocument", "4.0.1")]
         [InlineData("System.Xml.XPath", "1.0.0", "System.Xml.XPath", "4.0.1")]
-        [InlineData("System.Xml.XPath.XmlDocument", "1.0.0", "System.Xml.XPath.XmlDocument", "4.0.1")]
         [InlineData("runtime.native.System", "1.0.0", "runtime.native.System", "4.0.0")]
         [InlineData("runtime.native.System.IO.Compression", "1.0.0", "runtime.native.System.IO.Compression", "4.1.0")]
         [InlineData("runtime.native.System.Net.Http", "1.0.0", "runtime.native.System.Net.Http", "4.0.1")]
@@ -203,11 +198,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Theory]
-        [InlineData("Microsoft.Extensions.Logging", "1.0.0", "Microsoft.Extensions.Logging", ConstantPackageVersions.AspNet101PackagesVersion)]
-        [InlineData("Microsoft.Extensions.Logging.Console", "1.0.0", "Microsoft.Extensions.Logging.Console", ConstantPackageVersions.AspNet101PackagesVersion)]
-        [InlineData("Microsoft.Extensions.Logging.Debug", "1.0.0", "Microsoft.Extensions.Logging.Debug", ConstantPackageVersions.AspNet101PackagesVersion)]
-        [InlineData("Microsoft.Extensions.Configuration.Json", "1.0.0", "Microsoft.Extensions.Configuration.Json", ConstantPackageVersions.AspNet101PackagesVersion)]
-        [InlineData("Microsoft.Extensions.Configuration.UserSecrets", "1.0.0", "Microsoft.Extensions.Configuration.UserSecrets", ConstantPackageVersions.AspNet101PackagesVersion)]
+        [InlineData("Microsoft.Extensions.Logging", "1.0.0", "Microsoft.Extensions.Logging", "1.0.1")]
+        [InlineData("Microsoft.Extensions.Logging.Console", "1.0.0", "Microsoft.Extensions.Logging.Console", "1.0.1")]
+        [InlineData("Microsoft.Extensions.Logging.Debug", "1.0.0", "Microsoft.Extensions.Logging.Debug", "1.0.1")]
+        [InlineData("Microsoft.Extensions.Configuration.Json", "1.0.0", "Microsoft.Extensions.Configuration.Json", "1.0.1")]
+        [InlineData("Microsoft.Extensions.Configuration.UserSecrets", "1.0.0", "Microsoft.Extensions.Configuration.UserSecrets", "1.0.1")]
         public void ItUpliftsMicrosoftExtensionsPackages(
             string sourcePackageName,
             string sourceVersion,
