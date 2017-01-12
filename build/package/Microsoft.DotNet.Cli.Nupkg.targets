@@ -26,7 +26,7 @@
                 Output="$(NupkgOutputDirectory)"
                 ProjectPath="%(ProjectsToPack.Identity)/%(ProjectsToPack.ProjectName).csproj"
                 ToolPath="$(Stage0Directory)"
-                VersionSuffix="preview5-$(NupkgVersionSuffix)"
+                VersionSuffix="rc4-$(NupkgVersionSuffix)"
                 Configuration="$(Configuration)" />
   </Target>
 
