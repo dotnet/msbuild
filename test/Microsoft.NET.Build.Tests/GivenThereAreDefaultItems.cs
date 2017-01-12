@@ -24,7 +24,7 @@ namespace Microsoft.NET.Build.Tests
         {
             Action<GetValuesCommand> setup = getValuesCommand =>
             {
-                foreach (string folder in new[] { "bin", "obj" })
+                foreach (string folder in new[] { "bin", "obj", "packages" })
                 {
                     WriteFile(Path.Combine(getValuesCommand.ProjectRootPath, folder, "source.cs"),
                         "!InvalidCSharp!");
