@@ -2,7 +2,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   
   <ItemGroup>
-    <BundledSdk Include="NuGet.Build.Tasks.Pack" Version="4.0.0-rc3" />
+    <BundledSdk Include="NuGet.Build.Tasks.Pack" Version="$(CLI_NuGet_Version)" />
     <BundledSdk Include="Microsoft.NET.Sdk" Version="$(CLI_NETSDK_Version)" />
     <BundledSdk Include="Microsoft.NET.Sdk.Web" Version="$(CLI_WEBSDK_Version)" />
     <BundledSdk Include="Microsoft.NET.Sdk.Publish" Version="$(CLI_WEBSDK_Version)" />

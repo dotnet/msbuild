@@ -7,6 +7,7 @@ using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace Microsoft.DotNet.Migration.Tests
@@ -37,11 +38,11 @@ namespace Microsoft.DotNet.Migration.Tests
                 "PJAppWithSlnAndXprojRefThatRefsCsprojWhereSlnDoesNotRefCsproj");
         }
 
-        private void MigrateAndBuild(string groupName, string projectName)
+        private void MigrateAndBuild(string groupName, string projectName, [CallerMemberName] string callingMethod = "", string identifier = "")
         {
             var projectDirectory = TestAssets
                 .Get(groupName, projectName)
-                .CreateInstance()
+                .CreateInstance(callingMethod: callingMethod, identifier: identifier)
                 .WithSourceFiles()
                 .Root;
 
