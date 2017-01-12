@@ -57,8 +57,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Remove package references with metadata IsImplicitlyDefined = true, if there are other PackageReference items with the same identity -->
   <Target Name="CheckForImplicitPackageReferenceOverrides" BeforeTargets="_GetRestoreProjectStyle;_CheckForInvalidConfigurationAndPlatform">
     <PropertyGroup>
-      <!-- TODO: Create a fwlink for this -->
-      <ImplicitPackageReferenceInformationLink>https://github.com/dotnet/sdk</ImplicitPackageReferenceInformationLink>
+      <ImplicitPackageReferenceInformationLink>https://aka.ms/sdkimplicitrefs</ImplicitPackageReferenceInformationLink>
     </PropertyGroup>
     
     <CheckForImplicitPackageReferenceOverrides
