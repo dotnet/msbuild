@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 using System.IO;
@@ -2077,6 +2078,41 @@ EndGlobal
             instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, null, new List<string> { "My_Project:Six" });
 
             Assert.Equal(1, instances[0].Targets.Count(target => String.Compare(target.Value.Name, "Six", StringComparison.OrdinalIgnoreCase) == 0));
+        }
+
+        /// <summary>
+        /// Verifies that illegal target names don't crash the SolutionProjectGenerator
+        /// </summary>
+        [Fact]
+        public void IllegalUserTargetNamesDoNotThrow()
+        {
+            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper
+            (@"
+                Microsoft Visual Studio Solution File, Format Version 14.00
+                # Visual Studio 2015
+                Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""ClassLibrary1"", ""ClassLibrary1.csproj"", ""{6185CC21-BE89-448A-B3C0-D1C27112E595}""
+                EndProject
+                Global
+	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		                Debug|Any CPU = Debug|Any CPU
+		                Release|Any CPU = Release|Any CPU
+	                EndGlobalSection
+	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
+	                EndGlobalSection
+                EndGlobal
+            ");
+
+            var illegalTargetNamesForCsproj = SolutionProjectGenerator._illegaUserTargetNames.Union(new []{"ClassLibrary1"}).Except(new []{ "GetFrameworkPathAndRedistList" }).ToList();
+            ProjectInstance[]  instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, null, illegalTargetNamesForCsproj);
+
+            foreach (var illegalTargetName in illegalTargetNamesForCsproj)
+            {
+                Assert.Equal(1, instances[0].Targets.Count(target => String.Compare(target.Value.Name, illegalTargetName, StringComparison.OrdinalIgnoreCase) == 0));
+            }
         }
 
         #region Helper Functions
