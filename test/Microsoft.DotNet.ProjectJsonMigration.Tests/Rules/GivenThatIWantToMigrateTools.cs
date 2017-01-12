@@ -12,19 +12,23 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
     public class GivenThatIWantToMigrateTools : PackageDependenciesTestBase
     {
         [Theory]
-        [InlineData("Microsoft.EntityFrameworkCore.Tools", "Microsoft.EntityFrameworkCore.Tools", ConstantPackageVersions.AspNetToolsVersion)]
-        [InlineData("Microsoft.VisualStudio.Web.CodeGenerators.Mvc", "Microsoft.VisualStudio.Web.CodeGeneration.Design", ConstantPackageVersions.AspNetToolsVersion)]
-        public void It_migrates_project_dependencies_to_a_new_name_and_version(
+        [InlineData("Microsoft.EntityFrameworkCore.Tools", "1.0.0-preview2-final", "Microsoft.EntityFrameworkCore.Tools", ConstantPackageVersions.AspNetToolsVersion)]
+        [InlineData("Microsoft.VisualStudio.Web.CodeGenerators.Mvc", "1.0.0-preview2-final", "Microsoft.VisualStudio.Web.CodeGeneration.Design", ConstantPackageVersions.AspNetToolsVersion)]
+        [InlineData("Microsoft.VisualStudio.Web.CodeGenerators.Mvc", "1.0.0-*", "Microsoft.VisualStudio.Web.CodeGeneration.Design", ConstantPackageVersions.AspNetToolsVersion)]
+        [InlineData("Microsoft.VisualStudio.Web.CodeGenerators.Mvc", "1.0.1", "Microsoft.VisualStudio.Web.CodeGeneration.Design", ConstantPackageVersions.AspNetToolsVersion)]
+        [InlineData("Microsoft.VisualStudio.Web.CodeGenerators.Mvc", "1.0.0-preview3-final", "Microsoft.VisualStudio.Web.CodeGeneration.Design", ConstantPackageVersions.AspNetToolsVersion)]
+        [InlineData("Microsoft.VisualStudio.Web.CodeGenerators.Mvc", "1.1.0-preview4-final", "Microsoft.VisualStudio.Web.CodeGeneration.Design", ConstantPackageVersions.AspNet110ToolsVersion)]
+        public void ItMigratesProjectDependenciesToANewNameAndVersion(
             string sourceToolName,
+            string sourceVersion,
             string targetToolName,
             string targetVersion)
         {
-            const string anyVersion = "1.0.0-preview2-final";
-            var mockProj = RunPackageDependenciesRuleOnPj("{ \"dependencies\": { \"" + sourceToolName + "\" : { \"version\": \"" + anyVersion + "\", \"type\": \"build\" } } }");
+            var mockProj = RunPackageDependenciesRuleOnPj("{ \"dependencies\": { \"" + sourceToolName + "\" : { \"version\": \"" + sourceVersion + "\", \"type\": \"build\" } } }");
             
             var packageRef = mockProj.Items.First(i => i.Include == targetToolName && i.ItemType == "PackageReference");
 
-            packageRef.GetMetadataWithName("Version").Value.Should().Be(ConstantPackageVersions.AspNetToolsVersion);
+            packageRef.GetMetadataWithName("Version").Value.Should().Be(targetVersion);
 
             packageRef.GetMetadataWithName("PrivateAssets").Value.Should().NotBeNull().And.Be("All");
         }
@@ -35,7 +39,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [InlineData("Microsoft.VisualStudio.Web.CodeGeneration.Tools")]
         [InlineData("dotnet-test-xunit")]
         [InlineData("dotnet-test-mstest")]
-        public void It_does_not_migrate_project_tool_dependency_that_is_no_longer_needed(string dependencyName)
+        public void ItDoesNotMigrateProjectToolDependencyThatIsNoLongerNeeded(string dependencyName)
         {
             var mockProj = RunPackageDependenciesRuleOnPj(@"
                 {
@@ -59,7 +63,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [InlineData("Microsoft.DotNet.Watcher.Tools", "Microsoft.DotNet.Watcher.Tools", ConstantPackageVersions.AspNetToolsVersion)]
         [InlineData("Microsoft.Extensions.SecretManager.Tools", "Microsoft.Extensions.SecretManager.Tools", ConstantPackageVersions.AspNetToolsVersion)]
         [InlineData("BundlerMinifier.Core", "BundlerMinifier.Core", ConstantPackageVersions.BundleMinifierToolVersion)]
-        public void It_migrates_asp_project_tools_to_a_new_name_and_version(
+        public void ItMigratesAspProjectToolsToANewNameAndVersion(
             string sourceToolName,
             string targetToolName,
             string targetVersion)
@@ -73,7 +77,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [Theory]
         [InlineData("Microsoft.AspNetCore.Razor.Tools")]
         [InlineData("Microsoft.AspNetCore.Server.IISIntegration.Tools")]
-        public void It_does_not_migrate_asp_project_tool(string toolName)
+        public void ItDoesNotMigrateAspProjectTool(string toolName)
         {
             var mockProj = RunPackageDependenciesRuleOnPj(@"
                 {
