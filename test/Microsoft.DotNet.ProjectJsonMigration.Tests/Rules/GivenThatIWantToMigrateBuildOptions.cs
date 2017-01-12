@@ -582,7 +582,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         private static IEnumerable<string> GetDefaultExcludePatterns(string group)
         {
             var defaultExcludePatterns = new List<string>(group == "copyToOutput" ?
-                                    ProjectFilesCollection.DefaultPublishExcludePatterns :
+                                    Enumerable.Empty<string>() :
                                     ProjectFilesCollection.DefaultBuiltInExcludePatterns);
 
             if (group == "embed")
@@ -595,9 +595,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
         private static IEnumerable<string> GetDefaultIncludePatterns(string group)
         {
-            return group == "compile" ? ProjectFilesCollection.DefaultCompileBuiltInPatterns
-                                       : group == "embed" ? ProjectFilesCollection.DefaultResourcesBuiltInPatterns
-                                       : Enumerable.Empty<string>();
+            return Enumerable.Empty<string>();
         }
 
         private static void VerifyContentMetadata(ProjectItemElement item)
