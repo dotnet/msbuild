@@ -39,17 +39,5 @@ Tests are currently disabled on platforms other than Windows. If you'd like to r
 ./cibuild.sh --scope Test
 ```
 
-## Unofficial: Getting .Net Core MSBuild binaries without building the code ##
-This is a non-ideal, intermediary solution for getting .NET core MSBuild binaries. We plan on improving this experience.
-
-```
-git clone https://github.com/Microsoft/msbuild.git
-cd msbuild
-git fetch --all
-git checkout origin/xplat
-init-tools.cmd # windows
-./init-tools.sh # unix
-
-./Tools/dotnetcli/dotnet ./Tools/MSBuild.exe /path/to/project
-```
-
+## Getting .Net Core MSBuild binaries without building the code ##
+The best way to get .NET Core MSBuild is through the [dotnet CLI](https://github.com/dotnet/cli/), which redistributes us. It's not always the very very latest but they take regular drops. After installing it, you can use MSBuild through `dotnet build` or by manual invocation of the `MSBuild.dll` in the dotnet distribution.
