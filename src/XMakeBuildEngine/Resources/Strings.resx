@@ -616,6 +616,7 @@
   </data>
   <data name="IncludeRemoveOrUpdate" UESanitized="false" Visibility="Public">
     <value>MSB4232: Static items (items not under targets) must have one of the following operations: Include, Update, or Remove.</value>
+    <comment>{StrBegin="MSB4232: "} Include, Update, and Remove should not be localized and their casing should not be changed</comment>
   </data>
   <data name="MissingTaskError" UESanitized="false" Visibility="Public">
     <value>MSB4036: The "{0}" task was not found. Check the following: 1.) The name of the task in the project file is the same as the name of the task class. 2.) The task class is "public" and implements the Microsoft.Build.Framework.ITask interface. 3.) The task is correctly declared with &lt;UsingTask&gt; in the project file, or in the *.tasks files located in the "{1}" directory.</value>
