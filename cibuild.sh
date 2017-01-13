@@ -316,8 +316,13 @@ fi
 
 # Microsoft.Net.Compilers package is available now, so we can use the latest csc.exe
 if [ "$host" = "Mono" ]; then
-        CSC_EXE="$PACKAGES_DIR/microsoft.net.compilers/2.0.0-rc3-61110-06/tools/csc.exe"
-        CSC_ARGS="/p:CscToolExe=csc.exe /p:CscToolPath=`dirname $CSC_EXE` /p:DebugType=portable"
+    # The compiler includes the net46 version of System.Runtime.InteropServices.RuntimeInformation,
+    # which is compiled for Windows, breaking csc.exe. Deleting the binary will cause Mono's platform
+    # specific assembly to be used
+    rm $PACKAGES_DIR/microsoft.net.compilers/2.0.0-rc3-61110-06/tools/System.Runtime.InteropServices.RuntimeInformation.dll
+
+    CSC_EXE="$PACKAGES_DIR/microsoft.net.compilers/2.0.0-rc3-61110-06/tools/csc.exe"
+    CSC_ARGS="/p:CscToolExe=csc.exe /p:CscToolPath=`dirname $CSC_EXE` /p:DebugType=portable"
 fi
 
 # The set of warnings to suppress for now
