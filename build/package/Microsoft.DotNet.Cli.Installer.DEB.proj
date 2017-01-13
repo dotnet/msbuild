@@ -101,6 +101,9 @@
       <Exec Command="sudo dpkg -i $(SdkInstallerFile)" />
 
       <!-- Run E2E -->
+      <DotNetRestore ProjectPath="$(EndToEndTestProject)" 
+                     ToolPath="$(Stage0Directory)" /> 
+ 
       <DotNetTest ProjectPath="$(EndToEndTestProject)"
                   EnvironmentVariables="@(TestSdkDebTaskEnvironmentVariables)"
                   ToolPath="$(Stage0Directory)" />

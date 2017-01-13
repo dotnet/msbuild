@@ -3,12 +3,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.Internal.ProjectModel;
 using Microsoft.DotNet.Internal.ProjectModel.Graph;
 using Microsoft.DotNet.Cli;
-using System.Linq;
-using System.IO;
+using Microsoft.DotNet.Cli.Utils.ExceptionExtensions;
 using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.ProjectJsonMigration.Rules;
 using Microsoft.DotNet.Tools.Common;
@@ -87,14 +88,22 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             try
             {
                 File.Delete(Path.Combine(rootsettings.ProjectDirectory, "project.json"));
-            } catch {} 
+            }
+            catch (Exception e)
+            {
+                e.ReportAsWarning();
+            }
 
             foreach (var projectDependency in projectDependencies)
             {
                 try 
                 {
                     File.Delete(projectDependency.ProjectFilePath);
-                } catch { }
+                }
+                catch (Exception e)
+                {
+                    e.ReportAsWarning();
+                }
             }
         }
 

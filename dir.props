@@ -12,5 +12,7 @@
 
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
 
+
+    <CliVersionPrefix>1.0.0-rc4</CliVersionPrefix>
   </PropertyGroup>
 </Project>

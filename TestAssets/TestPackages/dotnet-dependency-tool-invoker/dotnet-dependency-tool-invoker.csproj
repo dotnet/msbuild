@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <SdkNugetVersion Condition=" '$(SdkNugetVersion)' == ''">1.0.0-preview5-*</SdkNugetVersion>
+    <SdkNugetVersion Condition=" '$(SdkNugetVersion)' == ''">$(CliVersionPrefix)-*</SdkNugetVersion>
   </PropertyGroup>
 
   <ItemGroup>

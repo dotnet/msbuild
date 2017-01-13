@@ -36,15 +36,9 @@ namespace Microsoft.Extensions.EnvironmentAbstractions
 
         public void CreateEmptyFile(string path)
         {
-            try
+            using (File.Create(path))
             {
-                var emptyFile = File.Create(path);
-                if (emptyFile != null)
-                {
-                    emptyFile.Dispose();
-                }
             }
-            catch { }
         }
     }
 }

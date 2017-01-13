@@ -88,6 +88,20 @@ namespace Microsoft.DotNet.Tools.Common
             }
         }
 
+        public static bool TryDeleteDirectory(string directoryPath)
+        {
+            try
+            {
+                Directory.Delete(directoryPath, true);
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         /// <summary>
         /// Returns childItem relative to directory, with Path.DirectorySeparatorChar as separator
         /// </summary>

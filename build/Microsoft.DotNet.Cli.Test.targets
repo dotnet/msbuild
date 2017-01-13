@@ -36,7 +36,7 @@
     <ItemGroup>
       <ProjectsToTest Include="build/test/RunTest.proj">
         <Properties>
-          CLIBuildDll=$(CLIBuildDll);
+          CLIBuildDll=$(CLIBuildDll); 
           Configuration=$(Configuration);
           EnvironmentVariables=$(RunTestEnvironmentVariables);
           TestProject=%(TestProjects.ProjectPath);
@@ -70,6 +70,8 @@
       <TestDirectory>$(RepoRoot)/test/</TestDirectory>
       <DotnetUnderTest>$(Stage2Directory)</DotnetUnderTest>
     </PropertyGroup>
+
+    <MakeDir Directories="$(TestPackagesDir)" Condition="!Exists('$(TestPackagesDir)')"/>
   </Target>
 
   <Target Name="BuildTests"
@@ -202,15 +204,27 @@
   </Target>
 
   <Target Name="CreateTestAssetPackageNuPkgs"
-          DependsOnTargets="BuildTestAssetPackageProjects;
+          DependsOnTargets="PrepareTests;
                             SetupTestPackageProjectData;"
           Inputs="%(TestPackageProject.PackInputs)"
           Outputs="%(TestPackageProject.PackOutputs)">
 
     <PropertyGroup>
-      <DotNetPackMsbuildArgs>/p:TargetFramework=%(TestPackageProject.Framework)</DotNetPackMsbuildArgs>
-      <DotNetPackMsbuildArgs Condition=" '$(IsDesktopAvailable)' == 'True' And '%(TestPackageProject.PackRuntime)' != '' ">/p:RuntimeIdentifier=%(TestPackageProject.PackRuntime)</DotNetPackMsbuildArgs>
+      <Framework>%(TestPackageProject.Framework)</Framework>
+      <DoPackRuntime Condition=" '$(Framework)' == 'net45' Or '$(Framework)' == 'net451' ">true</DoPackRuntime>
+      <DotNetPackMsbuildArgs>/p:TargetFramework=$(Framework)</DotNetPackMsbuildArgs>
+      <DotNetPackMsbuildArgs Condition=" '$(IsDesktopAvailable)' == 'True' And '%(TestPackageProject.PackRuntime)' != '' And '$(DoPackRuntime)' != '' ">/p:RuntimeIdentifier=%(TestPackageProject.PackRuntime)</DotNetPackMsbuildArgs>
     </PropertyGroup>
+
+    <DotNetRestore ToolPath="$(Stage2Directory)"
+                   Source="$(TestPackagesDir)"
+                   ConfigFile="$(RepoRoot)\NuGet.Config"
+                   ProjectPath="%(TestPackageProject.ProjectPath)" />
+
+    <DotNetBuild Framework="$(Framework)"
+                 Runtime="%(TestPackageProject.Runtime)"
+                 ProjectPath="%(TestPackageProject.ProjectPath)"
+                 ToolPath="$(Stage0Directory)" />
     
     <!-- https://github.com/NuGet/Home/issues/4063 -->
     <DotNetPack NoBuild="True"
@@ -219,25 +233,5 @@
                 ToolPath="$(Stage0Directory)"
                 VersionSuffix="%(TestPackageProject.VersionSuffix)"
                 MsbuildArgs="$(DotNetPackMsbuildArgs) /p:SdkNuGetVersion=$(SdkNugetVersion)" />
-  </Target>
-
-  <Target Name="BuildTestAssetPackageProjects"
-          DependsOnTargets="RestoreTestAssetPackageProjects;
-                            SetupTestPackageProjectData;"
-          Inputs="%(TestPackageProject.BuildInputs)"
-          Outputs="%(TestPackageProject.BuildOutputs)">
-
-    <DotNetBuild Framework="%(TestPackageProject.Framework)"
-                 Runtime="%(TestPackageProject.Runtime)"
-                 ProjectPath="%(TestPackageProject.ProjectPath)"
-                 ToolPath="$(Stage0Directory)" />
-  </Target>
-
-  <Target Name="RestoreTestAssetPackageProjects"
-          DependsOnTargets="PrepareTests;
-                            SetupTestPackageProjectData;">
-
-    <DotNetRestore ToolPath="$(Stage2Directory)"
-                   WorkingDirectory="%(TestPackageProject.FullPath)" />
   </Target>
 </Project>
