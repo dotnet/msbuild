@@ -1806,7 +1806,7 @@ namespace Microsoft.Build.Construction
                         _lastWriteTimeWhenRead = fileInfo.LastWriteTime;
                     }
 
-                    _versionOnDisk = Version;
+                    MarkAsUpToDateToDisk();
                 }
             }
 #if MSBUILDENABLEVSPROFILING 
@@ -1856,6 +1856,11 @@ namespace Microsoft.Build.Construction
                 XmlDocument.Save(projectWriter);
             }
 
+            MarkAsUpToDateToDisk();
+        }
+
+        private void MarkAsUpToDateToDisk()
+        {
             _versionOnDisk = Version;
         }
 
@@ -1892,7 +1897,11 @@ namespace Microsoft.Build.Construction
             ErrorUtilities.VerifyThrowInvalidOperation(File.Exists(path), "FileToReloadFromDoesNotExist", path);
 
             Func<bool, XmlDocumentWithLocation> documentProducer = shouldPreserveFormatting => LoadDocument(path, shouldPreserveFormatting);
-            ReloadFrom(documentProducer, throwIfUnsavedChanges, preserveFormatting);
+
+            // Reloads from a file leave this object up to date wrt to that file, so mark the object as up to date
+            Action postReloadActions = MarkAsUpToDateToDisk;
+
+            ReloadFrom(documentProducer, throwIfUnsavedChanges, preserveFormatting, postReloadActions);
         }
 
         /// <summary>
@@ -1918,7 +1927,7 @@ namespace Microsoft.Build.Construction
             ReloadFrom(documentProducer, throwIfUnsavedChanges, preserveFormatting);
         }
 
-        private void ReloadFrom(Func<bool, XmlDocumentWithLocation> documentProducer, bool throwIfUnsavedChanges, bool? preserveFormatting)
+        private void ReloadFrom(Func<bool, XmlDocumentWithLocation> documentProducer, bool throwIfUnsavedChanges, bool? preserveFormatting, Action postReloadActions = null)
         {
             ThrowIfUnsavedChanges(throwIfUnsavedChanges);
 
@@ -1937,6 +1946,8 @@ namespace Microsoft.Build.Construction
             ProjectParser.Parse(document, this);
 
             MarkDirty("Project reloaded", null);
+
+            postReloadActions?.Invoke();
         }
 
         [MethodImpl(MethodImplOptions.NoOptimization)]
