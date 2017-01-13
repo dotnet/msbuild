@@ -202,6 +202,26 @@ namespace Microsoft.DotNet.Migration.Tests
             outputsIdentical.Should().BeTrue();
         }
 
+        [WindowsOnlyFact]
+        public void ItMigratesLibraryWithMultipleTFMsAndFullFramework()
+        {
+            var projectName = "PJLibWithMultipleFrameworks";
+            var projectDirectory =
+                TestAssetsManager.CreateTestInstance(projectName, identifier: projectName).WithLockFiles().Path;
+
+            var outputComparisonData = BuildProjectJsonMigrateBuildMSBuild(projectDirectory, projectName);
+
+            var outputsIdentical =
+                outputComparisonData.ProjectJsonBuildOutputs.SetEquals(outputComparisonData.MSBuildBuildOutputs);
+
+            if (!outputsIdentical)
+            {
+                OutputDiagnostics(outputComparisonData);
+            }
+
+            outputsIdentical.Should().BeTrue();
+        }
+
         [Theory]
         [InlineData("TestAppWithLibrary/TestLibrary")]
         [InlineData("TestLibraryWithAnalyzer")]

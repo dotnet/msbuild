@@ -23,6 +23,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         public void Apply(MigrationSettings migrationSettings, MigrationRuleInputs migrationRuleInputs)
         {
             var csproj = migrationRuleInputs.OutputMSBuildProject;
+            var commonPropertyGroup = migrationRuleInputs.CommonPropertyGroup;
             var projectContext = migrationRuleInputs.DefaultProjectContext;
             var scripts = projectContext.ProjectFile.Scripts;
 
@@ -30,6 +31,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             {
                 MigrateScriptSet(
                     csproj,
+                    commonPropertyGroup,
                     scriptSet.Value,
                     scriptSet.Key,
                     migrationRuleInputs.IsMultiTFM);
@@ -38,6 +40,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
         public ProjectTargetElement MigrateScriptSet(
             ProjectRootElement csproj,
+            ProjectPropertyGroupElement commonPropertyGroup,
             IEnumerable<string> scriptCommands,
             string scriptSetName,
             bool isMultiTFM)
@@ -47,6 +50,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             {
                 if (CommandIsNotNeededInMSBuild(scriptCommand))
                 {
+                    continue;
+                }
+                else if (IsRazorPrecompilationCommand(scriptCommand))
+                {
+                    EnableRazorCompilationOnPublish(commonPropertyGroup);
                     continue;
                 }
 
@@ -92,6 +100,16 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         private bool CommandIsNotNeededInMSBuild(string command)
         {
             return command.Contains("dotnet publish-iis");
+        }
+
+        private static bool IsRazorPrecompilationCommand(string command)
+        {
+            return command.Contains("dotnet razor-precompile");
+        }
+
+        private static void EnableRazorCompilationOnPublish(ProjectPropertyGroupElement commonPropertyGroup)
+        {
+            commonPropertyGroup.AddProperty("MvcRazorCompileOnPublish", "true");
         }
 
         private bool IsPathRootedForAnyOS(string path)
