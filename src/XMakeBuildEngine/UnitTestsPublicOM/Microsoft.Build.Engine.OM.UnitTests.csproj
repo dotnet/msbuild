@@ -52,8 +52,14 @@
     <Compile Include="..\..\Shared\ResourceUtilities.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\..\Shared\VisualStudioLocationHelper.cs">
+      <Link>VisualStudioLocationHelper.cs</Link>
+    </Compile>
     <Compile Include="AssemblyResources.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\..\Shared\BuildEnvironmentHelper.cs">
+      <Link>BuildEnvironmentHelper.cs</Link>
     </Compile>
     <Compile Include="..\..\Shared\InternalErrorException.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>

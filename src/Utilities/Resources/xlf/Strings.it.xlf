@@ -164,29 +164,29 @@
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledAsNoTrackingLog">
-        <source>{0} will be compiled as the tracking log is not available.</source>
-        <target state="translated">Verrà eseguita la compilazione di {0} poiché il log di rilevamento non è disponibile.</target>
-        <note />
+        <source>{0} will be compiled because the tracking log is not available.</source>
+        <target state="updated">Verrà eseguita la compilazione di {0} poiché il log di rilevamento non è disponibile.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="Tracking_SourceNotInTrackingLog">
-        <source>{0} will be compiled as it was not found in the tracking log.</source>
-        <target state="translated">Verrà eseguita la compilazione di {0} poiché non presente nel log di rilevamento.</target>
-        <note />
+        <source>{0} will be compiled because it was not found in the tracking log.</source>
+        <target state="updated">Verrà eseguita la compilazione di {0} poiché non presente nel log di rilevamento.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="Tracking_SourceOutputsNotAvailable">
-        <source>{0} will be compiled as not all outputs are available.</source>
-        <target state="translated">Verrà eseguita la compilazione di {0} poiché non tutti gli output sono disponibili.</target>
-        <note />
+        <source>{0} will be compiled because not all outputs are available.</source>
+        <target state="updated">Verrà eseguita la compilazione di {0} poiché non tutti gli output sono disponibili.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledMissingDependency">
-        <source>{0} will be compiled as dependency {1} was missing.</source>
-        <target state="translated">Verrà eseguita la compilazione di {0} poiché la dipendenza {1} è mancante.</target>
-        <note />
+        <source>{0} will be compiled because dependency {1} was missing.</source>
+        <target state="updated">Verrà eseguita la compilazione di {0} poiché la dipendenza {1} è mancante.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledDependencyWasModifiedAt">
-        <source>{0} will be compiled as {1} was modified at {2}.</source>
-        <target state="translated">Verrà eseguita la compilazione di {0} poiché {1} è stato modificato in {2}.</target>
-        <note />
+        <source>{0} will be compiled because {1} was modified at {2}.</source>
+        <target state="updated">Verrà eseguita la compilazione di {0} poiché {1} è stato modificato in {2}.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiled">
         <source>{0} will be compiled.</source>
@@ -209,9 +209,9 @@
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledOutputDoesNotExist">
-        <source>{0} will be compiled as output {1} does not exist.</source>
-        <target state="translated">Verrà eseguita la compilazione di {0} poiché l'output {1} non esiste.</target>
-        <note />
+        <source>{0} will be compiled because output {1} does not exist.</source>
+        <target state="updated">Verrà eseguita la compilazione di {0} poiché l'output {1} non esiste.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="Tracking_ReadTrackingLogs">
         <source>Read Tracking Logs:</source>

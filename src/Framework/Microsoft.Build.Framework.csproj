@@ -10,6 +10,7 @@
     <EnableDocumentationFile>true</EnableDocumentationFile>
     <UpdateNuGetPackageDependencies>true</UpdateNuGetPackageDependencies>
     <DoNotLocalizeProject>true</DoNotLocalizeProject>
+    <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
