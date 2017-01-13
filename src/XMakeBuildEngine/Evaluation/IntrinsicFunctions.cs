@@ -8,6 +8,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 using Microsoft.Build.Internal;
@@ -305,6 +306,27 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// Searches for a file based on the specified <see cref="IElementLocation"/>.
+        /// </summary>
+        /// <param name="file">The file to search for.</param>
+        /// <param name="startingDirectory">An optional directory to start the search in.  The default location is the directory
+        /// of the file containing the property funciton.</param>
+        /// <returns>The full path of the file if it is found, otherwise an empty string.</returns>
+        internal static string GetPathOfFileAbove(string file, string startingDirectory)
+        {
+            // This method does not accept a path, only a file name
+            if(file.Any(i => i.Equals(Path.DirectorySeparatorChar) || i.Equals(Path.AltDirectorySeparatorChar)))
+            {
+                ErrorUtilities.ThrowArgument("InvalidGetPathOfFileAboveParameter", file);
+            }
+
+            // Search for a directory that contains that file
+            string directoryName = GetDirectoryNameOfFileAbove(startingDirectory, file);
+
+            return String.IsNullOrWhiteSpace(directoryName) ? String.Empty : NormalizePath(directoryName, file);
+        }
+
+        /// <summary>
         /// Return the string in parameter 'defaultValue' only if parameter 'conditionValue' is empty
         /// else, return the value conditionValue
         /// </summary>
@@ -364,14 +386,71 @@ namespace Microsoft.Build.Evaluation
             return false;
         }
 
-        public static string GetCurrentExecutableDirectory()
+        /// <summary>
+        /// If the given path doesn't have a trailing slash then add one.
+        /// If the path is an empty string, does not modify it.
+        /// </summary>
+        /// <param name="path">The path to check.</param>
+        /// <returns>The specified path with a trailing slash.</returns>
+        internal static string EnsureTrailingSlash(string path)
+        {
+            return FileUtilities.EnsureTrailingSlash(path);
+        }
+
+        /// <summary>
+        /// Gets the canonicalized full path of the provided directory and ensures it contains the correct directory separator characters for the current operating system
+        /// while ensuring it has a trailing slash.
+        /// </summary>
+        /// <param name="path">One or more directory paths to combine and normalize.</param>
+        /// <returns>A canonicalized full directory path with the correct directory separators and a trailing slash.</returns>
+        internal static string NormalizeDirectory(params string[] path)
+        {
+            return EnsureTrailingSlash(NormalizePath(path));
+        }
+
+        /// <summary>
+        /// Gets the canonicalized full path of the provided path and ensures it contains the correct directory separator characters for the current operating system.
+        /// </summary>
+        /// <param name="path">One or more paths to combine and normalize.</param>
+        /// <returns>A canonicalized full path with the correct directory separators.</returns>
+        internal static string NormalizePath(params string[] path)
+        {
+            return FileUtilities.NormalizePath(Path.Combine(path));
+        }
+
+        public static string GetCurrentToolsDirectory()
         {
             return BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
+        }
+
+        public static string GetToolsDirectory32()
+        {
+            return BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
+        }
+
+        public static string GetToolsDirectory64()
+        {
+            return BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64;
+        }
+
+        public static string GetMSBuildSDKsPath()
+        {
+            return BuildEnvironmentHelper.Instance.MSBuildSDKsPath;
         }
 
         public static string GetVsInstallRoot()
         {
             return BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory;
+        }
+
+        public static string GetProgramFiles32()
+        {
+            return FrameworkLocationHelper.programFiles32;
+        }
+
+        public static string GetMSBuildExtensionsPath()
+        {
+            return BuildEnvironmentHelper.Instance.MSBuildExtensionsPath;
         }
 
         #region Debug only intrinsics
@@ -386,6 +465,7 @@ namespace Microsoft.Build.Evaluation
 
         #endregion
 
+#if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Following function will parse a keyName and returns the basekey for it.
         /// It will also store the subkey name in the out parameter.
@@ -393,7 +473,6 @@ namespace Microsoft.Build.Evaluation
         /// The return value shouldn't be null.
         /// Taken from: \ndp\clr\src\BCL\Microsoft\Win32\Registry.cs
         /// </summary>
-#if FEATURE_WIN32_REGISTRY
         private static RegistryKey GetBaseKeyFromKeyName(string keyName, RegistryView view, out string subKeyName)
         {
             if (keyName == null)

@@ -97,9 +97,18 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <ItemGroup Condition="'$(_HasReferenceToSystemRuntime)' == 'true'">
       <_DesignTimeFacadeAssemblies Include="%(DesignTimeFacadeDirectories.Identity)*.dll"/>
-      <!-- If the user has manually referenced these assemblies, remove them so we don't end up with duplicates -->
-      <ReferencePath Remove="@(_DesignTimeFacadeAssemblies)"/>
-      <ReferencePath Include="%(_DesignTimeFacadeAssemblies.Identity)">
+
+      <_DesignTimeFacadeAssemblies_Names Include="@(_DesignTimeFacadeAssemblies->'%(FileName)')">
+          <OriginalIdentity>%(_DesignTimeFacadeAssemblies.Identity)</OriginalIdentity>
+      </_DesignTimeFacadeAssemblies_Names>
+
+      <_ReferencePath_Names Include="@(ReferencePath->'%(FileName)')">
+          <OriginalIdentity>%(ReferencePath.Identity)</OriginalIdentity>
+      </_ReferencePath_Names>
+
+      <_DesignTimeFacadeAssemblies_Names Remove="@(_ReferencePath_Names)"/>
+
+      <ReferencePath Include="@(_DesignTimeFacadeAssemblies_Names->'%(OriginalIdentity)')">
         <WinMDFile>false</WinMDFile>
         <CopyLocal>false</CopyLocal>
         <ResolvedFrom>ImplicitlyExpandDesignTimeFacades</ResolvedFrom>

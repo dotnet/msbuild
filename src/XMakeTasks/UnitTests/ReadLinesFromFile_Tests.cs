@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Threading;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.AccessControl;
 #endif
@@ -301,6 +302,79 @@ namespace Microsoft.Build.UnitTests
                 Assert.True(r.Execute());
 
                 Assert.NotEqual("\uBDEA", r.Lines[0].ItemSpec);
+            }
+            finally
+            {
+                File.Delete(file);
+            }
+        }
+
+        [Fact]
+        [Trait("Category", "mono-osx-failing")]
+        public void WriteLinesWriteOnlyWhenDifferentTest()
+        {
+            string file = FileUtilities.GetTemporaryFile();
+            try
+            {
+                // Write an initial file.
+                WriteLinesToFile a = new WriteLinesToFile
+                {
+                    Overwrite = true,
+                    BuildEngine = new MockEngine(),
+                    File = new TaskItem(file),
+                    WriteOnlyWhenDifferent = true,
+                    Lines = new ITaskItem[] {new TaskItem("File contents1")}
+                };
+
+                Assert.True(a.Execute());
+
+                // Verify contents
+                ReadLinesFromFile r = new ReadLinesFromFile {File = new TaskItem(file)};
+                Assert.True(r.Execute());
+                Assert.Equal("File contents1", r.Lines[0].ItemSpec);
+
+                var creationTime = File.GetCreationTime(file);
+                var writeTime = File.GetLastWriteTime(file);
+
+                if (!NativeMethodsShared.IsWindows)
+                {
+                    // Non-Windows file systems do not have sub-second timestamps. Unfortunately we need
+                    // to sleep to determine if the file is written or not.
+                    Thread.Sleep(1000);
+                }
+
+                // Write the same contents to the file, timestamps should match.
+                WriteLinesToFile a2 = new WriteLinesToFile
+                {
+                    Overwrite = true,
+                    BuildEngine = new MockEngine(),
+                    File = new TaskItem(file),
+                    WriteOnlyWhenDifferent = true,
+                    Lines = new ITaskItem[] {new TaskItem("File contents1")}
+                };
+                Assert.True(a2.Execute());
+                Assert.Equal(creationTime, File.GetCreationTime(file));
+                Assert.Equal(writeTime, File.GetLastWriteTime(file));
+
+                if (!NativeMethodsShared.IsWindows)
+                {
+                    // Non-Windows file systems do not have sub-second timestamps. Unfortunately we need
+                    // to sleep to determine if the file is written or not.
+                    Thread.Sleep(1000);
+                }
+
+                // Write different contents to the file, last write time should differ.
+                WriteLinesToFile a3 = new WriteLinesToFile
+                {
+                    Overwrite = true,
+                    BuildEngine = new MockEngine(),
+                    File = new TaskItem(file),
+                    WriteOnlyWhenDifferent = true,
+                    Lines = new ITaskItem[] {new TaskItem("File contents2")}
+                };
+                Assert.True(a3.Execute());
+                Assert.Equal(creationTime, File.GetCreationTime(file));
+                Assert.NotEqual(writeTime, File.GetLastWriteTime(file));
             }
             finally
             {

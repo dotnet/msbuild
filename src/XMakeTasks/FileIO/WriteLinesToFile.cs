@@ -4,12 +4,7 @@
 using System;
 using System.IO;
 using System.Text;
-using System.Diagnostics;
-using System.Collections;
-using System.Globalization;
-
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
@@ -23,6 +18,9 @@ namespace Microsoft.Build.Tasks
         private ITaskItem[] _lines = null;
         private bool _overwrite = false;
         private string _encoding = null;
+
+        // Default encoding taken from System.IO.WriteAllText()
+        private static readonly Encoding s_defaultEncoding = new UTF8Encoding(false, true);
 
         /// <summary>
         /// File to write lines to.
@@ -61,6 +59,13 @@ namespace Microsoft.Build.Tasks
             set { _encoding = value; }
         }
 
+        /// <summary>
+        /// If true, the target file specified, if it exists, will be read first to compare against
+        /// what the task would have written. If identical, the file is not written to disk and the
+        /// timestamp will be preserved.
+        /// </summary>
+        public bool WriteOnlyWhenDifferent { get; set; }
+
 
         /// <summary>
         /// Execute the task.
@@ -83,12 +88,12 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 
-                Encoding encode = null;
+                Encoding encoding = s_defaultEncoding;
                 if (_encoding != null)
                 {
                     try
                     {
-                        encode = System.Text.Encoding.GetEncoding(_encoding);
+                        encoding = System.Text.Encoding.GetEncoding(_encoding);
                     }
                     catch (ArgumentException)
                     {
@@ -96,7 +101,6 @@ namespace Microsoft.Build.Tasks
                         return false;
                     }
                 }
-
 
                 try
                 {
@@ -110,29 +114,41 @@ namespace Microsoft.Build.Tasks
                         }
                         else
                         {
-                            // Passing a null encoding, or Encoding.Default, to WriteAllText or AppendAllText
-                            // is not the same as calling the overload that does not take encoding!
-                            // Encoding.Default is based on the current codepage, the overload without encoding is UTF8-without-BOM.
-                            if (encode == null)
+                            string contentsAsString = null;
+
+                            try
                             {
-                                System.IO.File.WriteAllText(File.ItemSpec, buffer.ToString());
+                                // When WriteOnlyWhenDifferent is set, read the file and if they're the same return.
+                                if (WriteOnlyWhenDifferent && FileUtilities.FileExistsNoThrow(File.ItemSpec))
+                                {
+                                    var existingContents = System.IO.File.ReadAllText(File.ItemSpec);
+                                    if (existingContents.Length == buffer.Length)
+                                    {
+                                        contentsAsString = buffer.ToString();
+                                        if (existingContents.Equals(contentsAsString))
+                                        {
+                                            Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.SkippingUnchangedFile", File.ItemSpec);
+                                            return true;
+                                        }
+                                    }
+                                }
                             }
-                            else
+                            catch (IOException)
                             {
-                                System.IO.File.WriteAllText(File.ItemSpec, buffer.ToString(), encode);
+                                Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
                             }
+
+                            if (contentsAsString == null)
+                            {
+                                contentsAsString = buffer.ToString();
+                            }
+
+                            System.IO.File.WriteAllText(File.ItemSpec, contentsAsString, encoding);
                         }
                     }
                     else
                     {
-                        if (encode == null)
-                        {
-                            System.IO.File.AppendAllText(File.ItemSpec, buffer.ToString());
-                        }
-                        else
-                        {
-                            System.IO.File.AppendAllText(File.ItemSpec, buffer.ToString(), encode);
-                        }
+                        System.IO.File.AppendAllText(File.ItemSpec, buffer.ToString(), encoding);
                     }
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))

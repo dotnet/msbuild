@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 #if FEATURE_SECURITY_PRINCIPAL_WINDOWS
@@ -31,6 +32,61 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// </summary>
     public class ProjectRootElement_Tests
     {
+        private const string SimpleProject = 
+@"<Project xmlns=`msbuildnamespace`>
+
+  <PropertyGroup>
+    <P>property value</P>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <i Include=`a`>
+      <m>metadata value</m>
+    </i>
+  </ItemGroup>
+
+</Project>";
+
+        private const string ComplexProject =
+@"<?xml version=""1.0"" encoding=""utf-16""?>
+<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+    <PropertyGroup Condition=""false"">
+        <p>p1</p>
+        <q>q1</q>
+    </PropertyGroup>
+    <PropertyGroup/>
+    <PropertyGroup>
+        <r>r1</r>
+    </PropertyGroup>
+    <Choose>
+        <When Condition=""true"">
+            <Choose>
+                <When Condition=""true"">
+                    <PropertyGroup>
+                        <s>s1</s>
+                    </PropertyGroup>
+                </When>
+            </Choose>
+        </When>
+        <When Condition=""false"">
+            <PropertyGroup>
+                <s>s2</s> <!-- both esses -->
+            </PropertyGroup>
+        </When>
+        <Otherwise>
+            <Choose>
+                <When Condition=""false""/>
+                <Otherwise>
+                    <PropertyGroup>
+                        <t>t1</t>
+                    </PropertyGroup>
+                </Otherwise>
+            </Choose>
+        </Otherwise>
+    </Choose>
+    <Import Project='$(MSBuildToolsPath)\microsoft.csharp.targets'/>
+</Project>";
+
         /// <summary>
         /// Empty project content
         /// </summary>
@@ -389,6 +445,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void ValidXmlXmlTextReaderNotCache()
         {
             string content = @"
@@ -677,6 +734,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/301")]
 #endif
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void EncodingGetterBasedOnActualEncodingWhenXmlDeclarationIsAbsent()
         {
             string projectFullPath = FileUtilities.GetTemporaryFile();
@@ -1202,6 +1260,568 @@ Project(""{";
         }
 
         /// <summary>
+        /// Tests DeepClone and CopyFrom when there is metadata expressed as attributes
+        /// </summary>
+        [Fact]
+        public void DeepCloneWithMetadataAsAttributes()
+        {
+            var project =
+@"<?xml version=`1.0` encoding=`utf-8`?>
+  <Project xmlns = 'msbuildnamespace'>
+
+    <ItemGroup>
+      <Compile Include=`Class1.cs` A=`a` />
+      <Compile Include=`Class2.cs` />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <P>val</P>
+    </PropertyGroup>
+
+    <Target Name=`Build`>
+      <ItemGroup>
+        <A Include=`a` />
+        <B Include=`b` M1=`v1`>
+          <M2>v2</M2>
+        </B>
+        <C Include=`c`/>
+      </ItemGroup>
+    </Target>
+
+  </Project>";
+
+            var pre = ProjectRootElement.Create(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(project))));
+
+            ValidateDeepCloneAndCopyFrom(pre);
+        }
+
+        /// <summary>
+        /// Tests TryOpen when preserveFormatting is the same and different than the cached project.
+        /// </summary>
+        [Fact]
+        public void TryOpenWithPreserveFormatting()
+        {
+            string project =
+@"<?xml version=`1.0` encoding=`utf-8`?>
+<Project xmlns = 'msbuildnamespace'>
+</Project>";
+
+            using (var projectFiles = new Helpers.TestProjectWithFiles("", new[] {"build.proj"}))
+            using (var projectCollection = new ProjectCollection())
+            {
+                var projectFile = projectFiles.CreatedFiles.First();
+
+                var projectXml = ProjectRootElement.Create(
+                    XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(project))),
+                    projectCollection,
+                    preserveFormatting: true);
+
+                projectXml.Save(projectFile);
+
+                var xml0 = ProjectRootElement.TryOpen(projectXml.FullPath, projectCollection, preserveFormatting: true);
+                Assert.True(xml0.PreserveFormatting);
+
+                var xml1 = ProjectRootElement.TryOpen(projectXml.FullPath, projectCollection, preserveFormatting: false);
+                Assert.False(xml1.PreserveFormatting);
+
+                var xml2 = ProjectRootElement.TryOpen(projectXml.FullPath, projectCollection, preserveFormatting: null);
+                // reuses existing setting
+                Assert.False(xml2.PreserveFormatting);
+
+                Assert.NotNull(xml0);
+                
+                Assert.Same(xml0, xml1);
+                Assert.Same(xml0, xml2);
+            }
+        }
+
+        [Theory]
+        [InlineData(true, false, false)]
+        [InlineData(true, true, true)]
+        [InlineData(false, false, false)]
+        [InlineData(false, true, true)]
+        [InlineData(true, null, true)]
+        [InlineData(false, null, false)]
+        public void ReloadCanSpecifyPreserveFormatting(bool initialPreserveFormatting, bool? reloadShouldPreserveFormatting, bool expectedFormattingAfterReload)
+        {
+            using (var testFiles = new Helpers.TestProjectWithFiles("", new[] { "build.proj" }))
+            {
+                var projectFile = testFiles.CreatedFiles.First();
+
+                var projectElement = ObjectModelHelpers.CreateInMemoryProjectRootElement(SimpleProject, null, initialPreserveFormatting);
+                projectElement.Save(projectFile);
+                Assert.Equal(initialPreserveFormatting, projectElement.PreserveFormatting);
+
+                projectElement.Reload(false, reloadShouldPreserveFormatting);
+                Assert.Equal(expectedFormattingAfterReload, projectElement.PreserveFormatting);
+
+                // reset project to original preserve formatting
+                projectElement.Reload(false, initialPreserveFormatting);
+                Assert.Equal(initialPreserveFormatting, projectElement.PreserveFormatting);
+
+                projectElement.ReloadFrom(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(SimpleProject))), false, reloadShouldPreserveFormatting);
+                Assert.Equal(expectedFormattingAfterReload, projectElement.PreserveFormatting);
+
+                // reset project to original preserve formatting
+                projectElement.Reload(false, initialPreserveFormatting);
+                Assert.Equal(initialPreserveFormatting, projectElement.PreserveFormatting);
+
+                projectElement.ReloadFrom(projectFile, false, reloadShouldPreserveFormatting);
+                Assert.Equal(expectedFormattingAfterReload, projectElement.PreserveFormatting);
+            }
+        }
+
+        [Theory]
+
+        // same content should still dirty the project
+        [InlineData(
+SimpleProject,
+SimpleProject,
+true, false, false)]
+
+        // new comment
+        [InlineData(
+@"<Project xmlns=`msbuildnamespace`>
+
+  <PropertyGroup>
+    <P>property value</P>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <i Include=`a`>
+      <m>metadata value</m>
+    </i>
+  </ItemGroup>
+
+</Project>",
+@"
+<!-- new comment -->
+<Project xmlns=`msbuildnamespace`>
+  <PropertyGroup>
+    <P><!-- new comment -->property value<!-- new comment --></P>
+  </PropertyGroup>
+  
+  <!-- new comment -->
+  <ItemGroup>
+    <i Include=`a`>
+      <!-- new comment -->
+      <m>metadata value</m>
+    </i>
+  </ItemGroup>
+
+</Project>",
+true, false, true)]
+
+        // changed comment
+        [InlineData(
+@"
+<!-- new comment -->
+<Project xmlns=`msbuildnamespace`>
+  <PropertyGroup>
+    <P><!-- new comment -->property value<!-- new comment --></P>
+  </PropertyGroup>
+  
+  <!-- new comment -->
+  <ItemGroup>
+    <i Include=`a`>
+      <!-- new comment -->
+      <m>metadata value</m>
+    </i>
+  </ItemGroup>
+
+</Project>",
+@"
+<!-- changed comment -->
+<Project xmlns=`msbuildnamespace`>
+  <PropertyGroup>
+    <P><!-- changed comment -->property value<!-- changed comment --></P>
+  </PropertyGroup>
+  
+  <!-- changed comment -->
+  <ItemGroup>
+    <i Include=`a`>
+      <!-- changed comment -->
+      <m>metadata value</m>
+    </i>
+  </ItemGroup>
+
+</Project>",
+true, false, true)]
+
+        // deleted comment
+        [InlineData(
+@"
+<!-- new comment -->
+<Project xmlns=`msbuildnamespace`>
+  <PropertyGroup>
+    <P><!-- new comment -->property value<!-- new comment --></P>
+  </PropertyGroup>
+  
+  <!-- new comment -->
+  <ItemGroup>
+    <i Include=`a`>
+      <!-- new comment -->
+      <m>metadata value</m>
+    </i>
+  </ItemGroup>
+
+</Project>",
+@"
+<Project xmlns=`msbuildnamespace`>
+  <PropertyGroup>
+    <P>property value</P>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <i Include=`a`>
+      <m>metadata value</m>
+    </i>
+  </ItemGroup>
+
+</Project>",
+true, false, true)]
+
+        // new comments and changed code
+        [InlineData(
+@"<Project xmlns=`msbuildnamespace`>
+
+  <PropertyGroup>
+    <P>property value</P>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <i Include=`a`>
+      <m>metadata value</m>
+    </i>
+  </ItemGroup>
+
+</Project>",
+@"
+<!-- new comment -->
+<Project xmlns=`msbuildnamespace`>
+  <PropertyGroup>
+    <P>property value</P>
+    <P2><!-- new comment -->property value<!-- new comment --></P2>
+  </PropertyGroup>
+
+</Project>",
+true, true, true)]
+
+        // commented out code
+        [InlineData(
+@"<Project xmlns=`msbuildnamespace`>
+
+  <PropertyGroup>
+    <P>property value</P>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <i Include=`a`>
+      <m>metadata value</m>
+    </i>
+  </ItemGroup>
+
+</Project>",
+@"<Project xmlns=`msbuildnamespace`>
+  <PropertyGroup>
+    <P>property value</P>
+  </PropertyGroup>
+
+<!--
+  <ItemGroup>
+    <i Include=`a`>
+      <m>metadata value</m>
+    </i>
+  </ItemGroup>
+-->
+</Project>",
+true, true, true)]
+        public void ReloadRespectsNewContents(string initialProjectContents, string changedProjectContents, bool versionChanged, bool msbuildChildrenChanged, bool xmlChanged)
+        {
+            Action<ProjectRootElement, string> act = (p, c) =>
+            {
+                p.ReloadFrom(
+                    XmlReader.Create(new StringReader(c)),
+                    throwIfUnsavedChanges: false);
+            };
+
+            AssertReload(initialProjectContents, changedProjectContents, versionChanged, msbuildChildrenChanged, xmlChanged, act);
+        }
+
+        [Fact]
+        public void ReloadedStateIsResilientToChangesAndDiskRoundtrip()
+        {
+            var initialProjectContents = ObjectModelHelpers.CleanupFileContents(
+@"
+<!-- new comment -->
+<Project xmlns=`msbuildnamespace`>
+
+  <!-- new comment -->
+  <ItemGroup>
+    <i Include=`a`>
+      <!-- new comment -->
+      <m>metadata value</m>
+    </i>
+  </ItemGroup>
+
+</Project>");
+
+            var changedProjectContents1 = ObjectModelHelpers.CleanupFileContents(
+@"
+<!-- changed comment -->
+<Project xmlns=`msbuildnamespace`>
+  
+  <!-- changed comment -->
+  <ItemGroup>
+
+    <i Include=`a`>
+         <!-- changed comment -->
+           <m>metadata value</m>
+    </i>
+
+  </ItemGroup>
+
+</Project>");
+
+            var changedProjectContents2 = ObjectModelHelpers.CleanupFileContents(
+// spurious comment placement issue: https://github.com/Microsoft/msbuild/issues/1503
+@"
+<!-- changed comment -->
+<Project xmlns=`msbuildnamespace`>
+  
+  <!-- changed comment -->
+  <PropertyGroup>
+    <P>v</P>
+  </PropertyGroup>
+  <ItemGroup>
+
+    <i Include=`a`>
+         <!-- changed comment -->
+           <m>metadata value</m>
+    </i>
+
+  </ItemGroup>
+
+</Project>");
+
+            using (var testFiles = new Helpers.TestProjectWithFiles("", new []{"build.proj"}))
+            using (var projectCollection1 = new ProjectCollection())
+            using (var projectCollection2 = new ProjectCollection())
+            {
+                var projectPath = testFiles.CreatedFiles.First();
+
+                var projectElement = ObjectModelHelpers.CreateInMemoryProjectRootElement(initialProjectContents, projectCollection1, preserveFormatting: true);
+                projectElement.Save(projectPath);
+
+                projectElement.ReloadFrom(XmlReader.Create(new StringReader(changedProjectContents1)));
+
+                VerifyAssertLineByLine(changedProjectContents1, projectElement.RawXml);
+
+                projectElement.AddProperty("P", "v");
+
+                VerifyAssertLineByLine(changedProjectContents2, projectElement.RawXml);
+
+                projectElement.Save();
+
+                var projectElement2 = ProjectRootElement.Open(projectPath, projectCollection2, preserveFormatting: true);
+
+                VerifyAssertLineByLine(changedProjectContents2, projectElement2.RawXml);
+            }
+        }
+
+        [Fact]
+        public void ReloadThrowsOnInvalidXmlSyntax()
+        {
+            var missingClosingTag =
+@"<Project xmlns=`msbuildnamespace`>
+
+  <PropertyGroup>
+    <P>property value</P>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <i Include=`a`>
+      <m>metadata value<m>
+    </i>
+  </ItemGroup>
+
+</Project>";
+
+            Action<ProjectRootElement, string> act = (p, c) =>
+            {
+                var exception =
+                    Assert.Throws<InvalidProjectFileException>(
+                        () =>
+                            p.ReloadFrom(
+                                XmlReader.Create(
+                                    new StringReader(c)),
+                                throwIfUnsavedChanges: false));
+
+                Assert.Contains(@"The project file could not be loaded. The 'm' start tag on line", exception.Message);
+            };
+
+            // reload does not mutate the project element
+            AssertReload(SimpleProject, missingClosingTag, false, false, false, act);
+        }
+
+        [Fact]
+        public void ReloadThrowsForInMemoryProjectsWithoutAPath()
+        {
+            Action<ProjectRootElement, string> act = (p, c) =>
+            {
+                var exception =
+                    Assert.Throws<InvalidOperationException>(
+                        () =>
+                            p.Reload(throwIfUnsavedChanges: false));
+
+                Assert.Contains(@"Value not set:", exception.Message);
+            };
+
+            // reload does not mutate the project element
+            AssertReload(SimpleProject, ComplexProject, false, false, false, act);
+        }
+
+        [Fact]
+        public void ReloadFromAPathThrowsOnMissingPath()
+        {
+            Action<ProjectRootElement, string> act = (p, c) =>
+            {
+                var fullPath = Path.GetFullPath("foo");
+
+                var exception =
+                    Assert.Throws<InvalidOperationException>(
+                        () =>
+                            p.ReloadFrom(fullPath, throwIfUnsavedChanges: false));
+
+                Assert.Contains(@"File to reload from does not exist:", exception.Message);
+            };
+
+            // reload does not mutate the project element
+            AssertReload(SimpleProject, ComplexProject, false, false, false, act);
+        }
+
+        [Fact]
+        public void ReloadThrowsOnInvalidMsBuildSyntax()
+        {
+            var unknownAttribute =
+@"<Project xmlns=`msbuildnamespace`>
+
+  <PropertyGroup Foo=`bar`>
+    <P>property value</P>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <i Include=`a`>
+      <m>metadata value</m>
+    </i>
+  </ItemGroup>
+
+</Project>";
+
+            Action<ProjectRootElement, string> act = (p, c) =>
+            {
+                var exception =
+                    Assert.Throws<InvalidProjectFileException>(
+                        () =>
+                            p.ReloadFrom(
+                                XmlReader.Create(
+                                    new StringReader(c)),
+                                throwIfUnsavedChanges: false));
+
+                Assert.Contains(@"The attribute ""Foo"" in element <PropertyGroup> is unrecognized", exception.Message);
+            };
+
+            // reload does not mutate the project element
+            AssertReload(SimpleProject, unknownAttribute, false, false, false, act);
+        }
+
+        [Fact]
+        public void ReloadThrowsByDefaultIfThereAreUnsavedChanges()
+        {
+            Action<ProjectRootElement, string> act = (p, c) =>
+            {
+                var exception =
+                    Assert.Throws<InvalidOperationException>(
+                        () =>
+                            p.ReloadFrom(
+                                XmlReader.Create(
+                                    new StringReader(c))));
+
+                Assert.Contains(@"ProjectRootElement can't reload if it contains unsaved changes.", exception.Message);
+            };
+
+            // reload does not mutate the project element
+            AssertReload(SimpleProject, ComplexProject, false, false, false, act);
+        }
+
+        [Fact]
+        public void ReloadCanOverwriteUnsavedChanges()
+        {
+            Action<ProjectRootElement, string> act = (p, c) =>
+            {
+                p.ReloadFrom(
+                    XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(c))),
+                    throwIfUnsavedChanges: false);
+            };
+
+            AssertReload(SimpleProject, ComplexProject, true, true, true, act);
+        }
+
+        private void AssertReload(
+            string initialContents,
+            string changedContents,
+            bool versionChanged,
+            bool msbuildChildrenChanged,
+            bool xmlChanged,
+            Action<ProjectRootElement, string> act)
+        {
+            var projectElement = ObjectModelHelpers.CreateInMemoryProjectRootElement(initialContents);
+
+            var version = projectElement.Version;
+            var childrenCount = projectElement.AllChildren.Count();
+            var xml = projectElement.RawXml;
+
+            Assert.True(projectElement.HasUnsavedChanges);
+            act(projectElement, ObjectModelHelpers.CleanupFileContents(changedContents));
+
+            if (versionChanged)
+            {
+                Assert.NotEqual(version, projectElement.Version);
+            }
+            else
+            {
+                Assert.Equal(version, projectElement.Version);
+            }
+
+            if (msbuildChildrenChanged)
+            {
+                Assert.NotEqual(childrenCount, projectElement.AllChildren.Count());
+            }
+            else
+            {
+                Assert.Equal(childrenCount, projectElement.AllChildren.Count());
+            }
+
+
+            if (xmlChanged)
+            {
+                Assert.NotEqual(xml, projectElement.RawXml);
+            }
+            else
+            {
+                Assert.Equal(xml, projectElement.RawXml);
+            }
+        }
+
+        private static string SaveToString(ProjectRootElement project)
+        {
+            var writer = new EncodingStringWriter();
+            project.Save(writer);
+
+            return writer.ToString();
+        }
+
+        /// <summary>
         /// Test helper for validating that DeepClone and CopyFrom work as advertised.
         /// </summary>
         private static void ValidateDeepCloneAndCopyFrom(ProjectRootElement pre)
@@ -1277,49 +1897,16 @@ Project(""{";
         /// </summary>
         private ProjectRootElement CreatePREWithSubstantialContent()
         {
-            string content = ObjectModelHelpers.CleanupFileContents(
-      @"<?xml version=""1.0"" encoding=""utf-16""?>
-                    <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
-                        <PropertyGroup Condition=""false"">
-                            <p>p1</p>
-                            <q>q1</q>
-                        </PropertyGroup>
-                        <PropertyGroup/>
-                        <PropertyGroup>
-                            <r>r1</r>
-                        </PropertyGroup>
-                        <Choose>
-                            <When Condition=""true"">
-                                <Choose>
-                                    <When Condition=""true"">
-                                        <PropertyGroup>
-                                            <s>s1</s>
-                                        </PropertyGroup>
-                                    </When>
-                                </Choose>
-                            </When>
-                            <When Condition=""false"">
-                                <PropertyGroup>
-                                    <s>s2</s> <!-- both esses -->
-                                </PropertyGroup>
-                            </When>
-                            <Otherwise>
-                                <Choose>
-                                    <When Condition=""false""/>
-                                    <Otherwise>
-                                        <PropertyGroup>
-                                            <t>t1</t>
-                                        </PropertyGroup>
-                                    </Otherwise>
-                                </Choose>
-                            </Otherwise>
-                        </Choose>
-                        <Import Project='$(MSBuildToolsPath)\microsoft.csharp.targets'/>
-                    </Project>");
+            string content = ObjectModelHelpers.CleanupFileContents(ComplexProject);
 
             ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
 
             return project;
+        }
+
+        private void VerifyAssertLineByLine(string expected, string actual)
+        {
+            Helpers.VerifyAssertLineByLine(expected, actual, false);
         }
     }
 }

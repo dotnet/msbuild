@@ -844,5 +844,98 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
             Helpers.VerifyAssertLineByLine(expected, writer.ToString());
         }
+
+        [Fact]
+        public void SdkImportsAreInPreprocessedOutput()
+        {
+            var testSdkRoot = Path.Combine(Path.GetTempPath(), "MSBuildUnitTest");
+            var testSdkDirectory = Path.Combine(testSdkRoot, "MSBuildUnitTestSdk", "Sdk");
+
+            try
+            {
+                Directory.CreateDirectory(testSdkDirectory);
+
+                string sdkPropsPath = Path.Combine(testSdkDirectory, "Sdk.props");
+                string sdkTargetsPath = Path.Combine(testSdkDirectory, "Sdk.targets");
+
+                File.WriteAllText(sdkPropsPath, @"<Project>
+    <PropertyGroup>
+        <SdkPropsImported>true</SdkPropsImported>
+    </PropertyGroup>
+</Project>");
+                File.WriteAllText(sdkTargetsPath, @"<Project>
+    <PropertyGroup>
+        <SdkTargetsImported>true</SdkTargetsImported>
+    </PropertyGroup>
+</Project>");
+
+                using (new Helpers.TemporaryEnvironment("MSBuildSDKsPath", testSdkRoot))
+                {
+                    string content = @"<Project Sdk='MSBuildUnitTestSdk'>
+  <PropertyGroup>
+    <p>v1</p>
+  </PropertyGroup>
+</Project>";
+
+                    var project = new  Project(ProjectRootElement.Create(XmlReader.Create(new StringReader(content))));
+
+                    StringWriter writer = new StringWriter();
+
+                    project.SaveLogicalProject(writer);
+
+                    string expected = ObjectModelHelpers.CleanupFileContents(
+                        $@"<?xml version=""1.0"" encoding=""utf-16""?>
+<Project>
+  <!--
+============================================================================================================================================
+  <Import Project=""Sdk.props"" Sdk=""MSBuildUnitTestSdk"">
+  This import was added implicitly because of the Project element's Sdk attribute specified ""MSBuildUnitTestSdk"".
+
+{sdkPropsPath}
+============================================================================================================================================
+-->
+  <PropertyGroup>
+    <SdkPropsImported>true</SdkPropsImported>
+  </PropertyGroup>
+  <!--
+============================================================================================================================================
+  </Import>
+
+
+============================================================================================================================================
+-->
+  <PropertyGroup>
+    <p>v1</p>
+  </PropertyGroup>
+  <!--
+============================================================================================================================================
+  <Import Project=""Sdk.targets"" Sdk=""MSBuildUnitTestSdk"">
+  This import was added implicitly because of the Project element's Sdk attribute specified ""MSBuildUnitTestSdk"".
+
+{sdkTargetsPath}
+============================================================================================================================================
+-->
+  <PropertyGroup>
+    <SdkTargetsImported>true</SdkTargetsImported>
+  </PropertyGroup>
+  <!--
+============================================================================================================================================
+  </Import>
+
+
+============================================================================================================================================
+-->
+</Project>");
+                    Helpers.VerifyAssertLineByLine(expected, writer.ToString());
+                }
+            }
+            finally
+            {
+                if (Directory.Exists(testSdkDirectory))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(testSdkDirectory, true);
+                }
+            }
+        }
     }
 }

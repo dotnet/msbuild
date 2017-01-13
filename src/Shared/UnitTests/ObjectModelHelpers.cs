@@ -139,14 +139,17 @@ namespace Microsoft.Build.UnitTests
         {
 
             using (var testProject = new Helpers.TestProjectWithFiles(projectContents, inputFiles))
+            using (var collection = new ProjectCollection())
             {
+                var evaluatedItems = new Project(testProject.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, collection).Items.ToList();
+
                 if (expectedMetadataPerItem == null)
                 {
-                    ObjectModelHelpers.AssertItems(expectedInclude, new Project(testProject.ProjectFile).Items.ToList(), expectedDirectMetadata: null, normalizeSlashes: normalizeSlashes);
+                    ObjectModelHelpers.AssertItems(expectedInclude, evaluatedItems, expectedDirectMetadata: null, normalizeSlashes: normalizeSlashes);
                 }
                 else
                 {
-                    ObjectModelHelpers.AssertItems(expectedInclude, new Project(testProject.ProjectFile).Items.ToList(), expectedMetadataPerItem, normalizeSlashes);
+                    ObjectModelHelpers.AssertItems(expectedInclude, evaluatedItems, expectedMetadataPerItem, normalizeSlashes);
                 }
             }
         }
@@ -535,6 +538,16 @@ namespace Microsoft.Build.UnitTests
             return projectFilePath;
         }
 
+        internal static ProjectRootElement CreateInMemoryProjectRootElement(string projectContents, ProjectCollection collection = null, bool preserveFormatting = true)
+        {
+            var cleanedProject = ObjectModelHelpers.CleanupFileContents(projectContents);
+
+            return ProjectRootElement.Create(
+                XmlReader.Create(new StringReader(cleanedProject)),
+                collection ?? new ProjectCollection(),
+                preserveFormatting);
+        }
+
         /// <summary>
         /// Create a project in memory. Load up the given XML.
         /// </summary>
@@ -701,6 +714,8 @@ namespace Microsoft.Build.UnitTests
                 if (s_tempProjectDir == null)
                 {
                     s_tempProjectDir = Path.Combine(Path.GetTempPath(), "TempDirForMSBuildUnitTests");
+
+                    Directory.CreateDirectory(s_tempProjectDir);
                 }
 
                 return s_tempProjectDir;
@@ -1264,6 +1279,11 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         internal static string[] CreateFilesInDirectory(string rootDirectory, params string[] files)
         {
+            if (files == null)
+            {
+                return null;
+            }
+
             Assert.True(Directory.Exists(rootDirectory), $"Directory {rootDirectory} does not exist");
 
             var result = new string[files.Length];
@@ -1445,32 +1465,15 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Command you can pass to Exec to sleep for rough number of milliseconds.
-        /// @for /l %i in (1,1,X) do "@dir %windir% > nul"
-        /// sleeps for X/100 seconds, roughly
-        /// This works around not having sleep.exe on the path.
+        /// Gets a command that can be used by an Exec task to sleep for the specified amount of time.
         /// </summary>
-        internal static string SleepCommandInMilliseconds(int milliseconds)
+        /// <param name="timeSpan">A <see cref="TimeSpan"/> representing the amount of time to sleep.</param>
+        internal static string GetSleepCommand(TimeSpan timeSpan)
         {
             return
-                string.Format(
-                    NativeMethodsShared.IsWindows
-                        ? @"@for /l %25%25i in (1,1,{0}) do @dir %25windir%25 > nul"
-                        : "for i in {{1..{0}}}; do ls /bin > /dev/null; done",
-                    milliseconds / 10);
-        }
-
-        /// <summary>
-        /// Command you can pass to Exec to sleep for rough number of seconds.
-        /// @for /l %i in (1,1,X) do "@dir %windir% > nul"
-        /// sleeps for X/100 seconds, roughly
-        /// This works around not having sleep.exe on the path.
-        /// </summary>
-        /// <param name="seconds"></param>
-        /// <returns></returns>
-        internal static string SleepCommand(int seconds)
-        {
-            return SleepCommandInMilliseconds(seconds * 1000);
+                NativeMethodsShared.IsWindows
+                ? $"@powershell -command &quot;Start-Sleep -Milliseconds {(int)timeSpan.TotalMilliseconds}&quot; &gt;nul"
+                : $"sleep {timeSpan.TotalSeconds}";
         }
 
         /// <summary>
@@ -1530,6 +1533,7 @@ namespace Microsoft.Build.UnitTests
                 Path = System.IO.Path.GetFullPath($"TMP_{Guid.NewGuid()}");
                 Directory.CreateDirectory(_path);
 
+                // TODO: this could use TemporaryEnvironment
                 _oldtempPaths = SetTempPath(_path);
             }
 
@@ -1595,6 +1599,40 @@ namespace Microsoft.Build.UnitTests
                 }
 
                 return tempPaths;
+            }
+        }
+
+        internal class TemporaryEnvironment : IDisposable
+        {
+            private bool _disposed;
+            private readonly string _name;
+            private readonly string _originalValue;
+
+            public TemporaryEnvironment(string name, string value)
+            {
+                _name = name;
+                _originalValue = Environment.GetEnvironmentVariable(name);
+
+                Environment.SetEnvironmentVariable(name, value);
+            }
+
+            public void Dispose()
+            {
+                Dispose(true);
+                GC.SuppressFinalize(this);
+            }
+
+            private void Dispose(bool disposing)
+            {
+                if (!_disposed)
+                {
+                    if (disposing)
+                    {
+                        Environment.SetEnvironmentVariable(_name, _originalValue);
+                    }
+
+                    _disposed = true;
+                }
             }
         }
 

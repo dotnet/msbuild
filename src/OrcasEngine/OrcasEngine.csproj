@@ -10,6 +10,7 @@
     <AssemblyName>Microsoft.Build.Engine</AssemblyName>
     <RootNamespace>Microsoft.Build.Engine</RootNamespace>
     <NoWarn>$(NoWarn);618</NoWarn>
+    <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />

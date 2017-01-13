@@ -3,7 +3,7 @@
     "xunit.runner.console": "2.1.0",
     "Nerdbank.GitVersioning": "1.5.46",
     "NuSpec.ReferenceGenerator": "1.4.2",
-    "Microsoft.Net.Compilers": "2.0.0-beta3",
+    "Microsoft.Net.Compilers": "2.0.0-rc3-61110-06",
     "MicroBuild.Core": "0.2.0",
     "Microsoft.DotNet.BuildTools.GenAPI": "1.0.0-beta2-00731-01"
   },

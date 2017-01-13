@@ -105,6 +105,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void SimpleBuild()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -205,6 +206,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -267,6 +270,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -280,6 +285,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -352,6 +359,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void InProcForwardPropertiesFromChild()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -404,6 +412,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void InProcMsBuildForwardAllPropertiesFromChild()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -524,6 +533,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -585,6 +596,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -674,6 +687,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -730,6 +745,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -807,6 +824,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -861,6 +880,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void SimpleBuildWithFailure()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -882,6 +902,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void SimpleBuildWithFailureAndWarningOnlyLogCriticalEventsTrue()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -917,6 +938,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void SimpleBuildWithFailureAndWarningOnlyLogCriticalEventsFalse()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1117,12 +1139,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void EndBuildBlocks()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
-    <Exec Command='" + Helpers.SleepCommand(1) + @"'/>
+    <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(1)) + @"'/>
 	<Message Text='[success 1]'/>
  </Target>
 </Project>
@@ -1187,6 +1210,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void SequentialBuild()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1224,12 +1248,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void OverlappingBuildSubmissions()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
-    <Exec Command='" + Helpers.SleepCommandInMilliseconds(500) + @"'/>
+    <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromMilliseconds(500)) + @"'/>
 	<Message Text='[success 1]'/>
  </Target>
 </Project>
@@ -1267,6 +1292,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void OverlappingIdenticalBuildSubmissions()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1302,6 +1328,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void OverlappingBuildSubmissions_OnlyOneSucceeds()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1355,7 +1382,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
-	<Exec Command='" + Helpers.SleepCommand(20) + @"'/>
+	<Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(20)) + @"'/>
     <Message Text='[fail]'/>
  </Target>
 </Project>
@@ -1375,7 +1402,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
-	<Exec Command='" + Helpers.SleepCommand(20) + @"'/>
+	<Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(20)) + @"'/>
     <Message Text='[fail]'/>
  </Target>
 </Project>
@@ -1397,7 +1424,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
-	<Exec Command='" + Helpers.SleepCommand(60) + @"'/>
+	<Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(60)) + @"'/>
     <Message Text='[fail]'/>
  </Target>
 </Project>
@@ -1422,7 +1449,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A canceled build which waits for the task to get started before canceling.  Because it is a 2.0 task, we should
         /// wait until the task finishes normally (cancellation not supported.)
         /// </summary>
-        [Fact(Skip= "https://github.com/Microsoft/msbuild/issues/696")]
+        [Fact]
         public void CancelledBuildWithDelay20()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 != null)
@@ -1430,7 +1457,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='2.0'>
  <Target Name='test'>
-	<Exec Command='" + Helpers.SleepCommand(5) + @"'/>
+	<Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(5)) + @"'/>
     <Message Text='[fail]'/>
  </Target>
 </Project>
@@ -1451,11 +1478,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
+#if FEATURE_TASKHOST
         /// <summary>
         /// A canceled build which waits for the task to get started before canceling.  Because it is a 2.0 task, we should
         /// wait until the task finishes normally (cancellation not supported.)
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void CancelledBuildInTaskHostWithDelay20()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 != null)
@@ -1464,7 +1493,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <UsingTask TaskName='Microsoft.Build.Tasks.Exec' AssemblyName='Microsoft.Build.Tasks.v3.5, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a' TaskFactory='TaskHostFactory' />
  <Target Name='test'>
-	<Exec Command='" + Helpers.SleepCommand(10) + @"'/>
+	<Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(10)) + @"'/>
     <Message Text='[fail]'/>
  </Target>
 </Project>
@@ -1487,6 +1516,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 _logger.AssertLogDoesntContain("MSB4217");
             }
         }
+#endif
 
         /// <summary>
         /// A canceled build which waits for the task to get started before canceling.  Because it is a 12.. task, we should
@@ -1499,7 +1529,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
-	<Exec Command='" + Helpers.SleepCommand(10) + @"'/>
+	<Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(10)) + @"'/>
     <Message Text='[fail]'/>
  </Target>
 </Project>
@@ -1519,18 +1549,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogDoesntContain("[fail]");
         }
 
+#if FEATURE_TASKHOST
         /// <summary>
         /// A canceled build which waits for the task to get started before canceling.  Because it is a 12.0 task, we should
         /// cancel the task and exit out after a short period wherein we wait for the task to exit cleanly. 
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void CancelledBuildInTaskHostWithDelay40()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <UsingTask TaskName='Microsoft.Build.Tasks.Exec' AssemblyName='Microsoft.Build.Tasks.Core, Version=msbuildassemblyversion, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a' TaskFactory='TaskHostFactory' />
  <Target Name='test'>
-	<Exec Command='" + Helpers.SleepCommand(10) + @"'/>
+	<Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(10)) + @"'/>
     <Message Text='[fail]'/>
  </Target>
 </Project>
@@ -1552,12 +1584,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Task host should not have exited prematurely
             _logger.AssertLogDoesntContain("MSB4217");
         }
+#endif
 
         /// <summary>
         /// This test verifies that builds of the same project instance in sequence are permitted.
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void SequentialBuildsOfTheSameProjectAllowed()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1588,12 +1622,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void OverlappingBuildsOfTheSameProjectDifferentTargetsAreAllowed()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='target1'>
-    <Exec Command='" + Helpers.SleepCommand(3) + @"'/>
+    <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(3)) + @"'/>
     <Message Text='text'/>
  </Target>
  <Target Name='target2'>
@@ -1629,12 +1664,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void OverlappingBuildsOfTheSameProjectSameTargetsAreAllowed()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='target1'>
-    <Exec Command='" + Helpers.SleepCommand(3) + @"'/>
+    <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(3)) + @"'/>
     <Message Text='text'/>
  </Target>
  <Target Name='target2'>
@@ -1728,6 +1764,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void ProjectInstanceRetrievedAfterBuildMatchesSourceProject()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1755,6 +1792,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void ResetCacheClearsInstances()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1788,6 +1826,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void DisablingCacheResetKeepsInstance()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1828,6 +1867,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void GhostProjectRootElementCache()
         {
             string contents1 = ObjectModelHelpers.CleanupFileContents(@"
@@ -1983,6 +2023,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void Regress251333()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -2017,6 +2058,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -2092,6 +2135,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -2167,6 +2212,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -2217,6 +2264,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         [Trait("Category", "mono-osx-failing")]
         public void CacheLifetime()
         {
@@ -2333,6 +2381,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void FailedAfterTargetInP2PShouldCauseOverallBuildFailure_MultipleEntrypoints()
         {
             string projA = null;
@@ -2483,6 +2532,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void NonOverlappingEntrypointTargetsShouldNotInfluenceEachOthersResults()
         {
             string projA = null;
@@ -2551,6 +2601,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -2619,7 +2671,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
   </Target>
 
   <Target Name='BuildSlower'>
-    <Exec Command='" + Helpers.SleepCommandInMilliseconds(500) + @"' />
+    <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromMilliseconds(500)) + @"' />
   </Target>
 </Project>
 ";
@@ -2680,6 +2732,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -2726,7 +2780,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
   </Target>
 
   <Target Name=`Sleep`>
-    <Exec Command=`" + Helpers.SleepCommandInMilliseconds(500) + @"` />
+    <Exec Command=`" + Helpers.GetSleepCommand(TimeSpan.FromMilliseconds(500)) + @"` />
   </Target>
 </Project>
 ";
@@ -2789,6 +2843,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -2850,7 +2906,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
   </Target>
 
   <Target Name=`Sleep`>
-    <Exec Command=`" + Helpers.SleepCommandInMilliseconds(500) + @"` />
+    <Exec Command=`" + Helpers.GetSleepCommand(TimeSpan.FromMilliseconds(500)) + @"` />
   </Target>
 </Project>
 ";
@@ -2928,6 +2984,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -2974,7 +3032,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
   </Target>
 
   <Target Name=`Sleep`>
-    <Exec Command=`" + Helpers.SleepCommandInMilliseconds(500) + @"` />
+    <Exec Command=`" + Helpers.GetSleepCommand(TimeSpan.FromMilliseconds(500)) + @"` />
   </Target>
 </Project>
 ";
@@ -3039,6 +3097,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -3085,7 +3145,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
   </Target>
 
   <Target Name=`Sleep`>
-    <Exec Command=`" + Helpers.SleepCommandInMilliseconds(500) + @"` />
+    <Exec Command=`" + Helpers.GetSleepCommand(TimeSpan.FromMilliseconds(500)) + @"` />
   </Target>
 </Project>
 ";
@@ -3135,6 +3195,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void VerifyMultipleRequestForSameProjectWithErrors_DifferentEntrypoints()
         {
             string projA = null;
@@ -3229,7 +3290,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 string projectContent = @"<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
     <Target Name=`Build`>
         <!-- Wait 200 ms -->
-        <Exec Command=`" + Helpers.SleepCommandInMilliseconds(200) + @"` />
+        <Exec Command=`" + Helpers.GetSleepCommand(TimeSpan.FromMilliseconds(200)) + @"` />
     </Target>
 
 </Project>
@@ -3297,6 +3358,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void TestSimultaneousSubmissionsWithLegacyThreadingData_P2P()
         {
             string projectPath1 = null;
@@ -3307,12 +3369,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 string projectContent1 = @"<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
     <Target Name=`CopyRunEnvironmentFiles`>
         <!-- Wait 100 ms -->
-        <Exec Command=`" + Helpers.SleepCommandInMilliseconds(100) + @"` />
+        <Exec Command=`" + Helpers.GetSleepCommand(TimeSpan.FromMilliseconds(100)) + @"` />
     </Target>
 
     <Target Name=`MyConsoleTarget`>
         <!-- Wait 100 ms -->
-        <Exec Command=`" + Helpers.SleepCommandInMilliseconds(100) + @"` />
+        <Exec Command=`" + Helpers.GetSleepCommand(TimeSpan.FromMilliseconds(100)) + @"` />
     </Target>
 
 </Project>
@@ -3398,6 +3460,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+#elif MONO
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1245")]
 #else
         [Fact]
 #endif
@@ -3411,12 +3475,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 string projectContent1 = @"<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
     <Target Name=`CopyRunEnvironmentFiles`>
         <!-- Wait 100 ms -->
-        <Exec Command=`" + Helpers.SleepCommandInMilliseconds(100) + @"` />
+        <Exec Command=`" + Helpers.GetSleepCommand(TimeSpan.FromMilliseconds(100)) + @"` />
     </Target>
 
     <Target Name=`MyConsoleTarget`>
         <!-- Wait 100 ms -->
-        <Exec Command=`" + Helpers.SleepCommandInMilliseconds(100) + @"` />
+        <Exec Command=`" + Helpers.GetSleepCommand(TimeSpan.FromMilliseconds(100)) + @"` />
     </Target>
 
 </Project>
@@ -3504,6 +3568,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
 #else
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
 #endif
         public void Regress265010()
         {
@@ -3564,6 +3629,101 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 _buildManager.EndBuild();
             }
+        }
+
+        /// <summary>
+        /// Verifies that all warnings are treated as errors and that the overall build result is a failure.
+        /// </summary>
+        [Fact]
+        public void WarningsAreTreatedAsErrorsAll()
+        {
+            string contents = ObjectModelHelpers.CleanupFileContents(@"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+ <Target Name='target1'>
+    <Warning Text='This warning should be treated as an error' Code='ABC123'/>
+    <Warning Text='This warning should NOT be treated as an error' />
+ </Target>
+</Project>
+");
+            _parameters.WarningsAsErrors = new HashSet<string>();
+
+            Project project = CreateProject(contents, ObjectModelHelpers.MSBuildDefaultToolsVersion, _projectCollection, true);
+            ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
+            _buildManager.BeginBuild(_parameters);
+            BuildResult result1 = _buildManager.BuildRequest(new BuildRequestData(instance, new string[] { "target1" }));
+            _buildManager.EndBuild();
+
+            Assert.Equal(0, _logger.WarningCount);
+            Assert.Equal(2, _logger.ErrorCount);
+
+            Assert.Equal(BuildResultCode.Failure, result1.OverallResult);
+            Assert.True(result1.HasResultsForTarget("target1"));
+        }
+
+        /// <summary>
+        /// Verifies that only the specified warnings are treated as errors and that the overall build result is a failure.
+        /// </summary>
+        [Fact]
+        public void WarningsAreTreatedAsErrorsSpecific()
+        {
+            string contents = ObjectModelHelpers.CleanupFileContents(@"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+ <Target Name='target1'>
+    <Warning Text='This warning should be treated as an error' Code='ABC123'/>
+    <Warning Text='This warning should NOT be treated as an error' Code='NA123' />
+    <Warning Text='This warning should NOT be treated as an error' />
+ </Target>
+</Project>
+");
+            _parameters.WarningsAsErrors = new HashSet<string> { "ABC123" };
+
+            Project project = CreateProject(contents, ObjectModelHelpers.MSBuildDefaultToolsVersion, _projectCollection, true);
+            ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
+            _buildManager.BeginBuild(_parameters);
+            BuildResult result1 = _buildManager.BuildRequest(new BuildRequestData(instance, new string[] { "target1" }));
+            _buildManager.EndBuild();
+
+            Assert.Equal(2, _logger.WarningCount);
+            Assert.Equal(1, _logger.ErrorCount);
+
+            Assert.Equal(BuildResultCode.Failure, result1.OverallResult);
+            Assert.True(result1.HasResultsForTarget("target1"));
+        }
+
+        /// <summary>
+        /// Verifies that when building targets which emit warnings, they still show as succeeding but the overall build result is a failure.
+        /// </summary>
+        [Fact]
+        public void WarningsAreTreatedAsErrorsButTargetsStillSucceed()
+        {
+            string contents = ObjectModelHelpers.CleanupFileContents(@"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+<Target Name='target1'>
+    <Message Text='text'/>
+ </Target>
+ <Target Name='target2'>
+    <Warning Text='This warning should be treated as an error' Code='ABC123'/>
+ </Target>
+</Project>
+");
+            _parameters.WarningsAsErrors = new HashSet<string> { "ABC123" };
+
+            Project project = CreateProject(contents, ObjectModelHelpers.MSBuildDefaultToolsVersion, _projectCollection, true);
+            ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
+            _buildManager.BeginBuild(_parameters);
+            BuildResult buildResult = _buildManager.BuildRequest(new BuildRequestData(instance, new string[] { "target1", "target2" }));
+            _buildManager.EndBuild();
+
+            Assert.Equal(0, _logger.WarningCount);
+            Assert.Equal(1, _logger.ErrorCount);
+
+            Assert.Equal(BuildResultCode.Failure, buildResult.OverallResult);
+            Assert.True(buildResult.HasResultsForTarget("target1"));
+            Assert.True(buildResult.HasResultsForTarget("target2"));
+            // The two targets should still show as success because they don't know their warning was changed to an error
+            // Logging a warning as an error does not change execution, only the final result of the build
+            Assert.Equal(TargetResultCode.Success, buildResult.ResultsByTarget["target1"].ResultCode);
+            Assert.Equal(TargetResultCode.Success, buildResult.ResultsByTarget["target2"].ResultCode);
         }
 
         /// <summary>

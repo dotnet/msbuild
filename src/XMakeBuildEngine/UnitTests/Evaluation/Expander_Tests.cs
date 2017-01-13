@@ -227,6 +227,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void ExpandItemVectorFunctionsGetDirectoryNameOfMetadataValueDistinct()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -252,6 +253,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         [Trait("Category", "mono-osx-failing")]
         public void ExpandItemVectorFunctionsItemSpecModifier()
         {
@@ -312,6 +314,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         [Trait("Category", "mono-osx-failing")]
         public void ExpandItemVectorFunctionsChained1()
         {
@@ -328,6 +331,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         [Trait("Category", "mono-osx-failing")]
         public void ExpandItemVectorFunctionsChained2()
         {
@@ -355,6 +359,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         [Trait("Category", "mono-osx-failing")]
         public void ExpandItemVectorFunctionsChainedProject1()
         {
@@ -631,6 +636,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         [Trait("Category", "mono-osx-failing")]
         public void ExpandItemVectorFunctionsItemSpecModifier2()
         {
@@ -669,6 +675,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void ExpandItemVectorFunctionsGetDirectoryNameOfMetadataValue()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -688,6 +695,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void ExpandItemVectorFunctionsMetadataValueMultiItem()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -2011,6 +2019,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         [Trait("Category", "mono-osx-failing")]
         public void PropertyFunctionDictionaryReturn()
         {
@@ -2234,6 +2243,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void PropertyFunctionStaticMethodMakeRelative()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -2367,6 +2377,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void PropertyFunctionStaticMethodQuoted1()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -2640,6 +2651,75 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
+        /// Verifies that <see cref="IntrinsicFunctions.GetPathOfFileAbove"/> returns the correct path if a file exists
+        /// or an empty string if it doesn't.
+        /// </summary>
+        [Fact]
+        public void PropertyFunctionStaticMethodGetPathOfFileAbove()
+        {
+            // Set element location to a file deep in the directory structure.  This is where the function should start looking
+            //
+            MockElementLocation mockElementLocation = new MockElementLocation(Path.Combine(ObjectModelHelpers.TempProjectDir, "one", "two", "three", "four", "five", Path.GetRandomFileName()));
+            
+            string fileToFind = FileUtilities.GetTemporaryFile(ObjectModelHelpers.TempProjectDir, ".tmp");
+
+            try
+            {
+                PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
+                pg.Set(ProjectPropertyInstance.Create("FileToFind", Path.GetFileName(fileToFind)));
+
+                Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
+
+                string result = expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::GetPathOfFileAbove($(FileToFind)))", ExpanderOptions.ExpandProperties, mockElementLocation);
+
+                Assert.Equal(fileToFind, result);
+
+                result = expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::GetPathOfFileAbove('Hobbits'))", ExpanderOptions.ExpandProperties, mockElementLocation);
+
+                Assert.Equal(String.Empty, result);
+            }
+            finally
+            {
+                ObjectModelHelpers.DeleteTempProjectDirectory();
+            }
+        }
+
+        /// <summary>
+        /// Verifies that the usage of GetPathOfFileAbove() within an in-memory project throws an exception.
+        /// </summary>
+        [Fact]
+        public void PropertyFunctionStaticMethodGetPathOfFileAboveInMemoryProject()
+        {
+            InvalidProjectFileException exception = Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                ObjectModelHelpers.CreateInMemoryProject("<Project><PropertyGroup><foo>$([MSBuild]::GetPathOfFileAbove('foo'))</foo></PropertyGroup></Project>");
+            });
+
+            Assert.True(exception.Message.StartsWith("The expression \"[MSBuild]::GetPathOfFileAbove(foo, \'\')\" cannot be evaluated."));
+        }
+
+        /// <summary>
+        /// Verifies that <see cref="IntrinsicFunctions.GetPathOfFileAbove"/> only accepts a file name.
+        /// </summary>
+        [Fact]
+        public void PropertyFunctionStaticMethodGetPathOfFileAboveFileNameOnly()
+        {
+            string fileWithPath = Path.Combine("foo", "bar", "file.txt");
+
+            InvalidProjectFileException exception = Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
+                pg.Set(ProjectPropertyInstance.Create("FileWithPath", fileWithPath));
+
+                Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
+
+                string result = expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::GetPathOfFileAbove($(FileWithPath)))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+            });
+
+            Assert.Contains(ResourceUtilities.FormatResourceString("InvalidGetPathOfFileAboveParameter", fileWithPath), exception.Message);
+        }
+
+        /// <summary>
         /// Expand property function that calls GetCultureInfo
         /// </summary>
         [Fact]
@@ -2766,6 +2846,24 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 #endif
 
+        [Fact]
+        public void PropertyFunctionNormalizeDirectory()
+        {
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(new[]
+            {
+                ProjectPropertyInstance.Create("MyPath", "one"),
+                ProjectPropertyInstance.Create("MySecondPath", "two"),
+            }));
+
+            Assert.Equal(
+                $"{Path.GetFullPath("one")}{Path.DirectorySeparatorChar}",
+                expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::NormalizeDirectory($(MyPath)))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance));
+
+            Assert.Equal(
+                $"{Path.GetFullPath(Path.Combine("one", "two"))}{Path.DirectorySeparatorChar}",
+                expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::NormalizeDirectory($(MyPath), $(MySecondPath)))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance));
+        }
+
         /// <summary>
         /// Expand property function that tests for existence of the task host
         /// </summary>
@@ -2843,6 +2941,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         [Trait("Category", "mono-osx-failing")]
         public void PropertyFunctionStaticMethodFileAttributes()
         {
@@ -3348,6 +3447,28 @@ $(
                         "FAILURE: Expected '" + errorTests[i] + "' to not parse or not be evaluated but it evaluated to '" + result + "'"
                     );
             }
+        }
+
+        [Fact]
+        public void PropertyFunctionEnsureTrailingSlash()
+        {
+            string path = Path.Combine("foo", "bar");
+
+            PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
+
+            pg.Set(ProjectPropertyInstance.Create("SomeProperty", path));
+
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
+
+            // Verify a constant expands properly
+            string result = expander.ExpandIntoStringLeaveEscaped($"$([MSBuild]::EnsureTrailingSlash('{path}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+            Assert.Equal(path + Path.DirectorySeparatorChar, result);
+
+            // Verify that a property expands properly
+            result = expander.ExpandIntoStringLeaveEscaped("$([MSBuild]::EnsureTrailingSlash($(SomeProperty)))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+            Assert.Equal(path + Path.DirectorySeparatorChar, result);
         }
     }
 }

@@ -125,7 +125,7 @@ namespace Microsoft.Build.UnitTests
                 Assert.NotEqual(processHandle, NativeMethodsShared.NullIntPtr);
 
                 //Actually call the method
-                GetProcessIdDelegate processIdDelegate = (GetProcessIdDelegate)Marshal.GetDelegateForFunctionPointer(processHandle, typeof(GetProcessIdDelegate));
+                GetProcessIdDelegate processIdDelegate = Marshal.GetDelegateForFunctionPointer<GetProcessIdDelegate>(processHandle);
                 uint processId = processIdDelegate();
 
                 //Make sure the return value is the same as retrieved from the .net methods to make sure everything works

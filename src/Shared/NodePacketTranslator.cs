@@ -18,6 +18,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using System.Globalization;
 using System.Reflection;
@@ -1318,7 +1319,7 @@ namespace Microsoft.Build.BackEnd
                         projectContextId = context.ProjectContextId;
                         taskId = context.TaskId;
                         projectInstanceId = context.ProjectInstanceId;
-                        submissionId = context.ProjectInstanceId;
+                        submissionId = context.SubmissionId;
                     }
 
                     translator.Translate(ref nodeId);
@@ -1396,35 +1397,44 @@ namespace Microsoft.Build.BackEnd
 
             public static Exception ToException(SerializedException serializedException)
             {
-                var typeLoader = new TypeLoader((t, o) => true);
-
-                LoadedType loadedExceptionType = typeLoader.Load(serializedException.TypeFullName, serializedException.ExceptionAssembly);
-                Type exceptionType = loadedExceptionType.Type;
-
                 Exception innerException = null;
                 if (serializedException.InnerException != null)
                 {
                     innerException = ToException(serializedException.InnerException);
                 }
 
-                Type[] parameterTypes;
-                object[] constructorParameters;
-                if (innerException == null)
+                ConstructorInfo constructor = null;
+                object[] constructorParameters = null;
+
+                try
                 {
-                    parameterTypes = new[] { typeof(string) };
-                    constructorParameters = new object[] { serializedException.Message };
+                    var typeLoader = new TypeLoader((t, o) => true);
+
+                    LoadedType loadedExceptionType = typeLoader.Load(serializedException.TypeFullName, serializedException.ExceptionAssembly);
+                    Type exceptionType = loadedExceptionType.Type;
+
+                    Type[] parameterTypes;
+                    if (innerException == null)
+                    {
+                        parameterTypes = new[] { typeof(string) };
+                        constructorParameters = new object[] { serializedException.Message };
+                    }
+                    else
+                    {
+                        parameterTypes = new[] { typeof(string), typeof(Exception) };
+                        constructorParameters = new object[] { serializedException.Message, innerException };
+                    }
+
+                    constructor = exceptionType.GetConstructor(parameterTypes);
                 }
-                else
+                catch (FileLoadException e)
                 {
-                    parameterTypes = new[] { typeof(string), typeof(Exception) };
-                    constructorParameters = new object[] { serializedException.Message, innerException };
+                    CommunicationsUtilities.Trace($"Exception while attempting to deserialize an exception of type \"{serializedException.TypeFullName}\". Could not load from \"{serializedException.ExceptionAssembly.AssemblyLocation}\": {e}");
                 }
 
-                ConstructorInfo constructor = exceptionType.GetConstructor(parameterTypes);
                 if (constructor == null)
                 {
-                    //  Couldn't find appropriate constructor.  Fall back to creating an exception
-                    //  that will look the same as the original one when ToString() is called
+                    CommunicationsUtilities.Trace($"Could not find a constructor to deserialize an exception of type \"{serializedException.TypeFullName}\". Falling back to an exception that will look the same.");
                     return new FormattedException(serializedException.ExceptionToString);
                 }
 

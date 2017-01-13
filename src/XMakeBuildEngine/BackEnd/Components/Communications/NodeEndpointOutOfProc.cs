@@ -44,6 +44,7 @@ namespace Microsoft.Build.BackEnd
 
         #region Constructors and Factories
 
+#if FEATURE_NAMED_PIPES_FULL_DUPLEX
         /// <summary>
         /// Instantiates an endpoint to act as a client
         /// </summary>
@@ -51,13 +52,19 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The component host.</param>
         /// <param name="enableReuse">Whether this node may be reused for a later build.</param>
         internal NodeEndpointOutOfProc(
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
             string pipeName, 
+            IBuildComponentHost host,
+            bool enableReuse)
 #else
+        /// <summary>
+        /// Instantiates an endpoint to act as a client
+        /// </summary>
+        internal NodeEndpointOutOfProc(
             string clientToServerPipeHandle,
             string serverToClientPipeHandle,
+            IBuildComponentHost host,
+            bool enableReuse)
 #endif
-            IBuildComponentHost host, bool enableReuse)
         {
             ErrorUtilities.VerifyThrowArgumentNull(host, "host");
             _componentHost = host;

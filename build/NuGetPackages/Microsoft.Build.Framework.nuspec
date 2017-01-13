@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>$id$</id>
     <version>$version$</version>
@@ -11,10 +11,10 @@
     <projectUrl>$projectUrl$</projectUrl>
     <iconUrl>$iconUrl$</iconUrl>
     <description>This package contains the $id$ assembly which is a common assembly used by other MSBuild assemblies.</description>
-    <tags>MSBuild</tags>
     <copyright>Copyright © Microsoft Corporation</copyright>
+    <tags>MSBuild</tags>
     <dependencies>
-      <group targetFramework="netstandard1.3">
+      <group targetFramework=".NETStandard1.3">
         <dependency id="System.Collections" version="4.0.11" />
         <dependency id="System.Diagnostics.Debug" version="4.0.11" />
         <dependency id="System.Globalization" version="4.0.11" />

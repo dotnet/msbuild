@@ -46,6 +46,7 @@ namespace Microsoft.Build.UnitTests.Construction
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void ParseFirstProjectLine_VC()
         {
             Assert.Throws<InvalidProjectFileException>(() =>
@@ -166,8 +167,8 @@ namespace Microsoft.Build.UnitTests.Construction
                     @"
                     Microsoft Visual Studio Solution File, Format Version 8.00
                         Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
-	                        ProjectSection(ProjectDependencies) = postProject
-	                        EndProjectSection
+                            ProjectSection(ProjectDependencies) = postProject
+                            EndProjectSection
                         EndProject";
                 SolutionFile solution = ParseSolutionHelper(solutionFileContents);
                 //Project should get added to the solution
@@ -234,12 +235,12 @@ namespace Microsoft.Build.UnitTests.Construction
                     @"
                     Microsoft Visual Studio Solution File, Format Version 8.00
                         Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
-	                        ProjectSection(ProjectDependencies) = postProject
-	                        EndProjectSection
+                            ProjectSection(ProjectDependencies) = postProject
+                            EndProjectSection
                         EndProject
                         Project('{NNNNNNNN-9925-4D57-9DAF-E0A9D936ABDB}') = 'someproja', 'someproja.proj', '{CCCCCCCC-9925-4D57-9DAF-E0A9D936ABDB}'
-	                        ProjectSection(ProjectDependencies) = postProject
-	                        EndProjectSection
+                            ProjectSection(ProjectDependencies) = postProject
+                            EndProjectSection
                         EndProject";
 
 
@@ -307,8 +308,8 @@ namespace Microsoft.Build.UnitTests.Construction
                     @"
                     Microsoft Visual Studio Solution File, Format Version 8.00
                         Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
-	                        ProjectSection(ProjectDependencies) = postProject
-	                        EndProjectSection
+                            ProjectSection(ProjectDependencies) = postProject
+                            EndProjectSection
                         EndProject";
                 SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
@@ -333,8 +334,8 @@ namespace Microsoft.Build.UnitTests.Construction
                 @"
                     Microsoft Visual Studio Solution File, Format Version 11.00
                         Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
-	                        ProjectSection(ProjectDependencies) = postProject
-	                        EndProjectSection
+                            ProjectSection(ProjectDependencies) = postProject
+                            EndProjectSection
                         EndProject";
 
             SolutionFile solutionPriorToDev12 = ParseSolutionHelper(solutionFileContentsPriorToDev12);
@@ -349,8 +350,8 @@ namespace Microsoft.Build.UnitTests.Construction
                         VisualStudioVersion = 12.0.20311.0 VSPRO_PLATFORM
                         MinimumVisualStudioVersion = 10.0.40219.1
                         Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
-	                        ProjectSection(ProjectDependencies) = postProject
-	                        EndProjectSection
+                            ProjectSection(ProjectDependencies) = postProject
+                            EndProjectSection
                         EndProject";
 
             SolutionFile solutionDev12 = ParseSolutionHelper(solutionFileContentsDev12);
@@ -367,8 +368,8 @@ namespace Microsoft.Build.UnitTests.Construction
                         VisualStudioVersion = VSPRO_PLATFORM
                         MinimumVisualStudioVersion = 10.0.40219.1
                         Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
-	                        ProjectSection(ProjectDependencies) = postProject
-	                        EndProjectSection
+                            ProjectSection(ProjectDependencies) = postProject
+                            EndProjectSection
                         EndProject";
 
             SolutionFile solutionDev12Corrupted1 = ParseSolutionHelper(solutionFileContentsDev12Corrupted1);
@@ -382,8 +383,8 @@ namespace Microsoft.Build.UnitTests.Construction
                         VisualStudioVersion = 
                         MinimumVisualStudioVersion = 10.0.40219.1
                         Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
-	                        ProjectSection(ProjectDependencies) = postProject
-	                        EndProjectSection
+                            ProjectSection(ProjectDependencies) = postProject
+                            EndProjectSection
                         EndProject";
 
             SolutionFile solutionDev12Corrupted2 = ParseSolutionHelper(solutionFileContentsDev12Corrupted2);
@@ -397,8 +398,8 @@ namespace Microsoft.Build.UnitTests.Construction
                         VisualStudioVersion = VSPRO_PLATFORM 12.0.20311.0
                         MinimumVisualStudioVersion = 10.0.40219.1
                         Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
-	                        ProjectSection(ProjectDependencies) = postProject
-	                        EndProjectSection
+                            ProjectSection(ProjectDependencies) = postProject
+                            EndProjectSection
                         EndProject";
 
             SolutionFile solutionDev12Corrupted3 = ParseSolutionHelper(solutionFileContentsDev12Corrupted3);
@@ -412,8 +413,8 @@ namespace Microsoft.Build.UnitTests.Construction
                         VisualStudioVersion =                   12.0.20311.0VSPRO_PLATFORM
                         MinimumVisualStudioVersion = 10.0.40219.1
                         Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
-	                        ProjectSection(ProjectDependencies) = postProject
-	                        EndProjectSection
+                            ProjectSection(ProjectDependencies) = postProject
+                            EndProjectSection
                         EndProject";
 
             SolutionFile solutionDev12Corrupted4 = ParseSolutionHelper(solutionFileContentsDev12Corrupted4);
@@ -427,8 +428,8 @@ namespace Microsoft.Build.UnitTests.Construction
                         VisualStudioVersion = ...12..0,.20311.0 VSPRO_PLATFORM
                         MinimumVisualStudioVersion = 10.0.40219.1
                         Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
-	                        ProjectSection(ProjectDependencies) = postProject
-	                        EndProjectSection
+                            ProjectSection(ProjectDependencies) = postProject
+                            EndProjectSection
                         EndProject";
 
             SolutionFile solutionDev12Corrupted5 = ParseSolutionHelper(solutionFileContentsDev12Corrupted5);
@@ -442,8 +443,8 @@ namespace Microsoft.Build.UnitTests.Construction
                         VisualStudioVersion =                   12.0.20311.0 VSPRO_PLATFORM
                         MinimumVisualStudioVersion = 10.0.40219.1
                         Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
-	                        ProjectSection(ProjectDependencies) = postProject
-	                        EndProjectSection
+                            ProjectSection(ProjectDependencies) = postProject
+                            EndProjectSection
                         EndProject";
 
             SolutionFile solutionDev12Corrupted6 = ParseSolutionHelper(solutionFileContentsDev12Corrupted6);
@@ -457,6 +458,7 @@ namespace Microsoft.Build.UnitTests.Construction
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void ParseNestedEtpProjectMultipleLevel()
         {
             string proj1Path = Path.Combine(Path.GetTempPath(), "someproj.etp");
@@ -521,8 +523,8 @@ namespace Microsoft.Build.UnitTests.Construction
                     @"
                     Microsoft Visual Studio Solution File, Format Version 8.00
                         Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
-	                        ProjectSection(ProjectDependencies) = postProject
-	                        EndProjectSection
+                            ProjectSection(ProjectDependencies) = postProject
+                            EndProjectSection
                         EndProject";
                 SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
@@ -580,8 +582,8 @@ namespace Microsoft.Build.UnitTests.Construction
                     @"
                     Microsoft Visual Studio Solution File, Format Version 8.00
                         Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
-	                        ProjectSection(ProjectDependencies) = postProject
-	                        EndProjectSection
+                            ProjectSection(ProjectDependencies) = postProject
+                            EndProjectSection
                         EndProject";
                 SolutionFile solution = ParseSolutionHelper(solutionFileContents);
                 string errCode, ignoredKeyword;
@@ -613,8 +615,8 @@ namespace Microsoft.Build.UnitTests.Construction
                 @"
                 Microsoft Visual Studio Solution File, Format Version 8.00
                     Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
-	                    ProjectSection(ProjectDependencies) = postProject
-	                    EndProjectSection
+                        ProjectSection(ProjectDependencies) = postProject
+                        EndProjectSection
                     EndProject";
             // Delete the someproj.etp file if it exists
             File.Delete(proj1Path);
@@ -764,20 +766,20 @@ namespace Microsoft.Build.UnitTests.Construction
                 Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'AnyProject', 'AnyProject\AnyProject.csproj', '{2CAB0FBD-15D8-458B-8E63-1B5B840E9798}'
                 EndProject
                 Global
-	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		                Debug|Any CPU = Debug|Any CPU
-		                Release|Any CPU = Release|Any CPU
-		                Description = Some description of this solution
-	                EndGlobalSection
-	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		                {2CAB0FBD-15D8-458B-8E63-1B5B840E9798}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		                {2CAB0FBD-15D8-458B-8E63-1B5B840E9798}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		                {2CAB0FBD-15D8-458B-8E63-1B5B840E9798}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                {2CAB0FBD-15D8-458B-8E63-1B5B840E9798}.Release|Any CPU.Build.0 = Release|Any CPU
-	                EndGlobalSection
-	                GlobalSection(SolutionProperties) = preSolution
-		                HideSolutionNode = FALSE
-	                EndGlobalSection
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|Any CPU = Debug|Any CPU
+                        Release|Any CPU = Release|Any CPU
+                        Description = Some description of this solution
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {2CAB0FBD-15D8-458B-8E63-1B5B840E9798}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                        {2CAB0FBD-15D8-458B-8E63-1B5B840E9798}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                        {2CAB0FBD-15D8-458B-8E63-1B5B840E9798}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                        {2CAB0FBD-15D8-458B-8E63-1B5B840E9798}.Release|Any CPU.Build.0 = Release|Any CPU
+                    EndGlobalSection
+                    GlobalSection(SolutionProperties) = preSolution
+                        HideSolutionNode = FALSE
+                    EndGlobalSection
                 EndGlobal
                 ";
             try
@@ -1098,96 +1100,96 @@ EndProject
 Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{A5EE8128-B08E-4533-86C5-E46714981680}'
 EndProject
 Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Debug|ARM = Debug|ARM
-		Debug|Mixed Platforms = Debug|Mixed Platforms
-		Debug|Win32 = Debug|Win32
-		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
-		Release|Any CPU = Release|Any CPU
-		Release|ARM = Release|ARM
-		Release|Mixed Platforms = Release|Mixed Platforms
-		Release|Win32 = Release|Win32
-		Release|x64 = Release|x64
-		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|ARM.ActiveCfg = Debug|ARM
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|ARM.Build.0 = Debug|ARM
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|ARM.Deploy.0 = Debug|ARM
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|Mixed Platforms.Build.0 = Debug|Win32
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|Mixed Platforms.Deploy.0 = Debug|Win32
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|Win32.ActiveCfg = Debug|Win32
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|Win32.Build.0 = Debug|Win32
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|Win32.Deploy.0 = Debug|Win32
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|x64.ActiveCfg = Debug|x64
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|x64.Build.0 = Debug|x64
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|x64.Deploy.0 = Debug|x64
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|x86.ActiveCfg = Debug|Win32
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|x86.Build.0 = Debug|Win32
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|x86.Deploy.0 = Debug|Win32
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|Any CPU.ActiveCfg = Release|Win32
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|ARM.ActiveCfg = Release|ARM
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|ARM.Build.0 = Release|ARM
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|ARM.Deploy.0 = Release|ARM
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|Mixed Platforms.ActiveCfg = Release|Win32
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|Mixed Platforms.Build.0 = Release|Win32
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|Mixed Platforms.Deploy.0 = Release|Win32
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|Win32.ActiveCfg = Release|Win32
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|Win32.Build.0 = Release|Win32
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|Win32.Deploy.0 = Release|Win32
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|x64.ActiveCfg = Release|x64
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|x64.Build.0 = Release|x64
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|x64.Deploy.0 = Release|x64
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|x86.ActiveCfg = Release|Win32
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|x86.Build.0 = Release|Win32
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|x86.Deploy.0 = Release|Win32
-		{024E8607-06B0-440D-8741-5A888DC4B176}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{024E8607-06B0-440D-8741-5A888DC4B176}.Debug|ARM.ActiveCfg = Debug|ARM
-		{024E8607-06B0-440D-8741-5A888DC4B176}.Debug|ARM.Build.0 = Debug|ARM
-		{024E8607-06B0-440D-8741-5A888DC4B176}.Debug|ARM.Deploy.0 = Debug|ARM
-		{024E8607-06B0-440D-8741-5A888DC4B176}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
-		{024E8607-06B0-440D-8741-5A888DC4B176}.Debug|Mixed Platforms.Build.0 = Debug|Win32
-		{024E8607-06B0-440D-8741-5A888DC4B176}.Debug|Mixed Platforms.Deploy.0 = Debug|Win32
-		{024E8607-06B0-440D-8741-5A888DC4B176}.Debug|Win32.ActiveCfg = Debug|Win32
-		{024E8607-06B0-440D-8741-5A888DC4B176}.Debug|Win32.Build.0 = Debug|Win32
-		{024E8607-06B0-440D-8741-5A888DC4B176}.Debug|Win32.Deploy.0 = Debug|Win32
-		{024E8607-06B0-440D-8741-5A888DC4B176}.Debug|x64.ActiveCfg = Debug|Win32
-		{024E8607-06B0-440D-8741-5A888DC4B176}.Debug|x86.ActiveCfg = Debug|Win32
-		{024E8607-06B0-440D-8741-5A888DC4B176}.Debug|x86.Build.0 = Debug|Win32
-		{024E8607-06B0-440D-8741-5A888DC4B176}.Debug|x86.Deploy.0 = Debug|Win32
-		{024E8607-06B0-440D-8741-5A888DC4B176}.Release|Any CPU.ActiveCfg = Release|Win32
-		{024E8607-06B0-440D-8741-5A888DC4B176}.Release|ARM.ActiveCfg = Release|ARM
-		{024E8607-06B0-440D-8741-5A888DC4B176}.Release|ARM.Build.0 = Release|ARM
-		{024E8607-06B0-440D-8741-5A888DC4B176}.Release|ARM.Deploy.0 = Release|ARM
-		{024E8607-06B0-440D-8741-5A888DC4B176}.Release|Mixed Platforms.ActiveCfg = Release|Win32
-		{024E8607-06B0-440D-8741-5A888DC4B176}.Release|Mixed Platforms.Build.0 = Release|Win32
-		{024E8607-06B0-440D-8741-5A888DC4B176}.Release|Mixed Platforms.Deploy.0 = Release|Win32
-		{024E8607-06B0-440D-8741-5A888DC4B176}.Release|Win32.ActiveCfg = Release|Win32
-		{024E8607-06B0-440D-8741-5A888DC4B176}.Release|Win32.Build.0 = Release|Win32
-		{024E8607-06B0-440D-8741-5A888DC4B176}.Release|Win32.Deploy.0 = Release|Win32
-		{024E8607-06B0-440D-8741-5A888DC4B176}.Release|x64.ActiveCfg = Release|Win32
-		{024E8607-06B0-440D-8741-5A888DC4B176}.Release|x86.ActiveCfg = Release|Win32
-		{024E8607-06B0-440D-8741-5A888DC4B176}.Release|x86.Build.0 = Release|Win32
-		{024E8607-06B0-440D-8741-5A888DC4B176}.Release|x86.Deploy.0 = Release|Win32
-		{A5EE8128-B08E-4533-86C5-E46714981680}.Debug|x86.ActiveCfg = Debug|Win32
-		{A5EE8128-B08E-4533-86C5-E46714981680}.Debug|x86.Build.0 = Debug|Win32
-		{A5EE8128-B08E-4533-86C5-E46714981680}.Debug|x86.Deploy.0 = Debug|Win32
-		{A5EE8128-B08E-4533-86C5-E46714981680}.Release|x86.ActiveCfg = Release|Win32
-		{A5EE8128-B08E-4533-86C5-E46714981680}.Release|x86.Build.0 = Release|Win32
-		{A5EE8128-B08E-4533-86C5-E46714981680}.Release|x86.Deploy.0 = Release|Win32
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{A5526AEA-E0A2-496D-94B7-2BBE835C83F8} = {892B5932-9AA8-46F9-A857-8967DCDBE4F5}
-		{FF6AEDF3-950A-46DD-910B-52BC69B9C99A} = {892B5932-9AA8-46F9-A857-8967DCDBE4F5}
-		{024E8607-06B0-440D-8741-5A888DC4B176} = {892B5932-9AA8-46F9-A857-8967DCDBE4F5}
-	EndGlobalSection
+    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+        Debug|Any CPU = Debug|Any CPU
+        Debug|ARM = Debug|ARM
+        Debug|Mixed Platforms = Debug|Mixed Platforms
+        Debug|Win32 = Debug|Win32
+        Debug|x64 = Debug|x64
+        Debug|x86 = Debug|x86
+        Release|Any CPU = Release|Any CPU
+        Release|ARM = Release|ARM
+        Release|Mixed Platforms = Release|Mixed Platforms
+        Release|Win32 = Release|Win32
+        Release|x64 = Release|x64
+        Release|x86 = Release|x86
+    EndGlobalSection
+    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|Any CPU.ActiveCfg = Debug|Win32
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|ARM.ActiveCfg = Debug|ARM
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|ARM.Build.0 = Debug|ARM
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|ARM.Deploy.0 = Debug|ARM
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|Mixed Platforms.Deploy.0 = Debug|Win32
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|Win32.ActiveCfg = Debug|Win32
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|Win32.Build.0 = Debug|Win32
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|Win32.Deploy.0 = Debug|Win32
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|x64.ActiveCfg = Debug|x64
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|x64.Build.0 = Debug|x64
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|x64.Deploy.0 = Debug|x64
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|x86.ActiveCfg = Debug|Win32
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|x86.Build.0 = Debug|Win32
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|x86.Deploy.0 = Debug|Win32
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|Any CPU.ActiveCfg = Release|Win32
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|ARM.ActiveCfg = Release|ARM
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|ARM.Build.0 = Release|ARM
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|ARM.Deploy.0 = Release|ARM
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|Mixed Platforms.Build.0 = Release|Win32
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|Mixed Platforms.Deploy.0 = Release|Win32
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|Win32.ActiveCfg = Release|Win32
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|Win32.Build.0 = Release|Win32
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|Win32.Deploy.0 = Release|Win32
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|x64.ActiveCfg = Release|x64
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|x64.Build.0 = Release|x64
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|x64.Deploy.0 = Release|x64
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|x86.ActiveCfg = Release|Win32
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|x86.Build.0 = Release|Win32
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|x86.Deploy.0 = Release|Win32
+        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|Any CPU.ActiveCfg = Debug|Win32
+        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|ARM.ActiveCfg = Debug|ARM
+        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|ARM.Build.0 = Debug|ARM
+        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|ARM.Deploy.0 = Debug|ARM
+        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|Mixed Platforms.Deploy.0 = Debug|Win32
+        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|Win32.ActiveCfg = Debug|Win32
+        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|Win32.Build.0 = Debug|Win32
+        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|Win32.Deploy.0 = Debug|Win32
+        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|x64.ActiveCfg = Debug|Win32
+        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|x86.ActiveCfg = Debug|Win32
+        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|x86.Build.0 = Debug|Win32
+        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|x86.Deploy.0 = Debug|Win32
+        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|Any CPU.ActiveCfg = Release|Win32
+        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|ARM.ActiveCfg = Release|ARM
+        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|ARM.Build.0 = Release|ARM
+        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|ARM.Deploy.0 = Release|ARM
+        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|Mixed Platforms.Build.0 = Release|Win32
+        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|Mixed Platforms.Deploy.0 = Release|Win32
+        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|Win32.ActiveCfg = Release|Win32
+        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|Win32.Build.0 = Release|Win32
+        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|Win32.Deploy.0 = Release|Win32
+        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|x64.ActiveCfg = Release|Win32
+        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|x86.ActiveCfg = Release|Win32
+        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|x86.Build.0 = Release|Win32
+        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|x86.Deploy.0 = Release|Win32
+        {A5EE8128-B08E-4533-86C5-E46714981680}.Debug|x86.ActiveCfg = Debug|Win32
+        {A5EE8128-B08E-4533-86C5-E46714981680}.Debug|x86.Build.0 = Debug|Win32
+        {A5EE8128-B08E-4533-86C5-E46714981680}.Debug|x86.Deploy.0 = Debug|Win32
+        {A5EE8128-B08E-4533-86C5-E46714981680}.Release|x86.ActiveCfg = Release|Win32
+        {A5EE8128-B08E-4533-86C5-E46714981680}.Release|x86.Build.0 = Release|Win32
+        {A5EE8128-B08E-4533-86C5-E46714981680}.Release|x86.Deploy.0 = Release|Win32
+    EndGlobalSection
+    GlobalSection(SolutionProperties) = preSolution
+        HideSolutionNode = FALSE
+    EndGlobalSection
+    GlobalSection(NestedProjects) = preSolution
+        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8} = {892B5932-9AA8-46F9-A857-8967DCDBE4F5}
+        {FF6AEDF3-950A-46DD-910B-52BC69B9C99A} = {892B5932-9AA8-46F9-A857-8967DCDBE4F5}
+        {024E8607-06B0-440D-8741-5A888DC4B176} = {892B5932-9AA8-46F9-A857-8967DCDBE4F5}
+    EndGlobalSection
 EndGlobal
                 ";
 

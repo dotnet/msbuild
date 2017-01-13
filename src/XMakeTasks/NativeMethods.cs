@@ -1171,19 +1171,21 @@ typedef enum _tagAssemblyComparisonResult
         //  Based on coreclr baseassemblyspec.cpp (https://github.com/dotnet/coreclr/blob/4cf8a6b082d9bb1789facd996d8265d3908757b2/src/vm/baseassemblyspec.cpp#L330)
         private static bool RefMatchesDef(AssemblyName @ref, AssemblyName def)
         {
-            var refPkt = @ref.GetPublicKeyToken();
-            bool refStrongNamed = refPkt != null && refPkt.Length != 0;
-            if (refStrongNamed)
+            if (IsStrongNamed(@ref))
             {
-                var defPkt = def.GetPublicKeyToken();
-                bool defStrongNamed = defPkt != null && defPkt.Length != 0;
-
-                return CompareRefToDef(@ref, def);
+                return IsStrongNamed(def) && CompareRefToDef(@ref, def);
             }
             else
             {
                 return @ref.Name.Equals(def.Name, StringComparison.OrdinalIgnoreCase);
             }
+        }
+
+        // Based on coreclr baseassemblyspec.inl (https://github.com/dotnet/coreclr/blob/32f0f9721afb584b4a14d69135bea7ddc129f755/src/vm/baseassemblyspec.inl#L679-L683)
+        private static bool IsStrongNamed(AssemblyName assembly)
+        {
+            var refPkt = assembly.GetPublicKeyToken();
+            return refPkt != null && refPkt.Length != 0;
         }
 
         //  Based on https://github.com/dotnet/coreclr/blob/4cf8a6b082d9bb1789facd996d8265d3908757b2/src/vm/baseassemblyspec.cpp#L241
@@ -1302,6 +1304,7 @@ typedef enum _tagAssemblyComparisonResult
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool CertFreeCertificateContext(IntPtr CertContext);
 
+#if FEATURE_MSCOREE
         /// <summary>
         /// Get the runtime version for a given file
         /// </summary>
@@ -1312,6 +1315,7 @@ typedef enum _tagAssemblyComparisonResult
         /// <returns>HResult</returns>
         [DllImport(MscoreeDLL, SetLastError = true, CharSet = CharSet.Unicode)]
         internal static extern uint GetFileVersion(String szFullPath, StringBuilder szBuffer, int cchBuffer, out uint dwLength);
+#endif
         #endregion
 
         #region Methods

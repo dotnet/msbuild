@@ -99,16 +99,20 @@ namespace Microsoft.Build.Utilities
             var process = Process.Start(startInfo);
 
             stdout = null;
-            if (process.WaitForExit(30))
+            if (process.WaitForExit((int) TimeSpan.FromSeconds(30).TotalMilliseconds))
             {
                 stdout = process.StandardOutput.ReadToEnd();
             }
             else
             {
                 process.Kill();
+                
+                // Kill is asynchronous so we should still wait a little
+                //
+                process.WaitForExit((int) TimeSpan.FromSeconds(1).TotalMilliseconds);
             }
 
-            return process.ExitCode;
+            return process.HasExited ? process.ExitCode : -1;
         }
     }
 }

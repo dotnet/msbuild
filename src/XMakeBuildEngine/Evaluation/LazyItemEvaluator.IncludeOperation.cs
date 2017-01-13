@@ -7,6 +7,7 @@ using System.Linq;
 using Microsoft.Build.Construction;
 using System.Collections.Immutable;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -54,9 +55,11 @@ namespace Microsoft.Build.Evaluation
 
                     if (excludePatterns.Any())
                     {
-                        excludeTester = new Lazy<Func<string, bool>>(() => EngineFileUtilities.GetMatchTester(excludePatterns, _rootDirectory));
+                        excludeTester = new Lazy<Func<string, bool>>(() => EngineFileUtilities.GetFileSpecMatchTester(excludePatterns, _rootDirectory));
                     }
                 }
+
+                ISet<string> excludePatternsForGlobs = null;
 
                 foreach (var fragment in _itemSpec.Fragments)
                 {
@@ -82,7 +85,7 @@ namespace Microsoft.Build.Evaluation
                         string value = ((ValueFragment)fragment).ItemSpecFragment;
 
                         if (excludeTester == null ||
-                            !excludeTester.Value(value))
+                            !excludeTester.Value(EscapingUtilities.UnescapeAll(value)))
                         {
                             var item = _itemFactory.CreateItem(value, value, _itemElement.ContainingProject.FullPath);
                             itemsToAdd.Add(item);
@@ -91,11 +94,20 @@ namespace Microsoft.Build.Evaluation
                     else if (fragment is GlobFragment)
                     {
                         string glob = ((GlobFragment)fragment).ItemSpecFragment;
+
+                        if (excludePatternsForGlobs == null)
+                        {
+                            excludePatternsForGlobs = BuildExcludePatternsForGlobs(globsToIgnore, excludePatterns);
+                        }
+
                         string[] includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
                             _rootDirectory,
                             glob,
-                            excludePatterns.Count > 0 ? (IEnumerable<string>) excludePatterns.Concat(globsToIgnore) : globsToIgnore
+                            excludePatternsForGlobs
                             );
+
+                        // itemsToAdd might grow 0 or more times during the following iteration. Proactively increase its capacity to ensure only one growth happens
+                        IncreaseListCapacityIfNecessary(itemsToAdd, includeSplitFilesEscaped.Length);
 
                         foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
                         {
@@ -111,6 +123,29 @@ namespace Microsoft.Build.Evaluation
                 return itemsToAdd;
             }
 
+            private static ISet<string> BuildExcludePatternsForGlobs(ImmutableHashSet<string> globsToIgnore, ImmutableList<string>.Builder excludePatterns)
+            {
+                var anyExcludes = excludePatterns.Count > 0;
+                var anyGlobstoIgnore = globsToIgnore.Count > 0;
+
+                if (anyGlobstoIgnore && anyExcludes)
+                {
+                    return excludePatterns.Concat(globsToIgnore).ToImmutableHashSet();
+                }
+
+                return anyExcludes ? excludePatterns.ToImmutableHashSet() : globsToIgnore;
+            }
+
+            private void IncreaseListCapacityIfNecessary(List<I> list, int itemsToAdd)
+            {
+                var newLength = list.Count + itemsToAdd;
+
+                if (list.Capacity < newLength)
+                {
+                    list.Capacity = newLength;
+                }
+            }
+
             protected override void MutateItems(ICollection<I> items)
             {
                 DecorateItemsWithMetadata(items, _metadata);
@@ -118,7 +153,10 @@ namespace Microsoft.Build.Evaluation
 
             protected override void SaveItems(ICollection<I> items, ImmutableList<ItemData>.Builder listBuilder)
             {
-                listBuilder.AddRange(items.Select(item => new ItemData(item, _elementOrder, _conditionResult)));
+                foreach (var item in items)
+                {
+                    listBuilder.Add(new ItemData(item, _itemElement, _elementOrder, _conditionResult));
+                }
             }
         }
 

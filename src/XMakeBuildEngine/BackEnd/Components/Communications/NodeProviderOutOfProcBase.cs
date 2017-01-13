@@ -136,7 +136,8 @@ namespace Microsoft.Build.BackEnd
             // For all processes in the list, send signal to terminate if able to connect
             foreach (Process nodeProcess in nodeProcesses)
             {
-                NamedPipeClientStream nodeStream = TryConnectToProcess(nodeProcess.Id, 30/*verified to miss nodes if smaller*/, hostHandshake, clientHandshake);
+                Stream nodeStream = TryConnectToProcess(nodeProcess.Id, 30/*verified to miss nodes if smaller*/, hostHandshake, clientHandshake);
+
                 if (null != nodeStream)
                 {
                     // If we're able to connect to such a process, send a packet requesting its termination
@@ -219,7 +220,7 @@ namespace Microsoft.Build.BackEnd
                 _processesToIgnore.Add(nodeLookupKey);
 
                 // Attempt to connect to each process in turn.
-                NamedPipeClientStream nodeStream = TryConnectToProcess(nodeProcess.Id, 0 /* poll, don't wait for connections */, hostHandshake, clientHandshake);
+                Stream nodeStream = TryConnectToProcess(nodeProcess.Id, 0 /* poll, don't wait for connections */, hostHandshake, clientHandshake);
                 if (nodeStream != null)
                 {
                     // Connection successful, use this node.   
@@ -276,7 +277,7 @@ namespace Microsoft.Build.BackEnd
                 // to the debugger process. Instead, use MSBUILDDEBUGONSTART=1
 
                 // Now try to connect to it.
-                NamedPipeClientStream nodeStream = TryConnectToProcess(msbuildProcessId, TimeoutForNewNodeCreation, hostHandshake, clientHandshake);
+                Stream nodeStream = TryConnectToProcess(msbuildProcessId, TimeoutForNewNodeCreation, hostHandshake, clientHandshake);
                 if (nodeStream != null)
                 {
                     // Connection successful, use this node.
@@ -335,7 +336,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Attempts to connect to the specified process.
         /// </summary>
-        private NamedPipeClientStream TryConnectToProcess(int nodeProcessId, int timeout, long hostHandshake, long clientHandshake)
+        private Stream TryConnectToProcess(int nodeProcessId, int timeout, long hostHandshake, long clientHandshake)
         {
             // Try and connect to the process.
             string pipeName = "MSBuild" + nodeProcessId;
@@ -484,9 +485,6 @@ namespace Microsoft.Build.BackEnd
             processSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
             threadSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
 
-            BackendNativeMethods.PROCESS_INFORMATION processInfo = new BackendNativeMethods.PROCESS_INFORMATION();
-
-
             CommunicationsUtilities.Trace("Launching node from {0}", msbuildLocation);
 
 #if RUNTIME_TYPE_NETCORE
@@ -522,6 +520,8 @@ namespace Microsoft.Build.BackEnd
             CommunicationsUtilities.Trace("Successfully launched msbuild.exe node with PID {0}", process.Id);
             return process.Id;
 #else
+            BackendNativeMethods.PROCESS_INFORMATION processInfo = new BackendNativeMethods.PROCESS_INFORMATION();
+
             string exeName = msbuildLocation;
             
             bool result = BackendNativeMethods.CreateProcess
@@ -572,8 +572,8 @@ namespace Microsoft.Build.BackEnd
             private static bool s_trace = String.Equals(Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM"), "1", StringComparison.Ordinal);
 
             // The pipe(s) used to communicate with the node.
-            private PipeStream _clientToServerStream;
-            private PipeStream _serverToClientStream;
+            private Stream _clientToServerStream;
+            private Stream _serverToClientStream;
 
             /// <summary>
             /// The factory used to create packets from data read off the pipe.
@@ -620,7 +620,7 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public NodeContext(int nodeId, int processId,
 #if FEATURE_NAMED_PIPES_FULL_DUPLEX
-                NamedPipeClientStream nodePipe,
+                Stream nodePipe,
 #else
                 AnonymousPipeServerStream clientToServerStream,
                 AnonymousPipeServerStream serverToClientStream,

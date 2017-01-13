@@ -4,6 +4,14 @@
   <UsingTask AssemblyFile="$(BuildBinDir)\Microsoft.Build.LocalizationTasks.dll" TaskName="SaveXlfToResx"/>
   <UsingTask AssemblyFile="$(BuildBinDir)\Microsoft.Build.LocalizationTasks.dll" TaskName="UpdateXlfFromResx"/>
   <UsingTask AssemblyFile="$(BuildBinDir)\Microsoft.Build.LocalizationTasks.dll" TaskName="EmitLocalizedResources"/>
+  <UsingTask AssemblyFile="$(BuildBinDir)\Microsoft.Build.LocalizationTasks.dll" TaskName="ConvertToNeutralXlf"/>
+
+ <Target Name="CreateNeutralXlf"
+         AfterTargets="SyncXlf"
+         Condition="$(SyncXlf) == 'true' and $(IsTestProject) != 'true'">
+    
+    <ConvertToNeutralXlf NeutralResources="@(NeutralResources)"/>
+ </Target>
 
   <Target Name="AddLocalizedResxFilesToEmbeddedResource"
           BeforeTargets="$(PrepareResourcesDependsOn);PrepareResources"
@@ -75,8 +83,7 @@
     <EmitLocalizedResources 
       NeutralResources="@(NeutralResources)"
       AssemblyName="$(AssemblyName)"
-      LocalizedResxRoot="$(IntermediateOutputPath)"
-      RelativePathToXlfRoot=".\xlf\">
+      LocalizedResxRoot="$(IntermediateOutputPath)">
 
       <Output TaskParameter="ResolvedXlfResources" ItemName="XlfFiles" />
       <Output TaskParameter="ResolvedLocalizedResxResources" ItemName="LocalizedResxResources" />
@@ -104,7 +111,7 @@
   -->
   <Target Name="OpenSourceSignSatelliteAssemblies"
           Condition="'$(DelaySign)' == 'true' and '@(IntermediateSatelliteAssembliesWithTargetPath)' != '' and '$(SkipSigning)' != 'true' and '$(SignType)' == 'oss'"
-          AfterTargets="CreateSatelliteAssemblies"
+          DependsOnTargets="ComputeIntermediateSatelliteAssemblies"
           BeforeTargets="CopyFilesToOutputDirectory"
           Inputs="@(IntermediateSatelliteAssembliesWithTargetPath)"
           Outputs="%(IntermediateSatelliteAssembliesWithTargetPath.Identity).oss_signed"
@@ -119,8 +126,8 @@
   <!-- Target SignFiles from MicroBuild.Plugins.Signing.targets signs @(FilesToSign) -->
   <Target Name="AddSatelliteAssembliesToFilesToSignItem"
           Condition="('$(SignType)' == 'real' OR '$(SignType)' == 'test')"
-          BeforeTargets="@(SignFilesDependsOn);SignFiles"
-          AfterTargets="CreateSatelliteAssemblies"
+          DependsOnTargets="ComputeIntermediateSatelliteAssemblies"
+          BeforeTargets="SignFiles"
           >
 
     <ItemGroup>

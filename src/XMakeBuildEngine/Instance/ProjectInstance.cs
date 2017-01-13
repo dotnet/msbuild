@@ -1716,7 +1716,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Creates a set of project instances which represent the project dependency graph for a solution build.
         /// </summary>
-        internal static ProjectInstance[] LoadSolutionForBuild(string projectFile, PropertyDictionary<ProjectPropertyInstance> globalPropertiesInstances, string toolsVersion, BuildParameters buildParameters, ILoggingService loggingService, BuildEventContext projectBuildEventContext, bool isExplicitlyLoaded)
+        internal static ProjectInstance[] LoadSolutionForBuild(string projectFile, PropertyDictionary<ProjectPropertyInstance> globalPropertiesInstances, string toolsVersion, BuildParameters buildParameters, ILoggingService loggingService, BuildEventContext projectBuildEventContext, bool isExplicitlyLoaded, IReadOnlyCollection<string> targetNames)
         {
             ErrorUtilities.VerifyThrowArgumentLength(projectFile, "projectFile");
             ErrorUtilities.VerifyThrowArgumentNull(globalPropertiesInstances, "globalPropertiesInstances");
@@ -1748,7 +1748,7 @@ namespace Microsoft.Build.Execution
                 }
                 else
                 {
-                    projectInstances = GenerateSolutionWrapper(projectFile, globalProperties, toolsVersion, loggingService, projectBuildEventContext);
+                    projectInstances = GenerateSolutionWrapper(projectFile, globalProperties, toolsVersion, loggingService, projectBuildEventContext, targetNames);
                 }
             }
 
@@ -1785,7 +1785,7 @@ namespace Microsoft.Build.Execution
                     }
 
                     string toolsVersionToUse = Utilities.GenerateToolsVersionToUse(explicitToolsVersion: null, toolsVersionFromProject: toolsVersion, getToolset: buildParameters.GetToolset, defaultToolsVersion: Constants.defaultSolutionWrapperProjectToolsVersion);
-                    projectInstances = GenerateSolutionWrapper(projectFile, globalProperties, toolsVersionToUse, loggingService, projectBuildEventContext);
+                    projectInstances = GenerateSolutionWrapper(projectFile, globalProperties, toolsVersionToUse, loggingService, projectBuildEventContext, targetNames);
                 }
             }
 
@@ -2010,6 +2010,7 @@ namespace Microsoft.Build.Execution
         /// <param name="toolsVersion">The ToolsVersion to use when generating the wrapper.</param>
         /// <param name="loggingService">The logging service used to log messages etc. from the solution wrapper generator.</param>
         /// <param name="projectBuildEventContext">The build event context in which this project is being constructed.</param>
+        /// <param name="targetNames">A collection of target names that the user requested be built.</param>
         /// <returns>The ProjectRootElement for the root traversal and each of the metaprojects.</returns>
         private static ProjectInstance[] GenerateSolutionWrapper
             (
@@ -2017,7 +2018,8 @@ namespace Microsoft.Build.Execution
                 IDictionary<string, string> globalProperties,
                 string toolsVersion,
                 ILoggingService loggingService,
-                BuildEventContext projectBuildEventContext
+                BuildEventContext projectBuildEventContext,
+                IReadOnlyCollection<string> targetNames
             )
         {
             SolutionFile sp = SolutionFile.Parse(projectFile);
@@ -2035,7 +2037,7 @@ namespace Microsoft.Build.Execution
             // It's needed to determine which <UsingTask> tags to put in, whether to put a ToolsVersion parameter
             // on the <MSBuild> task tags, and what MSBuildToolsPath to use when scanning child projects
             // for dependency information.
-            ProjectInstance[] instances = SolutionProjectGenerator.Generate(sp, globalProperties, toolsVersion, projectBuildEventContext, loggingService);
+            ProjectInstance[] instances = SolutionProjectGenerator.Generate(sp, globalProperties, toolsVersion, projectBuildEventContext, loggingService, targetNames);
             return instances;
         }
 

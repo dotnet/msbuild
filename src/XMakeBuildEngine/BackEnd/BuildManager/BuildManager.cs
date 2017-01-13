@@ -424,7 +424,7 @@ namespace Microsoft.Build.Execution
                 }
 
                 // Set up the logging service.
-                ILoggingService loggingService = CreateLoggingService(_buildParameters.Loggers, _buildParameters.ForwardingLoggers);
+                ILoggingService loggingService = CreateLoggingService(_buildParameters.Loggers, _buildParameters.ForwardingLoggers, _buildParameters.WarningsAsErrors, _buildParameters.WarningsAsMessages);
 
                 _nodeManager.RegisterPacketHandler(NodePacketType.LogMessage, LogMessagePacket.FactoryForDeserialization, loggingService as INodePacketHandler);
                 try
@@ -575,7 +575,11 @@ namespace Microsoft.Build.Execution
         public BuildResult BuildRequest(BuildRequestData requestData)
         {
             BuildSubmission submission = PendBuildRequest(requestData);
-            return submission.Execute();
+            BuildResult result = submission.Execute();
+
+            SetOverallResultIfWarningsAsErrors(result);
+
+            return result;
         }
 
         /// <summary>
@@ -621,6 +625,12 @@ namespace Microsoft.Build.Execution
 
                 if (loggingService != null)
                 {
+                    // Override the build success if the user specified /warnaserror and any errors were logged outside of a build submission.
+                    if (_overallBuildSuccess && loggingService.HasBuildSubmissionLoggedErrors(BuildEventContext.InvalidSubmissionId))
+                    {
+                        _overallBuildSuccess = false;
+                    }
+
                     loggingService.LogBuildFinished(_overallBuildSuccess);
                 }
 
@@ -901,7 +911,7 @@ namespace Microsoft.Build.Execution
             }
 
             ErrorUtilities.VerifyThrow(FileUtilities.IsSolutionFilename(config.ProjectFullPath), "{0} is not a solution", config.ProjectFullPath);
-            ProjectInstance[] instances = ProjectInstance.LoadSolutionForBuild(config.ProjectFullPath, config.Properties, config.ExplicitToolsVersionSpecified ? config.ToolsVersion : null, _buildParameters, ((IBuildComponentHost)this).LoggingService, buildEventContext, false /* loaded by solution parser*/);
+            ProjectInstance[] instances = ProjectInstance.LoadSolutionForBuild(config.ProjectFullPath, config.Properties, config.ExplicitToolsVersionSpecified ? config.ToolsVersion : null, _buildParameters, ((IBuildComponentHost)this).LoggingService, buildEventContext, false /* loaded by solution parser*/, config.TargetNames);
 
             // The first instance is the traversal project, which goes into this configuration
             config.Project = instances[0];
@@ -1578,6 +1588,9 @@ namespace Microsoft.Build.Execution
                 if (_buildSubmissions.ContainsKey(result.SubmissionId))
                 {
                     BuildSubmission submission = _buildSubmissions[result.SubmissionId];
+
+                    SetOverallResultIfWarningsAsErrors(result);
+
                     submission.CompleteResults(result);
 
                     // If the request failed because we caught an exception from the loggers, we can assume we will receive no more logging messages for
@@ -1723,7 +1736,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Creates a logging service around the specified set of loggers.
         /// </summary>
-        private ILoggingService CreateLoggingService(IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> forwardingLoggers)
+        private ILoggingService CreateLoggingService(IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> forwardingLoggers, ISet<string> warningsAsErrors, ISet<string> warningsAsMessages)
         {
             int cpuCount = _buildParameters.MaxNodeCount;
 
@@ -1750,6 +1763,8 @@ namespace Microsoft.Build.Execution
             loggingService.OnLoggingThreadException += _loggingThreadExceptionEventHandler;
             loggingService.OnProjectStarted += _projectStartedEventHandler;
             loggingService.OnProjectFinished += _projectFinishedEventHandler;
+            loggingService.WarningsAsErrors = warningsAsErrors;
+            loggingService.WarningsAsMessages = warningsAsMessages;
 
             try
             {
@@ -1818,6 +1833,23 @@ namespace Microsoft.Build.Execution
             }
 
             return castPacket;
+        }
+
+        /// <summary>
+        /// Sets the overall result of a build only if the user had specified /warnaserror and there were any errors.
+        /// This ensures the old behavior stays intact where builds could succeed even if a failure was logged.
+        /// </summary>
+        private void SetOverallResultIfWarningsAsErrors(BuildResult result)
+        {
+            if (result.OverallResult == BuildResultCode.Success)
+            {
+                ILoggingService loggingService = ((IBuildComponentHost)this).LoggingService;
+
+                if (loggingService.HasBuildSubmissionLoggedErrors(result.SubmissionId))
+                {
+                    result.SetOverallResult(overallResult: false);
+                }
+            }
         }
 
         /// <summary>

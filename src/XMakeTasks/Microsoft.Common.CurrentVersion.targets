@@ -14,7 +14,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
 
-<Project DefaultTargets="Build" InitialTargets="_CheckForInvalidConfigurationAndPlatform" TreatAsLocalProperty="OutDir" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" TreatAsLocalProperty="OutDir" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="'$(MicrosoftCommonPropsHasBeenImported)' != 'true' and Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
 
@@ -323,6 +323,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <AutoUnifyAssemblyReferences Condition="'$(GenerateBindingRedirectsOutputType)' == 'true' and '$(AutoGenerateBindingRedirects)' != 'true'">false</AutoUnifyAssemblyReferences>
   </PropertyGroup>
   <PropertyGroup>
+    <BaseIntermediateOutputPath Condition="!HasTrailingSlash('$(BaseIntermediateOutputPath)')">$(BaseIntermediateOutputPath)\</BaseIntermediateOutputPath>
     <CleanFile Condition="'$(CleanFile)'==''">$(MSBuildProjectFile).FileListAbsolute.txt</CleanFile>
     <!-- During DesignTime Builds, skip project reference build as Design time is only queueing information.-->
     <BuildProjectReferences Condition="'$(BuildProjectReferences)' == '' and '$(DesignTimeBuild)' == 'true'">false</BuildProjectReferences>
@@ -550,8 +551,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       $(ReferencePath);
       {HintPathFromItem};
       {TargetFrameworkDirectory};
-      {Registry:$(FrameworkRegistryBase),$(TargetFrameworkVersion),$(AssemblyFoldersSuffix)$(AssemblyFoldersExConditions)};
       $(AssemblyFoldersConfigFileSearchPath)
+      {Registry:$(FrameworkRegistryBase),$(TargetFrameworkVersion),$(AssemblyFoldersSuffix)$(AssemblyFoldersExConditions)};
       {AssemblyFolders};
       {GAC};
       {RawFileName};
@@ -576,7 +577,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <AllowedReferenceRelatedFileExtensions Condition=" '$(AllowedReferenceRelatedFileExtensions)' == '' ">
       .pdb;
       .xml;
-      .pri
+      .pri;
+      .dll.config;
+      .exe.config
     </AllowedReferenceRelatedFileExtensions>
 
     <!--
@@ -713,12 +716,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
                                         _CheckForInvalidConfigurationAndPlatform
 
-    This target checks for errors in statically defined properties.  It always
-    gets executed before any other target.
+    This target checks for errors in statically defined properties.  By setting BeforeTargets, we try
+    to ensure that the target runs before any build related targets.  
+    If your target requires this check and is running as a BeforeTargets of one of the first targets
+    of $(BuildDependsOn), $(RebuildDependsOn), or $(CleanDependsOn) you will need to set your DependsOn
+    to this target.
     ============================================================
     -->
   <Target
-      Name="_CheckForInvalidConfigurationAndPlatform">
+      Name="_CheckForInvalidConfigurationAndPlatform"
+      BeforeTargets="$(BuildDependsOn);Build;$(RebuildDependsOn);Rebuild;$(CleanDependsOn);Clean">
 
     <PropertyGroup>
       <_InvalidConfigurationMessageText>The OutputPath property is not set for project '$(MSBuildProjectFile)'.  Please check to make sure that you have specified a valid combination of Configuration and Platform for this project.  Configuration='$(_OriginalConfiguration)'  Platform='$(_OriginalPlatform)'.</_InvalidConfigurationMessageText>
@@ -1502,14 +1509,19 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     ======================================================================================
   -->
-  <Target Name="_GetProjectReferenceTargetFrameworkProperties" Outputs="%(_MSBuildProjectReferenceExistent.Identity)">
+  <Target Name="_GetProjectReferenceTargetFrameworkProperties"
+          Outputs="%(_MSBuildProjectReferenceExistent.Identity)">
+    <!-- As a mitigation for https://github.com/Microsoft/msbuild/issues/1276
+       .vcxproj is treated specially to avoid the cost of double-evaluating
+       for easily-identifiable-as-not-cross-targeting C++ projects. -->
     <MSBuild
         Projects="%(_MSBuildProjectReferenceExistent.Identity)"
         Targets="GetTargetFrameworkProperties"
         BuildInParallel="$(BuildInParallel)"
         Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); ReferringTargetFramework=$(TargetFrameworkMoniker)"
         ContinueOnError="!$(BuildingProject)"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework">
+        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework"
+        Condition="'%(_MSBuildProjectReferenceExistent.Extension)' != '.vcxproj'">
 
       <Output TaskParameter="TargetOutputs" PropertyName="_ProjectReferenceTargetFrameworkProperties" />
     </MSBuild>
@@ -3001,6 +3013,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       _GenerateCompileInputs;
       BeforeCompile;
       _TimeStampBeforeCompile;
+      _GenerateCompileDependencyCache;
       CoreCompile;
       _TimeStampAfterCompile;
       AfterCompile;
@@ -3153,6 +3166,31 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_AssemblyTimestampBeforeCompile>%(IntermediateAssembly.ModifiedTime)</_AssemblyTimestampBeforeCompile>
     </PropertyGroup>
 
+  </Target>
+
+  <!--
+    ============================================================
+                                        _GenerateCompileDependencyCache
+
+    Generate a file used to track compiler dependencies between incremental build
+    executions. This handles cases where items are added or removed from a glob (e.g.
+    <Compile Include="**\*.cs" />) and can't otherwise be detected with timestamp 
+    comparisons. The file contains a hash of compiler inputs that are known to 
+    contribute to incremental build inconsistencies.
+    ============================================================
+    -->
+  <Target Name="_GenerateCompileDependencyCache" DependsOnTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <CustomAdditionalCompileInputs Include="$(IntermediateOutputPath)CoreCompileInputs.cache" />
+      <CoreCompileCache Include="@(Compile->'%(FullPath)')" />
+      <CoreCompileCache Include="@(ReferencePath->'%(FullPath)')" />
+    </ItemGroup>
+
+    <Hash ItemsToHash="@(CoreCompileCache)">
+      <Output TaskParameter="HashResult" PropertyName="CoreCompileDependencyHash" />
+    </Hash>
+
+    <WriteLinesToFile Lines="$(CoreCompileDependencyHash)" File="$(IntermediateOutputPath)CoreCompileInputs.cache" Overwrite="True" WriteOnlyWhenDifferent="True" />
   </Target>
 
   <!--
@@ -5288,6 +5326,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <SatelliteDllsProjectOutputGroupOutputIntermediate Include="$(IntermediateOutputPath)%(EmbeddedResource.Culture)\$(TargetName).resources.dll"
                                                          Condition="'%(WithCulture)' == 'true'">
         <TargetPath>%(EmbeddedResource.Culture)\$(TargetName).resources.dll</TargetPath>
+        <Culture>%(EmbeddedResource.Culture)</Culture>
       </SatelliteDllsProjectOutputGroupOutputIntermediate>
     </ItemGroup>
 

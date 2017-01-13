@@ -133,7 +133,7 @@ namespace Microsoft.Build.UnitTests.Construction
             {
                 foreach (var property in element.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
                 {
-                    if (property.Name.Contains("Location"))
+                    if (!property.Name.Equals("ImplicitImportLocation") && property.Name.Contains("Location"))
                     {
                         if (property.Name == "ParameterLocations")
                         {

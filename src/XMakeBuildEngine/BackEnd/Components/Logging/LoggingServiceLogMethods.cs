@@ -809,5 +809,32 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         #endregion
+
+        #region Log telemetry
+
+        /// <summary>
+        /// Logs a telemetry event.
+        /// </summary>
+        /// <param name="buildEventContext">Event context information which describes who is logging the event</param>
+        /// <param name="eventName">The event name.</param>
+        /// <param name="properties">The list of properties assocated with the event.</param>
+        public void LogTelemetry(BuildEventContext buildEventContext, string eventName, IDictionary<string, string> properties)
+        {
+            lock (_lockObject)
+            {
+                ErrorUtilities.VerifyThrow(eventName != null, "eventName is null");
+
+                TelemetryEventArgs telemetryEvent = new TelemetryEventArgs
+                {
+                    BuildEventContext = buildEventContext,
+                    EventName = eventName,
+                    Properties = properties == null ? new Dictionary<string, string>() : new Dictionary<string, string>(properties)
+                };
+
+                ProcessLoggingEvent(telemetryEvent);
+            }
+        }
+
+        #endregion
     }
 }

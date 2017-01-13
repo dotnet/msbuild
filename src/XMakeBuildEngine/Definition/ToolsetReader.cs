@@ -80,12 +80,12 @@ namespace Microsoft.Build.Evaluation
             get;
         }
 
+#if FEATURE_WIN32_REGISTRY || FEATURE_SYSTEM_CONFIGURATION
         /// <summary>
         /// Gathers toolset data from the registry and configuration file, if any:
         /// allows you to specify which of the registry and configuration file to
         /// read from by providing ToolsetInitialization
         /// </summary>
-#if FEATURE_WIN32_REGISTRY || FEATURE_SYSTEM_CONFIGURATION
         internal static string ReadAllToolsets(Dictionary<string, Toolset> toolsets, PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, ToolsetDefinitionLocations locations)
         {
             return ReadAllToolsets(toolsets,
@@ -131,21 +131,15 @@ namespace Microsoft.Build.Evaluation
 #if FEATURE_SYSTEM_CONFIGURATION
             if ((locations & ToolsetDefinitionLocations.ConfigurationFile) == ToolsetDefinitionLocations.ConfigurationFile)
             {
-                if (configurationReader == null && ToolsetConfigurationReaderHelpers.ConfigurationFileMayHaveToolsets())
+                if (configurationReader == null)
                 {
-                    // We haven't been passed in a fake configuration reader by a unit test,
-                    // and it looks like we have a .config file to read, so create a real
-                    // configuration reader
                     configurationReader = new ToolsetConfigurationReader(environmentProperties, globalProperties);
                 }
 
-                if (configurationReader != null)
-                {
-                    // Accumulation of properties is okay in the config file because it's deterministically ordered
-                    defaultToolsVersionFromConfiguration = configurationReader.ReadToolsets(toolsets, globalProperties,
-                        initialProperties, true /* accumulate properties */, out overrideTasksPathFromConfiguration,
-                        out defaultOverrideToolsVersionFromConfiguration);
-                }
+                // Accumulation of properties is okay in the config file because it's deterministically ordered
+                defaultToolsVersionFromConfiguration = configurationReader.ReadToolsets(toolsets, globalProperties,
+                    initialProperties, true /* accumulate properties */, out overrideTasksPathFromConfiguration,
+                    out defaultOverrideToolsVersionFromConfiguration);
             }
 #endif
 
@@ -631,7 +625,7 @@ namespace Microsoft.Build.Evaluation
         {
             if (0 == String.Compare(property.Name, ReservedPropertyNames.toolsPath, StringComparison.OrdinalIgnoreCase))
             {
-                toolsPath = ExpandPropertyLeaveEscaped(property, expander);
+                toolsPath = ExpandPropertyUnescaped(property, expander);
                 toolsPath = ExpandRelativePathsRelativeToExeLocation(toolsPath);
 
                 if (accumulateProperties)
@@ -646,7 +640,7 @@ namespace Microsoft.Build.Evaluation
             }
             else if (0 == String.Compare(property.Name, ReservedPropertyNames.binPath, StringComparison.OrdinalIgnoreCase))
             {
-                binPath = ExpandPropertyLeaveEscaped(property, expander);
+                binPath = ExpandPropertyUnescaped(property, expander);
                 binPath = ExpandRelativePathsRelativeToExeLocation(binPath);
 
                 if (accumulateProperties)
@@ -668,7 +662,7 @@ namespace Microsoft.Build.Evaluation
             else
             {
                 // It's an arbitrary property
-                property.Value = ExpandPropertyLeaveEscaped(property, expander);
+                property.Value = ExpandPropertyUnescaped(property, expander);
 
                 SetProperty(property, properties, globalProperties);
 
@@ -688,11 +682,11 @@ namespace Microsoft.Build.Evaluation
         /// Expands the given unexpanded property expression using the properties in the
         /// given expander.
         /// </summary>
-        private string ExpandPropertyLeaveEscaped(ToolsetPropertyDefinition property, Expander<ProjectPropertyInstance, ProjectItemInstance> expander)
+        private string ExpandPropertyUnescaped(ToolsetPropertyDefinition property, Expander<ProjectPropertyInstance, ProjectItemInstance> expander)
         {
             try
             {
-                return expander.ExpandIntoStringLeaveEscaped(property.Value, ExpanderOptions.ExpandProperties, property.Source);
+                return expander.ExpandIntoStringAndUnescape(property.Value, ExpanderOptions.ExpandProperties, property.Source);
             }
             catch (InvalidProjectFileException ex)
             {

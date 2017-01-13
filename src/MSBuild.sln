@@ -48,13 +48,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PortableTask", "..\Samples\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetCoreCompileTest", "..\Samples\NetCoreCompileTest\NetCoreCompileTest.csproj", "{11B5D53E-90E4-4BD5-9883-B5921F7DE854}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{144F834D-9344-42E1-919D-4D1951F3E281}"
-	ProjectSection(SolutionItems) = preProject
-		nuget\Microsoft.Build.Framework.nuspec = nuget\Microsoft.Build.Framework.nuspec
-		nuget\Microsoft.Build.Tasks.Core.nuspec = nuget\Microsoft.Build.Tasks.Core.nuspec
-		nuget\Microsoft.Build.Utilities.Core.nuspec = nuget\Microsoft.Build.Utilities.Core.nuspec
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSBuildTaskHost", "XMakeCommandLine\MSBuildTaskHost\MSBuildTaskHost.csproj", "{53733ECF-0D81-43DA-B602-2AE9417F614F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dependency", "..\Samples\Dependency\Dependency.csproj", "{9EAE36C3-50CD-49A6-9CA2-94649125DCD1}"
@@ -66,6 +59,18 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrcasEngine", "OrcasEngine\OrcasEngine.csproj", "{D21C4BF9-E131-4ACB-8960-794797F19A39}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XMakeConversion", "XMakeConversion\XMakeConversion.csproj", "{5274C277-F122-4A44-B7A0-00A1B3F39803}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGetPackages", "NuGetPackages", "{B3A6667F-80C1-4264-874B-60AF572F641F}"
+	ProjectSection(SolutionItems) = preProject
+		..\build\NuGetPackages\CreateNuGetPackages.proj = ..\build\NuGetPackages\CreateNuGetPackages.proj
+		..\build\NuGetPackages\Microsoft.Build.Conversion.Core.nuspec = ..\build\NuGetPackages\Microsoft.Build.Conversion.Core.nuspec
+		..\build\NuGetPackages\Microsoft.Build.Engine.nuspec = ..\build\NuGetPackages\Microsoft.Build.Engine.nuspec
+		..\build\NuGetPackages\Microsoft.Build.Framework.nuspec = ..\build\NuGetPackages\Microsoft.Build.Framework.nuspec
+		..\build\NuGetPackages\Microsoft.Build.nuspec = ..\build\NuGetPackages\Microsoft.Build.nuspec
+		..\build\NuGetPackages\Microsoft.Build.Runtime.nuspec = ..\build\NuGetPackages\Microsoft.Build.Runtime.nuspec
+		..\build\NuGetPackages\Microsoft.Build.Tasks.Core.nuspec = ..\build\NuGetPackages\Microsoft.Build.Tasks.Core.nuspec
+		..\build\NuGetPackages\Microsoft.Build.Utilities.Core.nuspec = ..\build\NuGetPackages\Microsoft.Build.Utilities.Core.nuspec
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

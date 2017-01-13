@@ -722,9 +722,12 @@ namespace Microsoft.Build.Shared
                     filesToExclude = new HashSet<string>();
                     foreach (var excludeStep in excludeNextSteps)
                     {
-                        foreach (var file in excludeStep.Files)
+                        if (excludeStep.Files != null)
                         {
-                            filesToExclude.Add(file);
+                            foreach (var file in excludeStep.Files)
+                            {
+                                filesToExclude.Add(file);
+                            }
                         }
                     }
                 }
@@ -1336,6 +1339,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="projectDirectoryUnescaped">The project directory.</param>
         /// <param name="filespecUnescaped">Get files that match the given file spec.</param>
+        /// <param name="excludeSpecsUnescaped">Exclude files that match this file spec.</param>
         /// <returns>The array of files.</returns>
         internal static string[] GetFiles
         (
@@ -1471,18 +1475,24 @@ namespace Microsoft.Build.Shared
             {
                 foreach (string excludeSpec in excludeSpecsUnescaped)
                 {
-                    //  The FileMatch method always creates a Regex to check if the file matches the pattern
-                    //  Creating a Regex is relatively expensive, so we may want to avoid doing so if possible
-                    Result match = FileMatch(excludeSpec, filespecUnescaped);
+
+                    // Try a path equality check first to:
+                    // - avoid the expensive regex
+                    // - maintain legacy behaviour where an illegal filespec is treated as a normal string
+                    if (FileUtilities.PathsEqual(filespecUnescaped, excludeSpec))
+                    {
+                        return new string[0];
+                    }
+
+                    var match = FileMatch(excludeSpec, filespecUnescaped);
 
                     if (match.isLegalFileSpec && match.isMatch)
                     {
-                        //  This file is excluded
                         return new string[0];
                     }
                 }
             }
-            return new string[] { filespecUnescaped };
+            return new[] { filespecUnescaped };
         }
 
         /// <summary>
@@ -1491,6 +1501,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="projectDirectoryUnescaped">The project directory.</param>
         /// <param name="filespecUnescaped">Get files that match the given file spec.</param>
+        /// <param name="excludeSpecsUnescaped">Exclude files that match this file spec.</param>
         /// <param name="getFileSystemEntries">Get files that match the given file spec.</param>
         /// <param name="directoryExists">Determine whether a directory exists.</param>
         /// <returns>The array of files.</returns>
@@ -1564,6 +1575,8 @@ namespace Microsoft.Build.Shared
                             resultsToExclude = new HashSet<string>();
                         }
                         resultsToExclude.Add(excludeSpec);
+
+                        continue;
                     }
                     else if (excludeAction == SearchAction.ReturnEmptyList)
                     {

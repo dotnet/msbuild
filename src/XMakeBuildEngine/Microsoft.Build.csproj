@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)' == 'Debug-NetCore' or '$(Configuration)' == 'Release-NetCore'">
     <TargetFrameworkVersion Condition="'$(TargetFrameworkVersion)' == ''">v1.5</TargetFrameworkVersion>
@@ -137,6 +137,7 @@
     <Compile Include="..\Shared\StringBuilderCache.cs">
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\Shared\BufferedReadStream.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
     <Compile Include="..\Shared\TaskHostTaskCancelled.cs" />
     <Compile Include="..\Shared\TaskHostTaskComplete.cs" />
@@ -230,6 +231,7 @@
     <Compile Include="Collections\RetrievableEntryHashSet\HashHelpers.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="Construction\ImplicitImportLocation.cs" />
     <Compile Include="Definition\NewProjectFileOptions.cs" />
     <Compile Include="Definition\ProjectCollectionChangedEventArgs.cs" />
     <Compile Include="Definition\ProjectImportPathMatch.cs" />
@@ -238,6 +240,7 @@
     <Compile Include="Evaluation\ItemSpec.cs" />
     <Compile Include="Evaluation\ItemsAndMetadataPair.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.IItemOperation.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.UpdateOperation.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.IncludeOperation.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.ItemFactoryWrapper.cs" />
@@ -593,6 +596,7 @@
     <Compile Include="Xml\ProjectXmlUtilities.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="Xml\XmlReaderExtension.cs" />
     <Compile Include="..\Shared\AssemblyLoadInfo.cs">
       <Link>SharedUtilities\AssemblyLoadInfo.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
@@ -763,4 +767,20 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" Condition="!$(Configuration.EndsWith('MONO'))"/>
   -->
   <Import Project="..\dir.targets" />
+  <Target Name="CopyImmutableLocal"
+          BeforeTargets="ResolveAssemblyReferences">
+    <!-- The VSIX installer manifest references System.Collections.Immutable from the Output folder,
+         but it won't be placed there by default because NuGet references come in as CopyLocal false.
+
+         Work around this by munging the reference after NuGet emits it but before RAR.
+
+         TODO: this shouldn't be here. After moving to a better binplacing model (like "publish
+         msbuild.exe to a folder") it should be removed.
+    -->
+    <ItemGroup>
+      <Reference Condition="'%(Reference.NuGetPackageId)' == 'System.Collections.Immutable'">
+        <Private>true</Private>
+      </Reference>
+    </ItemGroup>
+  </Target>
 </Project>

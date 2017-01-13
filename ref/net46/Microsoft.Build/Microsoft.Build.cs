@@ -14,6 +14,12 @@ namespace Microsoft.Build.Construction
         public override int GetHashCode() { throw null; }
         public override string ToString() { throw null; }
     }
+    public enum ImplicitImportLocation
+    {
+        Bottom = 2,
+        None = 0,
+        Top = 1,
+    }
     [System.Diagnostics.DebuggerDisplayAttribute("ProjectChooseElement (#Children={Count} HasOtherwise={OtherwiseElement != null})")]
     public partial class ProjectChooseElement : Microsoft.Build.Construction.ProjectElementContainer
     {
@@ -49,6 +55,7 @@ namespace Microsoft.Build.Construction
         protected internal virtual Microsoft.Build.Construction.ProjectElement Clone(Microsoft.Build.Construction.ProjectRootElement factory) { throw null; }
         public virtual void CopyFrom(Microsoft.Build.Construction.ProjectElement element) { }
         protected abstract Microsoft.Build.Construction.ProjectElement CreateNewInstance(Microsoft.Build.Construction.ProjectRootElement owner);
+        protected virtual bool ShouldCloneXmlAttribute(System.Xml.XmlAttribute attribute) { throw null; }
     }
     public abstract partial class ProjectElementContainer : Microsoft.Build.Construction.ProjectElement
     {
@@ -82,8 +89,11 @@ namespace Microsoft.Build.Construction
     public partial class ProjectImportElement : Microsoft.Build.Construction.ProjectElement
     {
         internal ProjectImportElement() { }
+        public Microsoft.Build.Construction.ImplicitImportLocation ImplicitImportLocation { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public string Project { get { throw null; } set { } }
         public Microsoft.Build.Construction.ElementLocation ProjectLocation { get { throw null; } }
+        public string Sdk { get { throw null; } set { } }
+        public Microsoft.Build.Construction.ElementLocation SdkLocation { get { throw null; } }
         protected override Microsoft.Build.Construction.ProjectElement CreateNewInstance(Microsoft.Build.Construction.ProjectRootElement owner) { throw null; }
     }
     [System.Diagnostics.DebuggerDisplayAttribute("#Imports={Count} Condition={Condition} Label={Label}")]
@@ -148,6 +158,7 @@ namespace Microsoft.Build.Construction
         public Microsoft.Build.Construction.ProjectMetadataElement AddMetadata(string name, string unevaluatedValue, bool expressAsAttribute) { throw null; }
         public override void CopyFrom(Microsoft.Build.Construction.ProjectElement element) { }
         protected override Microsoft.Build.Construction.ProjectElement CreateNewInstance(Microsoft.Build.Construction.ProjectRootElement owner) { throw null; }
+        protected override bool ShouldCloneXmlAttribute(System.Xml.XmlAttribute attribute) { throw null; }
     }
     [System.Diagnostics.DebuggerDisplayAttribute("#Items={Count} Condition={Condition} Label={Label}")]
     public partial class ProjectItemGroupElement : Microsoft.Build.Construction.ProjectElementContainer
@@ -244,11 +255,14 @@ namespace Microsoft.Build.Construction
         public System.Collections.Generic.ICollection<Microsoft.Build.Construction.ProjectItemGroupElement> ItemGroupsReversed { get { throw null; } }
         public System.Collections.Generic.ICollection<Microsoft.Build.Construction.ProjectItemElement> Items { get { throw null; } }
         public System.DateTime LastWriteTimeWhenRead { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
+        public bool PreserveFormatting { get { throw null; } }
         public Microsoft.Build.Construction.ElementLocation ProjectFileLocation { get { throw null; } }
         public System.Collections.Generic.ICollection<Microsoft.Build.Construction.ProjectPropertyElement> Properties { get { throw null; } }
         public System.Collections.Generic.ICollection<Microsoft.Build.Construction.ProjectPropertyGroupElement> PropertyGroups { get { throw null; } }
         public System.Collections.Generic.ICollection<Microsoft.Build.Construction.ProjectPropertyGroupElement> PropertyGroupsReversed { get { throw null; } }
         public string RawXml { get { throw null; } }
+        public string Sdk { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } [System.Diagnostics.DebuggerStepThroughAttribute]set { } }
+        public Microsoft.Build.Construction.ElementLocation SdkLocation { get { throw null; } }
         public System.Collections.Generic.ICollection<Microsoft.Build.Construction.ProjectTargetElement> Targets { get { throw null; } }
         public System.DateTime TimeLastChanged { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
         public string ToolsVersion { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } [System.Diagnostics.DebuggerStepThroughAttribute]set { } }
@@ -307,7 +321,10 @@ namespace Microsoft.Build.Construction
         public Microsoft.Build.Construction.ProjectRootElement DeepClone() { throw null; }
         public static Microsoft.Build.Construction.ProjectRootElement Open(string path) { throw null; }
         public static Microsoft.Build.Construction.ProjectRootElement Open(string path, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { throw null; }
-        public static Microsoft.Build.Construction.ProjectRootElement Open(string path, Microsoft.Build.Evaluation.ProjectCollection projectCollection, bool preserveFormatting) { throw null; }
+        public static Microsoft.Build.Construction.ProjectRootElement Open(string path, Microsoft.Build.Evaluation.ProjectCollection projectCollection, System.Nullable<bool> preserveFormatting) { throw null; }
+        public void Reload(bool throwIfUnsavedChanges=true, System.Nullable<bool> preserveFormatting=null) { }
+        public void ReloadFrom(string path, bool throwIfUnsavedChanges=true, System.Nullable<bool> preserveFormatting=null) { }
+        public void ReloadFrom(System.Xml.XmlReader reader, bool throwIfUnsavedChanges=true, System.Nullable<bool> preserveFormatting=null) { }
         public void Save() { }
         public void Save(System.IO.TextWriter writer) { }
         public void Save(string path) { }
@@ -315,6 +332,7 @@ namespace Microsoft.Build.Construction
         public void Save(System.Text.Encoding saveEncoding) { }
         public static Microsoft.Build.Construction.ProjectRootElement TryOpen(string path) { throw null; }
         public static Microsoft.Build.Construction.ProjectRootElement TryOpen(string path, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { throw null; }
+        public static Microsoft.Build.Construction.ProjectRootElement TryOpen(string path, Microsoft.Build.Evaluation.ProjectCollection projectCollection, System.Nullable<bool> preserveFormatting) { throw null; }
     }
     [System.Diagnostics.DebuggerDisplayAttribute("Name={Name} #Children={Count} Condition={Condition}")]
     public partial class ProjectTargetElement : Microsoft.Build.Construction.ProjectElementContainer
@@ -936,6 +954,8 @@ namespace Microsoft.Build.Execution
         public System.Collections.Generic.ICollection<Microsoft.Build.Evaluation.Toolset> Toolsets { get { throw null; } }
         public System.Globalization.CultureInfo UICulture { get { throw null; } set { } }
         public bool UseSynchronousLogging { get { throw null; } set { } }
+        public System.Collections.Generic.ISet<string> WarningsAsErrors { get { throw null; } set { } }
+        public System.Collections.Generic.ISet<string> WarningsAsMessages { get { throw null; } set { } }
         public Microsoft.Build.Execution.BuildParameters Clone() { throw null; }
         public Microsoft.Build.Evaluation.Toolset GetToolset(string toolsVersion) { throw null; }
     }
@@ -1403,4 +1423,69 @@ namespace Microsoft.Build.Logging
         public Microsoft.Build.Framework.ILogger CreateLogger() { throw null; }
     }
     public delegate void WriteHandler(string message);
+}
+namespace Microsoft.VisualStudio.Setup.Configuration
+{
+    [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
+    [System.Runtime.InteropServices.GuidAttribute("6380BCFF-41D3-4B2E-8B2E-BF8A6810C848")]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute((System.Runtime.InteropServices.ComInterfaceType)(1))]
+    [System.Runtime.InteropServices.TypeIdentifierAttribute]
+    public partial interface IEnumSetupInstances
+    {
+        void Next(int celt, Microsoft.VisualStudio.Setup.Configuration.ISetupInstance[] rgelt, out int pceltFetched);
+    }
+    [System.FlagsAttribute]
+    [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
+    [System.Runtime.InteropServices.TypeIdentifierAttribute("310100ba-5f84-4103-abe0-e8132ae862d9", "Microsoft.VisualStudio.Setup.Configuration.InstanceState")]
+    public enum InstanceState : uint
+    {
+        Complete = (uint)4294967295,
+        Local = (uint)1,
+        None = (uint)0,
+        NoRebootRequired = (uint)4,
+        Registered = (uint)2,
+    }
+    [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
+    [System.Runtime.InteropServices.GuidAttribute("42843719-DB4C-46C2-8E7C-64F1816EFD5B")]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute((System.Runtime.InteropServices.ComInterfaceType)(1))]
+    [System.Runtime.InteropServices.TypeIdentifierAttribute]
+    public partial interface ISetupConfiguration
+    {
+    }
+    [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
+    [System.Runtime.InteropServices.GuidAttribute("26AAB78C-4A60-49D6-AF3B-3C35BC93365D")]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute((System.Runtime.InteropServices.ComInterfaceType)(1))]
+    [System.Runtime.InteropServices.TypeIdentifierAttribute]
+    public partial interface ISetupConfiguration2 : Microsoft.VisualStudio.Setup.Configuration.ISetupConfiguration
+    {
+        void _VtblGap1_3() { }
+        Microsoft.VisualStudio.Setup.Configuration.IEnumSetupInstances EnumAllInstances();
+    }
+    [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
+    [System.Runtime.InteropServices.GuidAttribute("B41463C3-8866-43B5-BC33-2B0676F7F42E")]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute((System.Runtime.InteropServices.ComInterfaceType)(1))]
+    [System.Runtime.InteropServices.TypeIdentifierAttribute]
+    public partial interface ISetupInstance
+    {
+        void _VtblGap1_3() { }
+        string GetDisplayName(int lcid=0);
+        string GetInstallationPath();
+        string GetInstallationVersion();
+    }
+    [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
+    [System.Runtime.InteropServices.GuidAttribute("89143C9A-05AF-49B0-B717-72E218A2185C")]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute((System.Runtime.InteropServices.ComInterfaceType)(1))]
+    [System.Runtime.InteropServices.TypeIdentifierAttribute]
+    public partial interface ISetupInstance2 : Microsoft.VisualStudio.Setup.Configuration.ISetupInstance
+    {
+        void _VtblGap1_8() { }
+        Microsoft.VisualStudio.Setup.Configuration.InstanceState GetState();
+    }
+    [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
+    [System.Runtime.InteropServices.CoClassAttribute(typeof(object))]
+    [System.Runtime.InteropServices.GuidAttribute("42843719-DB4C-46C2-8E7C-64F1816EFD5B")]
+    [System.Runtime.InteropServices.TypeIdentifierAttribute]
+    public partial interface SetupConfiguration : Microsoft.VisualStudio.Setup.Configuration.ISetupConfiguration, Microsoft.VisualStudio.Setup.Configuration.ISetupConfiguration2
+    {
+    }
 }

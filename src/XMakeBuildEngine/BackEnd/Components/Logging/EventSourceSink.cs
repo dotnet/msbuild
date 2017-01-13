@@ -5,6 +5,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -19,7 +20,7 @@ namespace Microsoft.Build.BackEnd.Logging
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        IEventSource, IBuildEventSink
+        IEventSource2, IBuildEventSink
     {
         #region Events
 
@@ -94,7 +95,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// occurred.  It is raised on every event.
         /// </summary>
         public event AnyEventHandler AnyEventRaised;
-
+        
+        /// <summary>
+        /// This event is raised to log telemetry.
+        /// </summary>
+        public event TelemetryEventHandler TelemetryLogged;
         #endregion
 
         #region Properties
@@ -125,6 +130,33 @@ namespace Microsoft.Build.BackEnd.Logging
             get;
             set;
         }
+
+        /// <summary>
+        /// A list of warnings to treat as errors.  If null, nothing is treated as an error.  If an empty set, all warnings are treated as errors.
+        /// </summary>
+        public ISet<string> WarningsAsErrors
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// A list of warnings to treat as low importance messages.
+        /// </summary>
+        public ISet<string> WarningsAsMessages
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// A list of build submission IDs that have logged errors.  If an error is logged outside of a submission, the submission ID is <see cref="BuildEventContext.InvalidSubmissionId"/>.
+        /// </summary>
+        public ISet<int> BuildSubmissionIdsThatHaveLoggedErrors
+        {
+            get;
+        } = new HashSet<int>();
+        
         #endregion
 
         #region Methods
@@ -199,11 +231,66 @@ namespace Microsoft.Build.BackEnd.Logging
             }
             else if (buildEvent is BuildWarningEventArgs)
             {
-                this.RaiseWarningEvent(null, (BuildWarningEventArgs)buildEvent);
+                BuildWarningEventArgs warningEvent = (BuildWarningEventArgs) buildEvent;
+
+                if (WarningsAsMessages != null && WarningsAsMessages.Contains(warningEvent.Code))
+                {
+                    // Treat this warning as a message with low importance if its in the list
+                    BuildMessageEventArgs errorEvent = new BuildMessageEventArgs(
+                        warningEvent.Subcategory,
+                        warningEvent.Code,
+                        warningEvent.File,
+                        warningEvent.LineNumber,
+                        warningEvent.ColumnNumber,
+                        warningEvent.EndLineNumber,
+                        warningEvent.EndColumnNumber,
+                        warningEvent.Message,
+                        warningEvent.HelpKeyword,
+                        warningEvent.SenderName,
+                        MessageImportance.Low,
+                        warningEvent.Timestamp)
+                    {
+                        BuildEventContext = warningEvent.BuildEventContext,
+                        ProjectFile = warningEvent.ProjectFile,
+                    };
+
+                    this.RaiseMessageEvent(null, errorEvent);
+
+                }
+                else if (WarningsAsErrors != null && (WarningsAsErrors.Count == 0 || WarningsAsErrors.Contains(warningEvent.Code)))
+                {
+                    // Treat this warning as an error if an empty set of warnings was specified or this code was specified
+                    BuildErrorEventArgs errorEvent = new BuildErrorEventArgs(
+                        warningEvent.Subcategory,
+                        warningEvent.Code,
+                        warningEvent.File,
+                        warningEvent.LineNumber,
+                        warningEvent.ColumnNumber,
+                        warningEvent.EndLineNumber,
+                        warningEvent.EndColumnNumber,
+                        warningEvent.Message,
+                        warningEvent.HelpKeyword,
+                        warningEvent.SenderName,
+                        warningEvent.Timestamp)
+                    {
+                        BuildEventContext = warningEvent.BuildEventContext,
+                        ProjectFile = warningEvent.ProjectFile,
+                    };
+
+                    this.RaiseErrorEvent(null, errorEvent);
+                }
+                else
+                {
+                    this.RaiseWarningEvent(null, warningEvent);
+                }
             }
             else if (buildEvent is BuildErrorEventArgs)
             {
                 this.RaiseErrorEvent(null, (BuildErrorEventArgs)buildEvent);
+            }
+            else if (buildEvent is TelemetryEventArgs)
+            {
+                this.RaiseTelemetryEvent(null, (TelemetryEventArgs) buildEvent);
             }
             else
             {
@@ -241,6 +328,7 @@ namespace Microsoft.Build.BackEnd.Logging
             CustomEventRaised = null;
             StatusEventRaised = null;
             AnyEventRaised = null;
+            TelemetryLogged = null;
         }
 
         #endregion
@@ -299,6 +387,9 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="Exception">ExceptionHandling.IsCriticalException exceptions will not be wrapped</exception>
         private void RaiseErrorEvent(object sender, BuildErrorEventArgs buildEvent)
         {
+            // Keep track of build submissions that have logged errors.  If there is no build context, add BuildEventContext.InvalidSubmissionId.
+            BuildSubmissionIdsThatHaveLoggedErrors.Add(buildEvent?.BuildEventContext?.SubmissionId ?? BuildEventContext.InvalidSubmissionId);
+
             if (ErrorRaised != null)
             {
                 try
@@ -833,6 +924,41 @@ namespace Microsoft.Build.BackEnd.Logging
                     // catch(Exception) block and not rethrowing it, there's the possibility that this exception could 
                     // just get silently eaten.  So better to have duplicates than to not log the problem at all. :) 
                     ExceptionHandling.DumpExceptionToFile(exception);
+
+                    if (ExceptionHandling.IsCriticalException(exception))
+                    {
+                        throw;
+                    }
+
+                    InternalLoggerException.Throw(exception, buildEvent, "FatalErrorWhileLogging", false);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Raises the a telemetry event to all registered loggers.
+        /// </summary>
+        private void RaiseTelemetryEvent(object sender, TelemetryEventArgs buildEvent)
+        {
+            if (TelemetryLogged != null)
+            {
+                try
+                {
+                    TelemetryLogged(sender, buildEvent);
+                }
+                catch (LoggerException)
+                {
+                    // if a logger has failed politely, abort immediately
+                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
+                    // if a fellow logger is throwing in an event handler.
+                    this.UnregisterAllEventHandlers();
+                    throw;
+                }
+                catch (Exception exception)
+                {
+                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
+                    // if a fellow logger is throwing in an event handler.
+                    this.UnregisterAllEventHandlers();
 
                     if (ExceptionHandling.IsCriticalException(exception))
                     {

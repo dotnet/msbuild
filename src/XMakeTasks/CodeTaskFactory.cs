@@ -31,6 +31,37 @@ namespace Microsoft.Build.Tasks
     public class CodeTaskFactory : ITaskFactory
     {
         /// <summary>
+        /// This dictionary keeps track of custom references to compiled assemblies.  The in-memory assembly is loaded from a byte
+        /// stream and as such its dependencies cannot be found unless they are in the MSBuild.exe directory or the GAC.  They
+        /// cannot be found even if they are already loaded in the AppDomain.  This dictionary knows the FullName of the assembly
+        /// and a reference to the assembly itself.  In the <see cref="CurrentDomainOnAssemblyResolve"/> handler, the dictionary 
+        /// is used to return the loaded assemblies as a way to allow custom references that are not in the normal assembly Load
+        /// context.
+        /// </summary>
+        private static readonly IDictionary<string, Assembly> s_knownReferenceAssemblies = new ConcurrentDictionary<string, Assembly>(StringComparer.OrdinalIgnoreCase);
+
+        static CodeTaskFactory()
+        {
+            // The handler is not detached because it only returns assemblies for custom references that cannot be found in the normal Load context
+            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainOnAssemblyResolve;
+        }
+
+        /// <summary>
+        /// Handles the <see cref="AppDomain.AssemblyResolve"/> event to return assemblies loaded from custom references.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        private static Assembly CurrentDomainOnAssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            Assembly assembly = null;
+            // Return the assembly loaded from the custom reference if the FullName matches what is being looked for
+            s_knownReferenceAssemblies.TryGetValue(args.Name, out assembly);
+
+            return assembly;
+        }
+
+        /// <summary>
         /// Default assemblies names to reference during inline code compilation - from the .NET Framework
         /// </summary>
         private static readonly string[] s_defaultReferencedFrameworkAssemblyNames = { @"System.Core" };
@@ -620,7 +651,7 @@ namespace Microsoft.Build.Tasks
                         {
                             if (!referenceAssembly.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) || !referenceAssembly.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
                             {
-#pragma warning disable 618
+#pragma warning disable 618, 612
                                 // Unfortunately Assembly.Load is not an alternative to LoadWithPartialName, since
                                 // Assembly.Load requires the full assembly name to be passed to it.
                                 // Therefore we must ignore the deprecated warning.
@@ -646,7 +677,7 @@ namespace Microsoft.Build.Tasks
                                         candidateAssemblyLocation = candidateAssembly.Location;
                                     }
                                 }
-#pragma warning restore 618
+#pragma warning restore 618, 612
                             }
                         }
                         else
@@ -657,6 +688,7 @@ namespace Microsoft.Build.Tasks
                                 if (candidateAssembly != null)
                                 {
                                     candidateAssemblyLocation = candidateAssembly.Location;
+                                    s_knownReferenceAssemblies[candidateAssembly.FullName] = candidateAssembly;
                                 }
                             }
                             catch (BadImageFormatException e)

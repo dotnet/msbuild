@@ -18,7 +18,7 @@ namespace Microsoft.Build.Evaluation
 
             protected override ICollection<I> SelectItems(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
-                return SelectItemsMatchingItemSpec(listBuilder, _itemElement.RemoveLocation);
+                return SelectItemsMatchingItemSpec(listBuilder, _itemElement.RemoveLocation).ToList();
             }
 
             protected override void SaveItems(ICollection<I> items, ImmutableList<ItemData>.Builder listBuilder)

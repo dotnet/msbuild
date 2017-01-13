@@ -106,39 +106,17 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Empty warning should not log an event
+        /// Empty warning SHOULD log an event
         /// </summary>
         [Fact]
         public void EmptyWarning()
         {
             MockEngine e = new MockEngine();
-            Warning w = new Warning();
-            w.BuildEngine = e;
-
-            // don't set text
-
-            bool retval = w.Execute();
-
-            Console.WriteLine("===");
-            Console.WriteLine(e.Log);
-            Console.WriteLine("===");
-
-            Assert.True(retval);
-            Assert.Equal(0, e.Warnings);
-        }
-
-        /// <summary>
-        /// Empty warning message but a code specified should still be logged
-        /// </summary>
-        [Fact]
-        public void EmptyWarningMessageButCodeSpecified()
-        {
-            MockEngine e = new MockEngine();
-            Warning w = new Warning();
-            w.BuildEngine = e;
-
-            // don't set text
-            w.Code = "123";
+            Warning w = new Warning
+            {
+                BuildEngine = e
+                // don't set text
+            };
 
             bool retval = w.Execute();
 
@@ -148,19 +126,48 @@ namespace Microsoft.Build.UnitTests
 
             Assert.True(retval);
             Assert.Equal(1, e.Warnings);
+            Assert.Contains(AssemblyResources.GetString("ErrorAndWarning.EmptyMessage"), e.Log);
         }
 
         /// <summary>
-        /// Empty error should not log an event
+        /// Empty warning message but a code specified should still be logged
+        /// </summary>
+        [Fact]
+        public void EmptyWarningMessageButCodeSpecified()
+        {
+            MockEngine e = new MockEngine();
+            Warning w = new Warning
+            {
+                BuildEngine = e,
+                Code = "123"
+                // don't set text
+            };
+
+            bool retval = w.Execute();
+
+            Console.WriteLine("===");
+            Console.WriteLine(e.Log);
+            Console.WriteLine("===");
+
+            Assert.True(retval);
+            Assert.Equal(1, e.Warnings);
+            Assert.Contains(AssemblyResources.GetString("ErrorAndWarning.EmptyMessage"), e.Log);
+        }
+
+        /// <summary>
+        /// Empty error SHOULD log an event
         /// </summary>
         [Fact]
         public void EmptyError()
         {
             MockEngine e = new MockEngine();
-            Error err = new Error();
-            err.BuildEngine = e;
+            Error err = new Error
+            {
+                BuildEngine = e
+                // don't set text
+            };
 
-            // don't set text
+            
 
             bool retval = err.Execute();
 
@@ -169,7 +176,8 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine("===");
 
             Assert.False(retval);
-            Assert.Equal(0, e.Errors);
+            Assert.Equal(1, e.Errors);
+            Assert.Contains(AssemblyResources.GetString("ErrorAndWarning.EmptyMessage"), e.Log);
         }
 
         /// <summary>
@@ -179,11 +187,14 @@ namespace Microsoft.Build.UnitTests
         public void EmptyErrorMessageButCodeSpecified()
         {
             MockEngine e = new MockEngine();
-            Error err = new Error();
-            err.BuildEngine = e;
+            Error err = new Error
+            {
+                BuildEngine = e,
+                Code = "999"
+                // don't set text
+            };
 
-            // don't set text
-            err.Code = "999";
+
             bool retval = err.Execute();
 
             Console.WriteLine("===");
@@ -192,6 +203,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.False(retval);
             Assert.Equal(1, e.Errors);
+            Assert.Contains(AssemblyResources.GetString("ErrorAndWarning.EmptyMessage"), e.Log);
         }
 
         /// <summary>

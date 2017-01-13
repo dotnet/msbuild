@@ -1743,7 +1743,7 @@ namespace Microsoft.Build.Evaluation
         /// The ReusableLogger wraps a logger and allows it to be used for both design-time and build-time.  It internally swaps
         /// between the design-time and build-time event sources in response to Initialize and Shutdown events.
         /// </summary>
-        internal class ReusableLogger : INodeLogger, IEventSource
+        internal class ReusableLogger : INodeLogger, IEventSource2
         {
             /// <summary>
             /// The logger we are wrapping.
@@ -1831,6 +1831,11 @@ namespace Microsoft.Build.Evaluation
             private BuildWarningEventHandler _buildWarningEventHandler;
 
             /// <summary>
+            ///  The telemetry event handler.
+            /// </summary>
+            private TelemetryEventHandler _telemetryEventHandler;
+
+            /// <summary>
             /// Constructor.
             /// </summary>
             public ReusableLogger(ILogger originalLogger)
@@ -1910,6 +1915,11 @@ namespace Microsoft.Build.Evaluation
             /// The Any logging event
             /// </summary>
             public event AnyEventHandler AnyEventRaised;
+
+            /// <summary>
+            /// The telemetry sent event.
+            /// </summary>
+            public event TelemetryEventHandler TelemetryLogged;
 
 #endregion
 
@@ -2027,6 +2037,7 @@ namespace Microsoft.Build.Evaluation
                 _taskFinishedEventHandler = new TaskFinishedEventHandler(TaskFinishedHandler);
                 _taskStartedEventHandler = new TaskStartedEventHandler(TaskStartedHandler);
                 _buildWarningEventHandler = new BuildWarningEventHandler(WarningRaisedHandler);
+                _telemetryEventHandler = new TelemetryEventHandler(TelemetryLoggedHandler);
 
                 // Register for the events.
                 eventSource.AnyEventRaised += _anyEventHandler;
@@ -2043,6 +2054,12 @@ namespace Microsoft.Build.Evaluation
                 eventSource.TaskFinished += _taskFinishedEventHandler;
                 eventSource.TaskStarted += _taskStartedEventHandler;
                 eventSource.WarningRaised += _buildWarningEventHandler;
+
+                IEventSource2 eventSource2 = eventSource as IEventSource2;
+                if (eventSource2 != null)
+                {
+                    eventSource2.TelemetryLogged += _telemetryEventHandler;
+                }
             }
 
             /// <summary>
@@ -2066,6 +2083,12 @@ namespace Microsoft.Build.Evaluation
                 eventSource.TaskStarted -= _taskStartedEventHandler;
                 eventSource.WarningRaised -= _buildWarningEventHandler;
 
+                IEventSource2 eventSource2 = eventSource as IEventSource2;
+                if (eventSource2 != null)
+                {
+                    eventSource2.TelemetryLogged -= _telemetryEventHandler;
+                }
+
                 // Null out the handlers.
                 _anyEventHandler = null;
                 _buildFinishedEventHandler = null;
@@ -2081,6 +2104,7 @@ namespace Microsoft.Build.Evaluation
                 _taskFinishedEventHandler = null;
                 _taskStartedEventHandler = null;
                 _buildWarningEventHandler = null;
+                _telemetryEventHandler = null;
             }
 
             /// <summary>
@@ -2234,6 +2258,17 @@ namespace Microsoft.Build.Evaluation
                 if (AnyEventRaised != null)
                 {
                     AnyEventRaised(sender, e);
+                }
+            }
+
+            /// <summary>
+            /// Handler for telemetry events.
+            /// </summary>
+            private void TelemetryLoggedHandler(object sender, TelemetryEventArgs e)
+            {
+                if (TelemetryLogged != null)
+                {
+                    TelemetryLogged(sender, e);
                 }
             }
         }

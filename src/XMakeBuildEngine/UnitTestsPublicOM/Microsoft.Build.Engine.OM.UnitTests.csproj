@@ -52,8 +52,14 @@
     <Compile Include="..\..\Shared\ResourceUtilities.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\..\Shared\VisualStudioLocationHelper.cs">
+      <Link>VisualStudioLocationHelper.cs</Link>
+    </Compile>
     <Compile Include="AssemblyResources.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\..\Shared\BuildEnvironmentHelper.cs">
+      <Link>BuildEnvironmentHelper.cs</Link>
     </Compile>
     <Compile Include="..\..\Shared\InternalErrorException.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
@@ -85,12 +91,14 @@
     <Compile Include="Construction\ElementLocationPublic_Tests.cs" />
     <Compile Include="Construction\ProjectChooseElement_Tests.cs" />
     <Compile Include="Construction\ProjectFormatting_Tests.cs" />
+    <Compile Include="Construction\ProjectSdkImplicitImport_Tests.cs" />
     <Compile Include="Construction\ProjectImportElement_Tests.cs" />
     <Compile Include="Construction\ProjectImportGroupElement_Tests.cs" />
     <Compile Include="Construction\ProjectItemDefinitionGroupElement_Tests.cs" />
     <Compile Include="Construction\ProjectItemDefinitionElement_Tests.cs" />
     <Compile Include="Construction\ProjectItemGroupElement_tests.cs" />
     <Compile Include="Construction\ProjectItemElement_Tests.cs" />
+    <Compile Include="Construction\WhiteSpacePreservation_Tests.cs" />
     <Compile Include="Construction\ProjectMetadataElement_Tests.cs" />
     <Compile Include="Construction\ProjectOnErrorElement_Tests.cs" />
     <Compile Include="Construction\ProjectOutputElement_Tests.cs" />
@@ -129,7 +137,7 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />

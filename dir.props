@@ -43,11 +43,10 @@
     <!-- Output directories -->
     <BinDir>$(ProjectDir)bin\</BinDir>
     <TestWorkingDir>$(BinDir)tests\</TestWorkingDir>
-    <BootstrapDestination>$(BinDir)Bootstrap\</BootstrapDestination>
 
     <!-- Package version / directories -->
-    <BuildToolsVersion>1.0.26-prerelease-00826-05</BuildToolsVersion>
-    <CompilerToolsVersion>2.0.0-beta3</CompilerToolsVersion>
+    <BuildToolsVersion>1.0.27-prerelease-00927-05</BuildToolsVersion>
+    <CompilerToolsVersion>2.0.0-rc3-61110-06</CompilerToolsVersion>
     <XunitVersion>2.1.0</XunitVersion>
     <MicroBuildVersion>0.2.0</MicroBuildVersion>
     <GitVersioningVersion>1.5.46</GitVersioningVersion>
@@ -96,11 +95,6 @@
 
     <!-- packageresolve.targets from build tools uses the DnuRestoreCommand property. Setting it to use dotnet CLI under the hood-->
     <DnuRestoreCommand>$(DnuCoreRestoreCommand) --packages $(PackagesDir)</DnuRestoreCommand>
-  </PropertyGroup>
-
-  <!-- If we're building with a bootstrapped MSBuild, use fresh extensions instead of the installed ones. -->
-  <PropertyGroup Condition="'$(BootstrappedMSBuild)' == 'true'">
-    <MSBuildExtensionsPath>$(BootstrapDestination)</MSBuildExtensionsPath>
   </PropertyGroup>
 
   <!-- Common nuget properties -->
@@ -205,6 +199,15 @@
     <PlatformTarget Condition="'$(PlatformSpecificBuild)' == 'true' AND '$(FullFrameworkBuild)' != 'true'">AnyCPU</PlatformTarget>
   </PropertyGroup>
 
+  <!-- Configure bootstrapping -->
+  <PropertyGroup>
+    <BootstrapDestination Condition="'$(NetCoreBuild)' != 'true'">$(BinDir)Bootstrap$([System.IO.Path]::DirectorySeparatorChar)</BootstrapDestination>
+    <BootstrapDestination Condition="'$(NetCoreBuild)' == 'true'">$(BinDir)Bootstrap-NetCore$([System.IO.Path]::DirectorySeparatorChar)</BootstrapDestination>
+
+    <!-- If we're building with a bootstrapped MSBuild, use fresh extensions instead of the installed ones. -->
+    <MSBuildExtensionsPath Condition="'$(BootstrappedMSBuild)' == 'true'">$(BootstrapDestination)</MSBuildExtensionsPath>
+  </PropertyGroup>
+
   <!-- This configuration builds against the full .NET Framework but with the compilation constants to compile against
        the .NET Core surface area.  This way we can build a binary to run ApiPort on to measure progress. -->
   <PropertyGroup Condition="'$(Configuration)' == 'Port-Progress'">
@@ -240,7 +243,7 @@
     <DefineConstants>$(DefineConstants);RUNTIME_TYPE_NETCORE</DefineConstants>
     
     <!-- target framework for msbuild nuget packages. Used by Nuspec.ReferenceGenerator.targets to update corefx dependencies-->
-    <NuSpecTfm>netstandard$(TargetFrameworkVersion.TrimStart('v'))</NuSpecTfm>
+    <NuSpecTfm>.NETStandard$(TargetFrameworkVersion.TrimStart('v'))</NuSpecTfm>
 
   </PropertyGroup>
 
@@ -269,7 +272,7 @@
     <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLY_LOCATION</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLYNAME_CULTUREINFO</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLYNAME_CLONE</DefineConstants>
-    <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_BINARY_SERIALIZATION</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_BINARY_SERIALIZATION</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_COM_INTEROP</DefineConstants>
     <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_COMPILE_IN_TESTS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_CONSOLE_BUFFERWIDTH</DefineConstants>
@@ -305,8 +308,12 @@
     <DefineConstants>$(DefineConstants);FEATURE_REGISTRYHIVE_DYNDATA</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_RESGEN</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_RESOURCE_EXPOSURE</DefineConstants>
+    <!-- System.Resources.ResourceManager.GetResourceSet() method is currently only in full framework -->
+    <DefineConstants>$(DefineConstants);FEATURE_RESOURCEMANAGER_GETRESOURCESET</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_RESX_RESOURCE_READER</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_RTLMOVEMEMORY</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_RUN_EXE_IN_TESTS</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' == 'true'">$(DefineConstants);USE_MSBUILD_DLL_EXTN</DefineConstants>
     <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_SECURITY_PERMISSIONS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_SECURITY_PRINCIPAL_WINDOWS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_SPECIAL_FOLDERS</DefineConstants>
@@ -338,6 +345,8 @@
     <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_DEBUG_LAUNCH</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_WIN32_REGISTRY</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_WORKINGSET</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_VISUALSTUDIOSETUP</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_MSCOREE</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -356,6 +365,7 @@
 
     <DefineConstants>$(DefineConstants);FEATURE_PROCESSSTARTINFO_ENVIRONMENT</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_RUNTIMEINFORMATION</DefineConstants>
+    <DefineConstants>$(DefineConstants);USE_MSBUILD_DLL_EXTN</DefineConstants>
   </PropertyGroup>
 
   <!-- Change define constants as needed -->
@@ -384,6 +394,9 @@
     <IntermediateOutputPath>$([System.IO.Path]::Combine($(BaseIntermediateOutputPath)$(MSBuildProjectName),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</IntermediateOutputPath>
     <IntermediateOutputPath Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(BaseIntermediateOutputPath)$(MSBuildProjectName),$(Platform),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</IntermediateOutputPath>
 
+    <!-- BuildTools uses this path to write some files -->
+    <ObjDir>$(IntermediateOutputPath)</ObjDir>
+
     <!-- The TestPath seems to be used by Microsoft.DotNet.BuildTools targets. It does not seem to affect the MSBuild build in any way -->
     <TestPath>$(TestWorkingDir)$([System.IO.Path]::Combine($(MSBuildProjectName),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</TestPath>
     <TestPath Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(TestWorkingDir)$(MSBuildProjectName),$(Platform),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</TestPath>
@@ -394,8 +407,6 @@
 
     <DeploymentDir>$([System.IO.Path]::Combine($(BaseOutputPath), $(Configuration), $(DeploymentDirName)))$([System.IO.Path]::DirectorySeparatorChar)</DeploymentDir>
     <TestDeploymentDir>$([System.IO.Path]::Combine($(BaseOutputPath), $(Configuration), $(TestDeploymentDirName)))$([System.IO.Path]::DirectorySeparatorChar)</TestDeploymentDir>
-
-    <BootstrapDestination>$(BinDir)Bootstrap$([System.IO.Path]::DirectorySeparatorChar)</BootstrapDestination>
 
     <!-- Output path for helper tasks that we build for our own build process (e.g. localization tasks). Tasks should be imported from this property -->
     <BuildBinDir>$([System.IO.Path]::Combine($(ProjectDir), "build", "bin", $(RelativeOutputPathWithConfig), "Output"))$([System.IO.Path]::DirectorySeparatorChar)</BuildBinDir>

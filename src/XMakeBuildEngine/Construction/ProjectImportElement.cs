@@ -44,13 +44,13 @@ namespace Microsoft.Build.Construction
             get
             {
                 return
-                    FileUtilities.FixFilePath(
-                        ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.project));
+                    FileUtilities.FixFilePath(ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.project));
             }
 
             set
             {
                 ErrorUtilities.VerifyThrowArgumentLength(value, XMakeAttributes.project);
+
                 ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.project, value);
                 MarkDirty("Set Import Project {0}", value);
             }
@@ -59,10 +59,39 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Location of the project attribute
         /// </summary>
-        public ElementLocation ProjectLocation
+        public ElementLocation ProjectLocation => XmlElement.GetAttributeLocation(XMakeAttributes.project);
+
+        /// <summary>
+        /// Gets or sets the SDK that contains the import.
+        /// </summary>
+        public string Sdk
         {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.project); }
+            get
+            {
+                return
+                    FileUtilities.FixFilePath(ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.sdk));
+            }
+
+            set
+            {
+                ErrorUtilities.VerifyThrowArgumentLength(value, XMakeAttributes.sdk);
+
+                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.sdk, value);
+                MarkDirty("Set Import Sdk {0}", value);
+            }
         }
+
+        /// <summary>
+        /// Location of the Sdk attribute
+        /// </summary>
+        public ElementLocation SdkLocation => XmlElement.GetAttributeLocation(XMakeAttributes.sdk);
+
+        /// <summary>
+        /// Gets the <see cref="ImplicitImportLocation"/> of the import.  This indicates if the import was implicitly
+        /// added because of the <see cref="ProjectRootElement.Sdk"/> attribute and the location where the project was
+        /// imported.
+        /// </summary>
+        public ImplicitImportLocation ImplicitImportLocation { get; internal set; } = ImplicitImportLocation.None;
 
         /// <summary>
         /// Creates an unparented ProjectImportElement, wrapping an unparented XmlElement.
@@ -76,6 +105,21 @@ namespace Microsoft.Build.Construction
             ProjectImportElement import = new ProjectImportElement(element, containingProject);
 
             import.Project = project;
+
+            return import;
+        }
+
+        /// <summary>
+        /// Creates an implicit ProjectImportElement as if it was in the project.
+        /// </summary>
+        /// <returns></returns>
+        internal static ProjectImportElement CreateImplicit(string project, ProjectRootElement containingProject, ImplicitImportLocation implicitImportLocation, string sdkName)
+        {
+            ProjectImportElement import = CreateDisconnected(project, containingProject);
+
+            import.ImplicitImportLocation = implicitImportLocation;
+
+            import.Sdk = sdkName;
 
             return import;
         }

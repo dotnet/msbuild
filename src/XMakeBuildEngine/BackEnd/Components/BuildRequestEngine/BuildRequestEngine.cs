@@ -825,61 +825,81 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Check the amount of memory we are using and, if we exceed the threshold, unload cacheable items.
         /// </summary>
+        /// <remarks>
+        /// Since this causes synchronous I/O and a stop-the-world GC, it can be very expensive. If
+        /// something other than build results is taking up the bulk of the memory space, it may not
+        /// free any space. That's caused customer reports of VS hangs resulting from build requests
+        /// that are very slow because something in VS is taking all of the memory, but every
+        /// project build is slowed down by this codepath. To mitigate this, don't perform these
+        /// checks in devenv.exe. On the command line, 32-bit MSBuild may still need to cache build
+        /// results on very large builds, but build results are much more likely to be the bulk of
+        /// memory usage there.
+        /// </remarks>
         [SuppressMessage("Microsoft.Reliability", "CA2001:AvoidCallingProblematicMethods", MessageId = "System.GC.Collect", Justification = "We're trying to get rid of memory because we're running low, so we need to collect NOW in order to free it up ASAP")]
         private void CheckMemoryUsage()
         {
-            if (NativeMethodsShared.IsWindows)
+            if (!NativeMethodsShared.IsWindows || BuildEnvironmentHelper.Instance.RunningInVisualStudio)
             {
-                // Jeffrey Richter suggests that when the memory load in the system exceeds 80% it is a good
-                // idea to start finding ways to unload unnecessary data to prevent memory starvation.  We use this metric in
-                // our calculations below.
-                NativeMethodsShared.MemoryStatus memoryStatus = NativeMethodsShared.GetMemoryStatus();
-                if (memoryStatus != null)
+                // Since this causes synchronous I/O and a stop-the-world GC, it can be very expensive. If
+                // something other than build results is taking up the bulk of the memory space, it may not
+                // free any space. That's caused customer reports of VS hangs resulting from build requests
+                // that are very slow because something in VS is taking all of the memory, but every
+                // project build is slowed down by this codepath. To mitigate this, don't perform these
+                // checks in devenv.exe. On the command line, 32-bit MSBuild may still need to cache build
+                // results on very large builds, but build results are much more likely to be the bulk of
+                // memory usage there.
+                return;
+            }
+
+            // Jeffrey Richter suggests that when the memory load in the system exceeds 80% it is a good
+            // idea to start finding ways to unload unnecessary data to prevent memory starvation.  We use this metric in
+            // our calculations below.
+            NativeMethodsShared.MemoryStatus memoryStatus = NativeMethodsShared.GetMemoryStatus();
+            if (memoryStatus != null)
+            {
+                try
                 {
-                    try
-                    {
-                        // The minimum limit must be no more than 80% of the virtual memory limit to reduce the chances of a single unfortunately
-                        // large project resulting in allocations which exceed available VM space between calls to this function.  This situation
-                        // is more likely on 32-bit machines where VM space is only 2 gigs.
-                        ulong memoryUseLimit = Convert.ToUInt64(memoryStatus.TotalVirtual * 0.8);
+                    // The minimum limit must be no more than 80% of the virtual memory limit to reduce the chances of a single unfortunately
+                    // large project resulting in allocations which exceed available VM space between calls to this function.  This situation
+                    // is more likely on 32-bit machines where VM space is only 2 gigs.
+                    ulong memoryUseLimit = Convert.ToUInt64(memoryStatus.TotalVirtual * 0.8);
 
-                        // See how much memory we are using and compart that to our limit.
-                        ulong memoryInUse = memoryStatus.TotalVirtual - memoryStatus.AvailableVirtual;
-                        while ((memoryInUse > memoryUseLimit) || _debugForceCaching)
+                    // See how much memory we are using and compart that to our limit.
+                    ulong memoryInUse = memoryStatus.TotalVirtual - memoryStatus.AvailableVirtual;
+                    while ((memoryInUse > memoryUseLimit) || _debugForceCaching)
+                    {
+                        TraceEngine(
+                            "Memory usage at {0}, limit is {1}.  Caching configurations and results cache and collecting.",
+                            memoryInUse,
+                            memoryUseLimit);
+                        IResultsCache resultsCache =
+                            _componentHost.GetComponent(BuildComponentType.ResultsCache) as IResultsCache;
+
+                        resultsCache.WriteResultsToDisk();
+                        if (_configCache.WriteConfigurationsToDisk())
                         {
-                            TraceEngine(
-                                "Memory usage at {0}, limit is {1}.  Caching configurations and results cache and collecting.",
-                                memoryInUse,
-                                memoryUseLimit);
-                            IResultsCache resultsCache =
-                                _componentHost.GetComponent(BuildComponentType.ResultsCache) as IResultsCache;
-
-                            resultsCache.WriteResultsToDisk();
-                            if (_configCache.WriteConfigurationsToDisk())
-                            {
-                                // We have to collect here because WriteConfigurationsToDisk only collects 10% of the configurations.  It is entirely possible
-                                // that those 10% don't constitute enough collected memory to reduce our usage below the threshold.  The only way to know is to 
-                                // force the collection then re-test the memory usage.  We repeat until we have reduced our use below the threshold or
-                                // we failed to write any more configurations to disk.
-                                GC.Collect();
-                            }
-                            else
-                            {
-                                break;
-                            }
-
-                            memoryStatus = NativeMethodsShared.GetMemoryStatus();
-                            memoryInUse = memoryStatus.TotalVirtual - memoryStatus.AvailableVirtual;
-                            TraceEngine("Memory usage now at {0}", memoryInUse);
+                            // We have to collect here because WriteConfigurationsToDisk only collects 10% of the configurations.  It is entirely possible
+                            // that those 10% don't constitute enough collected memory to reduce our usage below the threshold.  The only way to know is to
+                            // force the collection then re-test the memory usage.  We repeat until we have reduced our use below the threshold or
+                            // we failed to write any more configurations to disk.
+                            GC.Collect();
                         }
+                        else
+                        {
+                            break;
+                        }
+
+                        memoryStatus = NativeMethodsShared.GetMemoryStatus();
+                        memoryInUse = memoryStatus.TotalVirtual - memoryStatus.AvailableVirtual;
+                        TraceEngine("Memory usage now at {0}", memoryInUse);
                     }
-                    catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-                    {
-                        _nodeLoggingContext.LogFatalBuildError(
-                            new BuildEventFileInfo(Microsoft.Build.Construction.ElementLocation.EmptyLocation),
-                            e);
-                        throw new BuildAbortedException(e.Message, e);
-                    }
+                }
+                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+                {
+                    _nodeLoggingContext.LogFatalBuildError(
+                        new BuildEventFileInfo(Microsoft.Build.Construction.ElementLocation.EmptyLocation),
+                        e);
+                    throw new BuildAbortedException(e.Message, e);
                 }
             }
         }

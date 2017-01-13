@@ -41,6 +41,7 @@ namespace Microsoft.Build.UnitTests
         /// lying around.
         /// </summary>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void NoTempFileLeaks()
         {
             using (var alternativeTemp = new Helpers.AlternativeTempPath())
@@ -88,15 +89,17 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)] // TODO: https://github.com/Microsoft/msbuild/issues/434
         public void Timeout()
         {
+            // On non-Windows the exit code of a killed process is SIGTERM (143)
+            int expectedExitCode = NativeMethodsShared.IsWindows ? -1 : 143;
+
             Exec exec = PrepareExec(NativeMethodsShared.IsWindows ? ":foo \n goto foo" : "while true; do sleep 1; done");
             exec.Timeout = 5;
             bool result = exec.Execute();
 
             Assert.Equal(false, result);
-            Assert.Equal(-1, exec.ExitCode);
+            Assert.Equal(expectedExitCode, exec.ExitCode);
             ((MockEngine)exec.BuildEngine).AssertLogContains("MSB5002");
             Assert.Equal(1, ((MockEngine)exec.BuildEngine).Warnings);
 
@@ -119,6 +122,7 @@ namespace Microsoft.Build.UnitTests
 
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void ExitCodeGetter()
         {
             Exec exec = PrepareExec("exit 120");
@@ -381,6 +385,7 @@ namespace Microsoft.Build.UnitTests
 #else
         [Fact]
 #endif
+        [Trait("Category", "mono-osx-failing")]
         public void ExecTaskUtf8NeverWithNonAnsi()
         {
             RunExec(true, EncodingUtilities.CurrentSystemOemEncoding.EncodingName, "Never", false);
@@ -462,6 +467,7 @@ namespace Microsoft.Build.UnitTests
 
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void InvalidWorkingDirectorySet()
         {
             Exec exec = PrepareExec("echo [%cd%]");
@@ -761,6 +767,7 @@ namespace Microsoft.Build.UnitTests
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/623")]
 #else
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
 #endif
         public void CanEncodeTest()
         {

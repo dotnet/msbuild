@@ -458,7 +458,11 @@ namespace Microsoft.Build.BackEnd
                         }
 #endif
                     }
-                    catch (IOException e)
+                    catch (IOException
+#if FEATURE_NAMED_PIPES_FULL_DUPLEX
+                    e
+#endif
+                    )
                     {
                         // We will get here when:
                         // 1. The host (OOP main node) connects to us, it immediately checks for user privileges
@@ -507,6 +511,36 @@ namespace Microsoft.Build.BackEnd
             localWritePipe.WriteLongForHandshake(GetClientHandshake());
             ChangeLinkStatus(LinkStatus.Active);
 
+            RunReadLoop(
+                new BufferedReadStream(localReadPipe),
+                localWritePipe,
+                localPacketQueue, localPacketAvailable, localTerminatePacketPump);
+
+            CommunicationsUtilities.Trace("Ending read loop");
+
+            try
+            {
+#if FEATURE_NAMED_PIPES_FULL_DUPLEX
+                if (localPipeServer.IsConnected)
+                {
+                    localPipeServer.WaitForPipeDrain();
+                    localPipeServer.Disconnect();
+                }
+#else
+                localReadPipe.Dispose();
+                localWritePipe.WaitForPipeDrain();
+                localWritePipe.Dispose();
+#endif
+            }
+            catch (Exception)
+            {
+                // We don't really care if Disconnect somehow fails, but it gives us a chance to do the right thing.
+            }
+        }
+
+        private void RunReadLoop(Stream localReadPipe, Stream localWritePipe,
+            Queue<INodePacket> localPacketQueue, AutoResetEvent localPacketAvailable, AutoResetEvent localTerminatePacketPump)
+        {
             // Ordering of the wait handles is important.  The first signalled wait handle in the array 
             // will be returned by WaitAny if multiple wait handles are signalled.  We prefer to have the
             // terminate event triggered so that we cannot get into a situation where packets are being
@@ -514,7 +548,7 @@ namespace Microsoft.Build.BackEnd
             CommunicationsUtilities.Trace("Entering read loop.");
             byte[] headerByte = new byte[5];
 #if FEATURE_APM
-            IAsyncResult result = localPipeServer.BeginRead(headerByte, 0, headerByte.Length, null, null);
+            IAsyncResult result = localReadPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
 #else
             Task<int> readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length);
 #endif
@@ -541,7 +575,7 @@ namespace Microsoft.Build.BackEnd
                             try
                             {
 #if FEATURE_APM
-                                bytesRead = localPipeServer.EndRead(result);
+                                bytesRead = localReadPipe.EndRead(result);
 #else
                                 bytesRead = readTask.Result;
 #endif
@@ -591,7 +625,7 @@ namespace Microsoft.Build.BackEnd
                             }
 
 #if FEATURE_APM
-                            result = localPipeServer.BeginRead(headerByte, 0, headerByte.Length, null, null);
+                            result = localReadPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
 #else
                             readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length);
 #endif
@@ -630,7 +664,7 @@ namespace Microsoft.Build.BackEnd
                                 packetStream.Write(BitConverter.GetBytes((int)packetStream.Length - 5), 0, 4);
 
 #if FEATURE_MEMORYSTREAM_GETBUFFER
-                                localPipeServer.Write(packetStream.GetBuffer(), 0, (int)packetStream.Length);
+                                localWritePipe.Write(packetStream.GetBuffer(), 0, (int)packetStream.Length);
 #else
                                 ArraySegment<byte> packetStreamBuffer;
                                 if (packetStream.TryGetBuffer(out packetStreamBuffer))
@@ -671,27 +705,6 @@ namespace Microsoft.Build.BackEnd
                 }
             }
             while (!exitLoop);
-
-            CommunicationsUtilities.Trace("Ending read loop");
-
-            try
-            {
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
-                if (localPipeServer.IsConnected)
-                {
-                    localPipeServer.WaitForPipeDrain();
-                    localPipeServer.Disconnect();
-                }
-#else
-                localReadPipe.Dispose();
-                localWritePipe.WaitForPipeDrain();
-                localWritePipe.Dispose();
-#endif
-            }
-            catch (Exception)
-            {
-                // We don't really care if Disconnect somehow fails, but it gives us a chance to do the right thing.
-            }
         }
 
         #endregion

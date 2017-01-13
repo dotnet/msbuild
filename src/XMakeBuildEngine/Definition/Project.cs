@@ -210,6 +210,9 @@ namespace Microsoft.Build.Evaluation
         /// Project will be added to the specified project collection when it is named.
         /// </summary>
         /// <param name="globalProperties">Global properties to evaluate with. May be null in which case the containing project collection's global properties will be used.</param>
+        /// <param name="toolsVersion">Tools version to evaluate with. May be null</param>
+        /// <param name="projectCollection">The <see cref="ProjectCollection"/> the project is added to.</param>
+        /// <param name="newProjectFileOptions">The <see cref="NewProjectFileOptions"/> to use for the new project.</param>
         public Project(IDictionary<string, string> globalProperties, string toolsVersion, ProjectCollection projectCollection, NewProjectFileOptions newProjectFileOptions)
             : this(ProjectRootElement.Create(projectCollection, newProjectFileOptions), globalProperties, toolsVersion, projectCollection)
         {

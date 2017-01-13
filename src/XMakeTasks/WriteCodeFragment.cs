@@ -303,7 +303,7 @@ namespace Microsoft.Build.Tasks
 
                     foreach (ITaskItem attributeItem in AssemblyAttributes)
                     {
-                        string args = GetAttributeArguments(attributeItem, "=");
+                        string args = GetAttributeArguments(attributeItem, "=", QuoteSnippetStringCSharp);
                         if (args == null) return null;
 
                         code.AppendLine(string.Format($"[assembly: {attributeItem.ItemSpec}({args})]"));
@@ -313,6 +313,7 @@ namespace Microsoft.Build.Tasks
                     break;
                 case "visual basic":
                 case "visualbasic":
+                case "vb":
                     if (AssemblyAttributes == null) return string.Empty;
 
                     extension = "vb";
@@ -326,7 +327,7 @@ namespace Microsoft.Build.Tasks
 
                     foreach (ITaskItem attributeItem in AssemblyAttributes)
                     {
-                        string args = GetAttributeArguments(attributeItem, ":=");
+                        string args = GetAttributeArguments(attributeItem, ":=", QuoteSnippetStringVisualBasic);
                         if (args == null) return null;
 
                         code.AppendLine(string.Format($"<Assembly: {attributeItem.ItemSpec}({args})>"));
@@ -343,7 +344,7 @@ namespace Microsoft.Build.Tasks
             return haveGeneratedContent ? code.ToString() : string.Empty; 
         }
 
-        private string GetAttributeArguments(ITaskItem attributeItem, string namedArgumentString)
+        private string GetAttributeArguments(ITaskItem attributeItem, string namedArgumentString, Func<string, string> quoteString)
         {
             // Some attributes only allow positional constructor arguments, or the user may just prefer them.
             // To set those, use metadata names like "_Parameter1", "_Parameter2" etc.
@@ -357,7 +358,7 @@ namespace Microsoft.Build.Tasks
             foreach (DictionaryEntry entry in customMetadata)
             {
                 string name = (string) entry.Key;
-                string value = entry.Value is string ? $@"""{entry.Value}""" : entry.Value.ToString();
+                string value = entry.Value is string ? quoteString(entry.Value.ToString()) : entry.Value.ToString();
 
                 if (name.StartsWith("_Parameter", StringComparison.OrdinalIgnoreCase))
                 {
@@ -403,6 +404,215 @@ namespace Microsoft.Build.Tasks
             }
 
             return string.Join(", ", orderedParameters.Union(namedParameters).Where(p => !string.IsNullOrWhiteSpace(p)));
+        }
+
+        private const int MaxLineLength = 80;
+
+        // copied from Microsoft.CSharp.CSharpCodeProvider
+        private string QuoteSnippetStringCSharp(string value)
+        {
+            // If the string is short, use C style quoting (e.g "\r\n")
+            // Also do it if it is too long to fit in one line
+            // If the string contains '\0', verbatim style won't work.
+            if (value.Length < 256 || value.Length > 1500 || (value.IndexOf('\0') != -1))
+                return QuoteSnippetStringCStyle(value);
+
+            // Otherwise, use 'verbatim' style quoting (e.g. @"foo")
+            return QuoteSnippetStringVerbatimStyle(value);
+        }
+
+        // copied from Microsoft.CSharp.CSharpCodeProvider
+        private string QuoteSnippetStringCStyle(string value)
+        {
+            StringBuilder b = new StringBuilder(value.Length + 5);
+
+            b.Append("\"");
+
+            int i = 0;
+            while (i < value.Length)
+            {
+                switch (value[i])
+                {
+                    case '\r':
+                        b.Append("\\r");
+                        break;
+                    case '\t':
+                        b.Append("\\t");
+                        break;
+                    case '\"':
+                        b.Append("\\\"");
+                        break;
+                    case '\'':
+                        b.Append("\\\'");
+                        break;
+                    case '\\':
+                        b.Append("\\\\");
+                        break;
+                    case '\0':
+                        b.Append("\\0");
+                        break;
+                    case '\n':
+                        b.Append("\\n");
+                        break;
+                    case '\u2028':
+                    case '\u2029':
+                        b.Append("\\n");
+                        break;
+
+                    default:
+                        b.Append(value[i]);
+                        break;
+                }
+
+                if (i > 0 && i%MaxLineLength == 0)
+                {
+                    //
+                    // If current character is a high surrogate and the following 
+                    // character is a low surrogate, don't break them. 
+                    // Otherwise when we write the string to a file, we might lose 
+                    // the characters.
+                    // 
+                    if (Char.IsHighSurrogate(value[i])
+                        && (i < value.Length - 1)
+                        && Char.IsLowSurrogate(value[i + 1]))
+                    {
+                        b.Append(value[++i]);
+                    }
+
+                    b.Append("\" +");
+                    b.Append(Environment.NewLine);
+                    b.Append('\"');
+                }
+                ++i;
+            }
+
+            b.Append("\"");
+
+            return b.ToString();
+        }
+
+        // copied from Microsoft.CSharp.CSharpCodeProvider
+        private string QuoteSnippetStringVerbatimStyle(string value)
+        {
+            StringBuilder b = new StringBuilder(value.Length + 5);
+
+            b.Append("@\"");
+
+            for (int i = 0; i < value.Length; i++)
+            {
+                if (value[i] == '\"')
+                    b.Append("\"\"");
+                else
+                    b.Append(value[i]);
+            }
+
+            b.Append("\"");
+
+            return b.ToString();
+        }
+
+        // copied from Microsoft.VisualBasic.VBCodeProvider
+        private string QuoteSnippetStringVisualBasic(string value)
+        {
+            StringBuilder b = new StringBuilder(value.Length + 5);
+
+            bool fInDoubleQuotes = true;
+
+            b.Append("\"");
+
+            int i = 0;
+            while (i < value.Length)
+            {
+                char ch = value[i];
+                switch (ch)
+                {
+                    case '\"':
+                    // These are the inward sloping quotes used by default in some cultures like CHS. 
+                    // VBC.EXE does a mapping ANSI that results in it treating these as syntactically equivalent to a
+                    // regular double quote.
+                    case '\u201C':
+                    case '\u201D':
+                    case '\uFF02':
+                        EnsureInDoubleQuotes(ref fInDoubleQuotes, b);
+                        b.Append(ch);
+                        b.Append(ch);
+                        break;
+                    case '\r':
+                        EnsureNotInDoubleQuotes(ref fInDoubleQuotes, b);
+                        if (i < value.Length - 1 && value[i + 1] == '\n')
+                        {
+                            b.Append("&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10)");
+                            i++;
+                        }
+                        else
+                        {
+                            b.Append("&Global.Microsoft.VisualBasic.ChrW(13)");
+                        }
+                        break;
+                    case '\t':
+                        EnsureNotInDoubleQuotes(ref fInDoubleQuotes, b);
+                        b.Append("&Global.Microsoft.VisualBasic.ChrW(9)");
+                        break;
+                    case '\0':
+                        EnsureNotInDoubleQuotes(ref fInDoubleQuotes, b);
+                        b.Append("&Global.Microsoft.VisualBasic.ChrW(0)");
+                        break;
+                    case '\n':
+                    case '\u2028':
+                    case '\u2029':
+                        EnsureNotInDoubleQuotes(ref fInDoubleQuotes, b);
+                        b.Append("&Global.Microsoft.VisualBasic.ChrW(10)");
+                        break;
+                    default:
+                        EnsureInDoubleQuotes(ref fInDoubleQuotes, b);
+                        b.Append(value[i]);
+                        break;
+                }
+
+                if (i > 0 && i%MaxLineLength == 0)
+                {
+                    //
+                    // If current character is a high surrogate and the following 
+                    // character is a low surrogate, don't break them. 
+                    // Otherwise when we write the string to a file, we might lose 
+                    // the characters.
+                    // 
+                    if (Char.IsHighSurrogate(value[i])
+                        && (i < value.Length - 1)
+                        && Char.IsLowSurrogate(value[i + 1]))
+                    {
+                        b.Append(value[++i]);
+                    }
+
+                    if (fInDoubleQuotes)
+                        b.Append("\"");
+                    fInDoubleQuotes = true;
+
+                    b.Append("& _ ");
+                    b.Append(Environment.NewLine);
+                    b.Append('\"');
+                }
+                ++i;
+            }
+
+            if (fInDoubleQuotes)
+                b.Append("\"");
+
+            return b.ToString();
+        }
+
+        private void EnsureNotInDoubleQuotes(ref bool fInDoubleQuotes, StringBuilder b)
+        {
+            if (!fInDoubleQuotes) return;
+            b.Append("\"");
+            fInDoubleQuotes = false;
+        }
+
+        private void EnsureInDoubleQuotes(ref bool fInDoubleQuotes, StringBuilder b)
+        {
+            if (fInDoubleQuotes) return;
+            b.Append("&\"");
+            fInDoubleQuotes = true;
         }
     }
 }

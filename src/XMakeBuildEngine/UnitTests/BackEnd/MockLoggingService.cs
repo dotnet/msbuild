@@ -148,6 +148,24 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// List of warnings to treat as errors.
+        /// </summary>
+        public ISet<string> WarningsAsErrors
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// List of warnings to treat as low importance messages.
+        /// </summary>
+        public ISet<string> WarningsAsMessages
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Is the logging service on a remote node, this is used to determine if properties need to be serialized
         /// </summary>
         public bool RunningOnRemoteNode
@@ -463,6 +481,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <param name="success">Whether the task was successful or not.</param>
         public void LogTaskFinished(BuildEventContext taskBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, bool success)
         {
+        }
+
+        /// <summary>
+        /// Logs a telemetry event.
+        /// </summary>
+        /// <param name="buildEventContext">The task's build event context</param>
+        /// <param name="eventName">The event name.</param>
+        /// <param name="properties">The list of properties associated with the event.</param>
+        public void LogTelemetry(BuildEventContext buildEventContext, string eventName, IDictionary<string, string> properties)
+        {
+        }
+
+        public bool HasBuildSubmissionLoggedErrors(int submissionId)
+        {
+            return false;
         }
 
         #endregion

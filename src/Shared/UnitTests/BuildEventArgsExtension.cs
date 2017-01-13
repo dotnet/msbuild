@@ -58,13 +58,16 @@ namespace Microsoft.Build.UnitTests
                 return false;
             }
 
-            // Just in case we're matching chk against ret or vice versa, make sure the message still registers as the same
-            string fixedArgsMessage = args.Message.Replace("\r\nThis is an unhandled exception from a task -- PLEASE OPEN A BUG AGAINST THE TASK OWNER.", String.Empty);
-            string fixedOtherMessage = other.Message.Replace("\r\nThis is an unhandled exception from a task -- PLEASE OPEN A BUG AGAINST THE TASK OWNER.", String.Empty);
-
-            if (!String.Equals(fixedArgsMessage, fixedOtherMessage, StringComparison.OrdinalIgnoreCase))
+            if (!String.IsNullOrEmpty(args.Message))
             {
-                return false;
+                // Just in case we're matching chk against ret or vice versa, make sure the message still registers as the same
+                string fixedArgsMessage = args.Message.Replace("\r\nThis is an unhandled exception from a task -- PLEASE OPEN A BUG AGAINST THE TASK OWNER.", String.Empty);
+                string fixedOtherMessage = other.Message.Replace("\r\nThis is an unhandled exception from a task -- PLEASE OPEN A BUG AGAINST THE TASK OWNER.", String.Empty);
+
+                if (!String.Equals(fixedArgsMessage, fixedOtherMessage, StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
             }
 
             if (!String.Equals(args.SenderName, other.SenderName, StringComparison.OrdinalIgnoreCase))

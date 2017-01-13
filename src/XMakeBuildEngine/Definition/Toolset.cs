@@ -108,11 +108,13 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private const string Dev10LightSwitchInstallKeyRegistryPath = @"Software\Microsoft\DevDiv\vs\Servicing\10.0\vslscore";
 
+#if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Null if it hasn't been figured out yet; true if (some variation of) Visual Studio 2010 is installed on 
         /// the current machine, false otherwise. 
         /// </summary>
         private static bool? s_dev10IsInstalled = null;
+#endif
 
         /// <summary>
         /// Name of the tools version
@@ -297,7 +299,12 @@ namespace Microsoft.Build.Evaluation
         /// Properties that should be associated with the Toolset.
         /// May be null, in which case an empty property group will be used.
         /// </param>
-        /// <param name="importSearchPathsTable">Map of parameter name to <see cref="PropertyWithFallbackPaths"/> for use during Import.</param>
+        /// <param name="environmentProperties">A <see cref="PropertyDictionary{ProjectPropertyInstance}"/> containing the environment properties.</param>
+        /// <param name="globalProperties">A <see cref="PropertyDictionary{ProjectPropertyInstance}"/> containing the global properties.</param>
+        /// <param name="subToolsets">A list of <see cref="SubToolset"/> to use.</param>
+        /// <param name="msbuildOverrideTasksPath">The override tasks path.</param>
+        /// <param name="defaultOverrideToolsVersion">ToolsVersion to use as the default ToolsVersion for this version of MSBuild.</param>
+        /// <param name="importSearchPathsTable">Map of parameter name to property search paths for use during Import.</param>
         internal Toolset(string toolsVersion, string toolsPath, PropertyDictionary<ProjectPropertyInstance> buildProperties, PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, IDictionary<string, SubToolset> subToolsets, string msbuildOverrideTasksPath, string defaultOverrideToolsVersion, Dictionary<string, ProjectImportPathMatch> importSearchPathsTable = null)
             : this(toolsVersion, toolsPath, environmentProperties, globalProperties, msbuildOverrideTasksPath, defaultOverrideToolsVersion)
         {
@@ -1075,7 +1082,7 @@ namespace Microsoft.Build.Evaluation
                 catch (XmlException e)
                 {
                     // handle XML errors in the default tasks file
-                    ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(false, new BuildEventFileInfo(e), taskFileError, e.Message);
+                    ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(false, new BuildEventFileInfo(defaultTasksFile, e), taskFileError, e.Message);
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {

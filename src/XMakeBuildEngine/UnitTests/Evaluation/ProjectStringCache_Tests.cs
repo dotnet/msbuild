@@ -26,6 +26,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void ContentIsSameAcrossInstances()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -91,6 +92,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void ContentCanBeModified()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -176,6 +178,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void RemovingFilesRemovesEntries()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"

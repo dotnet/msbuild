@@ -692,8 +692,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                   <configSections>
                     <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build"" />
                   </configSections>
-                  <msbuildToolsets default=""14.1"">
-                    <toolset toolsVersion=""14.1"">
+                  <msbuildToolsets default=""" + toolsVersionToUse + @""">
+                    <toolset toolsVersion=""" + toolsVersionToUse + @""">
                       <property name=""MSBuildToolsPath"" value="".""/>
                       <property name=""MSBuildBinPath"" value="".""/>
                       <projectImportSearchPaths>
@@ -727,6 +727,65 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 var project = projectCollection.LoadProject(mainProjectPath);
                 Assert.True(project.Build("Main"));
                 logger.AssertLogContains("Running FromExtn");
+            }
+            finally
+            {
+                FileUtilities.DeleteNoThrow(mainProjectPath);
+                FileUtilities.DeleteDirectoryNoThrow(extnDir1, true);
+            }
+        }
+
+        [Fact]
+        public void FallbackImportWithFileNotFoundWhenPropertyNotDefined()
+        {
+            // Import something from $(UndefinedProperty)
+            string mainTargetsFileContent = @"
+               <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                   <Import Project='$(UndefinedProperty)\filenotfound.props' />
+                   <Target Name='Main' DependsOnTargets='FromExtn' />
+               </Project>";
+
+            string extnDir1 = null;
+            string mainProjectPath = null;
+
+            try
+            {
+                // The path to "extensions1" fallback should exist, but the file doens't need to
+                extnDir1 = GetNewExtensionsPathAndCreateFile("extensions1", Path.Combine("file.props"), string.Empty);
+
+                // Implement fallback for UndefinedProperty, but don't define the property.
+                var configFileContents = @"
+                <configuration>
+                  <configSections>
+                    <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"" />
+                  </configSections>
+                  <msbuildToolsets default=""" + toolsVersionToUse + @""">
+                    <toolset toolsVersion=""" + toolsVersionToUse + @""">
+                      <property name=""MSBuildToolsPath"" value="".""/>
+                      <property name=""MSBuildBinPath"" value="".""/>
+                      <projectImportSearchPaths>
+                        <searchPaths os=""" + NativeMethodsShared.GetOSNameForExtensionsPath() + @""">
+                          <property name=""UndefinedProperty"" value=""" + extnDir1 + @""" />
+                        </searchPaths>
+                      </projectImportSearchPaths>
+                     </toolset>
+                  </msbuildToolsets>
+                </configuration>";
+
+                mainProjectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("main.proj", mainTargetsFileContent);
+
+                ToolsetConfigurationReaderTestHelper.WriteConfigFile(configFileContents);
+                var reader = GetStandardConfigurationReader();
+
+                var projectCollection = new ProjectCollection(new Dictionary<string, string> { ["FallbackExpandDir1"] = extnDir1 });
+
+                projectCollection.ResetToolsetsForTests(reader);
+                var logger = new MockLogger();
+                projectCollection.RegisterLogger(logger);
+
+                Assert.Throws<InvalidProjectFileException>(() => projectCollection.LoadProject(mainProjectPath));
+                logger.AssertLogContains(@"MSB4226: The imported project """ + Path.Combine("$(UndefinedProperty)", "filenotfound.props")
+                                            + @""" was not found. Also, tried to find");
             }
             finally
             {

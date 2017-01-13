@@ -12,7 +12,7 @@ using System.Linq;
 using Microsoft.Build.Shared;
 using System.Text;
 using System.Runtime.Versioning;
-#if !FEATURE_ASSEMBLY_LOADFROM
+#if !FEATURE_ASSEMBLY_LOADFROM || MONO
 using System.Reflection.PortableExecutable;
 using System.Reflection.Metadata;
 #endif
@@ -32,12 +32,13 @@ namespace Microsoft.Build.Tasks
         private IMetaDataDispenser _metadataDispenser = null;
         private IMetaDataAssemblyImport _assemblyImport = null;
         private static Guid s_importerGuid = new Guid(((GuidAttribute)Attribute.GetCustomAttribute(typeof(IMetaDataImport), typeof(GuidAttribute), false)).Value);
+        private readonly Assembly _assembly;
 #endif
         private string _sourceFile;
         private FrameworkName _frameworkName;
+#if FEATURE_ASSEMBLY_LOADFROM && !MONO
         private static string s_targetFrameworkAttribute = "System.Runtime.Versioning.TargetFrameworkAttribute";
-        private readonly Assembly _assembly;
-
+#endif
         // Borrowed from genman.
         private const int GENMAN_STRING_BUF_SIZE = 1024;
         private const int GENMAN_LOCALE_BUF_SIZE = 64;
@@ -456,6 +457,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>The CLR runtime version or empty if the path does not exist.</returns>
         internal static string GetRuntimeVersion(string path)
         {
+#if FEATURE_MSCOREE
             if (NativeMethodsShared.IsWindows)
             {
                 StringBuilder runtimeVersion = null;
@@ -488,6 +490,9 @@ namespace Microsoft.Build.Tasks
             {
                 return ManagedRuntimeVersionReader.GetRuntimeVersion(path);
             }
+#else
+                return ManagedRuntimeVersionReader.GetRuntimeVersion(path);
+#endif
         }
 
 

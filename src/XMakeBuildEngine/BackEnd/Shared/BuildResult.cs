@@ -640,6 +640,15 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Sets the overall result.
+        /// </summary>
+        /// <param name="overallResult"><code>true</code> if the result is success, otherwise <code>false</code>.</param>
+        internal void SetOverallResult(bool overallResult)
+        {
+            _baseOverallResult = false;
+        }
+
+        /// <summary>
         /// Creates the target result dictionary.
         /// </summary>
         private ConcurrentDictionary<string, TargetResult> CreateTargetResultDictionary(int capacity)

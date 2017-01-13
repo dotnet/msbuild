@@ -10,6 +10,7 @@ using System;
 using System.Xml;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
 
@@ -46,7 +47,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Valid attributes on import element
         /// </summary>
-        private readonly static string[] s_validAttributesOnImport = new string[] { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.project };
+        private readonly static string[] s_validAttributesOnImport = new string[] { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.project, XMakeAttributes.sdk };
 
         /// <summary>
         /// Valid attributes on usingtask element
@@ -185,6 +186,7 @@ namespace Microsoft.Build.Construction
             // The element wasn't available to the ProjectRootElement constructor,
             // so we have to set it now
             _project.SetProjectRootElementFromParser(element, _project);
+
 
             ParseProjectRootElementChildren(element);
         }
@@ -393,11 +395,11 @@ namespace Microsoft.Build.Construction
             return item;
         }
 
-        internal static void CheckMetadataAsAttributeName(string name, out bool isKnownAttribute, out bool isValidMetadataNameInAttribute)
+        internal static void CheckMetadataAsAttributeName(string name, out bool isReservedAttributeName, out bool isValidMetadataNameInAttribute)
         {
             if (!XmlUtilities.IsValidElementName(name))
             {
-                isKnownAttribute = false;
+                isReservedAttributeName = false;
                 isValidMetadataNameInAttribute = false;
                 return;
             }
@@ -408,13 +410,13 @@ namespace Microsoft.Build.Construction
                 //  error instead of unexpected behavior
                 if (name == s_knownAttributesOnItem[i])
                 {
-                    isKnownAttribute = true;
+                    isReservedAttributeName = true;
                     isValidMetadataNameInAttribute = false;
                     return;
                 }
                 else if (name.Equals(s_knownAttributesOnItem[i], StringComparison.OrdinalIgnoreCase))
                 {
-                    isKnownAttribute = false;
+                    isReservedAttributeName = false;
                     isValidMetadataNameInAttribute = false;
                     return;
                 }
@@ -423,7 +425,7 @@ namespace Microsoft.Build.Construction
             //  Reserve attributes starting with underscores in case we need to add more built-in attributes later
             if (name[0] == '_')
             {
-                isKnownAttribute = false;
+                isReservedAttributeName = false;
                 isValidMetadataNameInAttribute = false;
                 return;
             }
@@ -431,12 +433,12 @@ namespace Microsoft.Build.Construction
             if (FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name) ||
                 XMakeElements.IllegalItemPropertyNames[name] != null)
             {
-                isKnownAttribute = false;
+                isReservedAttributeName = false;
                 isValidMetadataNameInAttribute = false;
                 return;
             }
 
-            isKnownAttribute = false;
+            isReservedAttributeName = false;
             isValidMetadataNameInAttribute = true;
         }
 

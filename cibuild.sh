@@ -8,7 +8,9 @@ usage()
     echo "  --scope <scope>                Scope of the build (Compile / Test)"
     echo "  --target <target>              CoreCLR or Mono (default: CoreCLR)"
     echo "  --host <host>                  CoreCLR or Mono (default: CoreCLR)"
-    echo "  --bootstrap-only               Do not rebuild msbuild with local binaries"
+    echo "  --bootstrap-only               Build and bootstrap MSBuild but do not build again with those binaries"
+    echo "  --build-only                   Only build using a downloaded copy of MSBuild but do not bootstrap"
+    echo "                                 or build again with those binaries"
 }
 
 restoreBuildTools(){
@@ -22,6 +24,10 @@ setHome()
     then
         export HOME=$HOME_DEFAULT
         mkdir -p $HOME_DEFAULT
+
+        # Use a different temp directory in CI so that hopefully things are a little more stable
+        export TMPDIR=$TEMP_DEFAULT
+        mkdir -p $TEMP_DEFAULT
     fi
 }
 
@@ -129,23 +135,19 @@ BOOTSTRAP_ONLY=false
 THIS_SCRIPT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PACKAGES_DIR="$THIS_SCRIPT_PATH/packages"
 TOOLS_DIR="$THIS_SCRIPT_PATH/Tools"
-MSBUILD_DOWNLOAD_URL="https://github.com/Microsoft/msbuild/releases/download/mono-hosted-msbuild-v0.2/mono_msbuild_bootstrap_5e01f07.zip"
+MSBUILD_DOWNLOAD_URL="https://github.com/Microsoft/msbuild/releases/download/mono-hosted-msbuild-v0.03/mono_msbuild_d25dd923839404bd64cc63f420e75acf96fc75c4.zip"
 MSBUILD_ZIP="$PACKAGES_DIR/msbuild.zip"
 HOME_DEFAULT="$WORKSPACE/msbuild-CI-home"
-
-BOOTSTRAP_BUILD_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_bootstrap_build.log"
-LOCAL_BUILD_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_local_build.log"
-MOVE_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_move_bootstrap.log"
+TEMP_DEFAULT="$WORKSPACE/tmp"
 
 PROJECT_FILE_ARG='"'"$THIS_SCRIPT_PATH/build.proj"'"'
-BOOTSTRAP_FILE_ARG='"'"$THIS_SCRIPT_PATH/BootStrapMSBuild.proj"'"'
-BOOTSTRAPPED_RUNTIME_HOST='"'"$THIS_SCRIPT_PATH/bin/Bootstrap/dotnet"'"'
-MSBUILD_BOOTSTRAPPED_EXE='"'"$THIS_SCRIPT_PATH/bin/Bootstrap/MSBuild.dll"'"'
+BOOTSTRAP_FILE_ARG='"'"$THIS_SCRIPT_PATH/targets/BootStrapMSBuild.proj"'"'
+BOOTSTRAPPED_RUNTIME_HOST='"'"$THIS_SCRIPT_PATH/bin/Bootstrap-NetCore/dotnet"'"'
 
 # Default msbuild arguments
 TARGET_ARG="Build"
 EXTRA_ARGS=""
-
+CSC_ARGS=""
 
 #parse command line args
 while [ $# -gt 0 ]
@@ -170,6 +172,11 @@ do
         --host)
         host=$2
         shift 2
+        ;;
+
+        --build-only)
+        BUILD_ONLY=true
+        shift 1
         ;;
 
         --bootstrap-only)
@@ -215,16 +222,27 @@ if [ "$target" = "" ]; then
     target=CoreCLR
 fi
 
+if [ "$host" = "Mono" ]; then
+    # check if mono is available
+    echo "debug: which mono: `which mono`"
+    echo "MONO_BIN_DIR: $MONO_BIN_DIR"
+    if [ "`which mono`" = "" -a "$MONO_BIN_DIR" = "" ]; then
+        echo "** Error: Building with host Mono, requires Mono to be installed."
+        exit 1
+    fi
+fi
+
 case $target in
     CoreCLR)
         CONFIGURATION=Debug-NetCore
+        MSBUILD_BOOTSTRAPPED_EXE='"'"$THIS_SCRIPT_PATH/bin/Bootstrap-NetCore/MSBuild.dll"'"'
         ;;
 
     Mono)
         setMonoDir
         CONFIGURATION=Debug-MONO
-        EXTRA_ARGS="/p:CscToolExe=mcs /p:CscToolPath=$MONO_BIN_DIR"
         RUNTIME_HOST_ARGS="--debug"
+        MSBUILD_BOOTSTRAPPED_EXE='"'"$THIS_SCRIPT_PATH/bin/Bootstrap/MSBuild.dll"'"'
         ;;
     *)
         echo "Unsupported target detected: $target. Aborting."
@@ -253,6 +271,12 @@ case $host in
         setMonoDir
         RUNTIME_HOST="${MONO_BIN_DIR}mono"
         MSBUILD_EXE="$PACKAGES_DIR/msbuild/MSBuild.exe"
+        CSC_ARGS="/p:CscToolExe=csc.exe /p:CscToolPath=$PACKAGES_DIR/msbuild/ /p:DebugType=portable"
+
+        if [[ "$MONO_BIN_DIR" != "" ]]; then
+            echo "** Using mono from $RUNTIME_HOST"
+            $RUNTIME_HOST --version
+        fi
 
         downloadMSBuildForMono
         ;;
@@ -263,6 +287,10 @@ case $host in
         ;;
 esac
 
+BOOTSTRAP_BUILD_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_bootstrap_build-$host.log"
+LOCAL_BUILD_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_local_build-$host.log"
+MOVE_LOG_PATH="$THIS_SCRIPT_PATH"/"msbuild_move_bootstrap-$host.log"
+
 BUILD_MSBUILD_ARGS="$PROJECT_FILE_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURATION /p:OverrideToolHost=$RUNTIME_HOST /verbosity:minimal $EXTRA_ARGS"
 
 setHome
@@ -271,9 +299,9 @@ restoreBuildTools
 
 echo
 echo "** Rebuilding MSBuild with downloaded binaries"
-runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_EXE" "/t:Rebuild $BUILD_MSBUILD_ARGS" "$BOOTSTRAP_BUILD_LOG_PATH"
+runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_EXE" "/t:Rebuild $BUILD_MSBUILD_ARGS $CSC_ARGS" "$BOOTSTRAP_BUILD_LOG_PATH"
 
-if [[ $BOOTSTRAP_ONLY = true ]]; then
+if [[ $BUILD_ONLY = true ]]; then
     exit $?
 fi
 
@@ -282,6 +310,25 @@ echo "** Moving bootstrapped MSBuild to the bootstrap folder"
 MOVE_MSBUILD_ARGS="$BOOTSTRAP_FILE_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURATION /p:OverrideToolHost=$RUNTIME_HOST /verbosity:minimal"
 runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_EXE" "$MOVE_MSBUILD_ARGS" "$MOVE_LOG_PATH"
 
+if [[ $BOOTSTRAP_ONLY = true ]]; then
+    exit $?
+fi
+
+# Microsoft.Net.Compilers package is available now, so we can use the latest csc.exe
+if [ "$host" = "Mono" ]; then
+        CSC_EXE="$PACKAGES_DIR/microsoft.net.compilers/2.0.0-rc3-61110-06/tools/csc.exe"
+        CSC_ARGS="/p:CscToolExe=csc.exe /p:CscToolPath=`dirname $CSC_EXE` /p:DebugType=portable"
+fi
+
+# The set of warnings to suppress for now
+# warning MSB3276: Found conflicts between different versions of the same dependent assembly.
+#   - Microsoft.VisualStudio.Setup.Configuration.Interop.dll (referenced from Utilities project) references mscorlib 2.0 and thus conflicting
+#     with mscorlib 4.0
+# warning MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.
+# warning MSB3026: Could not copy "XXX" to "XXX". Beginning retry 1 in 1000ms.
+# warning AL1053: The version '1.2.3.4-foo' specified for the 'product version' is not in the normal 'major.minor.build.revision' format
+_NOWARN="MSB3276;MSB3277;MSB3026;AL1053"
+
 echo
 echo "** Rebuilding MSBuild with locally built binaries"
-runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_BOOTSTRAPPED_EXE" "/t:$TARGET_ARG $BUILD_MSBUILD_ARGS" "$LOCAL_BUILD_LOG_PATH"
+runMSBuildWith "$RUNTIME_HOST" "$RUNTIME_HOST_ARGS" "$MSBUILD_BOOTSTRAPPED_EXE" "/t:$TARGET_ARG $BUILD_MSBUILD_ARGS $CSC_ARGS /warnaserror /nowarn:\"$_NOWARN\"" "$LOCAL_BUILD_LOG_PATH"

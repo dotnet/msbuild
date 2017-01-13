@@ -184,6 +184,7 @@ namespace Microsoft.Build.Utilities
         public Microsoft.Build.Framework.IBuildEngine2 BuildEngine2 { get { throw null; } }
         public Microsoft.Build.Framework.IBuildEngine3 BuildEngine3 { get { throw null; } }
         public Microsoft.Build.Framework.IBuildEngine4 BuildEngine4 { get { throw null; } }
+        public Microsoft.Build.Framework.IBuildEngine5 BuildEngine5 { get { throw null; } }
         protected string HelpKeywordPrefix { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskHost HostObject { get { throw null; } set { } }
         public Microsoft.Build.Utilities.TaskLoggingHelper Log { get { throw null; } }
@@ -247,6 +248,7 @@ namespace Microsoft.Build.Utilities
         public bool LogMessagesFromFile(string fileName) { throw null; }
         public bool LogMessagesFromFile(string fileName, Microsoft.Build.Framework.MessageImportance messageImportance) { throw null; }
         public bool LogMessagesFromStream(System.IO.TextReader stream, Microsoft.Build.Framework.MessageImportance messageImportance) { throw null; }
+        public void LogTelemetry(string eventName, System.Collections.Generic.IDictionary<string, string> properties) { }
         public void LogWarning(string message, params object[] messageArgs) { }
         public void LogWarning(string subcategory, string warningCode, string helpKeyword, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, params object[] messageArgs) { }
         public void LogWarningFromException(System.Exception exception) { }
@@ -327,6 +329,7 @@ namespace Microsoft.Build.Utilities
         public static System.Collections.Generic.IEnumerable<string> GetPlatformsForSDK(string sdkIdentifier, System.Version sdkVersion) { throw null; }
         public static System.Collections.Generic.IEnumerable<string> GetPlatformsForSDK(string sdkIdentifier, System.Version sdkVersion, string[] diskRoots, string registryRoot) { throw null; }
         public static string GetProgramFilesReferenceAssemblyRoot() { throw null; }
+        public static string GetSDKContentFolderPath(string sdkIdentifier, string sdkVersion, string targetPlatformIdentifier, string targetPlatformMinVersion, string targetPlatformVersion, string folderName, string diskRoot=null) { throw null; }
         public static System.Collections.Generic.IList<string> GetSDKDesignTimeFolders(string sdkRoot) { throw null; }
         public static System.Collections.Generic.IList<string> GetSDKDesignTimeFolders(string sdkRoot, string targetConfiguration, string targetArchitecture) { throw null; }
         public static System.Collections.Generic.IList<string> GetSDKRedistFolders(string sdkRoot) { throw null; }

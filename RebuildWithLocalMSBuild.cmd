@@ -32,7 +32,7 @@ if %ERRORLEVEL% NEQ 0 (
 taskkill /F /IM vbcscompiler.exe
 
 set MSBUILDLOGPATH=%~dp0msbuild_move_bootstrap.log
-set MSBUILD_ARGS=/verbosity:minimal BootStrapMSbuild.proj /p:Configuration=Debug-NetCore
+set MSBUILD_ARGS=/verbosity:minimal targets\BootStrapMSbuild.proj /p:Configuration=Debug-NetCore
 
 echo.
 echo ** Moving bootstrapped MSBuild to the bootstrap folder
@@ -41,7 +41,7 @@ call "%~dp0build.cmd"
 set MSBUILD_ARGS=
 
 if %ERRORLEVEL% NEQ 0 (
-	echo.
+    echo.
     echo build.cmd with bootstrapped MSBuild failed with errorlevel %ERRORLEVEL% 1>&2
     goto :error
 )

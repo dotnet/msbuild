@@ -339,6 +339,7 @@ namespace Microsoft.Build.Utilities
         public Microsoft.Build.Framework.IBuildEngine2 BuildEngine2 { get { throw null; } }
         public Microsoft.Build.Framework.IBuildEngine3 BuildEngine3 { get { throw null; } }
         public Microsoft.Build.Framework.IBuildEngine4 BuildEngine4 { get { throw null; } }
+        public Microsoft.Build.Framework.IBuildEngine5 BuildEngine5 { get { throw null; } }
         protected string HelpKeywordPrefix { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskHost HostObject { get { throw null; } set { } }
         public Microsoft.Build.Utilities.TaskLoggingHelper Log { get { throw null; } }
@@ -405,6 +406,7 @@ namespace Microsoft.Build.Utilities
         public bool LogMessagesFromFile(string fileName) { throw null; }
         public bool LogMessagesFromFile(string fileName, Microsoft.Build.Framework.MessageImportance messageImportance) { throw null; }
         public bool LogMessagesFromStream(System.IO.TextReader stream, Microsoft.Build.Framework.MessageImportance messageImportance) { throw null; }
+        public void LogTelemetry(string eventName, System.Collections.Generic.IDictionary<string, string> properties) { }
         public void LogWarning(string message, params object[] messageArgs) { }
         public void LogWarning(string subcategory, string warningCode, string helpKeyword, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, params object[] messageArgs) { }
         public void LogWarningFromException(System.Exception exception) { }
@@ -487,6 +489,7 @@ namespace Microsoft.Build.Utilities
         public static System.Collections.Generic.IEnumerable<string> GetPlatformsForSDK(string sdkIdentifier, System.Version sdkVersion) { throw null; }
         public static System.Collections.Generic.IEnumerable<string> GetPlatformsForSDK(string sdkIdentifier, System.Version sdkVersion, string[] diskRoots, string registryRoot) { throw null; }
         public static string GetProgramFilesReferenceAssemblyRoot() { throw null; }
+        public static string GetSDKContentFolderPath(string sdkIdentifier, string sdkVersion, string targetPlatformIdentifier, string targetPlatformMinVersion, string targetPlatformVersion, string folderName, string diskRoot=null) { throw null; }
         public static System.Collections.Generic.IList<string> GetSDKDesignTimeFolders(string sdkRoot) { throw null; }
         public static System.Collections.Generic.IList<string> GetSDKDesignTimeFolders(string sdkRoot, string targetConfiguration, string targetArchitecture) { throw null; }
         public static System.Collections.Generic.IList<string> GetSDKRedistFolders(string sdkRoot) { throw null; }
@@ -568,5 +571,70 @@ namespace Microsoft.Build.Utilities
         Version140 = 3,
         Version150 = 4,
         VersionLatest = 4,
+    }
+}
+namespace Microsoft.VisualStudio.Setup.Configuration
+{
+    [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
+    [System.Runtime.InteropServices.GuidAttribute("6380BCFF-41D3-4B2E-8B2E-BF8A6810C848")]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute((System.Runtime.InteropServices.ComInterfaceType)(1))]
+    [System.Runtime.InteropServices.TypeIdentifierAttribute]
+    public partial interface IEnumSetupInstances
+    {
+        void Next(int celt, Microsoft.VisualStudio.Setup.Configuration.ISetupInstance[] rgelt, out int pceltFetched);
+    }
+    [System.FlagsAttribute]
+    [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
+    [System.Runtime.InteropServices.TypeIdentifierAttribute("310100ba-5f84-4103-abe0-e8132ae862d9", "Microsoft.VisualStudio.Setup.Configuration.InstanceState")]
+    public enum InstanceState : uint
+    {
+        Complete = (uint)4294967295,
+        Local = (uint)1,
+        None = (uint)0,
+        NoRebootRequired = (uint)4,
+        Registered = (uint)2,
+    }
+    [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
+    [System.Runtime.InteropServices.GuidAttribute("42843719-DB4C-46C2-8E7C-64F1816EFD5B")]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute((System.Runtime.InteropServices.ComInterfaceType)(1))]
+    [System.Runtime.InteropServices.TypeIdentifierAttribute]
+    public partial interface ISetupConfiguration
+    {
+    }
+    [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
+    [System.Runtime.InteropServices.GuidAttribute("26AAB78C-4A60-49D6-AF3B-3C35BC93365D")]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute((System.Runtime.InteropServices.ComInterfaceType)(1))]
+    [System.Runtime.InteropServices.TypeIdentifierAttribute]
+    public partial interface ISetupConfiguration2 : Microsoft.VisualStudio.Setup.Configuration.ISetupConfiguration
+    {
+        void _VtblGap1_3() { }
+        Microsoft.VisualStudio.Setup.Configuration.IEnumSetupInstances EnumAllInstances();
+    }
+    [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
+    [System.Runtime.InteropServices.GuidAttribute("B41463C3-8866-43B5-BC33-2B0676F7F42E")]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute((System.Runtime.InteropServices.ComInterfaceType)(1))]
+    [System.Runtime.InteropServices.TypeIdentifierAttribute]
+    public partial interface ISetupInstance
+    {
+        void _VtblGap1_3() { }
+        string GetDisplayName(int lcid=0);
+        string GetInstallationPath();
+        string GetInstallationVersion();
+    }
+    [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
+    [System.Runtime.InteropServices.GuidAttribute("89143C9A-05AF-49B0-B717-72E218A2185C")]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute((System.Runtime.InteropServices.ComInterfaceType)(1))]
+    [System.Runtime.InteropServices.TypeIdentifierAttribute]
+    public partial interface ISetupInstance2 : Microsoft.VisualStudio.Setup.Configuration.ISetupInstance
+    {
+        void _VtblGap1_8() { }
+        Microsoft.VisualStudio.Setup.Configuration.InstanceState GetState();
+    }
+    [System.Runtime.CompilerServices.CompilerGeneratedAttribute]
+    [System.Runtime.InteropServices.CoClassAttribute(typeof(object))]
+    [System.Runtime.InteropServices.GuidAttribute("42843719-DB4C-46C2-8E7C-64F1816EFD5B")]
+    [System.Runtime.InteropServices.TypeIdentifierAttribute]
+    public partial interface SetupConfiguration : Microsoft.VisualStudio.Setup.Configuration.ISetupConfiguration, Microsoft.VisualStudio.Setup.Configuration.ISetupConfiguration2
+    {
     }
 }

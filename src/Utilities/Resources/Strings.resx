@@ -216,19 +216,19 @@
     <value xml:space="preserve">Tracking log {0} is not available.</value>
   </data>
   <data name="Tracking_SourceWillBeCompiledAsNoTrackingLog">
-    <value xml:space="preserve">{0} will be compiled as the tracking log is not available.</value>
+    <value xml:space="preserve">{0} will be compiled because the tracking log is not available.</value>
   </data>
   <data name="Tracking_SourceNotInTrackingLog">
-    <value xml:space="preserve">{0} will be compiled as it was not found in the tracking log.</value>
+    <value xml:space="preserve">{0} will be compiled because it was not found in the tracking log.</value>
   </data>
   <data name="Tracking_SourceOutputsNotAvailable">
-    <value xml:space="preserve">{0} will be compiled as not all outputs are available.</value>
+    <value xml:space="preserve">{0} will be compiled because not all outputs are available.</value>
   </data>
   <data name="Tracking_SourceWillBeCompiledMissingDependency">
-    <value xml:space="preserve">{0} will be compiled as dependency {1} was missing.</value>
+    <value xml:space="preserve">{0} will be compiled because dependency {1} was missing.</value>
   </data>
   <data name="Tracking_SourceWillBeCompiledDependencyWasModifiedAt">
-    <value xml:space="preserve">{0} will be compiled as {1} was modified at {2}.</value>
+    <value xml:space="preserve">{0} will be compiled because {1} was modified at {2}.</value>
   </data>
   <data name="Tracking_SourceWillBeCompiled">
     <value xml:space="preserve">{0} will be compiled.</value>
@@ -243,7 +243,7 @@
     <value xml:space="preserve">{0} does not exist; source compilation required.</value>
   </data>
   <data name="Tracking_SourceWillBeCompiledOutputDoesNotExist">
-    <value xml:space="preserve">{0} will be compiled as output {1} does not exist.</value>
+    <value xml:space="preserve">{0} will be compiled because output {1} does not exist.</value>
   </data>
   <data name="Tracking_ReadTrackingLogs">
     <value xml:space="preserve">Read Tracking Logs:</value>

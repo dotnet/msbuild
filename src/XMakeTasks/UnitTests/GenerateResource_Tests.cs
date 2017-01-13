@@ -271,6 +271,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void ForceOutOfDate()
         {
             string resxFile = Utilities.WriteTestResX(false, null, null);
@@ -297,7 +298,14 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
 
                 DateTime time = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
+
                 System.Threading.Thread.Sleep(200);
+                if (NativeMethodsShared.IsOSX)
+                {
+                    // Must be > 1 sec for HFS+ timestamp granularity
+                    System.Threading.Thread.Sleep(1100);
+                }
+
                 File.SetLastWriteTime(resxFile, DateTime.Now);
 
                 Utilities.ExecuteTask(t2);
@@ -321,8 +329,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Force out-of-date with ShouldRebuildResgenOutputFile on the linked file
         /// </summary>
+#if FEATURE_LINKED_RESOURCES
         [Fact]
-        [Trait("Category", "netcore-osx-failing")]
+#else
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1247")]
+#endif
         public void ForceOutOfDateLinked()
         {
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
@@ -377,7 +388,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         ///  Force partially out-of-date: should build only the out of date inputs
         /// </summary>
         [Fact]
-        [Trait("Category", "netcore-osx-failing")]
         public void ForceSomeOutOfDate()
         {
             string resxFile = null;
@@ -405,7 +415,15 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 // Get current write times of outputs
                 DateTime time = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
                 DateTime time2 = File.GetLastWriteTime(t.OutputResources[1].ItemSpec);
+
                 System.Threading.Thread.Sleep(200);
+                if (!NativeMethodsShared.IsWindows)
+                {
+                    // Must be > 1 sec on some file systems for proper timestamp granularity
+                    // TODO: Implement an interface for fetching deterministic timestamps rather than relying on the file
+                    System.Threading.Thread.Sleep(1000);
+                }
+
                 // Touch one input
                 File.SetLastWriteTime(resxFile, DateTime.Now);
 
@@ -414,11 +432,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 // Check only one output was updated
                 Assert.True(DateTime.Compare(File.GetLastWriteTime(t2.OutputResources[0].ItemSpec), time) > 0);
 
-#if FEATURE_BINARY_SERIALIZATION
                 Assert.Equal(0, DateTime.Compare(File.GetLastWriteTime(t2.OutputResources[1].ItemSpec), time2));
-#else
-                Assert.Equal(1, DateTime.Compare(File.GetLastWriteTime(t2.OutputResources[1].ItemSpec), time2));
-#endif
 
                 // Although only one file was updated, both should be in OutputResources and FilesWritten
                 Assert.Equal(t2.OutputResources[0].ItemSpec, t.OutputResources[0].ItemSpec);
@@ -439,10 +453,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Allow ShouldRebuildResgenOutputFile to return "false" since nothing's out of date, including linked file
         /// </summary>
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_RESX_RESOURCE_READER
         [Fact]
 #else
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1247")]
 #endif
         public void AllowLinkedNoGenerate()
         {
@@ -495,11 +509,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Allow the task to skip processing based on having nothing out of date
         /// </summary>
-#if FEATURE_BINARY_SERIALIZATION
         [Fact]
-#else
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
-#endif
         public void NothingOutOfDate()
         {
             string resxFile = null;
@@ -525,7 +535,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.Equal(t.OutputResources[1].ItemSpec, resourcesFile2);
                 Assert.Equal(t.FilesWritten[1].ItemSpec, resourcesFile2);
 
+#if FEATURE_BINARY_SERIALIZATION
                 Utilities.AssertStateFileWasWritten(t);
+#endif
 
                 // Repeat, and it should do nothing as they are up to date
                 GenerateResource t2 = Utilities.CreateTask();
@@ -544,7 +556,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.Equal(t2.OutputResources[1].ItemSpec, resourcesFile2);
                 Assert.Equal(t2.FilesWritten[1].ItemSpec, resourcesFile2);
 
+#if FEATURE_BINARY_SERIALIZATION
                 Utilities.AssertStateFileWasWritten(t2);
+#endif
 
                 Assert.True(time.Equals(File.GetLastWriteTime(t2.OutputResources[0].ItemSpec)));
                 Assert.True(time2.Equals(File.GetLastWriteTime(t2.OutputResources[1].ItemSpec)));
@@ -563,11 +577,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// otherwise up to date
         /// </summary>
         /// <remarks>System dll is not locked because it forces a new app domain</remarks>
-#if FEATURE_BINARY_SERIALIZATION
         [Fact]
-#else
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
-#endif
         public void NothingOutOfDateExceptReference()
         {
             string resxFile = null;
@@ -601,6 +611,14 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 t3.Sources = new ITaskItem[] { new TaskItem(resxFile) };
                 t3.References = new ITaskItem[] { new TaskItem(systemDll) };
                 t3.StateFile = new TaskItem(t.StateFile);
+
+                if (!NativeMethodsShared.IsWindows)
+                {
+                    // Must be > 1 sec on some file systems for proper timestamp granularity
+                    // TODO: Implement an interface for fetching deterministic timestamps rather than relying on the file
+                    System.Threading.Thread.Sleep(1100);
+                }
+
                 Utilities.ExecuteTask(t3);
                 Assert.True(DateTime.Compare(File.GetLastWriteTime(t3.OutputResources[0].ItemSpec), time) > 0);
                 resourcesFile = t3.OutputResources[0].ItemSpec;
@@ -616,11 +634,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         /// If an additional input is out of date, resources should be regenerated.
         /// </summary>
-#if FEATURE_BINARY_SERIALIZATION
         [Fact]
-#else
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
-#endif
         public void NothingOutOfDateExceptAdditionalInput()
         {
             string resxFile = null;
@@ -709,50 +723,47 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Round trip from resx to resources to resx with the same blobs
         /// </summary>
+#if FEATURE_RESX_RESOURCE_READER
         [Fact]
+#else
+        [Fact(Skip = "ResGen.exe not supported on.NET Core MSBuild")]
+#endif
         public void ResX2ResX()
         {
-            try
-            {
-                string resourcesFile = Utilities.CreateBasicResourcesFile(true);
+            string resourcesFile = Utilities.CreateBasicResourcesFile(true);
 
-                // Step 1: create a resx file directly from the resources, to get a framework generated resx
-                GenerateResource t = Utilities.CreateTask();
-                t.Sources = new ITaskItem[] { new TaskItem(resourcesFile) };
-                t.OutputResources = new ITaskItem[] { new TaskItem(Path.ChangeExtension(resourcesFile, ".resx")) };
-                Utilities.ExecuteTask(t);
-                Assert.Equal(Path.GetExtension(t.FilesWritten[0].ItemSpec), ".resx");
+            // Step 1: create a resx file directly from the resources, to get a framework generated resx
+            GenerateResource t = Utilities.CreateTask();
+            t.Sources = new ITaskItem[] { new TaskItem(resourcesFile) };
+            t.OutputResources = new ITaskItem[] { new TaskItem(Path.ChangeExtension(resourcesFile, ".resx")) };
+            Utilities.ExecuteTask(t);
+            Assert.Equal(Path.GetExtension(t.FilesWritten[0].ItemSpec), ".resx");
 
-                // Step 2a: create a resources file from the resx
-                GenerateResource t2a = Utilities.CreateTask();
-                t2a.Sources = new ITaskItem[] { new TaskItem(t.FilesWritten[0].ItemSpec) };
-                t2a.OutputResources = new ITaskItem[] { new TaskItem(Path.ChangeExtension(t.FilesWritten[0].ItemSpec, ".resources")) };
-                Utilities.ExecuteTask(t2a);
-                Assert.Equal(Path.GetExtension(t2a.FilesWritten[0].ItemSpec), ".resources");
+            // Step 2a: create a resources file from the resx
+            GenerateResource t2a = Utilities.CreateTask();
+            t2a.Sources = new ITaskItem[] { new TaskItem(t.FilesWritten[0].ItemSpec) };
+            t2a.OutputResources = new ITaskItem[] { new TaskItem(Path.ChangeExtension(t.FilesWritten[0].ItemSpec, ".resources")) };
+            Utilities.ExecuteTask(t2a);
+            Assert.Equal(Path.GetExtension(t2a.FilesWritten[0].ItemSpec), ".resources");
 
-                // Step 2b: create a resx from the resources
-                GenerateResource t2b = Utilities.CreateTask();
-                t2b.Sources = new ITaskItem[] { new TaskItem(t2a.FilesWritten[0].ItemSpec) };
-                t2b.OutputResources = new ITaskItem[] { new TaskItem(Utilities.GetTempFileName(".resx")) };
-                File.Delete(t2b.OutputResources[0].ItemSpec);
-                Utilities.ExecuteTask(t2b);
-                Assert.Equal(Path.GetExtension(t2b.FilesWritten[0].ItemSpec), ".resx");
+            // Step 2b: create a resx from the resources
+            GenerateResource t2b = Utilities.CreateTask();
+            t2b.Sources = new ITaskItem[] { new TaskItem(t2a.FilesWritten[0].ItemSpec) };
+            t2b.OutputResources = new ITaskItem[] { new TaskItem(Utilities.GetTempFileName(".resx")) };
+            File.Delete(t2b.OutputResources[0].ItemSpec);
+            Utilities.ExecuteTask(t2b);
+            Assert.Equal(Path.GetExtension(t2b.FilesWritten[0].ItemSpec), ".resx");
 
-                // make sure the output resx files from each fork are the same
-                Assert.Equal(Utilities.ReadFileContent(t.OutputResources[0].ItemSpec),
-                                       Utilities.ReadFileContent(t2b.OutputResources[0].ItemSpec));
+            // make sure the output resx files from each fork are the same
+            Assert.Equal(Utilities.ReadFileContent(t.OutputResources[0].ItemSpec),
+                         Utilities.ReadFileContent(t2b.OutputResources[0].ItemSpec));
 
-                // Done, so clean up.
-                File.Delete(resourcesFile);
-                File.Delete(t.OutputResources[0].ItemSpec);
-                File.Delete(t2a.OutputResources[0].ItemSpec);
-                foreach (ITaskItem item in t2b.FilesWritten)
-                    File.Delete(item.ItemSpec);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
+            // Done, so clean up.
+            File.Delete(resourcesFile);
+            File.Delete(t.OutputResources[0].ItemSpec);
+            File.Delete(t2a.OutputResources[0].ItemSpec);
+            foreach (ITaskItem item in t2b.FilesWritten)
+                File.Delete(item.ItemSpec);
         }
 
         /// <summary>
@@ -2060,6 +2071,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 #else
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
 #endif
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void StateFileUnwritable()
         {
             GenerateResource t = Utilities.CreateTask();
@@ -2473,7 +2485,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
     public class References
     {
         [Fact]
-        [Trait("Category", "netcore-osx-failing")] // https://github.com/Microsoft/msbuild/issues/309
+        [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")] // https://github.com/Microsoft/msbuild/issues/309
+        [Trait("Category", "mono-osx-failing")] // https://github.com/Microsoft/msbuild/issues/677
         public void DontLockP2PReferenceWhenResolvingSystemTypes()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -2525,7 +2539,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             ObjectModelHelpers.BuildTempProjectFileExpectSuccess("lib1.csproj");
 
-            string p2pReference = Path.Combine(ObjectModelHelpers.TempProjectDir, @"bin\debug\lib1.dll");
+            string p2pReference = Path.Combine(ObjectModelHelpers.TempProjectDir, "bin", "debug", "lib1.dll");
             Assert.True(File.Exists(p2pReference)); // "lib1.dll doesn't exist."
 
             // -------------------------------------------------------------------------------
@@ -2651,7 +2665,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// Assembly.LoadFrom instead.
         /// </summary>
         [Fact]
-        [Trait("Category", "netcore-osx-failing")] // https://github.com/Microsoft/msbuild/issues/309
+        [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")] // https://github.com/Microsoft/msbuild/issues/309
+        [Trait("Category", "mono-osx-failing")] // https://github.com/Microsoft/msbuild/issues/677
         public void ReferencedAssemblySpecifiedUsingRelativePath()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -3352,9 +3368,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
 
             string pathToSystemDLL =
 #if FEATURE_INSTALLED_MSBUILD
-                ToolLocationHelper.GetPathToDotNetFrameworkFile("system.dll", TargetDotNetFrameworkVersion.Version45);
+                ToolLocationHelper.GetPathToDotNetFrameworkFile("System.dll", TargetDotNetFrameworkVersion.Version45);
 #else
-                Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "system.dll");
+                Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "System.dll");
 #endif
 
             File.Copy(pathToSystemDLL, tempSystemDLL);
