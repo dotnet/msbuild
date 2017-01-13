@@ -317,8 +317,12 @@ fi
 
 # Microsoft.Net.Compilers package is available now, so we can use the latest csc.exe
 if [ "$host" = "Mono" ]; then
-        CSC_EXE="$PACKAGES_DIR/microsoft.net.compilers/2.0.0-rc3-61110-06/tools/csc.exe"
-        CSC_ARGS="/p:CscToolExe=csc.exe /p:CscToolPath=`dirname $CSC_EXE` /p:DebugType=portable"
+    # The compiler includes the net46 version of System.Runtime.InteropServices.RuntimeInformation,
+    # which is compiled for Windows, breaking csc.exe. Deleting the binary fixes this problem.
+    MS_COMPILER_DIR="$PACKAGES_DIR/microsoft.net.compilers/2.0.0-rc3-61110-06/tools/"
+    rm -f $MS_COMPILER_DIR/System.Runtime.InteropServices.RuntimeInformation.dll
+
+    CSC_ARGS="/p:CscToolExe=csc.exe /p:CscToolPath=$MS_COMPILER_DIR /p:DebugType=portable"
 fi
 
 # The set of warnings to suppress for now
