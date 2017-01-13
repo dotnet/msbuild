@@ -224,9 +224,14 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
                     nonReloadingProject.Save();
                     Assert.False(nonReloadingProject.HasUnsavedChanges);
 
+                    DateTime lastWrite = new FileInfo(path).LastWriteTimeUtc;
+                    File.SetLastWriteTime(path, lastWrite + new TimeSpan(i + 1, 0, 0));
+
                     var reloadingProject = ProjectRootElement.Open(path, reloadingCache, true, null);
                     Assert.False(reloadingProject.HasUnsavedChanges);
                     Assert.Same(previousReloadingProject, reloadingProject);
+
+                    Assert.Equal(i + 1, reloadingProject.Items.Count);
 
                     var lastItemElement = reloadingProject.Items.Last();
                     Assert.Equal(newItemType, lastItemElement.ItemType);
