@@ -25,6 +25,18 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Theory]
+        [InlineData("NETStandard.Library", "1.6.2-*", "NETStandard.Library", "1.6.2-*")]
+        [InlineData("System.Text.Encodings.Web", "4.4.0-*", "System.Text.Encodings.Web", "4.4.0-*")]
+        public void ItDoesNotDropDependenciesThatDoNotHaveAMatchingVersionInTheMapping(
+            string sourcePackageName,
+            string sourceVersion,
+            string targetPackageName,
+            string targetVersion)
+        {
+            ValidatePackageMigration(sourcePackageName, sourceVersion, targetPackageName, targetVersion);
+        }
+
+        [Theory]
         [InlineData("Microsoft.AspNetCore.Antiforgery", "1.0.0", "Microsoft.AspNetCore.Antiforgery", ConstantPackageVersions.AspNetLTSPackagesVersion)]
         [InlineData("Microsoft.AspNetCore.Mvc", "1.0.0", "Microsoft.AspNetCore.Mvc", ConstantPackageVersions.AspNetLTSPackagesVersion)]
         [InlineData("Microsoft.AspNetCore.Mvc.Abstractions", "1.0.0", "Microsoft.AspNetCore.Mvc.Abstractions", ConstantPackageVersions.AspNetLTSPackagesVersion)]

@@ -291,21 +291,19 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             {
                 var possibleVersions = possibleMappings.Select(p => VersionRange.Parse(p.Key.Version));
                 var matchVersion = possibleVersions.FirstOrDefault(p => p.Satisfies(minRange));
-                if (matchVersion == null)
+                if (matchVersion != null)
                 {
-                    return null;
+                    var dependencyInfo = possibleMappings.First(c =>
+                        c.Key.Version.Equals(matchVersion.OriginalString, StringComparison.OrdinalIgnoreCase)).Value;
+
+                    if (dependencyInfo == null)
+                    {
+                        return null;
+                    }
+
+                    name = dependencyInfo.Name;
+                    version = dependencyInfo.Version;
                 }
-
-                var dependencyInfo = possibleMappings.First(c =>
-                    c.Key.Version.Equals(matchVersion.OriginalString, StringComparison.OrdinalIgnoreCase)).Value;
-
-                if (dependencyInfo == null)
-                {
-                    return null;
-                }
-
-                name = dependencyInfo.Name;
-                version = dependencyInfo.Version;
             }
             
             return new PackageDependencyInfo
