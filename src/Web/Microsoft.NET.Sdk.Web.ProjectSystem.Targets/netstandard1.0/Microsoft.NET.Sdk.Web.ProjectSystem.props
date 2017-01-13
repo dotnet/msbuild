@@ -12,9 +12,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <DefaultRemoves>$(DefaultRemoves);node_modules/**</DefaultRemoves>
-    <DefaultRemoves>$(DefaultRemoves);jspm_packages/**</DefaultRemoves>
-    <DefaultRemoves>$(DefaultRemoves);bower_components/**</DefaultRemoves>
+    <DefaultItemExcludes>$(DefaultItemExcludes);node_modules/**</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);jspm_packages/**</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);bower_components/**</DefaultItemExcludes>
 
     <OutputType>Exe</OutputType>
     <PreserveCompilationContext Condition="'$(PreserveCompilationContext)' == ''">True</PreserveCompilationContext>
@@ -22,7 +22,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <ItemGroup Condition=" '$(EnableDefaultItems)' == 'true' And '$(EnableDefaultContentItems)' == 'true' ">
     <!-- Publish everything under wwwroot, all JSON files, all web.config files and all Razor files -->
-    <Content Include="wwwroot/**;**/*.json;**/web.config;**/*.cshtml" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="wwwroot/**;**/*.json;**/web.config;**/*.cshtml" CopyToPublishDirectory="PreserveNewest" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
 
     <!-- Set CopyToPublishDirectory to Never for items under AppDesignerFolder ("Properties", by default) to avoid publishing launchSettings.json -->
     <Content Update="$(AppDesignerFolder)/**" CopyToPublishDirectory="Never" Condition="'$(AppDesignerFolder)' != ''"/>
