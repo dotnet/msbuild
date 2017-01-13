@@ -148,7 +148,12 @@ namespace Microsoft.DotNet.Cli.CommandLine
                 var arg = args[index];
 
                 bool isLongOption = arg.StartsWith("--");
-                if (isLongOption || arg.StartsWith("-"))
+                if (arg == "-?" || arg == "/?")
+                {
+                    command.ShowHelp();
+                    return 0;
+                }
+                else if (isLongOption || arg.StartsWith("-"))
                 {
                     CommandOption option;
                     var result = ParseOption(isLongOption, command, args, ref index, out option);
