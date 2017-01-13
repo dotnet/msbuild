@@ -52,4 +52,42 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Content Remove="$(DefaultRemoves)" />
   </ItemGroup>
 
+  <UsingTask TaskName="CheckForDuplicateItems" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
+  <Target Name="CheckForDuplicateItems" BeforeTargets="_CheckForInvalidConfigurationAndPlatform">
+
+    <PropertyGroup>
+      <DefaultItemsMoreInformationLink>https://aka.ms/sdkimplicititems</DefaultItemsMoreInformationLink>
+    </PropertyGroup>
+
+    <CheckForDuplicateItems
+      Items="@(Compile)"
+      ItemName="Compile"
+      DefaultItemsEnabled="$(EnableDefaultItems)"
+      DefaultItemsOfThisTypeEnabled="$(EnableDefaultCompileItems)"
+      PropertyNameToDisableDefaultItems="EnableDefaultCompileItems"
+      MoreInformationLink="$(DefaultItemsMoreInformationLink)"
+      />
+
+    <CheckForDuplicateItems
+      Items="@(EmbeddedResource)"
+      ItemName="EmbeddedResource"
+      DefaultItemsEnabled="$(EnableDefaultItems)"
+      DefaultItemsOfThisTypeEnabled="$(EnableDefaultEmbeddedResourceItems)"
+      PropertyNameToDisableDefaultItems="EnableDefaultEmbeddedResourceItems"
+      MoreInformationLink="$(DefaultItemsMoreInformationLink)"
+      />
+    
+    <!-- TODO: Do we check for duplicate content items here, or in the Web SDK? EnableDefaultContentItems isn't defined or used at all by the .NET SDK -->
+    <CheckForDuplicateItems
+      Items="@(Content)"
+      ItemName="Content"
+      DefaultItemsEnabled="$(EnableDefaultItems)"
+      DefaultItemsOfThisTypeEnabled="$(EnableDefaultContentItems)"
+      PropertyNameToDisableDefaultItems="EnableDefaultContentItems"
+      MoreInformationLink="$(DefaultItemsMoreInformationLink)"
+      />
+    
+  </Target>
+  
 </Project>

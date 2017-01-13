@@ -42,8 +42,7 @@ namespace Microsoft.NET.TestFramework
         {
             _projectFiles = new List<string>();
 
-            var files = Directory.GetFiles(base.Path, "*.*", SearchOption.AllDirectories)
-                .Where(file => !IsInBinOrObjFolder(file));
+            var files = Directory.GetFiles(base.Path, "*.*", SearchOption.AllDirectories);
 
             foreach (string file in files)
             {
