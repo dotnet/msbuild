@@ -85,7 +85,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         {
             var packageRefs = outputMSBuildProject
                 .Items
-                .Where(i => i.ItemType == "PackageReference" && i.Include != PackageConstants.SdkPackageName)
+                .Where(i => i.ItemType == "PackageReference" && i.Include != SupportedPackageVersions.SdkPackageName)
                 .ToList();
 
             foreach (var packageRef in packageRefs)
@@ -133,13 +133,16 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 "RuntimeIdentifiers",
                 projectContexts => RuntimeIdentifiers,
                 projectContexts => !projectContexts.HasRuntimes() &&
+                                   !projectContexts.HasLibraryOutput() &&
                                     projectContexts.HasBothCoreAndFullFrameworkTFMs());
 
         private AddPropertyTransform<IEnumerable<ProjectContext>> RuntimeIdentifierTransform =>
             new AddPropertyTransform<IEnumerable<ProjectContext>>(
                 "RuntimeIdentifier",
                 projectContexts => "win7-x86",
-                projectContexts => !projectContexts.HasRuntimes() && projectContexts.HasFullFrameworkTFM())
+                projectContexts => !projectContexts.HasRuntimes() &&
+                                   !projectContexts.HasLibraryOutput() && 
+                                    projectContexts.HasFullFrameworkTFM())
             .WithMSBuildCondition(projectContexts =>
                 {
                     string msBuildCondition = null;

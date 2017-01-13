@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Tools.Migrate
             return projectRootElement
                 .Items
                 .Where(i => i.ItemType == "PackageReference")
-                .First(i => i.Include == PackageConstants.SdkPackageName)
+                .First(i => i.Include == SupportedPackageVersions.SdkPackageName)
                 .GetMetadataWithName("version").Value;
         }
     }
