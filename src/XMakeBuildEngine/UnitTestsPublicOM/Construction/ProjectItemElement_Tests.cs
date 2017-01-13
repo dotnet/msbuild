@@ -227,7 +227,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     () => { ProjectRootElement.Create(XmlReader.Create(new StringReader(project))); }
                     );
             
-            Assert.Contains("Static items (items not under targets) must have one of the following operations: Include, Update, or Remove.", exception.Message);
+            Assert.Contains("Items that are outside Target elements must have one of the following operations: Include, Update, or Remove.", exception.Message);
         }
         
         /// <summary>
