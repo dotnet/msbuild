@@ -78,8 +78,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <When Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(RuntimeFrameworkVersion)' == ''">
       <PropertyGroup>
         <!-- Use the version of the framework runtime matching the target framework version-->
-        <!-- TODO: Do we upgrade to the latest patch we know about?  Ie if the TargetFrameworkVersion is 1.0, should the
-                   RuntimeFrameworkVersion be 1.0.3? -->
         <RuntimeFrameworkVersion>$(_TargetFrameworkVersionWithoutV)</RuntimeFrameworkVersion>
       
         <!-- Normalize RuntimeFrameworkVersion to 3 digits -->

@@ -33,8 +33,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PackageReference Include="NETStandard.Library" Version="$(NetStandardImplicitPackageVersion)" IsImplicitlyDefined="true"/>
   </ItemGroup>
 
-  <!-- The reference to the Microsoft.NETCore.App currently needs to match the target framework version.  So mark it as
-       ReadOnly so it won't show updates to the package in the package manager UI. -->
   <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
     <PackageReference Include="Microsoft.NETCore.App" Version="$(NetCoreAppImplicitPackageVersion)" IsImplicitlyDefined="true" />
   </ItemGroup>
