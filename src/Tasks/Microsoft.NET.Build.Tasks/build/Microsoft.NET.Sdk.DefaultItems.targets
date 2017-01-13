@@ -94,50 +94,29 @@ Copyright (c) .NET Foundation. All rights reserved.
       </PropertyGroup>
     </When>
   </Choose>
-  
-  
-  <!-- Remove the implicit PackageReference items if there are non-implicit PackageReference items with the same identity.
-       Do this during evaluation instead of adding a target because Visual Studio only uses evaluation to get the
-       PackageReferenceitems to restore. -->
-  <PropertyGroup Condition="'$(DisableImplicitFrameworkReferences)' != 'true'">
-    <_ImplicitPackageName Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">NETStandard.Library</_ImplicitPackageName>
-    <_ImplicitPackageName Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">Microsoft.NETCore.App</_ImplicitPackageName>
-  </PropertyGroup>
-  
-  <ItemGroup Condition="'$(_ImplicitPackageName)' != ''">
-    <!-- Filter PackageReference to items where the ItemSpec matches the implicit package name, and add IsImplicitlyDefined metadata
-         for items that don't have it-->
-    <_ImplicitPackageReferenceCheck
-        Include="@(PackageReference->WithMetadataValue('Identity', '$(_ImplicitPackageName)'))">
-      <IsImplicitlyDefined Condition="'%(IsImplicitlyDefined)' != 'true' ">false</IsImplicitlyDefined>
-    </_ImplicitPackageReferenceCheck>
-    
-    <!-- Now filter down to an item with just the implicit reference and another one with just the overriding reference -->
-    <_ImplicitPackageReference Include="@(_ImplicitPackageReferenceCheck->WithMetadataValue('IsImplicitlyDefined', 'true'))"/>
-    <_OverridingPackageReference Include="@(_ImplicitPackageReferenceCheck->WithMetadataValue('IsImplicitlyDefined', 'false'))"/>
 
-    <!-- Remove both the implicit and the override item, if there was both an implicit and an override item -->
-    <PackageReference Remove="@(PackageReference->WithMetadataValue('Identity', '$(_ImplicitPackageName)'))"
-                      Condition="'@(_ImplicitPackageReference)' != '' And '@(_OverridingPackageReference)' != ''"
-                      />
+  <UsingTask TaskName="CheckForImplicitPackageReferenceOverrides" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
-    <!-- Add the override item back -->
-    <PackageReference Include="@(_OverridingPackageReference)"
-                      Condition="'@(_ImplicitPackageReference)' != '' And '@(_OverridingPackageReference)' != ''" />
-  </ItemGroup>
-
-  <!-- If an implicit PackageReference was overridden, generate a warning saying that is not typically needed -->
+  <!-- Remove package references with metadata IsImplicitlyDefined = true, if there are other PackageReference items with the same identity -->
   <Target Name="CheckForImplicitPackageReferenceOverrides" BeforeTargets="_GetRestoreProjectStyle;_CheckForInvalidConfigurationAndPlatform">
     <PropertyGroup>
       <ImplicitPackageReferenceInformationLink>https://aka.ms/sdkimplicitrefs</ImplicitPackageReferenceInformationLink>
     </PropertyGroup>
 
-    <NETSdkError Condition="'@(_ImplicitPackageReference)' != '' And '@(_OverridingPackageReference)' != ''"
-                 ResourceName="PackageReferenceOverrideWarning"
-                 FormatArguments="$(_ImplicitPackageName);$(ImplicitPackageReferenceInformationLink)"
-                 WarningOnly="true"/>
-  </Target>
+    <CheckForImplicitPackageReferenceOverrides
+        PackageReferenceItems="@(PackageReference)"
+        MoreInformationLink="$(ImplicitPackageReferenceInformationLink)">
+      <Output TaskParameter="ItemsToRemove" ItemName="_PackageReferenceToRemove" />
+    </CheckForImplicitPackageReferenceOverrides>
 
+    <ItemGroup>
+      <!-- Note that the condition here is important, otherwise the Remove will operate based just on item identity and remove all items
+           that had duplicates, instead of leaving the ones without IsImplicitlyDefined set to true. -->
+      <PackageReference Remove="@(_PackageReferenceToRemove)" Condition="'%(PackageReference.IsImplicitlyDefined)' == 'true' "/>
+    </ItemGroup>
+
+  </Target>
+  
   <UsingTask TaskName="CheckForDuplicateItems" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <Target Name="CheckForDuplicateItems" BeforeTargets="_CheckForInvalidConfigurationAndPlatform">
