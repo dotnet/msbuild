@@ -84,10 +84,10 @@ namespace Microsoft.DotNet.Tools.Migrate
                 Reporter.Error.WriteLine(LocalizableStrings.MigrationFailedError);
                 return 1;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 Reporter.Error.WriteLine(LocalizableStrings.MigrationFailedError);
-                throw e;
+                throw;
             }
         }
     }
