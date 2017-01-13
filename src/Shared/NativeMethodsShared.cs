@@ -494,6 +494,10 @@ namespace Microsoft.Build.Shared
             }
         }
 
+        private static readonly object IsMonoLock = new object();
+
+        private static bool? _isMono;
+
         /// <summary>
         /// Gets a flag indicating if we are running under MONO
         /// </summary>
@@ -501,7 +505,20 @@ namespace Microsoft.Build.Shared
         {
             get
             {
-                return Type.GetType("Mono.Runtime") != null;
+                if (_isMono != null) return _isMono.Value;
+
+                lock (IsMonoLock)
+                {
+                    if (_isMono == null)
+                    {
+                        // There could be potentially expensive TypeResolve events, so cache IsMono.
+                        // Also, VS does not host Mono runtimes, so turn IsMono off when msbuild is running under VS
+                        _isMono = !BuildEnvironmentHelper.Instance.RunningInVisualStudio &&
+                                  Type.GetType("Mono.Runtime") != null;
+                    }
+                }
+
+                return _isMono.Value;
             }
         }
 

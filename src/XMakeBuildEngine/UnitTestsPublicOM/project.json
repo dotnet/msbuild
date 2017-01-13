@@ -11,7 +11,8 @@
   "frameworks": {
     "net46": {
       "dependencies": {
-        "xunit.runner.visualstudio": "2.1.0"
+        "xunit.runner.visualstudio": "2.1.0",
+        "Microsoft.VisualStudio.Setup.Configuration.Interop":  "1.2.304-preview5"
       }
     },
     "netstandard1.3": {
