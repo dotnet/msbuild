@@ -1435,9 +1435,26 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public IEnumerable<ProjectElement> GetLogicalProject()
         {
-            IEnumerable<ProjectElement> enumerable = GetLogicalProject(Xml.AllChildren);
+            foreach (ProjectRootElement import in _data.ImportClosure.Where(i => i.First?.ImplicitImportLocation == ImplicitImportLocation.Top).Select(i => i.Second))
+            {
+                foreach (ProjectElement child in GetLogicalProject(import.AllChildren))
+                {
+                    yield return child;
+                }
+            }
 
-            return enumerable;
+            foreach (ProjectElement child in GetLogicalProject(Xml.AllChildren))
+            {
+                yield return child;
+            }
+
+            foreach (ProjectRootElement import in _data.ImportClosure.Where(i => i.First?.ImplicitImportLocation == ImplicitImportLocation.Bottom).Select(i => i.Second))
+            {
+                foreach (ProjectElement child in GetLogicalProject(import.AllChildren))
+                {
+                    yield return child;
+                }
+            }
         }
 
         /// <summary>
