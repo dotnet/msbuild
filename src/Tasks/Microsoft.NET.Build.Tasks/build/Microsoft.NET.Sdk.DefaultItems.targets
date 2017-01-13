@@ -58,16 +58,45 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' And '$(NetStandardImplicitPackageVersion)' == ''">
     <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
   </PropertyGroup>
+  
+  <!--
+    Determine the NetCoreImplicitPackageVersion and RuntimeFrameworkVersion
+    
+    The RuntimeFrameworkVersion is the version that is written to the runtimeconfig.json, and is the version of the runtime
+    that the app should run on.
+    
+    If RuntimeFrameworkVersion is not set, then derive the RuntimeFrameworkVersion from the TargetFrameworkVersion,
+    and use the latest known version of Microsoft.NETCore.App as the NetCoreAppImplicitPackageVersion, unless that
+    property is already set.
+    
+    If RuntimeFrameworkVersion is set, then use that version for the NetCoreAppImplicitPackageVersion, unless
+    NetCoreAppImplicitPackageVersion is already set.
+    
+  -->
 
-  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(NetCoreAppImplicitPackageVersion)' == ''" >
+  <Choose>
+    <When Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(RuntimeFrameworkVersion)' == ''">
+      <PropertyGroup>
+        <!-- Use the version of the framework runtime matching the target framework version-->
+        <!-- TODO: Do we upgrade to the latest patch we know about?  Ie if the TargetFrameworkVersion is 1.0, should the
+                   RuntimeFrameworkVersion be 1.0.3? -->
+        <RuntimeFrameworkVersion>$(_TargetFrameworkVersionWithoutV)</RuntimeFrameworkVersion>
+      
+        <!-- Normalize RuntimeFrameworkVersion to 3 digits -->
+        <RuntimeFrameworkVersion Condition=" $(RuntimeFrameworkVersion.Split('.').Length) == 1">$(RuntimeFrameworkVersion).0.0</RuntimeFrameworkVersion>
+        <RuntimeFrameworkVersion Condition=" $(RuntimeFrameworkVersion.Split('.').Length) == 2">$(RuntimeFrameworkVersion).0</RuntimeFrameworkVersion>
 
-    <!-- For Microsoft.NETCore.App, default to using the version of the package that matches the target framework version -->
-    <NetCoreAppImplicitPackageVersion>$(_TargetFrameworkVersionWithoutV)</NetCoreAppImplicitPackageVersion>
-
-    <!-- When the TFM is .NET Core 1.0, use version 1.0.3 of the Microsoft.NETCore.App package -->
-    <NetCoreAppImplicitPackageVersion Condition=" '$(_TargetFrameworkVersionWithoutV)' == '1.0' ">1.0.3</NetCoreAppImplicitPackageVersion>
-
-  </PropertyGroup>
+        <NetCoreAppImplicitPackageVersion Condition="'$(NetCoreAppImplicitPackageVersion)' == ''">1.1.0</NetCoreAppImplicitPackageVersion>
+      </PropertyGroup>
+    </When>
+    
+    <When Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(RuntimeFrameworkVersion)' != ''">
+      <PropertyGroup>
+        <NetCoreAppImplicitPackageVersion Condition="'$(NetCoreAppImplicitPackageVersion)' == ''">$(RuntimeFrameworkVersion)</NetCoreAppImplicitPackageVersion>
+      </PropertyGroup>
+    </When>
+  </Choose>
+  
   
   <!-- Remove the implicit PackageReference items if there are non-implicit PackageReference items with the same identity.
        Do this during evaluation instead of adding a target because Visual Studio only uses evaluation to get the
