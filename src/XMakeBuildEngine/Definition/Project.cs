@@ -1435,9 +1435,30 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public IEnumerable<ProjectElement> GetLogicalProject()
         {
-            IEnumerable<ProjectElement> enumerable = GetLogicalProject(Xml.AllChildren);
+            // Implicit imports exist in the import closure but not in the project XML so the ImplicitImportLocation.Top
+            // imports need to be returned before walking the project XML
+            foreach (ProjectRootElement import in _data.ImportClosure.Where(i => i.First?.ImplicitImportLocation == ImplicitImportLocation.Top).Select(i => i.Second))
+            {
+                foreach (ProjectElement child in GetLogicalProject(import.AllChildren))
+                {
+                    yield return child;
+                }
+            }
 
-            return enumerable;
+            foreach (ProjectElement child in GetLogicalProject(Xml.AllChildren))
+            {
+                yield return child;
+            }
+
+            // Implicit imports exist in the import closure but not in the project XML so the ImplicitImportLocation.Bottom
+            // imports need to be returned before walking the project XML
+            foreach (ProjectRootElement import in _data.ImportClosure.Where(i => i.First?.ImplicitImportLocation == ImplicitImportLocation.Bottom).Select(i => i.Second))
+            {
+                foreach (ProjectElement child in GetLogicalProject(import.AllChildren))
+                {
+                    yield return child;
+                }
+            }
         }
 
         /// <summary>
