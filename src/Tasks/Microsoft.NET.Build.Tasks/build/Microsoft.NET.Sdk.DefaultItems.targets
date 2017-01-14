@@ -16,41 +16,36 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup>
-    <EnableDefaultItems Condition=" '$(EnableDefaultItems)' == '' ">true</EnableDefaultItems>
-    <EnableDefaultCompileItems Condition=" '$(EnableDefaultCompileItems)' == '' ">true</EnableDefaultCompileItems>
+   <EnableDefaultItems Condition=" '$(EnableDefaultItems)' == '' ">true</EnableDefaultItems>
+   <EnableDefaultCompileItems Condition=" '$(EnableDefaultCompileItems)' == '' ">true</EnableDefaultCompileItems>
     <EnableDefaultEmbeddedResourceItems Condition=" '$(EnableDefaultEmbeddedResourceItems)' == '' ">true</EnableDefaultEmbeddedResourceItems>
     <EnableDefaultNoneItems Condition=" '$(EnableDefaultNoneItems)' == '' ">true</EnableDefaultNoneItems>
   </PropertyGroup>
 
-  <PropertyGroup>
+  <PropertyGroup>    
+    <!-- Set DefaultItemExcludes property for items that should be excluded from the default Compile, etc items.
+         This is in the .targets because it needs to come after the final BaseOutputPath has been evaluated. -->
+    
     <!-- bin folder, by default -->
-    <DefaultRemoves>$(DefaultRemoves);$(BaseOutputPath)/**</DefaultRemoves>
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(BaseOutputPath)/**</DefaultItemExcludes>
     <!-- obj folder, by default -->
-    <DefaultRemoves>$(DefaultRemoves);$(BaseIntermediateOutputPath)/**</DefaultRemoves>
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(BaseIntermediateOutputPath)/**</DefaultItemExcludes>
 
     <!-- Various files that should generally always be ignored -->
-    <DefaultRemoves>$(DefaultRemoves);**/*.user</DefaultRemoves>
-    <DefaultRemoves>$(DefaultRemoves);**/*.*proj</DefaultRemoves>
-    <DefaultRemoves>$(DefaultRemoves);**/*.sln</DefaultRemoves>
-    <DefaultRemoves>$(DefaultRemoves);**/*.vssscc</DefaultRemoves>
+    <DefaultItemExcludes>$(DefaultItemExcludes);**/*.user</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);**/*.*proj</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);**/*.sln</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);**/*.vssscc</DefaultItemExcludes>
     
-    <!-- This pattern is supposed to ignore folders such as .git and .vs, but it would also match items included with a relative path
-         outside the project folder (for example "..\Shared\Shared.cs").  So instead of using it to remove from the Compile,
-         EmbeddedResource, and Content items in this .targets file, it will be used in the Exclude attribute for the default
-         patterns which include files in these items (which happens in Microsoft.NET.Sdk.DefaultItems.props). -->
-    <DefaultExcludesInProjectFolder>$(DefaultExcludesInProjectFolder);**/.*/**</DefaultExcludesInProjectFolder>
+    <!-- WARNING: This pattern is there to ignore folders such as .git and .vs, but it will also match items included with a
+         relative path outside the project folder (for example "..\Shared\Shared.cs").  So be sure only to apply it to items
+         that are in the project folder. -->
+    <DefaultItemExcludesInProjectFolder>$(DefaultItemExcludesInProjectFolder);**/.*/**</DefaultItemExcludesInProjectFolder>
 
     <!-- TODO: Verify why this was originally added and whether we really need it -->
-    <DefaultRemoves>$(DefaultRemoves);packages/**</DefaultRemoves>
+    <DefaultItemExcludes>$(DefaultItemExcludes);packages/**</DefaultItemExcludes>
     
   </PropertyGroup>
-  
-  <ItemGroup Condition="'$(DisableDefaultRemoves)' != 'true'">
-    <Compile Remove="$(DefaultRemoves)" />
-    <EmbeddedResource Remove="$(DefaultRemoves)" />
-    <None Remove="$(DefaultRemoves)" />
-    <Content Remove="$(DefaultRemoves)" />
-  </ItemGroup>
 
   <!-- Set the default versions of the NETStandard.Library or Microsoft.NETCore.App packages to reference.
        The implicit package references themselves are defined in Microsoft.NET.Sdk.props, so that they can be overridden
@@ -116,7 +111,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
 
   </Target>
-  
+
   <UsingTask TaskName="CheckForDuplicateItems" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <Target Name="CheckForDuplicateItems" BeforeTargets="_CheckForInvalidConfigurationAndPlatform">
@@ -154,5 +149,4 @@ Copyright (c) .NET Foundation. All rights reserved.
       />
     
   </Target>
-  
 </Project>
