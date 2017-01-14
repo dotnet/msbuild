@@ -22,7 +22,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <ItemGroup Condition=" '$(EnableDefaultItems)' == 'true' And '$(EnableDefaultContentItems)' == 'true' ">
     <!-- Publish everything under wwwroot, all JSON files, all web.config files and all Razor files -->
-    <Content Include="wwwroot/**;**/*.json;**/web.config;**/*.cshtml" CopyToPublishDirectory="PreserveNewest" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+    <Content Include="wwwroot/**" CopyToPublishDirectory="PreserveNewest" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+    <Content Include="**/web.config" CopyToPublishDirectory="PreserveNewest" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder);wwwroot/**" />
+    <Content Include="**/*.cshtml" CopyToPublishDirectory="PreserveNewest" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder);wwwroot/**" />
+    <Content Include="**/*.json" CopyToPublishDirectory="PreserveNewest" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder);wwwroot/**" />
 
     <!-- Set CopyToPublishDirectory to Never for items under AppDesignerFolder ("Properties", by default) to avoid publishing launchSettings.json -->
     <Content Update="$(AppDesignerFolder)/**" CopyToPublishDirectory="Never" Condition="'$(AppDesignerFolder)' != ''"/>
