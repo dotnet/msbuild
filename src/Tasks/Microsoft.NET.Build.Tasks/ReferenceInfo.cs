@@ -24,7 +24,8 @@ namespace Microsoft.NET.Build.Tasks
         public static IEnumerable<ReferenceInfo> CreateFrameworkReferenceInfos(IEnumerable<ITaskItem> referencePaths)
         {
             IEnumerable<ITaskItem> frameworkReferencePaths = referencePaths
-                .Where(r => r.GetBooleanMetadata("FrameworkFile") == true);
+                .Where(r => r.GetBooleanMetadata("FrameworkFile") == true ||
+                            r.GetMetadata("ResolvedFrom") == "ImplicitlyExpandDesignTimeFacades");
 
             List<ReferenceInfo> frameworkReferences = new List<ReferenceInfo>();
             foreach (ITaskItem frameworkReferencePath in frameworkReferencePaths)
@@ -32,6 +33,13 @@ namespace Microsoft.NET.Build.Tasks
                 string fullPath = frameworkReferencePath.ItemSpec;
                 string name = Path.GetFileNameWithoutExtension(fullPath);
                 string version = frameworkReferencePath.GetMetadata("Version");
+
+                if (string.IsNullOrEmpty(version))
+                {
+                    // ImplicitlyExpandDesignTimeFacades adds straight to reference path
+                    // without setting version metadata. Use 0.0.0.0 as placeholder.
+                    version = "0.0.0.0";
+                }
 
                 frameworkReferences.Add(new ReferenceInfo(name, version, fullPath));
             }

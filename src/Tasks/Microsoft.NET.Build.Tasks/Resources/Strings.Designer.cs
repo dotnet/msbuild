@@ -197,6 +197,15 @@ namespace Microsoft.NET.Build.Tasks {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Duplicate {0} items were included. The .NET SDK includes {0} items from your project directory by default. You can either remove these items from your project file, or set the &apos;{1}&apos; property to &apos;{2}&apos; if you want to explicitly include them in your project file. The duplicate items were: {3}.
+        /// </summary>
+        internal static string DuplicateItemsError {
+            get {
+                return ResourceManager.GetString("DuplicateItemsError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The preprocessor token &apos;{0}&apos; has been given more than one value. Choosing &apos;{1}&apos; as the value..
         /// </summary>
         internal static string DuplicatePreprocessorToken {
