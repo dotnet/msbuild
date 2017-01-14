@@ -29,8 +29,11 @@ namespace Microsoft.NET.Build.Tasks
         public string PlatformLibraryName { get; set; }
 
         public ITaskItem[] PrivateAssetsPackageReferences { get; set; }
-        
+
         public bool PreserveCacheLayout { get; set; }
+
+        public string FilterProjectAssetsFile { get; set; }
+
         /// <summary>
         /// All the assemblies to publish.
         /// </summary>
@@ -42,16 +45,25 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
-            LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(AssetsFilePath);            
+            var lockFileCache = new LockFileCache(BuildEngine4);
+            LockFile lockFile = lockFileCache.GetLockFile(AssetsFilePath);
             IEnumerable<string> privateAssetsPackageIds = PackageReferenceConverter.GetPackageIds(PrivateAssetsPackageReferences);
             IPackageResolver packageResolver = NuGetPackageResolver.CreateResolver(lockFile, ProjectPath);
 
+            LockFile filterLockFile = null;
+            if (!string.IsNullOrEmpty(FilterProjectAssetsFile))
+            {
+                filterLockFile = lockFileCache.GetLockFile(FilterProjectAssetsFile);
+
+            }
             ProjectContext projectContext = lockFile.CreateProjectContext(
                 NuGetUtils.ParseFrameworkName(TargetFramework),
                 RuntimeIdentifier,
-                PlatformLibraryName);
+                PlatformLibraryName,
+                filterLockFile
+                );
 
-            IEnumerable<ResolvedFile> resolvedAssemblies = 
+            IEnumerable<ResolvedFile> resolvedAssemblies =
                 new PublishAssembliesResolver(packageResolver)
                     .WithPrivateAssets(privateAssetsPackageIds)
                     .WithPreserveCacheLayout(PreserveCacheLayout)
