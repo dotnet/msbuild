@@ -1,0 +1,12 @@
+{
+  "author": "Microsoft",
+  "classifications": ["Config"],
+  "name": "Web Config",
+  "tags": {
+    "type": "item"
+  },
+  "groupIdentity": "ItemWebConfig",
+  "identity": "Microsoft.Standard.QuickStarts.Web.Config",
+  "shortName": "webconfig",
+  "sourceName": "WebConfig"
+}
