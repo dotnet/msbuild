@@ -93,7 +93,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <UsingTask TaskName="CheckForImplicitPackageReferenceOverrides" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <!-- Remove package references with metadata IsImplicitlyDefined = true, if there are other PackageReference items with the same identity -->
-  <Target Name="CheckForImplicitPackageReferenceOverrides" BeforeTargets="_GetRestoreProjectStyle;_CheckForInvalidConfigurationAndPlatform;ResolvePackageReferencesDesignTime">
+  <Target Name="CheckForImplicitPackageReferenceOverrides" BeforeTargets="_GetRestoreProjectStyle;_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences">
     <PropertyGroup>
       <ImplicitPackageReferenceInformationLink>https://aka.ms/sdkimplicitrefs</ImplicitPackageReferenceInformationLink>
     </PropertyGroup>
