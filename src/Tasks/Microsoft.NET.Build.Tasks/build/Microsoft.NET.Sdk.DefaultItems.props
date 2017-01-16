@@ -17,13 +17,24 @@ Copyright (c) .NET Foundation. All rights reserved.
 
 
   <ItemGroup Condition=" '$(EnableDefaultItems)' == 'true' ">
-    <Compile Include="**/*$(DefaultLanguageSourceExtension)" Exclude="$(DefaultExcludesInProjectFolder)" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
-    <EmbeddedResource Include="**/*.resx" Exclude="$(DefaultExcludesInProjectFolder)" Condition=" '$(EnableDefaultEmbeddedResourceItems)' == 'true' " />
+    <Compile Include="**/*$(DefaultLanguageSourceExtension)" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
+    <EmbeddedResource Include="**/*.resx" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" Condition=" '$(EnableDefaultEmbeddedResourceItems)' == 'true' " />
   </ItemGroup>
   <ItemGroup Condition=" '$(EnableDefaultItems)' == 'true' And '$(EnableDefaultNoneItems)' == 'true' ">
-    <None Include="**/*" Exclude="$(DefaultExcludesInProjectFolder)" />
+    <None Include="**/*" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
     <None Remove="**/*$(DefaultLanguageSourceExtension)" Condition=" '$(EnableDefaultCompileItems)' == 'true' "/>
     <None Remove="**/*.resx" Condition=" '$(EnableDefaultEmbeddedResourceItems)' == 'true' "/>
+  </ItemGroup>
+
+  <!-- Automatically reference NETStandard.Library or Microsoft.NETCore.App package if targeting the corresponding target framework.
+      We can refer here in the .props file to properties set in the .targets files because items and their conditions are
+      evaluated in the second pass of evaluation, after all properties have been evaluated. -->
+  <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETStandard'">
+    <PackageReference Include="NETStandard.Library" Version="$(NetStandardImplicitPackageVersion)" IsImplicitlyDefined="true"/>
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
+    <PackageReference Include="Microsoft.NETCore.App" Version="$(NetCoreAppImplicitPackageVersion)" IsImplicitlyDefined="true" />
   </ItemGroup>
 
 </Project>

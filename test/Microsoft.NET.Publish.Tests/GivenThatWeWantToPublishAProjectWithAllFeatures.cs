@@ -18,7 +18,7 @@ namespace Microsoft.NET.Publish.Tests
 {
     public class GivenThatWeWantToPublishAProjectWithAllFeatures : SdkTest
     {
-        //[Theory]
+        [Theory]
         [MemberData("PublishData")]
         public void It_publishes_the_project_correctly(string targetFramework, string [] expectedPublishFiles)
         {
