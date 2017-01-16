@@ -90,7 +90,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     Append $(TargetFramework) directory to output and intermediate paths to prevent bin clashes between
     targets.
    -->
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(_UnsupportedTargetFrameworkError)' != 'true'">
     <IntermediateOutputPath>$(IntermediateOutputPath)$(TargetFramework)\</IntermediateOutputPath>
     <OutputPath>$(OutputPath)$(TargetFramework)\</OutputPath>
   </PropertyGroup>
