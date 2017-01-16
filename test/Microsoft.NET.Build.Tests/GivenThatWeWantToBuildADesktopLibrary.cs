@@ -6,6 +6,7 @@ using Microsoft.NET.TestFramework.ProjectConstruction;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Xml.Linq;
 using Xunit;
@@ -17,6 +18,11 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_can_use_HttpClient_and_exchange_the_type_with_a_NETStandard_library()
         {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
             var netStandardLibrary = new TestProject()
             {
                 Name = "NETStandardLibrary",
