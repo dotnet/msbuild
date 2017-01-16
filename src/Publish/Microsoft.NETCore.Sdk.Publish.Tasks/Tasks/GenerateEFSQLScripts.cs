@@ -95,12 +95,13 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
                 proc = null;
             }
 
+            bool isProcessExited = false;
             if (proc != null)
             {
-                proc.WaitForExit(60000);
+                isProcessExited = proc.WaitForExit(300000);
             }
 
-            if (proc == null || proc.ExitCode != 0)
+            if (!isProcessExited || proc == null || proc.ExitCode != 0)
             {
                 if (isLoggingEnabled)
                 {
