@@ -1,0 +1,170 @@
+  <!-- Build file -->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <UsingTask AssemblyFile="$(WebSdkTools)\Microsoft.Web.MsBuildTasks2.dll" TaskName="Microsoft.Web.MsBuildTasks.SubmitCodeSignJob" />
+  <UsingTask AssemblyFile="$(WebSdkTools)\Microsoft.Web.MsBuildTasks2.dll" TaskName="Microsoft.Web.MsBuildTasks.WaitForCodeSignJobs" />
+  
+  <!-- 
+    Variables that can be overriden by CI machine (official build):
+    
+      - CoreSdkVersion - specifies full version of core sdk package
+      - CoreSdkPackagesDropDir - root drop dir that contains versioned build folders, e.g. \\cpvsbuild\Drops\Roslyn\Roslyn-Project-System\DotNet-Core-Sdk
+      - WebSdkVersion -  web sdk full version
+      - WebSdkPackagesDropDir [Required] - official drop folder path for web packages
+  -->
+  
+  <PropertyGroup>
+    <CoreSdkDropDir Condition="'$(CoreSdkDropDir)' == ''">\\cpvsbuild\Drops\Roslyn\Roslyn-Project-System\DotNet-Core-Sdk</CoreSdkDropDir>
+    <VersionPrefix Condition="'$(VersionPrefix)' == ''">1.0.0</VersionPrefix>
+    <VersionPrereleasePrefix Condition="'$(VersionPrereleasePrefix)' == ''">alpha</VersionPrereleasePrefix>
+    <PackagesOutputPath>$(WebSdkRoot)\bin\$(Configuration)\NuGet</PackagesOutputPath>
+    <LocalDropRoot>$(WebSdkRoot)\bin\$(Configuration)</LocalDropRoot>
+    <CodeSignOutputPath>$(WebSdkRoot)\bin\Signed</CodeSignOutputPath>
+    <NugetExe>$(WebSdkRoot)\tools\NuGet\NuGet.exe</NugetExe>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectFiles Include="src\Publish\Microsoft.NET.Sdk.Publish.Package\Microsoft.NET.Sdk.Publish.Package.csproj" />
+    <ProjectFiles Include="src\Web\Microsoft.NET.Sdk.Web.ProjectSystem.Package\Microsoft.NET.Sdk.Web.ProjectSystem.Package.csproj" />
+    <ProjectFiles Include="src\Web\Microsoft.NET.Sdk.Web.Package\Microsoft.NET.Sdk.Web.Package.csproj" />
+  </ItemGroup>
+
+  <UsingTask TaskName="GetCoreSdkBuildVersion" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll" >
+    <ParameterGroup>
+      <CoreSdkDropDir ParameterType="System.String" Required="true" />
+      <CoreSdkBuildVersion ParameterType="System.String" Output="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System.IO" />
+      <Using Namespace="System.Linq" />
+      <Code Type="Fragment" Language="cs">
+        <![CDATA[
+            CoreSdkBuildVersion = "";
+            if (!Directory.Exists(CoreSdkDropDir))
+            {
+                return false;
+            }
+
+            var coreSdkDropDirInfo = new DirectoryInfo(CoreSdkDropDir);
+            var subDirs = coreSdkDropDirInfo.EnumerateDirectories("*.*", SearchOption.TopDirectoryOnly);
+            if (subDirs != null && subDirs.Count() > 0)
+            {
+                CoreSdkBuildVersion = subDirs.OrderByDescending(x => x.LastWriteTime)
+                                             .First().Name;
+            }
+        ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
+  <Target Name="Build" DependsOnTargets="Init;_Build"/>
+  
+  <Target Name="Init" DependsOnTargets="_InitCoreSdk;_InitWebSdk">
+  </Target>
+
+  <Target Name="_InitCoreSdk" Condition="'$(CoreSdkVersion)' == ''">
+    <!-- 
+      Runs if core sdk version and drop path were not provided
+      (final release builds, should provide final versions (not pre-release ones))
+    -->
+    <GetCoreSdkBuildVersion CoreSdkDropDir="$(CoreSdkDropDir)">
+      <Output PropertyName="CoreSdkBuildVersion" TaskParameter="CoreSdkBuildVersion" />
+    </GetCoreSdkBuildVersion>
+
+    <PropertyGroup>
+      <CoreSdkVersion Condition="'$(CoreSdkVersion)' == ''">$(VersionPrefix)-$(VersionPrereleasePrefix)-$(CoreSdkBuildVersion)</CoreSdkVersion>
+      <CoreSdkPackagesDropDir>$(CoreSdkDropDir)\$(CoreSdkBuildVersion)\Packages</CoreSdkPackagesDropDir>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="_InitWebSdk" Condition="'$(WebSdkVersion)' == ''">
+    <!-- 
+      Runs if web sdk version was not provided
+      (final release builds, should provide final versions (not pre-release ones))
+    -->
+    <PropertyGroup>
+      <WebSdkBuildVersion Condition="'$(WebSdkVersion)' == ''">$(CoreSdkBuildVersion)</WebSdkBuildVersion>
+      <CiBuildPostfix Condition="'$(BUILD_NUMBER)' != ''">-$(BUILD_NUMBER)</CiBuildPostfix>
+      <WebSdkVersion Condition="'$(WebSdkVersion)' == ''">$(VersionPrefix)-$(VersionPrereleasePrefix)-$(WebSdkBuildVersion)$(CiBuildPostfix)</WebSdkVersion>
+    </PropertyGroup>
+  </Target>
+  
+  <Target Name="_Build">
+    <PropertyGroup>
+      <!-- When C# projects have external dependencies that are shared,
+                 the Copy task can fail during parallel builds because multiple
+                 builds attempt to copy the same DLL at the same time.
+                 These properties tell the Copy task to retry after such a failure,
+                 so the build can ultimately succeed. -->
+      <CopyRetryProperties>Retries=20;RetryDelayMilliseconds=150</CopyRetryProperties>
+    </PropertyGroup>
+
+    <MSBuild Projects="@(ProjectFiles)" BuildInParallel="true" Targets="Build"
+             Properties="$(CopyRetryProperties);CoreSdkVersion=$(CoreSdkVersion);WebSdkVersion=$(WebSdkVersion)" />
+  </Target>
+
+  <Target Name="Clean">
+    <MSBuild Projects="@(ProjectFiles)" BuildInParallel="true" Targets="Clean" />
+  </Target>
+
+  <Target Name="_Publish">
+    <!-- Generate semaphore files for core and web sdk -->
+    <PropertyGroup>
+      <WebSdkSemaphorePath>$(LocalDropRoot)\web-sdk.sem</WebSdkSemaphorePath>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <SemaphoreParameter Include="CoreSdkVersion=$(CoreSdkBuildVersion)" />
+      <SemaphoreParameter Include="CoreSdkDropPath=$(CoreSdkDropDir)\$(CoreSdkBuildVersion)" />
+      <SemaphoreParameter Include="WebSdkVersion=$(WebSdkVersion)"/>
+      <SemaphoreParameter Include="WebSdkDropPath=$(WebSdkPackagesDropDir)" />
+    </ItemGroup>
+
+    <GenerateSemaphore Parameters="@(SemaphoreParameter)" SemaphoreFilePath="$(WebSdkSemaphorePath)" />
+
+    <ItemGroup>
+      <SignedPackages Include="$(CodeSignOutputPath)\Packages\*.nupkg" />
+    </ItemGroup>
+
+    <Exec Command="$(NugetExe) push %(SignedPackages.Identity) $(MyGetSecurityToken) -Source https://dotnet.myget.org/F/dotnet-web/api/v2/package" Condition="'$(MyGetSecurityToken)' != ''" />   
+  </Target>
+
+  <UsingTask TaskName="GenerateSemaphore" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll" >
+    <ParameterGroup>
+      <Parameters ParameterType="System.String[]" Required="true" />
+      <SemaphoreFilePath ParameterType="System.String" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System.IO" />
+      <Using Namespace="System.Text" />
+      <Code Type="Fragment" Language="cs">
+        <![CDATA[
+            var builder = new StringBuilder();
+            builder.AppendLine("[Semaphore]");
+            foreach(var par in Parameters)
+            {
+              builder.AppendLine(par);
+            }
+            
+            var retry = 5;
+            while (retry > 0)
+            {
+              try
+              {
+                File.WriteAllText(SemaphoreFilePath, builder.ToString());
+                break;
+              }
+              catch
+              {
+                System.Threading.Thread.Sleep(500);
+                retry--;
+              }
+            }
+        ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
+  <Target Name="Sign" />
+
+  <Import Project="$(WebSdkTools)\MIcrosoft.NET.Sdk.Web.Sign.targets" Condition="Exists('$(WebSdkTools)\MIcrosoft.NET.Sdk.Web.Sign.targets')"/>
+</Project>
