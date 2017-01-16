@@ -3,9 +3,9 @@
 call %~dp0\EnsureWebSdkEnv.cmd
 
 REM Copy the files required for signing
-copy \\aspnetci\share\tools\Microsoft.Web.MsBuildTasks2.dll %WebSdkTools% /y
-copy \\aspnetci\share\tools\7za.exe %WebSdkTools% /y
-copy \\aspnetci\share\tools\MIcrosoft.NET.Sdk.Web.Sign.targets %WebSdkTools% /y
+xcopy \\aspnetci\share\tools\Microsoft.Web.MsBuildTasks2.dll %WebSdkTools% /y /C
+xcopy \\aspnetci\share\tools\7za.exe %WebSdkTools% /y /C
+xcopy \\aspnetci\share\tools\MIcrosoft.NET.Sdk.Web.Sign.targets %WebSdkTools% /y /C
 
 call dotnet restore %WebSdkRoot%\Microsoft.Net.Sdk.Web.Sln /p:SkipInvalidConfigurations=true;configuration=Release
 if errorlevel 1 GOTO ERROR
