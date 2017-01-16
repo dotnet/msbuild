@@ -155,8 +155,8 @@
       </trans-unit>
       <trans-unit id="SlnDefinition">
         <source>Modify solution (SLN) files.</source>
-        <target state="new">Modify solution (SLN) files.</target>
-        <note></note>
+        <target state="translated">修改方案 (SLN) 檔。</target>
+        <note />
       </trans-unit>
     </body>
   </file>

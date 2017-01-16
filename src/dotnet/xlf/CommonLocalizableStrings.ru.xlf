@@ -612,33 +612,33 @@
       </trans-unit>
       <trans-unit id="UnsupportedProjectType">
         <source>Unsupported project type. Please check with your sdk provider.</source>
-        <target state="new">Unsupported project type. Please check with your sdk provider.</target>
-        <note></note>
+        <target state="translated">Тип проекта не поддерживается. Обратитесь к поставщику пакета SDK.</target>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidSolutionFormatString">
         <source>Invalid solution `{0}`. {1}</source>
-        <target state="new">Invalid solution `{0}`. {1}</target>
-        <note></note>
+        <target state="translated">Решение "{0}" недопустимо. {1}</target>
+        <note />
       </trans-unit>
       <trans-unit id="ArgumentsProjectDescription">
         <source>The project file to operate on. If a file is not specified, the command will search the current directory for one.</source>
-        <target state="new">The project file to operate on. If a file is not specified, the command will search the current directory for one.</target>
-        <note></note>
+        <target state="translated">Обрабатываемый файл проекта. Если файл не указан, команда будет искать его в текущем каталоге.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ArgumentsSolutionDescription">
         <source>Solution file to operate on. If not specified, the command will search the current directory for one.</source>
-        <target state="new">Solution file to operate on. If not specified, the command will search the current directory for one.</target>
-        <note></note>
+        <target state="translated">Обрабатываемый файл решения. Если он не указан, команда будет искать его в текущем каталоге.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSlnFile">
         <source>&lt;SLN_FILE&gt;</source>
-        <target state="new">&lt;SLN_FILE&gt;</target>
-        <note></note>
+        <target state="translated">&lt;ФАЙЛ_SLN&gt;</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdProjectFile">
         <source>&lt;PROJECT&gt;</source>
-        <target state="new">&lt;PROJECT&gt;</target>
-        <note></note>
+        <target state="translated">&lt;ПРОЕКТ&gt;</target>
+        <note />
       </trans-unit>
     </body>
   </file>
