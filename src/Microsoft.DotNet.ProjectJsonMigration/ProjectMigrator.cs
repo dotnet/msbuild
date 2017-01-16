@@ -37,11 +37,19 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             // Try to read the project dependencies, ignore an unresolved exception for now
             MigrationRuleInputs rootInputs = ComputeMigrationRuleInputs(rootSettings);
             IEnumerable<ProjectDependency> projectDependencies = null;
+            var projectMigrationReports = new List<ProjectMigrationReport>();
 
             try
             {
                 // Verify up front so we can prefer these errors over an unresolved project dependency
                 VerifyInputs(rootInputs, rootSettings);
+
+                projectMigrationReports.Add(MigrateProject(rootSettings));
+                
+                if (skipProjectReferences)
+                {
+                    return new MigrationReport(projectMigrationReports);
+                }
 
                 projectDependencies = ResolveTransitiveClosureProjectDependencies(
                     rootSettings.ProjectDirectory, 
@@ -59,14 +67,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                             new List<MigrationError> {e.Error},
                             null)
                     });
-            }
-
-            var projectMigrationReports = new List<ProjectMigrationReport>();
-            projectMigrationReports.Add(MigrateProject(rootSettings));
-            
-            if (skipProjectReferences)
-            {
-                return new MigrationReport(projectMigrationReports);
             }
 
             foreach(var project in projectDependencies)
