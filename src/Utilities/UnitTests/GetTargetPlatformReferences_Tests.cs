@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -20,7 +23,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Location of the fake SDK structure
         /// </summary>
-        static string fakeStructureRoot = null;
+        private static string s_fakeStructureRoot = null;
 
         /// <summary>
         /// Setup the fake SDK structure used by these tests
@@ -28,7 +31,7 @@ namespace Microsoft.Build.UnitTests
         [ClassInitialize]
         public static void ClassInit(TestContext context)
         {
-            fakeStructureRoot = MakeFakeSDKStructure();
+            s_fakeStructureRoot = MakeFakeSDKStructure();
         }
 
         /// <summary>
@@ -37,11 +40,11 @@ namespace Microsoft.Build.UnitTests
         [ClassCleanup]
         public static void ClassCleanup()
         {
-            if (fakeStructureRoot != null)
+            if (s_fakeStructureRoot != null)
             {
-                if (FileUtilities.DirectoryExistsNoThrow(fakeStructureRoot))
+                if (FileUtilities.DirectoryExistsNoThrow(s_fakeStructureRoot))
                 {
-                    FileUtilities.DeleteDirectoryNoThrow(fakeStructureRoot, true);
+                    FileUtilities.DeleteDirectoryNoThrow(s_fakeStructureRoot, true);
                 }
             }
         }
@@ -52,7 +55,7 @@ namespace Microsoft.Build.UnitTests
         [TestMethod]
         public void NoRootSdk()
         {
-            string[] winmds = ToolLocationHelper.GetTargetPlatformReferences("MissingSDK", "1.1", "MissingPlatform", "0.0.0.0", "0.0.0.0", fakeStructureRoot, null);
+            string[] winmds = ToolLocationHelper.GetTargetPlatformReferences("MissingSDK", "1.1", "MissingPlatform", "0.0.0.0", "0.0.0.0", s_fakeStructureRoot, null);
             Assert.AreEqual(0, winmds.Length);
         }
 
@@ -62,11 +65,11 @@ namespace Microsoft.Build.UnitTests
         [TestMethod]
         public void LegacySdk()
         {
-            string[] winmds = ToolLocationHelper.GetTargetPlatformReferences(null, null, "OldSdk", null, "5.0", fakeStructureRoot, null);
+            string[] winmds = ToolLocationHelper.GetTargetPlatformReferences(null, null, "OldSdk", null, "5.0", s_fakeStructureRoot, null);
 
             Assert.AreEqual(2, winmds.Length);
-            Assert.AreEqual(Path.Combine(fakeStructureRoot, "OldSdk\\5.0\\References\\CommonConfiguration\\Neutral\\Another.winmd"), winmds[0]);
-            Assert.AreEqual(Path.Combine(fakeStructureRoot, "OldSdk\\5.0\\References\\CommonConfiguration\\Neutral\\Windows.winmd"), winmds[1]);
+            Assert.AreEqual(Path.Combine(s_fakeStructureRoot, "OldSdk\\5.0\\References\\CommonConfiguration\\Neutral\\Another.winmd"), winmds[0]);
+            Assert.AreEqual(Path.Combine(s_fakeStructureRoot, "OldSdk\\5.0\\References\\CommonConfiguration\\Neutral\\Windows.winmd"), winmds[1]);
         }
 
         /// <summary>
@@ -75,7 +78,7 @@ namespace Microsoft.Build.UnitTests
         [TestMethod]
         public void MissingPlatformDirectory()
         {
-            string[] winmds = ToolLocationHelper.GetTargetPlatformReferences("RootSdk", "1.1", "MissingPlatform", "0.0.0.0", "0.0.0.0", fakeStructureRoot, null);
+            string[] winmds = ToolLocationHelper.GetTargetPlatformReferences("RootSdk", "1.1", "MissingPlatform", "0.0.0.0", "0.0.0.0", s_fakeStructureRoot, null);
             Assert.AreEqual(0, winmds.Length);
         }
 
@@ -85,7 +88,7 @@ namespace Microsoft.Build.UnitTests
         [TestMethod]
         public void MissingPlatformXml()
         {
-            string[] winmds = ToolLocationHelper.GetTargetPlatformReferences("RootSdk", "1.1", "NoXml", "0.0.0.0", "1.0.1.0", fakeStructureRoot, null);
+            string[] winmds = ToolLocationHelper.GetTargetPlatformReferences("RootSdk", "1.1", "NoXml", "0.0.0.0", "1.0.1.0", s_fakeStructureRoot, null);
             Assert.AreEqual(0, winmds.Length);
         }
 
@@ -95,7 +98,7 @@ namespace Microsoft.Build.UnitTests
         [TestMethod]
         public void BadPlatformXml()
         {
-            string[] winmds = ToolLocationHelper.GetTargetPlatformReferences("RootSdk", "1.1", "BadXml", "0.0.0.0", "1.0.2.2", fakeStructureRoot, null);
+            string[] winmds = ToolLocationHelper.GetTargetPlatformReferences("RootSdk", "1.1", "BadXml", "0.0.0.0", "1.0.2.2", s_fakeStructureRoot, null);
             Assert.AreEqual(0, winmds.Length);
         }
 
@@ -105,7 +108,7 @@ namespace Microsoft.Build.UnitTests
         [TestMethod]
         public void NoContracts()
         {
-            string[] winmds = ToolLocationHelper.GetTargetPlatformReferences("RootSdk", "1.1", "NoContracts", "0.0.0.0", "3.0.5.4", fakeStructureRoot, null);
+            string[] winmds = ToolLocationHelper.GetTargetPlatformReferences("RootSdk", "1.1", "NoContracts", "0.0.0.0", "3.0.5.4", s_fakeStructureRoot, null);
             Assert.AreEqual(0, winmds.Length);
         }
 
@@ -115,8 +118,8 @@ namespace Microsoft.Build.UnitTests
         [TestMethod]
         public void ValidContracts()
         {
-            string[] winmds = ToolLocationHelper.GetTargetPlatformReferences("RootSdk", "1.1", "SomeContracts", "0.0.0.0", "1.0.9.9", fakeStructureRoot, null);
-            string referencesRoot = Path.Combine(fakeStructureRoot, "RootSdk\\1.1\\References");
+            string[] winmds = ToolLocationHelper.GetTargetPlatformReferences("RootSdk", "1.1", "SomeContracts", "0.0.0.0", "1.0.9.9", s_fakeStructureRoot, null);
+            string referencesRoot = Path.Combine(s_fakeStructureRoot, "RootSdk\\1.1\\References");
 
             Assert.AreEqual(4, winmds.Length);
             Assert.AreEqual(Path.Combine(referencesRoot, "Windows.Core\\0.7.0.0\\Windows.Core.winmd"), winmds[0]);
@@ -132,8 +135,8 @@ namespace Microsoft.Build.UnitTests
         [TestMethod]
         public void MissingContract()
         {
-            string[] winmds = ToolLocationHelper.GetTargetPlatformReferences("RootSdk", "1.1", "SomeContracts", "0.0.0.0", "2.3.4.5", fakeStructureRoot, null);
-            string referencesRoot = Path.Combine(fakeStructureRoot, "RootSdk\\1.1\\References");
+            string[] winmds = ToolLocationHelper.GetTargetPlatformReferences("RootSdk", "1.1", "SomeContracts", "0.0.0.0", "2.3.4.5", s_fakeStructureRoot, null);
+            string referencesRoot = Path.Combine(s_fakeStructureRoot, "RootSdk\\1.1\\References");
 
             Assert.AreEqual(1, winmds.Length);
             Assert.AreEqual(Path.Combine(referencesRoot, "Windows.Core\\0.7.0.0\\Windows.Core.winmd"), winmds[0]);
@@ -146,8 +149,8 @@ namespace Microsoft.Build.UnitTests
         [TestMethod]
         public void EmptyContract()
         {
-            string[] winmds = ToolLocationHelper.GetTargetPlatformReferences("RootSdk", "1.1", "SomeContracts", "0.0.0.0", "3.9.9.4", fakeStructureRoot, null);
-            string referencesRoot = Path.Combine(fakeStructureRoot, "RootSdk\\1.1\\References");
+            string[] winmds = ToolLocationHelper.GetTargetPlatformReferences("RootSdk", "1.1", "SomeContracts", "0.0.0.0", "3.9.9.4", s_fakeStructureRoot, null);
+            string referencesRoot = Path.Combine(s_fakeStructureRoot, "RootSdk\\1.1\\References");
 
             Assert.AreEqual(1, winmds.Length);
             Assert.AreEqual(Path.Combine(referencesRoot, "Windows.Core\\0.7.0.0\\Windows.Core.winmd"), winmds[0]);
@@ -160,8 +163,8 @@ namespace Microsoft.Build.UnitTests
         [TestMethod]
         public void NonEmptyContractFolderButNoWinMDs()
         {
-            string[] winmds = ToolLocationHelper.GetTargetPlatformReferences("RootSdk", "1.1", "SomeContracts", "0.0.0.0", "4.3.2.8", fakeStructureRoot, null);
-            string referencesRoot = Path.Combine(fakeStructureRoot, "RootSdk\\1.1\\References");
+            string[] winmds = ToolLocationHelper.GetTargetPlatformReferences("RootSdk", "1.1", "SomeContracts", "0.0.0.0", "4.3.2.8", s_fakeStructureRoot, null);
+            string referencesRoot = Path.Combine(s_fakeStructureRoot, "RootSdk\\1.1\\References");
 
             Assert.AreEqual(1, winmds.Length);
             Assert.AreEqual(Path.Combine(referencesRoot, "Windows.Core\\0.7.0.0\\Windows.Core.winmd"), winmds[0]);

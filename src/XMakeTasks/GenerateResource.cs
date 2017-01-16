@@ -1298,23 +1298,23 @@ namespace Microsoft.Build.Tasks
                 return true;
             }
 
-            FileInfo outputInfo = FileUtilities.GetFileInfoNoThrow(outputFilePath);
+            DateTime outputTime = NativeMethodsShared.GetLastWriteFileUtcTime(outputFilePath);
 
             // Quick check to see if any uncorrelated input is newer in which case we can avoid checking source file timestamp
-            if (_foundNewestUncorrelatedInputWriteTime && outputInfo != null && GetNewestUncorrelatedInputWriteTime() > outputInfo.LastWriteTime)
+            if (_foundNewestUncorrelatedInputWriteTime && GetNewestUncorrelatedInputWriteTime() > outputTime)
             {
                 // An uncorrelated input is newer, need to build
                 return true;
             }
 
-            FileInfo sourceInfo = FileUtilities.GetFileInfoNoThrow(sourceFilePath);
+            DateTime sourceTime = NativeMethodsShared.GetLastWriteFileUtcTime(sourceFilePath);
 
             if (!String.Equals(Path.GetExtension(sourceFilePath), ".resx", StringComparison.OrdinalIgnoreCase) &&
                 !String.Equals(Path.GetExtension(sourceFilePath), ".resw", StringComparison.OrdinalIgnoreCase))
             {
                 // If source file is NOT a .resx, for example a .restext file, 
                 // timestamp checking is simple, because there's no linked files to examine, and no references.
-                return NeedToRebuildSourceFile(sourceInfo, outputInfo);
+                return NeedToRebuildSourceFile(sourceTime, outputTime);
             }
 
             // OK, we have a .resx file
@@ -1344,7 +1344,7 @@ namespace Microsoft.Build.Tasks
 
             // if the .resources file is out of date even just with respect to the .resx or 
             // the additional inputs, we don't need to go to the point of checking the linked files. 
-            if (NeedToRebuildSourceFile(sourceInfo, outputInfo))
+            if (NeedToRebuildSourceFile(sourceTime, outputTime))
             {
                 return true;
             }
@@ -1356,16 +1356,16 @@ namespace Microsoft.Build.Tasks
             {
                 foreach (string linkedFilePath in resxFileInfo.LinkedFiles)
                 {
-                    FileInfo linkedFileInfo = FileUtilities.GetFileInfoNoThrow(linkedFilePath);
+                    DateTime linkedFileTime = NativeMethodsShared.GetLastWriteFileUtcTime(linkedFilePath);
 
-                    if (linkedFileInfo == null)
+                    if (linkedFileTime == DateTime.MinValue)
                     {
                         // Linked file is missing - force a build, so that resource generation
                         // will produce a nice error message
                         return true;
                     }
 
-                    if (linkedFileInfo.LastWriteTime > outputInfo.LastWriteTime)
+                    if (linkedFileTime > outputTime)
                     {
                         // Linked file is newer, need to build
                         return true;
@@ -1380,23 +1380,15 @@ namespace Microsoft.Build.Tasks
         /// Returns true if the output does not exist, if the provided source is newer than the output, 
         /// or if any of the set of additional inputs is newer than the output.  Otherwise, returns false. 
         /// </summary>
-        private bool NeedToRebuildSourceFile(FileInfo sourceInfo, FileInfo outputInfo)
+        private bool NeedToRebuildSourceFile(DateTime sourceTime, DateTime outputTime)
         {
-            if (sourceInfo == null || outputInfo == null)
-            {
-                // Source file is missing - force a build, so that resource generation
-                // will produce a nice error message; or output file is missing,
-                // need to build it
-                return true;
-            }
-
-            if (sourceInfo.LastWriteTime > outputInfo.LastWriteTime)
+            if (sourceTime > outputTime)
             {
                 // Source file is newer, need to build
                 return true;
             }
 
-            if (GetNewestUncorrelatedInputWriteTime() > outputInfo.LastWriteTime)
+            if (GetNewestUncorrelatedInputWriteTime() > outputTime)
             {
                 // An uncorrelated input is newer, need to build
                 return true;
@@ -1425,33 +1417,28 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                {
-                    throw;
-                }
-
-                // Now that we've logged an error, we know we're not going to do anything more, so 
-                // don't bother to correctly populate the inputs / outputs. 
                 Log.LogErrorWithCodeFromResources("GenerateResource.CannotWriteSTRFile", StronglyTypedFileName, e.Message);
+                // Now that we've logged an error, we know we're not going to do anything more, so 
+                // don't bother to correctly populate the inputs / outputs.
                 _unsuccessfullyCreatedOutFiles.Add(OutputResources[0].ItemSpec);
                 _stronglyTypedResourceSuccessfullyCreated = false;
                 return;
             }
 
             // Now we have the filename, check if it's up to date
-            FileInfo sourceInfo = FileUtilities.GetFileInfoNoThrow(Sources[0].ItemSpec);
-            FileInfo outputInfo = FileUtilities.GetFileInfoNoThrow(StronglyTypedFileName);
+            DateTime sourceTime = NativeMethodsShared.GetLastWriteFileUtcTime(Sources[0].ItemSpec);
+            DateTime outputTime = NativeMethodsShared.GetLastWriteFileUtcTime(StronglyTypedFileName);
 
-            if (sourceInfo == null || outputInfo == null)
+            if (sourceTime == DateTime.MinValue || outputTime == DateTime.MinValue)
             {
                 // Source file is missing - force a build, so that resource generation
                 // will produce a nice error message; or output file is missing,
                 // need to build it
                 needToRebuildSTR = true;
             }
-            else if (sourceInfo.LastWriteTime > outputInfo.LastWriteTime)
+            else if (sourceTime > outputTime)
             {
                 // Source file is newer, need to build
                 needToRebuildSTR = true;
@@ -1490,20 +1477,18 @@ namespace Microsoft.Build.Tasks
                 {
                     foreach (ITaskItem reference in this.References)
                     {
-                        // Get a FileInfo, so we can get existence and write time in a single
-                        // disk access
-                        FileInfo referenceInfo = FileUtilities.GetFileInfoNoThrow(reference.ItemSpec);
+                        DateTime referenceTime = NativeMethodsShared.GetLastWriteFileUtcTime(reference.ItemSpec);
 
-                        if (referenceInfo == null)
+                        if (referenceTime == DateTime.MinValue)
                         {
                             // File does not exist: force a build to produce an error message
                             _foundNewestUncorrelatedInputWriteTime = true;
                             return DateTime.MaxValue;
                         }
 
-                        if (referenceInfo.LastWriteTime > _newestUncorrelatedInputWriteTime)
+                        if (referenceTime > _newestUncorrelatedInputWriteTime)
                         {
-                            _newestUncorrelatedInputWriteTime = referenceInfo.LastWriteTime;
+                            _newestUncorrelatedInputWriteTime = referenceTime;
                         }
                     }
                 }
@@ -1513,20 +1498,18 @@ namespace Microsoft.Build.Tasks
                 {
                     foreach (ITaskItem additionalInput in this.AdditionalInputs)
                     {
-                        // Get a FileInfo, so we can get existence and write time in a single
-                        // disk access
-                        FileInfo additionalInputInfo = FileUtilities.GetFileInfoNoThrow(additionalInput.ItemSpec);
+                        DateTime additionalInputTime = NativeMethodsShared.GetLastWriteFileUtcTime(additionalInput.ItemSpec);
 
-                        if (additionalInputInfo == null)
+                        if (additionalInputTime == DateTime.MinValue)
                         {
                             // File does not exist: force a build to produce an error message
                             _foundNewestUncorrelatedInputWriteTime = true;
                             return DateTime.MaxValue;
                         }
 
-                        if (additionalInputInfo.LastWriteTime > _newestUncorrelatedInputWriteTime)
+                        if (additionalInputTime > _newestUncorrelatedInputWriteTime)
                         {
-                            _newestUncorrelatedInputWriteTime = additionalInputInfo.LastWriteTime;
+                            _newestUncorrelatedInputWriteTime = additionalInputTime;
                         }
                     }
                 }
@@ -2369,49 +2352,49 @@ namespace Microsoft.Build.Tasks
             {
                 if (ae.InnerException is XmlException)
                 {
-                    XmlException xe = (XmlException)ae.InnerException;
-                    _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), xe.LineNumber, xe.LinePosition, 0, 0, "General.InvalidResxFile", xe.Message);
+                    XmlException xe = (XmlException) ae.InnerException;
+                    _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), xe.LineNumber,
+                        xe.LinePosition, 0, 0, "General.InvalidResxFile", xe.Message);
                 }
                 else
                 {
-                    _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), 0, 0, 0, 0, "General.InvalidResxFile", ae.Message);
+                    _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), 0, 0, 0, 0,
+                        "General.InvalidResxFile", ae.Message);
                 }
                 return false;
             }
             catch (TextFileException tfe)
             {
                 // Used to pass back error context from ReadTextResources to here.
-                _logger.LogErrorWithCodeFromResources(null, tfe.FileName, tfe.LineNumber, tfe.LinePosition, 1, 1, "GenerateResource.MessageTunnel", tfe.Message);
+                _logger.LogErrorWithCodeFromResources(null, tfe.FileName, tfe.LineNumber, tfe.LinePosition, 1, 1,
+                    "GenerateResource.MessageTunnel", tfe.Message);
                 return false;
             }
             catch (XmlException xe)
             {
-                _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), xe.LineNumber, xe.LinePosition, 0, 0, "General.InvalidResxFile", xe.Message);
+                _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), xe.LineNumber,
+                    xe.LinePosition, 0, 0, "General.InvalidResxFile", xe.Message);
                 return false;
             }
-            catch (Exception e)
+            catch (Exception e) when (e is SerializationException || e is TargetInvocationException)
             {
                 // DDB #9819
                 // SerializationException and TargetInvocationException can occur when trying to deserialize a type from a resource format (typically with other exceptions inside)
                 // This is a bug in the type being serialized, so the best we can do is dump diagnostic information and move on to the next input resource file.
-                if (e is SerializationException ||
-                    e is TargetInvocationException)
-                {
-                    _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), 0, 0, 0, 0, "General.InvalidResxFile", e.Message);
+                _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), 0, 0, 0, 0,
+                    "General.InvalidResxFile", e.Message);
 
-                    // Log the stack, so the problem with the type in the .resx is diagnosable by the customer
-                    _logger.LogErrorFromException(e, /* stack */ true, /* inner exceptions */ true, FileUtilities.GetFullPathNoThrow(inFile));
-                    return false;
-                }
-
-                if (!ExceptionHandling.NotExpectedException(e))
-                {
-                    // Regular IO error
-                    _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), 0, 0, 0, 0, "General.InvalidResxFile", e.Message);
-                    return false;
-                }
-
-                throw;
+                // Log the stack, so the problem with the type in the .resx is diagnosable by the customer
+                _logger.LogErrorFromException(e, /* stack */ true, /* inner exceptions */ true,
+                    FileUtilities.GetFullPathNoThrow(inFile));
+                return false;
+            }
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+            {
+                // Regular IO error
+                _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), 0, 0, 0, 0,
+                    "General.InvalidResxFile", e.Message);
+                return false;
             }
 
             string currentOutputFile = null;
@@ -2433,9 +2416,9 @@ namespace Microsoft.Build.Tasks
                         currentOutputFile = null;
                         currentOutputDirectoryAlreadyExisted = true;
                         string priDirectory = Path.Combine(outFileOrDir ?? String.Empty,
-                                                           reader.assemblySimpleName);
+                            reader.assemblySimpleName);
                         currentOutputDirectory = Path.Combine(priDirectory,
-                                                              reader.cultureName ?? String.Empty);
+                            reader.cultureName ?? String.Empty);
 
                         if (!Directory.Exists(currentOutputDirectory))
                         {
@@ -2448,7 +2431,8 @@ namespace Microsoft.Build.Tasks
                         // If so, assume that the name is so long it will already uniquely distinguish itself.
                         // However for shorter names we'd still prefer to use the assembly simple name
                         // in the path to avoid conflicts.
-                        currentOutputFile = EnsurePathIsShortEnough(currentOutputFile, currentOutputFileNoPath, outFileOrDir, reader.cultureName);
+                        currentOutputFile = EnsurePathIsShortEnough(currentOutputFile, currentOutputFileNoPath,
+                            outFileOrDir, reader.cultureName);
 
                         if (currentOutputFile == null)
                         {
@@ -2479,7 +2463,9 @@ namespace Microsoft.Build.Tasks
                 else
                 {
                     currentOutputFile = outFileOrDir;
-                    ErrorUtilities.VerifyThrow(_readers.Count == 1, "We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {0}", _readers.Count);
+                    ErrorUtilities.VerifyThrow(_readers.Count == 1,
+                        "We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {0}",
+                        _readers.Count);
                     WriteResources(_readers[0], outFileOrDir);
                 }
 
@@ -2487,22 +2473,22 @@ namespace Microsoft.Build.Tasks
                 {
                     try
                     {
-                        ErrorUtilities.VerifyThrow(_readers.Count == 1, "We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {0}", _readers.Count);
+                        ErrorUtilities.VerifyThrow(_readers.Count == 1,
+                            "We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {0}",
+                            _readers.Count);
                         CreateStronglyTypedResources(_readers[0], outFileOrDir, inFile, out currentOutputSourceCodeFile);
                     }
-                    catch (Exception e)
+                    catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {
-                        if (ExceptionHandling.NotExpectedException(e))
-                        {
-                            throw;
-                        }
-
                         // IO Error
-                        _logger.LogErrorWithCodeFromResources("GenerateResource.CannotWriteSTRFile", _stronglyTypedFilename, e.Message);
+                        _logger.LogErrorWithCodeFromResources("GenerateResource.CannotWriteSTRFile",
+                            _stronglyTypedFilename, e.Message);
 
                         if (File.Exists(outFileOrDir)
-                            && GetFormat(inFile) != Format.Assembly // outFileOrDir is a directory when the input file is an assembly
-                            && GetFormat(outFileOrDir) != Format.Assembly) // Never delete an assembly since we don't ever actually write to assemblies.
+                            && GetFormat(inFile) != Format.Assembly
+                            // outFileOrDir is a directory when the input file is an assembly
+                            && GetFormat(outFileOrDir) != Format.Assembly)
+                            // Never delete an assembly since we don't ever actually write to assemblies.
                         {
                             RemoveCorruptedFile(outFileOrDir);
                         }
@@ -2518,10 +2504,12 @@ namespace Microsoft.Build.Tasks
             {
                 if (currentOutputFile != null)
                 {
-                    _logger.LogErrorWithCodeFromResources("GenerateResource.CannotWriteOutput", FileUtilities.GetFullPathNoThrow(currentOutputFile), io.Message);
+                    _logger.LogErrorWithCodeFromResources("GenerateResource.CannotWriteOutput",
+                        FileUtilities.GetFullPathNoThrow(currentOutputFile), io.Message);
                     if (File.Exists(currentOutputFile))
                     {
-                        if (GetFormat(currentOutputFile) != Format.Assembly) // Never delete an assembly since we don't ever actually write to assemblies.
+                        if (GetFormat(currentOutputFile) != Format.Assembly)
+                            // Never delete an assembly since we don't ever actually write to assemblies.
                         {
                             RemoveCorruptedFile(currentOutputFile);
                         }
@@ -2530,13 +2518,15 @@ namespace Microsoft.Build.Tasks
 
                 if (currentOutputDirectory != null &&
                     currentOutputDirectoryAlreadyExisted == false)
-                { // Do not annoy the user by removing an empty directory we did not create.
+                {
+                    // Do not annoy the user by removing an empty directory we did not create.
                     try
                     {
                         Directory.Delete(currentOutputDirectory); // Remove output directory if empty
                     }
                     catch (Exception e)
-                    { // Fail silently (we are not even checking if the call to File.Delete succeeded)
+                    {
+                        // Fail silently (we are not even checking if the call to File.Delete succeeded)
                         if (ExceptionHandling.IsCriticalException(e))
                         {
                             throw;
@@ -2545,29 +2535,25 @@ namespace Microsoft.Build.Tasks
                 }
                 return false;
             }
-            catch (Exception e)
+            catch (Exception e) when (e is SerializationException || e is TargetInvocationException)
             {
                 // DDB #9819
                 // SerializationException and TargetInvocationException can occur when trying to serialize a type into a resource format (typically with other exceptions inside)
                 // This is a bug in the type being serialized, so the best we can do is dump diagnostic information and move on to the next input resource file.
-                if (e is SerializationException ||
-                    e is TargetInvocationException)
-                {
-                    _logger.LogErrorWithCodeFromResources("GenerateResource.CannotWriteOutput", FileUtilities.GetFullPathNoThrow(inFile), e.Message); // Input file is more useful to log
+                _logger.LogErrorWithCodeFromResources("GenerateResource.CannotWriteOutput",
+                    FileUtilities.GetFullPathNoThrow(inFile), e.Message); // Input file is more useful to log
 
-                    // Log the stack, so the problem with the type in the .resx is diagnosable by the customer
-                    _logger.LogErrorFromException(e, /* stack */ true, /* inner exceptions */ true, FileUtilities.GetFullPathNoThrow(inFile));
-                    return false;
-                }
-
-                if (!ExceptionHandling.NotExpectedException(e))
-                {
-                    // Regular IO error
-                    _logger.LogErrorWithCodeFromResources("GenerateResource.CannotWriteOutput", FileUtilities.GetFullPathNoThrow(currentOutputFile), e.Message);
-                    return false;
-                }
-
-                throw;
+                // Log the stack, so the problem with the type in the .resx is diagnosable by the customer
+                _logger.LogErrorFromException(e, /* stack */ true, /* inner exceptions */ true,
+                    FileUtilities.GetFullPathNoThrow(inFile));
+                return false;
+            }
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+            {
+                // Regular IO error
+                _logger.LogErrorWithCodeFromResources("GenerateResource.CannotWriteOutput",
+                    FileUtilities.GetFullPathNoThrow(currentOutputFile), e.Message);
+                return false;
             }
 
             return true;
@@ -3546,9 +3532,9 @@ namespace Microsoft.Build.Tasks
         [Serializable]
         internal sealed class TextFileException : Exception
         {
-            private String _fileName;
-            private int _lineNumber;
-            private int _column;
+            private String fileName;
+            private int lineNumber;
+            private int column;
 
             /// <summary>
             /// Fxcop want to have the correct basic exception constructors implemented
@@ -3561,24 +3547,24 @@ namespace Microsoft.Build.Tasks
             internal TextFileException(String message, String fileName, int lineNumber, int linePosition)
                 : base(message)
             {
-                _fileName = fileName;
-                _lineNumber = lineNumber;
-                _column = linePosition;
+                this.fileName = fileName;
+                this.lineNumber = lineNumber;
+                column = linePosition;
             }
 
             internal String FileName
             {
-                get { return _fileName; }
+                get { return fileName; }
             }
 
             internal int LineNumber
             {
-                get { return _lineNumber; }
+                get { return lineNumber; }
             }
 
             internal int LinePosition
             {
-                get { return _column; }
+                get { return column; }
             }
         }
 

@@ -5,11 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices.ComTypes;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using Microsoft.Build.Tasks;
 
 using Marshal = System.Runtime.InteropServices.Marshal;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -148,7 +148,7 @@ namespace Microsoft.Build.UnitTests
             // and doesn't return the handle or clean it up itself there's not much we can do to avoid the leak.
             _faultInjector.FailurePointThrow(MockTypeLibrariesFailurePoints.ITypeLib_GetLibAttr);
 
-            ppTLibAttr = _memoryHelper.AllocateHandle(Marshal.SizeOf(typeof(TYPELIBATTR)));
+            ppTLibAttr = _memoryHelper.AllocateHandle(Marshal.SizeOf<TYPELIBATTR>());
             Marshal.StructureToPtr(this.Attributes, ppTLibAttr, false);
         }
 
@@ -165,7 +165,7 @@ namespace Microsoft.Build.UnitTests
         {
             _faultInjector.FailurePointThrow(MockTypeLibrariesFailurePoints.ITypeLib_GetTypeInfo);
 
-            Assert.IsTrue(index >= 0 && index < _containedTypeInfos.Count);
+            Assert.True(index >= 0 && index < _containedTypeInfos.Count);
             ppTI = _containedTypeInfos[index];
         }
 
@@ -224,7 +224,7 @@ namespace Microsoft.Build.UnitTests
             }
             else
             {
-                Assert.Fail("unexpected guid in ITypeLib2.GetCustData");
+                Assert.True(false, "unexpected guid in ITypeLib2.GetCustData");
                 pVarVal = null;
             }
         }

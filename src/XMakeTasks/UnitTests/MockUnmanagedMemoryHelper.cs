@@ -5,9 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices.ComTypes;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using Marshal = System.Runtime.InteropServices.Marshal;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -66,7 +66,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="handle"></param>
         public void FreeHandle(IntPtr handle)
         {
-            Assert.IsTrue(_allocatedHandles.Exists(new Predicate<IntPtr>(
+            Assert.True(_allocatedHandles.Exists(new Predicate<IntPtr>(
                 delegate (IntPtr ptr) { return ptr == handle; }
             )));
             Marshal.FreeHGlobal(handle);
@@ -89,7 +89,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="mainAllocation"></param>
         public void EnterSubAllocationScope(IntPtr mainAllocation)
         {
-            Assert.AreEqual(IntPtr.Zero, _mainAllocationHandle);
+            Assert.Equal(IntPtr.Zero, _mainAllocationHandle);
 
             _mainAllocationHandle = mainAllocation;
         }
@@ -99,7 +99,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public void ExitSubAllocationScope()
         {
-            Assert.IsTrue(IntPtr.Zero != _mainAllocationHandle);
+            Assert.NotEqual(IntPtr.Zero, _mainAllocationHandle);
 
             _mainAllocationHandle = IntPtr.Zero;
         }
@@ -109,7 +109,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public void AssertAllHandlesReleased()
         {
-            Assert.AreEqual(0, _allocatedHandles.Count);
+            Assert.Equal(0, _allocatedHandles.Count);
         }
     }
 }

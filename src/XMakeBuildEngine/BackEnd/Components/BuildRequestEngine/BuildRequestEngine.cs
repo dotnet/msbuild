@@ -839,14 +839,17 @@ namespace Microsoft.Build.BackEnd
                     // The minimum limit must be no more than 80% of the virtual memory limit to reduce the chances of a single unfortunately
                     // large project resulting in allocations which exceed available VM space between calls to this function.  This situation
                     // is more likely on 32-bit machines where VM space is only 2 gigs.
-                    ulong memoryUseLimit = Convert.ToUInt64(memoryStatus.TotalVirtual * 0.8);
+                    ulong memoryUseLimit = Convert.ToUInt64(memoryStatus.TotalVirtual*0.8);
 
                     // See how much memory we are using and compart that to our limit.
                     ulong memoryInUse = memoryStatus.TotalVirtual - memoryStatus.AvailableVirtual;
                     while ((memoryInUse > memoryUseLimit) || _debugForceCaching)
                     {
-                        TraceEngine("Memory usage at {0}, limit is {1}.  Caching configurations and results cache and collecting.", memoryInUse, memoryUseLimit);
-                        IResultsCache resultsCache = _componentHost.GetComponent(BuildComponentType.ResultsCache) as IResultsCache;
+                        TraceEngine(
+                            "Memory usage at {0}, limit is {1}.  Caching configurations and results cache and collecting.",
+                            memoryInUse, memoryUseLimit);
+                        IResultsCache resultsCache =
+                            _componentHost.GetComponent(BuildComponentType.ResultsCache) as IResultsCache;
 
                         resultsCache.WriteResultsToDisk();
                         if (_configCache.WriteConfigurationsToDisk())
@@ -867,17 +870,11 @@ namespace Microsoft.Build.BackEnd
                         TraceEngine("Memory usage now at {0}", memoryInUse);
                     }
                 }
-                catch (Exception e)
+                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    if (ExceptionHandling.NotExpectedException(e))
-                    {
-                        throw;
-                    }
-                    else
-                    {
-                        _nodeLoggingContext.LogFatalBuildError(new BuildEventFileInfo(Microsoft.Build.Construction.ElementLocation.EmptyLocation), e);
-                        throw new BuildAbortedException(e.Message, e);
-                    }
+                    _nodeLoggingContext.LogFatalBuildError(
+                        new BuildEventFileInfo(Microsoft.Build.Construction.ElementLocation.EmptyLocation), e);
+                    throw new BuildAbortedException(e.Message, e);
                 }
             }
         }

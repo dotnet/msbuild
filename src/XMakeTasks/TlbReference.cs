@@ -364,11 +364,8 @@ namespace Microsoft.Build.Tasks
                 // network path. Make sure that the assembly actually got written to where we wanted it to.
                 File.GetLastWriteTime(wrapperPath);
             }
-            catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                    throw;
-
                 if (!Silent)
                 {
                     Log.LogWarningWithCodeFromResources("ResolveComReference.ErrorCreatingWrapperAssembly", ItemName, e.Message);

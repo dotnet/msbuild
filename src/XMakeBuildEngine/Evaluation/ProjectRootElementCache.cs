@@ -191,7 +191,8 @@ namespace Microsoft.Build.Evaluation
         /// <param name="projectFile">The project file which contains the ProjectRootElement.  Must be a full path.</param>
         /// <param name="openProjectRootElement">The delegate to use to load if necessary. May be null.</param>
         /// <returns>The ProjectRootElement instance if one exists.  Null otherwise.</returns>
-        internal ProjectRootElement Get(string projectFile, OpenProjectRootElement openProjectRootElement, bool isExplicitlyLoaded)
+        internal ProjectRootElement Get(string projectFile, OpenProjectRootElement openProjectRootElement, bool isExplicitlyLoaded,
+            bool preserveFormatting)
         {
             // Should already have been canonicalized
             ErrorUtilities.VerifyThrowInternalRooted(projectFile);
@@ -200,6 +201,12 @@ namespace Microsoft.Build.Evaluation
             {
                 ProjectRootElement projectRootElement;
                 _weakCache.TryGetValue(projectFile, out projectRootElement);
+
+                if (projectRootElement != null && projectRootElement.XmlDocument.PreserveWhitespace != preserveFormatting)
+                {
+                    //  Cached project doesn't match preserveFormatting setting, so don't use it
+                    projectRootElement = null;
+                }
 
                 if (projectRootElement != null && _autoReloadFromDisk)
                 {
@@ -227,9 +234,13 @@ namespace Microsoft.Build.Evaluation
                             // use: it checks the file content as well as the timestamp. That's better than completely disabling
                             // the cache as we get test coverage of the rest of the cache code.
                             XmlDocument document = new XmlDocument();
-                            using (XmlTextReader xtr = new XmlTextReader(projectRootElement.FullPath))
+                            document.PreserveWhitespace = projectRootElement.XmlDocument.PreserveWhitespace;
+
+                            XmlReaderSettings dtdSettings = new XmlReaderSettings();
+                            dtdSettings.DtdProcessing = DtdProcessing.Ignore;
+                            using (var stream = new StreamReader(projectRootElement.FullPath))
+                            using (XmlReader xtr = XmlReader.Create(stream, dtdSettings))
                             {
-                                xtr.DtdProcessing = DtdProcessing.Ignore;
                                 document.Load(xtr);
                             }
 
@@ -336,7 +347,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal ProjectRootElement TryGet(string projectFile)
         {
-            ProjectRootElement result = Get(projectFile, null /* no delegate to load it */, false /*Since we are not creating a PRE this can be true or false*/);
+            ProjectRootElement result = Get(projectFile, null /* no delegate to load it */, false, /*Since we are not creating a PRE this can be true or false*/
+                preserveFormatting: false);
 
             return result;
         }

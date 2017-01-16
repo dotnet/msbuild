@@ -725,14 +725,10 @@ namespace Microsoft.Build.Tasks
                 errorsList.Add(ex);
                 errorFilenamesList.Add(path);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
                 // If there was a problem writing the file (like it's read-only or locked on disk, for
                 // example), then eat the exception and log a warning.  Otherwise, rethrow.
-                if (ExceptionHandling.NotExpectedException(ex))
-                    throw;
-
-                // Log the error and continue on.
                 errorsList.Add(ex);
                 errorFilenamesList.Add(path);
             }

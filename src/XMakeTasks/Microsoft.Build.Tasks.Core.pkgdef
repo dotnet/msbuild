@@ -1,0 +1,7 @@
+[$RootKey$\RuntimeConfiguration\dependentAssembly\bindingRedirection\{5BDA9EB8-561A-405C-A482-2CD328059DEA}]
+"name"="Microsoft.Build.Tasks.Core"
+"codeBase"="$BaseInstallDir$\MSBuild\15.0\Bin\Microsoft.Build.Tasks.Core.dll"
+"publicKeyToken"="b03f5f7f11d50a3a"
+"culture"="neutral"
+"oldVersion"="0.0.0.0-99.9.9.9"
+"newVersion"="15.1.0.0"

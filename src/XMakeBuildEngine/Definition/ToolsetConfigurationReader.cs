@@ -9,9 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
-using System.Text;
-using System.Globalization;
-using System.Reflection;
+using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
@@ -19,15 +17,9 @@ using Microsoft.Build.Shared;
 
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
-using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.Evaluation
 {
-    /// <summary>
-    /// Delegate for unit test purposes only
-    /// </summary>
-    internal delegate Configuration ReadApplicationConfiguration();
-
     /// <summary>
     /// Class used to read toolset configurations.
     /// </summary>
@@ -41,7 +33,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Delegate used to read application configurations
         /// </summary>
-        private ReadApplicationConfiguration _readApplicationConfiguration = null;
+        private readonly Func<Configuration> _readApplicationConfiguration;
 
         /// <summary>
         /// Flag indicating that an attempt has been made to read the configuration
@@ -49,21 +41,33 @@ namespace Microsoft.Build.Evaluation
         private bool _configurationReadAttempted = false;
 
         /// <summary>
+        /// Character used to separate search paths specified for MSBuildExtensionsPath* in
+        /// the config file
+        /// </summary>
+        private char _separatorForExtensionsPathSearchPaths = ';';
+
+        /// <summary>
+        /// Cached values of tools version -> project import search paths table
+        /// </summary>
+        private readonly Dictionary<string, Dictionary<string, ProjectImportPathMatch>> _projectImportSearchPathsCache;
+
+        /// <summary>
         /// Default constructor
         /// </summary>
         internal ToolsetConfigurationReader(PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties)
-            : this(environmentProperties, globalProperties, new ReadApplicationConfiguration(ToolsetConfigurationReader.ReadApplicationConfiguration))
+            : this(environmentProperties, globalProperties, ReadApplicationConfiguration)
         {
         }
 
         /// <summary>
         /// Constructor taking a delegate for unit test purposes only
         /// </summary>
-        internal ToolsetConfigurationReader(PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, ReadApplicationConfiguration readApplicationConfiguration)
+        internal ToolsetConfigurationReader(PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, Func<Configuration> readApplicationConfiguration)
             : base(environmentProperties, globalProperties)
         {
             ErrorUtilities.VerifyThrowArgumentNull(readApplicationConfiguration, "readApplicationConfiguration");
             _readApplicationConfiguration = readApplicationConfiguration;
+            _projectImportSearchPathsCache = new Dictionary<string, Dictionary<string, ProjectImportPathMatch>>(StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -87,46 +91,24 @@ namespace Microsoft.Build.Evaluation
                         yield return new ToolsetPropertyDefinition(toolset.toolsVersion, string.Empty, location);
                     }
                 }
-                else
-                {
-                    yield break;
-                }
             }
         }
 
         /// <summary>
         /// Returns the default tools version, or null if none was specified
         /// </summary>
-        protected override string DefaultToolsVersion
-        {
-            get
-            {
-                return (ConfigurationSection == null ? null : ConfigurationSection.Default);
-            }
-        }
+        protected override string DefaultToolsVersion => ConfigurationSection?.Default;
 
         /// <summary>
-        /// Returns the path to find overridetasks, or null if none was specified
+        /// Returns the path to find override tasks, or null if none was specified
         /// </summary>
-        protected override string MSBuildOverrideTasksPath
-        {
-            get
-            {
-                return (ConfigurationSection == null ? null : ConfigurationSection.MSBuildOverrideTasksPath);
-            }
-        }
+        protected override string MSBuildOverrideTasksPath => ConfigurationSection?.MSBuildOverrideTasksPath;
 
         /// <summary>
-        /// DefaultOverrideToolsVersion attribute on msbuildToolsets element, specifying the toolsversion that should be used by 
+        /// DefaultOverrideToolsVersion attribute on msbuildToolsets element, specifying the tools version that should be used by 
         /// default to build projects with this version of MSBuild.
         /// </summary>
-        protected override string DefaultOverrideToolsVersion
-        {
-            get
-            {
-                return (ConfigurationSection == null ? null : ConfigurationSection.DefaultOverrideToolsVersion);
-            }
-        }
+        protected override string DefaultOverrideToolsVersion => ConfigurationSection?.DefaultOverrideToolsVersion;
 
         /// <summary>
         /// Lazy getter for the ToolsetConfigurationSection
@@ -187,11 +169,11 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// Provides an enumerator over the set of sub-toolset names available to a particular
-        /// toolsversion.  MSBuild config files do not currently support sub-toolsets, so 
+        /// tools version.  MSBuild config files do not currently support sub-toolsets, so
         /// we return nothing. 
         /// </summary>
         /// <param name="toolsVersion">The tools version.</param>
-        /// <returns>An enumeration of the sub-toolsets that belong to that toolsversion.</returns>
+        /// <returns>An enumeration of the sub-toolsets that belong to that tools version.</returns>
         protected override IEnumerable<string> GetSubToolsetVersions(string toolsVersion)
         {
             yield break;
@@ -211,12 +193,75 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// Returns a map of project property names / list of search paths for the specified toolsVersion and os
+        /// </summary>
+        protected override Dictionary<string, ProjectImportPathMatch> GetProjectImportSearchPathsTable(string toolsVersion, string os)
+        {
+            Dictionary<string, ProjectImportPathMatch> kindToPathsCache;
+            var key = toolsVersion + ":" + os;
+            if (_projectImportSearchPathsCache.TryGetValue(key, out kindToPathsCache))
+            {
+                return kindToPathsCache;
+            }
+
+            // Read and populate the map
+            kindToPathsCache = new Dictionary<string, ProjectImportPathMatch>();
+            _projectImportSearchPathsCache[key] = kindToPathsCache;
+
+            ToolsetElement toolsetElement = ConfigurationSection.Toolsets.GetElement(toolsVersion);
+            var propertyCollection = toolsetElement?.AllProjectImportSearchPaths?.GetElement(os)?.PropertyElements;
+            if (propertyCollection == null || propertyCollection.Count == 0)
+            {
+                return kindToPathsCache;
+            }
+
+            kindToPathsCache = ComputeDistinctListOfSearchPaths(propertyCollection);
+
+            return kindToPathsCache;
+        }
+
+        /// <summary>
+        /// Returns a list of the search paths for a given search path property collection
+        /// </summary>
+        private Dictionary<string, ProjectImportPathMatch> ComputeDistinctListOfSearchPaths(ToolsetElement.PropertyElementCollection propertyCollection)
+        {
+            var pathsTable = new Dictionary<string, ProjectImportPathMatch>();
+
+            foreach (ToolsetElement.PropertyElement property in propertyCollection)
+            {
+                if (string.IsNullOrEmpty(property.Value) || string.IsNullOrEmpty(property.Name))
+                {
+                    continue;
+                }
+
+                //FIXME: handle ; in path on Unix
+                var paths =
+                    property.Value.Split(new[] {_separatorForExtensionsPathSearchPaths},
+                        StringSplitOptions.RemoveEmptyEntries).Distinct();
+
+                pathsTable.Add(property.Name, new ProjectImportPathMatch(property.Name, paths.ToList()));
+            }
+
+            return pathsTable;
+        }
+
+        /// <summary>
         /// Reads the application configuration file.
         /// NOTE: this is abstracted into a method to support unit testing GetToolsetDataFromConfiguration().
         /// Unit tests wish to avoid reading (nunit.exe) application configuration file.
         /// </summary>
         private static Configuration ReadApplicationConfiguration()
         {
+            var msbuildExeConfig = BuildEnvironmentHelper.Instance.CurrentMSBuildConfigurationFile;
+
+            // When running from the command-line or from VS, use the msbuild.exe.config file
+            if (!BuildEnvironmentHelper.Instance.RunningTests && File.Exists(msbuildExeConfig))
+            {
+                var configFile = new ExeConfigurationFileMap { ExeConfigFilename = msbuildExeConfig };
+                return ConfigurationManager.OpenMappedExeConfiguration(configFile, ConfigurationUserLevel.None);
+            }
+
+            // When running tests or the expected config file doesn't exist, fall-back to default
             return ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
         }
     }

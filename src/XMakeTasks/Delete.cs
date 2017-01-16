@@ -17,7 +17,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Delete files from disk.
     /// </summary>
-    public sealed class Delete : TaskExtension, ICancelableTask
+    public class Delete : TaskExtension, ICancelableTask
     {
         #region Properties
 
@@ -116,10 +116,8 @@ namespace Microsoft.Build.Tasks
                         deletedFilesList.Add(deletedFile);
                     }
                 }
-                catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    if (ExceptionHandling.NotExpectedException(e))
-                        throw;
                     LogError(file, e);
                 }
 

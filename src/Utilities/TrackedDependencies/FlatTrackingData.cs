@@ -68,12 +68,7 @@ namespace Microsoft.Build.Utilities
         #region Properties
 
         // Provide external access to the dependencyTable
-#if WHIDBEY_VISIBILITY
-        internal
-#else
-        public
-#endif
-        IDictionary<string, DateTime> DependencyTable
+        internal IDictionary<string, DateTime> DependencyTable
         {
             get { return _dependencyTable; }
         }
@@ -251,6 +246,28 @@ namespace Microsoft.Build.Utilities
 
             InternalConstruct(null, tlogFiles, tlogFilesToIgnore, false, missingFileTimeUtc, excludedInputPaths);
         }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="tlogFiles">The .tlog files to interpret</param>
+        /// <param name="tlogFilesToIgnore">The .tlog files to ignore</param>
+        /// <param name="missingFileTimeUtc">The DateTime that should be recorded for missing file.</param>
+        /// <param name="excludedInputPaths">The set of paths that contain files that are to be ignored during up to date check, including any subdirectories.</param>
+        /// <param name="sharedLastWriteTimeUtcCache">Cache to be used for all timestamp/exists comparisons, which can be shared between multiple FlatTrackingData instances.</param>
+        /// <param name="treatRootMarkersAsEntries">Add root markers as inputs.</param>
+        public FlatTrackingData(ITaskItem[] tlogFiles, ITaskItem[] tlogFilesToIgnore, DateTime missingFileTimeUtc, string[] excludedInputPaths, IDictionary<string, DateTime> sharedLastWriteTimeUtcCache, bool treatRootMarkersAsEntries)
+        {
+            _treatRootMarkersAsEntries = treatRootMarkersAsEntries;
+
+            if (sharedLastWriteTimeUtcCache != null)
+            {
+                _lastWriteTimeUtcCache = sharedLastWriteTimeUtcCache;
+            }
+
+            InternalConstruct(null, tlogFiles, tlogFilesToIgnore, false, missingFileTimeUtc, excludedInputPaths);
+        }
+
 
 
         /// <summary>
@@ -442,7 +459,7 @@ namespace Microsoft.Build.Utilities
                 {
                     FileTracker.LogMessage(_log, MessageImportance.Low, "\t{0}", tlogFileName.ItemSpec);
 
-                    DateTime tlogLastWriteTimeUtc = NativeMethods.GetLastWriteTimeUtc(tlogFileName.ItemSpec);
+                    DateTime tlogLastWriteTimeUtc = NativeMethodsShared.GetLastWriteFileUtcTime(tlogFileName.ItemSpec);
                     if (tlogLastWriteTimeUtc > _newestTLogTimeUtc)
                     {
                         _newestTLogTimeUtc = tlogLastWriteTimeUtc;
@@ -467,7 +484,7 @@ namespace Microsoft.Build.Utilities
                                 tlogEntry = tlog.ReadLine();
                                 continue;
                             }
-                            else if (tlogEntry[0] == '^' && TreatRootMarkersAsEntries) // This is a rooting record, and we should keep it
+                            else if (tlogEntry[0] == '^' && TreatRootMarkersAsEntries && tlogEntry.IndexOf('|') < 0) // This is a rooting non composite record, and we should keep it
                             {
                                 tlogEntry = tlogEntry.Substring(1);
 
@@ -497,13 +514,8 @@ namespace Microsoft.Build.Utilities
                         }
                     }
                 }
-                catch (Exception e)
+                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    if (ExceptionHandling.NotExpectedException(e))
-                    {
-                        throw;
-                    }
-
                     FileTracker.LogWarningWithCodeFromResources(_log, "Tracking_RebuildingDueToInvalidTLog", e.Message);
                     break;
                 }
@@ -555,7 +567,7 @@ namespace Microsoft.Build.Utilities
             // First update the details of our Tlogs
             foreach (ITaskItem tlogFileName in _tlogFiles)
             {
-                DateTime tlogLastWriteTimeUtc = NativeMethods.GetLastWriteTimeUtc(tlogFileName.ItemSpec);
+                DateTime tlogLastWriteTimeUtc = NativeMethodsShared.GetLastWriteFileUtcTime(tlogFileName.ItemSpec);
                 if (tlogLastWriteTimeUtc > _newestTLogTimeUtc)
                 {
                     _newestTLogTimeUtc = tlogLastWriteTimeUtc;
@@ -675,11 +687,11 @@ namespace Microsoft.Build.Utilities
                 // empty all tlogs
                 foreach (ITaskItem tlogFile in _tlogFiles)
                 {
-                    File.WriteAllText(tlogFile.ItemSpec, "", System.Text.Encoding.Unicode);
+                    File.WriteAllText(tlogFile.ItemSpec, "", Encoding.Unicode);
                 }
 
                 // Write out the dependency information as a new tlog
-                using (StreamWriter newTlog = new StreamWriter(firstTlog, false, System.Text.Encoding.Unicode))
+                using (StreamWriter newTlog = new StreamWriter(firstTlog, false, Encoding.Unicode))
                 {
                     foreach (string fileEntry in _dependencyTable.Keys)
                     {
@@ -715,7 +727,7 @@ namespace Microsoft.Build.Utilities
             DateTime fileModifiedTimeUtc = DateTime.MinValue;
             if (!_lastWriteTimeUtcCache.TryGetValue(file, out fileModifiedTimeUtc))
             {
-                fileModifiedTimeUtc = NativeMethods.GetLastWriteTimeUtc(file);
+                fileModifiedTimeUtc = NativeMethodsShared.GetLastWriteFileUtcTime(file);
                 _lastWriteTimeUtcCache[file] = fileModifiedTimeUtc;
             }
 
@@ -748,7 +760,7 @@ namespace Microsoft.Build.Utilities
             FlatTrackingData outputs = new FlatTrackingData(hostTask, writeTLogNames, DateTime.MinValue);
 
             // Find out if we are up to date
-            isUpToDate = FlatTrackingData.IsUpToDate(hostTask.Log, upToDateCheckType, inputs, outputs);
+            isUpToDate = IsUpToDate(hostTask.Log, upToDateCheckType, inputs, outputs);
 
             // We're going to execute, so clear out the tlogs so
             // the new execution will correctly populate the tlogs a-new
@@ -959,12 +971,7 @@ namespace Microsoft.Build.Utilities
     /// <summary>
     /// The possible types of up to date check that we can support
     /// </summary>
-#if WHIDBEY_VISIBILITY
-    internal
-#else
-    public
-#endif
-    enum UpToDateCheckType
+    public enum UpToDateCheckType
     {
         InputNewerThanOutput,
         InputOrOutputNewerThanTracking,

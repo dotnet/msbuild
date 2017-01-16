@@ -134,6 +134,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool _copyLocalDependenciesWhenParentReferenceInGac;
 
+        private bool _doNotCopyLocalIfInGac;
+
         /// <summary>
         ///  Shoould the framework attribute version mismatch be ignored.
         /// </summary>
@@ -142,7 +144,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Delegate to determine if an assembly name is in the GAC.
         /// </summary>
-        private CheckIfAssemblyInGac _checkIfAssemblyIsInGac;
+        private GetAssemblyPathInGac _getAssemblyPathInGac;
 
         /// <summary>
         /// Build engine 
@@ -218,7 +220,8 @@ namespace Microsoft.Build.Tasks
             TaskLoggingHelper log,
             string[] latestTargetFrameworkDirectories,
             bool copyLocalDependenciesWhenParentReferenceInGac,
-            CheckIfAssemblyInGac checkIfAssemblyIsInGac,
+            bool doNotCopyLocalIfInGac,
+            GetAssemblyPathInGac getAssemblyPathInGac,
             IsWinMDFile isWinMDFile,
             bool ignoreVersionForFrameworkReferences,
             ReadMachineTypeFromPEHeader readMachineTypeFromPEHeader,
@@ -250,7 +253,8 @@ namespace Microsoft.Build.Tasks
             _targetFrameworkMoniker = targetFrameworkMoniker;
             _latestTargetFrameworkDirectories = latestTargetFrameworkDirectories;
             _copyLocalDependenciesWhenParentReferenceInGac = copyLocalDependenciesWhenParentReferenceInGac;
-            _checkIfAssemblyIsInGac = checkIfAssemblyIsInGac;
+            _doNotCopyLocalIfInGac = doNotCopyLocalIfInGac;
+            _getAssemblyPathInGac = getAssemblyPathInGac;
             _isWinMDFile = isWinMDFile;
             _readMachineTypeFromPEHeader = readMachineTypeFromPEHeader;
             _warnOrErrorOnTargetArchitectureMismatch = warnOrErrorOnTargetArchitectureMismatch;
@@ -299,7 +303,9 @@ namespace Microsoft.Build.Tasks
                     openBaseKey,
                     installedAssemblies,
                     getRuntimeVersion,
-                    targetedRuntimeVersion
+                    targetedRuntimeVersion,
+                    getAssemblyPathInGac,
+                    log
                 );
         }
 
@@ -629,10 +635,8 @@ namespace Microsoft.Build.Tasks
                 // Managed assembly was found but could not be loaded.
                 reference.AddError(new BadImageReferenceException(e.Message, e));
             }
-            catch (Exception e) // Catching Exception, but rethrowing unless it's an IO related exception.
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                    throw;
                 reference.AddError(new BadImageReferenceException(e.Message, e));
             }
 
@@ -843,12 +847,8 @@ namespace Microsoft.Build.Tasks
 
                 AddReference(assemblyName, reference);
             }
-            catch (Exception e) // Catching Exception, but rethrowing unless it's an IO related exception.
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                    throw;
-
-                // Invalid file path. 
                 throw new InvalidParameterValueException("AssemblyFiles", referenceAssemblyFile.ItemSpec, e.Message);
             }
         }
@@ -931,13 +931,8 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                {
-                    throw;
-                }
-
                 if (_log != null)
                 {
                     _log.LogErrorFromResources("ResolveAssemblyReference.ProblemFindingSatelliteAssemblies", reference.FullPath, e.Message);
@@ -1196,11 +1191,8 @@ namespace Microsoft.Build.Tasks
             {
                 reference.AddError(new DependencyResolutionException(e.Message, e));
             }
-            catch (Exception e) // Catching Exception, but rethrowing unless it's an IO related exception.
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                    throw;
-
                 reference.AddError(new DependencyResolutionException(e.Message, e));
             }
         }
@@ -2021,7 +2013,7 @@ namespace Microsoft.Build.Tasks
                             referenceAssemblyDirectories = new List<string>(_latestTargetFrameworkDirectories);
                             otherFrameworkName = String.Join(";", _latestTargetFrameworkDirectories);
                         }
-                        else if (targetFrameworkMoniker != null)
+                        else
                         {
                             FrameworkNameVersioning highestFrameworkName = null;
                             referenceAssemblyDirectories = GetHighestVersionReferenceAssemblyDirectories(targetFrameworkMoniker, out highestFrameworkName);
@@ -2469,9 +2461,10 @@ namespace Microsoft.Build.Tasks
                         _getRuntimeVersion,
                         _targetedRuntimeVersion,
                         _fileExists,
+                        _getAssemblyPathInGac,
                         _copyLocalDependenciesWhenParentReferenceInGac,
-                        this,
-                        _checkIfAssemblyIsInGac
+                        _doNotCopyLocalIfInGac,
+                        this
                     );
 
                     // If mscorlib was found as a dependency and not a primary reference we will assume that mscorlib on the target machine will be ok to use.
@@ -2820,7 +2813,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (ExceptionHandling.IsCriticalException(e))
                 {
-                    throw e;
+                    throw;
                 }
 
                 _log.LogErrorWithCodeFromResources("ResolveAssemblyReference.ProblemReadingImplementationDll", dllPath, e.Message);

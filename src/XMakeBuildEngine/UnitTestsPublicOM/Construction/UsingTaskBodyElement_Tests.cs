@@ -1,6 +1,6 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="UsingTaskBodyElement_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // </copyright>
 // <summary>Tests for the ProjectUsingTaskBodyElement class.</summary>
 //-----------------------------------------------------------------------
@@ -14,38 +14,37 @@ using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
     /// Tests for the ProjectUsingTaskElement class
     /// </summary>
-    [TestClass]
     public class UsingTaskBodyElement_Tests
     {
         /// <summary>
         /// Read simple task body
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReadBody()
         {
             ProjectUsingTaskBodyElement body = GetBodyXml();
 
-            Assert.IsTrue(bool.FalseString.Equals(body.Evaluate, StringComparison.OrdinalIgnoreCase));
-            Assert.AreEqual("Contents", body.TaskBody);
+            Assert.True(bool.FalseString.Equals(body.Evaluate, StringComparison.OrdinalIgnoreCase));
+            Assert.Equal("Contents", body.TaskBody);
         }
 
         /// <summary>
         /// Read task body with an invalid attribute
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidAttribute()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <UsingTask AssemblyFile='af' TaskFactory='AssemblyFactory'>
                             <Task NotValidAttribute='OHI'/>
@@ -53,18 +52,20 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            Assert.Fail();
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                Assert.True(false);
+            }
+           );
         }
-
         /// <summary>
         /// Create a task body outside of a using task
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void CreateBodyOutsideUsingTask()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Task>
                             Contents
@@ -72,60 +73,63 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Set body value
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetValue()
         {
             ProjectUsingTaskBodyElement body = GetBodyXml();
             Helpers.ClearDirtyFlag(body.ContainingProject);
 
             body.TaskBody = "MoreContents";
-            Assert.AreEqual("MoreContents", body.TaskBody);
-            Assert.AreEqual(true, body.ContainingProject.HasUnsavedChanges);
+            Assert.Equal("MoreContents", body.TaskBody);
+            Assert.Equal(true, body.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set body value to empty
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetEmptyValue()
         {
             ProjectUsingTaskBodyElement body = GetBodyXml();
             Helpers.ClearDirtyFlag(body.ContainingProject);
 
             body.TaskBody = String.Empty;
-            Assert.AreEqual(String.Empty, body.TaskBody);
-            Assert.AreEqual(true, body.ContainingProject.HasUnsavedChanges);
+            Assert.Equal(String.Empty, body.TaskBody);
+            Assert.Equal(true, body.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set body value to null
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Fact]
         public void SetInvalidNullValue()
         {
-            ProjectUsingTaskBodyElement body = GetBodyXml();
-            body.TaskBody = null;
-            Assert.Fail();
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                ProjectUsingTaskBodyElement body = GetBodyXml();
+                body.TaskBody = null;
+                Assert.True(false);
+            }
+           );
         }
-
         /// <summary>
         /// Verify setting the value of evaluate to null will wipe out the element and then the property will return true by default.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetEvaluateAttributeToNull()
         {
             ProjectUsingTaskBodyElement body = GetBodyXml();
-            Assert.IsTrue(body.ContainingProject.RawXml.Contains("Evaluate"));
+            Assert.True(body.ContainingProject.RawXml.Contains("Evaluate"));
             body.Evaluate = null;
-            Assert.IsTrue(!body.ContainingProject.RawXml.Contains("Evaluate"));
-            Assert.AreEqual(bool.TrueString, body.Evaluate);
+            Assert.False(body.ContainingProject.RawXml.Contains("Evaluate"));
+            Assert.Equal(bool.TrueString, body.Evaluate);
         }
 
         /// <summary>

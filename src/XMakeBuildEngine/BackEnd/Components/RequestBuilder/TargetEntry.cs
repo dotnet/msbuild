@@ -13,7 +13,9 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Collections;
+#if FEATURE_MSBUILD_DEBUGGER
 using Microsoft.Build.Debugging;
+#endif
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
@@ -71,7 +73,7 @@ namespace Microsoft.Build.BackEnd
     /// This class represents a single target in the TargetBuilder.  It maintains the state machine for a particular target as well as
     /// relevant information on outputs generated while a target is running.
     /// </summary>
-    [DebuggerDisplay("Name={targetSpecification.TargetName} State={state} Result={targetResult.ResultCode}")]
+    [DebuggerDisplay("Name={_targetSpecification.TargetName} State={_state} Result={_targetResult.ResultCode}")]
     internal class TargetEntry : IEquatable<TargetEntry>
     {
         /// <summary>
@@ -791,19 +793,22 @@ namespace Microsoft.Build.BackEnd
                 {
                     ProjectTargetInstanceChild targetChildInstance = _target.Children[currentTask];
 
+#if FEATURE_MSBUILD_DEBUGGER
                     if (DebuggerManager.DebuggingEnabled)
                     {
                         DebuggerManager.EnterState(targetChildInstance.Location, lookupForExecution.GlobalsForDebugging /* does not matter which lookup we get this from */);
                     }
+#endif
 
                     // Execute the task.
                     lastResult = await taskBuilder.ExecuteTask(targetLoggingContext, _requestEntry, _targetBuilderCallback, targetChildInstance, mode, lookupForInference, lookupForExecution, _cancellationToken);
 
+#if FEATURE_MSBUILD_DEBUGGER
                     if (DebuggerManager.DebuggingEnabled)
                     {
                         DebuggerManager.LeaveState(targetChildInstance.Location);
                     }
-
+#endif
                     if (lastResult.ResultCode == WorkUnitResultCode.Failed)
                     {
                         aggregatedTaskResult = WorkUnitResultCode.Failed;

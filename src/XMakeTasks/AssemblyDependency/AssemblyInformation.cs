@@ -383,7 +383,7 @@ namespace Microsoft.Build.Tasks
             asmMeta.rpLocale = Marshal.AllocCoTaskMem(GENMAN_LOCALE_BUF_SIZE * 2);
             asmMeta.cchLocale = (uint)GENMAN_LOCALE_BUF_SIZE;
             // Convert to unmanaged structure.
-            int size = Marshal.SizeOf(typeof(ASSEMBLYMETADATA));
+            int size = Marshal.SizeOf<ASSEMBLYMETADATA>();
             IntPtr asmMetaPtr = Marshal.AllocCoTaskMem(size);
             Marshal.StructureToPtr(asmMeta, asmMetaPtr, false);
 

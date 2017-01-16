@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="pt-BR" original="../Strings.ManifestUtilities.resx">
+    <body>
+      <group id="MICROSOFT.BUILD.TASKS/MANIFESTUTIL/RESOURCES/STRINGS.RESX" datatype="resx" />
+      <trans-unit id="ComImporter.LocalServerNotSupported">
+        <source>Out of process servers are not supported</source>
+        <target state="translated">Não há suporte para servidores fora do processo</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ComImporter.MissingValue">
+        <source>Registry key '{0}' is missing value '{1}'.</source>
+        <target state="translated">A chave do Registro "{0}" não tem o valor "{1}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ComImporter.NoRegisteredClasses">
+        <source>No registered classes were detected for this component.</source>
+        <target state="translated">Nenhuma classe registrada foi detectada para este componente.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ComImporter.ProtectedFile">
+        <source>Components under system file protection should not be isolated.</source>
+        <target state="translated">Os componentes que estão sob proteção de arquivos de sistema não devem ser isolados.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ComImporter.TypeLibraryLoadFailure">
+        <source>Could not load type library.</source>
+        <target state="translated">Não foi possível carregar a biblioteca de tipos.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ComImporter.SubKeyNotImported">
+        <source>Registry key '{0}' was not imported.</source>
+        <target state="translated">A chave do Registro "{0}" não foi importada.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ComImporter.ValueNotImported">
+        <source>Registry value '{0}' was not imported.</source>
+        <target state="translated">O valor do Registro "{0}" não foi importado.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SecurityUtil.SignTargetNotFound">
+        <source>The file to be signed {0} could not be found.</source>
+        <target state="translated">O arquivo a ser assinado {0} não foi encontrado.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SecurityUtil.SigntoolFail">
+        <source>Failed to sign {0}. {1}</source>
+        <target state="translated">Falha ao assinar {0}. {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SecurityUtil.SigntoolWarning">
+        <source>Warning while signing {0}. {1}</source>
+        <target state="translated">Aviso durante assinatura de {0}. {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SecurityUtil.SigntoolNotFound">
+        <source>SignTool.exe was not found at path {0}.</source>
+        <target state="translated">Arquivo SignTool.exe não encontrado no caminho {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SecurityUtil.TimestampUrlNotFound">
+        <source>Timestamp URL server name or address could not be resolved.</source>
+        <target state="translated">Não foi possível resolver o endereço nem o nome do servidor da URL de carimbo de data/hora.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SecurityUtil.OnlyRSACertsAreAllowed">
+        <source>Only certificates using RSA encryption are valid for signing ClickOnce manifests.</source>
+        <target state="translated">Apenas os certificados que usam a criptografia RSA são válidos para assinar manifestos ClickOnce.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TrustInfo.RequestedExecutionLevelComment">
+        <source>
+          UAC Manifest Options
+          If you want to change the Windows User Account Control level replace the 
+          requestedExecutionLevel node with one of the following.
+
+        &lt;requestedExecutionLevel  level="asInvoker" uiAccess="false" /&gt;
+        &lt;requestedExecutionLevel  level="requireAdministrator" uiAccess="false" /&gt;
+        &lt;requestedExecutionLevel  level="highestAvailable" uiAccess="false" /&gt;
+
+         If you want to utilize File and Registry Virtualization for backward 
+         compatibility then delete the requestedExecutionLevel node.
+    </source>
+        <target state="translated">
+          Opções de Manifesto UAC
+          Se desejar mudar o nível de Controle de Conta de Usuário do Windows, substitua o 
+          nó requestedExecutionLevel por um dos seguintes.
+
+        &lt;requestedExecutionLevel  level="asInvoker" uiAccess="false" /&gt;
+        &lt;requestedExecutionLevel  level="requireAdministrator" uiAccess="false" /&gt;
+        &lt;requestedExecutionLevel  level="highestAvailable" uiAccess="false" /&gt;
+
+         Se deseja usar a Virtualização de Arquivos e Registro para compatibilidade 
+         com versões anteriores, exclua o nó requestedExecutionLevel.
+    </target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

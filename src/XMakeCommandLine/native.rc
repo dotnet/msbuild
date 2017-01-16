@@ -7,6 +7,4 @@
 #include <vsver.rc>
 
 APPICON               ICON    "MSBuild.ico"
-#ifndef BUILDING_DF_LKG
 1		RT_MANIFEST   "msbuild.exe.manifest"
-#endif

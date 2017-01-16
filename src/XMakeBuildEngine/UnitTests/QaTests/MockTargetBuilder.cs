@@ -1,4 +1,7 @@
-﻿using System;
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Xml;
 using System.Text;
 using System.Collections;
@@ -28,52 +31,52 @@ namespace Microsoft.Build.UnitTests.QA
         /// <summary>
         /// The component host.
         /// </summary>
-        private IBuildComponentHost host;
+        private IBuildComponentHost _host;
 
         /// <summary>
         /// The BuildRequestEntry for which we are building targets.
         /// </summary>
-        private BuildRequestEntry requestEntry;
+        private BuildRequestEntry _requestEntry;
 
         /// <summary>
         /// The project logging context
         /// </summary>
-        private ProjectLoggingContext projectLoggingContext;
+        private ProjectLoggingContext _projectLoggingContext;
 
         /// <summary>
         /// Request Callback
         /// </summary>
-        private IRequestBuilderCallback requestCallBack;
+        private IRequestBuilderCallback _requestCallBack;
 
         /// <summary>
         /// The test data provider
         /// </summary>
-        private ITestDataProvider testDataProvider;
+        private ITestDataProvider _testDataProvider;
 
         /// <summary>
         /// Test definition associated with the project that we are building
         /// </summary>
-        private RequestDefinition testDefinition;
+        private RequestDefinition _testDefinition;
 
         /// <summary>
         /// Event to notify that the build has been completed
         /// </summary>
-        private AutoResetEvent buildDone;
+        private AutoResetEvent _buildDone;
 
         /// <summary>
         /// The cancellation token
         /// </summary>
-        private CancellationToken cancellationToken;
+        private CancellationToken _cancellationToken;
 
         public QAMockTargetBuilder()
         {
-            this.host = null;
-            this.testDataProvider = null;
-            this.testDefinition = null;
-            this.requestCallBack = null;
-            this.requestEntry = null;
-            this.projectLoggingContext = null;
-            this.buildDone = new AutoResetEvent(false);
+            _host = null;
+            _testDataProvider = null;
+            _testDefinition = null;
+            _requestCallBack = null;
+            _requestEntry = null;
+            _projectLoggingContext = null;
+            _buildDone = new AutoResetEvent(false);
         }
 
         /// <summary>
@@ -82,13 +85,13 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public Task<BuildResult> BuildTargets(ProjectLoggingContext loggingContext, BuildRequestEntry entry, IRequestBuilderCallback callback, string[] targetNames, Lookup baseLookup, CancellationToken cancellationToken)
         {
-            this.requestEntry = entry;
-            this.projectLoggingContext = loggingContext;
-            this.requestCallBack = callback;
-            this.testDefinition = this.testDataProvider[entry.Request.ConfigurationId];
-            this.cancellationToken = cancellationToken;
+            _requestEntry = entry;
+            _projectLoggingContext = loggingContext;
+            _requestCallBack = callback;
+            _testDefinition = _testDataProvider[entry.Request.ConfigurationId];
+            _cancellationToken = cancellationToken;
             BuildResult result = GenerateResults(targetNames);
-            
+
             return Task<BuildResult>.FromResult(result);
         }
 
@@ -100,8 +103,8 @@ namespace Microsoft.Build.UnitTests.QA
         /// <param name="host">The component host.</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            this.host = host;
-            this.testDataProvider = (ITestDataProvider)host.GetComponent(BuildComponentType.TestDataProvider);
+            _host = host;
+            _testDataProvider = (ITestDataProvider)host.GetComponent(BuildComponentType.TestDataProvider);
         }
 
         /// <summary>
@@ -109,12 +112,12 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void ShutdownComponent()
         {
-            this.host = null;
-            this.testDataProvider = null;
-            this.testDefinition = null;
-            this.requestCallBack = null;
-            this.requestEntry = null;
-            this.projectLoggingContext = null;
+            _host = null;
+            _testDataProvider = null;
+            _testDefinition = null;
+            _requestCallBack = null;
+            _requestEntry = null;
+            _projectLoggingContext = null;
         }
 
         /// <summary>
@@ -122,7 +125,7 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public string GetToolsVersion(string filename, string elementname, string attributename)
         {
-            return this.testDefinition.ToolsVersion;
+            return _testDefinition.ToolsVersion;
         }
 
         #endregion
@@ -137,7 +140,7 @@ namespace Microsoft.Build.UnitTests.QA
         private BuildResult GenerateResults(string[] targetNames)
         {
             bool simulatedResults = false;
-            BuildResult result = new BuildResult(this.requestEntry.Request);
+            BuildResult result = new BuildResult(_requestEntry.Request);
             foreach (string target in targetNames)
             {
                 if (!simulatedResults)
@@ -147,24 +150,24 @@ namespace Microsoft.Build.UnitTests.QA
                 }
 
                 // Wait for this to be cancelled
-                if (this.testDefinition.WaitForCancel)
+                if (_testDefinition.WaitForCancel)
                 {
-                    this.cancellationToken.WaitHandle.WaitOne();
-                    this.buildDone.Set();
+                    _cancellationToken.WaitHandle.WaitOne();
+                    _buildDone.Set();
                     throw new BuildAbortedException();
                 }
 
-                if (this.testDefinition.ExecutionTime > 0)
+                if (_testDefinition.ExecutionTime > 0)
                 {
-                    Thread.Sleep(this.testDefinition.ExecutionTime);
+                    Thread.Sleep(_testDefinition.ExecutionTime);
                 }
 
-                TaskItem[] items = new TaskItem[] { new TaskItem("itemValue", this.requestEntry.RequestConfiguration.ProjectFullPath) };
+                TaskItem[] items = new TaskItem[] { new TaskItem("itemValue", _requestEntry.RequestConfiguration.ProjectFullPath) };
                 TargetResult targetResult = new TargetResult(items, TestUtilities.GetSuccessResult());
                 result.AddResultsForTarget(target, targetResult);
             }
 
-            buildDone.Set();
+            _buildDone.Set();
             return result;
         }
 
@@ -177,19 +180,19 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         private void SimulateCallBacks()
         {
-            if (this.testDefinition.ChildDefinitions == null || this.testDefinition.ChildDefinitions.Count < 1)
+            if (_testDefinition.ChildDefinitions == null || _testDefinition.ChildDefinitions.Count < 1)
             {
                 return;
             }
 
-            int count = this.testDefinition.ChildDefinitions.Count;
+            int count = _testDefinition.ChildDefinitions.Count;
             string[] projectFiles = new string[count];
             PropertyDictionary<ProjectPropertyInstance>[] properties = new PropertyDictionary<ProjectPropertyInstance>[count];
             string[] toolsVersions = new string[count];
             string[] targetsToBuild = null;
 
             count = 0;
-            foreach (RequestDefinition d in this.testDefinition.ChildDefinitions)
+            foreach (RequestDefinition d in _testDefinition.ChildDefinitions)
             {
                 projectFiles[count] = d.FileName;
                 properties[count] = d.GlobalProperties;
@@ -198,7 +201,7 @@ namespace Microsoft.Build.UnitTests.QA
                 count++;
             }
 
-            this.requestCallBack.BuildProjects(projectFiles, properties, toolsVersions, targetsToBuild, true);
+            _requestCallBack.BuildProjects(projectFiles, properties, toolsVersions, targetsToBuild, true);
         }
 
         #endregion

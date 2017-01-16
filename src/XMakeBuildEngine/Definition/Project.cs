@@ -6,7 +6,9 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -32,38 +34,6 @@ using System.Globalization;
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
-    /// Flags for controlling the project load.
-    /// </summary>
-    /// <remarks>
-    /// This is a "flags" enum, allowing future settings to be added
-    /// in an additive, non breaking fashion.
-    /// </remarks>
-    [Flags]
-    [SuppressMessage("Microsoft.Design", "CA1008:EnumsShouldHaveZeroValue", Justification = "Public API.  'Default' is roughly equivalent to 'None'. ")]
-    public enum ProjectLoadSettings
-    {
-        /// <summary>
-        /// Normal load. This is the default.
-        /// </summary>
-        Default = 0,
-
-        /// <summary>
-        /// Ignore nonexistent targets files when evaluating the project
-        /// </summary>
-        IgnoreMissingImports = 1,
-
-        /// <summary>
-        /// Record imports including duplicate, but not circular, imports on the ImportsIncludingDuplicates property
-        /// </summary>
-        RecordDuplicateButNotCircularImports = 2,
-
-        /// <summary>
-        /// Throw an exception and stop the evaluation of a project if any circular imports are detected
-        /// </summary>
-        RejectCircularImports = 4
-    }
-
-    /// <summary>
     /// Represents an evaluated project with design time semantics.
     /// Always backed by XML; can be built directly, or an instance can be cloned off to add virtual items/properties and build.
     /// Edits to this project always update the backing XML.
@@ -71,7 +41,7 @@ namespace Microsoft.Build.Evaluation
     /// <remarks>
     /// UNDONE: (Multiple configurations.) Protect against problems when attempting to edit, after edits were made to the same ProjectRootElement either directly or through other projects evaluated from that ProjectRootElement.
     /// </remarks>
-    [DebuggerDisplay("{FullPath} EffectiveToolsVersion={ToolsVersion} #GlobalProperties={data.globalProperties.Count} #Properties={data.Properties.Count} #ItemTypes={data.ItemTypes.Count} #ItemDefinitions={data.ItemDefinitions.Count} #Items={data.Items.Count} #Targets={data.Targets.Count}")]
+    [DebuggerDisplay("{FullPath} EffectiveToolsVersion={ToolsVersion} #GlobalProperties={_data._globalProperties.Count} #Properties={_data.Properties.Count} #ItemTypes={_data.ItemTypes.Count} #ItemDefinitions={_data.ItemDefinitions.Count} #Items={_data.Items.Count} #Targets={_data.Targets.Count}")]
     public class Project
     {
         /// <summary>
@@ -102,11 +72,6 @@ namespace Microsoft.Build.Evaluation
         /// Used such that even after unload and reload, the evaluation counter changes.
         /// </summary>
         private static int s_globalEvaluationCounter;
-
-        /// <summary>
-        /// Locking object.
-        /// </summary>
-        private static object s_locker = new Object();
 
         /// <summary>
         /// Backing data; stored in a nested class so it can be passed to the Evaluator to fill
@@ -164,12 +129,27 @@ namespace Microsoft.Build.Evaluation
         private RenameHandlerDelegate _renameHandler;
 
         /// <summary>
+        /// Default project template options (include all features).
+        /// </summary>
+        internal const NewProjectFileOptions DefaultNewProjectTemplateOptions = NewProjectFileOptions.IncludeAllOptions;
+
+        /// <summary>
         /// Construct an empty project, evaluating with the global project collection's
         /// global properties and default tools version.
         /// Project will be added to the global project collection when it is named.
         /// </summary>
         public Project()
-            : this(ProjectRootElement.Create(ProjectCollection.GlobalProjectCollection))
+            : this(DefaultNewProjectTemplateOptions)
+        {
+        }
+
+        /// <summary>
+        /// Construct an empty project, evaluating with the global project collection's
+        /// global properties and default tools version.
+        /// Project will be added to the global project collection when it is named.
+        /// </summary>
+        public Project(NewProjectFileOptions newProjectFileOptions)
+            : this(ProjectRootElement.Create(ProjectCollection.GlobalProjectCollection, newProjectFileOptions))
         {
         }
 
@@ -184,13 +164,51 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// Certain item operations split the item element in multiple elements if the include
+        /// contains globs, references to items or properties, or multiple item values.
+        ///
+        /// The items operations that may expand item elements are:
+        /// - <see cref="RemoveItem"/>
+        /// - <see cref="RemoveItems"/>
+        /// - <see cref="ProjectItem.ChangeItemType"/>
+        /// - <see cref="ProjectItem.Rename"/>
+        /// - <see cref="ProjectItem.RemoveMetadata"/>
+        /// - <see cref="ProjectItem.SetMetadataValue"/>
+        /// 
+        /// When this property is set to true, the previous item operations throw an <exception cref="InvalidOperationException"></exception>
+        /// instead of expanding the item element. 
+        /// </summary>
+        public bool ThrowInsteadOfSplittingItemElement { get; set; }
+
+        /// <summary>
+        /// Construct an empty project, evaluating with the specified project collection's
+        /// global properties and default tools version.
+        /// Project will be added to the specified project collection when it is named.
+        /// </summary>
+        public Project(ProjectCollection projectCollection, NewProjectFileOptions newProjectFileOptions)
+            : this(ProjectRootElement.Create(projectCollection, newProjectFileOptions), null, null, projectCollection)
+        {
+        }
+
+        /// <summary>
         /// Construct an empty project, evaluating with the specified project collection and
         /// the specified global properties and default tools version, either of which may be null.
         /// Project will be added to the specified project collection when it is named.
         /// </summary>
         /// <param name="globalProperties">Global properties to evaluate with. May be null in which case the containing project collection's global properties will be used.</param>
         public Project(IDictionary<string, string> globalProperties, string toolsVersion, ProjectCollection projectCollection)
-            : this(ProjectRootElement.Create(projectCollection), globalProperties, toolsVersion, projectCollection)
+            : this(ProjectRootElement.Create(projectCollection, DefaultNewProjectTemplateOptions), globalProperties, toolsVersion, projectCollection)
+        {
+        }
+
+        /// <summary>
+        /// Construct an empty project, evaluating with the specified project collection and
+        /// the specified global properties and default tools version, either of which may be null.
+        /// Project will be added to the specified project collection when it is named.
+        /// </summary>
+        /// <param name="globalProperties">Global properties to evaluate with. May be null in which case the containing project collection's global properties will be used.</param>
+        public Project(IDictionary<string, string> globalProperties, string toolsVersion, ProjectCollection projectCollection, NewProjectFileOptions newProjectFileOptions)
+            : this(ProjectRootElement.Create(projectCollection, newProjectFileOptions), globalProperties, toolsVersion, projectCollection)
         {
         }
 
@@ -358,7 +376,8 @@ namespace Microsoft.Build.Evaluation
 
             try
             {
-                _xml = ProjectRootElement.Create(xmlReader, projectCollection);
+                _xml = ProjectRootElement.Create(xmlReader, projectCollection,
+                    preserveFormatting: false);
             }
             catch (InvalidProjectFileException ex)
             {
@@ -1030,6 +1049,328 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowArgumentNull(item, "item");
 
             return ((IItem)item).EvaluatedIncludeEscaped;
+        }
+
+        /// <summary>
+        /// Finds all the globs specified in item includes.
+        /// </summary>
+        /// <example>
+        /// 
+        /// <code>
+        ///<P>*.txt</P>
+        /// 
+        ///<Zar Include="C:\**\*.foo"/> (both outside and inside project cone)
+        ///<Foo Include="*.a" Exclude="3.a"/>
+        ///<Foo Include="**\*.b" Exclude="1.b;**\obj\*.b";**\bar\*.b"/>
+        ///<Foo Include="$(P)"/> 
+        ///<Foo Include="*.a;@(Bar);3.a"/> (If Bar has globs, they will have been included when querying Bar ProjectItems for globs)
+        ///<Foo Include="*.cs"/ Exclude="@(Bar)"/> (out of project cone glob)
+        ///</code>
+        /// 
+        ///Example result: 
+        ///[
+        ///GlobResult(glob: "C:\**\*.foo", exclude: []),
+        ///GlobResult(glob: "*.a", exclude=["3.a"]),
+        ///GlobResult(glob: "**\*.b", exclude=["1.b, **\obj\*.b", **\bar\*.b"]),
+        ///GlobResult(glob: "*.txt", exclude=[]),
+        ///GlobResult(glob: "*.a", exclude=[]),
+        ///GlobResult(glob: "*.cs", exclude=[])
+        ///]
+        /// </example>
+        /// <remarks>
+        /// Sources of innacuracies: 
+        /// - <code>GlobResult.Excludes</code> does not contain information from item references (e.g. Exclude="@(Item)")
+        /// (it sees items as they are at the end of evaluation)
+        /// </remarks>
+        /// <returns>
+        /// List of <see cref="GlobResult"/>. Sorted in project evaluation order.
+        /// </returns>
+        public List<GlobResult> GetAllGlobs()
+        {
+            return GetAllGlobs(GetEvaluatedItemElements());
+        }
+
+        /// <summary>
+        /// Overload of <see cref="Project.GetAllGlobs()"/>
+        /// </summary>
+        /// <param name="itemType">Confine search to item elements of this type</param>
+        public List<GlobResult> GetAllGlobs(string itemType)
+        {
+            if (string.IsNullOrEmpty(itemType))
+            {
+                return new List<GlobResult>();
+            }
+
+            return GetAllGlobs(GetItemElementsByType(GetEvaluatedItemElements(), itemType));
+        }
+
+        private List<GlobResult> GetAllGlobs(List<ProjectItemElement> projectItemElements)
+        {
+            return projectItemElements
+                .AsParallel()
+                .AsOrdered()
+                .SelectMany(GetAllGlobs)
+                .ToList();
+        }
+
+        private IEnumerable<GlobResult> GetAllGlobs(ProjectItemElement itemElement)
+        {
+            var includeItemspec = new ItemSpec<ProjectProperty, ProjectItem>(itemElement.Include, _data.Expander, itemElement.IncludeLocation);
+            var excludeItemspec = new ItemSpec<ProjectProperty, ProjectItem>(itemElement.Exclude, _data.Expander, itemElement.ExcludeLocation);
+
+            var excludeSet =
+                new Lazy<IEnumerable<string>>(
+                    () =>
+                        excludeItemspec.Fragments.Where(
+                            // take out item references, we can't reason about them
+                            f => !(f is ItemExpressionFragment<ProjectProperty, ProjectItem>))
+                            .Select(f => f.ItemSpecFragment)
+                            .ToImmutableHashSet());
+
+            foreach (var globFragment in includeItemspec.Fragments.Where(f => f is GlobFragment))
+            {
+                yield return new GlobResult(itemElement, globFragment.ItemSpecFragment, excludeSet.Value);
+            }
+        }
+
+        /// <summary>
+        /// Finds all the item elements in the logical project with itemspecs that match the given string:
+        /// - elements that would include (or exclude) the string
+        /// - elements that would update the string (not yet implemented)
+        /// - elements that would remove the string (not yet implemented)
+        /// </summary>
+        /// 
+        /// <example>
+        /// The following snippet shows what <c>GetItemProvenance("a.cs")</c> returns for various item elements
+        /// <code>
+        /// <A Include="a.cs;*.cs"/> // Occurences:2; Operation: Include; Provenance: StringLiteral | Glob
+        /// <B Include="*.cs" Exclude="a.cs"/> // Occurences: 1; Operation: Exclude; Provenance: StringLiteral
+        /// <C Include="b.cs"/> // NA
+        /// <D Include="@(A)"/> // Occurences: 2; Operation: Include; Provenance: Inconclusive (it is an indirect occurence from a referenced item)
+        /// <E Include="$(P)"/> // Occurences: 4; Operation: Include; Provenance: FromLiteral (direct reference in $P) | Glob (direct reference in $P) | Inconclusive (it is an indirect occurence from referenced properties and items)
+        /// <PropertyGroup>
+        ///     <P>a.cs;*.cs;@(A)</P>
+        /// </PropertyGroup>
+        /// </code>
+        /// 
+        /// </example>
+        /// 
+        /// <remarks>
+        /// This method and its overloads are useful for clients that need to inspect all the item elements
+        /// that might refer to a specific item instance. For example, Visual Studio uses it to inspect
+        /// projects with globs. Upon a file system or IDE file artifact change, VS calls this method to find all the items
+        /// that might refer to the detected file change (e.g. 'which item elements refer to "Program.cs"?').
+        /// It uses such information to know which elements it should edit to reflect the user or file system changes.
+        /// 
+        /// Literal string matching tries to first match the strings. If the check fails, it then tries to match
+        /// the strings as if they represented files: it normalizes both strings as files relative to the current project directory
+        ///
+        /// GetItemProvenance suffers from some sources of innacuracy:
+        /// - it is performed after evaluation, thus is insensitive to item data flow when item references are present
+        /// (it sees items as they are at the end of evaluation)
+        /// 
+        /// This API and its return types are prone to change.
+        /// </remarks>
+        /// 
+        /// <param name="itemToMatch">The string to perform matching against</param>
+        /// 
+        /// <returns>
+        /// A list of <see cref="ProvenanceResult"/>, sorted in project evaluation order.
+        /// </returns>
+        public List<ProvenanceResult> GetItemProvenance(string itemToMatch)
+        {
+            return GetItemProvenance(itemToMatch, GetEvaluatedItemElements());
+        }
+
+        /// <summary>
+        /// Overload of <see cref="GetItemProvenance(string)"/>
+        /// </summary>
+        /// <param name="itemToMatch">The string to perform matching against</param>
+        /// <param name="itemType">The item type to constrain the search in</param>
+        public List<ProvenanceResult> GetItemProvenance(string itemToMatch, string itemType)
+        {
+            return GetItemProvenance(itemToMatch, GetItemElementsByType(GetEvaluatedItemElements(), itemType));
+        }
+
+        /// <summary>
+        /// Overload of <see cref="GetItemProvenance(string)"/>
+        /// </summary>
+        /// <param name="item"> 
+        /// The ProjectItem object that indicates: the itemspec to match and the item type to constrain the search in.
+        /// The search is also constrained on item elements appearing before the item element that produced this <paramref name="item"/>.
+        /// The element that produced this <paramref name="item"/> is included in the results.
+        /// </param>
+        public List<ProvenanceResult> GetItemProvenance(ProjectItem item)
+        {
+            if (item == null)
+            {
+                return new List<ProvenanceResult>();
+            }
+
+            var itemElementsAbove = GetItemElementsThatMightAffectItem(GetEvaluatedItemElements(), item);
+
+            return GetItemProvenance(item.EvaluatedInclude, itemElementsAbove);
+        }
+
+        /// <summary>
+        /// Some project APIs need to do analysis that requires the Evaluator to record more data than usual as it evaluates.
+        /// This method checks if the Evaluator was run with the extra required settings and if not, does a re-evaluation.
+        /// If a re-evaluation was necessary, it saves this information so a next call does not re-evaluate.
+        /// 
+        /// Using this method avoids storing extra data in memory when its not needed.
+        /// </summary>
+        private List<ProjectItemElement> GetEvaluatedItemElements()
+        {
+            if (!_loadSettings.HasFlag(ProjectLoadSettings.RecordEvaluatedItemElements))
+            {
+                _loadSettings = _loadSettings | ProjectLoadSettings.RecordEvaluatedItemElements;
+                Reevaluate(LoggingService, _loadSettings);
+            }
+
+            return _data.EvaluatedItemElements;
+        }
+
+        private static IEnumerable<ProjectItemElement> GetItemElementsThatMightAffectItem(List<ProjectItemElement> evaluatedItemElements, ProjectItem item)
+        {
+            var relevantElementsAfterInclude =  evaluatedItemElements
+                // Skip until we encounter the element that produced the item because
+                // there are no item operations that can affect future items
+                .SkipWhile((i => i != item.Xml))
+                .Where(itemElement =>
+                    // items operations of different item types cannot affect each other
+                    itemElement.ItemType.Equals(item.ItemType) &&
+                    // other includes cannot affect the current item
+                    itemElement.IncludeLocation == null &&
+                    // any remove that matches this item will cause the ProjectItem to not be produced in the first place
+                    // all other removes do not apply
+                    itemElement.RemoveLocation == null);
+
+            // add the include operation that created the project item element
+            return new[] {item.Xml}.Concat(relevantElementsAfterInclude);
+        }
+
+        private static List<ProjectItemElement> GetItemElementsByType(IEnumerable<ProjectItemElement> itemElements, string itemType)
+        {
+            return itemElements.Where(i => i.ItemType.Equals(itemType)).ToList();
+        }
+
+        private List<ProvenanceResult> GetItemProvenance(string itemToMatch, IEnumerable<ProjectItemElement> projectItemElements )
+        {
+            if (string.IsNullOrEmpty(itemToMatch))
+            {
+                return new List<ProvenanceResult>();
+            }
+
+            return
+                projectItemElements
+                .AsParallel()
+                .AsOrdered()
+                .Select(i => ComputeProvenanceResult(itemToMatch, i))
+                .Where(r => r != null)
+                .ToList();
+        }
+
+        private ProvenanceResult ComputeProvenanceResult(string itemToMatch, ProjectItemElement itemElement)
+        {
+            Func<string, IElementLocation, Operation, ProvenanceResult> singleItemSpecProvenance = (itemSpec, elementLocation, operation) =>
+            {
+                if (elementLocation == null)
+                {
+                    return null;
+                }
+
+                Provenance provenance;
+                var matchOccurrences = ItemMatchesInItemSpecString(itemToMatch, itemSpec, elementLocation, _data.Expander, out provenance);
+                var result = matchOccurrences > 0 ? Tuple.Create(provenance, matchOccurrences) : null;
+
+                return result?.Item2 > 0
+                    ? new ProvenanceResult(itemElement, operation, result.Item1, result.Item2)
+                    : null;
+            };
+
+            Func<ProvenanceResult>[] provenanceProviders =
+            {
+                // provenance provider for include item elements
+                () =>
+                {
+                    var includeResult = singleItemSpecProvenance(itemElement.Include, itemElement.IncludeLocation, Operation.Include);
+
+                    if (includeResult == null)
+                    {
+                        return null;
+                    }
+
+                    var excludeResult = singleItemSpecProvenance(itemElement.Exclude, itemElement.ExcludeLocation, Operation.Exclude);
+
+                    return excludeResult ?? includeResult;
+                },
+
+                // provenance provider for update item elements
+                () => singleItemSpecProvenance(itemElement.Update, itemElement.UpdateLocation, Operation.Update),
+                
+                // provenance provider for remove item elements
+                () => singleItemSpecProvenance(itemElement.Remove, itemElement.RemoveLocation, Operation.Remove)
+            };
+
+            return provenanceProviders.Select(provider => provider()).FirstOrDefault(provenanceResult => provenanceResult != null);
+        }
+
+        /// <summary>
+        /// Since:
+        ///     - we have no proper AST and interpreter for itemspecs that we can do analysis on
+        ///     - GetItemProvenance needs to have correct counts for exclude strings (as correct as it can get while doing it after evaluation)
+        /// 
+        /// The temporary hack is to use the expander to expand the strings, and if any property or item references were encountered, return Provenance.Inconclusive
+        /// </summary>
+        private int ItemMatchesInItemSpecString(string itemToMatch, string itemSpec, IElementLocation elementLocation, Expander<ProjectProperty, ProjectItem> expander, out Provenance provenance)
+        {
+            if (string.IsNullOrEmpty(itemSpec))
+            {
+                provenance = Provenance.Undefined;
+                return 0;
+            }
+
+            // expand the properties
+            var expandedItemSpec = new ItemSpec<ProjectProperty, ProjectItem>(itemSpec, expander, elementLocation, expandProperties: true);
+            var numberOfMatches = ItemMatchesInItemSpec(itemToMatch, expandedItemSpec, out provenance);
+
+            // Result is inconclusive if properties are present
+            if (itemSpec.Contains("$("))
+            {
+                provenance |= Provenance.Inconclusive;
+            }
+
+            return numberOfMatches;
+        }
+
+        private int ItemMatchesInItemSpec(string itemToMatch, ItemSpec<ProjectProperty, ProjectItem> itemSpec, out Provenance provenance)
+        {
+            provenance = Provenance.Undefined;
+
+            var occurrences = 0;
+
+            var fragmentsMatchingItem = itemSpec.FragmentsMatchingItem(itemToMatch, out occurrences);
+            foreach (var fragment in fragmentsMatchingItem)
+            {
+                if (fragment is ValueFragment)
+                {
+                    provenance |= Provenance.StringLiteral;
+                }
+                else if (fragment is GlobFragment)
+                {
+                    provenance |= Provenance.Glob;
+                }
+                else if (fragment is ItemExpressionFragment<ProjectProperty, ProjectItem>)
+                {
+                    provenance |= Provenance.Inconclusive;
+                }
+                else
+                {
+                    ErrorUtilities.ThrowInternalErrorUnreachable();
+                }
+            }
+
+            return occurrences;
         }
 
         /// <summary>
@@ -1799,10 +2140,12 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         internal bool SplitItemElementIfNecessary(ProjectItemElement itemElement)
         {
-            if (!FileMatcher.HasWildcardsSemicolonItemOrPropertyReferences(itemElement.Include))
+            if (!ItemElementRequiresSplitting(itemElement))
             {
                 return false;
             }
+
+            ErrorUtilities.VerifyThrowInvalidOperation(!ThrowInsteadOfSplittingItemElement, "OM_CannotSplitItemElementWhenSplittingIsDisabled", itemElement.Location, $"{nameof(Project)}.{nameof(ThrowInsteadOfSplittingItemElement)}");
 
             List<ProjectItem> relevantItems = new List<ProjectItem>();
 
@@ -1814,11 +2157,6 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            if (relevantItems.Count <= 1)
-            {
-                return false;
-            }
-
             foreach (ProjectItem item in relevantItems)
             {
                 item.SplitOwnItemElement();
@@ -1827,6 +2165,13 @@ namespace Microsoft.Build.Evaluation
             itemElement.Parent.RemoveChild(itemElement);
 
             return true;
+        }
+
+        internal bool ItemElementRequiresSplitting(ProjectItemElement itemElement)
+        {
+            var hasCharactersThatRequireSplitting = FileMatcher.HasWildcardsSemicolonItemOrPropertyReferences(itemElement.Include);
+
+            return hasCharactersThatRequireSplitting;
         }
 
         /// <summary>
@@ -2087,33 +2432,21 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void ReevaluateIfNecessary(ILoggingService loggingServiceForEvaluation)
         {
+            ReevaluateIfNecessary(loggingServiceForEvaluation, _loadSettings);
+        }
+
+        /// <summary>
+        /// Re-evaluates the project using the specified logging service and load settings.
+        /// </summary>
+        private void ReevaluateIfNecessary(ILoggingService loggingServiceForEvaluation, ProjectLoadSettings loadSettings)
+        {
             // We will skip the evaluation if the flag is set. This will give us better performance on scenarios
             // that we know we don't have to reevaluate. One example is project conversion bulk addfiles and set attributes. 
             if (!SkipEvaluation && !_projectCollection.SkipEvaluation && IsDirty)
             {
                 try
                 {
-                    Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.Evaluate(_data, _xml, _loadSettings, ProjectCollection.MaxNodeCount, ProjectCollection.EnvironmentProperties, loggingServiceForEvaluation, new ProjectItemFactory(this), _projectCollection as IToolsetProvider, _projectCollection.ProjectRootElementCache, s_buildEventContext, null /* no project instance for debugging */);
-
-                    // We have to do this after evaluation, because evaluation might have changed
-                    // the imports being pulled in.
-                    int highestXmlVersion = Xml.Version;
-
-                    if (_data.ImportClosure != null)
-                    {
-                        foreach (Triple<ProjectImportElement, ProjectRootElement, int> triple in _data.ImportClosure)
-                        {
-                            highestXmlVersion = (highestXmlVersion < triple.Third) ? triple.Third : highestXmlVersion;
-                        }
-                    }
-
-                    _explicitlyMarkedDirty = false;
-                    _evaluatedVersion = highestXmlVersion;
-                    _evaluatedToolsetCollectionVersion = ProjectCollection.ToolsetsVersion;
-                    _evaluationCounter = GetNextEvaluationCounter();
-                    _data.HasUnsavedChanges = false;
-
-                    ErrorUtilities.VerifyThrow(!IsDirty, "Should not be dirty now");
+                    Reevaluate(loggingServiceForEvaluation, loadSettings);
                 }
                 catch (InvalidProjectFileException ex)
                 {
@@ -2121,6 +2454,31 @@ namespace Microsoft.Build.Evaluation
                     throw;
                 }
             }
+        }
+
+        private void Reevaluate(ILoggingService loggingServiceForEvaluation, ProjectLoadSettings loadSettings)
+        {
+            Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.Evaluate(_data, _xml, loadSettings, ProjectCollection.MaxNodeCount, ProjectCollection.EnvironmentProperties, loggingServiceForEvaluation, new ProjectItemFactory(this), _projectCollection as IToolsetProvider, _projectCollection.ProjectRootElementCache, s_buildEventContext, null /* no project instance for debugging */);
+
+            // We have to do this after evaluation, because evaluation might have changed
+            // the imports being pulled in.
+            int highestXmlVersion = Xml.Version;
+
+            if (_data.ImportClosure != null)
+            {
+                foreach (Triple<ProjectImportElement, ProjectRootElement, int> triple in _data.ImportClosure)
+                {
+                    highestXmlVersion = (highestXmlVersion < triple.Third) ? triple.Third : highestXmlVersion;
+                }
+            }
+
+            _explicitlyMarkedDirty = false;
+            _evaluatedVersion = highestXmlVersion;
+            _evaluatedToolsetCollectionVersion = ProjectCollection.ToolsetsVersion;
+            _evaluationCounter = GetNextEvaluationCounter();
+            _data.HasUnsavedChanges = false;
+
+            ErrorUtilities.VerifyThrow(!IsDirty, "Should not be dirty now");
         }
 
         /// <summary>
@@ -2309,6 +2667,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
         }
+
 
         /// <summary>
         /// Encapsulates the backing data of a Project, so that it can be passed to the Evaluator to
@@ -2527,6 +2886,12 @@ namespace Microsoft.Build.Evaluation
             public ItemDictionary<ProjectItem> Items
             {
                 get { return _items; }
+            }
+
+            public List<ProjectItemElement> EvaluatedItemElements
+            {
+                get;
+                private set;
             }
 
             /// <summary>
@@ -2758,6 +3123,7 @@ namespace Microsoft.Build.Evaluation
                 this.AllEvaluatedProperties = new List<ProjectProperty>();
                 this.AllEvaluatedItemDefinitionMetadata = new List<ProjectMetadata>();
                 this.AllEvaluatedItems = new List<ProjectItem>();
+                this.EvaluatedItemElements = new List<ProjectItemElement>();
 
                 if (_globalPropertiesToTreatAsLocal != null)
                 {
@@ -3140,6 +3506,79 @@ namespace Microsoft.Build.Evaluation
                 string value = (property == null) ? String.Empty : property.EvaluatedValue;
                 return value;
             }
+        }
+    }
+    /// <summary>
+    /// Data class representing a result from <see cref="Project.GetAllGlobs()"/> and its overloads.
+    /// </summary>
+    public class GlobResult
+    {
+        public string Glob { get; private set; }
+        public IEnumerable<string> Excludes{ get; private set; }
+        public ProjectItemElement ItemElement { get; private set; }
+
+        public GlobResult(ProjectItemElement itemElement, string glob, IEnumerable<string> excludes)
+        {
+            ItemElement = itemElement;
+            Glob = glob;
+            Excludes = excludes;
+        }
+    }
+
+    /// <summary>
+    /// Bit flag enum that specifies how a string representing an item matched against an itemspec.
+    /// </summary>
+    [Flags]
+    public enum Provenance
+    {
+        /// <summary>
+        /// Undefined is the bottom element and should not appear in actual results 
+        /// </summary>
+        Undefined = 0,
+
+        /// <summary>
+        /// A string matched against a string literal from an itemspec
+        /// </summary>
+        StringLiteral = 1,
+
+        /// <summary>
+        /// A string matched against a glob pattern from an itemspec
+        /// </summary>
+        Glob = 2,
+
+        /// <summary>
+        /// Inconclusive means that the match is indirect, coming from either property or item references.
+        /// </summary>
+        Inconclusive = 4
+    }
+
+    /// <summary>
+    /// Enum that specifies how an item element references an item
+    /// </summary>
+    public enum Operation
+    {
+        Include, 
+        Exclude,
+        Update,
+        Remove
+    }
+
+    /// <summary>
+    /// Data class representing a result from <see cref="Project.GetItemProvenance(string)"/> and its overloads.
+    /// </summary>
+    public class ProvenanceResult
+    {
+        public Operation Operation { get; private set; }
+        public ProjectItemElement ItemElement { get; private set; }
+        public Provenance Provenance { get; private set; }
+        public int Occurrences { get; private set; }
+
+        public ProvenanceResult(ProjectItemElement itemElement, Operation operation, Provenance provenance, int occurrences)
+        {
+            ItemElement = itemElement;
+            Operation = operation;
+            Provenance = provenance;
+            Occurrences = occurrences;
         }
     }
 }

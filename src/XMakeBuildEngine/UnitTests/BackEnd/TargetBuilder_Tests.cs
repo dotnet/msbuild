@@ -14,7 +14,6 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
@@ -27,6 +26,7 @@ using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingCont
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
 using System.Threading.Tasks;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -34,8 +34,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// This is the unit test for the TargetBuilder.  This particular test is confined to just using the
     /// actual TargetBuilder, and uses a mock TaskBuilder on which TargetBuilder depends.
     /// </summary>
-    [TestClass]
-    public class TargetBuilder_Tests : IRequestBuilderCallback
+    public class TargetBuilder_Tests : IRequestBuilderCallback, IDisposable
     {
         /// <summary>
         /// The component host.
@@ -63,8 +62,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Sets up to run tests.  Creates the host object.
         /// </summary>
-        [TestInitialize]
-        public void SetUp()
+        public TargetBuilder_Tests()
         {
             _nodeRequestId = 1;
             _host = new MockHost();
@@ -75,8 +73,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Executed after all tests are run.
         /// </summary>
-        [TestCleanup]
-        public void TearDown()
+        public void Dispose()
         {
             File.Delete("testProject.proj");
             _mockLogger = null;
@@ -86,7 +83,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Runs the constructor.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestConstructor()
         {
             TargetBuilder builder = new TargetBuilder();
@@ -95,7 +92,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Runs a "simple" build with no dependencies and no outputs.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestSimpleBuild()
         {
             ProjectInstance project = CreateTestProject();
@@ -106,15 +103,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestEntry entry = new BuildRequestEntry(CreateNewBuildRequest(1, new string[] { "Empty" }), cache[1]);
 
             BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, entry.Request.Targets.ToArray(), CreateStandardLookup(project), CancellationToken.None).Result;
-            Assert.IsTrue(result.HasResultsForTarget("Empty"));
-            Assert.AreEqual(TargetResultCode.Success, result["Empty"].ResultCode);
-            Assert.AreEqual(0, result["Empty"].Items.Length);
+            Assert.True(result.HasResultsForTarget("Empty"));
+            Assert.Equal(TargetResultCode.Success, result["Empty"].ResultCode);
+            Assert.Equal(0, result["Empty"].Items.Length);
         }
 
         /// <summary>
         /// Runs a build with a target which depends on one other target.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestDependencyBuild()
         {
             ProjectInstance project = CreateTestProject();
@@ -127,20 +124,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, entry.Request.Targets.ToArray(), CreateStandardLookup(project), CancellationToken.None).Result;
 
             // The result returned from the builder includes only those for the specified targets.
-            Assert.IsTrue(result.HasResultsForTarget("Baz"));
-            Assert.IsFalse(result.HasResultsForTarget("Bar"));
-            Assert.AreEqual(TargetResultCode.Success, result["Baz"].ResultCode);
+            Assert.True(result.HasResultsForTarget("Baz"));
+            Assert.False(result.HasResultsForTarget("Bar"));
+            Assert.Equal(TargetResultCode.Success, result["Baz"].ResultCode);
 
             // The results cache should have ALL of the results.
             IResultsCache resultsCache = (IResultsCache)_host.GetComponent(BuildComponentType.ResultsCache);
-            Assert.IsTrue(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Bar"));
-            Assert.AreEqual(TargetResultCode.Success, resultsCache.GetResultForRequest(entry.Request)["Bar"].ResultCode);
+            Assert.True(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Bar"));
+            Assert.Equal(TargetResultCode.Success, resultsCache.GetResultForRequest(entry.Request)["Bar"].ResultCode);
         }
 
         /// <summary>
         /// Tests a project with a dependency which will be skipped because its up-to-date.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestDependencyBuildWithSkip()
         {
             ProjectInstance project = CreateTestProject();
@@ -150,19 +147,19 @@ namespace Microsoft.Build.UnitTests.BackEnd
             IConfigCache cache = (IConfigCache)_host.GetComponent(BuildComponentType.ConfigCache);
             BuildRequestEntry entry = new BuildRequestEntry(CreateNewBuildRequest(1, new string[] { "DepSkip" }), cache[1]);
             BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, entry.Request.Targets.ToArray(), CreateStandardLookup(project), CancellationToken.None).Result;
-            Assert.IsTrue(result.HasResultsForTarget("DepSkip"));
-            Assert.IsFalse(result.HasResultsForTarget("Skip"));
-            Assert.AreEqual(TargetResultCode.Success, result["DepSkip"].ResultCode);
+            Assert.True(result.HasResultsForTarget("DepSkip"));
+            Assert.False(result.HasResultsForTarget("Skip"));
+            Assert.Equal(TargetResultCode.Success, result["DepSkip"].ResultCode);
 
             IResultsCache resultsCache = (IResultsCache)_host.GetComponent(BuildComponentType.ResultsCache);
-            Assert.IsTrue(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("SkipCondition"));
-            Assert.AreEqual(TargetResultCode.Skipped, resultsCache.GetResultForRequest(entry.Request)["SkipCondition"].ResultCode);
+            Assert.True(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("SkipCondition"));
+            Assert.Equal(TargetResultCode.Skipped, resultsCache.GetResultForRequest(entry.Request)["SkipCondition"].ResultCode);
         }
 
         /// <summary>
         /// This test is currently ignored because the error tasks aren't implemented yet (due to needing the task builder.)
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestDependencyBuildWithError()
         {
             ProjectInstance project = CreateTestProject();
@@ -178,34 +175,34 @@ namespace Microsoft.Build.UnitTests.BackEnd
             IConfigCache cache = (IConfigCache)_host.GetComponent(BuildComponentType.ConfigCache);
             BuildRequestEntry entry = new BuildRequestEntry(CreateNewBuildRequest(1, new string[] { "DepError" }), cache[1]);
             BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, entry.Request.Targets.ToArray(), CreateStandardLookup(project), CancellationToken.None).Result;
-            Assert.IsTrue(result.HasResultsForTarget("DepError"));
-            Assert.IsFalse(result.HasResultsForTarget("Foo"));
-            Assert.IsFalse(result.HasResultsForTarget("Skip"));
-            Assert.IsFalse(result.HasResultsForTarget("Error"));
-            Assert.IsFalse(result.HasResultsForTarget("Baz2"));
-            Assert.IsFalse(result.HasResultsForTarget("Bar"));
-            Assert.IsFalse(result.HasResultsForTarget("Baz"));
+            Assert.True(result.HasResultsForTarget("DepError"));
+            Assert.False(result.HasResultsForTarget("Foo"));
+            Assert.False(result.HasResultsForTarget("Skip"));
+            Assert.False(result.HasResultsForTarget("Error"));
+            Assert.False(result.HasResultsForTarget("Baz2"));
+            Assert.False(result.HasResultsForTarget("Bar"));
+            Assert.False(result.HasResultsForTarget("Baz"));
 
             IResultsCache resultsCache = (IResultsCache)_host.GetComponent(BuildComponentType.ResultsCache);
 
-            Assert.IsTrue(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Foo"));
-            Assert.IsTrue(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Skip"));
-            Assert.IsTrue(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Error"));
-            Assert.IsFalse(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Baz2"));
-            Assert.IsTrue(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Bar"));
-            Assert.IsTrue(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Baz"));
-            Assert.AreEqual(TargetResultCode.Failure, resultsCache.GetResultForRequest(entry.Request)["DepError"].ResultCode);
-            Assert.AreEqual(TargetResultCode.Success, resultsCache.GetResultForRequest(entry.Request)["Foo"].ResultCode);
-            Assert.AreEqual(TargetResultCode.Success, resultsCache.GetResultForRequest(entry.Request)["Skip"].ResultCode);
-            Assert.AreEqual(TargetResultCode.Failure, resultsCache.GetResultForRequest(entry.Request)["Error"].ResultCode);
-            Assert.AreEqual(TargetResultCode.Success, resultsCache.GetResultForRequest(entry.Request)["Bar"].ResultCode);
-            Assert.AreEqual(TargetResultCode.Success, resultsCache.GetResultForRequest(entry.Request)["Baz"].ResultCode);
+            Assert.True(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Foo"));
+            Assert.True(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Skip"));
+            Assert.True(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Error"));
+            Assert.False(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Baz2"));
+            Assert.True(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Bar"));
+            Assert.True(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Baz"));
+            Assert.Equal(TargetResultCode.Failure, resultsCache.GetResultForRequest(entry.Request)["DepError"].ResultCode);
+            Assert.Equal(TargetResultCode.Success, resultsCache.GetResultForRequest(entry.Request)["Foo"].ResultCode);
+            Assert.Equal(TargetResultCode.Success, resultsCache.GetResultForRequest(entry.Request)["Skip"].ResultCode);
+            Assert.Equal(TargetResultCode.Failure, resultsCache.GetResultForRequest(entry.Request)["Error"].ResultCode);
+            Assert.Equal(TargetResultCode.Success, resultsCache.GetResultForRequest(entry.Request)["Bar"].ResultCode);
+            Assert.Equal(TargetResultCode.Success, resultsCache.GetResultForRequest(entry.Request)["Baz"].ResultCode);
         }
 
         /// <summary>
         /// Ensure that skipped targets only infer outputs once
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SkippedTargetsShouldOnlyInferOutputsOnce()
         {
             MockLogger logger = new MockLogger();
@@ -265,7 +262,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test empty before targets
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestLegacyCallTarget()
         {
             string projectBody = @"
@@ -299,7 +296,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// BeforeTargets specifies a missing target. Should not warn or error. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestBeforeTargetsMissing()
         {
             string content = @"
@@ -322,7 +319,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// BeforeTargets specifies a missing target. Should not warn or error. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestBeforeTargetsMissingRunsOthers()
         {
             string content = @"
@@ -354,7 +351,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// AfterTargets specifies a missing target. Should not warn or error.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestAfterTargetsMissing()
         {
             string content = @"
@@ -377,7 +374,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// AfterTargets specifies a missing target. Should not warn or error. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestAfterTargetsMissingRunsOthers()
         {
             string content = @"
@@ -413,7 +410,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test empty before targets
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestBeforeTargetsEmpty()
         {
             string projectBody = @"
@@ -438,7 +435,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test single before targets
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestBeforeTargetsSingle()
         {
             string projectBody = @"
@@ -463,7 +460,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test single before targets on an escaped target
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestBeforeTargetsEscaped()
         {
             string projectBody = @"
@@ -488,7 +485,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test single before targets
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestBeforeTargetsSingleWithError()
         {
             string projectBody = @"
@@ -517,7 +514,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test single before targets
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestBeforeTargetsSingleWithErrorAndParent()
         {
             string projectBody = @"
@@ -551,7 +548,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test multiple before targets
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestBeforeTargetsWithTwoReferringToOne()
         {
             string projectBody = @"
@@ -582,7 +579,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test multiple before targets
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestBeforeTargetsWithOneReferringToTwo()
         {
             string projectBody = @"
@@ -612,7 +609,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test before target on a skipped target
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestBeforeTargetsSkip()
         {
             string projectBody = @"
@@ -637,7 +634,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test before target on a skipped target
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestBeforeTargetsDependencyOrdering()
         {
             string projectBody = @"
@@ -672,7 +669,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test after target on a skipped target
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestAfterTargetsEmpty()
         {
             string projectBody = @"
@@ -697,7 +694,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test after target on a skipped target
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestAfterTargetsSkip()
         {
             string projectBody = @"
@@ -722,7 +719,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test single before targets
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestAfterTargetsSingleWithError()
         {
             string projectBody = @"
@@ -750,7 +747,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test single before targets
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestAfterTargetsSingleWithErrorAndParent()
         {
             string projectBody = @"
@@ -792,7 +789,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test after target on a normal target
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestAfterTargetsSingle()
         {
             string projectBody = @"
@@ -817,7 +814,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test after target on a target name which needs escaping
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestAfterTargetsEscaped()
         {
             string projectBody = @"
@@ -842,7 +839,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test after target on a skipped target
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestAfterTargetsWithTwoReferringToOne()
         {
             string projectBody = @"
@@ -872,7 +869,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test after target on a skipped target
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestAfterTargetsWithOneReferringToTwo()
         {
             string projectBody = @"
@@ -902,7 +899,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test after target on a skipped target
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestAfterTargetsWithDependencyOrdering()
         {
             string projectBody = @"
@@ -936,7 +933,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test a complex ordering with depends, before and after targets
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestComplexOrdering()
         {
             string projectBody = @"
@@ -986,7 +983,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test a complex ordering with depends, before and after targets
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestComplexOrdering2()
         {
             string projectBody = @"
@@ -1045,7 +1042,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test a complex ordering with depends, before and after targets
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestBeforeAndAfterWithErrorTargets()
         {
             string projectBody = @"
@@ -1086,7 +1083,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test after target on a skipped target
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestBeforeAndAfterOverrides()
         {
             string projectBody = @"
@@ -1130,7 +1127,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test that if before and after targets skip, the main target still runs (bug 476908)
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestSkippingBeforeAndAfterTargets()
         {
             string projectBody = @"
@@ -1160,7 +1157,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests that a circular dependency within a CallTarget call correctly propogates the failure.  Bug 502570.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestCircularDependencyInCallTarget()
         {
             string projectContents = @"
@@ -1177,13 +1174,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             StringReader reader = new StringReader(projectContents);
             Project project = new Project(new XmlTextReader(reader), null, null);
             bool success = project.Build(_mockLogger);
-            Assert.IsFalse(success);
+            Assert.False(success);
         }
 
         /// <summary>
         /// Tests that cancel with no entries after building does not fail.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestCancelWithNoEntriesAfterBuild()
         {
             string projectBody = @"
@@ -1268,12 +1265,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             MockTaskBuilder mockBuilder = (MockTaskBuilder)_host.GetComponent(BuildComponentType.TaskBuilder);
 
-            Assert.AreEqual(tasks.Length, mockBuilder.ExecutedTasks.Count);
+            Assert.Equal(tasks.Length, mockBuilder.ExecutedTasks.Count);
 
             int currentTask = 0;
             foreach (ProjectTaskInstance task in mockBuilder.ExecutedTasks)
             {
-                Assert.IsTrue(String.Equals(task.Name, tasks[currentTask]));
+                Assert.True(String.Equals(task.Name, tasks[currentTask]));
                 currentTask++;
             }
         }
@@ -1397,10 +1394,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     }
                     else
                     {
-                        // All the retries have failed. We will now fail with the 
-                        // actual problem now instead of with some more difficult-to-understand 
-                        // issue later. 
-                        throw ex;
+                        // All the retries have failed. We will now fail with the
+                        // actual problem now instead of with some more difficult-to-understand
+                        // issue later.
+                        throw;
                     }
                 }
             }

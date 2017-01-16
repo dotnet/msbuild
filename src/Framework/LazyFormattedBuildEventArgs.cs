@@ -21,18 +21,18 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Stores the message arguments.
         /// </summary>
-        private object[] _arguments;
+        private object[] arguments;
 
         /// <summary>
         /// Stores the original culture for String.Format.
         /// </summary>
-        private CultureInfo _originalCulture;
+        private CultureInfo originalCulture;
 
         /// <summary>
         /// Lock object.
         /// </summary>
         [NonSerialized]
-        private Object _locker;
+        private Object locker;
 
         /// <summary>
         /// This constructor allows all event data to be initialized.
@@ -68,9 +68,9 @@ namespace Microsoft.Build.Framework
         )
             : base(message, helpKeyword, senderName, eventTimestamp)
         {
-            _arguments = messageArgs;
-            _originalCulture = CultureInfo.CurrentCulture;
-            _locker = new Object();
+            arguments = messageArgs;
+            originalCulture = CultureInfo.CurrentCulture;
+            locker = new Object();
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace Microsoft.Build.Framework
         protected LazyFormattedBuildEventArgs()
             : base()
         {
-            _locker = new Object();
+            locker = new Object();
         }
 
         /// <summary>
@@ -89,12 +89,12 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                lock (_locker)
+                lock (locker)
                 {
-                    if (_arguments != null && _arguments.Length > 0)
+                    if (arguments != null && arguments.Length > 0)
                     {
-                        base.Message = FormatString(_originalCulture, base.Message, _arguments);
-                        _arguments = null;
+                        base.Message = FormatString(originalCulture, base.Message, arguments);
+                        arguments = null;
                     }
                 }
 
@@ -111,21 +111,21 @@ namespace Microsoft.Build.Framework
             // Locking is needed here as this is invoked on the serialization thread,
             // whereas a local logger (a distributed logger) may concurrently invoke this.Message
             // which will trigger formatting and thus the exception below
-            lock (_locker)
+            lock (locker)
             {
-                bool hasArguments = _arguments != null;
+                bool hasArguments = arguments != null;
                 base.WriteToStream(writer);
 
-                if (hasArguments && _arguments == null)
+                if (hasArguments && arguments == null)
                 {
                     throw new InvalidOperationException("BuildEventArgs has formatted message while serializing!");
                 }
 
-                if (_arguments != null)
+                if (arguments != null)
                 {
-                    writer.Write(_arguments.Length);
+                    writer.Write(arguments.Length);
 
-                    foreach (object argument in _arguments)
+                    foreach (object argument in arguments)
                     {
                         // Arguments may be ints, etc, so explicitly convert
                         // Convert.ToString returns String.Empty when it cannot convert, rather than throwing
@@ -137,7 +137,7 @@ namespace Microsoft.Build.Framework
                     writer.Write((Int32)(-1));
                 }
 
-                writer.Write(_originalCulture != null ? _originalCulture.LCID : 0);
+                writer.Write(originalCulture != null ? originalCulture.LCID : 0);
             }
         }
 
@@ -165,18 +165,18 @@ namespace Microsoft.Build.Framework
                     }
                 }
 
-                _arguments = messageArgs;
+                arguments = messageArgs;
 
                 int originalCultureId = reader.ReadInt32();
                 if (originalCultureId != 0)
                 {
                     if (originalCultureId == CultureInfo.CurrentCulture.LCID)
                     {
-                        _originalCulture = CultureInfo.CurrentCulture;
+                        originalCulture = CultureInfo.CurrentCulture;
                     }
                     else
                     {
-                        _originalCulture = new CultureInfo(originalCultureId);
+                        originalCulture = new CultureInfo(originalCultureId);
                     }
                 }
             }
@@ -201,7 +201,7 @@ namespace Microsoft.Build.Framework
             // NOTE: String.Format() does not allow a null arguments array
             if ((args != null) && (args.Length > 0))
             {
-#if DEBUG && !BUILDING_DF_LKG
+#if DEBUG
 
 #if VALIDATERESOURCESTRINGS
                 // The code below reveals many places in our codebase where
@@ -290,7 +290,7 @@ namespace Microsoft.Build.Framework
         [OnDeserialized]
         private void OnDeserialized(StreamingContext context)
         {
-            _locker = new Object();
+            locker = new Object();
         }
     }
 }

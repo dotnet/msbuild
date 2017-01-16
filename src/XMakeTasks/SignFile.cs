@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #region Using directives
+
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -17,6 +18,7 @@ using System.ComponentModel;
 
 
 #endregion
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -71,15 +73,10 @@ namespace Microsoft.Build.Tasks
                 SigningTarget.ItemSpec, TargetFrameworkVersion);
                 return true;
             }
-            catch (ArgumentException ex)
+            catch (ArgumentException ex) when (ex.ParamName.Equals("certThumbprint"))
             {
-                if (ex.ParamName.Equals("certThumbprint"))
-                {
-                    Log.LogErrorWithCodeFromResources("SignFile.CertNotInStore");
-                    return false;
-                }
-                else
-                    throw;
+                Log.LogErrorWithCodeFromResources("SignFile.CertNotInStore");
+                return false;
             }
             catch (FileNotFoundException ex)
             {

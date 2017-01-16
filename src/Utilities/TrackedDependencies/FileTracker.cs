@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -60,7 +60,7 @@ namespace Microsoft.Build.Utilities
     {
         #region Static Member Data
         // The default path to temp, used to create explicitly short and long paths
-        private static string s_tempPath = Path.GetDirectoryName(Path.GetTempPath());
+        private static string s_tempPath = Path.GetTempPath();
 
         // The short path to temp
         private static string s_tempShortPath = FileUtilities.EnsureTrailingSlash(NativeMethodsShared.GetShortFilePath(s_tempPath).ToUpperInvariant());
@@ -87,8 +87,9 @@ namespace Microsoft.Build.Utilities
         // The name of the standalone tracker tool.
         private static string s_TrackerFilename = "Tracker.exe";
 
-        // The name of the assembly that is injected into the executing process
-        private static string s_FileTrackerFilename = "FileTracker.dll";
+        // The name of the assembly that is injected into the executing process.
+        // Detours handles picking between FileTracker{32,64}.dll so only mention one.
+        private static string s_FileTrackerFilename = "FileTracker32.dll";
         #endregion
 
         #region Static constructor
@@ -444,14 +445,9 @@ namespace Microsoft.Build.Utilities
                         return trackerPath;
                     }
                 }
-                catch (Exception e)
+                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    if (ExceptionHandling.NotExpectedException(e))
-                    {
-                        throw;
-                    }
-
-                    // Otherwise, just ignore this path and move on -- it's just bad for some reason. 
+                    // ignore this path and move on -- it's just bad for some reason. 
                 }
             }
 
@@ -478,7 +474,6 @@ namespace Microsoft.Build.Utilities
         public static bool ForceOutOfProcTracking(ExecutableType toolType, string dllName, string cancelEventName)
         {
             bool trackOutOfProc = false;
-            string trackerPath = null;
 
             if (cancelEventName != null)
             {
@@ -488,37 +483,12 @@ namespace Microsoft.Build.Utilities
             else if (dllName != null)
             {
                 // If we have a DLL name, we need to track out of proc -- inproc tracking just uses
-                // the default FileTracker.dll from the path. 
+                // the default FileTracker
                 trackOutOfProc = true;
             }
-            else if (IntPtr.Size == sizeof(Int32))
-            {
-                // Current process is 32-bit.  So we need to spawn Tracker.exe if our tool is 
-                // explicitly marked as 64-bit OR is MSIL and we're installed on a 64-bit OS.  
-                if (toolType == ExecutableType.Managed64Bit || toolType == ExecutableType.Native64Bit)
-                {
-                    trackOutOfProc = true;
-                }
-                else if (toolType == ExecutableType.ManagedIL)
-                {
-                    trackerPath = ToolLocationHelper.GetPathToDotNetFrameworkFile(s_TrackerFilename, TargetDotNetFrameworkVersion.VersionLatest, DotNetFrameworkArchitecture.Bitness64);
 
-                    if (trackerPath != null)
-                    {
-                        // If we found a 64-bit path, we're on a 64-bit OS and need to use it.  Otherwise, we're fine. 
-                        trackOutOfProc = true;
-                    }
-                }
-            }
-            else if (IntPtr.Size == sizeof(Int64))
-            {
-                // Current process is 64-bit.  We need to spawn Tracker.exe if our tool is
-                // explicitly marked as 32-bit.  
-                if (toolType == ExecutableType.Managed32Bit || toolType == ExecutableType.Native32Bit)
-                {
-                    trackOutOfProc = true;
-                }
-            }
+            // toolType is not relevant now that Detours can handle child processes of a different
+            // bitness than the parent.
 
             return trackOutOfProc;
         }
@@ -587,60 +557,15 @@ namespace Microsoft.Build.Utilities
                 if (!File.Exists(trackerPath))
                 {
                     // if an override path was specified, that's it -- we don't want to fall back if the file
-                    // is not found there.  
+                    // is not found there.
                     trackerPath = null;
                 }
             }
             else
             {
-                switch (toolType)
-                {
-                    case ExecutableType.Native32Bit:
-                        // A native executable that's 32-bit.  Just return the 32-bit path 
-                        trackerPath = GetPath(filename, DotNetFrameworkArchitecture.Bitness32);
-                        break;
-                    case ExecutableType.Native64Bit:
-                        // A native executable that's 64-bit.  Just return the 64-bit path 
-                        trackerPath = GetPath(filename, DotNetFrameworkArchitecture.Bitness64);
-                        break;
-                    case ExecutableType.ManagedIL:
-                        // Next most likely -- the tool is a managed executable that has not been explicitly marked
-                        // either 32 or 64 bit.  
-                        // This case is slightly tricky -- we have to return the path to the 64-bit tracker if we're running 
-                        // on a 64-bit machine, and the 32-bit tracker if we're running on a 32-bit machine.  
-                        trackerPath = GetPath(filename, DotNetFrameworkArchitecture.Bitness64);
-
-                        // If the path is null, that means there is no 64-bit framework -- that's fine, return the 32-bit path instead. 
-                        if (trackerPath == null)
-                        {
-                            trackerPath = GetPath(filename, DotNetFrameworkArchitecture.Bitness32);
-                        }
-                        break;
-                    case ExecutableType.Managed32Bit:
-                        // A managed executable that has been explicitly marked 32-bit.  Just return the 32-bit path.  
-                        trackerPath = GetPath(filename, DotNetFrameworkArchitecture.Bitness32);
-                        break;
-                    case ExecutableType.Managed64Bit:
-                        // A managed executable that has been explicitly marked 64-bit.  Just return the 64-bit path.  If this 
-                        // is a 32-bit machine, then we will return null, and the error will be caught and handled appropriately 
-                        // elsewhere. 
-                        trackerPath = GetPath(filename, DotNetFrameworkArchitecture.Bitness64);
-                        break;
-                    case ExecutableType.SameAsCurrentProcess:
-                        // Figure out what bitness the current process is and return that bitness of Tracker.exe.  
-                        if (IntPtr.Size == sizeof(Int32))
-                        {
-                            trackerPath = GetPath(filename, DotNetFrameworkArchitecture.Bitness32);
-                        }
-                        else
-                        {
-                            trackerPath = GetPath(filename, DotNetFrameworkArchitecture.Bitness64);
-                        }
-                        break;
-                    default:
-                        ErrorUtilities.ThrowInternalErrorUnreachable();
-                        return null;
-                }
+                // Since Detours can handle cross-bitness process launches, the toolType
+                // can be ignored; just return the path corresponding to the current architecture.
+                trackerPath = GetPath(filename, DotNetFrameworkArchitecture.Current);
             }
 
             return trackerPath;
@@ -655,8 +580,6 @@ namespace Microsoft.Build.Utilities
         /// <returns></returns>
         private static string GetPath(string filename, DotNetFrameworkArchitecture bitness)
         {
-            string trackerPath;
-
             // Make sure that if someone starts passing the wrong thing to this method we don't silently 
             // eat it and do something possibly unexpected. 
             ErrorUtilities.VerifyThrow(
@@ -666,31 +589,9 @@ namespace Microsoft.Build.Utilities
                                        filename
                                        );
 
-            // Look for FileTracker.dll/FileTracker.exe first in the MSBuild tools directory, then fall back to .NET framework directory
-            // and finally to .NET SDK directories.
-            trackerPath = ToolLocationHelper.GetPathToBuildToolsFile(filename, ToolLocationHelper.CurrentToolsVersion, bitness);
-
-            if (String.IsNullOrEmpty(trackerPath))
-            {
-                trackerPath = ToolLocationHelper.GetPathToDotNetFrameworkFile(filename, TargetDotNetFrameworkVersion.VersionLatest, bitness);
-
-                if ((String.IsNullOrEmpty(trackerPath) || !File.Exists(trackerPath)) && s_TrackerFilename.Equals(filename, StringComparison.OrdinalIgnoreCase))
-                {
-                    // fall back to looking in the SDK directory -- this is where Tracker.exe will be in the typical VS case.  First check 
-                    // in the SDK for the latest target framework and latest Visual Studio version, since we want to make sure that we get 
-                    // the most up-to-date version of FileTracker.  
-                    trackerPath = ToolLocationHelper.GetPathToDotNetFrameworkSdkFile(filename, TargetDotNetFrameworkVersion.Version45, VisualStudioVersion.VersionLatest, bitness);
-
-                    // If that didn't work, we may be in a scenario where, e.g., we have VS 10 on Windows 8, which comes with .NET 4.5
-                    // pre-installed.  In which case, the Dev11 (or other "latest" SDK) may not exist, but the Dev10 SDK might.  Check 
-                    // for that here. 
-                    if (trackerPath == null)
-                    {
-                        trackerPath = ToolLocationHelper.GetPathToDotNetFrameworkSdkFile(filename, TargetDotNetFrameworkVersion.Version40, bitness);
-                    }
-                }
-            }
-            return trackerPath;
+            // Look for FileTracker.dll/Tracker.exe in the MSBuild tools directory. They may exist elsewhere on disk,
+            // but other copies aren't guaranteed to be compatible with the latest.
+            return ToolLocationHelper.GetPathToBuildToolsFile(filename, ToolLocationHelper.CurrentToolsVersion, bitness);
         }
 
         /// <summary>

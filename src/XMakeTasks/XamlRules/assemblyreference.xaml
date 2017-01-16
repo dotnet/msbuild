@@ -29,7 +29,11 @@
 
     <BoolProperty Name="SpecificVersion" 
                   DisplayName="Specific Version"
-                  Description="Indicates whether this assembly can be resolved without regard to multi-targeting rules for assembly resolution." />
+                  Description="Indicates whether this assembly can be resolved without regard to multi-targeting rules for assembly resolution.">
+        <BoolProperty.DataSource>
+            <DataSource Persistence="AssemblyReference" ItemType="Reference" HasConfigurationCondition="False"/>
+        </BoolProperty.DataSource>
+    </BoolProperty>
 
     <StringProperty Name="RequiredTargetFramework" DisplayName="Required Target Framework" Visible="False" />
     <StringProperty Name="HintPath" Visible="false" />

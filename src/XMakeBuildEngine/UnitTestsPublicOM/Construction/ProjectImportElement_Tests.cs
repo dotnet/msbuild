@@ -1,6 +1,6 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="ProjectImportElement_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // </copyright>
 // <summary>Tests for ProjectImportElement class.</summary>
 //-----------------------------------------------------------------------
@@ -17,81 +17,85 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
     /// Tests for the ProjectImportElement class
     /// </summary>
-    [TestClass]
     public class ProjectImportElement_Tests
     {
         /// <summary>
         /// Read project with no imports
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReadNone()
         {
             ProjectRootElement project = ProjectRootElement.Create();
 
-            Assert.AreEqual(null, project.Imports.GetEnumerator().Current);
+            Assert.Equal(null, project.Imports.GetEnumerator().Current);
         }
 
         /// <summary>
         /// Read import with no project attribute
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidMissingProject()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Import/>
                     </Project>
                 ";
 
-            ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Read import with empty project attribute
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidEmptyProject()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Import Project=''/>
                     </Project>
                 ";
 
-            ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Read import with unexpected attribute
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidAttribute()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Import Project='p' X='Y'/>
                     </Project>
                 ";
 
-            ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Read basic valid imports
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReadBasic()
         {
             string content = @"
@@ -105,16 +109,16 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             List<ProjectImportElement> imports = Helpers.MakeList(project.Imports);
 
-            Assert.AreEqual(2, imports.Count);
-            Assert.AreEqual("i1.proj", imports[0].Project);
-            Assert.AreEqual("i2.proj", imports[1].Project);
-            Assert.AreEqual("c", imports[1].Condition);
+            Assert.Equal(2, imports.Count);
+            Assert.Equal("i1.proj", imports[0].Project);
+            Assert.Equal("i2.proj", imports[1].Project);
+            Assert.Equal("c", imports[1].Condition);
         }
 
         /// <summary>
         /// Set valid project on import
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetProjectValid()
         {
             string content = @"
@@ -128,33 +132,35 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectImportElement import = (ProjectImportElement)Helpers.GetFirst(project.Children);
 
             import.Project = "i1b.proj";
-            Assert.AreEqual("i1b.proj", import.Project);
+            Assert.Equal("i1b.proj", import.Project);
         }
 
         /// <summary>
         /// Set invalid empty project value on import
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [Fact]
         public void SetProjectInvalidEmpty()
         {
-            string content = @"
+            Assert.Throws<ArgumentException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Import Project='i1.proj' />
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
 
-            ProjectImportElement import = (ProjectImportElement)Helpers.GetFirst(project.Children);
+                ProjectImportElement import = (ProjectImportElement)Helpers.GetFirst(project.Children);
 
-            import.Project = String.Empty;
+                import.Project = String.Empty;
+            }
+           );
         }
-
         /// <summary>
         /// Setting the project attribute should dirty the project
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SettingProjectDirties()
         {
             string file1 = null;
@@ -184,11 +190,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectImportElement import = Helpers.GetFirst(project.Xml.Imports);
                 import.Project = file2;
 
-                Assert.AreEqual("v1", project.GetPropertyValue("p"));
+                Assert.Equal("v1", project.GetPropertyValue("p"));
 
                 project.ReevaluateIfNecessary();
 
-                Assert.AreEqual("v2", project.GetPropertyValue("p"));
+                Assert.Equal("v2", project.GetPropertyValue("p"));
             }
             finally
             {
@@ -200,7 +206,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Setting the condition should dirty the project
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SettingConditionDirties()
         {
             string file = null;
@@ -224,11 +230,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectImportElement import = Helpers.GetFirst(project.Xml.Imports);
                 import.Condition = "false";
 
-                Assert.AreEqual("v1", project.GetPropertyValue("p"));
+                Assert.Equal("v1", project.GetPropertyValue("p"));
 
                 project.ReevaluateIfNecessary();
 
-                Assert.AreEqual(String.Empty, project.GetPropertyValue("p"));
+                Assert.Equal(String.Empty, project.GetPropertyValue("p"));
             }
             finally
             {
@@ -239,7 +245,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Importing a project which has a relative path
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ImportWithRelativePath()
         {
             string tempPath = Path.GetTempPath();

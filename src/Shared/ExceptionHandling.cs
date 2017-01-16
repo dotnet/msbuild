@@ -86,8 +86,18 @@ namespace Microsoft.Build.Shared
         /// Otherwise, return true.
         /// </summary>
         /// <param name="e">The exception to check.</param>
-        /// <returns> True if exception is not IO related or expected otherwise. </returns>
+        /// <returns>True if exception is not IO related or expected otherwise false.</returns>
         internal static bool NotExpectedException(Exception e)
+        {
+            return !IsIoRelatedException(e);
+        }
+
+        /// <summary>
+        /// Determine whether the exception is file-IO related.
+        /// </summary>
+        /// <param name="e">The exception to check.</param>
+        /// <returns>True if exception is IO related.</returns>
+        internal static bool IsIoRelatedException(Exception e)
         {
             // These all derive from IOException
             //     DirectoryNotFoundException
@@ -97,26 +107,11 @@ namespace Microsoft.Build.Shared
             //     FileNotFoundException
             //     PathTooLongException
             //     PipeException
-            if (e is UnauthorizedAccessException
-             || e is NotSupportedException
-             || (e is ArgumentException && !(e is ArgumentNullException))
-             || e is SecurityException
-             || e is IOException)
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Clearer named version of NotExpectedException.
-        /// </summary>
-        /// <param name="e"> The exception to check. </param>
-        /// <returns> True if exception is IO related. </returns>
-        internal static bool IsIoRelatedException(Exception e)
-        {
-            return !NotExpectedException(e);
+            return e is UnauthorizedAccessException
+                   || e is NotSupportedException
+                   || (e is ArgumentException && !(e is ArgumentNullException))
+                   || e is SecurityException
+                   || e is IOException;
         }
 
         /// <summary> Checks if the exception is an XML one. </summary>

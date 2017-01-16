@@ -42,8 +42,8 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             const int beginUpdateRetryInterval = 100; // In milliseconds
             bool endUpdate = false; // Only call EndUpdateResource() if this is true
 
-            // Environment.CurrentDirectory has previously been set to the project location
-            string filePath = System.IO.Path.Combine(Environment.CurrentDirectory, filename);
+            // Directory.GetCurrentDirectory() has previously been set to the project location
+            string filePath = System.IO.Path.Combine(Directory.GetCurrentDirectory(), filename);
 
             if (_stringResources.Count == 0 && _fileResources.Count == 0)
                 return true;

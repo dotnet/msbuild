@@ -20,7 +20,7 @@ namespace Microsoft.Build.Execution
     /// Wraps an unevaluated metadatum under an item in an itemgroup in a target
     /// Immutable.
     /// </summary>
-    [DebuggerDisplay("{name} Value={value} Condition={condition}")]
+    [DebuggerDisplay("{_name} Value={_value} Condition={_condition}")]
     public class ProjectItemGroupTaskMetadataInstance
     {
         /// <summary>

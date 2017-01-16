@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Xml;
 using System.Text;
 using System.Collections;
@@ -22,62 +25,62 @@ namespace Microsoft.Build.UnitTests.QA
         /// <summary>
         /// The BuildRequestDefinition
         /// </summary>
-        private Dictionary<int, RequestDefinition> definitions;
+        private Dictionary<int, RequestDefinition> _definitions;
 
         /// <summary>
         /// Configuration cache component
         /// </summary>
-        private IConfigCache configurationCache;
+        private IConfigCache _configurationCache;
 
         /// <summary>
         /// The results cache component being used by the host
         /// </summary>
-        private IResultsCache resultsCache;
+        private IResultsCache _resultsCache;
 
         /// <summary>
         /// Key assigned to a particular configuration. By default key starts at 2. 1 is reserved for the root
         /// </summary>
-        private int key;
+        private int _key;
 
         /// <summary>
         /// Queue that holds the new build requests from the engine
         /// </summary>
-        private Queue<BuildRequest> newRequests;
+        private Queue<BuildRequest> _newRequests;
 
         /// <summary>
         /// Queue that holds the new configuration requests from the engine
         /// </summary>
-        private Queue<BuildRequestConfiguration> newConfigurations;
+        private Queue<BuildRequestConfiguration> _newConfigurations;
 
         /// <summary>
         /// Queue that holds the results from the engine
         /// </summary>
-        private Queue<ResultFromEngine> newResults;
+        private Queue<ResultFromEngine> _newResults;
 
         /// <summary>
         /// Exception thrown by the engine
         /// </summary>
-        private Exception engineException;
+        private Exception _engineException;
 
         /// <summary>
         /// Thread which is responsible for processing the requests and results
         /// </summary>
-        private Thread processorThread;
+        private Thread _processorThread;
 
         /// <summary>
         /// Event that signals the processor thread to do something
         /// </summary>
-        private AutoResetEvent processorThreadResume;
+        private AutoResetEvent _processorThreadResume;
 
         /// <summary>
         /// Event that signals the processor thread to exit
         /// </summary>
-        private AutoResetEvent processorThreadExit;
+        private AutoResetEvent _processorThreadExit;
 
         /// <summary>
         /// Indicates if the processor thread has already exited
         /// </summary>
-        private bool processorThreadExited;
+        private bool _processorThreadExited;
 
         #endregion
 
@@ -88,19 +91,19 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public TestDataProvider()
         {
-            this.definitions = new Dictionary<int, RequestDefinition>();
-            this.configurationCache = null;
-            this.key = 2;
-            this.newConfigurations = new Queue<BuildRequestConfiguration>();
-            this.newRequests = new Queue<BuildRequest>();
-            this.newResults = new Queue<ResultFromEngine>();
-            this.engineException = null;
-            this.processorThreadResume = new AutoResetEvent(false);
-            this.processorThreadExit = new AutoResetEvent(false);
-            this.processorThreadExited = false;
-            this.processorThread = new Thread(ProcessorThreadProc);
-            this.processorThread.Name = "Test Data provider processor thread";
-            this.processorThread.Start();
+            _definitions = new Dictionary<int, RequestDefinition>();
+            _configurationCache = null;
+            _key = 2;
+            _newConfigurations = new Queue<BuildRequestConfiguration>();
+            _newRequests = new Queue<BuildRequest>();
+            _newResults = new Queue<ResultFromEngine>();
+            _engineException = null;
+            _processorThreadResume = new AutoResetEvent(false);
+            _processorThreadExit = new AutoResetEvent(false);
+            _processorThreadExited = false;
+            _processorThread = new Thread(ProcessorThreadProc);
+            _processorThread.Name = "Test Data provider processor thread";
+            _processorThread.Start();
         }
 
         /// <summary>
@@ -111,16 +114,16 @@ namespace Microsoft.Build.UnitTests.QA
         {
             int newKey;
 
-            if (this.configurationCache.GetMatchingConfiguration(definition.UnresolvedConfiguration) != null)
+            if (_configurationCache.GetMatchingConfiguration(definition.UnresolvedConfiguration) != null)
             {
                 throw new InvalidOperationException("Multiple request definition with the same configuration cannot be added");
             }
             else
             {
-                lock (this.definitions)
+                lock (_definitions)
                 {
-                    newKey = key++;
-                    this.definitions.Add(newKey, definition);
+                    newKey = _key++;
+                    _definitions.Add(newKey, definition);
                 }
             }
 
@@ -136,12 +139,12 @@ namespace Microsoft.Build.UnitTests.QA
         public BuildRequestConfiguration CreateConfiguration(RequestDefinition definition)
         {
             BuildRequestConfiguration unresolvedConfig = definition.UnresolvedConfiguration;
-            BuildRequestConfiguration newConfig = this.configurationCache.GetMatchingConfiguration(unresolvedConfig);
+            BuildRequestConfiguration newConfig = _configurationCache.GetMatchingConfiguration(unresolvedConfig);
             if (newConfig == null)
             {
                 int newId = GetIdForUnresolvedConfiguration(unresolvedConfig);
                 newConfig = new BuildRequestConfiguration(newId, new BuildRequestData(definition.FileName, definition.GlobalProperties.ToDictionary(), definition.ToolsVersion, new string[0], null), "2.0");
-                this.configurationCache.AddConfiguration(newConfig);
+                _configurationCache.AddConfiguration(newConfig);
                 newConfig.Project = definition.ProjectDefinition.GetMSBuildProjectInstance();
             }
 
@@ -149,13 +152,13 @@ namespace Microsoft.Build.UnitTests.QA
         }
 
         /// <summary>
-        /// Dictonary of request definitions where the key is the configuration id and the value is the request defination for that configuration
+        /// Dictionary of request definitions where the key is the configuration id and the value is the request definition for that configuration
         /// </summary>
         public Dictionary<int, RequestDefinition> RequestDefinitions
         {
             get
             {
-                return this.definitions;
+                return _definitions;
             }
         }
 
@@ -166,15 +169,14 @@ namespace Microsoft.Build.UnitTests.QA
         /// <summary>
         /// Returns the BuildRequestDefinition cached under the specified definition id.
         /// </summary>
-        public RequestDefinition this[int definationId]
+        public RequestDefinition this[int definitionId]
         {
             get
             {
-                lock (this.definitions)
+                lock (_definitions)
                 {
-                    return this.definitions[definationId];
+                    return _definitions[definitionId];
                 }
-               
             }
         }
 
@@ -189,17 +191,17 @@ namespace Microsoft.Build.UnitTests.QA
         {
             set
             {
-                if (this.processorThreadExited)
+                if (_processorThreadExited)
                 {
                     return;
                 }
 
-                lock (this.newRequests)
+                lock (_newRequests)
                 {
-                    this.newRequests.Enqueue(value);
+                    _newRequests.Enqueue(value);
                 }
 
-                this.processorThreadResume.Set();
+                _processorThreadResume.Set();
             }
         }
 
@@ -210,17 +212,17 @@ namespace Microsoft.Build.UnitTests.QA
         {
             set
             {
-                if (this.processorThreadExited)
+                if (_processorThreadExited)
                 {
                     return;
                 }
 
-                lock(this.newConfigurations)
+                lock (_newConfigurations)
                 {
-                    this.newConfigurations.Enqueue(value);
+                    _newConfigurations.Enqueue(value);
                 }
 
-                this.processorThreadResume.Set();
+                _processorThreadResume.Set();
             }
         }
 
@@ -231,17 +233,17 @@ namespace Microsoft.Build.UnitTests.QA
         {
             set
             {
-                if (this.processorThreadExited)
+                if (_processorThreadExited)
                 {
                     return;
                 }
 
-                lock (this.newResults)
+                lock (_newResults)
                 {
-                    this.newResults.Enqueue(value);
+                    _newResults.Enqueue(value);
                 }
 
-                this.processorThreadResume.Set();
+                _processorThreadResume.Set();
             }
         }
 
@@ -253,13 +255,13 @@ namespace Microsoft.Build.UnitTests.QA
         {
             set
             {
-                if (this.processorThreadExited)
+                if (_processorThreadExited)
                 {
                     return;
                 }
 
-                this.engineException = value;
-                this.processorThreadResume.Set();
+                _engineException = value;
+                _processorThreadResume.Set();
             }
         }
 
@@ -268,16 +270,16 @@ namespace Microsoft.Build.UnitTests.QA
         #region Private methods
 
         /// <summary>
-        /// Given adefination find and return the key value associated with it which will also act as the config id.
+        /// Given a definition find and return the key value associated with it which will also act as the config id.
         /// Sometimes we may have multiple definitions for the same project file name. So we want to make sure that we pick the correct one.
         /// </summary>
         private int GetIdForUnresolvedConfiguration(BuildRequestConfiguration config)
         {
             int id = -1;
 
-            lock (this.definitions)
+            lock (_definitions)
             {
-                foreach (KeyValuePair<int, RequestDefinition> pair in this.definitions)
+                foreach (KeyValuePair<int, RequestDefinition> pair in _definitions)
                 {
                     if (pair.Value.AreSameDefinitions(config))
                     {
@@ -302,48 +304,48 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         private void ProcessorThreadProc()
         {
-            WaitHandle[] waitHandles = { this.processorThreadExit, this.processorThreadResume };
-            while (!this.processorThreadExited)
+            WaitHandle[] waitHandles = { _processorThreadExit, _processorThreadResume };
+            while (!_processorThreadExited)
             {
                 int handle = WaitHandle.WaitAny(waitHandles);
                 switch (handle)
                 {
-                    case 0: 
+                    case 0:
                         // exit
-                        this.processorThreadExited = true;
+                        _processorThreadExited = true;
                         break;
 
                     case 1:
                         // something to process
-                        if (this.engineException != null)
+                        if (_engineException != null)
                         {
-                            foreach (RequestDefinition definition in this.definitions.Values)
+                            foreach (RequestDefinition definition in _definitions.Values)
                             {
-                                definition.RaiseEngineException(this.engineException);
+                                definition.RaiseEngineException(_engineException);
                             }
 
-                            this.processorThreadExited = true;
+                            _processorThreadExited = true;
                         }
 
                         // Process new configuration requests
-                        if (this.newConfigurations != null && this.newConfigurations.Count > 0)
+                        if (_newConfigurations != null && _newConfigurations.Count > 0)
                         {
                             BuildRequestConfiguration config = null;
-                            config = this.newConfigurations.Peek();
+                            config = _newConfigurations.Peek();
                             while (config != null)
                             {
                                 int newConfigId = this.GetIdForUnresolvedConfiguration(config);
                                 RequestDefinition definition = this[newConfigId];
                                 definition.RaiseOnNewConfigurationRequest(config);
 
-                                lock (this.newConfigurations)
+                                lock (_newConfigurations)
                                 {
-                                    this.newConfigurations.Dequeue();
+                                    _newConfigurations.Dequeue();
                                 }
 
-                                if (this.newConfigurations.Count > 0)
+                                if (_newConfigurations.Count > 0)
                                 {
-                                    config = this.newConfigurations.Peek();
+                                    config = _newConfigurations.Peek();
                                 }
                                 else
                                 {
@@ -351,25 +353,25 @@ namespace Microsoft.Build.UnitTests.QA
                                 }
                             }
                         }
- 
+
                         // Process new build requests
-                        if (this.newRequests != null && this.newRequests.Count > 0)
+                        if (_newRequests != null && _newRequests.Count > 0)
                         {
                             BuildRequest request = null;
-                            request = this.newRequests.Peek();
+                            request = _newRequests.Peek();
                             while (request != null)
                             {
                                 RequestDefinition definition = this[request.ConfigurationId];
                                 definition.RaiseOnNewBuildRequest(request);
 
-                                lock (this.newRequests)
+                                lock (_newRequests)
                                 {
-                                    this.newRequests.Dequeue();
+                                    _newRequests.Dequeue();
                                 }
 
-                                if (this.newRequests.Count > 0)
+                                if (_newRequests.Count > 0)
                                 {
-                                    request = this.newRequests.Peek();
+                                    request = _newRequests.Peek();
                                 }
                                 else
                                 {
@@ -377,25 +379,25 @@ namespace Microsoft.Build.UnitTests.QA
                                 }
                             }
                         }
- 
+
                         // Process results for completed requests
-                        if (this.newResults != null && this.newResults.Count > 0)
+                        if (_newResults != null && _newResults.Count > 0)
                         {
                             ResultFromEngine result = null;
-                            result = this.newResults.Peek();
+                            result = _newResults.Peek();
                             while (result != null)
                             {
                                 RequestDefinition definition = this[result.Request.ConfigurationId];
                                 definition.RaiseOnBuildRequestCompleted(result.Request, result.Result);
 
-                                lock (this.newResults)
+                                lock (_newResults)
                                 {
-                                    this.newResults.Dequeue();
+                                    _newResults.Dequeue();
                                 }
 
-                                if (this.newResults.Count > 0)
+                                if (_newResults.Count > 0)
                                 {
-                                    result = this.newResults.Peek();
+                                    result = _newResults.Peek();
                                 }
                                 else
                                 {
@@ -403,12 +405,12 @@ namespace Microsoft.Build.UnitTests.QA
                                 }
                             }
                         }
- 
+
                         break;
 
                     default:
                         // Unknown event
-                        this.processorThreadExited = true;
+                        _processorThreadExited = true;
                         throw new InvalidOperationException("Unknown wait signal received by the ProcessorThread");
                 }
             }
@@ -423,8 +425,8 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            this.configurationCache = (IConfigCache)host.GetComponent(BuildComponentType.ConfigCache);
-            this.resultsCache = (IResultsCache)host.GetComponent(BuildComponentType.ResultsCache);
+            _configurationCache = (IConfigCache)host.GetComponent(BuildComponentType.ConfigCache);
+            _resultsCache = (IResultsCache)host.GetComponent(BuildComponentType.ResultsCache);
         }
 
         /// <summary>
@@ -434,32 +436,32 @@ namespace Microsoft.Build.UnitTests.QA
         {
             // If the processor thread is still there then signal it to go away
             // Wait for QAMockHost.globalTimeOut seconds for the thread to go away or complete. If not then abort it.
-            if (!this.processorThreadExited)
+            if (!_processorThreadExited)
             {
-                this.processorThreadExit.Set();
-                if(!this.processorThread.Join(QAMockHost.globalTimeOut))
+                _processorThreadExit.Set();
+                if (!_processorThread.Join(QAMockHost.globalTimeOut))
                 {
-                    this.processorThread.Abort();
+                    _processorThread.Abort();
                 }
 
-                this.processorThread = null;
+                _processorThread = null;
             }
 
             // dispose all the definition object here.
-            foreach (RequestDefinition definition in this.definitions.Values)
+            foreach (RequestDefinition definition in _definitions.Values)
             {
                 definition.Dispose();
             }
 
-            this.definitions.Clear();
-            this.newResults.Clear();
-            this.newRequests.Clear();
-            this.newConfigurations.Clear();
-            this.newRequests = null;
-            this.newResults = null;
-            this.newConfigurations = null;
-            this.configurationCache = null;
-            this.resultsCache = null;
+            _definitions.Clear();
+            _newResults.Clear();
+            _newRequests.Clear();
+            _newConfigurations.Clear();
+            _newRequests = null;
+            _newResults = null;
+            _newConfigurations = null;
+            _configurationCache = null;
+            _resultsCache = null;
         }
 
         #endregion
@@ -473,7 +475,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.resultsCache;
+                return _resultsCache;
             }
         }
 
@@ -483,8 +485,8 @@ namespace Microsoft.Build.UnitTests.QA
 
         public void Dispose()
         {
-            this.processorThreadResume.Close();
-            this.processorThreadExit.Close();
+            _processorThreadResume.Close();
+            _processorThreadExit.Close();
             GC.SuppressFinalize(this);
         }
 
@@ -499,19 +501,19 @@ namespace Microsoft.Build.UnitTests.QA
         /// <summary>
         /// Associated request for the result
         /// </summary>
-        private BuildRequest request;
+        private BuildRequest _request;
         /// <summary>
         /// Build result
         /// </summary>
-        private BuildResult result;
-        
+        private BuildResult _result;
+
         /// <summary>
         /// Constructor. This is the only way of setting the data members.
         /// </summary>
         public ResultFromEngine(BuildRequest request, BuildResult result)
         {
-            this.request = request;
-            this.result = result;
+            _request = request;
+            _result = result;
         }
 
         /// <summary>
@@ -521,7 +523,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.request;
+                return _request;
             }
         }
 
@@ -532,7 +534,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.result;
+                return _result;
             }
         }
     }

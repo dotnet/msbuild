@@ -35,6 +35,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private string _condition;
 
+        private bool _expressedAsAttribute;
+
         /// <summary>
         /// Constructor called by ProjectRootElement only.
         /// XmlElement is set directly after construction.
@@ -59,6 +61,28 @@ namespace Microsoft.Build.Construction
             this.XmlElement = (XmlElementWithLocation)xmlElement;
             _parent = parent;
             this.ContainingProject = containingProject;
+        }
+
+        /// <summary>
+        /// Allows data (for example, item metadata) to be represented as an attribute on the parent element instead of as a child element.
+        /// </summary>
+        /// <remarks>
+        /// If this is true, then the <see cref="XmlElement"/> will still be used to hold the data for this (pseudo) ProjectElement, but
+        /// it will not be added to the Xml tree.  
+        /// </remarks>
+        internal virtual bool ExpressedAsAttribute
+        {
+            get { return _expressedAsAttribute; }
+            set
+            {
+                if (value != _expressedAsAttribute)
+                {
+                    Parent?.RemoveFromXml(this);
+                    _expressedAsAttribute = value;
+                    Parent?.AddToXml(this);
+                    MarkDirty("Set express as attribute: {0}", value.ToString());
+                }                
+            }
         }
 
         /// <summary>
@@ -339,7 +363,7 @@ namespace Microsoft.Build.Construction
             }
 
             // Ensure the element name itself matches.
-            this.ReplaceElement(XmlUtilities.RenameXmlElement(this.XmlElement, element.XmlElement.Name, XMakeAttributes.defaultXmlNamespace));
+            this.ReplaceElement(XmlUtilities.RenameXmlElement(this.XmlElement, element.XmlElement.Name, XmlElement.NamespaceURI));
 
             // Copy over the attributes from the template element.
             foreach (XmlAttribute attribute in element.XmlElement.Attributes)
@@ -352,6 +376,8 @@ namespace Microsoft.Build.Construction
             {
                 this.XmlElement.AppendChild(this.XmlElement.OwnerDocument.CreateTextNode(element.XmlElement.FirstChild.Value));
             }
+
+            this._expressedAsAttribute = element._expressedAsAttribute;
 
             this.MarkDirty("CopyFrom", null);
         }

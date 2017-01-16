@@ -475,12 +475,23 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Is the reference in the GAC or not, if the check has not been made this will be null.
+        /// True if the assembly was found to be in the GAC.
         /// </summary>
         internal bool? FoundInGac
         {
             get;
             private set;
+        }
+
+        /// <summary>
+        /// True if the assembly was resolved through the GAC. Otherwise, false.
+        /// </summary>
+        internal bool ResolvedFromGac
+        {
+            get
+            {
+                return string.Equals(_resolvedSearchPath, AssemblyResolutionConstants.gacSentinel, StringComparison.OrdinalIgnoreCase);
+            }
         }
 
         /// <summary>
@@ -1135,9 +1146,15 @@ namespace Microsoft.Build.Tasks
         /// Figure out the what the CopyLocal state of given assembly should be.
         /// </summary>
         /// <param name="assemblyName">The name of the assembly.</param>
-        /// <param name="frameworkPath">The path to the frameworks directory.</param>
+        /// <param name="frameworkPaths">The framework paths.</param>
         /// <param name="targetProcessorArchitecture">Like x86 or IA64\AMD64.</param>
-        /// <returns>The CopyLocal state.</returns>
+        /// <param name="getRuntimeVersion">Delegate to get runtime version.</param>
+        /// <param name="targetedRuntimeVersion">The targeted runtime version.</param>
+        /// <param name="fileExists">Delegate to check if a file exists.</param>
+        /// <param name="getAssemblyPathInGac">Delegate to get the path to an assembly in the system GAC.</param>
+        /// <param name="copyLocalDependenciesWhenParentReferenceInGac">if set to true, copy local dependencies when only parent reference in gac.</param>
+        /// <param name="doNotCopyLocalIfInGac">If set to true, do not copy local a reference that exists in the GAC (legacy behavior).</param>
+        /// <param name="referenceTable">The reference table.</param>
         internal void SetFinalCopyLocalState
         (
             AssemblyNameExtension assemblyName,
@@ -1146,9 +1163,10 @@ namespace Microsoft.Build.Tasks
             GetAssemblyRuntimeVersion getRuntimeVersion,
             Version targetedRuntimeVersion,
             FileExists fileExists,
+            GetAssemblyPathInGac getAssemblyPathInGac,
             bool copyLocalDependenciesWhenParentReferenceInGac,
-            ReferenceTable referenceTable,
-            CheckIfAssemblyInGac checkIfAssemblyInGac
+            bool doNotCopyLocalIfInGac,
+            ReferenceTable referenceTable
         )
         {
             // If this item was unresolvable, then copy-local is false.
@@ -1184,14 +1202,9 @@ namespace Microsoft.Build.Tasks
 
                 if (found)
                 {
-                    if (result)
-                    {
-                        _copyLocalState = CopyLocalState.YesBecauseReferenceItemHadMetadata;
-                    }
-                    else
-                    {
-                        _copyLocalState = CopyLocalState.NoBecauseReferenceItemHadMetadata;
-                    }
+                    _copyLocalState = result
+                        ? CopyLocalState.YesBecauseReferenceItemHadMetadata
+                        : CopyLocalState.NoBecauseReferenceItemHadMetadata;
                     return;
                 }
             }
@@ -1249,26 +1262,6 @@ namespace Microsoft.Build.Tasks
                 return;
             }
 
-            if (!FoundInGac.HasValue)
-            {
-                // Check to see if the assembly has been found by the GAC resolver. If it as been the FoundInGac is true.
-                if (_resolvedSearchPath != null && _resolvedSearchPath.Equals(AssemblyResolutionConstants.gacSentinel, StringComparison.OrdinalIgnoreCase))
-                {
-                    FoundInGac = true;
-                }
-                else
-                {
-                    bool assemblyIsInGac = checkIfAssemblyInGac(assemblyName, targetProcessorArchitecture, getRuntimeVersion, targetedRuntimeVersion, fileExists);
-                    FoundInGac = assemblyIsInGac;
-                }
-            }
-
-            if (FoundInGac.Value)
-            {
-                _copyLocalState = CopyLocalState.NoBecauseReferenceFoundInGAC;
-                return;
-            }
-
             // We are a dependency, check to see if all of our parent references have come from the GAC
             if (!IsPrimary && !copyLocalDependenciesWhenParentReferenceInGac)
             {
@@ -1281,22 +1274,27 @@ namespace Microsoft.Build.Tasks
                     AssemblyNameExtension primaryAssemblyName = referenceTable.GetReferenceFromItemSpec((string)entry.Key);
                     Reference primaryReference = referenceTable.GetReference(primaryAssemblyName);
 
-                    bool assemblyIsInGac = false;
-
-                    if (!primaryReference.FoundInGac.HasValue)
+                    if (doNotCopyLocalIfInGac)
                     {
-                        assemblyIsInGac = checkIfAssemblyInGac(primaryAssemblyName, targetProcessorArchitecture, getRuntimeVersion, targetedRuntimeVersion, fileExists);
-                        primaryReference.FoundInGac = assemblyIsInGac;
+                        // Legacy behavior, don't copy local if the assembly is in the GAC at all
+                        if (!primaryReference.FoundInGac.HasValue)
+                        {
+                            primaryReference.FoundInGac = !string.IsNullOrEmpty(getAssemblyPathInGac(primaryAssemblyName, targetProcessorArchitecture, getRuntimeVersion, targetedRuntimeVersion, fileExists, true, false));
+                        }
+
+                        if (!primaryReference.FoundInGac.Value)
+                        {
+                            foundSourceItemNotInGac = true;
+                            break;
+                        }
                     }
                     else
                     {
-                        assemblyIsInGac = primaryReference.FoundInGac.Value;
-                    }
-
-                    if (!assemblyIsInGac)
-                    {
-                        foundSourceItemNotInGac = true;
-                        break;
+                        if (!primaryReference.ResolvedFromGac)
+                        {
+                            foundSourceItemNotInGac = true;
+                            break;
+                        }
                     }
                 }
 
@@ -1308,8 +1306,29 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
+            if (doNotCopyLocalIfInGac)
+            {
+                // Legacy behavior, don't copy local if the assembly is in the GAC at all
+                if (!FoundInGac.HasValue)
+                {
+                    FoundInGac = !string.IsNullOrEmpty(getAssemblyPathInGac(assemblyName, targetProcessorArchitecture, getRuntimeVersion, targetedRuntimeVersion, fileExists, true, false));
+                }
+
+                if (FoundInGac.Value)
+                {
+                    _copyLocalState = CopyLocalState.NoBecauseReferenceFoundInGAC;
+                    return;
+                }
+            }
+
+            if (ResolvedFromGac)
+            {
+                _copyLocalState = CopyLocalState.NoBecauseReferenceResolvedFromGAC;
+                return;
+            }
+
+            //  It was resolved locally, so copy it.
             _copyLocalState = CopyLocalState.YesBecauseOfHeuristic;
-            return;
         }
 
         /// <summary>

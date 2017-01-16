@@ -8,12 +8,15 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Microsoft.Build.Engine.UnitTests</RootNamespace>
     <AssemblyName>Microsoft.Build.Engine.UnitTests</AssemblyName>
+    <IsTestProject>true</IsTestProject>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'" />
   <ItemGroup>
     <Compile Include="..\..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
@@ -114,6 +117,7 @@
     <Compile Include="BackEnd\TargetEntry_Tests.cs" />
     <Compile Include="BackEnd\TargetResult_Tests.cs" />
     <Compile Include="BackEnd\TargetUpToDateChecker_Tests.cs" />
+    <Compile Include="BuildEnvironmentHelper_Tests.cs" />
     <Compile Include="Definition\Project_Internal_Tests.cs" />
     <Compile Include="BackEnd\TaskBuilder_Tests.cs" />
     <Compile Include="BackEnd\TaskItemComparer.cs" />
@@ -122,7 +126,6 @@
     <Compile Include="Collections\MSBuildNameIgnoreCaseComparer_Tests.cs" />
     <Compile Include="Collections\MultiDictionary_Tests.cs" />
     <Compile Include="Collections\OMcollections_tests.cs" />
-    <Compile Include="Collections\WeakDictionary_Tests.cs" />
     <Compile Include="ConfigureableForwardingLogger_Tests.cs" />
     <Compile Include="ConsoleLogger_Tests.cs" />
     <Compile Include="Construction\ElementLocation_Tests.cs" />
@@ -139,13 +142,16 @@
     <Compile Include="Definition\Toolset_Tests.cs" />
     <Compile Include="Definition\ToolsVersion_Tests.cs" />
     <Compile Include="EscapingInProjects_Tests.cs" />
+    <Compile Include="Evaluation\ItemEvaluation_Tests.cs" />
     <Compile Include="Evaluation\Evaluator_Tests.cs" />
     <Compile Include="Evaluation\Expander_Tests.cs" />
     <Compile Include="Evaluation\ExpressionShredder_Tests.cs" />
+    <Compile Include="Evaluation\ImportFromMSBuildExtensionsPath_Tests.cs" />
     <Compile Include="Evaluation\Preprocessor_Tests.cs" />
     <Compile Include="Evaluation\ProjectRootElementCache_Tests.cs" />
     <Compile Include="Evaluation\ProjectStringCache_Tests.cs" />
     <Compile Include="EventArgsFormatting_Tests.cs" />
+    <Compile Include="ExpressionTreeExpression_Tests.cs" />
     <Compile Include="ExpressionTree_Tests.cs" />
     <Compile Include="FileLogger_Tests.cs" />
     <Compile Include="HashTableUtility_Tests.cs" />
@@ -178,6 +184,7 @@
       <Link>Microsoft.Common.tasks</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Utilities\Microsoft.Build.Utilities.csproj">
@@ -192,7 +199,10 @@
       <Project>{16cd7635-7cf4-4c62-a77b-cf87d0f09a58}</Project>
       <Name>Microsoft.Build</Name>
     </ProjectReference>
-    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework" />
+    <Reference Include="Microsoft.Build.Tasks.CodeAnalysis, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>$(CompilerToolsDir)\Microsoft.Build.Tasks.CodeAnalysis.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Xml" />
@@ -200,10 +210,7 @@
       <Project>{23c9fd0e-70c5-4f1f-b08a-d2774240fb51}</Project>
       <Name>MSBuild</Name>
     </ProjectReference>
-    
-    <!-- If TargetRetailBuildFramework is set to true, reference the public key version. Otherwise reference the project. -->
-    <Reference Condition=" '$(TargetRetailBuildFramework)' == 'true' " Include="Microsoft.Build.Framework, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
-    <ProjectReference Condition=" '$(TargetRetailBuildFramework)' != 'true' " Include="..\..\Framework\Microsoft.Build.Framework.csproj">
+    <ProjectReference Include="..\..\Framework\Microsoft.Build.Framework.csproj">
       <Project>{571F09DB-A81A-4444-945C-6F7B530054CD}</Project>
       <Name>Microsoft.Build.Framework</Name>
     </ProjectReference>

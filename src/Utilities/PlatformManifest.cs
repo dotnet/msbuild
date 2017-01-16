@@ -83,6 +83,12 @@ namespace Microsoft.Build.Utilities
             private set;
         }
 
+        public bool VersionedContent
+        {
+            get;
+            private set;
+        }
+
         /// <summary>
         /// Flag set to true if an exception occurred while reading the manifest
         /// </summary>
@@ -145,31 +151,37 @@ namespace Microsoft.Build.Utilities
                         }
                     }
 
+                    DependentPlatforms = new List<DependentPlatform>();
+                    ApiContracts = new List<ApiContract>();
+
                     if (rootElement != null)
                     {
                         Name = rootElement.GetAttribute(Attributes.Name);
                         FriendlyName = rootElement.GetAttribute(Attributes.FriendlyName);
                         PlatformVersion = rootElement.GetAttribute(Attributes.Version);
-                    }
 
-                    DependentPlatforms = new List<DependentPlatform>();
-                    ApiContracts = new List<ApiContract>();
+                        foreach (XmlNode childNode in rootElement.ChildNodes)
+                        {
+                            XmlElement childElement = childNode as XmlElement;
+                            if (childElement == null)
+                            {
+                                continue;
+                            }
 
-                    foreach (XmlNode childNode in rootElement.ChildNodes)
-                    {
-                        XmlElement childElement = childNode as XmlElement;
-                        if (childElement == null)
-                        {
-                            continue;
-                        }
-
-                        if (ApiContract.IsContainedApiContractsElement(childElement.Name))
-                        {
-                            ApiContract.ReadContractsElement(childElement, ApiContracts);
-                        }
-                        else if (String.Equals(childElement.Name, Elements.DependentPlatform, StringComparison.Ordinal))
-                        {
-                            DependentPlatforms.Add(new DependentPlatform(childElement.GetAttribute(Attributes.Name), childElement.GetAttribute(Attributes.Version)));
+                            if (ApiContract.IsContainedApiContractsElement(childElement.Name))
+                            {
+                                ApiContract.ReadContractsElement(childElement, ApiContracts);
+                            }
+                            else if(ApiContract.IsVersionedContentElement(childElement.Name))
+                            {
+                                bool versionedContent = false;
+                                bool.TryParse(childElement.InnerText, out versionedContent);
+                                this.VersionedContent = versionedContent;
+                            }
+                            else if (String.Equals(childElement.Name, Elements.DependentPlatform, StringComparison.Ordinal))
+                            {
+                                DependentPlatforms.Add(new DependentPlatform(childElement.GetAttribute(Attributes.Name), childElement.GetAttribute(Attributes.Version)));
+                            }
                         }
                     }
                 }

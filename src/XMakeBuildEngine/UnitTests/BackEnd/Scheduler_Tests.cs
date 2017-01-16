@@ -13,7 +13,6 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
@@ -21,6 +20,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Evaluation;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -31,9 +31,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// <summary>
     /// Tests of the scheduler.
     /// </summary>
-    //[TestClass]
     // Ignore: Causing issues with other tests
-    public class Scheduler_Tests
+    // NOTE: marked as "internal" to disable the entire test class, as was done for MSTest.
+    internal class Scheduler_Tests : IDisposable
     {
         /// <summary>
         /// The host object.
@@ -68,8 +68,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Set up
         /// </summary>
-        [TestInitialize]
-        public void SetUp()
+        public Scheduler_Tests()
         {
             // Since we're creating our own BuildManager, we need to make sure that the default 
             // one has properly relinquished the inproc node
@@ -99,8 +98,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tear down
         /// </summary>
-        [TestCleanup]
-        public void TearDown()
+        public void Dispose()
         {
             if (_buildManager != null)
             {
@@ -114,7 +112,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that when a single request is submitted, we get a request assigned back out.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestSimpleRequest()
         {
             CreateConfiguration(1, "foo.proj");
@@ -122,15 +120,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestBlocker blocker = new BuildRequestBlocker(request.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
-            Assert.AreEqual(1, response.Count);
-            Assert.AreEqual(ScheduleActionType.ScheduleWithConfiguration, response[0].Action);
-            Assert.AreEqual(request, response[0].BuildRequest);
+            Assert.Equal(1, response.Count);
+            Assert.Equal(ScheduleActionType.ScheduleWithConfiguration, response[0].Action);
+            Assert.Equal(request, response[0].BuildRequest);
         }
 
         /// <summary>
         /// Verify that when we submit a request and we already have results, we get the results back.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestSimpleRequestWithCachedResultsSuccess()
         {
             CreateConfiguration(1, "foo.proj");
@@ -140,21 +138,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestBlocker blocker = new BuildRequestBlocker(request.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
-            Assert.AreEqual(2, response.Count);
+            Assert.Equal(2, response.Count);
 
             // First response tells the parent of the results.
-            Assert.AreEqual(ScheduleActionType.ReportResults, response[0].Action);
-            Assert.IsTrue(ResultsCache_Tests.AreResultsIdentical(result, response[0].Unblocker.Result));
+            Assert.Equal(ScheduleActionType.ReportResults, response[0].Action);
+            Assert.True(ResultsCache_Tests.AreResultsIdentical(result, response[0].Unblocker.Result));
 
             // Second response tells the parent to continue.
-            Assert.AreEqual(ScheduleActionType.ResumeExecution, response[1].Action);
-            Assert.IsNull(response[1].Unblocker.Result);
+            Assert.Equal(ScheduleActionType.ResumeExecution, response[1].Action);
+            Assert.Null(response[1].Unblocker.Result);
         }
 
         /// <summary>
         /// Verify that when we submit a request with failing results, we get the results back.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestSimpleRequestWithCachedResultsFail()
         {
             CreateConfiguration(1, "foo.proj");
@@ -164,21 +162,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestBlocker blocker = new BuildRequestBlocker(request.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
-            Assert.AreEqual(2, response.Count);
+            Assert.Equal(2, response.Count);
 
             // First response tells the parent of the results.
-            Assert.AreEqual(ScheduleActionType.ReportResults, response[0].Action);
-            Assert.IsTrue(ResultsCache_Tests.AreResultsIdentical(result, response[0].Unblocker.Result));
+            Assert.Equal(ScheduleActionType.ReportResults, response[0].Action);
+            Assert.True(ResultsCache_Tests.AreResultsIdentical(result, response[0].Unblocker.Result));
 
             // Second response tells the parent to continue.
-            Assert.AreEqual(ScheduleActionType.ResumeExecution, response[1].Action);
-            Assert.IsNull(response[1].Unblocker.Result);
+            Assert.Equal(ScheduleActionType.ResumeExecution, response[1].Action);
+            Assert.Null(response[1].Unblocker.Result);
         }
 
         /// <summary>
         /// Verify that when we submit a child request with results cached, we get those results back.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestChildRequest()
         {
             CreateConfiguration(1, "foo.proj");
@@ -194,21 +192,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
             blocker = new BuildRequestBlocker(0, new string[] { "foo" }, new BuildRequest[] { childRequest });
             response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
-            Assert.AreEqual(2, response.Count);
+            Assert.Equal(2, response.Count);
 
             // The first response will be to report the results back to the node.
-            Assert.AreEqual(ScheduleActionType.ReportResults, response[0].Action);
-            Assert.IsTrue(ResultsCache_Tests.AreResultsIdentical(childResult, response[0].Unblocker.Result));
+            Assert.Equal(ScheduleActionType.ReportResults, response[0].Action);
+            Assert.True(ResultsCache_Tests.AreResultsIdentical(childResult, response[0].Unblocker.Result));
 
             // The second response will be to continue building the original request.
-            Assert.AreEqual(ScheduleActionType.ResumeExecution, response[1].Action);
-            Assert.IsNull(response[1].Unblocker.Result);
+            Assert.Equal(ScheduleActionType.ResumeExecution, response[1].Action);
+            Assert.Null(response[1].Unblocker.Result);
         }
 
         /// <summary>
         /// Verify that when multiple requests are submitted, the first one in is the first one out.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestMultipleRequests()
         {
             CreateConfiguration(1, "foo.proj");
@@ -218,15 +216,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request1, request2 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
-            Assert.AreEqual(1, response.Count);
-            Assert.AreEqual(ScheduleActionType.ScheduleWithConfiguration, response[0].Action);
-            Assert.AreEqual(request1, response[0].BuildRequest);
+            Assert.Equal(1, response.Count);
+            Assert.Equal(ScheduleActionType.ScheduleWithConfiguration, response[0].Action);
+            Assert.Equal(request1, response[0].BuildRequest);
         }
 
         /// <summary>
         /// Verify that when multiple requests are submitted with results cached, we get the results back.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestMultipleRequestsWithSomeResults()
         {
             CreateConfiguration(1, "foo.proj");
@@ -238,17 +236,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request1, request2 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
-            Assert.AreEqual(2, response.Count);
-            Assert.AreEqual(ScheduleActionType.ReportResults, response[0].Action);
-            Assert.IsTrue(ResultsCache_Tests.AreResultsIdentical(result2, response[0].Unblocker.Result));
-            Assert.AreEqual(ScheduleActionType.ScheduleWithConfiguration, response[1].Action);
-            Assert.AreEqual(request1, response[1].BuildRequest);
+            Assert.Equal(2, response.Count);
+            Assert.Equal(ScheduleActionType.ReportResults, response[0].Action);
+            Assert.True(ResultsCache_Tests.AreResultsIdentical(result2, response[0].Unblocker.Result));
+            Assert.Equal(ScheduleActionType.ScheduleWithConfiguration, response[1].Action);
+            Assert.Equal(request1, response[1].BuildRequest);
         }
 
         /// <summary>
         /// Verify that when multiple requests are submitted with results cached, we get the results back.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestMultipleRequestsWithAllResults()
         {
             CreateConfiguration(1, "foo.proj");
@@ -261,25 +259,25 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request1, request2 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
-            Assert.AreEqual(3, response.Count);
+            Assert.Equal(3, response.Count);
 
             // First two are the results which were cached.
-            Assert.AreEqual(ScheduleActionType.ReportResults, response[0].Action);
-            Assert.IsTrue(ResultsCache_Tests.AreResultsIdentical(result1, response[0].Unblocker.Result));
-            Assert.AreEqual(ScheduleActionType.ReportResults, response[1].Action);
-            Assert.IsTrue(ResultsCache_Tests.AreResultsIdentical(result2, response[1].Unblocker.Result));
+            Assert.Equal(ScheduleActionType.ReportResults, response[0].Action);
+            Assert.True(ResultsCache_Tests.AreResultsIdentical(result1, response[0].Unblocker.Result));
+            Assert.Equal(ScheduleActionType.ReportResults, response[1].Action);
+            Assert.True(ResultsCache_Tests.AreResultsIdentical(result2, response[1].Unblocker.Result));
 
             // Last response is to continue the parent.
-            Assert.AreEqual(ScheduleActionType.ResumeExecution, response[2].Action);
-            Assert.AreEqual(request1.ParentGlobalRequestId, response[2].Unblocker.BlockedRequestId);
-            Assert.IsNull(response[2].Unblocker.Result);
+            Assert.Equal(ScheduleActionType.ResumeExecution, response[2].Action);
+            Assert.Equal(request1.ParentGlobalRequestId, response[2].Unblocker.BlockedRequestId);
+            Assert.Null(response[2].Unblocker.Result);
         }
 
         /// <summary>
         /// Verify that if the affinity of one of the requests is out-of-proc, we create an out-of-proc node (but only one)
         /// even if the max node count = 1. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestOutOfProcNodeCreatedWhenAffinityIsOutOfProc()
         {
             CreateConfiguration(1, "foo.proj");
@@ -291,17 +289,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Parent request is blocked by the fact that both child requests require the out-of-proc node that doesn't 
             // exist yet.
-            Assert.AreEqual(1, response.Count);
-            Assert.AreEqual(ScheduleActionType.CreateNode, response[0].Action);
-            Assert.AreEqual(NodeAffinity.OutOfProc, response[0].RequiredNodeType);
-            Assert.AreEqual(1, response[0].NumberOfNodesToCreate);
+            Assert.Equal(1, response.Count);
+            Assert.Equal(ScheduleActionType.CreateNode, response[0].Action);
+            Assert.Equal(NodeAffinity.OutOfProc, response[0].RequiredNodeType);
+            Assert.Equal(1, response[0].NumberOfNodesToCreate);
         }
 
         /// <summary>
         /// Verify that if the affinity of our requests is out-of-proc, that many out-of-proc nodes will 
         /// be made (assuming it does not exceed MaxNodeCount)
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestOutOfProcNodesCreatedWhenAffinityIsOutOfProc()
         {
             _host.BuildParameters.MaxNodeCount = 4;
@@ -315,10 +313,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Parent request is blocked by the fact that both child requests require the out-of-proc node that doesn't 
             // exist yet.
-            Assert.AreEqual(1, response.Count);
-            Assert.AreEqual(ScheduleActionType.CreateNode, response[0].Action);
-            Assert.AreEqual(NodeAffinity.OutOfProc, response[0].RequiredNodeType);
-            Assert.AreEqual(2, response[0].NumberOfNodesToCreate);
+            Assert.Equal(1, response.Count);
+            Assert.Equal(ScheduleActionType.CreateNode, response[0].Action);
+            Assert.Equal(NodeAffinity.OutOfProc, response[0].RequiredNodeType);
+            Assert.Equal(2, response[0].NumberOfNodesToCreate);
         }
 
         /// <summary>
@@ -326,7 +324,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// we still won't create any new nodes if they're all for the same configuration -- 
         /// they'd end up all being assigned to the same node. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestNoNewNodesCreatedForMultipleRequestsWithSameConfiguration()
         {
             _host.BuildParameters.MaxNodeCount = 3;
@@ -340,16 +338,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request1, request2, request3, request4 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
-            Assert.AreEqual(1, response.Count);
-            Assert.AreEqual(ScheduleActionType.ScheduleWithConfiguration, response[0].Action);
-            Assert.AreEqual(request1, response[0].BuildRequest);
+            Assert.Equal(1, response.Count);
+            Assert.Equal(ScheduleActionType.ScheduleWithConfiguration, response[0].Action);
+            Assert.Equal(request1, response[0].BuildRequest);
         }
 
         /// <summary>
         /// Verify that if the affinity of our requests is "any", we will not create more than 
         /// MaxNodeCount nodes (1 IP node + MaxNodeCount - 1 OOP nodes)
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestMaxNodeCountNotExceededWithRequestsOfAffinityAny()
         {
             _host.BuildParameters.MaxNodeCount = 3;
@@ -366,12 +364,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request1, request2, request3, request4 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
-            Assert.AreEqual(2, response.Count);
-            Assert.AreEqual(ScheduleActionType.ScheduleWithConfiguration, response[0].Action);
-            Assert.AreEqual(request1, response[0].BuildRequest);
-            Assert.AreEqual(ScheduleActionType.CreateNode, response[1].Action);
-            Assert.AreEqual(NodeAffinity.OutOfProc, response[1].RequiredNodeType);
-            Assert.AreEqual(2, response[1].NumberOfNodesToCreate);
+            Assert.Equal(2, response.Count);
+            Assert.Equal(ScheduleActionType.ScheduleWithConfiguration, response[0].Action);
+            Assert.Equal(request1, response[0].BuildRequest);
+            Assert.Equal(ScheduleActionType.CreateNode, response[1].Action);
+            Assert.Equal(NodeAffinity.OutOfProc, response[1].RequiredNodeType);
+            Assert.Equal(2, response[1].NumberOfNodesToCreate);
         }
 
         /// <summary>
@@ -379,7 +377,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// node will service an Any request instead of an inproc request, leaving only one non-inproc request for the second round 
         /// of node creation.  
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyRequestOrderingDoesNotAffectNodeCreationCountWithInProcAndAnyRequests()
         {
             // Since we're creating our own BuildManager, we need to make sure that the default 
@@ -411,26 +409,26 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequest request3 = CreateBuildRequest(3, 1, new string[] { "bar" }, NodeAffinity.InProc, _defaultParentRequest);
 
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, new BuildRequestBlocker(-1, new string[] { }, new BuildRequest[] { _defaultParentRequest, request1, request2, request3 })));
-            Assert.AreEqual(1, response.Count);
-            Assert.AreEqual(ScheduleActionType.CreateNode, response[0].Action);
-            Assert.AreEqual(NodeAffinity.InProc, response[0].RequiredNodeType);
-            Assert.AreEqual(1, response[0].NumberOfNodesToCreate);
+            Assert.Equal(1, response.Count);
+            Assert.Equal(ScheduleActionType.CreateNode, response[0].Action);
+            Assert.Equal(NodeAffinity.InProc, response[0].RequiredNodeType);
+            Assert.Equal(1, response[0].NumberOfNodesToCreate);
 
             List<NodeInfo> nodeInfos = new List<NodeInfo>(new NodeInfo[] { new NodeInfo(1, NodeProviderType.InProc) });
             List<ScheduleResponse> moreResponses = new List<ScheduleResponse>(_scheduler.ReportNodesCreated(nodeInfos));
 
-            Assert.AreEqual(2, moreResponses.Count);
-            Assert.AreEqual(ScheduleActionType.ScheduleWithConfiguration, moreResponses[0].Action);
-            Assert.AreEqual(ScheduleActionType.CreateNode, moreResponses[1].Action);
-            Assert.AreEqual(NodeAffinity.OutOfProc, moreResponses[1].RequiredNodeType);
-            Assert.AreEqual(1, moreResponses[1].NumberOfNodesToCreate);
+            Assert.Equal(2, moreResponses.Count);
+            Assert.Equal(ScheduleActionType.ScheduleWithConfiguration, moreResponses[0].Action);
+            Assert.Equal(ScheduleActionType.CreateNode, moreResponses[1].Action);
+            Assert.Equal(NodeAffinity.OutOfProc, moreResponses[1].RequiredNodeType);
+            Assert.Equal(1, moreResponses[1].NumberOfNodesToCreate);
         }
 
         /// <summary>
         /// Verify that if the affinity of our requests is out-of-proc, we will create as many as
         /// MaxNodeCount out-of-proc nodes
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestMaxNodeCountOOPNodesCreatedForOOPAffinitizedRequests()
         {
             _host.BuildParameters.MaxNodeCount = 3;
@@ -449,10 +447,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Parent request is blocked by the fact that both child requests require the out-of-proc node that doesn't 
             // exist yet.
-            Assert.AreEqual(1, response.Count);
-            Assert.AreEqual(ScheduleActionType.CreateNode, response[0].Action);
-            Assert.AreEqual(NodeAffinity.OutOfProc, response[0].RequiredNodeType);
-            Assert.AreEqual(3, response[0].NumberOfNodesToCreate);
+            Assert.Equal(1, response.Count);
+            Assert.Equal(ScheduleActionType.CreateNode, response[0].Action);
+            Assert.Equal(NodeAffinity.OutOfProc, response[0].RequiredNodeType);
+            Assert.Equal(3, response[0].NumberOfNodesToCreate);
         }
 
         /// <summary>
@@ -460,7 +458,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// is less than MaxNodeCount, that we only create MaxNodeCount - 1 OOP nodes (for a total of MaxNodeCount
         /// nodes, when the inproc node is included)
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestMaxNodeCountNodesNotExceededWithSomeOOPRequests1()
         {
             _host.BuildParameters.MaxNodeCount = 3;
@@ -477,12 +475,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request1, request2, request3, request4 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
-            Assert.AreEqual(2, response.Count);
-            Assert.AreEqual(ScheduleActionType.ScheduleWithConfiguration, response[0].Action);
-            Assert.AreEqual(request2, response[0].BuildRequest);
-            Assert.AreEqual(ScheduleActionType.CreateNode, response[1].Action);
-            Assert.AreEqual(NodeAffinity.OutOfProc, response[1].RequiredNodeType);
-            Assert.AreEqual(2, response[1].NumberOfNodesToCreate);
+            Assert.Equal(2, response.Count);
+            Assert.Equal(ScheduleActionType.ScheduleWithConfiguration, response[0].Action);
+            Assert.Equal(request2, response[0].BuildRequest);
+            Assert.Equal(ScheduleActionType.CreateNode, response[1].Action);
+            Assert.Equal(NodeAffinity.OutOfProc, response[1].RequiredNodeType);
+            Assert.Equal(2, response[1].NumberOfNodesToCreate);
         }
 
         /// <summary>
@@ -490,7 +488,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// is less than MaxNodeCount, that we only create MaxNodeCount - 1 OOP nodes (for a total of MaxNodeCount
         /// nodes, when the inproc node is included)
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestMaxNodeCountNodesNotExceededWithSomeOOPRequests2()
         {
             _host.BuildParameters.MaxNodeCount = 3;
@@ -507,19 +505,19 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request1, request2, request3, request4 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
-            Assert.AreEqual(2, response.Count);
-            Assert.AreEqual(ScheduleActionType.ScheduleWithConfiguration, response[0].Action);
-            Assert.AreEqual(request3, response[0].BuildRequest);
-            Assert.AreEqual(ScheduleActionType.CreateNode, response[1].Action);
-            Assert.AreEqual(NodeAffinity.OutOfProc, response[1].RequiredNodeType);
-            Assert.AreEqual(2, response[1].NumberOfNodesToCreate);
+            Assert.Equal(2, response.Count);
+            Assert.Equal(ScheduleActionType.ScheduleWithConfiguration, response[0].Action);
+            Assert.Equal(request3, response[0].BuildRequest);
+            Assert.Equal(ScheduleActionType.CreateNode, response[1].Action);
+            Assert.Equal(NodeAffinity.OutOfProc, response[1].RequiredNodeType);
+            Assert.Equal(2, response[1].NumberOfNodesToCreate);
         }
 
         /// <summary>
         /// Make sure that traversal projects are marked with an affinity of "InProc", which means that 
         /// even if multiple are available, we should still only have the single inproc node.  
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestTraversalAffinityIsInProc()
         {
             _host.BuildParameters.MaxNodeCount = 3;
@@ -534,16 +532,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // There will be no request to create a new node, because both of the above requests are traversals, 
             // which have an affinity of "inproc", and the inproc node already exists. 
-            Assert.AreEqual(1, response.Count);
-            Assert.AreEqual(ScheduleActionType.ScheduleWithConfiguration, response[0].Action);
-            Assert.AreEqual(request1, response[0].BuildRequest);
+            Assert.Equal(1, response.Count);
+            Assert.Equal(ScheduleActionType.ScheduleWithConfiguration, response[0].Action);
+            Assert.Equal(request1, response[0].BuildRequest);
         }
 
         /// <summary>
         /// With something approximating the BuildManager's build loop, make sure that we don't end up 
         /// trying to create more nodes than we can actually support.   
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyNoOverCreationOfNodesWithBuildLoop()
         {
             // Since we're creating our own BuildManager, we need to make sure that the default 
@@ -579,13 +577,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             int nextNodeId = 1;
             bool inProcNodeExists = false;
             MockPerformSchedulingActions(responses, ref nextNodeId, ref inProcNodeExists);
-            Assert.AreEqual(4, nextNodeId); // 3 nodes
+            Assert.Equal(4, nextNodeId); // 3 nodes
         }
 
         /// <summary>
         /// Verify that if we get two requests but one of them is a failure, we only get the failure result back.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestTwoRequestsWithFirstFailure()
         {
             CreateConfiguration(1, "foo.proj");
@@ -596,15 +594,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request1, request2 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
-            Assert.AreEqual(2, response.Count);
-            Assert.IsTrue(ResultsCache_Tests.AreResultsIdentical(result1, response[0].Unblocker.Result));
-            Assert.AreEqual(ScheduleActionType.ScheduleWithConfiguration, response[1].Action);
+            Assert.Equal(2, response.Count);
+            Assert.True(ResultsCache_Tests.AreResultsIdentical(result1, response[0].Unblocker.Result));
+            Assert.Equal(ScheduleActionType.ScheduleWithConfiguration, response[1].Action);
         }
 
         /// <summary>
         /// Verify that if we get two requests but one of them is a failure, we only get the failure result back.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestTwoRequestsWithSecondFailure()
         {
             CreateConfiguration(1, "foo.proj");
@@ -615,15 +613,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request1, request2 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
-            Assert.AreEqual(2, response.Count);
-            Assert.IsTrue(ResultsCache_Tests.AreResultsIdentical(result2, response[0].Unblocker.Result));
-            Assert.AreEqual(ScheduleActionType.ScheduleWithConfiguration, response[1].Action);
+            Assert.Equal(2, response.Count);
+            Assert.True(ResultsCache_Tests.AreResultsIdentical(result2, response[0].Unblocker.Result));
+            Assert.Equal(ScheduleActionType.ScheduleWithConfiguration, response[1].Action);
         }
 
         /// <summary>
         /// Verify that if we get three requests but one of them is a failure, we only get the failure result back.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestThreeRequestsWithOneFailure()
         {
             CreateConfiguration(1, "foo.proj");
@@ -635,15 +633,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request1, request2, request3 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
-            Assert.AreEqual(2, response.Count);
-            Assert.IsTrue(ResultsCache_Tests.AreResultsIdentical(result2, response[0].Unblocker.Result));
-            Assert.AreEqual(ScheduleActionType.ScheduleWithConfiguration, response[1].Action);
+            Assert.Equal(2, response.Count);
+            Assert.True(ResultsCache_Tests.AreResultsIdentical(result2, response[0].Unblocker.Result));
+            Assert.Equal(ScheduleActionType.ScheduleWithConfiguration, response[1].Action);
         }
 
         /// <summary>
         /// Verify that providing a result to the only ourstanding request results in build complete.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestResult()
         {
             CreateConfiguration(1, "foo.proj");
@@ -654,20 +652,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildResult result = CreateBuildResult(request, "foo", TestUtilities.GetSuccessResult());
             response = new List<ScheduleResponse>(_scheduler.ReportResult(1, result));
 
-            Assert.AreEqual(2, response.Count);
+            Assert.Equal(2, response.Count);
 
             // First response is reporting the results for this request to the parent
-            Assert.AreEqual(ScheduleActionType.ReportResults, response[0].Action);
+            Assert.Equal(ScheduleActionType.ReportResults, response[0].Action);
 
             // Second response is continuing execution of the parent
-            Assert.AreEqual(ScheduleActionType.ResumeExecution, response[1].Action);
-            Assert.AreEqual(request.ParentGlobalRequestId, response[1].Unblocker.BlockedRequestId);
+            Assert.Equal(ScheduleActionType.ResumeExecution, response[1].Action);
+            Assert.Equal(request.ParentGlobalRequestId, response[1].Unblocker.BlockedRequestId);
         }
 
         /// <summary>
         /// Tests that the detailed summary setting causes the summary to be produced.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestDetailedSummary()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -682,7 +680,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Project project = new Project(new XmlTextReader(new StringReader(contents)));
             BuildRequestData data = new BuildRequestData(project.CreateProjectInstance(), new string[] { "test" });
             BuildResult result = _buildManager.Build(_parameters, data);
-            Assert.AreEqual(BuildResultCode.Success, result.OverallResult);
+            Assert.Equal(BuildResultCode.Success, result.OverallResult);
             _logger.AssertLogContains("[success]");
 
             // Verify the existence of the first line of the header.

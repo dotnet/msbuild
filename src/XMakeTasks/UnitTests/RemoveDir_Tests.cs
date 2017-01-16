@@ -4,14 +4,13 @@
 using System;
 using System.IO;
 using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
     sealed public class RemoveDir_Tests
     {
         /*
@@ -19,7 +18,7 @@ namespace Microsoft.Build.UnitTests
          *
          * Make sure that attributes set on input items are forwarded to ouput items.
          */
-        [TestMethod]
+        [Fact]
         public void AttributeForwarding()
         {
             RemoveDir t = new RemoveDir();
@@ -31,10 +30,10 @@ namespace Microsoft.Build.UnitTests
 
             t.Execute();
 
-            Assert.AreEqual("en-GB", t.RemovedDirectories[0].GetMetadata("Locale"));
+            Assert.Equal("en-GB", t.RemovedDirectories[0].GetMetadata("Locale"));
 
             // Output ItemSpec should not be overwritten.
-            Assert.AreEqual("MyNonExistentDirectory", t.RemovedDirectories[0].ItemSpec);
+            Assert.Equal("MyNonExistentDirectory", t.RemovedDirectories[0].ItemSpec);
         }
     }
 }

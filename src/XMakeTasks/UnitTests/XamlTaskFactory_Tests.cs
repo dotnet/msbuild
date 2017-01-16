@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Framework;
 using System.Xml;
 using System.IO;
@@ -17,6 +16,7 @@ using Microsoft.Build.Shared;
 using System.Globalization;
 using Microsoft.Build.Tasks.Xaml;
 using System.Xaml;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 {
@@ -25,13 +25,12 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
     /// The text fixture to unit test the task generator.
     /// Creates a new TaskGenerator object and tests the various methods
     /// </summary>
-    [TestClass]
     public sealed class LoadAndParseTests
     {
         /// <summary>
         /// Tests the load method. Expects true to be returned.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestLoadXml()
         {
             TaskParser tp = new TaskParser();
@@ -40,14 +39,14 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
                              <BoolProperty Name=`TestProperty1` Switch=`tp` />
                            </Rule>
                          </ProjectSchemaDefinitions>";
-            Assert.IsTrue(tp.Parse(s.Replace("`", "\""), "TaskGeneratorLoadTest"), "File failed to load correctly.");
+            Assert.True(tp.Parse(s.Replace("`", "\""), "TaskGeneratorLoadTest")); // "File failed to load correctly."
         }
 
         /// <summary>
         /// Tests the TaskName property. 
         /// Should get "CL" back for this specific case.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestGetTaskName()
         {
             string xmlContents = @"<ProjectSchemaDefinitions xmlns=`clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework` xmlns:x=`http://schemas.microsoft.com/winfx/2006/xaml` xmlns:sys=`clr-namespace:System;assembly=mscorlib` xmlns:impl=`clr-namespace:Microsoft.VisualStudio.Project.Contracts.Implementation;assembly=Microsoft.VisualStudio.Project.Contracts.Implementation`>
@@ -57,14 +56,13 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
                                    </ProjectSchemaDefinitions>";
 
             TaskParser tp = XamlTestHelpers.LoadAndParse(xmlContents, "CL");
-            Assert.IsTrue(tp.GeneratedTaskName.Equals("CL"), "Was expecting task name to be CL, but was " + tp.GeneratedTaskName);
+            Assert.True(tp.GeneratedTaskName.Equals("CL"), "Was expecting task name to be CL, but was " + tp.GeneratedTaskName);
         }
 
         /// <summary>
         /// Tests the BaseClass property. XamlTaskFactory does not currently support setting the BaseClass.
         /// </summary>
-        [TestMethod]
-        [Ignore] // "Should probably translate XamlObjectWriterException for this case into XamlParseException, but I want to minimize the code changes in this initial unit test checkin"
+        [Fact(Skip = "Ignored in MSTest")]
         public void TestGetBaseClass()
         {
             string xmlContents = @"<ProjectSchemaDefinitions xmlns=`clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework` xmlns:x=`http://schemas.microsoft.com/winfx/2006/xaml` xmlns:sys=`clr-namespace:System;assembly=mscorlib` xmlns:impl=`clr-namespace:Microsoft.VisualStudio.Project.Contracts.Implementation;assembly=Microsoft.VisualStudio.Project.Contracts.Implementation`>
@@ -74,14 +72,13 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
                                    </ProjectSchemaDefinitions>";
 
             TaskParser tp = XamlTestHelpers.LoadAndParse(xmlContents, "CL");
-            Assert.AreEqual("DataDrivenToolTask", tp.BaseClass);
+            Assert.Equal("DataDrivenToolTask", tp.BaseClass);
         }
 
         /// <summary>
         /// Tests the ResourceNamespace property. XamlTaskFactory does not currently support setting the ResourceNamespace.
         /// </summary>
-        [TestMethod]
-        [Ignore] // "Should probably translate XamlObjectWriterException for this case into XamlParseException, but I want to minimize the code changes in this initial unit test checkin"
+        [Fact(Skip = "Ignored in MSTest")]
         public void TestGetResourceNamespace()
         {
             string xmlContents = @"<ProjectSchemaDefinitions xmlns=`clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework` xmlns:x=`http://schemas.microsoft.com/winfx/2006/xaml` xmlns:sys=`clr-namespace:System;assembly=mscorlib` xmlns:impl=`clr-namespace:Microsoft.VisualStudio.Project.Contracts.Implementation;assembly=Microsoft.VisualStudio.Project.Contracts.Implementation`>
@@ -91,14 +88,13 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
                                    </ProjectSchemaDefinitions>";
 
             TaskParser tp = XamlTestHelpers.LoadAndParse(xmlContents, "CL");
-            Assert.AreEqual(null, tp.ResourceNamespace);
+            Assert.Equal(null, tp.ResourceNamespace);
         }
 
         /// <summary>
         /// Tests the Namespace property. XamlTaskFactory does not currently support setting the Namespace.
         /// </summary>
-        [TestMethod]
-        [Ignore] // "Should probably translate XamlObjectWriterException for this case into XamlParseException, but I want to minimize the code changes in this initial unit test checkin"
+        [Fact(Skip = "Ignored in MSTest")]
         public void TestGetNamespace()
         {
             string xmlContents = @"<ProjectSchemaDefinitions xmlns=`clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework` xmlns:x=`http://schemas.microsoft.com/winfx/2006/xaml` xmlns:sys=`clr-namespace:System;assembly=mscorlib` xmlns:impl=`clr-namespace:Microsoft.VisualStudio.Project.Contracts.Implementation;assembly=Microsoft.VisualStudio.Project.Contracts.Implementation`>
@@ -108,13 +104,13 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
                                    </ProjectSchemaDefinitions>";
 
             TaskParser tp = XamlTestHelpers.LoadAndParse(xmlContents, "CL");
-            Assert.AreEqual("XamlTaskNamespace", tp.Namespace);
+            Assert.Equal("XamlTaskNamespace", tp.Namespace);
         }
 
         /// <summary>
         /// See what happens when the name is missing from the task element
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestParseIncorrect_NoName()
         {
             bool exceptionCaught = false;
@@ -133,13 +129,13 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
                 exceptionCaught = true;
             }
 
-            Assert.IsTrue(exceptionCaught, "Should have caught a XamlParseException");
+            Assert.True(exceptionCaught); // "Should have caught a XamlParseException"
         }
 
         /// <summary>
         /// See what happens when the task element is valid, but we're searching for a different rule that's not in the file.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestParseIncorrect_NoMatchingRule()
         {
             bool exceptionCaught = false;
@@ -158,13 +154,13 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
                 exceptionCaught = true;
             }
 
-            Assert.IsTrue(exceptionCaught, "Should have caught a XamlParseException");
+            Assert.True(exceptionCaught); // "Should have caught a XamlParseException"
         }
 
         /// <summary>
         /// Basic test of several reversible boolean switches, to verify that everything gets passed through correctly.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestBasicReversibleBooleanSwitches()
         {
             string xmlContents = @"<ProjectSchemaDefinitions xmlns=`clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework` xmlns:x=`http://schemas.microsoft.com/winfx/2006/xaml` xmlns:sys=`clr-namespace:System;assembly=mscorlib` xmlns:impl=`clr-namespace:Microsoft.VisualStudio.Project.Contracts.Implementation;assembly=Microsoft.VisualStudio.Project.Contracts.Implementation`>
@@ -177,27 +173,27 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 
             LinkedList<Property> properties = tp.Properties;
 
-            Assert.AreEqual(2, properties.Count, "Expected two properties but there were " + properties.Count);
-            Assert.IsNotNull(properties.First.Value, "GlobalOptimizations switch should exist");
-            Assert.AreEqual("GlobalOptimizations", properties.First.Value.Name);
-            Assert.AreEqual("Og", properties.First.Value.SwitchName);
-            Assert.AreEqual("Og-", properties.First.Value.ReverseSwitchName);
-            Assert.AreEqual("true", properties.First.Value.Reversible, "Switch should be marked as reversible");
+            Assert.Equal(2, properties.Count); // "Expected two properties but there were " + properties.Count
+            Assert.NotNull(properties.First.Value); // "GlobalOptimizations switch should exist"
+            Assert.Equal("GlobalOptimizations", properties.First.Value.Name);
+            Assert.Equal("Og", properties.First.Value.SwitchName);
+            Assert.Equal("Og-", properties.First.Value.ReverseSwitchName);
+            Assert.Equal("true", properties.First.Value.Reversible); // "Switch should be marked as reversible"
 
             properties.RemoveFirst();
 
-            Assert.IsNotNull(properties.First.Value, "IntrinsicFunctions switch should exist");
-            Assert.AreEqual("IntrinsicFunctions", properties.First.Value.Name);
-            Assert.AreEqual("Oi", properties.First.Value.SwitchName);
-            Assert.AreEqual("Oi:NO", properties.First.Value.ReverseSwitchName);
-            Assert.AreEqual("true", properties.First.Value.Reversible, "Switch should be marked as reversible");
-            Assert.AreEqual(PropertyType.Boolean, properties.First.Value.Type);
+            Assert.NotNull(properties.First.Value); // "IntrinsicFunctions switch should exist"
+            Assert.Equal("IntrinsicFunctions", properties.First.Value.Name);
+            Assert.Equal("Oi", properties.First.Value.SwitchName);
+            Assert.Equal("Oi:NO", properties.First.Value.ReverseSwitchName);
+            Assert.Equal("true", properties.First.Value.Reversible); // "Switch should be marked as reversible"
+            Assert.Equal(PropertyType.Boolean, properties.First.Value.Type);
         }
 
         /// <summary>
         /// Tests a basic non-reversible booleans switch
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestBasicNonReversibleBooleanSwitch()
         {
             string xmlContents = @"<ProjectSchemaDefinitions xmlns=`clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework` xmlns:x=`http://schemas.microsoft.com/winfx/2006/xaml` xmlns:sys=`clr-namespace:System;assembly=mscorlib` xmlns:impl=`clr-namespace:Microsoft.VisualStudio.Project.Contracts.Implementation;assembly=Microsoft.VisualStudio.Project.Contracts.Implementation`>
@@ -209,20 +205,20 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 
             LinkedList<Property> properties = tp.Properties;
 
-            Assert.AreEqual(1, properties.Count, "Expected one property but there were " + properties.Count);
-            Assert.IsNotNull(properties.First.Value, "KeepComments switch should exist");
-            Assert.AreEqual("KeepComments", properties.First.Value.Name);
-            Assert.AreEqual("C", properties.First.Value.SwitchName);
-            Assert.IsNull(properties.First.Value.ReverseSwitchName, "KeepComments shouldn't have a reverse switch value");
-            Assert.AreEqual(String.Empty, properties.First.Value.Reversible, "Switch should NOT marked as reversible");
-            Assert.AreEqual(String.Empty, properties.First.Value.DefaultValue, "Switch should NOT have a default value");
-            Assert.AreEqual(PropertyType.Boolean, properties.First.Value.Type);
+            Assert.Equal(1, properties.Count); // "Expected one property but there were " + properties.Count
+            Assert.NotNull(properties.First.Value); // "KeepComments switch should exist"
+            Assert.Equal("KeepComments", properties.First.Value.Name);
+            Assert.Equal("C", properties.First.Value.SwitchName);
+            Assert.Null(properties.First.Value.ReverseSwitchName); // "KeepComments shouldn't have a reverse switch value"
+            Assert.Equal(String.Empty, properties.First.Value.Reversible); // "Switch should NOT marked as reversible"
+            Assert.Equal(String.Empty, properties.First.Value.DefaultValue); // "Switch should NOT have a default value"
+            Assert.Equal(PropertyType.Boolean, properties.First.Value.Type);
         }
 
         /// <summary>
         /// Tests a basic non-reversible booleans switch that has a default value set. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestBasicNonReversibleBooleanSwitch_WithDefault()
         {
             string xmlContents = @"<ProjectSchemaDefinitions xmlns=`clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework` xmlns:x=`http://schemas.microsoft.com/winfx/2006/xaml` xmlns:sys=`clr-namespace:System;assembly=mscorlib` xmlns:impl=`clr-namespace:Microsoft.VisualStudio.Project.Contracts.Implementation;assembly=Microsoft.VisualStudio.Project.Contracts.Implementation`>
@@ -234,20 +230,20 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 
             LinkedList<Property> properties = tp.Properties;
 
-            Assert.AreEqual(1, properties.Count, "Expected one property but there were " + properties.Count);
-            Assert.IsNotNull(properties.First.Value, "SuppressStartupBanner switch should exist");
-            Assert.AreEqual("SuppressStartupBanner", properties.First.Value.Name);
-            Assert.AreEqual("nologo", properties.First.Value.SwitchName);
-            Assert.IsNull(properties.First.Value.ReverseSwitchName, "SuppressStartupBanner shouldn't have a reverse switch value");
-            Assert.AreEqual(String.Empty, properties.First.Value.Reversible, "Switch should NOT be marked as reversible");
-            Assert.AreEqual("true", properties.First.Value.DefaultValue, "Switch should default to true");
-            Assert.AreEqual(PropertyType.Boolean, properties.First.Value.Type);
+            Assert.Equal(1, properties.Count); // "Expected one property but there were " + properties.Count
+            Assert.NotNull(properties.First.Value); // "SuppressStartupBanner switch should exist"
+            Assert.Equal("SuppressStartupBanner", properties.First.Value.Name);
+            Assert.Equal("nologo", properties.First.Value.SwitchName);
+            Assert.Null(properties.First.Value.ReverseSwitchName); // "SuppressStartupBanner shouldn't have a reverse switch value"
+            Assert.Equal(String.Empty, properties.First.Value.Reversible); // "Switch should NOT be marked as reversible"
+            Assert.Equal("true", properties.First.Value.DefaultValue); // "Switch should default to true"
+            Assert.Equal(PropertyType.Boolean, properties.First.Value.Type);
         }
 
         /// <summary>
         /// Test for a basic string property switch
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestBasicEnumProperty()
         {
             string xmlContents = @"<ProjectSchemaDefinitions xmlns=`clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework` xmlns:x=`http://schemas.microsoft.com/winfx/2006/xaml` xmlns:sys=`clr-namespace:System;assembly=mscorlib` xmlns:impl=`clr-namespace:Microsoft.VisualStudio.Project.Contracts.Implementation;assembly=Microsoft.VisualStudio.Project.Contracts.Implementation`>
@@ -263,18 +259,18 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 
             LinkedList<Property> properties = tp.Properties;
 
-            Assert.AreEqual(1, properties.Count, "Expected one property but there were " + properties.Count);
-            Assert.IsNotNull(properties.First.Value, "GeneratePreprocessedFile switch should exist");
-            Assert.AreEqual("GeneratePreprocessedFile", properties.First.Value.Name);
-            Assert.AreEqual(PropertyType.String, properties.First.Value.Type); // Enum properties are represented as string types
-            Assert.AreEqual(3, properties.First.Value.Values.Count, "GeneratePreprocessedFile should have three values");
+            Assert.Equal(1, properties.Count); // "Expected one property but there were " + properties.Count
+            Assert.NotNull(properties.First.Value); // "GeneratePreprocessedFile switch should exist"
+            Assert.Equal("GeneratePreprocessedFile", properties.First.Value.Name);
+            Assert.Equal(PropertyType.String, properties.First.Value.Type); // Enum properties are represented as string types
+            Assert.Equal(3, properties.First.Value.Values.Count); // "GeneratePreprocessedFile should have three values"
         }
 
         /// <summary>
         /// Tests XamlTaskFactory support for DynamicEnumProperties.  These are primarily of use as a visualization in the property pages; as far as the 
         /// XamlTaskFactory and XamlDataDrivenToolTask are concerned, they are treated as StringProperties.  
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestDynamicEnumProperty()
         {
             string xmlContents = @"<ProjectSchemaDefinitions xmlns=`clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework` xmlns:x=`http://schemas.microsoft.com/winfx/2006/xaml` xmlns:sys=`clr-namespace:System;assembly=mscorlib` xmlns:impl=`clr-namespace:Microsoft.VisualStudio.Project.Contracts.Implementation;assembly=Microsoft.VisualStudio.Project.Contracts.Implementation`>
@@ -286,16 +282,16 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 
             LinkedList<Property> properties = tp.Properties;
 
-            Assert.AreEqual(1, properties.Count, "Expected one property but there were " + properties.Count);
-            Assert.IsNotNull(properties.First.Value, "CLBeforeTargets switch should exist");
-            Assert.AreEqual("CLBeforeTargets", properties.First.Value.Name);
-            Assert.AreEqual(PropertyType.String, properties.First.Value.Type); // Enum properties are represented as string types
+            Assert.Equal(1, properties.Count); // "Expected one property but there were " + properties.Count
+            Assert.NotNull(properties.First.Value); // "CLBeforeTargets switch should exist"
+            Assert.Equal("CLBeforeTargets", properties.First.Value.Name);
+            Assert.Equal(PropertyType.String, properties.First.Value.Type); // Enum properties are represented as string types
         }
 
         /// <summary>
         /// Tests a simple string property. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestBasicStringProperty()
         {
             string xmlContents = @"<ProjectSchemaDefinitions xmlns=`clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework` xmlns:x=`http://schemas.microsoft.com/winfx/2006/xaml` xmlns:sys=`clr-namespace:System;assembly=mscorlib` xmlns:impl=`clr-namespace:Microsoft.VisualStudio.Project.Contracts.Implementation;assembly=Microsoft.VisualStudio.Project.Contracts.Implementation`>
@@ -307,17 +303,17 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 
             LinkedList<Property> properties = tp.Properties;
 
-            Assert.AreEqual(1, properties.Count, "Expected one property but there were " + properties.Count);
-            Assert.IsNotNull(properties.First.Value, "TargetAssembly switch should exist");
-            Assert.AreEqual("TargetAssembly", properties.First.Value.Name);
-            Assert.AreEqual(PropertyType.String, properties.First.Value.Type);
-            Assert.AreEqual("/target:\"[value]\"", properties.First.Value.SwitchName);
+            Assert.Equal(1, properties.Count); // "Expected one property but there were " + properties.Count
+            Assert.NotNull(properties.First.Value); // "TargetAssembly switch should exist"
+            Assert.Equal("TargetAssembly", properties.First.Value.Name);
+            Assert.Equal(PropertyType.String, properties.First.Value.Type);
+            Assert.Equal("/target:\"[value]\"", properties.First.Value.SwitchName);
         }
 
         /// <summary>
         /// Tests a simple string array property. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestBasicStringArrayProperty()
         {
             string xmlContents = @"<ProjectSchemaDefinitions xmlns=`clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework` xmlns:x=`http://schemas.microsoft.com/winfx/2006/xaml` xmlns:sys=`clr-namespace:System;assembly=mscorlib` xmlns:impl=`clr-namespace:Microsoft.VisualStudio.Project.Contracts.Implementation;assembly=Microsoft.VisualStudio.Project.Contracts.Implementation`>
@@ -329,18 +325,18 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 
             LinkedList<Property> properties = tp.Properties;
 
-            Assert.AreEqual(1, properties.Count, "Expected one property but there were " + properties.Count);
-            Assert.IsNotNull(properties.First.Value, "TargetAssembly switch should exist");
-            Assert.AreEqual("TargetAssembly", properties.First.Value.Name);
-            Assert.AreEqual(PropertyType.StringArray, properties.First.Value.Type);
-            Assert.AreEqual("/target:\"[value]\"", properties.First.Value.SwitchName);
-            Assert.AreEqual(";", properties.First.Value.Separator);
+            Assert.Equal(1, properties.Count); // "Expected one property but there were " + properties.Count
+            Assert.NotNull(properties.First.Value); // "TargetAssembly switch should exist"
+            Assert.Equal("TargetAssembly", properties.First.Value.Name);
+            Assert.Equal(PropertyType.StringArray, properties.First.Value.Type);
+            Assert.Equal("/target:\"[value]\"", properties.First.Value.SwitchName);
+            Assert.Equal(";", properties.First.Value.Separator);
         }
 
         /// <summary>
         /// Tests a simple string array property. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestStringArrayPropertyWithDataSource()
         {
             string xmlContents = @"<ProjectSchemaDefinitions xmlns=`clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework` xmlns:x=`http://schemas.microsoft.com/winfx/2006/xaml` xmlns:sys=`clr-namespace:System;assembly=mscorlib` xmlns:impl=`clr-namespace:Microsoft.VisualStudio.Project.Contracts.Implementation;assembly=Microsoft.VisualStudio.Project.Contracts.Implementation`>
@@ -356,18 +352,18 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 
             LinkedList<Property> properties = tp.Properties;
 
-            Assert.AreEqual(1, properties.Count, "Expected one property but there were " + properties.Count);
-            Assert.IsNotNull(properties.First.Value, "TargetAssembly switch should exist");
-            Assert.AreEqual("TargetAssembly", properties.First.Value.Name);
-            Assert.AreEqual(PropertyType.StringArray, properties.First.Value.Type);
-            Assert.AreEqual("/target:\"[value]\"", properties.First.Value.SwitchName);
-            Assert.AreEqual(";", properties.First.Value.Separator);
+            Assert.Equal(1, properties.Count); // "Expected one property but there were " + properties.Count
+            Assert.NotNull(properties.First.Value); // "TargetAssembly switch should exist"
+            Assert.Equal("TargetAssembly", properties.First.Value.Name);
+            Assert.Equal(PropertyType.StringArray, properties.First.Value.Type);
+            Assert.Equal("/target:\"[value]\"", properties.First.Value.SwitchName);
+            Assert.Equal(";", properties.First.Value.Separator);
         }
 
         /// <summary>
         /// Tests a simple string array property. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestStringArrayPropertyWithDataSource_DataSourceIsItem()
         {
             string xmlContents = @"<ProjectSchemaDefinitions xmlns=`clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework` xmlns:x=`http://schemas.microsoft.com/winfx/2006/xaml` xmlns:sys=`clr-namespace:System;assembly=mscorlib` xmlns:impl=`clr-namespace:Microsoft.VisualStudio.Project.Contracts.Implementation;assembly=Microsoft.VisualStudio.Project.Contracts.Implementation`>
@@ -383,12 +379,12 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 
             LinkedList<Property> properties = tp.Properties;
 
-            Assert.AreEqual(1, properties.Count, "Expected one property but there were " + properties.Count);
-            Assert.IsNotNull(properties.First.Value, "TargetAssembly switch should exist");
-            Assert.AreEqual("TargetAssembly", properties.First.Value.Name);
-            Assert.AreEqual(PropertyType.ItemArray, properties.First.Value.Type);  // Although it's a String array property, DataSource.SourceType overrides that
-            Assert.AreEqual("/target:\"[value]\"", properties.First.Value.SwitchName);
-            Assert.AreEqual(";", properties.First.Value.Separator);
+            Assert.Equal(1, properties.Count); // "Expected one property but there were " + properties.Count
+            Assert.NotNull(properties.First.Value); // "TargetAssembly switch should exist"
+            Assert.Equal("TargetAssembly", properties.First.Value.Name);
+            Assert.Equal(PropertyType.ItemArray, properties.First.Value.Type);  // Although it's a String array property, DataSource.SourceType overrides that
+            Assert.Equal("/target:\"[value]\"", properties.First.Value.SwitchName);
+            Assert.Equal(";", properties.First.Value.Separator);
         }
     }
 
@@ -396,14 +392,13 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 
     #region Tests for compilation
 
-    [TestClass]
     public class CompilationTests
     {
         /// <summary>
         /// Tests to see if the generated stream compiles
         /// Code must be compilable on its own.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestGenerateCodeToStream()
         {
             string xmlContents = @"<ProjectSchemaDefinitions xmlns=`clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework` xmlns:x=`http://schemas.microsoft.com/winfx/2006/xaml` xmlns:sys=`clr-namespace:System;assembly=mscorlib` xmlns:impl=`clr-namespace:Microsoft.VisualStudio.Project.Contracts.Implementation;assembly=Microsoft.VisualStudio.Project.Contracts.Implementation`>
@@ -448,14 +443,14 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
                 // Invoke compilation
                 CompilerResults cr = provider.CompileAssemblyFromSource(cp, sw.ToString());
                 // put in finally block
-                Assert.IsTrue(cr.Errors.Count == 0, "Compilation Failed");
+                Assert.Equal(0, cr.Errors.Count); // "Compilation Failed"
             }
         }
 
         /// <summary>
         /// Tests to make sure the file generated compiles
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestGenerateToFile()
         {
             string xml = @"<ProjectSchemaDefinitions xmlns=`clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework` xmlns:x=`http://schemas.microsoft.com/winfx/2006/xaml` xmlns:sys=`clr-namespace:System;assembly=mscorlib` xmlns:impl=`clr-namespace:Microsoft.VisualStudio.Project.Contracts.Implementation;assembly=Microsoft.VisualStudio.Project.Contracts.Implementation`>
@@ -503,7 +498,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
                 cp.GenerateInMemory = true;
                 // Invoke compilation
                 CompilerResults cr = provider.CompileAssemblyFromFile(cp, "XamlTaskFactory_Tests_TestGenerateToFile.cs");
-                Assert.IsTrue(cr.Errors.Count == 0, "Compilation Failed");
+                Assert.Equal(0, cr.Errors.Count); // "Compilation Failed"
             }
             finally
             {
@@ -517,7 +512,6 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
     #endregion
 
     #region Tests Generated code based on one xml file
-    [TestClass]
     public sealed class GeneratedTaskTests
     {
         private Assembly _fakeTaskDll;
@@ -525,7 +519,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
         /// <summary>
         /// Tests that quotes are correctly escaped
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestQuotingQuotes()
         {
             _fakeTaskDll = XamlTestHelpers.SetupGeneratedCode(XamlTestHelpers.QuotingQuotesXml);
@@ -535,7 +529,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
         /// <summary>
         /// Tests that backslashes are correctly escaped
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestQuotingBackslashes()
         {
             _fakeTaskDll = XamlTestHelpers.SetupGeneratedCode(XamlTestHelpers.QuotingBackslashXml);
@@ -545,110 +539,110 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
         /// <summary>
         /// Tests the GenerateReversible method
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestGenerateReversible()
         {
             _fakeTaskDll = XamlTestHelpers.SetupGeneratedCode();
             object obj = _fakeTaskDll.CreateInstance("XamlTaskNamespace.FakeTask");
             PropertyInfo pi = obj.GetType().GetProperty("BasicReversible");
-            Assert.IsNotNull(pi, "Shouldn't be null");
-            Assert.IsTrue(pi.PropertyType == typeof(bool), "PropertyType should be a boolean");
+            Assert.NotNull(pi); // "Shouldn't be null"
+            Assert.Equal(pi.PropertyType, typeof(bool)); // "PropertyType should be a boolean"
             object[] attributes = pi.GetCustomAttributes(true);
             foreach (object attribute in attributes)
             {
-                Assert.IsTrue((attribute.GetType().GetProperty("SwitchName").GetValue(attribute, null).ToString()) == "/Br");
+                Assert.Equal((attribute.GetType().GetProperty("SwitchName").GetValue(attribute, null).ToString()), "/Br");
             }
         }
 
         /// <summary>
         /// Tests the GenerateNonreversible method
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestGenerateNonreversible()
         {
             _fakeTaskDll = XamlTestHelpers.SetupGeneratedCode();
             object obj = _fakeTaskDll.CreateInstance("XamlTaskNamespace.FakeTask");
             PropertyInfo pi = obj.GetType().GetProperty("BasicNonreversible");
-            Assert.IsNotNull(pi, "Shouldn't be null");
-            Assert.IsTrue(pi.PropertyType == typeof(bool), "PropertyType should be a boolean");
+            Assert.NotNull(pi); // "Shouldn't be null"
+            Assert.Equal(pi.PropertyType, typeof(bool)); // "PropertyType should be a boolean"
             object[] attributes = pi.GetCustomAttributes(true);
             foreach (object attribute in attributes)
             {
-                Assert.IsTrue((attribute.GetType().GetProperty("SwitchName").GetValue(attribute, null).ToString()) == "/Bn");
+                Assert.Equal((attribute.GetType().GetProperty("SwitchName").GetValue(attribute, null).ToString()), "/Bn");
             }
         }
 
         /// <summary>
         /// Tests the GenerateStrings method
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestGenerateStrings()
         {
             _fakeTaskDll = XamlTestHelpers.SetupGeneratedCode();
             object obj = _fakeTaskDll.CreateInstance("XamlTaskNamespace.FakeTask");
             PropertyInfo pi = obj.GetType().GetProperty("BasicString");
-            Assert.IsNotNull(pi, "Shouldn't be null");
-            Assert.IsTrue(pi.PropertyType == typeof(string), "PropertyType should be a string");
+            Assert.NotNull(pi); // "Shouldn't be null"
+            Assert.Equal(pi.PropertyType, typeof(string)); // "PropertyType should be a string"
             object[] attributes = pi.GetCustomAttributes(true);
             foreach (object attribute in attributes)
             {
-                Assert.IsTrue((attribute.GetType().GetProperty("SwitchName").GetValue(attribute, null).ToString()) == "/Bs");
+                Assert.Equal((attribute.GetType().GetProperty("SwitchName").GetValue(attribute, null).ToString()), "/Bs");
             }
         }
 
         /// <summary>
         /// Tests the GenerateIntegers method
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestGenerateIntegers()
         {
             _fakeTaskDll = XamlTestHelpers.SetupGeneratedCode();
             object obj = _fakeTaskDll.CreateInstance("XamlTaskNamespace.FakeTask");
             PropertyInfo pi = obj.GetType().GetProperty("BasicInteger");
-            Assert.IsNotNull(pi, "Shouldn't be null");
-            Assert.IsTrue(pi.PropertyType == typeof(int), "PropertyType should be an int");
+            Assert.NotNull(pi); // "Shouldn't be null"
+            Assert.Equal(pi.PropertyType, typeof(int)); // "PropertyType should be an int"
             object[] attributes = pi.GetCustomAttributes(true);
             foreach (object attribute in attributes)
             {
-                Assert.IsTrue((attribute.GetType().GetProperty("SwitchName").GetValue(attribute, null).ToString()) == "/Bi");
+                Assert.Equal((attribute.GetType().GetProperty("SwitchName").GetValue(attribute, null).ToString()), "/Bi");
             }
         }
 
         /// <summary>
         /// Tests the GenerateStringArrays method
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestGenerateStringArrays()
         {
             _fakeTaskDll = XamlTestHelpers.SetupGeneratedCode();
             object obj = _fakeTaskDll.CreateInstance("XamlTaskNamespace.FakeTask");
             PropertyInfo pi = obj.GetType().GetProperty("BasicStringArray");
-            Assert.IsNotNull(pi, "Shouldn't be null");
-            Assert.IsTrue(pi.PropertyType == typeof(string[]), "PropertyType should be a stringarray");
+            Assert.NotNull(pi); // "Shouldn't be null"
+            Assert.Equal(pi.PropertyType, typeof(string[])); // "PropertyType should be a stringarray"
             object[] attributes = pi.GetCustomAttributes(true);
             foreach (object attribute in attributes)
             {
                 PropertyInfo documentationAttribute = attribute.GetType().GetProperty("SwitchName");
                 if (documentationAttribute != null)
                 {
-                    Assert.IsTrue((attribute.GetType().GetProperty("SwitchName").GetValue(attribute, null).ToString()) == "/Bsa");
+                    Assert.Equal((attribute.GetType().GetProperty("SwitchName").GetValue(attribute, null).ToString()), "/Bsa");
                 }
                 else
                 {
                     // required attribute
-                    Assert.IsTrue(attribute is RequiredAttribute);
+                    Assert.True(attribute is RequiredAttribute);
                 }
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void TestBasicReversibleTrue()
         {
             _fakeTaskDll = XamlTestHelpers.SetupGeneratedCode();
             object obj = _fakeTaskDll.CreateInstance("XamlTaskNamespace.FakeTask");
             XamlTestHelpers.SetProperty(obj, "BasicReversible", true);
             Dictionary<string, CommandLineToolSwitch> switchList = (Dictionary<string, CommandLineToolSwitch>)XamlTestHelpers.GetProperty(obj, "ActiveToolSwitches");
-            Assert.IsNotNull(switchList);
+            Assert.NotNull(switchList);
             bool booleanValue = switchList["BasicReversible"].BooleanValue;
             string toolSwitchValue;
             if (booleanValue)
@@ -659,17 +653,17 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
             {
                 toolSwitchValue = switchList["BasicReversible"].SwitchValue + switchList["BasicReversible"].FalseSuffix;
             }
-            Assert.IsTrue(toolSwitchValue == "/Br", "Expected /Br, got " + toolSwitchValue);
+            Assert.Equal(toolSwitchValue, "/Br");
         }
 
-        [TestMethod]
+        [Fact]
         public void TestBasicReversibleFalse()
         {
             _fakeTaskDll = XamlTestHelpers.SetupGeneratedCode();
             object obj = _fakeTaskDll.CreateInstance("XamlTaskNamespace.FakeTask");
             XamlTestHelpers.SetProperty(obj, "BasicReversible", false);
             Dictionary<string, CommandLineToolSwitch> switchList = (Dictionary<string, CommandLineToolSwitch>)XamlTestHelpers.GetProperty(obj, "ActiveToolSwitches");
-            Assert.IsNotNull(switchList);
+            Assert.NotNull(switchList);
             bool booleanValue = switchList["BasicReversible"].BooleanValue;
             string toolSwitchValue;
             if (booleanValue)
@@ -680,111 +674,111 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
             {
                 toolSwitchValue = switchList["BasicReversible"].ReverseSwitchValue;
             }
-            Assert.IsTrue(toolSwitchValue == "/BrF", "Expected /BrF, got " + toolSwitchValue);
+            Assert.Equal(toolSwitchValue, "/BrF");
         }
 
-        [TestMethod]
+        [Fact]
         public void TestBasicNonreversible()
         {
             _fakeTaskDll = XamlTestHelpers.SetupGeneratedCode();
             object obj = _fakeTaskDll.CreateInstance("XamlTaskNamespace.FakeTask");
             XamlTestHelpers.SetProperty(obj, "BasicNonreversible", true);
             Dictionary<string, CommandLineToolSwitch> switchList = (Dictionary<string, CommandLineToolSwitch>)XamlTestHelpers.GetProperty(obj, "ActiveToolSwitches");
-            Assert.IsNotNull(switchList);
+            Assert.NotNull(switchList);
             bool booleanValue = switchList["BasicNonreversible"].BooleanValue;
-            Assert.IsTrue(booleanValue, "Actual BooleanValue is " + booleanValue.ToString());
+            Assert.True(booleanValue, "Actual BooleanValue is " + booleanValue.ToString());
             string toolSwitchValue = switchList["BasicNonreversible"].SwitchValue;
-            Assert.IsTrue(toolSwitchValue == "/Bn", "Expected /Bn, got " + toolSwitchValue);
+            Assert.Equal(toolSwitchValue, "/Bn");
         }
 
-        [TestMethod]
+        [Fact]
         public void TestBasicString()
         {
             _fakeTaskDll = XamlTestHelpers.SetupGeneratedCode();
             object obj = _fakeTaskDll.CreateInstance("XamlTaskNamespace.FakeTask");
             XamlTestHelpers.SetProperty(obj, "BasicString", "Enum1");
             Dictionary<string, CommandLineToolSwitch> switchList = (Dictionary<string, CommandLineToolSwitch>)XamlTestHelpers.GetProperty(obj, "ActiveToolSwitches");
-            Assert.IsNotNull(switchList);
+            Assert.NotNull(switchList);
             string CommandLineToolSwitchOutput = switchList["BasicString"].SwitchValue;
-            Assert.IsTrue(CommandLineToolSwitchOutput == "/Bs1", "Expected /Bs1, got " + CommandLineToolSwitchOutput);
+            Assert.Equal(CommandLineToolSwitchOutput, "/Bs1");
             obj = _fakeTaskDll.CreateInstance("XamlTaskNamespace.FakeTask");
             XamlTestHelpers.SetProperty(obj, "BasicString", "Enum2");
             switchList = (Dictionary<string, CommandLineToolSwitch>)XamlTestHelpers.GetProperty(obj, "ActiveToolSwitches");
-            Assert.IsTrue(switchList != null);
+            Assert.NotNull(switchList);
             CommandLineToolSwitchOutput = switchList["BasicString"].SwitchValue;
-            Assert.IsTrue(CommandLineToolSwitchOutput == "/Bs2", "Expected /Bs2, got " + CommandLineToolSwitchOutput);
+            Assert.Equal(CommandLineToolSwitchOutput, "/Bs2");
         }
 
-        [TestMethod]
+        [Fact]
         public void TestBasicStringArray()
         {
             _fakeTaskDll = XamlTestHelpers.SetupGeneratedCode();
             object obj = _fakeTaskDll.CreateInstance("XamlTaskNamespace.FakeTask");
             XamlTestHelpers.SetProperty(obj, "BasicStringArray", new string[1]);
             Dictionary<string, CommandLineToolSwitch> switchList = (Dictionary<string, CommandLineToolSwitch>)XamlTestHelpers.GetProperty(obj, "ActiveToolSwitches");
-            Assert.IsNotNull(switchList);
+            Assert.NotNull(switchList);
             string toolSwitchValue = switchList["BasicStringArray"].SwitchValue;
-            Assert.IsTrue(toolSwitchValue == "/Bsa", "Expected /Bsa, got " + toolSwitchValue);
+            Assert.Equal(toolSwitchValue, "/Bsa");
         }
 
-        [TestMethod]
+        [Fact]
         public void TestBasicFileWSwitch()
         {
             _fakeTaskDll = XamlTestHelpers.SetupGeneratedCode();
             object obj = _fakeTaskDll.CreateInstance("XamlTaskNamespace.FakeTask");
             XamlTestHelpers.SetProperty(obj, "BasicFileWSwitch", "File");
             Dictionary<string, CommandLineToolSwitch> switchList = (Dictionary<string, CommandLineToolSwitch>)XamlTestHelpers.GetProperty(obj, "ActiveToolSwitches");
-            Assert.IsNotNull(switchList);
+            Assert.NotNull(switchList);
             string toolSwitchValue = switchList["BasicFileWSwitch"].SwitchValue;
-            Assert.IsTrue(toolSwitchValue == "/Bfws", "Expected /Bfws, got " + toolSwitchValue);
+            Assert.Equal(toolSwitchValue, "/Bfws");
         }
 
-        [TestMethod]
+        [Fact]
         public void TestBasicFileWOSwitch()
         {
             _fakeTaskDll = XamlTestHelpers.SetupGeneratedCode();
             object obj = _fakeTaskDll.CreateInstance("XamlTaskNamespace.FakeTask");
             XamlTestHelpers.SetProperty(obj, "BasicFileWOSwitch", "File");
             Dictionary<string, CommandLineToolSwitch> switchList = (Dictionary<string, CommandLineToolSwitch>)XamlTestHelpers.GetProperty(obj, "ActiveToolSwitches");
-            Assert.IsNotNull(switchList);
+            Assert.NotNull(switchList);
             string toolSwitchValue = switchList["BasicFileWOSwitch"].SwitchValue;
-            Assert.IsTrue(String.IsNullOrEmpty(toolSwitchValue), "Expected nothing, got " + toolSwitchValue);
+            Assert.True(String.IsNullOrEmpty(toolSwitchValue), "Expected nothing, got " + toolSwitchValue);
         }
 
-        [TestMethod]
+        [Fact]
         public void TestBasicDynamicEnum()
         {
             _fakeTaskDll = XamlTestHelpers.SetupGeneratedCode();
             object obj = _fakeTaskDll.CreateInstance("XamlTaskNamespace.FakeTask");
             XamlTestHelpers.SetProperty(obj, "BasicDynamicEnum", "MySpecialBeforeTarget");
             Dictionary<string, CommandLineToolSwitch> switchList = (Dictionary<string, CommandLineToolSwitch>)XamlTestHelpers.GetProperty(obj, "ActiveToolSwitches");
-            Assert.IsNotNull(switchList);
+            Assert.NotNull(switchList);
             string toolSwitchValue = switchList["BasicDynamicEnum"].SwitchValue;
-            Assert.IsTrue(String.IsNullOrEmpty(toolSwitchValue), "Expected nothing, got " + toolSwitchValue);
+            Assert.True(String.IsNullOrEmpty(toolSwitchValue), "Expected nothing, got " + toolSwitchValue);
         }
 
-        [TestMethod]
+        [Fact]
         public void TestBasicDirectory()
         {
             _fakeTaskDll = XamlTestHelpers.SetupGeneratedCode();
             object obj = _fakeTaskDll.CreateInstance("XamlTaskNamespace.FakeTask");
             XamlTestHelpers.SetProperty(obj, "BasicDirectory", "FakeDirectory");
             Dictionary<string, CommandLineToolSwitch> switchList = (Dictionary<string, CommandLineToolSwitch>)XamlTestHelpers.GetProperty(obj, "ActiveToolSwitches");
-            Assert.IsNotNull(switchList);
+            Assert.NotNull(switchList);
             string toolSwitchValue = switchList["BasicDirectory"].SwitchValue;
-            Assert.IsTrue(String.IsNullOrEmpty(toolSwitchValue), "Expected nothing, got " + toolSwitchValue);
+            Assert.True(String.IsNullOrEmpty(toolSwitchValue), "Expected nothing, got " + toolSwitchValue);
         }
 
-        [TestMethod]
+        [Fact]
         public void TestBasicInteger()
         {
             _fakeTaskDll = XamlTestHelpers.SetupGeneratedCode();
             object obj = _fakeTaskDll.CreateInstance("XamlTaskNamespace.FakeTask");
             XamlTestHelpers.SetProperty(obj, "BasicInteger", 1);
             Dictionary<string, CommandLineToolSwitch> switchList = (Dictionary<string, CommandLineToolSwitch>)XamlTestHelpers.GetProperty(obj, "ActiveToolSwitches");
-            Assert.IsNotNull(switchList);
+            Assert.NotNull(switchList);
             string CommandLineToolSwitchOutput = switchList["BasicInteger"].SwitchValue + switchList["BasicInteger"].Separator + switchList["BasicInteger"].Number;
-            Assert.IsTrue(CommandLineToolSwitchOutput == "/Bi1", "Expected /Bi1, got " + CommandLineToolSwitchOutput);
+            Assert.Equal(CommandLineToolSwitchOutput, "/Bi1");
         }
 
         #endregion

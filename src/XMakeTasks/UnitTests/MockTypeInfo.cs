@@ -5,11 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices.ComTypes;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using Marshal = System.Runtime.InteropServices.Marshal;
 using VarEnum = System.Runtime.InteropServices.VarEnum;
 using IFixedTypeInfo = Microsoft.Build.Tasks.IFixedTypeInfo;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -41,7 +41,7 @@ namespace Microsoft.Build.UnitTests
         {
             TYPEDESC typeDesc;
             typeDesc.vt = (short)VarEnum.VT_SAFEARRAY;
-            typeDesc.lpValue = memoryHelper.AllocateHandle(Marshal.SizeOf(typeof(TYPEDESC)));
+            typeDesc.lpValue = memoryHelper.AllocateHandle(Marshal.SizeOf<TYPEDESC>());
             Marshal.StructureToPtr(_baseElementType.CreateTypeDesc(finalTypeHRef, memoryHelper), typeDesc.lpValue, false);
             return typeDesc;
         }
@@ -77,7 +77,7 @@ namespace Microsoft.Build.UnitTests
         {
             TYPEDESC typeDesc;
             typeDesc.vt = (short)VarEnum.VT_PTR;
-            typeDesc.lpValue = memoryHelper.AllocateHandle(Marshal.SizeOf(typeof(TYPEDESC)));
+            typeDesc.lpValue = memoryHelper.AllocateHandle(Marshal.SizeOf<TYPEDESC>());
             Marshal.StructureToPtr(_baseElementType.CreateTypeDesc(finalTypeHRef, memoryHelper), typeDesc.lpValue, false);
             return typeDesc;
         }
@@ -247,7 +247,7 @@ namespace Microsoft.Build.UnitTests
 
         void IFixedTypeInfo.GetRefTypeOfImplType(int index, out System.IntPtr href)
         {
-            Assert.IsTrue(index >= 0 && index < _typeAttributes.cImplTypes);
+            Assert.True(index >= 0 && index < _typeAttributes.cImplTypes);
 
             _faultInjector.FailurePointThrow(MockTypeLibrariesFailurePoints.ITypeInfo_GetRefTypeOfImplType);
 
@@ -278,7 +278,7 @@ namespace Microsoft.Build.UnitTests
             else
             {
                 ppTI = null;
-                Assert.Fail("unexpected hRef value");
+                Assert.True(false, "unexpected hRef value");
             }
         }
 
@@ -300,7 +300,7 @@ namespace Microsoft.Build.UnitTests
             // and doesn't return the handle or clean it up itself there's not much we can do to avoid the leak.
             _faultInjector.FailurePointThrow(MockTypeLibrariesFailurePoints.ITypeInfo_GetTypeAttr);
 
-            ppTypeAttr = _memoryHelper.AllocateHandle(Marshal.SizeOf(typeof(TYPEATTR)));
+            ppTypeAttr = _memoryHelper.AllocateHandle(Marshal.SizeOf<TYPEATTR>());
             Marshal.StructureToPtr(_typeAttributes, ppTypeAttr, false);
         }
 
@@ -315,7 +315,7 @@ namespace Microsoft.Build.UnitTests
 
         public void GetRefTypeOfImplType(int index, out int href)
         {
-            Assert.IsTrue(index >= 0 && index < _typeAttributes.cImplTypes);
+            Assert.True(index >= 0 && index < _typeAttributes.cImplTypes);
 
             _faultInjector.FailurePointThrow(MockTypeLibrariesFailurePoints.ITypeInfo_GetRefTypeOfImplType);
 
@@ -345,7 +345,7 @@ namespace Microsoft.Build.UnitTests
             else
             {
                 ppTI = null;
-                Assert.Fail("unexpected hRef value");
+                Assert.True(false, "unexpected hRef value");
             }
         }
 
@@ -355,7 +355,7 @@ namespace Microsoft.Build.UnitTests
             // and doesn't return the handle or clean it up itself there's not much we can do to avoid the leak.
             _faultInjector.FailurePointThrow(MockTypeLibrariesFailurePoints.ITypeInfo_GetVarDesc);
 
-            ppVarDesc = _memoryHelper.AllocateHandle(Marshal.SizeOf(typeof(VARDESC)));
+            ppVarDesc = _memoryHelper.AllocateHandle(Marshal.SizeOf<VARDESC>());
 
             _memoryHelper.EnterSubAllocationScope(ppVarDesc);
             VARDESC varDesc = new VARDESC();
@@ -380,12 +380,12 @@ namespace Microsoft.Build.UnitTests
             // and doesn't return the handle or clean it up itself there's not much we can do to avoid the leak.
             _faultInjector.FailurePointThrow(MockTypeLibrariesFailurePoints.ITypeInfo_GetFuncDesc);
 
-            ppFuncDesc = _memoryHelper.AllocateHandle(Marshal.SizeOf(typeof(FUNCDESC)));
+            ppFuncDesc = _memoryHelper.AllocateHandle(Marshal.SizeOf<FUNCDESC>());
 
             _memoryHelper.EnterSubAllocationScope(ppFuncDesc);
             FUNCDESC funcDesc = new FUNCDESC();
 
-            funcDesc.lprgelemdescParam = _memoryHelper.AllocateHandle(_definedFunctions[index].parameters.Length * Marshal.SizeOf(typeof(ELEMDESC)));
+            funcDesc.lprgelemdescParam = _memoryHelper.AllocateHandle(_definedFunctions[index].parameters.Length * Marshal.SizeOf<ELEMDESC>());
             funcDesc.cParams = (short)_definedFunctions[index].parameters.Length;
 
             for (int i = 0; i < _definedFunctions[index].parameters.Length; i++)
@@ -396,7 +396,7 @@ namespace Microsoft.Build.UnitTests
 
                 Marshal.StructureToPtr(
                     elemDesc,
-                    new IntPtr(funcDesc.lprgelemdescParam.ToInt64() + i * Marshal.SizeOf(typeof(ELEMDESC))),
+                    new IntPtr(funcDesc.lprgelemdescParam.ToInt64() + i * Marshal.SizeOf<ELEMDESC>()),
                     false);
             }
 
@@ -418,7 +418,7 @@ namespace Microsoft.Build.UnitTests
 
         public void GetDocumentation(int index, out string strName, out string strDocString, out int dwHelpContext, out string strHelpFile)
         {
-            Assert.AreEqual(-1, index);
+            Assert.Equal(-1, index);
 
             _faultInjector.FailurePointThrow(MockTypeLibrariesFailurePoints.ITypeInfo_GetDocumentation);
 

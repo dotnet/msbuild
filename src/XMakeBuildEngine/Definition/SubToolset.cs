@@ -21,7 +21,7 @@ namespace Microsoft.Build.Evaluation
     /// <summary>
     /// Aggregation of a set of properties that correspond to a particular sub-toolset.  
     /// </summary>
-    [DebuggerDisplay("SubToolsetVersion={SubToolsetVersion} #Properties={properties.Count}")]
+    [DebuggerDisplay("SubToolsetVersion={SubToolsetVersion} #Properties={_properties.Count}")]
     public class SubToolset : INodePacketTranslatable
     {
         /// <summary>

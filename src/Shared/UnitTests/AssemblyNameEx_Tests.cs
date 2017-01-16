@@ -13,12 +13,10 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using System.Collections.Generic;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
     sealed public class AssemblyNameEx_Tests
     {
         /// <summary>
@@ -107,7 +105,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// General base name comparison validator.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void CompareBaseName()
         {
             // For each pair of assembly strings...
@@ -131,7 +129,7 @@ namespace Microsoft.Build.UnitTests
                             int resultBaseline = String.Compare(baseName1.Name, baseName2.Name, StringComparison.OrdinalIgnoreCase);
                             if (resultBaseline != result)
                             {
-                                Assert.AreEqual(resultBaseline, result);
+                                Assert.Equal(resultBaseline, result);
                             }
                         }
                     }
@@ -142,7 +140,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// General compareTo validator
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void CompareTo()
         {
             // For each pair of assembly strings...
@@ -166,12 +164,12 @@ namespace Microsoft.Build.UnitTests
 
                             if (a1.Equals(a2))
                             {
-                                Assert.AreEqual(0, result);
+                                Assert.Equal(0, result);
                             }
 
                             if (a1.CompareBaseNameTo(a2) != 0)
                             {
-                                Assert.AreEqual(a1.CompareBaseNameTo(a2), result);
+                                Assert.Equal(a1.CompareBaseNameTo(a2), result);
                             }
 
                             if
@@ -183,11 +181,11 @@ namespace Microsoft.Build.UnitTests
                                 if (a1.Version == null)
                                 {
                                     // Expect -1 if a1.Version is null and the baseNames match
-                                    Assert.AreEqual(-1, result);
+                                    Assert.Equal(-1, result);
                                 }
                                 else
                                 {
-                                    Assert.AreEqual(a1.Version.CompareTo(a2.Version), result);
+                                    Assert.Equal(a1.Version.CompareTo(a2.Version), result);
                                 }
                             }
 
@@ -195,7 +193,7 @@ namespace Microsoft.Build.UnitTests
                             // Only check to see if the result and the resultBaseline match when the result baseline is 0 and the result is not 0.
                             if (resultBaseline != result && resultBaseline == 0)
                             {
-                                Assert.AreEqual(resultBaseline, result);
+                                Assert.Equal(resultBaseline, result);
                             }
                         }
                     }
@@ -203,32 +201,32 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ExerciseMiscMethods()
         {
             AssemblyNameExtension a1 = s_producers[0](s_assemblyStrings[0]);
-            Assert.IsNotNull(a1.GetHashCode());
+            Assert.NotNull(a1.GetHashCode());
 
             Version newVersion = new Version(1, 2);
             a1.ReplaceVersion(newVersion);
-            Assert.IsTrue(a1.Version.Equals(newVersion));
+            Assert.True(a1.Version.Equals(newVersion));
 
-            Assert.IsNotNull(a1.ToString());
+            Assert.NotNull(a1.ToString());
         }
 
-        [TestMethod]
+        [Fact]
         public void EscapeDisplayNameCharacters()
         {
             // /// Those characters are Equals(=), Comma(,), Quote("), Apostrophe('), Backslash(\).
             string displayName = @"Hello,""Don't"" eat the \CAT";
-            Assert.IsTrue(String.Compare(AssemblyNameExtension.EscapeDisplayNameCharacters(displayName), @"Hello\,\""Don\'t\"" eat the \\CAT", StringComparison.OrdinalIgnoreCase) == 0);
+            Assert.Equal(0, String.Compare(AssemblyNameExtension.EscapeDisplayNameCharacters(displayName), @"Hello\,\""Don\'t\"" eat the \\CAT", StringComparison.OrdinalIgnoreCase));
         }
 
 
         /// <summary>
         /// General equals comparison validator.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void Equals()
         {
             // For each pair of assembly strings...
@@ -257,7 +255,7 @@ namespace Microsoft.Build.UnitTests
                             bool resultBaseline = a3.Equals(a4);
                             if (result != resultBaseline)
                             {
-                                Assert.AreEqual(resultBaseline, result);
+                                Assert.Equal(resultBaseline, result);
                             }
                         }
                     }
@@ -269,7 +267,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// General equals comparison validator when we are ignoring the version numbers in the name.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EqualsIgnoreVersion()
         {
             // For each pair of assembly strings...
@@ -298,7 +296,7 @@ namespace Microsoft.Build.UnitTests
                             bool resultBaseline = a3.EqualsIgnoreVersion(a4);
                             if (result != resultBaseline)
                             {
-                                Assert.AreEqual(resultBaseline, result);
+                                Assert.Equal(resultBaseline, result);
                             }
                         }
                     }
@@ -309,7 +307,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// This repros a bug that was found while coding AssemblyNameExtension.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void CompareBaseNameRealCase1()
         {
             AssemblyNameExtension a1 = ProduceAsBoth("System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
@@ -318,97 +316,101 @@ namespace Microsoft.Build.UnitTests
             int result = a1.CompareBaseNameTo(a2);
 
             // Base names should be equal.
-            Assert.AreEqual(0, result);
+            Assert.Equal(0, result);
         }
 
         /// <summary>
         /// Verify an exception is thrown when the simple name is not in the itemspec.
         /// 
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(FileLoadException))]
+        [Fact]
         public void CreateAssemblyNameExtensionWithNoSimpleName()
         {
-            AssemblyNameExtension extension = new AssemblyNameExtension("Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a", true);
+            Assert.Throws<FileLoadException>(() =>
+            {
+                AssemblyNameExtension extension = new AssemblyNameExtension("Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a", true);
+            }
+           );
         }
-
         /// <summary>
         /// Verify an exception is thrown when the simple name is not in the itemspec.
         /// 
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(FileLoadException))]
+        [Fact]
         public void CreateAssemblyNameExtensionWithNoSimpleName2()
         {
-            AssemblyNameExtension extension = new AssemblyNameExtension("Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
-            AssemblyNameExtension extension2 = new AssemblyNameExtension("A, Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
-            extension2.PartialNameCompare(extension);
+            Assert.Throws<FileLoadException>(() =>
+            {
+                AssemblyNameExtension extension = new AssemblyNameExtension("Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
+                AssemblyNameExtension extension2 = new AssemblyNameExtension("A, Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
+                extension2.PartialNameCompare(extension);
+            }
+           );
         }
-
         /// <summary>
         /// Create an assembly name extension providing the name, version, culture, and public key. Also test cases
         /// where the public key is the only item specified
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void CreateAssemblyNameWithNameAndVersionCulturePublicKey()
         {
             AssemblyNameExtension extension = new AssemblyNameExtension("A, Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
-            Assert.IsTrue(extension.Name.Equals("A", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(extension.Version.Equals(new Version("2.0.0.0")));
-            Assert.IsTrue(extension.CultureInfo.Equals(CultureInfo.GetCultureInfo("en")));
-            Assert.IsTrue(extension.FullName.Contains("b03f5f7f11d50a3a"));
+            Assert.True(extension.Name.Equals("A", StringComparison.OrdinalIgnoreCase));
+            Assert.True(extension.Version.Equals(new Version("2.0.0.0")));
+            Assert.True(extension.CultureInfo.Equals(CultureInfo.GetCultureInfo("en")));
+            Assert.True(extension.FullName.Contains("b03f5f7f11d50a3a"));
 
             extension = new AssemblyNameExtension("A, Version=2.0.0.0, PublicKeyToken=b03f5f7f11d50a3a");
-            Assert.IsTrue(extension.Name.Equals("A", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(extension.Version.Equals(new Version("2.0.0.0")));
-            Assert.IsTrue(Object.ReferenceEquals(extension.CultureInfo, null));
-            Assert.IsTrue(extension.FullName.Contains("b03f5f7f11d50a3a"));
+            Assert.True(extension.Name.Equals("A", StringComparison.OrdinalIgnoreCase));
+            Assert.True(extension.Version.Equals(new Version("2.0.0.0")));
+            Assert.True(Object.ReferenceEquals(extension.CultureInfo, null));
+            Assert.True(extension.FullName.Contains("b03f5f7f11d50a3a"));
 
             extension = new AssemblyNameExtension("A, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
-            Assert.IsTrue(extension.Name.Equals("A", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(Object.ReferenceEquals(extension.Version, null));
-            Assert.IsTrue(extension.CultureInfo.Equals(CultureInfo.GetCultureInfo("en")));
-            Assert.IsTrue(extension.FullName.Contains("b03f5f7f11d50a3a"));
+            Assert.True(extension.Name.Equals("A", StringComparison.OrdinalIgnoreCase));
+            Assert.True(Object.ReferenceEquals(extension.Version, null));
+            Assert.True(extension.CultureInfo.Equals(CultureInfo.GetCultureInfo("en")));
+            Assert.True(extension.FullName.Contains("b03f5f7f11d50a3a"));
 
             extension = new AssemblyNameExtension("A, PublicKeyToken=b03f5f7f11d50a3a");
-            Assert.IsTrue(extension.Name.Equals("A", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(Object.ReferenceEquals(extension.Version, null));
-            Assert.IsTrue(Object.ReferenceEquals(extension.CultureInfo, null));
-            Assert.IsTrue(extension.FullName.Contains("b03f5f7f11d50a3a"));
+            Assert.True(extension.Name.Equals("A", StringComparison.OrdinalIgnoreCase));
+            Assert.True(Object.ReferenceEquals(extension.Version, null));
+            Assert.True(Object.ReferenceEquals(extension.CultureInfo, null));
+            Assert.True(extension.FullName.Contains("b03f5f7f11d50a3a"));
 
             extension = new AssemblyNameExtension("A");
-            Assert.IsTrue(extension.Name.Equals("A", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(Object.ReferenceEquals(extension.Version, null));
-            Assert.IsTrue(Object.ReferenceEquals(extension.CultureInfo, null));
+            Assert.True(extension.Name.Equals("A", StringComparison.OrdinalIgnoreCase));
+            Assert.True(Object.ReferenceEquals(extension.Version, null));
+            Assert.True(Object.ReferenceEquals(extension.CultureInfo, null));
         }
 
         /// <summary>
         /// Make sure processor architecture is seen when it is in the string.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void CreateAssemblyNameWithNameAndProcessorArchitecture()
         {
             AssemblyNameExtension extension = new AssemblyNameExtension("A, Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a, ProcessorArchitecture=MSIL");
-            Assert.IsTrue(extension.Name.Equals("A", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(extension.Version.Equals(new Version("2.0.0.0")));
-            Assert.IsTrue(extension.CultureInfo.Equals(CultureInfo.GetCultureInfo("en")));
-            Assert.IsTrue(extension.FullName.Contains("b03f5f7f11d50a3a"));
-            Assert.IsTrue(extension.FullName.Contains("MSIL"));
-            Assert.IsTrue(extension.HasProcessorArchitectureInFusionName);
+            Assert.True(extension.Name.Equals("A", StringComparison.OrdinalIgnoreCase));
+            Assert.True(extension.Version.Equals(new Version("2.0.0.0")));
+            Assert.True(extension.CultureInfo.Equals(CultureInfo.GetCultureInfo("en")));
+            Assert.True(extension.FullName.Contains("b03f5f7f11d50a3a"));
+            Assert.True(extension.FullName.Contains("MSIL"));
+            Assert.True(extension.HasProcessorArchitectureInFusionName);
 
             extension = new AssemblyNameExtension("A, Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
-            Assert.IsTrue(extension.Name.Equals("A", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(extension.Version.Equals(new Version("2.0.0.0")));
-            Assert.IsTrue(extension.CultureInfo.Equals(CultureInfo.GetCultureInfo("en")));
-            Assert.IsTrue(extension.FullName.Contains("b03f5f7f11d50a3a"));
-            Assert.IsFalse(extension.HasProcessorArchitectureInFusionName);
+            Assert.True(extension.Name.Equals("A", StringComparison.OrdinalIgnoreCase));
+            Assert.True(extension.Version.Equals(new Version("2.0.0.0")));
+            Assert.True(extension.CultureInfo.Equals(CultureInfo.GetCultureInfo("en")));
+            Assert.True(extension.FullName.Contains("b03f5f7f11d50a3a"));
+            Assert.False(extension.HasProcessorArchitectureInFusionName);
         }
 
 
         /// <summary>
         /// Verify partial matching on the simple name works
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestAssemblyPatialMatchSimpleName()
         {
             AssemblyNameExtension assemblyNameToMatch = new AssemblyNameExtension("System.Xml");
@@ -418,17 +420,17 @@ namespace Microsoft.Build.UnitTests
             {
                 AssemblyNameExtension assemblyToCompare = new AssemblyNameExtension(assembly);
 
-                Assert.IsTrue(assemblyNameToMatch.PartialNameCompare(assemblyToCompare));
-                Assert.IsTrue(assemblyNameToMatch.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName));
-                Assert.IsFalse(assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare));
-                Assert.IsFalse(assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName));
+                Assert.True(assemblyNameToMatch.PartialNameCompare(assemblyToCompare));
+                Assert.True(assemblyNameToMatch.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName));
+                Assert.False(assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare));
+                Assert.False(assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName));
             }
         }
 
         /// <summary>
         /// Verify partial matching on the simple name and version
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestAssemblyPatialMatchSimpleNameVersion()
         {
             AssemblyNameExtension assemblyNameToMatchVersion = new AssemblyNameExtension("System.Xml, Version=10.0.0.0");
@@ -443,28 +445,28 @@ namespace Microsoft.Build.UnitTests
                 // Make sure the assembly with the wrong version does not match
                 if (assemblyToCompare.Version != null)
                 {
-                    Assert.IsTrue(assemblyNameToMatchVersion.PartialNameCompare(assemblyToCompare));
-                    Assert.IsTrue(assemblyNameToMatchVersion.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.Version));
+                    Assert.True(assemblyNameToMatchVersion.PartialNameCompare(assemblyToCompare));
+                    Assert.True(assemblyNameToMatchVersion.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.Version));
 
-                    Assert.IsFalse(assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare));
-                    Assert.IsFalse(assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.Version));
+                    Assert.False(assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare));
+                    Assert.False(assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.Version));
 
                     // Matches because version is not specified
-                    Assert.IsTrue(assemblyMatchNoVersion.PartialNameCompare(assemblyToCompare));
-                    Assert.IsTrue(assemblyMatchNoVersion.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.Version));
+                    Assert.True(assemblyMatchNoVersion.PartialNameCompare(assemblyToCompare));
+                    Assert.True(assemblyMatchNoVersion.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.Version));
                 }
                 else
                 {
                     // If there is no version make names with a version specified do not match
-                    Assert.IsFalse(assemblyNameToMatchVersion.PartialNameCompare(assemblyToCompare));
-                    Assert.IsFalse(assemblyNameToMatchVersion.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.Version));
+                    Assert.False(assemblyNameToMatchVersion.PartialNameCompare(assemblyToCompare));
+                    Assert.False(assemblyNameToMatchVersion.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.Version));
 
-                    Assert.IsFalse(assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare));
-                    Assert.IsFalse(assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.Version));
+                    Assert.False(assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare));
+                    Assert.False(assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.Version));
 
                     // Matches because version is not specified
-                    Assert.IsTrue(assemblyMatchNoVersion.PartialNameCompare(assemblyToCompare));
-                    Assert.IsTrue(assemblyMatchNoVersion.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.Version));
+                    Assert.True(assemblyMatchNoVersion.PartialNameCompare(assemblyToCompare));
+                    Assert.True(assemblyMatchNoVersion.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.Version));
                 }
             }
         }
@@ -472,7 +474,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify partial matching on the simple name and culture
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestAssemblyPatialMatchSimpleNameCulture()
         {
             AssemblyNameExtension assemblyNameToMatchCulture = new AssemblyNameExtension("System.Xml, Culture=en");
@@ -487,28 +489,28 @@ namespace Microsoft.Build.UnitTests
                 // Make sure the assembly with the wrong culture does not match
                 if (assemblyToCompare.CultureInfo != null)
                 {
-                    Assert.IsTrue(assemblyNameToMatchCulture.PartialNameCompare(assemblyToCompare));
-                    Assert.IsTrue(assemblyNameToMatchCulture.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.Culture));
+                    Assert.True(assemblyNameToMatchCulture.PartialNameCompare(assemblyToCompare));
+                    Assert.True(assemblyNameToMatchCulture.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.Culture));
 
-                    Assert.IsFalse(assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare));
-                    Assert.IsFalse(assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.Culture));
+                    Assert.False(assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare));
+                    Assert.False(assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.Culture));
 
                     // Matches because culture is not specified
-                    Assert.IsTrue(assemblyMatchNoVersion.PartialNameCompare(assemblyToCompare));
-                    Assert.IsTrue(assemblyMatchNoVersion.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.Culture));
+                    Assert.True(assemblyMatchNoVersion.PartialNameCompare(assemblyToCompare));
+                    Assert.True(assemblyMatchNoVersion.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.Culture));
                 }
                 else
                 {
                     // If there is no version make names with a culture specified do not match
-                    Assert.IsFalse(assemblyNameToMatchCulture.PartialNameCompare(assemblyToCompare));
-                    Assert.IsFalse(assemblyNameToMatchCulture.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.Culture));
+                    Assert.False(assemblyNameToMatchCulture.PartialNameCompare(assemblyToCompare));
+                    Assert.False(assemblyNameToMatchCulture.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.Culture));
 
-                    Assert.IsFalse(assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare));
-                    Assert.IsFalse(assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.Culture));
+                    Assert.False(assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare));
+                    Assert.False(assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.Culture));
 
                     // Matches because culture is not specified
-                    Assert.IsTrue(assemblyMatchNoVersion.PartialNameCompare(assemblyToCompare));
-                    Assert.IsTrue(assemblyMatchNoVersion.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.Culture));
+                    Assert.True(assemblyMatchNoVersion.PartialNameCompare(assemblyToCompare));
+                    Assert.True(assemblyMatchNoVersion.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.Culture));
                 }
             }
         }
@@ -516,7 +518,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify partial matching on the simple name and PublicKeyToken
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestAssemblyPatialMatchSimpleNamePublicKeyToken()
         {
             AssemblyNameExtension assemblyNameToMatchPublicToken = new AssemblyNameExtension("System.Xml, PublicKeyToken=b03f5f7f11d50a3a");
@@ -531,28 +533,28 @@ namespace Microsoft.Build.UnitTests
                 // Make sure the assembly with the wrong publicKeyToken does not match
                 if (assemblyToCompare.GetPublicKeyToken() != null)
                 {
-                    Assert.IsTrue(assemblyNameToMatchPublicToken.PartialNameCompare(assemblyToCompare));
-                    Assert.IsTrue(assemblyNameToMatchPublicToken.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.PublicKeyToken));
+                    Assert.True(assemblyNameToMatchPublicToken.PartialNameCompare(assemblyToCompare));
+                    Assert.True(assemblyNameToMatchPublicToken.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.PublicKeyToken));
 
-                    Assert.IsFalse(assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare));
-                    Assert.IsFalse(assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.PublicKeyToken));
+                    Assert.False(assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare));
+                    Assert.False(assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.PublicKeyToken));
 
                     // Matches because publicKeyToken is not specified
-                    Assert.IsTrue(assemblyMatchNoVersion.PartialNameCompare(assemblyToCompare));
-                    Assert.IsTrue(assemblyMatchNoVersion.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.PublicKeyToken));
+                    Assert.True(assemblyMatchNoVersion.PartialNameCompare(assemblyToCompare));
+                    Assert.True(assemblyMatchNoVersion.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.PublicKeyToken));
                 }
                 else
                 {
                     // If there is no version make names with a publicKeyToken specified do not match
-                    Assert.IsFalse(assemblyNameToMatchPublicToken.PartialNameCompare(assemblyToCompare));
-                    Assert.IsFalse(assemblyNameToMatchPublicToken.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.PublicKeyToken));
+                    Assert.False(assemblyNameToMatchPublicToken.PartialNameCompare(assemblyToCompare));
+                    Assert.False(assemblyNameToMatchPublicToken.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.PublicKeyToken));
 
-                    Assert.IsFalse(assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare));
-                    Assert.IsFalse(assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.PublicKeyToken));
+                    Assert.False(assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare));
+                    Assert.False(assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.PublicKeyToken));
 
                     // Matches because publicKeyToken is not specified
-                    Assert.IsTrue(assemblyMatchNoVersion.PartialNameCompare(assemblyToCompare));
-                    Assert.IsTrue(assemblyMatchNoVersion.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.PublicKeyToken));
+                    Assert.True(assemblyMatchNoVersion.PartialNameCompare(assemblyToCompare));
+                    Assert.True(assemblyMatchNoVersion.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName | PartialComparisonFlags.PublicKeyToken));
                 }
             }
         }
@@ -560,7 +562,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify partial matching on the simple name and retargetable
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestAssemblyPartialMatchSimpleNameRetargetable()
         {
             AssemblyNameExtension assemblyNameToMatchRetargetable = new AssemblyNameExtension("System.Xml, Version=10.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a, Retargetable=Yes");
@@ -573,36 +575,36 @@ namespace Microsoft.Build.UnitTests
 
                 if (assemblyToCompare.FullName.IndexOf("Retargetable=Yes", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
-                    Assert.IsTrue(assemblyNameToMatchRetargetable.PartialNameCompare(assemblyToCompare));
-                    Assert.IsTrue(assemblyNameToMatchRetargetable.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName, true));
+                    Assert.True(assemblyNameToMatchRetargetable.PartialNameCompare(assemblyToCompare));
+                    Assert.True(assemblyNameToMatchRetargetable.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName, true));
 
-                    Assert.IsTrue(assemblyToCompare.PartialNameCompare(assemblyNameToNotMatch));
-                    Assert.IsFalse(assemblyToCompare.PartialNameCompare(assemblyNameToNotMatch, PartialComparisonFlags.SimpleName, true));
+                    Assert.True(assemblyToCompare.PartialNameCompare(assemblyNameToNotMatch));
+                    Assert.False(assemblyToCompare.PartialNameCompare(assemblyNameToNotMatch, PartialComparisonFlags.SimpleName, true));
 
-                    Assert.IsFalse(assemblyToCompare.PartialNameCompare(assemblyMatchNoRetargetable));
-                    Assert.IsFalse(assemblyToCompare.PartialNameCompare(assemblyMatchNoRetargetable, PartialComparisonFlags.SimpleName, true));
+                    Assert.False(assemblyToCompare.PartialNameCompare(assemblyMatchNoRetargetable));
+                    Assert.False(assemblyToCompare.PartialNameCompare(assemblyMatchNoRetargetable, PartialComparisonFlags.SimpleName, true));
 
-                    Assert.IsTrue(assemblyMatchNoRetargetable.PartialNameCompare(assemblyToCompare));
-                    Assert.IsFalse(assemblyMatchNoRetargetable.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName, true));
+                    Assert.True(assemblyMatchNoRetargetable.PartialNameCompare(assemblyToCompare));
+                    Assert.False(assemblyMatchNoRetargetable.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName, true));
                 }
                 else
                 {
-                    Assert.IsFalse(assemblyNameToMatchRetargetable.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName, true));
+                    Assert.False(assemblyNameToMatchRetargetable.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName, true));
 
                     // Match because retargetable false is the same as no retargetable bit
                     bool match = assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare);
                     if (assemblyToCompare.FullName.IndexOf("System.Xml, Version=10.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
-                        Assert.IsTrue(match);
+                        Assert.True(match);
                     }
                     else
                     {
-                        Assert.IsFalse(match);
+                        Assert.False(match);
                     }
-                    Assert.IsTrue(assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName, true));
+                    Assert.True(assemblyNameToNotMatch.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName, true));
 
-                    Assert.IsTrue(assemblyMatchNoRetargetable.PartialNameCompare(assemblyToCompare));
-                    Assert.IsTrue(assemblyMatchNoRetargetable.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName, true));
+                    Assert.True(assemblyMatchNoRetargetable.PartialNameCompare(assemblyToCompare));
+                    Assert.True(assemblyMatchNoRetargetable.PartialNameCompare(assemblyToCompare, PartialComparisonFlags.SimpleName, true));
                 }
             }
         }
@@ -611,7 +613,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure that our assemblyNameComparers correctly work.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyAssemblyNameComparers()
         {
             AssemblyNameExtension a = new AssemblyNameExtension("System.Xml, Version=10.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a, Retargetable=Yes");
@@ -621,29 +623,29 @@ namespace Microsoft.Build.UnitTests
             AssemblyNameExtension d = new AssemblyNameExtension("System.Xml, Version=9.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a, Retargetable=No");
             AssemblyNameExtension e = new AssemblyNameExtension("System.Xml, Version=11.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a, Retargetable=No");
 
-            Assert.IsTrue(AssemblyNameComparer.GenericComparer.Equals(a, b));
-            Assert.IsFalse(AssemblyNameComparer.GenericComparer.Equals(a, d));
+            Assert.True(AssemblyNameComparer.GenericComparer.Equals(a, b));
+            Assert.False(AssemblyNameComparer.GenericComparer.Equals(a, d));
 
-            Assert.IsFalse(AssemblyNameComparer.GenericComparerConsiderRetargetable.Equals(a, b));
-            Assert.IsTrue(AssemblyNameComparer.GenericComparerConsiderRetargetable.Equals(a, c));
-            Assert.IsFalse(AssemblyNameComparer.GenericComparerConsiderRetargetable.Equals(a, d));
+            Assert.False(AssemblyNameComparer.GenericComparerConsiderRetargetable.Equals(a, b));
+            Assert.True(AssemblyNameComparer.GenericComparerConsiderRetargetable.Equals(a, c));
+            Assert.False(AssemblyNameComparer.GenericComparerConsiderRetargetable.Equals(a, d));
 
 
-            Assert.IsTrue(AssemblyNameComparer.Comparer.Compare(a, b) == 0);
-            Assert.IsTrue(AssemblyNameComparer.Comparer.Compare(a, d) > 0);
-            Assert.IsTrue(AssemblyNameComparer.Comparer.Compare(a, e) < 0);
+            Assert.Equal(0, AssemblyNameComparer.Comparer.Compare(a, b));
+            Assert.True(AssemblyNameComparer.Comparer.Compare(a, d) > 0);
+            Assert.True(AssemblyNameComparer.Comparer.Compare(a, e) < 0);
 
-            Assert.IsTrue(AssemblyNameComparer.ComparerConsiderRetargetable.Compare(a, c) == 0);
-            Assert.IsTrue(AssemblyNameComparer.ComparerConsiderRetargetable.Compare(a, b) > 0);
-            Assert.IsTrue(AssemblyNameComparer.ComparerConsiderRetargetable.Compare(a, d) > 0);
-            Assert.IsTrue(AssemblyNameComparer.ComparerConsiderRetargetable.Compare(a, e) < 0);
+            Assert.Equal(0, AssemblyNameComparer.ComparerConsiderRetargetable.Compare(a, c));
+            Assert.True(AssemblyNameComparer.ComparerConsiderRetargetable.Compare(a, b) > 0);
+            Assert.True(AssemblyNameComparer.ComparerConsiderRetargetable.Compare(a, d) > 0);
+            Assert.True(AssemblyNameComparer.ComparerConsiderRetargetable.Compare(a, e) < 0);
         }
 
 
         /// <summary>
         /// Make sure the reverse version comparer will compare the version in a way that would sort them in reverse order. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyReverseVersionComparer()
         {
             AssemblyNameExtension x = new AssemblyNameExtension("System, Version=2.0.0.0");
@@ -652,13 +654,13 @@ namespace Microsoft.Build.UnitTests
             AssemblyNameExtension a = new AssemblyNameExtension("Zar, Version=3.0.0.0");
 
             AssemblyNameReverseVersionComparer reverseComparer = new AssemblyNameReverseVersionComparer();
-            Assert.AreEqual(-1, reverseComparer.Compare(x, y));
-            Assert.AreEqual(1, reverseComparer.Compare(y, x));
-            Assert.AreEqual(0, reverseComparer.Compare(x, z));
-            Assert.AreEqual(0, reverseComparer.Compare(null, null));
-            Assert.AreEqual(-1, reverseComparer.Compare(x, null));
-            Assert.AreEqual(1, reverseComparer.Compare(null, y));
-            Assert.AreEqual(-1, reverseComparer.Compare(a, x));
+            Assert.Equal(-1, reverseComparer.Compare(x, y));
+            Assert.Equal(1, reverseComparer.Compare(y, x));
+            Assert.Equal(0, reverseComparer.Compare(x, z));
+            Assert.Equal(0, reverseComparer.Compare(null, null));
+            Assert.Equal(-1, reverseComparer.Compare(x, null));
+            Assert.Equal(1, reverseComparer.Compare(null, y));
+            Assert.Equal(-1, reverseComparer.Compare(a, x));
 
             List<AssemblyNameExtension> assemblies = new List<AssemblyNameExtension>();
             assemblies.Add(y);
@@ -667,9 +669,9 @@ namespace Microsoft.Build.UnitTests
 
             assemblies.Sort(AssemblyNameReverseVersionComparer.GenericComparer);
 
-            Assert.IsTrue(assemblies[0].Equals(x));
-            Assert.IsTrue(assemblies[1].Equals(z));
-            Assert.IsTrue(assemblies[2].Equals(y));
+            Assert.True(assemblies[0].Equals(x));
+            Assert.True(assemblies[1].Equals(z));
+            Assert.True(assemblies[2].Equals(y));
         }
     }
 }

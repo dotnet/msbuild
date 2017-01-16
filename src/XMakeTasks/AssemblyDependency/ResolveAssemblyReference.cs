@@ -575,6 +575,17 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
+        /// [default=false]
+        /// Enables legacy mode for CopyLocal determination. If true, referenced assemblies will not be copied locally if they 
+        /// are found in the GAC. If false, assemblies will be copied locally unless they were found only in the GAC.
+        /// </summary>
+        public bool DoNotCopyLocalIfInGac
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// An optional file name that indicates where to save intermediate build state
         /// for this task. If not specified, then no inter-build caching will occur.
         /// </summary>
@@ -734,15 +745,6 @@ namespace Microsoft.Build.Tasks
                 ErrorUtilities.VerifyThrowArgumentNull(value, "FullFrameworkFolders");
                 _fullFrameworkFolders = value;
             }
-        }
-
-        /// <summary>
-        /// Default false.  Force SystemRuntimeDependency check to include direct dependencies of primary references even if FindDependencies is false
-        /// </summary>
-        public bool ForceSystemRuntimeDependencyCalculation
-        {
-            get;
-            set;
         }
 
         /// <summary>
@@ -1191,7 +1193,7 @@ namespace Microsoft.Build.Tasks
 
             // If there is a list of assemblyFiles that was considered but then rejected,
             // show information about them.
-            LogAssembliesConsideredAndRejected(reference, importance);
+            LogAssembliesConsideredAndRejected(reference, fusionName, importance);
 
             if (!reference.IsBadImage)
             {
@@ -1286,12 +1288,8 @@ namespace Microsoft.Build.Tasks
                             Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", file);
                         }
                     }
-                    catch (Exception e) // Catching Exception, but rethrowing unless it's an IO related exception.
+                    catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {
-                        if (ExceptionHandling.NotExpectedException(e))
-                            throw;
-
-                        // Invalid file path. 
                         throw new InvalidParameterValueException("CandidateAssemblyFiles", file, e.Message);
                     }
                 }
@@ -1547,7 +1545,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="reference">The reference.</param>
         /// <param name="importance">The importance of the message.</param>
-        private void LogAssembliesConsideredAndRejected(Reference reference, MessageImportance importance)
+        private void LogAssembliesConsideredAndRejected(Reference reference, string fusionName, MessageImportance importance)
         {
             if (reference.AssembliesConsideredAndRejected != null)
             {
@@ -1600,7 +1598,7 @@ namespace Microsoft.Build.Tasks
                                 break;
                             }
                         case NoMatchReason.FusionNamesDidNotMatch:
-                            Log.LogMessageFromResources(importance, "ResolveAssemblyReference.EightSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.ConsideredAndRejectedBecauseFusionNamesDidntMatch", location.FileNameAttempted, location.AssemblyName.FullName));
+                            Log.LogMessageFromResources(importance, "ResolveAssemblyReference.EightSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.ConsideredAndRejectedBecauseFusionNamesDidntMatch", location.FileNameAttempted, location.AssemblyName.FullName, fusionName));
                             break;
 
                         case NoMatchReason.TargetHadNoFusionName:
@@ -1720,6 +1718,7 @@ namespace Microsoft.Build.Tasks
                         Log.LogMessageFromResources(importance, "ResolveAssemblyReference.FourSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.NotCopyLocalBecauseFrameworksFiles"));
                         break;
 
+                    case CopyLocalState.NoBecauseReferenceResolvedFromGAC:
                     case CopyLocalState.NoBecauseReferenceFoundInGAC:
                         Log.LogMessageFromResources(importance, "ResolveAssemblyReference.FourSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.NotCopyLocalBecauseReferenceFoundInGAC"));
                         break;
@@ -1884,7 +1883,7 @@ namespace Microsoft.Build.Tasks
             GetLastWriteTime getLastWriteTime,
             GetAssemblyRuntimeVersion getRuntimeVersion,
             OpenBaseKey openBaseKey,
-            CheckIfAssemblyInGac checkIfAssemblyIsInGac,
+            GetAssemblyPathInGac getAssemblyPathInGac,
             IsWinMDFile isWinMDFile,
             ReadMachineTypeFromPEHeader readMachineTypeFromPEHeader
         )
@@ -2033,8 +2032,8 @@ namespace Microsoft.Build.Tasks
                         // Some files may have been skipped. Log warnings for these.
                         for (int i = 0; i < whiteListErrors.Count; ++i)
                         {
-                            Exception e = whiteListErrors[i] as Exception;
-                            string filename = whiteListErrorFilesNames[i] as string;
+                            Exception e = whiteListErrors[i];
+                            string filename = whiteListErrorFilesNames[i];
 
                             // Give the user a warning about the bad file (or files).
                             Log.LogWarningWithCodeFromResources("ResolveAssemblyReference.InvalidInstalledAssemblySubsetTablesFile", filename, SubsetListFinder.SubsetListFolder, e.Message);
@@ -2075,11 +2074,6 @@ namespace Microsoft.Build.Tasks
 
                     SystemProcessorArchitecture processorArchitecture = TargetProcessorArchitectureToEnumeration(_targetProcessorArchitecture);
 
-                    if (checkIfAssemblyIsInGac == null)
-                    {
-                        checkIfAssemblyIsInGac = new CheckIfAssemblyInGac(CheckForAssemblyInGac);
-                    }
-
                     // Start the table of dependencies with all of the primary references.
                     ReferenceTable dependencyTable = new ReferenceTable
                     (
@@ -2111,7 +2105,8 @@ namespace Microsoft.Build.Tasks
                         Log,
                         _latestTargetFrameworkDirectories,
                         _copyLocalDependenciesWhenParentReferenceInGac,
-                        checkIfAssemblyIsInGac,
+                        DoNotCopyLocalIfInGac,
+                        getAssemblyPathInGac,
                         isWinMDFile,
                         _ignoreVersionForFrameworkReferences,
                         readMachineTypeFromPEHeader,
@@ -2237,7 +2232,7 @@ namespace Microsoft.Build.Tasks
                         }
                     }
 
-                    if (!useSystemRuntime && !FindDependencies && this.ForceSystemRuntimeDependencyCalculation)
+                    if (!useSystemRuntime && !FindDependencies)
                     {
                         // when we are not producing the dependency graph look for direct dependencies of primary references.
                         foreach (var resolvedReference in dependencyTable.References.Values)
@@ -2575,17 +2570,13 @@ namespace Microsoft.Build.Tasks
                     Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.TargetFrameworkSubsetLogHeader");
 
                     Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.TargetFrameworkRedistLogHeader");
-                    if (installedAssemblyTableInfo != null)
+                    foreach (AssemblyTableInfo redistInfo in installedAssemblyTableInfo)
                     {
-                        foreach (AssemblyTableInfo redistInfo in installedAssemblyTableInfo)
+                        if (redistInfo != null)
                         {
-                            if (redistInfo != null)
-                            {
-                                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.FormattedAssemblyInfo", redistInfo.Path));
-                            }
+                            Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.FormattedAssemblyInfo", redistInfo.Path));
                         }
                     }
-
 
                     Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.TargetFrameworkWhiteListLogHeader");
                     if (whiteListSubsetTableInfo != null)
@@ -2881,14 +2872,9 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         ///  Checks to see if the assemblyName passed in is in the GAC.
         /// </summary>
-        private bool CheckForAssemblyInGac(AssemblyNameExtension assemblyName, SystemProcessorArchitecture targetProcessorArchitecture, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVersion, FileExists fileExists)
+        private string GetAssemblyPathInGac(AssemblyNameExtension assemblyName, SystemProcessorArchitecture targetProcessorArchitecture, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVersion, FileExists fileExists, bool fullFusionName, bool specificVersion)
         {
-            string gacLocation = null;
-            if (assemblyName.Version != null)
-            {
-                gacLocation = GlobalAssemblyCache.GetLocation(BuildEngine as IBuildEngine4, assemblyName, targetProcessorArchitecture, getRuntimeVersion, targetedRuntimeVersion, true, fileExists, null, null, false /* this value does not matter if we are passing a full fusion name*/);
-            }
-            return gacLocation != null;
+            return GlobalAssemblyCache.GetLocation(BuildEngine as IBuildEngine4, assemblyName, targetProcessorArchitecture, getRuntimeVersion, targetedRuntimeVersion, fullFusionName, fileExists, null, null, specificVersion /* this value does not matter if we are passing a full fusion name*/);
         }
 
         /// <summary>
@@ -2909,7 +2895,7 @@ namespace Microsoft.Build.Tasks
                 new GetLastWriteTime(NativeMethodsShared.GetLastWriteFileUtcTime),
                 new GetAssemblyRuntimeVersion(AssemblyInformation.GetRuntimeVersion),
                 new OpenBaseKey(RegistryHelper.OpenBaseKey),
-                new CheckIfAssemblyInGac(CheckForAssemblyInGac),
+                new GetAssemblyPathInGac(GetAssemblyPathInGac),
                 new IsWinMDFile(AssemblyInformation.IsWinMDFile),
                 new ReadMachineTypeFromPEHeader(ReferenceTable.ReadMachineTypeFromPEHeader)
             );

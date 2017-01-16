@@ -882,21 +882,39 @@ namespace Microsoft.Build.CommandLine
                 // This is a hack for now to make sure the perf hit only happens
                 // on diagnostic. This should be changed to pipe it through properly,
                 // perhaps as part of a fuller tracing feature.
-                bool aLoggerIsDiagnostic = false;
-                foreach (var logger in loggers)
+                bool logTaskInputs = verbosity == LoggerVerbosity.Diagnostic;
+
+                if (!logTaskInputs)
                 {
-                    if (logger.Parameters != null &&
-                        (logger.Parameters.IndexOf("V=DIAG", StringComparison.OrdinalIgnoreCase) != -1 ||
-                         logger.Parameters.IndexOf("VERBOSITY=DIAG", StringComparison.OrdinalIgnoreCase) != -1)
-                       )
+                    foreach (var logger in loggers)
                     {
-                        aLoggerIsDiagnostic = true;
+                        if (logger.Parameters != null &&
+                            (logger.Parameters.IndexOf("V=DIAG", StringComparison.OrdinalIgnoreCase) != -1 ||
+                             logger.Parameters.IndexOf("VERBOSITY=DIAG", StringComparison.OrdinalIgnoreCase) != -1)
+                           )
+                        {
+                            logTaskInputs = true;
+                            break;
+                        }
                     }
                 }
 
-                if (verbosity == LoggerVerbosity.Diagnostic || aLoggerIsDiagnostic)
+                if (!logTaskInputs)
                 {
-                    Environment.SetEnvironmentVariable("MSBUILDLOGTASKINPUTS", "1");
+                    foreach (var logger in distributedLoggerRecords)
+                    {
+                        if (logger.CentralLogger != null)
+                        {
+                            if (logger.CentralLogger.Parameters != null &&
+                                (logger.CentralLogger.Parameters.IndexOf("V=DIAG", StringComparison.OrdinalIgnoreCase) != -1 ||
+                                 logger.CentralLogger.Parameters.IndexOf("VERBOSITY=DIAG", StringComparison.OrdinalIgnoreCase) != -1)
+                               )
+                            {
+                                logTaskInputs = true;
+                                break;
+                            }
+                        }
+                    }
                 }
 
                 projectCollection = new ProjectCollection
@@ -969,6 +987,8 @@ namespace Microsoft.Build.CommandLine
                     parameters.ForwardingLoggers = remoteLoggerRecords;
                     parameters.ToolsetDefinitionLocations = Microsoft.Build.Evaluation.ToolsetDefinitionLocations.ConfigurationFile | Microsoft.Build.Evaluation.ToolsetDefinitionLocations.Registry;
                     parameters.DetailedSummary = detailedSummary;
+                    parameters.LogTaskInputs = logTaskInputs;
+
                     if (!String.IsNullOrEmpty(toolsVersion))
                     {
                         parameters.DefaultToolsVersion = toolsVersion;
@@ -1152,7 +1172,7 @@ namespace Microsoft.Build.CommandLine
                 {
                     InitializationException.Throw("InvalidToolsVersionError", toolsVersion, e, false /*no stack*/);
                 }
-                
+
                 project.IsValidated = needToValidateProject;
                 project.SchemaFile = schemaFile;
 
@@ -1782,7 +1802,9 @@ namespace Microsoft.Build.CommandLine
                         preprocessWriter = ProcessPreprocessSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Preprocess]);
                     }
 
+#if FEATURE_MSBUILD_DEBUGGER
                     debugger = commandLineSwitches.IsParameterlessSwitchSet(CommandLineSwitches.ParameterlessSwitch.Debugger);
+#endif
                     detailedSummary = commandLineSwitches.IsParameterlessSwitchSet(CommandLineSwitches.ParameterlessSwitch.DetailedSummary);
 
                     // figure out which loggers are going to listen to build events
@@ -1879,13 +1901,8 @@ namespace Microsoft.Build.CommandLine
                 {
                     writer = new StreamWriter(parameters[parameters.Length - 1]);
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
                 {
-                    if (ExceptionHandling.NotExpectedException(ex))
-                    {
-                        throw;
-                    }
-
                     CommandLineSwitchException.Throw("InvalidPreprocessPath", parameters[parameters.Length - 1], ex.Message);
                 }
             }
@@ -1900,13 +1917,13 @@ namespace Microsoft.Build.CommandLine
         private static void StartLocalNode(CommandLineSwitches commandLineSwitches)
         {
             string[] input = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeMode];
-            int nodeNumber = 0;
+            int nodeModeNumber = 0;
 
             if (input.Length > 0)
             {
                 try
                 {
-                    nodeNumber = int.Parse(input[0], CultureInfo.InvariantCulture);
+                    nodeModeNumber = int.Parse(input[0], CultureInfo.InvariantCulture);
                 }
                 catch (FormatException ex)
                 {
@@ -1917,7 +1934,7 @@ namespace Microsoft.Build.CommandLine
                     CommandLineSwitchException.Throw("InvalidNodeNumberValue", input[0], ex.Message);
                 }
 
-                CommandLineSwitchException.VerifyThrow(nodeNumber >= 0, "InvalidNodeNumberValueIsNegative", input[0]);
+                CommandLineSwitchException.VerifyThrow(nodeModeNumber >= 0, "InvalidNodeNumberValueIsNegative", input[0]);
             }
 
 #if !STANDALONEBUILD
@@ -1930,13 +1947,13 @@ namespace Microsoft.Build.CommandLine
                     Exception nodeException = null;
                     NodeEngineShutdownReason shutdownReason = NodeEngineShutdownReason.Error;
                     // normal OOP node case
-                    if (nodeNumber == 1)
+                    if (nodeModeNumber == 1)
                     {
                         OutOfProcNode node = new OutOfProcNode();
-                        shutdownReason = node.Run(out nodeException);
+                        shutdownReason = node.Run(ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]), out nodeException);
                         FileUtilities.ClearCacheDirectory();
                     }
-                    else if (nodeNumber == 2)
+                    else if (nodeModeNumber == 2)
                     {
                         OutOfProcTaskHostNode node = new OutOfProcTaskHostNode();
                         shutdownReason = node.Run(out nodeException);
@@ -1962,7 +1979,7 @@ namespace Microsoft.Build.CommandLine
 #if !STANDALONEBUILD
             else
             {
-                StartLocalNodeOldOM(nodeNumber);
+                StartLocalNodeOldOM(nodeModeNumber);
             }
 #endif
         }
@@ -1981,7 +1998,7 @@ namespace Microsoft.Build.CommandLine
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static void StartLocalNodeOldOM(int nodeNumber)
         {
- 	        Microsoft.Build.BuildEngine.LocalNode.StartLocalNodeServer(nodeNumber);
+            Microsoft.Build.BuildEngine.LocalNode.StartLocalNodeServer(nodeNumber);
         }
 #endif
 
@@ -2062,7 +2079,7 @@ namespace Microsoft.Build.CommandLine
                 {
                     foreach (string s in potentialSolutionFiles)
                     {
-                        if (s.EndsWith("~", true, CultureInfo.CurrentCulture))
+                        if (!FileUtilities.IsSolutionFilename(s))
                         {
                             extensionsToIgnore.Add(Path.GetExtension(s));
                         }
@@ -2540,16 +2557,11 @@ namespace Microsoft.Build.CommandLine
                     // If the string is empty then send it through as the distributed file logger WILL deal with EMPTY logfile paths
                     if (!String.IsNullOrEmpty(logFileName) && !Path.IsPathRooted(logFileName))
                     {
-                        fileParameters = fileParameters.Replace(logFileParameter, "logFile=" + Path.Combine(Environment.CurrentDirectory, logFileName));
+                        fileParameters = fileParameters.Replace(logFileParameter, "logFile=" + Path.Combine(Directory.GetCurrentDirectory(), logFileName));
                     }
                 }
-                catch (Exception e)
+                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    if (ExceptionHandling.NotExpectedException(e))
-                    {
-                        throw;
-                    }
-
                     throw new LoggerException(e.Message, e);
                 }
 
@@ -2562,7 +2574,7 @@ namespace Microsoft.Build.CommandLine
                         fileParameters += ";";
                     }
 
-                    fileParameters += "logFile=" + Path.Combine(Environment.CurrentDirectory, msbuildLogFileName);
+                    fileParameters += "logFile=" + Path.Combine(Directory.GetCurrentDirectory(), msbuildLogFileName);
                 }
 
                 //Gets the currently loaded assembly in which the specified class is defined
@@ -2823,10 +2835,7 @@ namespace Microsoft.Build.CommandLine
             {
                 logger = loggerDescription.CreateLogger();
 
-                if (logger == null)
-                {
-                    InitializationException.VerifyThrow(logger != null, "LoggerNotFoundError", unquotedParameter);
-                }
+                InitializationException.VerifyThrow(logger != null, "LoggerNotFoundError", unquotedParameter);
             }
             catch (IOException e)
             {

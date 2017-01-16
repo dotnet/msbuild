@@ -119,6 +119,15 @@ namespace Microsoft.Build.Tasks
             set;
         }
 
+        /// <summary>
+        /// Create Symbolic Links for the copied files rather than copy the files if possible to do so
+        /// </summary>
+        public bool UseSymboliclinksIfPossible
+        {
+            get;
+            set;
+        }
+
         public bool SkipUnchangedFiles
         {
             get
@@ -298,45 +307,17 @@ namespace Microsoft.Build.Tasks
                 destinationFileExists = destinationFileState.FileExists;
             }
 
-            bool hardLinkCreated = false;
+            bool linkCreated = false;
 
-            // If we want to create hard links, then try that first
+            // If we want to create hard or symbolic links, then try that first
             if (UseHardlinksIfPossible)
-            {
-                // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-                Log.LogMessageFromResources(MessageImportance.Normal, "Copy.HardLinkComment", sourceFileState.Name, destinationFileState.Name);
+                TryCopyViaLink("Copy.HardLinkComment", MessageImportance.High, sourceFileState, destinationFileState, ref destinationFileExists, ref linkCreated, (source, destination) => NativeMethods.CreateHardLink(destination, source, IntPtr.Zero /* reserved, must be NULL */));
+            else if (UseSymboliclinksIfPossible)
+                TryCopyViaLink("Copy.SymbolicLinkComment", MessageImportance.High, sourceFileState, destinationFileState, ref destinationFileExists, ref linkCreated, (source, destination) => NativeMethods.CreateSymbolicLink(destination, source, SymbolicLink.File));
 
-                if (!_overwriteReadOnlyFiles)
-                {
-                    destinationFileExists = destinationFileState.FileExists;
-                }
-
-                // CreateHardLink cannot overwrite an existing file or hard link
-                // so we need to delete the existing entry before we create the hard link.
-                // We need to do a best-effort check to see if the files are the same
-                // if they are the same then we won't delete, just in case they refer to the same
-                // physical file on disk.
-                // Since we'll fall back to a copy (below) this will fail and issue a correct
-                // message in the case that the source and destination are in fact the same file.
-                if (destinationFileExists && !IsMatchingSizeAndTimeStamp(sourceFileState, destinationFileState))
-                {
-                    FileUtilities.DeleteNoThrow(destinationFileState.Name);
-                }
-
-                hardLinkCreated = NativeMethods.CreateHardLink(destinationFileState.Name, sourceFileState.Name, IntPtr.Zero /* reserved, must be NULL */);
-
-                if (!hardLinkCreated)
-                {
-                    int errorCode = Marshal.GetHRForLastWin32Error();
-                    Exception hardLinkException = Marshal.GetExceptionForHR(errorCode);
-                    // This is only a message since we don't want warnings when copying to network shares etc.
-                    Log.LogMessageFromResources(MessageImportance.Low, "Copy.RetryingAsFileCopy", sourceFileState.Name, destinationFileState.Name, hardLinkException.Message);
-                }
-            }
-
-            // If the hard link was not created (either because the user didn't want one, or because it couldn't be created)
+            // If the link was not created (either because the user didn't want one, or because it couldn't be created)
             // then let's copy the file
-            if (!hardLinkCreated)
+            if (!linkCreated)
             {
                 // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
                 Log.LogMessageFromResources(MessageImportance.Normal, "Copy.FileComment", sourceFileState.Name, destinationFileState.Name);
@@ -354,6 +335,39 @@ namespace Microsoft.Build.Tasks
             }
 
             return true;
+        }
+
+        private void TryCopyViaLink(string linkComment, MessageImportance messageImportance, FileState sourceFileState, FileState destinationFileState, ref bool destinationFileExists, ref bool linkCreated, Func<string, string, bool> createLink)
+        {
+            // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
+            Log.LogMessageFromResources(MessageImportance.Normal, linkComment, sourceFileState.Name, destinationFileState.Name);
+
+            if (!_overwriteReadOnlyFiles)
+            {
+                destinationFileExists = destinationFileState.FileExists;
+            }
+
+            // CreateHardLink and CreateSymbolicLink cannot overwrite an existing file or link
+            // so we need to delete the existing entry before we create the hard or symbolic link.
+            // We need to do a best-effort check to see if the files are the same
+            // if they are the same then we won't delete, just in case they refer to the same
+            // physical file on disk.
+            // Since we'll fall back to a copy (below) this will fail and issue a correct
+            // message in the case that the source and destination are in fact the same file.
+            if (destinationFileExists && !IsMatchingSizeAndTimeStamp(sourceFileState, destinationFileState))
+            {
+                FileUtilities.DeleteNoThrow(destinationFileState.Name);
+            }
+                        
+            linkCreated = createLink(sourceFileState.Name, destinationFileState.Name);
+
+            if (!linkCreated)
+            {
+                int errorCode = Marshal.GetHRForLastWin32Error();
+                Exception linkException = Marshal.GetExceptionForHR(errorCode);
+                // This is only a message since we don't want warnings when copying to network shares etc.
+                Log.LogMessageFromResources(messageImportance, "Copy.RetryingAsFileCopy", sourceFileState.Name, destinationFileState.Name, linkException.Message);
+            }
         }
 
         /// <summary>
@@ -497,6 +511,13 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
+            //First check if create hard or symbolic link option is selected. If both then return an error
+            if (UseHardlinksIfPossible & UseSymboliclinksIfPossible)
+            {
+                Log.LogErrorWithCodeFromResources("Copy.ExactlyOneTypeOfLink", "UseHardlinksIfPossible", "UseSymboliclinksIfPossible");
+                return false;
+            }
+
             return true;
         }
 
@@ -581,12 +602,8 @@ namespace Microsoft.Build.Tasks
                 Log.LogErrorWithCodeFromResources("Copy.Error", sourceFileState.Name, destinationFileState.Name, e.Message);
                 success = false;
             }
-            catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                {
-                    throw;
-                }
                 Log.LogErrorWithCodeFromResources("Copy.Error", sourceFileState.Name, destinationFileState.Name, e.Message);
                 success = false;
             }
@@ -612,13 +629,8 @@ namespace Microsoft.Build.Tasks
                         return result.Value;
                     }
                 }
-                catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    if (ExceptionHandling.NotExpectedException(e))
-                    {
-                        throw;
-                    }
-
                     if (e is ArgumentException ||  // Invalid chars
                         e is NotSupportedException || // Colon in the middle of the path
                         e is PathTooLongException)

@@ -1,61 +1,38 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" InitialTargets="_RestoreBuildToolsWrapper" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-
-  <!-- Inline task to bootstrap the build to enable downloading nuget.exe -->
-  <UsingTask TaskName="DownloadFile" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v12.0.dll">
-    <ParameterGroup>
-      <Address ParameterType="System.String" Required="true"/>
-      <FileName ParameterType="System.String" Required="true" />
-    </ParameterGroup>
-    <Task>
-      <Reference Include="System" />
-      <Reference Include="System.IO" />
-      <Code Type="Fragment" Language="cs">
-        <![CDATA[
-            var directory = System.IO.Path.GetDirectoryName(FileName);
-            Directory.CreateDirectory(directory);
-
-            var tempFile = Path.Combine(directory, Path.GetRandomFileName());
-            var client = new System.Net.WebClient();
-            client.Proxy = System.Net.WebRequest.DefaultWebProxy;
-            client.Proxy.Credentials = System.Net.CredentialCache.DefaultCredentials;
-            client.DownloadFile(Address, tempFile);
-
-            try
-            {
-                if (!File.Exists(FileName))
-                   File.Move(tempFile, FileName);
-            }
-            finally
-            {
-              if (File.Exists(tempFile))
-                  File.Delete(tempFile);
-            }
-        ]]>
-      </Code>
-    </Task>
-  </UsingTask>
-
-  <!-- 
-    Needed to avoid the InitialTargets from having an Output which ends up getting
-    added to the output references when you have a project to project reference.
-  -->
-  <Target Name="_RestoreBuildToolsWrapper" DependsOnTargets="_RestoreBuildTools" />
-
-  <Target Name="_RestoreBuildTools"
-          Inputs="$(MSBuildThisFileFullPath);$(MSBuildThisFileDirectory)dir.props"
-          Outputs="$(ToolsDir)Microsoft.DotNet.Build.Tasks.dll;$(NugetToolPath)">
-
-    <!-- Download latest nuget.exe -->
-    <DownloadFile FileName="$(NuGetToolPath)"
-                  Address="http://nuget.org/nuget.exe" 
-                  Condition="!Exists('$(NuGetToolPath)')" />
-
-    <!-- Restore build tools -->
-    <Exec Command="$(NugetRestoreCommand) &quot;$(SourceDir).nuget\packages.config&quot;" StandardOutputImportance="Low" />
-    
-    <Error Condition="'$(ErrorIfBuildToolsRestoredFromIndividualProject)'=='true'"
-           Text="The build tools package was just restored and so we cannot continue the build of an individual project because targets from the build tools package were not able to be imported. Please retry the build the individual project again." />
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">  
+  <Target Name="EnsurePrerequisitesCopied"
+          BeforeTargets="Build"
+          Condition="'$(IsTestProject)' == 'true'">
+    <MSBuild Projects="$(SourceDir)CopyTestPrerequisites.proj"
+             Targets="CopyPrerequisites"
+             BuildInParallel="true" />
   </Target>
 
+  <Target Name="Test"
+          DependsOnTargets="Build;EnsurePrerequisitesCopied"
+          Condition="'$(IsTestProject)' == 'true'">
+    <!-- Exec the console runner instead of using the MSBuild runner,
+         because our tests have dependencies on being run as x86. -->
+    <!-- Noshadow because our assemblies do not pass the checks for it
+         (due to open source signing). -->
+    <!-- No parallel execution because most of our tests do bad things
+         with state.  They were passing because MSTest was serial. -->
+    <Message Importance="High" Text="xunit -> %(MainAssembly.Filename)..." />
+    <!-- Exec 32-bit console runner -->
+    <Exec Command="$(PackagesDir)\xunit.runner.console.$(XunitVersion)\tools\xunit.console.x86.exe @(MainAssembly, ' ') -noshadow -parallel none -xml %(MainAssembly.FullPath)_TestResults.xml -html %(MainAssembly.FullPath)_TestResults.html > %(MainAssembly.FullPath)_stdout.txt"
+          Condition="'$(PlatformTarget)'!='x64'" />
+
+    <!-- Building 64-bit only, use x64 console runner -->
+    <Exec Command="$(PackagesDir)\xunit.runner.console.$(XunitVersion)\tools\xunit.console.exe @(MainAssembly, ' ') -noshadow -parallel none -xml %(MainAssembly.FullPath)_TestResults.xml -html %(MainAssembly.FullPath)_TestResults.html > %(MainAssembly.FullPath)_stdout.txt"
+          Condition="'$(PlatformTarget)'=='x64'" />
+  </Target>
+
+  <!-- See https://github.com/Microsoft/msbuild/issues/224 -->
+  <Target Name="EnsureSDKTargetPresent"
+          BeforeTargets="_RestoreBuildToolsPackagesConfig" >
+    <Error Condition="!Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportAfter\Microsoft.NuGet.ImportAfter.targets')"
+      Text="MSBuild depends on the 'Tools and Windows SDK' Visual Studio plugin. Please install it. Reference: https://github.com/Microsoft/msbuild/wiki/Building+Testing+and+Debugging" />
+  </Target>
+  
+  <Import Project="$(NuGetConfigDir)\packageLoad.targets" />
 </Project>

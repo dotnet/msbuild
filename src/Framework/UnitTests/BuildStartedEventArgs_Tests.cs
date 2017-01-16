@@ -7,14 +7,13 @@
 
 using System;
 using Microsoft.Build.Framework;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
     /// Verify the functioning of the BuildStartedEventArgs class.
     /// </summary>
-    [TestClass]
     public class BuildStartedEventArgs_Tests
     {
         /// <summary>
@@ -25,7 +24,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Trivially exercise event args default ctors to boost Frameworks code coverage
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EventArgsCtors()
         {
             BuildStartedEventArgs bsea = new BuildStartedEventArgs2();
@@ -40,7 +39,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Trivially exercise getHashCode. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestGetHashCode()
         {
             _baseStartedEvent.GetHashCode();

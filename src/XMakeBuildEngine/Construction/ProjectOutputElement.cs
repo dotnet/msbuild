@@ -19,7 +19,7 @@ namespace Microsoft.Build.Construction
     /// <summary>
     /// ProjectOutputElement represents the Output element in the MSBuild project.
     /// </summary>
-    [DebuggerDisplay("Name={Name} TaskParameter={TaskParameter} ItemName={ItemName} PropertyName={PropertyName} Condition={Condition}")]
+    [DebuggerDisplay("TaskParameter={TaskParameter} ItemType={ItemType} PropertyName={PropertyName} Condition={Condition}")]
     public class ProjectOutputElement : ProjectElement
     {
         /// <summary>

@@ -8,7 +8,6 @@
 using System.Collections.Generic;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Construction;
@@ -17,19 +16,19 @@ using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using System.Xml;
 using Microsoft.Build.Framework;
 using System.IO;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
     /// <summary>
     /// Tests for ProjectPropertyInstance internal members
     /// </summary>
-    [TestClass]
     public class TaskItem_Tests
     {
         /// <summary>
         /// Test serialization
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void Serialization()
         {
             TaskItem item = new TaskItem("foo", "bar.proj");
@@ -39,40 +38,40 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             TaskItem deserializedItem = null;
             TranslationHelpers.GetReadTranslator().Translate(ref deserializedItem, TaskItem.FactoryForDeserialization);
 
-            Assert.AreEqual(item.ItemSpec, deserializedItem.ItemSpec);
-            Assert.AreEqual(item.MetadataCount, deserializedItem.MetadataCount);
-            Assert.AreEqual(item.GetMetadata("a"), deserializedItem.GetMetadata("a"));
-            Assert.AreEqual(item.GetMetadata(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath), deserializedItem.GetMetadata(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath));
+            Assert.Equal(item.ItemSpec, deserializedItem.ItemSpec);
+            Assert.Equal(item.MetadataCount, deserializedItem.MetadataCount);
+            Assert.Equal(item.GetMetadata("a"), deserializedItem.GetMetadata("a"));
+            Assert.Equal(item.GetMetadata(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath), deserializedItem.GetMetadata(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath));
         }
 
         /// <summary>
         /// Ensure an item is equivalent to itself.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestEquivalenceIdentity()
         {
             TaskItem left = new TaskItem("foo", "bar.proj");
 
-            Assert.IsTrue(left.Equals(left));
+            Assert.True(left.Equals(left));
         }
 
         /// <summary>
         /// Ensure two items with the same item spec and no metadata are equivalent
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestEquivalence()
         {
             TaskItem left = new TaskItem("foo", "bar.proj");
             TaskItem right = new TaskItem("foo", "bar.proj");
 
-            Assert.IsTrue(left == right);
-            Assert.IsFalse(left != right);
+            Assert.Equal(left, right);
+            Assert.Equal(left, right);
         }
 
         /// <summary>
         /// Ensure two items with the same custom metadata are equivalent
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestEquivalenceWithCustomMetadata()
         {
             TaskItem left = new TaskItem("foo", "bar.proj");
@@ -80,14 +79,14 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             TaskItem right = new TaskItem("foo", "bar.proj");
             right.SetMetadata("a", "b");
 
-            Assert.IsTrue(left == right);
-            Assert.IsFalse(left != right);
+            Assert.Equal(left, right);
+            Assert.Equal(left, right);
         }
 
         /// <summary>
         /// Ensure two items with different custom metadata values are not equivalent
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestInequivalenceWithDifferentCustomMetadataValues()
         {
             TaskItem left = new TaskItem("foo", "bar.proj");
@@ -95,14 +94,14 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             TaskItem right = new TaskItem("foo", "bar.proj");
             right.SetMetadata("a", "c");
 
-            Assert.IsFalse(left == right);
-            Assert.IsTrue(left != right);
+            Assert.NotEqual(left, right);
+            Assert.NotEqual(left, right);
         }
 
         /// <summary>
         /// Ensure two items with different custom metadata keys are not equivalent
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestInequivalenceWithDifferentCustomMetadataKeys()
         {
             TaskItem left = new TaskItem("foo", "bar.proj");
@@ -110,28 +109,28 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             TaskItem right = new TaskItem("foo", "bar.proj");
             right.SetMetadata("b", "b");
 
-            Assert.IsFalse(left == right);
-            Assert.IsTrue(left != right);
+            Assert.NotEqual(left, right);
+            Assert.NotEqual(left, right);
         }
 
         /// <summary>
         /// Ensure two items with different numbers of custom metadata are not equivalent
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestInequivalenceWithDifferentCustomMetadataCount()
         {
             TaskItem left = new TaskItem("foo", "bar.proj");
             left.SetMetadata("a", "b");
             TaskItem right = new TaskItem("foo", "bar.proj");
 
-            Assert.IsFalse(left == right);
-            Assert.IsTrue(left != right);
+            Assert.NotEqual(left, right);
+            Assert.NotEqual(left, right);
         }
 
         /// <summary>
         /// Ensure two items with different numbers of custom metadata are not equivalent
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestInequivalenceWithDifferentCustomMetadataCount2()
         {
             TaskItem left = new TaskItem("foo", "bar.proj");
@@ -140,14 +139,14 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             right.SetMetadata("a", "b");
             right.SetMetadata("c", "d");
 
-            Assert.IsFalse(left == right);
-            Assert.IsTrue(left != right);
+            Assert.NotEqual(left, right);
+            Assert.NotEqual(left, right);
         }
 
         /// <summary>
         /// Ensure when cloning an Item that the clone is equivilant to the parent item and that they are not the same object.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestDeepClone()
         {
             TaskItem parent = new TaskItem("foo", "bar.proj");
@@ -155,14 +154,14 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             parent.SetMetadata("c", "d");
 
             TaskItem clone = parent.DeepClone();
-            Assert.IsTrue(parent.Equals(clone), "The parent and the clone should be equal");
-            Assert.IsFalse(object.ReferenceEquals(parent, clone), "The parent and the child should not be the same object");
+            Assert.True(parent.Equals(clone)); // "The parent and the clone should be equal"
+            Assert.False(object.ReferenceEquals(parent, clone)); // "The parent and the child should not be the same object"
         }
 
         /// <summary>
         /// Flushing an item through a task should not mess up special characters on the metadata. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void Escaping1()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -214,7 +213,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Flushing an item through a task run in the task host also should not mess up special characters on the metadata. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void Escaping2()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -267,7 +266,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Flushing an item through a task run in the task host also should not mess up the escaping of the itemspec either. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void Escaping3()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"

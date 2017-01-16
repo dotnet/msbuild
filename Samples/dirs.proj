@@ -3,13 +3,9 @@
 
   <ItemGroup>
     <Project Include="TaskUsageLogger\TaskUsageLogger.csproj" />
+    <Project Include="XmlFileLogger\XmlFileLogger.csproj" />
   </ItemGroup>
 
   <Import Project="..\dir.traversal.targets" />
-  
-  <PropertyGroup>
-    <!-- Explicitly set the OutDir as it is used by the packaging targets -->
-    <OutDir>$(BaseOutputPathWithConfig)</OutDir>
-  </PropertyGroup>
 
 </Project>

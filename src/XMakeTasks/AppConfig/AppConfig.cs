@@ -38,16 +38,13 @@ namespace Microsoft.Build.Tasks
             {
                 throw new AppConfigException(e.Message, appConfigFile, (reader != null ? reader.LineNumber : 0), (reader != null ? reader.LinePosition : 0), e);
             }
-            catch (Exception e) // Catching Exception, but rethrowing unless it's an IO related exception.
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                    throw;
-
                 throw new AppConfigException(e.Message, appConfigFile, (reader != null ? reader.LineNumber : 0), (reader != null ? reader.LinePosition : 0), e);
             }
             finally
             {
-                if (reader != null) reader.Close();
+                reader?.Close();
             }
         }
 

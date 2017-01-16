@@ -399,6 +399,48 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// Sets foreground color to color specified using ANSI escape codes
+        /// </summary>
+        /// <param name="c">foreground color</param>
+        internal static void SetColorANSI(ConsoleColor c)
+        {
+            string colorString = "\x1b[";
+            switch (c)
+            {
+                case ConsoleColor.Black: colorString += "30"; break;
+                case ConsoleColor.DarkBlue: colorString += "34"; break;
+                case ConsoleColor.DarkGreen: colorString += "32"; break;
+                case ConsoleColor.DarkCyan: colorString += "36"; break;
+                case ConsoleColor.DarkRed: colorString += "31"; break;
+                case ConsoleColor.DarkMagenta: colorString += "35"; break;
+                case ConsoleColor.DarkYellow: colorString += "33"; break;
+                case ConsoleColor.Gray: colorString += "37"; break;
+                case ConsoleColor.DarkGray: colorString += "30;1"; break;
+                case ConsoleColor.Blue: colorString += "34;1"; break;
+                case ConsoleColor.Green: colorString += "32;1"; break;
+                case ConsoleColor.Cyan: colorString += "36;1"; break;
+                case ConsoleColor.Red: colorString += "31;1"; break;
+                case ConsoleColor.Magenta: colorString += "35;1"; break;
+                case ConsoleColor.Yellow: colorString += "33;1"; break;
+                case ConsoleColor.White: colorString += "37;1"; break;
+                default: colorString = ""; break;
+            }
+            if ("" != colorString)
+            {
+                colorString += "m";
+                Console.Out.Write(colorString);
+            }
+        }
+
+        /// <summary>
+        /// Resets the color using ANSI escape codes
+        /// </summary>
+        internal static void ResetColorANSI()
+        {
+            Console.Out.Write("\x1b[m");
+        }
+
+        /// <summary>
         /// Changes the foreground color to black if the foreground is the
         /// same as the background. Changes the foreground to white if the
         /// background is black.

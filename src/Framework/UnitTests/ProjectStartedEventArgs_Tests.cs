@@ -9,14 +9,13 @@ using System;
 using System.Collections;
 
 using Microsoft.Build.Framework;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
     /// Verify the functioning of the ProjectStartedEventArgs class.
     /// </summary>
-    [TestClass]
     public class ProjectStartedEventArgs_Tests
     {
         /// <summary>
@@ -27,8 +26,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Setup for text fixture, this is run ONCE for the entire test fixture
         /// </summary>
-        [ClassInitialize]
-        public static void FixtureSetup(TestContext context)
+        public ProjectStartedEventArgs_Tests()
         {
             BuildEventContext parentBuildEventContext = new BuildEventContext(2, 3, 4, 5);
             s_baseProjectStartedEvent = new ProjectStartedEventArgs(1, "Message", "HelpKeyword", "ProjecFile", "TargetNames", null, null, parentBuildEventContext);
@@ -37,11 +35,11 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Trivially exercise event args default ctors to boost Frameworks code coverage
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EventArgsCtors()
         {
             ProjectStartedEventArgs projectStartedEvent = new ProjectStartedEventArgs2();
-            Assert.IsNotNull(projectStartedEvent);
+            Assert.NotNull(projectStartedEvent);
 
             projectStartedEvent = new ProjectStartedEventArgs("Message", "HelpKeyword", "ProjecFile", "TargetNames", null, null);
             projectStartedEvent = new ProjectStartedEventArgs("Message", "HelpKeyword", "ProjecFile", "TargetNames", null, null, DateTime.Now);
@@ -57,7 +55,7 @@ namespace Microsoft.Build.UnitTests
         /// Verify different Items and properties are not taken into account in the equals comparison. They should 
         /// not be considered as part of the equals evaluation
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ItemsAndPropertiesDifferentEquals()
         {
             ArrayList itemsList = new ArrayList();
@@ -75,8 +73,8 @@ namespace Microsoft.Build.UnitTests
                   s_baseProjectStartedEvent.Timestamp
                 );
 
-            Assert.IsFalse(propertiesList == s_baseProjectStartedEvent.Properties);
-            Assert.IsFalse(itemsList == s_baseProjectStartedEvent.Items);
+            Assert.NotEqual(propertiesList, s_baseProjectStartedEvent.Properties);
+            Assert.NotEqual(itemsList, s_baseProjectStartedEvent.Items);
         }
 
         /// <summary>

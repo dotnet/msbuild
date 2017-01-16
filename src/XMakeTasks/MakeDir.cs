@@ -88,10 +88,8 @@ namespace Microsoft.Build.Tasks
                             items.Add(directory);
                         }
                     }
-                    catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+                    catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {
-                        if (ExceptionHandling.NotExpectedException(e))
-                            throw;
                         Log.LogErrorWithCodeFromResources("MakeDir.Error", directory.ItemSpec, e.Message);
                     }
 

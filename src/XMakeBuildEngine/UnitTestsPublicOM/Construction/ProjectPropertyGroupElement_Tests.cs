@@ -1,6 +1,6 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="ProjectPropertyGroupElement_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // </copyright>
 // <summary>Test the ProjectPropertyGroupElement class.</summary>
 //-----------------------------------------------------------------------
@@ -8,32 +8,30 @@
 using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
     /// Test the ProjectPropertyGroupElement class
     /// </summary>
-    [TestClass]
     public class ProjectPropertyGroupElement_Tests
     {
         /// <summary>
         /// Read property groups in an empty project
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReadNoPropertyGroup()
         {
             ProjectRootElement project = ProjectRootElement.Create();
-            Assert.AreEqual(0, Helpers.Count(project.Children));
-            Assert.AreEqual(null, project.PropertyGroups.GetEnumerator().Current);
+            Assert.Equal(0, Helpers.Count(project.Children));
+            Assert.Equal(null, project.PropertyGroups.GetEnumerator().Current);
         }
 
         /// <summary>
         /// Read an empty property group
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReadEmptyPropertyGroup()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -45,13 +43,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
             ProjectPropertyGroupElement group = (ProjectPropertyGroupElement)Helpers.GetFirst(project.Children);
 
-            Assert.AreEqual(0, Helpers.Count(group.Properties));
+            Assert.Equal(0, Helpers.Count(group.Properties));
         }
 
         /// <summary>
         /// Read an property group with two property children
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReadPropertyGroupTwoProperties()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -67,15 +65,15 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectPropertyGroupElement group = (ProjectPropertyGroupElement)Helpers.GetFirst(project.Children);
 
             var properties = Helpers.MakeList(group.Properties);
-            Assert.AreEqual(2, properties.Count);
-            Assert.AreEqual("p1", properties[0].Name);
-            Assert.AreEqual("p2", properties[1].Name);
+            Assert.Equal(2, properties.Count);
+            Assert.Equal("p1", properties[0].Name);
+            Assert.Equal("p2", properties[1].Name);
         }
 
         /// <summary>
         /// Set the condition value
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetCondition()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -85,14 +83,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectPropertyGroupElement propertyGroup = Helpers.GetFirst(project.PropertyGroups);
             propertyGroup.Condition = "c";
 
-            Assert.AreEqual("c", propertyGroup.Condition);
-            Assert.AreEqual(true, project.HasUnsavedChanges);
+            Assert.Equal("c", propertyGroup.Condition);
+            Assert.Equal(true, project.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set the Label value
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetLabel()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -102,14 +100,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectPropertyGroupElement propertyGroup = Helpers.GetFirst(project.PropertyGroups);
             propertyGroup.Label = "c";
 
-            Assert.AreEqual("c", propertyGroup.Label);
-            Assert.AreEqual(true, project.HasUnsavedChanges);
+            Assert.Equal("c", propertyGroup.Label);
+            Assert.Equal(true, project.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Add a property through the convenience method on a property group
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void AddProperty_ExistingPropertySameName()
         {
             ProjectRootElement project = ProjectRootElement.Create();

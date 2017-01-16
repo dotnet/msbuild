@@ -1,6 +1,6 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="ProjectOnErrorElement_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // </copyright>
 // <summary>Tests for the ProjectOnErrorElement class.</summary>
 //-----------------------------------------------------------------------
@@ -15,34 +15,32 @@ using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
     /// Tests for the ProjectOnErrorElement class
     /// </summary>
-    [TestClass]
     public class ProjectOnErrorElement_Tests
     {
         /// <summary>
         /// Read a target containing only OnError
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReadTargetOnlyContainingOnError()
         {
             ProjectOnErrorElement onError = GetOnError();
 
-            Assert.AreEqual("t", onError.ExecuteTargetsAttribute);
-            Assert.AreEqual("c", onError.Condition);
+            Assert.Equal("t", onError.ExecuteTargetsAttribute);
+            Assert.Equal("c", onError.Condition);
         }
 
         /// <summary>
         /// Read a target with two onerrors, and some tasks
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReadTargetTwoOnErrors()
         {
             string content = @"
@@ -63,8 +61,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectOnErrorElement onError1 = onErrors[0];
             ProjectOnErrorElement onError2 = onErrors[1];
 
-            Assert.AreEqual("1", onError1.ExecuteTargetsAttribute);
-            Assert.AreEqual("2", onError2.ExecuteTargetsAttribute);
+            Assert.Equal("1", onError1.ExecuteTargetsAttribute);
+            Assert.Equal("2", onError2.ExecuteTargetsAttribute);
         }
 
         /// <summary>
@@ -73,11 +71,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <remarks>
         /// This was accidentally allowed in 2.0/3.5 but it should be an error now.
         /// </remarks>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadMissingExecuteTargets()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Target Name='t'>
                             <OnError/>
@@ -85,24 +84,26 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            ProjectTargetElement target = (ProjectTargetElement)Helpers.GetFirst(project.Children);
-            ProjectOnErrorElement onError = (ProjectOnErrorElement)Helpers.GetFirst(target.Children);
+                ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectTargetElement target = (ProjectTargetElement)Helpers.GetFirst(project.Children);
+                ProjectOnErrorElement onError = (ProjectOnErrorElement)Helpers.GetFirst(target.Children);
 
-            Assert.AreEqual(String.Empty, onError.ExecuteTargetsAttribute);
+                Assert.Equal(String.Empty, onError.ExecuteTargetsAttribute);
+            }
+           );
         }
-
         /// <summary>
         /// Read onerror with empty executetargets attribute
         /// </summary>
         /// <remarks>
         /// This was accidentally allowed in 2.0/3.5 but it should be an error now.
         /// </remarks>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadEmptyExecuteTargets()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Target Name='t'>
                             <OnError ExecuteTargets=''/>
@@ -110,21 +111,23 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            ProjectTargetElement target = (ProjectTargetElement)Helpers.GetFirst(project.Children);
-            ProjectOnErrorElement onError = (ProjectOnErrorElement)Helpers.GetFirst(target.Children);
+                ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectTargetElement target = (ProjectTargetElement)Helpers.GetFirst(project.Children);
+                ProjectOnErrorElement onError = (ProjectOnErrorElement)Helpers.GetFirst(target.Children);
 
-            Assert.AreEqual(String.Empty, onError.ExecuteTargetsAttribute);
+                Assert.Equal(String.Empty, onError.ExecuteTargetsAttribute);
+            }
+           );
         }
-
         /// <summary>
         /// Read onerror with invalid attribute
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidUnexpectedAttribute()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Target Name='t'>
                             <OnError ExecuteTargets='t' XX='YY'/>
@@ -132,17 +135,19 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Read onerror with invalid child element
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidUnexpectedChild()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Target Name='t'>
                             <OnError ExecuteTargets='t'>
@@ -152,17 +157,19 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Read onerror before task
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidBeforeTask()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Target Name='t'>
                             <OnError ExecuteTargets='t'/>
@@ -171,17 +178,19 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Read onerror before task
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidBeforePropertyGroup()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Target Name='t'>
                             <OnError ExecuteTargets='t'/>
@@ -190,17 +199,19 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Read onerror before task
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidBeforeItemGroup()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Target Name='t'>
                             <OnError ExecuteTargets='t'/>
@@ -209,50 +220,55 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Set ExecuteTargets
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetExecuteTargetsValid()
         {
             ProjectOnErrorElement onError = GetOnError();
 
             onError.ExecuteTargetsAttribute = "t2";
 
-            Assert.AreEqual("t2", onError.ExecuteTargetsAttribute);
+            Assert.Equal("t2", onError.ExecuteTargetsAttribute);
         }
 
         /// <summary>
         /// Set ExecuteTargets to null
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Fact]
         public void SetInvalidExecuteTargetsNull()
         {
-            ProjectOnErrorElement onError = GetOnError();
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                ProjectOnErrorElement onError = GetOnError();
 
-            onError.ExecuteTargetsAttribute = null;
+                onError.ExecuteTargetsAttribute = null;
+            }
+           );
         }
-
         /// <summary>
         /// Set ExecuteTargets to empty string
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [Fact]
         public void SetInvalidExecuteTargetsEmpty()
         {
-            ProjectOnErrorElement onError = GetOnError();
+            Assert.Throws<ArgumentException>(() =>
+            {
+                ProjectOnErrorElement onError = GetOnError();
 
-            onError.ExecuteTargetsAttribute = String.Empty;
+                onError.ExecuteTargetsAttribute = String.Empty;
+            }
+           );
         }
-
         /// <summary>
         /// Set on error condition
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetCondition()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -263,14 +279,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             onError.Condition = "c";
 
-            Assert.AreEqual("c", onError.Condition);
-            Assert.AreEqual(true, project.HasUnsavedChanges);
+            Assert.Equal("c", onError.Condition);
+            Assert.Equal(true, project.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set on error executetargets value
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetExecuteTargets()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -281,8 +297,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             onError.ExecuteTargetsAttribute = "et2";
 
-            Assert.AreEqual("et2", onError.ExecuteTargetsAttribute);
-            Assert.AreEqual(true, project.HasUnsavedChanges);
+            Assert.Equal("et2", onError.ExecuteTargetsAttribute);
+            Assert.Equal(true, project.HasUnsavedChanges);
         }
 
         /// <summary>

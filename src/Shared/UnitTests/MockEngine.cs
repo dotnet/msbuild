@@ -8,7 +8,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -413,13 +413,10 @@ namespace Microsoft.Build.UnitTests
                 _upperLog = _upperLog.ToUpperInvariant();
             }
 
-            Assert.IsTrue
-            (
-                !_upperLog.Contains
+            Assert.False(_upperLog.Contains
                 (
                     contains.ToUpperInvariant()
-                )
-            );
+                ));
 
             // If we do not contain this string than pass it to
             // MockLogger. Since MockLogger is also registered as

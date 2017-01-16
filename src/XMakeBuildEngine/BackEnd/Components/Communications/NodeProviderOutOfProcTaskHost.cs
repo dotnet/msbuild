@@ -217,7 +217,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownAllNodes()
         {
-            ShutdownAllNodes(NodeProviderOutOfProc.HostHandshake, NodeProviderOutOfProc.ClientHandshake, NodeContextTerminated);
+            ShutdownAllNodes(NodeProviderOutOfProc.GetHostHandshake(ComponentHost.BuildParameters.EnableNodeReuse), NodeProviderOutOfProc.GetClientHandshake(), NodeContextTerminated);
         }
 
         #endregion
@@ -413,36 +413,8 @@ namespace Microsoft.Build.BackEnd
             string toolName = GetTaskHostNameFromHostContext(hostContext);
             string toolPath = null;
 
-            if (s_baseTaskHostPath == null)
-            {
-                Toolset currentToolset = ProjectCollection.GlobalProjectCollection.GetToolset(MSBuildConstants.CurrentToolsVersion);
-
-                if (currentToolset != null)
-                {
-                    ProjectPropertyInstance toolsPath32 = null;
-
-                    if (!currentToolset.Properties.TryGetValue("MSBuildToolsPath32", out toolsPath32))
-                    {
-                        // ... This is a very weird toolset.  But try falling back to the base ToolsPath since we 
-                        // know for a fact that that will always exist. 
-                        s_baseTaskHostPath = currentToolset.ToolsPath;
-                    }
-                    else
-                    {
-                        s_baseTaskHostPath = toolsPath32.EvaluatedValue;
-                    }
-                }
-            }
-
-            if (s_baseTaskHostPath64 == null && s_baseTaskHostPath != null)
-            {
-                s_baseTaskHostPath64 = Path.Combine(s_baseTaskHostPath, "amd64");
-                if (!Directory.Exists(s_baseTaskHostPath64))
-                {
-                    // time to give up
-                    s_baseTaskHostPath64 = null;
-                }
-            }
+            s_baseTaskHostPath = BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
+            s_baseTaskHostPath64 = BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64;
 
             switch (hostContext)
             {
@@ -496,10 +468,8 @@ namespace Microsoft.Build.BackEnd
             {
                 return Path.Combine(toolPath, toolName);
             }
-            else
-            {
-                return null;
-            }
+
+            return null;
         }
 
         /// <summary>
@@ -570,7 +540,7 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            CommunicationsUtilities.Trace("For a host context of {0}, spawning executable from {1}.", hostContext.ToString(), msbuildLocation);
+            CommunicationsUtilities.Trace("For a host context of {0}, spawning executable from {1}.", hostContext.ToString(), msbuildLocation ?? "MSBuild.exe");
 
             // Make it here.
             NodeContext context = GetNode

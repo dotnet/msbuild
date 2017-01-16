@@ -6,7 +6,6 @@
 //-----------------------------------------------------------------------
 
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Construction;
@@ -20,13 +19,13 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Unittest;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using System.Threading.Tasks;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
     /// Test the task host class which acts as a communication mechanism between tasks and the msbuild engine.
     /// </summary>
-    [TestClass]
     public class TaskHost_Tests
     {
         /// <summary>
@@ -62,8 +61,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Set up and initialize before each test is run
         /// </summary>
-        [TestInitialize]
-        public void SetUp()
+        ///
+        public TaskHost_Tests()
         {
             LoggingServiceFactory loggingFactory = new LoggingServiceFactory(LoggerMode.Synchronous, 1);
 
@@ -93,22 +92,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Clean up after each tests is run
-        /// </summary>
-        [TestCleanup]
-        public void TearDown()
-        {
-            _customLogger = null;
-            _mockHost = null;
-            _elementLocation = null;
-            _taskHost = null;
-        }
-
-        /// <summary>
         /// Verify when pulling target outputs out that we do not get the lives ones which are in the cache. 
         /// This is to prevent changes to the target outputs from being reflected in the cache if the changes are made in the task which calls the msbuild callback.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestLiveTargetOutputs()
         {
             IDictionary targetOutputs = new Hashtable();
@@ -116,16 +103,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             _taskHost.BuildProjectFile("ProjectFile", new string[] { "Build" }, projectProperties, targetOutputs);
 
-            Assert.IsNotNull(((ITaskItem[])targetOutputs["Build"])[0]);
+            Assert.NotNull(((ITaskItem[])targetOutputs["Build"])[0]);
 
             TaskItem targetOutputItem = ((ITaskItem[])targetOutputs["Build"])[0] as TaskItem;
             TaskItem mockItemInCache = _mockRequestCallback.BuildResultsToReturn[0].ResultsByTarget["Build"].Items[0] as TaskItem;
 
             // Assert the contents are the same
-            Assert.IsTrue(targetOutputItem.Equals(mockItemInCache));
+            Assert.True(targetOutputItem.Equals(mockItemInCache));
 
             // Assert they are different instances.
-            Assert.IsTrue(!object.ReferenceEquals(targetOutputItem, mockItemInCache));
+            Assert.False(object.ReferenceEquals(targetOutputItem, mockItemInCache));
         }
 
         /// <summary>
@@ -134,7 +121,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// words, the engine should not try to read data out of the event args and construct
         /// its own.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void CustomBuildErrorEventIsPreserved()
         {
             // Create a custom build event args that derives from MSBuild's BuildErrorEventArgs.
@@ -146,12 +133,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _taskHost.LogErrorEvent(fxcopError);
 
             // Make sure our custom logger received the actual custom event and not some fake.
-            Assert.IsTrue(_customLogger.LastError is MyCustomBuildErrorEventArgs, "Expected Custom Error Event");
+            Assert.True(_customLogger.LastError is MyCustomBuildErrorEventArgs); // "Expected Custom Error Event"
 
             // Make sure the special fields in the custom event match what we originally logged.
             fxcopError = _customLogger.LastError as MyCustomBuildErrorEventArgs;
-            Assert.AreEqual("Your code failed.", fxcopError.Message);
-            Assert.AreEqual("CodeViolation", fxcopError.FXCopRule);
+            Assert.Equal("Your code failed.", fxcopError.Message);
+            Assert.Equal("CodeViolation", fxcopError.FXCopRule);
         }
 
         /// <summary>
@@ -160,7 +147,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// words, the engine should not try to read data out of the event args and construct
         /// its own.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void CustomBuildWarningEventIsPreserved()
         {
             // Create a custom build event args that derives from MSBuild's BuildWarningEventArgs.
@@ -171,12 +158,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _taskHost.LogWarningEvent(fxcopWarning);
 
             // Make sure our custom logger received the actual custom event and not some fake.
-            Assert.IsTrue(_customLogger.LastWarning is MyCustomBuildWarningEventArgs, "Expected Custom Warning Event");
+            Assert.True(_customLogger.LastWarning is MyCustomBuildWarningEventArgs); // "Expected Custom Warning Event"
 
             // Make sure the special fields in the custom event match what we originally logged.
             fxcopWarning = _customLogger.LastWarning as MyCustomBuildWarningEventArgs;
-            Assert.AreEqual("Your code failed.", fxcopWarning.Message);
-            Assert.AreEqual("CodeViolation", fxcopWarning.FXCopRule);
+            Assert.Equal("Your code failed.", fxcopWarning.Message);
+            Assert.Equal("CodeViolation", fxcopWarning.FXCopRule);
         }
 
         /// <summary>
@@ -185,7 +172,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// words, the engine should not try to read data out of the event args and construct
         /// its own.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void CustomBuildMessageEventIsPreserved()
         {
             // Create a custom build event args that derives from MSBuild's BuildMessageEventArgs.
@@ -196,17 +183,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _taskHost.LogMessageEvent(customMessage);
 
             // Make sure our custom logger received the actual custom event and not some fake.
-            Assert.IsTrue(_customLogger.LastMessage is MyCustomMessageEvent, "Expected Custom message Event");
+            Assert.True(_customLogger.LastMessage is MyCustomMessageEvent); // "Expected Custom message Event"
 
             customMessage = _customLogger.LastMessage as MyCustomMessageEvent;
-            Assert.AreEqual("I am a message", customMessage.Message);
-            Assert.AreEqual("CodeViolation", customMessage.CustomMessage);
+            Assert.Equal("I am a message", customMessage.Message);
+            Assert.Equal("CodeViolation", customMessage.CustomMessage);
         }
 
         /// <summary>
         /// Test that error events are correctly logged and take into account continue on error
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestLogErrorEventWithContinueOnError()
         {
             _taskHost.ContinueOnError = false;
@@ -214,129 +201,137 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _taskHost.LogErrorEvent(new BuildErrorEventArgs("SubCategory", "code", null, 0, 1, 2, 3, "message", "Help", "Sender"));
 
             // Make sure our custom logger received the actual custom event and not some fake.
-            Assert.IsTrue(_customLogger.LastError is BuildErrorEventArgs, "Expected Error Event");
-            Assert.IsTrue(_customLogger.LastError.LineNumber == 0, "Expected line number to be 0");
+            Assert.True(_customLogger.LastError is BuildErrorEventArgs); // "Expected Error Event"
+            Assert.Equal(0, _customLogger.LastError.LineNumber); // "Expected line number to be 0"
 
             _taskHost.ContinueOnError = true;
             _taskHost.ConvertErrorsToWarnings = true;
 
-            Assert.IsNull(_customLogger.LastWarning, "Expected no Warning Event at this point");
+            Assert.Null(_customLogger.LastWarning); // "Expected no Warning Event at this point"
 
             // Log the custom event args.  (Pretend that the task actually did this.)
             _taskHost.LogErrorEvent(new BuildErrorEventArgs("SubCategory", "code", null, 0, 1, 2, 3, "message", "Help", "Sender"));
 
             // Make sure our custom logger received the actual custom event and not some fake.
-            Assert.IsTrue(_customLogger.LastWarning is BuildWarningEventArgs, "Expected Warning Event");
-            Assert.IsTrue(_customLogger.LastWarning.LineNumber == 0, "Expected line number to be 0");
+            Assert.True(_customLogger.LastWarning is BuildWarningEventArgs); // "Expected Warning Event"
+            Assert.Equal(0, _customLogger.LastWarning.LineNumber); // "Expected line number to be 0"
 
             _taskHost.ContinueOnError = true;
             _taskHost.ConvertErrorsToWarnings = false;
 
-            Assert.IsTrue(_customLogger.NumberOfWarning == 1, "Expected one Warning Event at this point");
-            Assert.IsTrue(_customLogger.NumberOfError == 1, "Expected one Warning Event at this point");
+            Assert.Equal(1, _customLogger.NumberOfWarning); // "Expected one Warning Event at this point"
+            Assert.Equal(1, _customLogger.NumberOfError); // "Expected one Warning Event at this point"
 
             // Log the custom event args.  (Pretend that the task actually did this.)
             _taskHost.LogErrorEvent(new BuildErrorEventArgs("SubCategory", "code", null, 0, 1, 2, 3, "message", "Help", "Sender"));
 
             // Make sure our custom logger received the actual custom event and not some fake.
-            Assert.IsTrue(_customLogger.LastError is BuildErrorEventArgs, "Expected Error Event");
-            Assert.IsTrue(_customLogger.LastWarning.LineNumber == 0, "Expected line number to be 0");
+            Assert.True(_customLogger.LastError is BuildErrorEventArgs); // "Expected Error Event"
+            Assert.Equal(0, _customLogger.LastWarning.LineNumber); // "Expected line number to be 0"
         }
 
         /// <summary>
         /// Test that a null error event will cause an exception
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Fact]
         public void TestLogErrorEventNull()
         {
-            _taskHost.LogErrorEvent(null);
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                _taskHost.LogErrorEvent(null);
+            }
+           );
         }
-
         /// <summary>
         /// Test that a null warning event will cause an exception
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Fact]
         public void TestLogWarningEventNull()
         {
-            _taskHost.LogWarningEvent(null);
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                _taskHost.LogWarningEvent(null);
+            }
+           );
         }
-
         /// <summary>
         /// Test that a null message event will cause an exception
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Fact]
         public void TestLogMessageEventNull()
         {
-            _taskHost.LogMessageEvent(null);
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                _taskHost.LogMessageEvent(null);
+            }
+           );
         }
-
         /// <summary>
         /// Test that a null custom event will cause an exception
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Fact]
         public void TestLogCustomEventNull()
         {
-            _taskHost.LogCustomEvent(null);
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                _taskHost.LogCustomEvent(null);
+            }
+           );
         }
-
         /// <summary>
         /// Test that errors are logged properly
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestLogErrorEvent()
         {
             // Log the custom event args.  (Pretend that the task actually did this.)
             _taskHost.LogErrorEvent(new BuildErrorEventArgs("SubCategory", "code", null, 0, 1, 2, 3, "message", "Help", "Sender"));
 
             // Make sure our custom logger received the actual custom event and not some fake.
-            Assert.IsTrue(_customLogger.LastError is BuildErrorEventArgs, "Expected Error Event");
-            Assert.IsTrue(_customLogger.LastError.LineNumber == 0, "Expected line number to be 0");
+            Assert.True(_customLogger.LastError is BuildErrorEventArgs); // "Expected Error Event"
+            Assert.Equal(0, _customLogger.LastError.LineNumber); // "Expected line number to be 0"
         }
 
         /// <summary>
         /// Test that warnings are logged properly
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestLogWarningEvent()
         {
             // Log the custom event args.  (Pretend that the task actually did this.)
             _taskHost.LogWarningEvent(new BuildWarningEventArgs("SubCategory", "code", null, 0, 1, 2, 3, "message", "Help", "Sender"));
 
             // Make sure our custom logger received the actual custom event and not some fake.
-            Assert.IsTrue(_customLogger.LastWarning is BuildWarningEventArgs, "Expected Warning Event");
-            Assert.IsTrue(_customLogger.LastWarning.LineNumber == 0, "Expected line number to be 0");
+            Assert.True(_customLogger.LastWarning is BuildWarningEventArgs); // "Expected Warning Event"
+            Assert.Equal(0, _customLogger.LastWarning.LineNumber); // "Expected line number to be 0"
         }
 
         /// <summary>
         /// Test that messages are logged properly
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestLogMessageEvent()
         {
             // Log the custom event args.  (Pretend that the task actually did this.)
             _taskHost.LogMessageEvent(new BuildMessageEventArgs("message", "HelpKeyword", "senderName", MessageImportance.High));
 
             // Make sure our custom logger received the actual custom event and not some fake.
-            Assert.IsTrue(_customLogger.LastMessage is BuildMessageEventArgs, "Expected Message Event");
-            Assert.IsTrue(_customLogger.LastMessage.Importance == MessageImportance.High, "Expected Message importance to be high");
+            Assert.True(_customLogger.LastMessage is BuildMessageEventArgs); // "Expected Message Event"
+            Assert.Equal(_customLogger.LastMessage.Importance, MessageImportance.High); // "Expected Message importance to be high"
         }
 
         /// <summary>
         /// Test that custom events are logged properly
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestLogCustomEvent()
         {
             // Log the custom event args.  (Pretend that the task actually did this.)
             _taskHost.LogCustomEvent(new MyCustomBuildEventArgs("testCustomBuildEvent"));
 
             // Make sure our custom logger received the actual custom event and not some fake.
-            Assert.IsTrue(_customLogger.LastCustom is CustomBuildEventArgs, "Expected custom build Event");
-            Assert.AreEqual("testCustomBuildEvent", _customLogger.LastCustom.Message);
+            Assert.True(_customLogger.LastCustom is CustomBuildEventArgs); // "Expected custom build Event"
+            Assert.Equal("testCustomBuildEvent", _customLogger.LastCustom.Message);
         }
 
         #region NotSerializableEvents
@@ -344,164 +339,164 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test that errors are logged properly
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestLogErrorEventNotSerializableSP()
         {
             // Log the custom event args.  (Pretend that the task actually did this.)
             _taskHost.LogErrorEvent(new MyCustomBuildErrorEventArgsNotSerializable("SubCategory"));
 
             // Make sure our custom logger received the actual custom event and not some fake.
-            Assert.IsTrue(_customLogger.LastError is BuildErrorEventArgs, "Expected Error Event");
-            Assert.IsTrue(_customLogger.LastError.Message.Contains("SubCategory"), "Expected line number to be 0");
+            Assert.True(_customLogger.LastError is BuildErrorEventArgs); // "Expected Error Event"
+            Assert.True(_customLogger.LastError.Message.Contains("SubCategory")); // "Expected line number to be 0"
         }
 
         /// <summary>
         /// Test that warnings are logged properly
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestLogWarningEventNotSerializableSP()
         {
             // Log the custom event args.  (Pretend that the task actually did this.)
             _taskHost.LogWarningEvent(new MyCustomBuildWarningEventArgsNotSerializable("SubCategory"));
 
             // Make sure our custom logger received the actual custom event and not some fake.
-            Assert.IsTrue(_customLogger.LastWarning is MyCustomBuildWarningEventArgsNotSerializable, "Expected Warning Event");
-            Assert.IsTrue(_customLogger.LastWarning.Message.Contains("SubCategory"), "Expected line number to be 0");
+            Assert.True(_customLogger.LastWarning is MyCustomBuildWarningEventArgsNotSerializable); // "Expected Warning Event"
+            Assert.True(_customLogger.LastWarning.Message.Contains("SubCategory")); // "Expected line number to be 0"
         }
 
         /// <summary>
         /// Test that messages are logged properly
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestLogMessageEventNotSerializableSP()
         {
             // Log the custom event args.  (Pretend that the task actually did this.)
             _taskHost.LogMessageEvent(new MyCustomMessageEventNotSerializable("message"));
 
             // Make sure our custom logger received the actual custom event and not some fake.
-            Assert.IsTrue(_customLogger.LastMessage is MyCustomMessageEventNotSerializable, "Expected Message Event");
-            Assert.IsTrue(_customLogger.LastMessage.Message.Contains("message"), "Expected Message importance to be high");
+            Assert.True(_customLogger.LastMessage is MyCustomMessageEventNotSerializable); // "Expected Message Event"
+            Assert.True(_customLogger.LastMessage.Message.Contains("message")); // "Expected Message importance to be high"
         }
 
         /// <summary>
         /// Test that custom events are logged properly
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestLogCustomEventNotSerializableSP()
         {
             // Log the custom event args.  (Pretend that the task actually did this.)
             _taskHost.LogCustomEvent(new MyCustomBuildEventArgsNotSerializable("testCustomBuildEvent"));
 
             // Make sure our custom logger received the actual custom event and not some fake.
-            Assert.IsTrue(_customLogger.LastCustom is MyCustomBuildEventArgsNotSerializable, "Expected custom build Event");
-            Assert.AreEqual(_customLogger.LastCustom.Message, "testCustomBuildEvent");
+            Assert.True(_customLogger.LastCustom is MyCustomBuildEventArgsNotSerializable); // "Expected custom build Event"
+            Assert.Equal(_customLogger.LastCustom.Message, "testCustomBuildEvent");
         }
 
         /// <summary>
         /// Test that errors are logged properly
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestLogErrorEventNotSerializableMP()
         {
             MyCustomBuildErrorEventArgsNotSerializable e = new MyCustomBuildErrorEventArgsNotSerializable("SubCategory");
 
             _mockHost.BuildParameters.MaxNodeCount = 4;
-            Assert.IsTrue(_taskHost.IsRunningMultipleNodes);
+            Assert.True(_taskHost.IsRunningMultipleNodes);
 
             // Log the custom event args.  (Pretend that the task actually did this.)
             _taskHost.LogErrorEvent(e);
 
-            Assert.IsNull(_customLogger.LastError, "Expected no error Event");
-            Assert.IsTrue(_customLogger.LastWarning is BuildWarningEventArgs, "Expected Warning Event");
+            Assert.Null(_customLogger.LastError); // "Expected no error Event"
+            Assert.True(_customLogger.LastWarning is BuildWarningEventArgs); // "Expected Warning Event"
 
             string message = ResourceUtilities.FormatResourceString("ExpectedEventToBeSerializable", e.GetType().Name);
-            Assert.IsTrue(_customLogger.LastWarning.Message.Contains(message), "Expected line to contain NotSerializable message but it did not");
+            Assert.True(_customLogger.LastWarning.Message.Contains(message)); // "Expected line to contain NotSerializable message but it did not"
         }
 
         /// <summary>
         /// Test that warnings are logged properly
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestLogWarningEventNotSerializableMP()
         {
             MyCustomBuildWarningEventArgsNotSerializable e = new MyCustomBuildWarningEventArgsNotSerializable("SubCategory");
 
             _mockHost.BuildParameters.MaxNodeCount = 4;
             _taskHost.LogWarningEvent(e);
-            Assert.IsTrue(_taskHost.IsRunningMultipleNodes);
+            Assert.True(_taskHost.IsRunningMultipleNodes);
 
-            Assert.IsTrue(_customLogger.LastWarning is BuildWarningEventArgs, "Expected Warning Event");
-            Assert.IsTrue(_customLogger.NumberOfWarning == 1, "Expected there to be only one warning");
+            Assert.True(_customLogger.LastWarning is BuildWarningEventArgs); // "Expected Warning Event"
+            Assert.Equal(1, _customLogger.NumberOfWarning); // "Expected there to be only one warning"
 
             string message = ResourceUtilities.FormatResourceString("ExpectedEventToBeSerializable", e.GetType().Name);
-            Assert.IsTrue(_customLogger.LastWarning.Message.Contains(message), "Expected line to contain NotSerializable message but it did not");
+            Assert.True(_customLogger.LastWarning.Message.Contains(message)); // "Expected line to contain NotSerializable message but it did not"
         }
 
         /// <summary>
         /// Test that messages are logged properly
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestLogMessageEventNotSerializableMP()
         {
             MyCustomMessageEventNotSerializable e = new MyCustomMessageEventNotSerializable("Message");
 
             _mockHost.BuildParameters.MaxNodeCount = 4;
             _taskHost.LogMessageEvent(e);
-            Assert.IsTrue(_taskHost.IsRunningMultipleNodes);
+            Assert.True(_taskHost.IsRunningMultipleNodes);
 
             // Make sure our custom logger received the actual custom event and not some fake.
-            Assert.IsTrue(_customLogger.LastWarning is BuildWarningEventArgs, "Expected Warning Event");
-            Assert.IsTrue(_customLogger.NumberOfWarning == 1, "Expected there to be only one warning");
+            Assert.True(_customLogger.LastWarning is BuildWarningEventArgs); // "Expected Warning Event"
+            Assert.Equal(1, _customLogger.NumberOfWarning); // "Expected there to be only one warning"
 
             string message = ResourceUtilities.FormatResourceString("ExpectedEventToBeSerializable", e.GetType().Name);
-            Assert.IsTrue(_customLogger.LastWarning.Message.Contains(message), "Expected line to contain NotSerializable message but it did not");
+            Assert.True(_customLogger.LastWarning.Message.Contains(message)); // "Expected line to contain NotSerializable message but it did not"
         }
 
         /// <summary>
         /// Test that custom events are logged properly
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestLogCustomEventNotSerializableMP()
         {
             MyCustomBuildEventArgsNotSerializable e = new MyCustomBuildEventArgsNotSerializable("testCustomBuildEvent");
 
             _mockHost.BuildParameters.MaxNodeCount = 4;
             _taskHost.LogCustomEvent(e);
-            Assert.IsTrue(_taskHost.IsRunningMultipleNodes);
-            Assert.IsNull(_customLogger.LastCustom as MyCustomBuildEventArgsNotSerializable, "Expected no custom Event");
+            Assert.True(_taskHost.IsRunningMultipleNodes);
+            Assert.Null(_customLogger.LastCustom as MyCustomBuildEventArgsNotSerializable); // "Expected no custom Event"
 
             // Make sure our custom logger received the actual custom event and not some fake.
-            Assert.IsTrue(_customLogger.LastWarning is BuildWarningEventArgs, "Expected Warning Event");
-            Assert.IsTrue(_customLogger.NumberOfWarning == 1, "Expected there to be only one warning");
+            Assert.True(_customLogger.LastWarning is BuildWarningEventArgs); // "Expected Warning Event"
+            Assert.Equal(1, _customLogger.NumberOfWarning); // "Expected there to be only one warning"
             string message = ResourceUtilities.FormatResourceString("ExpectedEventToBeSerializable", e.GetType().Name);
-            Assert.IsTrue(_customLogger.LastWarning.Message.Contains(message), "Expected line to contain NotSerializable message but it did not");
+            Assert.True(_customLogger.LastWarning.Message.Contains(message)); // "Expected line to contain NotSerializable message but it did not"
         }
         #endregion
 
         /// <summary>
         /// Verify IsRunningMultipleNodes
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void IsRunningMultipleNodes1Node()
         {
             _mockHost.BuildParameters.MaxNodeCount = 1;
-            Assert.IsFalse(_taskHost.IsRunningMultipleNodes, "Expect IsRunningMultipleNodes to be false with 1 node");
+            Assert.False(_taskHost.IsRunningMultipleNodes); // "Expect IsRunningMultipleNodes to be false with 1 node"
         }
 
         /// <summary>
         /// Verify IsRunningMultipleNodes
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void IsRunningMultipleNodes4Nodes()
         {
             _mockHost.BuildParameters.MaxNodeCount = 4;
-            Assert.IsTrue(_taskHost.IsRunningMultipleNodes, "Expect IsRunningMultipleNodes to be true with 4 nodes");
+            Assert.True(_taskHost.IsRunningMultipleNodes); // "Expect IsRunningMultipleNodes to be true with 4 nodes"
         }
 
         /// <summary>
         /// Task logging after it's done should not crash us.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LogCustomAfterTaskIsDone()
         {
             string projectFileContents = @"
@@ -537,7 +532,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Task logging after it's done should not crash us.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LogCommentAfterTaskIsDone()
         {
             string projectFileContents = @"
@@ -573,7 +568,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Task logging after it's done should not crash us.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LogWarningAfterTaskIsDone()
         {
             string projectFileContents = @"
@@ -609,7 +604,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Task logging after it's done should not crash us.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LogErrorAfterTaskIsDone()
         {
             string projectFileContents = @"

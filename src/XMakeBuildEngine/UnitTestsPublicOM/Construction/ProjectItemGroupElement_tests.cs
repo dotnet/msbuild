@@ -1,6 +1,6 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="ProjectItemGroupElement_tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // </copyright>
 // <summary>Test the ProjectItemGroupElement class.</summary>
 //-----------------------------------------------------------------------
@@ -14,32 +14,30 @@ using System.Xml;
 
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
     /// Test the ProjectItemGroupElement class
     /// </summary>
-    [TestClass]
     public class ProjectItemGroupElement_tests
     {
         /// <summary>
         /// Read item groups in an empty project
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReadNoItemGroup()
         {
             ProjectRootElement project = ProjectRootElement.Create();
-            Assert.AreEqual(0, Helpers.Count(project.Children));
-            Assert.AreEqual(null, project.ItemGroups.GetEnumerator().Current);
+            Assert.Equal(0, Helpers.Count(project.Children));
+            Assert.Equal(null, project.ItemGroups.GetEnumerator().Current);
         }
 
         /// <summary>
         /// Read an empty item group
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReadEmptyItemGroup()
         {
             string content = @"
@@ -51,13 +49,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
             ProjectItemGroupElement group = (ProjectItemGroupElement)Helpers.GetFirst(project.Children);
 
-            Assert.AreEqual(0, Helpers.Count(group.Items));
+            Assert.Equal(0, Helpers.Count(group.Items));
         }
 
         /// <summary>
         /// Read an item group with two item children
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReadItemGroupTwoItems()
         {
             string content = @"
@@ -74,15 +72,15 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var items = Helpers.MakeList(group.Items);
 
-            Assert.AreEqual(2, items.Count);
-            Assert.AreEqual("i1", items[0].Include);
-            Assert.AreEqual("i2", items[1].Include);
+            Assert.Equal(2, items.Count);
+            Assert.Equal("i1", items[0].Include);
+            Assert.Equal("i2", items[1].Include);
         }
 
         /// <summary>
         /// Set the condition value
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetCondition()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -92,14 +90,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectItemGroupElement itemGroup = Helpers.GetFirst(project.ItemGroups);
             itemGroup.Condition = "c";
 
-            Assert.AreEqual("c", itemGroup.Condition);
-            Assert.AreEqual(true, project.HasUnsavedChanges);
+            Assert.Equal("c", itemGroup.Condition);
+            Assert.Equal(true, project.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set the Label value
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetLabel()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -109,8 +107,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectItemGroupElement itemGroup = Helpers.GetFirst(project.ItemGroups);
             itemGroup.Label = "c";
 
-            Assert.AreEqual("c", itemGroup.Label);
-            Assert.AreEqual(true, project.HasUnsavedChanges);
+            Assert.Equal("c", itemGroup.Label);
+            Assert.Equal(true, project.HasUnsavedChanges);
         }
     }
 }

@@ -21,7 +21,7 @@ namespace Microsoft.Build.Execution
     /// Added and removed via methods on the ProjectItemInstance object.
     /// IMMUTABLE OBJECT.
     /// </summary>
-    [DebuggerDisplay("{name}={EvaluatedValue}")]
+    [DebuggerDisplay("{_name}={EvaluatedValue}")]
     public class ProjectMetadataInstance : IKeyed, IValued, IEquatable<ProjectMetadataInstance>, INodePacketTranslatable, IMetadatum, IDeepCloneable<ProjectMetadataInstance>, IImmutable
     {
         /// <summary>

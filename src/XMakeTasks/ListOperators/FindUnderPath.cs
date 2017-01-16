@@ -86,11 +86,8 @@ namespace Microsoft.Build.Tasks
                 conePath = OpportunisticIntern.InternStringIfPossible(System.IO.Path.GetFullPath(_path.ItemSpec));
                 conePath = FileUtilities.EnsureTrailingSlash(conePath);
             }
-            catch (Exception e) // Catching Exception, but rethrowing unless it's an IO related exception.
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                    throw;
-
                 Log.LogErrorWithCodeFromResources(null, "", 0, 0, 0, 0,
                     "FindUnderPath.InvalidParameter", "Path", _path.ItemSpec, e.Message);
                 return false;
@@ -107,11 +104,8 @@ namespace Microsoft.Build.Tasks
                 {
                     fullPath = OpportunisticIntern.InternStringIfPossible(System.IO.Path.GetFullPath(item.ItemSpec));
                 }
-                catch (Exception e) // Catching Exception, but rethrowing unless it's an IO related exception.
+                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    if (ExceptionHandling.NotExpectedException(e))
-                        throw;
-
                     Log.LogErrorWithCodeFromResources(null, "", 0, 0, 0, 0,
                         "FindUnderPath.InvalidParameter", "Files", item.ItemSpec, e.Message);
                     return false;

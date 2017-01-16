@@ -4,22 +4,21 @@
 using System;
 using System.IO;
 using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Shared;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
     sealed public class Move_Tests
     {
         /// <summary>
         /// Basic case of moving a file
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void BasicMove()
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
@@ -42,14 +41,14 @@ namespace Microsoft.Build.UnitTests
                 t.SourceFiles = sourceFiles;
                 t.DestinationFiles = destinationFiles;
 
-                Assert.IsTrue(t.Execute());
+                Assert.True(t.Execute());
 
-                Assert.IsTrue(!File.Exists(sourceFile), "Expected the source file to be gone.");
-                Assert.IsTrue(File.Exists(destinationFile), "Expected the destination file to exist.");
-                Assert.AreEqual(1, t.DestinationFiles.Length);
-                Assert.AreEqual(destinationFile, t.DestinationFiles[0].ItemSpec);
-                Assert.AreEqual(1, t.MovedFiles.Length);
-                Assert.AreEqual(true, ((new FileInfo(destinationFile)).Attributes & FileAttributes.ReadOnly) == 0); // should have cleared r/o bit
+                Assert.False(File.Exists(sourceFile)); // "Expected the source file to be gone."
+                Assert.True(File.Exists(destinationFile)); // "Expected the destination file to exist."
+                Assert.Equal(1, t.DestinationFiles.Length);
+                Assert.Equal(destinationFile, t.DestinationFiles[0].ItemSpec);
+                Assert.Equal(1, t.MovedFiles.Length);
+                Assert.Equal(true, ((new FileInfo(destinationFile)).Attributes & FileAttributes.ReadOnly) == 0); // should have cleared r/o bit
             }
             finally
             {
@@ -61,7 +60,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Basic case of moving a file but with OverwriteReadOnlyFiles = true.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void BasicMoveOverwriteReadOnlyFilesTrue()
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
@@ -85,14 +84,14 @@ namespace Microsoft.Build.UnitTests
                 t.OverwriteReadOnlyFiles = true;
                 t.DestinationFiles = destinationFiles;
 
-                Assert.IsTrue(t.Execute());
+                Assert.True(t.Execute());
 
-                Assert.IsFalse(File.Exists(sourceFile), "Expected the source file to be gone.");
-                Assert.IsTrue(File.Exists(destinationFile), "Expected the destination file to exist.");
-                Assert.AreEqual(1, t.DestinationFiles.Length);
-                Assert.AreEqual(destinationFile, t.DestinationFiles[0].ItemSpec);
-                Assert.AreEqual(1, t.MovedFiles.Length);
-                Assert.AreEqual(true, ((new FileInfo(destinationFile)).Attributes & FileAttributes.ReadOnly) == 0); // should have cleared r/o bit
+                Assert.False(File.Exists(sourceFile)); // "Expected the source file to be gone."
+                Assert.True(File.Exists(destinationFile)); // "Expected the destination file to exist."
+                Assert.Equal(1, t.DestinationFiles.Length);
+                Assert.Equal(destinationFile, t.DestinationFiles[0].ItemSpec);
+                Assert.Equal(1, t.MovedFiles.Length);
+                Assert.Equal(true, ((new FileInfo(destinationFile)).Attributes & FileAttributes.ReadOnly) == 0); // should have cleared r/o bit
             }
             finally
             {
@@ -111,7 +110,7 @@ namespace Microsoft.Build.UnitTests
         /// File to move does not exist
         /// Should not overwrite destination!
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void NonexistentSource()
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
@@ -131,23 +130,19 @@ namespace Microsoft.Build.UnitTests
                 t.SourceFiles = sourceFiles;
                 t.DestinationFiles = destinationFiles;
 
-                Assert.IsTrue(!t.Execute());
+                Assert.False(t.Execute());
 
-                Assert.IsFalse(File.Exists(sourceFile), "Expected the source file to still not exist.");
-                Assert.IsTrue(File.Exists(destinationFile), "Expected the destination file to still exist.");
-                Assert.AreEqual(1, t.DestinationFiles.Length);
-                Assert.AreEqual(destinationFile, t.DestinationFiles[0].ItemSpec);
-                Assert.AreEqual(0, t.MovedFiles.Length);
+                Assert.False(File.Exists(sourceFile)); // "Expected the source file to still not exist."
+                Assert.True(File.Exists(destinationFile)); // "Expected the destination file to still exist."
+                Assert.Equal(1, t.DestinationFiles.Length);
+                Assert.Equal(destinationFile, t.DestinationFiles[0].ItemSpec);
+                Assert.Equal(0, t.MovedFiles.Length);
 
                 string destinationFileContents;
                 using (StreamReader sr = new StreamReader(destinationFile))
                     destinationFileContents = sr.ReadToEnd();
 
-                Assert.IsTrue
-                (
-                    destinationFileContents == "This is a destination temp file.",
-                    "Expected the destination file to still contain the contents of destination file."
-                );
+                Assert.Equal(destinationFileContents, "This is a destination temp file."); //                     "Expected the destination file to still contain the contents of destination file."
             }
             finally
             {
@@ -159,7 +154,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// A file can be moved onto itself successfully (it's a no-op).
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MoveOverSelfIsSuccessful()
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
@@ -180,10 +175,10 @@ namespace Microsoft.Build.UnitTests
                 t.DestinationFiles = destinationFiles;
 
                 // Success
-                Assert.IsTrue(t.Execute());
+                Assert.True(t.Execute());
 
                 // File is still there.
-                Assert.IsTrue(File.Exists(sourceFile), "Source file should be there");
+                Assert.True(File.Exists(sourceFile)); // "Source file should be there"
             }
             finally
             {
@@ -194,7 +189,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Move should overwrite any destination file except if it's r/o
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MoveOverExistingFileReadOnlyNoOverwrite()
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
@@ -218,21 +213,17 @@ namespace Microsoft.Build.UnitTests
                 t.SourceFiles = sourceFiles;
                 t.DestinationFiles = destinationFiles;
 
-                Assert.IsTrue(!t.Execute());
+                Assert.False(t.Execute());
 
-                Assert.IsTrue(File.Exists(sourceFile), "Source file should be present");
+                Assert.True(File.Exists(sourceFile)); // "Source file should be present"
 
                 string destinationFileContents;
                 using (StreamReader sr = new StreamReader(destinationFile))
                     destinationFileContents = sr.ReadToEnd();
 
-                Assert.IsTrue
-                (
-                    destinationFileContents == "This is a destination temp file.",
-                    "Expected the destination file to be unchanged."
-                );
+                Assert.Equal(destinationFileContents, "This is a destination temp file."); //                     "Expected the destination file to be unchanged."
 
-                Assert.AreEqual(true, ((new FileInfo(destinationFile)).Attributes & FileAttributes.ReadOnly) != 0); // should still be r/o
+                Assert.Equal(true, ((new FileInfo(destinationFile)).Attributes & FileAttributes.ReadOnly) != 0); // should still be r/o
             }
             finally
             {
@@ -247,7 +238,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Move should overwrite any writeable destination file
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MoveOverExistingFileDestinationWriteable()
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
@@ -270,17 +261,13 @@ namespace Microsoft.Build.UnitTests
 
                 t.Execute();
 
-                Assert.IsFalse(File.Exists(sourceFile), "Source file should be gone");
+                Assert.False(File.Exists(sourceFile)); // "Source file should be gone"
 
                 string destinationFileContents;
                 using (StreamReader sr = new StreamReader(destinationFile))
                     destinationFileContents = sr.ReadToEnd();
 
-                Assert.IsTrue
-                (
-                    destinationFileContents == "This is a source temp file.",
-                    "Expected the destination file to contain the contents of source file."
-                );
+                Assert.Equal(destinationFileContents, "This is a source temp file."); //                     "Expected the destination file to contain the contents of source file."
             }
             finally
             {
@@ -297,7 +284,7 @@ namespace Microsoft.Build.UnitTests
         /// This is a regression test for bug 814744 where a move operation with OverwriteReadonlyFiles = true on a destination file with the readonly 
         /// flag not set caused the readonly flag to be set before the move which caused the move to fail.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MoveOverExistingFileOverwriteReadOnly()
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
@@ -324,19 +311,15 @@ namespace Microsoft.Build.UnitTests
 
                 t.Execute();
 
-                Assert.IsFalse(File.Exists(sourceFile), "Source file should be gone");
+                Assert.False(File.Exists(sourceFile)); // "Source file should be gone"
 
                 string destinationFileContents;
                 using (StreamReader sr = new StreamReader(destinationFile))
                     destinationFileContents = sr.ReadToEnd();
 
-                Assert.IsTrue
-                (
-                    destinationFileContents == "This is a source temp file.",
-                    "Expected the destination file to contain the contents of source file."
-                );
+                Assert.Equal(destinationFileContents, "This is a source temp file."); //                     "Expected the destination file to contain the contents of source file."
 
-                Assert.AreEqual(true, ((new FileInfo(destinationFile)).Attributes & FileAttributes.ReadOnly) == 0); // readonly bit should not be set
+                Assert.Equal(true, ((new FileInfo(destinationFile)).Attributes & FileAttributes.ReadOnly) == 0); // readonly bit should not be set
             }
             finally
             {
@@ -349,7 +332,7 @@ namespace Microsoft.Build.UnitTests
         /// Move should overwrite any destination file even if it's r/o
         /// if OverwriteReadOnlyFiles is set.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MoveOverExistingFileOverwriteReadOnlyOverWriteReadOnlyFilesTrue()
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
@@ -376,19 +359,15 @@ namespace Microsoft.Build.UnitTests
 
                 t.Execute();
 
-                Assert.IsFalse(File.Exists(sourceFile), "Source file should be gone");
+                Assert.False(File.Exists(sourceFile)); // "Source file should be gone"
 
                 string destinationFileContents;
                 using (StreamReader sr = new StreamReader(destinationFile))
                     destinationFileContents = sr.ReadToEnd();
 
-                Assert.IsTrue
-                (
-                    destinationFileContents == "This is a source temp file.",
-                    "Expected the destination file to contain the contents of source file."
-                );
+                Assert.Equal(destinationFileContents, "This is a source temp file."); //                     "Expected the destination file to contain the contents of source file."
 
-                Assert.AreEqual(true, ((new FileInfo(destinationFile)).Attributes & FileAttributes.ReadOnly) == 0); // should have cleared r/o bit
+                Assert.Equal(true, ((new FileInfo(destinationFile)).Attributes & FileAttributes.ReadOnly) == 0); // should have cleared r/o bit
             }
             finally
             {
@@ -401,7 +380,7 @@ namespace Microsoft.Build.UnitTests
         /// MovedFiles should only include files that were successfully moved 
         /// (or skipped), not files for which there was an error.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void OutputsOnlyIncludeSuccessfulMoves()
         {
             string temp = Path.GetTempPath();
@@ -442,32 +421,32 @@ namespace Microsoft.Build.UnitTests
 
                 bool success = t.Execute();
 
-                Assert.IsTrue(!success);
-                Assert.AreEqual(1, t.MovedFiles.Length);
-                Assert.AreEqual(validOutFile, t.MovedFiles[0].ItemSpec);
-                Assert.AreEqual(2, t.DestinationFiles.Length);
-                Assert.AreEqual("fr", t.DestinationFiles[1].GetMetadata("Locale"));
+                Assert.False(success);
+                Assert.Equal(1, t.MovedFiles.Length);
+                Assert.Equal(validOutFile, t.MovedFiles[0].ItemSpec);
+                Assert.Equal(2, t.DestinationFiles.Length);
+                Assert.Equal("fr", t.DestinationFiles[1].GetMetadata("Locale"));
 
                 // Output ItemSpec should not be overwritten.
-                Assert.AreEqual(invalidFile, t.DestinationFiles[0].ItemSpec);
-                Assert.AreEqual(validOutFile, t.DestinationFiles[1].ItemSpec);
-                Assert.AreEqual(validOutFile, t.MovedFiles[0].ItemSpec);
+                Assert.Equal(invalidFile, t.DestinationFiles[0].ItemSpec);
+                Assert.Equal(validOutFile, t.DestinationFiles[1].ItemSpec);
+                Assert.Equal(validOutFile, t.MovedFiles[0].ItemSpec);
 
                 // Sources attributes should be left untouched.
-                Assert.AreEqual("en-GB", t.SourceFiles[1].GetMetadata("Locale"));
-                Assert.AreEqual("taupe", t.SourceFiles[1].GetMetadata("Color"));
+                Assert.Equal("en-GB", t.SourceFiles[1].GetMetadata("Locale"));
+                Assert.Equal("taupe", t.SourceFiles[1].GetMetadata("Color"));
 
                 // Attributes not on Sources should be left untouched.
-                Assert.AreEqual("Pumpkin", t.DestinationFiles[1].GetMetadata("Flavor"));
-                Assert.AreEqual("Pumpkin", t.MovedFiles[0].GetMetadata("Flavor"));
+                Assert.Equal("Pumpkin", t.DestinationFiles[1].GetMetadata("Flavor"));
+                Assert.Equal("Pumpkin", t.MovedFiles[0].GetMetadata("Flavor"));
 
                 // Attribute should have been forwarded
-                Assert.AreEqual("taupe", t.DestinationFiles[1].GetMetadata("Color"));
-                Assert.AreEqual("taupe", t.MovedFiles[0].GetMetadata("Color"));
+                Assert.Equal("taupe", t.DestinationFiles[1].GetMetadata("Color"));
+                Assert.Equal("taupe", t.MovedFiles[0].GetMetadata("Color"));
 
                 // Attribute should not have been updated if it already existed on destination
-                Assert.AreEqual("fr", t.DestinationFiles[1].GetMetadata("Locale"));
-                Assert.AreEqual("fr", t.MovedFiles[0].GetMetadata("Locale"));
+                Assert.Equal("fr", t.DestinationFiles[1].GetMetadata("Locale"));
+                Assert.Equal("fr", t.MovedFiles[0].GetMetadata("Locale"));
             }
             finally
             {
@@ -480,7 +459,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Moving a locked file will fail
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MoveLockedFile()
         {
             string file = null;
@@ -500,9 +479,9 @@ namespace Microsoft.Build.UnitTests
                     result = move.Execute();
                 }
 
-                Assert.IsTrue(!result);
+                Assert.False(result);
                 ((MockEngine)move.BuildEngine).AssertLogContains("MSB3677");
-                Assert.AreEqual(false, File.Exists(file + "2"));
+                Assert.Equal(false, File.Exists(file + "2"));
             }
             finally
             {
@@ -513,60 +492,60 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Must have destination
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void NoDestination()
         {
             Move move = new Move();
             move.BuildEngine = new MockEngine();
             move.SourceFiles = new ITaskItem[] { new TaskItem(Assembly.GetExecutingAssembly().Location) };
 
-            Assert.AreEqual(false, move.Execute());
+            Assert.Equal(false, move.Execute());
             ((MockEngine)move.BuildEngine).AssertLogContains("MSB3679");
         }
 
         /// <summary>
         /// Can't have both destination file and directory
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DestinationFileAndDirectory()
         {
             Move move = new Move();
             move.BuildEngine = new MockEngine();
             move.SourceFiles = new ITaskItem[] { new TaskItem(Assembly.GetExecutingAssembly().Location) };
             move.DestinationFiles = new ITaskItem[] { new TaskItem("x") };
-            move.DestinationFolder = new TaskItem(Environment.CurrentDirectory);
+            move.DestinationFolder = new TaskItem(Directory.GetCurrentDirectory());
 
-            Assert.AreEqual(false, move.Execute());
+            Assert.Equal(false, move.Execute());
             ((MockEngine)move.BuildEngine).AssertLogContains("MSB3678");
         }
 
         /// <summary>
         /// Can't specify a directory for the destination file
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DestinationFileIsDirectory()
         {
             Move move = new Move();
             move.BuildEngine = new MockEngine();
             move.SourceFiles = new ITaskItem[] { new TaskItem(Assembly.GetExecutingAssembly().Location) };
-            move.DestinationFiles = new ITaskItem[] { new TaskItem(Environment.CurrentDirectory) };
+            move.DestinationFiles = new ITaskItem[] { new TaskItem(Directory.GetCurrentDirectory()) };
 
-            Assert.AreEqual(false, move.Execute());
+            Assert.Equal(false, move.Execute());
             ((MockEngine)move.BuildEngine).AssertLogContains("MSB3676");
         }
 
         /// <summary>
         /// Can't move a directory to a file
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SourceFileIsDirectory()
         {
             Move move = new Move();
             move.BuildEngine = new MockEngine();
             move.DestinationFiles = new ITaskItem[] { new TaskItem(Assembly.GetExecutingAssembly().Location) };
-            move.SourceFiles = new ITaskItem[] { new TaskItem(Environment.CurrentDirectory) };
+            move.SourceFiles = new ITaskItem[] { new TaskItem(Directory.GetCurrentDirectory()) };
 
-            Assert.AreEqual(false, move.Execute());
+            Assert.Equal(false, move.Execute());
             ((MockEngine)move.BuildEngine).AssertLogContains("MSB3681");
         }
 
@@ -574,10 +553,10 @@ namespace Microsoft.Build.UnitTests
         /// Moving a file on top of itself should be a success (no-op).
         /// Variation with different casing/relativeness.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MoveFileOnItself2()
         {
-            string currdir = Environment.CurrentDirectory;
+            string currdir = Directory.GetCurrentDirectory();
             string filename = "2A333ED756AF4dc392E728D0F864A396";
             string file = Path.Combine(currdir, filename);
 
@@ -601,11 +580,11 @@ namespace Microsoft.Build.UnitTests
                 t.DestinationFiles = new ITaskItem[] { new TaskItem(filename.ToLowerInvariant()) };
                 bool success = t.Execute();
 
-                Assert.IsTrue(success);
-                Assert.AreEqual(1, t.DestinationFiles.Length);
-                Assert.AreEqual(filename.ToLowerInvariant(), t.DestinationFiles[0].ItemSpec);
+                Assert.True(success);
+                Assert.Equal(1, t.DestinationFiles.Length);
+                Assert.Equal(filename.ToLowerInvariant(), t.DestinationFiles[0].ItemSpec);
 
-                Assert.IsTrue(File.Exists(file), "Source file should be there");
+                Assert.True(File.Exists(file)); // "Source file should be there"
             }
             finally
             {
@@ -617,7 +596,7 @@ namespace Microsoft.Build.UnitTests
         /// Moving a file on top of itself should be a success (no-op).
         /// Variation with a second move failure.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MoveFileOnItselfAndFailAMove()
         {
             string temp = Path.GetTempPath();
@@ -645,12 +624,12 @@ namespace Microsoft.Build.UnitTests
                 t.DestinationFiles = new ITaskItem[] { new TaskItem(file), new TaskItem(dest2) };
                 bool success = t.Execute();
 
-                Assert.IsTrue(!success);
-                Assert.AreEqual(2, t.DestinationFiles.Length);
-                Assert.AreEqual(file, t.DestinationFiles[0].ItemSpec);
-                Assert.AreEqual(dest2, t.DestinationFiles[1].ItemSpec);
-                Assert.AreEqual(1, t.MovedFiles.Length);
-                Assert.AreEqual(file, t.MovedFiles[0].ItemSpec);
+                Assert.False(success);
+                Assert.Equal(2, t.DestinationFiles.Length);
+                Assert.Equal(file, t.DestinationFiles[0].ItemSpec);
+                Assert.Equal(dest2, t.DestinationFiles[1].ItemSpec);
+                Assert.Equal(1, t.MovedFiles.Length);
+                Assert.Equal(file, t.MovedFiles[0].ItemSpec);
             }
             finally
             {
@@ -661,7 +640,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// DestinationFolder should work.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MoveToNonexistentDestinationFolder()
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
@@ -684,24 +663,20 @@ namespace Microsoft.Build.UnitTests
 
                 bool success = t.Execute();
 
-                Assert.IsTrue(success, "success");
-                Assert.IsFalse(File.Exists(sourceFile), "source gone");
-                Assert.IsTrue(File.Exists(destFile), "destination exists");
+                Assert.True(success); // "success"
+                Assert.False(File.Exists(sourceFile)); // "source gone"
+                Assert.True(File.Exists(destFile)); // "destination exists"
 
                 string destinationFileContents;
                 using (StreamReader sr = new StreamReader(destFile))
                     destinationFileContents = sr.ReadToEnd();
 
-                Assert.IsTrue
-                (
-                    destinationFileContents == "This is a source temp file.",
-                    "Expected the destination file to contain the contents of source file."
-                );
+                Assert.Equal(destinationFileContents, "This is a source temp file."); //                     "Expected the destination file to contain the contents of source file."
 
-                Assert.AreEqual(1, t.DestinationFiles.Length);
-                Assert.AreEqual(1, t.MovedFiles.Length);
-                Assert.AreEqual(destFile, t.DestinationFiles[0].ItemSpec);
-                Assert.AreEqual(destFile, t.MovedFiles[0].ItemSpec);
+                Assert.Equal(1, t.DestinationFiles.Length);
+                Assert.Equal(1, t.MovedFiles.Length);
+                Assert.Equal(destFile, t.DestinationFiles[0].ItemSpec);
+                Assert.Equal(destFile, t.MovedFiles[0].ItemSpec);
             }
             finally
             {
@@ -716,7 +691,7 @@ namespace Microsoft.Build.UnitTests
         /// DestinationFiles should only include files that were successfully moved,
         /// not files for which there was an error.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DestinationFilesLengthNotEqualSourceFilesLength()
         {
             string temp = Path.GetTempPath();
@@ -749,10 +724,10 @@ namespace Microsoft.Build.UnitTests
 
                 bool success = t.Execute();
 
-                Assert.IsTrue(!success);
-                Assert.AreEqual(1, t.DestinationFiles.Length);
-                Assert.IsNull(t.MovedFiles);
-                Assert.IsTrue(!File.Exists(outFile1));
+                Assert.False(success);
+                Assert.Equal(1, t.DestinationFiles.Length);
+                Assert.Null(t.MovedFiles);
+                Assert.False(File.Exists(outFile1));
             }
             finally
             {
@@ -766,7 +741,7 @@ namespace Microsoft.Build.UnitTests
         /// If the destination path is too long, the task should not bubble up
         /// the System.IO.PathTooLongException 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void Regress451057_ExitGracefullyIfPathNameIsTooLong()
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
@@ -788,7 +763,7 @@ namespace Microsoft.Build.UnitTests
                 bool result = t.Execute();
 
                 // Expect for there to have been no copies.
-                Assert.AreEqual(false, result);
+                Assert.Equal(false, result);
             }
             finally
             {
@@ -800,7 +775,7 @@ namespace Microsoft.Build.UnitTests
         /// If the source path is too long, the task should not bubble up
         /// the System.IO.PathTooLongException 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void Regress451057_ExitGracefullyIfPathNameIsTooLong2()
         {
             string sourceFile = "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -817,14 +792,14 @@ namespace Microsoft.Build.UnitTests
             bool result = t.Execute();
 
             // Expect for there to have been no copies.
-            Assert.AreEqual(false, result);
+            Assert.Equal(false, result);
         }
 
         /// <summary>
         /// If the SourceFiles parameter is given invalid path
         /// characters, make sure the task exits gracefully.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ExitGracefullyOnInvalidPathCharacters()
         {
             Move t = new Move();
@@ -835,14 +810,14 @@ namespace Microsoft.Build.UnitTests
             bool result = t.Execute();
 
             // Expect for there to have been no copies.
-            Assert.AreEqual(false, result);
+            Assert.Equal(false, result);
         }
 
         /// <summary>
         /// If the DestinationFile parameter is given invalid path
         /// characters, make sure the task exits gracefully.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ExitGracefullyOnInvalidPathCharactersInDestinationFile()
         {
             Move t = new Move();
@@ -853,14 +828,14 @@ namespace Microsoft.Build.UnitTests
             bool result = t.Execute();
 
             // Expect for there to have been no copies.
-            Assert.AreEqual(false, result);
+            Assert.Equal(false, result);
         }
 
         /// <summary>
         /// If the DestinationFile parameter is given invalid path
         /// characters, make sure the task exits gracefully.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ExitGracefullyOnInvalidPathCharactersInDestinationFolder()
         {
             Move t = new Move();
@@ -871,7 +846,7 @@ namespace Microsoft.Build.UnitTests
             bool result = t.Execute();
 
             // Expect for there to have been no copies.
-            Assert.AreEqual(false, result);
+            Assert.Equal(false, result);
         }
     }
 }

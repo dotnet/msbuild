@@ -569,7 +569,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="targetFrameworkVersion">Version of the .NET Framework for the target.</param>
         public static void SignFile(string certThumbprint, Uri timestampUrl, string path, string targetFrameworkVersion)
         {
-            System.Resources.ResourceManager resources = new System.Resources.ResourceManager("Microsoft.Build.Tasks.Deployment.ManifestUtilities.Strings", typeof(SecurityUtilities).Module.Assembly);
+            System.Resources.ResourceManager resources = new System.Resources.ResourceManager("Microsoft.Build.Tasks.Core.Strings.ManifestUtilities", typeof(SecurityUtilities).Module.Assembly);
 
             if (String.IsNullOrEmpty(certThumbprint))
                 throw new ArgumentNullException("certThumbprint");
@@ -628,7 +628,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static void SignFile(X509Certificate2 cert, Uri timestampUrl, string path)
         {
             // setup resources
-            System.Resources.ResourceManager resources = new System.Resources.ResourceManager("Microsoft.Build.Tasks.Deployment.ManifestUtilities.Strings", typeof(SecurityUtilities).Module.Assembly);
+            System.Resources.ResourceManager resources = new System.Resources.ResourceManager("Microsoft.Build.Tasks.Core.Strings.ManifestUtilities", typeof(SecurityUtilities).Module.Assembly);
             SignFileInternal(cert, timestampUrl, path, true, resources);
         }
 
@@ -654,6 +654,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             else
             {
+                if (cert.PrivateKey == null)
+                    throw new InvalidOperationException(resources.GetString("SignFile.CertMissingPrivateKey"));
+
                 if (cert.PrivateKey.GetType() != typeof(RSACryptoServiceProvider))
                     throw new ApplicationException(resources.GetString("SecurityUtil.OnlyRSACertsAreAllowed"));
                 try
@@ -700,9 +703,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         private static void SignPEFile(X509Certificate2 cert, System.Uri timestampUrl, string path, System.Resources.ResourceManager resources, bool useSha256)
         {
-            if (GetPathToTool() == null) throw new ApplicationException(resources.GetString("SecurityUtil.SigntoolNotFound"));
-
-            ProcessStartInfo startInfo = new ProcessStartInfo(GetPathToTool(), GetCommandLineParameters(cert.Thumbprint, timestampUrl, path, useSha256));
+            ProcessStartInfo startInfo = new ProcessStartInfo(GetPathToTool(resources), GetCommandLineParameters(cert.Thumbprint, timestampUrl, path, useSha256));
             startInfo.CreateNoWindow = true;
             startInfo.UseShellExecute = false;
             startInfo.RedirectStandardError = true;
@@ -757,18 +758,37 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return commandLine.ToString();
         }
 
-        internal static string GetPathToTool()
+        internal static string GetPathToTool(System.Resources.ResourceManager resources)
         {
 #pragma warning disable 618 // Disabling warning on using internal ToolLocationHelper API. At some point we should migrate this.
             string toolPath = ToolLocationHelper.GetPathToWindowsSdkFile(ToolName, TargetDotNetFrameworkVersion.VersionLatest, VisualStudioVersion.VersionLatest);
-            if (toolPath == null)
-                toolPath = ToolLocationHelper.GetPathToWindowsSdkFile(ToolName, TargetDotNetFrameworkVersion.Version45, VisualStudioVersion.Version110);
-            if (toolPath == null)
-                toolPath = Path.Combine(ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Version40, VisualStudioVersion.Version100), "bin", ToolName);
-            if (toolPath == null)
-                toolPath = Path.Combine(Environment.CurrentDirectory, ToolName);
+            if (toolPath == null || !File.Exists(toolPath))
+            {
+                toolPath = ToolLocationHelper.GetPathToWindowsSdkFile(ToolName, TargetDotNetFrameworkVersion.Version45,
+                    VisualStudioVersion.Version110);
+            }
+            if (toolPath == null || !File.Exists(toolPath))
+            {
+                var pathToDotNetFrameworkSdk = ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Version40, VisualStudioVersion.Version100);
+                if (pathToDotNetFrameworkSdk != null)
+                {
+                    toolPath = Path.Combine(pathToDotNetFrameworkSdk, "bin", ToolName);
+                }
+            }
+            if (toolPath == null || !File.Exists(toolPath))
+            {
+                toolPath = GetVersionIndependentToolPath(ToolName);
+            }
+            if (toolPath == null || !File.Exists(toolPath))
+            {
+                toolPath = Path.Combine(Directory.GetCurrentDirectory(), ToolName);
+            }
             if (!File.Exists(toolPath))
-                toolPath = null;
+            {
+                throw new ApplicationException(String.Format(CultureInfo.CurrentCulture,
+                    resources.GetString("SecurityUtil.SigntoolNotFound"), toolPath));
+            }
+
             return toolPath;
 #pragma warning restore 618
         }
@@ -807,6 +827,24 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 personalStore.Close();
             }
             return false;
+        }
+
+        private static string GetVersionIndependentToolPath(string toolName)
+        {
+            RegistryKey localMachineKey = Registry.LocalMachine;
+            const string versionIndependentToolKeyName = @"Software\Microsoft\ClickOnce\SignTool";
+
+            using (RegistryKey versionIndependentToolKey = localMachineKey.OpenSubKey(versionIndependentToolKeyName, writable: false))
+            {
+                string versionIndependentToolPath = null;
+
+                if (versionIndependentToolKey != null)
+                {
+                    versionIndependentToolPath = versionIndependentToolKey.GetValue("Path") as string;
+                }
+
+                return versionIndependentToolPath != null ? Path.Combine(versionIndependentToolPath, toolName) : null;
+            }
         }
     }
 }

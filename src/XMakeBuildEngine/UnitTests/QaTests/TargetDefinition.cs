@@ -1,4 +1,7 @@
-﻿using System;
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Xml;
 using System.Text;
 using System.Collections;
@@ -23,42 +26,42 @@ namespace Microsoft.Build.UnitTests.QA
         /// <summary>
         /// Name of the target
         /// </summary>
-        private string name;
+        private string _name;
 
         /// <summary>
         /// Condition of the target
         /// </summary>
-        private string condition;
+        private string _condition;
 
         /// <summary>
         /// Target Inputs
         /// </summary>
-        private string inputs;
-        
+        private string _inputs;
+
         /// <summary>
         /// Target Outputs
         /// </summary>
-        private string outputs;
+        private string _outputs;
 
         /// <summary>
         /// This target depends on the following targets
         /// </summary>
-        private string dependsOnTargets;
+        private string _dependsOnTargets;
 
         /// <summary>
         /// Target XML element
         /// </summary>
-        private XmlElement targetXmlElement;
+        private XmlElement _targetXmlElement;
 
         /// <summary>
         /// Tasks which have been added to this definition
         /// </summary>
-        private Dictionary<string, TaskDefinition> tasks;
+        private Dictionary<string, TaskDefinition> _tasks;
 
         /// <summary>
         /// Target result
         /// </summary>
-        private TargetResult result;
+        private TargetResult _result;
 
         #endregion
 
@@ -101,14 +104,14 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public TargetDefinition(string name, string inputs, string outputs, string condition, string dependsOnTargets, XmlDocument projectXmlDoc)
         {
-            this.name = name;
-            this.inputs = inputs;
-            this.outputs = outputs;
-            this.condition = condition;
-            this.dependsOnTargets = dependsOnTargets;
-            this.tasks = new Dictionary<string, TaskDefinition>();
-            this.result = null;
-            this.targetXmlElement = projectXmlDoc.CreateElement("Target", @"http://schemas.microsoft.com/developer/msbuild/2003");
+            _name = name;
+            _inputs = inputs;
+            _outputs = outputs;
+            _condition = condition;
+            _dependsOnTargets = dependsOnTargets;
+            _tasks = new Dictionary<string, TaskDefinition>();
+            _result = null;
+            _targetXmlElement = projectXmlDoc.CreateElement("Target", @"http://schemas.microsoft.com/developer/msbuild/2003");
             GenerateTargetElementXml();
         }
 
@@ -123,7 +126,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.targetXmlElement;
+                return _targetXmlElement;
             }
         }
 
@@ -134,7 +137,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.tasks;
+                return _tasks;
             }
         }
 
@@ -145,11 +148,11 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.result;
+                return _result;
             }
             set
             {
-                this.result = value;
+                _result = value;
             }
         }
 
@@ -160,7 +163,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.name;
+                return _name;
             }
         }
 
@@ -174,8 +177,8 @@ namespace Microsoft.Build.UnitTests.QA
         /// <param name="task"></param>
         public void AddTask(TaskDefinition task)
         {
-            this.targetXmlElement.AppendChild(task.FinalTaskXmlElement);
-            this.tasks.Add(task.Name, task);
+            _targetXmlElement.AppendChild(task.FinalTaskXmlElement);
+            _tasks.Add(task.Name, task);
         }
 
         /// <summary>
@@ -183,7 +186,7 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void AddOnError(string onErrorTargets, string onErrorCondition)
         {
-            XmlDocument xmlDoc = targetXmlElement.OwnerDocument;
+            XmlDocument xmlDoc = _targetXmlElement.OwnerDocument;
             XmlElement targetOnErrorElement = xmlDoc.CreateElement("OnError", @"http://schemas.microsoft.com/developer/msbuild/2003");
             targetOnErrorElement.SetAttribute("ExecuteTargets", onErrorTargets);
             if (onErrorCondition != null)
@@ -191,7 +194,7 @@ namespace Microsoft.Build.UnitTests.QA
                 targetOnErrorElement.SetAttribute("Condition", onErrorCondition);
             }
 
-            this.targetXmlElement.AppendChild(targetOnErrorElement);
+            _targetXmlElement.AppendChild(targetOnErrorElement);
         }
 
         #endregion
@@ -204,27 +207,27 @@ namespace Microsoft.Build.UnitTests.QA
         /// <param name="projectFileName"></param>
         private void GenerateTargetElementXml()
         {
-            this.targetXmlElement.SetAttribute("Name", this.name);
+            _targetXmlElement.SetAttribute("Name", _name);
 
-            if (this.dependsOnTargets != null)
+            if (_dependsOnTargets != null)
             {
-                this.targetXmlElement.SetAttribute("DependsOnTargets", this.dependsOnTargets);
+                _targetXmlElement.SetAttribute("DependsOnTargets", _dependsOnTargets);
             }
 
-            if (this.condition != null)
+            if (_condition != null)
             {
-                this.targetXmlElement.SetAttribute("Condition", this.condition);
+                _targetXmlElement.SetAttribute("Condition", _condition);
             }
 
-            if (this.inputs != null)
+            if (_inputs != null)
             {
-                this.targetXmlElement.SetAttribute("Inputs", this.inputs);
+                _targetXmlElement.SetAttribute("Inputs", _inputs);
             }
 
-            if (this.outputs != null)
+            if (_outputs != null)
             {
-                this.targetXmlElement.SetAttribute("Outputs", this.outputs);
-            }   
+                _targetXmlElement.SetAttribute("Outputs", _outputs);
+            }
         }
 
         #endregion
@@ -236,7 +239,7 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void Dispose()
         {
-            this.tasks.Clear();
+            _tasks.Clear();
         }
 
         #endregion

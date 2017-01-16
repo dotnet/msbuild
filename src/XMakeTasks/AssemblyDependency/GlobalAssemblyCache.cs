@@ -172,7 +172,7 @@ namespace Microsoft.Build.Tasks
             ErrorUtilities.VerifyThrow(hr == NativeMethodsShared.S_OK, "CreateAssemblyCache failed, hr {0}", hr);
 
             ASSEMBLY_INFO assemblyInfo = new ASSEMBLY_INFO();
-            assemblyInfo.cbAssemblyInfo = (uint)Marshal.SizeOf(typeof(ASSEMBLY_INFO));
+            assemblyInfo.cbAssemblyInfo = (uint)Marshal.SizeOf<ASSEMBLY_INFO>();
 
             assemblyCache.QueryAssemblyInfo(0, strongName, ref assemblyInfo);
 

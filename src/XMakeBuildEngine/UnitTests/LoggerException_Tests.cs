@@ -7,20 +7,19 @@ using System.Collections;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Exceptions;
 using System.Text.RegularExpressions;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
     public class InternalLoggerExceptionTests
     {
         /// <summary>
         /// Verify I implemented ISerializable correctly
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SerializeDeserialize()
         {
             InternalLoggerException e = new InternalLoggerException("message",
@@ -39,12 +38,12 @@ namespace Microsoft.Build.UnitTests
 
                 InternalLoggerException e2 = (InternalLoggerException)frm.Deserialize(memstr);
 
-                Assert.AreEqual(e.BuildEventArgs.Message, e2.BuildEventArgs.Message);
-                Assert.AreEqual(e.BuildEventArgs.HelpKeyword, e2.BuildEventArgs.HelpKeyword);
-                Assert.AreEqual(e.ErrorCode, e2.ErrorCode);
-                Assert.AreEqual(e.HelpKeyword, e2.HelpKeyword);
-                Assert.AreEqual(e.Message, e2.Message);
-                Assert.AreEqual(e.InnerException.Message, e2.InnerException.Message);
+                Assert.Equal(e.BuildEventArgs.Message, e2.BuildEventArgs.Message);
+                Assert.Equal(e.BuildEventArgs.HelpKeyword, e2.BuildEventArgs.HelpKeyword);
+                Assert.Equal(e.ErrorCode, e2.ErrorCode);
+                Assert.Equal(e.HelpKeyword, e2.HelpKeyword);
+                Assert.Equal(e.Message, e2.Message);
+                Assert.Equal(e.InnerException.Message, e2.InnerException.Message);
             }
         }
     }

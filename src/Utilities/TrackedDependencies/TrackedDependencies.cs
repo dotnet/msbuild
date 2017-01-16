@@ -15,12 +15,7 @@ namespace Microsoft.Build.Utilities
     /// <summary>
     /// This class contains utility functions to assist with tracking dependencies
     /// </summary>
-#if WHIDBEY_VISIBILITY
-    internal
-#else
-    public
-#endif
-    static class TrackedDependencies
+    public static class TrackedDependencies
     {
         #region Methods
         /// <summary>

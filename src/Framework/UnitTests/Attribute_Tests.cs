@@ -9,39 +9,38 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 
 using Microsoft.Build.Framework;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
     public class AttributeTests
     {
         /// <summary>
         /// Test RequiredRuntimeAttribute
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void RequiredRuntimeAttribute()
         {
             RequiredRuntimeAttribute attribute =
                 (RequiredRuntimeAttribute)Attribute.GetCustomAttribute(typeof(X), typeof(RequiredRuntimeAttribute));
 
-            Assert.AreEqual("v5", attribute.RuntimeVersion);
+            Assert.Equal("v5", attribute.RuntimeVersion);
         }
 
-        [TestMethod]
+        [Fact]
         public void OutputAttribute()
         {
             OutputAttribute attribute =
                 (OutputAttribute)Attribute.GetCustomAttribute(typeof(X).GetMember("TestValue2", BindingFlags.NonPublic | BindingFlags.Static)[0], typeof(OutputAttribute));
-            Assert.IsNotNull(attribute);
+            Assert.NotNull(attribute);
         }
 
-        [TestMethod]
+        [Fact]
         public void RequiredAttribute()
         {
             RequiredAttribute attribute =
                 (RequiredAttribute)Attribute.GetCustomAttribute(typeof(X).GetMember("TestValue", BindingFlags.NonPublic | BindingFlags.Static)[0], typeof(RequiredAttribute));
-            Assert.IsNotNull(attribute);
+            Assert.NotNull(attribute);
         }
     }
 

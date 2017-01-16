@@ -77,6 +77,14 @@ namespace Microsoft.Build.Shared
                 version = version.Substring(1);
             }
 
+            // Versions must have at least a Major and a Minor (e.g. 10.0), so if it's
+            // just one number without a decimal, add a decimal and a 0. Random strings
+            // like "tmp" will be filtered out in the Parse() or TryParse() steps
+            if (version.IndexOf(".") == -1)
+            {
+                version += ".0";
+            }
+
             if (throwException)
             {
                 result = Version.Parse(version);

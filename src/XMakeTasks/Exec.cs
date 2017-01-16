@@ -3,14 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Text;
 using System.IO;
-using System.Resources;
-using System.Reflection;
-using System.Globalization;
 using System.Text.RegularExpressions;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
@@ -33,90 +28,55 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public Exec()
         {
-            // do nothing
+            Command = string.Empty;
+
+            // Console-based output uses the current system OEM code page by default. Note that we should not use Console.OutputEncoding
+            // here since processes we run don't really have much to do with our console window (and also Console.OutputEncoding
+            // doesn't return the OEM code page if the running application that hosts MSBuild is not a console application).
+            // If the cmd file contains non-ANSI characters encoding may change.
+            _standardOutputEncoding = EncodingUtilities.CurrentSystemOemEncoding;
+            _standardErrorEncoding = EncodingUtilities.CurrentSystemOemEncoding;
         }
 
         #endregion
 
         #region Fields
 
-        // Are the ecodings for StdErr and StdOut streams valid
+        private const string UseUtf8Always = "ALWAYS";
+        private const string UseUtf8Never = "NEVER";
+        private const string UseUtf8Detect = "DETECT";
+
+        // Are the encodings for StdErr and StdOut streams valid
         private bool _encodingParametersValid = true;
-        private string _command = String.Empty;
-        private string _userSpecifiedWorkingDirectory;
         private string _workingDirectory;
-        private bool _ignoreExitCode = false;
-        private bool _consoleToMSBuild = false;
         private ITaskItem[] _outputs;
-        internal bool workingDirectoryIsUNC = false; // internal for unit testing
+        internal bool workingDirectoryIsUNC; // internal for unit testing
         private string _batchFile;
         private string _customErrorRegex;
         private string _customWarningRegex;
         private bool _ignoreStandardErrorWarningFormat = false; // By default, detect standard-format errors
-        private List<ITaskItem> _nonEmptyOutput = new List<ITaskItem>();
+        private readonly List<ITaskItem> _nonEmptyOutput = new List<ITaskItem>();
+        private Encoding _standardErrorEncoding;
+        private Encoding _standardOutputEncoding;
 
         #endregion
 
         #region Properties
 
         [Required]
-        public string Command
-        {
-            get
-            {
-                return _command;
-            }
+        public string Command { get; set; }
 
-            set
-            {
-                _command = value;
-            }
-        }
+        public string WorkingDirectory { get; set; }
 
-        public string WorkingDirectory
-        {
-            get
-            {
-                return _userSpecifiedWorkingDirectory;
-            }
-
-            set
-            {
-                _userSpecifiedWorkingDirectory = value;
-            }
-        }
-
-        public bool IgnoreExitCode
-        {
-            get
-            {
-                return _ignoreExitCode;
-            }
-
-            set
-            {
-                _ignoreExitCode = value;
-            }
-        }
+        public bool IgnoreExitCode { get; set; }
 
         /// <summary>
         /// Enable the pipe of the standard out to an item (StandardOutput).
         /// </summary>
         /// <Remarks>
-        /// Even thought this is called a pipe, it is infact a Tee.  Use StandardOutputImportance to adjust the visibility of the stdout.
+        /// Even thought this is called a pipe, it is in fact a Tee.  Use StandardOutputImportance to adjust the visibility of the stdout.
         /// </Remarks>
-        public bool ConsoleToMSBuild
-        {
-            get
-            {
-                return _consoleToMSBuild;
-            }
-
-            set
-            {
-                _consoleToMSBuild = value;
-            }
-        }
+        public bool ConsoleToMSBuild { get; set; }
 
         /// <summary>
         /// Users can supply a regular expression that we should
@@ -159,13 +119,6 @@ namespace Microsoft.Build.Tasks
             get { return _standardOutputEncoding; }
         }
 
-        /// <remarks>
-        /// Console-based output uses the current system OEM code page by default. Note that we should not use Console.OutputEncoding
-        /// here since processes we run don't really have much to do with our console window (and also Console.OutputEncoding
-        /// doesn't return the OEM code page if the running application that hosts MSBuild is not a console application).
-        /// </remarks>
-        private Encoding _standardOutputEncoding = EncodingUtilities.CurrentSystemOemEncoding;
-
         /// <summary>
         /// Property specifying the encoding of the captured task standard error stream
         /// </summary>
@@ -174,12 +127,13 @@ namespace Microsoft.Build.Tasks
             get { return _standardErrorEncoding; }
         }
 
-        /// <remarks>
-        /// Console-based output uses the current system OEM code page by default. Note that we should not use Console.OutputEncoding
-        /// here since processes we run don't really have much to do with our console window (and also Console.OutputEncoding
-        /// doesn't return the OEM code page if the running application that hosts MSBuild is not a console application).
-        /// </remarks>
-        private Encoding _standardErrorEncoding = EncodingUtilities.CurrentSystemOemEncoding;
+        /// <summary>
+        /// Whether or not to use UTF8 encoding for the cmd file and console window.
+        /// Values: Always, Never, Detect
+        /// If set to Detect, the current code page will be used unless it cannot represent 
+        /// the Command string. In that case, UTF-8 is used.
+        /// </summary>
+        public string UseUtf8Encoding { get; set; }
 
         /// <summary>
         /// Project visible property specifying the encoding of the captured task standard output stream
@@ -226,22 +180,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] Outputs
         {
-            get
-            {
-                if (_outputs == null)
-                {
-                    return new ITaskItem[0];
-                }
-                else
-                {
-                    return _outputs;
-                }
-            }
-
-            set
-            {
-                _outputs = value;
-            }
+            get { return _outputs ?? new ITaskItem[0]; }
+            set { _outputs = value; }
         }
 
         /// <summary>
@@ -252,18 +192,7 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] ConsoleOutput
         {
-            get
-            {
-                if (!ConsoleToMSBuild)
-                {
-                    return new ITaskItem[0];
-                }
-                else
-                {
-                    return _nonEmptyOutput.ToArray();
-                }
-            }
-            set { }
+            get { return !ConsoleToMSBuild ? new ITaskItem[0] : _nonEmptyOutput.ToArray(); }
         }
 
         #endregion
@@ -274,6 +203,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void CreateTemporaryBatchFile()
         {
+            var encoding = BatchFileEncoding();
+
             // Temporary file with the extension .Exec.bat
             _batchFile = FileUtilities.GetTemporaryFile(".exec.cmd");
 
@@ -282,7 +213,9 @@ namespace Microsoft.Build.Tasks
             // We need to get the current OEM code page which will be the same language as the current ANSI code page,
             // just the OEM version.
             // See http://www.microsoft.com/globaldev/getWR/steps/wrg_codepage.mspx for a discussion of ANSI vs OEM
-            using (StreamWriter sw = new StreamWriter(_batchFile, false, EncodingUtilities.CurrentSystemOemEncoding)) // HIGHCHAR: Exec task batch files are in OEM code pages (not ANSI!)
+            // Note: 8/12/15 - Switched to use UTF8 on OS newer than 6.1 (Windows 7)
+            // Note: 1/12/16 - Only use UTF8 when we detect we need to or the user specifies 'Always'
+            using (StreamWriter sw = new StreamWriter(_batchFile, false, encoding))
             {
                 // In some wierd setups, users may have set an env var actually called "errorlevel"
                 // this would cause our "exit %errorlevel%" to return false.
@@ -299,8 +232,21 @@ namespace Microsoft.Build.Tasks
                 sw.WriteLine("set errorlevel=dummy");
                 sw.WriteLine("set errorlevel=");
 
+                // We may need to change the code page and console encoding.
+                if (encoding.CodePage != EncodingUtilities.CurrentSystemOemEncoding.CodePage)
+                {
+                    // Output to nul so we don't change output and logs.
+                    sw.WriteLine(string.Format(@"%SystemRoot%\System32\chcp.com {0}>nul", encoding.CodePage));
+
+                    // Ensure that the console encoding is correct.
+                    _standardOutputEncoding = encoding;
+                    _standardErrorEncoding = encoding;
+                }
+
                 // if the working directory is a UNC path, bracket the exec command with pushd and popd, because pushd
-                // automatically maps the network path to a drive letter, and then popd disconnects it
+                // automatically maps the network path to a drive letter, and then popd disconnects it.
+                // This is required because Cmd.exe does not support UNC names as the current directory:
+                // https://support.microsoft.com/en-us/kb/156276
                 if (workingDirectoryIsUNC)
                 {
                     sw.WriteLine("pushd " + _workingDirectory);
@@ -320,7 +266,7 @@ namespace Microsoft.Build.Tasks
                 // 2) also because of another (or perhaps the same) bug in the Process class, when we use pushd/popd for a
                 //    UNC path, even if the command fails, the exit code comes back as 0 (seemingly reflecting the success
                 //    of popd) -- the statement below fixes that too
-                // 3) the above described behaviour is most likely bugs in the Process class because batch files in a
+                // 3) the above described behavior is most likely bugs in the Process class because batch files in a
                 //    console window do not hide or change the exit code a.k.a. errorlevel, esp. since the popd command is
                 //    a no-fail command, and it never changes the previous errorlevel
                 sw.WriteLine("exit %errorlevel%");
@@ -359,23 +305,21 @@ namespace Microsoft.Build.Tasks
         /// </remarks>
         protected override bool HandleTaskExecutionErrors()
         {
-            if (_ignoreExitCode)
+            if (IgnoreExitCode)
             {
                 Log.LogMessageFromResources(MessageImportance.Normal, "Exec.CommandFailedNoErrorCode", this.Command, ExitCode);
                 return true;
             }
+
+            if (ExitCode == NativeMethods.SE_ERR_ACCESSDENIED)
+            {
+                Log.LogErrorWithCodeFromResources("Exec.CommandFailedAccessDenied", this.Command, ExitCode);
+            }
             else
             {
-                if (ExitCode == NativeMethods.SE_ERR_ACCESSDENIED)
-                {
-                    Log.LogErrorWithCodeFromResources("Exec.CommandFailedAccessDenied", this.Command, ExitCode);
-                }
-                else
-                {
-                    Log.LogErrorWithCodeFromResources("Exec.CommandFailed", this.Command, ExitCode);
-                }
-                return false;
+                Log.LogErrorWithCodeFromResources("Exec.CommandFailed", this.Command, ExitCode);
             }
+            return false;
         }
 
         /// <summary>
@@ -387,7 +331,6 @@ namespace Microsoft.Build.Tasks
         protected override void LogPathToTool(string toolName, string pathToTool)
         {
             // Do nothing
-            return;
         }
 
         /// <summary>
@@ -397,10 +340,7 @@ namespace Microsoft.Build.Tasks
         /// Overridden to log the batch file command instead of the cmd.exe command.
         /// </remarks>
         /// <param name="message"></param>
-        protected override void LogToolCommand
-        (
-            string message
-        )
+        protected override void LogToolCommand(string message)
         {
             //Dont print the command line if Echo is Off.
             if (!EchoOff)
@@ -416,11 +356,7 @@ namespace Microsoft.Build.Tasks
         /// <remarks>
         /// Overridden to handle any custom regular expressions supplied.
         /// </remarks>
-        protected override void LogEventsFromTextOutput
-        (
-            string singleLine,
-            MessageImportance messageImportance
-        )
+        protected override void LogEventsFromTextOutput(string singleLine, MessageImportance messageImportance)
         {
             if (OutputMatchesRegex(singleLine, ref _customErrorRegex))
             {
@@ -505,8 +441,8 @@ namespace Microsoft.Build.Tasks
 
             // determine what the working directory for the exec command is going to be -- if the user specified a working
             // directory use that, otherwise it's the current directory
-            _workingDirectory = ((_userSpecifiedWorkingDirectory != null) && (_userSpecifiedWorkingDirectory.Length > 0))
-                ? _userSpecifiedWorkingDirectory
+            _workingDirectory = !string.IsNullOrEmpty(WorkingDirectory)
+                ? WorkingDirectory
                 : Directory.GetCurrentDirectory();
 
             // check if the working directory we're going to use for the exec command is a UNC path
@@ -617,10 +553,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         protected override string ToolName
         {
-            get
-            {
-                return "cmd.exe";
-            }
+            get { return "cmd.exe"; }
         }
 
         /// <summary>
@@ -645,5 +578,76 @@ namespace Microsoft.Build.Tasks
         }
 
         #endregion
+
+        private static readonly Encoding s_utf8WithoutBom = new UTF8Encoding(false);
+
+        /// <summary>
+        /// Find the encoding for the batch file.
+        /// </summary>
+        /// <remarks>
+        /// The "best" encoding is the current OEM encoding, unless it's not capable of representing
+        /// the characters we plan to put in the file. If it isn't, we can fall back to UTF-8.
+        ///
+        /// Why not always UTF-8? Because tools don't always handle it well. See
+        /// https://github.com/Microsoft/msbuild/issues/397
+        /// </remarks>
+        private Encoding BatchFileEncoding()
+        {
+            var defaultEncoding = EncodingUtilities.CurrentSystemOemEncoding;
+            string useUtf8 = string.IsNullOrEmpty(UseUtf8Encoding) ? UseUtf8Detect : UseUtf8Encoding;
+
+            // UTF8 is only supposed in Windows 7 (6.1) or greater.
+            var windows7 = new Version(6, 1);
+
+            if (Environment.OSVersion.Version < windows7)
+            {
+                useUtf8 = UseUtf8Never;
+            }
+
+            switch (useUtf8.ToUpperInvariant())
+            {
+                case UseUtf8Always:
+                    return s_utf8WithoutBom;
+                case UseUtf8Never:
+                    return EncodingUtilities.CurrentSystemOemEncoding;
+                default:
+                    return CanEncodeString(defaultEncoding.CodePage, Command + WorkingDirectory)
+                        ? defaultEncoding
+                        : s_utf8WithoutBom;
+            }
+        }
+
+        /// <summary>
+        /// Checks to see if a string can be encoded in a specified code page.
+        /// </summary>
+        /// <remarks>Internal for testing purposes.</remarks>
+        /// <param name="codePage">Code page for encoding.</param>
+        /// <param name="stringToEncode">String to encode.</param>
+        /// <returns>True if the string can be encoded in the specified code page.</returns>
+        internal static bool CanEncodeString(int codePage, string stringToEncode)
+        {
+            // We have a System.String that contains some characters. Get a lossless representation
+            // in byte-array form.
+            var unicodeEncoding = new UnicodeEncoding();
+            var unicodeBytes = unicodeEncoding.GetBytes(stringToEncode);
+
+            // Create an Encoding using the desired code page, but throws if there's a
+            // character that can't be represented.
+            var systemEncoding = Encoding.GetEncoding(codePage, EncoderFallback.ExceptionFallback,
+                DecoderFallback.ExceptionFallback);
+
+            try
+            {
+                var oemBytes = Encoding.Convert(unicodeEncoding, systemEncoding, unicodeBytes);
+
+                // If Convert didn't throw, we can represent everything in the desired encoding.
+                return true;
+            }
+            catch (EncoderFallbackException)
+            {
+                // If a fallback encoding was attempted, we need to go to Unicode.
+                return false;
+            }
+        }
     }
 }

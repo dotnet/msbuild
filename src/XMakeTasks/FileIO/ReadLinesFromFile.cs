@@ -77,10 +77,8 @@ namespace Microsoft.Build.Tasks
 
                         Lines = (ITaskItem[])nonEmptyLines.ToArray(typeof(ITaskItem));
                     }
-                    catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+                    catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {
-                        if (ExceptionHandling.NotExpectedException(e))
-                            throw;
                         LogError(_file, e, ref success);
                     }
                 }

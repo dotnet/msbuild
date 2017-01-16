@@ -28,26 +28,26 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The list of resx files.
         /// </summary>
-        private Dependencies _resXFiles = new Dependencies();
+        private Dependencies resXFiles = new Dependencies();
 
         /// <summary>
         /// A list of portable libraries and the ResW files they can produce.
         /// </summary>
-        private Dependencies _portableLibraries = new Dependencies();
+        private Dependencies portableLibraries = new Dependencies();
 
         /// <summary>
         /// A newly-created ResGenDependencies is not dirty.
         /// What would be the point in saving the default?
         /// </summary>
         [NonSerialized]
-        private bool _isDirty = false;
+        private bool isDirty = false;
 
         /// <summary>
         ///  This is the directory that will be used for resolution of files linked within a .resx.
         ///  If this is NULL then we use the directory in which the .resx is in (that should always
         ///  be the default!)
         /// </summary>
-        private string _baseLinkedFileDirectory;
+        private string baseLinkedFileDirectory;
 
         /// <summary>
         /// Construct.
@@ -60,25 +60,25 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                return _baseLinkedFileDirectory;
+                return baseLinkedFileDirectory;
             }
             set
             {
-                if (value == null && _baseLinkedFileDirectory == null)
+                if (value == null && baseLinkedFileDirectory == null)
                 {
                     // No change
                     return;
                 }
-                else if ((value == null && _baseLinkedFileDirectory != null) ||
-                         (value != null && _baseLinkedFileDirectory == null) ||
-                         (String.Compare(_baseLinkedFileDirectory, value, StringComparison.OrdinalIgnoreCase) != 0))
+                else if ((value == null && baseLinkedFileDirectory != null) ||
+                         (value != null && baseLinkedFileDirectory == null) ||
+                         (String.Compare(baseLinkedFileDirectory, value, StringComparison.OrdinalIgnoreCase) != 0))
                 {
                     // Ok, this is slightly complicated.  Changing the base directory in any manner may
                     // result in changes to how we find .resx files.  Therefore, we must clear our out
                     // cache whenever the base directory changes.  
-                    _resXFiles.Clear();
-                    _isDirty = true;
-                    _baseLinkedFileDirectory = value;
+                    resXFiles.Clear();
+                    isDirty = true;
+                    baseLinkedFileDirectory = value;
                 }
             }
         }
@@ -96,14 +96,14 @@ namespace Microsoft.Build.Tasks
                 // contains the .resx file as the path from which it should resolve
                 // relative paths. So we should base our timestamp/existence checking
                 // on the same switch & resolve in the same manner as ResGen.
-                BaseLinkedFileDirectory = value ? null : Environment.CurrentDirectory;
+                BaseLinkedFileDirectory = value ? null : Directory.GetCurrentDirectory();
             }
         }
 
         internal ResXFile GetResXFileInfo(string resxFile)
         {
             // First, try to retrieve the resx information from our hashtable.  
-            ResXFile retVal = (ResXFile)_resXFiles.GetDependencyFile(resxFile);
+            ResXFile retVal = (ResXFile)resXFiles.GetDependencyFile(resxFile);
 
             if (retVal == null)
             {
@@ -116,8 +116,8 @@ namespace Microsoft.Build.Tasks
                 // by removing it from the hashtable and readding it.
                 if (retVal.HasFileChanged())
                 {
-                    _resXFiles.RemoveDependencyFile(resxFile);
-                    _isDirty = true;
+                    resXFiles.RemoveDependencyFile(resxFile);
+                    isDirty = true;
                     retVal = AddResxFile(resxFile);
                 }
             }
@@ -131,22 +131,22 @@ namespace Microsoft.Build.Tasks
             // to be cracked for contained files.
 
             ResXFile resxFile = new ResXFile(file, BaseLinkedFileDirectory);
-            _resXFiles.AddDependencyFile(file, resxFile);
-            _isDirty = true;
+            resXFiles.AddDependencyFile(file, resxFile);
+            isDirty = true;
             return resxFile;
         }
 
         internal PortableLibraryFile TryGetPortableLibraryInfo(string libraryPath)
         {
             // First, try to retrieve the portable library information from our hashtable.  
-            PortableLibraryFile retVal = (PortableLibraryFile)_portableLibraries.GetDependencyFile(libraryPath);
+            PortableLibraryFile retVal = (PortableLibraryFile)portableLibraries.GetDependencyFile(libraryPath);
 
             // The file is in our cache.  Make sure it's up to date.  If not, discard
             // this entry from the cache and rebuild all the state at a later point.
             if (retVal != null && retVal.HasFileChanged())
             {
-                _portableLibraries.RemoveDependencyFile(libraryPath);
-                _isDirty = true;
+                portableLibraries.RemoveDependencyFile(libraryPath);
+                isDirty = true;
                 retVal = null;
             }
 
@@ -155,12 +155,12 @@ namespace Microsoft.Build.Tasks
 
         internal void UpdatePortableLibrary(PortableLibraryFile library)
         {
-            PortableLibraryFile cached = (PortableLibraryFile)_portableLibraries.GetDependencyFile(library.FileName);
+            PortableLibraryFile cached = (PortableLibraryFile)portableLibraries.GetDependencyFile(library.FileName);
             if (cached == null || !library.Equals(cached))
             {
                 // Add a new entry or replace the existing one.
-                _portableLibraries.AddDependencyFile(library.FileName, library);
-                _isDirty = true;
+                portableLibraries.AddDependencyFile(library.FileName, library);
+                isDirty = true;
             }
         }
 
@@ -171,7 +171,7 @@ namespace Microsoft.Build.Tasks
         override internal void SerializeCache(string stateFile, TaskLoggingHelper log)
         {
             base.SerializeCache(stateFile, log);
-            _isDirty = false;
+            isDirty = false;
         }
 
         /// <summary>
@@ -210,11 +210,11 @@ namespace Microsoft.Build.Tasks
         internal sealed class ResXFile : DependencyFile
         {
             // Files contained within this resx file.  
-            private string[] _linkedFiles;
+            private string[] linkedFiles;
 
             internal string[] LinkedFiles
             {
-                get { return _linkedFiles; }
+                get { return linkedFiles; }
             }
 
             internal ResXFile(string filename, string baseLinkedFileDirectory) : base(filename)
@@ -226,7 +226,7 @@ namespace Microsoft.Build.Tasks
 
                 if (File.Exists(FileName))
                 {
-                    _linkedFiles = ResXFile.GetLinkedFiles(filename, baseLinkedFileDirectory);
+                    linkedFiles = ResXFile.GetLinkedFiles(filename, baseLinkedFileDirectory);
                 }
             }
 
@@ -287,9 +287,9 @@ namespace Microsoft.Build.Tasks
         [Serializable()]
         internal sealed class PortableLibraryFile : DependencyFile
         {
-            private string[] _outputFiles;
-            private string _neutralResourceLanguage;
-            private string _assemblySimpleName;
+            private string[] outputFiles;
+            private string neutralResourceLanguage;
+            private string assemblySimpleName;
 
             internal PortableLibraryFile(string filename)
                 : base(filename)
@@ -298,26 +298,26 @@ namespace Microsoft.Build.Tasks
 
             internal string[] OutputFiles
             {
-                get { return _outputFiles; }
-                set { _outputFiles = value; }
+                get { return outputFiles; }
+                set { outputFiles = value; }
             }
 
             internal string NeutralResourceLanguage
             {
-                get { return _neutralResourceLanguage; }
-                set { _neutralResourceLanguage = value; }
+                get { return neutralResourceLanguage; }
+                set { neutralResourceLanguage = value; }
             }
 
             internal string AssemblySimpleName
             {
-                get { return _assemblySimpleName; }
-                set { _assemblySimpleName = value; }
+                get { return assemblySimpleName; }
+                set { assemblySimpleName = value; }
             }
 
             internal bool AllOutputFilesAreUpToDate()
             {
-                Debug.Assert(_outputFiles != null, "OutputFiles hasn't been set");
-                foreach (string outputFileName in _outputFiles)
+                Debug.Assert(outputFiles != null, "OutputFiles hasn't been set");
+                foreach (string outputFileName in outputFiles)
                 {
                     FileInfo outputFile = new FileInfo(outputFileName);
                     if (!outputFile.Exists || outputFile.LastWriteTime < this.LastModified)
@@ -331,12 +331,12 @@ namespace Microsoft.Build.Tasks
 
             internal bool Equals(PortableLibraryFile otherLibrary)
             {
-                if (!String.Equals(_assemblySimpleName, otherLibrary._assemblySimpleName, StringComparison.OrdinalIgnoreCase))
+                if (!String.Equals(assemblySimpleName, otherLibrary.assemblySimpleName, StringComparison.OrdinalIgnoreCase))
                 {
                     return false;
                 }
 
-                if (!String.Equals(_neutralResourceLanguage, otherLibrary._neutralResourceLanguage, StringComparison.OrdinalIgnoreCase))
+                if (!String.Equals(neutralResourceLanguage, otherLibrary.neutralResourceLanguage, StringComparison.OrdinalIgnoreCase))
                 {
                     return false;
                 }
@@ -368,7 +368,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                return _isDirty;
+                return isDirty;
             }
         }
     }

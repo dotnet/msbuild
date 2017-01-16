@@ -11,11 +11,13 @@
     <AssemblyName>Microsoft.Build.Tasks.Core</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-    <!-- Default configurations to help VS understand the configurations -->
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-  </PropertyGroup>
+  <!-- Default configurations to help VS understand the configurations -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'" />
   <ItemGroup>
     <EmbeddedResource Include="system.design\system.design.txt">
       <Type>Resx</Type>
@@ -39,11 +41,22 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Source Files -->
-    <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\AssemblyFoldersEx.cs">
+    <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersEx.cs">
       <Link>AssemblyDependency\AssemblyFoldersEx.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersFromConfig.cs">
+      <Link>AssemblyDependency\AssemblyFoldersFromConfig\AssemblyFoldersFromConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\AssemblyFolders\Serialization\AssemblyFolderCollection.cs">
+      <Link>AssemblyDependency\AssemblyFoldersFromConfig\Serialization\AssemblyFolderCollection.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\AssemblyFolders\Serialization\AssemblyFolderItem.cs">
+      <Link>AssemblyDependency\AssemblyFoldersFromConfig\Serialization\AssemblyFolderItem.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
+      <Link>BuildEnvironmentHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\AssemblyNameComparer.cs">
@@ -141,6 +154,9 @@
     <Compile Include="..\Shared\VisualStudioConstants.cs">
       <Link>VisualStudioConstants.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\VisualStudioLocationHelper.cs">
+      <Link>VisualStudioLocationHelper.cs</Link>
+    </Compile>
     <Compile Include="Al.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -156,6 +172,8 @@
     <Compile Include="AssemblyDependency\AssemblyFoldersExResolver.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="AssemblyDependency\AssemblyFoldersFromConfig\AssemblyFoldersFromConfigCache.cs" />
+    <Compile Include="AssemblyDependency\AssemblyFoldersFromConfig\AssemblyFoldersFromConfigResolver.cs" />
     <Compile Include="AssemblyDependency\AssemblyFoldersResolver.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -340,9 +358,6 @@
     <Compile Include="CreateVisualBasicManifestResourceName.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="Csc.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="CSharpParserUtilities.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -488,9 +503,6 @@
     <Compile Include="MakeDir.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="ManagedCompiler.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="ManifestUtil\*.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -627,9 +639,6 @@
     <Compile Include="UpdateManifest.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="Vbc.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="VisualBasicParserUtilities.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -668,6 +677,10 @@
   <ItemGroup>
     <Content Include="Microsoft.Common.CurrentVersion.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Microsoft.Common.CrossTargeting.targets">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Microsoft.Common.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -675,10 +688,13 @@
     <Content Include="Microsoft.CSharp.CurrentVersion.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Microsoft.CSharp.CrossTargeting.targets">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Microsoft.CSharp.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Microsoft.Data.Entity.Shim.targets">
+    <Content Include="Microsoft.Data.Entity.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Microsoft.NETFramework.CurrentVersion.targets">
@@ -687,28 +703,31 @@
     <Content Include="Microsoft.NETFramework.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Microsoft.ServiceModel.Shim.targets">
+    <Content Include="Microsoft.ServiceModel.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Microsoft.VisualBasic.CurrentVersion.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Microsoft.VisualBasic.CrossTargeting.targets">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Microsoft.VisualBasic.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Microsoft.WinFx.Shim.targets">
+    <Content Include="Microsoft.WinFx.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Microsoft.WorkflowBuildExtensions.Shim.targets">
+    <Content Include="Microsoft.WorkflowBuildExtensions.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Microsoft.Xaml.Shim.targets">
+    <Content Include="Microsoft.Xaml.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Workflow.Shim.Targets">
+    <Content Include="Workflow.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Workflow.VisualBasic.Shim.Targets">
+    <Content Include="Workflow.VisualBasic.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Microsoft.Common.overridetasks">
@@ -736,20 +755,34 @@
     <Content Include="Microsoft.VisualStudioVersion.v14.Common.props">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <EmbeddedResource Include="Strings.resx">
+    <Content Include="Microsoft.VisualStudioVersion.v15.Common.props">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <!-- Resource Files -->
+    <EmbeddedResource Include="Resources\Strings.resx">
+      <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\Shared\Strings.shared.resx">
+    <EmbeddedResource Include="..\Shared\Resources\Strings.shared.resx">
+      <Link>Resources\Strings.shared.resx</Link>
       <SubType>Designer</SubType>
-      <LogicalName>Microsoft.Build.Tasks.Strings.shared.resources</LogicalName>
+      <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ManifestUtil\Resources\Strings.ManifestUtilities.resx">
+      <LogicalName>$(AssemblyName).Strings.ManifestUtilities.resources</LogicalName>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <!-- ==========================================================================================-->
     <!-- Assemblies Files we depend on -->
     <!-- For perf, do not add more references (that will be loaded in common scenarios) without good reason -->
     <!-- ==========================================================================================-->
+    <Reference Include="Microsoft.Build.Tasks.CodeAnalysis">
+      <HintPath>$(CompilerToolsDir)\Microsoft.Build.Tasks.CodeAnalysis.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <!-- Needed by GenerateResource's ResXResourceReader: UNDONE: When CLR has moved this type to improve layering, remove this reference -->
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Security" />
     <Reference Include="System.XML" />
@@ -762,14 +795,10 @@
       <Project>{828566EE-6F6A-4EF4-98B0-513F7DF9C628}</Project>
       <Name>Microsoft.Build.Utilities</Name>
     </ProjectReference>
-    
-    <!-- If TargetRetailBuildFramework is set to true, reference the public key version. Otherwise reference the project. -->
-    <Reference Condition=" '$(TargetRetailBuildFramework)' == 'true' " Include="Microsoft.Build.Framework, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
-    <ProjectReference Condition=" '$(TargetRetailBuildFramework)' != 'true' " Include="..\Framework\Microsoft.Build.Framework.csproj">
+    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj">
       <Project>{571F09DB-A81A-4444-945C-6F7B530054CD}</Project>
       <Name>Microsoft.Build.Framework</Name>
     </ProjectReference>
-	
     <!-- Other Source Files -->
     <EmbeddedResource Include="ManifestUtil\manifest.xml">
       <LogicalName>Microsoft.Build.Tasks.Deployment.ManifestUtilities.manifest.xml</LogicalName>
@@ -810,6 +839,9 @@
     <DataFile Include="Microsoft.Common.CurrentVersion.targets">
       <SubType>Designer</SubType>
     </DataFile>
+    <DataFile Include="Microsoft.Common.CrossTargeting.targets">
+      <SubType>Designer</SubType>
+    </DataFile>
     <DataFile Include="Microsoft.NETFramework.targets" />
     <DataFile Include="Microsoft.NETFramework.CurrentVersion.targets" />
     <DataFile Include="Microsoft.NETFramework.props">
@@ -820,8 +852,10 @@
     </DataFile>
     <DataFile Include="Microsoft.CSharp.targets" />
     <DataFile Include="Microsoft.CSharp.CurrentVersion.targets" />
+    <DataFile Include="Microsoft.CSharp.CrossTargeting.targets" />
     <DataFile Include="Microsoft.VisualBasic.targets" />
     <DataFile Include="Microsoft.VisualBasic.CurrentVersion.targets" />
+    <DataFile Include="Microsoft.VisualBasic.CrossTargeting.targets" />
     <CopyFile Include="@(DataFile)">
       <DestFolder>$(SuiteBinPath)</DestFolder>
     </CopyFile>
@@ -831,13 +865,13 @@
     <CopyFile Include="Microsoft.VisualStudioVersion.v$(VsMajorVersion).Common.props">
       <DestFolder>$(AssetCompatPropsDir)</DestFolder>
     </CopyFile>
-    <DataFile Include="Microsoft.Data.Entity.Shim.targets" />
-    <DataFile Include="Microsoft.ServiceModel.Shim.targets" />
-    <DataFile Include="Microsoft.WinFx.Shim.targets" />
-    <DataFile Include="Microsoft.WorkflowBuildExtensions.Shim.targets" />
-    <DataFile Include="Microsoft.Xaml.Shim.targets" />
-    <DataFile Include="Workflow.Shim.Targets" />
-    <DataFile Include="Workflow.VisualBasic.Shim.Targets" />
+    <DataFile Include="Microsoft.Data.Entity.targets" />
+    <DataFile Include="Microsoft.ServiceModel.targets" />
+    <DataFile Include="Microsoft.WinFx.targets" />
+    <DataFile Include="Microsoft.WorkflowBuildExtensions.targets" />
+    <DataFile Include="Microsoft.Xaml.targets" />
+    <DataFile Include="Workflow.targets" />
+    <DataFile Include="Workflow.VisualBasic.targets" />
     <!-- CPS Xaml Rules-->
     <CopyFile Include="XamlRules\Content.xaml">
       <DestFolder>$(XamlRulesOutputDir)</DestFolder>
@@ -911,6 +945,15 @@
     <CopyFile Include="XamlRules\VisualBasic.xaml">
       <DestFolder>$(XamlRulesOutputDir)</DestFolder>
     </CopyFile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="project.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <FilesToSign Include="$(OutDir)\$(AssemblyName)$(TargetExt)">
+      <Authenticode>Microsoft</Authenticode>
+      <StrongName>StrongName</StrongName>
+    </FilesToSign>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

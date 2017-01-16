@@ -1,6 +1,6 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="ProjectItemDefinitionElement_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // </copyright>
 // <summary>Tests for the ProjectItemDefinitionElement class.</summary>
 //-----------------------------------------------------------------------
@@ -14,21 +14,19 @@ using System.Xml;
 
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
     /// Tests for the ProjectItemDefinitionElement class
     /// </summary>
-    [TestClass]
     public class ProjectItemDefinitionElement_Tests
     {
         /// <summary>
         /// Read item definition with no children
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReadNoChildren()
         {
             string content = @"
@@ -43,13 +41,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectItemDefinitionGroupElement itemDefinitionGroup = (ProjectItemDefinitionGroupElement)Helpers.GetFirst(project.Children);
             ProjectItemDefinitionElement itemDefinition = Helpers.GetFirst(itemDefinitionGroup.ItemDefinitions);
 
-            Assert.AreEqual(0, Helpers.Count(itemDefinition.Metadata));
+            Assert.Equal(0, Helpers.Count(itemDefinition.Metadata));
         }
 
         /// <summary>
         /// Read an item definition with a child
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReadBasic()
         {
             string content = @"
@@ -66,10 +64,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectItemDefinitionGroupElement itemDefinitionGroup = (ProjectItemDefinitionGroupElement)Helpers.GetFirst(project.Children);
             ProjectItemDefinitionElement definition = Helpers.GetFirst(itemDefinitionGroup.ItemDefinitions);
 
-            Assert.AreEqual("i", definition.ItemType);
-            Assert.AreEqual(1, Helpers.Count(definition.Metadata));
-            Assert.AreEqual("m1", Helpers.GetFirst(definition.Metadata).Name);
-            Assert.AreEqual("v1", Helpers.GetFirst(definition.Metadata).Value);
+            Assert.Equal("i", definition.ItemType);
+            Assert.Equal(1, Helpers.Count(definition.Metadata));
+            Assert.Equal("m1", Helpers.GetFirst(definition.Metadata).Name);
+            Assert.Equal("v1", Helpers.GetFirst(definition.Metadata).Value);
         }
 
         /// <summary>
@@ -79,7 +77,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Orcas inadvertently did not check for reserved item types (like "Choose") in item definitions,
         /// as we do for item types in item groups. So we do not fail here.
         /// </remarks>
-        [TestMethod]
+        [Fact]
         public void ReadBuiltInElementName()
         {
             string content = @"
@@ -96,7 +94,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read an item definition with several metadata
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReadMetadata()
         {
             string content = @"
@@ -117,20 +115,20 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var metadata = Helpers.MakeList(itemDefinition.Metadata);
 
-            Assert.AreEqual(3, metadata.Count);
-            Assert.AreEqual("m1", metadata[0].Name);
-            Assert.AreEqual("v1", metadata[0].Value);
-            Assert.AreEqual("m2", metadata[1].Name);
-            Assert.AreEqual("v2", metadata[1].Value);
-            Assert.AreEqual("c", metadata[1].Condition);
-            Assert.AreEqual("m1", metadata[2].Name);
-            Assert.AreEqual("v3", metadata[2].Value);
+            Assert.Equal(3, metadata.Count);
+            Assert.Equal("m1", metadata[0].Name);
+            Assert.Equal("v1", metadata[0].Value);
+            Assert.Equal("m2", metadata[1].Name);
+            Assert.Equal("v2", metadata[1].Value);
+            Assert.Equal("c", metadata[1].Condition);
+            Assert.Equal("m1", metadata[2].Name);
+            Assert.Equal("v3", metadata[2].Value);
         }
 
         /// <summary>
         /// Set the condition value
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetCondition()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -139,8 +137,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             itemDefinition.Condition = "c";
 
-            Assert.AreEqual("c", itemDefinition.Condition);
-            Assert.AreEqual(true, project.HasUnsavedChanges);
+            Assert.Equal("c", itemDefinition.Condition);
+            Assert.Equal(true, project.HasUnsavedChanges);
         }
     }
 }

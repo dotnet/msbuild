@@ -12,21 +12,19 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using System.Xml;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading;
 using System.Diagnostics;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
-    [TestClass]
     public class Lookup_Tests
     {
         /// <summary>
         /// Primary group contains an item for a type and secondary does;
         /// primary item should be returned instead of the secondary item.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SecondaryItemShadowedByPrimaryItem()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -40,15 +38,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.PopulateWithItem(new ProjectItemInstance(project, "i2", "a%282", project.FullPath));
 
             // Should return the item from the primary, not the secondary table
-            Assert.AreEqual("a2", lookup.GetItems("i1").First().EvaluatedInclude);
-            Assert.AreEqual("a(2", lookup.GetItems("i2").First().EvaluatedInclude);
+            Assert.Equal("a2", lookup.GetItems("i1").First().EvaluatedInclude);
+            Assert.Equal("a(2", lookup.GetItems("i2").First().EvaluatedInclude);
         }
 
         /// <summary>
         /// Primary group does not contain an item for a type but secondary does;
         /// secondary item should be returned.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SecondaryItemNotShadowedByPrimaryItem()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -60,27 +58,27 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Lookup.Scope enteredScope = lookup.EnterScope("x");
 
             // Should return item from the secondary table.
-            Assert.AreEqual("a1", lookup.GetItems("i1").First().EvaluatedInclude);
-            Assert.AreEqual("a;1", lookup.GetItems("i2").First().EvaluatedInclude);
+            Assert.Equal("a1", lookup.GetItems("i1").First().EvaluatedInclude);
+            Assert.Equal("a;1", lookup.GetItems("i2").First().EvaluatedInclude);
         }
 
         /// <summary>
         /// No items of that type: should return empty group rather than null
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void UnknownItemType()
         {
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
 
             Lookup.Scope enteredScope = lookup.EnterScope("x"); // Doesn't matter really
 
-            Assert.AreEqual(0, lookup.GetItems("i1").Count);
+            Assert.Equal(0, lookup.GetItems("i1").Count);
         }
 
         /// <summary>
         /// Adds accumulate as we lookup in the tables
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void AddsAreCombinedWithPopulates()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -90,67 +88,67 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Lookup lookup = LookupHelpers.CreateLookup(table1);
 
             // We see the one item
-            Assert.AreEqual("a1", lookup.GetItems("i1").First().EvaluatedInclude);
-            Assert.AreEqual(1, lookup.GetItems("i1").Count);
+            Assert.Equal("a1", lookup.GetItems("i1").First().EvaluatedInclude);
+            Assert.Equal(1, lookup.GetItems("i1").Count);
 
             // One item in the project
-            Assert.AreEqual("a1", table1["i1"].First().EvaluatedInclude);
-            Assert.AreEqual(1, table1["i1"].Count);
+            Assert.Equal("a1", table1["i1"].First().EvaluatedInclude);
+            Assert.Equal(1, table1["i1"].Count);
 
             // Start a target
             Lookup.Scope enteredScope = lookup.EnterScope("x");
 
             // We see the one item 
-            Assert.AreEqual("a1", lookup.GetItems("i1").First().EvaluatedInclude);
-            Assert.AreEqual(1, lookup.GetItems("i1").Count);
+            Assert.Equal("a1", lookup.GetItems("i1").First().EvaluatedInclude);
+            Assert.Equal(1, lookup.GetItems("i1").Count);
 
             // One item in the project
-            Assert.AreEqual("a1", table1["i1"].First().EvaluatedInclude);
-            Assert.AreEqual(1, table1["i1"].Count);
+            Assert.Equal("a1", table1["i1"].First().EvaluatedInclude);
+            Assert.Equal(1, table1["i1"].Count);
 
             // Start a task (eg) and add a new item
             Lookup.Scope enteredScope2 = lookup.EnterScope("x");
             lookup.AddNewItem(new ProjectItemInstance(project, "i1", "a2", project.FullPath));
 
             // Now we see two items
-            Assert.AreEqual("a1", lookup.GetItems("i1").First().EvaluatedInclude);
-            Assert.AreEqual("a2", lookup.GetItems("i1").ElementAt(1).EvaluatedInclude);
-            Assert.AreEqual(2, lookup.GetItems("i1").Count);
+            Assert.Equal("a1", lookup.GetItems("i1").First().EvaluatedInclude);
+            Assert.Equal("a2", lookup.GetItems("i1").ElementAt(1).EvaluatedInclude);
+            Assert.Equal(2, lookup.GetItems("i1").Count);
 
             // But there's still one item in the project
-            Assert.AreEqual("a1", table1["i1"].First().EvaluatedInclude);
-            Assert.AreEqual(1, table1["i1"].Count);
+            Assert.Equal("a1", table1["i1"].First().EvaluatedInclude);
+            Assert.Equal(1, table1["i1"].Count);
 
             // Finish the task
             enteredScope2.LeaveScope();
 
             // We still see two items
-            Assert.AreEqual("a1", lookup.GetItems("i1").First().EvaluatedInclude);
-            Assert.AreEqual("a2", lookup.GetItems("i1").ElementAt(1).EvaluatedInclude);
-            Assert.AreEqual(2, lookup.GetItems("i1").Count);
+            Assert.Equal("a1", lookup.GetItems("i1").First().EvaluatedInclude);
+            Assert.Equal("a2", lookup.GetItems("i1").ElementAt(1).EvaluatedInclude);
+            Assert.Equal(2, lookup.GetItems("i1").Count);
 
             // But there's still one item in the project
-            Assert.AreEqual("a1", table1["i1"].First().EvaluatedInclude);
-            Assert.AreEqual(1, table1["i1"].Count);
+            Assert.Equal("a1", table1["i1"].First().EvaluatedInclude);
+            Assert.Equal(1, table1["i1"].Count);
 
             // Finish the target
             enteredScope.LeaveScope();
 
             // We still see two items
-            Assert.AreEqual("a1", lookup.GetItems("i1").First().EvaluatedInclude);
-            Assert.AreEqual("a2", lookup.GetItems("i1").ElementAt(1).EvaluatedInclude);
-            Assert.AreEqual(2, lookup.GetItems("i1").Count);
+            Assert.Equal("a1", lookup.GetItems("i1").First().EvaluatedInclude);
+            Assert.Equal("a2", lookup.GetItems("i1").ElementAt(1).EvaluatedInclude);
+            Assert.Equal(2, lookup.GetItems("i1").Count);
 
             // And now the items have gotten put into the global group
-            Assert.AreEqual("a1", table1["i1"].First().EvaluatedInclude);
-            Assert.AreEqual("a2", table1["i1"].ElementAt(1).EvaluatedInclude);
-            Assert.AreEqual(2, table1["i1"].Count);
+            Assert.Equal("a1", table1["i1"].First().EvaluatedInclude);
+            Assert.Equal("a2", table1["i1"].ElementAt(1).EvaluatedInclude);
+            Assert.Equal(2, table1["i1"].Count);
         }
 
         /// <summary>
         /// Adds when duplicate removal is enabled removes only duplicates.  Tests only item specs, not metadata differences
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void AddsWithDuplicateRemovalItemSpecsOnly()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -177,30 +175,30 @@ namespace Microsoft.Build.UnitTests.BackEnd
             var group = lookup.GetItems("i1");
 
             // We should have the original two duplicates plus one new addition.
-            Assert.AreEqual(3, group.Count);
+            Assert.Equal(3, group.Count);
 
             // Only two of the items should have the 'a1' include.
-            Assert.AreEqual(2, group.Where(item => item.EvaluatedInclude == "a1").Count());
+            Assert.Equal(2, group.Where(item => item.EvaluatedInclude == "a1").Count());
             // And ensure the other item got added.
-            Assert.AreEqual(1, group.Where(item => item.EvaluatedInclude == "a2").Count());
+            Assert.Equal(1, group.Where(item => item.EvaluatedInclude == "a2").Count());
 
             scope.LeaveScope();
 
             group = lookup.GetItems("i1");
 
             // We should have the original two duplicates plus one new addition.
-            Assert.AreEqual(3, group.Count);
+            Assert.Equal(3, group.Count);
 
             // Only two of the items should have the 'a1' include.
-            Assert.AreEqual(2, group.Where(item => item.EvaluatedInclude == "a1").Count());
+            Assert.Equal(2, group.Where(item => item.EvaluatedInclude == "a1").Count());
             // And ensure the other item got added.
-            Assert.AreEqual(1, group.Where(item => item.EvaluatedInclude == "a2").Count());
+            Assert.Equal(1, group.Where(item => item.EvaluatedInclude == "a2").Count());
         }
 
         /// <summary>
         /// Adds when duplicate removal is enabled removes only duplicates.  Tests only item specs, not metadata differences
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void AddsWithDuplicateRemovalWithMetadata()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -229,29 +227,29 @@ namespace Microsoft.Build.UnitTests.BackEnd
             var group = lookup.GetItems("i1");
 
             // We should have the original two duplicates plus one new addition.
-            Assert.AreEqual(5, group.Count);
+            Assert.Equal(5, group.Count);
 
             // Four of the items will have the a1 include
-            Assert.AreEqual(4, group.Where(item => item.EvaluatedInclude == "a1").Count());
+            Assert.Equal(4, group.Where(item => item.EvaluatedInclude == "a1").Count());
 
             // One item will have the a2 include
-            Assert.AreEqual(1, group.Where(item => item.EvaluatedInclude == "a2").Count());
+            Assert.Equal(1, group.Where(item => item.EvaluatedInclude == "a2").Count());
 
             scope.LeaveScope();
 
             group = lookup.GetItems("i1");
 
             // We should have the original two duplicates plus one new addition.
-            Assert.AreEqual(5, group.Count);
+            Assert.Equal(5, group.Count);
 
             // Four of the items will have the a1 include
-            Assert.AreEqual(4, group.Where(item => item.EvaluatedInclude == "a1").Count());
+            Assert.Equal(4, group.Where(item => item.EvaluatedInclude == "a1").Count());
 
             // One item will have the a2 include
-            Assert.AreEqual(1, group.Where(item => item.EvaluatedInclude == "a2").Count());
+            Assert.Equal(1, group.Where(item => item.EvaluatedInclude == "a2").Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void Removes()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -273,36 +271,36 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.RemoveItem(item1);
 
             // We see one item
-            Assert.AreEqual(1, lookup.GetItems("i1").Count);
-            Assert.AreEqual("a2", lookup.GetItems("i1").First().EvaluatedInclude);
+            Assert.Equal(1, lookup.GetItems("i1").Count);
+            Assert.Equal("a2", lookup.GetItems("i1").First().EvaluatedInclude);
 
             // Remove the other item
             lookup.RemoveItem(item2);
 
             // We see no items
-            Assert.AreEqual(0, lookup.GetItems("i1").Count);
+            Assert.Equal(0, lookup.GetItems("i1").Count);
 
             // Finish the task
             enteredScope2.LeaveScope();
 
             // We still see no items
-            Assert.AreEqual(0, lookup.GetItems("i1").Count);
+            Assert.Equal(0, lookup.GetItems("i1").Count);
 
             // But there's still one item in the project
-            Assert.AreEqual("a1", table1["i1"].First().EvaluatedInclude);
-            Assert.AreEqual(1, table1["i1"].Count);
+            Assert.Equal("a1", table1["i1"].First().EvaluatedInclude);
+            Assert.Equal(1, table1["i1"].Count);
 
             // Finish the target
             enteredScope.LeaveScope();
 
             // We still see no items
-            Assert.AreEqual(0, lookup.GetItems("i1").Count);
+            Assert.Equal(0, lookup.GetItems("i1").Count);
 
             // And now there are no items in the project either
-            Assert.AreEqual(0, table1["i1"].Count);
+            Assert.Equal(0, table1["i1"].Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void RemoveItemPopulatedInLowerScope()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -317,47 +315,47 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.PopulateWithItem(item1);
 
             // We see it
-            Assert.AreEqual(1, lookup.GetItems("i1").Count);
+            Assert.Equal(1, lookup.GetItems("i1").Count);
 
             // Make a clone so we can keep an eye on that item
             Lookup lookup2 = lookup.Clone();
 
             // We can see the item in the clone
-            Assert.AreEqual(1, lookup2.GetItems("i1").Count);
+            Assert.Equal(1, lookup2.GetItems("i1").Count);
 
             // Start a task (eg)
             Lookup.Scope enteredScope2 = lookup.EnterScope("x");
 
             // We see the item below
-            Assert.AreEqual(1, lookup.GetItems("i1").Count);
+            Assert.Equal(1, lookup.GetItems("i1").Count);
 
             // Remove that item
             lookup.RemoveItem(item1);
 
             // We see no items
-            Assert.AreEqual(0, lookup.GetItems("i1").Count);
+            Assert.Equal(0, lookup.GetItems("i1").Count);
 
             // The clone is unaffected so far
-            Assert.AreEqual(1, lookup2.GetItems("i1").Count);
+            Assert.Equal(1, lookup2.GetItems("i1").Count);
 
             // Finish the task
             enteredScope2.LeaveScope();
 
             // We still see no items
-            Assert.AreEqual(0, lookup.GetItems("i1").Count);
+            Assert.Equal(0, lookup.GetItems("i1").Count);
 
             // But now the clone doesn't either
-            Assert.AreEqual(0, lookup2.GetItems("i1").Count);
+            Assert.Equal(0, lookup2.GetItems("i1").Count);
 
             // Finish the target
             enteredScope.LeaveScope();
 
             // We still see no items
-            Assert.AreEqual(0, lookup.GetItems("i1").Count);
-            Assert.AreEqual(0, lookup2.GetItems("i1").Count);
+            Assert.Equal(0, lookup.GetItems("i1").Count);
+            Assert.Equal(0, lookup2.GetItems("i1").Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void RemoveItemAddedInLowerScope()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -375,31 +373,31 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Lookup.Scope enteredScope2 = lookup.EnterScope("x");
 
             // We see the item below
-            Assert.AreEqual(1, lookup.GetItems("i1").Count);
+            Assert.Equal(1, lookup.GetItems("i1").Count);
 
             // Remove that item
             lookup.RemoveItem(item1);
 
             // We see no items
-            Assert.AreEqual(0, lookup.GetItems("i1").Count);
+            Assert.Equal(0, lookup.GetItems("i1").Count);
 
             // Finish the task
             enteredScope2.LeaveScope();
 
             // We still see no items
-            Assert.AreEqual(0, lookup.GetItems("i1").Count);
+            Assert.Equal(0, lookup.GetItems("i1").Count);
 
             // Finish the target
             enteredScope.LeaveScope();
 
             // We still see no items
-            Assert.AreEqual(0, lookup.GetItems("i1").Count);
+            Assert.Equal(0, lookup.GetItems("i1").Count);
         }
 
         /// <summary>
         /// Ensure that once keepOnlySpecified is set to true, it remains in effect.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void KeepMetadataOnlySpecifiedPropagate1()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -422,11 +420,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.ModifyItems(item1.ItemType, group, newMetadata);
 
             group = lookup.GetItems("i1");
-            Assert.AreEqual(1, group.Count);
+            Assert.Equal(1, group.Count);
 
             // m1 and m2 are gone.
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m1"));
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m2"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m2"));
 
             enteredScope2.LeaveScope();
 
@@ -437,33 +435,33 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.ModifyItems(item1.ItemType, group, newMetadata2);
 
             group = lookup.GetItems("i1");
-            Assert.AreEqual(1, group.Count);
+            Assert.Equal(1, group.Count);
 
             // m1 and m2 are gone
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m1"));
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m2"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m2"));
 
             // m3 is still there.
-            Assert.AreEqual("m3", group.First().GetMetadataValue("m3"));
+            Assert.Equal("m3", group.First().GetMetadataValue("m3"));
 
             enteredScope.LeaveScope();
 
             group = lookup.GetItems("i1");
-            Assert.AreEqual(1, group.Count);
+            Assert.Equal(1, group.Count);
 
             // m1 and m2 are gone
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m1"));
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m2"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m2"));
 
             // m3 is still there.
-            Assert.AreEqual("m3", group.First().GetMetadataValue("m3"));
+            Assert.Equal("m3", group.First().GetMetadataValue("m3"));
         }
 
         /// <summary>
         /// Ensure that if keepOnlySpecified is specified after some metadata have been set in a higher scope that it will
         /// eliminate that metadata are the current scope and beyond.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void KeepMetadataOnlySpecifiedPropagate2()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -487,12 +485,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.ModifyItems(item1.ItemType, group, newMetadata);
 
             group = lookup.GetItems("i1");
-            Assert.AreEqual(1, group.Count);
+            Assert.Equal(1, group.Count);
 
             // All metadata are present
-            Assert.AreEqual("m1", group.First().GetMetadataValue("m1"));
-            Assert.AreEqual("m2", group.First().GetMetadataValue("m2"));
-            Assert.AreEqual("m3", group.First().GetMetadataValue("m3"));
+            Assert.Equal("m1", group.First().GetMetadataValue("m1"));
+            Assert.Equal("m2", group.First().GetMetadataValue("m2"));
+            Assert.Equal("m3", group.First().GetMetadataValue("m3"));
 
             enteredScope2.LeaveScope();
 
@@ -502,28 +500,28 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.ModifyItems(item1.ItemType, group, newMetadata2);
 
             group = lookup.GetItems("i1");
-            Assert.AreEqual(1, group.Count);
+            Assert.Equal(1, group.Count);
 
             // All metadata are gone
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m1"));
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m2"));
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m3"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m2"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m3"));
 
             enteredScope.LeaveScope();
 
             group = lookup.GetItems("i1");
-            Assert.AreEqual(1, group.Count);
+            Assert.Equal(1, group.Count);
 
             // All metadata are gone
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m1"));
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m2"));
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m3"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m2"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m3"));
         }
 
         /// <summary>
         /// Ensure that once keepOnlySpecified is set to true, it remains in effect, but that metadata explicitly added at subsequent levels is still retained.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void KeepMetadataOnlySpecifiedPropagate3()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -547,14 +545,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.ModifyItems(item1.ItemType, group, newMetadata);
 
             group = lookup.GetItems("i1");
-            Assert.AreEqual(1, group.Count);
+            Assert.Equal(1, group.Count);
 
             // m1 and m2 are gone.
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m1"));
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m2"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m2"));
 
             // m3 is still there.
-            Assert.AreEqual("m3", group.First().GetMetadataValue("m3"));
+            Assert.Equal("m3", group.First().GetMetadataValue("m3"));
 
             enteredScope2.LeaveScope();
 
@@ -565,28 +563,28 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.ModifyItems(item1.ItemType, group, newMetadata2);
 
             group = lookup.GetItems("i1");
-            Assert.AreEqual(1, group.Count);
+            Assert.Equal(1, group.Count);
 
             // m1, m2 and m3 are gone
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m1"));
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m2"));
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m3"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m2"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m3"));
 
             // m4 is still there.
-            Assert.AreEqual("m4", group.First().GetMetadataValue("m4"));
+            Assert.Equal("m4", group.First().GetMetadataValue("m4"));
 
             enteredScope.LeaveScope();
 
             group = lookup.GetItems("i1");
-            Assert.AreEqual(1, group.Count);
+            Assert.Equal(1, group.Count);
 
             // m1, m2 and m3 are gone
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m1"));
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m2"));
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m3"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m2"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m3"));
 
             // m4 is still there.
-            Assert.AreEqual("m4", group.First().GetMetadataValue("m4"));
+            Assert.Equal("m4", group.First().GetMetadataValue("m4"));
         }
 
 
@@ -594,7 +592,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Ensure that once keepOnlySpecified is set to true, it remains in effect, and that if a metadata modification is declared as 'keep value' that
         /// the value as lower scopes is retained.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void KeepMetadataOnlySpecifiedPropagate4()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -618,14 +616,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.ModifyItems(item1.ItemType, group, newMetadata);
 
             group = lookup.GetItems("i1");
-            Assert.AreEqual(1, group.Count);
+            Assert.Equal(1, group.Count);
 
             // m1 and m2 are gone.
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m1"));
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m2"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m2"));
 
             // m3 is still there.
-            Assert.AreEqual("m3", group.First().GetMetadataValue("m3"));
+            Assert.Equal("m3", group.First().GetMetadataValue("m3"));
 
             enteredScope2.LeaveScope();
 
@@ -636,32 +634,32 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.ModifyItems(item1.ItemType, group, newMetadata2);
 
             group = lookup.GetItems("i1");
-            Assert.AreEqual(1, group.Count);
+            Assert.Equal(1, group.Count);
 
             // m1 and m2 are gone
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m1"));
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m2"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m2"));
 
             // m3 is still there
-            Assert.AreEqual("m3", group.First().GetMetadataValue("m3"));
+            Assert.Equal("m3", group.First().GetMetadataValue("m3"));
 
             enteredScope.LeaveScope();
 
             group = lookup.GetItems("i1");
-            Assert.AreEqual(1, group.Count);
+            Assert.Equal(1, group.Count);
 
             // m1 and m2 are gone
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m1"));
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m2"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m2"));
 
             // m3 is still there.
-            Assert.AreEqual("m3", group.First().GetMetadataValue("m3"));
+            Assert.Equal("m3", group.First().GetMetadataValue("m3"));
         }
 
         /// <summary>
         /// Ensure that when keepOnlySpecified is true, we will clear all metadata unless it is retained using the 'NoChange' modification type.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void KeepMetadataOnlySpecified()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -685,38 +683,38 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.ModifyItems(item1.ItemType, group, newMetadata);
 
             group = lookup.GetItems("i1");
-            Assert.AreEqual(1, group.Count);
+            Assert.Equal(1, group.Count);
 
             // m1 is still here.
-            Assert.AreEqual("m1", group.First().GetMetadataValue("m1"));
+            Assert.Equal("m1", group.First().GetMetadataValue("m1"));
 
             // m2 is gone
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m2"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m2"));
 
             enteredScope2.LeaveScope();
 
             group = lookup.GetItems("i1");
-            Assert.AreEqual(1, group.Count);
+            Assert.Equal(1, group.Count);
 
             // m1 should still be here
-            Assert.AreEqual("m1", group.First().GetMetadataValue("m1"));
+            Assert.Equal("m1", group.First().GetMetadataValue("m1"));
 
             // m2 is gone.
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m2"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m2"));
 
             enteredScope.LeaveScope();
 
             group = lookup.GetItems("i1");
-            Assert.AreEqual(1, group.Count);
+            Assert.Equal(1, group.Count);
 
             // m1 should still be here
-            Assert.AreEqual("m1", group.First().GetMetadataValue("m1"));
+            Assert.Equal("m1", group.First().GetMetadataValue("m1"));
 
             // m2 should not persist here either
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m2"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m2"));
         }
 
-        [TestMethod]
+        [Fact]
         public void KeepMetadataOnlySpecifiedNoneSpecified()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -739,32 +737,32 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.ModifyItems(item1.ItemType, group, newMetadata);
 
             group = lookup.GetItems("i1");
-            Assert.AreEqual(1, group.Count);
+            Assert.Equal(1, group.Count);
 
             // m1 and m2 are gone.
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m1"));
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m2"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m2"));
 
             enteredScope2.LeaveScope();
 
             group = lookup.GetItems("i1");
-            Assert.AreEqual(1, group.Count);
+            Assert.Equal(1, group.Count);
 
             // m1 and m2 are gone.
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m1"));
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m2"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m2"));
 
             enteredScope.LeaveScope();
 
             group = lookup.GetItems("i1");
-            Assert.AreEqual(1, group.Count);
+            Assert.Equal(1, group.Count);
 
             // m1 and m2 are gone.
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m1"));
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m2"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m2"));
         }
 
-        [TestMethod]
+        [Fact]
         public void ModifyItem()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -789,38 +787,38 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Now it has m=m2
             group = lookup.GetItems("i1");
-            Assert.AreEqual(1, group.Count);
-            Assert.AreEqual("m2", group.First().GetMetadataValue("m"));
+            Assert.Equal(1, group.Count);
+            Assert.Equal("m2", group.First().GetMetadataValue("m"));
 
             // But the original item hasn't changed yet
-            Assert.AreEqual("m1", item1.GetMetadataValue("m"));
+            Assert.Equal("m1", item1.GetMetadataValue("m"));
 
             enteredScope2.LeaveScope();
 
             // It still has m=m2
             group = lookup.GetItems("i1");
-            Assert.AreEqual(1, group.Count);
-            Assert.AreEqual("m2", group.First().GetMetadataValue("m"));
+            Assert.Equal(1, group.Count);
+            Assert.Equal("m2", group.First().GetMetadataValue("m"));
 
             // The original item still hasn't changed
             // even though it was added in this scope
-            Assert.AreEqual("m1", item1.GetMetadataValue("m"));
+            Assert.Equal("m1", item1.GetMetadataValue("m"));
 
             enteredScope.LeaveScope();
 
             // It still has m=m2
             group = lookup.GetItems("i1");
-            Assert.AreEqual(1, group.Count);
-            Assert.AreEqual("m2", group.First().GetMetadataValue("m"));
+            Assert.Equal(1, group.Count);
+            Assert.Equal("m2", group.First().GetMetadataValue("m"));
 
             // But now the original item has changed
-            Assert.AreEqual("m2", item1.GetMetadataValue("m"));
+            Assert.Equal("m2", item1.GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Modifications should be merged
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ModifyItemModifiedInPreviousScope()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -852,16 +850,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // It's now m=m3, n=n2, o=o3
             group = lookup.GetItems("i1");
-            Assert.AreEqual(1, group.Count);
-            Assert.AreEqual("m3", group.First().GetMetadataValue("m"));
-            Assert.AreEqual("n2", group.First().GetMetadataValue("n"));
-            Assert.AreEqual("o3", group.First().GetMetadataValue("o"));
+            Assert.Equal(1, group.Count);
+            Assert.Equal("m3", group.First().GetMetadataValue("m"));
+            Assert.Equal("n2", group.First().GetMetadataValue("n"));
+            Assert.Equal("o3", group.First().GetMetadataValue("o"));
         }
 
         /// <summary>
         /// Modifications should be merged
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ModifyItemTwiceInSameScope1()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -889,14 +887,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // It's now m=m2
             group = lookup.GetItems("i1");
-            Assert.AreEqual(1, group.Count);
-            Assert.AreEqual("m2", group.First().GetMetadataValue("m"));
+            Assert.Equal(1, group.Count);
+            Assert.Equal("m2", group.First().GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Modifications should be merged
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ModifyItemTwiceInSameScope2()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -914,10 +912,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // It's still m=m1, n=n1, o=o1
             ICollection<ProjectItemInstance> group = lookup.GetItems("i1");
-            Assert.AreEqual(1, group.Count);
-            Assert.AreEqual("m1", group.First().GetMetadataValue("m"));
-            Assert.AreEqual("n1", group.First().GetMetadataValue("n"));
-            Assert.AreEqual("o1", group.First().GetMetadataValue("o"));
+            Assert.Equal(1, group.Count);
+            Assert.Equal("m1", group.First().GetMetadataValue("m"));
+            Assert.Equal("n1", group.First().GetMetadataValue("n"));
+            Assert.Equal("o1", group.First().GetMetadataValue("o"));
 
             // Make a modification to the item to be m=m2 and n=n2
             Lookup.MetadataModifications newMetadata = new Lookup.MetadataModifications(keepOnlySpecified: false);
@@ -929,10 +927,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // It's now m=m2, n=n2, o=o1
             ICollection<ProjectItemInstance> foundGroup = lookup.GetItems("i1");
-            Assert.AreEqual(1, foundGroup.Count);
-            Assert.AreEqual("m2", foundGroup.First().GetMetadataValue("m"));
-            Assert.AreEqual("n2", foundGroup.First().GetMetadataValue("n"));
-            Assert.AreEqual("o1", foundGroup.First().GetMetadataValue("o"));
+            Assert.Equal(1, foundGroup.Count);
+            Assert.Equal("m2", foundGroup.First().GetMetadataValue("m"));
+            Assert.Equal("n2", foundGroup.First().GetMetadataValue("n"));
+            Assert.Equal("o1", foundGroup.First().GetMetadataValue("o"));
 
             // Make a modification to the item to be n=n3 
             newMetadata = new Lookup.MetadataModifications(keepOnlySpecified: false);
@@ -941,33 +939,33 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // It's now m=m2, n=n3, o=o1
             foundGroup = lookup.GetItems("i1");
-            Assert.AreEqual(1, foundGroup.Count);
-            Assert.AreEqual("m2", foundGroup.First().GetMetadataValue("m"));
-            Assert.AreEqual("n3", foundGroup.First().GetMetadataValue("n"));
-            Assert.AreEqual("o1", foundGroup.First().GetMetadataValue("o"));
+            Assert.Equal(1, foundGroup.Count);
+            Assert.Equal("m2", foundGroup.First().GetMetadataValue("m"));
+            Assert.Equal("n3", foundGroup.First().GetMetadataValue("n"));
+            Assert.Equal("o1", foundGroup.First().GetMetadataValue("o"));
 
             // But the original item hasn't changed yet
-            Assert.AreEqual("m1", item1.GetMetadataValue("m"));
-            Assert.AreEqual("n1", item1.GetMetadataValue("n"));
-            Assert.AreEqual("o1", item1.GetMetadataValue("o"));
+            Assert.Equal("m1", item1.GetMetadataValue("m"));
+            Assert.Equal("n1", item1.GetMetadataValue("n"));
+            Assert.Equal("o1", item1.GetMetadataValue("o"));
 
             enteredScope.LeaveScope();
 
             // It's still m=m2, n=n3, o=o1
             foundGroup = lookup.GetItems("i1");
-            Assert.AreEqual(1, foundGroup.Count);
-            Assert.AreEqual("m2", foundGroup.First().GetMetadataValue("m"));
-            Assert.AreEqual("n3", foundGroup.First().GetMetadataValue("n"));
-            Assert.AreEqual("o1", foundGroup.First().GetMetadataValue("o"));
+            Assert.Equal(1, foundGroup.Count);
+            Assert.Equal("m2", foundGroup.First().GetMetadataValue("m"));
+            Assert.Equal("n3", foundGroup.First().GetMetadataValue("n"));
+            Assert.Equal("o1", foundGroup.First().GetMetadataValue("o"));
 
             // And the original item has changed
-            Assert.AreEqual("m2", item1.GetMetadataValue("m"));
-            Assert.AreEqual("n3", item1.GetMetadataValue("n"));
-            Assert.AreEqual("o1", item1.GetMetadataValue("o"));
+            Assert.Equal("m2", item1.GetMetadataValue("m"));
+            Assert.Equal("n3", item1.GetMetadataValue("n"));
+            Assert.Equal("o1", item1.GetMetadataValue("o"));
         }
 
 
-        [TestMethod]
+        [Fact]
         public void ModifyItemThatWasAddedInSameScope()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -990,40 +988,42 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Now it has m=m2
             group = lookup.GetItems("i1");
-            Assert.AreEqual(1, group.Count);
-            Assert.AreEqual("m2", group.First().GetMetadataValue("m"));
+            Assert.Equal(1, group.Count);
+            Assert.Equal("m2", group.First().GetMetadataValue("m"));
 
             // But the original item hasn't changed yet
-            Assert.AreEqual("m1", item1.GetMetadataValue("m"));
+            Assert.Equal("m1", item1.GetMetadataValue("m"));
 
             enteredScope.LeaveScope();
 
             // It still has m=m2
             group = lookup.GetItems("i1");
-            Assert.AreEqual(1, group.Count);
-            Assert.AreEqual("m2", group.First().GetMetadataValue("m"));
+            Assert.Equal(1, group.Count);
+            Assert.Equal("m2", group.First().GetMetadataValue("m"));
 
             // But now the original item has changed as well
-            Assert.AreEqual("m2", item1.GetMetadataValue("m"));
+            Assert.Equal("m2", item1.GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Modifying an item in the outside scope is prohibited-
         /// purely because we don't need to do it in our code
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void ModifyItemInOutsideScope()
         {
-            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
-            Lookup lookup = LookupHelpers.CreateLookup(new ItemDictionary<ProjectItemInstance>());
-            lookup.AddNewItem(new ProjectItemInstance(project, "x", "y", project.FullPath));
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+                Lookup lookup = LookupHelpers.CreateLookup(new ItemDictionary<ProjectItemInstance>());
+                lookup.AddNewItem(new ProjectItemInstance(project, "x", "y", project.FullPath));
+            }
+           );
         }
-
         /// <summary>
         /// After modification, should be able to GetItem and then modify it again
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ModifyItemPreviouslyModifiedAndGottenThroughGetItem()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -1046,7 +1046,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Get the item (under the covers, it cloned it in order to apply the modification)
             ICollection<ProjectItemInstance> group2 = lookup.GetItems(item1.ItemType);
-            Assert.AreEqual(1, group2.Count);
+            Assert.Equal(1, group2.Count);
             ProjectItemInstance item1b = group2.First();
 
             // Modify to m=m3
@@ -1058,23 +1058,23 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Modifications are visible
             ICollection<ProjectItemInstance> group4 = lookup.GetItems(item1b.ItemType);
-            Assert.AreEqual(1, group4.Count);
-            Assert.AreEqual("m3", group4.First().GetMetadataValue("m"));
+            Assert.Equal(1, group4.Count);
+            Assert.Equal("m3", group4.First().GetMetadataValue("m"));
 
             // Leave scope
             enteredScope.LeaveScope();
 
             // Still visible
             ICollection<ProjectItemInstance> group5 = lookup.GetItems(item1b.ItemType);
-            Assert.AreEqual(1, group5.Count);
-            Assert.AreEqual("m3", group5.First().GetMetadataValue("m"));
+            Assert.Equal(1, group5.Count);
+            Assert.Equal("m3", group5.First().GetMetadataValue("m"));
         }
 
 
         /// <summary>
         /// After modification, should be able to GetItem and then modify it again
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ModifyItemInProjectPreviouslyModifiedAndGottenThroughGetItem()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -1097,7 +1097,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Get the item (under the covers, it cloned it in order to apply the modification)
             ICollection<ProjectItemInstance> group2 = lookup.GetItems(item1.ItemType);
-            Assert.AreEqual(1, group2.Count);
+            Assert.Equal(1, group2.Count);
             ProjectItemInstance item1b = group2.First();
 
             // Modify to m=m3
@@ -1109,25 +1109,25 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Modifications are visible
             ICollection<ProjectItemInstance> group4 = lookup.GetItems(item1b.ItemType);
-            Assert.AreEqual(1, group4.Count);
-            Assert.AreEqual("m3", group4.First().GetMetadataValue("m"));
+            Assert.Equal(1, group4.Count);
+            Assert.Equal("m3", group4.First().GetMetadataValue("m"));
 
             // Leave scope
             enteredScope.LeaveScope();
 
             // Still visible
             ICollection<ProjectItemInstance> group5 = lookup.GetItems(item1b.ItemType);
-            Assert.AreEqual(1, group5.Count);
-            Assert.AreEqual("m3", group5.First().GetMetadataValue("m"));
+            Assert.Equal(1, group5.Count);
+            Assert.Equal("m3", group5.First().GetMetadataValue("m"));
 
             // And the one in the project is changed
-            Assert.AreEqual("m3", item1.GetMetadataValue("m"));
+            Assert.Equal("m3", item1.GetMetadataValue("m"));
         }
 
         /// <summary>
         /// After modification, should be able to GetItem and then remove it
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void RemoveItemPreviouslyModifiedAndGottenThroughGetItem()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -1150,7 +1150,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Get the item (under the covers, it cloned it in order to apply the modification)
             ICollection<ProjectItemInstance> group2 = lookup.GetItems(item1.ItemType);
-            Assert.AreEqual(1, group2.Count);
+            Assert.Equal(1, group2.Count);
             ProjectItemInstance item1b = group2.First();
 
             // Remove the item
@@ -1158,13 +1158,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // There's now no items at all
             ICollection<ProjectItemInstance> group3 = lookup.GetItems(item1.ItemType);
-            Assert.AreEqual(0, group3.Count);
+            Assert.Equal(0, group3.Count);
         }
 
         /// <summary>
         /// After modification, should be able to GetItem and then remove it
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void RemoveItemFromProjectPreviouslyModifiedAndGottenThroughGetItem()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -1187,7 +1187,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Get the item (under the covers, it cloned it in order to apply the modification)
             ICollection<ProjectItemInstance> group2 = lookup.GetItems(item1.ItemType);
-            Assert.AreEqual(1, group2.Count);
+            Assert.Equal(1, group2.Count);
             ProjectItemInstance item1b = group2.First();
 
             // Remove the item
@@ -1195,20 +1195,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // There's now no items at all
             ICollection<ProjectItemInstance> group3 = lookup.GetItems(item1.ItemType);
-            Assert.AreEqual(0, group3.Count);
+            Assert.Equal(0, group3.Count);
 
             // Leave scope
             enteredScope.LeaveScope();
 
             // And now none left in the project either
-            Assert.AreEqual(0, table1["i1"].Count);
+            Assert.Equal(0, table1["i1"].Count);
         }
 
         /// <summary>
         /// If the property isn't modified, the initial property
         /// should be returned
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void UnmodifiedProperty()
         {
             PropertyDictionary<ProjectPropertyInstance> group = new PropertyDictionary<ProjectPropertyInstance>();
@@ -1216,34 +1216,34 @@ namespace Microsoft.Build.UnitTests.BackEnd
             group.Set(property);
             Lookup lookup = LookupHelpers.CreateLookup(group);
 
-            Assert.AreEqual(property, lookup.GetProperty("p1"));
+            Assert.Equal(property, lookup.GetProperty("p1"));
 
             Lookup.Scope enteredScope = lookup.EnterScope("x");
 
-            Assert.AreEqual(property, lookup.GetProperty("p1"));
+            Assert.Equal(property, lookup.GetProperty("p1"));
         }
 
         /// <summary>
         /// If the property isn't found, should return null
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void NonexistentProperty()
         {
             PropertyDictionary<ProjectPropertyInstance> group = new PropertyDictionary<ProjectPropertyInstance>();
             Lookup lookup = LookupHelpers.CreateLookup(group);
 
-            Assert.AreEqual(null, lookup.GetProperty("p1"));
+            Assert.Equal(null, lookup.GetProperty("p1"));
 
             Lookup.Scope enteredScope = lookup.EnterScope("x");
 
-            Assert.AreEqual(null, lookup.GetProperty("p1"));
+            Assert.Equal(null, lookup.GetProperty("p1"));
         }
 
         /// <summary>
         /// If the property is modified, the updated value should be returned,
         /// both before and after leaving scope.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ModifiedProperty()
         {
             PropertyDictionary<ProjectPropertyInstance> group = new PropertyDictionary<ProjectPropertyInstance>();
@@ -1256,8 +1256,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.SetProperty(ProjectPropertyInstance.Create("p1", "v2"));
 
             // Lookup is updated, but not original item group
-            Assert.AreEqual("v2", lookup.GetProperty("p1").EvaluatedValue);
-            Assert.AreEqual("v1", group["p1"].EvaluatedValue);
+            Assert.Equal("v2", lookup.GetProperty("p1").EvaluatedValue);
+            Assert.Equal("v1", group["p1"].EvaluatedValue);
 
             Lookup.Scope enteredScope2 = lookup.EnterScope("x");
 
@@ -1265,27 +1265,27 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.SetProperty(ProjectPropertyInstance.Create("p1", "v3"));
 
             // Lookup is updated, but not the original item group
-            Assert.AreEqual("v3", lookup.GetProperty("p1").EvaluatedValue);
-            Assert.AreEqual("v1", group["p1"].EvaluatedValue);
+            Assert.Equal("v3", lookup.GetProperty("p1").EvaluatedValue);
+            Assert.Equal("v1", group["p1"].EvaluatedValue);
 
             Lookup.Scope enteredScope3 = lookup.EnterScope("x");
 
             // Change the value again in the new scope 
             lookup.SetProperty(ProjectPropertyInstance.Create("p1", "v4"));
 
-            Assert.AreEqual("v4", lookup.GetProperty("p1").EvaluatedValue);
+            Assert.Equal("v4", lookup.GetProperty("p1").EvaluatedValue);
 
             enteredScope3.LeaveScope();
 
-            Assert.AreEqual("v4", lookup.GetProperty("p1").EvaluatedValue);
+            Assert.Equal("v4", lookup.GetProperty("p1").EvaluatedValue);
 
             // Leave to the outer scope
             enteredScope2.LeaveScope();
             enteredScope.LeaveScope();
 
             // Now the lookup and original group are updated
-            Assert.AreEqual("v4", lookup.GetProperty("p1").EvaluatedValue);
-            Assert.AreEqual("v4", group["p1"].EvaluatedValue);
+            Assert.Equal("v4", lookup.GetProperty("p1").EvaluatedValue);
+            Assert.Equal("v4", group["p1"].EvaluatedValue);
         }
 
 #if false

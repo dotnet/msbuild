@@ -26,6 +26,7 @@ namespace Microsoft.Build.Tasks
         private static string s_version45Path;
         private static string s_version451Path;
         private static string s_version46Path;
+        private static string s_version461Path;
 
         /// <summary>
         /// The path to the latest .NET SDK if it could be found. It will be String.Empty if the SDK was not found.
@@ -266,6 +267,40 @@ namespace Microsoft.Build.Tasks
                 }
 
                 return s_version46Path;
+            }
+        }
+
+        /// <summary>
+        /// The path to the v4.6.1 .NET SDK if it could be found. It will be String.Empty if the SDK was not found.
+        /// </summary>
+        [Output]
+        public string FrameworkSdkVersion461Path
+        {
+            get
+            {
+                if (s_version461Path == null)
+                {
+                    s_version461Path = ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Version461, VisualStudioVersion.VersionLatest);
+
+                    if (String.IsNullOrEmpty(s_version461Path))
+                    {
+                        Log.LogMessageFromResources(
+                            MessageImportance.High,
+                            "GetFrameworkSdkPath.CouldNotFindSDK",
+                            ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(TargetDotNetFrameworkVersion.Version461, VisualStudioVersion.VersionLatest),
+                            ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version461, VisualStudioVersion.VersionLatest)
+                        );
+
+                        s_version461Path = String.Empty;
+                    }
+                    else
+                    {
+                        s_version461Path = FileUtilities.EnsureTrailingSlash(s_version461Path);
+                        Log.LogMessageFromResources(MessageImportance.Low, "GetFrameworkSdkPath.FoundSDK", s_version461Path);
+                    }
+                }
+
+                return s_version461Path;
             }
         }
 

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Xml;
 using System.Text;
 using System.Collections;
@@ -24,16 +27,16 @@ namespace Microsoft.Build.UnitTests.QA
     {
         #region Data members
 
-        private IBuildComponentHost host;
-        private ITestDataProvider testDataProvider;
-        private IResultsCache resultsCache;
-        private IConfigCache configCache;
-        private Thread builderThread;
-        private BuildRequestEntry requestedEntry;
-        private AutoResetEvent continueEvent;
-        private AutoResetEvent cancelEvent;
-        private ManualResetEvent threadStarted;
-        private RequestDefinition currentProjectDefinition;
+        private IBuildComponentHost _host;
+        private ITestDataProvider _testDataProvider;
+        private IResultsCache _resultsCache;
+        private IConfigCache _configCache;
+        private Thread _builderThread;
+        private BuildRequestEntry _requestedEntry;
+        private AutoResetEvent _continueEvent;
+        private AutoResetEvent _cancelEvent;
+        private ManualResetEvent _threadStarted;
+        private RequestDefinition _currentProjectDefinition;
 
         #endregion
 
@@ -44,15 +47,15 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public QARequestBuilder()
         {
-            this.host = null;
-            this.configCache = null;
-            this.resultsCache = null;
-            this.builderThread = null;
-            this.requestedEntry = null;
-            this.cancelEvent = new AutoResetEvent(false);
-            this.continueEvent = new AutoResetEvent(false);
-            this.threadStarted = new ManualResetEvent(false);
-            this.currentProjectDefinition = null;
+            _host = null;
+            _configCache = null;
+            _resultsCache = null;
+            _builderThread = null;
+            _requestedEntry = null;
+            _cancelEvent = new AutoResetEvent(false);
+            _continueEvent = new AutoResetEvent(false);
+            _threadStarted = new ManualResetEvent(false);
+            _currentProjectDefinition = null;
         }
 
         #endregion
@@ -83,10 +86,10 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            this.host = host;
-            this.resultsCache = (IResultsCache)(this.host.GetComponent(BuildComponentType.ResultsCache));
-            this.configCache = (IConfigCache)(this.host.GetComponent(BuildComponentType.ConfigCache));
-            this.testDataProvider = (ITestDataProvider)(this.host.GetComponent(BuildComponentType.TestDataProvider));
+            _host = host;
+            _resultsCache = (IResultsCache)(_host.GetComponent(BuildComponentType.ResultsCache));
+            _configCache = (IConfigCache)(_host.GetComponent(BuildComponentType.ConfigCache));
+            _testDataProvider = (ITestDataProvider)(_host.GetComponent(BuildComponentType.TestDataProvider));
         }
 
         /// <summary>
@@ -94,8 +97,8 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void ShutdownComponent()
         {
-            this.requestedEntry = null;
-            this.currentProjectDefinition = null;
+            _requestedEntry = null;
+            _currentProjectDefinition = null;
         }
 
         #endregion
@@ -108,23 +111,22 @@ namespace Microsoft.Build.UnitTests.QA
         /// <param name="entry"></param>
         public void BuildRequest(NodeLoggingContext nodeLoggingContext, BuildRequestEntry entry)
         {
-
-            this.requestedEntry = entry;
-            if (null == this.requestedEntry.RequestConfiguration.Project)
+            _requestedEntry = entry;
+            if (null == _requestedEntry.RequestConfiguration.Project)
             {
                 Project mockProject = new Project(XmlReader.Create(new System.IO.StringReader(
 @"<Project ToolsVersion='4.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
             <Target Name='t'>
             </Target>
             </Project>")));
-                this.requestedEntry.RequestConfiguration.Project = mockProject.CreateProjectInstance();
+                _requestedEntry.RequestConfiguration.Project = mockProject.CreateProjectInstance();
             }
 
-            this.currentProjectDefinition = this.testDataProvider[this.requestedEntry.Request.ConfigurationId];
-            this.requestedEntry.Continue();
-            this.builderThread = new Thread(BuilderThreadProc);
-            this.builderThread.Name = "Builder Thread for Request: " + entry.Request.ConfigurationId.ToString();
-            this.builderThread.Start();
+            _currentProjectDefinition = _testDataProvider[_requestedEntry.Request.ConfigurationId];
+            _requestedEntry.Continue();
+            _builderThread = new Thread(BuilderThreadProc);
+            _builderThread.Name = "Builder Thread for Request: " + entry.Request.ConfigurationId.ToString();
+            _builderThread.Start();
         }
 
         /// <summary>
@@ -132,8 +134,8 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void ContinueRequest()
         {
-            this.threadStarted.WaitOne();
-            this.continueEvent.Set();
+            _threadStarted.WaitOne();
+            _continueEvent.Set();
         }
 
         /// <summary>
@@ -150,8 +152,8 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void BeginCancel()
         {
-            this.threadStarted.WaitOne();
-            this.cancelEvent.Set();
+            _threadStarted.WaitOne();
+            _cancelEvent.Set();
         }
 
         /// <summary>
@@ -159,33 +161,33 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void WaitForCancelCompletion()
         {
-            this.builderThread.Join();
-            this.cancelEvent.Close();
-            this.continueEvent.Close();
-            this.threadStarted.Close();
-            this.builderThread = null;
+            _builderThread.Join();
+            _cancelEvent.Close();
+            _continueEvent.Close();
+            _threadStarted.Close();
+            _builderThread = null;
         }
 
         #endregion
 
         #region Private methods
-        
+
         /// <summary>
         /// Thread to process the build request
         /// </summary>
         private void BuilderThreadProc()
         {
             bool completeSuccess = true;
-            WaitHandle[] handles = new WaitHandle[2] { cancelEvent, continueEvent };
+            WaitHandle[] handles = new WaitHandle[2] { _cancelEvent, _continueEvent };
 
-            this.threadStarted.Set();
+            _threadStarted.Set();
 
             // Add a request for each of the referenced projects. All we need to do is to make sure that the new project definition for the referenced
             // project has been added to the host collection
 
-            FullyQualifiedBuildRequest[] fq = new FullyQualifiedBuildRequest[this.currentProjectDefinition.ChildDefinitions.Count];
+            FullyQualifiedBuildRequest[] fq = new FullyQualifiedBuildRequest[_currentProjectDefinition.ChildDefinitions.Count];
             int fqCount = 0;
-            foreach(RequestDefinition childDefinition in this.currentProjectDefinition.ChildDefinitions)
+            foreach (RequestDefinition childDefinition in _currentProjectDefinition.ChildDefinitions)
             {
                 BuildRequestConfiguration unresolvedConfig = childDefinition.UnresolvedConfiguration;
                 fq[fqCount++] = new FullyQualifiedBuildRequest(unresolvedConfig, childDefinition.TargetsToBuild, true);
@@ -194,7 +196,7 @@ namespace Microsoft.Build.UnitTests.QA
             try
             {
                 // Check to see if there was a cancel before we do anything
-                if (cancelEvent.WaitOne(1, false))
+                if (_cancelEvent.WaitOne(1, false))
                 {
                     HandleCancel();
                     return;
@@ -203,7 +205,7 @@ namespace Microsoft.Build.UnitTests.QA
                 // Submit the build request for the references if we have any
                 if (fqCount > 0)
                 {
-                    OnNewBuildRequests(this.requestedEntry, fq);
+                    OnNewBuildRequests(_requestedEntry, fq);
 
                     // Wait for all of them to complete till our entry is marked ready
                     int evt = WaitHandle.WaitAny(handles);
@@ -220,7 +222,7 @@ namespace Microsoft.Build.UnitTests.QA
                     // requests in progress which may call back to this thread
                     else if (evt == 1)
                     {
-                        IDictionary<int, BuildResult> results = requestedEntry.Continue();
+                        IDictionary<int, BuildResult> results = _requestedEntry.Continue();
                         foreach (BuildResult configResult in results.Values)
                         {
                             if (configResult.OverallResult == BuildResultCode.Failure)
@@ -229,58 +231,57 @@ namespace Microsoft.Build.UnitTests.QA
                             }
                             else
                             {
-                                this.resultsCache.AddResult(configResult);
+                                _resultsCache.AddResult(configResult);
                             }
                         }
                     }
                 }
 
                 // Check to see if there was a cancel we process the final result
-                if (cancelEvent.WaitOne(1, false))
+                if (_cancelEvent.WaitOne(1, false))
                 {
                     HandleCancel();
                     return;
                 }
 
                 // Simulate execution time for the actual entry if one was specified and if the entry built successfully
-                if (this.currentProjectDefinition.ExecutionTime > 0 && completeSuccess == true)
+                if (_currentProjectDefinition.ExecutionTime > 0 && completeSuccess == true)
                 {
-                    Thread.Sleep(this.currentProjectDefinition.ExecutionTime);
+                    Thread.Sleep(_currentProjectDefinition.ExecutionTime);
                 }
 
                 // Create and send the result
-                BuildResult result = new BuildResult(requestedEntry.Request);
+                BuildResult result = new BuildResult(_requestedEntry.Request);
 
                 // No specific target was asked to build. Return the default result
-                if (requestedEntry.Request.Targets.Count == 0)
+                if (_requestedEntry.Request.Targets.Count == 0)
                 {
                     result.AddResultsForTarget(RequestDefinition.defaultTargetName, new TargetResult(new TaskItem[1], completeSuccess ? TestUtilities.GetSuccessResult() : TestUtilities.GetStopWithErrorResult()));
                 }
                 else
                 {
-                    foreach (string target in requestedEntry.Request.Targets)
+                    foreach (string target in _requestedEntry.Request.Targets)
                     {
                         result.AddResultsForTarget(target, new TargetResult(new TaskItem[1], completeSuccess ? TestUtilities.GetSuccessResult() : TestUtilities.GetStopWithErrorResult()));
                     }
                 }
 
-                this.resultsCache.AddResult(result);
-                this.requestedEntry.Complete(result);
-                RaiseRequestComplete(this.requestedEntry);
+                _resultsCache.AddResult(result);
+                _requestedEntry.Complete(result);
+                RaiseRequestComplete(_requestedEntry);
                 return;
             }
 
             catch (Exception e)
             {
-                if (this.requestedEntry != null)
+                if (_requestedEntry != null)
                 {
                     string message = String.Format("Test: Unhandeled exception occured: \nMessage: {0} \nStack:\n{1}", e.Message, e.StackTrace);
-                    BuildResult errorResult = new BuildResult(this.requestedEntry.Request, new InvalidOperationException(message));
-                    this.requestedEntry.Complete(errorResult);
-                    RaiseRequestComplete(this.requestedEntry);
+                    BuildResult errorResult = new BuildResult(_requestedEntry.Request, new InvalidOperationException(message));
+                    _requestedEntry.Complete(errorResult);
+                    RaiseRequestComplete(_requestedEntry);
                 }
             }
-            
         }
 
         /// <summary>
@@ -288,9 +289,9 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         private void HandleCancel()
         {
-            BuildResult res = new BuildResult(this.requestedEntry.Request, new BuildAbortedException());
-            this.requestedEntry.Complete(res);
-            RaiseRequestComplete(this.requestedEntry);
+            BuildResult res = new BuildResult(_requestedEntry.Request, new BuildAbortedException());
+            _requestedEntry.Complete(res);
+            RaiseRequestComplete(_requestedEntry);
         }
 
         /// <summary>

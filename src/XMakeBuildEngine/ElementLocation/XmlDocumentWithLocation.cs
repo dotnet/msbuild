@@ -173,7 +173,8 @@ namespace Microsoft.Build.Construction
             XmlReaderSettings rs = new XmlReaderSettings();
             rs.DtdProcessing = DtdProcessing.Ignore;
 
-            using (XmlReader xmlReader = XmlReader.Create(fullPath, rs))
+            using (var stream = new StreamReader(fullPath))
+            using(XmlReader xmlReader = XmlReader.Create(stream, rs))
             {
                 this.Load(xmlReader);
             }

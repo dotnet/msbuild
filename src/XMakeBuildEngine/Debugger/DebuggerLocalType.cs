@@ -5,6 +5,8 @@
 // <summary>Description of a local type for a debugger local.</summary>
 //-----------------------------------------------------------------------
 
+#if FEATURE_MSBUILD_DEBUGGER
+
 using System;
 using Microsoft.Build.Shared;
 using System.Diagnostics;
@@ -58,3 +60,4 @@ namespace Microsoft.Build.Debugging
         }
     }
 }
+#endif

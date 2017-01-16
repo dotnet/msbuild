@@ -17,6 +17,8 @@ using System.Text;
 using System.Threading;
 using Microsoft.Win32.SafeHandles;
 
+using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -199,7 +201,11 @@ namespace Microsoft.Build.Shared
             /// </summary>
             public MemoryStatus()
             {
-                _length = (uint)Marshal.SizeOf(typeof(NativeMethodsShared.MemoryStatus));
+#if (CLR2COMPATIBILITY)
+            _length = (uint)Marshal.SizeOf(typeof(NativeMethodsShared.MemoryStatus));
+#else
+            _length = (uint)Marshal.SizeOf<NativeMethodsShared.MemoryStatus>();
+#endif
             }
 
             /// <summary>
@@ -294,7 +300,11 @@ namespace Microsoft.Build.Shared
         {
             public SecurityAttributes()
             {
-                _nLength = (uint)Marshal.SizeOf(typeof(NativeMethodsShared.SecurityAttributes));
+#if (CLR2COMPATIBILITY)
+            _nLength = (uint)Marshal.SizeOf(typeof(NativeMethodsShared.SecurityAttributes));
+#else
+            _nLength = (uint)Marshal.SizeOf<NativeMethodsShared.SecurityAttributes>();
+#endif
             }
 
             private uint _nLength;
@@ -317,6 +327,19 @@ namespace Microsoft.Build.Shared
         /// </remarks>
         internal static int MAX_PATH = 260;
 
+        /// <summary>
+        /// OS name that can be used for the projectImportSearchPaths element
+        /// for a toolset
+        /// </summary>
+        internal static string GetOSNameForExtensionsPath()
+        {
+#if XPLAT
+            return IsOSX ? "osx" : (IsUnix ? "unix" : "windows");
+#else
+            return "windows";
+#endif
+        }
+
         #endregion
 
         #region Set Error Mode (copied from BCL)
@@ -334,9 +357,11 @@ namespace Microsoft.Build.Shared
             return SetErrorMode_VistaAndOlder(newMode);
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [DllImport("kernel32.dll", EntryPoint = "SetThreadErrorMode", SetLastError = true)]
         private static extern bool SetErrorMode_Win7AndNewer(int newMode, out int oldMode);
 
+        [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [DllImport("kernel32.dll", EntryPoint = "SetErrorMode", ExactSpelling = true)]
         private static extern int SetErrorMode_VistaAndOlder(int newMode);
 
@@ -348,18 +373,21 @@ namespace Microsoft.Build.Shared
         /// Really truly non pumping wait.
         /// Raw IntPtrs have to be used, because the marshaller does not support arrays of SafeHandle, only
         /// single SafeHandles.
-        /// </summary>       
+        /// </summary>
+        [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
         public static extern Int32 WaitForMultipleObjects(uint handle, IntPtr[] handles, bool waitAll, uint milliseconds);
 
+        [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [DllImport("kernel32.dll", SetLastError = true)]
         internal static extern void GetSystemInfo(ref SYSTEM_INFO lpSystemInfo);
 
+        [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [DllImport("kernel32.dll", SetLastError = true)]
         internal static extern void GetNativeSystemInfo(ref SYSTEM_INFO lpSystemInfo);
 
         /// <summary>
-        /// Get the last write time of the fullpath to a directory. If the pointed path is not a directory, or 
+        /// Get the last write time of the fullpath to a directory. If the pointed path is not a directory, or
         /// if the directory does not exist, then false is returned and fileModifiedTimeUtc is set DateTime.MinValue.
         /// </summary>
         /// <param name="fullPath">Full path to the file in the filesystem</param>
@@ -472,6 +500,8 @@ namespace Microsoft.Build.Shared
             return status;
         }
 
+        private static readonly bool UseSymlinkTimeInsteadOfTargetTime = Environment.GetEnvironmentVariable("MSBUILDUSESYMLINKTIMESTAMP") == "1";
+
         /// <summary>
         /// Get the last write time of the fullpath to the file. 
         /// If the file does not exist, then DateTime.MinValue is returned
@@ -481,14 +511,37 @@ namespace Microsoft.Build.Shared
         internal static DateTime GetLastWriteFileUtcTime(string fullPath)
         {
             DateTime fileModifiedTime = DateTime.MinValue;
-            WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
-            bool success = false;
 
-            success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
-            if (success)
+            if (UseSymlinkTimeInsteadOfTargetTime)
             {
-                long dt = ((long)(data.ftLastWriteTimeHigh) << 32) | ((long)data.ftLastWriteTimeLow);
-                fileModifiedTime = DateTime.FromFileTimeUtc(dt);
+                WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
+                bool success = false;
+
+                success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
+                if (success)
+                {
+                    long dt = ((long) (data.ftLastWriteTimeHigh) << 32) | ((long) data.ftLastWriteTimeLow);
+                    fileModifiedTime = DateTime.FromFileTimeUtc(dt);
+                }
+            }
+            else
+            {
+                using (SafeFileHandle handle =
+                    CreateFile(fullPath, GENERIC_READ, FILE_SHARE_READ, IntPtr.Zero, OPEN_EXISTING,
+                        FILE_ATTRIBUTE_NORMAL, IntPtr.Zero))
+                {
+                    if (!handle.IsInvalid)
+                    {
+                        FILETIME ftCreationTime, ftLastAccessTime, ftLastWriteTime;
+                        if (!GetFileTime(handle, out ftCreationTime, out ftLastAccessTime, out ftLastWriteTime) != true)
+                        {
+                            long fileTime = ((long) (uint) ftLastWriteTime.dwHighDateTime) << 32 |
+                                            (long) (uint) ftLastWriteTime.dwLowDateTime;
+                            fileModifiedTime =
+                                DateTime.FromFileTimeUtc(fileTime);
+                        }
+                    }
+                }
             }
 
             return fileModifiedTime;
@@ -886,6 +939,32 @@ namespace Microsoft.Build.Shared
         [DllImport("ole32.dll")]
         public static extern int CoWaitForMultipleHandles(COWAIT_FLAGS dwFlags, int dwTimeout, int cHandles, [MarshalAs(UnmanagedType.LPArray)] IntPtr[] pHandles, out int pdwIndex);
 
+        internal const uint GENERIC_READ = 0x80000000;
+        internal const uint FILE_SHARE_READ = 0x1;
+        internal const uint FILE_ATTRIBUTE_NORMAL = 0x80;
+        internal const uint FILE_FLAG_OPEN_REPARSE_POINT = 0x00200000;
+        internal const uint OPEN_EXISTING = 3;
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall,
+            SetLastError = true)]
+        internal static extern SafeFileHandle CreateFile(
+            string lpFileName,
+            uint dwDesiredAccess,
+            uint dwShareMode,
+            IntPtr lpSecurityAttributes,
+            uint dwCreationDisposition,
+            uint dwFlagsAndAttributes,
+            IntPtr hTemplateFile
+            );
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        internal static extern bool GetFileTime(
+            SafeFileHandle hFile,
+            out FILETIME lpCreationTime,
+            out FILETIME lpLastAccessTime,
+            out FILETIME lpLastWriteTime
+            );
+
         #endregion
 
         #region Extensions
@@ -925,6 +1004,6 @@ namespace Microsoft.Build.Shared
             return returnValue == 0;
         }
 
-        #endregion
+#endregion
     }
 }

@@ -254,11 +254,6 @@ namespace Microsoft.Build.Tasks
 
             _sourceCode = taskContent.InnerText;
 
-            if (_log.HasLoggedErrors)
-            {
-                return false;
-            }
-
             if (_type == null)
             {
                 _type = "Fragment";
@@ -771,6 +766,12 @@ namespace Microsoft.Build.Tasks
                 if (!s_compiledTaskCache.TryGetValue(fullSpec, out existingAssembly))
                 {
                     // Invokes compilation. 
+
+                    // Note: CompileAssemblyFromSource uses Path.GetTempPath() directory, but will not create it. In some cases 
+                    // this will throw inside CompileAssemblyFromSource. To work around this, ensure the temp directory exists. 
+                    // See: https://github.com/Microsoft/msbuild/issues/328
+                    Directory.CreateDirectory(Path.GetTempPath());
+
                     CompilerResults compilerResults = provider.CompileAssemblyFromSource(compilerParameters, fullCode);
 
                     string outputPath = null;

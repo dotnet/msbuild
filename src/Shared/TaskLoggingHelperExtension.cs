@@ -7,28 +7,6 @@ using System.Globalization;
 using System.IO;
 using System.Resources;
 
-/* Unmerged change from project 'Microsoft.Build.Tasks'
-Before:
-using System.Resources;
-
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-
-//This is in the Tasks namespace because that's where it was before and it is public.
-#if BUILD_ENGINE
-namespace Microsoft.Build.BackEnd
-#else
-using Microsoft.Build.Utilities;
-After:
-using Microsoft.Build.Shared;
-
-//This is in the Tasks namespace because that's where it was before and it is public.
-#if BUILD_ENGINE
-namespace Microsoft.Build.BackEnd
-#else
-using Microsoft.Build.Utilities;
-*/
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -45,7 +23,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Helper logging class for tasks, used for dealing with two resource streams.
     /// </summary>
-#if WHIDBEY_VISIBILITY || BUILD_ENGINE
+#if BUILD_ENGINE
     internal
 #else
     public

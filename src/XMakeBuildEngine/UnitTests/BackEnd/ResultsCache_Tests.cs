@@ -8,36 +8,25 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Microsoft.Build.Unittest;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
-    [TestClass]
     public class ResultsCache_Tests
     {
-        [TestInitialize]
-        public void SetUp()
-        {
-        }
-
-        [TestCleanup]
-        public void TearDown()
-        {
-        }
-
-        [TestMethod]
+        [Fact]
         public void TestConstructor()
         {
             ResultsCache cache = new ResultsCache();
         }
 
-        [TestMethod]
+        [Fact]
         public void TestAddAndRetrieveResults()
         {
             ResultsCache cache = new ResultsCache();
@@ -47,10 +36,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             BuildResult retrievedResult = cache.GetResultForRequest(request);
 
-            Assert.IsTrue(AreResultsIdentical(result, retrievedResult));
+            Assert.True(AreResultsIdentical(result, retrievedResult));
         }
 
-        [TestMethod]
+        [Fact]
         public void TestAddAndRetrieveResultsByConfiguration()
         {
             ResultsCache cache = new ResultsCache();
@@ -66,21 +55,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             BuildResult retrievedResult = cache.GetResultsForConfiguration(1);
 
-            Assert.IsTrue(retrievedResult.HasResultsForTarget("testTarget"));
-            Assert.IsTrue(retrievedResult.HasResultsForTarget("otherTarget"));
+            Assert.True(retrievedResult.HasResultsForTarget("testTarget"));
+            Assert.True(retrievedResult.HasResultsForTarget("otherTarget"));
         }
 
-        [TestMethod]
+        [Fact]
         public void TestMissingResults()
         {
             ResultsCache cache = new ResultsCache();
 
             BuildRequest request = new BuildRequest(1 /* submissionId */, 0, 1, new string[1] { "testTarget" }, null, BuildEventContext.Invalid, null);
             BuildResult retrievedResult = cache.GetResultForRequest(request);
-            Assert.IsNull(retrievedResult);
+            Assert.Null(retrievedResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void TestRetrieveMergedResults()
         {
             ResultsCache cache = new ResultsCache();
@@ -95,11 +84,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             BuildResult retrievedResult = cache.GetResultForRequest(request);
 
-            Assert.IsTrue(AreResultsIdenticalForTarget(result, retrievedResult, "testTarget"));
-            Assert.IsTrue(AreResultsIdenticalForTarget(result2, retrievedResult, "testTarget2"));
+            Assert.True(AreResultsIdenticalForTarget(result, retrievedResult, "testTarget"));
+            Assert.True(AreResultsIdenticalForTarget(result2, retrievedResult, "testTarget2"));
         }
 
-        [TestMethod]
+        [Fact]
         public void TestMergeResultsWithException()
         {
             ResultsCache cache = new ResultsCache();
@@ -113,23 +102,25 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             BuildResult retrievedResult = cache.GetResultForRequest(request);
 
-            Assert.IsNotNull(retrievedResult.Exception);
+            Assert.NotNull(retrievedResult.Exception);
         }
 
-        [ExpectedException(typeof(InternalErrorException))]
-        [TestMethod]
+        [Fact]
         public void TestRetrieveIncompleteResults()
         {
-            ResultsCache cache = new ResultsCache();
-            BuildRequest request = new BuildRequest(1 /* submissionId */, 0, 1, new string[2] { "testTarget", "testTarget2" }, null, BuildEventContext.Invalid, null);
-            BuildResult result = new BuildResult(request);
-            result.AddResultsForTarget("testTarget", TestUtilities.GetEmptyFailingTargetResult());
-            cache.AddResult(result);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                ResultsCache cache = new ResultsCache();
+                BuildRequest request = new BuildRequest(1 /* submissionId */, 0, 1, new string[2] { "testTarget", "testTarget2" }, null, BuildEventContext.Invalid, null);
+                BuildResult result = new BuildResult(request);
+                result.AddResultsForTarget("testTarget", TestUtilities.GetEmptyFailingTargetResult());
+                cache.AddResult(result);
 
-            BuildResult retrievedResult = cache.GetResultForRequest(request);
+                BuildResult retrievedResult = cache.GetResultForRequest(request);
+            }
+           );
         }
-
-        [TestMethod]
+        [Fact]
         public void TestRetrieveSubsetResults()
         {
             ResultsCache cache = new ResultsCache();
@@ -144,7 +135,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             BuildResult retrievedResult = cache.GetResultForRequest(request);
 
-            Assert.IsTrue(AreResultsIdenticalForTarget(result2, retrievedResult, "testTarget2"));
+            Assert.True(AreResultsIdenticalForTarget(result2, retrievedResult, "testTarget2"));
         }
 
         /// <summary>
@@ -152,7 +143,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// results, the returned result should only contain the targets we asked for, BUT the overall 
         /// status of the result should remain the same.  
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestRetrieveSubsetTargetsFromResult()
         {
             ResultsCache cache = new ResultsCache();
@@ -165,14 +156,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ResultsCacheResponse response = cache.SatisfyRequest(request, new List<string>(), new List<string>(new string[] { "testTarget2" }), new List<string>(new string[] { "testTarget" }), skippedResultsAreOK: false);
 
-            Assert.AreEqual(ResultsCacheResponseType.Satisfied, response.Type);
+            Assert.Equal(ResultsCacheResponseType.Satisfied, response.Type);
 
-            Assert.IsTrue(AreResultsIdenticalForTarget(result, response.Results, "testTarget2"));
-            Assert.IsFalse(response.Results.HasResultsForTarget("testTarget"));
-            Assert.AreEqual(BuildResultCode.Failure, response.Results.OverallResult);
+            Assert.True(AreResultsIdenticalForTarget(result, response.Results, "testTarget2"));
+            Assert.False(response.Results.HasResultsForTarget("testTarget"));
+            Assert.Equal(BuildResultCode.Failure, response.Results.OverallResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void TestClearResultsCache()
         {
             ResultsCache cache = new ResultsCache();
@@ -185,7 +176,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             cache.ClearResults();
 
-            Assert.IsNull(cache.GetResultForRequest(request));
+            Assert.Null(cache.GetResultForRequest(request));
         }
 
         #region Helper Methods

@@ -12,8 +12,6 @@ using System.Xml;
 using System.Text;
 using System.Globalization;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Collections;
@@ -24,19 +22,19 @@ using System.Threading;
 
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.Definition
 {
     /// <summary>
     /// Class containing tests for the ProjectItemDefinition and related functionality.
     /// </summary>
-    [TestClass]
     public class ItemDefinitionGroup_Tests
     {
         /// <summary>
         /// Test for item definition group definitions showing up in project.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ItemDefinitionGroupExistsInProject()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
@@ -50,14 +48,14 @@ namespace Microsoft.Build.UnitTests.Definition
 	                <Target Name='Build' />
 	            </Project>")));
 
-            Assert.IsTrue(ContainsMetadata(p.ItemDefinitions["Compile"].Metadata, "First", "1st"));
-            Assert.IsTrue(ContainsMetadata(p.ItemDefinitions["Compile"].Metadata, "Second", "2nd"));
+            Assert.True(ContainsMetadata(p.ItemDefinitions["Compile"].Metadata, "First", "1st"));
+            Assert.True(ContainsMetadata(p.ItemDefinitions["Compile"].Metadata, "Second", "2nd"));
         }
 
         /// <summary>
         /// Test for multiple item definition group definitions showing up in project.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MultipleItemDefinitionGroupExistsInProject()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
@@ -77,16 +75,16 @@ namespace Microsoft.Build.UnitTests.Definition
 	                <Target Name='Build' />
 	            </Project>")));
 
-            Assert.IsTrue(ContainsMetadata(p.ItemDefinitions["Compile"].Metadata, "First", "1st"));
-            Assert.IsTrue(ContainsMetadata(p.ItemDefinitions["Compile"].Metadata, "Second", "2nd"));
-            Assert.IsTrue(ContainsMetadata(p.ItemDefinitions["Link"].Metadata, "Third", "3rd"));
-            Assert.IsTrue(ContainsMetadata(p.ItemDefinitions["Link"].Metadata, "Fourth", "4th"));
+            Assert.True(ContainsMetadata(p.ItemDefinitions["Compile"].Metadata, "First", "1st"));
+            Assert.True(ContainsMetadata(p.ItemDefinitions["Compile"].Metadata, "Second", "2nd"));
+            Assert.True(ContainsMetadata(p.ItemDefinitions["Link"].Metadata, "Third", "3rd"));
+            Assert.True(ContainsMetadata(p.ItemDefinitions["Link"].Metadata, "Fourth", "4th"));
         }
 
         /// <summary>
         /// Tests that items with no metadata inherit from item definition groups
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EmptyItemsInheritValues()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
@@ -109,17 +107,17 @@ namespace Microsoft.Build.UnitTests.Definition
 	                <Target Name='Build' />
 	            </Project>")));
 
-            Assert.IsTrue(ItemContainsMetadata(p, "Compile", "a.cs", "First", "1st"));
-            Assert.IsTrue(ItemContainsMetadata(p, "Compile", "b.cs", "First", "1st"));
-            Assert.IsTrue(ItemContainsMetadata(p, "Compile", "a.cs", "Second", "2nd"));
-            Assert.IsTrue(ItemContainsMetadata(p, "Compile", "b.cs", "Second", "2nd"));
-            Assert.IsFalse(ItemContainsMetadata(p, "Compile", "a.cs", "Third", "3rd"));
+            Assert.True(ItemContainsMetadata(p, "Compile", "a.cs", "First", "1st"));
+            Assert.True(ItemContainsMetadata(p, "Compile", "b.cs", "First", "1st"));
+            Assert.True(ItemContainsMetadata(p, "Compile", "a.cs", "Second", "2nd"));
+            Assert.True(ItemContainsMetadata(p, "Compile", "b.cs", "Second", "2nd"));
+            Assert.False(ItemContainsMetadata(p, "Compile", "a.cs", "Third", "3rd"));
         }
 
         /// <summary>
         /// Tests that items with metadata override inherited metadata of the same name
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ItemMetadataOverridesInheritedValues()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
@@ -151,23 +149,24 @@ namespace Microsoft.Build.UnitTests.Definition
 	                <Target Name='Build' />
 	            </Project>")));
 
-            Assert.IsTrue(ItemContainsMetadata(p, "Compile", "a.cs", "First", "Not1st"));
-            Assert.IsTrue(ItemContainsMetadata(p, "Compile", "a.cs", "Second", "2nd"));
-            Assert.IsTrue(ItemContainsMetadata(p, "Compile", "b.cs", "First", "1st"));
-            Assert.IsTrue(ItemContainsMetadata(p, "Compile", "b.cs", "Second", "2nd"));
-            Assert.IsTrue(ItemContainsMetadata(p, "Link", "a.o", "Third", "3rd"));
-            Assert.IsTrue(ItemContainsMetadata(p, "Link", "a.o", "Fourth", "4th"));
+            Assert.True(ItemContainsMetadata(p, "Compile", "a.cs", "First", "Not1st"));
+            Assert.True(ItemContainsMetadata(p, "Compile", "a.cs", "Second", "2nd"));
+            Assert.True(ItemContainsMetadata(p, "Compile", "b.cs", "First", "1st"));
+            Assert.True(ItemContainsMetadata(p, "Compile", "b.cs", "Second", "2nd"));
+            Assert.True(ItemContainsMetadata(p, "Link", "a.o", "Third", "3rd"));
+            Assert.True(ItemContainsMetadata(p, "Link", "a.o", "Fourth", "4th"));
         }
 
         /// <summary>
         /// Tests that item definition doesn't allow item expansion for the conditional.
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ItemDefinitionDoesntAllowItemExpansion()
         {
-            Project p = new Project(XmlReader.Create(new StringReader(
-            @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                Project p = new Project(XmlReader.Create(new StringReader(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <ItemGroup>
                         <Compile Include='a.cs'>
                             <Foo>Bar</Foo>
@@ -185,17 +184,19 @@ namespace Microsoft.Build.UnitTests.Definition
                     </ItemDefinitionGroup>
 	                <Target Name='Build' />
 	            </Project>")));
+            }
+           );
         }
-
         /// <summary>
         /// Tests that item definition metadata doesn't allow item expansion for the conditional.
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ItemDefinitionMetadataConditionDoesntAllowItemExpansion()
         {
-            Project p = new Project(XmlReader.Create(new StringReader(
-            @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                Project p = new Project(XmlReader.Create(new StringReader(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <ItemGroup>
                         <Compile Include='a.cs'>
                             <Foo>Bar</Foo>
@@ -212,17 +213,19 @@ namespace Microsoft.Build.UnitTests.Definition
                     </ItemDefinitionGroup>
 	                <Target Name='Build' />
 	            </Project>")));
+            }
+           );
         }
-
         /// <summary>
         /// Tests that item definition metadata doesn't allow item expansion for the value.
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ItemDefinitionMetadataDoesntAllowItemExpansion()
         {
-            Project p = new Project(XmlReader.Create(new StringReader(
-            @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                Project p = new Project(XmlReader.Create(new StringReader(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <ItemGroup>
                         <Compile Include='a.cs'>
                             <Foo>Bar</Foo>
@@ -239,13 +242,14 @@ namespace Microsoft.Build.UnitTests.Definition
                     </ItemDefinitionGroup>
 	                <Target Name='Build' />
 	            </Project>")));
+            }
+           );
         }
-
         /// <summary>
         /// Tests that item metadata which contains a metadata expansion referring to an item type other
         /// than the one this item definition refers to expands to blank.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ItemMetadataReferringToDifferentItemGivesEmptyValue()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
@@ -277,13 +281,13 @@ namespace Microsoft.Build.UnitTests.Definition
 	                <Target Name='Build' />
 	            </Project>")));
 
-            Assert.IsTrue(ItemContainsMetadata(p, "Link", "a.o", "Third", "----"));
+            Assert.True(ItemContainsMetadata(p, "Link", "a.o", "Third", "----"));
         }
 
         /// <summary>
         /// Tests that empty item definition groups are OK.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EmptyItemDefinitionGroup()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
@@ -300,7 +304,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests that item definition groups with empty item definitions are OK.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EmptyItemDefinitions()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
@@ -316,11 +320,11 @@ namespace Microsoft.Build.UnitTests.Definition
 	                <Target Name='Build' />
 	            </Project>")));
 
-            Assert.IsTrue(ItemContainsMetadata(p, "Compile", "a.cs", "Foo", "Bar"));
-            Assert.IsTrue(ItemContainsMetadata(p, "Compile", "b.cs", "Foo", "Bar"));
+            Assert.True(ItemContainsMetadata(p, "Compile", "a.cs", "Foo", "Bar"));
+            Assert.True(ItemContainsMetadata(p, "Compile", "b.cs", "Foo", "Bar"));
         }
 
-        [TestMethod]
+        [Fact]
         public void SelfReferencingMetadataReferencesUseItemDefinition()
         {
             MockLogger logger = new MockLogger();
@@ -349,7 +353,7 @@ namespace Microsoft.Build.UnitTests.Definition
         }
 
 
-        [TestMethod]
+        [Fact]
         public void SelfReferencingMetadataReferencesUseItemDefinitionInTarget()
         {
             MockLogger logger = new MockLogger();
@@ -377,7 +381,7 @@ namespace Microsoft.Build.UnitTests.Definition
             logger.AssertLogContains("[{a.cpp}{DEBUG;CODEANALYSIS}]"); // Unexpected value after evaluation
         }
 
-        [TestMethod]
+        [Fact]
         public void SelfReferencingMetadataReferencesUseItemDefinitionInTargetModify()
         {
             MockLogger logger = new MockLogger();
@@ -411,7 +415,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests that item definition groups with false conditions don't produce definitions
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ItemDefinitionGroupWithFalseCondition()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
@@ -429,15 +433,15 @@ namespace Microsoft.Build.UnitTests.Definition
 	                <Target Name='Build' />
 	            </Project>")));
 
-            Assert.IsFalse(p.ItemDefinitions.ContainsKey("Compile"));
-            Assert.IsTrue(ItemContainsMetadata(p, "Compile", "a.cs", "Foo", "Bar"));
-            Assert.IsFalse(ItemContainsMetadata(p, "Compile", "a.cs", "First", "1st"));
+            Assert.False(p.ItemDefinitions.ContainsKey("Compile"));
+            Assert.True(ItemContainsMetadata(p, "Compile", "a.cs", "Foo", "Bar"));
+            Assert.False(ItemContainsMetadata(p, "Compile", "a.cs", "First", "1st"));
         }
 
         /// <summary>
         /// Tests that item definition groups with true conditions produce definitions
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ItemDefinitionGroupWithTrueCondition()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
@@ -455,15 +459,15 @@ namespace Microsoft.Build.UnitTests.Definition
 	                <Target Name='Build' />
 	            </Project>")));
 
-            Assert.IsTrue(p.ItemDefinitions.ContainsKey("Compile"));
-            Assert.IsTrue(ItemContainsMetadata(p, "Compile", "a.cs", "Foo", "Bar"));
-            Assert.IsTrue(ItemContainsMetadata(p, "Compile", "a.cs", "First", "1st"));
+            Assert.True(p.ItemDefinitions.ContainsKey("Compile"));
+            Assert.True(ItemContainsMetadata(p, "Compile", "a.cs", "Foo", "Bar"));
+            Assert.True(ItemContainsMetadata(p, "Compile", "a.cs", "First", "1st"));
         }
 
         /// <summary>
         /// Tests that item definition with false conditions don't produce definitions
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ItemDefinitionWithFalseCondition()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
@@ -481,15 +485,15 @@ namespace Microsoft.Build.UnitTests.Definition
 	                <Target Name='Build' />
 	            </Project>")));
 
-            Assert.IsFalse(p.ItemDefinitions.ContainsKey("Compile"));
-            Assert.IsTrue(ItemContainsMetadata(p, "Compile", "a.cs", "Foo", "Bar"));
-            Assert.IsFalse(ItemContainsMetadata(p, "Compile", "a.cs", "First", "1st"));
+            Assert.False(p.ItemDefinitions.ContainsKey("Compile"));
+            Assert.True(ItemContainsMetadata(p, "Compile", "a.cs", "Foo", "Bar"));
+            Assert.False(ItemContainsMetadata(p, "Compile", "a.cs", "First", "1st"));
         }
 
         /// <summary>
         /// Tests that item definition with true conditions produce definitions
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ItemDefinitionWithTrueCondition()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
@@ -507,15 +511,15 @@ namespace Microsoft.Build.UnitTests.Definition
 	                <Target Name='Build' />
 	            </Project>")));
 
-            Assert.IsTrue(p.ItemDefinitions.ContainsKey("Compile"));
-            Assert.IsTrue(ItemContainsMetadata(p, "Compile", "a.cs", "Foo", "Bar"));
-            Assert.IsTrue(ItemContainsMetadata(p, "Compile", "a.cs", "First", "1st"));
+            Assert.True(p.ItemDefinitions.ContainsKey("Compile"));
+            Assert.True(ItemContainsMetadata(p, "Compile", "a.cs", "Foo", "Bar"));
+            Assert.True(ItemContainsMetadata(p, "Compile", "a.cs", "First", "1st"));
         }
 
         /// <summary>
         /// Tests that item definition metadata with false conditions don't produce definitions
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ItemDefinitionMetadataWithFalseCondition()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
@@ -533,15 +537,15 @@ namespace Microsoft.Build.UnitTests.Definition
 	                <Target Name='Build' />
 	            </Project>")));
 
-            Assert.IsTrue(p.ItemDefinitions.ContainsKey("Compile"));
-            Assert.IsTrue(ItemContainsMetadata(p, "Compile", "a.cs", "Foo", "Bar"));
-            Assert.IsFalse(ItemContainsMetadata(p, "Compile", "a.cs", "First", "1st"));
+            Assert.True(p.ItemDefinitions.ContainsKey("Compile"));
+            Assert.True(ItemContainsMetadata(p, "Compile", "a.cs", "Foo", "Bar"));
+            Assert.False(ItemContainsMetadata(p, "Compile", "a.cs", "First", "1st"));
         }
 
         /// <summary>
         /// Tests that item definition metadata with true conditions produce definitions
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ItemDefinitionMetadataWithTrueCondition()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
@@ -559,15 +563,15 @@ namespace Microsoft.Build.UnitTests.Definition
 	                <Target Name='Build' />
 	            </Project>")));
 
-            Assert.IsTrue(p.ItemDefinitions.ContainsKey("Compile"));
-            Assert.IsTrue(ItemContainsMetadata(p, "Compile", "a.cs", "Foo", "Bar"));
-            Assert.IsTrue(ItemContainsMetadata(p, "Compile", "a.cs", "First", "1st"));
+            Assert.True(p.ItemDefinitions.ContainsKey("Compile"));
+            Assert.True(ItemContainsMetadata(p, "Compile", "a.cs", "Foo", "Bar"));
+            Assert.True(ItemContainsMetadata(p, "Compile", "a.cs", "First", "1st"));
         }
 
         /// <summary>
         /// Tests that item definition metadata is correctly copied to a destination item
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ItemDefinitionMetadataCopiedToTaskItem()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
@@ -580,7 +584,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 </ItemDefinitionGroup>
             </Project>")));
 
-            Assert.IsTrue(p.ItemDefinitions.ContainsKey("ItemA"));
+            Assert.True(p.ItemDefinitions.ContainsKey("ItemA"));
 
             ProjectInstance pi = p.CreateProjectInstance();
             ITaskItem noMetaItem = null;
@@ -596,14 +600,14 @@ namespace Microsoft.Build.UnitTests.Definition
             // from an item definition. The destination item's metadata should be maintained
             noMetaItem.CopyMetadataTo(withMetaItem);
 
-            Assert.AreEqual("M-A(b)", withMetaItem.GetMetadata("MetaA"));
-            Assert.AreEqual("M-B(b)", withMetaItem.GetMetadata("MetaB"));
+            Assert.Equal("M-A(b)", withMetaItem.GetMetadata("MetaA"));
+            Assert.Equal("M-B(b)", withMetaItem.GetMetadata("MetaB"));
         }
 
         /// <summary>
         /// Tests that item definition metadata is correctly copied to a destination item
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ItemDefinitionMetadataCopiedToTaskItem2()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
@@ -616,7 +620,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 </ItemDefinitionGroup>
             </Project>")));
 
-            Assert.IsTrue(p.ItemDefinitions.ContainsKey("ItemA"));
+            Assert.True(p.ItemDefinitions.ContainsKey("ItemA"));
 
             ProjectInstance pi = p.CreateProjectInstance();
             ITaskItem noMetaItem = null;
@@ -635,14 +639,14 @@ namespace Microsoft.Build.UnitTests.Definition
             noMetaItem.CopyMetadataTo(withMetaItem);
 
             // New direct metadata takes precedence over item definitions on the destination item
-            Assert.AreEqual("NEWMETA_A", withMetaItem.GetMetadata("MetaA"));
-            Assert.AreEqual("M-B(b)", withMetaItem.GetMetadata("MetaB"));
+            Assert.Equal("NEWMETA_A", withMetaItem.GetMetadata("MetaA"));
+            Assert.Equal("M-B(b)", withMetaItem.GetMetadata("MetaB"));
         }
 
         /// <summary>
         /// Tests that item definition metadata is correctly copied to a destination item
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ItemDefinitionMetadataCopiedToTaskItem3()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
@@ -658,7 +662,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 </ItemGroup>
             </Project>")));
 
-            Assert.IsTrue(p.ItemDefinitions.ContainsKey("ItemA"));
+            Assert.True(p.ItemDefinitions.ContainsKey("ItemA"));
 
             ProjectInstance pi = p.CreateProjectInstance();
             ITaskItem noMetaItem = null;
@@ -679,13 +683,13 @@ namespace Microsoft.Build.UnitTests.Definition
             // from an item definition. The destination item's metadata should be maintained
             noMetaItem.CopyMetadataTo(withMetaItem);
 
-            Assert.AreEqual("M-A(b)", withMetaItem.GetMetadata("MetaA"));
-            Assert.AreEqual("M-B(b)", withMetaItem.GetMetadata("MetaB"));
+            Assert.Equal("M-A(b)", withMetaItem.GetMetadata("MetaA"));
+            Assert.Equal("M-B(b)", withMetaItem.GetMetadata("MetaB"));
         }
 
         #region Project tests
 
-        [TestMethod]
+        [Fact]
         public void BasicItemDefinitionInProject()
         {
             MockLogger logger = new MockLogger();
@@ -712,7 +716,7 @@ namespace Microsoft.Build.UnitTests.Definition
             logger.AssertLogContains("[a.cpp==DEBUG]", "[b.cpp==DEBUG]");
         }
 
-        [TestMethod]
+        [Fact]
         public void EscapingInItemDefinitionInProject()
         {
             MockLogger logger = new MockLogger();
@@ -737,7 +741,7 @@ namespace Microsoft.Build.UnitTests.Definition
         }
 
 
-        [TestMethod]
+        [Fact]
         public void ItemDefinitionForOtherItemType()
         {
             MockLogger logger = new MockLogger();
@@ -761,7 +765,7 @@ namespace Microsoft.Build.UnitTests.Definition
             logger.AssertLogContains("[]");
         }
 
-        [TestMethod]
+        [Fact]
         public void RedefinitionLastOneWins()
         {
             MockLogger logger = new MockLogger();
@@ -792,13 +796,14 @@ namespace Microsoft.Build.UnitTests.Definition
             logger.AssertLogContains("[m2-n1-o1]");
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ItemExpressionInDefaultMetadataValueErrors()
         {
-            // We don't allow item expressions on an ItemDefinitionGroup because there are no items when IDG is evaluated.
-            MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                // We don't allow item expressions on an ItemDefinitionGroup because there are no items when IDG is evaluated.
+                MockLogger logger = new MockLogger();
+                Project p = new Project(XmlReader.Create(new StringReader(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
                   <ItemDefinitionGroup>
                     <i>
@@ -807,38 +812,43 @@ namespace Microsoft.Build.UnitTests.Definition
                   </ItemDefinitionGroup> 
                 </Project>
             ")));
-            p.Build("t", new ILogger[] { logger });
+                p.Build("t", new ILogger[] { logger });
+            }
+           );
         }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void UnqualifiedMetadataConditionOnItemDefinitionGroupErrors()
         {
-            // We don't allow unqualified metadata on an ItemDefinitionGroup because we don't know what item type it refers to.
-            MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                // We don't allow unqualified metadata on an ItemDefinitionGroup because we don't know what item type it refers to.
+                MockLogger logger = new MockLogger();
+                Project p = new Project(XmlReader.Create(new StringReader(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
                   <ItemDefinitionGroup Condition=""'%(m)'=='m1'""/>
                 </Project>
             ")));
-            p.Build("t", new ILogger[] { logger });
+                p.Build("t", new ILogger[] { logger });
+            }
+           );
         }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void QualifiedMetadataConditionOnItemDefinitionGroupErrors()
         {
-            // We don't allow qualified metadata because it's not worth distinguishing from unqualified, when you can just move the condition to the child.
-            MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                // We don't allow qualified metadata because it's not worth distinguishing from unqualified, when you can just move the condition to the child.
+                MockLogger logger = new MockLogger();
+                Project p = new Project(XmlReader.Create(new StringReader(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
                   <ItemDefinitionGroup Condition=""'%(x.m)'=='m1'""/>
                 </Project>
             ")));
-            p.Build("t", new ILogger[] { logger });
+                p.Build("t", new ILogger[] { logger });
+            }
+           );
         }
-
-        [TestMethod]
+        [Fact]
         public void MetadataConditionOnItemDefinition()
         {
             MockLogger logger = new MockLogger();
@@ -876,7 +886,7 @@ namespace Microsoft.Build.UnitTests.Definition
             logger.AssertLogContains("[m2]", "[n2]");
         }
 
-        [TestMethod]
+        [Fact]
         public void QualifiedMetadataConditionOnItemDefinitionBothQualifiedAndUnqualified()
         {
             MockLogger logger = new MockLogger();
@@ -905,7 +915,7 @@ namespace Microsoft.Build.UnitTests.Definition
             logger.AssertLogContains("[m2]");
         }
 
-        [TestMethod]
+        [Fact]
         public void FalseMetadataConditionOnItemDefinitionBothQualifiedAndUnqualified()
         {
             MockLogger logger = new MockLogger();
@@ -934,7 +944,7 @@ namespace Microsoft.Build.UnitTests.Definition
             logger.AssertLogContains("[m1]");
         }
 
-        [TestMethod]
+        [Fact]
         public void MetadataConditionOnItemDefinitionChildBothQualifiedAndUnqualified()
         {
             MockLogger logger = new MockLogger();
@@ -964,7 +974,7 @@ namespace Microsoft.Build.UnitTests.Definition
             logger.AssertLogContains("[m2]");
         }
 
-        [TestMethod]
+        [Fact]
         public void FalseMetadataConditionOnItemDefinitionChildBothQualifiedAndUnqualified()
         {
             MockLogger logger = new MockLogger();
@@ -994,7 +1004,7 @@ namespace Microsoft.Build.UnitTests.Definition
             logger.AssertLogContains("[m1]");
         }
 
-        [TestMethod]
+        [Fact]
         public void MetadataConditionOnItemDefinitionAndChildQualifiedWithUnrelatedItemType()
         {
             MockLogger logger = new MockLogger();
@@ -1029,24 +1039,26 @@ namespace Microsoft.Build.UnitTests.Definition
         /// we want to error even if there's no child tag. This will make it 
         /// easier to support it inside targets in a future version.
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ItemDefinitionInTargetErrors()
         {
-            MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                MockLogger logger = new MockLogger();
+                Project p = new Project(XmlReader.Create(new StringReader(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
                   <Target Name=""t"">
                     <ItemDefinitionGroup/>
                   </Target>
                 </Project>
             ")));
-            bool result = p.Build("t", new ILogger[] { logger });
+                bool result = p.Build("t", new ILogger[] { logger });
+            }
+           );
         }
-
         // Verify that anyone with a task named "ItemDefinitionGroup" can still
         // use it by fully qualifying the name.
-        [TestMethod]
+        [Fact]
         public void ItemDefinitionGroupTask()
         {
             MockLogger ml = Helpers.BuildProjectWithNewOMExpectSuccess(String.Format(@"
@@ -1058,10 +1070,10 @@ namespace Microsoft.Build.UnitTests.Definition
                     </Project>
                ", new Uri(Assembly.GetExecutingAssembly().EscapedCodeBase).LocalPath));
 
-            Assert.IsTrue(ml.FullLog.Contains("In ItemDefinitionGroup task."));
+            Assert.True(ml.FullLog.Contains("In ItemDefinitionGroup task."));
         }
 
-        [TestMethod]
+        [Fact]
         public void MetadataOnItemWins()
         {
             MockLogger logger = new MockLogger();
@@ -1088,7 +1100,7 @@ namespace Microsoft.Build.UnitTests.Definition
             logger.AssertLogContains("[a.cpp==RETAIL]", "[b.cpp==DEBUG]");
         }
 
-        [TestMethod]
+        [Fact]
         public void MixtureOfItemAndDefaultMetadata()
         {
             MockLogger logger = new MockLogger();
@@ -1115,7 +1127,7 @@ namespace Microsoft.Build.UnitTests.Definition
             logger.AssertLogContains("[a.cpp==DEBUG]", "[a.cpp==4]");
         }
 
-        [TestMethod]
+        [Fact]
         public void IntrinsicTaskModifyingDefaultMetadata()
         {
             MockLogger logger = new MockLogger();
@@ -1144,7 +1156,7 @@ namespace Microsoft.Build.UnitTests.Definition
             logger.AssertLogContains("[m2]");
         }
 
-        [TestMethod]
+        [Fact]
         public void IntrinsicTaskConsumingDefaultMetadata()
         {
             MockLogger logger = new MockLogger();
@@ -1173,7 +1185,7 @@ namespace Microsoft.Build.UnitTests.Definition
             logger.AssertLogContains("[n2]");
         }
 
-        [TestMethod]
+        [Fact]
         public void DefinitionInImportedFile()
         {
             MockLogger logger = new MockLogger();
@@ -1216,7 +1228,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Item added to project should pick up the item
         /// definitions that project has.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ProjectAddNewItemPicksUpProjectItemDefinitions()
         {
             Project p = new Project(XmlReader.Create(new StringReader(@"
@@ -1232,14 +1244,14 @@ namespace Microsoft.Build.UnitTests.Definition
             p.AddItem("i", "i1");
             p.ReevaluateIfNecessary();
 
-            Assert.IsTrue(ItemContainsMetadata(p, "i", "i1", "m", "m1"));
+            Assert.True(ItemContainsMetadata(p, "i", "i1", "m", "m1"));
         }
 
         /// <summary>
         /// Item added to project should pick up the item
         /// definitions that project has.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ProjectAddNewItemExistingGroupPicksUpProjectItemDefinitions()
         {
             Project p = new Project(XmlReader.Create(new StringReader(@"
@@ -1260,11 +1272,11 @@ namespace Microsoft.Build.UnitTests.Definition
             p.AddItem("i", "i1");
             p.ReevaluateIfNecessary();
 
-            Assert.IsTrue(ItemContainsMetadata(p, "i", "i1", "m", "m1"));
-            Assert.IsTrue(ItemContainsMetadata(p, "i", "i2", "m", "m2"));
+            Assert.True(ItemContainsMetadata(p, "i", "i1", "m", "m1"));
+            Assert.True(ItemContainsMetadata(p, "i", "i2", "m", "m2"));
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemsEmittedByTaskPickUpItemDefinitions()
         {
             MockLogger logger = new MockLogger();
@@ -1290,7 +1302,7 @@ namespace Microsoft.Build.UnitTests.Definition
             logger.AssertLogContains("[m1][n2]");
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemsEmittedByIntrinsicTaskPickUpItemDefinitions()
         {
             MockLogger logger = new MockLogger();
@@ -1322,7 +1334,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// When items are passed with an item list expression, default metadata values on the source
         /// items should become regular metadata values on the new items, unless overridden.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ItemsEmittedByIntrinsicTaskConsumingItemExpression_SourceDefaultMetadataPassed()
         {
             MockLogger logger = new MockLogger();
@@ -1353,7 +1365,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Default metadata on the source item list is overridden by matching metadata explicitly on the destination
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ItemsEmittedByIntrinsicTaskConsumingItemExpression_DestinationExplicitMetadataBeatsSourceDefaultMetadata()
         {
             MockLogger logger = new MockLogger();
@@ -1391,7 +1403,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Either behavior here is fairly reasonable. We decided on this way around based on feedback from VC.
         /// Note: this differs from how Orcas did it.
         /// </remarks>
-        [TestMethod]
+        [Fact]
         public void ItemsEmittedByIntrinsicTaskConsumingItemExpression_DestinationDefaultMetadataOverriddenBySourceDefaultMetadata()
         {
             MockLogger logger = new MockLogger();
@@ -1419,7 +1431,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 </Project>
             ")));
 
-            Assert.AreEqual("m1", p.GetItems("j").First().GetMetadataValue("m"));
+            Assert.Equal("m1", p.GetItems("j").First().GetMetadataValue("m"));
 
             p.Build("t", new ILogger[] { logger });
 
@@ -1431,7 +1443,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Default and explicit metadata on both source and destination.
         /// Item definition metadata from the source override item definition on the destination.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ItemsEmittedByIntrinsicTaskConsumingItemExpression_Combination_OutsideTarget()
         {
             MockLogger logger = new MockLogger();
@@ -1476,54 +1488,54 @@ namespace Microsoft.Build.UnitTests.Definition
                 </Project>
             ")));
 
-            Assert.AreEqual("im1", p.GetItems("i").First().GetMetadataValue("m"));
-            Assert.AreEqual("in1", p.GetItems("i").First().GetMetadataValue("n"));
-            Assert.AreEqual("io2", p.GetItems("i").First().GetMetadataValue("o"));
-            Assert.AreEqual("ip1", p.GetItems("i").First().GetMetadataValue("p"));
-            Assert.AreEqual("", p.GetItems("i").First().GetMetadataValue("q"));
+            Assert.Equal("im1", p.GetItems("i").First().GetMetadataValue("m"));
+            Assert.Equal("in1", p.GetItems("i").First().GetMetadataValue("n"));
+            Assert.Equal("io2", p.GetItems("i").First().GetMetadataValue("o"));
+            Assert.Equal("ip1", p.GetItems("i").First().GetMetadataValue("p"));
+            Assert.Equal("", p.GetItems("i").First().GetMetadataValue("q"));
 
-            Assert.AreEqual("jm3", p.GetItems("j").First().GetMetadataValue("m"));
-            Assert.AreEqual("jn3", p.GetItems("j").First().GetMetadataValue("n"));
-            Assert.AreEqual("", p.GetItems("j").First().GetMetadataValue("o"));
-            Assert.AreEqual("", p.GetItems("j").First().GetMetadataValue("p"));
-            Assert.AreEqual("jq3", p.GetItems("j").First().GetMetadataValue("q"));
+            Assert.Equal("jm3", p.GetItems("j").First().GetMetadataValue("m"));
+            Assert.Equal("jn3", p.GetItems("j").First().GetMetadataValue("n"));
+            Assert.Equal("", p.GetItems("j").First().GetMetadataValue("o"));
+            Assert.Equal("", p.GetItems("j").First().GetMetadataValue("p"));
+            Assert.Equal("jq3", p.GetItems("j").First().GetMetadataValue("q"));
 
-            Assert.AreEqual("jm6", p.GetItems("j").ElementAt(1).GetMetadataValue("m"));
-            Assert.AreEqual("in1", p.GetItems("j").ElementAt(1).GetMetadataValue("n"));
-            Assert.AreEqual("io2", p.GetItems("j").ElementAt(1).GetMetadataValue("o"));
-            Assert.AreEqual("ip1", p.GetItems("j").ElementAt(1).GetMetadataValue("p"));
-            Assert.AreEqual("jq3", p.GetItems("j").ElementAt(1).GetMetadataValue("q"));
+            Assert.Equal("jm6", p.GetItems("j").ElementAt(1).GetMetadataValue("m"));
+            Assert.Equal("in1", p.GetItems("j").ElementAt(1).GetMetadataValue("n"));
+            Assert.Equal("io2", p.GetItems("j").ElementAt(1).GetMetadataValue("o"));
+            Assert.Equal("ip1", p.GetItems("j").ElementAt(1).GetMetadataValue("p"));
+            Assert.Equal("jq3", p.GetItems("j").ElementAt(1).GetMetadataValue("q"));
 
-            Assert.AreEqual("km5", p.GetItems("k").ElementAt(0).GetMetadataValue("m"));
-            Assert.AreEqual("", p.GetItems("k").ElementAt(0).GetMetadataValue("n"));
-            Assert.AreEqual("", p.GetItems("k").ElementAt(0).GetMetadataValue("o"));
-            Assert.AreEqual("", p.GetItems("k").ElementAt(0).GetMetadataValue("p"));
-            Assert.AreEqual("kq4", p.GetItems("k").ElementAt(0).GetMetadataValue("q"));
-            Assert.AreEqual("kr4", p.GetItems("k").ElementAt(0).GetMetadataValue("r"));
-            Assert.AreEqual("", p.GetItems("k").ElementAt(0).GetMetadataValue("s"));
+            Assert.Equal("km5", p.GetItems("k").ElementAt(0).GetMetadataValue("m"));
+            Assert.Equal("", p.GetItems("k").ElementAt(0).GetMetadataValue("n"));
+            Assert.Equal("", p.GetItems("k").ElementAt(0).GetMetadataValue("o"));
+            Assert.Equal("", p.GetItems("k").ElementAt(0).GetMetadataValue("p"));
+            Assert.Equal("kq4", p.GetItems("k").ElementAt(0).GetMetadataValue("q"));
+            Assert.Equal("kr4", p.GetItems("k").ElementAt(0).GetMetadataValue("r"));
+            Assert.Equal("", p.GetItems("k").ElementAt(0).GetMetadataValue("s"));
 
-            Assert.AreEqual("jm3", p.GetItems("k").ElementAt(1).GetMetadataValue("m"));
-            Assert.AreEqual("jn3", p.GetItems("k").ElementAt(1).GetMetadataValue("n"));
-            Assert.AreEqual("", p.GetItems("k").ElementAt(1).GetMetadataValue("o"));
-            Assert.AreEqual("", p.GetItems("k").ElementAt(1).GetMetadataValue("p"));
-            Assert.AreEqual("jq3", p.GetItems("k").ElementAt(1).GetMetadataValue("q"));
-            Assert.AreEqual("kr4", p.GetItems("k").ElementAt(1).GetMetadataValue("r"));
-            Assert.AreEqual("ks3", p.GetItems("k").ElementAt(1).GetMetadataValue("s"));
+            Assert.Equal("jm3", p.GetItems("k").ElementAt(1).GetMetadataValue("m"));
+            Assert.Equal("jn3", p.GetItems("k").ElementAt(1).GetMetadataValue("n"));
+            Assert.Equal("", p.GetItems("k").ElementAt(1).GetMetadataValue("o"));
+            Assert.Equal("", p.GetItems("k").ElementAt(1).GetMetadataValue("p"));
+            Assert.Equal("jq3", p.GetItems("k").ElementAt(1).GetMetadataValue("q"));
+            Assert.Equal("kr4", p.GetItems("k").ElementAt(1).GetMetadataValue("r"));
+            Assert.Equal("ks3", p.GetItems("k").ElementAt(1).GetMetadataValue("s"));
 
-            Assert.AreEqual("jm6", p.GetItems("k").ElementAt(2).GetMetadataValue("m"));
-            Assert.AreEqual("in1", p.GetItems("k").ElementAt(2).GetMetadataValue("n"));
-            Assert.AreEqual("io2", p.GetItems("k").ElementAt(2).GetMetadataValue("o"));
-            Assert.AreEqual("ip1", p.GetItems("k").ElementAt(2).GetMetadataValue("p"));
-            Assert.AreEqual("jq3", p.GetItems("k").ElementAt(2).GetMetadataValue("q"));
-            Assert.AreEqual("kr4", p.GetItems("k").ElementAt(2).GetMetadataValue("r"));
-            Assert.AreEqual("ks3", p.GetItems("k").ElementAt(1).GetMetadataValue("s"));
+            Assert.Equal("jm6", p.GetItems("k").ElementAt(2).GetMetadataValue("m"));
+            Assert.Equal("in1", p.GetItems("k").ElementAt(2).GetMetadataValue("n"));
+            Assert.Equal("io2", p.GetItems("k").ElementAt(2).GetMetadataValue("o"));
+            Assert.Equal("ip1", p.GetItems("k").ElementAt(2).GetMetadataValue("p"));
+            Assert.Equal("jq3", p.GetItems("k").ElementAt(2).GetMetadataValue("q"));
+            Assert.Equal("kr4", p.GetItems("k").ElementAt(2).GetMetadataValue("r"));
+            Assert.Equal("ks3", p.GetItems("k").ElementAt(1).GetMetadataValue("s"));
         }
 
         /// <summary>
         /// Default and explicit metadata on both source and destination.
         /// Item definition metadata from the source override item definition on the destination.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ItemsEmittedByIntrinsicTaskConsumingItemExpression_Combination_InsideTarget()
         {
             MockLogger logger = new MockLogger();
@@ -1579,7 +1591,7 @@ namespace Microsoft.Build.UnitTests.Definition
             logger.AssertLogContains("k:1 [jm6][in1][io2][ip1][jq3]");
         }
 
-        [TestMethod]
+        [Fact]
         public void MutualReferenceToDefinition1()
         {
             MockLogger logger = new MockLogger();
@@ -1605,7 +1617,7 @@ namespace Microsoft.Build.UnitTests.Definition
             logger.AssertLogContains("[m1][~m1~]");
         }
 
-        [TestMethod]
+        [Fact]
         public void MutualReferenceToDefinition2()
         {
             MockLogger logger = new MockLogger();
@@ -1631,7 +1643,7 @@ namespace Microsoft.Build.UnitTests.Definition
             logger.AssertLogContains("[~~][n1]");
         }
 
-        [TestMethod]
+        [Fact]
         public void MutualReferenceToDefinition3()
         {
             MockLogger logger = new MockLogger();
@@ -1658,7 +1670,7 @@ namespace Microsoft.Build.UnitTests.Definition
             logger.AssertLogContains("[m1][m1][]");
         }
 
-        [TestMethod]
+        [Fact]
         public void ProjectReevaluationReevaluatesItemDefinitions()
         {
             MockLogger logger = new MockLogger();
@@ -1688,17 +1700,15 @@ namespace Microsoft.Build.UnitTests.Definition
 
             logger.AssertLogContains("[a.cpp==CODEANALYSIS;RETAIL]");
 
-            Assert.IsTrue(ItemContainsMetadata(p, "CppCompile", "a.cpp", "Defines", "CODEANALYSIS;RETAIL"));
+            Assert.True(ItemContainsMetadata(p, "CppCompile", "a.cpp", "Defines", "CODEANALYSIS;RETAIL"));
 
             p.SetProperty("BuildFlavor", "chk");
             p.ReevaluateIfNecessary();
 
-            Assert.IsTrue(ItemContainsMetadata(p, "CppCompile", "a.cpp", "Defines", "CODEANALYSIS;DEBUG"));
+            Assert.True(ItemContainsMetadata(p, "CppCompile", "a.cpp", "Defines", "CODEANALYSIS;DEBUG"));
         }
 
-        [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
+        [Fact]
         public void MSBuildCallDoesNotAffectCallingProjectsDefinitions()
         {
             string otherProject = null;
@@ -1754,9 +1764,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
+        [Fact]
         public void DefaultMetadataTravelWithTargetOutputs()
         {
             string otherProject = null;

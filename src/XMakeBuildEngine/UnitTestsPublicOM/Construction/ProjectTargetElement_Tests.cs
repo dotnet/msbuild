@@ -1,6 +1,6 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="ProjectTargetElement_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // </copyright>
 // <summary>Test the ProjectTargetElement class.</summary>
 //-----------------------------------------------------------------------
@@ -10,43 +10,43 @@ using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
     /// Test the ProjectTargetElement class
     /// </summary>
-    [TestClass]
     public class ProjectTargetElement_Tests
     {
         /// <summary>
         /// Create target with invalid name
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [Fact]
         public void AddTargetInvalidName()
         {
-            ProjectRootElement project = ProjectRootElement.Create();
-            project.CreateTargetElement("@#$invalid@#$");
+            Assert.Throws<ArgumentException>(() =>
+            {
+                ProjectRootElement project = ProjectRootElement.Create();
+                project.CreateTargetElement("@#$invalid@#$");
+            }
+           );
         }
-
         /// <summary>
         /// Read targets in an empty project
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReadNoTarget()
         {
             ProjectRootElement project = ProjectRootElement.Create();
-            Assert.AreEqual(null, project.Targets.GetEnumerator().Current);
+            Assert.Equal(null, project.Targets.GetEnumerator().Current);
         }
 
         /// <summary>
         /// Read an empty target
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReadEmptyTarget()
         {
             string content = @"
@@ -58,28 +58,28 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
             ProjectTargetElement target = (ProjectTargetElement)Helpers.GetFirst(project.Children);
 
-            Assert.AreEqual(0, Helpers.Count(target.Children));
-            Assert.AreEqual(true, project.HasUnsavedChanges);
+            Assert.Equal(0, Helpers.Count(target.Children));
+            Assert.Equal(true, project.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Read attributes on the target element
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReadParameters()
         {
             ProjectTargetElement target = GetTargetXml();
 
-            Assert.AreEqual("i", target.Inputs);
-            Assert.AreEqual("o", target.Outputs);
-            Assert.AreEqual("d", target.DependsOnTargets);
-            Assert.AreEqual("c", target.Condition);
+            Assert.Equal("i", target.Inputs);
+            Assert.Equal("o", target.Outputs);
+            Assert.Equal("d", target.DependsOnTargets);
+            Assert.Equal("c", target.Condition);
         }
 
         /// <summary>
         /// Set attributes on the target element
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetParameters()
         {
             ProjectTargetElement target = GetTargetXml();
@@ -89,123 +89,135 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             target.DependsOnTargets = "db";
             target.Condition = "cb";
 
-            Assert.AreEqual("ib", target.Inputs);
-            Assert.AreEqual("ob", target.Outputs);
-            Assert.AreEqual("db", target.DependsOnTargets);
-            Assert.AreEqual("cb", target.Condition);
+            Assert.Equal("ib", target.Inputs);
+            Assert.Equal("ob", target.Outputs);
+            Assert.Equal("db", target.DependsOnTargets);
+            Assert.Equal("cb", target.Condition);
         }
 
         /// <summary>
         /// Set null inputs on the target element
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Fact]
         public void SetInvalidNullInputs()
         {
-            ProjectTargetElement target = GetTargetXml();
-            target.Inputs = null;
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                ProjectTargetElement target = GetTargetXml();
+                target.Inputs = null;
+            }
+           );
         }
-
         /// <summary>
         /// Set null outputs on the target element
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Fact]
         public void SetInvalidNullOutputs()
         {
-            ProjectTargetElement target = GetTargetXml();
-            target.Outputs = null;
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                ProjectTargetElement target = GetTargetXml();
+                target.Outputs = null;
+            }
+           );
         }
-
         /// <summary>
         /// Set null dependsOnTargets on the target element
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Fact]
         public void SetInvalidNullDependsOnTargets()
         {
-            ProjectTargetElement target = GetTargetXml();
-            target.DependsOnTargets = null;
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                ProjectTargetElement target = GetTargetXml();
+                target.DependsOnTargets = null;
+            }
+           );
         }
-
         /// <summary>
         /// Set null dependsOnTargets on the target element
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Fact]
         public void SetInvalidNullKeepDuplicateOutputs()
         {
-            ProjectTargetElement target = GetTargetXml();
-            target.KeepDuplicateOutputs = null;
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                ProjectTargetElement target = GetTargetXml();
+                target.KeepDuplicateOutputs = null;
+            }
+           );
         }
-
         /// <summary>
         /// Set null condition on the target element
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetNullCondition()
         {
             ProjectTargetElement target = GetTargetXml();
             target.Condition = null;
 
-            Assert.AreEqual(String.Empty, target.Condition);
+            Assert.Equal(String.Empty, target.Condition);
         }
 
         /// <summary>
         /// Read a target with a missing name
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidMissingName()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Target/>
                     </Project>
                 ";
 
-            ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Read a target with an invalid attribute
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidAttribute()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Target XX='YY'/>
                     </Project>
                 ";
 
-            ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Read an target with two task children
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReadTargetTwoTasks()
         {
             ProjectTargetElement target = GetTargetXml();
 
             var tasks = Helpers.MakeList(target.Children);
 
-            Assert.AreEqual(2, tasks.Count);
+            Assert.Equal(2, tasks.Count);
 
             ProjectTaskElement task1 = (ProjectTaskElement)tasks[0];
             ProjectTaskElement task2 = (ProjectTaskElement)tasks[1];
 
-            Assert.AreEqual("t1", task1.Name);
-            Assert.AreEqual("t2", task2.Name);
+            Assert.Equal("t1", task1.Name);
+            Assert.Equal("t2", task2.Name);
         }
 
         /// <summary>
         /// Set name
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetName()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -214,14 +226,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             target.Name = "t2";
 
-            Assert.AreEqual("t2", target.Name);
-            Assert.AreEqual(true, project.HasUnsavedChanges);
+            Assert.Equal("t2", target.Name);
+            Assert.Equal(true, project.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set inputs
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetInputs()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -230,14 +242,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             target.Inputs = "in";
 
-            Assert.AreEqual("in", target.Inputs);
-            Assert.AreEqual(true, project.HasUnsavedChanges);
+            Assert.Equal("in", target.Inputs);
+            Assert.Equal(true, project.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set outputs
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetOutputs()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -246,14 +258,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             target.Outputs = "out";
 
-            Assert.AreEqual("out", target.Outputs);
-            Assert.AreEqual(true, project.HasUnsavedChanges);
+            Assert.Equal("out", target.Outputs);
+            Assert.Equal(true, project.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set dependsontargets
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetDependsOnTargets()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -262,14 +274,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             target.DependsOnTargets = "dot";
 
-            Assert.AreEqual("dot", target.DependsOnTargets);
-            Assert.AreEqual(true, project.HasUnsavedChanges);
+            Assert.Equal("dot", target.DependsOnTargets);
+            Assert.Equal(true, project.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set condition
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetCondition()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -278,14 +290,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             target.Condition = "c";
 
-            Assert.AreEqual("c", target.Condition);
-            Assert.AreEqual(true, project.HasUnsavedChanges);
+            Assert.Equal("c", target.Condition);
+            Assert.Equal(true, project.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set KeepDuplicateOutputs attribute
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetKeepDuplicateOutputs()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -294,15 +306,15 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             target.KeepDuplicateOutputs = "true";
 
-            Assert.AreEqual("true", target.KeepDuplicateOutputs);
-            Assert.AreEqual(true, project.HasUnsavedChanges);
+            Assert.Equal("true", target.KeepDuplicateOutputs);
+            Assert.Equal(true, project.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set return value.  Verify that setting to the empty string and null are
         /// both allowed and have distinct behaviour. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetReturns()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -311,22 +323,22 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             target.Returns = "@(a)";
 
-            Assert.AreEqual("@(a)", target.Returns);
-            Assert.AreEqual(true, project.HasUnsavedChanges);
+            Assert.Equal("@(a)", target.Returns);
+            Assert.Equal(true, project.HasUnsavedChanges);
 
             Helpers.ClearDirtyFlag(project);
 
             target.Returns = String.Empty;
 
-            Assert.AreEqual(String.Empty, target.Returns);
-            Assert.AreEqual(true, project.HasUnsavedChanges);
+            Assert.Equal(String.Empty, target.Returns);
+            Assert.Equal(true, project.HasUnsavedChanges);
 
             Helpers.ClearDirtyFlag(project);
 
             target.Returns = null;
 
-            Assert.IsNull(target.Returns);
-            Assert.AreEqual(true, project.HasUnsavedChanges);
+            Assert.Null(target.Returns);
+            Assert.Equal(true, project.HasUnsavedChanges);
         }
 
         /// <summary>

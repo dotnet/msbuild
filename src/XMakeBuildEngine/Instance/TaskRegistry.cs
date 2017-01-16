@@ -84,7 +84,7 @@ namespace Microsoft.Build.Execution
         /// references it with just a simple name, used for shimming in loading 
         /// task factory UsingTasks
         /// </summary>
-        private static string s_potentialTasksV4Location = Path.Combine(FileUtilities.CurrentExecutableDirectory, s_tasksV4Filename);
+        private static string s_potentialTasksV4Location = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, s_tasksV4Filename);
 
         /// <summary>
         /// Simple name for the MSBuild tasks (v12), used for shimming in loading 
@@ -103,7 +103,7 @@ namespace Microsoft.Build.Execution
         /// references it with just a simple name, used for shimming in loading 
         /// task factory UsingTasks
         /// </summary>
-        private static string s_potentialTasksV12Location = Path.Combine(FileUtilities.CurrentExecutableDirectory, s_tasksV12Filename);
+        private static string s_potentialTasksV12Location = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, s_tasksV12Filename);
 
         /// <summary>
         /// Simple name for the MSBuild tasks (v14+), used for shimming in loading 
@@ -122,7 +122,7 @@ namespace Microsoft.Build.Execution
         /// references it with just a simple name, used for shimming in loading 
         /// task factory UsingTasks
         /// </summary>
-        private static string s_potentialTasksCoreLocation = Path.Combine(FileUtilities.CurrentExecutableDirectory, s_tasksCoreFilename);
+        private static string s_potentialTasksCoreLocation = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, s_tasksCoreFilename);
 
         /// <summary>
         /// Cache of tasks already found using exact matching,

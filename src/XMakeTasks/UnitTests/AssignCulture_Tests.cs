@@ -4,14 +4,13 @@
 using System;
 using System.IO;
 using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
     sealed public class AssignCulture_Tests
     {
         /*
@@ -19,7 +18,7 @@ namespace Microsoft.Build.UnitTests
         *
         * Test the basic functionality.
         */
-        [TestMethod]
+        [Fact]
         public void Basic()
         {
             AssignCulture t = new AssignCulture();
@@ -28,11 +27,11 @@ namespace Microsoft.Build.UnitTests
             t.Files = new ITaskItem[] { i };
             t.Execute();
 
-            Assert.AreEqual(1, t.AssignedFiles.Length);
-            Assert.AreEqual(1, t.CultureNeutralAssignedFiles.Length);
-            Assert.AreEqual("fr", t.AssignedFiles[0].GetMetadata("Culture"));
-            Assert.AreEqual("MyResource.fr.resx", t.AssignedFiles[0].ItemSpec);
-            Assert.AreEqual("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
+            Assert.Equal(1, t.AssignedFiles.Length);
+            Assert.Equal(1, t.CultureNeutralAssignedFiles.Length);
+            Assert.Equal("fr", t.AssignedFiles[0].GetMetadata("Culture"));
+            Assert.Equal("MyResource.fr.resx", t.AssignedFiles[0].ItemSpec);
+            Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
         }
 
         /*
@@ -41,7 +40,7 @@ namespace Microsoft.Build.UnitTests
          * Not everything that looks like a culture, really is.
          * Only a specific set of culture ids should be matched.
          */
-        [TestMethod]
+        [Fact]
         public void LooksLikeCultureButIsnt()
         {
             AssignCulture t = new AssignCulture();
@@ -50,11 +49,11 @@ namespace Microsoft.Build.UnitTests
             t.Files = new ITaskItem[] { i };
             t.Execute();
 
-            Assert.AreEqual(1, t.AssignedFiles.Length);
-            Assert.AreEqual(1, t.CultureNeutralAssignedFiles.Length);
-            Assert.IsTrue(String.Empty == t.AssignedFiles[0].GetMetadata("Culture"));
-            Assert.AreEqual("MyResource.yy.resx", t.AssignedFiles[0].ItemSpec);
-            Assert.AreEqual("MyResource.yy.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
+            Assert.Equal(1, t.AssignedFiles.Length);
+            Assert.Equal(1, t.CultureNeutralAssignedFiles.Length);
+            Assert.Equal(String.Empty, t.AssignedFiles[0].GetMetadata("Culture"));
+            Assert.Equal("MyResource.yy.resx", t.AssignedFiles[0].ItemSpec);
+            Assert.Equal("MyResource.yy.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
         }
 
         /*
@@ -62,7 +61,7 @@ namespace Microsoft.Build.UnitTests
         *
         * Any pre-existing Culture attribute on the item is to be ignored
         */
-        [TestMethod]
+        [Fact]
         public void CultureAttributePrecedence()
         {
             AssignCulture t = new AssignCulture();
@@ -72,11 +71,11 @@ namespace Microsoft.Build.UnitTests
             t.Files = new ITaskItem[] { i };
             t.Execute();
 
-            Assert.AreEqual(1, t.AssignedFiles.Length);
-            Assert.AreEqual(1, t.CultureNeutralAssignedFiles.Length);
-            Assert.AreEqual("fr", t.AssignedFiles[0].GetMetadata("Culture"));
-            Assert.AreEqual("MyResource.fr.resx", t.AssignedFiles[0].ItemSpec);
-            Assert.AreEqual("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
+            Assert.Equal(1, t.AssignedFiles.Length);
+            Assert.Equal(1, t.CultureNeutralAssignedFiles.Length);
+            Assert.Equal("fr", t.AssignedFiles[0].GetMetadata("Culture"));
+            Assert.Equal("MyResource.fr.resx", t.AssignedFiles[0].ItemSpec);
+            Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
         }
 
         /*
@@ -86,7 +85,7 @@ namespace Microsoft.Build.UnitTests
         * If the incoming item has a 'Culture' attribute already, but that culture is invalid,
         * we still overwrite that culture.
         */
-        [TestMethod]
+        [Fact]
         public void CultureAttributePrecedenceWithBogusCulture()
         {
             AssignCulture t = new AssignCulture();
@@ -96,11 +95,11 @@ namespace Microsoft.Build.UnitTests
             t.Files = new ITaskItem[] { i };
             t.Execute();
 
-            Assert.AreEqual(1, t.AssignedFiles.Length);
-            Assert.AreEqual(1, t.CultureNeutralAssignedFiles.Length);
-            Assert.AreEqual("fr", t.AssignedFiles[0].GetMetadata("Culture"));
-            Assert.AreEqual("MyResource.fr.resx", t.AssignedFiles[0].ItemSpec);
-            Assert.AreEqual("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
+            Assert.Equal(1, t.AssignedFiles.Length);
+            Assert.Equal(1, t.CultureNeutralAssignedFiles.Length);
+            Assert.Equal("fr", t.AssignedFiles[0].GetMetadata("Culture"));
+            Assert.Equal("MyResource.fr.resx", t.AssignedFiles[0].ItemSpec);
+            Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
         }
 
 
@@ -111,7 +110,7 @@ namespace Microsoft.Build.UnitTests
         * Make sure that attributes set on input items are forwarded to ouput items.
         * This applies to every attribute except for the one pointed to by CultureAttribute.
         */
-        [TestMethod]
+        [Fact]
         public void AttributeForwarding()
         {
             AssignCulture t = new AssignCulture();
@@ -121,12 +120,12 @@ namespace Microsoft.Build.UnitTests
             t.Files = new ITaskItem[] { i };
             t.Execute();
 
-            Assert.AreEqual(1, t.AssignedFiles.Length);
-            Assert.AreEqual(1, t.CultureNeutralAssignedFiles.Length);
-            Assert.AreEqual("fr", t.AssignedFiles[0].GetMetadata("Culture"));
-            Assert.AreEqual("My Random String", t.AssignedFiles[0].GetMetadata("MyAttribute"));
-            Assert.AreEqual("MyResource.fr.resx", t.AssignedFiles[0].ItemSpec);
-            Assert.AreEqual("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
+            Assert.Equal(1, t.AssignedFiles.Length);
+            Assert.Equal(1, t.CultureNeutralAssignedFiles.Length);
+            Assert.Equal("fr", t.AssignedFiles[0].GetMetadata("Culture"));
+            Assert.Equal("My Random String", t.AssignedFiles[0].GetMetadata("MyAttribute"));
+            Assert.Equal("MyResource.fr.resx", t.AssignedFiles[0].ItemSpec);
+            Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
         }
 
 
@@ -136,7 +135,7 @@ namespace Microsoft.Build.UnitTests
         * Test the case where an item has no embedded culture. For example,
         * "MyResource.resx"
         */
-        [TestMethod]
+        [Fact]
         public void NoCulture()
         {
             AssignCulture t = new AssignCulture();
@@ -145,11 +144,11 @@ namespace Microsoft.Build.UnitTests
             t.Files = new ITaskItem[] { i };
             t.Execute();
 
-            Assert.AreEqual(1, t.AssignedFiles.Length);
-            Assert.AreEqual(1, t.CultureNeutralAssignedFiles.Length);
-            Assert.IsTrue(String.Empty == t.AssignedFiles[0].GetMetadata("Culture"));
-            Assert.AreEqual("MyResource.resx", t.AssignedFiles[0].ItemSpec);
-            Assert.AreEqual("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
+            Assert.Equal(1, t.AssignedFiles.Length);
+            Assert.Equal(1, t.CultureNeutralAssignedFiles.Length);
+            Assert.Equal(String.Empty, t.AssignedFiles[0].GetMetadata("Culture"));
+            Assert.Equal("MyResource.resx", t.AssignedFiles[0].ItemSpec);
+            Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
         }
 
         /*
@@ -157,7 +156,7 @@ namespace Microsoft.Build.UnitTests
         *
         * Test the case where an item has no extension. For example "MyResource".
         */
-        [TestMethod]
+        [Fact]
         public void NoExtension()
         {
             AssignCulture t = new AssignCulture();
@@ -166,11 +165,11 @@ namespace Microsoft.Build.UnitTests
             t.Files = new ITaskItem[] { i };
             t.Execute();
 
-            Assert.AreEqual(1, t.AssignedFiles.Length);
-            Assert.AreEqual(1, t.CultureNeutralAssignedFiles.Length);
-            Assert.IsTrue(String.Empty == t.AssignedFiles[0].GetMetadata("Culture"));
-            Assert.AreEqual("MyResource", t.AssignedFiles[0].ItemSpec);
-            Assert.AreEqual("MyResource", t.CultureNeutralAssignedFiles[0].ItemSpec);
+            Assert.Equal(1, t.AssignedFiles.Length);
+            Assert.Equal(1, t.CultureNeutralAssignedFiles.Length);
+            Assert.Equal(String.Empty, t.AssignedFiles[0].GetMetadata("Culture"));
+            Assert.Equal("MyResource", t.AssignedFiles[0].ItemSpec);
+            Assert.Equal("MyResource", t.CultureNeutralAssignedFiles[0].ItemSpec);
         }
 
         /*
@@ -179,7 +178,7 @@ namespace Microsoft.Build.UnitTests
         * Test the case where an item has two dots embedded, but otherwise looks
         * like a well-formed item. For example "MyResource..resx".
         */
-        [TestMethod]
+        [Fact]
         public void DoubleDot()
         {
             AssignCulture t = new AssignCulture();
@@ -188,11 +187,11 @@ namespace Microsoft.Build.UnitTests
             t.Files = new ITaskItem[] { i };
             t.Execute();
 
-            Assert.AreEqual(1, t.AssignedFiles.Length);
-            Assert.AreEqual(1, t.CultureNeutralAssignedFiles.Length);
-            Assert.IsTrue(String.Empty == t.AssignedFiles[0].GetMetadata("Culture"));
-            Assert.AreEqual("MyResource..resx", t.AssignedFiles[0].ItemSpec);
-            Assert.AreEqual("MyResource..resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
+            Assert.Equal(1, t.AssignedFiles.Length);
+            Assert.Equal(1, t.CultureNeutralAssignedFiles.Length);
+            Assert.Equal(String.Empty, t.AssignedFiles[0].GetMetadata("Culture"));
+            Assert.Equal("MyResource..resx", t.AssignedFiles[0].ItemSpec);
+            Assert.Equal("MyResource..resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
         }
 
         /// <summary>
@@ -200,7 +199,7 @@ namespace Microsoft.Build.UnitTests
         /// is a resource and form that happen to have an embedded culture. That is, don't assign a 
         /// culture to these.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void Regress283991()
         {
             AssignCulture t = new AssignCulture();
@@ -211,9 +210,9 @@ namespace Microsoft.Build.UnitTests
 
             t.Execute();
 
-            Assert.AreEqual(1, t.AssignedFiles.Length);
-            Assert.AreEqual(0, t.AssignedFilesWithCulture.Length);
-            Assert.AreEqual(1, t.AssignedFilesWithNoCulture.Length);
+            Assert.Equal(1, t.AssignedFiles.Length);
+            Assert.Equal(0, t.AssignedFilesWithCulture.Length);
+            Assert.Equal(1, t.AssignedFilesWithNoCulture.Length);
         }
     }
 }

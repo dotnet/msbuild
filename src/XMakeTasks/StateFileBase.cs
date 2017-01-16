@@ -17,13 +17,13 @@ namespace Microsoft.Build.Tasks
     [Serializable()]
     internal class StateFileBase
     {
-        /// <summary>
-        /// Default constructor
-        /// </summary>
-        internal StateFileBase()
-        {
-            // do nothing
-        }
+        // Current version for serialization. This should be changed when breaking changes
+        // are made to this class.
+        // Note: Consider that changes can break VS2015 RTM which did not have a version check.
+        private const byte CurrentSerializationVersion = 3;
+
+        // Version this instance is serialized with.
+        private byte _serializedVersion = CurrentSerializationVersion;
 
         /// <summary>
         /// Writes the contents of this object out to the specified file.
@@ -33,7 +33,7 @@ namespace Microsoft.Build.Tasks
         {
             try
             {
-                if (stateFile != null && stateFile.Length > 0)
+                if (!string.IsNullOrEmpty(stateFile))
                 {
                     if (File.Exists(stateFile))
                     {
@@ -73,7 +73,7 @@ namespace Microsoft.Build.Tasks
             // then we create one.  
             try
             {
-                if (stateFile != null && stateFile.Length > 0 && File.Exists(stateFile))
+                if (!string.IsNullOrEmpty(stateFile) && File.Exists(stateFile))
                 {
                     using (FileStream s = new FileStream(stateFile, FileMode.Open))
                     {
@@ -95,6 +95,13 @@ namespace Microsoft.Build.Tasks
                         {
                             log.LogWarningWithCodeFromResources("General.CouldNotReadStateFile", stateFile,
                                 log.FormatResourceString("General.IncompatibleStateFileType"));
+                            retVal = null;
+                        }
+
+                        // If we get back a valid object and internals were changed, things are likely to be null. Check the version before we use it.
+                        if (retVal != null && retVal._serializedVersion != CurrentSerializationVersion)
+                        {
+                            log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile, log.FormatResourceString("General.IncompatibleStateFileType"));
                             retVal = null;
                         }
                     }
@@ -134,13 +141,8 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                // If there was a problem deleting the file (like it's read-only or locked on disk, for
-                // example), then eat the exception and log a warning.  Otherwise, rethrow.
-                if (ExceptionHandling.NotExpectedException(e))
-                    throw;
-
                 log.LogWarningWithCodeFromResources("General.CouldNotDeleteStateFile", stateFile, e.Message);
             }
         }

@@ -26,7 +26,7 @@ namespace Microsoft.Build.Evaluation
     /// often will not point to a single ProjectItemDefinitionElement. The metadata within, however, will each point to a single
     /// ProjectMetadataElement, and these can be added, removed, and modified.
     /// </remarks>
-    [DebuggerDisplay("{itemType} #Metadata={MetadataCount}")]
+    [DebuggerDisplay("{_itemType} #Metadata={MetadataCount}")]
     public class ProjectItemDefinition : IKeyed, IMetadataTable, IItemDefinition<ProjectMetadata>, IProjectMetadataParent
     {
         /// <summary>

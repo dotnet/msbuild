@@ -26,12 +26,12 @@ namespace Microsoft.Build.Collections
         /// Cache the hashcode so that it is still available even if the target has been 
         /// collected. This allows this object to be still found in a table so it can be removed.
         /// </summary>
-        private int _hashcode;
+        private readonly int _hashcode;
 
         /// <summary>
         /// Backing weak reference
         /// </summary>
-        private WeakReference _weakReference;
+        private readonly WeakReference _weakReference;
 
         /// <summary>
         /// Constructor.

@@ -457,15 +457,24 @@ namespace Microsoft.Build.Evaluation
             // Maybe we need to generate an error for invalid characters in itemgroup name?
             // For now, just let item evaluation handle the error.
             bool fInReplacement = false;
+            int parenToClose = 0;
             while (_parsePoint < _expression.Length)
             {
                 if (_expression[_parsePoint] == '\'')
                 {
                     fInReplacement = !fInReplacement;
                 }
+                else if (_expression[_parsePoint] == '(' && !fInReplacement)
+                {
+                    parenToClose++;
+                }
                 else if (_expression[_parsePoint] == ')' && !fInReplacement)
                 {
-                    break;
+                    if (parenToClose == 0)
+                    {
+                        break;
+                    }
+                    else { parenToClose--; }
                 }
                 _parsePoint++;
             }

@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
@@ -19,14 +18,14 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Unittest;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
     using System.Threading.Tasks;
 
-    [TestClass]
-    public class RequestBuilder_Tests
+    public class RequestBuilder_Tests : IDisposable
     {
         private AutoResetEvent _newBuildRequestsEvent;
         private BuildRequestEntry _newBuildRequests_Entry;
@@ -43,8 +42,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
         }
 
-        [TestInitialize]
-        public void SetUp()
+        public RequestBuilder_Tests()
         {
             _nodeRequestId = 1;
             _host = new MockHost();
@@ -61,20 +59,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _requestBuilder.OnNewBuildRequests += this.NewBuildRequestsCallback;
         }
 
-        [TestCleanup]
-        public void TearDown()
+        public void Dispose()
         {
             ((IBuildComponent)_requestBuilder).ShutdownComponent();
             _host = null;
         }
 
-        [TestMethod]
-        public void TestConstructor()
-        {
-            // The call to Setup will test this.
-        }
-
-        [TestMethod]
+        [Fact]
         public void TestSimpleBuildRequest()
         {
             BuildRequestConfiguration configuration = CreateTestProject(1);
@@ -93,9 +84,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 _requestBuilder.BuildRequest(GetNodeLoggingContext(), entry);
                 WaitForEvent(_buildRequestCompletedEvent, "Build Request Completed");
-                Assert.AreEqual(BuildRequestEntryState.Complete, entry.State);
-                Assert.AreEqual(entry, _buildRequestCompleted_Entry);
-                Assert.AreEqual(BuildResultCode.Success, _buildRequestCompleted_Entry.Result.OverallResult);
+                Assert.Equal(BuildRequestEntryState.Complete, entry.State);
+                Assert.Equal(entry, _buildRequestCompleted_Entry);
+                Assert.Equal(BuildResultCode.Success, _buildRequestCompleted_Entry.Result.OverallResult);
             }
             finally
             {
@@ -103,7 +94,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void TestSimpleBuildRequestCancelled()
         {
             BuildRequestConfiguration configuration = CreateTestProject(1);
@@ -125,9 +116,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 _requestBuilder.CancelRequest();
 
                 WaitForEvent(_buildRequestCompletedEvent, "Build Request Completed");
-                Assert.AreEqual(BuildRequestEntryState.Complete, entry.State);
-                Assert.AreEqual(entry, _buildRequestCompleted_Entry);
-                Assert.AreEqual(BuildResultCode.Failure, _buildRequestCompleted_Entry.Result.OverallResult);
+                Assert.Equal(BuildRequestEntryState.Complete, entry.State);
+                Assert.Equal(entry, _buildRequestCompleted_Entry);
+                Assert.Equal(BuildResultCode.Failure, _buildRequestCompleted_Entry.Result.OverallResult);
             }
             finally
             {
@@ -135,7 +126,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void TestRequestWithReference()
         {
             BuildRequestConfiguration configuration = CreateTestProject(1);
@@ -155,7 +146,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 _requestBuilder.BuildRequest(GetNodeLoggingContext(), entry);
                 WaitForEvent(_newBuildRequestsEvent, "New Build Requests");
-                Assert.AreEqual(_newBuildRequests_Entry, entry);
+                Assert.Equal(_newBuildRequests_Entry, entry);
                 ObjectModelHelpers.AssertArrayContentsMatch(_newBuildRequests_FQRequests, newRequest);
 
                 BuildResult newResult = new BuildResult(_newBuildRequests_BuildRequests[0]);
@@ -164,9 +155,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 _requestBuilder.ContinueRequest();
 
                 WaitForEvent(_buildRequestCompletedEvent, "Build Request Completed");
-                Assert.AreEqual(BuildRequestEntryState.Complete, entry.State);
-                Assert.AreEqual(entry, _buildRequestCompleted_Entry);
-                Assert.AreEqual(BuildResultCode.Success, _buildRequestCompleted_Entry.Result.OverallResult);
+                Assert.Equal(BuildRequestEntryState.Complete, entry.State);
+                Assert.Equal(entry, _buildRequestCompleted_Entry);
+                Assert.Equal(BuildResultCode.Success, _buildRequestCompleted_Entry.Result.OverallResult);
             }
             finally
             {
@@ -174,7 +165,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void TestRequestWithReferenceCancelled()
         {
             BuildRequestConfiguration configuration = CreateTestProject(1);
@@ -194,7 +185,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 _requestBuilder.BuildRequest(GetNodeLoggingContext(), entry);
                 WaitForEvent(_newBuildRequestsEvent, "New Build Requests");
-                Assert.AreEqual(_newBuildRequests_Entry, entry);
+                Assert.Equal(_newBuildRequests_Entry, entry);
                 ObjectModelHelpers.AssertArrayContentsMatch(_newBuildRequests_FQRequests, newRequest);
 
                 BuildResult newResult = new BuildResult(_newBuildRequests_BuildRequests[0]);
@@ -206,9 +197,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 _requestBuilder.CancelRequest();
 
                 WaitForEvent(_buildRequestCompletedEvent, "Build Request Completed");
-                Assert.AreEqual(BuildRequestEntryState.Complete, entry.State);
-                Assert.AreEqual(entry, _buildRequestCompleted_Entry);
-                Assert.AreEqual(BuildResultCode.Failure, _buildRequestCompleted_Entry.Result.OverallResult);
+                Assert.Equal(BuildRequestEntryState.Complete, entry.State);
+                Assert.Equal(entry, _buildRequestCompleted_Entry);
+                Assert.Equal(BuildResultCode.Failure, _buildRequestCompleted_Entry.Result.OverallResult);
             }
             finally
             {
@@ -216,7 +207,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void TestMissingProjectFile()
         {
             TestTargetBuilder targetBuilder = (TestTargetBuilder)_host.GetComponent(BuildComponentType.TargetBuilder);
@@ -228,10 +219,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestEntry entry = new BuildRequestEntry(request, configuration);
             _requestBuilder.BuildRequest(GetNodeLoggingContext(), entry);
             WaitForEvent(_buildRequestCompletedEvent, "Build Request Completed");
-            Assert.AreEqual(BuildRequestEntryState.Complete, entry.State);
-            Assert.AreEqual(entry, _buildRequestCompleted_Entry);
-            Assert.AreEqual(BuildResultCode.Failure, _buildRequestCompleted_Entry.Result.OverallResult);
-            Assert.AreEqual(typeof(InvalidProjectFileException), _buildRequestCompleted_Entry.Result.Exception.GetType());
+            Assert.Equal(BuildRequestEntryState.Complete, entry.State);
+            Assert.Equal(entry, _buildRequestCompleted_Entry);
+            Assert.Equal(BuildResultCode.Failure, _buildRequestCompleted_Entry.Result.OverallResult);
+            Assert.Equal(typeof(InvalidProjectFileException), _buildRequestCompleted_Entry.Result.Exception.GetType());
         }
 
         private BuildRequestConfiguration CreateTestProject(int configId)
@@ -324,7 +315,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             if (!evt.WaitOne(5000, false))
             {
-                Assert.Fail("Did not receive " + eventName + " callback before the timeout expired.");
+                Assert.True(false, "Did not receive " + eventName + " callback before the timeout expired.");
             }
         }
 

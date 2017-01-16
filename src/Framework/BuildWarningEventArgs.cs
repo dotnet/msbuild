@@ -125,23 +125,23 @@ namespace Microsoft.Build.Framework
         )
             : base(message, helpKeyword, senderName, eventTimestamp, messageArgs)
         {
-            _subcategory = subcategory;
-            _code = code;
-            _file = file;
-            _lineNumber = lineNumber;
-            _columnNumber = columnNumber;
-            _endLineNumber = endLineNumber;
-            _endColumnNumber = endColumnNumber;
+            this.subcategory = subcategory;
+            this.code = code;
+            this.file = file;
+            this.lineNumber = lineNumber;
+            this.columnNumber = columnNumber;
+            this.endLineNumber = endLineNumber;
+            this.endColumnNumber = endColumnNumber;
         }
 
-        private string _subcategory;
-        private string _code;
-        private string _file;
-        private string _projectFile;
-        private int _lineNumber;
-        private int _columnNumber;
-        private int _endLineNumber;
-        private int _endColumnNumber;
+        private string subcategory;
+        private string code;
+        private string file;
+        private string projectFile;
+        private int lineNumber;
+        private int columnNumber;
+        private int endLineNumber;
+        private int endColumnNumber;
 
         #region CustomSerializationToStream
         /// <summary>
@@ -152,53 +152,53 @@ namespace Microsoft.Build.Framework
         {
             base.WriteToStream(writer);
             #region SubCategory
-            if (_subcategory == null)
+            if (subcategory == null)
             {
                 writer.Write((byte)0);
             }
             else
             {
                 writer.Write((byte)1);
-                writer.Write(_subcategory);
+                writer.Write(subcategory);
             }
             #endregion
             #region Code
-            if (_code == null)
+            if (code == null)
             {
                 writer.Write((byte)0);
             }
             else
             {
                 writer.Write((byte)1);
-                writer.Write(_code);
+                writer.Write(code);
             }
             #endregion
             #region File
-            if (_file == null)
+            if (file == null)
             {
                 writer.Write((byte)0);
             }
             else
             {
                 writer.Write((byte)1);
-                writer.Write(_file);
+                writer.Write(file);
             }
             #endregion
             #region ProjectFile
-            if (_projectFile == null)
+            if (projectFile == null)
             {
                 writer.Write((byte)0);
             }
             else
             {
                 writer.Write((byte)1);
-                writer.Write(_projectFile);
+                writer.Write(projectFile);
             }
             #endregion
-            writer.Write((Int32)_lineNumber);
-            writer.Write((Int32)_columnNumber);
-            writer.Write((Int32)_endLineNumber);
-            writer.Write((Int32)_endColumnNumber);
+            writer.Write((Int32)lineNumber);
+            writer.Write((Int32)columnNumber);
+            writer.Write((Int32)endLineNumber);
+            writer.Write((Int32)endColumnNumber);
         }
 
         /// <summary>
@@ -212,31 +212,31 @@ namespace Microsoft.Build.Framework
             #region SubCategory
             if (reader.ReadByte() == 0)
             {
-                _subcategory = null;
+                subcategory = null;
             }
             else
             {
-                _subcategory = reader.ReadString();
+                subcategory = reader.ReadString();
             }
             #endregion
             #region Code
             if (reader.ReadByte() == 0)
             {
-                _code = null;
+                code = null;
             }
             else
             {
-                _code = reader.ReadString();
+                code = reader.ReadString();
             }
             #endregion
             #region File
             if (reader.ReadByte() == 0)
             {
-                _file = null;
+                file = null;
             }
             else
             {
-                _file = reader.ReadString();
+                file = reader.ReadString();
             }
             #endregion
             #region ProjectFile
@@ -244,18 +244,18 @@ namespace Microsoft.Build.Framework
             {
                 if (reader.ReadByte() == 0)
                 {
-                    _projectFile = null;
+                    projectFile = null;
                 }
                 else
                 {
-                    _projectFile = reader.ReadString();
+                    projectFile = reader.ReadString();
                 }
             }
             #endregion
-            _lineNumber = reader.ReadInt32();
-            _columnNumber = reader.ReadInt32();
-            _endLineNumber = reader.ReadInt32();
-            _endColumnNumber = reader.ReadInt32();
+            lineNumber = reader.ReadInt32();
+            columnNumber = reader.ReadInt32();
+            endLineNumber = reader.ReadInt32();
+            endColumnNumber = reader.ReadInt32();
         }
         #endregion
         /// <summary>
@@ -265,7 +265,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _subcategory;
+                return subcategory;
             }
         }
 
@@ -276,7 +276,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _code;
+                return code;
             }
         }
 
@@ -287,7 +287,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _file;
+                return file;
             }
         }
 
@@ -298,7 +298,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _lineNumber;
+                return lineNumber;
             }
         }
 
@@ -309,7 +309,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _columnNumber;
+                return columnNumber;
             }
         }
 
@@ -320,7 +320,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _endLineNumber;
+                return endLineNumber;
             }
         }
 
@@ -331,7 +331,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _endColumnNumber;
+                return endColumnNumber;
             }
         }
 
@@ -342,12 +342,12 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _projectFile;
+                return projectFile;
             }
 
             set
             {
-                _projectFile = value;
+                projectFile = value;
             }
         }
     }

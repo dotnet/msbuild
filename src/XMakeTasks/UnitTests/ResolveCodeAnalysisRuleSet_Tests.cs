@@ -5,11 +5,10 @@ using System;
 using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
     public class ResolveAnalyzerRuleSet_Tests
     {
         private class TemporaryFile : IDisposable
@@ -46,7 +45,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void GetResolvedRuleSetPath_FullPath_NonExistent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -62,12 +61,12 @@ namespace Microsoft.Build.UnitTests
             bool result = task.Execute();
             string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-            Assert.AreEqual(expected: true, actual: result);
-            Assert.AreEqual(expected: null, actual: resolvedRuleSet);
+            Assert.Equal(expected: true, actual: result);
+            Assert.Equal(expected: null, actual: resolvedRuleSet);
             mockEngine.AssertLogContains("MSB3884");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetResolvedRuleSetPath_FullPath_Existent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -85,13 +84,13 @@ namespace Microsoft.Build.UnitTests
                 bool result = task.Execute();
                 string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-                Assert.AreEqual(expected: true, actual: result);
-                Assert.AreEqual(expected: codeAnalysisRuleSet, actual: resolvedRuleSet);
+                Assert.Equal(expected: true, actual: result);
+                Assert.Equal(expected: codeAnalysisRuleSet, actual: resolvedRuleSet);
                 mockEngine.AssertLogDoesntContain("MSB3884");
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void GetResolvedRuleSetPath_SimpleNameAlone_NonExistent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -105,12 +104,12 @@ namespace Microsoft.Build.UnitTests
             bool result = task.Execute();
             string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-            Assert.AreEqual(expected: true, actual: result);
-            Assert.AreEqual(expected: null, actual: resolvedRuleSet);
+            Assert.Equal(expected: true, actual: result);
+            Assert.Equal(expected: null, actual: resolvedRuleSet);
             mockEngine.AssertLogContains("MSB3884");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetResolvedRuleSetPath_SimpleNameAndProjectDirectory_Existent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -131,13 +130,13 @@ namespace Microsoft.Build.UnitTests
                 bool result = task.Execute();
                 string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-                Assert.AreEqual(expected: true, actual: result);
-                Assert.AreEqual(expected: codeAnalysisRuleSet, actual: resolvedRuleSet);
+                Assert.Equal(expected: true, actual: result);
+                Assert.Equal(expected: codeAnalysisRuleSet, actual: resolvedRuleSet);
                 mockEngine.AssertLogDoesntContain("MSB3884");
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void GetResolvedRuleSetPath_SimpleNameAndProjectDirectory_NonExistent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -154,12 +153,12 @@ namespace Microsoft.Build.UnitTests
             bool result = task.Execute();
             string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-            Assert.AreEqual(expected: true, actual: result);
-            Assert.AreEqual(expected: null, actual: resolvedRuleSet);
+            Assert.Equal(expected: true, actual: result);
+            Assert.Equal(expected: null, actual: resolvedRuleSet);
             mockEngine.AssertLogContains("MSB3884");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetResolvedRuleSetPath_SimpleNameAndDirectories_Existent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -180,13 +179,13 @@ namespace Microsoft.Build.UnitTests
                 bool result = task.Execute();
                 string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-                Assert.AreEqual(expected: true, actual: result);
-                Assert.AreEqual(expected: ruleSetFullPath, actual: resolvedRuleSet);
+                Assert.Equal(expected: true, actual: result);
+                Assert.Equal(expected: ruleSetFullPath, actual: resolvedRuleSet);
                 mockEngine.AssertLogDoesntContain("MSB3884");
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void GetResolvedRuleSetPath_SimpleNameAndDirectories_NonExistent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -202,12 +201,12 @@ namespace Microsoft.Build.UnitTests
             bool result = task.Execute();
             string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-            Assert.AreEqual(expected: true, actual: result);
-            Assert.AreEqual(expected: null, actual: resolvedRuleSet);
+            Assert.Equal(expected: true, actual: result);
+            Assert.Equal(expected: null, actual: resolvedRuleSet);
             mockEngine.AssertLogContains("MSB3884");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetResolvedRuleSetPath_RelativePath_WithProject_NonExistent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -224,12 +223,12 @@ namespace Microsoft.Build.UnitTests
             bool result = task.Execute();
             string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-            Assert.AreEqual(expected: true, actual: result);
-            Assert.AreEqual(expected: null, actual: resolvedRuleSet);
+            Assert.Equal(expected: true, actual: result);
+            Assert.Equal(expected: null, actual: resolvedRuleSet);
             mockEngine.AssertLogContains("MSB3884");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetResolvedRuleSetPath_RelativePath_WithProject_Existent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -252,13 +251,13 @@ namespace Microsoft.Build.UnitTests
                 bool result = task.Execute();
                 string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-                Assert.AreEqual(expected: true, actual: result);
-                Assert.AreEqual(expected: codeAnalysisRuleSet, actual: resolvedRuleSet);
+                Assert.Equal(expected: true, actual: result);
+                Assert.Equal(expected: codeAnalysisRuleSet, actual: resolvedRuleSet);
                 mockEngine.AssertLogDoesntContain("MSB3884");
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void GetResolvedRuleSetPath_RelativePath_NoProject()
         {
             MockEngine mockEngine = new MockEngine();
@@ -273,12 +272,12 @@ namespace Microsoft.Build.UnitTests
             bool result = task.Execute();
             string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-            Assert.AreEqual(expected: true, actual: result);
-            Assert.AreEqual(expected: null, actual: resolvedRuleSet);
+            Assert.Equal(expected: true, actual: result);
+            Assert.Equal(expected: null, actual: resolvedRuleSet);
             mockEngine.AssertLogContains("MSB3884");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetResolvedRuleSetPath_EmptyString()
         {
             MockEngine mockEngine = new MockEngine();
@@ -292,12 +291,12 @@ namespace Microsoft.Build.UnitTests
             bool result = task.Execute();
             string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-            Assert.AreEqual(expected: true, actual: result);
-            Assert.AreEqual(expected: null, actual: resolvedRuleSet);
+            Assert.Equal(expected: true, actual: result);
+            Assert.Equal(expected: null, actual: resolvedRuleSet);
             mockEngine.AssertLogDoesntContain("MSB3884");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetResolvedRuleSetPath_Null()
         {
             MockEngine mockEngine = new MockEngine();
@@ -311,8 +310,8 @@ namespace Microsoft.Build.UnitTests
             bool result = task.Execute();
             string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-            Assert.AreEqual(expected: true, actual: result);
-            Assert.AreEqual(expected: null, actual: resolvedRuleSet);
+            Assert.Equal(expected: true, actual: result);
+            Assert.Equal(expected: null, actual: resolvedRuleSet);
             mockEngine.AssertLogDoesntContain("MSB3884");
         }
     }

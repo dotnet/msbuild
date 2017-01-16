@@ -17,6 +17,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
    <!-- 
+        We are doing a cross-targeting build if there is no list of target frameworks specified
+        nor is there a current target framework being built individually. In that case, this import is
+        redirected to Microsoft.CSharp.CrossTargeting.targets.
+   -->
+   <PropertyGroup Condition="'$(TargetFrameworks)' != '' and '$(TargetFramework)' == ''">
+      <IsCrossTargetingBuild>true</IsCrossTargetingBuild>
+   </PropertyGroup>
+
+   <!--
         In VS 2010 SP1 and VS 2012, both supported for asset compatibility, the MSBuild installed 
         as part of them did not enforce using the local ToolsVersion (4.0) in all cases, but instead 
         just used whatever ToolsVersion was in the project file if it existed on the machine, and 
@@ -39,6 +48,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                  MSBuildToolsPath, which would be incorrect in this case -->
             <CscToolPath Condition="'$(CscToolPath)' == '' and '$(BuildingInsideVisualStudio)' != 'true'">$(MsBuildFrameworkToolsPath)</CscToolPath>
          </PropertyGroup>
+      </When>
+      <When Condition="'$(IsCrossTargetingBuild)' == 'true'">
+         <PropertyGroup>
+            <CSharpTargetsPath>$(MSBuildToolsPath)\Microsoft.CSharp.CrossTargeting.targets</CSharpTargetsPath>
+          </PropertyGroup>
       </When>
       <Otherwise>
          <PropertyGroup>

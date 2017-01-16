@@ -22,6 +22,11 @@ namespace Microsoft.Build.Tasks
     {
         #region Data
         /// <summary>
+        /// Environment variable name for the override error on missing reference assembly directory.
+        /// </summary>
+        private const string WARNONNOREFERENCEASSEMBLYDIRECTORY = "MSBUILDWARNONNOREFERENCEASSEMBLYDIRECTORY";
+
+        /// <summary>
         /// This is the sentinel assembly for .NET FX 3.5 SP1
         /// Used to determine if SP1 of 3.5 is installed
         /// </summary>
@@ -43,7 +48,7 @@ namespace Microsoft.Build.Tasks
         private IList<string> _tfmPathsNoProfile;
 
         /// <summary>
-        /// Target framework moniker string passd into the task
+        /// Target framework moniker string passed into the task
         /// </summary>
         private string _targetFrameworkMoniker;
 
@@ -241,7 +246,7 @@ namespace Microsoft.Build.Tasks
                     _tfmPathsNoProfile = GetPaths(_rootPath, monikerWithNoProfile);
                 }
 
-                // The path with out the profile is just the referecne assembly paths.
+                // The path with out the profile is just the reference assembly paths.
                 if (!targetingProfile)
                 {
                     _tfmPathsNoProfile = _tfmPaths;
@@ -281,10 +286,22 @@ namespace Microsoft.Build.Tasks
                 pathsToReturn = ToolLocationHelper.GetPathToReferenceAssemblies(rootPath, frameworkmoniker);
             }
 
-            // No reference assembly paths could be found, log a warning as there could be future errors which may be confusing because of this.
+            // No reference assembly paths could be found, log an error so an invalid build will not be produced.
+            // 1/26/16: Note this was changed from a warning to an error (see GitHub #173). Also added the escape hatch 
+            // (set MSBUILDWARNONNOREFERENCEASSEMBLYDIRECTORY = 1) in case this causes issues.
+            // TODO: This should be removed for Dev15
             if (pathsToReturn.Count == 0)
             {
-                Log.LogWarningWithCodeFromResources("GetReferenceAssemblyPaths.NoReferenceAssemblyDirectoryFound", frameworkmoniker.ToString());
+                var warn = Environment.GetEnvironmentVariable(WARNONNOREFERENCEASSEMBLYDIRECTORY);
+
+                if (string.Equals(warn, "1", StringComparison.Ordinal))
+                {
+                    Log.LogWarningWithCodeFromResources("GetReferenceAssemblyPaths.NoReferenceAssemblyDirectoryFound", frameworkmoniker.ToString());
+                }
+                else
+                {
+                    Log.LogErrorWithCodeFromResources("GetReferenceAssemblyPaths.NoReferenceAssemblyDirectoryFound", frameworkmoniker.ToString());
+                }
             }
 
             return pathsToReturn;

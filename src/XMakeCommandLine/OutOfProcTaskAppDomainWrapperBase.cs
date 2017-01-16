@@ -36,7 +36,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// This is the actual user task whose instance we will create and invoke Execute
         /// </summary>
-        private ITask _wrappedTask;
+        private ITask wrappedTask;
 
         /// <summary>
         /// This is an appDomain instance if any is created for running this task
@@ -52,20 +52,20 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Need to keep the build engine around in order to log from the task loader. 
         /// </summary>
-        private IBuildEngine _buildEngine;
+        private IBuildEngine buildEngine;
 
         /// <summary>
         /// Need to keep track of the task name also so that we can log valid information
         /// from the task loader. 
         /// </summary>
-        private string _taskName;
+        private string taskName;
 
         /// <summary>
         /// This is the actual user task whose instance we will create and invoke Execute
         /// </summary>
         public ITask WrappedTask
         {
-            get { return _wrappedTask; }
+            get { return wrappedTask; }
         }
 
         /// <summary>
@@ -107,11 +107,11 @@ namespace Microsoft.Build.CommandLine
                 IDictionary<string, TaskParameter> taskParams
             )
         {
-            _buildEngine = oopTaskHostNode;
-            _taskName = taskName;
+            buildEngine = oopTaskHostNode;
+            this.taskName = taskName;
 
             _taskAppDomain = null;
-            _wrappedTask = null;
+            wrappedTask = null;
 
             LoadedType taskType = null;
             try
@@ -170,7 +170,7 @@ namespace Microsoft.Build.CommandLine
             }
 
             TaskLoader.RemoveAssemblyResolver();
-            _wrappedTask = null;
+            wrappedTask = null;
         }
 
         /// <summary>
@@ -273,14 +273,14 @@ namespace Microsoft.Build.CommandLine
             )
         {
             _taskAppDomain = null;
-            _wrappedTask = null;
+            wrappedTask = null;
 
             try
             {
-                _wrappedTask = TaskLoader.CreateTask(taskType, taskName, taskFile, taskLine, taskColumn, new TaskLoader.LogError(LogErrorDelegate), appDomainSetup, true /* always out of proc */, out _taskAppDomain);
-                Type wrappedTaskType = _wrappedTask.GetType();
+                wrappedTask = TaskLoader.CreateTask(taskType, taskName, taskFile, taskLine, taskColumn, new TaskLoader.LogError(LogErrorDelegate), appDomainSetup, true /* always out of proc */, out _taskAppDomain);
+                Type wrappedTaskType = wrappedTask.GetType();
 
-                _wrappedTask.BuildEngine = oopTaskHostNode;
+                wrappedTask.BuildEngine = oopTaskHostNode;
             }
             catch (Exception e)
             {
@@ -311,8 +311,8 @@ namespace Microsoft.Build.CommandLine
             {
                 try
                 {
-                    PropertyInfo paramInfo = _wrappedTask.GetType().GetProperty(param.Key, BindingFlags.Instance | BindingFlags.Public);
-                    paramInfo.SetValue(_wrappedTask, (param.Value == null ? null : param.Value.WrappedParameter), null);
+                    PropertyInfo paramInfo = wrappedTask.GetType().GetProperty(param.Key, BindingFlags.Instance | BindingFlags.Public);
+                    paramInfo.SetValue(wrappedTask, (param.Value == null ? null : param.Value.WrappedParameter), null);
                 }
                 catch (Exception e)
                 {
@@ -349,7 +349,7 @@ namespace Microsoft.Build.CommandLine
                 }
 
                 // If it didn't crash and return before now, we're clear to go ahead and execute here. 
-                success = _wrappedTask.Execute();
+                success = wrappedTask.Execute();
             }
             catch (Exception e)
             {
@@ -361,7 +361,7 @@ namespace Microsoft.Build.CommandLine
                 return new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedDuringExecution, e);
             }
 
-            PropertyInfo[] finalPropertyValues = _wrappedTask.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
+            PropertyInfo[] finalPropertyValues = wrappedTask.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
 
             IDictionary<string, Object> finalParameterValues = new Dictionary<string, Object>(StringComparer.OrdinalIgnoreCase);
             foreach (PropertyInfo value in finalPropertyValues)
@@ -371,7 +371,7 @@ namespace Microsoft.Build.CommandLine
                 {
                     try
                     {
-                        finalParameterValues[value.Name] = value.GetValue(_wrappedTask, null);
+                        finalParameterValues[value.Name] = value.GetValue(wrappedTask, null);
                     }
                     catch (Exception e)
                     {
@@ -396,7 +396,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void LogErrorDelegate(string taskLocation, int taskLine, int taskColumn, string message, params object[] messageArgs)
         {
-            _buildEngine.LogErrorEvent(new BuildErrorEventArgs(
+            buildEngine.LogErrorEvent(new BuildErrorEventArgs(
                                                     null,
                                                     null,
                                                     taskLocation,
@@ -406,7 +406,7 @@ namespace Microsoft.Build.CommandLine
                                                     0,
                                                     ResourceUtilities.FormatString(AssemblyResources.GetString(message), messageArgs),
                                                     null,
-                                                    _taskName
+                                                    taskName
                                                 )
                                             );
         }

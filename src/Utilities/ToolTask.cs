@@ -63,6 +63,8 @@ namespace Microsoft.Build.Utilities
     /// </remarks>
     public abstract class ToolTask : Task, ICancelableTask
     {
+        private static bool s_preserveTempFiles = String.Equals(Environment.GetEnvironmentVariable("MSBUILDPRESERVETOOLTEMPFILES"), "1", StringComparison.Ordinal);
+
         #region Constructors
 
         /// <summary>
@@ -930,14 +932,18 @@ namespace Microsoft.Build.Utilities
         /// <param name="filename">File to delete</param>
         protected void DeleteTempFile(string fileName)
         {
+            if (s_preserveTempFiles)
+            {
+                Log.LogMessageFromText($"Preserving temporary file '{fileName}'", MessageImportance.Low);
+                return;
+            }
+
             try
             {
                 File.Delete(fileName);
             }
-            catch (Exception e) // Catching Exception, but rethrowing unless it's an IO related exception.
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                    throw;
                 // Warn only -- occasionally temp files fail to delete because of virus checkers; we 
                 // don't want the build to fail in such cases
                 LogShared.LogWarningWithCodeFromResources("Shared.FailedDeletingTempFile", fileName, e.Message);
@@ -1650,7 +1656,7 @@ namespace Microsoft.Build.Utilities
                 // Clean up after ourselves.
                 if (_temporaryBatchFile != null && File.Exists(_temporaryBatchFile))
                 {
-                    File.Delete(_temporaryBatchFile);
+                    DeleteTempFile(_temporaryBatchFile);
                 }
             }
         } // Execute()

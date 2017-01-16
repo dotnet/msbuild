@@ -1,6 +1,6 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="ProjectChooseElement_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // </copyright>
 // <summary>Tests for the ProjectChooseElement class (and for ProjectWhenElement and ProjectOtherwiseElement).</summary>
 //-----------------------------------------------------------------------
@@ -16,59 +16,62 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
     /// Tests for the ProjectChooseElement class (and for ProjectWhenElement and ProjectOtherwiseElement)
     /// </summary>
-    [TestClass]
     public class ProjectChooseElement_Tests
     {
         /// <summary>
         /// Read choose with unexpected attribute
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidAttribute()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Choose X='Y'/>
                     </Project>
                 ";
 
-            ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Read choose with unexpected Condition attribute.
         /// Condition is not currently allowed on Choose.
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidConditionAttribute()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Choose Condition='true'/>
                     </Project>
                 ";
 
-            ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Read choose with unexpected child
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidChild()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Choose>
                             <X/>
@@ -76,17 +79,19 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Read choose with a When containing no Condition attribute
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidWhen()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Choose>
                             <When>
@@ -99,17 +104,19 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Read choose with only an otherwise
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidOnlyOtherwise()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Choose>
                             <Otherwise/>
@@ -117,17 +124,19 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Read choose with two otherwises
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidTwoOtherwise()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Choose>
                             <Otherwise/>
@@ -136,17 +145,19 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Read choose with otherwise before when
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidOtherwiseBeforeWhen()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Choose>
                             <Otherwise/>
@@ -155,35 +166,38 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Read empty choose
         /// </summary>
         /// <remarks>
         /// One might think this should work but 2.0 required at least one When.
         /// </remarks>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidEmptyChoose()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Choose/>
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            ProjectChooseElement choose = (ProjectChooseElement)Helpers.GetFirst(project.Children);
+                ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectChooseElement choose = (ProjectChooseElement)Helpers.GetFirst(project.Children);
 
-            Assert.AreEqual(null, Helpers.GetFirst(choose.Children));
+                Assert.Equal(null, Helpers.GetFirst(choose.Children));
+            }
+           );
         }
-
         /// <summary>
         /// Read choose with only a when
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReadChooseOnlyWhen()
         {
             string content = @"
@@ -197,14 +211,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
             ProjectChooseElement choose = (ProjectChooseElement)Helpers.GetFirst(project.Children);
 
-            Assert.AreEqual(1, Helpers.Count(choose.WhenElements));
-            Assert.AreEqual(null, choose.OtherwiseElement);
+            Assert.Equal(1, Helpers.Count(choose.WhenElements));
+            Assert.Equal(null, choose.OtherwiseElement);
         }
 
         /// <summary>
         /// Read basic choose
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReadChooseBothWhenOtherwise()
         {
             string content = @"
@@ -221,40 +235,42 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectChooseElement choose = (ProjectChooseElement)Helpers.GetFirst(project.Children);
 
             List<ProjectWhenElement> whens = Helpers.MakeList(choose.WhenElements);
-            Assert.AreEqual(2, whens.Count);
-            Assert.AreEqual("c1", whens[0].Condition);
-            Assert.AreEqual("c2", whens[1].Condition);
-            Assert.IsNotNull(choose.OtherwiseElement);
+            Assert.Equal(2, whens.Count);
+            Assert.Equal("c1", whens[0].Condition);
+            Assert.Equal("c2", whens[1].Condition);
+            Assert.NotNull(choose.OtherwiseElement);
         }
 
         /// <summary>
         /// Test stack overflow is prevented.
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ExcessivelyNestedChoose()
         {
-            StringBuilder builder1 = new StringBuilder();
-            StringBuilder builder2 = new StringBuilder();
-
-            for (int i = 0; i < 52; i++)
+            Assert.Throws<InvalidProjectFileException>(() =>
             {
-                builder1.Append("<Choose><When Condition='true'>");
-                builder2.Append("</When></Choose>");
+                StringBuilder builder1 = new StringBuilder();
+                StringBuilder builder2 = new StringBuilder();
+
+                for (int i = 0; i < 52; i++)
+                {
+                    builder1.Append("<Choose><When Condition='true'>");
+                    builder2.Append("</When></Choose>");
+                }
+
+                string content = "<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>";
+                content += builder1.ToString();
+                content += builder2.ToString();
+                content += @"</Project>";
+
+                ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
             }
-
-            string content = "<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>";
-            content += builder1.ToString();
-            content += builder2.ToString();
-            content += @"</Project>";
-
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+           );
         }
-
         /// <summary>
         /// Setting a When's condition should dirty the project
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SettingWhenConditionDirties()
         {
             string content = @"
@@ -274,11 +290,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectWhenElement when = Helpers.GetFirst(choose.WhenElements);
             when.Condition = "false";
 
-            Assert.AreEqual("v1", project.GetPropertyValue("p"));
+            Assert.Equal("v1", project.GetPropertyValue("p"));
 
             project.ReevaluateIfNecessary();
 
-            Assert.AreEqual(String.Empty, project.GetPropertyValue("p"));
+            Assert.Equal(String.Empty, project.GetPropertyValue("p"));
         }
     }
 }

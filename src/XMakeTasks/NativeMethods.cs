@@ -286,7 +286,6 @@ namespace Microsoft.Build.Tasks
         afRetargetable = 0x0100            // The assembly can be retargeted (at runtime) to an
                                            //  assembly from a different publisher.
     };
-    [StructLayout(LayoutKind.Sequential)]
 
     /*
     From cor.h:
@@ -304,6 +303,7 @@ namespace Microsoft.Build.Tasks
             ULONG       ulOS;                   // [IN/OUT]Size of the OSINFO array/Actual # of entries filled in.
         } ASSEMBLYMETADATA;
     */
+    [StructLayout(LayoutKind.Sequential)]
     internal struct ASSEMBLYMETADATA
     {
         public UInt16 usMajorVersion;
@@ -493,6 +493,12 @@ namespace Microsoft.Build.Tasks
         public IntPtr hThread;
         public int dwProcessId;
         public int dwThreadId;
+    }
+
+    internal enum SymbolicLink
+    {
+        File = 0,
+        Directory = 1
     }
 
     /// <summary>
@@ -769,6 +775,12 @@ namespace Microsoft.Build.Tasks
         //------------------------------------------------------------------------------
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         internal static extern bool CreateHardLink(string newFileName, string exitingFileName, IntPtr securityAttributes);
+
+        //------------------------------------------------------------------------------
+        // CreateSymbolicLink
+        //------------------------------------------------------------------------------
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        internal static extern bool CreateSymbolicLink(string symLinkFileName, string targetFileName, SymbolicLink dwFlags);
 
         //------------------------------------------------------------------------------
         // MoveFileEx

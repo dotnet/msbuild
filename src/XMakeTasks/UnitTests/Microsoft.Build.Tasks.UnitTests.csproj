@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -8,12 +8,15 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Microsoft.Build.Tasks.UnitTests</RootNamespace>
     <AssemblyName>Microsoft.Build.Tasks.UnitTests</AssemblyName>
+    <IsTestProject>true</IsTestProject>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'" />
   <ItemGroup>
     <Compile Include="..\..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
@@ -33,6 +36,23 @@
     <Compile Include="Al_Tests.cs" />
     <Compile Include="AppConfig_Tests.cs" />
     <Compile Include="AspNetCompiler_Tests.cs" />
+    <Compile Include="AssemblyDependency\AssemblyFoldersFromConfig_Tests.cs" />
+    <Compile Include="AssemblyDependency\FilePrimary.cs" />
+    <Compile Include="AssemblyDependency\GlobalAssemblyCacheTests.cs" />
+    <Compile Include="AssemblyDependency\InstalledSDKResolverFixture.cs" />
+    <Compile Include="AssemblyDependency\Miscellaneous.cs" />
+    <Compile Include="AssemblyDependency\NonSpecificVersionStrictPrimary.cs" />
+    <Compile Include="AssemblyDependency\Perf.cs" />
+    <Compile Include="AssemblyDependency\ReferenceTests.cs" />
+    <Compile Include="AssemblyDependency\ResolveAssemblyReferenceTestFixture.cs" />
+    <Compile Include="AssemblyDependency\SpecificVersionPrimary.cs" />
+    <Compile Include="AssemblyDependency\StronglyNamedDependency.cs" />
+    <Compile Include="AssemblyDependency\StronglyNamedDependencyAppConfig.cs" />
+    <Compile Include="AssemblyDependency\StronglyNamedDependencyAutoUnify.cs" />
+    <Compile Include="AssemblyDependency\VerifyIgnoreVersionForFrameworkReference.cs" />
+    <Compile Include="AssemblyDependency\VerifyTargetFrameworkAttribute.cs" />
+    <Compile Include="AssemblyDependency\VerifyTargetFrameworkHigherThanRedist.cs" />
+    <Compile Include="AssemblyDependency\WinMDTests.cs" />
     <Compile Include="AssemblyIdentity_Tests.cs" />
     <Compile Include="AssemblyRefs.cs" />
     <Compile Include="AssemblyRegistrationCache_Tests.cs" />
@@ -59,7 +79,6 @@
     <Compile Include="CreateItem_Tests.cs" />
     <Compile Include="CreateProperty_Tests.cs" />
     <Compile Include="CreateVisualBasicManifestResourceName_Tests.cs" />
-    <Compile Include="Csc_Tests.cs" />
     <Compile Include="CSharpParserUtilitites_Tests.cs" />
     <Compile Include="CSharpTokenizer_Tests.cs" />
     <Compile Include="Culture_Tests.cs" />
@@ -75,30 +94,33 @@
     <Compile Include="FindAppConfigFile_Tests.cs" />
     <Compile Include="FindInvalidProjectReferences_Tests.cs" />
     <Compile Include="FindUnderPath_Tests.cs" />
+    <Compile Include="GenerateBindingRedirects_Tests.cs" />
     <Compile Include="GenerateResourceOutOfProc_Tests.cs" />
     <Compile Include="GenerateResource_Tests.cs" />
     <Compile Include="GetInstalledSDKLocations_Tests.cs" />
     <Compile Include="GetReferencePaths_Tests.cs" />
     <Compile Include="GetSDKReference_Tests.cs" />
+    <Compile Include="DirectoryBuildProjectImportTestBase.cs" />
+    <Compile Include="DirectoryBuildTargetsImportTests.cs" />
     <Compile Include="LC_Tests.cs" />
     <Compile Include="MakeDir_Tests.cs" />
-    <Compile Include="ManagedCompiler_Tests.cs" />
     <Compile Include="ManifestWriter_Tests.cs" />
-    <Compile Include="MockCscHostObject.cs" />
+    <Compile Include="DirectoryBuildPropsImportTests.cs" />
     <Compile Include="MockFaultInjectionHelper.cs" />
     <Compile Include="MockTypeInfo.cs" />
     <Compile Include="MockTypeLib.cs" />
     <Compile Include="MockUnmanagedMemoryHelper.cs" />
-    <Compile Include="MockVbcHostObject.cs" />
     <Compile Include="Move_Tests.cs" />
     <Compile Include="MSBuild_Tests.cs" />
+    <Compile Include="ProjectExtensionsImportTestBase.cs" />
+    <Compile Include="ProjectExtensionsPropsImportTest.cs" />
+    <Compile Include="ProjectExtensionsTargetsImportTest.cs" />
     <Compile Include="PropertyParser_Tests.cs" />
     <Compile Include="ReadLinesFromFile_Tests.cs" />
     <Compile Include="RemoveDir_Tests.cs" />
     <Compile Include="RemoveDuplicates_Tests.cs" />
     <Compile Include="ResGen_Tests.cs" />
     <Compile Include="ResGenDependencies_Tests.cs" />
-    <Compile Include="ResolveAssemblyReference_Tests.cs" />
     <Compile Include="ResolveCodeAnalysisRuleSet_Tests.cs" />
     <!--
     <Compile Include="ResolveAssemblyReference_Tests.cs" />
@@ -114,7 +136,6 @@
     <Compile Include="ToolTaskExtension_Tests.cs" />
     <Compile Include="Touch_Tests.cs" />
     <Compile Include="TrustInfo_Tests.cs" />
-    <Compile Include="Vbc_Tests.cs" />
     <Compile Include="VisualBasicParserUtilitites_Tests.cs" />
     <Compile Include="VisualBasicTokenizer_Tests.cs" />
     <Compile Include="WinMDExp_Tests.cs" />
@@ -136,9 +157,12 @@
       <Link>App.config</Link>
       <SubType>Designer</SubType>
     </None>
+    <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework" />
+    <Reference Include="Microsoft.Build.Tasks.CodeAnalysis">
+      <HintPath>$(CompilerToolsDir)\Microsoft.Build.Tasks.CodeAnalysis.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
@@ -161,16 +185,15 @@
       <Project>{59A73FE0-D3B7-4299-9063-3A587D429AF4}</Project>
       <Name>Microsoft.Build.Tasks</Name>
     </ProjectReference>
-	    
-    <!-- If TargetRetailBuildFramework is set to true, reference the public key version. Otherwise reference the project. -->
-    <Reference Condition=" '$(TargetRetailBuildFramework)' == 'true' " Include="Microsoft.Build.Framework, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
-    <ProjectReference Condition=" '$(TargetRetailBuildFramework)' != 'true' " Include="..\..\Framework\Microsoft.Build.Framework.csproj">
+    <ProjectReference Include="..\..\Framework\Microsoft.Build.Framework.csproj">
       <Project>{571F09DB-A81A-4444-945C-6F7B530054CD}</Project>
       <Name>Microsoft.Build.Framework</Name>
     </ProjectReference>
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

@@ -81,8 +81,8 @@ namespace Microsoft.Build.Logging
             (
                 verbosity,
                 new WriteHandler(Console.Out.Write),
-                new ColorSetter(SetColor),
-                new ColorResetter(ResetColor)
+                new ColorSetter(BaseConsoleLogger.SetColor),
+                new ColorResetter(BaseConsoleLogger.ResetColor)
             )
         {
             // do nothing
@@ -120,6 +120,7 @@ namespace Microsoft.Build.Logging
             {
                 bool useMPLogger = false;
                 bool disableConsoleColor = false;
+                bool forceConsoleColor = false;
                 if (!string.IsNullOrEmpty(_parameters))
                 {
                     string[] parameterComponents = _parameters.Split(BaseConsoleLogger.parameterDelimiters);
@@ -139,11 +140,20 @@ namespace Microsoft.Build.Logging
                             {
                                 disableConsoleColor = true;
                             }
+                            if (0 == String.Compare(parameterComponents[param], "FORCECONSOLECOLOR", StringComparison.OrdinalIgnoreCase))
+                            {
+                                forceConsoleColor = true;
+                            }
                         }
                     }
                 }
 
-                if (disableConsoleColor)
+                if (forceConsoleColor)
+                {
+                    _colorSet = new ColorSetter(BaseConsoleLogger.SetColorANSI);
+                    _colorReset = new ColorResetter(BaseConsoleLogger.ResetColorANSI);
+                }
+                else if (disableConsoleColor)
                 {
                     _colorSet = new ColorSetter(BaseConsoleLogger.DontSetColor);
                     _colorReset = new ColorResetter(BaseConsoleLogger.DontResetColor);
@@ -475,66 +485,6 @@ namespace Microsoft.Build.Logging
             InitializeBaseConsoleLogger(); // for compat: see DDB#136924
 
             _consoleLogger.CustomEventHandler(sender, e);
-        }
-
-        /// <summary>
-        /// Sets foreground color to color specified
-        /// </summary>
-        /// <param name="c">foreground color</param>
-        internal static void SetColor(ConsoleColor c)
-        {
-            try
-            {
-                Console.ForegroundColor =
-                            TransformColor(c, Console.BackgroundColor);
-            }
-            catch (IOException)
-            {
-                // The color could not be set, no reason to crash
-            }
-        }
-
-        /// <summary>
-        /// Resets the color
-        /// </summary>
-        internal static void ResetColor()
-        {
-            try
-            {
-                Console.ResetColor();
-            }
-            catch (IOException)
-            {
-                // The color could not be reset, no reason to crash
-            }
-        }
-
-
-        /// <summary>
-        /// Changes the foreground color to black if the foreground is the
-        /// same as the background. Changes the foreground to white if the
-        /// background is black.
-        /// </summary>
-        /// <param name="foreground">foreground color for black</param>
-        /// <param name="background">current background</param>
-        private static ConsoleColor TransformColor(ConsoleColor foreground,
-                                                   ConsoleColor background)
-        {
-            ConsoleColor result = foreground; //typically do nothing ...
-
-            if (foreground == background)
-            {
-                if (background != ConsoleColor.Black)
-                {
-                    result = ConsoleColor.Black;
-                }
-                else
-                {
-                    result = ConsoleColor.Gray;
-                }
-            }
-
-            return result;
         }
 
         #endregion

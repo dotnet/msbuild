@@ -69,11 +69,11 @@ namespace Microsoft.Build.Framework
         )
             : base(message, helpKeyword, senderName, eventTimestamp)
         {
-            _projectFile = projectFile;
-            _succeeded = succeeded;
+            this.projectFile = projectFile;
+            this.succeeded = succeeded;
         }
 
-        private string _projectFile;
+        private string projectFile;
 
         /// <summary>
         /// Project name
@@ -82,11 +82,11 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _projectFile;
+                return projectFile;
             }
         }
 
-        private bool _succeeded;
+        private bool succeeded;
 
         /// <summary>
         /// True if project built successfully, false otherwise
@@ -95,7 +95,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _succeeded;
+                return succeeded;
             }
         }
     }

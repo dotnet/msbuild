@@ -20,7 +20,7 @@ namespace Microsoft.Build.Execution
     /// Wraps an unevaluated itemgroup under a target.
     /// Immutable.
     /// </summary>
-    [DebuggerDisplay("Condition={condition}")]
+    [DebuggerDisplay("Condition={_condition}")]
     public class ProjectItemGroupTaskInstance : ProjectTargetInstanceChild
     {
         /// <summary>

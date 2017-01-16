@@ -9,19 +9,14 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 using System.IO;
 using System.IO.Pipes;
 using System.Diagnostics;
 using System.Threading;
 using System.Runtime.InteropServices;
-using System.Security;
-using System.Security.AccessControl;
 using System.Security.Principal;
-using System.Security.Permissions;
 
 using Microsoft.Build.Shared;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Internal;
 
@@ -309,15 +304,8 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 CommunicationsUtilities.Trace("Writing handshake to pipe {0}", pipeName);
-#if true
                 nodeStream.WriteLongForHandshake(hostHandshake);
-#else
-                // When the 4th and subsequent node start up, we see this taking a long period of time (0.5s or greater.)  This is strictly for debugging purposes.
-                DateTime writeStart = DateTime.UtcNow;
-                nodeStream.WriteLong(HostHandshake);
-                DateTime writeEnd = DateTime.UtcNow;
-                Console.WriteLine("Node ProcessId {0} WriteLong {1}", nodeProcessId, (writeEnd - writeStart).TotalSeconds);
-#endif
+
                 CommunicationsUtilities.Trace("Reading handshake from pipe {0}", pipeName);
                 long handshake = nodeStream.ReadLongForHandshake();
 
@@ -373,7 +361,7 @@ namespace Microsoft.Build.BackEnd
             commandLineArgs = msbuildLocation + " " + commandLineArgs;
 
             BackendNativeMethods.STARTUP_INFO startInfo = new BackendNativeMethods.STARTUP_INFO();
-            startInfo.cb = Marshal.SizeOf(startInfo);
+            startInfo.cb = Marshal.SizeOf<BackendNativeMethods.STARTUP_INFO>();
 
             // Null out the process handles so that the parent process does not wait for the child process
             // to exit before it can exit.
@@ -394,8 +382,8 @@ namespace Microsoft.Build.BackEnd
 
             BackendNativeMethods.SECURITY_ATTRIBUTES processSecurityAttributes = new BackendNativeMethods.SECURITY_ATTRIBUTES();
             BackendNativeMethods.SECURITY_ATTRIBUTES threadSecurityAttributes = new BackendNativeMethods.SECURITY_ATTRIBUTES();
-            processSecurityAttributes.nLength = Marshal.SizeOf(processSecurityAttributes);
-            threadSecurityAttributes.nLength = Marshal.SizeOf(threadSecurityAttributes);
+            processSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
+            threadSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
 
             BackendNativeMethods.PROCESS_INFORMATION processInfo = new BackendNativeMethods.PROCESS_INFORMATION();
 

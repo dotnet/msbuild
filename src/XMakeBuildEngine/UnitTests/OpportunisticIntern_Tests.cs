@@ -6,25 +6,23 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using Microsoft.Build;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
     public class OpportunisticIntern_Tests
     {
         private static bool IsInternable(OpportunisticIntern.IInternable internable)
         {
             string i1 = OpportunisticIntern.InternableToString(internable);
             string i2 = OpportunisticIntern.InternableToString(internable);
-            Assert.AreEqual(i1, i2); // No matter what, the same string value should return.
+            Assert.Equal(i1, i2); // No matter what, the same string value should return.
             return Object.ReferenceEquals(i1, i2);
         }
 
         private static void AssertInternable(OpportunisticIntern.IInternable internable)
         {
-            Assert.IsTrue(IsInternable(internable));
+            Assert.True(IsInternable(internable));
         }
 
         private static void AssertInternable(StringBuilder sb)
@@ -36,7 +34,7 @@ namespace Microsoft.Build.UnitTests
         {
             var target = new OpportunisticIntern.CharArrayInternTarget(ch, startIndex, count);
             AssertInternable(target);
-            Assert.IsTrue(target.Length == count);
+            Assert.Equal(target.Length, count);
 
             return target.ExpensiveConvertToString();
         }
@@ -49,7 +47,7 @@ namespace Microsoft.Build.UnitTests
 
         private static void AssertNotInternable(OpportunisticIntern.IInternable internable)
         {
-            Assert.IsFalse(IsInternable(internable));
+            Assert.False(IsInternable(internable));
         }
 
         private static void AssertNotInternable(StringBuilder sb)
@@ -71,29 +69,29 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test interning segment of char array
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SubArray()
         {
             var result = AssertInternable(new char[] { 'a', 't', 'r', 'u', 'e' }, 1, 4);
 
-            Assert.AreEqual(result, "true");
+            Assert.Equal(result, "true");
         }
 
         /// <summary>
         /// Test interning segment of char array
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SubArray2()
         {
             var result = AssertInternable(new char[] { 'a', 't', 'r', 'u', 'e', 'x' }, 1, 4);
 
-            Assert.AreEqual(result, "true");
+            Assert.Equal(result, "true");
         }
 
         /// <summary>
         /// Test a single know-to-intern tiny string to verify the mechanism.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void InternableTinyString()
         {
             AssertInternable("true");
@@ -102,7 +100,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test a single known-to-not-intern tiny string to verify the mechanism.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void NonInternableTinyString()
         {
             AssertNotInternable("1234");
@@ -111,7 +109,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// This is the list of hard-coded interns. They should report interned even though they are too small for normal interning.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void KnownInternableTinyStrings()
         {
             AssertInternable("C#");
@@ -137,7 +135,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test a set of strings that are similar to eachother
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void InternableDifferingOnlyByNthCharacter()
         {
             string test = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890!@#$%^&*()_+ABCDEFGHIJKLMNOPQRSTUVabcdefghijklmnopqrstuvwxyz0150";
@@ -151,7 +149,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test The empty string
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void StringDotEmpty()
         {
             AssertInternable(String.Empty);
@@ -160,7 +158,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test an empty string.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DoubleDoubleQuotes()
         {
             AssertInternable("");

@@ -4,18 +4,17 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 
 using Microsoft.Build.Logging;
 using Microsoft.Build.Framework;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
     public class LoggerDescription_Tests
     {
-        [TestMethod]
+        [Fact]
         public void LoggerDescriptionCustomSerialization()
         {
             string className = "Class";
@@ -37,12 +36,12 @@ namespace Microsoft.Build.UnitTests
                 LoggerDescription description2 = new LoggerDescription();
                 description2.CreateFromStream(reader);
                 long streamReadEndPosition = stream.Position;
-                Assert.IsTrue(streamWriteEndPosition == streamReadEndPosition, "Stream end positions should be equal");
+                Assert.Equal(streamWriteEndPosition, streamReadEndPosition); // "Stream end positions should be equal"
 
-                Assert.IsTrue(description.Verbosity == description2.Verbosity, "Expected Verbosity to Match");
-                Assert.IsTrue(description.LoggerId == description2.LoggerId, "Expected Verbosity to Match");
-                Assert.IsTrue(string.Compare(description.LoggerSwitchParameters, description2.LoggerSwitchParameters, StringComparison.OrdinalIgnoreCase) == 0, "Expected LoggerSwitchParameters to Match");
-                Assert.IsTrue(string.Compare(description.Name, description2.Name, StringComparison.OrdinalIgnoreCase) == 0, "Expected Name to Match");
+                Assert.Equal(description.Verbosity, description2.Verbosity); // "Expected Verbosity to Match"
+                Assert.Equal(description.LoggerId, description2.LoggerId); // "Expected Verbosity to Match"
+                Assert.Equal(0, string.Compare(description.LoggerSwitchParameters, description2.LoggerSwitchParameters, StringComparison.OrdinalIgnoreCase)); // "Expected LoggerSwitchParameters to Match"
+                Assert.Equal(0, string.Compare(description.Name, description2.Name, StringComparison.OrdinalIgnoreCase)); // "Expected Name to Match"
             }
             finally
             {

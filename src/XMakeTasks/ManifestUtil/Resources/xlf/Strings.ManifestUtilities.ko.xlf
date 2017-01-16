@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="../Strings.ManifestUtilities.resx">
+    <body>
+      <group id="MICROSOFT.BUILD.TASKS/MANIFESTUTIL/RESOURCES/STRINGS.RESX" datatype="resx" />
+      <trans-unit id="ComImporter.LocalServerNotSupported">
+        <source>Out of process servers are not supported</source>
+        <target state="translated">Out-of-process 서버는 지원되지 않습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ComImporter.MissingValue">
+        <source>Registry key '{0}' is missing value '{1}'.</source>
+        <target state="translated">레지스트리 키 '{0}'에 '{1}' 값이 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ComImporter.NoRegisteredClasses">
+        <source>No registered classes were detected for this component.</source>
+        <target state="translated">이 구성 요소에 대해 등록된 클래스가 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ComImporter.ProtectedFile">
+        <source>Components under system file protection should not be isolated.</source>
+        <target state="translated">시스템 파일 보호에 의해 보호되는 구성 요소는 격리하면 안 됩니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ComImporter.TypeLibraryLoadFailure">
+        <source>Could not load type library.</source>
+        <target state="translated">형식 라이브러리를 로드할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ComImporter.SubKeyNotImported">
+        <source>Registry key '{0}' was not imported.</source>
+        <target state="translated">레지스트리 키 '{0}'을(를) 가져오지 않았습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ComImporter.ValueNotImported">
+        <source>Registry value '{0}' was not imported.</source>
+        <target state="translated">레지스트리 값 '{0}'을(를) 가져오지 않았습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SecurityUtil.SignTargetNotFound">
+        <source>The file to be signed {0} could not be found.</source>
+        <target state="translated">서명할 파일({0})을 찾을 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SecurityUtil.SigntoolFail">
+        <source>Failed to sign {0}. {1}</source>
+        <target state="translated">{0}에 서명하지 못했습니다. {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SecurityUtil.SigntoolWarning">
+        <source>Warning while signing {0}. {1}</source>
+        <target state="translated">{0}에 서명하는 동안 경고가 발생했습니다. {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SecurityUtil.SigntoolNotFound">
+        <source>SignTool.exe was not found at path {0}.</source>
+        <target state="translated">SignTool.exe를 {0} 경로에서 찾을 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SecurityUtil.TimestampUrlNotFound">
+        <source>Timestamp URL server name or address could not be resolved.</source>
+        <target state="translated">타임스탬프 URL 서버 이름 또는 주소를 확인할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SecurityUtil.OnlyRSACertsAreAllowed">
+        <source>Only certificates using RSA encryption are valid for signing ClickOnce manifests.</source>
+        <target state="translated">RSA 암호화를 사용하는 인증서만 ClickOnce 매니페스트 서명에 사용할 수 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TrustInfo.RequestedExecutionLevelComment">
+        <source>
+          UAC Manifest Options
+          If you want to change the Windows User Account Control level replace the 
+          requestedExecutionLevel node with one of the following.
+
+        &lt;requestedExecutionLevel  level="asInvoker" uiAccess="false" /&gt;
+        &lt;requestedExecutionLevel  level="requireAdministrator" uiAccess="false" /&gt;
+        &lt;requestedExecutionLevel  level="highestAvailable" uiAccess="false" /&gt;
+
+         If you want to utilize File and Registry Virtualization for backward 
+         compatibility then delete the requestedExecutionLevel node.
+    </source>
+        <target state="translated">
+          UAC 매니페스트 옵션
+          Windows 사용자 계정 컨트롤 수준을 변경하려면 
+          requestedExecutionLevel 노드를 다음 중 하나로 바꾸세요.
+
+        &lt;requestedExecutionLevel  level="asInvoker" uiAccess="false" /&gt;
+        &lt;requestedExecutionLevel  level="requireAdministrator" uiAccess="false" /&gt;
+        &lt;requestedExecutionLevel  level="highestAvailable" uiAccess="false" /&gt;
+
+         이전 버전과의 호환성을 위해 파일 및 레지스트리 가상화를 사용하려면 
+         requestedExecutionLevel 노드를 삭제하세요.
+    </target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

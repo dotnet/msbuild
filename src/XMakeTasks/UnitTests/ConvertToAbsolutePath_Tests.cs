@@ -4,21 +4,19 @@
 using System;
 using System.IO;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
     sealed public class ConvertToAbsolutePath_Tests
     {
         /// <summary>
         /// Passing in a relative path (expecting an absolute back)
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void RelativePath()
         {
             string fileName = ObjectModelHelpers.CreateFileInTempProjectDirectory("file.temp", "foo");
@@ -32,15 +30,15 @@ namespace Microsoft.Build.UnitTests
             {
                 Directory.SetCurrentDirectory(ObjectModelHelpers.TempProjectDir);
                 t.Paths = new ITaskItem[] { new TaskItem(@"file.temp") };
-                Assert.IsTrue(t.Execute(), "success");
+                Assert.True(t.Execute()); // "success"
             }
             finally
             {
                 Directory.SetCurrentDirectory(currentDirectory);
             }
 
-            Assert.AreEqual(1, t.AbsolutePaths.Length);
-            Assert.AreEqual(testFile.FullName, t.AbsolutePaths[0].ItemSpec);
+            Assert.Equal(1, t.AbsolutePaths.Length);
+            Assert.Equal(testFile.FullName, t.AbsolutePaths[0].ItemSpec);
 
             ObjectModelHelpers.DeleteTempProjectDirectory();
         }
@@ -48,7 +46,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Passing in a relative path (expecting an absolute back)
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void RelativePathWithEscaping()
         {
             string fileName = ObjectModelHelpers.CreateFileInTempProjectDirectory("file%3A.temp", "foo");
@@ -62,15 +60,15 @@ namespace Microsoft.Build.UnitTests
             {
                 Directory.SetCurrentDirectory(ObjectModelHelpers.TempProjectDir);
                 t.Paths = new ITaskItem[] { new TaskItem(@"file%253A.temp") };
-                Assert.IsTrue(t.Execute(), "success");
+                Assert.True(t.Execute()); // "success"
             }
             finally
             {
                 Directory.SetCurrentDirectory(currentDirectory);
             }
 
-            Assert.AreEqual(1, t.AbsolutePaths.Length);
-            Assert.AreEqual(testFile.FullName, t.AbsolutePaths[0].ItemSpec);
+            Assert.Equal(1, t.AbsolutePaths.Length);
+            Assert.Equal(testFile.FullName, t.AbsolutePaths[0].ItemSpec);
 
             ObjectModelHelpers.DeleteTempProjectDirectory();
         }
@@ -78,7 +76,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Passing in a absolute path (expecting an absolute back)
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void AbsolutePath()
         {
             string fileName = ObjectModelHelpers.CreateFileInTempProjectDirectory("file.temp", "foo");
@@ -92,15 +90,15 @@ namespace Microsoft.Build.UnitTests
             {
                 Directory.SetCurrentDirectory(ObjectModelHelpers.TempProjectDir);
                 t.Paths = new ITaskItem[] { new TaskItem(fileName) };
-                Assert.IsTrue(t.Execute(), "success");
+                Assert.True(t.Execute()); // "success"
             }
             finally
             {
                 Directory.SetCurrentDirectory(currentDirectory);
             }
 
-            Assert.AreEqual(1, t.AbsolutePaths.Length);
-            Assert.AreEqual(testFile.FullName, t.AbsolutePaths[0].ItemSpec);
+            Assert.Equal(1, t.AbsolutePaths.Length);
+            Assert.Equal(testFile.FullName, t.AbsolutePaths[0].ItemSpec);
 
             ObjectModelHelpers.DeleteTempProjectDirectory();
         }
@@ -108,7 +106,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Passing in a relative path that doesn't exist (expecting sucess)
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void FakeFile()
         {
             ConvertToAbsolutePath t = new ConvertToAbsolutePath();
@@ -116,9 +114,9 @@ namespace Microsoft.Build.UnitTests
 
             t.Paths = new ITaskItem[] { new TaskItem("RandomFileThatDoesntExist.txt") };
 
-            Assert.IsTrue(t.Execute(), "success");
+            Assert.True(t.Execute()); // "success"
 
-            Assert.AreEqual(1, t.AbsolutePaths.Length);
+            Assert.Equal(1, t.AbsolutePaths.Length);
         }
     }
 }

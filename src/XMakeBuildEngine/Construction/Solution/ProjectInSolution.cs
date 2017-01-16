@@ -305,11 +305,8 @@ namespace Microsoft.Build.Construction
 
                 if (mainProjectElement != null && mainProjectElement.LocalName == "Project")
                 {
-                    if (String.Compare(mainProjectElement.NamespaceURI, XMakeAttributes.defaultXmlNamespace, StringComparison.OrdinalIgnoreCase) == 0)
-                    {
-                        _canBeMSBuildProjectFile = true;
-                        return _canBeMSBuildProjectFile;
-                    }
+                    _canBeMSBuildProjectFile = true;
+                    return _canBeMSBuildProjectFile;
                 }
             }
             // catch all sorts of exceptions - if we encounter any problems here, we just assume the project file is not

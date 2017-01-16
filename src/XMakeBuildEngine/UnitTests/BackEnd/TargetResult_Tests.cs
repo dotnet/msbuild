@@ -12,7 +12,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Unittest;
 using Microsoft.Build.Evaluation;
@@ -21,81 +20,83 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
     /// Tests for the target result test.
     /// </summary>
-    [TestClass]
     public class TargetResult_Tests
     {
         /// <summary>
         /// Tests a constructor with no items.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestConstructorNoItems()
         {
             TargetResult result = new TargetResult(new TaskItem[] { }, TestUtilities.GetStopWithErrorResult());
-            Assert.AreEqual(0, result.Items.Length);
-            Assert.IsNull(result.Exception);
-            Assert.AreEqual(TargetResultCode.Failure, result.ResultCode);
+            Assert.Equal(0, result.Items.Length);
+            Assert.Null(result.Exception);
+            Assert.Equal(TargetResultCode.Failure, result.ResultCode);
         }
 
         /// <summary>
         /// Tests a constructor with items.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestConstructorWithItems()
         {
             TaskItem item = new TaskItem("foo", "bar.proj");
             TargetResult result = new TargetResult(new TaskItem[] { item }, TestUtilities.GetStopWithErrorResult());
-            Assert.AreEqual(1, result.Items.Length);
-            Assert.AreEqual(item.ItemSpec, result.Items[0].ItemSpec);
-            Assert.AreEqual(TargetResultCode.Failure, result.ResultCode);
+            Assert.Equal(1, result.Items.Length);
+            Assert.Equal(item.ItemSpec, result.Items[0].ItemSpec);
+            Assert.Equal(TargetResultCode.Failure, result.ResultCode);
         }
 
         /// <summary>
         /// Tests a constructor with a null item array passed.
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Fact]
         public void TestConstructorNullItems()
         {
-            TargetResult result = new TargetResult(null, TestUtilities.GetStopWithErrorResult());
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                TargetResult result = new TargetResult(null, TestUtilities.GetStopWithErrorResult());
+            }
+           );
         }
-
         /// <summary>
         /// Tests a constructor with an exception passed.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestConstructorWithException()
         {
             TaskItem item = new TaskItem("foo", "bar.proj");
             TargetResult result = new TargetResult(new TaskItem[] { item }, TestUtilities.GetStopWithErrorResult(new ArgumentException()));
-            Assert.AreEqual(1, result.Items.Length);
-            Assert.IsNotNull(result.Exception);
-            Assert.AreEqual(typeof(ArgumentException), result.Exception.GetType());
-            Assert.AreEqual(TargetResultCode.Failure, result.ResultCode);
+            Assert.Equal(1, result.Items.Length);
+            Assert.NotNull(result.Exception);
+            Assert.Equal(typeof(ArgumentException), result.Exception.GetType());
+            Assert.Equal(TargetResultCode.Failure, result.ResultCode);
         }
 
         /// <summary>
         /// Tests a constructor with a null exception passed.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestConstructorWithExceptionNull()
         {
             TaskItem item = new TaskItem("foo", "bar.proj");
             TargetResult result = new TargetResult(new TaskItem[] { item }, TestUtilities.GetStopWithErrorResult());
-            Assert.AreEqual(1, result.Items.Length);
-            Assert.IsNull(result.Exception);
-            Assert.AreEqual(TargetResultCode.Failure, result.ResultCode);
+            Assert.Equal(1, result.Items.Length);
+            Assert.Null(result.Exception);
+            Assert.Equal(TargetResultCode.Failure, result.ResultCode);
         }
 
         /// <summary>
         /// Tests serialization with no exception in the result.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestTranslationNoException()
         {
             TaskItem item = new TaskItem("foo", "bar.proj");
@@ -106,15 +107,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ((INodePacketTranslatable)result).Translate(TranslationHelpers.GetWriteTranslator());
             TargetResult deserializedResult = TargetResult.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.AreEqual(result.ResultCode, deserializedResult.ResultCode);
-            Assert.IsTrue(TranslationHelpers.CompareCollections(result.Items, deserializedResult.Items, TaskItemComparer.Instance));
-            Assert.IsTrue(TranslationHelpers.CompareExceptions(result.Exception, deserializedResult.Exception));
+            Assert.Equal(result.ResultCode, deserializedResult.ResultCode);
+            Assert.True(TranslationHelpers.CompareCollections(result.Items, deserializedResult.Items, TaskItemComparer.Instance));
+            Assert.True(TranslationHelpers.CompareExceptions(result.Exception, deserializedResult.Exception));
         }
 
         /// <summary>
         /// Tests serialization with an exception in the result.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestTranslationWithException()
         {
             TaskItem item = new TaskItem("foo", "bar.proj");
@@ -125,15 +126,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ((INodePacketTranslatable)result).Translate(TranslationHelpers.GetWriteTranslator());
             TargetResult deserializedResult = TargetResult.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.AreEqual(result.ResultCode, deserializedResult.ResultCode);
-            Assert.IsTrue(TranslationHelpers.CompareCollections(result.Items, deserializedResult.Items, TaskItemComparer.Instance));
-            Assert.IsTrue(TranslationHelpers.CompareExceptions(result.Exception, deserializedResult.Exception));
+            Assert.Equal(result.ResultCode, deserializedResult.ResultCode);
+            Assert.True(TranslationHelpers.CompareCollections(result.Items, deserializedResult.Items, TaskItemComparer.Instance));
+            Assert.True(TranslationHelpers.CompareExceptions(result.Exception, deserializedResult.Exception));
         }
 
         /// <summary>
         /// Test GetCacheDirectory is resilient to paths with strings that would normally make string.format to throw a FormatException
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestGetCacheDirectory()
         {
             string oldTmp = Environment.GetEnvironmentVariable("TMP");

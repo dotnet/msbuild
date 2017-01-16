@@ -30,7 +30,7 @@ namespace Microsoft.Build.Tasks
         private bool _copyComponents = true;
         private string _culture = Util.DefaultCultureInfo.Name;
         private string _fallbackCulture = Util.DefaultCultureInfo.Name;
-        private string _outputPath = Environment.CurrentDirectory;
+        private string _outputPath = Directory.GetCurrentDirectory();
         private string _path = null;
         private string _supportUrl = null;
         private bool _validate = true;

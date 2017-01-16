@@ -48,6 +48,28 @@ namespace Microsoft.Build.Construction
             set { ChangeName(value); }
         }
 
+        //  Add a new property with the same name here because this attribute should be public for ProjectMetadataElement,
+        //  but internal for ProjectElement, because we don't want it to be settable for arbitrary elements.
+        /// <summary>
+        /// Gets or sets whether this piece of metadata is expressed as an attribute.
+        /// </summary>
+        /// <remarks>
+        /// If true, then the metadata will be expressed as an attribute instead of a child element, for example
+        /// &lt;Reference Include="Libary.dll" HintPath="..\lib\Library.dll" Private="True" /&gt;
+        /// </remarks>
+        public new bool ExpressedAsAttribute
+        {
+            get { return base.ExpressedAsAttribute; }
+            set
+            {
+                if (value)
+                {
+                    ValidateValidMetadataAsAttributeName(this.Name, Parent?.ElementName ?? "null" , Parent?.Location);
+                }
+                base.ExpressedAsAttribute = value;
+            }
+        }
+
         /// <summary>
         /// Gets or sets the unevaluated value. 
         /// Returns empty string if it is not present.
@@ -63,6 +85,7 @@ namespace Microsoft.Build.Construction
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, "Value");
                 Microsoft.Build.Internal.Utilities.SetXmlNodeInnerContents(XmlElement, value);
+                Parent?.UpdateElementValue(this);
                 MarkDirty("Set metadata Value {0}", value);
             }
         }
@@ -94,11 +117,29 @@ namespace Microsoft.Build.Construction
             XmlUtilities.VerifyThrowArgumentValidElementName(newName);
             ErrorUtilities.VerifyThrowArgument(XMakeElements.IllegalItemPropertyNames[newName] == null, "CannotModifyReservedItemMetadata", newName);
 
+            if (ExpressedAsAttribute)
+            {
+                ValidateValidMetadataAsAttributeName(newName, Parent.ElementName, Parent.Location);
+            }
+
             // Because the element was created from our special XmlDocument, we know it's
             // an XmlElementWithLocation.
-            XmlElementWithLocation newElement = (XmlElementWithLocation)XmlUtilities.RenameXmlElement(XmlElement, newName, XMakeAttributes.defaultXmlNamespace);
+            XmlElementWithLocation newElement = (XmlElementWithLocation)XmlUtilities.RenameXmlElement(XmlElement, newName, XmlElement.NamespaceURI);
 
             ReplaceElement(newElement);
+        }
+
+        internal static void ValidateValidMetadataAsAttributeName(string name, string parentName, IElementLocation parentLocation)
+        {
+            bool isKnownAttribute;
+            bool isValidMetadataNameInAttribute;
+
+            ProjectParser.CheckMetadataAsAttributeName(name, out isKnownAttribute, out isValidMetadataNameInAttribute);
+
+            if (isKnownAttribute || !isValidMetadataNameInAttribute)
+            {
+                ProjectErrorUtilities.ThrowInvalidProject(parentLocation, "InvalidMetadataAsAttribute", name, parentName);
+            }
         }
 
         /// <summary>

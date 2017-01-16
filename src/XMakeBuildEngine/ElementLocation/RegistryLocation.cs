@@ -26,7 +26,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// The location.
         /// </summary>
-        private string _registryPath;
+        private string registryPath;
 
         /// <summary>
         /// Constructor taking the registry location.
@@ -35,7 +35,7 @@ namespace Microsoft.Build.Construction
         {
             ErrorUtilities.VerifyThrowInternalLength(registryPath, "registryPath");
 
-            _registryPath = registryPath;
+            this.registryPath = registryPath;
         }
 
         /// <summary>
@@ -76,7 +76,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string LocationString
         {
-            get { return _registryPath; }
+            get { return registryPath; }
         }
 
         #region INodePacketTranslatable Members
@@ -86,7 +86,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public void Translate(INodePacketTranslator translator)
         {
-            translator.Translate(ref _registryPath);
+            translator.Translate(ref registryPath);
         }
 
         /// <summary>

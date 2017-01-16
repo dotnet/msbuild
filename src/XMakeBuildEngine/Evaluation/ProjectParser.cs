@@ -41,7 +41,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Valid attribute list for item
         /// </summary>
-        private readonly static string[] s_validAttributesOnItem = new string[] { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.include, XMakeAttributes.exclude, XMakeAttributes.remove, XMakeAttributes.keepMetadata, XMakeAttributes.removeMetadata, XMakeAttributes.keepDuplicates };
+        private readonly static string[] s_knownAttributesOnItem = new string[] { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.include, XMakeAttributes.exclude, XMakeAttributes.remove, XMakeAttributes.keepMetadata, XMakeAttributes.removeMetadata, XMakeAttributes.keepDuplicates, XMakeAttributes.update };
 
         /// <summary>
         /// Valid attributes on import element
@@ -161,9 +161,15 @@ namespace Microsoft.Build.Construction
             ProjectErrorUtilities.VerifyThrowInvalidProject(element.Name != XMakeElements.visualStudioProject, element.Location, "ProjectUpgradeNeeded", _project.FullPath);
             ProjectErrorUtilities.VerifyThrowInvalidProject(element.LocalName == XMakeElements.project, element.Location, "UnrecognizedElement", element.Name);
 
-            if (element.Prefix.Length > 0 || !String.Equals(element.NamespaceURI, XMakeAttributes.defaultXmlNamespace, StringComparison.OrdinalIgnoreCase))
+            // If a namespace was specified it must be the default MSBuild namespace.
+            if (!ProjectXmlUtilities.VerifyValidProjectNamespace(element))
             {
-                ProjectErrorUtilities.ThrowInvalidProject(element.Location, "ProjectMustBeInMSBuildXmlNamespace", XMakeAttributes.defaultXmlNamespace);
+                ProjectErrorUtilities.ThrowInvalidProject(element.Location, "ProjectMustBeInMSBuildXmlNamespace",
+                    XMakeAttributes.defaultXmlNamespace);
+            }
+            else
+            {
+                _project.XmlNamespace = element.NamespaceURI;
             }
 
             ParseProjectElement(element);
@@ -303,20 +309,41 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private ProjectItemElement ParseProjectItemElement(XmlElementWithLocation element, ProjectItemGroupElement parent)
         {
-            ProjectXmlUtilities.VerifyThrowProjectAttributes(element, s_validAttributesOnItem);
-
             bool belowTarget = parent.Parent is ProjectTargetElement;
 
             string itemType = element.Name;
             string include = element.GetAttribute(XMakeAttributes.include);
             string exclude = element.GetAttribute(XMakeAttributes.exclude);
             string remove = element.GetAttribute(XMakeAttributes.remove);
+            string update = element.GetAttribute(XMakeAttributes.update);
 
-            // Remove must be missing, unless inside a target and Include is missing
-            ProjectXmlUtilities.VerifyThrowProjectInvalidAttribute((remove.Length == 0 || (belowTarget && include.Length == 0)), (XmlAttributeWithLocation)element.Attributes[XMakeAttributes.remove]);
+            var exclusiveItemOperation = "";
+            int exclusiveAttributeCount = 0;
+            if (element.HasAttribute(XMakeAttributes.include))
+            {
+                exclusiveAttributeCount++;
+                exclusiveItemOperation = XMakeAttributes.include;
+            }
+            if (element.HasAttribute(XMakeAttributes.remove))
+            {
+                exclusiveAttributeCount++;
+                exclusiveItemOperation = XMakeAttributes.remove;
+            }
+            if (element.HasAttribute(XMakeAttributes.update))
+            {
+                exclusiveAttributeCount++;
+                exclusiveItemOperation = XMakeAttributes.update;
+            }
 
-            // Include must be present, unless inside a target
-            ProjectErrorUtilities.VerifyThrowInvalidProject(include.Length > 0 || belowTarget, element.Location, "MissingRequiredAttribute", XMakeAttributes.include, itemType);
+            //  At most one of the include, remove, or update attributes may be specified
+            if (exclusiveAttributeCount > 1)
+            {
+                XmlAttributeWithLocation errorAttribute = remove.Length > 0 ? (XmlAttributeWithLocation)element.Attributes[XMakeAttributes.remove] : (XmlAttributeWithLocation)element.Attributes[XMakeAttributes.update];
+                ProjectErrorUtilities.ThrowInvalidProject(errorAttribute.Location, "InvalidAttributeExclusive");
+            }
+
+            // Include, remove, or update must be present unless inside a target
+            ProjectErrorUtilities.VerifyThrowInvalidProject(exclusiveAttributeCount == 1 || belowTarget, element.Location, "MissingRequiredAttribute", exclusiveItemOperation, itemType);
 
             // Exclude must be missing, unless Include exists
             ProjectXmlUtilities.VerifyThrowProjectInvalidAttribute(exclude.Length == 0 || include.Length > 0, (XmlAttributeWithLocation)element.Attributes[XMakeAttributes.exclude]);
@@ -324,10 +351,37 @@ namespace Microsoft.Build.Construction
             // If we have an Include attribute at all, it must have non-zero length
             ProjectErrorUtilities.VerifyThrowInvalidProject(include.Length > 0 || element.Attributes[XMakeAttributes.include] == null, element.Location, "MissingRequiredAttribute", XMakeAttributes.include, itemType);
 
+            // If we have a Remove attribute at all, it must have non-zero length
+            ProjectErrorUtilities.VerifyThrowInvalidProject(remove.Length > 0 || element.Attributes[XMakeAttributes.remove] == null, element.Location, "MissingRequiredAttribute", XMakeAttributes.remove, itemType);
+
+            // If we have an Update attribute at all, it must have non-zero length
+            ProjectErrorUtilities.VerifyThrowInvalidProject(update.Length > 0 || element.Attributes[XMakeAttributes.update] == null, element.Location, "MissingRequiredAttribute", XMakeAttributes.update, itemType);
+
             XmlUtilities.VerifyThrowProjectValidElementName(element);
             ProjectErrorUtilities.VerifyThrowInvalidProject(XMakeElements.IllegalItemPropertyNames[itemType] == null, element.Location, "CannotModifyReservedItem", itemType);
 
             ProjectItemElement item = new ProjectItemElement(element, parent, _project);
+
+            foreach (XmlAttributeWithLocation attribute in element.Attributes)
+            {
+                bool isKnownAttribute;
+                bool isValidMetadataNameInAttribute;
+
+                CheckMetadataAsAttributeName(attribute.Name, out isKnownAttribute, out isValidMetadataNameInAttribute);
+
+                if (!isKnownAttribute && !isValidMetadataNameInAttribute)
+                {
+                    ProjectXmlUtilities.ThrowProjectInvalidAttribute(attribute);
+                }
+                else if (isValidMetadataNameInAttribute)
+                {
+                    ProjectMetadataElement metadatum = _project.CreateMetadataElement(attribute.Name, attribute.Value);
+                    metadatum.ExpressedAsAttribute = true;
+                    metadatum.Parent = item;
+
+                    item.AppendParentedChildNoChecks(metadatum);
+                }
+            }
 
             foreach (XmlElementWithLocation childElement in ProjectXmlUtilities.GetVerifyThrowProjectChildElements(element))
             {
@@ -337,6 +391,53 @@ namespace Microsoft.Build.Construction
             }
 
             return item;
+        }
+
+        internal static void CheckMetadataAsAttributeName(string name, out bool isKnownAttribute, out bool isValidMetadataNameInAttribute)
+        {
+            if (!XmlUtilities.IsValidElementName(name))
+            {
+                isKnownAttribute = false;
+                isValidMetadataNameInAttribute = false;
+                return;
+            }
+
+            for (int i = 0; i < s_knownAttributesOnItem.Length; i++)
+            {
+                //  Case insensitive comparison so that mis-capitalizing an attribute like Include or Exclude results in an easy to understand
+                //  error instead of unexpected behavior
+                if (name == s_knownAttributesOnItem[i])
+                {
+                    isKnownAttribute = true;
+                    isValidMetadataNameInAttribute = false;
+                    return;
+                }
+                else if (name.Equals(s_knownAttributesOnItem[i], StringComparison.OrdinalIgnoreCase))
+                {
+                    isKnownAttribute = false;
+                    isValidMetadataNameInAttribute = false;
+                    return;
+                }
+            }
+
+            //  Reserve attributes starting with underscores in case we need to add more built-in attributes later
+            if (name[0] == '_')
+            {
+                isKnownAttribute = false;
+                isValidMetadataNameInAttribute = false;
+                return;
+            }
+
+            if (FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name) ||
+                XMakeElements.IllegalItemPropertyNames[name] != null)
+            {
+                isKnownAttribute = false;
+                isValidMetadataNameInAttribute = false;
+                return;
+            }
+
+            isKnownAttribute = false;
+            isValidMetadataNameInAttribute = true;
         }
 
         /// <summary>

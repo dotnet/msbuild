@@ -1,0 +1,278 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../Strings.resx">
+    <body>
+      <group id="MICROSOFT.BUILD.UTILITIES/RESOURCES/STRINGS.RESX" datatype="resx" />
+      <trans-unit id="General.InvalidToolSwitch">
+        <source>MSB6001: Invalid command line switch for "{0}". {1}</source>
+        <target state="translated">MSB6001: "{0}" 的命令列參數無效。{1}</target>
+        <note>{StrBegin="MSB6001: "}UE: This message is shown when a tool-based task (i.e. the task is a wrapper for an .exe) is given a parameter value that converts into an invalid command line switch for the tool. "{0}" is the name of the tool e.g. "csc.exe", and "{1}" is a message explaining the problem. LOCALIZATION: "{1}" is a localized message.</note>
+      </trans-unit>
+      <trans-unit id="General.QuotesNotAllowedInThisKindOfTaskParameter">
+        <source>Illegal quote passed to the command line switch named "{0}". The value was [{1}].</source>
+        <target state="translated">傳遞至名稱為 "{0}" 的命令列參數的引號不合法。值為 [{1}]。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="General.QuotesNotAllowedInThisKindOfTaskParameterNoSwitchName">
+        <source>Illegal quote in the command line value [{0}].</source>
+        <target state="translated">命令列值的引號不合法 [{0}]。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="General.ToolCommandFailedNoErrorCode">
+        <source>The command exited with code {0}.</source>
+        <target state="translated">命令以返回碼 {0} 結束。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LoggingBeforeTaskInitialization">
+        <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
+        <target state="translated">MSB6005: 工作在初始化之前就嘗試記錄。訊息為: {0}</target>
+        <note>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</note>
+      </trans-unit>
+      <trans-unit id="PlatformManifest.MissingPlatformXml">
+        <source>MSB6010: Could not find platform manifest file at "{0}".</source>
+        <target state="translated">MSB6010: 在 "{0}" 找不到平台資訊清單檔案。</target>
+        <note>{StrBegin="MSB6010: "}</note>
+      </trans-unit>
+      <trans-unit id="ToolLocationHelper.UnsupportedFrameworkVersion">
+        <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
+        <target state="translated">不支援 .NET Framework 版本 "{0}"。請從列舉 Microsoft.Build.Utilities.TargetDotNetFrameworkVersion 中指定值。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolLocationHelper.UnsupportedFrameworkVersionForWindowsSdk">
+        <source>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</source>
+        <target state="translated">明確地以 Windows SDK 為目標時，不支援 .NET Framework 版本 "{0}"，只有 .NET 4.5 及更新版本才予以支援。請從 Version45 (含) 以上版本的列舉 Microsoft.Build.Utilities.TargetDotNetFrameworkVersion 中指定值。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolLocationHelper.UnsupportedVisualStudioVersion">
+        <source>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</source>
+        <target state="translated">不支援 Visual Studio 版本 "{0}"。請從列舉 Microsoft.Build.Utilities.VisualStudioVersion 中指定值。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolTask.CommandTooLong">
+        <source>MSB6002: The command-line for the "{0}" task is too long. Command-lines longer than 32000 characters are likely to fail. Try reducing the length of the command-line by breaking down the call to "{0}" into multiple calls with fewer parameters per call.</source>
+        <target state="translated">MSB6002: "{0}" 工作的命令列太長。長度超過 32000 個字元的命令列可能會失敗。請嘗試將對 "{0}" 的呼叫分為多個呼叫，在每個呼叫中包含較少的參數，以減低命令列的長度。</target>
+        <note>{StrBegin="MSB6002: "}</note>
+      </trans-unit>
+      <trans-unit id="ToolTask.CouldNotStartToolExecutable">
+        <source>MSB6003: The specified task executable "{0}" could not be run. {1}</source>
+        <target state="translated">MSB6003: 無法執行指定的工作可執行檔 "{0}"。{1}</target>
+        <note>{StrBegin="MSB6003: "}</note>
+      </trans-unit>
+      <trans-unit id="ToolTask.ToolCommandFailed">
+        <source>MSB6006: "{0}" exited with code {1}.</source>
+        <target state="translated">MSB6006: "{0}" 以返回碼 {1} 結束。</target>
+        <note>{StrBegin="MSB6006: "}</note>
+      </trans-unit>
+      <trans-unit id="ToolTask.ToolExecutableNotFound">
+        <source>MSB6004: The specified task executable location "{0}" is invalid.</source>
+        <target state="translated">MSB6004: 指定的工作可執行檔位置 "{0}" 無效。</target>
+        <note>{StrBegin="MSB6004: "}</note>
+      </trans-unit>
+      <trans-unit id="ToolsLocationHelper.InvalidRedistFile">
+        <source>There was an error reading the redist list file "{0}". {1}</source>
+        <target state="translated">讀取可轉散發清單檔 "{0}" 時發生錯誤。{1}</target>
+        <note>No Error code because this resource will be used in an exception. The error code is discarded if it is included</note>
+      </trans-unit>
+      <trans-unit id="ToolsLocationHelper.CouldNotCreateChain">
+        <source>The Framework at path "{0}" tried to include the framework at path "{1}" as part of its reference assembly paths but there was an error. {2}</source>
+        <target state="translated">路徑 "{0}" 的架構嘗試將路徑 "{1}" 的架構當做自己的參考組件路徑，但發生錯誤。{2}</target>
+        <note>No Error code because this resource will be used in an exception. The error code is discarded if it is included</note>
+      </trans-unit>
+      <trans-unit id="ToolsLocationHelper.CouldNotGenerateReferenceAssemblyDirectory">
+        <source>When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</source>
+        <target state="translated">嘗試從路徑 "{0}" 和架構 Moniker "{1}" 產生參考組件路徑時，發生錯誤。{2}</target>
+        <note>No Error code because this resource will be used in an exception. The error code is discarded if it is included</note>
+      </trans-unit>
+      <trans-unit id="ToolTask.InvalidEnvironmentParameter">
+        <source>MSB6007: The "{0}" value passed to the Environment property is not in the format "name=value", where the value part may be empty.</source>
+        <target state="translated">MSB6007: 傳遞至 Environment 屬性的 "{0}" 值不是 "name=value" 格式，其中 value 部分可能會空白。</target>
+        <note>{StrBegin="MSB6007: "}</note>
+      </trans-unit>
+      <trans-unit id="ToolTask.EnvironmentVariableHeader">
+        <source>Environment Variables passed to tool:</source>
+        <target state="translated">傳遞給工具的環境變數:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_LogFilesNotAvailable">
+        <source>Tracking logs are not available, minimal rebuild will be disabled.</source>
+        <target state="translated">追蹤記錄檔無法使用，將停用最少重建。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_MissingInputs">
+        <source>Missing input files detected, minimal rebuild will be disabled.</source>
+        <target state="translated">偵測到遺漏輸入檔，將停用最少重建。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_MissingOutputs">
+        <source>Missing output files detected, minimal rebuild will be disabled.</source>
+        <target state="translated">偵測到遺漏輸出檔，將停用最少重建。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_UpToDate">
+        <source>Skipping task because it is up-to-date.</source>
+        <target state="translated">略過工作，因為它是最新的。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_TrackingLogNotAvailable">
+        <source>Write Tracking log not available, minimal rebuild will be disabled.</source>
+        <target state="translated">寫入追蹤記錄檔無法使用，將停用最少重建。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_WriteTrackingLogs">
+        <source>Write Tracking Logs:</source>
+        <target state="translated">寫入追蹤記錄檔:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_WriteTrackingCached">
+        <source>Using cached output dependency table built from:</source>
+        <target state="translated">使用從下列建置的快取輸出相依性表格:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_TrackingLogs">
+        <source>Tracking Logs:</source>
+        <target state="translated">追蹤記錄檔:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_TrackingCached">
+        <source>Using cached dependency table built from:</source>
+        <target state="translated">使用從下列建置的快取相依性表格:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_OutputsFor">
+        <source>Outputs for {0}:</source>
+        <target state="translated">{0} 的輸出:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_InputsFor">
+        <source>Inputs for {0}:</source>
+        <target state="translated">{0} 的輸入:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_OutputsNotShown">
+        <source>Output details ({0} of them) were not logged for performance reasons.</source>
+        <target state="translated">輸出詳細資料 (其中 {0} 項) 因效能原因而未記錄。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_InputsNotShown">
+        <source>Input details ({0} of them) were not logged for performance reasons.</source>
+        <target state="translated">輸入詳細資料 (其中 {0} 項) 因效能原因而未記錄。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_SingleLogFileNotAvailable">
+        <source>Tracking log {0} is not available.</source>
+        <target state="translated">追蹤記錄檔 {0} 無法使用。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_SourceWillBeCompiledAsNoTrackingLog">
+        <source>{0} will be compiled as the tracking log is not available.</source>
+        <target state="translated">{0} 將進行編譯，因為追蹤記錄檔無法使用。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_SourceNotInTrackingLog">
+        <source>{0} will be compiled as it was not found in the tracking log.</source>
+        <target state="translated">{0} 將進行編譯，因為在追蹤記錄檔中找不到。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_SourceOutputsNotAvailable">
+        <source>{0} will be compiled as not all outputs are available.</source>
+        <target state="translated">{0} 將進行編譯，因為並非所有輸出都可使用。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_SourceWillBeCompiledMissingDependency">
+        <source>{0} will be compiled as dependency {1} was missing.</source>
+        <target state="translated">{0} 將進行編譯，因為遺漏相依性 {1}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_SourceWillBeCompiledDependencyWasModifiedAt">
+        <source>{0} will be compiled as {1} was modified at {2}.</source>
+        <target state="translated">{0} 將進行編譯，因為 {1} 已於 {2} 修改。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_SourceWillBeCompiled">
+        <source>{0} will be compiled.</source>
+        <target state="translated">{0} 將進行編譯。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_AllOutputsAreUpToDate">
+        <source>All outputs are up-to-date.</source>
+        <target state="translated">所有輸出都是最新的。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_DependencyWasModifiedAt">
+        <source>File {0} was modified at {1} which is newer than {2} modified at {3}.</source>
+        <target state="translated">檔案 {0} 於 {1} 修改過，它比在 {3} 修改的 {2} 新。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_OutputDoesNotExist">
+        <source>{0} does not exist; source compilation required.</source>
+        <target state="translated">{0} 不存在; 必須進行原始檔編譯。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_SourceWillBeCompiledOutputDoesNotExist">
+        <source>{0} will be compiled as output {1} does not exist.</source>
+        <target state="translated">{0} 將進行編譯，因為輸出 {1} 不存在。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_ReadTrackingLogs">
+        <source>Read Tracking Logs:</source>
+        <target state="translated">讀取追蹤記錄檔:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_ReadTrackingCached">
+        <source>Using cached input dependency table built from:</source>
+        <target state="translated">使用從下列建置的快取輸入相依性表格:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_OutputForRootNotFound">
+        <source>No output for {0} was found in the tracking log; source compilation required.</source>
+        <target state="translated">在追蹤記錄檔中找不到 {0} 的輸出; 必須進行原始檔編譯。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_DependenciesForRootNotFound">
+        <source>No dependencies for output {0} were found in the tracking log; source compilation required.</source>
+        <target state="translated">在追蹤記錄檔中找不到輸出 {0} 的相依性; 必須進行原始檔編譯。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_WriteLogEntryNotFound">
+        <source>Could not find {0} in the write tracking log.</source>
+        <target state="translated">在寫入追蹤記錄檔中找不到 {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_ReadLogEntryNotFound">
+        <source>Could not find {0} in the read tracking log.</source>
+        <target state="translated">在讀取追蹤記錄檔中找不到 {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_SourcesAndCorrespondingOutputMismatch">
+        <source>The number of source files and corresponding outputs must match.</source>
+        <target state="translated">原始程式檔的數目與對應的輸出必須相符。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_InputNewerThanOutput">
+        <source>Source compilation required: input {0} is newer than output {1}.</source>
+        <target state="translated">必須進行原始檔編譯: 輸入 {0} 比輸出 {1} 還要新。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_RebuildingDueToInvalidTLog">
+        <source>MSB6008: Forcing a rebuild of all sources due to an error with the tracking logs. {0}</source>
+        <target state="translated">MSB6008: 正在強制重建所有資源，因為追蹤記錄檔有錯誤。{0}</target>
+        <note>{StrBegin="MSB6008: "}</note>
+      </trans-unit>
+      <trans-unit id="Tracking_RebuildingDueToInvalidTLogContents">
+        <source>MSB6009: Forcing a rebuild of all source files due to the contents of "{0}" being invalid.</source>
+        <target state="translated">MSB6009: 正在強制重建所有原始程式檔，因為 "{0}" 的內容無效。</target>
+        <note>{StrBegin="MSB6009: "}</note>
+      </trans-unit>
+      <trans-unit id="MuxLogger_BuildFinishedFailure">
+        <source>Build FAILED.</source>
+        <target state="translated">建置失敗。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MuxLogger_BuildFinishedSuccess">
+        <source>Build succeeded.</source>
+        <target state="translated">建置成功。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

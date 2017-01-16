@@ -349,6 +349,16 @@ namespace Microsoft.Build.Evaluation
             return false;
         }
 
+        public static string GetCurrentExecutableDirectory()
+        {
+            return BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
+        }
+
+        public static string GetVsInstallRoot()
+        {
+            return BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory;
+        }
+
         #region Debug only intrinsics
 
         /// <summary>

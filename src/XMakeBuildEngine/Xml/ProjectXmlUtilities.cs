@@ -50,6 +50,13 @@ namespace Microsoft.Build.Internal
                         break;
 
                     default:
+                        if (child.NodeType == XmlNodeType.Text && String.IsNullOrWhiteSpace(child.InnerText))
+                        {
+                            // If the text is greather than 4k and only contains whitespace, the XML reader will assume it's a text node
+                            // instead of ignoring it.  Our call to String.IsNullOrWhiteSpace() can be a little slow if the text is
+                            // large but this should be extremely rare.
+                            break;
+                        }
                         if (throwForInvalidNodeTypes)
                         {
                             ThrowProjectInvalidChildElement(child.Name, element.Name, element.Location);
@@ -94,11 +101,28 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static void VerifyThrowProjectValidNamespace(XmlElementWithLocation element)
         {
-            if (element.Prefix.Length > 0 ||
-                !String.Equals(element.NamespaceURI, XMakeAttributes.defaultXmlNamespace, StringComparison.OrdinalIgnoreCase))
+            // If a namespace was specified it must be the default MSBuild namespace.
+            if (!VerifyValidProjectNamespace(element))
             {
-                ProjectErrorUtilities.ThrowInvalidProject(element.Location, "CustomNamespaceNotAllowedOnThisChildElement", element.Name, element.ParentNode.Name);
+                ProjectErrorUtilities.ThrowInvalidProject(element.Location,
+                    "CustomNamespaceNotAllowedOnThisChildElement", element.Name, element.ParentNode?.Name);
             }
+        }
+
+        /// <summary>
+        /// Verify that if a namespace is specified it matches the default MSBuild namespace.
+        /// </summary>
+        /// <param name="element">Element to check namespace.</param>
+        /// <returns>True when the namespace is in the MSBuild namespace or no namespace.</returns>
+        internal static bool VerifyValidProjectNamespace(XmlElementWithLocation element)
+        {
+            return
+                // Prefix must be empty
+                element.Prefix.Length == 0 &&
+
+                // Namespace must equal to the MSBuild namespace or empty
+                (string.Equals(element.NamespaceURI, XMakeAttributes.defaultXmlNamespace,
+                     StringComparison.OrdinalIgnoreCase) || string.IsNullOrEmpty(element.NamespaceURI));
         }
 
         /// <summary>

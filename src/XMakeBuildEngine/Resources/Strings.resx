@@ -252,6 +252,12 @@
        t2.targets and t2.targets tries to import t1.targets, then it results in a circular dependency. 
     </comment>
   </data>
+  <data name="SearchPathsForMSBuildExtensionsPath">
+      <value>Search paths being used for {0} are {1}</value>
+  </data>
+  <data name="TryingExtensionsPath">
+      <value>Trying to import {0} using extensions path {1}</value>
+  </data>
   <data name="OverrideTasksFileFailure" UESanitized="false" Visibility="Public">
     <value>MSB4194: The override tasks file could not be successfully loaded. {0}</value>
     <comment>
@@ -413,6 +419,14 @@
     <value>MSB4019: The imported project "{0}" was not found. Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk.</value>
     <comment>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</comment>
   </data>
+  <data name="ImportedProjectFromExtensionsPathNotFoundFromAppConfig" UESanitized="false" Visibility="Public">
+    <value>MSB4226: The imported project "{0}" was not found. Also, tried to find "{1}" in the fallback search path(s) for {2} - {3} . These search paths are defined in "{4}". Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk in one of the search paths.</value>
+    <comment>{StrBegin="MSB4226: "}LOCALIZATION: &lt;Import&gt; should not be localized.</comment>
+  </data>
+  <data name="ImportedProjectFromExtensionsPathNotFound" UESanitized="false" Visibility="Public">
+    <value>MSB4226: The imported project "{0}" was not found. Also, tried to find "{1}" in the fallback search path(s) for {2} - {3} . Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk in one of the search paths.</value>
+    <comment>{StrBegin="MSB4226: "}LOCALIZATION: &lt;Import&gt; should not be localized.</comment>
+  </data>
   <data name="IncorrectNumberOfFunctionArguments" UESanitized="false" Visibility="Public">
     <value>MSB4089: Incorrect number of arguments to function in condition "{0}". Found {1} argument(s) when expecting {2}.</value>
     <comment>{StrBegin="MSB4089: "}</comment>
@@ -421,6 +435,9 @@
     <value>MSB4020: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; is invalid.</value>
     <comment>{StrBegin="MSB4020: "}UE: This is a generic message that is displayed when we find a project element with an incorrect value for one of its
     attributes e.g. &lt;Import Project=""&gt; -- the value of Project should not be an empty string.</comment>
+  </data>
+  <data name="InvalidAttributeExclusive" UESanitized="false" Visibility="Public">
+    <value>MSB4111: At most one of the include, remove, and update attributes may be specified for an item element.</value>
   </data>
   <data name="InvalidAttributeValueWithException" UESanitized="false" Visibility="Public">
     <value>MSB4102: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; is invalid. {3}</value>
@@ -612,6 +629,10 @@
     <value>MSB4144: Multiple definitions were found for the toolset "{0}". </value>
     <comment>{StrBegin="MSB4144: "}</comment>
   </data>
+  <data name="MultipleDefinitionsForSameExtensionsPathOS" UESanitized="false" Visibility="Public">
+      <value>MSB4225: Toolset contains multiple definitions of searchPaths for the OS "{0}" at "{1}".</value>
+    <comment>{StrBegin="MSB4225: "}</comment>
+  </data>
   <data name="MultipleDefinitionsForSameProperty" UESanitized="false" Visibility="Public">
     <value>MSB4145: Multiple definitions were found for the property "{0}".</value>
     <comment>{StrBegin="MSB4145: "}</comment>
@@ -674,7 +695,7 @@
     <value>Done Building Project "{0}" (default targets) -- FAILED.</value>
   </data>
   <data name="ProjectMustBeInMSBuildXmlNamespace" UESanitized="false" Visibility="Public">
-    <value>MSB4041: The default XML namespace of the project must be the MSBuild XML namespace. If the project is authored in the MSBuild 2003 format, please add xmlns="{0}" to the &lt;Project&gt; element. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</value>
+    <value>MSB4041: The default XML namespace of the project must be the MSBuild XML namespace or no namespace. If the project is authored in the MSBuild 2003 format, please add xmlns="{0}" to the &lt;Project&gt; element. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</value>
     <comment>{StrBegin="MSB4041: "}UE: This is a Beta 1 message only.
       LOCALIZATION: &lt;Project&gt;, "MSBuild" and "xmlns" should not be localized.</comment>
   </data>
@@ -1140,6 +1161,14 @@
     <value>MSB4173: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is invalid because a child element with that name already exists</value>
     <comment>{StrBegin="MSB4173: "}</comment>
   </data>
+  <data name="InvalidAttributeDueToDuplication" UESanitized="false" Visibility="Public">
+    <value>MSB4227: The attribute "{0}" on element &lt;{1}&gt; is invalid because an attribute with that name already exists</value>
+    <comment>{StrBegin="MSB4227: "}</comment>
+  </data>
+  <data name="InvalidMetadataAsAttribute" UESanitized="false" Visibility="Public">
+    <value>MSB4228: The name "{0}" is not valid for metadata expressed as an attribute (on element &lt;{1}&gt;)</value>
+    <comment>{StrBegin="MSB4228: "}</comment>
+  </data>
   <data name="UnrecognizedParentElement" UESanitized="true" Visibility="Public">
     <value>MSB4189: &lt;{1}&gt; is not a valid child of the &lt;{0}&gt; element.</value>
     <comment>{StrBegin="MSB4189: "}</comment>
@@ -1174,10 +1203,6 @@
   <data name="InvalidAffinityForProjectWithHostObject" UESanitized="false" Visibility="Public">
     <value>MSB4207: Only an in-process affinity may be specified for projects which have registered host objects.</value>
     <comment>{StrBegin="MSB4207: "}</comment>
-  </data>
-  <data name="InvalidAffinityForProjectWithHostObject" UESanitized="false" Visibility="Public">
-    <value>MSB4208: Only an in-process affinity may be specified for projects which have registered host objects.</value>
-    <comment>{StrBegin="MSB4208: "}</comment>
   </data>
   <data name="ProjectInstanceConflictsWithAffinity" UESanitized="false" Visibility="Public">
     <value>MSB4209: The specified project instance conflicts with the affinity specified in the HostServices.</value>
@@ -1324,6 +1349,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="OM_EitherAttributeButNotBoth">
     <value>The &lt;{0}&gt; element must have either the "{1}" attribute or the "{2}" attribute but not both.</value>
   </data>
+  <data name="OM_OneOfAttributeButNotMore">
+    <value>The &lt;{0}&gt; element must have either the "{1}" attribute, the "{2}" attribute, or the "{3}" attribute, but not more than one.</value>
+  </data>
   <data name="OM_NoRemoveOutsideTargets">
     <value>The "Remove" attribute is not permitted on an item outside of a &lt;Target&gt;.</value>
   </data>
@@ -1361,9 +1389,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="OM_CannotAcceptParent">
     <value>This parent is not a valid parent for the item.</value>
   </data>
-  <data name="OM_ItemsOutsideTargetMustHaveIncludeNoRemove">
-    <value>An item not parented under a Target must have a value for Include and no value for Remove.</value>
-    <comment>LOCALIZATION: Please do not localize "Target", "Include", and "Remove".</comment>
+  <data name="OM_ItemsOutsideTargetMustHaveIncludeOrUpdateOrRemove">
+    <value>An item not parented under a Target must have a value for Include or Update or Remove.</value>
+    <comment>LOCALIZATION: Please do not localize "Target", "Include", "Update", and "Remove".</comment>
   </data>
   <data name="OM_NameInvalid">
     <value>The name "{0}" contains an invalid character "{1}".</value>
@@ -1406,6 +1434,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="OM_CannotRemoveMetadataOriginatingFromItemDefinition">
     <value>Cannot remove the metadata named "{0}" as it originates from an item definition, rather than being directly defined on this item.</value>
   </data>
+  <data name="OM_CannotSplitItemElementWhenSplittingIsDisabled">
+    <value>The requested operation needs to split the item element at location {0} into individual elements but item element splitting is disabled with {1}.</value>
+  </data>
   <data name="OM_ProjectIsNoLongerActive">
     <value>The project cannot be used as it is no longer loaded into a project collection.</value>
   </data>
@@ -1430,7 +1461,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <!-- #################################################################################################-->
   <!-- ######################################## Shared strings #########################################-->
   <!-- ###### These belong in Strings.shared.resx, but have been copied here for performance ###########-->
-  <!-- ##### If you change the string here, please also change it in Shared\Strings.shared.resx ########-->
+  <!-- ##### If you change the string here, please also change it in Shared\Resources\Strings.shared.resx ########-->
   <!-- ############################ and in XMakeCommandLine\Strings.resx ###############################-->
   <!-- ############## Remove this block once ResourceManager bug 627270 has been fixed. ################-->
   <!-- #################################################################################################-->
@@ -1517,7 +1548,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
         MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
         MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
 
-        Next message code should be MSB4225.
+        Next message code should be MSB4229.
               
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>

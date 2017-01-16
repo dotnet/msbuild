@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Xml;
 using System.Text;
 using System.Collections;
@@ -31,13 +34,13 @@ namespace Microsoft.Build.UnitTests.QA
     {
         #region Data members
 
-        private QAMockHost host;
-        private ConfigCache configCache;
-        private TestDataProvider testDataProvider;
-        private BuildRequestEngine requestEngine;
-        private GetComponentFromTestDelegate getComponent;
-        private bool createMSBuildProject;
-        private string tempPath;
+        private QAMockHost _host;
+        private ConfigCache _configCache;
+        private TestDataProvider _testDataProvider;
+        private BuildRequestEngine _requestEngine;
+        private GetComponentFromTestDelegate _getComponent;
+        private bool _createMSBuildProject;
+        private string _tempPath;
 
 
         #endregion
@@ -49,13 +52,13 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public Common_Tests(GetComponentFromTestDelegate getComponent, bool createMSBuildProject)
         {
-            this.getComponent = getComponent;
-            this.configCache = null;
-            this.host = null;
-            this.requestEngine = null;
-            this.testDataProvider = null;
-            this.createMSBuildProject = createMSBuildProject;
-            this.tempPath = System.IO.Path.GetTempPath();
+            _getComponent = getComponent;
+            _configCache = null;
+            _host = null;
+            _requestEngine = null;
+            _testDataProvider = null;
+            _createMSBuildProject = createMSBuildProject;
+            _tempPath = System.IO.Path.GetTempPath();
         }
 
         #endregion
@@ -70,15 +73,15 @@ namespace Microsoft.Build.UnitTests.QA
             switch (type)
             {
                 case BuildComponentType.ConfigCache:
-                    return (IBuildComponent)this.configCache;
+                    return (IBuildComponent)_configCache;
 
                 case BuildComponentType.TestDataProvider:
-                    return (IBuildComponent)this.testDataProvider;
+                    return (IBuildComponent)_testDataProvider;
 
                 case BuildComponentType.RequestEngine:
-                    return (IBuildComponent)this.requestEngine;
+                    return (IBuildComponent)_requestEngine;
                 default:
-                    return this.getComponent(type);
+                    return _getComponent(type);
             }
         }
 
@@ -89,7 +92,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.host;
+                return _host;
             }
         }
 
@@ -102,12 +105,12 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void Setup()
         {
-            this.host = new QAMockHost(this.GetComponent);
-            this.testDataProvider = new TestDataProvider();
-            this.requestEngine = new BuildRequestEngine();
-            this.requestEngine.InitializeComponent(this.host);
-            this.requestEngine.InitializeForBuild(new NodeLoggingContext(host.LoggingService, 0, false));
-            this.configCache = new ConfigCache();
+            _host = new QAMockHost(this.GetComponent);
+            _testDataProvider = new TestDataProvider();
+            _requestEngine = new BuildRequestEngine();
+            _requestEngine.InitializeComponent(_host);
+            _requestEngine.InitializeForBuild(new NodeLoggingContext(_host.LoggingService, 0, false));
+            _configCache = new ConfigCache();
         }
 
         /// <summary>
@@ -115,14 +118,13 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void TearDown()
         {
-            this.host.ShutdownComponent();
-            this.host = null;
-            this.configCache = null;
-            this.requestEngine.CleanupForBuild();
-            this.requestEngine.ShutdownComponent();
-            this.requestEngine = null;
-            this.testDataProvider = null;
-
+            _host.ShutdownComponent();
+            _host = null;
+            _configCache = null;
+            _requestEngine.CleanupForBuild();
+            _requestEngine.ShutdownComponent();
+            _requestEngine = null;
+            _testDataProvider = null;
         }
 
         #endregion
@@ -175,7 +177,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             RequestDefinition p1 = CreateNewRequest("1.proj", "2.0");
             RequestDefinition p2 = CreateNewRequest("1.proj", "3.5");
- 
+
             p1.SubmitBuildRequest();
             p1.ValidateBuildResult();
 
@@ -197,7 +199,7 @@ namespace Microsoft.Build.UnitTests.QA
 
             RequestDefinition p1 = CreateNewRequest("1.proj", "2.0", null, group1);
             RequestDefinition p2 = CreateNewRequest("1.proj", "3.0", null, group2);
-  
+
             p1.SubmitBuildRequest();
             p1.ValidateBuildResult();
 
@@ -399,7 +401,7 @@ namespace Microsoft.Build.UnitTests.QA
 
             p1.SubmitBuildRequest();
             p1.ValidateBuildResult();
-            
+
             p2.SubmitBuildRequest();
             p2.ValidateBuildResult();
 
@@ -422,7 +424,7 @@ namespace Microsoft.Build.UnitTests.QA
             p1.AddChildDefinition(p5);
             p1.AddChildDefinition(p6);
 
-            p1.SubmitBuildRequest(); 
+            p1.SubmitBuildRequest();
             p1.ValidateBuildResult();
 
             p2.SubmitBuildRequest();
@@ -655,11 +657,11 @@ namespace Microsoft.Build.UnitTests.QA
         {
             // Make sure that the path is rooted. This is particularly important when testing implementation of RequestBuilder. The RequestBuild adds default path if the project file path 
             // is not rooted. This will cause us to not be able to locate the approprate RequestDefinition as the file name is also used as a comparing mechinasim
-            projectFile = System.IO.Path.Combine(this.tempPath, projectFile);
-            RequestDefinition p1 = new RequestDefinition(projectFile, toolsversion, targetsToBuild, globalProperties, 0, null, (IBuildComponentHost)this.host);
+            projectFile = System.IO.Path.Combine(_tempPath, projectFile);
+            RequestDefinition p1 = new RequestDefinition(projectFile, toolsversion, targetsToBuild, globalProperties, 0, null, (IBuildComponentHost)_host);
 
             // If a project object is to be created then we will need to add all targets that we will be building to the project XML
-            if (this.createMSBuildProject)
+            if (_createMSBuildProject)
             {
                 p1.CreateMSBuildProject = true;
                 ProjectDefinition p = p1.ProjectDefinition;
@@ -669,7 +671,7 @@ namespace Microsoft.Build.UnitTests.QA
                     p1.ProjectDefinition.AddTarget(t);
                 }
             }
-            
+
             return p1;
         }
 

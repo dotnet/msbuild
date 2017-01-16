@@ -21,7 +21,7 @@ namespace Microsoft.Build.Execution
     /// An evaluated item definition for a particular item-type, divested of all references to XML.
     /// Immutable.
     /// </summary>
-    [DebuggerDisplay("{itemType} #Metadata={MetadataCount}")]
+    [DebuggerDisplay("{_itemType} #Metadata={MetadataCount}")]
     public class ProjectItemDefinitionInstance : IKeyed, IMetadataTable, IItemDefinition<ProjectMetadataInstance>
     {
         /// <summary>

@@ -6,7 +6,6 @@
 //-----------------------------------------------------------------------
 
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd;
@@ -22,13 +21,13 @@ using System.Collections.Generic;
 using System.Xml;
 
 using MockHost = Microsoft.Build.UnitTests.BackEnd.MockHost;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.Logging
 {
     /// <summary>
     /// Contain the logging services tests which deal with the logging methods themselves
     /// </summary>
-    [TestClass]
     public class LoggingServicesLogMethod_Tests
     {
         #region Data
@@ -48,18 +47,20 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Make sure an InternalErrorExcetpionis thrown when a null event is attempted to be logged
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void LogBuildEventNullEvent()
         {
-            LoggingService loggingService = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
-            loggingService.LogBuildEvent(null);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                LoggingService loggingService = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
+                loggingService.LogBuildEvent(null);
+            }
+           );
         }
-
         /// <summary>
         /// Test LogBuildevent by logging a number of events with both OnlyLogCriticalEvents On and Off
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LogBuildEvents()
         {
             // This event should only be logged when OnlyLogCriticalEvents is off
@@ -81,7 +82,7 @@ namespace Microsoft.Build.UnitTests.Logging
             // Verify when OnlyLogCriticalEvents is true
             loggingService.OnlyLogCriticalEvents = true;
             loggingService.LogBuildEvent(messageEvent);
-            Assert.IsNull(loggingService.ProcessedBuildEvent, "Expected ProcessedBuildEvent to be null");
+            Assert.Null(loggingService.ProcessedBuildEvent); // "Expected ProcessedBuildEvent to be null"
             LogandVerifyBuildEvent(warning, loggingService);
             LogandVerifyBuildEvent(error, loggingService);
             LogandVerifyBuildEvent(externalStartedEvent, loggingService);
@@ -96,29 +97,33 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an InternalErrorException is thrown when MessageResourceName  is null.
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void LogErrorNullMessageResource()
         {
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogError(s_buildEventContext, "SubCategoryForSolutionParsingErrors", new BuildEventFileInfo("foo.cs"), null, "MyTask");
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogError(s_buildEventContext, "SubCategoryForSolutionParsingErrors", new BuildEventFileInfo("foo.cs"), null, "MyTask");
+            }
+           );
         }
-
         /// <summary>
         /// Verify an InternlErrorException is thrown when an empty MessageResourceName is passed in. 
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void LogErrorEmptyMessageResource()
         {
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogError(s_buildEventContext, "SubCategoryForSolutionParsingErrors", new BuildEventFileInfo("foo.cs"), string.Empty, "MyTask");
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogError(s_buildEventContext, "SubCategoryForSolutionParsingErrors", new BuildEventFileInfo("foo.cs"), string.Empty, "MyTask");
+            }
+           );
         }
-
         /// <summary>
         /// Verify a message is logged when all of the parameters are filled out correctly.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LogErrorGoodParameters()
         {
             BuildEventFileInfo fileInfo = new BuildEventFileInfo("foo.cs", 1, 2, 3, 4);
@@ -142,47 +147,51 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an exception is thrown when a null buildevent context is passed in
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void LogInvalidProjectFileErrorNullEventContext()
         {
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogInvalidProjectFileError(null, new InvalidProjectFileException());
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogInvalidProjectFileError(null, new InvalidProjectFileException());
+            }
+           );
         }
-
         /// <summary>
         /// Verify an exception is thrown when a null Invalid ProjectFile exception is passed in
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void LogInvalidProjectFileErrorNullException()
         {
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogInvalidProjectFileError(s_buildEventContext, null);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogInvalidProjectFileError(s_buildEventContext, null);
+            }
+           );
         }
-
         /// <summary>
         /// Verify a message is logged when both parameters are good and 
         /// the exception has not been logged yet. Verify with and without OnlyLogCriticalEvents.
         /// In Both cases we expect the event to be logged
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LogInvalidProjectFileError()
         {
             ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
             InvalidProjectFileException exception = new InvalidProjectFileException("ProjectFile", 1, 2, 3, 4, "Message", "errorSubCategory", "ErrorCode", "HelpKeyword");
 
             // Log the exception for the first time
-            Assert.IsFalse(exception.HasBeenLogged);
+            Assert.False(exception.HasBeenLogged);
             service.LogInvalidProjectFileError(s_buildEventContext, exception);
-            Assert.IsTrue(exception.HasBeenLogged);
+            Assert.True(exception.HasBeenLogged);
             BuildEventFileInfo fileInfo = new BuildEventFileInfo(exception.ProjectFile, exception.LineNumber, exception.ColumnNumber, exception.EndLineNumber, exception.EndColumnNumber);
             VerifyBuildErrorEventArgs(fileInfo, exception.ErrorCode, exception.HelpKeyword, exception.BaseMessage, service, exception.ErrorSubcategory);
 
             // Verify when the exception is logged again that it does not actually get logged due to it already being logged
             service.ResetProcessedBuildEvent();
             service.LogInvalidProjectFileError(s_buildEventContext, exception);
-            Assert.IsNull(service.ProcessedBuildEvent);
+            Assert.Null(service.ProcessedBuildEvent);
 
             // Reset the HasLogged field and verify OnlyLogCriticalEvents does not effect the logging of the message
             service.ResetProcessedBuildEvent();
@@ -199,29 +208,33 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an InternalErrorException is thrown when a null build event context is passed in
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void LogFatalErrorNullContext()
         {
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogFatalError(null, new Exception("SuperException"), new BuildEventFileInfo("foo.cs"), "FatalTaskError", "TaskName");
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogFatalError(null, new Exception("SuperException"), new BuildEventFileInfo("foo.cs"), "FatalTaskError", "TaskName");
+            }
+           );
         }
-
         /// <summary>
         /// Verify an InternalErrorException is thrown when fileInfo is null
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void LogFatalErrorNullFileInfo()
         {
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogFatalError(s_buildEventContext, new Exception("SuperException"), null, "FatalTaskError", "TaskName");
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogFatalError(s_buildEventContext, new Exception("SuperException"), null, "FatalTaskError", "TaskName");
+            }
+           );
         }
-
         /// <summary>
         /// Verify a error message is correctly logged when  the exception is null.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LogFatalErrorNullException()
         {
             BuildEventFileInfo fileInfo = new BuildEventFileInfo("foo.cs", 1, 2, 3, 4);
@@ -240,31 +253,35 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an InternalErrorException is thrown when messageResourceName is null
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void LogFatalErrorNullMessageResourceName()
         {
-            BuildEventFileInfo fileInfo = new BuildEventFileInfo("foo.cs", 1, 2, 3, 4);
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogFatalError(s_buildEventContext, new Exception("SuperException"), fileInfo, null);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                BuildEventFileInfo fileInfo = new BuildEventFileInfo("foo.cs", 1, 2, 3, 4);
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogFatalError(s_buildEventContext, new Exception("SuperException"), fileInfo, null);
+            }
+           );
         }
-
         /// <summary>
         /// Verify an InternalErrorException is thrown when messageResourceName is empty
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void LogFatalErrorEmptyMessageResourceName()
         {
-            BuildEventFileInfo fileInfo = new BuildEventFileInfo("foo.cs", 1, 2, 3, 4);
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogFatalError(s_buildEventContext, new Exception("SuperException"), fileInfo, string.Empty, null);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                BuildEventFileInfo fileInfo = new BuildEventFileInfo("foo.cs", 1, 2, 3, 4);
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogFatalError(s_buildEventContext, new Exception("SuperException"), fileInfo, string.Empty, null);
+            }
+           );
         }
-
         /// <summary>
         /// Verify a error message is correctly logged when all of the inputs are valid.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LogFatalErrorAllGoodInput()
         {
             BuildEventFileInfo fileInfo = new BuildEventFileInfo("foo.cs", 1, 2, 3, 4);
@@ -288,7 +305,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify a error message is correctly logged when all of the inputs are valid.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LogFatalBuildErrorGoodInput()
         {
             BuildEventFileInfo fileInfo = new BuildEventFileInfo("foo.cs", 1, 2, 3, 4);
@@ -310,19 +327,21 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an InternalErrorException is thrown when taskName is null
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void LogFatalTaskErrorNullTaskNameName()
         {
-            BuildEventFileInfo fileInfo = new BuildEventFileInfo("foo.cs", 1, 2, 3, 4);
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogFatalTaskError(s_buildEventContext, new Exception("SuperException"), fileInfo, null);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                BuildEventFileInfo fileInfo = new BuildEventFileInfo("foo.cs", 1, 2, 3, 4);
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogFatalTaskError(s_buildEventContext, new Exception("SuperException"), fileInfo, null);
+            }
+           );
         }
-
         /// <summary>
         /// Verify a error message is correctly logged when all of the inputs are valid.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LogFatalTaskError()
         {
             BuildEventFileInfo fileInfo = new BuildEventFileInfo("foo.cs", 1, 2, 3, 4);
@@ -350,40 +369,46 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an InternalErrorException is thrown when BuildEventContext is null.
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void LogErrorFromTextNullBuildEventContext()
         {
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogErrorFromText(null, "SubCategoryForSolutionParsingErrors", "WarningCode", "HelpKeyword", new BuildEventFileInfo("foo.cs"), "Message");
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogErrorFromText(null, "SubCategoryForSolutionParsingErrors", "WarningCode", "HelpKeyword", new BuildEventFileInfo("foo.cs"), "Message");
+            }
+           );
         }
-
         /// <summary>
         /// Verify an InternalErrorException when a null FileInfo is passed in
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void LogErrorFromTextNullFileInfo()
         {
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogErrorFromText(s_buildEventContext, "SubCategoryForSolutionParsingErrors", "WarningCode", "HelpKeyword", null, "Message");
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogErrorFromText(s_buildEventContext, "SubCategoryForSolutionParsingErrors", "WarningCode", "HelpKeyword", null, "Message");
+            }
+           );
         }
-
         /// <summary>
         /// Verify an InternalErrorException is thrown when a null message is passed in
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void LogErrorFromTextNullMessage()
         {
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogErrorFromText(null, "SubCategoryForSolutionParsingErrors", "WarningCode", "HelpKeyword", new BuildEventFileInfo("foo.cs"), null);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogErrorFromText(null, "SubCategoryForSolutionParsingErrors", "WarningCode", "HelpKeyword", new BuildEventFileInfo("foo.cs"), null);
+            }
+           );
         }
-
         /// <summary>
         /// Test LogErrorFromText with a number of different inputs
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LogErrorFromTextTests()
         {
             string warningCode;
@@ -413,7 +438,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Make sure if an imported project has an invalid project file exception say by trying to run a nonexistent task that we properly get
         /// the [projectfile] post fix information.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyErrorPostfixForInvalidProjectFileException()
         {
             MockLogger mockLogger = new MockLogger();
@@ -447,10 +472,10 @@ namespace Microsoft.Build.UnitTests.Logging
                 msbuildProject.Build(mockLogger);
 
                 List<BuildErrorEventArgs> errors = mockLogger.Errors;
-                Assert.IsTrue(errors.Count == 1);
+                Assert.Equal(1, errors.Count);
                 BuildErrorEventArgs error = errors[0];
-                Assert.IsTrue(String.Equals(error.File, targetsFile));
-                Assert.IsTrue(String.Equals(error.ProjectFile, projectFile));
+                Assert.True(String.Equals(error.File, targetsFile));
+                Assert.True(String.Equals(error.ProjectFile, projectFile));
             }
             finally
             {
@@ -478,32 +503,36 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an InternalErrorException is thrown when taskName is null
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void LogTaskWarningFromExceptionNullTaskName()
         {
-            BuildEventFileInfo fileInfo = new BuildEventFileInfo("foo.cs", 1, 2, 3, 4);
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogTaskWarningFromException(s_buildEventContext, null, fileInfo, null);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                BuildEventFileInfo fileInfo = new BuildEventFileInfo("foo.cs", 1, 2, 3, 4);
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogTaskWarningFromException(s_buildEventContext, null, fileInfo, null);
+            }
+           );
         }
-
         /// <summary>
         /// Verify an InternalErrorException is thrown when taskName is empty
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void LogTaskWarningFromExceptionEmptyTaskName()
         {
-            BuildEventFileInfo fileInfo = new BuildEventFileInfo("foo.cs", 1, 2, 3, 4);
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogTaskWarningFromException(s_buildEventContext, null, fileInfo, null);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                BuildEventFileInfo fileInfo = new BuildEventFileInfo("foo.cs", 1, 2, 3, 4);
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogTaskWarningFromException(s_buildEventContext, null, fileInfo, null);
+            }
+           );
         }
-
         /// <summary>
         /// Verify a LogTaskWarningFromException with a null exception and a non null exception 
         /// with all of the other fields properly filled out.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LogTaskWarningFromException()
         {
             BuildEventFileInfo fileInfo = new BuildEventFileInfo("foo.cs", 1, 2, 3, 4);
@@ -532,29 +561,33 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an exception is when a null MessageResourceName is passed in
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void LogWarningNullMessageResource()
         {
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogWarning(s_buildEventContext, "SubCategoryForSolutionParsingErrors", new BuildEventFileInfo("foo.cs"), null, "MyTask");
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogWarning(s_buildEventContext, "SubCategoryForSolutionParsingErrors", new BuildEventFileInfo("foo.cs"), null, "MyTask");
+            }
+           );
         }
-
         /// <summary>
         /// Verify an exception is when a empty MessageResourceName is passed in. 
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void LogWarningEmptyMessageResource()
         {
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogWarning(s_buildEventContext, "SubCategoryForSolutionParsingErrors", new BuildEventFileInfo("foo.cs"), string.Empty, "MyTask");
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogWarning(s_buildEventContext, "SubCategoryForSolutionParsingErrors", new BuildEventFileInfo("foo.cs"), string.Empty, "MyTask");
+            }
+           );
         }
-
         /// <summary>
         /// Verify a message is logged when all of the parameters are filled out 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LogWarningTests()
         {
             TestLogWarning(null, "SubCategoryForSolutionParsingErrors");
@@ -568,40 +601,46 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an InternalErrorException is thrown when a null BuildEventContext is passed in
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void LogWarningFromTextNullBuildEventContext()
         {
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogWarningFromText(null, "SubCategoryForSolutionParsingErrors", "WarningCode", "HelpKeyword", new BuildEventFileInfo("foo.cs"), "Message");
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogWarningFromText(null, "SubCategoryForSolutionParsingErrors", "WarningCode", "HelpKeyword", new BuildEventFileInfo("foo.cs"), "Message");
+            }
+           );
         }
-
         /// <summary>
         /// Verify an InternalErrorException is thrown when a null fileInfo is passed in
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void LogWarningFromTextNullFileInfo()
         {
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogWarningFromText(s_buildEventContext, "SubCategoryForSolutionParsingErrors", "WarningCode", "HelpKeyword", null, "Message");
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogWarningFromText(s_buildEventContext, "SubCategoryForSolutionParsingErrors", "WarningCode", "HelpKeyword", null, "Message");
+            }
+           );
         }
-
         /// <summary>
         /// Verify an InternalErrorException is thrown when a null message is passed in
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void LogWarningFromTextNullMessage()
         {
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogWarningFromText(null, "SubCategoryForSolutionParsingErrors", "WarningCode", "HelpKeyword", new BuildEventFileInfo("foo.cs"), null);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogWarningFromText(null, "SubCategoryForSolutionParsingErrors", "WarningCode", "HelpKeyword", new BuildEventFileInfo("foo.cs"), null);
+            }
+           );
         }
-
         /// <summary>
         /// Test LogWarningFromText with a number of different inputs
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LogWarningFromTextTests()
         {
             string warningCode;
@@ -632,30 +671,34 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an InternalErrorException is thrown when a null messageResource name is passed in
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void LogCommentNullMessageResourceName()
         {
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogComment(s_buildEventContext, MessageImportance.Low, null, null);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogComment(s_buildEventContext, MessageImportance.Low, null, null);
+            }
+           );
         }
-
         /// <summary>
         /// Verify an InternalErrorException is thrown when a empty messageResource name is passed in
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void LogCommentEmptyMessageResourceName()
         {
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogComment(s_buildEventContext, MessageImportance.Low, String.Empty, null);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogComment(s_buildEventContext, MessageImportance.Low, String.Empty, null);
+            }
+           );
         }
-
         /// <summary>
         /// Verify LogComment by testing it with OnlyLogCriticalEvents On and Off when the rest of the fields are 
         /// valid inputs.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LogCommentGoodMessage()
         {
             MessageImportance messageImportance = MessageImportance.Normal;
@@ -671,7 +714,7 @@ namespace Microsoft.Build.UnitTests.Logging
             service.ResetProcessedBuildEvent();
             service.OnlyLogCriticalEvents = true;
             service.LogComment(s_buildEventContext, MessageImportance.Normal, "BuildFinishedSuccess");
-            Assert.IsNull(service.ProcessedBuildEvent);
+            Assert.Null(service.ProcessedBuildEvent);
         }
 
         #endregion
@@ -681,18 +724,20 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an InternalErrorException is thrown when a null message is passed in
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void LogCommentFromTextNullMessage()
         {
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogCommentFromText(s_buildEventContext, MessageImportance.Low, null);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogCommentFromText(s_buildEventContext, MessageImportance.Low, null);
+            }
+           );
         }
-
         /// <summary>
         /// Verify a message is logged when an empty message is passed in
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LogCommentFromTextEmptyMessage()
         {
             ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
@@ -702,18 +747,20 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an InternalErrorException is thrown when a null build event context is passed in
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void LogCommentFromTextNullBuildEventContextMessage()
         {
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogCommentFromText(null, MessageImportance.Low, "Hello");
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogCommentFromText(null, MessageImportance.Low, "Hello");
+            }
+           );
         }
-
         /// <summary>
         /// Make sure we can log a comment when everything should be working correctly
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LogCommentFromTextGoodMessage()
         {
             MessageImportance messageImportance = MessageImportance.Normal;
@@ -726,7 +773,7 @@ namespace Microsoft.Build.UnitTests.Logging
             service.ResetProcessedBuildEvent();
             service.OnlyLogCriticalEvents = true;
             service.LogCommentFromText(s_buildEventContext, MessageImportance.Normal, ResourceUtilities.FormatResourceString("BuildFinishedSuccess"));
-            Assert.IsNull(service.ProcessedBuildEvent);
+            Assert.Null(service.ProcessedBuildEvent);
         }
         #endregion
 
@@ -740,31 +787,35 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Expect an exception to be thrown if a null build event context is passed in
         /// and OnlyLogCriticalEvents is false
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void ProjectStartedNullBuildEventContext()
         {
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogProjectStarted(null, 1, 2, s_buildEventContext, "ProjectFile", "TargetNames", null, null);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogProjectStarted(null, 1, 2, s_buildEventContext, "ProjectFile", "TargetNames", null, null);
+            }
+           );
         }
-
         /// <summary>
         /// Expect an exception to be thrown if a null build event context is passed in
         /// and OnlyLogCriticalEvents is false
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void ProjectStartedNullParentBuildEventContext()
         {
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogProjectStarted(s_buildEventContext, 1, 2, null, "ProjectFile", "TargetNames", null, null);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogProjectStarted(s_buildEventContext, 1, 2, null, "ProjectFile", "TargetNames", null, null);
+            }
+           );
         }
-
         /// <summary>
         /// Test the case where ProjectFile is good and TargetNames is null.
         /// Expect an event to be logged
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ProjectStartedEventTests()
         {
             // Good project File and null target names
@@ -793,18 +844,20 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Expect an exception to be thrown if a null build event context is passed in
         /// and OnlyLogCriticalEvents is false
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void ProjectFinishedNullBuildEventContext()
         {
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogProjectFinished(null, "ProjectFile", true);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogProjectFinished(null, "ProjectFile", true);
+            }
+           );
         }
-
         /// <summary>
         /// Test the project finished event
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ProjectFinished()
         {
             TestProjectFinishedEvent(null, true);
@@ -822,50 +875,72 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Make sure we can log a build started event correctly.
         /// Test both the LogOnlyCriticalEvents true and false
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LogBuildStarted()
         {
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogBuildStarted();
-            BuildStartedEventArgs buildEvent = new BuildStartedEventArgs(ResourceUtilities.FormatResourceString("BuildStarted"), null /* no help keyword */, service.ProcessedBuildEvent.Timestamp);
-            Assert.IsTrue(((BuildStartedEventArgs)service.ProcessedBuildEvent).IsEquivalent(buildEvent));
+            ProcessBuildEventHelper service =
+                (ProcessBuildEventHelper) ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
 
-            service.ResetProcessedBuildEvent();
+            service.LogBuildStarted();
+
+            BuildStartedEventArgs buildEvent =
+                new BuildStartedEventArgs(
+                    ResourceUtilities.FormatResourceString("BuildStarted"), 
+                    null /* no help keyword */,
+                    service.ProcessedBuildEvent.Timestamp);
+
+            Assert.IsType<BuildStartedEventArgs>(service.ProcessedBuildEvent);
+            Assert.Equal(buildEvent, (BuildStartedEventArgs) service.ProcessedBuildEvent,
+                new EventArgsEqualityComparer<BuildStartedEventArgs>());
+        }
+
+        [Fact]
+        public void LogBuildStartedCriticalOnly()
+        {
+            ProcessBuildEventHelper service =
+                (ProcessBuildEventHelper) ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.OnlyLogCriticalEvents = true;
             service.LogBuildStarted();
-            buildEvent = new BuildStartedEventArgs(string.Empty, null /* no help keyword */);
-            Assert.IsTrue(((BuildStartedEventArgs)service.ProcessedBuildEvent).IsEquivalent(buildEvent));
+
+            BuildStartedEventArgs buildEvent =
+                new BuildStartedEventArgs(
+                    string.Empty,
+                    null /* no help keyword */);
+
+            Assert.IsType<BuildStartedEventArgs>(service.ProcessedBuildEvent);
+            Assert.Equal(buildEvent, (BuildStartedEventArgs) service.ProcessedBuildEvent,
+                new EventArgsEqualityComparer<BuildStartedEventArgs>());
         }
 
         /// <summary>
         /// Make sure we can log a build finished event correctly.
         /// Verify the success cases as well as OnlyLogCriticalEvents
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LogBuildFinished()
         {
             ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.LogBuildFinished(true);
             BuildFinishedEventArgs buildEvent = new BuildFinishedEventArgs(ResourceUtilities.FormatResourceString("BuildFinishedSuccess"), null /* no help keyword */, true, service.ProcessedBuildEvent.Timestamp);
-            Assert.IsTrue(((BuildFinishedEventArgs)service.ProcessedBuildEvent).IsEquivalent(buildEvent));
+            Assert.True(((BuildFinishedEventArgs)service.ProcessedBuildEvent).IsEquivalent(buildEvent));
 
             service.ResetProcessedBuildEvent();
             service.LogBuildFinished(false);
             buildEvent = new BuildFinishedEventArgs(ResourceUtilities.FormatResourceString("BuildFinishedFailure"), null /* no help keyword */, false, service.ProcessedBuildEvent.Timestamp);
-            Assert.IsTrue(((BuildFinishedEventArgs)service.ProcessedBuildEvent).IsEquivalent(buildEvent));
+            Assert.True(((BuildFinishedEventArgs)service.ProcessedBuildEvent).IsEquivalent(buildEvent));
 
             service.ResetProcessedBuildEvent();
             service.OnlyLogCriticalEvents = true;
             service.LogBuildFinished(true);
             buildEvent = new BuildFinishedEventArgs(string.Empty, null /* no help keyword */, true, service.ProcessedBuildEvent.Timestamp);
-            Assert.IsTrue(((BuildFinishedEventArgs)service.ProcessedBuildEvent).IsEquivalent(buildEvent));
+            Assert.True(((BuildFinishedEventArgs)service.ProcessedBuildEvent).IsEquivalent(buildEvent));
         }
 
         /// <summary>
         ///  Exercise Asynchronous code path, this method should return right away as there are no events to process.
         ///  This will be further tested in the LoggingService_Tests class.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestBuildFinishedWaitForEvents()
         {
             ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Asynchronous, 1);
@@ -882,18 +957,20 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Expect an exception to be thrown if a null build event context is passed in
         /// and OnlyLogCriticalEvents is false
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void TaskStartedNullBuildEventContext()
         {
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogTaskStarted(null, "MyTask", "ProjectFile", "ProjectFileOfTask");
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogTaskStarted(null, "MyTask", "ProjectFile", "ProjectFileOfTask");
+            }
+           );
         }
-
         /// <summary>
         /// Test the case where TaskName 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TaskStartedEvent()
         {
             TestTaskStartedEvent(null, "ProjectFile", "ProjectFileOfTaskNode");
@@ -915,18 +992,20 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Expect an exception to be thrown if a null build event context is passed in
         /// and OnlyLogCriticalEvents is false
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void TaskFinishedNullBuildEventContext()
         {
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogTaskFinished(null, "MyTask", "ProjectFile", "ProjectFileOfTask", true);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogTaskFinished(null, "MyTask", "ProjectFile", "ProjectFileOfTask", true);
+            }
+           );
         }
-
         /// <summary>
         /// Test the case where TaskName is null. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TaskFinishedNullTaskName()
         {
             TestTaskFinished(null, "ProjectFile", "ProjectFileOfTaskNode", true);
@@ -953,18 +1032,20 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Expect an exception to be thrown if a null build event context is passed in
         /// and OnlyLogCriticalEvents is false
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void TargetStartedNullBuildEventContext()
         {
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogTargetStarted(null, "MyTarget", "ProjectFile", "ProjectFileOfTarget", null);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogTargetStarted(null, "MyTarget", "ProjectFile", "ProjectFileOfTarget", null);
+            }
+           );
         }
-
         /// <summary>
         /// Test the target started event with a null target name.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TargetStartedNullTargetName()
         {
             TestTargetStartedEvent(null, "ProjectFile", "projectFileOfTarget");
@@ -980,7 +1061,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Test the target started event with different values being null.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TargetStartedWithParentTarget()
         {
             TestTargetStartedWithParentTargetEvent(null, "ProjectFile", "projectFileOfTarget");
@@ -999,18 +1080,20 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Expect an exception to be thrown if a null build event context is passed in
         /// and OnlyLogCriticalEvents is false
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void TargetFinishedNullBuildEventContext()
         {
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogTargetFinished(null, "MyTarget", "ProjectFile", "ProjectFileOfTarget", true, null);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                service.LogTargetFinished(null, "MyTarget", "ProjectFile", "ProjectFileOfTarget", true, null);
+            }
+           );
         }
-
         /// <summary>
         /// Test the case where TargetName is null. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TargetFinishedNullTargetName()
         {
             TestTargetFinished(null, "ProjectFile", "ProjectFileOfTarget", true);
@@ -1130,7 +1213,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
             catch (InternalErrorException ex)
             {
-                Assert.IsTrue(ex.Message.Contains("ContextID " + s_buildEventContext.ProjectContextId));
+                Assert.True(ex.Message.Contains("ContextID " + s_buildEventContext.ProjectContextId));
             }
             finally
             {
@@ -1180,7 +1263,7 @@ namespace Microsoft.Build.UnitTests.Logging
             service.ResetProcessedBuildEvent();
             service.OnlyLogCriticalEvents = true;
             service.LogTaskStarted(s_buildEventContext, taskName, projectFile, projectFileOfTask);
-            Assert.IsNull(service.ProcessedBuildEvent);
+            Assert.Null(service.ProcessedBuildEvent);
         }
 
         /// <summary>
@@ -1200,7 +1283,7 @@ namespace Microsoft.Build.UnitTests.Logging
             service.ResetProcessedBuildEvent();
             service.OnlyLogCriticalEvents = true;
             service.LogTaskFinished(s_buildEventContext, taskName, projectFile, projectFileOfTask, succeeded);
-            Assert.IsNull(service.ProcessedBuildEvent);
+            Assert.Null(service.ProcessedBuildEvent);
         }
 
         /// <summary>
@@ -1223,7 +1306,7 @@ namespace Microsoft.Build.UnitTests.Logging
             service.ResetProcessedBuildEvent();
             service.OnlyLogCriticalEvents = true;
             service.LogTargetFinished(s_targetBuildEventContext, targetName, projectFile, projectFileOfTarget, succeeded, outputs);
-            Assert.IsNull(service.ProcessedBuildEvent);
+            Assert.Null(service.ProcessedBuildEvent);
         }
 
         /// <summary>
@@ -1253,7 +1336,7 @@ namespace Microsoft.Build.UnitTests.Logging
             service.ResetProcessedBuildEvent();
             service.OnlyLogCriticalEvents = true;
             service.LogTargetStarted(s_targetBuildEventContext, targetName, projectFile, projectFileOfTarget, null);
-            Assert.IsNull(service.ProcessedBuildEvent);
+            Assert.Null(service.ProcessedBuildEvent);
         }
 
         /// <summary>
@@ -1280,7 +1363,7 @@ namespace Microsoft.Build.UnitTests.Logging
             service.ResetProcessedBuildEvent();
             service.OnlyLogCriticalEvents = true;
             service.LogTargetStarted(s_targetBuildEventContext, targetName, projectFile, projectFileOfTarget, parentTargetName);
-            Assert.IsNull(service.ProcessedBuildEvent);
+            Assert.Null(service.ProcessedBuildEvent);
         }
 
         /// <summary>
@@ -1336,7 +1419,7 @@ namespace Microsoft.Build.UnitTests.Logging
                   targetOutputs
                 );
             targetEvent.BuildEventContext = s_targetBuildEventContext;
-            Assert.IsTrue(((TargetFinishedEventArgs)service.ProcessedBuildEvent).IsEquivalent(targetEvent));
+            Assert.True(((TargetFinishedEventArgs)service.ProcessedBuildEvent).IsEquivalent(targetEvent));
         }
 
         /// <summary>
@@ -1360,7 +1443,7 @@ namespace Microsoft.Build.UnitTests.Logging
                            service.ProcessedBuildEvent.Timestamp
                        );
             buildEvent.BuildEventContext = s_targetBuildEventContext;
-            Assert.IsTrue(((TargetStartedEventArgs)service.ProcessedBuildEvent).IsEquivalent(buildEvent));
+            Assert.True(((TargetStartedEventArgs)service.ProcessedBuildEvent).IsEquivalent(buildEvent));
         }
 
         /// <summary>
@@ -1385,7 +1468,7 @@ namespace Microsoft.Build.UnitTests.Logging
                   service.ProcessedBuildEvent.Timestamp
                 );
             taskEvent.BuildEventContext = s_buildEventContext;
-            Assert.IsTrue(((TaskFinishedEventArgs)service.ProcessedBuildEvent).IsEquivalent(taskEvent));
+            Assert.True(((TaskFinishedEventArgs)service.ProcessedBuildEvent).IsEquivalent(taskEvent));
         }
 
         /// <summary>
@@ -1408,7 +1491,7 @@ namespace Microsoft.Build.UnitTests.Logging
                   service.ProcessedBuildEvent.Timestamp
                 );
             taskEvent.BuildEventContext = s_buildEventContext;
-            Assert.IsTrue(((TaskStartedEventArgs)service.ProcessedBuildEvent).IsEquivalent(taskEvent));
+            Assert.True(((TaskStartedEventArgs)service.ProcessedBuildEvent).IsEquivalent(taskEvent));
         }
 
         /// <summary>
@@ -1430,7 +1513,7 @@ namespace Microsoft.Build.UnitTests.Logging
                   service.ProcessedBuildEvent.Timestamp
                 );
             projectEvent.BuildEventContext = projectContext;
-            Assert.IsTrue(((ProjectFinishedEventArgs)service.ProcessedBuildEvent).IsEquivalent(projectEvent));
+            Assert.True(((ProjectFinishedEventArgs)service.ProcessedBuildEvent).IsEquivalent(projectEvent));
         }
 
         /// <summary>
@@ -1457,7 +1540,7 @@ namespace Microsoft.Build.UnitTests.Logging
                         service.ProcessedBuildEvent.Timestamp
                     );
             buildEvent.BuildEventContext = generatedContext;
-            Assert.IsTrue(((ProjectStartedEventArgs)service.ProcessedBuildEvent).IsEquivalent(buildEvent));
+            Assert.True(((ProjectStartedEventArgs)service.ProcessedBuildEvent).IsEquivalent(buildEvent));
         }
 
         /// <summary>
@@ -1478,7 +1561,7 @@ namespace Microsoft.Build.UnitTests.Logging
                 );
 
             buildMessageEvent.BuildEventContext = s_buildEventContext;
-            Assert.IsTrue(((BuildMessageEventArgs)service.ProcessedBuildEvent).IsEquivalent(buildMessageEvent));
+            Assert.True(((BuildMessageEventArgs)service.ProcessedBuildEvent).IsEquivalent(buildMessageEvent));
         }
 
         /// <summary>
@@ -1507,7 +1590,7 @@ namespace Microsoft.Build.UnitTests.Logging
                     service.ProcessedBuildEvent.Timestamp
                 );
             buildEvent.BuildEventContext = s_buildEventContext;
-            Assert.IsTrue(buildEvent.IsEquivalent((BuildWarningEventArgs)service.ProcessedBuildEvent));
+            Assert.True(buildEvent.IsEquivalent((BuildWarningEventArgs)service.ProcessedBuildEvent));
         }
 
         /// <summary>
@@ -1536,7 +1619,7 @@ namespace Microsoft.Build.UnitTests.Logging
                     service.ProcessedBuildEvent.Timestamp
                 );
             buildEvent.BuildEventContext = s_buildEventContext;
-            Assert.IsTrue(buildEvent.IsEquivalent((BuildErrorEventArgs)service.ProcessedBuildEvent));
+            Assert.True(buildEvent.IsEquivalent((BuildErrorEventArgs)service.ProcessedBuildEvent));
         }
 
         /// <summary>
@@ -1547,7 +1630,7 @@ namespace Microsoft.Build.UnitTests.Logging
         private void LogandVerifyBuildEvent(BuildEventArgs expectedBuildEvent, ProcessBuildEventHelper loggingService)
         {
             loggingService.LogBuildEvent(expectedBuildEvent);
-            Assert.IsTrue(loggingService.ProcessedBuildEvent.IsEquivalent(expectedBuildEvent), "Expected ProcessedBuildEvent to equal expected build event");
+            Assert.True(loggingService.ProcessedBuildEvent.IsEquivalent(expectedBuildEvent)); // "Expected ProcessedBuildEvent to equal expected build event"
             loggingService.ResetProcessedBuildEvent();
         }
         #endregion
@@ -1649,6 +1732,19 @@ namespace Microsoft.Build.UnitTests.Logging
                 _processedBuildEvent = null;
             }
             #endregion
+        }
+
+        private class EventArgsEqualityComparer<T> : IEqualityComparer<T> where T : BuildEventArgs
+        {
+            public bool Equals(T x, T y)
+            {
+                return x.IsEquivalent(y);
+            }
+
+            public int GetHashCode(T obj)
+            {
+                throw new NotImplementedException();
+            }
         }
         #endregion
     }

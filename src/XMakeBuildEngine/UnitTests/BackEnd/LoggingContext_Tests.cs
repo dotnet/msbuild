@@ -8,40 +8,39 @@
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
     /// Tests for logging contexts. 
     /// </summary>
-    [TestClass]
     public class LoggingContext_Tests
     {
         /// <summary>
         /// A few simple tests for NodeLoggingContexts. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void CreateValidNodeLoggingContexts()
         {
             NodeLoggingContext context = new NodeLoggingContext(new MockLoggingService(), 1, true);
-            Assert.AreEqual(true, context.IsInProcNode);
-            Assert.IsTrue(context.IsValid);
+            Assert.Equal(true, context.IsInProcNode);
+            Assert.True(context.IsValid);
 
             context.LogBuildFinished(true);
-            Assert.IsFalse(context.IsValid);
+            Assert.False(context.IsValid);
 
-            Assert.AreEqual(1, context.BuildEventContext.NodeId);
+            Assert.Equal(1, context.BuildEventContext.NodeId);
 
             NodeLoggingContext context2 = new NodeLoggingContext(new MockLoggingService(), 2, false);
-            Assert.AreEqual(false, context2.IsInProcNode);
-            Assert.IsTrue(context2.IsValid);
+            Assert.Equal(false, context2.IsInProcNode);
+            Assert.True(context2.IsValid);
 
             context2.LogBuildFinished(true);
-            Assert.IsFalse(context2.IsValid);
+            Assert.False(context2.IsValid);
 
-            Assert.AreEqual(2, context2.BuildEventContext.NodeId);
+            Assert.Equal(2, context2.BuildEventContext.NodeId);
         }
 
         /// <summary>
@@ -49,11 +48,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// an exception -- this is to guarantee that if we're passing around invalid node IDs, 
         /// we'll know about it.  
         /// </summary>
-        [ExpectedException(typeof(InternalErrorException))]
-        [TestMethod]
+        [Fact]
         public void InvalidNodeIdOnNodeLoggingContext()
         {
-            NodeLoggingContext context = new NodeLoggingContext(new MockLoggingService(), -2, true);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                NodeLoggingContext context = new NodeLoggingContext(new MockLoggingService(), -2, true);
+            }
+           );
         }
     }
 }

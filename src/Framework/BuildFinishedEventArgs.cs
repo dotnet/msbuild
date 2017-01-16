@@ -27,7 +27,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Whether the build succeeded
         /// </summary>
-        private bool _succeeded;
+        private bool succeeded;
 
         /// <summary>
         /// Default constructor
@@ -92,7 +92,7 @@ namespace Microsoft.Build.Framework
         )
             : base(message, helpKeyword, "MSBuild", eventTimestamp, messageArgs)
         {
-            _succeeded = succeeded;
+            this.succeeded = succeeded;
         }
 
 
@@ -105,7 +105,7 @@ namespace Microsoft.Build.Framework
         internal override void WriteToStream(BinaryWriter writer)
         {
             base.WriteToStream(writer);
-            writer.Write(_succeeded);
+            writer.Write(succeeded);
         }
 
         /// <summary>
@@ -116,7 +116,7 @@ namespace Microsoft.Build.Framework
         internal override void CreateFromStream(BinaryReader reader, int version)
         {
             base.CreateFromStream(reader, version);
-            _succeeded = reader.ReadBoolean();
+            succeeded = reader.ReadBoolean();
         }
         #endregion
         /// <summary>
@@ -126,7 +126,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _succeeded;
+                return succeeded;
             }
         }
     }

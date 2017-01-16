@@ -6,11 +6,10 @@ using System.IO;
 using System.Resources;
 using System.Reflection;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -34,77 +33,76 @@ namespace Microsoft.Build.UnitTests
         }
     }
 
-    [TestClass]
     public class Logger_Tests
     {
-        [TestMethod]
+        [Fact]
         public void ExerciseMiscProperties()
         {
             EmptyLogger logger = new EmptyLogger(LoggerVerbosity.Diagnostic);
             logger.Parameters = "Parameters";
-            Assert.IsTrue(string.Compare(logger.Parameters, "Parameters", StringComparison.OrdinalIgnoreCase) == 0);
-            Assert.AreEqual(LoggerVerbosity.Diagnostic, logger.Verbosity);
+            Assert.Equal(0, string.Compare(logger.Parameters, "Parameters", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(LoggerVerbosity.Diagnostic, logger.Verbosity);
             logger.Shutdown();
         }
         /// <summary>
         /// Exercises every combination of the Logger.IsVerbosityAtLeast method.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void IsVerbosityAtLeast()
         {
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new EmptyLogger(LoggerVerbosity.Quiet)).IsVerbosityAtLeast(LoggerVerbosity.Quiet));
-            Assert.AreEqual(false,
+            Assert.Equal(false,
                 (new EmptyLogger(LoggerVerbosity.Quiet)).IsVerbosityAtLeast(LoggerVerbosity.Minimal));
-            Assert.AreEqual(false,
+            Assert.Equal(false,
                 (new EmptyLogger(LoggerVerbosity.Quiet)).IsVerbosityAtLeast(LoggerVerbosity.Normal));
-            Assert.AreEqual(false,
+            Assert.Equal(false,
                 (new EmptyLogger(LoggerVerbosity.Quiet)).IsVerbosityAtLeast(LoggerVerbosity.Detailed));
-            Assert.AreEqual(false,
+            Assert.Equal(false,
                 (new EmptyLogger(LoggerVerbosity.Quiet)).IsVerbosityAtLeast(LoggerVerbosity.Diagnostic));
 
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new EmptyLogger(LoggerVerbosity.Minimal)).IsVerbosityAtLeast(LoggerVerbosity.Quiet));
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new EmptyLogger(LoggerVerbosity.Minimal)).IsVerbosityAtLeast(LoggerVerbosity.Minimal));
-            Assert.AreEqual(false,
+            Assert.Equal(false,
                 (new EmptyLogger(LoggerVerbosity.Minimal)).IsVerbosityAtLeast(LoggerVerbosity.Normal));
-            Assert.AreEqual(false,
+            Assert.Equal(false,
                 (new EmptyLogger(LoggerVerbosity.Minimal)).IsVerbosityAtLeast(LoggerVerbosity.Detailed));
-            Assert.AreEqual(false,
+            Assert.Equal(false,
                 (new EmptyLogger(LoggerVerbosity.Minimal)).IsVerbosityAtLeast(LoggerVerbosity.Diagnostic));
 
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new EmptyLogger(LoggerVerbosity.Normal)).IsVerbosityAtLeast(LoggerVerbosity.Quiet));
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new EmptyLogger(LoggerVerbosity.Normal)).IsVerbosityAtLeast(LoggerVerbosity.Minimal));
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new EmptyLogger(LoggerVerbosity.Normal)).IsVerbosityAtLeast(LoggerVerbosity.Normal));
-            Assert.AreEqual(false,
+            Assert.Equal(false,
                 (new EmptyLogger(LoggerVerbosity.Normal)).IsVerbosityAtLeast(LoggerVerbosity.Detailed));
-            Assert.AreEqual(false,
+            Assert.Equal(false,
                 (new EmptyLogger(LoggerVerbosity.Normal)).IsVerbosityAtLeast(LoggerVerbosity.Diagnostic));
 
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new EmptyLogger(LoggerVerbosity.Detailed)).IsVerbosityAtLeast(LoggerVerbosity.Quiet));
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new EmptyLogger(LoggerVerbosity.Detailed)).IsVerbosityAtLeast(LoggerVerbosity.Minimal));
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new EmptyLogger(LoggerVerbosity.Detailed)).IsVerbosityAtLeast(LoggerVerbosity.Normal));
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new EmptyLogger(LoggerVerbosity.Detailed)).IsVerbosityAtLeast(LoggerVerbosity.Detailed));
-            Assert.AreEqual(false,
+            Assert.Equal(false,
                 (new EmptyLogger(LoggerVerbosity.Detailed)).IsVerbosityAtLeast(LoggerVerbosity.Diagnostic));
 
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new EmptyLogger(LoggerVerbosity.Diagnostic)).IsVerbosityAtLeast(LoggerVerbosity.Quiet));
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new EmptyLogger(LoggerVerbosity.Diagnostic)).IsVerbosityAtLeast(LoggerVerbosity.Minimal));
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new EmptyLogger(LoggerVerbosity.Diagnostic)).IsVerbosityAtLeast(LoggerVerbosity.Normal));
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new EmptyLogger(LoggerVerbosity.Diagnostic)).IsVerbosityAtLeast(LoggerVerbosity.Detailed));
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new EmptyLogger(LoggerVerbosity.Diagnostic)).IsVerbosityAtLeast(LoggerVerbosity.Diagnostic));
         }
     }

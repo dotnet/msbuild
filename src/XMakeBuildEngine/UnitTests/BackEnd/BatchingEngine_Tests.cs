@@ -7,8 +7,6 @@ using System.Xml;
 using System.Collections;
 using System.Text.RegularExpressions;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
@@ -18,13 +16,13 @@ using System.Collections.Generic;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
-    [TestClass]
     public class BatchingEngine_Tests
     {
-        [TestMethod]
+        [Fact]
         public void GetBuckets()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -57,7 +55,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             List<ItemBucket> buckets = BatchingEngine.PrepareBatchingBuckets(parameters, CreateLookup(itemsByType, properties), MockElementLocation.Instance);
 
-            Assert.AreEqual(5, buckets.Count);
+            Assert.Equal(5, buckets.Count);
 
             foreach (ItemBucket bucket in buckets)
             {
@@ -65,22 +63,22 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 XmlAttribute tempXmlAttribute = (new XmlDocument()).CreateAttribute("attrib");
                 tempXmlAttribute.Value = "'$(Obj)'=='obj'";
 
-                Assert.IsTrue(ConditionEvaluator.EvaluateCondition(tempXmlAttribute.Value, ParserOptions.AllowAll, bucket.Expander, ExpanderOptions.ExpandAll, Environment.CurrentDirectory, MockElementLocation.Instance, null, new BuildEventContext(1, 2, 3, 4)));
-                Assert.AreEqual("a.doc;b.doc;c.doc;d.doc;e.doc", bucket.Expander.ExpandIntoStringAndUnescape("@(doc)", ExpanderOptions.ExpandItems, MockElementLocation.Instance));
-                Assert.AreEqual("unittests.foo", bucket.Expander.ExpandIntoStringAndUnescape("$(bogus)$(UNITTESTS)", ExpanderOptions.ExpandPropertiesAndMetadata, MockElementLocation.Instance));
+                Assert.True(ConditionEvaluator.EvaluateCondition(tempXmlAttribute.Value, ParserOptions.AllowAll, bucket.Expander, ExpanderOptions.ExpandAll, Directory.GetCurrentDirectory(), MockElementLocation.Instance, null, new BuildEventContext(1, 2, 3, 4)));
+                Assert.Equal("a.doc;b.doc;c.doc;d.doc;e.doc", bucket.Expander.ExpandIntoStringAndUnescape("@(doc)", ExpanderOptions.ExpandItems, MockElementLocation.Instance));
+                Assert.Equal("unittests.foo", bucket.Expander.ExpandIntoStringAndUnescape("$(bogus)$(UNITTESTS)", ExpanderOptions.ExpandPropertiesAndMetadata, MockElementLocation.Instance));
             }
 
-            Assert.AreEqual("a.foo", buckets[0].Expander.ExpandIntoStringAndUnescape("@(File)", ExpanderOptions.ExpandItems, MockElementLocation.Instance));
-            Assert.AreEqual(".foo", buckets[0].Expander.ExpandIntoStringAndUnescape("@(File->'%(Extension)')", ExpanderOptions.ExpandItems, MockElementLocation.Instance));
-            Assert.AreEqual("obj\\a.ext", buckets[0].Expander.ExpandIntoStringAndUnescape("$(obj)\\%(Filename).ext", ExpanderOptions.ExpandPropertiesAndMetadata, MockElementLocation.Instance));
+            Assert.Equal("a.foo", buckets[0].Expander.ExpandIntoStringAndUnescape("@(File)", ExpanderOptions.ExpandItems, MockElementLocation.Instance));
+            Assert.Equal(".foo", buckets[0].Expander.ExpandIntoStringAndUnescape("@(File->'%(Extension)')", ExpanderOptions.ExpandItems, MockElementLocation.Instance));
+            Assert.Equal("obj\\a.ext", buckets[0].Expander.ExpandIntoStringAndUnescape("$(obj)\\%(Filename).ext", ExpanderOptions.ExpandPropertiesAndMetadata, MockElementLocation.Instance));
 
             // we weren't batching on this attribute, so it has no value
-            Assert.AreEqual(String.Empty, buckets[0].Expander.ExpandIntoStringAndUnescape("%(Extension)", ExpanderOptions.ExpandAll, MockElementLocation.Instance));
+            Assert.Equal(String.Empty, buckets[0].Expander.ExpandIntoStringAndUnescape("%(Extension)", ExpanderOptions.ExpandAll, MockElementLocation.Instance));
 
             ProjectItemInstanceFactory factory = new ProjectItemInstanceFactory(project, "i");
             items = buckets[0].Expander.ExpandIntoItemsLeaveEscaped("@(file)", factory, ExpanderOptions.ExpandItems, MockElementLocation.Instance);
-            Assert.IsNotNull(items);
-            Assert.AreEqual(1, items.Count);
+            Assert.NotNull(items);
+            Assert.Equal(1, items.Count);
 
             int invalidProjectFileExceptions = 0;
             try
@@ -93,17 +91,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
             catch (InvalidProjectFileException ex)
             {
                 // check we don't lose error codes from IPFE's during build
-                Assert.AreEqual(ex.ErrorCode, "MSB4012");
+                Assert.Equal(ex.ErrorCode, "MSB4012");
                 invalidProjectFileExceptions++;
             }
 
             // We do allow separators in item vectors, this results in an item group with a single flattened item
             items = buckets[0].Expander.ExpandIntoItemsLeaveEscaped("@(file, ',')", factory, ExpanderOptions.ExpandItems, MockElementLocation.Instance);
-            Assert.IsNotNull(items);
-            Assert.AreEqual(1, items.Count);
-            Assert.AreEqual("a.foo", items[0].EvaluatedInclude);
+            Assert.NotNull(items);
+            Assert.Equal(1, items.Count);
+            Assert.Equal("a.foo", items[0].EvaluatedInclude);
 
-            Assert.AreEqual(1, invalidProjectFileExceptions);
+            Assert.Equal(1, invalidProjectFileExceptions);
         }
 
         /// <summary>
@@ -111,7 +109,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// where there are only two items and both of them have a value for Culture, but they
         /// have different values.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ValidUnqualifiedMetadataReference()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -134,7 +132,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
 
             List<ItemBucket> buckets = BatchingEngine.PrepareBatchingBuckets(parameters, CreateLookup(itemsByType, properties), null);
-            Assert.AreEqual(2, buckets.Count);
+            Assert.Equal(2, buckets.Count);
         }
 
         /// <summary>
@@ -142,53 +140,57 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// It's illegal because not all of the items consumed contain a value for
         /// that metadata.
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void InvalidUnqualifiedMetadataReference()
         {
-            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
-            List<string> parameters = new List<string>();
-            parameters.Add("@(File)");
-            parameters.Add("%(Culture)");
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+                List<string> parameters = new List<string>();
+                parameters.Add("@(File)");
+                parameters.Add("%(Culture)");
 
-            ItemDictionary<ProjectItemInstance> itemsByType = new ItemDictionary<ProjectItemInstance>();
+                ItemDictionary<ProjectItemInstance> itemsByType = new ItemDictionary<ProjectItemInstance>();
 
-            List<ProjectItemInstance> items = new List<ProjectItemInstance>();
+                List<ProjectItemInstance> items = new List<ProjectItemInstance>();
 
-            ProjectItemInstance a = new ProjectItemInstance(project, "File", "a.foo", project.FullPath);
-            items.Add(a);
-            ProjectItemInstance b = new ProjectItemInstance(project, "File", "b.foo", project.FullPath);
-            items.Add(b);
-            a.SetMetadata("Culture", "fr-fr");
-            itemsByType.ImportItems(items);
+                ProjectItemInstance a = new ProjectItemInstance(project, "File", "a.foo", project.FullPath);
+                items.Add(a);
+                ProjectItemInstance b = new ProjectItemInstance(project, "File", "b.foo", project.FullPath);
+                items.Add(b);
+                a.SetMetadata("Culture", "fr-fr");
+                itemsByType.ImportItems(items);
 
-            PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
+                PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
 
-            // This is expected to throw because not all items contain a value for metadata "Culture".
-            // Only a.foo has a Culture metadata.  b.foo does not.
-            List<ItemBucket> buckets = BatchingEngine.PrepareBatchingBuckets(parameters, CreateLookup(itemsByType, properties), MockElementLocation.Instance);
+                // This is expected to throw because not all items contain a value for metadata "Culture".
+                // Only a.foo has a Culture metadata.  b.foo does not.
+                List<ItemBucket> buckets = BatchingEngine.PrepareBatchingBuckets(parameters, CreateLookup(itemsByType, properties), MockElementLocation.Instance);
+            }
+           );
         }
-
         /// <summary>
         /// Tests the case where an unqualified metadata reference is used illegally.
         /// It's illegal because not all of the items consumed contain a value for
         /// that metadata.
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void NoItemsConsumed()
         {
-            List<string> parameters = new List<string>();
-            parameters.Add("$(File)");
-            parameters.Add("%(Culture)");
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                List<string> parameters = new List<string>();
+                parameters.Add("$(File)");
+                parameters.Add("%(Culture)");
 
-            ItemDictionary<ProjectItemInstance> itemsByType = new ItemDictionary<ProjectItemInstance>();
-            PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
+                ItemDictionary<ProjectItemInstance> itemsByType = new ItemDictionary<ProjectItemInstance>();
+                PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
 
-            // This is expected to throw because we have no idea what item list %(Culture) refers to.
-            List<ItemBucket> buckets = BatchingEngine.PrepareBatchingBuckets(parameters, CreateLookup(itemsByType, properties), MockElementLocation.Instance);
+                // This is expected to throw because we have no idea what item list %(Culture) refers to.
+                List<ItemBucket> buckets = BatchingEngine.PrepareBatchingBuckets(parameters, CreateLookup(itemsByType, properties), MockElementLocation.Instance);
+            }
+           );
         }
-
         /// <summary>
         /// Missing unittest found by mutation testing.
         /// REASON TEST WASN'T ORIGINALLY PRESENT: Missed test.
@@ -196,7 +198,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// This test ensures that two items with duplicate attributes end up in exactly one batching
         /// bucket.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void Regress_Mutation_DuplicateBatchingBucketsAreFoldedTogether()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -216,10 +218,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // If duplicate buckes have been folded correctly, then there will be exactly one bucket here
             // containing both a.foo and b.foo.
-            Assert.AreEqual(1, buckets.Count);
+            Assert.Equal(1, buckets.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void Simple()
         {
             string content = @"
@@ -250,7 +252,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// due to us adding the same item instance to the remove item lists when merging the lookups between the two batches.
         /// The fix was to not add the item to the remove list if it already exists.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void Regress72803()
         {
             string content = @"
@@ -291,7 +293,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// items for that list even in buckets where there should be none, because
         /// it was batching over metadata that only other list/s had.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void BucketsWithEmptyListForBatchedItemList()
         {
             string content = @"
@@ -320,7 +322,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Bug for Targets instead of Tasks.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void BucketsWithEmptyListForTargetBatchedItemList()
         {
             string content = @"
@@ -345,7 +347,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A batching target that has no outputs should still run.
         /// This is how we shipped before, although Jay pointed out it's odd.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void BatchOnEmptyOutput()
         {
             string content = @"
@@ -371,7 +373,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// We verify this by using the Warning class. If the same object is being reused,
         /// the second warning would have the code from the first use of the task.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EachBatchGetsASeparateTaskObject()
         {
             string content = @"
@@ -390,8 +392,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             MockLogger log = Helpers.BuildProjectWithNewOMExpectSuccess(content);
 
-            Assert.AreEqual("high", log.Warnings[0].Code);
-            Assert.AreEqual(null, log.Warnings[1].Code);
+            Assert.Equal("high", log.Warnings[0].Code);
+            Assert.Equal(null, log.Warnings[1].Code);
         }
 
 
@@ -400,7 +402,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// order as the items are declared in the project, especially when batching is simply 
         /// being used as a "for loop".
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void BatcherPreservesItemOrderWithinASingleItemList()
         {
             string content = @"
@@ -435,7 +437,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Undefined and empty metadata values should not be distinguished when bucketing.
         /// This is the same as previously shipped.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void UndefinedAndEmptyMetadataValues()
         {
             string content = @"

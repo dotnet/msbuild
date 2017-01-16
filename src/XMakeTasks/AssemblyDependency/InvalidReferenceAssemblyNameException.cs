@@ -21,7 +21,7 @@ namespace Microsoft.Build.Tasks
     [Serializable]
     internal sealed class InvalidReferenceAssemblyNameException : Exception
     {
-        private string _sourceItemSpec;
+        private string sourceItemSpec;
 
         /// <summary>
         /// Don't allow default construction.
@@ -35,7 +35,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal InvalidReferenceAssemblyNameException(string sourceItemSpec)
         {
-            _sourceItemSpec = sourceItemSpec;
+            this.sourceItemSpec = sourceItemSpec;
         }
 
         /// <summary>
@@ -50,7 +50,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal string SourceItemSpec
         {
-            get { return _sourceItemSpec; }
+            get { return sourceItemSpec; }
         }
     }
 }

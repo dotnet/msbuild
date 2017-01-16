@@ -1,6 +1,6 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="ProjectTaskElement_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // </copyright>
 // <summary>Tests for the ProjectTaskElement class.</summary>
 //-----------------------------------------------------------------------
@@ -10,22 +10,20 @@ using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
     /// Tests for the ProjectTaskElement class
     /// </summary>
-    [TestClass]
     public class ProjectTaskElement_Tests
     {
         /// <summary>
         /// Read task with no parameters
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReadNoParameters()
         {
             string content = @"
@@ -38,16 +36,16 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             ProjectTaskElement task = GetTaskFromContent(content);
             var parameters = Helpers.MakeDictionary(task.Parameters);
-            Assert.AreEqual("t1", task.Name);
-            Assert.AreEqual(0, parameters.Count);
-            Assert.AreEqual(0, Helpers.Count(task.Outputs));
-            Assert.AreEqual(String.Empty, task.ContinueOnError);
+            Assert.Equal("t1", task.Name);
+            Assert.Equal(0, parameters.Count);
+            Assert.Equal(0, Helpers.Count(task.Outputs));
+            Assert.Equal(String.Empty, task.ContinueOnError);
         }
 
         /// <summary>
         /// Read task with continue on error
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReadContinueOnError()
         {
             string content = @"
@@ -60,13 +58,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             ProjectTaskElement task = GetTaskFromContent(content);
 
-            Assert.AreEqual("coe", task.ContinueOnError);
+            Assert.Equal("coe", task.ContinueOnError);
         }
 
         /// <summary>
         /// Read task with condition
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReadCondition()
         {
             string content = @"
@@ -79,17 +77,18 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             ProjectTaskElement task = GetTaskFromContent(content);
 
-            Assert.AreEqual("c", task.Condition);
+            Assert.Equal("c", task.Condition);
         }
-        
+
         /// <summary>
         /// Read task with invalid child
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidChild()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Target Name='t'>
                             <t1>
@@ -99,15 +98,16 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            GetTaskFromContent(content);
+                GetTaskFromContent(content);
+            }
+           );
         }
-
         /// <summary>
         /// Read task with empty parameter.
         /// Although MSBuild does not set these on tasks, they 
         /// are visible in the XML objects for editing purposes.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReadEmptyParameter()
         {
             string content = @"
@@ -122,13 +122,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var parameters = Helpers.MakeDictionary(task.Parameters);
 
-            Assert.AreEqual(1, parameters.Count);
+            Assert.Equal(1, parameters.Count);
         }
 
         /// <summary>
         /// Read task with parameters
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReadParameters()
         {
             string content = @"
@@ -143,18 +143,18 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var parameters = Helpers.MakeDictionary(task.Parameters);
 
-            Assert.AreEqual(2, parameters.Count);
-            Assert.AreEqual("v1", parameters["p1"]);
-            Assert.AreEqual("v2", parameters["p2"]);
+            Assert.Equal(2, parameters.Count);
+            Assert.Equal("v1", parameters["p1"]);
+            Assert.Equal("v2", parameters["p2"]);
 
-            Assert.AreEqual("v1", task.GetParameter("p1"));
-            Assert.AreEqual(String.Empty, task.GetParameter("xxxx"));
+            Assert.Equal("v1", task.GetParameter("p1"));
+            Assert.Equal(String.Empty, task.GetParameter("xxxx"));
         }
 
         /// <summary>
         /// Change a parameter value on the task
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetParameterValue()
         {
             ProjectTaskElement task = GetBasicTask();
@@ -163,62 +163,70 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             task.SetParameter("p1", "v1b");
 
             var parameters = Helpers.MakeDictionary(task.Parameters);
-            Assert.AreEqual("v1b", parameters["p1"]);
-            Assert.AreEqual(true, task.ContainingProject.HasUnsavedChanges);
+            Assert.Equal("v1b", parameters["p1"]);
+            Assert.Equal(true, task.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set a parameter to null
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Fact]
         public void SetInvalidNullParameterValue()
         {
-            ProjectTaskElement task = GetBasicTask();
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                ProjectTaskElement task = GetBasicTask();
 
-            task.SetParameter("p1", null);
+                task.SetParameter("p1", null);
+            }
+           );
         }
-
         /// <summary>
         /// Set a parameter with the reserved name 'continueonerror'
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [Fact]
         public void SetInvalidParameterNameContinueOnError()
         {
-            ProjectTaskElement task = GetBasicTask();
+            Assert.Throws<ArgumentException>(() =>
+            {
+                ProjectTaskElement task = GetBasicTask();
 
-            task.SetParameter("ContinueOnError", "v");
+                task.SetParameter("ContinueOnError", "v");
+            }
+           );
         }
-
         /// <summary>
         /// Set a parameter with the reserved name 'condition'
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [Fact]
         public void SetInvalidParameterNameCondition()
         {
-            ProjectTaskElement task = GetBasicTask();
+            Assert.Throws<ArgumentException>(() =>
+            {
+                ProjectTaskElement task = GetBasicTask();
 
-            task.SetParameter("Condition", "c");
+                task.SetParameter("Condition", "c");
+            }
+           );
         }
-
         /// <summary>
         /// Set a parameter using a null name
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Fact]
         public void SetInvalidNullParameterName()
         {
-            ProjectTaskElement task = GetBasicTask();
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                ProjectTaskElement task = GetBasicTask();
 
-            task.SetParameter(null, "v1");
+                task.SetParameter(null, "v1");
+            }
+           );
         }
-
         /// <summary>
         /// Add a parameter to the task
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetNotExistingParameter()
         {
             ProjectTaskElement task = GetBasicTask();
@@ -227,14 +235,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             task.SetParameter("p2", "v2");
 
             var parameters = Helpers.MakeDictionary(task.Parameters);
-            Assert.AreEqual("v2", parameters["p2"]);
-            Assert.AreEqual(true, task.ContainingProject.HasUnsavedChanges);
+            Assert.Equal("v2", parameters["p2"]);
+            Assert.Equal(true, task.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Remove a parameter from the task
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void RemoveExistingParameter()
         {
             ProjectTaskElement task = GetBasicTask();
@@ -243,8 +251,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             task.RemoveParameter("p1");
 
             var parameters = Helpers.MakeDictionary(task.Parameters);
-            Assert.AreEqual(0, parameters.Count);
-            Assert.AreEqual(true, task.ContainingProject.HasUnsavedChanges);
+            Assert.Equal(0, parameters.Count);
+            Assert.Equal(true, task.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
@@ -253,7 +261,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <remarks>
         /// This should not throw.
         /// </remarks>
-        [TestMethod]
+        [Fact]
         public void RemoveNonExistingParameter()
         {
             ProjectTaskElement task = GetBasicTask();
@@ -261,13 +269,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             task.RemoveParameter("XX");
 
             var parameters = Helpers.MakeDictionary(task.Parameters);
-            Assert.AreEqual(1, parameters.Count);
+            Assert.Equal(1, parameters.Count);
         }
 
         /// <summary>
         /// Set continue on error
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetContinueOnError()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -275,14 +283,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Helpers.ClearDirtyFlag(task.ContainingProject);
 
             task.ContinueOnError = "true";
-            Assert.AreEqual("true", task.ContinueOnError);
-            Assert.AreEqual(true, project.HasUnsavedChanges);
+            Assert.Equal("true", task.ContinueOnError);
+            Assert.Equal(true, project.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set condition
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetCondition()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -290,8 +298,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Helpers.ClearDirtyFlag(task.ContainingProject);
 
             task.Condition = "c";
-            Assert.AreEqual("c", task.Condition);
-            Assert.AreEqual(true, project.HasUnsavedChanges);
+            Assert.Equal("c", task.Condition);
+            Assert.Equal(true, project.HasUnsavedChanges);
         }
 
         /// <summary>

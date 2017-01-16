@@ -9,22 +9,21 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using Microsoft.Build.BackEnd;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
     /// Unit Tests for TaskHostTaskCancelled packet.
     /// </summary>
-    [TestClass]
     public class TaskHostTaskCancelled_Tests
     {
         /// <summary>
         /// Basic test of the constructor. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestConstructor()
         {
             TaskHostTaskCancelled cancelled = new TaskHostTaskCancelled();
@@ -33,7 +32,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Basic test of serialization / deserialization. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestTranslation()
         {
             TaskHostTaskCancelled cancelled = new TaskHostTaskCancelled();

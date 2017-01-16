@@ -18,7 +18,7 @@ namespace Microsoft.Build.Execution
     /// <remarks>
     /// This is an immutable class
     /// </remarks>
-    [DebuggerDisplay("ExecuteTargets={executeTargets} Condition={condition}")]
+    [DebuggerDisplay("ExecuteTargets={_executeTargets} Condition={_condition}")]
     public sealed class ProjectOnErrorInstance : ProjectTargetInstanceChild
     {
         /// <summary>

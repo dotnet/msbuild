@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
@@ -13,6 +12,7 @@ using Microsoft.Build.Shared;
 using System.Text.RegularExpressions;
 using System.Globalization;
 using System.Text;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -102,7 +102,7 @@ namespace Microsoft.Build.UnitTests
 
             msg += "Not found!\r\n";
             Console.WriteLine(msg);
-            Assert.Fail(msg); // Could not find the parameter.
+            Assert.True(false, msg); // Could not find the parameter.
 
             return 0;
         }
@@ -188,7 +188,7 @@ namespace Microsoft.Build.UnitTests
                     {
                         msg += String.Format(" Found something!\r\n");
                         Console.WriteLine(msg);
-                        Assert.Fail(msg); // Found the startsWith but shouldn't have.
+                        Assert.True(false, msg); // Found the startsWith but shouldn't have.
                         return;
                     }
                 }
@@ -220,7 +220,7 @@ namespace Microsoft.Build.UnitTests
             {
                 msg += "Not found!\r\n";
                 Console.WriteLine(msg);
-                Assert.Fail(msg);
+                Assert.True(false, msg);
             }
         }
 
@@ -248,7 +248,7 @@ namespace Microsoft.Build.UnitTests
             {
                 msg += "Found!\r\n";
                 Console.WriteLine(msg);
-                Assert.Fail(msg);
+                Assert.True(false, msg);
             }
         }
 
@@ -276,7 +276,7 @@ namespace Microsoft.Build.UnitTests
             {
                 msg += "Does not match!\r\n";
                 Console.WriteLine(msg);
-                Assert.Fail(msg);
+                Assert.True(false, msg);
             }
         }
 

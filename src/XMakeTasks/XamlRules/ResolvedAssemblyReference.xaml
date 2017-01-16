@@ -87,7 +87,7 @@
                   DisplayName="Specific Version"
                   Description="Indicates whether this assembly can be resolved without regard to multi-targeting rules for assembly resolution.">
         <BoolProperty.DataSource>
-            <DataSource Persistence="ProjectFile" ItemType="Reference" HasConfigurationCondition="False" />
+            <DataSource Persistence="AssemblyReference" ItemType="Reference" HasConfigurationCondition="False" />
         </BoolProperty.DataSource>
     </BoolProperty>
 

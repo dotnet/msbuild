@@ -75,7 +75,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         }
 
         // This is the 4.0 property and will always point to the Dev10 registry key so that we don't break backwards compatibility.
-        // Applications relying on 4.5 will need to use the new method that is introduced in 4.5
+        // Applications relying on 4.5 will need to use the new method that is introduced in 4.5.
         public static string DefaultPath
         {
             get
@@ -90,7 +90,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     if (!String.IsNullOrEmpty(s_defaultPath))
                         return s_defaultPath;
 
-                    s_defaultPath = Environment.CurrentDirectory;
+                    s_defaultPath = Directory.GetCurrentDirectory();
                 }
 
                 return s_defaultPath;
@@ -101,7 +101,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         // This method is not going to cache the path as it could be different depending on the Visual Studio version.
         public static string GetDefaultPath(string visualStudioVersion)
         {
-            // if the Visual Studio Version is not a valid string, we will fall back to using the v4.0 property
+            // if the Visual Studio Version is not a valid string, we will fall back to using the v4.0 property.
             if (String.IsNullOrEmpty(visualStudioVersion))
             {
                 return DefaultPath;
@@ -109,6 +109,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
             // With version 11.0 we start a direct mapping between the VS version and the registry key we use.
             // For Dev10, we use 4.0.
+            // For Dev15 this will go versionless as there will be singleton MSI setting the registry which will be common for all future VS.
 
             int majorVersion = 0;
             int dotIndex = visualStudioVersion.IndexOf('.');
@@ -123,6 +124,14 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
             string defaultPath;
 
+            defaultPath = ReadRegistryString(Win32.Registry.LocalMachine, BOOTSTRAPPER_REGISTRY_PATH_BASE, REGISTRY_DEFAULTPATH);
+            if (!String.IsNullOrEmpty(defaultPath))
+                return defaultPath;
+
+            defaultPath = ReadRegistryString(Win32.Registry.LocalMachine, BOOTSTRAPPER_WOW64_REGISTRY_PATH_BASE, REGISTRY_DEFAULTPATH);
+            if (!String.IsNullOrEmpty(defaultPath))
+                return defaultPath;
+
             defaultPath = ReadRegistryString(Win32.Registry.LocalMachine, String.Concat(BOOTSTRAPPER_REGISTRY_PATH_BASE, visualStudioVersion), REGISTRY_DEFAULTPATH);
             if (!String.IsNullOrEmpty(defaultPath))
                 return defaultPath;
@@ -131,22 +140,17 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             if (!String.IsNullOrEmpty(defaultPath))
                 return defaultPath;
 
-            return Environment.CurrentDirectory;
+            return Directory.GetCurrentDirectory();
         }
-
-
 
         private static string ReadRegistryString(Win32.RegistryKey key, string path, string registryValue)
         {
             RegistryKey subKey = key.OpenSubKey(path, false);
 
-            if (subKey != null)
+            object oValue = subKey?.GetValue(registryValue);
+            if (oValue != null && subKey.GetValueKind(registryValue) == RegistryValueKind.String)
             {
-                object oValue = subKey.GetValue(registryValue);
-                if (oValue != null && subKey.GetValueKind(registryValue) == RegistryValueKind.String)
-                {
-                    return (string)oValue;
-                }
+                return (string)oValue;
             }
 
             return null;

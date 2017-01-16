@@ -1381,16 +1381,9 @@ namespace Microsoft.Build.Tasks
                 // if found, add it to the PIA cache
                 _cachePia.Add(typeLibKey, wrapperInfo);
             }
-            catch (Exception e)
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                {
-                    throw;
-                }
-                else
-                {
-                    return false;
-                }
+                return false;
             }
 
             return true;
@@ -1457,7 +1450,10 @@ namespace Microsoft.Build.Tasks
                 }
 
                 // not in the cache? see if anyone was kind enough to generate it for us
-                TlbReference reference = new TlbReference(Log, Silent, this, referencePaths, referenceInfo, refName, outputDirectory, isTemporary, DelaySign, KeyFile, KeyContainer, this.NoClassMembers, this.TargetProcessorArchitecture, IncludeVersionInInteropName, ExecuteAsTool, _tlbimpPath, BuildEngine, EnvironmentVariables);
+                TlbReference reference = new TlbReference(Log, Silent, this, referencePaths, referenceInfo, refName,
+                    outputDirectory, isTemporary, DelaySign, KeyFile, KeyContainer, this.NoClassMembers,
+                    this.TargetProcessorArchitecture, IncludeVersionInInteropName, ExecuteAsTool, _tlbimpPath,
+                    BuildEngine, EnvironmentVariables);
 
                 // wrapper doesn't exist or needs regeneration? generate it then
                 if (!reference.FindExistingWrapper(out wrapperInfo, _timestampCache[referenceInfo.strippedTypeLibPath]))
@@ -1469,17 +1465,11 @@ namespace Microsoft.Build.Tasks
                 // if found or successfully generated, cache it.
                 _cacheTlb.Add(typeLibKey, wrapperInfo);
             }
-            catch (Exception e)
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                {
-                    throw;
-                }
-                else
-                {
-                    return false;
-                }
+                return false;
             }
+
             return true;
         }
 
@@ -1519,16 +1509,9 @@ namespace Microsoft.Build.Tasks
                 // if found or successfully generated, cache it.
                 _cacheAx.Add(typeLibKey, wrapperInfo);
             }
-            catch (Exception e)
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                {
-                    throw;
-                }
-                else
-                {
-                    return false;
-                }
+                return false;
             }
 
             return true;

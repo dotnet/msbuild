@@ -1,13 +1,12 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="ElementLocationPublic_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // </copyright>
 // <summary>Tests for the ElementLocation class</summary>
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.UnitTests;
@@ -20,13 +19,13 @@ using System.Xml;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.Construction
 {
     /// <summary>
     /// Tests for the ElementLocation class
     /// </summary>
-    [TestClass]
     public class ElementLocationPublic_Tests
     {
         /// <summary>
@@ -35,7 +34,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// loaded from disk, or has been edited since.
         /// This is really a test of our XmlDocumentWithLocation.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ShouldHaveFilePathLocationEvenIfNotLoadedNorSavedYet()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -44,15 +43,15 @@ namespace Microsoft.Build.UnitTests.Construction
             target.Outputs = "o";
             project.AppendChild(target);
 
-            Assert.AreEqual(project.FullPath, target.Location.File);
-            Assert.AreEqual(project.FullPath, target.OutputsLocation.File);
+            Assert.Equal(project.FullPath, target.Location.File);
+            Assert.Equal(project.FullPath, target.OutputsLocation.File);
         }
 
         /// <summary>
         /// Element location should reflect rename.
         /// This is really a test of our XmlXXXXWithLocation.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void XmlLocationReflectsRename()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -61,19 +60,19 @@ namespace Microsoft.Build.UnitTests.Construction
             target.Outputs = "o";
             project.AppendChild(target);
 
-            Assert.AreEqual(project.FullPath, target.Location.File);
-            Assert.AreEqual(project.FullPath, target.OutputsLocation.File);
+            Assert.Equal(project.FullPath, target.Location.File);
+            Assert.Equal(project.FullPath, target.OutputsLocation.File);
 
             project.FullPath = "c:\\y";
 
-            Assert.AreEqual(project.FullPath, target.Location.File);
-            Assert.AreEqual(project.FullPath, target.OutputsLocation.File);
+            Assert.Equal(project.FullPath, target.Location.File);
+            Assert.Equal(project.FullPath, target.OutputsLocation.File);
         }
 
         /// <summary>
         /// We should cache ElementLocation objects for perf.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void XmlLocationsAreCached()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -85,14 +84,14 @@ namespace Microsoft.Build.UnitTests.Construction
             ElementLocation e1 = target.Location;
             ElementLocation e2 = target.OutputsLocation;
 
-            Assert.AreEqual(true, Object.ReferenceEquals(e1, target.Location));
-            Assert.AreEqual(true, Object.ReferenceEquals(e2, target.OutputsLocation));
+            Assert.Equal(true, Object.ReferenceEquals(e1, target.Location));
+            Assert.Equal(true, Object.ReferenceEquals(e2, target.OutputsLocation));
         }
 
         /// <summary>
         /// Test many of the getters
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LocationStringsMedley()
         {
             string content = @"

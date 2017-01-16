@@ -24,7 +24,9 @@ using Utilities = Microsoft.Build.Internal.Utilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
+#if MSBUILD_DEBUGGER
 using Microsoft.Build.Debugging;
+#endif
 using System.Xml;
 using System.IO;
 using System.Collections;
@@ -325,6 +327,8 @@ namespace Microsoft.Build.Execution
             this.TaskRegistry = projectToInheritFrom.TaskRegistry;
             _isImmutable = projectToInheritFrom._isImmutable;
 
+            this.EvaluatedItemElements = new List<ProjectItemElement>();
+
             IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance> thisAsIEvaluatorData = (IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)this;
             thisAsIEvaluatorData.AfterTargets = new Dictionary<string, List<TargetSpecification>>();
             thisAsIEvaluatorData.BeforeTargets = new Dictionary<string, List<TargetSpecification>>();
@@ -418,6 +422,8 @@ namespace Microsoft.Build.Execution
 
             this.ProjectRootElementCache = data.Project.ProjectCollection.ProjectRootElementCache;
 
+            this.EvaluatedItemElements = new List<ProjectItemElement>(data.EvaluatedItemElements);
+
             _usingDifferentToolsVersionFromProjectFile = data.UsingDifferentToolsVersionFromProjectFile;
             _originalProjectToolsVersion = data.OriginalProjectToolsVersion;
             _explicitToolsVersionSpecified = data.ExplicitToolsVersion != null;
@@ -494,6 +500,8 @@ namespace Microsoft.Build.Execution
             _targets = that._targets;
             _itemDefinitions = that._itemDefinitions;
             _explicitToolsVersionSpecified = that._explicitToolsVersionSpecified;
+
+            this.EvaluatedItemElements = that.EvaluatedItemElements;
 
             this.ProjectRootElementCache = that.ProjectRootElementCache;
         }
@@ -577,6 +585,12 @@ namespace Microsoft.Build.Execution
                     (ICollection<ProjectItemInstance>)ReadOnlyEmptyCollection<ProjectItemInstance>.Instance :
                     new ReadOnlyCollection<ProjectItemInstance>(_items);
             }
+        }
+
+        public List<ProjectItemElement> EvaluatedItemElements
+        {
+            get;
+            private set;
         }
 
         /// <summary>
@@ -1735,7 +1749,7 @@ namespace Microsoft.Build.Execution
 
             // If the user didn't pass in a ToolsVersion, still try to make a best-effort guess as to whether
             // we should be generating a 4.0+ or a 3.5-style wrapper project based on the version of the solution. 
-            else if (toolsVersion == null)
+            else
             {
                 int solutionVersion;
                 int visualStudioVersion;
@@ -1815,6 +1829,11 @@ namespace Microsoft.Build.Execution
             if (loggers != null)
             {
                 parameters.Loggers = (loggers is ICollection<ILogger>) ? ((ICollection<ILogger>)loggers) : new List<ILogger>(loggers);
+
+                // Enables task parameter logging based on whether any of the loggers attached
+                // to the Project have their verbosity set to Diagnostic. If no logger has
+                // been set to log diagnostic then the existing/default value will be persisted.
+                parameters.LogTaskInputs = parameters.LogTaskInputs || loggers.Any(logger => logger.Verbosity == LoggerVerbosity.Diagnostic);
             }
 
             if (remoteLoggers != null)
@@ -2108,7 +2127,8 @@ namespace Microsoft.Build.Execution
             XmlReaderSettings xrs = new XmlReaderSettings();
             xrs.DtdProcessing = DtdProcessing.Ignore;
 
-            ProjectRootElement projectRootElement = new ProjectRootElement(XmlReader.Create(new StringReader(wrapperProjectXml), xrs), projectRootElementCache, isExplicitlyLoaded);
+            ProjectRootElement projectRootElement = new ProjectRootElement(XmlReader.Create(new StringReader(wrapperProjectXml), xrs), projectRootElementCache, isExplicitlyLoaded,
+                preserveFormatting: false);
             projectRootElement.DirectoryPath = Path.GetDirectoryName(projectFile);
             ProjectInstance instance = new ProjectInstance(projectRootElement, globalProperties, toolsVersion, buildParameters, loggingService, projectBuildEventContext);
             return new ProjectInstance[] { instance };
@@ -2174,6 +2194,8 @@ namespace Microsoft.Build.Execution
             _itemDefinitions = new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(MSBuildNameIgnoreCaseComparer.Default);
             _hostServices = buildParameters.HostServices;
             this.ProjectRootElementCache = buildParameters.ProjectRootElementCache;
+
+            this.EvaluatedItemElements = new List<ProjectItemElement>();
 
             string toolsVersionToUse = explicitToolsVersion;
             _explicitToolsVersionSpecified = (explicitToolsVersion != null);

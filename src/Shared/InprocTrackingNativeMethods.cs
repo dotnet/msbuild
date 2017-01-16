@@ -23,11 +23,11 @@ namespace Microsoft.Build.Shared
     /// Methods that are invoked on FileTracker.dll in order to handle inproc tracking
     /// </summary>
     /// <comments>
-    /// We want to P/Invoke to the FileTracker methods, but FileTracker.dll is not guaranteed to be on PATH (since it's 
-    /// in the .NET Framework directory), and there is no DefaultDllImportSearchPath that explicitly points out at the 
-    /// .NET Framework directory.  Thus, we are sneaking around P/Invoke by manually acquiring the method pointers and 
-    /// calling them ourselves. The vast majority of this code was lifted from ndp\fx\src\CLRCompression\ZLibNative.cs, 
-    /// which does the same thing for that assembly. 
+    /// We want to P/Invoke to the FileTracker methods, but FileTracker.dll is not guaranteed to be on PATH (since it's
+    /// in the MSBuild directory), and there is no DefaultDllImportSearchPath that explicitly points to us. Thus, we
+    /// are sneaking around P/Invoke by manually acquiring the method pointers and calling them ourselves. The vast
+    /// majority of this code was lifted from ndp\fx\src\CLRCompression\ZLibNative.cs, which does the same thing for
+    /// that assembly.
     /// </comments>
     internal static class InprocTrackingNativeMethods
     {
@@ -131,7 +131,7 @@ namespace Microsoft.Build.Shared
 
         private static class FileTrackerDllStub
         {
-            private const string fileTrackerDllName = "FileTracker.dll";
+            private readonly static Lazy<string> fileTrackerDllName = new Lazy<string>(() => (IntPtr.Size == sizeof(Int32)) ? "FileTracker32.dll" : "FileTracker64.dll");
 
             // Handle for FileTracker.dll itself
             [SecurityCritical]
@@ -180,19 +180,14 @@ namespace Microsoft.Build.Shared
             /// </summary>
             private static void LoadFileTrackerDll()
             {
-                // Get the FileTracker in the framework directory that matches the currently running process
+                // Get the FileTracker in our directory that matches the currently running process
                 string frameworkDir = RuntimeEnvironment.GetRuntimeDirectory();
                 string buildToolsPath = FrameworkLocationHelper.GeneratePathToBuildToolsForToolsVersion(MSBuildConstants.CurrentToolsVersion, DotNetFrameworkArchitecture.Current);
-                string fileTrackerPath = Path.Combine(buildToolsPath, fileTrackerDllName);
-
-                if (String.IsNullOrEmpty(fileTrackerPath) || !File.Exists(fileTrackerPath))
-                {
-                    fileTrackerPath = Path.Combine(frameworkDir, fileTrackerDllName);
-                }
+                string fileTrackerPath = Path.Combine(buildToolsPath, fileTrackerDllName.Value);
 
                 if (!File.Exists(fileTrackerPath))
                 {
-                    throw new DllNotFoundException(fileTrackerDllName);
+                    throw new DllNotFoundException(fileTrackerDllName.Value);
                 }
 
                 SafeLibraryHandle handle = LoadLibrary(fileTrackerPath);
@@ -219,7 +214,7 @@ namespace Microsoft.Build.Shared
                 IntPtr entryPoint = GetProcAddress(s_fileTrackerDllHandle, entryPointName);
 
                 if (IntPtr.Zero == entryPoint)
-                    throw new EntryPointNotFoundException(fileTrackerDllName + "!" + entryPointName);
+                    throw new EntryPointNotFoundException(fileTrackerDllName.Value + "!" + entryPointName);
 
                 return (DT)(Object)Marshal.GetDelegateForFunctionPointer(entryPoint, typeof(DT));
             }

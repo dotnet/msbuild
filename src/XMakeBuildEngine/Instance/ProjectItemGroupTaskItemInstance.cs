@@ -20,7 +20,7 @@ namespace Microsoft.Build.Execution
     /// Wraps an unevaluated item under an itemgroup in a target.
     /// Immutable.
     /// </summary>
-    [DebuggerDisplay("{itemType} Include={include} Exclude={exclude} Remove={remove} Condition={condition}")]
+    [DebuggerDisplay("{_itemType} Include={_include} Exclude={_exclude} Remove={_remove} Condition={_condition}")]
     public class ProjectItemGroupTaskItemInstance
     {
         /// <summary>

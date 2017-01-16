@@ -8,10 +8,10 @@ using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -200,8 +200,7 @@ namespace Microsoft.Build.UnitTests
                 _upperLog = _upperLog.ToUpperInvariant();
             }
 
-            Assert.IsTrue
-            (
+            Assert.True(
                 _upperLog.Contains
                 (
                     contains.ToUpperInvariant()
@@ -257,13 +256,10 @@ namespace Microsoft.Build.UnitTests
                 _upperLog = _upperLog.ToUpperInvariant();
             }
 
-            Assert.IsTrue
-            (
-                !_upperLog.Contains
+            Assert.False(_upperLog.Contains
                 (
                     contains.ToUpperInvariant()
-                )
-            );
+                ));
         }
     }
 }

@@ -224,10 +224,8 @@ namespace Microsoft.Build.Tasks
                     // Post-logging
                     Log.LogMessageFromResources(MessageImportance.Low, "CreateManifestResourceName.AssignedName", fileName, manifestName);
                 }
-                catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    if (ExceptionHandling.NotExpectedException(e))
-                        throw;
                     Log.LogErrorWithCodeFromResources("CreateManifestResourceName.Error", resourceFile.ItemSpec, e.Message);
                     success = false;
                 }

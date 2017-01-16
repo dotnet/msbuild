@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Evaluation;
 using System.IO;
 using System;
@@ -10,16 +9,16 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using System.CodeDom.Compiler;
 using Microsoft.Build.Shared;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
     sealed public class CodeTaskFactoryTests
     {
         /// <summary>
         /// Test the simple case where we have a string parameter and we want to log that.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void BuildTaskSimpleCodeFactory()
         {
             string projectFileContents = @"
@@ -49,7 +48,7 @@ namespace Microsoft.Build.UnitTests
         /// Microsoft.Build.Tasks.v4.0.dll is expected to NOT be in MSBuildToolsPath, that 
         /// we will redirect under the covers to use the current tasks instead.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void BuildTaskSimpleCodeFactory_RedirectFrom4()
         {
             string projectFileContents = @"
@@ -80,8 +79,7 @@ namespace Microsoft.Build.UnitTests
         /// Microsoft.Build.Tasks.v12.0.dll is expected to NOT be in MSBuildToolsPath, that 
         /// we will redirect under the covers to use the current tasks instead.
         /// </summary>
-        [TestMethod]
-        [Ignore] // Doesn't make sense while we continue to (temporarily) install Tasks.v12.0
+        [Fact]
         public void BuildTaskSimpleCodeFactory_RedirectFrom12()
         {
             string projectFileContents = @"
@@ -113,12 +111,12 @@ namespace Microsoft.Build.UnitTests
         /// being in MSBuildToolsPath anymore, that this does NOT affect full fusion AssemblyNames -- 
         /// it's picked up from the GAC, where it is anyway, so there's no need to redirect. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void BuildTaskSimpleCodeFactory_NoAssemblyNameRedirect()
         {
             string projectFileContents = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion='msbuilddefaulttoolsversion'>
-                        <UsingTask TaskName=`CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory` TaskFactory=`CodeTaskFactory` AssemblyName=`Microsoft.Build.Tasks.Core, Version=14.1.0.0` >
+                        <UsingTask TaskName=`CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory` TaskFactory=`CodeTaskFactory` AssemblyName=`Microsoft.Build.Tasks.Core, Version=15.1.0.0` >
                          <ParameterGroup>     
                              <Text/>
                           </ParameterGroup>
@@ -135,13 +133,13 @@ namespace Microsoft.Build.UnitTests
 
             MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
             mockLogger.AssertLogContains("Hello, World!");
-            mockLogger.AssertLogContains("Microsoft.Build.Tasks.Core, Version=14.1.0.0");
+            mockLogger.AssertLogContains("Microsoft.Build.Tasks.Core, Version=15.1.0.0");
         }
 
         /// <summary>
         /// Test the simple case where we have a string parameter and we want to log that.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyRequiredAttribute()
         {
             string projectFileContents = @"
@@ -168,7 +166,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get an error if a runtime exception is logged
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void RuntimeException()
         {
             string projectFileContents = @"
@@ -196,7 +194,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get an error if a the languages attribute is set but it is empty
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EmptyLanguage()
         {
             string projectFileContents = @"
@@ -225,7 +223,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get an error if a the Type attribute is set but it is empty
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EmptyType()
         {
             string projectFileContents = @"
@@ -253,7 +251,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get an error if a the source attribute is set but it is empty
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EmptySource()
         {
             string projectFileContents = @"
@@ -281,7 +279,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get an error if a reference is missing an include attribute is set but it is empty
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EmptyReferenceInclude()
         {
             string projectFileContents = @"
@@ -310,7 +308,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get an error if a Using statement is missing an namespace attribute is set but it is empty
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EmptyUsingNamespace()
         {
             string projectFileContents = @"
@@ -339,7 +337,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get pass even if the reference is not a full path
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReferenceNotPath()
         {
             string projectFileContents = @"
@@ -367,7 +365,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get an error a reference has strange chars
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReferenceInvalidChars()
         {
             string projectFileContents = @"
@@ -396,7 +394,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get an error if a using has invalid chars
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void UsingInvalidChars()
         {
             string projectFileContents = @"
@@ -424,7 +422,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get an error if the sources points to an invalid file
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SourcesInvalidFile()
         {
             string tempFileName = "Moose_" + Guid.NewGuid().ToString() + ".cs";
@@ -453,7 +451,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get an error if a the the code element is missing
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MissingCodeElement()
         {
             string projectFileContents = @"
@@ -477,7 +475,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where we have adding a using statement
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void BuildTaskSimpleCodeFactoryTestExtraUsing()
         {
             string projectFileContents = @"
@@ -507,7 +505,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify setting the output tag on the parameter causes it to be an output from the perspective of the targets
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void BuildTaskDateCodeFactory()
         {
             string projectFileContents = @"
@@ -539,7 +537,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that the vb language works and that creating the execute method also works
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MethodImplmentationVB()
         {
             string projectFileContents = @"
@@ -571,7 +569,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that System does not need to be passed in as a extra reference when targeting vb
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void BuildTaskSimpleCodeFactoryTestSystemVB()
         {
             string projectFileContents = @"
@@ -600,7 +598,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that System does not need to be passed in as a extra reference when targeting c#
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void BuildTaskSimpleCodeFactoryTestSystemCS()
         {
             string projectFileContents = @"
@@ -629,7 +627,7 @@ namespace Microsoft.Build.UnitTests
         /// Make sure we can pass in extra references than the automatic ones. For example the c# compiler does not pass in 
         /// system.dll. So lets test that case
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void BuildTaskSimpleCodeFactoryTestExtraReferenceCS()
         {
             string netFrameworkDirectory = ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version45);
@@ -674,7 +672,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// jscript .net works
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MethodImplementationJScriptNet()
         {
             if (!CodeDomProvider.IsDefinedLanguage("js"))
@@ -713,7 +711,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we can set a code type of Method which expects us to override the execute method entirely.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MethodImplementation()
         {
             string projectFileContents = @"
@@ -746,7 +744,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we can set the type to Class and this expects an entire class to be entered into the code tag
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ClassImplementationTest()
         {
             string projectFileContents = @"
@@ -812,7 +810,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we can set the type to Class and this expects an entire class to be entered into the code tag
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ClassImplementationTestDoesNotInheritFromITask()
         {
             string projectFileContents = @"
@@ -870,7 +868,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get an error if a the Type attribute is set but it is empty
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MultipleCodeElements()
         {
             string projectFileContents = @"
@@ -901,7 +899,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get an error if a the Type attribute is set but it is empty
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReferenceNestedInCode()
         {
             string projectFileContents = @"
@@ -934,7 +932,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get an error if there is an unknown element in the task tag
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void UnknownElementInTask()
         {
             string projectFileContents = @"
@@ -963,7 +961,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we can set a source file location and this will be read in and used.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ClassSourcesTest()
         {
             string sourceFileContent = @"
@@ -1038,6 +1036,57 @@ namespace Microsoft.Build.UnitTests
                 {
                     File.Delete(tempSourceFile);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Code factory test where the TMP directory does not exist.
+        /// See https://github.com/Microsoft/msbuild/issues/328 for details.
+        /// </summary>
+        [Fact]
+        public void BuildTaskSimpleCodeFactoryTempDirectoryDoesntExist()
+        {
+            string projectFileContents = @"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion='msbuilddefaulttoolsversion'>
+                        <UsingTask TaskName=`CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` >
+                         <ParameterGroup>     
+                             <Text/>
+                          </ParameterGroup>
+                            <Task>
+                                <Code>
+                                     Log.LogMessage(MessageImportance.High, Text);
+                                </Code>
+                            </Task>
+                        </UsingTask>
+                        <Target Name=`Build`>
+                            <CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory Text=`Hello, World!` />
+                        </Target>
+                    </Project>";
+
+            var oldTempPath = Environment.GetEnvironmentVariable("TMP");
+            var newTempPath = Path.Combine(Path.GetFullPath(oldTempPath), Path.GetRandomFileName());
+
+            try
+            {
+                // Ensure we're getting the right temp path (%TMP% == GetTempPath())
+                Assert.Equal(
+                    FileUtilities.EnsureTrailingSlash(Path.GetTempPath()),
+                    FileUtilities.EnsureTrailingSlash(Path.GetFullPath(oldTempPath)));
+                Assert.False(Directory.Exists(newTempPath));
+
+                Environment.SetEnvironmentVariable("TMP", newTempPath);
+
+                Assert.Equal(
+                    FileUtilities.EnsureTrailingSlash(newTempPath),
+                    FileUtilities.EnsureTrailingSlash(Path.GetTempPath()));
+
+                MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
+                mockLogger.AssertLogContains("Hello, World!");
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("TMP", oldTempPath);
+                FileUtilities.DeleteDirectoryNoThrow(newTempPath, true);
             }
         }
     }

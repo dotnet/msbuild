@@ -1,6 +1,6 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="ProjectItemDefinition_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // </copyright>
 // <summary>Tests for ProjectItemDefinition</summary>
 //-----------------------------------------------------------------------
@@ -15,21 +15,19 @@ using Microsoft.Build.Evaluation;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Definition
 {
     /// <summary>
     /// Tests for ProjectItemDefinition
     /// </summary>
-    [TestClass]
     public class ProjectItemDefinition_Tests
     {
         /// <summary>
         /// Add metadata; should add to an existing item definition group that has item definitions of the same item type
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void AddMetadataExistingItemDefinitionGroup()
         {
             ProjectRootElement xml = ProjectRootElement.Create();
@@ -56,7 +54,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Set metadata with property expression; should be expanded
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetMetadata()
         {
             ProjectRootElement xml = ProjectRootElement.Create();
@@ -70,13 +68,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             metadatum.UnevaluatedValue = "$(p)";
 
-            Assert.AreEqual("v", Helpers.GetFirst(project.GetItems("i")).GetMetadataValue("m"));
+            Assert.Equal("v", Helpers.GetFirst(project.GetItems("i")).GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Access metadata when there isn't any
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EmptyMetadataCollection()
         {
             ProjectRootElement xml = ProjectRootElement.Create();
@@ -88,15 +86,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             List<ProjectMetadata> metadataList = Helpers.MakeList(metadataCollection);
 
-            Assert.AreEqual(0, metadataList.Count);
+            Assert.Equal(0, metadataList.Count);
 
-            Assert.AreEqual(null, itemDefinition.GetMetadata("m"));
+            Assert.Equal(null, itemDefinition.GetMetadata("m"));
         }
 
         /// <summary>
         /// Set metadata get collection
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void GetMetadataCollection()
         {
             ProjectRootElement xml = ProjectRootElement.Create();
@@ -108,46 +106,48 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             List<ProjectMetadata> metadataList = Helpers.MakeList(metadataCollection);
 
-            Assert.AreEqual(1, metadataList.Count);
-            Assert.AreEqual("m", metadataList[0].Name);
-            Assert.AreEqual("m0", metadataList[0].EvaluatedValue);
+            Assert.Equal(1, metadataList.Count);
+            Assert.Equal("m", metadataList[0].Name);
+            Assert.Equal("m0", metadataList[0].EvaluatedValue);
         }
 
         /// <summary>
         /// Attempt to update metadata on imported item definition should fail
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
+        [Fact]
         public void UpdateMetadataImported()
         {
-            string file = null;
-
-            try
+            Assert.Throws<InvalidOperationException>(() =>
             {
-                file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
-                ProjectRootElement import = ProjectRootElement.Create(file);
-                import.AddItemDefinitionGroup().AddItemDefinition("i").AddMetadata("m", "m0");
-                import.Save();
+                string file = null;
 
-                ProjectRootElement main = ProjectRootElement.Create();
-                Project project = new Project(main);
-                main.AddImport(file);
-                project.ReevaluateIfNecessary();
+                try
+                {
+                    file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                    ProjectRootElement import = ProjectRootElement.Create(file);
+                    import.AddItemDefinitionGroup().AddItemDefinition("i").AddMetadata("m", "m0");
+                    import.Save();
 
-                ProjectItemDefinition definition = project.ItemDefinitions["i"];
-                definition.SetMetadataValue("m", "m1");
+                    ProjectRootElement main = ProjectRootElement.Create();
+                    Project project = new Project(main);
+                    main.AddImport(file);
+                    project.ReevaluateIfNecessary();
+
+                    ProjectItemDefinition definition = project.ItemDefinitions["i"];
+                    definition.SetMetadataValue("m", "m1");
+                }
+                finally
+                {
+                    File.Delete(file);
+                }
             }
-            finally
-            {
-                File.Delete(file);
-            }
+           );
         }
-
         /// <summary>
         /// Attempt to add new metadata on imported item definition should succeed,
         /// creating a new item definition in the main project
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetMetadataImported()
         {
             string file = null;
@@ -177,7 +177,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     </i>
   </ItemDefinitionGroup>
   <Import Project=""{0}"" />
-</Project>"), 
+</Project>"),
                    file
                    );
 
@@ -195,8 +195,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// order to use this metadata, either qualify it by specifying %(h.m), or ensure that all items in this list define a value
         /// for this metadata."
         /// </summary>
-        [TestMethod]
-        [TestCategory("serialize")]
+        [Fact]
+        [Trait("Category", "serialize")]
         public void BatchingConsidersItemDefinitionMetadata()
         {
             string content =
@@ -219,7 +219,7 @@ ObjectModelHelpers.CleanupFileContents(
 
             MockLogger logger = new MockLogger();
             List<ILogger> loggers = new List<ILogger>() { logger };
-            Assert.AreEqual(true, project.Build(loggers));
+            Assert.Equal(true, project.Build(loggers));
 
             logger.AssertLogContains("a.foo;a.bar/m1");
             logger.AssertNoErrors();
@@ -229,7 +229,7 @@ ObjectModelHelpers.CleanupFileContents(
         /// <summary>
         /// Expand built-in metadata "late"
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ExpandBuiltInMetadataAtPointOfUse()
         {
             string content =
@@ -248,13 +248,13 @@ ObjectModelHelpers.CleanupFileContents(
             Project project = new Project(XmlReader.Create(new StringReader(content)));
 
             ProjectItem item = project.GetItems("i").ElementAt(0);
-            Assert.AreEqual("b", item.GetMetadataValue("m"));
+            Assert.Equal("b", item.GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Expand built-in metadata "late"
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ExpandBuiltInMetadataAtPointOfUse_ReferToMetadataAbove()
         {
             string content =
@@ -274,13 +274,13 @@ ObjectModelHelpers.CleanupFileContents(
             Project project = new Project(XmlReader.Create(new StringReader(content)));
 
             ProjectItem item = project.GetItems("i").ElementAt(0);
-            Assert.AreEqual("b.ext", item.GetMetadataValue("m"));
+            Assert.Equal("b.ext", item.GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Expand built-in metadata "late"
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ExpandBuiltInMetadataAtPointOfUse_MixtureOfCustomAndBuiltIn()
         {
             string content =
@@ -300,14 +300,14 @@ ObjectModelHelpers.CleanupFileContents(
             Project project = new Project(XmlReader.Create(new StringReader(content)));
 
             ProjectItem item = project.GetItems("i").ElementAt(0);
-            Assert.AreEqual("b.l1", item.GetMetadataValue("m"));
+            Assert.Equal("b.l1", item.GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Custom metadata expressions on metadata on an ItemDefinitionGroup is still always
         /// expanded right there.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ExpandBuiltInMetadataAtPointOfUse_CustomEvaluationNeverDelayed()
         {
             string content =
@@ -330,14 +330,14 @@ ObjectModelHelpers.CleanupFileContents(
             Project project = new Project(XmlReader.Create(new StringReader(content)));
 
             ProjectItem item = project.GetItems("i").ElementAt(0);
-            Assert.AreEqual("b.n1", item.GetMetadataValue("m"));
+            Assert.Equal("b.n1", item.GetMetadataValue("m"));
         }
 
         /// <summary>
         /// A custom metadata that bizarrely expands to a built in metadata expression should
         /// not evaluate again.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ExpandBuiltInMetadataAtPointOfUse_DoNotDoubleEvaluate()
         {
             string content =
@@ -358,15 +358,15 @@ ObjectModelHelpers.CleanupFileContents(
 
             ProjectItem item = project.GetItems("i").ElementAt(0);
 
-            Assert.AreEqual("%25(filename)", Project.GetMetadataValueEscaped(item, "m"));
-            Assert.AreEqual("%(filename)", item.GetMetadataValue("m"));
+            Assert.Equal("%25(filename)", Project.GetMetadataValueEscaped(item, "m"));
+            Assert.Equal("%(filename)", item.GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Items created from other items should still have the built-in metadata expanded
         /// on them, not the original items.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ExpandBuiltInMetadataAtPointOfUse_CopyItems()
         {
             string content =
@@ -386,14 +386,14 @@ ObjectModelHelpers.CleanupFileContents(
             Project project = new Project(XmlReader.Create(new StringReader(content)));
 
             ProjectItem item = project.GetItems("i").ElementAt(0);
-            Assert.AreEqual(".bar", item.GetMetadataValue("m"));
+            Assert.Equal(".bar", item.GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Items created from other items should still have the built-in metadata expanded
         /// on them, not the original items.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ExpandBuiltInMetadataAtPointOfUse_UseInTransform()
         {
             string content =
@@ -413,15 +413,15 @@ ObjectModelHelpers.CleanupFileContents(
             Project project = new Project(XmlReader.Create(new StringReader(content)));
 
             ProjectItem item = project.GetItems("i").ElementAt(0);
-            Assert.AreEqual(".foo", item.EvaluatedInclude);
+            Assert.Equal(".foo", item.EvaluatedInclude);
         }
 
         /// <summary>
         /// Items created from other items should still have the built-in metadata expanded
         /// on them, not the original items.
         /// </summary>
-        [TestMethod]
-        [TestCategory("serialize")]
+        [Fact]
+        [Trait("Category", "serialize")]
         public void ExpandBuiltInMetadataAtPointOfUse_UseInBatching()
         {
             string content =
@@ -452,23 +452,24 @@ ObjectModelHelpers.CleanupFileContents(
             instance.Build(loggers);
 
             ProjectItemInstance item1 = instance.GetItems("i").ElementAt(0);
-            Assert.AreEqual("n1", item1.GetMetadataValue("n"));
+            Assert.Equal("n1", item1.GetMetadataValue("n"));
 
             ProjectItemInstance item2 = instance.GetItems("i").ElementAt(1);
-            Assert.AreEqual("", item2.GetMetadataValue("n"));
+            Assert.Equal("", item2.GetMetadataValue("n"));
         }
 
         /// <summary>
         /// Built-in metadata is prohibited in item definition conditions.
         /// Ideally it would also be late evaluated, but that's too difficult. 
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ExpandBuiltInMetadataAtPointOfUse_BuiltInProhibitedOnItemDefinitionMetadataCondition()
         {
-            string content =
-ObjectModelHelpers.CleanupFileContents(
-@"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content =
+    ObjectModelHelpers.CleanupFileContents(
+    @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemDefinitionGroup>
     <i>
       <m Condition=""'%(filename)'!=''"">m1</m>
@@ -476,20 +477,22 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemDefinitionGroup>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+                Project project = new Project(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Built-in metadata is prohibited in item definition conditions.
         /// Ideally it would also be late evaluated, but that's too difficult. 
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ExpandBuiltInMetadataAtPointOfUse_UnquotedBuiltInProhibitedOnItemDefinitionMetadataCondition()
         {
-            string content =
-ObjectModelHelpers.CleanupFileContents(
-@"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content =
+    ObjectModelHelpers.CleanupFileContents(
+    @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemDefinitionGroup>
     <i>
       <m Condition=""%(filename)!=''"">m1</m>
@@ -497,20 +500,22 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemDefinitionGroup>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+                Project project = new Project(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Built-in metadata is prohibited in item definition conditions.
         /// Ideally it would also be late evaluated, but that's too difficult. 
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ExpandBuiltInMetadataAtPointOfUse_BuiltInProhibitedOnItemDefinitionCondition()
         {
-            string content =
-ObjectModelHelpers.CleanupFileContents(
-@"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content =
+    ObjectModelHelpers.CleanupFileContents(
+    @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemDefinitionGroup>
     <i Condition=""'%(filename)'!=''"">
       <m>m1</m>
@@ -518,20 +523,22 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemDefinitionGroup>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+                Project project = new Project(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Built-in metadata is prohibited in item definition conditions.
         /// Ideally it would also be late evaluated, but that's too difficult. 
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ExpandBuiltInMetadataAtPointOfUse_BuiltInProhibitedOnItemDefinitionGroupCondition()
         {
-            string content =
-ObjectModelHelpers.CleanupFileContents(
-@"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content =
+    ObjectModelHelpers.CleanupFileContents(
+    @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemDefinitionGroup Condition=""'%(filename)'!=''"">
     <i>
       <m>m1</m>
@@ -539,20 +546,22 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemDefinitionGroup>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+                Project project = new Project(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Built-in metadata is prohibited in item definition conditions.
         /// Ideally it would also be late evaluated, but that's too difficult. 
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ExpandBuiltInMetadataAtPointOfUse_QualifiedBuiltInProhibitedOnItemDefinitionMetadataCondition()
         {
-            string content =
-ObjectModelHelpers.CleanupFileContents(
-@"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content =
+    ObjectModelHelpers.CleanupFileContents(
+    @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemDefinitionGroup>
     <i>
       <m Condition=""'%(i.filename)'!=''"">m1</m>
@@ -560,20 +569,22 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemDefinitionGroup>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+                Project project = new Project(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Built-in metadata is prohibited in item definition conditions.
         /// Ideally it would also be late evaluated, but that's too difficult. 
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ExpandBuiltInMetadataAtPointOfUse_QualifiedBuiltInProhibitedOnItemDefinitionCondition()
         {
-            string content =
-ObjectModelHelpers.CleanupFileContents(
-@"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content =
+    ObjectModelHelpers.CleanupFileContents(
+    @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemDefinitionGroup>
     <i Condition=""'%(i.filename)'!=''"">
       <m>m1</m>
@@ -581,20 +592,22 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemDefinitionGroup>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+                Project project = new Project(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Built-in metadata is prohibited in item definition conditions.
         /// Ideally it would also be late evaluated, but that's too difficult. 
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ExpandBuiltInMetadataAtPointOfUse_QualifiedBuiltInProhibitedOnItemDefinitionGroupCondition()
         {
-            string content =
-ObjectModelHelpers.CleanupFileContents(
-@"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content =
+    ObjectModelHelpers.CleanupFileContents(
+    @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemDefinitionGroup Condition=""'%(i.filename)'!=''"">
     <i>
       <m>m1</m>
@@ -602,20 +615,22 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemDefinitionGroup>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+                Project project = new Project(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Built-in metadata is prohibited in item definition conditions.
         /// Ideally it would also be late evaluated, but that's too difficult. 
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ExpandBuiltInMetadataAtPointOfUse_UnquotedQualifiedBuiltInProhibitedOnItemDefinitionCondition()
         {
-            string content =
-ObjectModelHelpers.CleanupFileContents(
-@"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content =
+    ObjectModelHelpers.CleanupFileContents(
+    @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemDefinitionGroup>
     <i Condition=""%(i.filename)!=''"">
       <m>m1</m>
@@ -623,13 +638,14 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemDefinitionGroup>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+                Project project = new Project(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Custom metadata is allowed in item definition conditions.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ExpandBuiltInMetadataAtPointOfUse_UnquotedQualifiedCustomAllowedOnItemDefinitionCondition()
         {
             string content =

@@ -8,6 +8,7 @@
 using System;
 using System.Text;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 using System.Diagnostics;
 using Microsoft.Build.Framework;
@@ -15,6 +16,7 @@ using Microsoft.Build.Shared;
 using System.Collections.ObjectModel;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.Construction
 {
@@ -23,6 +25,8 @@ namespace Microsoft.Build.Construction
     /// </summary>
     public abstract class ProjectElementContainer : ProjectElement
     {
+        const string DEFAULT_INDENT = "  ";
+
         /// <summary>
         /// Number of children of any kind
         /// </summary>
@@ -169,7 +173,7 @@ namespace Microsoft.Build.Construction
                 child.NextSibling.PreviousSibling = child;
             }
 
-            XmlElement.InsertAfter(child.XmlElement, reference.XmlElement);
+            AddToXml(child);
 
             _count++;
             MarkDirty("Insert element {0}", child.ElementName);
@@ -219,14 +223,14 @@ namespace Microsoft.Build.Construction
                 child.PreviousSibling.NextSibling = child;
             }
 
-            XmlElement.InsertBefore(child.XmlElement, reference.XmlElement);
+            AddToXml(child);
 
             _count++;
             MarkDirty("Insert element {0}", child.ElementName);
         }
 
         /// <summary>
-        /// Appends the provided element as the last child.
+        /// Inserts the provided element as the last child.
         /// Throws if the parent is not itself parented.
         /// Throws if the node to add is already parented.
         /// Throws if the node to add was created from a different project than this node.
@@ -245,7 +249,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Appends the provided element as the last child.
+        /// Inserts the provided element as the first child.
         /// Throws if the parent is not itself parented.
         /// Throws if the node to add is already parented.
         /// Throws if the node to add was created from a different project than this node.
@@ -305,7 +309,7 @@ namespace Microsoft.Build.Construction
                 LastChild = child.PreviousSibling;
             }
 
-            XmlElement.RemoveChild(child.XmlElement);
+            RemoveFromXml(child);
 
             _count--;
             MarkDirty("Remove element {0}", child.ElementName);
@@ -416,6 +420,182 @@ namespace Microsoft.Build.Construction
             return clone;
         }
 
+        private void SetElementAsAttributeValue(ProjectElement child)
+        {
+            //  Assumes that child.ExpressedAsAttribute is true
+            Debug.Assert(child.ExpressedAsAttribute, nameof(SetElementAsAttributeValue) + " method requires that " +
+                nameof(child.ExpressedAsAttribute) + " property of child is true");
+
+            string value = Microsoft.Build.Internal.Utilities.GetXmlNodeInnerContents(child.XmlElement);
+            ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, child.XmlElement.Name, value);
+        }
+
+        /// <summary>
+        /// If child "element" is actually represented as an attribute, update the value in the corresponding Xml attribute
+        /// </summary>
+        /// <param name="child">A child element which might be represented as an attribute</param>
+        internal void UpdateElementValue(ProjectElement child)
+        {
+            if (child.ExpressedAsAttribute)
+            {
+                SetElementAsAttributeValue(child);
+            }
+        }
+
+        /// <summary>
+        /// Adds a ProjectElement to the Xml tree
+        /// </summary>
+        /// <param name="child">A child to add to the Xml tree, which has already been added to the ProjectElement tree</param>
+        /// <remarks>
+        /// The MSBuild construction APIs keep a tree of ProjectElements and a parallel Xml tree which consists of
+        /// objects from System.Xml.  This is a helper method which adds an XmlElement or Xml attribute to the Xml
+        /// tree after the corresponding ProjectElement has been added to the construction API tree, and fixes up
+        /// whitespace as necessary.
+        /// </remarks>
+        internal void AddToXml(ProjectElement child)
+        {
+            if (child.ExpressedAsAttribute)
+            {
+                // todo children represented as attributes need to be placed in order too
+                //  Assume that the name of the child has already been validated to conform with rules in XmlUtilities.VerifyThrowArgumentValidElementName
+
+                //  Make sure we're not trying to add multiple attributes with the same name
+                ProjectErrorUtilities.VerifyThrowInvalidProject(!XmlElement.HasAttribute(child.XmlElement.Name),
+                    XmlElement.Location, "InvalidChildElementDueToDuplication", child.XmlElement.Name, ElementName);
+
+                SetElementAsAttributeValue(child);
+            }
+            else
+            {
+                //  We want to add the XmlElement to the same position in the child list as the corresponding ProjectElement.
+                //  Depending on whether the child ProjectElement has a PreviousSibling or a NextSibling, we may need to
+                //  use the InsertAfter, InsertBefore, or AppendChild methods to add it in the right place.
+                //
+                //  Also, if PreserveWhitespace is true, then the elements we add won't automatically get indented, so
+                //  we try to match the surrounding formatting.
+
+                // Siblings, in either direction in the linked list, may be represented either as attributes or as elements.
+                // Therefore, we need to traverse both directions to find the first sibling of the same type as the one being added.
+                // If none is found, then the node being added is inserted as the only node of its kind
+
+                ProjectElement referenceSibling;
+                Predicate<ProjectElement> siblingIsSameAsChild = _ => _.ExpressedAsAttribute == false;
+
+                if (TrySearchLeftSiblings(child.PreviousSibling, siblingIsSameAsChild, out referenceSibling))
+                {
+                    //  Add after previous sibling
+                    XmlElement.InsertAfter(child.XmlElement, referenceSibling.XmlElement);
+                    if (XmlDocument.PreserveWhitespace)
+                    {
+                        //  Try to match the surrounding formatting by checking the whitespace that precedes the node we inserted
+                        //  after, and inserting the same whitespace between the previous node and the one we added
+                        if (referenceSibling.XmlElement.PreviousSibling != null &&
+                            referenceSibling.XmlElement.PreviousSibling.NodeType == XmlNodeType.Whitespace)
+                        {
+                            var newWhitespaceNode = XmlDocument.CreateWhitespace(referenceSibling.XmlElement.PreviousSibling.Value);
+                            XmlElement.InsertAfter(newWhitespaceNode, referenceSibling.XmlElement);
+                        }
+                    }
+                }
+                else if (TrySearchRightSiblings(child.NextSibling, siblingIsSameAsChild, out referenceSibling))
+                {
+                    //  Add as first child
+                    XmlElement.InsertBefore(child.XmlElement, referenceSibling.XmlElement);
+
+                    if (XmlDocument.PreserveWhitespace)
+                    {
+                        //  Try to match the surrounding formatting by checking the whitespace that precedes where we inserted
+                        //  the new node, and inserting the same whitespace between the node we added and the one after it.
+                        if (child.XmlElement.PreviousSibling != null &&
+                            child.XmlElement.PreviousSibling.NodeType == XmlNodeType.Whitespace)
+                        {
+                            var newWhitespaceNode = XmlDocument.CreateWhitespace(child.XmlElement.PreviousSibling.Value);
+                            XmlElement.InsertBefore(newWhitespaceNode, referenceSibling.XmlElement);
+                        }
+                    }
+                }
+                else
+                {
+                    //  Add as only child
+                    XmlElement.AppendChild(child.XmlElement);
+
+                    if (XmlDocument.PreserveWhitespace)
+                    {
+                        //  If the empty parent has whitespace in it, delete it
+                        if (XmlElement.FirstChild.NodeType == XmlNodeType.Whitespace)
+                        {
+                            XmlElement.RemoveChild(XmlElement.FirstChild);
+                        }
+
+                        var parentIndentation = GetElementIndentation(XmlElement);
+
+                        var leadingWhitespaceNode = XmlDocument.CreateWhitespace("\n" + parentIndentation + DEFAULT_INDENT);
+                        var trailingWhiteSpaceNode = XmlDocument.CreateWhitespace("\n" + parentIndentation);
+
+                        XmlElement.InsertBefore(leadingWhitespaceNode, child.XmlElement);
+                        XmlElement.InsertAfter(trailingWhiteSpaceNode, child.XmlElement);
+                    }
+                }
+            }
+        }
+
+        private string GetElementIndentation(XmlElementWithLocation xmlElement)
+        {
+            if (xmlElement.PreviousSibling?.NodeType != XmlNodeType.Whitespace)
+            {
+                return string.Empty;
+            }
+
+            var leadingWhiteSpace = xmlElement.PreviousSibling.Value;
+
+            var lastIndexOfNewLine = leadingWhiteSpace.LastIndexOf("\n", StringComparison.Ordinal);
+
+            if (lastIndexOfNewLine == -1)
+            {
+                return string.Empty;
+            }
+
+            // the last newline is not included in the indentation, only what comes after it
+            return leadingWhiteSpace.Substring(lastIndexOfNewLine + 1);
+        }
+
+        internal void RemoveFromXml(ProjectElement child)
+        {
+            if (child.ExpressedAsAttribute)
+            {
+                XmlElement.RemoveAttribute(child.XmlElement.Name);
+            }
+            else
+            {
+                var previousSibling = child.XmlElement.PreviousSibling;
+
+                XmlElement.RemoveChild(child.XmlElement);
+
+                if (XmlDocument.PreserveWhitespace)
+                {
+                    //  If we are trying to preserve formatting of the file, then also remove any whitespace
+                    //  that came before the node we removed.
+                    if (previousSibling != null && previousSibling.NodeType == XmlNodeType.Whitespace)
+                    {
+                        XmlElement.RemoveChild(previousSibling);
+                    }
+
+                    //  If we removed the last non-whitespace child node, set IsEmpty to true so that we get:
+                    //      <ItemName />
+                    //  instead of:
+                    //      <ItemName>
+                    //      </ItemName>
+                    if (XmlElement.HasChildNodes)
+                    {
+                        if (XmlElement.ChildNodes.Cast<XmlNode>().All(c => c.NodeType == XmlNodeType.Whitespace))
+                        {
+                            XmlElement.IsEmpty = true;
+                        }
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Sets the first child in this container
         /// </summary>
@@ -435,7 +615,7 @@ namespace Microsoft.Build.Construction
             child.PreviousSibling = null;
             child.NextSibling = null;
 
-            XmlElement.AppendChild(child.XmlElement);
+            AddToXml(child);
 
             _count++;
             MarkDirty("Add child element named '{0}'", child.ElementName);
@@ -500,6 +680,40 @@ namespace Microsoft.Build.Construction
 
                 child = child.NextSibling;
             }
+        }
+
+        private static bool TrySearchLeftSiblings(ProjectElement initialElement, Predicate<ProjectElement> siblingIsAcceptable, out ProjectElement referenceSibling)
+        {
+            return TrySearchSiblings(initialElement, siblingIsAcceptable, s => s.PreviousSibling, out referenceSibling);
+        }
+
+        private static bool TrySearchRightSiblings(ProjectElement initialElement, Predicate<ProjectElement> siblingIsAcceptable, out ProjectElement referenceSibling)
+        {
+            return TrySearchSiblings(initialElement, siblingIsAcceptable, s => s.NextSibling, out referenceSibling);
+        }
+
+        private static bool TrySearchSiblings(
+            ProjectElement initialElement,
+            Predicate<ProjectElement> siblingIsAcceptable,
+            Func<ProjectElement, ProjectElement> nextSibling,
+            out ProjectElement referenceSibling)
+        {
+            if (initialElement == null)
+            {
+                referenceSibling = null;
+                return false;
+            }
+
+            var sibling = initialElement;
+
+            while (sibling != null && !siblingIsAcceptable(sibling))
+            {
+                sibling = nextSibling(sibling);
+            }
+
+            referenceSibling = sibling;
+
+            return referenceSibling != null;
         }
 
         /// <summary>

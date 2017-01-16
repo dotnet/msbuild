@@ -331,11 +331,8 @@ namespace Microsoft.Build.Tasks
                     {
                         fullPath = Path.Combine(directory, baseName);
                     }
-                    catch (Exception e) // Catching Exception, but rethrowing unless it's an IO related exception.
+                    catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {
-                        if (ExceptionHandling.NotExpectedException(e))
-                            throw;
-
                         // Assuming it's the search path that's bad. But combine them both so the error is visible if it's the reference itself.
                         throw new InvalidParameterValueException("SearchPaths", directory + (directory.EndsWith("\\", StringComparison.OrdinalIgnoreCase) ? String.Empty : "\\") + baseName, e.Message);
                     }

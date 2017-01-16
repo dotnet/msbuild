@@ -18,8 +18,6 @@ using System.IO;
 using System.Net;
 using System.Threading;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Evaluation;
@@ -29,20 +27,19 @@ using ProjectHelpers = Microsoft.Build.UnitTests.BackEnd.ProjectHelpers;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.Evaluation
 {
     /// <summary>
     /// Tests mainly for project evaluation
     /// </summary>
-    [TestClass]
-    public class Evaluator_Tests
+    public class Evaluator_Tests : IDisposable
     {
         /// <summary>
         /// Cleanup
         /// </summary>
-        [TestInitialize]
-        public void Setup()
+        public Evaluator_Tests()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
             GC.Collect();
@@ -51,8 +48,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Cleanup
         /// </summary>
-        [TestCleanup]
-        public void TearDown()
+        public void Dispose()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
             GC.Collect();
@@ -61,7 +57,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Verify Exist condition used in Import or ImportGroup elements will succeed when in-memory project is available inside projectCollection. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyExistsInMemoryProjecs()
         {
             string projXml = ObjectModelHelpers.CleanupFileContents(@"
@@ -89,8 +85,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Project project = new Project(XmlReader.Create(new StringReader(projXml)));
             project.ReevaluateIfNecessary();
 
-            Assert.IsNull(project.GetProperty("foo"));
-            Assert.IsNull(project.GetProperty("bar"));
+            Assert.Null(project.GetProperty("foo"));
+            Assert.Null(project.GetProperty("bar"));
 
             // add in-memory project c:\temp\foo.import
             Project fooImport = new Project(XmlReader.Create(new StringReader(fooXml)));
@@ -101,8 +97,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             project.ReevaluateIfNecessary();
 
             // foo should be available now via fooImport
-            Assert.IsNotNull(project.GetProperty("foo"));
-            Assert.IsNull(project.GetProperty("bar"));
+            Assert.NotNull(project.GetProperty("foo"));
+            Assert.Null(project.GetProperty("bar"));
 
             // add in-memory project c:\temp\bar.import
             Project barImport = new Project(XmlReader.Create(new StringReader(barXml)));
@@ -113,8 +109,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             project.ReevaluateIfNecessary();
 
             // both foo and bar should be available
-            Assert.IsNotNull(project.GetProperty("foo"));
-            Assert.IsNotNull(project.GetProperty("bar"));
+            Assert.NotNull(project.GetProperty("foo"));
+            Assert.NotNull(project.GetProperty("bar"));
 
             // remove the imports from PRE
             fooImport.FullPath = @"c:\temp\alteredfoo.import";
@@ -125,8 +121,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             project.ReevaluateIfNecessary();
 
             // both foo and bar should be gone
-            Assert.IsNull(project.GetProperty("foo"));
-            Assert.IsNull(project.GetProperty("bar"));
+            Assert.Null(project.GetProperty("foo"));
+            Assert.Null(project.GetProperty("bar"));
         }
 
         /// <summary>
@@ -139,7 +135,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// test.tx, file to check for existance
         /// subdir\test.proj
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyConditionsInsideOutsideTargets()
         {
             string testtargets = @"
@@ -242,7 +238,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 MockLogger logger = new MockLogger();
                 bool result = project.Build(logger);
-                Assert.IsTrue(result);
+                Assert.True(result);
                 logger.AssertLogContains("PropertyOutsideTarget: ..\\test.txt");
                 logger.AssertLogContains("PropertyGroupOutsideTarget: test.txt");
                 logger.AssertLogContains("PropertyInsideTarget: ..\\test.txt");
@@ -268,7 +264,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// test.tx, file to check for existance
         /// subdir\test.proj
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyConditionsInsideOutsideTargets_ProjectInstance()
         {
             string testtargets = @"
@@ -371,7 +367,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 MockLogger logger = new MockLogger();
                 bool result = project.Build(new ILogger[] { logger });
-                Assert.IsTrue(result);
+                Assert.True(result);
                 logger.AssertLogContains("PropertyOutsideTarget: ..\\test.txt");
                 logger.AssertLogContains("PropertyGroupOutsideTarget: test.txt");
                 logger.AssertLogContains("PropertyInsideTarget: ..\\test.txt");
@@ -390,7 +386,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// When properties are consumed and set in imports make sure that we get the correct warnigns.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyUsedUnInitializedPropertyInImports()
         {
             string targetA = ObjectModelHelpers.CleanupFileContents(@"
@@ -437,7 +433,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Project project = pc.LoadProject(projectPath);
 
                 bool result = project.Build();
-                Assert.AreEqual(true, result);
+                Assert.Equal(true, result);
                 logger.AssertLogContains("MSB4211");
             }
             finally
@@ -450,7 +446,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// If a property is set to an empty value and then set to a non empty value we do not expect a warning. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EmptyPropertyIsThenSet()
         {
             string testtargets = ObjectModelHelpers.CleanupFileContents(@"
@@ -480,7 +476,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Project project = pc.LoadProject(testTargetPath);
 
                 bool result = project.Build();
-                Assert.AreEqual(true, result);
+                Assert.Equal(true, result);
                 logger.AssertLogDoesntContain("MSB4211");
             }
             finally
@@ -493,7 +489,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// If a property is set to an empty value and the environment variable is not set then we do not expect an error
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EmptyPropertyIsThenSetEnvironmentVariableNotSet()
         {
             string testtargets = ObjectModelHelpers.CleanupFileContents(@"
@@ -522,7 +518,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Project project = pc.LoadProject(testTargetPath);
 
                 bool result = project.Build();
-                Assert.AreEqual(true, result);
+                Assert.Equal(true, result);
                 logger.AssertLogDoesntContain("MSB4211");
             }
             finally
@@ -535,7 +531,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// If a property has not been set yet and we consume the property we are setting in order to set it, do not warn 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetPropertyToItself()
         {
             string testtargets = ObjectModelHelpers.CleanupFileContents(@"
@@ -564,7 +560,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Project project = pc.LoadProject(testTargetPath);
 
                 bool result = project.Build();
-                Assert.AreEqual(true, result);
+                Assert.Equal(true, result);
                 logger.AssertLogDoesntContain("MSB4211");
             }
             finally
@@ -578,7 +574,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// If we consume a property which has not been initialized in a property we do not expect a warning because we are explicitly ignoring conditions.
         /// This is done because it is a very common scenario to use uninitialized properties in conditions to set default values.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void UsePropertyInCondition()
         {
             string testtargets = ObjectModelHelpers.CleanupFileContents(@"
@@ -610,7 +606,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Project project = pc.LoadProject(testTargetPath);
 
                 bool result = project.Build();
-                Assert.AreEqual(true, result);
+                Assert.Equal(true, result);
                 logger.AssertLogDoesntContain("MSB4211");
             }
             finally
@@ -623,7 +619,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// If a property is consumed before it is initialized for the first time log a warning.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void UsePropertyBeforeSet()
         {
             string testtargets = ObjectModelHelpers.CleanupFileContents(@"
@@ -654,9 +650,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Project project = pc.LoadProject(testTargetPath);
 
                 bool result = project.Build();
-                Assert.AreEqual(true, result);
+                Assert.Equal(true, result);
                 logger.AssertLogContains("MSB4211");
-                Assert.IsTrue(logger.WarningCount == 2, "Expected two warnings");
+                Assert.Equal(2, logger.WarningCount); // "Expected two warnings"
             }
             finally
             {
@@ -668,7 +664,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// If we use a property twice make sure we warn and dont crash due to the dictionary which is holding the used but uninitialized variables..
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void UsePropertyBeforeSetDuplicates()
         {
             string testtargets = ObjectModelHelpers.CleanupFileContents(@"
@@ -700,9 +696,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Project project = pc.LoadProject(testTargetPath);
 
                 bool result = project.Build();
-                Assert.AreEqual(true, result);
+                Assert.Equal(true, result);
                 logger.AssertLogContains("MSB4211");
-                Assert.IsTrue(logger.WarningCount == 2, "Expected two warnings");
+                Assert.Equal(2, logger.WarningCount); // "Expected two warnings"
             }
             finally
             {
@@ -717,7 +713,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// If it is imported twice, subtle problems will occur: because typically the 2nd import will
         /// have no effect, but occasionally it won't.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ImportsOnlyIncludedOnce()
         {
             string importPath = null;
@@ -762,7 +758,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 MockLogger logger = new MockLogger();
                 bool result = project.Build(logger);
-                Assert.AreEqual(true, result);
+                Assert.Equal(true, result);
 
                 logger.AssertLogContains("foo");
                 logger.AssertLogDoesntContain("foo_bar");
@@ -777,7 +773,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Imports should only be included once. However we should be able to see them in the ImportsIncludingDuplicates property
         /// A second import should give a warning, and still not be added to the Imports property.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MultipleImportsVerifyImportsIncludingDuplicates()
         {
             string importPath = null;
@@ -837,11 +833,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Project project = new Project(XmlReader.Create(new StringReader(content)), null, null, pc, ProjectLoadSettings.RecordDuplicateButNotCircularImports);
                 IList<ResolvedImport> imports = project.Imports;
                 IList<ResolvedImport> importsIncludingDuplicates = project.ImportsIncludingDuplicates;
-                Assert.IsTrue(imports.Count == 3);
-                Assert.IsTrue(importsIncludingDuplicates.Count == 5);
-                Assert.IsTrue(!imports[0].IsImported);
-                Assert.IsTrue(imports[1].IsImported);
-                Assert.IsTrue(!imports[2].IsImported);
+                Assert.Equal(3, imports.Count);
+                Assert.Equal(5, importsIncludingDuplicates.Count);
+                Assert.False(imports[0].IsImported);
+                Assert.True(imports[1].IsImported);
+                Assert.False(imports[2].IsImported);
             }
             finally
             {
@@ -854,7 +850,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// RecordDuplicateButNotCircularImports should not record circular imports (which do come under the category of "duplicate imports".
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void RecordDuplicateButNotCircularImportsWithCircularImports()
         {
             string importPath1 = null;
@@ -900,7 +896,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 // Even though, the text in importPath2 contains exactly one import, namely importPath1, it should not be recorded since
                 // importPath1 introduces a circular dependency when traversing depth-first from the project.
-                Assert.IsFalse(circularImportsAreRecorded);
+                Assert.False(circularImportsAreRecorded);
             }
             finally
             {
@@ -912,27 +908,28 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// RecordDuplicateButNotCircularImports should not record circular imports (which do come under the category of "duplicate imports".
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void RejectCircularImportsWithCircularImports()
         {
-            string importPath1 = null;
-            string importPath2 = null;
-
-            try
+            Assert.Throws<InvalidProjectFileException>(() =>
             {
-                importPath1 = FileUtilities.GetTemporaryFile();
-                importPath2 = FileUtilities.GetTemporaryFile();
+                string importPath1 = null;
+                string importPath2 = null;
 
-                // "import1" imports "import2" and vice versa.
-                string import1 = ObjectModelHelpers.CleanupFileContents(@"
+                try
+                {
+                    importPath1 = FileUtilities.GetTemporaryFile();
+                    importPath2 = FileUtilities.GetTemporaryFile();
+
+                    // "import1" imports "import2" and vice versa.
+                    string import1 = ObjectModelHelpers.CleanupFileContents(@"
                     <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace' >
                       <Import Project='" + importPath2 + @"'/>
                     </Project>
                 ");
 
-                // "import1" imports "import2" and vice versa.
-                string import2 = ObjectModelHelpers.CleanupFileContents(@"
+                    // "import1" imports "import2" and vice versa.
+                    string import2 = ObjectModelHelpers.CleanupFileContents(@"
                     <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace' >
                         <PropertyGroup>
                           <p>Hello</p>
@@ -941,60 +938,61 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     </Project>
                 ");
 
-                File.WriteAllText(importPath1, import1);
-                File.WriteAllText(importPath2, import2);
+                    File.WriteAllText(importPath1, import1);
+                    File.WriteAllText(importPath2, import2);
 
-                // The project file contents.
-                string manifest = ObjectModelHelpers.CleanupFileContents(@"
+                    // The project file contents.
+                    string manifest = ObjectModelHelpers.CleanupFileContents(@"
                     <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace' >
                         <Import Project='" + importPath1 + @"'/>
                     </Project>
                 ");
 
-                ProjectCollection pc = new ProjectCollection();
+                    ProjectCollection pc = new ProjectCollection();
 
-                // Because import1 and import2 import each other, there is a circular dependency. And since RejectCircularImports flag is set, the below call
-                // should throw.
-                Project project = new Project(XmlReader.Create(new StringReader(manifest)), null, null, pc, ProjectLoadSettings.RejectCircularImports);
+                    // Because import1 and import2 import each other, there is a circular dependency. And since RejectCircularImports flag is set, the below call
+                    // should throw.
+                    Project project = new Project(XmlReader.Create(new StringReader(manifest)), null, null, pc, ProjectLoadSettings.RejectCircularImports);
+                }
+                finally
+                {
+                    File.Delete(importPath1);
+                    File.Delete(importPath2);
+                }
             }
-            finally
-            {
-                File.Delete(importPath1);
-                File.Delete(importPath2);
-            }
+           );
         }
-
         /// <summary>
         /// MSBuildDefaultTargets was not getting cleared out between reevaluations.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MSBuildDefaultTargets()
         {
             Project project = new Project();
             project.Xml.DefaultTargets = "dt";
             project.ReevaluateIfNecessary();
 
-            Assert.AreEqual("dt", project.GetPropertyValue("msbuildprojectdefaulttargets"));
+            Assert.Equal("dt", project.GetPropertyValue("msbuildprojectdefaulttargets"));
 
             project.ReevaluateIfNecessary();
 
-            Assert.AreEqual("dt", project.GetPropertyValue("msbuildprojectdefaulttargets"));
+            Assert.Equal("dt", project.GetPropertyValue("msbuildprojectdefaulttargets"));
 
             project.MarkDirty();
             project.ReevaluateIfNecessary();
 
-            Assert.AreEqual("dt", project.GetPropertyValue("msbuildprojectdefaulttargets"));
+            Assert.Equal("dt", project.GetPropertyValue("msbuildprojectdefaulttargets"));
 
             project.Xml.DefaultTargets = "dt2";
             project.ReevaluateIfNecessary();
 
-            Assert.AreEqual("dt2", project.GetPropertyValue("msbuildprojectdefaulttargets"));
+            Assert.Equal("dt2", project.GetPropertyValue("msbuildprojectdefaulttargets"));
         }
 
         /// <summary>
         /// Something like a $ in an import's path should work.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EscapableCharactersInImportPath()
         {
             string importPath1 = null;
@@ -1042,7 +1040,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 MockLogger logger = new MockLogger();
                 bool result = project.Build("t2", new ILogger[] { logger });
 
-                Assert.AreEqual(true, result);
+                Assert.Equal(true, result);
 
                 logger.AssertLogContains("[imported1]");
                 logger.AssertLogContains("[imported2]");
@@ -1063,7 +1061,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// We also want MSBuildFileXXXX properties that are similar but have special behavior:
         /// their values vary according to the file they are evaluated in.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MSBuildThisFileProperties()
         {
             ProjectRootElement main = ProjectRootElement.Create(@"c:\a\p.proj");
@@ -1146,7 +1144,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Per Orcas/Whidbey, if there are several task parameters that only differ
         /// by case, we just silently take the last one.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void RepeatedTaskParameters()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -1159,13 +1157,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Project project = new Project(XmlReader.Create(new StringReader(content)));
             ProjectInstance instance = project.CreateProjectInstance();
 
-            Assert.AreEqual("3", (Helpers.GetFirst(instance.Targets["t"].Tasks)).GetParameter("Text"));
+            Assert.Equal("3", (Helpers.GetFirst(instance.Targets["t"].Tasks)).GetParameter("Text"));
         }
 
         /// <summary>
         /// Simple override
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void PropertyPredecessors()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -1183,19 +1181,16 @@ namespace Microsoft.Build.UnitTests.Evaluation
             ProjectProperty property = project.GetProperty("p");
 
             ProjectPropertyElement xml1 = project.Xml.Properties.First();
-            Assert.AreEqual("2;2", property.EvaluatedValue);
-            Assert.AreEqual("1", property.Predecessor.Predecessor.EvaluatedValue);
-            Assert.AreEqual(true, Object.ReferenceEquals(xml1, property.Predecessor.Predecessor.Xml));
-            Assert.AreEqual(null, property.Predecessor.Predecessor.Predecessor);
+            Assert.Equal("2;2", property.EvaluatedValue);
+            Assert.Equal("1", property.Predecessor.Predecessor.EvaluatedValue);
+            Assert.Equal(true, Object.ReferenceEquals(xml1, property.Predecessor.Predecessor.Xml));
+            Assert.Equal(null, property.Predecessor.Predecessor.Predecessor);
         }
 
         /// <summary>
         /// Predecessors and imports
         /// </summary>
-        [TestMethod]
-        [Ignore]
-        // Ignore: In-line Utilities function not found.
-
+        [Fact]
         public void PropertyPredecessorsAndImports()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -1213,13 +1208,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
             ProjectRootElement importXml = ProjectRootElement.Open(project.Items.ElementAt(0).Xml.ContainingProject.FullPath);
             ProjectRootElement predecessorXmlRoot = project.GetProperty("outdir").Predecessor.Xml.ContainingProject;
 
-            Assert.AreEqual(true, Object.ReferenceEquals(importXml, predecessorXmlRoot));
+            Assert.Equal(true, Object.ReferenceEquals(importXml, predecessorXmlRoot));
         }
 
         /// <summary>
         /// New properties get a null predecessor until reevaluation
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void PropertyPredecessorsSetProperty()
         {
             // Need an existing property with the same name in an import
@@ -1233,13 +1228,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             ProjectProperty property = project.SetProperty("outdir", "x"); // Outdir is set in microsoft.common.targets
 
-            Assert.AreEqual(null, property.Predecessor);
+            Assert.Equal(null, property.Predecessor);
         }
 
         /// <summary>
         /// Predecessor of item definition is item definition
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ItemDefinitionPredecessorToItemDefinition()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -1258,18 +1253,18 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             ProjectMetadata metadatum = project.ItemDefinitions["i"].GetMetadata("m");
 
-            Assert.AreEqual("2;2", metadatum.EvaluatedValue);
-            Assert.AreEqual("1", metadatum.Predecessor.Predecessor.EvaluatedValue);
+            Assert.Equal("2;2", metadatum.EvaluatedValue);
+            Assert.Equal("1", metadatum.Predecessor.Predecessor.EvaluatedValue);
 
             ProjectMetadataElement xml1 = project.Xml.ItemDefinitions.ElementAt(0).Metadata.ElementAt(0);
-            Assert.AreEqual(true, Object.ReferenceEquals(xml1, metadatum.Predecessor.Predecessor.Xml));
-            Assert.AreEqual(null, metadatum.Predecessor.Predecessor.Predecessor);
+            Assert.Equal(true, Object.ReferenceEquals(xml1, metadatum.Predecessor.Predecessor.Xml));
+            Assert.Equal(null, metadatum.Predecessor.Predecessor.Predecessor);
         }
 
         /// <summary>
         /// Newly added item's metadata always has null predecessor until reevaluation
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void NewItemPredecessor()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -1286,13 +1281,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
             ProjectItem item = project.AddItem("i", "i1")[0];
             ProjectMetadata metadatum = item.SetMetadataValue("m", "m2");
 
-            Assert.AreEqual(null, metadatum.Predecessor);
+            Assert.Equal(null, metadatum.Predecessor);
         }
 
         /// <summary>
         /// Predecessor of item is item definition
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ItemDefinitionPredecessorToItem()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -1315,23 +1310,23 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             ProjectMetadata metadatum = project.GetItems("i").ElementAt(0).GetMetadata("m");
 
-            Assert.AreEqual("3;2;1", metadatum.EvaluatedValue);
-            Assert.AreEqual("2;1", metadatum.Predecessor.EvaluatedValue);
-            Assert.AreEqual("1", metadatum.Predecessor.Predecessor.EvaluatedValue);
+            Assert.Equal("3;2;1", metadatum.EvaluatedValue);
+            Assert.Equal("2;1", metadatum.Predecessor.EvaluatedValue);
+            Assert.Equal("1", metadatum.Predecessor.Predecessor.EvaluatedValue);
 
             ProjectMetadataElement xml1 = project.Xml.ItemDefinitions.ElementAt(0).Metadata.ElementAt(0);
-            Assert.AreEqual(true, Object.ReferenceEquals(xml1, metadatum.Predecessor.Predecessor.Xml));
+            Assert.Equal(true, Object.ReferenceEquals(xml1, metadatum.Predecessor.Predecessor.Xml));
 
             ProjectMetadataElement xml2 = project.Xml.Items.ElementAt(0).Metadata.ElementAt(0);
-            Assert.AreEqual(true, Object.ReferenceEquals(xml2, metadatum.Predecessor.Xml));
+            Assert.Equal(true, Object.ReferenceEquals(xml2, metadatum.Predecessor.Xml));
 
-            Assert.AreEqual(null, metadatum.Predecessor.Predecessor.Predecessor);
+            Assert.Equal(null, metadatum.Predecessor.Predecessor.Predecessor);
         }
 
         /// <summary>
         /// Predecessor of item is on the same item.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void PredecessorOnSameItem()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -1353,19 +1348,19 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             ProjectMetadata metadatum = project.GetItems("i").ElementAt(1).GetMetadata("m");
 
-            Assert.AreEqual("3", metadatum.EvaluatedValue);
-            Assert.AreEqual("1", metadatum.Predecessor.EvaluatedValue);
+            Assert.Equal("3", metadatum.EvaluatedValue);
+            Assert.Equal("1", metadatum.Predecessor.EvaluatedValue);
 
             ProjectMetadataElement xml1 = project.Xml.Items.ElementAt(1).Metadata.ElementAt(0);
-            Assert.AreEqual(true, Object.ReferenceEquals(xml1, metadatum.Predecessor.Xml));
+            Assert.Equal(true, Object.ReferenceEquals(xml1, metadatum.Predecessor.Xml));
 
-            Assert.AreEqual(null, metadatum.Predecessor.Predecessor);
+            Assert.Equal(null, metadatum.Predecessor.Predecessor);
         }
 
         /// <summary>
         /// Predecessor of item is item 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ItemPredecessorToItem()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -1384,19 +1379,19 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             ProjectMetadata metadatum = project.GetItems("i").ElementAt(0).GetMetadata("m");
 
-            Assert.AreEqual("2;1", metadatum.EvaluatedValue);
-            Assert.AreEqual("1", metadatum.Predecessor.EvaluatedValue);
+            Assert.Equal("2;1", metadatum.EvaluatedValue);
+            Assert.Equal("1", metadatum.Predecessor.EvaluatedValue);
 
             ProjectMetadataElement xml1 = project.Xml.Items.ElementAt(0).Metadata.ElementAt(0);
-            Assert.AreEqual(true, Object.ReferenceEquals(xml1, metadatum.Predecessor.Xml));
+            Assert.Equal(true, Object.ReferenceEquals(xml1, metadatum.Predecessor.Xml));
 
-            Assert.AreEqual(null, metadatum.Predecessor.Predecessor);
+            Assert.Equal(null, metadatum.Predecessor.Predecessor);
         }
 
         /// <summary>
         /// Predecessor of item is item via transform
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ItemPredecessorToItemViaTransform()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -1415,14 +1410,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             ProjectMetadata metadatum = project.GetItems("i").ElementAt(0).GetMetadata("m");
 
-            Assert.AreEqual("2;", metadatum.EvaluatedValue);
-            Assert.AreEqual(null, metadatum.Predecessor);
+            Assert.Equal("2;", metadatum.EvaluatedValue);
+            Assert.Equal(null, metadatum.Predecessor);
         }
 
         /// <summary>
         /// Item predecessors and imports
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ItemPredecessorsAndImports()
         {
             string file = null;
@@ -1454,8 +1449,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 ProjectMetadata predecessor = project.GetItems("i").ElementAt(0).GetMetadata("m").Predecessor;
 
-                Assert.AreEqual(true, Object.ReferenceEquals(import, predecessor.Xml.ContainingProject));
-                Assert.AreEqual(true, Object.ReferenceEquals(project.Xml, predecessor.Predecessor.Xml.ContainingProject));
+                Assert.Equal(true, Object.ReferenceEquals(import, predecessor.Xml.ContainingProject));
+                Assert.Equal(true, Object.ReferenceEquals(project.Xml, predecessor.Predecessor.Xml.ContainingProject));
             }
             finally
             {
@@ -1466,7 +1461,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Cases where there are no predecessors at all
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void NoPredecessors()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -1488,9 +1483,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Project project = new Project(XmlReader.Create(new StringReader(content)));
 
-            Assert.AreEqual(null, project.GetProperty("p").Predecessor);
-            Assert.AreEqual(null, project.ItemDefinitions["i"].GetMetadata("m").Predecessor);
-            Assert.AreEqual(null, project.GetItems("j").ElementAt(0).GetMetadata("m").Predecessor);
+            Assert.Equal(null, project.GetProperty("p").Predecessor);
+            Assert.Equal(null, project.ItemDefinitions["i"].GetMetadata("m").Predecessor);
+            Assert.Equal(null, project.GetItems("j").ElementAt(0).GetMetadata("m").Predecessor);
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1498,7 +1493,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Simple override
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void AllEvaluatedProperties()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -1534,7 +1529,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             // All those properties which aren't defined in any file. Examples are global properties, environment properties, etc.
             IEnumerable<ProjectProperty> nonImportedProperties = project.Properties.Where(property => property.Xml == null);
 
-            Assert.AreEqual(allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates.Count, nonImportedProperties.Count());
+            Assert.Equal(allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates.Count, nonImportedProperties.Count());
 
             // Now check and make sure they all match.  If we get through the entire foreach without triggering an Assert.Fail(), then 
             // they do. 
@@ -1544,35 +1539,35 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 if (!allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates.TryGetValue(property.Name, out propertyFromAllEvaluated))
                 {
-                    Assert.Fail(String.Format("project.Properties contained property {0}, but AllEvaluatedProperties did not.", property.Name));
+                    Assert.True(false, String.Format("project.Properties contained property {0}, but AllEvaluatedProperties did not.", property.Name));
                 }
                 else if (!property.Equals(propertyFromAllEvaluated))
                 {
-                    Assert.Fail(String.Format("The properties in project.Properties and AllEvaluatedProperties for property {0} were different.", property.Name));
+                    Assert.True(false, String.Format("The properties in project.Properties and AllEvaluatedProperties for property {0} were different.", property.Name));
                 }
             }
 
             // These are the properties which are defined in some file.
             IEnumerable<ProjectProperty> restOfAllEvaluatedProperties = project.AllEvaluatedProperties.SkipWhile(property => property.Xml == null);
 
-            Assert.AreEqual(4, restOfAllEvaluatedProperties.Count());
-            Assert.AreEqual("1", restOfAllEvaluatedProperties.ElementAt(0).EvaluatedValue);
-            Assert.AreEqual("2", restOfAllEvaluatedProperties.ElementAt(1).EvaluatedValue);
-            Assert.AreEqual("2;2", restOfAllEvaluatedProperties.ElementAt(2).EvaluatedValue);
-            Assert.AreEqual("4", restOfAllEvaluatedProperties.ElementAt(3).EvaluatedValue);
+            Assert.Equal(4, restOfAllEvaluatedProperties.Count());
+            Assert.Equal("1", restOfAllEvaluatedProperties.ElementAt(0).EvaluatedValue);
+            Assert.Equal("2", restOfAllEvaluatedProperties.ElementAt(1).EvaluatedValue);
+            Assert.Equal("2;2", restOfAllEvaluatedProperties.ElementAt(2).EvaluatedValue);
+            Assert.Equal("4", restOfAllEvaluatedProperties.ElementAt(3).EvaluatedValue);
 
             // Verify lists reset on reevaluation
             project.MarkDirty();
             project.ReevaluateIfNecessary();
 
             restOfAllEvaluatedProperties = project.AllEvaluatedProperties.SkipWhile(property => property.Xml == null);
-            Assert.AreEqual(4, restOfAllEvaluatedProperties.Count());
+            Assert.Equal(4, restOfAllEvaluatedProperties.Count());
         }
 
         /// <summary>
         /// All evaluated items
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void AllEvaluatedItems()
         {
             string file = null;
@@ -1625,28 +1620,28 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 Project project = new Project(XmlReader.Create(new StringReader(content)));
 
-                Assert.AreEqual(6, project.AllEvaluatedItems.Count());
-                Assert.AreEqual("i1", project.AllEvaluatedItems.ElementAt(0).EvaluatedInclude);
-                Assert.AreEqual(String.Empty, project.AllEvaluatedItems.ElementAt(0).GetMetadataValue("m"));
-                Assert.AreEqual("j1", project.AllEvaluatedItems.ElementAt(1).EvaluatedInclude);
-                Assert.AreEqual("m1", project.AllEvaluatedItems.ElementAt(1).GetMetadataValue("m"));
-                Assert.AreEqual("i3", project.AllEvaluatedItems.ElementAt(2).EvaluatedInclude);
-                Assert.AreEqual("i1", project.AllEvaluatedItems.ElementAt(3).EvaluatedInclude);
-                Assert.AreEqual("m2", project.AllEvaluatedItems.ElementAt(3).GetMetadataValue("m"));
-                Assert.AreEqual("i5", project.AllEvaluatedItems.ElementAt(4).EvaluatedInclude);
-                Assert.AreEqual("i10", project.AllEvaluatedItems.ElementAt(5).EvaluatedInclude);
+                Assert.Equal(6, project.AllEvaluatedItems.Count());
+                Assert.Equal("i1", project.AllEvaluatedItems.ElementAt(0).EvaluatedInclude);
+                Assert.Equal(String.Empty, project.AllEvaluatedItems.ElementAt(0).GetMetadataValue("m"));
+                Assert.Equal("j1", project.AllEvaluatedItems.ElementAt(1).EvaluatedInclude);
+                Assert.Equal("m1", project.AllEvaluatedItems.ElementAt(1).GetMetadataValue("m"));
+                Assert.Equal("i3", project.AllEvaluatedItems.ElementAt(2).EvaluatedInclude);
+                Assert.Equal("i1", project.AllEvaluatedItems.ElementAt(3).EvaluatedInclude);
+                Assert.Equal("m2", project.AllEvaluatedItems.ElementAt(3).GetMetadataValue("m"));
+                Assert.Equal("i5", project.AllEvaluatedItems.ElementAt(4).EvaluatedInclude);
+                Assert.Equal("i10", project.AllEvaluatedItems.ElementAt(5).EvaluatedInclude);
 
                 // Adds aren't applied until reevaluation
                 project.AddItem("i", "i6");
                 project.AddItem("i", "i7");
                 project.RemoveItem(project.AllEvaluatedItems.ElementAt(1));
 
-                Assert.AreEqual(6, project.AllEvaluatedItems.Count());
+                Assert.Equal(6, project.AllEvaluatedItems.Count());
 
                 project.MarkDirty();
                 project.ReevaluateIfNecessary();
 
-                Assert.AreEqual(7, project.AllEvaluatedItems.Count());
+                Assert.Equal(7, project.AllEvaluatedItems.Count());
             }
             finally
             {
@@ -1657,7 +1652,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Evaluated properties list and imports
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void AllEvaluatedPropertiesAndImports()
         {
             string file = null;
@@ -1696,7 +1691,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 // All those properties which aren't defined in any file. Examples are global properties, environment properties, etc.
                 IEnumerable<ProjectProperty> nonImportedProperties = project.Properties.Where(property => property.Xml == null);
 
-                Assert.AreEqual(allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates.Count, nonImportedProperties.Count());
+                Assert.Equal(allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates.Count, nonImportedProperties.Count());
 
                 // Now check and make sure they all match.  If we get through the entire foreach without triggering an Assert.Fail(), then 
                 // they do. 
@@ -1706,21 +1701,21 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                     if (!allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates.TryGetValue(property.Name, out propertyFromAllEvaluated))
                     {
-                        Assert.Fail(String.Format("project.Properties contained property {0}, but AllEvaluatedProperties did not.", property.Name));
+                        Assert.True(false, String.Format("project.Properties contained property {0}, but AllEvaluatedProperties did not.", property.Name));
                     }
                     else if (!property.Equals(propertyFromAllEvaluated))
                     {
-                        Assert.Fail(String.Format("The properties in project.Properties and AllEvaluatedProperties for property {0} were different.", property.Name));
+                        Assert.True(false, String.Format("The properties in project.Properties and AllEvaluatedProperties for property {0} were different.", property.Name));
                     }
                 }
 
                 // These are the properties which are defined in some file.
                 IEnumerable<ProjectProperty> restOfAllEvaluatedProperties = project.AllEvaluatedProperties.SkipWhile(property => property.Xml == null);
 
-                Assert.AreEqual(3, restOfAllEvaluatedProperties.Count());
-                Assert.AreEqual("1", restOfAllEvaluatedProperties.ElementAt(0).EvaluatedValue);
-                Assert.AreEqual("2", restOfAllEvaluatedProperties.ElementAt(1).EvaluatedValue);
-                Assert.AreEqual("3", restOfAllEvaluatedProperties.ElementAt(2).EvaluatedValue);
+                Assert.Equal(3, restOfAllEvaluatedProperties.Count());
+                Assert.Equal("1", restOfAllEvaluatedProperties.ElementAt(0).EvaluatedValue);
+                Assert.Equal("2", restOfAllEvaluatedProperties.ElementAt(1).EvaluatedValue);
+                Assert.Equal("3", restOfAllEvaluatedProperties.ElementAt(2).EvaluatedValue);
             }
             finally
             {
@@ -1731,7 +1726,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// New properties do not appear in the evaluated properties list until reevaluation
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void AllEvaluatedPropertiesSetProperty()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -1745,17 +1740,17 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             ProjectProperty property = project.SetProperty("p", "1");
 
-            Assert.AreEqual(initial, project.AllEvaluatedProperties.Count());
+            Assert.Equal(initial, project.AllEvaluatedProperties.Count());
 
             project.ReevaluateIfNecessary();
 
-            Assert.AreEqual(initial + 1, project.AllEvaluatedProperties.Count());
+            Assert.Equal(initial + 1, project.AllEvaluatedProperties.Count());
         }
 
         /// <summary>
         /// Two item definitions
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void AllEvaluatedItemDefinitionMetadata()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -1777,19 +1772,19 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Project project = new Project(XmlReader.Create(new StringReader(content)));
 
-            Assert.AreEqual(4, project.AllEvaluatedItemDefinitionMetadata.Count());
+            Assert.Equal(4, project.AllEvaluatedItemDefinitionMetadata.Count());
 
-            Assert.AreEqual("2", project.AllEvaluatedItemDefinitionMetadata.ElementAt(1).EvaluatedValue);
-            Assert.AreEqual("1;2", project.AllEvaluatedItemDefinitionMetadata.ElementAt(3).EvaluatedValue);
+            Assert.Equal("2", project.AllEvaluatedItemDefinitionMetadata.ElementAt(1).EvaluatedValue);
+            Assert.Equal("1;2", project.AllEvaluatedItemDefinitionMetadata.ElementAt(3).EvaluatedValue);
 
             // Verify lists are cleared on reevaluation
-            Assert.AreEqual(4, project.AllEvaluatedItemDefinitionMetadata.Count());
+            Assert.Equal(4, project.AllEvaluatedItemDefinitionMetadata.Count());
         }
 
         /// <summary>
         /// Item's metadata does not appear in AllEvaluatedItemDefinitionMetadata
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void AllEvaluatedItemDefinitionItem()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -1803,13 +1798,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Project project = new Project(XmlReader.Create(new StringReader(content)));
 
-            Assert.AreEqual(0, project.AllEvaluatedItemDefinitionMetadata.Count());
+            Assert.Equal(0, project.AllEvaluatedItemDefinitionMetadata.Count());
         }
 
         /// <summary>
         /// Cases where there are no AllEvaluated* at all
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void AllEvaluatedListsExceptPropertiesAreEmpty()
         {
             Project project = new Project();
@@ -1825,15 +1820,15 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 allProjectPropertiesNoDuplicateNames.Add(property.Name);
             }
 
-            Assert.AreEqual(nonImportedProperties.Count(), allProjectPropertiesNoDuplicateNames.Count);
-            Assert.AreEqual(0, project.AllEvaluatedItemDefinitionMetadata.Count());
-            Assert.AreEqual(0, project.AllEvaluatedItems.Count());
+            Assert.Equal(nonImportedProperties.Count(), allProjectPropertiesNoDuplicateNames.Count);
+            Assert.Equal(0, project.AllEvaluatedItemDefinitionMetadata.Count());
+            Assert.Equal(0, project.AllEvaluatedItems.Count());
         }
 
         /// <summary>
         /// Test imports with wildcards and a relative path.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ImportWildcardsRelative()
         {
             string directory = Path.Combine(Path.GetTempPath(), "ImportWildcardsRelative");
@@ -1845,7 +1840,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Test imports with wildcards and a relative path.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ImportWildcardsRelative2()
         {
             string directory = Path.Combine(Path.GetTempPath(), "ImportWildcardsRelative2");
@@ -1857,7 +1852,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Test imports with wildcards and a relative path.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ImportWildcardsRelative3()
         {
             string directory = Path.Combine(Path.GetTempPath(), "ImportWildcardsRelative3");
@@ -1869,7 +1864,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Test imports with wildcards and a full path
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ImportWildcardsFullPath()
         {
             string directory = Path.Combine(Path.GetTempPath(), "ImportWildcardsFullPath");
@@ -1886,7 +1881,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Don't crash on a particular bad conditional.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void BadConditional()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -1903,14 +1898,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
             instance.Build(loggerList);
 
             // Expect an error from the bad condition
-            Assert.IsTrue(mockLogger.ErrorCount == 1);
+            Assert.Equal(1, mockLogger.ErrorCount);
             mockLogger.AssertLogContains("MSB4092");
         }
 
         /// <summary>
         /// Default targets with empty entries doesn't break
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DefaultTargetsWithBlanks()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -1924,15 +1919,15 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Project project = new Project(XmlReader.Create(new StringReader(content)));
             ProjectInstance instance = project.CreateProjectInstance();
-            Assert.AreEqual(instance.DefaultTargets.Count, 2);
-            Assert.AreEqual(instance.DefaultTargets[0], "t");
-            Assert.AreEqual(instance.DefaultTargets[1], "q");
+            Assert.Equal(instance.DefaultTargets.Count, 2);
+            Assert.Equal(instance.DefaultTargets[0], "t");
+            Assert.Equal(instance.DefaultTargets[1], "q");
         }
 
         /// <summary>
         /// Initial targets with empty entries doesn't break
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void InitialTargetsWithBlanks()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -1947,16 +1942,16 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Project project = new Project(XmlReader.Create(new StringReader(content)));
             ProjectInstance instance = project.CreateProjectInstance();
-            Assert.AreEqual(instance.InitialTargets.Count, 2);
-            Assert.AreEqual(instance.InitialTargets[0], "t");
-            Assert.AreEqual(instance.InitialTargets[1], "q");
+            Assert.Equal(instance.InitialTargets.Count, 2);
+            Assert.Equal(instance.InitialTargets[0], "t");
+            Assert.Equal(instance.InitialTargets[1], "q");
         }
 
         /// <summary>
         /// Test that the default value for $(MSBuildExtensionsPath) points to "c:\program files\msbuild" in a 64-bit process
         /// or on a 32-bit machine and "c:\program files (x86)\msbuild" in a 32-bit process on a 64-bit machine. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MSBuildExtensionsPathDefault_Legacy()
         {
             string specialPropertyName = "MSBuildExtensionsPath";
@@ -1978,7 +1973,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 // Need to create a new project collection object in order to pick up the new environment variables.
                 Project project = new Project(new ProjectCollection());
 
-                Assert.AreEqual(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + @"\MSBuild", project.GetPropertyValue(specialPropertyName));
+                Assert.Equal(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + @"\MSBuild", project.GetPropertyValue(specialPropertyName));
             }
             finally
             {
@@ -1995,7 +1990,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Test that the default value for $(MSBuildExtensionsPath) points to the 32-bit Program Files always 
         /// (ie. it should have the same value as MSBuildExtensionsPath32). 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MSBuildExtensionsPathDefault()
         {
             string specialPropertyName = "MSBuildExtensionsPath";
@@ -2020,7 +2015,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 // Need to create a new project collection object in order to pick up the new environment variables.
                 Project project = new Project(new ProjectCollection());
 
-                Assert.AreEqual(project.GetPropertyValue(specialPropertyName32), project.GetPropertyValue(specialPropertyName));
+                Assert.Equal(project.GetPropertyValue(specialPropertyName32), project.GetPropertyValue(specialPropertyName));
             }
             finally
             {
@@ -2038,7 +2033,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Test that if I set an environment variable called "MSBuildExtensionPath", that my env var
         /// should win over whatever MSBuild thinks the default is.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MSBuildExtensionsPathWithEnvironmentOverride()
         {
             // Save the old copy of the MSBuildExtensionsPath, so we can restore it when the unit test is done.
@@ -2053,7 +2048,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 // Need to create a new project collection object in order to pick up the new environment variables.
                 Project project = new Project(new ProjectCollection());
 
-                Assert.AreEqual(@"c:\foo\bar", project.GetPropertyValue("MSBuildExtensionsPath"));
+                Assert.Equal(@"c:\foo\bar", project.GetPropertyValue("MSBuildExtensionsPath"));
             }
             finally
             {
@@ -2065,7 +2060,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Test that if I set a global property called "MSBuildExtensionPath", that my global property
         /// should win over whatever MSBuild thinks the default is.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MSBuildExtensionsPathWithGlobalOverride()
         {
             Project project = new Project(new ProjectCollection());
@@ -2075,14 +2070,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
             project.SetGlobalProperty("MSBuildExtensionsPath", @"c:\devdiv\vscore\msbuild");
             project.ReevaluateIfNecessary();
 
-            Assert.AreEqual(@"c:\devdiv\vscore\msbuild", project.GetPropertyValue("MSBuildExtensionsPath"));
+            Assert.Equal(@"c:\devdiv\vscore\msbuild", project.GetPropertyValue("MSBuildExtensionsPath"));
         }
 
         /// <summary>
         /// The default value for $(MSBuildExtensionsPath32) should point to "c:\program files (x86)\msbuild" on a 64 bit machine. 
         /// We can't test that unless we are on a 64 bit box, but this test will work on either
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MSBuildExtensionsPath32Default()
         {
             // On a 64 bit machine we always want to use the program files x86.  If we are running as a 64 bit process then this variable will be set correctly
@@ -2101,7 +2096,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Environment.SetEnvironmentVariable("MSBuildExtensionsPath32", null);
                 Project project = new Project(new ProjectCollection());
 
-                Assert.AreEqual(expected + @"\MSBuild", project.GetPropertyValue("MSBuildExtensionsPath32"));
+                Assert.Equal(expected + @"\MSBuild", project.GetPropertyValue("MSBuildExtensionsPath32"));
             }
             finally
             {
@@ -2113,7 +2108,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Set an env var called MSBuildExtensionsPath32 to some value, for the purpose
         /// of seeing whether our value wins.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MSBuildExtensionsPath32WithEnvironmentOverride()
         {
             string originalMSBuildExtensionsPath32Value = Environment.GetEnvironmentVariable("MSBuildExtensionsPath32");
@@ -2123,7 +2118,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Environment.SetEnvironmentVariable("MSBuildExtensionsPath32", @"c:\devdiv\vscore\msbuild");
                 Project project = new Project(new ProjectCollection());
                 string msbuildExtensionsPath32Value = project.GetPropertyValue("MSBuildExtensionsPath32");
-                Assert.AreEqual(@"c:\devdiv\vscore\msbuild", msbuildExtensionsPath32Value);
+                Assert.Equal(@"c:\devdiv\vscore\msbuild", msbuildExtensionsPath32Value);
             }
             finally
             {
@@ -2136,14 +2131,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Set a global property called MSBuildExtensionsPath32 to some value, for the purpose
         /// of seeing whether our value wins.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MSBuildExtensionsPath32WithGlobalOverride()
         {
             Project project = new Project(new ProjectCollection());
 
             project.SetGlobalProperty("MSBuildExtensionsPath32", @"c:\devdiv\vscore\msbuild");
             string msbuildExtensionsPath32Value = project.GetPropertyValue("MSBuildExtensionsPath32");
-            Assert.AreEqual(@"c:\devdiv\vscore\msbuild", msbuildExtensionsPath32Value);
+            Assert.Equal(@"c:\devdiv\vscore\msbuild", msbuildExtensionsPath32Value);
         }
 
         /// <summary>
@@ -2151,7 +2146,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// and should be empty on a 32-bit machine. 
         /// We can't test that unless we are on a 64 bit box, but this test will work on either
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MSBuildExtensionsPath64Default()
         {
             string expected = String.Empty;
@@ -2177,14 +2172,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Project project = new Project();
 
-            Assert.AreEqual(expected, project.GetPropertyValue("MSBuildExtensionsPath64"));
+            Assert.Equal(expected, project.GetPropertyValue("MSBuildExtensionsPath64"));
         }
 
         /// <summary>
         /// Set an env var called MSBuildExtensionsPath64 to some value, for the purpose
         /// of seeing whether our value wins.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MSBuildExtensionsPath64WithEnvironmentOverride()
         {
             string originalMSBuildExtensionsPath64Value = Environment.GetEnvironmentVariable("MSBuildExtensionsPath64");
@@ -2194,7 +2189,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Environment.SetEnvironmentVariable("MSBuildExtensionsPath64", @"c:\devdiv\vscore\msbuild");
                 Project project = new Project(new ProjectCollection());
                 string msbuildExtensionsPath64Value = project.GetPropertyValue("MSBuildExtensionsPath64");
-                Assert.AreEqual(@"c:\devdiv\vscore\msbuild", msbuildExtensionsPath64Value);
+                Assert.Equal(@"c:\devdiv\vscore\msbuild", msbuildExtensionsPath64Value);
             }
             finally
             {
@@ -2207,21 +2202,21 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Set a global property called MSBuildExtensionsPath64 to some value, for the purpose
         /// of seeing whether our value wins.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MSBuildExtensionsPath64WithGlobalOverride()
         {
             Project project = new Project(new ProjectCollection());
 
             project.SetGlobalProperty("MSBuildExtensionsPath64", @"c:\devdiv\vscore\msbuild");
             string msbuildExtensionsPath64Value = project.GetPropertyValue("MSBuildExtensionsPath64");
-            Assert.AreEqual(@"c:\devdiv\vscore\msbuild", msbuildExtensionsPath64Value);
+            Assert.Equal(@"c:\devdiv\vscore\msbuild", msbuildExtensionsPath64Value);
         }
 
         /// <summary>
         /// Verify whether LocalAppData property is set by default in msbuild 
         /// with the path of the OS special LocalApplicationData or ApplicationData folders.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LocalAppDataDefault()
         {
             string expected = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
@@ -2232,14 +2227,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Project project = new Project();
 
-            Assert.AreEqual(expected, project.GetPropertyValue("LocalAppData"));
+            Assert.Equal(expected, project.GetPropertyValue("LocalAppData"));
         }
 
         /// <summary>
         /// Set an env var called LocalAppData to some value, for the purpose
         /// of seeing whether our value wins.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LocalAppDataWithEnvironmentOverride()
         {
             string originalLocalAppDataValue = Environment.GetEnvironmentVariable("LocalAppData");
@@ -2249,7 +2244,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Environment.SetEnvironmentVariable("LocalAppData", @"c:\AppData\Local");
                 Project project = new Project(new ProjectCollection());
                 string localAppDataValue = project.GetPropertyValue("LocalAppData");
-                Assert.AreEqual(@"c:\AppData\Local", localAppDataValue);
+                Assert.Equal(@"c:\AppData\Local", localAppDataValue);
             }
             finally
             {
@@ -2262,20 +2257,20 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Set a global property called LocalAppData to some value, for the purpose
         /// of seeing whether our value wins.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LocalAppDataWithGlobalOverride()
         {
             Project project = new Project(new ProjectCollection());
 
             project.SetGlobalProperty("LocalAppData", @"c:\AppData\Local");
             string localAppDataValue = project.GetPropertyValue("LocalAppData");
-            Assert.AreEqual(@"c:\AppData\Local", localAppDataValue);
+            Assert.Equal(@"c:\AppData\Local", localAppDataValue);
         }
 
         /// <summary>
         /// Test standard reserved properties
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReservedProjectProperties()
         {
             string file = @"c:\foo\bar.csproj";
@@ -2283,72 +2278,72 @@ namespace Microsoft.Build.UnitTests.Evaluation
             xml.DefaultTargets = "Build";
             Project project = new Project(xml);
 
-            Assert.AreEqual(@"c:\foo", project.GetPropertyValue("MSBuildProjectDirectory"));
-            Assert.AreEqual(@"foo", project.GetPropertyValue("MSBuildProjectDirectoryNoRoot"));
-            Assert.AreEqual("bar.csproj", project.GetPropertyValue("MSBuildProjectFile"));
-            Assert.AreEqual(".csproj", project.GetPropertyValue("MSBuildProjectExtension"));
-            Assert.AreEqual(@"c:\foo\bar.csproj", project.GetPropertyValue("MSBuildProjectFullPath"));
-            Assert.AreEqual("bar", project.GetPropertyValue("MSBuildProjectName"));
+            Assert.Equal(@"c:\foo", project.GetPropertyValue("MSBuildProjectDirectory"));
+            Assert.Equal(@"foo", project.GetPropertyValue("MSBuildProjectDirectoryNoRoot"));
+            Assert.Equal("bar.csproj", project.GetPropertyValue("MSBuildProjectFile"));
+            Assert.Equal(".csproj", project.GetPropertyValue("MSBuildProjectExtension"));
+            Assert.Equal(@"c:\foo\bar.csproj", project.GetPropertyValue("MSBuildProjectFullPath"));
+            Assert.Equal("bar", project.GetPropertyValue("MSBuildProjectName"));
         }
 
         /// <summary>
         /// Test standard reserved properties
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReservedProjectPropertiesAtRoot()
         {
             string file = @"c:\bar.csproj";
             ProjectRootElement xml = ProjectRootElement.Create(file);
             Project project = new Project(xml);
 
-            Assert.AreEqual(@"c:\", project.GetPropertyValue("MSBuildProjectDirectory"));
-            Assert.AreEqual(String.Empty, project.GetPropertyValue("MSBuildProjectDirectoryNoRoot"));
-            Assert.AreEqual("bar.csproj", project.GetPropertyValue("MSBuildProjectFile"));
-            Assert.AreEqual(".csproj", project.GetPropertyValue("MSBuildProjectExtension"));
-            Assert.AreEqual(@"c:\bar.csproj", project.GetPropertyValue("MSBuildProjectFullPath"));
-            Assert.AreEqual("bar", project.GetPropertyValue("MSBuildProjectName"));
+            Assert.Equal(@"c:\", project.GetPropertyValue("MSBuildProjectDirectory"));
+            Assert.Equal(String.Empty, project.GetPropertyValue("MSBuildProjectDirectoryNoRoot"));
+            Assert.Equal("bar.csproj", project.GetPropertyValue("MSBuildProjectFile"));
+            Assert.Equal(".csproj", project.GetPropertyValue("MSBuildProjectExtension"));
+            Assert.Equal(@"c:\bar.csproj", project.GetPropertyValue("MSBuildProjectFullPath"));
+            Assert.Equal("bar", project.GetPropertyValue("MSBuildProjectName"));
         }
 
         /// <summary>
         /// Test standard reserved properties on UNC at root
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReservedProjectPropertiesOnUNCRoot()
         {
             string uncFile = @"\\foo\bar\baz.csproj";
             ProjectRootElement xml = ProjectRootElement.Create(uncFile);
             Project project = new Project(xml);
 
-            Assert.AreEqual(@"\\foo\bar", project.GetPropertyValue("MSBuildProjectDirectory"));
-            Assert.AreEqual(String.Empty, project.GetPropertyValue("MSBuildProjectDirectoryNoRoot"));
-            Assert.AreEqual("baz.csproj", project.GetPropertyValue("MSBuildProjectFile"));
-            Assert.AreEqual(".csproj", project.GetPropertyValue("MSBuildProjectExtension"));
-            Assert.AreEqual(@"\\foo\bar\baz.csproj", project.GetPropertyValue("MSBuildProjectFullPath"));
-            Assert.AreEqual("baz", project.GetPropertyValue("MSBuildProjectName"));
+            Assert.Equal(@"\\foo\bar", project.GetPropertyValue("MSBuildProjectDirectory"));
+            Assert.Equal(String.Empty, project.GetPropertyValue("MSBuildProjectDirectoryNoRoot"));
+            Assert.Equal("baz.csproj", project.GetPropertyValue("MSBuildProjectFile"));
+            Assert.Equal(".csproj", project.GetPropertyValue("MSBuildProjectExtension"));
+            Assert.Equal(@"\\foo\bar\baz.csproj", project.GetPropertyValue("MSBuildProjectFullPath"));
+            Assert.Equal("baz", project.GetPropertyValue("MSBuildProjectName"));
         }
 
         /// <summary>
         /// Test standard reserved properties on UNC
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReservedProjectPropertiesOnUNC()
         {
             string uncFile = @"\\foo\bar\baz\biz.csproj";
             ProjectRootElement xml = ProjectRootElement.Create(uncFile);
             Project project = new Project(xml);
 
-            Assert.AreEqual(@"\\foo\bar\baz", project.GetPropertyValue("MSBuildProjectDirectory"));
-            Assert.AreEqual(@"baz", project.GetPropertyValue("MSBuildProjectDirectoryNoRoot"));
-            Assert.AreEqual("biz.csproj", project.GetPropertyValue("MSBuildProjectFile"));
-            Assert.AreEqual(".csproj", project.GetPropertyValue("MSBuildProjectExtension"));
-            Assert.AreEqual(@"\\foo\bar\baz\biz.csproj", project.GetPropertyValue("MSBuildProjectFullPath"));
-            Assert.AreEqual("biz", project.GetPropertyValue("MSBuildProjectName"));
+            Assert.Equal(@"\\foo\bar\baz", project.GetPropertyValue("MSBuildProjectDirectory"));
+            Assert.Equal(@"baz", project.GetPropertyValue("MSBuildProjectDirectoryNoRoot"));
+            Assert.Equal("biz.csproj", project.GetPropertyValue("MSBuildProjectFile"));
+            Assert.Equal(".csproj", project.GetPropertyValue("MSBuildProjectExtension"));
+            Assert.Equal(@"\\foo\bar\baz\biz.csproj", project.GetPropertyValue("MSBuildProjectFullPath"));
+            Assert.Equal("biz", project.GetPropertyValue("MSBuildProjectName"));
         }
 
         /// <summary>
         /// Verify when a node count is passed through on the project collection that the correct number is used to evaluate the msbuildNodeCount
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyMsBuildNodeCountReservedProperty()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -2377,14 +2372,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
-            Assert.AreEqual(true, result);
+            Assert.Equal(true, result);
             logger.AssertLogContains(String.Format("[{0}]", 4));
         }
 
         /// <summary>
         /// Verify when no node count is passed that we evaluate MsBuildNodeCount to 1
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyMsBuildNodeCountReservedPropertyDefault()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -2402,14 +2397,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
-            Assert.AreEqual(true, result);
+            Assert.Equal(true, result);
             logger.AssertLogContains(String.Format("[{0}]", 1));
         }
 
         /// <summary>
         /// Verify that the programfiles32 property points to the correct location
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyMsbuildProgramFiles32ReservedProperty()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -2426,14 +2421,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
-            Assert.AreEqual(true, result);
+            Assert.Equal(true, result);
             logger.AssertLogContains(String.Format("[{0}]", FrameworkLocationHelper.programFiles32));
         }
 
         /// <summary>
         /// Basic verification -- adding the tag to the ProjectRootElement on its own does nothing.  
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyTreatAsLocalPropertyTagDoesNothingIfNoGlobalProperty()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -2450,7 +2445,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
-            Assert.AreEqual(true, result);
+            Assert.Equal(true, result);
             logger.AssertLogContains("[Bar]");
         }
 
@@ -2458,7 +2453,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Basic verification -- with no TreatAsLocalProperty, but with a global property specified, the global property 
         /// overrides the local property.  
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyGlobalPropertyOverridesIfNoTreatAsLocalProperty()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -2479,7 +2474,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
-            Assert.AreEqual(true, result);
+            Assert.Equal(true, result);
             logger.AssertLogContains("[Baz]");
         }
 
@@ -2487,7 +2482,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Basic verification -- with TreatAsLocalProperty, and with a global property specified, the local property 
         /// overrides the global property.  
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyLocalPropertyOverridesIfTreatAsLocalPropertySet()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -2508,7 +2503,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
-            Assert.AreEqual(true, result);
+            Assert.Equal(true, result);
             logger.AssertLogContains("[Bar]");
         }
 
@@ -2516,7 +2511,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Basic verification -- with TreatAsLocalProperty set, but to a different property than is being passed as a global, the 
         /// global property overrides the local property.  
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyGlobalPropertyOverridesNonSpecifiedLocalProperty()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -2537,7 +2532,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
-            Assert.AreEqual(true, result);
+            Assert.Equal(true, result);
             logger.AssertLogContains("[Baz]");
         }
 
@@ -2545,7 +2540,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Basic verification -- with TreatAsLocalProperty set, but to a different property than is being passed as a global, the 
         /// global property overrides the local property.  
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyLocalPropertyInheritsFromOverriddenGlobalProperty()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -2566,7 +2561,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
-            Assert.AreEqual(true, result);
+            Assert.Equal(true, result);
             logger.AssertLogContains("[BazBar]");
         }
 
@@ -2574,7 +2569,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Basic verification -- with TreatAsLocalProperty set, but to a different property than is being passed as a global, the 
         /// global property overrides the local property.  
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyTreatAsLocalPropertySpecificationWorksIfSpecificationIsItselfAProperty()
         {
             string oldEnvironmentValue = Environment.GetEnvironmentVariable("EnvironmentProperty");
@@ -2608,7 +2603,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 MockLogger logger = new MockLogger();
                 bool result = project.Build(logger);
-                Assert.AreEqual(true, result);
+                Assert.Equal(true, result);
                 logger.AssertLogContains(".[Foo1Foo2].");
                 logger.AssertLogContains(".[[Bar1Bar2]].");
                 logger.AssertLogContains(".[[[Baz1Baz2]]].");
@@ -2622,11 +2617,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Basic verification -- setting an invalid TreatAsLocalProperty should be an evaluation error.
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void VerifyInvalidTreatAsLocalProperty()
         {
-            string content = ObjectModelHelpers.CleanupFileContents(@"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = ObjectModelHelpers.CleanupFileContents(@"
                              <Project ToolsVersion=""msbuilddefaulttoolsversion"" TreatAsLocalProperty=""||Bar;Foo"" xmlns='msbuildnamespace'>
                                 <PropertyGroup>
                                     <Foo>Bar</Foo>
@@ -2637,22 +2633,23 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                 </Target>
                               </Project>");
 
-            IDictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            globalProperties.Add("Foo", "Baz");
+                IDictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                globalProperties.Add("Foo", "Baz");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)), globalProperties, null);
+                Project project = new Project(XmlReader.Create(new StringReader(content)), globalProperties, null);
 
-            MockLogger logger = new MockLogger();
-            bool result = project.Build(logger);
+                MockLogger logger = new MockLogger();
+                bool result = project.Build(logger);
 
-            // Should not reach this point. 
-            Assert.Fail();
+                // Should not reach this point. 
+                Assert.True(false);
+            }
+           );
         }
-
         /// <summary>
         /// Basic verification -- whitespace in the TreatAsLocalProperty definition should be trimmed.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyTreatAsLocalPropertyTrimmed()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -2678,7 +2675,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
-            Assert.AreEqual(true, result);
+            Assert.Equal(true, result);
             logger.AssertLogContains(".[BazFoo].");
             logger.AssertLogContains(".[[FooGoo]].");
         }
@@ -2687,7 +2684,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Basic verification -- if there are empty entries in the split of the properties for TreatAsLocalProperty, 
         /// they should be ignored. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyTreatAsLocalPropertyEmptySplits()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -2711,7 +2708,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
-            Assert.AreEqual(true, result);
+            Assert.Equal(true, result);
             logger.AssertLogContains(".[BazGoo].");
             logger.AssertLogContains(".[[FooGoo]].");
         }
@@ -2721,7 +2718,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// value returns the mutable version, looking explicitly at the global properties dictionary still returns 
         /// the original global property value.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyGlobalPropertyRetainsOriginalValue()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -2740,15 +2737,15 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Project project = new Project(XmlReader.Create(new StringReader(content)), globalProperties, null);
 
-            Assert.AreEqual("BazBar", project.GetPropertyValue("Foo"));
-            Assert.AreEqual("Baz", project.GlobalProperties["Foo"]);
+            Assert.Equal("BazBar", project.GetPropertyValue("Foo"));
+            Assert.Equal("Baz", project.GlobalProperties["Foo"]);
         }
 
         /// <summary>
         /// Basic verification -- if TreatAsLocalProperty is modified on the project XML and then the project is 
         /// re-evaluated, it should be re-evaluated in the context of that modified value. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyModificationsToTreatAsLocalPropertyRespected()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -2769,27 +2766,27 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Project project = new Project(XmlReader.Create(new StringReader(content)), globalProperties, null);
 
-            Assert.AreEqual("Foo;Goo", project.Xml.TreatAsLocalProperty);
+            Assert.Equal("Foo;Goo", project.Xml.TreatAsLocalProperty);
 
-            Assert.AreEqual("BazGoo", project.GetPropertyValue("Foo"));
-            Assert.AreEqual("Baz", project.GlobalProperties["Foo"]);
-            Assert.AreEqual("FooGoo", project.GetPropertyValue("Goo"));
-            Assert.AreEqual("Foo", project.GlobalProperties["Goo"]);
+            Assert.Equal("BazGoo", project.GetPropertyValue("Foo"));
+            Assert.Equal("Baz", project.GlobalProperties["Foo"]);
+            Assert.Equal("FooGoo", project.GetPropertyValue("Goo"));
+            Assert.Equal("Foo", project.GlobalProperties["Goo"]);
 
             project.Xml.TreatAsLocalProperty = "Foo";
             project.ReevaluateIfNecessary();
 
-            Assert.AreEqual("BazGoo", project.GetPropertyValue("Foo"));
-            Assert.AreEqual("Baz", project.GlobalProperties["Foo"]);
-            Assert.AreEqual("Foo", project.GetPropertyValue("Goo"));
-            Assert.AreEqual("Foo", project.GlobalProperties["Goo"]);
+            Assert.Equal("BazGoo", project.GetPropertyValue("Foo"));
+            Assert.Equal("Baz", project.GlobalProperties["Foo"]);
+            Assert.Equal("Foo", project.GetPropertyValue("Goo"));
+            Assert.Equal("Foo", project.GlobalProperties["Goo"]);
         }
 
         /// <summary>
         /// Basic verification -- if TreatAsLocalProperty is modified on the project XML and then the project is 
         /// re-evaluated, it should be re-evaluated in the context of that modified value. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyModificationsToGlobalPropertiesRespected()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -2805,27 +2802,27 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Project project = new Project(XmlReader.Create(new StringReader(content)));
 
-            Assert.AreEqual("Bar", project.GetPropertyValue("Foo"));
-            Assert.IsFalse(project.GlobalProperties.ContainsKey("Foo"));
+            Assert.Equal("Bar", project.GetPropertyValue("Foo"));
+            Assert.False(project.GlobalProperties.ContainsKey("Foo"));
 
             project.SetGlobalProperty("Foo", "Baz");
             project.ReevaluateIfNecessary();
 
-            Assert.AreEqual("BazBar", project.GetPropertyValue("Foo"));
-            Assert.AreEqual("Baz", project.GlobalProperties["Foo"]);
+            Assert.Equal("BazBar", project.GetPropertyValue("Foo"));
+            Assert.Equal("Baz", project.GlobalProperties["Foo"]);
 
             project.RemoveGlobalProperty("Foo");
             project.ReevaluateIfNecessary();
 
-            Assert.AreEqual("Bar", project.GetPropertyValue("Foo"));
-            Assert.IsFalse(project.GlobalProperties.ContainsKey("Foo"));
+            Assert.Equal("Bar", project.GetPropertyValue("Foo"));
+            Assert.False(project.GlobalProperties.ContainsKey("Foo"));
         }
 
         /// <summary>
         /// Basic verification -- with TreatAsLocalProperty set to multiple global properties, and with multiple global properties 
         /// passed in, only the ones that are marked TALP are overridable.  
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyOnlySpecifiedPropertiesOverridden()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -2852,7 +2849,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
-            Assert.AreEqual(true, result);
+            Assert.Equal(true, result);
             logger.AssertLogContains(".[Foo2].");
             logger.AssertLogContains(".[[Bar2]].");
             logger.AssertLogContains(".[[[Baz1]]].");
@@ -2862,7 +2859,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// If TreatAsLocalProperty is set in a parent project, that property is still treated as overridable 
         /// when defined in an imported project. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyPropertySetInImportStillOverrides()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"
@@ -2906,7 +2903,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 MockLogger logger = new MockLogger();
                 bool result = project.Build(logger);
-                Assert.AreEqual(true, result);
+                Assert.Equal(true, result);
                 logger.AssertLogContains("[BazBar]");
             }
             finally
@@ -2922,7 +2919,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// If TreatAsLocalProperty is set in an imported project, any instances of that property in the parent 
         /// project before the import are ignored and the global property value is used instead. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyTreatAsLocalPropertyInImportDoesntAffectParentProjectAboveIt()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"
@@ -2967,7 +2964,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 MockLogger logger = new MockLogger();
                 bool result = project.Build(logger);
-                Assert.AreEqual(true, result);
+                Assert.Equal(true, result);
                 logger.AssertLogContains("[Baz]");
             }
             finally
@@ -2983,7 +2980,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// If TreatAsLocalProperty is set in an imported project, any instances of that property in the parent 
         /// project after the import recognize the TreatAsLocalProperty flag and override the global property value. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyTreatAsLocalPropertyInImportAffectsParentProjectBelowIt()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"
@@ -3027,7 +3024,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 MockLogger logger = new MockLogger();
                 bool result = project.Build(logger);
-                Assert.AreEqual(true, result);
+                Assert.Equal(true, result);
                 logger.AssertLogContains("[Bar]");
             }
             finally
@@ -3045,7 +3042,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// override a property until you reach the import that mentions it in its TreatAsLocalProperty 
         /// parameter.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyTreatAsLocalPropertyUnionBetweenImports()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"
@@ -3101,7 +3098,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 MockLogger logger = new MockLogger();
                 bool result = project.Build(logger);
-                Assert.AreEqual(true, result);
+                Assert.Equal(true, result);
                 logger.AssertLogContains(".[Foo3Foo1Foo2].");
                 logger.AssertLogContains(".[[Bar3Bar2]].");
                 logger.AssertLogContains(".[[[Baz3Baz2]]].");
@@ -3119,7 +3116,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// If a property is set to TreatAsLocalProperty in both the parent project and the import, this is 
         /// silently acknowledged.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyDuplicateTreatAsLocalProperty()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"
@@ -3174,7 +3171,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 MockLogger logger = new MockLogger();
                 bool result = project.Build(logger);
-                Assert.AreEqual(true, result);
+                Assert.Equal(true, result);
                 logger.AssertLogContains(".[Foo3Foo1Foo2].");
                 logger.AssertLogContains(".[[Bar3Bar2]].");
                 logger.AssertLogContains(".[[[Baz3Baz2]]].");
@@ -3192,9 +3189,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// If TreatAsLocalProperty is set in a parent project, a project that is P2P'ed to will 
         /// still receive the original value of the global property. 
         /// </summary>
-        [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
+        [Fact]
         public void VerifyGlobalPropertyPassedToP2P()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"
@@ -3239,7 +3234,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 MockLogger logger = new MockLogger();
                 bool result = project.Build(logger);
-                Assert.AreEqual(true, result);
+                Assert.Equal(true, result);
                 logger.AssertLogContains(".[Foo1].");
             }
             finally
@@ -3256,9 +3251,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// passed the property, will get the mutable local value rather than the original value of the 
         /// global property.
         /// </summary>
-        [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
+        [Fact]
         public void VerifyLocalPropertyPropagatesIfExplicitlyPassedToP2P()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"
@@ -3303,7 +3296,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 MockLogger logger = new MockLogger();
                 bool result = project.Build(logger);
-                Assert.AreEqual(true, result);
+                Assert.Equal(true, result);
                 logger.AssertLogContains(".[Foo1Foo2].");
             }
             finally
@@ -3320,7 +3313,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// based on the default sub-toolset version -- base toolset if Dev10 is installed, or lowest (numerically
         /// sorted) toolset if it's not.  
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyDefaultSubToolsetPropertiesAreEvaluated()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVerson");
@@ -3350,7 +3343,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 MockLogger logger = new MockLogger();
                 bool result = project.Build(logger);
-                Assert.AreEqual(true, result);
+                Assert.Equal(true, result);
 
                 if (Toolset.Dev10IsInstalled)
                 {
@@ -3385,7 +3378,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Verify that when we specify an invalid sub-toolset version, we just get the properties from the base 
         /// toolset ... but that invalid version is still reflected as a project property.  
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyNoSubToolsetPropertiesAreEvaluatedWithInvalidSubToolset()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVerson");
@@ -3415,7 +3408,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 MockLogger logger = new MockLogger();
                 bool result = project.Build(logger);
-                Assert.AreEqual(true, result);
+                Assert.Equal(true, result);
 
                 logger.AssertLogContains(".[a1].");
                 logger.AssertLogContains(".[[b1]].");
@@ -3436,7 +3429,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Verify that if a sub-toolset is explicitly specified, its properties are evaluated into the project properly.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyExplicitSubToolsetPropertiesAreEvaluated()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVerson");
@@ -3466,7 +3459,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 MockLogger logger = new MockLogger();
                 bool result = project.Build(logger);
-                Assert.AreEqual(true, result);
+                Assert.Equal(true, result);
 
                 logger.AssertLogContains(".[a3].");
                 logger.AssertLogContains(".[[b1]].");
@@ -3487,7 +3480,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Verify that if a non-existent sub-toolset is specified, we simply ignore it and just use the base toolset properties. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyExplicitNonExistentSubToolsetPropertiesAreEvaluated()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVerson");
@@ -3517,7 +3510,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 MockLogger logger = new MockLogger();
                 bool result = project.Build(logger);
-                Assert.AreEqual(true, result);
+                Assert.Equal(true, result);
 
                 logger.AssertLogContains(".[a1].");
                 logger.AssertLogContains(".[[b1]].");
@@ -3538,7 +3531,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Verify that if there is a conflict between sub-toolset and environment properties, the sub-toolset properties win.  
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifySubToolsetPropertiesOverrideEnvironment()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVerson");
@@ -3575,7 +3568,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 MockLogger logger = new MockLogger();
                 bool result = project.Build(logger);
-                Assert.AreEqual(true, result);
+                Assert.Equal(true, result);
 
                 logger.AssertLogContains(".[a3].");
                 logger.AssertLogContains(".[[b1]].");
@@ -3599,7 +3592,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Verify that if there is a conflict between sub-toolset and global properties, the global properties win.  
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyGlobalPropertiesOverrideSubToolset()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVerson");
@@ -3637,7 +3630,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 MockLogger logger = new MockLogger();
                 bool result = project.Build(logger);
-                Assert.AreEqual(true, result);
+                Assert.Equal(true, result);
 
                 logger.AssertLogContains(".[a3].");
                 logger.AssertLogContains(".[[b1]].");
@@ -3659,7 +3652,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Verify that even if the sub-toolset was set by a global property, it can be overridden from within the project
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifySubToolsetVersionSetByGlobalPropertyStillOverridable()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVerson");
@@ -3695,7 +3688,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 MockLogger logger = new MockLogger();
                 bool result = project.Build(logger);
-                Assert.AreEqual(true, result);
+                Assert.Equal(true, result);
 
                 logger.AssertLogContains(".[a1].");
                 logger.AssertLogContains(".[[b2]].");
@@ -3716,7 +3709,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Verify that if the sub-toolset was set by a global property, it cannot be overridden from within the project
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifySubToolsetVersionSetByConstructorOverridable_OverridesGlobalProperty()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -3746,7 +3739,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
-            Assert.AreEqual(true, result);
+            Assert.Equal(true, result);
 
             logger.AssertLogContains(".[a3].");
             logger.AssertLogContains(".[[b1]].");
@@ -3762,7 +3755,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Verify that if the sub-toolset was set by a global property, it cannot be overridden from within the project
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifySubToolsetVersionSetByConstructorOverridable()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -3789,7 +3782,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
-            Assert.AreEqual(true, result);
+            Assert.Equal(true, result);
 
             logger.AssertLogContains(".[a3].");
             logger.AssertLogContains(".[[b1]].");
@@ -3807,7 +3800,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// We add some invalid DTD code to a MSBuild project, if such code is ever parsed a XmlException will be thrown
         /// If DTD parsing is desabled (desired behavior), no XmlException should be caught
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyDTDProcessingIsDisabled()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(
@@ -3844,7 +3837,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             catch (XmlException)
             {
                 // XmlException thrown when invalid DTD statement is parsed: it means DTD processing was enabled
-                Assert.IsTrue(false);
+                Assert.True(false);
             }
         }
 
@@ -3854,7 +3847,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// This test emulates a scenario where some malicious DTD code could upload user data to a malicious website
         /// If DTD processing is disabled, the server should not receive any connection request.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyDTDProcessingIsDisabled2()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -3899,14 +3892,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Thread.Sleep(500);
 
                 // Expect server to be alive and hung up unless a request originating from DTD processing was sent
-                Assert.IsTrue(t.IsAlive);
+                Assert.True(t.IsAlive);
             }
         }
 
         /// <summary>
         /// Verify that Condition Evaluator does reset the cached state when the evaluation throws an exception.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyConditionEvaluatorResetStateOnFailure()
         {
             PropertyDictionary<ProjectPropertyInstance> propertyBag = new PropertyDictionary<ProjectPropertyInstance>();
@@ -3922,11 +3915,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     ParserOptions.AllowAll,
                     expander,
                     ExpanderOptions.ExpandProperties,
-                    Environment.CurrentDirectory,
+                    Directory.GetCurrentDirectory(),
                     MockElementLocation.Instance,
                     null,
                     new BuildEventContext(1, 2, 3, 4));
-                Assert.Fail("Expect exception due to the value of property \"TargetOSFamily\" is not a number.");
+                Assert.True(false, "Expect exception due to the value of property \"TargetOSFamily\" is not a number.");
             }
             catch (InvalidProjectFileException e)
             {
@@ -3935,12 +3928,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             // Correct the property "TargetOSFamily", and then the evaluation should succeed.
             propertyBag.Set(ProjectPropertyInstance.Create("TargetOSFamily", "3"));
-            Assert.IsTrue(ConditionEvaluator.EvaluateCondition(
+            Assert.True(ConditionEvaluator.EvaluateCondition(
                 condition,
                 ParserOptions.AllowAll,
                 expander,
                 ExpanderOptions.ExpandProperties,
-                Environment.CurrentDirectory,
+                Directory.GetCurrentDirectory(),
                 MockElementLocation.Instance,
                 null,
                 new BuildEventContext(1, 2, 3, 4)));
@@ -4078,7 +4071,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 MockLogger logger = new MockLogger();
                 bool result = project.Build(logger);
 
-                Assert.AreEqual(true, result);
+                Assert.Equal(true, result);
 
                 logger.AssertLogContains(new string[] { "[2.targets]", "[3.cpp.targets]", "[1.targets]" });
                 logger.AssertLogDoesntContain("4.nottargets");
@@ -4087,7 +4080,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 result = project.Build("t4");
 
-                Assert.AreEqual(false, result);
+                Assert.Equal(false, result);
             }
             finally
             {

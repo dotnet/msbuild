@@ -29,18 +29,13 @@ namespace Microsoft.Build.Shared
     {
         // A list of possible test runners. If the program running has one of these substrings in the name, we assume
         // this is a test harness.
-        private static readonly string[] s_testRunners = {
-                                                  "NUNIT", "DEVENV", "MSTEST", "VSTEST", "TASKRUNNER", "VSTESTHOST",
-                                                  "QTAGENT32", "CONCURRENT", "RESHARPER", "MDHOST", "TE.PROCESSHOST"
-                                              };
+
 
         // This flag, when set, indicates that we are running tests. Initially assume it's true. It also implies that
         // the currentExecutableOverride is set to a path (that is non-null). Assume this is not initialized when we
         // have the impossible combination of runningTests = false and currentExecutableOverride = null.
-        private static bool s_runningTests = true;
 
         // This is the fake current executable we use in case we are running tests.
-        private static string s_currentExecutableOverride = null;
 
         // MaxPath accounts for the null-terminating character, for example, the maximum path on the D drive is "D:\<256 chars>\0". 
         // See: ndp\clr\src\BCL\System\IO\Path.cs
@@ -52,64 +47,6 @@ namespace Microsoft.Build.Shared
         internal static string cacheDirectory = null;
 
         /// <summary>
-        /// Check if we are running unit tests (under some kind of test runner). If so, set the flag and come up with a
-        /// (potentially) fake executable path. Generally, the path will be used to find the config file, but also to
-        /// start msbuild.exe for remote nodes.
-        /// </summary>
-        private static void GetTestExecutionInfo()
-        {
-            // Get the executable we are running
-            var program = Path.GetFileNameWithoutExtension(Environment.GetCommandLineArgs()[0]);
-
-            // Check if it matches the pattern
-            s_runningTests = program != null &&
-                           s_testRunners.Any(s => program.IndexOf(s, StringComparison.InvariantCultureIgnoreCase) == -1);
-
-            // Does not look like it's a test, but check the process name
-            if (!s_runningTests)
-            {
-                program = Process.GetCurrentProcess().ProcessName;
-                s_runningTests =
-                    s_testRunners.Any(s => program.IndexOf(s, StringComparison.InvariantCultureIgnoreCase) == -1);
-            }
-
-            // Definitely not a test, leave
-            if (!s_runningTests)
-            {
-                s_currentExecutableOverride = null;
-                return;
-            }
-
-            // We are running test harness. Pretend instead that we are running msbuild.exe.
-            // See if the path is provided.
-            s_currentExecutableOverride = Environment.GetEnvironmentVariable("MSBUILD_EXE_PATH");
-
-            if (s_currentExecutableOverride == null)
-            {
-                // Try to find msbuild.exe. Assume it's where the current assembly is
-                var dir = ExecutingAssemblyPath;
-                if (dir == null)
-                {
-                    // Can't get the assembly path, use current directory
-                    dir = Environment.CurrentDirectory;
-                }
-                else
-                {
-                    // Get directory name from the assembly and make sure it does not end with a slash
-                    var path = Path.GetDirectoryName(dir);
-
-                    // The result may be null if we were looking at a drive root. Strange, but keep it
-                    // if it was the drive root
-                    dir = (path ?? dir).TrimEnd(new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar });
-                }
-
-                // The executable is msbuild.exe. This should come up with a valid path to msbuild.exe, but
-                // no need to check it here.
-                s_currentExecutableOverride = Path.Combine(dir, "MSBuild.exe");
-            }
-        }
-
-        /// <summary>
         /// FOR UNIT TESTS ONLY
         /// Clear out the static variable used for the cache directory so that tests that 
         /// modify it can validate their modifications. 
@@ -118,6 +55,9 @@ namespace Microsoft.Build.Shared
         {
             cacheDirectory = null;
         }
+
+        // TODO: assumption on file system case sensitivity: https://github.com/Microsoft/msbuild/issues/781
+        internal static readonly StringComparison PathComparison = StringComparison.OrdinalIgnoreCase;
 
         /// <summary>
         /// Retrieves the MSBuild runtime cache directory
@@ -390,7 +330,7 @@ namespace Microsoft.Build.Shared
                        // is available here - we don't want managed apps mucking 
                        // with this for security reasons.
                     */
-                    if (startIndex == finalFullPath.Length || finalFullPath.IndexOf(@"\\?\globalroot", StringComparison.OrdinalIgnoreCase) != -1)
+                    if (startIndex == finalFullPath.Length || finalFullPath.IndexOf(@"\\?\globalroot", PathComparison) != -1)
                     {
                         finalFullPath = Path.GetFullPath(finalFullPath);
                     }
@@ -453,11 +393,6 @@ namespace Microsoft.Build.Shared
         internal const string FileTimeFormat = "yyyy'-'MM'-'dd HH':'mm':'ss'.'fffffff";
 
         /// <summary>
-        /// Cached path to the current exe
-        /// </summary>
-        private static string s_executablePath;
-
-        /// <summary>
         /// Get the currently executing assembly path
         /// </summary>
         internal static string ExecutingAssemblyPath
@@ -475,67 +410,6 @@ namespace Microsoft.Build.Shared
                     ExceptionHandling.DumpExceptionToFile(e);
                     return System.Reflection.Assembly.GetExecutingAssembly().Location;
                 }
-            }
-        }
-
-        /// <summary>
-        /// Name of the current .exe without extension, such as "MSBuild" "Devenv" or "Blend".
-        /// This is much cheaper than calling Process.GetCurrentProcess().ProcessName.
-        /// </summary>
-        internal static string CurrentExecutableName
-        {
-            get
-            {
-                return Path.GetFileNameWithoutExtension(CurrentExecutablePath);
-            }
-        }
-
-        /// <summary>
-        /// Full path to the current exe (for example, msbuild.exe) including the file name
-        /// </summary>
-        internal static string CurrentExecutablePath
-        {
-            get
-            {
-                if (s_executablePath == null)
-                {
-                    s_executablePath = CurrentExecutableOverride;
-                }
-
-                if (s_executablePath == null)
-                {
-                    StringBuilder sb = new StringBuilder(NativeMethodsShared.MAX_PATH);
-                    if (NativeMethodsShared.GetModuleFileName(NativeMethodsShared.NullHandleRef, sb, sb.Capacity) == 0)
-                    {
-                        throw new System.ComponentModel.Win32Exception();
-                    }
-
-                    s_executablePath = sb.ToString();
-                }
-
-                return s_executablePath;
-            }
-        }
-
-        /// <summary>
-        /// Full path to the directory that the current exe (for example, msbuild.exe) is located in
-        /// </summary>
-        internal static string CurrentExecutableDirectory
-        {
-            get
-            {
-                return Path.GetDirectoryName(CurrentExecutablePath);
-            }
-        }
-
-        /// <summary>
-        /// Full path to the current config file (for example, msbuild.exe.config)
-        /// </summary>
-        internal static string CurrentExecutableConfigurationFilePath
-        {
-            get
-            {
-                return String.Concat(CurrentExecutablePath, ".config");
             }
         }
 
@@ -582,17 +456,83 @@ namespace Microsoft.Build.Shared
             {
                 path = NormalizePath(path);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
-                if (ExceptionHandling.NotExpectedException(ex))
-                {
-                    throw;
-                }
-
-                // Otherwise eat it.
             }
 
             return path;
+        }
+
+        /// <summary>
+        /// Compare if two paths, relative to the given currentDirectory are equal.
+        /// Does not throw IO exceptions. See <see cref="GetFullPathNoThrow(string, string)"/>
+        /// </summary>
+        /// <param name="first"></param>
+        /// <param name="second"></param>
+        /// <param name="currentDirectory"></param>
+        /// <returns></returns>
+        internal static bool ComparePathsNoThrow(string first, string second, string currentDirectory)
+        {
+
+            // perf: try comparing the bare strings first
+            if (string.Equals(first, second, PathComparison))
+            {
+                return true;
+            }
+
+            var firstFullPath = NormalizePathForComparisonNoThrow(first, currentDirectory);
+            var secondFullPath = NormalizePathForComparisonNoThrow(second, currentDirectory);
+
+            return string.Equals(firstFullPath, secondFullPath, PathComparison);
+        }
+
+        /// <summary>
+        /// Normalizes a path for path comparison
+        /// Does not throw IO exceptions. See <see cref="GetFullPathNoThrow(string, string)"/>
+        /// 
+        /// </summary>
+        internal static string NormalizePathForComparisonNoThrow(string path, string currentDirectory)
+        {
+            return GetFullPathNoThrow(path, currentDirectory).NormalizeForPathComparison();
+        }
+
+        /// <summary>
+        /// A variation of Path.GetFullPath that will return the input value 
+        /// instead of throwing any IO exception.
+        /// Useful to get a better path for an error message, without the risk of throwing
+        /// if the error message was itself caused by the path being invalid!
+        /// </summary>
+        internal static string GetFullPathNoThrow(string fileSpec, string currentDirectory)
+        {
+            var fullPath = fileSpec;
+
+            // file is invalid, return early to avoid triggering an exception
+            if (IsInvalidPath(fullPath))
+            {
+                return fullPath;
+            }
+
+            try
+            {
+                fullPath = GetFullPath(fileSpec, currentDirectory);
+            }
+            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
+            {
+            }
+
+            return fullPath;
+        }
+
+        private static bool IsInvalidPath(string path)
+        {
+            if (path.IndexOfAny(Path.GetInvalidPathChars()) >= 0)
+            {
+                return true;
+            }
+
+            var filename = Path.GetFileName(path);
+
+            return filename.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0;
         }
 
         /// <summary>
@@ -604,14 +544,8 @@ namespace Microsoft.Build.Shared
             {
                 File.Delete(path);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
-                if (ExceptionHandling.NotExpectedException(ex))
-                {
-                    throw;
-                }
-
-                // Otherwise eat it.
             }
         }
 
@@ -648,14 +582,8 @@ namespace Microsoft.Build.Shared
                         break;
                     }
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
                 {
-                    if (ExceptionHandling.NotExpectedException(ex))
-                    {
-                        throw;
-                    }
-
-                    // Otherwise eat it.
                 }
 
                 if (i + 1 < retryCount) // should not wait for the final iteration since we not gonna check anyway
@@ -676,14 +604,8 @@ namespace Microsoft.Build.Shared
             {
                 result = Path.IsPathRooted(path);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
-                if (ExceptionHandling.NotExpectedException(ex))
-                {
-                    throw;
-                }
-
-                // Otherwise eat it.
                 result = false;
             }
 
@@ -698,7 +620,7 @@ namespace Microsoft.Build.Shared
         /// for directories) was called - but with the advantage that a FileInfo object is returned
         /// that can be queried (e.g., for LastWriteTime) without hitting the disk again.
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="filePath"></param>
         /// <returns>FileInfo around path if it is an existing /file/, else null</returns>
         internal static FileInfo GetFileInfoNoThrow(string filePath)
         {
@@ -710,11 +632,8 @@ namespace Microsoft.Build.Shared
             {
                 fileInfo = new FileInfo(filePath);
             }
-            catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                if (ExceptionHandling.NotExpectedException(e))
-                    throw;
-
                 // Invalid or inaccessible path: treat as if nonexistent file, just as File.Exists does
                 return null;
             }
@@ -798,7 +717,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool IsSolutionFilename(string filename)
         {
-            return (String.Equals(Path.GetExtension(filename), ".sln", StringComparison.OrdinalIgnoreCase));
+            return (String.Equals(Path.GetExtension(filename), ".sln", PathComparison));
         }
 
         /// <summary>
@@ -806,7 +725,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool IsVCProjFilename(string filename)
         {
-            return (String.Equals(Path.GetExtension(filename), ".vcproj", StringComparison.OrdinalIgnoreCase));
+            return (String.Equals(Path.GetExtension(filename), ".vcproj", PathComparison));
         }
 
         /// <summary>
@@ -814,7 +733,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool IsMetaprojectFilename(string filename)
         {
-            return (String.Equals(Path.GetExtension(filename), ".metaproj", StringComparison.OrdinalIgnoreCase));
+            return (String.Equals(Path.GetExtension(filename), ".metaproj", PathComparison));
         }
 
         /// <summary>
@@ -889,7 +808,7 @@ namespace Microsoft.Build.Shared
         {
             // >= not > because MAX_PATH assumes a trailing null
             if (path.Length >= NativeMethodsShared.MAX_PATH ||
-               (!IsRootedNoThrow(path) && ((Environment.CurrentDirectory.Length + path.Length + 1 /* slash */) >= NativeMethodsShared.MAX_PATH)))
+               (!IsRootedNoThrow(path) && ((Directory.GetCurrentDirectory().Length + path.Length + 1 /* slash */) >= NativeMethodsShared.MAX_PATH)))
             {
                 // Attempt to make it shorter -- perhaps there are some \..\ elements
                 path = GetFullPathNoThrow(path);
@@ -899,36 +818,73 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Gets the flag that indicates if we are running in a test harness
+        /// Get the folder N levels above the given. Will stop and return current path when rooted.
         /// </summary>
-        internal static bool RunningTests
+        /// <param name="path">Path to get the folder above.</param>
+        /// <param name="count">Number of levels up to walk.</param>
+        /// <returns>Full path to the folder N levels above the path.</returns>
+        internal static string GetFolderAbove(string path, int count = 1)
         {
-            get
+            if (count < 1)
+                return path;
+
+            var parent = Directory.GetParent(path);
+
+            while (count > 1 && parent?.Parent != null)
             {
-                // Check if initialized and do so if not yet
-                if (s_runningTests && s_currentExecutableOverride == null)
-                {
-                    GetTestExecutionInfo();
-                }
-                return s_runningTests;
+                parent = parent.Parent;
+                count--;
             }
+
+            return parent?.FullName ?? path;
         }
 
         /// <summary>
-        /// Gets a supposed (computed) path for the msbuild.exe if running
-        /// in a test harness. Otherwise returns null.
+        /// Combine multiple paths. Should only be used when compiling against .NET 2.0.
+        /// <remarks>
+        /// Only use in .NET 2.0. Otherwise, use System.IO.Path.Combine(...)
+        /// </remarks>
         /// </summary>
-        private static string CurrentExecutableOverride
+        /// <param name="root">Root path.</param>
+        /// <param name="paths">Paths to concatenate.</param>
+        /// <returns>Combined path.</returns>
+        internal static string CombinePaths(string root, params string[] paths)
         {
-            get
+            ErrorUtilities.VerifyThrowArgumentNull(root, nameof(root));
+            ErrorUtilities.VerifyThrowArgumentNull(paths, nameof(paths));
+
+            return paths.Aggregate(root, Path.Combine);
+        }
+
+        internal static string TrimTrailingSlashes(this string s)
+        {
+            return s.TrimEnd('/', '\\');
+        }
+
+        /// <summary>
+        /// Replace all backward slashes to forward slashes
+        /// </summary>
+        internal static string ToSlash(this string s)
+        {
+            return s.Replace('\\', '/');
+        }
+
+        internal static string NormalizeForPathComparison(this string s) => s.ToSlash().TrimTrailingSlashes();
+
+        internal static bool PathsEqual(string path1, string path2)
+        {
+            var trim1 = path1.TrimTrailingSlashes();
+            var trim2 = path2.TrimTrailingSlashes();
+
+            if (string.Equals(trim1, trim2, PathComparison))
             {
-                // Check if initialized and do so if not yet
-                if (s_runningTests && s_currentExecutableOverride == null)
-                {
-                    GetTestExecutionInfo();
-                }
-                return s_currentExecutableOverride;
+                return true;
             }
+
+            var slash1 = trim1.ToSlash();
+            var slash2 = trim2.ToSlash();
+
+            return string.Equals(slash1, slash2, PathComparison);
         }
     }
 }

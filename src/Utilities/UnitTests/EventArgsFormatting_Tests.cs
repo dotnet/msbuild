@@ -2,102 +2,101 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
     public class EventArgsFormattingTests
     {
-        [TestMethod]
+        [Fact]
         public void NoLineInfoFormatEventMessage()
         {
             // Testing the method in Shared.EventArgsFormatting directly
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
                       "Missing ;", "312", "source.cs", 0, 0, 0, 0, 0);
-            Assert.AreEqual(
+            Assert.Equal(
                       "source.cs : CS error 312: Missing ;", s);
         }
 
         // Valid forms for line/col number patterns:
         // (line) or (line-line) or (line,col) or (line,col-col) or (line,col,line,col)
-        [TestMethod]
+        [Fact]
         public void LineNumberRange()
         {
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
                       "Missing ;", "312", "source.cs", 1, 2, 0, 0, 0);
-            Assert.AreEqual(
+            Assert.Equal(
                       "source.cs(1-2): CS error 312: Missing ;", s);
         }
 
-        [TestMethod]
+        [Fact]
         public void ColumnNumberRange()
         {
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
                       "Missing ;", "312", "source.cs", 0, 0, 1, 2, 0);
-            Assert.AreEqual(
+            Assert.Equal(
                       "source.cs : CS error 312: Missing ;", s);
         }
 
-        [TestMethod]
+        [Fact]
         public void LineAndColumnNumberRange()
         {
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
                       "Missing ;", "312", "source.cs", 1, 2, 3, 4, 0);
-            Assert.AreEqual(
+            Assert.Equal(
                       "source.cs(1,3,2,4): CS error 312: Missing ;", s);
         }
 
-        [TestMethod]
+        [Fact]
         public void LineAndColumnNumberRange2()
         {
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
                       "Missing ;", "312", "source.cs", 1, 0, 3, 4, 0);
-            Assert.AreEqual(
+            Assert.Equal(
                       "source.cs(1,3-4): CS error 312: Missing ;", s);
         }
 
-        [TestMethod]
+        [Fact]
         public void LineAndColumnNumberRange3()
         {
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
                       "Missing ;", "312", "source.cs", 1, 2, 3, 0, 0);
-            Assert.AreEqual(
+            Assert.Equal(
                       "source.cs(1-2,3): CS error 312: Missing ;", s);
         }
 
-        [TestMethod]
+        [Fact]
         public void LineAndColumnNumberRange4()
         {
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
                       "Missing ;", "312", "source.cs", 1, 2, 0, 3, 0);
-            Assert.AreEqual(
+            Assert.Equal(
                       "source.cs(1-2): CS error 312: Missing ;", s);
         }
 
-        [TestMethod]
+        [Fact]
         public void LineAndColumnNumberRange5()
         {
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
                       "Missing ;", "312", "source.cs", 1, 0, 2, 0, 0);
-            Assert.AreEqual(
+            Assert.Equal(
                       "source.cs(1,2): CS error 312: Missing ;", s);
         }
 
-        [TestMethod]
+        [Fact]
         public void BasicFormatEventMessage()
         {
             // Testing the method in Shared.EventArgsFormatting directly
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
                       "Missing ;", "312", "source.cs", 42, 0, 0, 0, 0);
-            Assert.AreEqual(
+            Assert.Equal(
                       "source.cs(42): CS error 312: Missing ;", s);
         }
 
-        [TestMethod]
+        [Fact]
         public void EscapeCarriageReturnMessages()
         {
             BuildErrorEventArgs error = new BuildErrorEventArgs("CS", "312", "source.cs", 42, 0, 0, 0, "message\r Hello", "help", "sender");
@@ -109,24 +108,24 @@ namespace Microsoft.Build.UnitTests
             string errorString2 = EventArgsFormatting.FormatEventMessage(error, false);
             string warningString2 = EventArgsFormatting.FormatEventMessage(warning, false);
 
-            Assert.AreEqual("source.cs(42): CS error 312: message\\r Hello", errorString);
-            Assert.AreEqual("source.cs(42): CS warning 312: message\\r Hello", warningString);
+            Assert.Equal("source.cs(42): CS error 312: message\\r Hello", errorString);
+            Assert.Equal("source.cs(42): CS warning 312: message\\r Hello", warningString);
 
-            Assert.AreEqual("source.cs(42): CS error 312: message\r Hello", errorString2);
-            Assert.AreEqual("source.cs(42): CS warning 312: message\r Hello", warningString2);
+            Assert.Equal("source.cs(42): CS error 312: message\r Hello", errorString2);
+            Assert.Equal("source.cs(42): CS warning 312: message\r Hello", warningString2);
         }
 
-        [TestMethod]
+        [Fact]
         public void ExactLocationFormatEventMessage()
         {
             // Testing the method in Shared.EventArgsFormatting directly
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
                       "Missing ;", "312", "source.cs", 233, 236, 4, 8, 0);
-            Assert.AreEqual(
+            Assert.Equal(
                     "source.cs(233,4,236,8): CS error 312: Missing ;", s);
         }
 
-        [TestMethod]
+        [Fact]
         public void NullMessage()
         {
             // Testing the method in Shared.EventArgsFormatting directly
@@ -139,7 +138,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Mainline test FormatEventMessage(BuildErrorEvent) 's common case
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void FormatEventMessageOnBEEA()
         {
             MyLogger l = new MyLogger();
@@ -147,14 +146,14 @@ namespace Microsoft.Build.UnitTests
                         "31415", "file.vb", 42, 0, 0, 0,
                         "Some long message", "help", "sender");
             string s = l.FormatErrorEvent(beea);
-            Assert.AreEqual(
+            Assert.Equal(
                "file.vb(42): VBC error 31415: Some long message", s);
         }
 
         /// <summary>
         /// Mainline test FormatEventMessage(BuildWarningEvent) 's common case
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void FormatEventMessageOnBWEA()
         {
             MyLogger l = new MyLogger();
@@ -162,32 +161,37 @@ namespace Microsoft.Build.UnitTests
                         "31415", "file.vb", 42, 0, 0, 0,
                         "Some long message", "help", "sender");
             string s = l.FormatWarningEvent(bwea);
-            Assert.AreEqual(
+            Assert.Equal(
                "file.vb(42): VBC warning 31415: Some long message", s);
         }
 
         /// <summary>
         /// Check null handling
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Fact]
         public void FormatEventMessageOnNullBEEA()
         {
-            MyLogger l = new MyLogger();
-            BuildErrorEventArgs beea = null;
-            string s = l.FormatErrorEvent(beea);
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                MyLogger l = new MyLogger();
+                BuildErrorEventArgs beea = null;
+                string s = l.FormatErrorEvent(beea);
+            }
+           );
         }
-
         /// <summary>
         /// Check null handling
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Fact]
         public void FormatEventMessageOnNullBWEA()
         {
-            MyLogger l = new MyLogger();
-            BuildWarningEventArgs bwea = null;
-            string s = l.FormatWarningEvent(bwea);
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                MyLogger l = new MyLogger();
+                BuildWarningEventArgs bwea = null;
+                string s = l.FormatWarningEvent(bwea);
+            }
+           );
         }
     }
 

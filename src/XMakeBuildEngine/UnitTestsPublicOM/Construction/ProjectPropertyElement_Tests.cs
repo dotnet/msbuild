@@ -1,6 +1,6 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="ProjectPropertyElement_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // </copyright>
 // <summary>Test the ProjectPropertyElement class.</summary>
 //-----------------------------------------------------------------------
@@ -10,35 +10,33 @@ using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
     /// Tests for the ProjectPropertyElement class
     /// </summary>
-    [TestClass]
     public class ProjectPropertyElement_Tests
     {
         /// <summary>
         /// Read simple property
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReadProperty()
         {
             ProjectPropertyElement property = GetPropertyXml();
 
-            Assert.AreEqual("p", property.Name);
-            Assert.AreEqual("v", property.Value);
-            Assert.AreEqual("c", property.Condition);
+            Assert.Equal("p", property.Name);
+            Assert.Equal("v", property.Value);
+            Assert.Equal("c", property.Condition);
         }
 
         /// <summary>
         /// Read property with children - they are merely part of its value
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReadPropertyWithChildren()
         {
             string content = @"
@@ -53,18 +51,19 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectPropertyGroupElement propertyGroup = (ProjectPropertyGroupElement)Helpers.GetFirst(project.Children);
             ProjectPropertyElement property = Helpers.GetFirst(propertyGroup.Properties);
 
-            Assert.AreEqual("p", property.Name);
-            Assert.AreEqual(@"A<B xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">C<D /></B>E", property.Value);
+            Assert.Equal("p", property.Name);
+            Assert.Equal(@"A<B xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">C<D /></B>E", property.Value);
         }
 
         /// <summary>
         /// Read property with invalid name (but legal xml)
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidName()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <PropertyGroup>
                             <" + "\u03A3" + @"/>
@@ -72,17 +71,19 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Read property with invalid reserved name
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidReservedName()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <PropertyGroup>
                             <PropertyGroup/>
@@ -90,17 +91,19 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Read property with invalid built in name
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidBuiltInName()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <PropertyGroup>
                             <MSBuildProjectFile/>
@@ -108,17 +111,19 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Read property with invalid attribute
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidAttribute()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <PropertyGroup>
                             <p XX='YY'/>
@@ -126,17 +131,19 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Read property with child element
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidChildElement()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <PropertyGroup>
                             <p>
@@ -146,28 +153,29 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Set property value
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetValue()
         {
             ProjectPropertyElement property = GetPropertyXml();
             Helpers.ClearDirtyFlag(property.ContainingProject);
 
             property.Value = "vb";
-            Assert.AreEqual("vb", property.Value);
-            Assert.AreEqual(true, property.ContainingProject.HasUnsavedChanges);
+            Assert.Equal("vb", property.Value);
+            Assert.Equal(true, property.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set property value to the same value it was before.
         /// This should not dirty the project.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetSameValue()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -175,79 +183,83 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Helpers.ClearDirtyFlag(property.ContainingProject);
 
             property.Value = "v1";
-            Assert.AreEqual("v1", property.Value);
-            Assert.AreEqual(false, property.ContainingProject.HasUnsavedChanges);
+            Assert.Equal("v1", property.Value);
+            Assert.Equal(false, property.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Rename
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetName()
         {
             ProjectPropertyElement property = GetPropertyXml();
 
             property.Name = "p2";
-            Assert.AreEqual("p2", property.Name);
-            Assert.AreEqual(true, property.ContainingProject.HasUnsavedChanges);
+            Assert.Equal("p2", property.Name);
+            Assert.Equal(true, property.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Rename to same value should not mark dirty
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetNameSame()
         {
             ProjectPropertyElement property = GetPropertyXml();
             Helpers.ClearDirtyFlag(property.ContainingProject);
 
             property.Name = "p";
-            Assert.AreEqual("p", property.Name);
-            Assert.AreEqual(false, property.ContainingProject.HasUnsavedChanges);
+            Assert.Equal("p", property.Name);
+            Assert.Equal(false, property.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Rename to illegal name
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [Fact]
         public void SetNameIllegal()
         {
-            ProjectPropertyElement property = GetPropertyXml();
+            Assert.Throws<ArgumentException>(() =>
+            {
+                ProjectPropertyElement property = GetPropertyXml();
 
-            property.Name = "ImportGroup";
+                property.Name = "ImportGroup";
+            }
+           );
         }
-
         /// <summary>
         /// Set property value to empty
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetEmptyValue()
         {
             ProjectPropertyElement property = GetPropertyXml();
             Helpers.ClearDirtyFlag(property.ContainingProject);
 
             property.Value = String.Empty;
-            Assert.AreEqual(String.Empty, property.Value);
-            Assert.AreEqual(true, property.ContainingProject.HasUnsavedChanges);
+            Assert.Equal(String.Empty, property.Value);
+            Assert.Equal(true, property.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set property value to null
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Fact]
         public void SetInvalidNullValue()
         {
-            ProjectPropertyElement property = GetPropertyXml();
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                ProjectPropertyElement property = GetPropertyXml();
 
-            property.Value = null;
+                property.Value = null;
+            }
+           );
         }
-
         /// <summary>
         /// Set condition
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetCondition()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -255,8 +267,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Helpers.ClearDirtyFlag(property.ContainingProject);
 
             property.Condition = "c";
-            Assert.AreEqual("c", property.Condition);
-            Assert.AreEqual(true, property.ContainingProject.HasUnsavedChanges);
+            Assert.Equal("c", property.Condition);
+            Assert.Equal(true, property.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>

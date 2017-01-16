@@ -2,10 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
-using System.Diagnostics;
-using System.Resources;
-using System.Reflection;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
@@ -16,183 +12,21 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public class GetFrameworkPath : TaskExtension
     {
-        #region Properties
-
-        // PERF NOTE: We cache these values in statics -- although the code we call does this too,
-        // it still seems to give an advantage perhaps because there is one less string copy.
-        // In a large build, this adds up.
-        // PERF NOTE: We also only find paths we are actually asked for (via <Output> tags)
-
-        private static string s_path;
-        private static string s_version11Path;
-        private static string s_version20Path;
-        private static string s_version30Path;
-        private static string s_version35Path;
-        private static string s_version40Path;
-        private static string s_version45Path;
-        private static string s_version451Path;
-        private static string s_version46Path;
-
-        /// <summary>
-        /// Path to the latest framework, whatever version it happens to be
-        /// </summary>
-        [Output]
-        public string Path
+        static GetFrameworkPath()
         {
-            get
-            {
-                if (s_path == null)
-                {
-                    s_path = ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.VersionLatest);
-                }
-
-                return s_path;
-            }
-
-            set
-            {
-                // Does nothing: backward compat
-                s_path = value;
-            }
+            s_path           = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.VersionLatest));
+            s_version11Path  = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version11));
+            s_version20Path  = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20));
+            s_version30Path  = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version30));
+            s_version35Path  = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version35));
+            s_version40Path  = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version40));
+            s_version45Path  = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version45));
+            s_version451Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version451));
+            s_version452Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version452));
+            s_version46Path  = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version46));
+            s_version461Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version461));
+            s_version462Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version462));
         }
-
-        /// <summary>
-        /// Path to the v1.1 framework, if available
-        /// </summary>
-        [Output]
-        public string FrameworkVersion11Path
-        {
-            get
-            {
-                if (s_version11Path == null)
-                {
-                    s_version11Path = ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version11);
-                }
-
-                return s_version11Path;
-            }
-        }
-
-        /// <summary>
-        /// Path to the v2.0 framework, if available
-        /// </summary>
-        [Output]
-        public string FrameworkVersion20Path
-        {
-            get
-            {
-                if (s_version20Path == null)
-                {
-                    s_version20Path = ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20);
-                }
-
-                return s_version20Path;
-            }
-        }
-
-        /// <summary>
-        /// Path to the v3.0 framework, if available
-        /// </summary>
-        [Output]
-        public string FrameworkVersion30Path
-        {
-            get
-            {
-                if (s_version30Path == null)
-                {
-                    s_version30Path = ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version30);
-                }
-
-                return s_version30Path;
-            }
-        }
-
-        /// <summary>
-        /// Path to the v3.5 framework, if available
-        /// </summary>
-        [Output]
-        public string FrameworkVersion35Path
-        {
-            get
-            {
-                if (s_version35Path == null)
-                {
-                    s_version35Path = ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version35);
-                }
-
-                return s_version35Path;
-            }
-        }
-
-        /// <summary>
-        /// Path to the v4.0 framework, if available
-        /// </summary>
-        [Output]
-        public string FrameworkVersion40Path
-        {
-            get
-            {
-                if (s_version40Path == null)
-                {
-                    s_version40Path = ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version40);
-                }
-
-                return s_version40Path;
-            }
-        }
-
-        /// <summary>
-        /// Path to the v4.5 framework, if available
-        /// </summary>
-        [Output]
-        public string FrameworkVersion45Path
-        {
-            get
-            {
-                if (s_version45Path == null)
-                {
-                    s_version45Path = ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version45);
-                }
-
-                return s_version45Path;
-            }
-        }
-
-        /// <summary>
-        /// Path to the v4.5.1 framework, if available
-        /// </summary>
-        [Output]
-        public string FrameworkVersion451Path
-        {
-            get
-            {
-                if (s_version451Path == null)
-                {
-                    s_version451Path = ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version451);
-                }
-
-                return s_version451Path;
-            }
-        }
-
-        /// <summary>
-        /// Path to the v4.6 framework, if available
-        /// </summary>
-        [Output]
-        public string FrameworkVersion46Path
-        {
-            get
-            {
-                if (s_version46Path == null)
-                {
-                    s_version46Path = ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version46);
-                }
-
-                return s_version46Path;
-            }
-        }
-
-        #endregion
 
         #region ITask Members
 
@@ -203,6 +37,100 @@ namespace Microsoft.Build.Tasks
         {
             return true;
         }
+
+        #endregion
+
+        #region Properties
+
+        // PERF NOTE: We cache these values in statics -- although the code we call does this too,
+        // it still seems to give an advantage perhaps because there is one less string copy.
+        // In a large build, this adds up.
+        // PERF NOTE: We also only find paths we are actually asked for (via <Output> tags)
+
+        private static Lazy<string> s_path;
+        private static Lazy<string> s_version11Path;
+        private static Lazy<string> s_version20Path;
+        private static Lazy<string> s_version30Path;
+        private static Lazy<string> s_version35Path;
+        private static Lazy<string> s_version40Path;
+        private static Lazy<string> s_version45Path;
+        private static Lazy<string> s_version451Path;
+        private static Lazy<string> s_version452Path;
+        private static Lazy<string> s_version46Path;
+        private static Lazy<string> s_version461Path;
+        private static Lazy<string> s_version462Path;
+
+        /// <summary>
+        /// Path to the latest framework, whatever version it happens to be
+        /// </summary>
+        [Output]
+        public string Path => s_path.Value;
+
+        /// <summary>
+        /// Path to the v1.1 framework, if available
+        /// </summary>
+        [Output]
+        public string FrameworkVersion11Path => s_version11Path.Value;
+
+        /// <summary>
+        /// Path to the v2.0 framework, if available
+        /// </summary>
+        [Output]
+        public string FrameworkVersion20Path => s_version20Path.Value;
+
+        /// <summary>
+        /// Path to the v3.0 framework, if available
+        /// </summary>
+        [Output]
+        public string FrameworkVersion30Path => s_version30Path.Value;
+
+        /// <summary>
+        /// Path to the v3.5 framework, if available
+        /// </summary>
+        [Output]
+        public string FrameworkVersion35Path => s_version35Path.Value;
+
+        /// <summary>
+        /// Path to the v4.0 framework, if available
+        /// </summary>
+        [Output]
+        public string FrameworkVersion40Path => s_version40Path.Value;
+
+        /// <summary>
+        /// Path to the v4.5 framework, if available
+        /// </summary>
+        [Output]
+        public string FrameworkVersion45Path => s_version45Path.Value;
+
+        /// <summary>
+        /// Path to the v4.5.1 framework, if available
+        /// </summary>
+        [Output]
+        public string FrameworkVersion451Path => s_version451Path.Value;
+
+        /// <summary>
+        /// Path to the v4.5.2 framework, if available
+        /// </summary>
+        [Output]
+        public string FrameworkVersion452Path => s_version452Path.Value;
+
+        /// <summary>
+        /// Path to the v4.6 framework, if available
+        /// </summary>
+        [Output]
+        public string FrameworkVersion46Path => s_version46Path.Value;
+
+        /// <summary>
+        /// Path to the v4.6.1 framework, if available
+        /// </summary>
+        [Output]
+        public string FrameworkVersion461Path => s_version461Path.Value;
+
+        /// <summary>
+        /// Path to the v4.6.2 framework, if available
+        /// </summary>
+        [Output]
+        public string FrameworkVersion462Path => s_version462Path.Value;
 
         #endregion
     }

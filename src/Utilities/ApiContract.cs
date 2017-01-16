@@ -43,6 +43,11 @@ namespace Microsoft.Build.Utilities
             return String.Equals(elementName, Elements.ContainedApiContracts, StringComparison.Ordinal);
         }
 
+        internal static bool IsVersionedContentElement(string elementName)
+        {
+            return string.Equals(elementName, Elements.VersionedContent, StringComparison.Ordinal);
+        }
+
         /// <summary>
         /// Given an XML element containing API contracts, read out all contracts within that element. 
         /// </summary>
@@ -85,6 +90,11 @@ namespace Microsoft.Build.Utilities
             /// Element representing an individual API contract
             /// </summary>
             public const string ApiContract = "ApiContract";
+
+            /// <summary>
+            /// Element representing a flag to indicate if the SDK content is versioned
+            /// </summary>
+            public const string VersionedContent = "VersionedContent";
         }
 
         /// <summary>

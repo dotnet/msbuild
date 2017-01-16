@@ -255,9 +255,9 @@ namespace System.Deployment.Internal.CodeSigning
                 fixed (byte* pbLicense = licenseXml)
                 {
                     Win32.AXL_SIGNER_INFO signerInfo = new Win32.AXL_SIGNER_INFO();
-                    signerInfo.cbSize = (uint)Marshal.SizeOf(typeof(Win32.AXL_SIGNER_INFO));
+                    signerInfo.cbSize = (uint)Marshal.SizeOf<Win32.AXL_SIGNER_INFO>();
                     Win32.AXL_TIMESTAMPER_INFO timestamperInfo = new Win32.AXL_TIMESTAMPER_INFO();
-                    timestamperInfo.cbSize = (uint)Marshal.SizeOf(typeof(Win32.AXL_TIMESTAMPER_INFO));
+                    timestamperInfo.cbSize = (uint)Marshal.SizeOf<Win32.AXL_TIMESTAMPER_INFO>();
                     Win32.CRYPT_DATA_BLOB licenseBlob = new Win32.CRYPT_DATA_BLOB();
                     IntPtr pvLicense = new IntPtr(pbLicense);
                     licenseBlob.cbData = (uint)licenseXml.Length;
@@ -1415,7 +1415,9 @@ namespace System.Deployment.Internal.CodeSigning
 
             // Add an enveloped and an Exc-C14N transform.
             reference.AddTransform(new XmlDsigEnvelopedSignatureTransform());
-            reference.AddTransform(new XmlLicenseTransform());
+#if (false) // BUGBUG: LTA transform complaining about issuer node not found.
+            reference.AddTransform(new XmlLicenseTransform()); 
+#endif
             reference.AddTransform(new XmlDsigExcC14NTransform());
 
             // Add the reference.

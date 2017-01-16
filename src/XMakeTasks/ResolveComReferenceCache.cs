@@ -28,21 +28,21 @@ namespace Microsoft.Build.Tasks
         /// Key: Component path on disk
         /// Value: DateTime struct
         /// </summary>
-        private Hashtable _componentTimestamps = null;
-        private string _tlbImpLocation = null;
-        private string _axImpLocation = null;
+        private Hashtable componentTimestamps = null;
+        private string tlbImpLocation = null;
+        private string axImpLocation = null;
 
         /// <summary>
         /// indicates whether the cache contents have changed since it's been created
         /// </summary>
         internal bool Dirty
         {
-            get { return _dirty; }
+            get { return dirty; }
         }
 
 
         [NonSerialized]
-        private bool _dirty;
+        private bool dirty;
 
         /// <summary>
         /// Construct.
@@ -52,9 +52,9 @@ namespace Microsoft.Build.Tasks
             ErrorUtilities.VerifyThrowArgumentNull(tlbImpPath, "tlbImpPath");
             ErrorUtilities.VerifyThrowArgumentNull(axImpPath, "axImpPath");
 
-            _tlbImpLocation = tlbImpPath;
-            _axImpLocation = axImpPath;
-            _componentTimestamps = new Hashtable();
+            tlbImpLocation = tlbImpPath;
+            axImpLocation = axImpPath;
+            componentTimestamps = new Hashtable();
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if both paths match what is in the cache, false otherwise</returns>
         internal bool ToolPathsMatchCachePaths(string tlbImpPath, string axImpPath)
         {
-            return (String.Equals(_tlbImpLocation, tlbImpPath, StringComparison.OrdinalIgnoreCase)) && (String.Equals(_axImpLocation, axImpPath, StringComparison.OrdinalIgnoreCase));
+            return (String.Equals(tlbImpLocation, tlbImpPath, StringComparison.OrdinalIgnoreCase)) && (String.Equals(axImpLocation, axImpPath, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
@@ -76,9 +76,9 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                if (_componentTimestamps.ContainsKey(componentPath))
+                if (componentTimestamps.ContainsKey(componentPath))
                 {
-                    return (DateTime)_componentTimestamps[componentPath];
+                    return (DateTime)componentTimestamps[componentPath];
                 }
                 else
                 {
@@ -92,8 +92,8 @@ namespace Microsoft.Build.Tasks
                 // only set the value and dirty the cache if the timestamp doesn't exist yet or is different than the current one
                 if (DateTime.Compare(this[componentPath], value) != 0)
                 {
-                    _componentTimestamps[componentPath] = value;
-                    _dirty = true;
+                    componentTimestamps[componentPath] = value;
+                    dirty = true;
                 }
             }
         }

@@ -7,7 +7,6 @@
 
 using System.Collections.Generic;
 using Microsoft.Build.Execution;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
@@ -16,20 +15,19 @@ using System;
 using Microsoft.Build.Construction;
 using System.IO;
 using Microsoft.Build.Shared;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Evaluation
 {
     /// <summary>
     /// Tests for ProjectRootElementCache
     /// </summary>
-    [TestClass]
-    public class ProjectRootElementCache_Tests
+    public class ProjectRootElementCache_Tests : IDisposable
     {
         /// <summary>
         /// Set up the test
         /// </summary>
-        [TestInitialize]
-        public void SetUp()
+        public ProjectRootElementCache_Tests()
         {
             // Empty the cache
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
@@ -39,8 +37,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// <summary>
         /// Tear down the test
         /// </summary>
-        [TestCleanup]
-        public void TearDown()
+        public void Dispose()
         {
             // Empty the cache
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
@@ -50,39 +47,43 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// <summary>
         /// Verifies that a null entry fails
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void AddNull()
         {
-            ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.Get("c:\\foo", (p, c) => null, true);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.Get("c:\\foo", (p, c) => null, true, false);
+            }
+           );
         }
-
         /// <summary>
         /// Verifies that the delegate cannot return a project with a different path
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void AddUnsavedProject()
         {
-            ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.Get("c:\\foo", (p, c) => ProjectRootElement.Create("c:\\bar"), true);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.Get("c:\\foo", (p, c) => ProjectRootElement.Create("c:\\bar"), true, false);
+            }
+           );
         }
-
         /// <summary>
         /// Tests that an entry added to the cache can be retrieved.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void AddEntry()
         {
             ProjectRootElement projectRootElement = ProjectRootElement.Create("c:\\foo");
-            ProjectRootElement projectRootElement2 = ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.Get("c:\\foo", (p, c) => { throw new InvalidOperationException(); }, true);
+            ProjectRootElement projectRootElement2 = ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.Get("c:\\foo", (p, c) => { throw new InvalidOperationException(); }, true, false);
 
-            Assert.AreSame(projectRootElement, projectRootElement2);
+            Assert.Same(projectRootElement, projectRootElement2);
         }
 
         /// <summary>
         /// Tests that a strong reference is held to a single item
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void AddEntryStrongReference()
         {
             ProjectRootElement projectRootElement = ProjectRootElement.Create("c:\\foo");
@@ -90,74 +91,22 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             projectRootElement = null;
             GC.Collect();
 
-            projectRootElement = ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.Get("c:\\foo", (p, c) => { throw new InvalidOperationException(); }, true);
+            projectRootElement = ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.Get("c:\\foo", (p, c) => { throw new InvalidOperationException(); }, true, false);
 
-            Assert.IsNotNull(projectRootElement);
+            Assert.NotNull(projectRootElement);
 
             ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.DiscardStrongReferences();
             projectRootElement = null;
             GC.Collect();
 
-            Assert.IsNull(ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.TryGet("c:\\foo"));
-        }
-
-        /// <summary>
-        /// Tests that only a limited number of strong references are held
-        /// </summary>
-        [TestMethod]
-        [Ignore] // "This test seems to be flaky depending on when garbage collection happened"
-        public void AddManyEntriesNotAllStrongReferences()
-        {
-            List<string> paths = new List<string>(55);
-            for (int i = 0; i < 55; i++)
-            {
-                paths.Add(Path.Combine("c:\\", i.ToString()));
-            }
-
-            for (int i = 0; i < paths.Count; i++)
-            {
-                ProjectRootElement.Create(paths[i]);
-            }
-
-            GC.Collect();
-
-            // Boost one
-            ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.Get(paths[2], (p, c) => null, true);
-
-            GC.Collect();
-
-            // Should have only indexes 6 through 54 remaining, except #2 which got boosted
-            for (int i = 0; i < 6; i++)
-            {
-                if (i != 2)
-                {
-                    Assert.IsNull(ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.TryGet(paths[i]), "expected " + i + " to not be in cache");
-                }
-            }
-
-            for (int i = 2; i < 55; i++)
-            {
-                if (i > 5 || i == 2)
-                {
-                    Assert.IsNotNull(ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.TryGet(paths[i]));
-                }
-            }
-
-            ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.DiscardStrongReferences();
-
-            GC.Collect();
-
-            for (int i = 0; i < 55; i++)
-            {
-                Assert.IsNull(ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.TryGet(paths[i]));
-            }
+            Assert.Null(ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.TryGet("c:\\foo"));
         }
 
         /// <summary>
         /// Cache should not return a ProjectRootElement if the file it was loaded from has since changed -
         /// if the cache was configured to auto-reload.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void GetProjectRootElementChangedOnDisk1()
         {
             string path = null;
@@ -174,12 +123,12 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
                 cache.AddEntry(xml0);
 
                 ProjectRootElement xml1 = cache.TryGet(path);
-                Assert.AreEqual(true, Object.ReferenceEquals(xml0, xml1));
+                Assert.Equal(true, Object.ReferenceEquals(xml0, xml1));
 
                 File.SetLastWriteTime(path, DateTime.Now + new TimeSpan(1, 0, 0));
 
                 ProjectRootElement xml2 = cache.TryGet(path);
-                Assert.AreEqual(false, Object.ReferenceEquals(xml0, xml2));
+                Assert.Equal(false, Object.ReferenceEquals(xml0, xml2));
             }
             finally
             {
@@ -191,7 +140,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// Cache should return a ProjectRootElement directly even if the file it was loaded from has since changed -
         /// if the cache was configured to NOT auto-reload.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void GetProjectRootElementChangedOnDisk2()
         {
             string path = null;
@@ -208,12 +157,12 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
                 cache.AddEntry(xml0);
 
                 ProjectRootElement xml1 = cache.TryGet(path);
-                Assert.AreEqual(true, Object.ReferenceEquals(xml0, xml1));
+                Assert.Equal(true, Object.ReferenceEquals(xml0, xml1));
 
                 File.SetLastWriteTime(path, DateTime.Now + new TimeSpan(1, 0, 0));
 
                 ProjectRootElement xml2 = cache.TryGet(path);
-                Assert.AreEqual(true, Object.ReferenceEquals(xml0, xml2));
+                Assert.Equal(true, Object.ReferenceEquals(xml0, xml2));
             }
             finally
             {

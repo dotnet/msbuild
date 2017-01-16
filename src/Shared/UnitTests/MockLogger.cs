@@ -11,9 +11,10 @@ using System.Text;
 using System.Xml;
 
 using Microsoft.Build.Framework;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
+using Xunit;
+using Xunit.Abstractions;
 
 
 namespace Microsoft.Build.UnitTests
@@ -45,6 +46,7 @@ namespace Microsoft.Build.UnitTests
         private List<BuildMessageEventArgs> _buildMessageEvents = new List<BuildMessageEventArgs>();
         private List<BuildStartedEventArgs> _buildStartedEvents = new List<BuildStartedEventArgs>();
         private List<BuildFinishedEventArgs> _buildFinishedEvents = new List<BuildFinishedEventArgs>();
+        private ITestOutputHelper _testOutputHelper;
 
         /// <summary>
         /// Should the build finished event be logged in the log file. This is to work around the fact we have different
@@ -280,6 +282,16 @@ namespace Microsoft.Build.UnitTests
         }
         #endregion
 
+        public MockLogger()
+        {
+            _testOutputHelper = null;
+        }
+
+        public MockLogger(ITestOutputHelper testOutputHelper)
+        {
+            _testOutputHelper = testOutputHelper;
+        }
+
         /*
          * Method:  LoggerEventHandler
          *
@@ -290,13 +302,13 @@ namespace Microsoft.Build.UnitTests
         {
             if (eventArgs is BuildWarningEventArgs)
             {
-                BuildWarningEventArgs w = (BuildWarningEventArgs)eventArgs;
+                BuildWarningEventArgs w = (BuildWarningEventArgs) eventArgs;
 
                 // hack: disregard the MTA warning.
                 // need the second condition to pass on ploc builds
                 if (w.Code != "MSB4056" && !w.Message.Contains("MSB4056"))
                 {
-                    _fullLog.AppendFormat("{0}({1},{2}): {3} warning {4}: {5}\r\n",
+                    string logMessage = string.Format("{0}({1},{2}): {3} warning {4}: {5}",
                         w.File,
                         w.LineNumber,
                         w.ColumnNumber,
@@ -304,21 +316,26 @@ namespace Microsoft.Build.UnitTests
                         w.Code,
                         w.Message);
 
+                    _fullLog.AppendLine(logMessage);
+                    _testOutputHelper?.WriteLine(logMessage);
+
                     ++_warningCount;
                     _warnings.Add(w);
                 }
             }
             else if (eventArgs is BuildErrorEventArgs)
             {
-                BuildErrorEventArgs e = (BuildErrorEventArgs)eventArgs;
+                BuildErrorEventArgs e = (BuildErrorEventArgs) eventArgs;
 
-                _fullLog.AppendFormat("{0}({1},{2}): {3} error {4}: {5}\r\n",
+                string logMessage = string.Format("{0}({1},{2}): {3} error {4}: {5}",
                     e.File,
                     e.LineNumber,
                     e.ColumnNumber,
                     e.Subcategory,
                     e.Code,
                     e.Message);
+                _fullLog.AppendLine(logMessage);
+                _testOutputHelper?.WriteLine(logMessage);
 
                 ++_errorCount;
                 _errors.Add(e);
@@ -326,11 +343,12 @@ namespace Microsoft.Build.UnitTests
             else
             {
                 // Log the message unless we are a build finished event and logBuildFinished is set to false.
-                bool logMessage = !(eventArgs is BuildFinishedEventArgs) || (eventArgs is BuildFinishedEventArgs && _logBuildFinishedEvent);
+                bool logMessage = !(eventArgs is BuildFinishedEventArgs) ||
+                                  (eventArgs is BuildFinishedEventArgs && _logBuildFinishedEvent);
                 if (logMessage)
                 {
-                    _fullLog.Append(eventArgs.Message);
-                    _fullLog.Append("\r\n");
+                    _fullLog.AppendLine(eventArgs.Message);
+                    _testOutputHelper?.WriteLine(eventArgs.Message);
                 }
             }
 
@@ -403,7 +421,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (s_engineResourceManager == null)
                 {
-                    s_engineResourceManager = new ResourceManager("Microsoft.Build.Resources.Strings", typeof(ProjectCollection).Assembly);
+                    s_engineResourceManager = new ResourceManager("Microsoft.Build.Strings", typeof(ProjectCollection).Assembly);
                 }
 
                 return s_engineResourceManager;
@@ -465,8 +483,15 @@ namespace Microsoft.Build.UnitTests
             }
             if (index != contains.Length)
             {
-                Console.WriteLine(FullLog);
-                Assert.Fail(String.Format(CultureInfo.CurrentCulture, "Log was expected to contain '{0}', but did not.\n=======\n{1}\n=======", contains[index], FullLog));
+                if (_testOutputHelper != null)
+                {
+                    _testOutputHelper.WriteLine(FullLog);
+                }
+                else
+                {
+                    Console.WriteLine(FullLog);
+                }
+                Assert.True(false, String.Format(CultureInfo.CurrentCulture, "Log was expected to contain '{0}', but did not.\n=======\n{1}\n=======", contains[index], FullLog));
             }
         }
 
@@ -478,8 +503,15 @@ namespace Microsoft.Build.UnitTests
         {
             if (FullLog.Contains(contains))
             {
-                Console.WriteLine(FullLog);
-                Assert.Fail(String.Format("Log was not expected to contain '{0}', but did.", contains));
+                if (_testOutputHelper != null)
+                {
+                    _testOutputHelper.WriteLine(FullLog);
+                }
+                else
+                {
+                    Console.WriteLine(FullLog);
+                }
+                Assert.True(false, String.Format("Log was not expected to contain '{0}', but did.", contains));
             }
         }
 
@@ -488,7 +520,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         internal void AssertNoErrors()
         {
-            Assert.AreEqual(0, _errorCount);
+            Assert.Equal(0, _errorCount);
         }
 
         /// <summary>
@@ -496,7 +528,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         internal void AssertNoWarnings()
         {
-            Assert.AreEqual(0, _warningCount);
+            Assert.Equal(0, _warningCount);
         }
     }
 }

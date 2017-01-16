@@ -8,30 +8,19 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Evaluation;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
-    [TestClass]
     public class FullyQualifiedBuildRequest_Tests
     {
-        [TestInitialize]
-        public void SetUp()
-        {
-        }
-
-        [TestCleanup]
-        public void TearDown()
-        {
-        }
-
-        [TestMethod]
+        [Fact]
         public void TestConstructorGood()
         {
             BuildRequestData data1 = new BuildRequestData("foo", new Dictionary<string, string>(), "tools", new string[0], null);
@@ -43,30 +32,34 @@ namespace Microsoft.Build.UnitTests.BackEnd
             request = new FullyQualifiedBuildRequest(new BuildRequestConfiguration(data1, "2.0"), new string[0] { }, false);
         }
 
-        [ExpectedException(typeof(ArgumentNullException))]
-        [TestMethod]
+        [Fact]
         public void TestConstructorBad1()
         {
-            FullyQualifiedBuildRequest request = new FullyQualifiedBuildRequest(null, new string[1] { "foo" }, true);
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                FullyQualifiedBuildRequest request = new FullyQualifiedBuildRequest(null, new string[1] { "foo" }, true);
+            }
+           );
         }
-
-        [ExpectedException(typeof(ArgumentNullException))]
-        [TestMethod]
+        [Fact]
         public void TestConstructorBad2()
         {
-            FullyQualifiedBuildRequest request = new FullyQualifiedBuildRequest(new BuildRequestConfiguration(new BuildRequestData("foo", new Dictionary<string, string>(), "tools", new string[0], null), "2.0"), null, true);
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                FullyQualifiedBuildRequest request = new FullyQualifiedBuildRequest(new BuildRequestConfiguration(new BuildRequestData("foo", new Dictionary<string, string>(), "tools", new string[0], null), "2.0"), null, true);
+            }
+           );
         }
-
-        [TestMethod]
+        [Fact]
         public void TestProperties()
         {
             BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "tools", new string[0], null);
             BuildRequestConfiguration config = new BuildRequestConfiguration(data, "2.0");
             FullyQualifiedBuildRequest request = new FullyQualifiedBuildRequest(config, new string[1] { "foo" }, true);
-            Assert.AreEqual(request.Config, config);
-            Assert.AreEqual(request.Targets.Length, 1);
-            Assert.AreEqual(request.Targets[0], "foo");
-            Assert.AreEqual(request.ResultsNeeded, true);
+            Assert.Equal(request.Config, config);
+            Assert.Equal(request.Targets.Length, 1);
+            Assert.Equal(request.Targets[0], "foo");
+            Assert.Equal(request.ResultsNeeded, true);
         }
     }
 }

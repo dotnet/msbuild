@@ -1,6 +1,6 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="ProjectTaskInstance_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // </copyright>
 // <summary>Tests for the ProjectTaskInstance class.</summary>
 //-----------------------------------------------------------------------
@@ -10,33 +10,31 @@ using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
     /// <summary>
     /// Tests for ProjectTaskInstance
     /// </summary>
-    [TestClass]
     public class ProjectTaskInstance_Tests
     {
         /// <summary>
         /// Test accessors
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void Accessors()
         {
             var task = GetSampleTaskInstance();
 
-            Assert.AreEqual("t1", task.Name);
-            Assert.AreEqual("c", task.Condition);
-            Assert.AreEqual("coe", task.ContinueOnError);
+            Assert.Equal("t1", task.Name);
+            Assert.Equal("c", task.Condition);
+            Assert.Equal("coe", task.ContinueOnError);
 
             var parameters = task.Parameters;
-            Assert.AreEqual(2, parameters.Count);
-            Assert.AreEqual("a1", parameters["a"]);
-            Assert.AreEqual("b1", parameters["b"]);
+            Assert.Equal(2, parameters.Count);
+            Assert.Equal("a1", parameters["a"]);
+            Assert.Equal("b1", parameters["b"]);
         }
 
         /// <summary>
@@ -45,12 +43,12 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// of array type, an empty array is set on the task class.
         /// Therefore empty task parameters should be returned by the parameter list.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EmptyParameter()
         {
             var task = GetTaskInstance(@"<t1 a=''/>");
 
-            Assert.AreEqual(1, task.Parameters.Count);
+            Assert.Equal(1, task.Parameters.Count);
         }
 
         /// <summary>

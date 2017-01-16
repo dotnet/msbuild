@@ -20,7 +20,7 @@ namespace Microsoft.Build.Execution
     /// <remarks>
     /// This is an immutable class
     /// </remarks>
-    [DebuggerDisplay("Name={name} Condition={condition} ContinueOnError={continueOnError} MSBuildRuntime={MSBuildRuntime} MSBuildArchitecture={MSBuildArchitecture} #Parameters={parameters.Count} #Outputs={outputs.Count}")]
+    [DebuggerDisplay("Name={_name} Condition={_condition} ContinueOnError={_continueOnError} MSBuildRuntime={MSBuildRuntime} MSBuildArchitecture={MSBuildArchitecture} #Parameters={_parameters.Count} #Outputs={_outputs.Count}")]
     public sealed class ProjectTaskInstance : ProjectTargetInstanceChild
     {
         /// <summary>

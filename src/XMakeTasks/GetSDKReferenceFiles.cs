@@ -195,7 +195,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// The targetted SDK version.
+        /// The targeted SDK version.
         /// </summary>
         public string TargetSDKVersion
         {
@@ -690,7 +690,8 @@ namespace Microsoft.Build.Tasks
             {
                 foreach (KeyValuePair<string, List<string>> directoryToFileList in info.DirectoryToFileList)
                 {
-                    if (directoryToFileList.Key.StartsWith(FileUtilities.EnsureNoTrailingSlash(redistFilePath), StringComparison.OrdinalIgnoreCase))
+                    // Add a trailing slash to ensure we don't match the start of a platform (e.g. ...\ARM matching ...\ARM64)
+                    if (FileUtilities.EnsureTrailingSlash(directoryToFileList.Key).StartsWith(FileUtilities.EnsureTrailingSlash(redistFilePath), StringComparison.OrdinalIgnoreCase))
                     {
                         List<string> redistFiles = directoryToFileList.Value;
                         string targetPathRoot = sdkReference.GetMetadata("CopyRedistToSubDirectory");
@@ -979,7 +980,7 @@ namespace Microsoft.Build.Tasks
         private class SDKFilesCache
         {
             /// <summary>
-            ///  Threadsafe queue which contains exceptions throws during cache file reading and writing.
+            ///  Thread-safe queue which contains exceptions throws during cache file reading and writing.
             /// </summary>
             private ConcurrentQueue<string> _exceptionMessages;
 
@@ -1020,18 +1021,13 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             internal SDKInfo LoadAssemblyListFromCacheFile(string sdkIdentity, string sdkRoot)
             {
-                string[] existingCacheFiles = Directory.GetFiles(_cacheFileDirectory, GetCacheFileName(sdkIdentity, sdkRoot, "*"));
+                var cacheFile = Directory.GetFiles(_cacheFileDirectory, GetCacheFileName(sdkIdentity, sdkRoot, "*")).FirstOrDefault();
 
                 try
                 {
-                    if (existingCacheFiles.Length > 0 && File.Exists(existingCacheFiles[0]))
+                    if (!string.IsNullOrEmpty(cacheFile))
                     {
-                        string referencesCacheFile = existingCacheFiles[0];
-                        using (FileStream fs = new FileStream(referencesCacheFile, FileMode.Open))
-                        {
-                            BinaryFormatter formatter = new BinaryFormatter();
-                            return (SDKInfo)formatter.Deserialize(fs);
-                        }
+                        return SDKInfo.Deserialize(cacheFile);
                     }
                 }
                 catch (Exception e)
@@ -1042,7 +1038,7 @@ namespace Microsoft.Build.Tasks
                     }
 
                     // Queue up for later logging, does not matter if the file is deleted or not
-                    _exceptionMessages.Enqueue(ResourceUtilities.FormatResourceString("GetSDKReferenceFiles.ProblemReadingCacheFile", existingCacheFiles.Length > 0 ? String.Empty : existingCacheFiles[0], e.Message));
+                    _exceptionMessages.Enqueue(ResourceUtilities.FormatResourceString("GetSDKReferenceFiles.ProblemReadingCacheFile", cacheFile, e.Message));
                 }
 
                 return null;
@@ -1367,6 +1363,13 @@ namespace Microsoft.Build.Tasks
         [Serializable]
         private class SDKInfo
         {
+            // Current version for serialization. This should be changed when breaking changes
+            // are made to this class.
+            private const byte CurrentSerializationVersion = 1;
+
+            // Version this instance is serialized with.
+            private byte _serializedVersion = CurrentSerializationVersion;
+
             /// <summary>
             /// Constructor
             /// </summary>
@@ -1397,6 +1400,21 @@ namespace Microsoft.Build.Tasks
             /// Hashset
             /// </summary>
             public int Hash { get; private set; }
+
+            public static SDKInfo Deserialize(string cacheFile)
+            {
+                using (FileStream fs = new FileStream(cacheFile, FileMode.Open))
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
+                    var info = (SDKInfo)formatter.Deserialize(fs);
+
+                    // If the serialization versions don't match, don't use the cache
+                    if (info != null && info._serializedVersion != CurrentSerializationVersion)
+                        return null;
+
+                    return info;
+                }
+            }
         }
 
         /// <summary>

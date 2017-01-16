@@ -92,7 +92,7 @@ namespace Microsoft.Build.BackEnd.Logging
 #if (!CLR2COMPATIBILITY)
                             return Assembly.UnsafeLoadFrom(_taskAssemblyFile);
 #else
-                            return Assembly.LoadFrom(taskAssemblyFile);
+                            return Assembly.LoadFrom(_taskAssemblyFile);
 #endif
                         }
                     }

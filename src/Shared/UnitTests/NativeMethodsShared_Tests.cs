@@ -7,13 +7,11 @@ using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Text;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using Microsoft.Build.Shared;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
     public sealed class NativeMethodsShared_Tests
     {
         #region Data
@@ -28,26 +26,26 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Confirms we can find a file on the system path.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void FindFileOnPath()
         {
             string expectedCmdPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe");
             string cmdPath = NativeMethodsShared.FindOnPath("cmd.exe");
 
-            Assert.IsNotNull(cmdPath);
+            Assert.NotNull(cmdPath);
 
             // for the NUnit "Standard Out" tab
             Console.WriteLine("Expected location of \"cmd.exe\": " + expectedCmdPath);
             Console.WriteLine("Found \"cmd.exe\" here: " + cmdPath);
 
-            Assert.AreEqual(0, String.Compare(cmdPath, expectedCmdPath, StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(0, String.Compare(cmdPath, expectedCmdPath, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
         /// Confirms we can find a file on the system path even if the path
         /// to the file is very long.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void FindFileOnPathAfterResizingBuffer()
         {
             int savedMaxPath = NativeMethodsShared.MAX_PATH;
@@ -68,7 +66,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Confirms we cannot find a bogus file on the system path.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DoNotFindFileOnPath()
         {
             string bogusFile = Path.ChangeExtension(Guid.NewGuid().ToString(), ".txt");
@@ -77,14 +75,14 @@ namespace Microsoft.Build.UnitTests
 
             string bogusFilePath = NativeMethodsShared.FindOnPath(bogusFile);
 
-            Assert.IsNull(bogusFilePath);
+            Assert.Null(bogusFilePath);
         }
 
         /// <summary>
         /// Verify that getProcAddress works, bug previously was due to a bug in the attributes used to pinvoke the method
         /// when that bug was in play this test would fail.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestGetProcAddress()
         {
             IntPtr kernel32Dll = NativeMethodsShared.LoadLibrary("kernel32.dll");
@@ -97,18 +95,18 @@ namespace Microsoft.Build.UnitTests
                 }
                 else
                 {
-                    Assert.Fail();
+                    Assert.True(false);
                 }
 
                 // Make sure the pointer passed back for the method is not null
-                Assert.IsTrue(processHandle != NativeMethodsShared.NullIntPtr);
+                Assert.NotEqual(processHandle, NativeMethodsShared.NullIntPtr);
 
                 //Actually call the method
                 GetProcessIdDelegate processIdDelegate = (GetProcessIdDelegate)Marshal.GetDelegateForFunctionPointer(processHandle, typeof(GetProcessIdDelegate));
                 uint processId = processIdDelegate();
 
                 //Make sure the return value is the same as retrieved from the .net methods to make sure everything works
-                Assert.AreEqual((uint)Process.GetCurrentProcess().Id, processId, "Expected the .net processId to match the one from GetCurrentProcessId");
+                Assert.Equal((uint)Process.GetCurrentProcess().Id, processId); // "Expected the .net processId to match the one from GetCurrentProcessId"
             }
             finally
             {
@@ -123,7 +121,7 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that when NativeMethodsShared.GetLastWriteFileUtcTime() is called on a
         /// missing time, DateTime.MinValue is returned.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void GetLastWriteFileUtcTimeReturnsMinValueForMissingFile()
         {
             string nonexistentFile = FileUtilities.GetTemporaryFile();
@@ -131,17 +129,17 @@ namespace Microsoft.Build.UnitTests
             File.Delete(nonexistentFile);
 
             DateTime nonexistentFileTime = NativeMethodsShared.GetLastWriteFileUtcTime(nonexistentFile);
-            Assert.AreEqual(nonexistentFileTime, DateTime.MinValue);
+            Assert.Equal(DateTime.MinValue, nonexistentFileTime);
         }
 
         /// <summary>
         /// Verifies that NativeMethodsShared.SetCurrentDirectory(), when called on a nonexistent
         /// directory, will not set the current directory to that location. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetCurrentDirectoryDoesNotSetNonexistentFolder()
         {
-            string currentDirectory = Environment.CurrentDirectory;
+            string currentDirectory = Directory.GetCurrentDirectory();
             string nonexistentDirectory = currentDirectory + @"foo\bar\baz";
 
             // Make really sure the nonexistent directory doesn't actually exist
@@ -158,28 +156,24 @@ namespace Microsoft.Build.UnitTests
                 }
             }
 
-            if (Directory.Exists(nonexistentDirectory))
+            Assert.False(Directory.Exists(nonexistentDirectory),
+                "Tried 10 times to get a nonexistent directory name and failed -- please try again");
+
+            bool exceptionCaught = false;
+            try
             {
-                Assert.Fail("Directory.Exists(nonexistentDirectory)", "Tried 10 times to get a nonexistent directory name and failed -- please try again");
+                NativeMethodsShared.SetCurrentDirectory(nonexistentDirectory);
             }
-            else
+            catch (Exception e)
             {
-                bool exceptionCaught = false;
-                try
-                {
-                    NativeMethodsShared.SetCurrentDirectory(nonexistentDirectory);
-                }
-                catch (Exception e)
-                {
-                    exceptionCaught = true;
-                    Console.WriteLine(e.Message);
-                }
-                finally
-                {
-                    // verify that the current directory did not change
-                    Assert.IsFalse(exceptionCaught, "SetCurrentDirectory should not throw!");
-                    Assert.AreEqual(currentDirectory, Environment.CurrentDirectory);
-                }
+                exceptionCaught = true;
+                Console.WriteLine(e.Message);
+            }
+            finally
+            {
+                // verify that the current directory did not change
+                Assert.False(exceptionCaught); // "SetCurrentDirectory should not throw!"
+                Assert.Equal(currentDirectory, Directory.GetCurrentDirectory());
             }
         }
 

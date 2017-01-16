@@ -14,7 +14,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
 
-<Project DefaultTargets="Build" InitialTargets="_CheckForInvalidConfigurationAndPlatform" TreatAsLocalProperty="OutDir" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" TreatAsLocalProperty="OutDir" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="'$(MicrosoftCommonPropsHasBeenImported)' != 'true' and Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
 
@@ -146,6 +146,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <_DebugSymbolsProduced Condition="'$(DebugType)'=='none'">false</_DebugSymbolsProduced>
     <_DebugSymbolsProduced Condition="'$(DebugType)'=='pdbonly'">true</_DebugSymbolsProduced>
     <_DebugSymbolsProduced Condition="'$(DebugType)'=='full'">true</_DebugSymbolsProduced>
+    <_DebugSymbolsProduced Condition="'$(DebugType)'=='portable'">true</_DebugSymbolsProduced>
+    <_DebugSymbolsProduced Condition="'$(DebugType)'=='embedded'">false</_DebugSymbolsProduced>
 
     <!-- Whether or not a .xml file is produced. -->
     <_DocumentationFileProduced>true</_DocumentationFileProduced>
@@ -316,9 +318,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <GenerateBindingRedirectsOutputType Condition="'$(OutputType)'=='exe' or '$(OutputType)'=='winexe'">true</GenerateBindingRedirectsOutputType>
   </PropertyGroup>
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(AutoUnifyAssemblyReferences)' == ''">
     <AutoUnifyAssemblyReferences>true</AutoUnifyAssemblyReferences>
     <AutoUnifyAssemblyReferences Condition="'$(GenerateBindingRedirectsOutputType)' == 'true' and '$(AutoGenerateBindingRedirects)' != 'true'">false</AutoUnifyAssemblyReferences>
+  </PropertyGroup>
+  <PropertyGroup>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">obj\</BaseIntermediateOutputPath>
     <BaseIntermediateOutputPath Condition="!HasTrailingSlash('$(BaseIntermediateOutputPath)')">$(BaseIntermediateOutputPath)\</BaseIntermediateOutputPath>
     <CleanFile Condition="'$(CleanFile)'==''">$(MSBuildProjectFile).FileListAbsolute.txt</CleanFile>
@@ -526,6 +530,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <AssemblyFoldersSuffix Condition=" '$(AssemblyFoldersSuffix)' == '' ">AssemblyFoldersEx</AssemblyFoldersSuffix>
     <FrameworkRegistryBase Condition=" '$(FrameworkRegistryBase)' == '' ">Software\Microsoft\$(TargetFrameworkIdentifier)</FrameworkRegistryBase>
     <TargetPlatformRegistryBase Condition="'$(TargetPlatformRegistryBase)' == ''">Software\Microsoft\Microsoft SDKs\$(TargetPlatformIdentifier)</TargetPlatformRegistryBase>
+    <AssemblyFoldersConfigFile Condition="'$(AssemblyFoldersConfigFile)' == ''">$(MSBuildToolsPath)\AssemblyFolders.config</AssemblyFoldersConfigFile>
+    <AssemblyFoldersConfigFileSearchPath Condition="Exists('$(AssemblyFoldersConfigFile)')">{AssemblyFoldersFromConfig:$(AssemblyFoldersConfigFile),$(TargetFrameworkVersion)};</AssemblyFoldersConfigFileSearchPath>
     <!--
         The SearchPaths property is set to find assemblies in the following order:
 
@@ -535,16 +541,18 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             (4) The directory of MSBuild's "target" runtime from GetFrameworkPath.
                 The "target" runtime folder is the folder of the runtime that MSBuild is a part of.
             (5) Registered assembly folders, indicated by {Registry:*,*,*}
-            (6) Legacy registered assembly folders, indicated by {AssemblyFolders}
-            (7) Resolve to the GAC.
-            (8) Treat the reference's Include as if it were a real file name.
-            (9) Look in the application's output folder (like bin\debug)
+            (6) Assembly folders from AssemblyFolders.config file (provided by Visual Studio Dev15+).
+            (7) Legacy registered assembly folders, indicated by {AssemblyFolders}
+            (8) Resolve to the GAC.
+            (9) Treat the reference's Include as if it were a real file name.
+            (10) Look in the application's output folder (like bin\debug)
         -->
     <AssemblySearchPaths Condition=" '$(AssemblySearchPaths)' == ''">
       {CandidateAssemblyFiles};
       $(ReferencePath);
       {HintPathFromItem};
       {TargetFrameworkDirectory};
+      $(AssemblyFoldersConfigFileSearchPath)
       {Registry:$(FrameworkRegistryBase),$(TargetFrameworkVersion),$(AssemblyFoldersSuffix)$(AssemblyFoldersExConditions)};
       {AssemblyFolders};
       {GAC};
@@ -631,7 +639,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PropertyPageSchema Include="$(CommonXamlResourcesDirectory)SpecialFolder.xaml;">
       <Context>File;ProjectSubscriptionService</Context>
     </PropertyPageSchema>
+  </ItemGroup>
 
+  <PropertyGroup>
+    <DefineCommonReferenceSchemas Condition=" '$(DefineCommonReferenceSchemas)' == '' ">$(DefineCommonItemSchemas)</DefineCommonReferenceSchemas>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(DefineCommonReferenceSchemas)' == 'true' ">
     <!-- Assembly references -->
     <PropertyPageSchema Include="$(CommonXamlResourcesDirectory)assemblyreference.xaml">
       <Context>;BrowseObject</Context>
@@ -667,7 +681,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                           AllTargetOutputGroups;
                           VisualStudioWellKnownOutputGroups;
                           SingleFileGenerators;
+                          DeclaredSourceItems;
+                          UserSourceItems;
                            " />
+    <ProjectCapability Condition=" '$(TargetPlatformIdentifier)' == 'Windows' and '$(TargetPlatformVersion)' &lt; 8.0 "
+                       Include="BuildWindowsDesktopTarget" />
   </ItemGroup>
 
   <ItemDefinitionGroup Condition=" '$(DefineExplicitDefaults)' == 'true' ">
@@ -697,12 +715,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
                                         _CheckForInvalidConfigurationAndPlatform
 
-    This target checks for errors in statically defined properties.  It always
-    gets executed before any other target.
+    This target checks for errors in statically defined properties.  By setting BeforeTargets, we try
+    to ensure that the target runs before any build related targets.  
+    If your target requires this check and is running as a BeforeTargets of one of the first targets
+    of $(BuildDependsOn), $(RebuildDependsOn), or $(CleanDependsOn) you will need to set your DependsOn
+    to this target.
     ============================================================
     -->
   <Target
-      Name="_CheckForInvalidConfigurationAndPlatform">
+      Name="_CheckForInvalidConfigurationAndPlatform"
+      BeforeTargets="$(BuildDependsOn);Build;$(RebuildDependsOn);Rebuild;$(CleanDependsOn);Clean">
 
     <PropertyGroup>
       <_InvalidConfigurationMessageText>The OutputPath property is not set for project '$(MSBuildProjectFile)'.  Please check to make sure that you have specified a valid combination of Configuration and Platform for this project.  Configuration='$(_OriginalConfiguration)'  Platform='$(_OriginalPlatform)'.</_InvalidConfigurationMessageText>
@@ -870,12 +892,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Target Name="BuildGenerateSources" DependsOnTargets="BuildGenerateSourcesTraverse;$(BuildGenerateSourcesAction)" />
 
-  <Target Name="BuildGenerateSourcesTraverse" DependsOnTargets="AssignProjectConfiguration;_SplitProjectReferencesByFileExistence">
+  <Target Name="BuildGenerateSourcesTraverse" DependsOnTargets="PrepareProjectReferences">
     <MSBuild
         Projects="@(_MSBuildProjectReferenceExistent)"
         Targets="BuildGenerateSources"
         BuildInParallel="$(BuildInParallel)"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform)"
+        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework);"
         Condition="'$(BuildPassReferences)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceExistent)' != '' and '%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true'"
         ContinueOnError="!$(BuildingProject)"
         RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
@@ -895,12 +917,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Target Name="BuildCompile" DependsOnTargets="BuildCompileTraverse;$(BuildCompileAction)" />
 
-  <Target Name="BuildCompileTraverse" DependsOnTargets="AssignProjectConfiguration;_SplitProjectReferencesByFileExistence">
+  <Target Name="BuildCompileTraverse" DependsOnTargets="PrepareProjectReferences">
     <MSBuild
         Projects="@(_MSBuildProjectReferenceExistent)"
         Targets="BuildCompile"
         BuildInParallel="$(BuildInParallel)"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform)"
+        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
         Condition="'$(BuildPassReferences)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceExistent)' != ''  and '%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true'"
         ContinueOnError="!$(BuildingProject)"
         RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
@@ -920,12 +942,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Target Name="BuildLink" DependsOnTargets="BuildLinkTraverse;$(BuildLinkAction)" />
 
-  <Target Name="BuildLinkTraverse" DependsOnTargets="AssignProjectConfiguration;_SplitProjectReferencesByFileExistence" >
+  <Target Name="BuildLinkTraverse" DependsOnTargets="PrepareProjectReferences" >
     <MSBuild
         Projects="@(_MSBuildProjectReferenceExistent)"
         Targets="BuildLink"
         BuildInParallel="$(BuildInParallel)"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform)"
+        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
         Condition="'$(BuildPassReferences)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceExistent)' != ''  and '%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true'"
         ContinueOnError="!$(BuildingProject)"
         RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
@@ -1474,6 +1496,86 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </Target>
 
   <!--
+    ====================================================================================
+                                        _GetProjectReferenceTargetFrameworkProperties
+
+    Builds the GetTargetFrameworkProperties target of all existent project references,
+    passing $(TargetFrameworkMoniker) as $(ReferringTargetFramework) and sets the
+    SetTargetFramework metadata of the project reference to the value that is returned.
+
+    This allows a cross-targeting project to select how it should be configured to
+    build against the most appropriate target for the referring target framework.
+
+    ======================================================================================
+  -->
+  <Target Name="_GetProjectReferenceTargetFrameworkProperties"
+          Outputs="%(_MSBuildProjectReferenceExistent.Identity)">
+    <!-- As a mitigation for https://github.com/Microsoft/msbuild/issues/1276
+       .vcxproj is treated specially to avoid the cost of double-evaluating
+       for easily-identifiable-as-not-cross-targeting C++ projects. -->
+    <MSBuild
+        Projects="%(_MSBuildProjectReferenceExistent.Identity)"
+        Targets="GetTargetFrameworkProperties"
+        BuildInParallel="$(BuildInParallel)"
+        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); ReferringTargetFramework=$(TargetFrameworkMoniker)"
+        ContinueOnError="!$(BuildingProject)"
+        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework"
+        Condition="'%(_MSBuildProjectReferenceExistent.Extension)' != '.vcxproj'">
+
+      <Output TaskParameter="TargetOutputs" PropertyName="_ProjectReferenceTargetFrameworkProperties" />
+    </MSBuild>
+
+    <ItemGroup>
+      <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.Identity)' == '%(Identity)'">
+        <SetTargetFramework>$(_ProjectReferenceTargetFrameworkProperties)</SetTargetFramework>
+      </_MSBuildProjectReferenceExistent>
+    </ItemGroup>
+
+    <PropertyGroup>
+      <_ProjectReferenceTargetFrameworkProperties />
+    </PropertyGroup>
+  </Target>
+
+  <!--
+    ============================================================
+                                    GetTargetFrameworkProperties
+
+    Overrridden by cross-targeting projects to return the set of
+    properties (in the form "key1=value1;...keyN=valueN") needed
+    to build it with the best target for the referring project's
+    target framework.
+
+    The referring project's $(TargetFrameworkMoniker) is passed 
+    in as $(ReferringTargetFramework)
+  -->
+  <Target Name="GetTargetFrameworkProperties" />
+
+  <!--
+    ============================================================
+                                        PrepareProjectReferences
+
+    Prepares project references for consumption by other targets.
+
+        [IN]
+        @(ProjectReference) - The list of project references.
+
+        [OUT]
+        @(ProjectReferenceWithConfiguration)   - Project references with apporpriate metadata
+        @(_MSBuildProjectReferenceExistent)    - Subset of @(ProjectReferenceWithConfiguration) that exist 
+                                                 with added SetTargetFramework metadata for cross-targeting
+        @(_MSBuildProjectReferenceNonExistent) - Subset of  @(ProjectReferenceWithConfiguration) that do not exist
+    ============================================================
+  -->
+  <PropertyGroup>
+    <PrepareProjectReferencesDependsOn>
+      AssignProjectConfiguration;
+      _SplitProjectReferencesByFileExistence;
+      _GetProjectReferenceTargetFrameworkProperties
+    </PrepareProjectReferencesDependsOn>
+  </PropertyGroup>
+  <Target Name="PrepareProjectReferences" DependsOnTargets="$(PrepareProjectReferencesDependsOn)" />
+
+  <!--
     ============================================================
                                         ResolveProjectReferences
 
@@ -1500,7 +1602,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Target
       Name="ResolveProjectReferences"
-      DependsOnTargets="AssignProjectConfiguration;_SplitProjectReferencesByFileExistence"
+      DependsOnTargets="PrepareProjectReferences"
       Returns="@(_ResolvedNativeProjectReferencePaths);@(_ResolvedProjectReferencePaths)">
 
     <!--
@@ -1510,16 +1612,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         The ContinueOnError setting is here so that, during project load, as
         much information as possible will be passed to the compilers.
         -->
-    <PropertyGroup>
-        <_GetTargetPathName>GetTargetPath</_GetTargetPathName>
-        <_GetTargetPathName Condition="'$(IntelliSenseBuild)' == 'true'">GetTargetPathWithTargetPlatformMoniker</_GetTargetPathName>
-    </PropertyGroup>  
 
     <MSBuild
         Projects="@(_MSBuildProjectReferenceExistent)"
-        Targets="$(_GetTargetPathName)"
+        Targets="GetTargetPath"
         BuildInParallel="$(BuildInParallel)"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform)"
+        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
         Condition="'%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and ('$(BuildingInsideVisualStudio)' == 'true' or '$(BuildProjectReferences)' != 'true') and '$(VisualStudioVersion)' != '10.0' and '@(_MSBuildProjectReferenceExistent)' != ''"
         ContinueOnError="!$(BuildingProject)"
         RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
@@ -1546,7 +1644,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Projects="@(_MSBuildProjectReferenceExistent)"
         Targets="%(_MSBuildProjectReferenceExistent.Targets);GetTargetPath"
         BuildInParallel="$(BuildInParallel)"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform)"
+        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
         Condition="'%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and ('$(BuildingInsideVisualStudio)' == 'true' or '$(BuildProjectReferences)' != 'true') and '$(VisualStudioVersion)' == '10.0' and '@(_MSBuildProjectReferenceExistent)' != ''"
         ContinueOnError="!$(BuildingProject)"
         RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
@@ -1563,7 +1661,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Projects="@(_MSBuildProjectReferenceExistent)"
         Targets="%(_MSBuildProjectReferenceExistent.Targets)"
         BuildInParallel="$(BuildInParallel)"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform)"
+        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform);  %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
         Condition="'%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and '$(BuildingInsideVisualStudio)' != 'true' and '$(BuildProjectReferences)' == 'true' and '@(_MSBuildProjectReferenceExistent)' != ''"
         ContinueOnError="$(ContinueOnError)"
         RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
@@ -1580,7 +1678,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Projects="@(_MSBuildProjectReferenceExistent)"
         Targets="GetNativeManifest"
         BuildInParallel="$(BuildInParallel)"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform)"
+        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
         Condition="'%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and '$(BuildingProject)' == 'true' and '@(_MSBuildProjectReferenceExistent)' != ''"
         ContinueOnError="$(ContinueOnError)"
         RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
@@ -1641,13 +1739,23 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target
       Name="GetTargetPath"
       DependsOnTargets="$(GetTargetPathDependsOn)"
-      Returns="$(TargetPath)"/>
+      Returns="@(TargetPathWithTargetPlatformMoniker)">
+    <ItemGroup>
+      <TargetPathWithTargetPlatformMoniker Include="$(TargetPath)">
+        <TargetPlatformMoniker>$(TargetPlatformMoniker)</TargetPlatformMoniker>
+        <TargetPlatformIdentifier>$(TargetPlatformIdentifier)</TargetPlatformIdentifier>
+      </TargetPathWithTargetPlatformMoniker>
+    </ItemGroup>
+  </Target>
 
   <!--
     ============================================================
                                         GetTargetPathWithTargetPlatformMoniker
 
     This stand-alone target returns the name and version of the target platform for this project.
+
+    NOTE: The functionality of this target has been subsumed by GetTargetPath.  This target is
+    provided purely for compat reasons.
     ============================================================
     -->
   <PropertyGroup>
@@ -1657,14 +1765,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target
       Name="GetTargetPathWithTargetPlatformMoniker"
       DependsOnTargets="$(GetTargetPathWithTargetPlatformMonikerDependsOn)"
-      Returns="@(TargetPathWithTargetPlatformMoniker)">
-    <ItemGroup>
-      <TargetPathWithTargetPlatformMoniker Include="$(TargetPath)">
-        <TargetPlatformMoniker>$(TargetPlatformMoniker)</TargetPlatformMoniker>
-        <TargetPlatformIdentifier>$(TargetPlatformIdentifier)</TargetPlatformIdentifier>
-      </TargetPathWithTargetPlatformMoniker>
-    </ItemGroup>
-  </Target>
+      Returns="@(TargetPathWithTargetPlatformMoniker)" />
   
   <!--
     ============================================================
@@ -1792,7 +1893,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PropertyGroup>
       <!-- Default in task is true -->
       <_FindDependencies Condition="'$(BuildingProject)' != 'true' and '$(_ResolveReferenceDependencies)' != 'true'">false</_FindDependencies>
-      <_ForceSystemRuntimeDependencyCalculation Condition="'$(IntelliSenseBuild)' == 'true' or '$(CheckForSystemRuntimeDependency)' == 'true'">true</_ForceSystemRuntimeDependencyCalculation>
       <ResolveAssemblyReferencesSilent Condition="'$(ResolveAssemblyReferencesSilent)' == '' and '$(TraceDesignTime)' != 'true' and '$(BuildingProject)' == 'false'">true</ResolveAssemblyReferencesSilent>
       <ResolveAssemblyReferencesSilent Condition="'$(ResolveAssemblyReferencesSilent)' == ''">false</ResolveAssemblyReferencesSilent>
       <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch Condition="'$(ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch)' == ''">Warning</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
@@ -1825,7 +1925,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         SupportsBindingRedirectGeneration="$(GenerateBindingRedirectsOutputType)"
         IgnoreVersionForFrameworkReferences="$(IgnoreVersionForFrameworkReferences)"
         FindDependencies="$(_FindDependencies)"
-        ForceSystemRuntimeDependencyCalculation="$(_ForceSystemRuntimeDependencyCalculation)"
         FindSatellites="$(BuildingProject)"
         FindSerializationAssemblies="$(BuildingProject)"
         FindRelatedFiles="$(BuildingProject)"
@@ -1843,6 +1942,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         ProfileName="$(TargetFrameworkProfile)"
         LatestTargetFrameworkDirectories="@(LatestTargetFrameworkDirectories)"
         CopyLocalDependenciesWhenParentReferenceInGac="$(CopyLocalDependenciesWhenParentReferenceInGac)"
+        DoNotCopyLocalIfInGac="$(DoNotCopyLocalIfInGac)"
         ResolvedSDKReferences="@(ResolvedSDKReference)"
         WarnOrErrorOnTargetArchitectureMismatch="$(ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch)"
         IgnoreTargetFrameworkAttributeVersionMismatch ="$(ResolveAssemblyReferenceIgnoreTargetFrameworkAttributeVersionMismatch)"
@@ -1922,19 +2022,31 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </ItemGroup>
 
   </Target>
+
   <!--
-    ============================================================
+    ===========================================================================================
                                         GetInstalledSDKs
 
     Gets the list of SDKs installed in the SDKDirectoryRoot and SDKRegistryRoot locations
 
     These paths are used by the ResolveSDKReference task and the ResolveAssemblyReference task.
-    ============================================================
-    -->
-   <PropertyGroup>
+    ===========================================================================================
+  -->
+  <PropertyGroup>
     <SDKReferenceRegistryRoot Condition="'$(SDKReferenceRegistryRoot)' == ''">Software\Microsoft\Microsoft SDKs</SDKReferenceRegistryRoot>
     <SDKReferenceDirectoryRoot Condition="'$(SDKReferenceDirectoryRoot)' == ''">$(LocalAppData)\Microsoft SDKs;$(MSBuildProgramFiles32)\Microsoft SDKs</SDKReferenceDirectoryRoot>
-    <SDKExtensionDirectoryRoot Condition="'$(SDKTargetReferenceDirectoryRoot)' == '' and '$(SDKIdentifier)' != '' and '$(SDKVersion)' != ''">$(LocalAppData)\$(SDKIdentifier)\$(SDKVersion);$(MSBuildProgramFiles32)\$(SDKIdentifier)\$(SDKVersion)</SDKExtensionDirectoryRoot>
+    <!-- Manifest driven extension SDK locations -->
+    <SDKExtensionDirectoryRoot Condition="'$(SDKExtensionDirectoryRoot)' == '' and '$(SDKIdentifier)' != ''">$(MSBuildProgramFiles32)\Microsoft SDKs\Windows Kits\10;$(MSBuildProgramFiles32)\Windows Kits\10</SDKExtensionDirectoryRoot>
+
+    <!-- UAP projects by default should support Windows 8.1 SDKs -->
+    <SupportWindows81SDKs Condition="'$(SupportWindows81SDKs)' == '' and '$(Support81SDKs)' != 'false' and '$(TargetPlatformIdentifier)' == 'UAP'">true</SupportWindows81SDKs>
+    <TargetPlatformIdentifierWindows81 Condition="'$(TargetPlatformIdentifierWindows81)' == '' and '$(SupportWindows81SDKs)' == 'true'">Windows</TargetPlatformIdentifierWindows81>
+    <TargetPlatformVersionWindows81 Condition="'$(TargetPlatformVersionWindows81)' == '' and '$(SupportWindows81SDKs)' == 'true'">8.1</TargetPlatformVersionWindows81>
+
+    <!-- Desktop and phone SDKs often have the exact same identifiers, don't enable phone by default -->
+    <SupportWindowsPhone81SDKs Condition="'$(SupportWindowsPhone81SDKs)' == '' and '$(Support81SDKs)' != 'false' and '$(TargetPlatformIdentifier)' == 'UAP'">false</SupportWindowsPhone81SDKs>
+    <TargetPlatformIdentifierWindowsPhone81 Condition="'$(TargetPlatformIdentifierWindowsPhone81)' == '' and '$(SupportWindowsPhone81SDKs)' == 'true'">WindowsPhoneApp</TargetPlatformIdentifierWindowsPhone81>
+    <TargetPlatformVersionWindowsPhone81 Condition="'$(TargetPlatformVersionWindowsPhone81)' == '' and '$(SupportWindowsPhone81SDKs)' == 'true'">8.1</TargetPlatformVersionWindowsPhone81>
   </PropertyGroup>
 
   <Target
@@ -1953,7 +2065,32 @@ Copyright (C) Microsoft Corporation. All rights reserved.
            >
       <Output TaskParameter="InstalledSDKs" ItemName="InstalledSDKLocations"/>
     </GetInstalledSDKLocations>
-  
+
+    <!-- Also lookup 8.1 SDKs if requested -->
+    <GetInstalledSDKLocations
+           SDKDirectoryRoots="$(SDKReferenceDirectoryRoot)"
+           SDKExtensionDirectoryRoots=""
+           SDKRegistryRoot="$(SDKReferenceRegistryRoot)"
+           TargetPlatformVersion="$(TargetPlatformVersionWindows81)"
+           TargetPlatformIdentifier="$(TargetPlatformIdentifierWindows81)"
+           Condition="'@(SDKReference)' != '' and '$(SupportWindows81SDKs)' == 'true' and '$(TargetPlatformIdentifierWindows81)' != '' and '$(TargetPlatformVersionWindows81)' != ''"
+           WarnWhenNoSDKsFound="false"
+           >
+      <Output TaskParameter="InstalledSDKs" ItemName="InstalledSDKLocations"/>
+    </GetInstalledSDKLocations>
+
+    <GetInstalledSDKLocations
+           SDKDirectoryRoots="$(SDKReferenceDirectoryRoot)"
+           SDKExtensionDirectoryRoots=""
+           SDKRegistryRoot="$(SDKReferenceRegistryRoot)"
+           TargetPlatformVersion="$(TargetPlatformVersionWindowsPhone81)"
+           TargetPlatformIdentifier="$(TargetPlatformIdentifierWindowsPhone81)"
+           Condition="'@(SDKReference)' != '' and '$(SupportWindowsPhone81SDKs)' == 'true' and '$(TargetPlatformIdentifierWindowsPhone81)' != '' and '$(TargetPlatformVersionWindowsPhone81)' != ''"
+           WarnWhenNoSDKsFound="false"
+           >
+      <Output TaskParameter="InstalledSDKs" ItemName="InstalledSDKLocations"/>
+    </GetInstalledSDKLocations>
+
   </Target>
 
   <!--
@@ -1972,7 +2109,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         [OUT]
         @(ResolvedSDKReference) - Full path to the root of the SDK
     ============================================================
-    -->
+  -->
   <PropertyGroup>
     <ResolveSDKReferencesDependsOn>
       GetInstalledSDKLocations
@@ -2040,7 +2177,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                                                      target GetTargetPlatformMonikers.
 
         [OUT]
-	@(InvalidProjectReferences) - List of invalid project references
+    @(InvalidProjectReferences) - List of invalid project references
 
     ============================================================
     -->
@@ -2068,10 +2205,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
      </ItemGroup>
    </Target>
 
-  <Target Name="GetReferenceTargetPlatformMonikers" DependsOnTargets="AssignProjectConfiguration;_SplitProjectReferencesByFileExistence">
+  <Target Name="GetReferenceTargetPlatformMonikers" DependsOnTargets="PrepareProjectReferences">
     <MSBuild
       Projects="@(_MSBuildProjectReferenceExistent)"
-      Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform)"
+      Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
       Targets="GetTargetPathWithTargetPlatformMoniker"
       BuildInParallel="$(BuildInParallel)"
       ContinueOnError="!$(BuildingProject)"
@@ -2793,6 +2930,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         SdkToolsPath="$(TargetFrameworkSDKToolsDirectory)"
         EnvironmentVariables="$(LCEnvironment)"
         MSBuildArchitecture="$(LCMSBuildArchitecture)"
+        TargetFrameworkVersion="$(TargetFrameworkVersion)"
         >
 
       <Output TaskParameter="OutputLicense" ItemName="CompiledLicenseFile"/>
@@ -3130,7 +3268,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         References="@(ReferencePath)"
         ShouldGenerateSerializer="$(SGenShouldGenerateSerializer)"
         UseProxyTypes="$(SGenUseProxyTypes)"
-	UseKeep="$(SGenUseKeep)"
+        UseKeep="$(SGenUseKeep)"
         KeyContainer="$(KeyContainerName)"
         KeyFile="$(KeyOriginatorFile)"
         DelaySign="$(DelaySign)"
@@ -3739,8 +3877,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
     -->
   <PropertyGroup>
-    <!-- By default we're not using Hard Links to copy to the output directory, and never when building in VS -->
+    <!-- By default we're not using Hard or Symbolic Links to copy to the output directory, and never when building in VS -->
     <CreateHardLinksForCopyAdditionalFilesIfPossible Condition="'$(BuildingInsideVisualStudio)' == 'true' or '$(CreateHardLinksForCopyAdditionalFilesIfPossible)' == ''">false</CreateHardLinksForCopyAdditionalFilesIfPossible>
+    <CreateSymbolicLinksForCopyAdditionalFilesIfPossible Condition="'$(BuildingInsideVisualStudio)' == 'true' or '$(CreateSymbolicLinksForCopyAdditionalFilesIfPossible)' == ''">false</CreateSymbolicLinksForCopyAdditionalFilesIfPossible>
   </PropertyGroup>
 
   <Target
@@ -3757,6 +3896,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PropertyGroup>
       <!-- By default we're not using Hard Links to copy to the output directory, and never when building in VS -->
       <CreateHardLinksForCopyFilesToOutputDirectoryIfPossible Condition="'$(BuildingInsideVisualStudio)' == 'true' or '$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)' == ''">false</CreateHardLinksForCopyFilesToOutputDirectoryIfPossible>
+      <CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible Condition="'$(BuildingInsideVisualStudio)' == 'true' or '$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)' == ''">false</CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -3773,6 +3913,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
         Condition="'$(CopyBuildOutputToOutputDirectory)' == 'true' and '$(SkipCopyBuildProduct)' != 'true'"
             >
 
@@ -3792,6 +3933,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForCopyAdditionalFilesIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyAdditionalFilesIfPossible)"
         Condition="'@(AddModules)' != ''"
             >
 
@@ -3808,6 +3950,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
         Condition="'$(_SGenDllCreated)'=='true'">
 
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
@@ -3823,6 +3966,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
         Condition="'$(_DebugSymbolsProduced)'=='true' and '$(SkipCopyingSymbolsToOutputDirectory)' != 'true' and '$(CopyOutputSymbolsToOutputDirectory)'=='true'">
 
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
@@ -3838,6 +3982,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
         Condition="'$(_DocumentationFileProduced)'=='true'">
 
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
@@ -3853,6 +3998,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
         Condition="'@(IntermediateSatelliteAssembliesWithTargetPath)' != ''"
             >
 
@@ -3872,6 +4018,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForCopyAdditionalFilesIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyAdditionalFilesIfPossible)"
         Condition="'@(ReferenceComWrappersToCopyLocal)' != '' or '@(ResolvedIsolatedComModules)' != '' or '@(_DeploymentLooseManifestFile)' != '' or '@(NativeReferenceFile)' != '' "
             >
 
@@ -3888,6 +4035,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
         Condition="'$(SkipCopyWinMDArtifact)' != 'true' and '@(WinMDExpArtifacts)' != ''"
             >
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
@@ -3913,6 +4061,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PropertyGroup>
       <!-- By default we're not using Hard Links to copy to the output directory, and never when building in VS -->
       <CreateHardLinksForCopyLocalIfPossible Condition="'$(BuildingInsideVisualStudio)' == 'true' or '$(CreateHardLinksForCopyLocalIfPossible)' == ''">false</CreateHardLinksForCopyLocalIfPossible>
+      <CreateSymbolicLinksForCopyLocalIfPossible Condition="'$(BuildingInsideVisualStudio)' == 'true' or '$(CreateSymbolicLinksForCopyLocalIfPossible)' == ''">false</CreateSymbolicLinksForCopyLocalIfPossible>
     </PropertyGroup>
 
     <Copy
@@ -3923,6 +4072,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForCopyLocalIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyLocalIfPossible)"
         Condition="'$(UseCommonOutputDirectory)' != 'true'"
             >
 
@@ -3962,7 +4112,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <GetCopyToOutputDirectoryItemsDependsOn>
       AssignTargetPaths;
-      _SplitProjectReferencesByFileExistence
+      _SplitProjectReferencesByFileExistence;
+      _GetProjectReferenceTargetFrameworkProperties
     </GetCopyToOutputDirectoryItemsDependsOn>
   </PropertyGroup>
   <Target
@@ -3986,7 +4137,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Projects="@(_MSBuildProjectReferenceExistent)"
         Targets="GetCopyToOutputDirectoryItems"
         BuildInParallel="$(BuildInParallel)"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform)"
+        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
         Condition="'@(_MSBuildProjectReferenceExistent)' != '' and '$(_GetChildProjectCopyToOutputDirectoryItems)' == 'true' and '%(_MSBuildProjectReferenceExistent.Private)' != 'false' and '$(UseCommonOutputDirectory)' != 'true'"
         ContinueOnError="$(ContinueOnError)"
         RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
@@ -4065,6 +4216,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForAdditionalFilesIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForAdditionalFilesIfPossible)"
             >
 
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
@@ -4095,6 +4247,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForAdditionalFilesIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForAdditionalFilesIfPossible)"
             >
 
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
@@ -4128,6 +4281,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForAdditionalFilesIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForAdditionalFilesIfPossible)"
             >
 
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
@@ -4156,6 +4310,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForAdditionalFilesIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForAdditionalFilesIfPossible)"
         Condition="'$(GenerateClickOnceManifests)'=='true' or '$(_DeploymentCopyApplicationManifest)'=='true'">
 
       <Output TaskParameter="DestinationFiles" ItemName="_DeploymentMainApplicationManifest"/>
@@ -4173,6 +4328,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForAdditionalFilesIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForAdditionalFilesIfPossible)"
         Condition="'$(GenerateClickOnceManifests)'=='true'">
 
       <Output TaskParameter="DestinationFiles" ItemName="_DeploymentMainDeployManifest"/>
@@ -4504,7 +4660,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
   <Target
       Name="CleanReferencedProjects"
-      DependsOnTargets="AssignProjectConfiguration; _SplitProjectReferencesByFileExistence">
+      DependsOnTargets="PrepareProjectReferences">
 
     <!--
         When building the project directly from the command-line, clean those referenced projects
@@ -4514,7 +4670,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <MSBuild
         Projects="@(_MSBuildProjectReferenceExistent)"
         Targets="Clean"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform)"
+        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
         BuildInParallel="$(BuildInParallel)"
         Condition="'$(BuildingInsideVisualStudio)' != 'true' and '$(BuildProjectReferences)' == 'true' and '@(_MSBuildProjectReferenceExistent)' != ''"
         ContinueOnError="$(ContinueOnError)"
@@ -4822,8 +4978,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </PropertyGroup>
 
     <PropertyGroup>
-      <!-- By default we're not using Hard Links to copy to the publish directory, and never when building in VS -->
+      <!-- By default we're not using Hard or Symbolic Links to copy to the publish directory, and never when building in VS -->
       <CreateHardLinksForPublishFilesIfPossible Condition="'$(BuildingInsideVisualStudio)' == 'true' or '$(CreateHardLinksForPublishFilesIfPossible)' == ''">false</CreateHardLinksForPublishFilesIfPossible>
+      <CreateSymbolicLinksForPublishFilesIfPossible Condition="'$(BuildingInsideVisualStudio)' == 'true' or '$(CreateSymbolicLinksForPublishFilesIfPossible)' == ''">false</CreateSymbolicLinksForPublishFilesIfPossible>
     </PropertyGroup>
 
     <!-- Copy files to publish folder -->
@@ -4846,6 +5003,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
         Retries="$(CopyRetryCount)"
         UseHardlinksIfPossible="$(CreateHardLinksForPublishFilesIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForPublishFilesIfPossible)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"/>
 
     <Copy
@@ -4856,6 +5014,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForPublishFilesIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForPublishFilesIfPossible)"
         Condition="'%(_DeploymentManifestDependencies.DependencyType)'=='Install'"/>
 
     <Copy
@@ -4866,6 +5025,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Retries="$(CopyRetryCount)"
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForPublishFilesIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForPublishFilesIfPossible)"
             />
 
     <FormatUrl InputUrl="$(_DeploymentApplicationUrl)">
@@ -5102,7 +5262,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </PropertyGroup>
   <ItemGroup Condition="'$(DocumentationFile)'!='' and '$(OutputType)' != 'winmdobj'">
     <DocumentationProjectOutputGroupOutput Include="@(DocFileItem->'%(FullPath)')">
-      <FinalOutputPath>@(FinalDocFile)</FinalOutputPath>
+      <FinalOutputPath>@(FinalDocFile->'%(FullPath)')</FinalOutputPath>
       <IsKeyOutput>true</IsKeyOutput>
       <TargetPath>@(DocFileItem->'%(Filename)%(Extension)')</TargetPath>
     </DocumentationProjectOutputGroupOutput>
@@ -5145,6 +5305,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- Convert intermediate items into final items; this way we can get the full path for each item. -->
     <ItemGroup>
       <SatelliteDllsProjectOutputGroupOutput Include="@(SatelliteDllsProjectOutputGroupOutputIntermediate->'%(FullPath)')">
+        <FinalOutputPath>$(TargetDir)%(SatelliteDllsProjectOutputGroupOutputIntermediate.TargetPath)</FinalOutputPath>
         <!-- For compatibility with 2.0 -->
         <OriginalItemSpec>%(SatelliteDllsProjectOutputGroupOutputIntermediate.Identity)</OriginalItemSpec>
       </SatelliteDllsProjectOutputGroupOutput>
@@ -5419,7 +5580,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Import Project="$(MSBuildToolsPath)\Microsoft.NETFramework.targets" Condition="('$(TargetFrameworkIdentifier)' == ''  or '$(TargetFrameworkIdentifier)' == '.NETFramework') and ('$(TargetRuntime)' == 'Managed')"/>
 
-  <Import Project="$(MSBuildToolsPath)\Microsoft.Xaml.targets" Condition="('$(TargetFrameworkVersion)' != 'v2.0' and '$(TargetFrameworkVersion)' != 'v3.5') and Exists('$(MSBuildToolsPath)\Microsoft.Xaml.targets')"/>
+  <PropertyGroup>
+    <ImportXamlTargets Condition="'$(ImportXamlTargets)'=='' and ('$(TargetFrameworkVersion)' != 'v2.0' and '$(TargetFrameworkVersion)' != 'v3.5') and Exists('$(MSBuildToolsPath)\Microsoft.Xaml.targets')">true</ImportXamlTargets>
+  </PropertyGroup>
+  
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Xaml.targets" Condition="('$(ImportXamlTargets)' == 'true')" />
 
   <!-- imports Microsoft.WorkflowBuildExtensions.targets only if TargetFrameworkVersion is v4.5 or above or TargetFrameworkfVersion specified does not conform to the format of vX.X[.X.X] -->
   <!-- Underlying assumption is that there shouldn't be any other versions between v4.0.* and v4.5 -->

@@ -128,13 +128,8 @@ namespace Microsoft.Build.Tasks
 
                 File.WriteAllText(OutputFile.ItemSpec, code); // Overwrites file if it already exists (and can be overwritten)
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
-                if (ExceptionHandling.NotExpectedException(ex))
-                {
-                    throw;
-                }
-
                 Log.LogErrorWithCodeFromResources("WriteCodeFragment.CouldNotWriteOutput", (OutputFile == null) ? String.Empty : OutputFile.ItemSpec, ex.Message);
                 return false;
             }
@@ -181,7 +176,7 @@ namespace Microsoft.Build.Tasks
             unit.Namespaces.Add(globalNamespace);
 
             // Declare authorship. Unfortunately CodeDOM puts this comment after the attributes.
-            string comment = ResourceUtilities.FormatResourceString("WriteCodeFragment.Comment", DateTime.Now.ToString());
+            string comment = ResourceUtilities.FormatResourceString("WriteCodeFragment.Comment");
             globalNamespace.Comments.Add(new CodeCommentStatement(comment));
 
             if (AssemblyAttributes == null)

@@ -1,6 +1,6 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="ProjectProperty_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // </copyright>
 // <summary>Tests for ProjectProperty</summary>
 //-----------------------------------------------------------------------
@@ -11,33 +11,31 @@ using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Definition
 {
     /// <summary>
     /// Tests for ProjectProperty
     /// </summary>
-    [TestClass]
     public class ProjectProperty_Tests
     {
         /// <summary>
         /// Project getter
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ProjectGetter()
         {
             Project project = new Project();
             ProjectProperty property = project.SetProperty("p", "v");
 
-            Assert.AreEqual(true, Object.ReferenceEquals(project, property.Project));
+            Assert.Equal(true, Object.ReferenceEquals(project, property.Project));
         }
 
         /// <summary>
         /// Property with nothing to expand
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void NoExpansion()
         {
             string content = @"
@@ -50,16 +48,16 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             ProjectProperty property = GetFirstProperty(content);
 
-            Assert.IsNotNull(property.Xml);
-            Assert.AreEqual("p", property.Name);
-            Assert.AreEqual("v1", property.EvaluatedValue);
-            Assert.AreEqual("v1", property.UnevaluatedValue);
+            Assert.NotNull(property.Xml);
+            Assert.Equal("p", property.Name);
+            Assert.Equal("v1", property.EvaluatedValue);
+            Assert.Equal("v1", property.UnevaluatedValue);
         }
 
         /// <summary>
         /// Embedded property
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ExpandProperty()
         {
             string content = @"
@@ -73,16 +71,16 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             ProjectProperty property = GetFirstProperty(content);
 
-            Assert.IsNotNull(property.Xml);
-            Assert.AreEqual("p", property.Name);
-            Assert.AreEqual("v1", property.EvaluatedValue);
-            Assert.AreEqual("$(o)", property.UnevaluatedValue);
+            Assert.NotNull(property.Xml);
+            Assert.Equal("p", property.Name);
+            Assert.Equal("v1", property.EvaluatedValue);
+            Assert.Equal("$(o)", property.UnevaluatedValue);
         }
 
         /// <summary>
         /// Set the value of a property
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetValue()
         {
             Project project = new Project();
@@ -90,16 +88,16 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             project.ReevaluateIfNecessary();
 
             property.UnevaluatedValue = "v2";
-            
-            Assert.AreEqual("v2", property.EvaluatedValue);
-            Assert.AreEqual("v2", property.UnevaluatedValue);
-            Assert.AreEqual(true, project.IsDirty);
+
+            Assert.Equal("v2", property.EvaluatedValue);
+            Assert.Equal("v2", property.UnevaluatedValue);
+            Assert.Equal(true, project.IsDirty);
         }
 
         /// <summary>
         /// Set the value of a property
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetValue_Escaped()
         {
             Project project = new Project();
@@ -108,16 +106,16 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             property.UnevaluatedValue = "v%282%29";
 
-            Assert.AreEqual("v(2)", property.EvaluatedValue);
-            Assert.AreEqual("v%282%29", property.UnevaluatedValue);
-            Assert.AreEqual(true, project.IsDirty);
+            Assert.Equal("v(2)", property.EvaluatedValue);
+            Assert.Equal("v%282%29", property.UnevaluatedValue);
+            Assert.Equal(true, project.IsDirty);
         }
 
         /// <summary>
         /// Set the value of a property to the same value.
         /// This should not dirty the project.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetValueSameValue()
         {
             Project project = new Project();
@@ -126,28 +124,30 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             property.UnevaluatedValue = "v1";
 
-            Assert.AreEqual(false, project.IsDirty);
+            Assert.Equal(false, project.IsDirty);
         }
 
         /// <summary>
         /// Attempt to set the value of a built-in property
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
+        [Fact]
         public void InvalidSetValueBuiltInProperty()
         {
-            Project project = new Project();
-            ProjectProperty property = project.GetProperty("MSBuildProjectDirectory");
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                Project project = new Project();
+                ProjectProperty property = project.GetProperty("MSBuildProjectDirectory");
 
-            property.UnevaluatedValue = "v";
+                property.UnevaluatedValue = "v";
+            }
+           );
         }
-
         /// <summary>
         /// Set the value of a property originating in the environment.
         /// Should work even though there is no XML behind it.
         /// Also, should persist.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetValueEnvironmentProperty()
         {
             Project project = new Project();
@@ -155,65 +155,65 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             property.UnevaluatedValue = "v";
 
-            Assert.AreEqual("v", property.EvaluatedValue);
-            Assert.AreEqual("v", property.UnevaluatedValue);
+            Assert.Equal("v", property.EvaluatedValue);
+            Assert.Equal("v", property.UnevaluatedValue);
 
             project.ReevaluateIfNecessary();
 
             property = project.GetProperty("Username");
-            Assert.AreEqual("v", property.UnevaluatedValue);
+            Assert.Equal("v", property.UnevaluatedValue);
         }
 
         /// <summary>
         /// Test IsEnvironmentVariable
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void IsEnvironmentVariable()
         {
             Project project = new Project();
 
-            Assert.AreEqual(true, project.GetProperty("username").IsEnvironmentProperty);
-            Assert.AreEqual(false, project.GetProperty("username").IsGlobalProperty);
-            Assert.AreEqual(false, project.GetProperty("username").IsReservedProperty);
-            Assert.AreEqual(false, project.GetProperty("username").IsImported);
+            Assert.Equal(true, project.GetProperty("username").IsEnvironmentProperty);
+            Assert.Equal(false, project.GetProperty("username").IsGlobalProperty);
+            Assert.Equal(false, project.GetProperty("username").IsReservedProperty);
+            Assert.Equal(false, project.GetProperty("username").IsImported);
         }
 
         /// <summary>
         /// Test IsGlobalProperty
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void IsGlobalProperty()
         {
             Dictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             globalProperties["g"] = String.Empty;
             Project project = new Project(globalProperties, null, ProjectCollection.GlobalProjectCollection);
 
-            Assert.AreEqual(false, project.GetProperty("g").IsEnvironmentProperty);
-            Assert.AreEqual(true, project.GetProperty("g").IsGlobalProperty);
-            Assert.AreEqual(false, project.GetProperty("g").IsReservedProperty);
-            Assert.AreEqual(false, project.GetProperty("g").IsImported);
+            Assert.Equal(false, project.GetProperty("g").IsEnvironmentProperty);
+            Assert.Equal(true, project.GetProperty("g").IsGlobalProperty);
+            Assert.Equal(false, project.GetProperty("g").IsReservedProperty);
+            Assert.Equal(false, project.GetProperty("g").IsImported);
         }
 
         /// <summary>
         /// Test IsReservedProperty
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void IsReservedProperty()
         {
             Project project = new Project();
             project.FullPath = @"c:\x";
             project.ReevaluateIfNecessary();
 
-            Assert.AreEqual(false, project.GetProperty("MSBuildProjectFile").IsEnvironmentProperty);
-            Assert.AreEqual(false, project.GetProperty("MSBuildProjectFile").IsGlobalProperty);
-            Assert.AreEqual(true, project.GetProperty("MSBuildProjectFile").IsReservedProperty);
-            Assert.AreEqual(false, project.GetProperty("MSBuildProjectFile").IsImported);
+            Assert.Equal(false, project.GetProperty("MSBuildProjectFile").IsEnvironmentProperty);
+            Assert.Equal(false, project.GetProperty("MSBuildProjectFile").IsGlobalProperty);
+            Assert.Equal(true, project.GetProperty("MSBuildProjectFile").IsReservedProperty);
+            Assert.Equal(false, project.GetProperty("MSBuildProjectFile").IsImported);
         }
 
         /// <summary>
         /// Verify properties are expanded in new property values
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetPropertyWithPropertyExpression()
         {
             Project project = new Project();
@@ -221,9 +221,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectProperty property = project.SetProperty("p1", "v1");
             property.UnevaluatedValue = "$(p0)";
 
-            Assert.AreEqual("v0", project.GetPropertyValue("p1"));
-            Assert.AreEqual("v0", property.EvaluatedValue);
-            Assert.AreEqual("$(p0)", property.UnevaluatedValue);
+            Assert.Equal("v0", project.GetPropertyValue("p1"));
+            Assert.Equal("v0", property.EvaluatedValue);
+            Assert.Equal("$(p0)", property.UnevaluatedValue);
         }
 
         /// <summary>
@@ -232,7 +232,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// when you output them, item expansion happens after property expansion, and 
         /// they may evaluate to blank then. (Unless items do exist at that point.)
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetPropertyWithItemAndMetadataExpression()
         {
             Project project = new Project();
@@ -240,40 +240,42 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectProperty property = project.SetProperty("p1", "v1");
             property.UnevaluatedValue = "@(i)-%(m)";
 
-            Assert.AreEqual("@(i)-%(m)", project.GetPropertyValue("p1"));
-            Assert.AreEqual("@(i)-%(m)", property.EvaluatedValue);
-            Assert.AreEqual("@(i)-%(m)", property.UnevaluatedValue);
+            Assert.Equal("@(i)-%(m)", project.GetPropertyValue("p1"));
+            Assert.Equal("@(i)-%(m)", property.EvaluatedValue);
+            Assert.Equal("@(i)-%(m)", property.UnevaluatedValue);
         }
 
         /// <summary>
         /// Attempt to set value on imported property should fail
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
+        [Fact]
         public void SetPropertyImported()
         {
-            string file = null;
-
-            try
+            Assert.Throws<InvalidOperationException>(() =>
             {
-                file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
-                Project import = new Project();
-                import.SetProperty("p", "v0");
-                import.Save(file);
+                string file = null;
 
-                ProjectRootElement xml = ProjectRootElement.Create();
-                xml.AddImport(file);
-                Project project = new Project(xml);
+                try
+                {
+                    file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                    Project import = new Project();
+                    import.SetProperty("p", "v0");
+                    import.Save(file);
 
-                ProjectProperty property = project.GetProperty("p");
-                property.UnevaluatedValue = "v1";
+                    ProjectRootElement xml = ProjectRootElement.Create();
+                    xml.AddImport(file);
+                    Project project = new Project(xml);
+
+                    ProjectProperty property = project.GetProperty("p");
+                    property.UnevaluatedValue = "v1";
+                }
+                finally
+                {
+                    File.Delete(file);
+                }
             }
-            finally
-            {
-                File.Delete(file);
-            }
+           );
         }
-
         /// <summary>
         /// Get the property named "p" in the project provided
         /// </summary>

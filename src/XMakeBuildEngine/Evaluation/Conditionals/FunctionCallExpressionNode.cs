@@ -57,11 +57,8 @@ namespace Microsoft.Build.Evaluation
                         expandedValue = Path.GetFullPath(Path.Combine(state.EvaluationDirectory, expandedValue));
                     }
                 }
-                catch (Exception e) // Catching Exception, but rethrowing unless it's an IO related exception.
+                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    if (ExceptionHandling.NotExpectedException(e))
-                        throw;
-
                     // Ignore invalid characters or path related exceptions
 
                     // We will ignore the PathTooLong exception caused by GetFullPath because in single proc this code

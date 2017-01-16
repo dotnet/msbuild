@@ -1,0 +1,278 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="pl" original="../Strings.resx">
+    <body>
+      <group id="MICROSOFT.BUILD.UTILITIES/RESOURCES/STRINGS.RESX" datatype="resx" />
+      <trans-unit id="General.InvalidToolSwitch">
+        <source>MSB6001: Invalid command line switch for "{0}". {1}</source>
+        <target state="translated">MSB6001: Nieprawidłowy przełącznik wiersza polecenia dla „{0}”. {1}</target>
+        <note>{StrBegin="MSB6001: "}UE: This message is shown when a tool-based task (i.e. the task is a wrapper for an .exe) is given a parameter value that converts into an invalid command line switch for the tool. "{0}" is the name of the tool e.g. "csc.exe", and "{1}" is a message explaining the problem. LOCALIZATION: "{1}" is a localized message.</note>
+      </trans-unit>
+      <trans-unit id="General.QuotesNotAllowedInThisKindOfTaskParameter">
+        <source>Illegal quote passed to the command line switch named "{0}". The value was [{1}].</source>
+        <target state="translated">Niedozwolony cudzysłów przekazany do przełącznika wiersza polecenia o nazwie „{0}”. Wartość: [{1}].</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="General.QuotesNotAllowedInThisKindOfTaskParameterNoSwitchName">
+        <source>Illegal quote in the command line value [{0}].</source>
+        <target state="translated">Niedozwolony cudzysłów w wartości wiersza polecenia [{0}].</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="General.ToolCommandFailedNoErrorCode">
+        <source>The command exited with code {0}.</source>
+        <target state="translated">Polecenie zostało zakończone z kodem {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LoggingBeforeTaskInitialization">
+        <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
+        <target state="translated">MSB6005: Zadanie podjęło próbę zarejestrowania przed zainicjowaniem. Pojawił się komunikat: {0}</target>
+        <note>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</note>
+      </trans-unit>
+      <trans-unit id="PlatformManifest.MissingPlatformXml">
+        <source>MSB6010: Could not find platform manifest file at "{0}".</source>
+        <target state="translated">MSB6010: nie można odnaleźć pliku manifestu platformy w lokalizacji „{0}”.</target>
+        <note>{StrBegin="MSB6010: "}</note>
+      </trans-unit>
+      <trans-unit id="ToolLocationHelper.UnsupportedFrameworkVersion">
+        <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
+        <target state="translated">Program .NET Framework w wersji „{0}” nie jest obsługiwany. Podaj wartość z wyliczenia Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolLocationHelper.UnsupportedFrameworkVersionForWindowsSdk">
+        <source>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</source>
+        <target state="translated">Program .NET Framework w wersji „{0}” nie jest obsługiwany, jeśli jawnym obiektem docelowym jest zestaw SDK systemu Windows, ponieważ taki zestaw jest obsługiwany tylko na platformie .NET w wersji 4.5 lub nowszej.  Podaj wartość z wyliczenia Microsoft.Build.Utilities.TargetDotNetFrameworkVersion, która wynosi co najmniej Version45.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolLocationHelper.UnsupportedVisualStudioVersion">
+        <source>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</source>
+        <target state="translated">Program Visual Studio w wersji „{0}” nie jest obsługiwany.  Podaj wartość z wyliczenia Microsoft.Build.Utilities.VisualStudioVersion.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolTask.CommandTooLong">
+        <source>MSB6002: The command-line for the "{0}" task is too long. Command-lines longer than 32000 characters are likely to fail. Try reducing the length of the command-line by breaking down the call to "{0}" into multiple calls with fewer parameters per call.</source>
+        <target state="translated">MSB6002: Wiersz polecenia zadania „{0}” jest za długi. Wiersze zawierające więcej niż 32 000 znaków mogą nie działać prawidłowo. Spróbuj skrócić długość wiersza polecenia, dzieląc wywołanie „{0}” na wiele wywołań zawierających odpowiednio mniej parametrów.</target>
+        <note>{StrBegin="MSB6002: "}</note>
+      </trans-unit>
+      <trans-unit id="ToolTask.CouldNotStartToolExecutable">
+        <source>MSB6003: The specified task executable "{0}" could not be run. {1}</source>
+        <target state="translated">MSB6003: Nie można uruchomić określonego pliku wykonywalnego zadania „{0}”. {1}</target>
+        <note>{StrBegin="MSB6003: "}</note>
+      </trans-unit>
+      <trans-unit id="ToolTask.ToolCommandFailed">
+        <source>MSB6006: "{0}" exited with code {1}.</source>
+        <target state="translated">MSB6006: Polecenie „{0}” zakończone przez kod {1}.</target>
+        <note>{StrBegin="MSB6006: "}</note>
+      </trans-unit>
+      <trans-unit id="ToolTask.ToolExecutableNotFound">
+        <source>MSB6004: The specified task executable location "{0}" is invalid.</source>
+        <target state="translated">MSB6004: Określona lokalizacja pliku wykonywalnego zadania „{0}” jest nieprawidłowa.</target>
+        <note>{StrBegin="MSB6004: "}</note>
+      </trans-unit>
+      <trans-unit id="ToolsLocationHelper.InvalidRedistFile">
+        <source>There was an error reading the redist list file "{0}". {1}</source>
+        <target state="translated">Wystąpił błąd odczytu pliku listy redystrybucyjnej „{0}”. {1}</target>
+        <note>No Error code because this resource will be used in an exception. The error code is discarded if it is included</note>
+      </trans-unit>
+      <trans-unit id="ToolsLocationHelper.CouldNotCreateChain">
+        <source>The Framework at path "{0}" tried to include the framework at path "{1}" as part of its reference assembly paths but there was an error. {2}</source>
+        <target state="translated">Właściwość Framework w ścieżce „{0}” próbowała uwzględnić właściwość framework w ścieżce „{1}” jako część jej ścieżek zestawu odwołania, ale wystąpił błąd. {2}</target>
+        <note>No Error code because this resource will be used in an exception. The error code is discarded if it is included</note>
+      </trans-unit>
+      <trans-unit id="ToolsLocationHelper.CouldNotGenerateReferenceAssemblyDirectory">
+        <source>When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</source>
+        <target state="translated">Wystąpił błąd podczas próby wygenerowania ścieżki zestawu odwołania ze ścieżki „{0}” i monikera struktury „{1}”. {2}</target>
+        <note>No Error code because this resource will be used in an exception. The error code is discarded if it is included</note>
+      </trans-unit>
+      <trans-unit id="ToolTask.InvalidEnvironmentParameter">
+        <source>MSB6007: The "{0}" value passed to the Environment property is not in the format "name=value", where the value part may be empty.</source>
+        <target state="translated">MSB6007: Wartość „{0}” przekazana do właściwości Environment nie ma formatu „nazwa=wartość”, gdzie część wartość może być pusta.</target>
+        <note>{StrBegin="MSB6007: "}</note>
+      </trans-unit>
+      <trans-unit id="ToolTask.EnvironmentVariableHeader">
+        <source>Environment Variables passed to tool:</source>
+        <target state="translated">Zmienna środowiskowa przekazana do narzędzia:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_LogFilesNotAvailable">
+        <source>Tracking logs are not available, minimal rebuild will be disabled.</source>
+        <target state="translated">Dzienniki śledzenia są niedostępne; minimalna ponowna kompilacja zostanie wyłączona.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_MissingInputs">
+        <source>Missing input files detected, minimal rebuild will be disabled.</source>
+        <target state="translated">Wykryto brak pewnych plików wejściowych; minimalna ponowna kompilacja zostanie wyłączona.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_MissingOutputs">
+        <source>Missing output files detected, minimal rebuild will be disabled.</source>
+        <target state="translated">Wykryto brak pewnych plików wyjściowych; minimalna ponowna kompilacja zostanie wyłączona.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_UpToDate">
+        <source>Skipping task because it is up-to-date.</source>
+        <target state="translated">Pomijanie zadania, ponieważ jego ono aktualne.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_TrackingLogNotAvailable">
+        <source>Write Tracking log not available, minimal rebuild will be disabled.</source>
+        <target state="translated">Dziennik śledzenia zapisów jest niedostępny; minimalna ponowna kompilacja zostanie wyłączona.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_WriteTrackingLogs">
+        <source>Write Tracking Logs:</source>
+        <target state="translated">Dzienniki śledzenia zapisów:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_WriteTrackingCached">
+        <source>Using cached output dependency table built from:</source>
+        <target state="translated">Używanie zbuforowanej wyjściowej kompilacji tabeli zależności z:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_TrackingLogs">
+        <source>Tracking Logs:</source>
+        <target state="translated">Dzienniki śledzenia:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_TrackingCached">
+        <source>Using cached dependency table built from:</source>
+        <target state="translated">Używanie zbuforowanej kompilacji tabeli zależności z:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_OutputsFor">
+        <source>Outputs for {0}:</source>
+        <target state="translated">Dane wyjściowe dla {0}:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_InputsFor">
+        <source>Inputs for {0}:</source>
+        <target state="translated">Dane wejściowe dla {0}:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_OutputsNotShown">
+        <source>Output details ({0} of them) were not logged for performance reasons.</source>
+        <target state="translated">Szczegóły danych wyjściowych ({0} z nich) nie zostały zarejestrowane ze względu na wydajność.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_InputsNotShown">
+        <source>Input details ({0} of them) were not logged for performance reasons.</source>
+        <target state="translated">Szczegóły danych wejściowych ({0} z nich) nie zostały zarejestrowane ze względu na wydajność.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_SingleLogFileNotAvailable">
+        <source>Tracking log {0} is not available.</source>
+        <target state="translated">Dziennik śledzenia {0} jest niedostępny.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_SourceWillBeCompiledAsNoTrackingLog">
+        <source>{0} will be compiled as the tracking log is not available.</source>
+        <target state="translated">Plik {0} zostanie skompilowany, ponieważ dziennik śledzenia jest niedostępny.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_SourceNotInTrackingLog">
+        <source>{0} will be compiled as it was not found in the tracking log.</source>
+        <target state="translated">Plik {0} zostanie skompilowany, ponieważ nie odnaleziono go w dzienniku śledzenia.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_SourceOutputsNotAvailable">
+        <source>{0} will be compiled as not all outputs are available.</source>
+        <target state="translated">Plik {0} zostanie skompilowany, ponieważ nie wszystkie dane wyjściowe są dostępne.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_SourceWillBeCompiledMissingDependency">
+        <source>{0} will be compiled as dependency {1} was missing.</source>
+        <target state="translated">{0} zostanie skompilowany, ponieważ brakuje zależności {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_SourceWillBeCompiledDependencyWasModifiedAt">
+        <source>{0} will be compiled as {1} was modified at {2}.</source>
+        <target state="translated">{0} zostanie skompilowany, ponieważ {1} został zmodyfikowany w {2}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_SourceWillBeCompiled">
+        <source>{0} will be compiled.</source>
+        <target state="translated">Plik {0} zostanie skompilowany.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_AllOutputsAreUpToDate">
+        <source>All outputs are up-to-date.</source>
+        <target state="translated">Wszystkie dane wyjściowe są aktualne.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_DependencyWasModifiedAt">
+        <source>File {0} was modified at {1} which is newer than {2} modified at {3}.</source>
+        <target state="translated">Plik {0} został zmodyfikowany {1} i jest nowszy niż plik {2} zmodyfikowany {3}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_OutputDoesNotExist">
+        <source>{0} does not exist; source compilation required.</source>
+        <target state="translated">Dane wyjściowe {0} nie istnieją; wymagana jest kompilacja źródłowa.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_SourceWillBeCompiledOutputDoesNotExist">
+        <source>{0} will be compiled as output {1} does not exist.</source>
+        <target state="translated">{0} zostanie skompilowany, ponieważ obiekt wyjściowy {1} nie istnieje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_ReadTrackingLogs">
+        <source>Read Tracking Logs:</source>
+        <target state="translated">Dzienniki śledzenia odczytów:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_ReadTrackingCached">
+        <source>Using cached input dependency table built from:</source>
+        <target state="translated">Używanie zbuforowanej kompilacji wejściowej tabeli zależności z:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_OutputForRootNotFound">
+        <source>No output for {0} was found in the tracking log; source compilation required.</source>
+        <target state="translated">W dzienniku śledzenia nie znaleziono żadnych danych wyjściowych dla {0}; wymagana jest kompilacja źródłowa.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_DependenciesForRootNotFound">
+        <source>No dependencies for output {0} were found in the tracking log; source compilation required.</source>
+        <target state="translated">W dzienniku śledzenia nie znaleziono żadnych zależności dla danych wyjściowych {0}; wymagana jest kompilacja źródłowa.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_WriteLogEntryNotFound">
+        <source>Could not find {0} in the write tracking log.</source>
+        <target state="translated">Nie można znaleźć wpisu {0} w dzienniku śledzenia zapisów.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_ReadLogEntryNotFound">
+        <source>Could not find {0} in the read tracking log.</source>
+        <target state="translated">Nie można znaleźć wpisu {0} w dzienniku śledzenia odczytów.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_SourcesAndCorrespondingOutputMismatch">
+        <source>The number of source files and corresponding outputs must match.</source>
+        <target state="translated">Liczba plików źródłowych musi być taka sama jak liczba odpowiadających im plików wyjściowych.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_InputNewerThanOutput">
+        <source>Source compilation required: input {0} is newer than output {1}.</source>
+        <target state="translated">Wymagana jest kompilacja źródłowa: dane wejściowe {0} są nowsze niż dane wyjściowe {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Tracking_RebuildingDueToInvalidTLog">
+        <source>MSB6008: Forcing a rebuild of all sources due to an error with the tracking logs. {0}</source>
+        <target state="translated">MSB6008: Wymuszanie ponownej kompilacji wszystkich źródeł z powodu błędu dzienników śledzenia. {0}</target>
+        <note>{StrBegin="MSB6008: "}</note>
+      </trans-unit>
+      <trans-unit id="Tracking_RebuildingDueToInvalidTLogContents">
+        <source>MSB6009: Forcing a rebuild of all source files due to the contents of "{0}" being invalid.</source>
+        <target state="translated">MSB6009: Wymuszanie ponownej kompilacji wszystkich plików źródłowych z powodu nieprawidłowej zawartości dziennika {0}.</target>
+        <note>{StrBegin="MSB6009: "}</note>
+      </trans-unit>
+      <trans-unit id="MuxLogger_BuildFinishedFailure">
+        <source>Build FAILED.</source>
+        <target state="translated">Kompilacja NIE POWIODŁA SIĘ.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MuxLogger_BuildFinishedSuccess">
+        <source>Build succeeded.</source>
+        <target state="translated">Kompilacja powiodła się.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

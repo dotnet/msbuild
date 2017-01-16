@@ -1,6 +1,6 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="EditingElementsReferencedByOrReferences_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // </copyright>
 // <summary>Tests for editing elements that are related to other XML elements</summary>
 //-----------------------------------------------------------------------
@@ -13,21 +13,19 @@ using System.Linq;
 using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Definition
 {
     /// <summary>
     /// Tests around editing elements that are referenced by others or the ones that references others.
     /// </summary>
-    [TestClass]
     public class EditingElementsReferencedByOrReferences_Tests
     {
         /// <summary>
         /// Changes the item type on an item used with the at operator.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ChangeItemTypeInReferencedItem()
         {
             Project project = GetProject(
@@ -49,19 +47,19 @@ namespace Microsoft.Build.UnitTests.OM.Definition
   </ItemGroup>
 </Project>";
 
-            Helpers.VerifyAssertProjectContent(expected, project.Xml);
+            Helpers.VerifyAssertProjectContent(expected, project.Xml, false);
 
             project.ReevaluateIfNecessary();
             IEnumerable<ProjectItem> items = project.GetItems("I");
 
-            Assert.AreEqual(1, items.Count(), "Wrong number of items after changing type");
-            Assert.AreEqual("Y", items.First().EvaluatedInclude, "Wrong evaluated include after changing type");
+            Assert.Equal(1, items.Count()); // "Wrong number of items after changing type"
+            Assert.Equal("Y", items.First().EvaluatedInclude); // "Wrong evaluated include after changing type"
         }
 
         /// <summary>
         /// Removes an item in a ; separated list. It blows up the list.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void RemoveItemInList()
         {
             Project project = GetProject(
@@ -83,14 +81,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     <I Include=""Z"" />
   </ItemGroup>
 </Project>";
-            
-            Helpers.VerifyAssertProjectContent(expected, project.Xml);
+
+            Helpers.VerifyAssertProjectContent(expected, project.Xml, false);
         }
 
         /// <summary>
         /// Renames an item in a ; separated list. It blows up the list.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void RenameItemInList()
         {
             Project project = GetProject(
@@ -113,13 +111,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
   </ItemGroup>
 </Project>";
 
-            Helpers.VerifyAssertProjectContent(expected, project.Xml);
+            Helpers.VerifyAssertProjectContent(expected, project.Xml, false);
         }
 
         /// <summary>
         /// Removes metadata duplicated in item.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void RemoveMetadata1()
         {
             Project project = GetProject(
@@ -141,13 +139,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 </Project>");
 
             ProjectItem item1 = project.GetItems("I").Where(i => i.EvaluatedInclude == "X").First();
-            Assert.AreEqual("A;B;C", item1.GetMetadataValue("M"), "Invalid metadata at start");
+            Assert.Equal("A;B;C", item1.GetMetadataValue("M")); // "Invalid metadata at start"
 
             ProjectItem item2 = project.GetItems("I").Where(i => i.EvaluatedInclude == "Y").First();
-            Assert.AreEqual("A;D", item2.GetMetadataValue("M"), "Invalid metadata at start");
+            Assert.Equal("A;D", item2.GetMetadataValue("M")); // "Invalid metadata at start"
 
             item1.RemoveMetadata("M");
-            
+
             string expected =
 @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
   <ItemDefinitionGroup>
@@ -164,13 +162,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     </I>
   </ItemGroup>
 </Project>";
-            Helpers.VerifyAssertProjectContent(expected, project.Xml);
+            Helpers.VerifyAssertProjectContent(expected, project.Xml, false);
         }
 
         /// <summary>
         /// Removes duplicated metadata and checks evaluation.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void RemoveMetadata2()
         {
             Project project = GetProject(
@@ -193,7 +191,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             ProjectItem item1 = project.GetItems("I").Where(i => i.EvaluatedInclude == "X").First();
             item1.RemoveMetadata("M");
-            
+
             string expected =
 @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
   <ItemDefinitionGroup>
@@ -210,19 +208,19 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     </I>
   </ItemGroup>
 </Project>";
-            Helpers.VerifyAssertProjectContent(expected, project.Xml);
+            Helpers.VerifyAssertProjectContent(expected, project.Xml, false);
 
             project.ReevaluateIfNecessary();
             item1 = project.GetItems("I").Where(i => i.EvaluatedInclude == "X").First();
-            Assert.AreEqual("A;B", item1.GetMetadataValue("M"), "Invalid metadata after first removal");
+            Assert.Equal("A;B", item1.GetMetadataValue("M")); // "Invalid metadata after first removal"
             ProjectItem item2 = project.GetItems("I").Where(i => i.EvaluatedInclude == "Y").First();
-            Assert.AreEqual("A;D", item2.GetMetadataValue("M"), "Invalid metadata after first removal");
+            Assert.Equal("A;D", item2.GetMetadataValue("M")); // "Invalid metadata after first removal"
         }
-    
+
         /// <summary>
         /// Removes metadata but still keep inherited one from item definition.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void RemoveMetadata3()
         {
             Project project = GetProject(
@@ -264,19 +262,19 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     <I Include=""Y"" />
   </ItemGroup>
 </Project>";
-            Helpers.VerifyAssertProjectContent(expected, project.Xml);
+            Helpers.VerifyAssertProjectContent(expected, project.Xml, false);
 
             project.ReevaluateIfNecessary();
             item1 = project.GetItems("I").Where(i => i.EvaluatedInclude == "X").First();
-            Assert.AreEqual("A;B", item1.GetMetadataValue("M"), "Invalid metadata after second removal");
+            Assert.Equal("A;B", item1.GetMetadataValue("M")); // "Invalid metadata after second removal"
             item2 = project.GetItems("I").Where(i => i.EvaluatedInclude == "Y").First();
-            Assert.AreEqual("A", item2.GetMetadataValue("M"), "Invalid metadata after second removal");
+            Assert.Equal("A", item2.GetMetadataValue("M")); // "Invalid metadata after second removal"
         }
 
         /// <summary>
         /// Removes metadata referenced with % qualification.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void RemoveReferencedMetadata()
         {
             Project project = GetProject(
@@ -290,10 +288,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 </Project>");
 
             ProjectItem item = project.GetItems("I").First();
-            Assert.AreEqual("m", item.GetMetadataValue("N"), "Wrong metadata value at startup");
+            Assert.Equal("m", item.GetMetadataValue("N")); // "Wrong metadata value at startup"
 
             item.RemoveMetadata("M");
-            
+
             string expected =
 @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
   <ItemGroup>
@@ -302,20 +300,20 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     </I>
   </ItemGroup>
 </Project>";
-            Helpers.VerifyAssertProjectContent(expected, project.Xml);
+            Helpers.VerifyAssertProjectContent(expected, project.Xml, false);
 
             project.ReevaluateIfNecessary();
             item = project.GetItems("I").First();
             ProjectMetadata metadata = item.GetMetadata("N");
 
-            Assert.AreEqual("%(I.M)", metadata.UnevaluatedValue, "Unevaluated value is wrong");
-            Assert.AreEqual(String.Empty, metadata.EvaluatedValue, "Evaluated value is wrong");
+            Assert.Equal("%(I.M)", metadata.UnevaluatedValue); // "Unevaluated value is wrong"
+            Assert.Equal(String.Empty, metadata.EvaluatedValue); // "Evaluated value is wrong"
         }
-        
+
         /// <summary>
         /// Removes duplicated property.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void RemoveProperty()
         {
             Project project = GetProject(
@@ -336,7 +334,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
   </PropertyGroup>
 </Project>";
 
-            Helpers.VerifyAssertProjectContent(expected, project.Xml);
+            Helpers.VerifyAssertProjectContent(expected, project.Xml, false);
         }
 
         /// <summary>

@@ -6,23 +6,22 @@ using System.IO;
 using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using System.Text.RegularExpressions;
 using System.Text;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 {
-    [TestClass]
     sealed public class RequiredTransformations
     {
         /// <summary>
         ///  ResX to Resources, no references
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void BasicResX2Resources()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -41,11 +40,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 Utilities.ExecuteTask(t);
 
-                Assert.AreEqual("InputValue", t.OutputResources[0].GetMetadata("Attribute"));
+                Assert.Equal("InputValue", t.OutputResources[0].GetMetadata("Attribute"));
                 string resourcesFile = t.OutputResources[0].ItemSpec;
-                Assert.IsTrue(Path.GetExtension(resourcesFile) == ".resources");
+                Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
                 resourcesFile = t.FilesWritten[0].ItemSpec;
-                Assert.IsTrue(Path.GetExtension(resourcesFile) == ".resources");
+                Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
                 Utilities.AssertStateFileWasWritten(t);
             }
             finally
@@ -65,7 +64,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         /// Ensure that OutputResource Metadata is populated on the Sources item
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void OutputResourceMetadataPopulatedOnInputItems()
         {
             string resxFile0 = Utilities.WriteTestResX(false, null, null);
@@ -87,10 +86,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             Utilities.ExecuteTask(t);
 
-            Assert.AreEqual(expectedOutFile0, t.Sources[0].GetMetadata("OutputResource"));
-            Assert.AreEqual(expectedOutFile1, t.Sources[1].GetMetadata("OutputResource"));
-            Assert.AreEqual(expectedOutFile2, t.Sources[2].GetMetadata("OutputResource"));
-            Assert.AreEqual(expectedOutFile3, t.Sources[3].GetMetadata("OutputResource"));
+            Assert.Equal(expectedOutFile0, t.Sources[0].GetMetadata("OutputResource"));
+            Assert.Equal(expectedOutFile1, t.Sources[1].GetMetadata("OutputResource"));
+            Assert.Equal(expectedOutFile2, t.Sources[2].GetMetadata("OutputResource"));
+            Assert.Equal(expectedOutFile3, t.Sources[3].GetMetadata("OutputResource"));
 
             // Done, so clean up.
             File.Delete(resxFile0);
@@ -104,7 +103,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  Text to Resources
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void BasicText2Resources()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc();
@@ -118,11 +117,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 Utilities.ExecuteTask(t);
 
-                Assert.AreEqual("InputValue", t.OutputResources[0].GetMetadata("Attribute"));
+                Assert.Equal("InputValue", t.OutputResources[0].GetMetadata("Attribute"));
                 string resourcesFile = t.OutputResources[0].ItemSpec;
-                Assert.IsTrue(Path.GetExtension(resourcesFile) == ".resources");
+                Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
                 resourcesFile = t.FilesWritten[0].ItemSpec;
-                Assert.IsTrue(Path.GetExtension(resourcesFile) == ".resources");
+                Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
                 Utilities.AssertStateFileWasWritten(t);
             }
             finally
@@ -143,7 +142,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  ResX to Resources with references that are used in the resx
         /// </summary>
         /// <remarks>System dll is not locked because it forces a new app domain</remarks> 
-        [TestMethod]
+        [Fact]
         public void ResX2ResourcesWithReferences()
         {
             string systemDll = Utilities.GetPathToCopiedSystemDLL();
@@ -161,8 +160,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 Utilities.ExecuteTask(t);
 
                 resourcesFile = t.OutputResources[0].ItemSpec;
-                Assert.IsTrue(Path.GetExtension(resourcesFile) == ".resources");
-                Assert.IsTrue(t.FilesWritten[0].ItemSpec == resourcesFile);
+                Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
+                Assert.Equal(t.FilesWritten[0].ItemSpec, resourcesFile);
             }
             finally
             {
@@ -175,7 +174,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  Resources to ResX
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void BasicResources2ResX()
         {
             string resourcesFile = Utilities.CreateBasicResourcesFile(false);
@@ -185,24 +184,24 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             t.Sources = new ITaskItem[] { new TaskItem(resourcesFile) };
             t.OutputResources = new ITaskItem[] { new TaskItem(Path.ChangeExtension(resourcesFile, ".resx")) };
             Utilities.ExecuteTask(t);
-            Assert.IsTrue(Path.GetExtension(t.FilesWritten[0].ItemSpec) == ".resx");
+            Assert.Equal(Path.GetExtension(t.FilesWritten[0].ItemSpec), ".resx");
 
             // Fork 2a: create a text file from the resources
             GenerateResource t2a = Utilities.CreateTaskOutOfProc();
             t2a.Sources = new ITaskItem[] { new TaskItem(resourcesFile) };
             t2a.OutputResources = new ITaskItem[] { new TaskItem(Path.ChangeExtension(resourcesFile, ".txt")) };
             Utilities.ExecuteTask(t2a);
-            Assert.IsTrue(Path.GetExtension(t2a.FilesWritten[0].ItemSpec) == ".txt");
+            Assert.Equal(Path.GetExtension(t2a.FilesWritten[0].ItemSpec), ".txt");
 
             // Fork 2b: create a resx file from the text file
             GenerateResource t2b = Utilities.CreateTaskOutOfProc();
             t2b.Sources = new ITaskItem[] { new TaskItem(t2a.FilesWritten[0].ItemSpec) };
             t2b.OutputResources = new ITaskItem[] { new TaskItem(Utilities.GetTempFileName(".resx")) };
             Utilities.ExecuteTask(t2b);
-            Assert.IsTrue(Path.GetExtension(t2b.FilesWritten[0].ItemSpec) == ".resx");
+            Assert.Equal(Path.GetExtension(t2b.FilesWritten[0].ItemSpec), ".resx");
 
             // make sure the output resx files from each fork are the same
-            Assert.AreEqual(Utilities.ReadFileContent(t.OutputResources[0].ItemSpec),
+            Assert.Equal(Utilities.ReadFileContent(t.OutputResources[0].ItemSpec),
                                    Utilities.ReadFileContent(t2b.OutputResources[0].ItemSpec));
 
             // Done, so clean up.
@@ -216,7 +215,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  Resources to Text
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void BasicResources2Text()
         {
             string resourcesFile = Utilities.CreateBasicResourcesFile(false);
@@ -230,8 +229,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             Utilities.ExecuteTask(t);
 
             resourcesFile = t.FilesWritten[0].ItemSpec;
-            Assert.IsTrue(Path.GetExtension(resourcesFile) == ".txt");
-            Assert.AreEqual(Utilities.GetTestTextContent(null, null, true /*cleaned up */), Utilities.ReadFileContent(resourcesFile));
+            Assert.Equal(Path.GetExtension(resourcesFile), ".txt");
+            Assert.Equal(Utilities.GetTestTextContent(null, null, true /*cleaned up */), Utilities.ReadFileContent(resourcesFile));
 
             // Done, so clean up.
             File.Delete(t.Sources[0].ItemSpec);
@@ -242,7 +241,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  Force out-of-date with ShouldRebuildResgenOutputFile on the source only
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ForceOutOfDate()
         {
             string resxFile = Utilities.WriteTestResX(false, null, null);
@@ -256,9 +255,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 Utilities.ExecuteTask(t);
 
                 string resourcesFile = t.OutputResources[0].ItemSpec;
-                Assert.IsTrue(Path.GetExtension(resourcesFile) == ".resources");
+                Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
                 resourcesFile = t.FilesWritten[0].ItemSpec;
-                Assert.IsTrue(Path.GetExtension(resourcesFile) == ".resources");
+                Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
                 Utilities.AssertStateFileWasWritten(t);
 
                 GenerateResource t2 = Utilities.CreateTaskOutOfProc();
@@ -271,7 +270,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 Utilities.ExecuteTask(t2);
 
-                Assert.IsTrue(DateTime.Compare(File.GetLastWriteTime(t2.OutputResources[0].ItemSpec), time) > 0);
+                Assert.True(DateTime.Compare(File.GetLastWriteTime(t2.OutputResources[0].ItemSpec), time) > 0);
             }
             finally
             {
@@ -290,7 +289,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  Force out-of-date with ShouldRebuildResgenOutputFile on the linked file
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ForceOutOfDateLinked()
         {
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
@@ -305,9 +304,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 Utilities.ExecuteTask(t);
 
                 string resourcesFile = t.OutputResources[0].ItemSpec;
-                Assert.IsTrue(Path.GetExtension(resourcesFile) == ".resources");
+                Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
                 resourcesFile = t.FilesWritten[0].ItemSpec;
-                Assert.IsTrue(Path.GetExtension(resourcesFile) == ".resources");
+                Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
 
                 Utilities.AssertStateFileWasWritten(t);
 
@@ -321,7 +320,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 Utilities.ExecuteTask(t2);
 
-                Assert.IsTrue(DateTime.Compare(File.GetLastWriteTime(t2.OutputResources[0].ItemSpec), time) > 0);
+                Assert.True(DateTime.Compare(File.GetLastWriteTime(t2.OutputResources[0].ItemSpec), time) > 0);
             }
             finally
             {
@@ -341,7 +340,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  Force partially out-of-date: should build only the out of date inputs
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ForceSomeOutOfDate()
         {
             string resxFile = null;
@@ -376,14 +375,14 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 Utilities.ExecuteTask(t2);
 
                 // Check only one output was updated
-                Assert.IsTrue(DateTime.Compare(File.GetLastWriteTime(t2.OutputResources[0].ItemSpec), time) > 0);
-                Assert.IsTrue(DateTime.Compare(File.GetLastWriteTime(t2.OutputResources[1].ItemSpec), time2) == 0);
+                Assert.True(DateTime.Compare(File.GetLastWriteTime(t2.OutputResources[0].ItemSpec), time) > 0);
+                Assert.Equal(0, DateTime.Compare(File.GetLastWriteTime(t2.OutputResources[1].ItemSpec), time2));
 
                 // Although only one file was updated, both should be in OutputResources and FilesWritten
-                Assert.IsTrue(t2.OutputResources[0].ItemSpec == t.OutputResources[0].ItemSpec);
-                Assert.IsTrue(t2.OutputResources[1].ItemSpec == t.OutputResources[1].ItemSpec);
-                Assert.IsTrue(t2.FilesWritten[0].ItemSpec == t.FilesWritten[0].ItemSpec);
-                Assert.IsTrue(t2.FilesWritten[1].ItemSpec == t.FilesWritten[1].ItemSpec);
+                Assert.Equal(t2.OutputResources[0].ItemSpec, t.OutputResources[0].ItemSpec);
+                Assert.Equal(t2.OutputResources[1].ItemSpec, t.OutputResources[1].ItemSpec);
+                Assert.Equal(t2.FilesWritten[0].ItemSpec, t.FilesWritten[0].ItemSpec);
+                Assert.Equal(t2.FilesWritten[1].ItemSpec, t.FilesWritten[1].ItemSpec);
             }
             finally
             {
@@ -398,7 +397,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  Allow ShouldRebuildResgenOutputFile to return "false" since nothing's out of date, including linked file
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void AllowLinkedNoGenerate()
         {
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
@@ -413,9 +412,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 Utilities.ExecuteTask(t);
 
                 string resourcesFile = t.OutputResources[0].ItemSpec;
-                Assert.IsTrue(Path.GetExtension(resourcesFile) == ".resources");
+                Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
                 resourcesFile = t.FilesWritten[0].ItemSpec;
-                Assert.IsTrue(Path.GetExtension(resourcesFile) == ".resources");
+                Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
                 Utilities.AssertStateFileWasWritten(t);
 
                 DateTime time = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
@@ -428,7 +427,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 Utilities.ExecuteTask(t2);
 
-                Assert.IsTrue(time.Equals(File.GetLastWriteTime(t2.OutputResources[0].ItemSpec)));
+                Assert.True(time.Equals(File.GetLastWriteTime(t2.OutputResources[0].ItemSpec)));
             }
             finally
             {
@@ -448,7 +447,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  Allow the task to skip processing based on having nothing out of date
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void NothingOutOfDate()
         {
             string resxFile = null;
@@ -469,10 +468,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 Utilities.ExecuteTask(t);
 
-                Assert.IsTrue(t.OutputResources[0].ItemSpec == resourcesFile1);
-                Assert.IsTrue(t.FilesWritten[0].ItemSpec == resourcesFile1);
-                Assert.IsTrue(t.OutputResources[1].ItemSpec == resourcesFile2);
-                Assert.IsTrue(t.FilesWritten[1].ItemSpec == resourcesFile2);
+                Assert.Equal(t.OutputResources[0].ItemSpec, resourcesFile1);
+                Assert.Equal(t.FilesWritten[0].ItemSpec, resourcesFile1);
+                Assert.Equal(t.OutputResources[1].ItemSpec, resourcesFile2);
+                Assert.Equal(t.FilesWritten[1].ItemSpec, resourcesFile2);
 
                 Utilities.AssertStateFileWasWritten(t);
 
@@ -488,15 +487,15 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 Utilities.ExecuteTask(t2);
                 // Although everything was up to date, OutputResources and FilesWritten
                 // must contain the files that would have been created if they weren't up to date.
-                Assert.IsTrue(t2.OutputResources[0].ItemSpec == resourcesFile1);
-                Assert.IsTrue(t2.FilesWritten[0].ItemSpec == resourcesFile1);
-                Assert.IsTrue(t2.OutputResources[1].ItemSpec == resourcesFile2);
-                Assert.IsTrue(t2.FilesWritten[1].ItemSpec == resourcesFile2);
+                Assert.Equal(t2.OutputResources[0].ItemSpec, resourcesFile1);
+                Assert.Equal(t2.FilesWritten[0].ItemSpec, resourcesFile1);
+                Assert.Equal(t2.OutputResources[1].ItemSpec, resourcesFile2);
+                Assert.Equal(t2.FilesWritten[1].ItemSpec, resourcesFile2);
 
                 Utilities.AssertStateFileWasWritten(t2);
 
-                Assert.IsTrue(time.Equals(File.GetLastWriteTime(t2.OutputResources[0].ItemSpec)));
-                Assert.IsTrue(time2.Equals(File.GetLastWriteTime(t2.OutputResources[1].ItemSpec)));
+                Assert.True(time.Equals(File.GetLastWriteTime(t2.OutputResources[0].ItemSpec)));
+                Assert.True(time2.Equals(File.GetLastWriteTime(t2.OutputResources[1].ItemSpec)));
             }
             finally
             {
@@ -512,7 +511,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// otherwise up to date
         /// </summary>
         /// <remarks>System dll is not locked because it forces a new app domain</remarks>
-        [TestMethod]
+        [Fact]
         public void NothingOutOfDateExceptReference()
         {
             string resxFile = null;
@@ -537,7 +536,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 t2.References = new ITaskItem[] { new TaskItem(systemDll) };
                 t2.StateFile = new TaskItem(t.StateFile);
                 Utilities.ExecuteTask(t2);
-                Assert.IsTrue(time.Equals(File.GetLastWriteTime(t2.OutputResources[0].ItemSpec)));
+                Assert.True(time.Equals(File.GetLastWriteTime(t2.OutputResources[0].ItemSpec)));
 
                 // Touch the reference, and repeat, it should now rebuild
                 DateTime newTime = DateTime.Now + new TimeSpan(0, 1, 0);
@@ -547,7 +546,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 t3.References = new ITaskItem[] { new TaskItem(systemDll) };
                 t3.StateFile = new TaskItem(t.StateFile);
                 Utilities.ExecuteTask(t3);
-                Assert.IsTrue(DateTime.Compare(File.GetLastWriteTime(t3.OutputResources[0].ItemSpec), time) > 0);
+                Assert.True(DateTime.Compare(File.GetLastWriteTime(t3.OutputResources[0].ItemSpec), time) > 0);
                 resourcesFile = t3.OutputResources[0].ItemSpec;
             }
             finally
@@ -561,7 +560,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         /// If an additional input is out of date, resources should be regenerated.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void NothingOutOfDateExceptAdditionalInput()
         {
             string resxFile = null;
@@ -612,7 +611,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  Text to ResX
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void BasicText2ResX()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc();
@@ -626,7 +625,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             Utilities.ExecuteTask(t);
 
             string resourcesFile = t.OutputResources[0].ItemSpec;
-            Assert.IsTrue(Path.GetExtension(resourcesFile) == ".resx");
+            Assert.Equal(Path.GetExtension(resourcesFile), ".resx");
 
             // Done, so clean up.
             File.Delete(t.Sources[0].ItemSpec);
@@ -637,7 +636,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  Round trip from resx to resources to resx with the same blobs
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ResX2ResX()
         {
             try
@@ -649,14 +648,14 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 t.Sources = new ITaskItem[] { new TaskItem(resourcesFile) };
                 t.OutputResources = new ITaskItem[] { new TaskItem(Path.ChangeExtension(resourcesFile, ".resx")) };
                 Utilities.ExecuteTask(t);
-                Assert.IsTrue(Path.GetExtension(t.FilesWritten[0].ItemSpec) == ".resx");
+                Assert.Equal(Path.GetExtension(t.FilesWritten[0].ItemSpec), ".resx");
 
                 // Step 2a: create a resources file from the resx
                 GenerateResource t2a = Utilities.CreateTaskOutOfProc();
                 t2a.Sources = new ITaskItem[] { new TaskItem(t.FilesWritten[0].ItemSpec) };
                 t2a.OutputResources = new ITaskItem[] { new TaskItem(Path.ChangeExtension(t.FilesWritten[0].ItemSpec, ".resources")) };
                 Utilities.ExecuteTask(t2a);
-                Assert.IsTrue(Path.GetExtension(t2a.FilesWritten[0].ItemSpec) == ".resources");
+                Assert.Equal(Path.GetExtension(t2a.FilesWritten[0].ItemSpec), ".resources");
 
                 // Step 2b: create a resx from the resources
                 GenerateResource t2b = Utilities.CreateTaskOutOfProc();
@@ -664,10 +663,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 t2b.OutputResources = new ITaskItem[] { new TaskItem(Utilities.GetTempFileName(".resx")) };
                 File.Delete(t2b.OutputResources[0].ItemSpec);
                 Utilities.ExecuteTask(t2b);
-                Assert.IsTrue(Path.GetExtension(t2b.FilesWritten[0].ItemSpec) == ".resx");
+                Assert.Equal(Path.GetExtension(t2b.FilesWritten[0].ItemSpec), ".resx");
 
                 // make sure the output resx files from each fork are the same
-                Assert.AreEqual(Utilities.ReadFileContent(t.OutputResources[0].ItemSpec),
+                Assert.Equal(Utilities.ReadFileContent(t.OutputResources[0].ItemSpec),
                                        Utilities.ReadFileContent(t2b.OutputResources[0].ItemSpec));
 
                 // Done, so clean up.
@@ -686,7 +685,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  Round trip from text to resources to text with the same blobs
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void Text2Text()
         {
             string textFile = Utilities.WriteTestText(null, null);
@@ -699,7 +698,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             // make sure round 1 is successful
             string resourcesFile = t.OutputResources[0].ItemSpec;
-            Assert.IsTrue(Path.GetExtension(resourcesFile) == ".resources");
+            Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
 
             // round 2, do the resources2Text from the same file
             GenerateResource t2 = Utilities.CreateTaskOutOfProc();
@@ -710,9 +709,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             Utilities.ExecuteTask(t2);
 
             resourcesFile = t2.FilesWritten[0].ItemSpec;
-            Assert.IsTrue(Path.GetExtension(resourcesFile) == ".txt");
+            Assert.Equal(Path.GetExtension(resourcesFile), ".txt");
 
-            Assert.AreEqual(Utilities.GetTestTextContent(null, null, true /*cleaned up */), Utilities.ReadFileContent(resourcesFile));
+            Assert.Equal(Utilities.GetTestTextContent(null, null, true /*cleaned up */), Utilities.ReadFileContent(resourcesFile));
 
             // Done, so clean up.
             File.Delete(t.Sources[0].ItemSpec);
@@ -726,7 +725,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  STR without references yields proper output, message
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void StronglyTypedResources()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc();
@@ -742,15 +741,15 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 string resourcesFile = t.OutputResources[0].ItemSpec;
                 // STR class name should have been generated from the output
                 string stronglyTypedClassName = Path.GetFileNameWithoutExtension(t.OutputResources[0].ItemSpec);
-                Assert.IsTrue(t.StronglyTypedClassName == stronglyTypedClassName);
-                Assert.IsTrue(Path.GetExtension(resourcesFile) == ".resources");
+                Assert.Equal(t.StronglyTypedClassName, stronglyTypedClassName);
+                Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
                 resourcesFile = t.FilesWritten[0].ItemSpec;
-                Assert.IsTrue(Path.GetExtension(resourcesFile) == ".resources");
+                Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
                 Utilities.AssertStateFileWasWritten(t);
                 // Files written should contain STR class file
                 string stronglyTypedFileName = Path.ChangeExtension(t.Sources[0].ItemSpec, ".cs");
-                Assert.IsTrue(t.FilesWritten[t.FilesWritten.Length - 1].ItemSpec == stronglyTypedFileName);
-                Assert.IsTrue(File.Exists(stronglyTypedFileName));
+                Assert.Equal(t.FilesWritten[t.FilesWritten.Length - 1].ItemSpec, stronglyTypedFileName);
+                Assert.True(File.Exists(stronglyTypedFileName));
 
                 string typeName = null;
                 if (t.StronglyTypedNamespace != null)
@@ -780,7 +779,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  STR without references yields proper output, message
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void StronglyTypedResourcesUpToDate()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc();
@@ -797,15 +796,15 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 string resourcesFile = t.OutputResources[0].ItemSpec;
                 // STR class name should have been generated from the output
                 string stronglyTypedClassName = Path.GetFileNameWithoutExtension(t.OutputResources[0].ItemSpec);
-                Assert.IsTrue(t.StronglyTypedClassName == stronglyTypedClassName);
-                Assert.IsTrue(Path.GetExtension(resourcesFile) == ".resources");
+                Assert.Equal(t.StronglyTypedClassName, stronglyTypedClassName);
+                Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
                 resourcesFile = t.FilesWritten[0].ItemSpec;
-                Assert.IsTrue(Path.GetExtension(resourcesFile) == ".resources");
+                Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
                 Utilities.AssertStateFileWasWritten(t);
                 // Files written should contain STR class file
                 string stronglyTypedFileName = Path.ChangeExtension(t.Sources[0].ItemSpec, ".cs");
-                Assert.IsTrue(t.FilesWritten[t.FilesWritten.Length - 1].ItemSpec == stronglyTypedFileName);
-                Assert.IsTrue(File.Exists(stronglyTypedFileName));
+                Assert.Equal(t.FilesWritten[t.FilesWritten.Length - 1].ItemSpec, stronglyTypedFileName);
+                Assert.True(File.Exists(stronglyTypedFileName));
 
                 string typeName = null;
                 if (t.StronglyTypedNamespace != null)
@@ -825,10 +824,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 Utilities.ExecuteTask(t2);
 
-                Assert.IsTrue(t2.OutputResources[0].ItemSpec == resourcesFile);
-                Assert.IsTrue(t2.FilesWritten[0].ItemSpec == resourcesFile);
+                Assert.Equal(t2.OutputResources[0].ItemSpec, resourcesFile);
+                Assert.Equal(t2.FilesWritten[0].ItemSpec, resourcesFile);
                 Utilities.AssertStateFileWasWritten(t2);
-                Assert.IsTrue(t2.FilesWritten[t2.FilesWritten.Length - 1].ItemSpec == Path.ChangeExtension(t2.Sources[0].ItemSpec, ".cs"));
+                Assert.Equal(t2.FilesWritten[t2.FilesWritten.Length - 1].ItemSpec, Path.ChangeExtension(t2.Sources[0].ItemSpec, ".cs"));
             }
             finally
             {
@@ -855,7 +854,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         /// STR class file is out of date, but resources are up to date. Should still generate it.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void StronglyTypedResourcesOutOfDate()
         {
             string resxFile = null;
@@ -881,12 +880,12 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 // STR class name generated from output resource file name
                 string stronglyTypedClassName = Path.GetFileNameWithoutExtension(resourcesFile);
-                Assert.IsTrue(t.StronglyTypedClassName == stronglyTypedClassName);
+                Assert.Equal(t.StronglyTypedClassName, stronglyTypedClassName);
                 resourcesFile = t.OutputResources[0].ItemSpec;
-                Assert.IsTrue(Path.GetExtension(resourcesFile) == ".resources");
-                Assert.IsTrue(File.Exists(resourcesFile));
-                Assert.IsTrue(t.FilesWritten[t.FilesWritten.Length - 1].ItemSpec == strFile);
-                Assert.IsTrue(File.Exists(strFile));
+                Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
+                Assert.True(File.Exists(resourcesFile));
+                Assert.Equal(t.FilesWritten[t.FilesWritten.Length - 1].ItemSpec, strFile);
+                Assert.True(File.Exists(strFile));
 
                 // Repeat. It should not update either file.
                 // First move both the timestamps back so they're still up to date,
@@ -899,7 +898,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 t.StronglyTypedLanguage = "C#";
                 t.StateFile = new TaskItem(cacheFile);
                 Utilities.ExecuteTask(t);
-                Assert.IsTrue(!Utilities.FileUpdated(strFile, strTime)); // Was not updated
+                Assert.False(Utilities.FileUpdated(strFile, strTime)); // Was not updated
 
                 // OK, now delete the STR class file
                 File.Delete(strFile);
@@ -911,11 +910,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 t.StronglyTypedLanguage = "C#";
                 t.StateFile = new TaskItem(cacheFile);
                 Utilities.ExecuteTask(t);
-                Assert.IsTrue(Utilities.FileUpdated(strFile, strTime)); // Was updated
-                Assert.IsTrue(t.OutputResources[0].ItemSpec == resourcesFile);
-                Assert.IsTrue(File.Exists(resourcesFile));
-                Assert.IsTrue(t.FilesWritten[t.FilesWritten.Length - 1].ItemSpec == strFile);
-                Assert.IsTrue(File.Exists(strFile));
+                Assert.True(Utilities.FileUpdated(strFile, strTime)); // Was updated
+                Assert.Equal(t.OutputResources[0].ItemSpec, resourcesFile);
+                Assert.True(File.Exists(resourcesFile));
+                Assert.Equal(t.FilesWritten[t.FilesWritten.Length - 1].ItemSpec, strFile);
+                Assert.True(File.Exists(strFile));
 
                 // OK, now delete the STR class file again
                 File.Delete(strFile);
@@ -928,7 +927,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 t.StronglyTypedLanguage = "C#";
                 t.StronglyTypedFileName = strFile;
                 Utilities.ExecuteTask(t);
-                Assert.IsTrue(File.Exists(strFile));
+                Assert.True(File.Exists(strFile));
             }
             finally
             {
@@ -942,7 +941,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         /// Verify STR generation with a specified specific filename
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void StronglyTypedResourcesWithFilename()
         {
             string txtFile = null;
@@ -963,15 +962,15 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 // Check resources is output
                 resourcesFile = t.OutputResources[0].ItemSpec;
-                Assert.IsTrue(Path.GetExtension(resourcesFile) == ".resources");
-                Assert.IsTrue(t.OutputResources.Length == 1);
-                Assert.IsTrue(Path.GetExtension(t.FilesWritten[0].ItemSpec) == ".resources");
-                Assert.IsTrue(File.Exists(resourcesFile));
+                Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
+                Assert.Equal(1, t.OutputResources.Length);
+                Assert.Equal(Path.GetExtension(t.FilesWritten[0].ItemSpec), ".resources");
+                Assert.True(File.Exists(resourcesFile));
 
                 // Check STR file is output
-                Assert.IsTrue(t.FilesWritten[1].ItemSpec == strFile);
-                Assert.IsTrue(t.StronglyTypedFileName == strFile);
-                Assert.IsTrue(File.Exists(strFile));
+                Assert.Equal(t.FilesWritten[1].ItemSpec, strFile);
+                Assert.Equal(t.StronglyTypedFileName, strFile);
+                Assert.True(File.Exists(strFile));
 
                 string typeName = "";
                 if (t.StronglyTypedNamespace != null)
@@ -994,7 +993,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  STR with VB
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void StronglyTypedResourcesVB()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc();
@@ -1009,14 +1008,14 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 // FilesWritten should contain STR class file
                 string stronglyTypedFileName = Path.ChangeExtension(t.Sources[0].ItemSpec, ".vb");
-                Assert.IsTrue(t.FilesWritten[t.FilesWritten.Length - 1].ItemSpec == stronglyTypedFileName);
+                Assert.Equal(t.FilesWritten[t.FilesWritten.Length - 1].ItemSpec, stronglyTypedFileName);
 
                 string resourcesFile = t.OutputResources[0].ItemSpec;
-                Assert.IsTrue(Path.GetExtension(resourcesFile) == ".resources");
+                Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
                 resourcesFile = t.FilesWritten[0].ItemSpec;
-                Assert.IsTrue(Path.GetExtension(resourcesFile) == ".resources");
+                Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
                 Utilities.AssertStateFileWasWritten(t);
-                Assert.IsTrue(File.Exists(stronglyTypedFileName));
+                Assert.True(File.Exists(stronglyTypedFileName));
 
                 string typeName = null;
                 if (t.StronglyTypedNamespace != null)
@@ -1046,7 +1045,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  STR namespace can be empty
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void StronglyTypedResourcesWithoutNamespaceOrClassOrFilename()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc();
@@ -1061,22 +1060,22 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 Utilities.ExecuteTask(t);
 
                 string resourcesFile = t.OutputResources[0].ItemSpec;
-                Assert.IsTrue(Path.GetExtension(resourcesFile) == ".resources");
+                Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
                 resourcesFile = t.FilesWritten[0].ItemSpec;
-                Assert.IsTrue(Path.GetExtension(resourcesFile) == ".resources");
+                Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
 
                 Utilities.AssertStateFileWasWritten(t);
 
                 // Should have defaulted the STR filename to the bare output resource name + ".cs"
                 string STRfile = Path.ChangeExtension(t.Sources[0].ItemSpec, ".cs");
-                Assert.IsTrue(t.StronglyTypedFileName == STRfile);
-                Assert.IsTrue(File.Exists(STRfile));
+                Assert.Equal(t.StronglyTypedFileName, STRfile);
+                Assert.True(File.Exists(STRfile));
 
                 // Should have defaulted the class name to the bare output resource name
-                Assert.IsTrue(t.StronglyTypedClassName == Path.GetFileNameWithoutExtension(t.OutputResources[0].ItemSpec));
+                Assert.Equal(t.StronglyTypedClassName, Path.GetFileNameWithoutExtension(t.OutputResources[0].ItemSpec));
 
                 // Should not have used a namespace
-                Assert.IsTrue(!File.ReadAllText(t.StronglyTypedFileName).Contains("namespace"));
+                Assert.False(File.ReadAllText(t.StronglyTypedFileName).Contains("namespace"));
             }
             finally
             {
@@ -1096,7 +1095,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  STR with resource namespace yields proper output, message (CS)
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void STRWithResourcesNamespaceCS()
         {
             Utilities.STRNamespaceTestHelper("CSharp", "MyResourcesNamespace", null);
@@ -1105,7 +1104,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  STR with resource namespace yields proper output, message (VB)
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void STRWithResourcesNamespaceVB()
         {
             Utilities.STRNamespaceTestHelper("VB", "MyResourcesNamespace", null);
@@ -1114,7 +1113,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  STR with resource namespace and STR namespace yields proper output, message (CS)
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void STRWithResourcesNamespaceAndSTRNamespaceCS()
         {
             Utilities.STRNamespaceTestHelper("CSharp", "MyResourcesNamespace", "MySTClassNamespace");
@@ -1123,20 +1122,19 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  STR with resource namespace and STR namespace yields proper output, message (CS)
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void STRWithResourcesNamespaceAndSTRNamespaceVB()
         {
             Utilities.STRNamespaceTestHelper("VB", "MyResourcesNamespace", "MySTClassNamespace");
         }
     }
 
-    [TestClass]
     sealed public class TransformationErrors
     {
         /// <summary>
         ///  Text input failures, no name, no '=', 'strings' token, invalid token, invalid escape
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TextToResourcesBadFormat()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -1186,7 +1184,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             t.Sources = new ITaskItem[] { new TaskItem(textFile) };
             bool success = t.Execute();
             // Task should have succeeded (it was just a warning)
-            Assert.IsTrue(success);
+            Assert.True(success);
             // warning that 'strings' is an obsolete tag
             Utilities.AssertLogContains(t, "WARNING RG0000");
 
@@ -1199,7 +1197,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  Cause failures in ResXResourceReader
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void FailedResXReader()
         {
             string resxFile1 = null;
@@ -1223,16 +1221,16 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 File.Delete(resourcesFile2);
                 bool success = t.Execute();
                 // Task should have failed
-                Assert.IsTrue(!success);
+                Assert.False(success);
 
                 Utilities.AssertStateFileWasWritten(t);
                 // Should not have created an output for the invalid resx
                 // Should have created the other file
-                Assert.IsTrue(!File.Exists(resourcesFile1));
-                Assert.IsTrue(t.OutputResources[0].ItemSpec == resourcesFile2);
-                Assert.IsTrue(t.OutputResources.Length == 1);
-                Assert.IsTrue(t.FilesWritten[0].ItemSpec == resourcesFile2);
-                Assert.IsTrue(File.Exists(resourcesFile2));
+                Assert.False(File.Exists(resourcesFile1));
+                Assert.Equal(t.OutputResources[0].ItemSpec, resourcesFile2);
+                Assert.Equal(1, t.OutputResources.Length);
+                Assert.Equal(t.FilesWritten[0].ItemSpec, resourcesFile2);
+                Assert.True(File.Exists(resourcesFile2));
 
                 // "error in resource file" with exception from the framework --
                 // resgen.exe error
@@ -1250,7 +1248,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  Cause failures in ResXResourceReader, different codepath
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void FailedResXReaderWithAllOutputResourcesSpecified()
         {
             string resxFile1 = null;
@@ -1276,17 +1274,17 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 bool success = t.Execute();
                 // Task should have failed
-                Assert.IsTrue(!success);
+                Assert.False(success);
 
                 Utilities.AssertStateFileWasWritten(t);
 
                 // Should not have created an output for the invalid resx
                 // Should have created the other file
-                Assert.IsTrue(!File.Exists(resourcesFile1));
-                Assert.IsTrue(t.OutputResources[0].ItemSpec == resourcesFile2);
-                Assert.IsTrue(t.OutputResources.Length == 1);
-                Assert.IsTrue(t.FilesWritten[0].ItemSpec == resourcesFile2);
-                Assert.IsTrue(File.Exists(resourcesFile2));
+                Assert.False(File.Exists(resourcesFile1));
+                Assert.Equal(t.OutputResources[0].ItemSpec, resourcesFile2);
+                Assert.Equal(1, t.OutputResources.Length);
+                Assert.Equal(t.FilesWritten[0].ItemSpec, resourcesFile2);
+                Assert.True(File.Exists(resourcesFile2));
 
                 // "error in resource file" with exception from the framework --
                 // resgen.exe error
@@ -1312,7 +1310,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  Duplicate resource names
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DuplicateResourceNames()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc();
@@ -1321,7 +1319,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             t.Sources = new ITaskItem[] { new TaskItem(textFile) };
             bool success = t.Execute();
             // Task should have succeeded (it was just a warning)
-            Assert.IsTrue(success);
+            Assert.True(success);
 
             // "duplicate resource name" -- from resgen.exe
             Utilities.AssertLogContains(t, "WARNING RG0000");
@@ -1335,7 +1333,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  Non-string resource with text output
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void UnsupportedTextType()
         {
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
@@ -1347,7 +1345,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             t.OutputResources = new ITaskItem[] { new TaskItem(Path.ChangeExtension(resxFile, ".txt")) };
             bool success = t.Execute();
             // Task should have failed
-            Assert.IsTrue(!success);
+            Assert.False(success);
 
             // "only strings can be written to a .txt file"
             // resgen.exe error
@@ -1363,7 +1361,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         /// Can't write the statefile
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void InvalidStateFile()
         {
             string resxFile = null;
@@ -1377,11 +1375,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 t.StateFile = new TaskItem("||invalid filename||");
 
                 // Should still succeed
-                Assert.IsTrue(t.Execute());
+                Assert.True(t.Execute());
 
                 resourcesFile = t.OutputResources[0].ItemSpec;
-                Assert.IsTrue(Path.GetExtension(resourcesFile) == ".resources");
-                Assert.IsTrue(t.FilesWritten[0].ItemSpec == t.OutputResources[0].ItemSpec);
+                Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
+                Assert.Equal(t.FilesWritten[0].ItemSpec, t.OutputResources[0].ItemSpec);
             }
             finally
             {
@@ -1393,7 +1391,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  Cause failures in ResourceReader
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void FailedResourceReader()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc();
@@ -1409,7 +1407,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             bool success = t.Execute();
             // Task should have failed
-            Assert.IsTrue(!success);
+            Assert.False(success);
 
             // "error in resource file" with exception from the framework --
             // resgen.exe error
@@ -1424,7 +1422,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  Invalid STR Class name
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void FailedSTRProperty()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc();
@@ -1439,7 +1437,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             bool success = t.Execute();
             // Task should have failed
-            Assert.IsTrue(!success);
+            Assert.False(success);
 
             // cannot write to STR class file -- resgen.exe error
             Utilities.AssertLogContains(t, "ERROR RG0000");
@@ -1454,7 +1452,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         /// Reference passed in that can't be loaded should error
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void InvalidReference()
         {
             string txtFile = null;
@@ -1472,11 +1470,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 bool result = t.Execute();
                 // Task should have failed
-                Assert.IsTrue(!result);
+                Assert.False(result);
 
                 // Should have not written any files
-                Assert.IsTrue(t.FilesWritten != null && t.FilesWritten.Length == 0);
-                Assert.IsTrue(!File.Exists(resourcesFile));
+                Assert.True(t.FilesWritten != null && t.FilesWritten.Length == 0);
+                Assert.False(File.Exists(resourcesFile));
             }
             finally
             {
@@ -1485,13 +1483,12 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         }
     }
 
-    [TestClass]
     sealed public class PropertyHandling
     {
         /// <summary>
         ///  Sources attributes are copied to given OutputResources
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void AttributeForwarding()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -1515,13 +1512,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             // Locale was forward from source item and should overwrite the 'fr'
             // locale that the output item originally had.
-            Assert.AreEqual("fr", t.OutputResources[0].GetMetadata("Locale"));
+            Assert.Equal("fr", t.OutputResources[0].GetMetadata("Locale"));
 
             // Output ItemSpec should not be overwritten.
-            Assert.AreEqual("MyAlternateResource.resources", t.OutputResources[0].ItemSpec);
+            Assert.Equal("MyAlternateResource.resources", t.OutputResources[0].ItemSpec);
 
             // Attributes not on Sources should be left untouched.
-            Assert.AreEqual("Pumpkin", t.OutputResources[0].GetMetadata("Flavor"));
+            Assert.Equal("Pumpkin", t.OutputResources[0].GetMetadata("Flavor"));
 
             // Done, so clean up.
             File.Delete(t.Sources[0].ItemSpec);
@@ -1532,7 +1529,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  Sources attributes copied to computed OutputResources
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void AttributeForwardingOnEmptyOutputs()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc();
@@ -1546,10 +1543,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             // Output ItemSpec should be computed from input
             string resourcesFile = Path.ChangeExtension(resxFile, ".resources");
-            Assert.AreEqual(resourcesFile, t.OutputResources[0].ItemSpec);
+            Assert.Equal(resourcesFile, t.OutputResources[0].ItemSpec);
 
             // Attribute from source should be copied to output
-            Assert.AreEqual("en-GB", t.OutputResources[0].GetMetadata("Locale"));
+            Assert.Equal("en-GB", t.OutputResources[0].GetMetadata("Locale"));
 
             // Done, so clean up.
             File.Delete(t.Sources[0].ItemSpec);
@@ -1560,7 +1557,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  OutputFiles used for output, and also are synthesized if not set on input
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void OutputFilesNotSpecified()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc();
@@ -1578,7 +1575,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             for (int i = 0; i < t.Sources.Length; i++)
             {
                 string outputFile = Path.ChangeExtension(t.Sources[i].ItemSpec, ".resources");
-                Assert.AreEqual(outputFile, t.OutputResources[i].ItemSpec);
+                Assert.Equal(outputFile, t.OutputResources[i].ItemSpec);
             }
 
             // Done, so clean up.
@@ -1591,7 +1588,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  FilesWritten contains OutputResources + StateFile
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void FilesWrittenSet()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc();
@@ -1611,8 +1608,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             for (i = 0; i < 4; i++)
             {
-                Assert.AreEqual(t.FilesWritten[i].ItemSpec, t.OutputResources[i].ItemSpec);
-                Assert.IsTrue(File.Exists(t.FilesWritten[i].ItemSpec));
+                Assert.Equal(t.FilesWritten[i].ItemSpec, t.OutputResources[i].ItemSpec);
+                Assert.True(File.Exists(t.FilesWritten[i].ItemSpec));
             }
 
             Utilities.AssertStateFileWasWritten(t);
@@ -1632,7 +1629,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  Resource transformation fails on 3rd of 4 inputs, inputs 1 & 2 & 4 are in outputs and fileswritten.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void OutputFilesPartialInputs()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc();
@@ -1654,26 +1651,26 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 bool success = t.Execute();
                 // Task should have failed
-                Assert.IsTrue(!success);
+                Assert.False(success);
 
                 string outputFile = Path.ChangeExtension(t.Sources[0].ItemSpec, ".resources");
-                Assert.AreEqual(outputFile, t.OutputResources[0].ItemSpec);
-                Assert.IsTrue(File.Exists(t.OutputResources[0].ItemSpec));
+                Assert.Equal(outputFile, t.OutputResources[0].ItemSpec);
+                Assert.True(File.Exists(t.OutputResources[0].ItemSpec));
                 outputFile = Path.ChangeExtension(t.Sources[1].ItemSpec, ".resources");
-                Assert.AreEqual(outputFile, t.OutputResources[1].ItemSpec);
-                Assert.IsTrue(File.Exists(t.OutputResources[1].ItemSpec));
+                Assert.Equal(outputFile, t.OutputResources[1].ItemSpec);
+                Assert.True(File.Exists(t.OutputResources[1].ItemSpec));
                 // Sources[2] should NOT have been converted and should not be in OutputResources
                 outputFile = Path.ChangeExtension(t.Sources[2].ItemSpec, ".resources");
-                Assert.IsTrue(!File.Exists(outputFile));
+                Assert.False(File.Exists(outputFile));
                 // Sources[3] should have been converted
                 outputFile = Path.ChangeExtension(t.Sources[3].ItemSpec, ".resources");
-                Assert.AreEqual(outputFile, t.OutputResources[2].ItemSpec);
-                Assert.IsTrue(File.Exists(t.OutputResources[2].ItemSpec));
+                Assert.Equal(outputFile, t.OutputResources[2].ItemSpec);
+                Assert.True(File.Exists(t.OutputResources[2].ItemSpec));
 
                 // FilesWritten should contain only the 3 successfully output .resources and the cache
-                Assert.IsTrue(t.FilesWritten[0].ItemSpec == Path.ChangeExtension(t.Sources[0].ItemSpec, ".resources"));
-                Assert.IsTrue(t.FilesWritten[1].ItemSpec == Path.ChangeExtension(t.Sources[1].ItemSpec, ".resources"));
-                Assert.IsTrue(t.FilesWritten[2].ItemSpec == Path.ChangeExtension(t.Sources[3].ItemSpec, ".resources"));
+                Assert.Equal(t.FilesWritten[0].ItemSpec, Path.ChangeExtension(t.Sources[0].ItemSpec, ".resources"));
+                Assert.Equal(t.FilesWritten[1].ItemSpec, Path.ChangeExtension(t.Sources[1].ItemSpec, ".resources"));
+                Assert.Equal(t.FilesWritten[2].ItemSpec, Path.ChangeExtension(t.Sources[3].ItemSpec, ".resources"));
                 Utilities.AssertStateFileWasWritten(t);
 
                 // Make sure there was an error on the second resource
@@ -1698,7 +1695,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  STR class name derived from output file transformation
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void StronglyTypedClassName()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc();
@@ -1715,9 +1712,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 Utilities.ExecuteTask(t);
 
-                Assert.AreEqual(t.StronglyTypedClassName, Path.GetFileNameWithoutExtension(t.StronglyTypedFileName));
+                Assert.Equal(t.StronglyTypedClassName, Path.GetFileNameWithoutExtension(t.StronglyTypedFileName));
                 // Verify class was public, as we specified
-                Assert.IsTrue(File.ReadAllText(t.StronglyTypedFileName).Contains("public class " + t.StronglyTypedClassName));
+                Assert.True(File.ReadAllText(t.StronglyTypedFileName).Contains("public class " + t.StronglyTypedClassName));
 
                 Utilities.AssertStateFileWasWritten(t);
             }
@@ -1739,7 +1736,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  STR class file name derived from class name transformation
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void StronglyTypedFileName()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc();
@@ -1755,11 +1752,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 Utilities.ExecuteTask(t);
 
                 Utilities.AssertStateFileWasWritten(t);
-                Assert.AreEqual(t.StronglyTypedFileName, Path.ChangeExtension(t.Sources[0].ItemSpec, ".cs"));
-                Assert.IsTrue(File.Exists(t.StronglyTypedFileName));
+                Assert.Equal(t.StronglyTypedFileName, Path.ChangeExtension(t.Sources[0].ItemSpec, ".cs"));
+                Assert.True(File.Exists(t.StronglyTypedFileName));
 
                 // Verify class was internal, since we didn't specify a preference
-                Assert.IsTrue(File.ReadAllText(t.StronglyTypedFileName).Contains("internal class " + t.StronglyTypedClassName));
+                Assert.True(File.ReadAllText(t.StronglyTypedFileName).Contains("internal class " + t.StronglyTypedClassName));
             }
             finally
             {
@@ -1778,13 +1775,12 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         }
     }
 
-    [TestClass]
     sealed public class PropertyErrors
     {
         /// <summary>
         ///  Empty Sources yields message, success
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EmptySources()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -1808,7 +1804,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  References with invalid assemblies yields warning
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReferencesToBadAssemblies()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc();
@@ -1823,7 +1819,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 // Resgen.exe attempts to consume the bad reference even if it's not
                 // necessary, so task should fail
-                Assert.IsTrue(!success);
+                Assert.False(success);
             }
             finally
             {
@@ -1839,7 +1835,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  Source item not found
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SourceItemMissing()
         {
             string txtFile = null;
@@ -1854,15 +1850,15 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 t.Sources = new ITaskItem[] { new TaskItem("non-existent.resx"), new TaskItem(txtFile) };
                 bool success = t.Execute();
                 // Task should have failed
-                Assert.IsTrue(!success);
+                Assert.False(success);
 
                 // Invalid resx file: "Resource file cannot be found". 
                 Utilities.AssertLogContains(t, "ERROR MSB3552");
 
                 // Should have processed remaining file
-                Assert.IsTrue(t.OutputResources.Length == 1);
-                Assert.IsTrue(t.OutputResources[0].ItemSpec == resourcesFile);
-                Assert.IsTrue(File.Exists(resourcesFile));
+                Assert.Equal(1, t.OutputResources.Length);
+                Assert.Equal(t.OutputResources[0].ItemSpec, resourcesFile);
+                Assert.True(File.Exists(resourcesFile));
             }
             finally
             {
@@ -1874,7 +1870,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  Non-existent StateFile yields message
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void StateFileUnwritable()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc();
@@ -1911,7 +1907,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  Bad file extension on input
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void InputFileExtension()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc();
@@ -1942,7 +1938,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  Bad file extension on output
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void OutputFileExtension()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc();
@@ -1973,7 +1969,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  Sources and OutputResources different # of elements
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SourcesMatchesOutputResources()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc();
@@ -2003,7 +1999,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  Invalid StronglyTypedLanguage yields CodeDOM exception
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void UnknownStronglyTypedLanguage()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc();
@@ -2034,7 +2030,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         /// StronglyTypedLanguage, but more than one resources file
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void StronglyTypedResourceWithMoreThanOneInputResourceFile()
         {
             string resxFile = null;
@@ -2049,13 +2045,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile), new TaskItem(resxFile2) };
                 t.StronglyTypedLanguage = "VisualBasic";
 
-                Assert.IsTrue(!t.Execute());
+                Assert.False(t.Execute());
 
                 // "str language but more than one source file"
                 Utilities.AssertLogContains(t, "MSB3573");
 
-                Assert.IsTrue(t.FilesWritten.Length == 0);
-                Assert.IsTrue(t.OutputResources == null || t.OutputResources.Length == 0);
+                Assert.Equal(0, t.FilesWritten.Length);
+                Assert.True(t.OutputResources == null || t.OutputResources.Length == 0);
             }
             finally
             {
@@ -2069,7 +2065,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         ///  STR class name derived from output file transormation
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void BadStronglyTypedFilename()
         {
             string txtFile = null;
@@ -2088,7 +2084,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 bool success = t.Execute();
                 // Task should have failed
-                Assert.IsTrue(!success);
+                Assert.False(success);
 
                 // Other messages in InProc.PropertyErrors.BadStronglyTypedFilename() will not
                 // show up because their equivalents (in sentiment but not exact syntax) will 
@@ -2110,7 +2106,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         /// Verify that passing a STR class without a language, errors
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void StronglyTypedResourceClassWithoutLanguage()
         {
             string txtFile = null;
@@ -2127,13 +2123,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 bool success = t.Execute();
                 // Task should have failed
-                Assert.IsTrue(!success);
+                Assert.False(success);
 
                 Utilities.AssertLogContainsResource(t, "GenerateResource.STRClassNamespaceOrFilenameWithoutLanguage");
 
                 // Even the .resources wasn't created
-                Assert.IsTrue(!File.Exists(resourcesFile));
-                Assert.IsTrue(t.FilesWritten.Length == 0);
+                Assert.False(File.Exists(resourcesFile));
+                Assert.Equal(0, t.FilesWritten.Length);
             }
             finally
             {
@@ -2144,7 +2140,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         /// Verify that passing a STR namespace without a language, errors
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void StronglyTypedResourceNamespaceWithoutLanguage()
         {
             string txtFile = null;
@@ -2161,13 +2157,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 bool success = t.Execute();
                 // Task should have failed
-                Assert.IsTrue(!success);
+                Assert.False(success);
 
                 Utilities.AssertLogContainsResource(t, "GenerateResource.STRClassNamespaceOrFilenameWithoutLanguage");
 
                 // Even the .resources wasn't created
-                Assert.IsTrue(!File.Exists(resourcesFile));
-                Assert.IsTrue(t.FilesWritten.Length == 0);
+                Assert.False(File.Exists(resourcesFile));
+                Assert.Equal(0, t.FilesWritten.Length);
             }
             finally
             {
@@ -2178,7 +2174,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         /// Verify that passing a STR filename without a language, errors
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void StronglyTypedResourceFilenameWithoutLanguage()
         {
             string txtFile = null;
@@ -2195,13 +2191,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 bool success = t.Execute();
                 // Task should have failed
-                Assert.IsTrue(!success);
+                Assert.False(success);
 
                 Utilities.AssertLogContainsResource(t, "GenerateResource.STRClassNamespaceOrFilenameWithoutLanguage");
 
                 // Even the .resources wasn't created
-                Assert.IsTrue(!File.Exists(resourcesFile));
-                Assert.IsTrue(t.FilesWritten.Length == 0);
+                Assert.False(File.Exists(resourcesFile));
+                Assert.Equal(0, t.FilesWritten.Length);
             }
             finally
             {
@@ -2212,7 +2208,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         /// Verify that passing a STR language with more than 1 sources errors
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void StronglyTypedResourceFileIsExistingDirectory()
         {
             string dir = null;
@@ -2235,7 +2231,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 bool success = t.Execute();
                 // Task should have failed
-                Assert.IsTrue(!success);
+                Assert.False(success);
 
                 // "AccessDeniedException" -- StronglyTypedFileName can't be 
                 // a directory
@@ -2243,9 +2239,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 Utilities.AssertLogContains(t, t.StronglyTypedClassName);
 
                 // Resgen.exe does not create either the resources or the STR file
-                Assert.IsTrue(!File.Exists(resourcesFile));
-                Assert.IsTrue(!File.Exists(csFile));
-                Assert.IsTrue(t.FilesWritten.Length == 0);
+                Assert.False(File.Exists(resourcesFile));
+                Assert.False(File.Exists(csFile));
+                Assert.Equal(0, t.FilesWritten.Length);
             }
             finally
             {
@@ -2255,7 +2251,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Regress25163_OutputResourcesContainsInvalidPathCharacters()
         {
             string resourcesFile = null;
@@ -2270,7 +2266,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 bool success = t.Execute();
 
-                Assert.IsFalse(success, "Task should have failed.");
+                Assert.False(success); // "Task should have failed."
 
                 // We will now hit the error earlier in task execution when checking for duplicates so we will not get resgen to even execute.
                 Utilities.AssertLogContains(t, "MSB3553");
@@ -2282,11 +2278,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         }
     }
 
-    [TestClass]
     public class References
     {
-        [TestMethod]
-        [Ignore] // "ResGen.exe is claiming there is a null reference -- have contacted CDF about the issue"
+        [Fact]
         public void DontLockP2PReferenceWhenResolvingSystemTypes()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -2339,7 +2333,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             ObjectModelHelpers.BuildTempProjectFileExpectSuccess("lib1.csproj");
 
             string p2pReference = Path.Combine(ObjectModelHelpers.TempProjectDir, @"bin\debug\lib1.dll");
-            Assert.IsTrue(File.Exists(p2pReference), "lib1.dll doesn't exist.");
+            Assert.True(File.Exists(p2pReference)); // "lib1.dll doesn't exist."
 
             // -------------------------------------------------------------------------------
             // Done producing an assembly on disk.
@@ -2445,7 +2439,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             bool success = t.Execute();
 
             // Make sure the resource was built.
-            Assert.IsTrue(success, "GenerateResource failed");
+            Assert.True(success); // "GenerateResource failed"
             ObjectModelHelpers.AssertFileExistsInTempProjectDirectory("MyStrings.resources");
 
             // Make sure the P2P reference is not locked after calling GenerateResource.
@@ -2459,8 +2453,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// Assembly.LoadFile on that relative path, which fails (LoadFile requires an
         /// absolute path).  The fix was to use Assembly.LoadFrom instead.
         /// </summary>
-        [TestMethod]
-        [Ignore] // "ResGen.exe is claiming there is a null reference -- have contacted CDF about the issue"
+        [Fact]
         public void ReferencedAssemblySpecifiedUsingRelativePath()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -2589,24 +2582,27 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             // Set the current working directory to the location of ClassLibrary20.csproj.
             // This is what allows us to pass in a relative path to the referenced assembly.
-            string originalCurrentDirectory = Environment.CurrentDirectory;
-            Environment.CurrentDirectory = ObjectModelHelpers.TempProjectDir;
+            string originalCurrentDirectory = Directory.GetCurrentDirectory();
+            Directory.SetCurrentDirectory(ObjectModelHelpers.TempProjectDir);
 
-            bool success = t.Execute();
+            try
+            {
+                bool success = t.Execute();
 
-            // Restore the current working directory to what it was before the test.
-            Environment.CurrentDirectory = originalCurrentDirectory;
-
-            // Make sure the resource was built.
-            Assert.IsTrue(success, "GenerateResource failed");
-            ObjectModelHelpers.AssertFileExistsInTempProjectDirectory("MyStrings.resources");
+                // Make sure the resource was built.
+                Assert.True(success); // "GenerateResource failed"
+                ObjectModelHelpers.AssertFileExistsInTempProjectDirectory("MyStrings.resources");
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(originalCurrentDirectory);
+            }
         }
     }
 
-    [TestClass]
     public class MiscTests
     {
-        [TestMethod]
+        [Fact]
         public void ResgenCommandLineLogging()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -2761,7 +2757,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// <summary>
         /// Validate that when using ResGen 3.5, a command line command where the last parameter takes us past the 28,000 character limit is handled appropriately
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ResgenCommandLineExceedsAllowedLength()
         {
             string sdkToolsPath;
@@ -2774,7 +2770,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             }
             else
             {
-                Assert.IsTrue(true, "We only need to test .NET 3.5 ResGen, if it isn't on disk then pass the test and return");
+                Assert.True(true); // "We only need to test .NET 3.5 ResGen, if it isn't on disk then pass the test and return"
                 return;
             }
 
@@ -2854,7 +2850,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 t.UseSourcePath = false;
                 t.NeverLockTypeAssemblies = false;
                 t.SdkToolsPath = sdkToolsPath;
-                Assert.IsTrue(t.Execute(), "Task should have completed succesfully");
+                Assert.True(t.Execute()); // "Task should have completed succesfully"
 
                 Utilities.AssertLogContains(t, "/compile");
                 foreach (ITaskItem i in sources)
@@ -2905,12 +2901,12 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// v3.5 path.  It is difficult to verify the tool paths in a unit test, however, so 
         /// this was done by ad hoc testing and will be maintained by the dev suites.  
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MultiTargetingDefaultsSetCorrectly()
         {
             GenerateResource t = new GenerateResource();
 
-            Assert.IsTrue(t.ExecuteAsTool, "ExecuteAsTool should default to true");
+            Assert.True(t.ExecuteAsTool); // "ExecuteAsTool should default to true"
         }
     }
 }
@@ -2942,7 +2938,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         {
             foreach (ITaskItem file in filesWritten)
             {
-                Assert.IsTrue(Path.GetExtension(file.ItemSpec).Equals(".tlog", StringComparison.OrdinalIgnoreCase), "The only files written should be tlogs");
+                Assert.True(Path.GetExtension(file.ItemSpec).Equals(".tlog", StringComparison.OrdinalIgnoreCase)); // "The only files written should be tlogs"
             }
         }
     }
