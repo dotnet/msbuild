@@ -28,7 +28,7 @@ if errorlevel 1 GOTO ERROR
 call dotnet test %WebSdkRoot%\test\Publish\Microsoft.NET.Sdk.Publish.Tasks.Tests\Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj /p:SkipInvalidConfigurations=true;configuration=Release
 if errorlevel 1 GOTO ERROR
 
-msbuild %WebSdkRoot%\dirs.proj /p:configuration=Release;SkipInvalidConfigurations=true /t:Build;Sign
+msbuild %WebSdkRoot%\build.proj /p:configuration=Release;SkipInvalidConfigurations=true /t:Build;Sign
 if errorlevel 0 exit /b 0
 
 :ERROR

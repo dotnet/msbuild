@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26004.1
+VisualStudioVersion = 15.0.26028.2
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.NET.Sdk.Web.ProjectSystem.Package", "src\Web\Microsoft.NET.Sdk.Web.ProjectSystem.Package\Microsoft.NET.Sdk.Web.ProjectSystem.Package.csproj", "{800AAAB3-AE22-483C-90A8-E1056CF39D5A}"
 EndProject
@@ -27,6 +27,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{1CAF6E2F-326F-4E77-B067-6CD22EAE89B6}"
 	ProjectSection(SolutionItems) = preProject
 		tools\Build.cmd = tools\Build.cmd
+		build.proj = build.proj
 		dirs.proj = dirs.proj
 		dotnet-install.ps1 = dotnet-install.ps1
 		tools\EnsureWebSdkEnv.cmd = tools\EnsureWebSdkEnv.cmd
@@ -43,7 +44,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{4927120B-89F
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.NET.Sdk.Publish.Package", "src\Publish\Microsoft.NET.Sdk.Publish.Package\Microsoft.NET.Sdk.Publish.Package.csproj", "{66A79C91-8FB7-4F46-8B43-3D4CD32F5736}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.NET.Sdk.Publish.Tasks", "src\Publish\Microsoft.NET.Sdk.Publish.Tasks\Microsoft.NET.Sdk.Publish.Tasks.csproj", "{994A9D35-ED60-4000-B7A1-A7CDD71B0E60}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Sdk.Publish.Tasks", "src\Publish\Microsoft.NET.Sdk.Publish.Tasks\Microsoft.NET.Sdk.Publish.Tasks.csproj", "{994A9D35-ED60-4000-B7A1-A7CDD71B0E60}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NETCore.Sdk.Publish.Tasks", "src\Publish\Microsoft.NETCore.Sdk.Publish.Tasks\Microsoft.NETCore.Sdk.Publish.Tasks.csproj", "{F81ED1C2-3D7A-46A9-9E39-F2B718CA940F}"
 EndProject
@@ -81,7 +82,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{3CA45E5E-5
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Publish", "Publish", "{E537A967-65B7-46F5-8574-01F8C08F385F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.NET.Sdk.Publish.Tasks.Tests", "test\Publish\Microsoft.NET.Sdk.Publish.Tasks.Tests\Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj", "{66964EC2-712A-451A-AB4F-33F18D8F54F1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Sdk.Publish.Tasks.Tests", "test\Publish\Microsoft.NET.Sdk.Publish.Tasks.Tests\Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj", "{66964EC2-712A-451A-AB4F-33F18D8F54F1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TransformTargets", "TransformTargets", "{37FCE9FE-671D-4F3E-B3C1-FE90AC4CF822}"
 	ProjectSection(SolutionItems) = preProject
