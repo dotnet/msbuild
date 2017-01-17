@@ -1115,7 +1115,7 @@ namespace Microsoft.Build.Construction
         public static ProjectRootElement Open(string path, ProjectCollection projectCollection)
         {
             return Open(path, projectCollection,
-                preserveFormatting: false);
+                preserveFormatting: null);
         }
 
         /// <summary>
@@ -1162,7 +1162,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         public static ProjectRootElement TryOpen(string path, ProjectCollection projectCollection)
         {
-            return TryOpen(path, projectCollection, preserveFormatting: false);
+            return TryOpen(path, projectCollection, preserveFormatting: null);
         }
 
         /// <summary>
