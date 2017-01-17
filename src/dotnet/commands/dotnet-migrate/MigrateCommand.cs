@@ -145,9 +145,13 @@ namespace Microsoft.DotNet.Tools.Migrate
                 }
             }
 
-            _slnFile.ProductDescription = ProductDescription;
-            _slnFile.VisualStudioVersion = VisualStudioVersion;
-            _slnFile.MinimumVisualStudioVersion = MinimumVisualStudioVersion;
+            Version version;
+            if (!Version.TryParse(_slnFile.VisualStudioVersion, out version) || version.Major < 15)
+            {
+                _slnFile.ProductDescription = ProductDescription;
+                _slnFile.VisualStudioVersion = VisualStudioVersion;
+                _slnFile.MinimumVisualStudioVersion = MinimumVisualStudioVersion;
+            }
 
             _slnFile.Write();
 
