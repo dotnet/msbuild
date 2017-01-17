@@ -103,24 +103,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   </ItemGroup>
 
-  <!-- Set the default versions of the NETStandard.Library or Microsoft.NETCore.App packages to reference.
-       The implicit package references themselves are defined in Microsoft.NET.Sdk.props, so that they can be overridden
-       in the project file. -->
-  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' And '$(NetStandardImplicitPackageVersion)' == ''">
-    <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(NetCoreAppImplicitPackageVersion)' == ''" >
-    
-    <!-- For Microsoft.NETCore.App, default to using the version of the package that matches the target framework version -->
-    <NetCoreAppImplicitPackageVersion>$(_TargetFrameworkVersionWithoutV)</NetCoreAppImplicitPackageVersion>
-    
-    <!-- When the TFM is .NET Core 1.0, use version 1.0.3 of the Microsoft.NETCore.App package -->
-    <NetCoreAppImplicitPackageVersion Condition=" '$(_TargetFrameworkVersionWithoutV)' == '1.0' ">1.0.3</NetCoreAppImplicitPackageVersion>
-    
-  </PropertyGroup>
-
-
   <!-- Add conditional compilation symbols for the target framework (for example NET461, NETSTANDARD2_0, NETCOREAPP1_0) -->
   <PropertyGroup Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' and '$(TargetFrameworkIdentifier)' != '.NETPortable'">
     <_FrameworkIdentifierForImplicitDefine>$(TargetFrameworkIdentifier.Replace('.', '').ToUpperInvariant())</_FrameworkIdentifierForImplicitDefine>

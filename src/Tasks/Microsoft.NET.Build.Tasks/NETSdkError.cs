@@ -24,13 +24,22 @@ namespace Microsoft.NET.Build.Tasks
         /// </summary>
         public string[] FormatArguments { get; set; }
 
+        public bool WarningOnly { get; set; }
+
         protected override void ExecuteCore()
         {
             string format = Strings.ResourceManager.GetString(ResourceName, Strings.Culture);
             string[] arguments = FormatArguments ?? Array.Empty<string>();
             string message = string.Format(CultureInfo.CurrentCulture, format, arguments);
 
-            Log.LogError(message);
+            if (WarningOnly)
+            {
+                Log.LogWarning(message);
+            }
+            else
+            {
+                Log.LogError(message);
+            }
         }
     }
 }
