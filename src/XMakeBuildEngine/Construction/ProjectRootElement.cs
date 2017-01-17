@@ -1898,10 +1898,10 @@ namespace Microsoft.Build.Construction
 
             Func<bool, XmlDocumentWithLocation> documentProducer = shouldPreserveFormatting => LoadDocument(path, shouldPreserveFormatting);
 
-            // Reloads from a file leave this object up to date wrt to that file, so mark the object as up to date
-            Action postReloadActions = MarkAsUpToDateToDisk;
+            ReloadFrom(documentProducer, throwIfUnsavedChanges, preserveFormatting);
 
-            ReloadFrom(documentProducer, throwIfUnsavedChanges, preserveFormatting, postReloadActions);
+            // Reloads from a file leave this object up to date wrt to that file, so mark the object as up to date
+            MarkAsUpToDateToDisk();
         }
 
         /// <summary>
@@ -1927,7 +1927,7 @@ namespace Microsoft.Build.Construction
             ReloadFrom(documentProducer, throwIfUnsavedChanges, preserveFormatting);
         }
 
-        private void ReloadFrom(Func<bool, XmlDocumentWithLocation> documentProducer, bool throwIfUnsavedChanges, bool? preserveFormatting, Action postReloadActions = null)
+        private void ReloadFrom(Func<bool, XmlDocumentWithLocation> documentProducer, bool throwIfUnsavedChanges, bool? preserveFormatting)
         {
             ThrowIfUnsavedChanges(throwIfUnsavedChanges);
 
@@ -1946,8 +1946,6 @@ namespace Microsoft.Build.Construction
             ProjectParser.Parse(document, this);
 
             MarkDirty("Project reloaded", null);
-
-            postReloadActions?.Invoke();
         }
 
         [MethodImpl(MethodImplOptions.NoOptimization)]
