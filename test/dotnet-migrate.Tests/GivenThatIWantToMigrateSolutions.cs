@@ -64,6 +64,11 @@ namespace Microsoft.DotNet.Migration.Tests
             //    .Should().Pass();
 
             SlnFile slnFile = SlnFile.Read(Path.Combine(projectDirectory.FullName, solutionRelPath));
+
+            slnFile.ProductDescription.Should().Be("Visual Studio 15"); ;
+            slnFile.VisualStudioVersion.Should().Be("15.0.26114.2");
+            slnFile.MinimumVisualStudioVersion.Should().Be("10.0.40219.1");
+
             var nonSolutionFolderProjects = slnFile.Projects
                 .Where(p => p.TypeGuid != ProjectTypeGuids.SolutionFolderGuid);
 

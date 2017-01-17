@@ -20,6 +20,10 @@ namespace Microsoft.DotNet.Tools.Migrate
 {
     public partial class MigrateCommand
     {
+        private const string ProductDescription = "Visual Studio 15";
+        private const string VisualStudioVersion = "15.0.26114.2";
+        private const string MinimumVisualStudioVersion = "10.0.40219.1";
+
         private SlnFile _slnFile;
         private readonly DirectoryInfo _workspaceDirectory;
         private readonly string _templateFile;
@@ -140,6 +144,10 @@ namespace Microsoft.DotNet.Tools.Migrate
                     csprojFilesToAdd.Add(Path.Combine(report.ProjectDirectory, preExisting));
                 }
             }
+
+            _slnFile.ProductDescription = ProductDescription;
+            _slnFile.VisualStudioVersion = VisualStudioVersion;
+            _slnFile.MinimumVisualStudioVersion = MinimumVisualStudioVersion;
 
             _slnFile.Write();
 
