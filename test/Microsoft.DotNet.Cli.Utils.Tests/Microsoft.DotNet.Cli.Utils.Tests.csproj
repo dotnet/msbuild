@@ -57,16 +57,16 @@
       <Version>4.1.1</Version>
     </PackageReference>
     <PackageReference Include="NuGet.Versioning">
-      <Version>4.0.0-rc3</Version>
+      <Version>4.0.0-rc3-2215</Version>
     </PackageReference>
     <PackageReference Include="NuGet.Packaging">
-      <Version>4.0.0-rc3</Version>
+      <Version>4.0.0-rc3-2215</Version>
     </PackageReference>
     <PackageReference Include="NuGet.Frameworks">
-      <Version>4.0.0-rc3</Version>
+      <Version>4.0.0-rc3-2215</Version>
     </PackageReference>
     <PackageReference Include="NuGet.ProjectModel">
-      <Version>4.0.0-rc3</Version>
+      <Version>4.0.0-rc3-2215</Version>
     </PackageReference>
     <PackageReference Include="moq.netcore">
       <Version>4.4.0-beta8</Version>
