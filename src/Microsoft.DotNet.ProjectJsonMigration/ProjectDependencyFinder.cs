@@ -323,7 +323,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             return projects;
         }
 
-        private static bool AddIfProjectExists(List<ProjectDependency> projects, DirectoryInfo projectDirectory)
+        private static void AddIfProjectExists(List<ProjectDependency> projects, DirectoryInfo projectDirectory)
         {
             var projectJSONFilePath = Path.Combine(projectDirectory.FullName, "project.json");
             var csProjFilePath = Path.Combine(projectDirectory.FullName, $"{projectDirectory.Name}.csproj");
