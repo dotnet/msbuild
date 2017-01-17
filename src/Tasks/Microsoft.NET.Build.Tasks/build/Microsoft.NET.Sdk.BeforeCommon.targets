@@ -114,8 +114,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_FrameworkVersionForImplicitDefine>$(_FrameworkVersionForImplicitDefine.Replace('.', '_'))</_FrameworkVersionForImplicitDefine>
     
     <_FrameworkVersionForImplicitDefine Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework'">$(_FrameworkVersionForImplicitDefine.Replace('_', ''))</_FrameworkVersionForImplicitDefine>
-    
-    <DefineConstants>$(DefineConstants);$(_FrameworkIdentifierForImplicitDefine)$(_FrameworkVersionForImplicitDefine)</DefineConstants>
+
+    <ImplicitFrameworkDefine>$(_FrameworkIdentifierForImplicitDefine)$(_FrameworkVersionForImplicitDefine)</ImplicitFrameworkDefine>
   </PropertyGroup>
 
   <!-- Handle XML documentation file settings -->

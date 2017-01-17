@@ -29,4 +29,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ImplicitConfigurationDefine>$(ImplicitConfigurationDefine.Replace('.', '_'))</ImplicitConfigurationDefine>
     <DefineConstants>$(DefineConstants);$(ImplicitConfigurationDefine)</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);$(ImplicitFrameworkDefine)</DefineConstants>
+  </PropertyGroup>
 </Project>
