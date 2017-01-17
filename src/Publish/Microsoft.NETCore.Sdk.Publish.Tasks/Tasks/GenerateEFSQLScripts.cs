@@ -75,8 +75,9 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
                 RedirectStandardOutput = false,
                 UseShellExecute = false
             };
+            psi.EnvironmentVariables["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "true";
 
-            Process proc;
+            Process proc = null;
 
             try
             {
