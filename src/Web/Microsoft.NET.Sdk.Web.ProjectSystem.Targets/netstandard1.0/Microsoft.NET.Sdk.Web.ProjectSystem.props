@@ -15,8 +15,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DefaultItemExcludes>$(DefaultItemExcludes);node_modules/**</DefaultItemExcludes>
     <DefaultItemExcludes>$(DefaultItemExcludes);jspm_packages/**</DefaultItemExcludes>
     <DefaultItemExcludes>$(DefaultItemExcludes);bower_components/**</DefaultItemExcludes>
-
     <OutputType>Exe</OutputType>
+    <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType>
     <PreserveCompilationContext Condition="'$(PreserveCompilationContext)' == ''">True</PreserveCompilationContext>
   </PropertyGroup>
 
