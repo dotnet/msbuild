@@ -1806,7 +1806,7 @@ namespace Microsoft.Build.Construction
                         _lastWriteTimeWhenRead = fileInfo.LastWriteTime;
                     }
 
-                    MarkAsUpToDateToDisk();
+                    MarkAsUpToDateWithDisk();
                 }
             }
 #if MSBUILDENABLEVSPROFILING 
@@ -1856,10 +1856,10 @@ namespace Microsoft.Build.Construction
                 XmlDocument.Save(projectWriter);
             }
 
-            MarkAsUpToDateToDisk();
+            MarkAsUpToDateWithDisk();
         }
 
-        private void MarkAsUpToDateToDisk()
+        private void MarkAsUpToDateWithDisk()
         {
             _versionOnDisk = Version;
         }
@@ -1901,7 +1901,7 @@ namespace Microsoft.Build.Construction
             ReloadFrom(documentProducer, throwIfUnsavedChanges, preserveFormatting);
 
             // Reloads from a file leave this object up to date wrt to that file, so mark the object as up to date
-            MarkAsUpToDateToDisk();
+            MarkAsUpToDateWithDisk();
         }
 
         /// <summary>
