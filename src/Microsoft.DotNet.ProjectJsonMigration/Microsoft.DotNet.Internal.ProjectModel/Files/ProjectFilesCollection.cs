@@ -9,14 +9,9 @@ namespace Microsoft.DotNet.Internal.ProjectModel.Files
 {
     internal class ProjectFilesCollection
     {
-        public static readonly string[] DefaultCompileBuiltInPatterns = new[] { @"**/*.cs" };
+        public static readonly string[] SdkInjectedDefaultCompileBuiltInPatterns = new[] { @"**/*.cs" };
         public static readonly string[] DefaultPreprocessPatterns = new[] { @"compiler/preprocess/**/*.cs" };
         public static readonly string[] DefaultSharedPatterns = new[] { @"compiler/shared/**/*.cs" };
-        public static readonly string[] DefaultResourcesBuiltInPatterns = new[] { @"compiler/resources/**/*", "**/*.resx" };
-
-        public static readonly string[] DefaultPublishExcludePatterns = new string[0];
-        public static readonly string[] DefaultContentsBuiltInPatterns = new string[0];
-
         public static readonly string[] DefaultBuiltInExcludePatterns = new[] { "bin/**", "obj/**", "**/*.xproj", "packages/**" };
 
         public static readonly string PackIncludePropertyName = "packInclude";
@@ -53,11 +48,11 @@ namespace Microsoft.DotNet.Internal.ProjectModel.Files
             var excludeBuiltIns = PatternsCollectionHelper.GetPatternsCollection(_rawProject, _projectDirectory, _projectFilePath, "excludeBuiltIn", DefaultBuiltInExcludePatterns);
             var excludePatterns = PatternsCollectionHelper.GetPatternsCollection(_rawProject, _projectDirectory, _projectFilePath, "exclude")
                                                           .Concat(excludeBuiltIns);
-            var contentBuiltIns = PatternsCollectionHelper.GetPatternsCollection(_rawProject, _projectDirectory, _projectFilePath, "contentBuiltIn", DefaultContentsBuiltInPatterns);
-            var compileBuiltIns = PatternsCollectionHelper.GetPatternsCollection(_rawProject, _projectDirectory, _projectFilePath, "compileBuiltIn", DefaultCompileBuiltInPatterns);
-            var resourceBuiltIns = PatternsCollectionHelper.GetPatternsCollection(_rawProject, _projectDirectory, _projectFilePath, "resourceBuiltIn", DefaultResourcesBuiltInPatterns);
+            var contentBuiltIns = PatternsCollectionHelper.GetPatternsCollection(_rawProject, _projectDirectory, _projectFilePath, "contentBuiltIn");
+            var compileBuiltIns = PatternsCollectionHelper.GetPatternsCollection(_rawProject, _projectDirectory, _projectFilePath, "compileBuiltIn", SdkInjectedDefaultCompileBuiltInPatterns);
+            var resourceBuiltIns = PatternsCollectionHelper.GetPatternsCollection(_rawProject, _projectDirectory, _projectFilePath, "resourceBuiltIn");
 
-            _publishExcludePatterns = PatternsCollectionHelper.GetPatternsCollection(_rawProject, _projectDirectory, _projectFilePath, "publishExclude", DefaultPublishExcludePatterns);
+            _publishExcludePatterns = PatternsCollectionHelper.GetPatternsCollection(_rawProject, _projectDirectory, _projectFilePath, "publishExclude");
 
             _sharedPatternsGroup = PatternGroup.Build(_rawProject, _projectDirectory, _projectFilePath, "shared", fallbackIncluding: DefaultSharedPatterns, additionalExcluding: excludePatterns);
 

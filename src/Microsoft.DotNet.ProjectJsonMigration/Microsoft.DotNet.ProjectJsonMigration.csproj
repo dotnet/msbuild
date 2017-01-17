@@ -11,6 +11,9 @@
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="sdkdefaults.json" />
+    <Content Include="dotnet-supported-package-versions.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.DotNet.Cli.Sln.Internal\Microsoft.DotNet.Cli.Sln.Internal.csproj" />
