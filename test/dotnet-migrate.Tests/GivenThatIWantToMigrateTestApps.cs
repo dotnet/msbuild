@@ -164,6 +164,21 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Fact]
+        public void ItMigratesAPackageReferenceAsSuchEvenIfAFolderWithTheSameNameExistsInTheRepo()
+        {
+            var solutionDirectory =
+                TestAssetsManager.CreateTestInstance("AppWithPackageNamedAfterFolder").Path;
+            var appProject = Path.Combine(solutionDirectory, "App", "App.csproj");
+
+            MigrateProject(solutionDirectory);
+
+            var projectRootElement = ProjectRootElement.Open(appProject);
+            projectRootElement.Items.Where(
+                i => i.Include == "EntityFramework" && i.ItemType == "PackageReference")
+                .Should().HaveCount(2);
+        }
+
+        [Fact]
         public void ItAddsMicrosoftNetWebSdkToTheSdkAttributeOfAWebApp()
         {
             var testInstance = TestAssetsManager
