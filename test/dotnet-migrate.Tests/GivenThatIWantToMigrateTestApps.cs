@@ -177,6 +177,18 @@ namespace Microsoft.DotNet.Migration.Tests
                 i => i.Include == "EntityFramework" && i.ItemType == "PackageReference")
                 .Should().HaveCount(2);
         }
+        [Fact]
+        public void ItMigratesAProjectThatDependsOnAMigratedProjectWithTheSkipProjectReferenceFlag()
+        {
+            const string dependentProject = "ProjectA";
+            const string dependencyProject = "ProjectB";
+
+            var projectDirectory = TestAssetsManager.CreateTestInstance("TestAppDependencyGraph").Path;
+
+            MigrateProject(Path.Combine(projectDirectory, dependencyProject));
+
+            MigrateProject("--skip-project-references", Path.Combine(projectDirectory, dependentProject));
+        }
 
         [Fact]
         public void ItAddsMicrosoftNetWebSdkToTheSdkAttributeOfAWebApp()
