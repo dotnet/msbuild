@@ -10,11 +10,11 @@ using Microsoft.DotNet.InternalAbstractions;
 
 namespace Microsoft.NET.TestFramework.Commands
 {
-    public sealed class PublishCommand : TestCommand
+    public sealed class ComposeCache : TestCommand
     {
-        private const string PublishSubfolderName = "publish";
+        private const string PublishSubfolderName = "packages";
 
-        public PublishCommand(MSBuildTest msbuild, string projectPath)
+        public ComposeCache(MSBuildTest msbuild, string projectPath)
             : base(msbuild, projectPath)
         {
         }
@@ -22,16 +22,17 @@ namespace Microsoft.NET.TestFramework.Commands
         public override CommandResult Execute(params string[] args)
         {
             var newArgs = args.ToList();
+
             newArgs.Insert(0, FullPathProjectFile);
 
-            var command = MSBuild.CreateCommandForTarget("publish", newArgs.ToArray());
+            var command = MSBuild.CreateCommandForTarget("ComposeCache", newArgs.ToArray());
 
             return command.Execute();
         }
 
-        public DirectoryInfo GetOutputDirectory(string targetFramework = "netcoreapp1.0", string configuration = "Debug", string runtimeIdentifier = "", bool selfContained = false)
+        public DirectoryInfo GetOutputDirectory(string targetFramework = "netcoreapp1.0", string configuration = "Debug", string runtimeIdentifier = "")
         {
-            string output = Path.Combine(ProjectRootPath, "bin", BuildRelativeOutputPath(targetFramework, configuration, runtimeIdentifier, selfContained));
+            string output = Path.Combine(ProjectRootPath, "bin", BuildRelativeOutputPath(targetFramework, configuration, runtimeIdentifier));
             return new DirectoryInfo(output);
         }
 
@@ -40,14 +41,14 @@ namespace Microsoft.NET.TestFramework.Commands
             return Path.Combine(GetOutputDirectory().FullName, $"{appName}.dll");
         }
 
-        private string BuildRelativeOutputPath(string targetFramework, string configuration, string runtimeIdentifier, bool selfContained)
+        private string BuildRelativeOutputPath(string targetFramework, string configuration, string runtimeIdentifier)
         {
-            if (runtimeIdentifier.Length == 0 && selfContained)
+            if (runtimeIdentifier.Length == 0)
             {
                 runtimeIdentifier = RuntimeEnvironment.GetRuntimeIdentifier();
             }
-			
-            return Path.Combine(configuration, targetFramework, runtimeIdentifier, PublishSubfolderName);
+            string arch = runtimeIdentifier.Substring(runtimeIdentifier.LastIndexOf("-") + 1);
+            return Path.Combine(configuration, arch, targetFramework, PublishSubfolderName);
         }
     }
 }
