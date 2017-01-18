@@ -63,6 +63,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <Delete
       Files="@(_DestinationFiles)"
       Condition="'$(DeleteExistingFiles)' == 'true'" />
+
+    <RemoveDir
+      Directories="$(PublishUrl)"
+      Condition="'$(DeleteExistingFiles)' == 'true' And Exists('$(PublishUrl)')" />
+
+    <MakeDir
+      Directories="$(PublishUrl)"
+      Condition="'$(DeleteExistingFiles)' == 'true' And !Exists('$(PublishUrl)')"/>
   </Target>
 
   <!--
