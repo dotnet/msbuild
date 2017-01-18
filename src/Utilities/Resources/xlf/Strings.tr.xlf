@@ -165,28 +165,28 @@
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledAsNoTrackingLog">
         <source>{0} will be compiled because the tracking log is not available.</source>
-        <target state="updated">İzleme günlüğü kullanılamadığından {0} derlenecek.</target>
-        <note></note>
+        <target state="translated">İzleme günlüğü kullanılamadığından {0} derlenecek.</target>
+        <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceNotInTrackingLog">
         <source>{0} will be compiled because it was not found in the tracking log.</source>
-        <target state="updated">İzleme günlüğünde bulunamadığından {0} derlenecek.</target>
-        <note></note>
+        <target state="translated">İzleme günlüğünde bulunamadığından {0} derlenecek.</target>
+        <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceOutputsNotAvailable">
         <source>{0} will be compiled because not all outputs are available.</source>
-        <target state="updated">Tüm çıkışlar kullanılamadığından {0} derlenecek.</target>
-        <note></note>
+        <target state="translated">Tüm çıkışlar kullanılamadığından {0} derlenecek.</target>
+        <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledMissingDependency">
         <source>{0} will be compiled because dependency {1} was missing.</source>
-        <target state="updated">{1} bağımlılığı eksik olduğundan {0} derlenecek.</target>
-        <note></note>
+        <target state="translated">{1} bağımlılığı eksik olduğundan {0} derlenecek.</target>
+        <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledDependencyWasModifiedAt">
         <source>{0} will be compiled because {1} was modified at {2}.</source>
-        <target state="updated">{1} {2} konumunda değiştirildiğinden {0} derlenecek.</target>
-        <note></note>
+        <target state="translated">{1}, {2} üzerinde değiştirildiğinden {0} derlenecek.</target>
+        <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiled">
         <source>{0} will be compiled.</source>
@@ -210,8 +210,8 @@
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledOutputDoesNotExist">
         <source>{0} will be compiled because output {1} does not exist.</source>
-        <target state="updated">{1} çıkışı var olmadığından {0} derlenecek.</target>
-        <note></note>
+        <target state="translated">{1} çıkışı mevcut olmadığından {0} derlenecek.</target>
+        <note />
       </trans-unit>
       <trans-unit id="Tracking_ReadTrackingLogs">
         <source>Read Tracking Logs:</source>

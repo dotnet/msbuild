@@ -51,7 +51,7 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
       <trans-unit id="HelpMessage_1_Syntax">
         <source>Syntax:              MSBuild.exe [options] [project file | directory]
 </source>
-        <target state="updated">Syntaxe :              MSBuild.exe [options] [fichier projet]
+        <target state="translated">Syntaxe :              MSBuild.exe [options] [fichier projet | répertoire]
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -70,10 +70,12 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
                      a directory is specified, MSBuild searches that
                      directory for a project file.
 </source>
-        <target state="updated">Description :         Génère les cibles spécifiées dans le fichier projet. Si
+        <target state="translated">Description :         Génère les cibles spécifiées dans le fichier projet. Si
                      aucun fichier projet n'est spécifié, MSBuild recherche dans le
                      répertoire de travail actuel un fichier dont
-                     l'extension se termine par "proj" et utilise ce dernier.
+                     l'extension se termine par « proj » et utilise ce dernier. Si
+                     un répertoire est spécifié, MSBuild recherche dans ce
+                     répertoire un fichier projet.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -1184,7 +1186,7 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
       </trans-unit>
       <trans-unit id="AmbiguousProjectDirectoryError">
         <source>MSBUILD : error MSB1050: Specify which project or solution file to use because the folder "{0}" contains more than one project or solution file.</source>
-        <target state="new">MSBUILD : error MSB1050: Specify which project or solution file to use because the folder "{0}" contains more than one project or solution file.</target>
+        <target state="translated">MSBUILD : error MSB1050: Spécifiez le fichier projet ou solution à utiliser, car le dossier "{0}" contient plusieurs fichiers projet ou solution.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1050: "}UE: If no project or solution file is explicitly specified on the MSBuild.exe command-line, then the engine searches for a
       project or solution file in the current directory by looking for *.*PROJ and *.SLN. If more than one file is found that matches this wildcard, we
@@ -1206,18 +1208,19 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
                      continue to execute as if it was a warning but the overall
                      build will fail.
     </source>
-        <target state="new">  /warnaserror[:code[;code2]]
-                     List of warning codes to treats as errors.  Use a semicolon
-                     or a comma to separate multiple warning codes. To treat all
-                     warnings as errors use the switch with no values.
-                     (Short form: /err[:c;[c2]])
+        <target state="translated">  /warnaserror[:code[;code2]]
+                     Liste de codes d'avertissement à traiter comme des erreurs. Utilisez
+                     un point-virgule ou une virgule pour séparer plusieurs codes
+                     d'avertissement. Pour traiter tous les avertissements comme des erreurs,
+                     utilisez le commutateur sans valeur.
+                     (Forme abrégée : /err[:c;[c2]])
 
-                     Example:
+                     Exemple :
                        /warnaserror:MSB4130
 
-                     When a warning is treated as an error the target will
-                     continue to execute as if it was a warning but the overall
-                     build will fail.
+                     Quand un avertissement est traité comme une erreur, la cible
+                     continue de s'exécuter comme un avertissement, mais la génération
+                     globale échoue.
     </target>
         <note>
       LOCALIZATION: "/warnaserror" and "/err" should not be localized.
@@ -1234,13 +1237,13 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
                      Example:
                        /warnasmessage:MSB3026
     </source>
-        <target state="new">  /warnasmessage[:code[;code2]]
-                     List of warning codes to treats as low importance
-                     messages.  Use a semicolon or a comma to separate
-                     multiple warning codes.
-                     (Short form: /nowarn[:c;[c2]])
+        <target state="translated">  /warnasmessage[:code[;code2]]
+                     Liste de codes d'avertissement à traiter comme des messages
+                     d'importance faible. Utilisez un point-virgule ou une virgule pour séparer
+                     plusieurs codes d'avertissement.
+                     (Forme abrégée : /nowarn[:c;[c2]])
 
-                     Example:
+                     Exemple :
                        /warnasmessage:MSB3026
     </target>
         <note>
@@ -1250,12 +1253,12 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
       </trans-unit>
       <trans-unit id="ParameterRequiredError">
         <source>MSBUILD : error MSB1049: The {0} parameter must be specified</source>
-        <target state="new">MSBUILD : error MSB1049: The {0} parameter must be specified</target>
+        <target state="translated">MSBUILD : error MSB1049: Le paramètre {0} doit être spécifié</target>
         <note>{StrBegin="MSBUILD : error MSB1049: "}</note>
       </trans-unit>
       <trans-unit id="MissingWarnAsMessageParameterError">
         <source>MSBUILD : error MSB1051: Specify one or more warning codes to treat as low importance messages when using the /warnasmessage switch.</source>
-        <target state="new">MSBUILD : error MSB1051: Specify one or more warning codes to treat as low importance messages when using the /warnasmessage switch.</target>
+        <target state="translated">MSBUILD : error MSB1051: Spécifiez un ou plusieurs codes d'avertissement à traiter comme des messages d'importance faible lors de l'utilisation du commutateur /warnasmessage.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1051: "}
       UE: This happens if the user does something like "msbuild.exe /warnasmessage:" without any codes.

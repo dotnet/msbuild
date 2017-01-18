@@ -10,7 +10,7 @@
       </trans-unit>
       <trans-unit id="BuildEngineCallbacksInTaskHostUnsupported">
         <source>MSB5022: The MSBuild task host does not support running tasks that perform IBuildEngine callbacks. If you wish to perform these operations, please run your task in the core MSBuild process instead.  A task will automatically execute in the task host if the UsingTask has been attributed with a "Runtime" or "Architecture" value, or the task invocation has been attributed with an "MSBuildRuntime" or "MSBuildArchitecture" value, that does not match the current runtime or architecture of MSBuild.</source>
-        <target state="translated">MSB5022: l'host attività MSBuild non supporta l'esecuzione di attività che eseguono callback IBuildEngine. Per eseguire tali operazioni, eseguire l'attività nel processo MSBuild di base.  Un'attività verrà automaticamente eseguita nell'host attività se per UsingTask è stato definito un attributo con valore "Runtime" o "Architecture" o se per la chiamata all'attività è stato definito un attributo con valore "MSBuildRuntime" o "MSBuildArchitecture" che non corrisponde al runtime corrente o all'architettura di MSBuild.</target>
+        <target state="translated">MSB5022: l'host attività MSBuild non supporta l'esecuzione di attività che eseguono callback IBuildEngine. Per eseguire tali operazioni, eseguire l'attività nel processo MSBuild di base. Un'attività verrà automaticamente eseguita nell'host attività se per UsingTask è stato definito un attributo con valore "Runtime" o "Architecture" o se per la chiamata all'attività è stato definito un attributo con valore "MSBuildRuntime" o "MSBuildArchitecture" che non corrisponde al runtime corrente o all'architettura di MSBuild.</target>
         <note>{StrBegin="MSB5022: "} "Runtime", "Architecture", "MSBuildRuntime", and "MSBuildArchitecture" are all attributes in the project file, and thus should not be localized.</note>
       </trans-unit>
       <trans-unit id="BuildStarted">
@@ -45,7 +45,7 @@
       </trans-unit>
       <trans-unit id="InvalidProjectFile">
         <source>MSB4025: The project file could not be loaded. {0}</source>
-        <target state="translated">MSB4025: impossibile caricare il file di progetto. {0}</target>
+        <target state="translated">MSB4025: non è stato possibile caricare il file di progetto. {0}</target>
         <note>{StrBegin="MSB4025: "}UE: This message is shown when the project file given to the engine cannot be loaded because the filename/path is
     invalid, or due to lack of permissions, or incorrect XML. The project filename is not part of the message because it is
     provided separately to loggers.
@@ -78,7 +78,7 @@
       </trans-unit>
       <trans-unit id="Shared.CannotConvertStringToBool">
         <source>The string "{0}" cannot be converted to a boolean (true/false) value.</source>
-        <target state="translated">Impossibile convertire la stringa "{0}" in un valore Boolean (true/false).</target>
+        <target state="translated">Non è possibile convertire la stringa "{0}" in un valore Boolean (true/false).</target>
         <note />
       </trans-unit>
       <trans-unit id="Shared.FailedCreatingTempFile">
@@ -93,7 +93,7 @@
       </trans-unit>
       <trans-unit id="Shared.InvalidFilespecForTransform">
         <source>The item metadata "%({0})" cannot be applied to the path "{1}". {2}</source>
-        <target state="translated">Impossibile applicare i metadati dell'elemento "%({0})" al percorso "{1}". {2}</target>
+        <target state="translated">Non è possibile applicare i metadati dell'elemento "%({0})" al percorso "{1}". {2}</target>
         <note>UE: This message is shown when the user tries to perform path manipulations using one of the built-in item metadata e.g. %(RootDir), on an item-spec that's not a valid path. LOCALIZATION: "{2}" is a localized message from a CLR/FX exception.</note>
       </trans-unit>
       <trans-unit id="TaskNotMarshalByRef">
@@ -108,12 +108,12 @@
       </trans-unit>
       <trans-unit id="FrameworkLocationHelper.UnsupportedFrameworkVersionForWindowsSdk">
         <source>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</source>
-        <target state="translated">La versione "{0}" di .NET Framework non è supportata se è destinata in modo esplicito a Windows SDK, che è supportato solo da .NET 4.5 e versioni successive.  Specificare un valore dell'enumerazione Microsoft.Build.Utilities.TargetDotNetFrameworkVersion che sia Version45 o successivo.</target>
+        <target state="translated">La versione "{0}" di .NET Framework non è supportata se è destinata in modo esplicito a Windows SDK, che è supportato solo da .NET 4.5 e versioni successive. Specificare un valore dell'enumerazione Microsoft.Build.Utilities.TargetDotNetFrameworkVersion che sia Version45 o successivo.</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkLocationHelper.UnsupportedVisualStudioVersion">
         <source>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</source>
-        <target state="translated">La versione "{0}" di Visual Studio non è supportata.  Specificare un valore dall'enumerazione Microsoft.Build.Utilities.VisualStudioVersion.</target>
+        <target state="translated">La versione "{0}" di Visual Studio non è supportata. Specificare un valore dall'enumerazione Microsoft.Build.Utilities.VisualStudioVersion.</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkLocationHelper.CouldNotGenerateReferenceAssemblyDirectory">
@@ -123,7 +123,7 @@
       </trans-unit>
       <trans-unit id="DirectoryNotFound">
         <source>Could not find directory path: {0}</source>
-        <target state="translated">Impossibile trovare il percorso di directory: {0}</target>
+        <target state="translated">Il percorso di directory {0} non è stato trovato</target>
         <note>Directory must exist</note>
       </trans-unit>
       <trans-unit id="UnauthorizedAccess">
@@ -228,12 +228,12 @@
       </trans-unit>
       <trans-unit id="SolutionParseVersionMismatchError">
         <source>MSB5014: File format version is not recognized.  MSBuild can only read solution files between versions {0}.0 and {1}.0, inclusive.</source>
-        <target state="translated">MSB5014: la versione del formato di file non è riconosciuta.  Con MSBuild è possibile leggere solo file di soluzione dalla versione {0}.0 alla versione {1}.0.</target>
+        <target state="translated">MSB5014: la versione del formato di file non è riconosciuta. Con MSBuild è possibile leggere solo file di soluzione dalla versione {0}.0 alla versione {1}.0.</target>
         <note>{StrBegin="MSB5014: "}UE: The solution filename is provided separately to loggers.</note>
       </trans-unit>
       <trans-unit id="SolutionParseWebProjectPropertiesError">
         <source>MSB5015: The properties could not be read from the WebsiteProperties section of the "{0}" project.</source>
-        <target state="translated">MSB5015: impossibile leggere le proprietà dalla sezione WebsiteProperties del progetto "{0}".</target>
+        <target state="translated">MSB5015: non è stato possibile leggere le proprietà dalla sezione WebsiteProperties del progetto "{0}".</target>
         <note>{StrBegin="MSB5015: "}UE: The solution filename is provided separately to loggers.</note>
       </trans-unit>
       <trans-unit id="UnrecognizedSolutionComment">
@@ -256,7 +256,7 @@
       </trans-unit>
       <trans-unit id="Shared.ProjectFileCouldNotBeLoaded">
         <source>MSB5020: Could not load the project file: "{0}". {1}</source>
-        <target state="translated">MSB5020: impossibile caricare il file di progetto: "{0}". {1}</target>
+        <target state="translated">MSB5020: non è stato possibile caricare il file di progetto: "{0}". {1}</target>
         <note>{StrBegin="MSB5020: "}</note>
       </trans-unit>
       <trans-unit id="Shared.KillingProcessByCancellation">
