@@ -92,6 +92,7 @@
           Inputs="@(RestoreTestsInputs)"
           Outputs="@(RestoreTestsInputs->'%(RelativeDir)/obj/project.assets.json');@(RestoreTestsInputs->'%(RelativeDir)/obj/%(Filename).csproj.nuget.g.props');@(RestoreTestsInputs->'%(RelativeDir)/obj/%(Filename).csproj.nuget.g.targets')">
     <CallTarget Targets="CleanTestProjectsLockFiles"/>
+    
     <DotNetRestore ToolPath="$(Stage0Directory)"
                    ProjectPath="&quot;%(RestoreTestsInputs.FullPath)&quot;" />
   </Target>
