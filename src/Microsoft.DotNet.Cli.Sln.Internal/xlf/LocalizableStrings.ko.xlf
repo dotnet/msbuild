@@ -40,18 +40,18 @@
       </trans-unit>
       <trans-unit id="ErrorMessageFormatString">
         <source>Invalid format in line {0}: {1}</source>
-        <target state="new">Invalid format in line {0}: {1}</target>
-        <note></note>
+        <target state="translated">{0} 줄에 잘못된 형식: {1}</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectParsingErrorFormatString">
         <source>Project section is missing '{0}' when parsing the line starting at position {1}</source>
-        <target state="new">Project section is missing '{0}' when parsing the line starting at position {1}</target>
-        <note></note>
+        <target state="translated">{1} 위치에서 시작하는 줄을 구문 분석할 때 프로젝트 섹션에 '{0}'이(가) 없습니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidPropertySetFormatString">
         <source>Property set is missing '{0}'</source>
-        <target state="new">Property set is missing '{0}'</target>
-        <note></note>
+        <target state="translated">속성 설정에 '{0}'이(가) 없습니다.</target>
+        <note />
       </trans-unit>
     </body>
   </file>
