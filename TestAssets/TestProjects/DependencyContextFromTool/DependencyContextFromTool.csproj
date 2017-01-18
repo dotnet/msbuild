@@ -18,6 +18,9 @@
       <Version>1.0.0-*</Version>
     </DotNetCliToolReference>
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="NewtonSoft.Json" Version="9.0.1" />
+  </ItemGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DefineConstants>$(DefineConstants);RELEASE;TRACE</DefineConstants>
     <Optimize>true</Optimize>
