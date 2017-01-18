@@ -170,6 +170,44 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Fact]
+        public void It_allows_files_in_the_obj_folder_to_be_explicitly_included()
+        {
+            Action<GetValuesCommand> setup = getValuesCommand =>
+            {
+                WriteFile(Path.Combine(getValuesCommand.ProjectRootPath, "Code", "Class1.cs"),
+                    "public class Class1 {}");
+                WriteFile(Path.Combine(getValuesCommand.ProjectRootPath, "obj", "Class2.cs"),
+                    "public class Class2 {}");
+                WriteFile(Path.Combine(getValuesCommand.ProjectRootPath, "obj", "Excluded.cs"),
+                    "!InvalidCSharp!");
+            };
+
+            Action<XDocument> projectChanges = project =>
+            {
+                var ns = project.Root.Name.Namespace;
+
+                XElement itemGroup = new XElement(ns + "ItemGroup");
+                project.Root.Add(itemGroup);
+                itemGroup.Add(new XElement(ns + "Compile", new XAttribute("Include", "obj\\Class2.cs")));
+            };
+
+            var compileItems = GivenThatWeWantToBuildALibrary.GetValuesFromTestLibrary(_testAssetsManager, "Compile", setup, projectChanges: projectChanges);
+
+            RemoveGeneratedCompileItems(compileItems);
+
+            var expectedItems = new[]
+            {
+                "Helper.cs",
+                @"Code\Class1.cs",
+                @"obj\Class2.cs"
+            }
+            .Select(item => item.Replace('\\', Path.DirectorySeparatorChar))
+            .ToArray();
+
+            compileItems.Should().BeEquivalentTo(expectedItems);
+        }
+
+        [Fact]
         public void It_allows_a_CSharp_file_to_be_used_as_an_EmbeddedResource()
         {
             Action<GetValuesCommand> setup = getValuesCommand =>
@@ -429,6 +467,45 @@ namespace Microsoft.NET.Build.Tests
                 .And.NotHaveStdOutMatching("EnableDefaultCompileItems");
         }
 
+        [Fact]
+        public void Implicit_package_references_are_overridden_by_PackageReference_includes_in_the_project_file()
+        {
+            var testProject = new TestProject()
+            {
+                //  Underscore is in the project name so we can verify that the warning message output contained "PackageReference"
+                Name = "DeduplicatePackage_Reference",
+                TargetFrameworks = "netstandard1.6",
+                IsSdkProject = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, "DeduplicatePackage_Reference")
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+
+                    //  Set the implicit package reference version to something that doesn't exist to verify that the Include
+                    //  in the project file overrides the implicit one
+                    project.Root.Element(ns + "PropertyGroup").Add(
+                        new XElement(ns + "NetStandardImplicitPackageVersion", "0.1.0-does-not-exist"));
+
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    project.Root.Add(itemGroup);
+                    itemGroup.Add(new XElement(ns + "PackageReference",
+                        new XAttribute("Include", "NETStandard.Library"), new XAttribute("Version", "1.6.1")));
+                })
+                .Restore(testProject.Name);
+
+            var buildCommand = new BuildCommand(Stage0MSBuild, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .CaptureStdOut()
+                .Execute()
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining("PackageReference")
+                .And.HaveStdOutContaining("'NETStandard.Library'");
+        }
+        
         void RemoveGeneratedCompileItems(List<string> compileItems)
         {
             //  Remove auto-generated compile items.
