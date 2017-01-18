@@ -191,7 +191,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         }
 
         /// <summary>
-        /// This test replicates the scenario in https://devdiv.visualstudio.com/DevDiv/_workitems?id=366077&_a=edit
+        /// This test replicates the scenario in https://devdiv.visualstudio.com/DevDiv/_workitems?id=366077
         /// Two different caches can interfere with each other when auto reloading from disk is turned on.
         /// </summary>
         [Fact]
