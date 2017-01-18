@@ -612,33 +612,33 @@
       </trans-unit>
       <trans-unit id="UnsupportedProjectType">
         <source>Unsupported project type. Please check with your sdk provider.</source>
-        <target state="new">Unsupported project type. Please check with your sdk provider.</target>
-        <note></note>
+        <target state="translated">不支持的项目类型。请联系 SDK 提供商。</target>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidSolutionFormatString">
         <source>Invalid solution `{0}`. {1}</source>
-        <target state="new">Invalid solution `{0}`. {1}</target>
-        <note></note>
+        <target state="translated">解决方案“{0}”无效。{1}</target>
+        <note />
       </trans-unit>
       <trans-unit id="ArgumentsProjectDescription">
         <source>The project file to operate on. If a file is not specified, the command will search the current directory for one.</source>
-        <target state="new">The project file to operate on. If a file is not specified, the command will search the current directory for one.</target>
-        <note></note>
+        <target state="translated">要操作的项目文件。如果未指定文件，则命令会在当前目录下搜索一个文件。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ArgumentsSolutionDescription">
         <source>Solution file to operate on. If not specified, the command will search the current directory for one.</source>
-        <target state="new">Solution file to operate on. If not specified, the command will search the current directory for one.</target>
-        <note></note>
+        <target state="translated">要操作的解决方案文件。如未指定，则命令会在当前目录下搜索一个文件。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdSlnFile">
         <source>&lt;SLN_FILE&gt;</source>
-        <target state="new">&lt;SLN_FILE&gt;</target>
-        <note></note>
+        <target state="translated">&lt;SLN_FILE&gt;</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdProjectFile">
         <source>&lt;PROJECT&gt;</source>
-        <target state="new">&lt;PROJECT&gt;</target>
-        <note></note>
+        <target state="translated">&lt;PROJECT&gt;</target>
+        <note />
       </trans-unit>
     </body>
   </file>

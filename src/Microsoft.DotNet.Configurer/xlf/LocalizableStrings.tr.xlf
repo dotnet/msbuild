@@ -19,17 +19,17 @@ Configuring...
 A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</source>
         <target state="translated">.NET Core’a Hoş Geldiniz!
 ---------------------
-.NET Core hakkında daha fazla bilgiyi https://aka.ms/dotnet-docs adresinde bulabilirsiniz. Kullanılabilir komutları görmek için dotnet --help kullanın veya https://aka.ms/dotnet-cli-docs adresine gidin.
+.NET Core hakkında daha fazla bilgi edinmek için bkz. https://aka.ms/dotnet-docs. Kullanılabilen komutları görüntülemek için dotnet --help komutunu kullanın veya https://aka.ms/dotnet-cli-docs adresine gidin.
 
 Telemetri
 --------------
-.NET Core araçları, deneyiminizi iyileştirmek için kullanım verileri toplar. Veriler anonimdir ve komut satırı bağımsız değişkenlerini içermez. Veriler Microsoft tarafından toplanır ve topluluk ile paylaşılır.
-Sık kullandığınız kabuk aracılığıyla DOTNET_CLI_TELEMETRY_OPTOUT ortam değişkenini 1 değerine ayarlayarak telemetriyi geri çevirebilirsiniz.
-.NET Core araç telemetrisi hakkında daha faza bilgiyi https://aka.ms/dotnet-cli-telemetry adresinde bulabilirsiniz.
+.NET Core araçları, deneyiminizi geliştirmek için kullanım verilerini toplar. Veriler anonimdir ve komut satırı bağımsız değişkenlerini içermez. Veriler Microsoft tarafından toplanır ve toplulukla paylaşılır.
+İstediğiniz kabuk içinde DOTNET_CLI_TELEMETRY_OPTOUT ortam değişkenini 1 olarak ayarlayarak telemetriyi geri çevirebilirsiniz.
+.NET Core araçlarında telemetri hakkında daha fazla bilgi edinmek için bkz. https://aka.ms/dotnet-cli-telemetry.
 
 Yapılandırılıyor...
 -------------------
-Yerel paket önbelleğinizi başlangıçta doldurmak, geri yükleme hızını artırmak ve çevrimdışı erişimi etkinleştirmek için bir komut çalıştırılıyor. Bu komutun tamamlanması yaklaşık bir dakika sürer ve bu işlem yalnızca bir kez gerçekleştirilir.</target>
+Geri yükleme hızını artırmak ve çevrimdışı erişimi etkinleştirmek için yerel paket önbelleğinizi başlangıçta doldurmak amacıyla bir komut çalıştırılıyor. Bu komutun tamamlanması yaklaşık bir dakika sürer ve yalnızca bir kez çalışır.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">
