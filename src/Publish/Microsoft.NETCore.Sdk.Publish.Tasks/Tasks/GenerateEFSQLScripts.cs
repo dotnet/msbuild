@@ -68,7 +68,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
 
         private bool GenerateSQLScript(string sqlFileFullPath, string dbContextName, bool isLoggingEnabled = true)
         {
-            string currentValue = Environment.GetEnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE");
+            string previousValue = Environment.GetEnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE");
             Environment.SetEnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", "true");
             ProcessStartInfo psi = new ProcessStartInfo("dotnet", string.Format("ef migrations script --idempotent --output \"{0}\" --context {1}", sqlFileFullPath, dbContextName))
             {
@@ -103,7 +103,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
                 isProcessExited = proc.WaitForExit(300000);
             }
 
-            Environment.SetEnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", currentValue);
+            Environment.SetEnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", previousValue);
             if (!isProcessExited || proc == null || proc.ExitCode != 0)
             {
                 if (isLoggingEnabled)
