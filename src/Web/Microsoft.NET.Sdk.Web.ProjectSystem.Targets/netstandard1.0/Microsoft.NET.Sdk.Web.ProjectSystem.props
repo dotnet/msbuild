@@ -15,9 +15,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DefaultItemExcludes>$(DefaultItemExcludes);node_modules/**</DefaultItemExcludes>
     <DefaultItemExcludes>$(DefaultItemExcludes);jspm_packages/**</DefaultItemExcludes>
     <DefaultItemExcludes>$(DefaultItemExcludes);bower_components/**</DefaultItemExcludes>
-
     <OutputType>Exe</OutputType>
-    <PreserveCompilationContext Condition="'$(PreserveCompilationContext)' == ''">True</PreserveCompilationContext>
+    <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
+    <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType>
+    <PreserveCompilationContext Condition="'$(PreserveCompilationContext)' == ''">true</PreserveCompilationContext>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(EnableDefaultItems)' == 'true' And '$(EnableDefaultContentItems)' == 'true' ">
