@@ -114,10 +114,17 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <UsingTask TaskName="CheckForDuplicateItems" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
-  <Target Name="CheckForDuplicateItems" BeforeTargets="_CheckForInvalidConfigurationAndPlatform">
+  <Target Name="CheckForDuplicateItems" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CoreCompile">
 
     <PropertyGroup>
       <DefaultItemsMoreInformationLink>https://aka.ms/sdkimplicititems</DefaultItemsMoreInformationLink>
+
+      <!-- For the design-time build, we will continue on error and remove the duplicate items.
+           This is because otherwise there won't be any references to pass to the compiler, leading to design-time
+           compilation errors for every API that is used in the project.  Amidst all the compile errors, it would
+           be easy to miss the duplicate items error which is the real source of the problem. -->
+      <CheckForDuplicateItemsContinueOnError>false</CheckForDuplicateItemsContinueOnError>
+      <CheckForDuplicateItemsContinueOnError Condition="'$(DesignTimeBuild)' == 'true'">ErrorAndContinue</CheckForDuplicateItemsContinueOnError>
     </PropertyGroup>
 
     <CheckForDuplicateItems
@@ -127,7 +134,9 @@ Copyright (c) .NET Foundation. All rights reserved.
       DefaultItemsOfThisTypeEnabled="$(EnableDefaultCompileItems)"
       PropertyNameToDisableDefaultItems="EnableDefaultCompileItems"
       MoreInformationLink="$(DefaultItemsMoreInformationLink)"
-      />
+      ContinueOnError="$(CheckForDuplicateItemsContinueOnError)">
+      <Output TaskParameter="DeduplicatedItems" ItemName="DeduplicatedCompileItems" />
+    </CheckForDuplicateItems>
 
     <CheckForDuplicateItems
       Items="@(EmbeddedResource)"
@@ -136,9 +145,11 @@ Copyright (c) .NET Foundation. All rights reserved.
       DefaultItemsOfThisTypeEnabled="$(EnableDefaultEmbeddedResourceItems)"
       PropertyNameToDisableDefaultItems="EnableDefaultEmbeddedResourceItems"
       MoreInformationLink="$(DefaultItemsMoreInformationLink)"
-      />
+      ContinueOnError="$(CheckForDuplicateItemsContinueOnError)">
+      <Output TaskParameter="DeduplicatedItems" ItemName="DeduplicatedEmbeddedResourceItems" />
+    </CheckForDuplicateItems>
     
-    <!-- TODO: Do we check for duplicate content items here, or in the Web SDK? EnableDefaultContentItems isn't defined or used at all by the .NET SDK -->
+    <!-- Default content items are enabled by the Web SDK, not the .NET SDK, but we check it here for simplicity -->
     <CheckForDuplicateItems
       Items="@(Content)"
       ItemName="Content"
@@ -146,7 +157,24 @@ Copyright (c) .NET Foundation. All rights reserved.
       DefaultItemsOfThisTypeEnabled="$(EnableDefaultContentItems)"
       PropertyNameToDisableDefaultItems="EnableDefaultContentItems"
       MoreInformationLink="$(DefaultItemsMoreInformationLink)"
-      />
+      ContinueOnError="$(CheckForDuplicateItemsContinueOnError)">
+      <Output TaskParameter="DeduplicatedItems" ItemName="DeduplicatedContentItems" />
+    </CheckForDuplicateItems>
+
+    <ItemGroup Condition="'$(DesignTimeBuild)' == 'true' And '@(DeduplicatedCompileItems)' != ''">
+      <Compile Remove="@(Compile)" />
+      <Compile Include="@(DeduplicatedCompileItems)" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(DesignTimeBuild)' == 'true' And '@(DeduplicatedEmbeddedResourceItems)' != ''">
+      <EmbeddedResource Remove="@(EmbeddedResource)" />
+      <EmbeddedResource Include="@(DeduplicatedEmbeddedResourceItems)" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(DesignTimeBuild)' == 'true' And '@(DeduplicatedContentItems)' != ''">
+      <Content Remove="@(Content)" />
+      <Content Include="@(DeduplicatedContentItems)" />
+    </ItemGroup>
     
   </Target>
 </Project>
