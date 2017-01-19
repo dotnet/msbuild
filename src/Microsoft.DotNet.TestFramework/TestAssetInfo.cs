@@ -143,7 +143,7 @@ namespace Microsoft.DotNet.TestFramework
             file.Refresh();
             if (!file.Exists)
             {
-                throw new InvalidOperationException("Inventory file should exist.");
+                throw new ArgumentException("Inventory file should exist.");
             }
 
             var inventory = new List<FileInfo>();
