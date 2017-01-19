@@ -109,17 +109,18 @@ namespace Microsoft.DotNet.Tools.Migrate
                 return;
             }
 
-            List<string> csprojFilesToAdd = new List<string>();
+            var csprojFilesToAdd = new HashSet<string>();
 
             var slnPathWithTrailingSlash = PathUtility.EnsureTrailingSlash(_slnFile.BaseDirectory);
             foreach (var report in migrationReport.ProjectMigrationReports)
             {
                 var reportPathWithTrailingSlash = PathUtility.EnsureTrailingSlash(report.ProjectDirectory);
-                var reportRelPath = Path.Combine(
-                    PathUtility.GetRelativePath(slnPathWithTrailingSlash, reportPathWithTrailingSlash),
-                    report.ProjectName + ".xproj");
+                var relReportPath = PathUtility.GetRelativePath(
+                    slnPathWithTrailingSlash,
+                    reportPathWithTrailingSlash);
 
-                var projects = _slnFile.Projects.Where(p => p.FilePath == reportRelPath);
+                var xprojPath = Path.Combine(relReportPath, report.ProjectName + ".xproj");
+                var projects = _slnFile.Projects.Where(p => p.FilePath == xprojPath);
 
                 var migratedProjectName = report.ProjectName + ".csproj";
                 if (projects.Count() == 1)
@@ -132,7 +133,15 @@ namespace Microsoft.DotNet.Tools.Migrate
                 }
                 else
                 {
-                    csprojFilesToAdd.Add(Path.Combine(report.ProjectDirectory, migratedProjectName));
+                    var csprojPath = Path.Combine(relReportPath, migratedProjectName);
+                    var slnAlreadyContainsMigratedCsproj = _slnFile.Projects
+                        .Where(p => p.FilePath == csprojPath)
+                        .Any();
+
+                    if (!slnAlreadyContainsMigratedCsproj)
+                    {
+                        csprojFilesToAdd.Add(Path.Combine(report.ProjectDirectory, migratedProjectName));
+                    }
                 }
 
                 foreach (var preExisting in report.PreExistingCsprojDependencies)

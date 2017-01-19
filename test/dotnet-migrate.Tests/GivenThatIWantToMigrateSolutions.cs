@@ -38,6 +38,24 @@ namespace Microsoft.DotNet.Migration.Tests
                 "PJAppWithSlnAndXprojRefThatRefsCsprojWhereSlnDoesNotRefCsproj");
         }
 
+        [Fact]
+        public void WhenSolutionContainsACsprojFileItDoesNotTryToAddItAgain()
+        {
+            var projectDirectory = TestAssets
+                .Get("NonRestoredTestProjects", "PJAppWithSlnAndOneAlreadyMigratedCsproj")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root;
+
+            var solutionRelPath = Path.Combine("TestApp", "TestApp.sln");
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput($"migrate \"{solutionRelPath}\"");
+            cmd.Should().Pass();
+            cmd.StdOut.Should().NotContain("already contains project");
+            cmd.StdErr.Should().BeEmpty();
+        }
+
         private void MigrateAndBuild(string groupName, string projectName, [CallerMemberName] string callingMethod = "", string identifier = "")
         {
             var projectDirectory = TestAssets
