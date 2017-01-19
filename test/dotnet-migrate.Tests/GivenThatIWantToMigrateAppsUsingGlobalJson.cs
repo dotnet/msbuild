@@ -26,6 +26,31 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Fact]
+        public void WhenUsingGlobalJsonItOnlyMigratesProjectsInTheGlobalJsonNode()
+        {
+            var solutionDirectory =
+                TestAssetsManager.CreateTestInstance("AppWithPackageNamedAfterFolder").Path;
+            var globalJsonPath = Path.Combine(solutionDirectory, "global.json");
+
+            new TestCommand("dotnet")
+                    .WithForwardingToConsole()
+                    .Execute($"migrate {globalJsonPath}")
+                    .Should()
+                    .Pass();
+
+            new DirectoryInfo(solutionDirectory)
+                .Should().HaveFiles(new []
+                    {
+                        Path.Combine("src", "App", "App.csproj"),
+                        Path.Combine("test", "App.Tests", "App.Tests.csproj"),
+                        Path.Combine("TestAssets", "TestAsset", "project.json")
+                    });
+
+            new DirectoryInfo(solutionDirectory)
+                .Should().NotHaveFile(Path.Combine("TestAssets", "TestAsset", "TestAsset.csproj"));
+        }
+
+        [Fact]
         public void ItMigratesWhenBeingPassedJustGlobalJson()
         {
             var solutionDirectory =
