@@ -364,12 +364,7 @@ namespace Microsoft.DotNet.Tools.Migrate
 
         private IEnumerable<string> GetProjectsFromGlobalJson(string globalJson)
         {
-            if (!File.Exists(globalJson))
-            {
-                throw new GracefulException($"Unable to find global settings file at {globalJson}");
-            }
-
-            var searchPaths = ProjectDependencyFinder.GetGlobalPaths(Path.GetDirectoryName(globalJson));
+            var searchPaths = ProjectDependencyFinder.GetGlobalPaths(GetGlobalJsonDirectory(globalJson));
 
             foreach (var searchPath in searchPaths)
             {
@@ -390,6 +385,17 @@ namespace Microsoft.DotNet.Tools.Migrate
                     }
                 }
             }
+        }
+
+        private string GetGlobalJsonDirectory(string globalJson)
+        {
+            if (!File.Exists(globalJson))
+            {
+                throw new GracefulException($"Unable to find global settings file at {globalJson}");
+            }
+
+            var globalJsonDirectory = Path.GetDirectoryName(globalJson);
+            return string.IsNullOrEmpty(globalJsonDirectory) ? "." : globalJsonDirectory;
         }
 
         private IEnumerable<string> GetProjectsFromSolution(string slnPath)
