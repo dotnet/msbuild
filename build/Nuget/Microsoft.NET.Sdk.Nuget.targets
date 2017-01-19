@@ -19,29 +19,29 @@
       <CopyLocalAssembly Include="@(NuGetCopyLocalAssembly)">
         <Version>$(NuGetVersion)</Version>
         <TFM>netstandard1.3</TFM>
-        <DestinationTFM>net46;netcoreapp1.0</DestinationTFM>
+        <DestinationTFM>netcoreapp1.0</DestinationTFM>
       </CopyLocalAssembly>
       <CopyLocalAssembly Include="NuGet.Versioning">
         <Version>$(NuGetVersion)</Version>
         <TFM>netstandard1.0</TFM>
-        <DestinationTFM>net46;netcoreapp1.0</DestinationTFM>
+        <DestinationTFM>netcoreapp1.0</DestinationTFM>
       </CopyLocalAssembly>
 
       <CopyLocalAssembly Include="Microsoft.Extensions.DependencyModel">
         <Version>$(CoreSetupVersion)</Version>
         <TFM>netstandard1.3</TFM>
-        <DestinationTFM>net46;netcoreapp1.0</DestinationTFM>
+        <DestinationTFM>netcoreapp1.0</DestinationTFM>
       </CopyLocalAssembly>
       <CopyLocalAssembly Include="Microsoft.DotNet.PlatformAbstractions">
         <Version>$(CoreSetupVersion)</Version>
         <TFM>netstandard1.3</TFM>
-        <DestinationTFM>net46;netcoreapp1.0</DestinationTFM>
+        <DestinationTFM>netcoreapp1.0</DestinationTFM>
       </CopyLocalAssembly>
 
       <CopyLocalAssembly Include="Newtonsoft.Json">
         <Version>9.0.1</Version>
         <TFM>netstandard1.0</TFM>
-        <DestinationTFM>net46;netcoreapp1.0</DestinationTFM>
+        <DestinationTFM>netcoreapp1.0</DestinationTFM>
       </CopyLocalAssembly>
 
       <CopyLocalAssembly Include="System.Runtime.Serialization.Primitives">
@@ -49,79 +49,9 @@
         <TFM>netstandard1.3</TFM>
         <DestinationTFM>netcoreapp1.0</DestinationTFM>
       </CopyLocalAssembly>
-
-      <CopyLocalAssembly Include="System.Runtime.InteropServices.RuntimeInformation">
-        <Version>4.0.0</Version>
-        <TFM>net45</TFM>
-        <DestinationTFM>net46</DestinationTFM>
-      </CopyLocalAssembly>
-      <CopyLocalAssembly Include="System.Security.Cryptography.Algorithms">
-        <Version>4.2.0</Version>
-        <TFM>net46</TFM>
-        <DestinationTFM>net46</DestinationTFM>
-      </CopyLocalAssembly>
-      <CopyLocalAssembly Include="System.Security.Cryptography.Primitives">
-        <Version>4.0.0</Version>
-        <TFM>net46</TFM>
-        <DestinationTFM>net46</DestinationTFM>
-      </CopyLocalAssembly>
-      <CopyLocalAssembly Include="System.Threading.Thread">
-        <Version>4.0.0</Version>
-        <TFM>net46</TFM>
-        <DestinationTFM>net46</DestinationTFM>
-      </CopyLocalAssembly>
-      <CopyLocalAssembly Include="System.IO.FileSystem">
-        <Version>4.0.1</Version>
-        <TFM>net46</TFM>
-        <DestinationTFM>net46</DestinationTFM>
-      </CopyLocalAssembly>
-      <CopyLocalAssembly Include="System.AppContext">
-        <Version>4.1.0</Version>
-        <TFM>net46</TFM>
-        <DestinationTFM>net46</DestinationTFM>
-      </CopyLocalAssembly>
-      <CopyLocalAssembly Include="System.Console">
-        <Version>4.0.0</Version>
-        <TFM>net46</TFM>
-        <DestinationTFM>net46</DestinationTFM>
-      </CopyLocalAssembly>
-      <CopyLocalAssembly Include="System.Diagnostics.FileVersionInfo">
-        <Version>4.0.0</Version>
-        <TFM>net46</TFM>
-        <DestinationTFM>net46</DestinationTFM>
-      </CopyLocalAssembly>
-      <CopyLocalAssembly Include="System.Diagnostics.Process">
-        <Version>4.1.0</Version>
-        <TFM>net46</TFM>
-        <DestinationTFM>net46</DestinationTFM>
-      </CopyLocalAssembly>
-      <CopyLocalAssembly Include="System.Diagnostics.StackTrace">
-        <Version>4.0.1</Version>
-        <TFM>net46</TFM>
-        <DestinationTFM>net46</DestinationTFM>
-      </CopyLocalAssembly>
-      <CopyLocalAssembly Include="System.IO.Compression">
-        <Version>4.1.0</Version>
-        <TFM>net46</TFM>
-        <DestinationTFM>net46</DestinationTFM>
-      </CopyLocalAssembly>
-      <CopyLocalAssembly Include="System.IO.FileSystem.Primitives">
-        <Version>4.0.1</Version>
-        <TFM>net46</TFM>
-        <DestinationTFM>net46</DestinationTFM>
-      </CopyLocalAssembly>
+      
       <CopyLocalAssembly Include="System.Security.Claims">
         <Version>4.0.1</Version>
-        <TFM>net46</TFM>
-        <DestinationTFM>net46</DestinationTFM>
-      </CopyLocalAssembly>
-      <CopyLocalAssembly Include="System.Security.Cryptography.Encoding">
-        <Version>4.0.0</Version>
-        <TFM>net46</TFM>
-        <DestinationTFM>net46</DestinationTFM>
-      </CopyLocalAssembly>
-      <CopyLocalAssembly Include="System.Security.Cryptography.X509Certificates">
-        <Version>4.1.0</Version>
         <TFM>net46</TFM>
         <DestinationTFM>net46</DestinationTFM>
       </CopyLocalAssembly>
@@ -130,31 +60,12 @@
         <TFM>net46</TFM>
         <DestinationTFM>net46</DestinationTFM>
       </CopyLocalAssembly>
-      <CopyLocalAssembly Include="System.Text.Encoding.CodePages">
-        <Version>4.0.1</Version>
-        <TFM>net46</TFM>
-        <DestinationTFM>net46</DestinationTFM>
-      </CopyLocalAssembly>
       <CopyLocalAssembly Include="System.Xml.ReaderWriter">
         <Version>4.0.11</Version>
         <TFM>netstandard1.3</TFM>
         <DestinationTFM>net46</DestinationTFM>
       </CopyLocalAssembly>
-      <CopyLocalAssembly Include="System.Xml.XmlDocument">
-        <Version>4.0.1</Version>
-        <TFM>net46</TFM>
-        <DestinationTFM>net46</DestinationTFM>
-      </CopyLocalAssembly>
-      <CopyLocalAssembly Include="System.Xml.XPath">
-        <Version>4.0.1</Version>
-        <TFM>net46</TFM>
-        <DestinationTFM>net46</DestinationTFM>
-      </CopyLocalAssembly>
-      <CopyLocalAssembly Include="System.Xml.XPath.XDocument">
-        <Version>4.0.1</Version>
-        <TFM>net46</TFM>
-        <DestinationTFM>net46</DestinationTFM>
-      </CopyLocalAssembly>
+
 
       <CopyLocalAssembly>
         <PackageRelativePath>$([System.String]::Copy('%(Identity)\%(Version)').ToLowerInvariant())</PackageRelativePath>
@@ -192,10 +103,36 @@
 
       <CopyLocalBuildFile Include="@(CopyLocalBuildCrossTargetingFile)" />
       <CopyLocalBuildFile Include="@(CopyLocalSdkFile)" />
+
+      <!-- Use the contents of the output directory of the net46 build of the SDK tasks, except
+           for MSBuild and Roslyn DLLs and their dependencies-->
+      <Net46OutputAssembly Include="$(OutDir)net46\*.dll" />
+      
+      <!-- Use the versions of these that come with MSBuild -->
+      <Net46OutputAssembly Remove="$(OutDir)net46\Microsoft.Build.Framework.dll" />
+      <Net46OutputAssembly Remove="$(OutDir)net46\Microsoft.Build.Utilities.Core.dll" />
+
+      <!-- This is a dependency of Microsoft.Build.Utilities.Core -->
+      <Net46OutputAssembly Remove="$(OutDir)net46\Microsoft.Win32.Primitives.dll" />
+      
+      <!-- Use versions of Roslyn that come with MSBuild / the CLI -->
+      <Net46OutputAssembly Remove="$(OutDir)net46\Microsoft.CodeAnalysis.CSharp.dll" />
+      <Net46OutputAssembly Remove="$(OutDir)net46\Microsoft.CodeAnalysis.dll" />
+      
+      <!-- These should be dependencies of Roslyn -->
+      <Net46OutputAssembly Remove="$(OutDir)net46\System.Collections.Immutable.dll" />
+      <Net46OutputAssembly Remove="$(OutDir)net46\System.Collections.NonGeneric.dll" />
+      <Net46OutputAssembly Remove="$(OutDir)net46\System.Diagnostics.TraceSource.dll" />
+      <Net46OutputAssembly Remove="$(OutDir)net46\System.Reflection.Metadata.dll" />
+      <Net46OutputAssembly Remove="$(OutDir)net46\System.Reflection.TypeExtensions.dll" />
+
     </ItemGroup>
 
     <Copy SourceFiles="%(Net46CopyLocalAssembly.FullFilePath)"
           DestinationFolder="$(PackagesLayoutToolsNet46Dir)" />
+
+    <Copy SourceFiles="@(Net46OutputAssembly)"
+      DestinationFolder="$(PackagesLayoutToolsNet46Dir)" />
 
     <Copy SourceFiles="%(NetCoreAppCopyLocalAssembly.FullFilePath)"
           DestinationFolder="$(PackagesLayoutToolsNetCoreAppDir)" />
