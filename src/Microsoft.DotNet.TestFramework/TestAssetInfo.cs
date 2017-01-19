@@ -140,18 +140,16 @@ namespace Microsoft.DotNet.TestFramework
 
         private IEnumerable<FileInfo> LoadInventory(FileInfo file)
         {
+            file.Refresh();
             if (!file.Exists)
             {
-                return Enumerable.Empty<FileInfo>();
+                throw new InvalidOperationException("Inventory file should exist.");
             }
 
             var inventory = new List<FileInfo>();
-
-            var lines = file.OpenText();
-
-            while (lines.Peek() > 0)
+            foreach (var p in File.ReadAllLines(file.FullName))
             {
-                inventory.Add(new FileInfo(lines.ReadLine()));
+                inventory.Add(new FileInfo(p));
             }
 
             return inventory;
@@ -159,27 +157,13 @@ namespace Microsoft.DotNet.TestFramework
 
         private void SaveInventory(FileInfo file, IEnumerable<FileInfo> inventory)
         {
-            FileUtility.ReplaceWithLock(
-                filePath =>
-                {
-                    if (!_dataDirectory.Exists)
-                    {
-                        _dataDirectory.Create();
-                    }
+            _dataDirectory.Refresh();
+            if (!_dataDirectory.Exists)
+            {
+                _dataDirectory.Create();
+            }
 
-                    using (var stream =
-                        new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
-                    {
-                        using (var writer = new StreamWriter(stream))
-                        {
-                            foreach (var path in inventory.Select(i => i.FullName))
-                            {
-                                writer.WriteLine(path);
-                            }
-                        }
-                    }
-                },
-                file.FullName);
+            File.WriteAllLines(file.FullName, inventory.Select((fi) => fi.FullName).ToList());
         }
 
         private IEnumerable<FileInfo> GetFileList()
@@ -195,15 +179,6 @@ namespace Microsoft.DotNet.TestFramework
             Action action)
         {
             var inventory = Enumerable.Empty<FileInfo>();
-            if (file.Exists)
-            {
-                inventory = LoadInventory(file);
-            }
-
-            if(inventory.Any())
-            {
-                return inventory;
-            }
 
             IEnumerable<FileInfo> preInventory;
 
@@ -220,6 +195,7 @@ namespace Microsoft.DotNet.TestFramework
                 _dataDirectory.FullName, 
                 lockedToken =>
                 {
+                    file.Refresh();
                     if (file.Exists)
                     {
                         inventory = LoadInventory(file);
