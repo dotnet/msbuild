@@ -18,7 +18,7 @@ namespace Microsoft.NET.Publish.Tests
 {
     public class GivenThatWeWantToPreserveCompilationContext : SdkTest
     {
-        //[Fact]
+        [Fact]
         public void It_publishes_the_project_with_a_refs_folder_and_correct_deps_file()
         {
             var testAsset = _testAssetsManager
@@ -105,6 +105,12 @@ namespace Microsoft.NET.Publish.Tests
                             .FirstOrDefault(l => string.Equals(l.Name, "system.core", StringComparison.OrdinalIgnoreCase));
                         systemCoreLibrary.Assemblies.Count.Should().Be(1);
                         systemCoreLibrary.Assemblies[0].Should().Be(".NETFramework/v4.6/System.Core.dll");
+
+                        var systemCollectionsLibrary = dependencyContext
+                            .CompileLibraries
+                            .FirstOrDefault(l => string.Equals(l.Name, "system.collections", StringComparison.OrdinalIgnoreCase));
+                        systemCollectionsLibrary.Assemblies.Count.Should().Be(1);
+                        systemCollectionsLibrary.Assemblies[0].Should().Be(".NETFramework/v4.6/Facades/System.Collections.dll");
                     }
                 }
             }
@@ -122,6 +128,58 @@ system.numerics
 system.runtime.serialization
 system.xml
 system.xml.linq
+system.collections.concurrent
+system.collections
+system.componentmodel.annotations
+system.componentmodel
+system.componentmodel.eventbasedasync
+system.diagnostics.contracts
+system.diagnostics.debug
+system.diagnostics.tools
+system.diagnostics.tracing
+system.dynamic.runtime
+system.globalization
+system.io
+system.linq
+system.linq.expressions
+system.linq.parallel
+system.linq.queryable
+system.net.networkinformation
+system.net.primitives
+system.net.requests
+system.net.webheadercollection
+system.objectmodel
+system.reflection
+system.reflection.emit
+system.reflection.emit.ilgeneration
+system.reflection.emit.lightweight
+system.reflection.extensions
+system.reflection.primitives
+system.resources.resourcemanager
+system.runtime
+system.runtime.extensions
+system.runtime.handles
+system.runtime.interopservices
+system.runtime.interopservices.windowsruntime
+system.runtime.numerics
+system.runtime.serialization.json
+system.runtime.serialization.primitives
+system.runtime.serialization.xml
+system.security.principal
+system.servicemodel.duplex
+system.servicemodel.http
+system.servicemodel.nettcp
+system.servicemodel.primitives
+system.servicemodel.security
+system.text.encoding
+system.text.encoding.extensions
+system.text.regularexpressions
+system.threading
+system.threading.tasks
+system.threading.tasks.parallel
+system.threading.timer
+system.xml.xdocument
+system.xml.xmlserializer
 microsoft.netcore.platforms
 microsoft.win32.primitives
 netstandard.library
