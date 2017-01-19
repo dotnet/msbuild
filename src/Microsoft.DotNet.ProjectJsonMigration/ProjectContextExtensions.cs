@@ -14,8 +14,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration
     {
         public static string GetProjectName(this ProjectContext projectContext)
         {
-            // _ here is just an arbitrary configuration value so we can obtain the output name
-            return Path.GetFileNameWithoutExtension(projectContext.GetOutputPaths("_").CompilationFiles.Assembly);
+            var projectDirectory = projectContext.ProjectDirectory;
+            
+            return Path.GetFileName(projectDirectory);
         }
 
         public static bool HasRuntimes(this IEnumerable<ProjectContext> projectContexts)
