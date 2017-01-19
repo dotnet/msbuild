@@ -2106,14 +2106,35 @@ EndGlobal
                 EndGlobal
             ");
 
-            // "GetFrameworkPathAndRedistList" is for web projects only
-            var illegalTargetNamesForCsproj = SolutionProjectGenerator._solutionGeneratedTargetNames.Union(new []{"ClassLibrary1"}).Except(new []{ "GetFrameworkPathAndRedistList" }).ToList();
-            ProjectInstance[]  instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, null, illegalTargetNamesForCsproj);
+            ProjectInstance[] instances;
 
-            foreach (var illegalTargetName in illegalTargetNamesForCsproj)
+            foreach (string builtInTargetName in new[]
             {
-                Assert.Equal(1, instances[0].Targets.Count(target => String.Compare(target.Value.Name, illegalTargetName, StringComparison.OrdinalIgnoreCase) == 0));
+                null,
+                "Build",
+                "Rebuild",
+                "Clean",
+                "Publish",
+                "ClassLibrary1",
+                "ClassLibrary1:Clean",
+                "ClassLibrary1:Rebuild",
+                "GetSolutionConfigurationContents",
+                "ValidateProjects",
+            })
+            {
+                instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, null, builtInTargetName == null ? null : new [] { builtInTargetName });
+
+                Assert.Equal(1, instances.Length);
+
+                Assert.Equal(12, instances[0].TargetsCount);
             }
+
+
+            instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, null, new[] { "Foo" });
+
+            Assert.Equal(1, instances.Length);
+
+            Assert.Equal(14, instances[0].TargetsCount);
         }
 
         #region Helper Functions
