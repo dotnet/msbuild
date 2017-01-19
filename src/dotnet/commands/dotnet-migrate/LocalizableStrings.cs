@@ -31,6 +31,6 @@ Defaults to current directory if nothing is specified.";
 
         public const string MigrationFailedError = "Migration failed.";
 
-        public const string MigrationAdditionalHelp = "Your project has been migrated to .csproj format and can be used with this build of .NET Core Tools.  Please visit https://aka.ms/coremigration to report issues or for help.";
+        public const string MigrationAdditionalHelp = "Your project has been migrated to the .csproj format and can be used with this build of the .NET Core Tools.  Please visit https://aka.ms/coremigration to report issues or ask for help.";
     }
 }
