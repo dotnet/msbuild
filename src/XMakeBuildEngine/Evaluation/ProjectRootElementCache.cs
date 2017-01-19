@@ -218,7 +218,7 @@ namespace Microsoft.Build.Evaluation
                     // It's an in-memory project that hasn't been saved yet.
                     if (fileInfo != null)
                     {
-                        bool reloadEntry = false;
+                        bool forgetEntry = false;
 
                         if (fileInfo.LastWriteTime != projectRootElement.LastWriteTimeWhenRead)
                         {
@@ -228,7 +228,7 @@ namespace Microsoft.Build.Evaluation
                             // to force a load from disk. There might then exist more than one ProjectRootElement with the same path,
                             // but clients ought not get themselves into such a state - and unless they save them to disk,
                             // it may not be a problem.  
-                            reloadEntry = true;
+                            forgetEntry = true;
                         }
                         else if (!String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDCACHECHECKFILECONTENT")))
                         {
@@ -248,14 +248,16 @@ namespace Microsoft.Build.Evaluation
 
                             if (diskContent != cacheContent)
                             {
-                                reloadEntry = true;
+                                forgetEntry = true;
                             }
                         }
 
-                        if (reloadEntry)
+                        if (forgetEntry)
                         {
-                            DebugTraceCache("Out of date, reloaded: ", projectFile);
-                            projectRootElement.Reload(true, null);
+                            ForgetEntry(projectRootElement);
+
+                            DebugTraceCache("Out of date dropped from XML cache: ", projectFile);
+                            projectRootElement = null;
                         }
                     }
                 }
