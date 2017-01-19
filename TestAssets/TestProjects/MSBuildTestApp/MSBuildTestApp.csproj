@@ -6,12 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.3</Version>
-    </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
     <DotNetCliToolReference Include="dotnet-portable">
       <Version>1.0.0</Version>
     </DotNetCliToolReference>
