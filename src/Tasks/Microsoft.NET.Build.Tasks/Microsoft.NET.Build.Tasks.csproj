@@ -10,7 +10,8 @@
     <RootNamespace>Microsoft.NET.Build.Tasks</RootNamespace>
     <AssemblyName>Microsoft.NET.Build.Tasks</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
-    <TargetFrameworks>netstandard1.3;net46</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netstandard1.3</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">netstandard1.3;net46</TargetFrameworks>
     <GenerateDependencyFile>false</GenerateDependencyFile>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
