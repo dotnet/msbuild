@@ -211,15 +211,32 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read item with Exclude without Include
         /// </summary>
-        [Theory]
-        [InlineData(@"
+        [Fact]
+        public void ReadInvalidExcludeWithoutInclude()
+        {
+            var project = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <ItemGroup>
                             <i Exclude='i1'/>
                         </ItemGroup>
                     </Project>
-                ")]
-        [InlineData(@"
+                ";
+
+            var exception =
+                Assert.Throws<InvalidProjectFileException>(
+                    () => { ProjectRootElement.Create(XmlReader.Create(new StringReader(project))); }
+                    );
+            
+            Assert.Contains("Items that are outside Target elements must have one of the following operations: Include, Update, or Remove.", exception.Message);
+        }
+        
+        /// <summary>
+        /// Read item with Exclude without Include under a target
+        /// </summary>
+        [Fact]
+        public void ReadInvalidExcludeWithoutIncludeUnderTarget()
+        {
+            var project = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Target Name='t'>
                             <ItemGroup>
@@ -227,14 +244,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                             </ItemGroup>
                         </Target>
                     </Project>
-                ")]
-        public void ReadInvalidExcludeWithoutInclude(string project)
-        {
-            Assert.Throws<InvalidProjectFileException>(() =>
-            {
-                ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
-            }
-           );
+                ";
+
+            var exception =
+                Assert.Throws<InvalidProjectFileException>(
+                    () => { ProjectRootElement.Create(XmlReader.Create(new StringReader(project))); }
+                    );
+            
+            Assert.Contains("The attribute \"Exclude\" in element <i> is unrecognized.", exception.Message);
         }
 
         [Theory]
@@ -592,34 +609,6 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Equal("i", item.Update);
         }
 
-        /// <summary>
-        /// Read item with Exclude without Include, inside of Target
-        /// </summary>
-        [Theory]
-        [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
-                        <ItemGroup>
-                            <i Exclude='i1'/>
-                        </ItemGroup>
-                    </Project>
-                ")]
-        [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
-                        <Target Name='t'>
-                            <ItemGroup>
-                                <i Exclude='i1'/>
-                            </ItemGroup>
-                        </Target>
-                    </Project>
-                ")]
-        public void ReadInvalidExcludeWithoutIncludeWithinTarget(string project)
-        {
-            Assert.Throws<InvalidProjectFileException>(() =>
-            {
-                ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
-            }
-           );
-        }
         /// <summary>
         /// Read item with Exclude without Include, inside of Target
         /// </summary>

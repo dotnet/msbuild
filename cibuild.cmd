@@ -156,6 +156,20 @@ if %ERRORLEVEL% NEQ 0 (
     goto :error
 )
 
+:: Only detect source control changes when running in the CI environment
+:: Detect if there are any changed files which should fail the build
+if DEFINED JENKINS_URL (
+    echo Detecting changed files...
+    git status
+    git --no-pager diff HEAD --word-diff=plain --exit-code
+    if ERRORLEVEL 1 (
+        echo.
+        echo [ERROR] After building, there are changed files.  Please build locally ^(cibuild.cmd --target All^) and include these changes in your pull request. 1>&2
+        goto :error
+    )
+    goto :EOF
+)
+
 :success
 echo.
 echo ++++++++++++++++

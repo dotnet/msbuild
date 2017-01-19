@@ -51,7 +51,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <trans-unit id="HelpMessage_1_Syntax">
         <source>Syntax:              MSBuild.exe [options] [project file | directory]
 </source>
-        <target state="updated">구문:              MSBuild.exe [options] [project file]
+        <target state="translated">구문:              MSBuild.exe [options] [project file | directory]
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -70,10 +70,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      a directory is specified, MSBuild searches that
                      directory for a project file.
 </source>
-        <target state="updated">설명:         지정한 대상을 프로젝트 파일에 빌드합니다. 프로젝트
+        <target state="translated">설명:         지정한 대상을 프로젝트 파일에 빌드합니다. 프로젝트
                      파일을 지정하지 않으면 MSBuild는 현재
                      작업 디렉터리에서 파일 확장명이 "proj"로 끝나는
-                     파일을 찾아서 사용합니다.
+                     파일을 찾아서 사용합니다. 디렉터리를
+                     지정하면 MSBuild는 해당 디렉터리에서 프로젝트 파일을
+                     검색합니다.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -1184,7 +1186,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="AmbiguousProjectDirectoryError">
         <source>MSBUILD : error MSB1050: Specify which project or solution file to use because the folder "{0}" contains more than one project or solution file.</source>
-        <target state="new">MSBUILD : error MSB1050: Specify which project or solution file to use because the folder "{0}" contains more than one project or solution file.</target>
+        <target state="translated">MSBUILD : error MSB1050: "{0}" 폴더에 프로젝트 또는 솔루션 파일이 두 개 이상 있으므로 사용할 프로젝트 또는 솔루션 파일을 지정하세요.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1050: "}UE: If no project or solution file is explicitly specified on the MSBuild.exe command-line, then the engine searches for a
       project or solution file in the current directory by looking for *.*PROJ and *.SLN. If more than one file is found that matches this wildcard, we
@@ -1206,18 +1208,18 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      continue to execute as if it was a warning but the overall
                      build will fail.
     </source>
-        <target state="new">  /warnaserror[:code[;code2]]
-                     List of warning codes to treats as errors.  Use a semicolon
-                     or a comma to separate multiple warning codes. To treat all
-                     warnings as errors use the switch with no values.
-                     (Short form: /err[:c;[c2]])
+        <target state="translated">  /warnaserror[:code[;code2]]
+                     오류로 처리할 경고 코드 목록입니다. 여러 경고 코드를
+                     구분하려면 세미콜론이나 쉼표를 사용하세요. 모든 경고를
+                     오류로 처리하려면 값없이 스위치를 사용하세요.
+                     (약식: /err[:c;[c2]])
 
-                     Example:
+                     예:
                        /warnaserror:MSB4130
 
-                     When a warning is treated as an error the target will
-                     continue to execute as if it was a warning but the overall
-                     build will fail.
+                     경고를 오류로 처리하는 경우 대상이
+                     계속해서 경고인 것처럼 실행되지만 전체
+                     빌드는 실패합니다.
     </target>
         <note>
       LOCALIZATION: "/warnaserror" and "/err" should not be localized.
@@ -1234,13 +1236,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        /warnasmessage:MSB3026
     </source>
-        <target state="new">  /warnasmessage[:code[;code2]]
-                     List of warning codes to treats as low importance
-                     messages.  Use a semicolon or a comma to separate
-                     multiple warning codes.
-                     (Short form: /nowarn[:c;[c2]])
+        <target state="translated">  /warnasmessage[:code[;code2]]
+                     중요도가 낮은 메시지로 처리할 경고 코드
+                     목록입니다. 여러 경고 코드를 구분하려면 세미콜론이나
+                     쉼표를 사용하세요.
+                     (약식: /nowarn[:c;[c2]])
 
-                     Example:
+                     예:
                        /warnasmessage:MSB3026
     </target>
         <note>
@@ -1250,12 +1252,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="ParameterRequiredError">
         <source>MSBUILD : error MSB1049: The {0} parameter must be specified</source>
-        <target state="new">MSBUILD : error MSB1049: The {0} parameter must be specified</target>
+        <target state="translated">MSBUILD : error MSB1049: {0} 매개 변수를 지정해야 합니다.</target>
         <note>{StrBegin="MSBUILD : error MSB1049: "}</note>
       </trans-unit>
       <trans-unit id="MissingWarnAsMessageParameterError">
         <source>MSBUILD : error MSB1051: Specify one or more warning codes to treat as low importance messages when using the /warnasmessage switch.</source>
-        <target state="new">MSBUILD : error MSB1051: Specify one or more warning codes to treat as low importance messages when using the /warnasmessage switch.</target>
+        <target state="translated">MSBUILD : error MSB1051: /warnasmessage 스위치를 사용하는 경우 중요도가 낮은 메시지로 처리할 경고 코드를 하나 이상 지정하세요.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1051: "}
       UE: This happens if the user does something like "msbuild.exe /warnasmessage:" without any codes.

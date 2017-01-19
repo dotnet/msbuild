@@ -345,7 +345,7 @@ namespace Microsoft.Build.Construction
             }
 
             // Include, remove, or update must be present unless inside a target
-            ProjectErrorUtilities.VerifyThrowInvalidProject(exclusiveAttributeCount == 1 || belowTarget, element.Location, "MissingRequiredAttribute", exclusiveItemOperation, itemType);
+            ProjectErrorUtilities.VerifyThrowInvalidProject(exclusiveAttributeCount == 1 || belowTarget, element.Location, "IncludeRemoveOrUpdate", exclusiveItemOperation, itemType);
 
             // Exclude must be missing, unless Include exists
             ProjectXmlUtilities.VerifyThrowProjectInvalidAttribute(exclude.Length == 0 || include.Length > 0, (XmlAttributeWithLocation)element.Attributes[XMakeAttributes.exclude]);

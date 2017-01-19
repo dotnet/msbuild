@@ -23,7 +23,7 @@
       <group id="ORCASENGINE/RESOURCES/STRINGS.RESX" datatype="resx" />
       <trans-unit id="AmbiguousTaskParameterError">
         <source>MSB4001: The "{0}" task has more than one parameter called "{1}".</source>
-        <target state="translated">MSB4001: più di un parametro dell'attività "{0}" è denominato "{1}".</target>
+        <target state="translated">MSB4001: l'attività "{0}" contiene più di un parametro denominato "{1}".</target>
         <note>{StrBegin="MSB4001: "}UE: This message is shown when a task has more than one .NET property with the same name -- it's unclear which of
     those properties the task wants to use as a parameter in project files.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
@@ -33,7 +33,7 @@
       </trans-unit>
       <trans-unit id="AtSignInTaskOutputItemName">
         <source>MSB4081: The value "{0}" of the "ItemName" attribute in element &lt;Output&gt; contains an "@" character. If you intended to use an item name then remove the @( ) around the item name.</source>
-        <target state="translated">MSB4081: il valore "{0}" dell'attributo "ItemName" in un elemento &lt;Output&gt; contiene un carattere "@". Se si desidera utilizzare un nome di elemento, non racchiuderlo in @( ).</target>
+        <target state="translated">MSB4081: il valore "{0}" dell'attributo "ItemName" in un elemento &lt;Output&gt; contiene un carattere "@". Se si vuole usare un nome di elemento, non racchiuderlo in @( ).</target>
         <note>{StrBegin="MSB4081: "}UE: This message is shown when an output tag has an itemname that contains an @. They probably typed @(foo) instead of foo in the ItemName.LOCALIZATION: Output and ItemName should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="mt-suggestion">MSB4081: Il valore "{0}" di "ItemName" attributo nell'elemento &lt; Output &gt; contiene un "@" caratteri. Se si intende utilizzare un nome di elemento, quindi rimuovere la @ () per racchiudere il nome dell'elemento.</target>
@@ -53,7 +53,7 @@
       </trans-unit>
       <trans-unit id="BadlyCasedSpecialTaskAttribute">
         <source>MSB4003: "{0}" is a reserved attribute of the &lt;{1}&gt; element, and must be spelled with the correct casing. This attribute cannot be used as a parameter to the "{2}" task.</source>
-        <target state="translated">MSB4003: "{0}" è un attributo riservato dell'elemento &lt;{1}&gt; e deve essere scritto con le maiuscole e minuscole corrette. Questo attributo non può essere utilizzato come parametro per l'attività "{2}".</target>
+        <target state="translated">MSB4003: "{0}" è un attributo riservato dell'elemento &lt;{1}&gt; e deve essere scritto con le maiuscole e minuscole corrette. Questo attributo non può essere usato come parametro per l'attività "{2}".</target>
         <note>{StrBegin="MSB4003: "}UE: Tasks are not allowed to use incorrect case for reserved attributes on the task nodes e.g. "continueonerror"
     instead of the "ContinueOnError".</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
@@ -63,7 +63,7 @@
       </trans-unit>
       <trans-unit id="BatchRequestSizeOutOfRange">
         <source>The "REQUESTBATCHSIZE" must be a number greater than 1. "{0}" is an invalid value. The value 10 will be used instead.</source>
-        <target state="translated">Il valore di "REQUESTBATCHSIZE" deve essere maggiore di 1. "{0}" non è un valore valido. Verrà utilizzato il valore 10.</target>
+        <target state="translated">Il valore di "REQUESTBATCHSIZE" deve essere maggiore di 1. "{0}" non è un valore valido. Verrà usato il valore 10.</target>
         <note>The name "REQUESTBATCHSIZE" is an environment variable</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">Il valore di "REQUESTBATCHSIZE" deve essere maggiore di 1. "{0}" non è un valore valido. Verrà utilizzato il valore 10.</target>
@@ -162,7 +162,7 @@
       </trans-unit>
       <trans-unit id="BuildTargetPartially">
         <source>Building target "{0}" partially, because some output files are out of date with respect to their input files.</source>
-        <target state="translated">Compilazione parziale della destinazione "{0}" poiché alcuni file di output sono obsoleti rispetto ai file di input corrispondenti.</target>
+        <target state="translated">Compilazione parziale della destinazione "{0}" perché alcuni file di output sono obsoleti rispetto ai file di input corrispondenti.</target>
         <note>{0} is the name of the target.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">Compilazione parziale della destinazione "{0}" poiché alcuni file di output sono obsoleti rispetto ai file di input corrispondenti.</target>
@@ -198,7 +198,7 @@
       </trans-unit>
       <trans-unit id="CannotAccessKnownAttributes">
         <source>The attribute "{0}" is a known MSBuild attribute, and cannot be accessed using this method.</source>
-        <target state="translated">L'attributo "{0}" è un attributo MSBuild noto. Non è possibile accedervi utilizzando questo metodo.</target>
+        <target state="translated">L'attributo "{0}" è un attributo MSBuild noto. Non è possibile accedervi usando questo metodo.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">L'attributo "{0}" è un attributo MSBuild noto. Non è possibile accedervi utilizzando questo metodo.</target>
@@ -216,7 +216,7 @@
       </trans-unit>
       <trans-unit id="CannotEvaluateItemMetadata">
         <source>MSB4023: Cannot evaluate the item metadata "%({0})". {1}</source>
-        <target state="translated">MSB4023: impossibile valutare i metadati dell'elemento "%({0})". {1}</target>
+        <target state="translated">MSB4023: non è possibile valutare i metadati dell'elemento "%({0})". {1}</target>
         <note>{StrBegin="MSB4023: "}UE: This message is shown when the value of an item metadata cannot be computed for some reason e.g. trying to apply
     %(RootDir) to an item-spec that's not a valid path, would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
@@ -245,7 +245,7 @@
       </trans-unit>
       <trans-unit id="CannotModifyEnvironmentProperty">
         <source>The "{0}" property comes from an environment variable, and cannot be modified.</source>
-        <target state="translated">Impossibile modificare la proprietà "{0}". Proviene da una variabile di ambiente.</target>
+        <target state="translated">Non è possibile modificare la proprietà "{0}". Proviene da una variabile di ambiente.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">Impossibile modificare la proprietà "{0}". Proviene da una variabile di ambiente.</target>
@@ -254,7 +254,7 @@
       </trans-unit>
       <trans-unit id="CannotModifyGlobalProperty">
         <source>The "{0}" property is a global property, and cannot be modified through an evaluated property group. Use "{1}" instead.</source>
-        <target state="translated">Impossibile modificare la proprietà "{0}" tramite un gruppo di proprietà valutato. È una proprietà globale. Utilizzare "{1}".</target>
+        <target state="translated">Non è possibile modificare la proprietà "{0}" tramite un gruppo di proprietà valutato perché è una proprietà globale. Usare "{1}".</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">Impossibile modificare la proprietà "{0}" tramite un gruppo di proprietà valutato. È una proprietà globale. Utilizzare "{1}".</target>
@@ -272,7 +272,7 @@
       </trans-unit>
       <trans-unit id="CannotModifyReservedItem">
         <source>MSB4117: The "{0}" item name is reserved, and cannot be used.</source>
-        <target state="translated">MSB4117: il nome di elemento "{0}" è riservato e non può essere utilizzato.</target>
+        <target state="translated">MSB4117: il nome di elemento "{0}" è riservato e non può essere usato.</target>
         <note>{StrBegin="MSB4117: "}UE: This message is shown when the user tries to redefine one of the reserved MSBuild items e.g. @(Choose)</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4117: il nome di elemento "{0}" è riservato e non può essere utilizzato.</target>
@@ -281,7 +281,7 @@
       </trans-unit>
       <trans-unit id="CannotModifyReservedItemMetadata">
         <source>MSB4118: The "{0}" item metadata name is reserved, and cannot be used.</source>
-        <target state="translated">MSB4118: il nome dei metadati dell'elemento "{0}" è riservato e non può essere utilizzato.</target>
+        <target state="translated">MSB4118: il nome dei metadati dell'elemento "{0}" è riservato e non può essere usato.</target>
         <note>{StrBegin="MSB4118: "}UE: This message is shown when the user tries to redefine one of the reserved MSBuild items e.g. @(Choose)</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4118: il nome dei metadati dell'elemento "{0}" è riservato e non può essere utilizzato.</target>
@@ -290,7 +290,7 @@
       </trans-unit>
       <trans-unit id="CannotModifyReservedProperty">
         <source>MSB4004: The "{0}" property is reserved, and cannot be modified.</source>
-        <target state="translated">MSB4004: impossibile modificare la proprietà "{0}". È riservata.</target>
+        <target state="translated">MSB4004: non è possibile modificare la proprietà "{0}". È riservata.</target>
         <note>{StrBegin="MSB4004: "}UE: This message is shown when the user tries to redefine one of the reserved MSBuild properties e.g. $(MSBuildProjectFile)</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4004: impossibile modificare la proprietà "{0}". È riservata.</target>
@@ -330,7 +330,7 @@
       </trans-unit>
       <trans-unit id="CannotReferenceItemMetadataWithoutItemName">
         <source>MSB4095: The item metadata %({0}) is being referenced without an item name.  Specify the item name by using %(itemname.{0}).</source>
-        <target state="translated">MSB4095: riferimento ai metadati dell'elemento %({0}) senza un nome di elemento. Specificare il nome dell'elemento utilizzando il formato %(itemname.{0}).</target>
+        <target state="translated">MSB4095: riferimento ai metadati dell'elemento %({0}) senza un nome di elemento. Specificare il nome dell'elemento usando il formato %(itemname.{0}).</target>
         <note>{StrBegin="MSB4095: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4095: riferimento ai metadati dell'elemento %({0}) senza un nome di elemento. Specificare il nome dell'elemento utilizzando il formato %(itemname.{0}).</target>
@@ -348,7 +348,7 @@
       </trans-unit>
       <trans-unit id="CannotRestoreWorkingDirectoryWarning">
         <source>MSB4005: The current working directory could not be restored to {0}. {1}</source>
-        <target state="translated">MSB4005: impossibile ripristinare la directory di lavoro corrente in {0}. {1}</target>
+        <target state="translated">MSB4005: non è stato possibile ripristinare la directory di lavoro corrente in {0}. {1}</target>
         <note>{StrBegin="MSB4005: "}UE: This message is shown when the current working directory cannot be reset after a build. "{1}" contains a message explaining why.
     LOCALIZATION: "{1}" is a message from an CLR/FX exception and is already localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
@@ -358,7 +358,7 @@
       </trans-unit>
       <trans-unit id="CannotSetCondition">
         <source>Cannot set a condition on an object not represented by an XML element in the project file.</source>
-        <target state="translated">Impossibile impostare una condizione per un oggetto non rappresentato da un elemento XML nel file di progetto.</target>
+        <target state="translated">Non è possibile impostare una condizione per un oggetto non rappresentato da un elemento XML nel file di progetto.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">Impossibile impostare una condizione per un oggetto non rappresentato da un elemento XML nel file di progetto.</target>
@@ -367,7 +367,7 @@
       </trans-unit>
       <trans-unit id="CannotSetContinueOnError">
         <source>Cannot set ContinueOnError on an object not represented by an XML element in the project file.</source>
-        <target state="translated">Impossibile impostare ContinueOnError per un oggetto non rappresentato da un elemento XML nel file di progetto.</target>
+        <target state="translated">Non è possibile impostare ContinueOnError per un oggetto non rappresentato da un elemento XML nel file di progetto.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">Impossibile impostare ContinueOnError per un oggetto non rappresentato da un elemento XML nel file di progetto.</target>
@@ -376,7 +376,7 @@
       </trans-unit>
       <trans-unit id="CannotSetDefaultToolsVersionAfterLoadingProjects">
         <source>MSB4134: DefaultToolsVersion cannot be set after a project has been loaded into the Engine.</source>
-        <target state="translated">MSB4134: impossibile impostare DefaultToolsVersion dopo che un progetto è stato caricato nel motore.</target>
+        <target state="translated">MSB4134: non è possibile impostare DefaultToolsVersion dopo che un progetto è stato caricato nel motore.</target>
         <note>{StrBegin="MSB4134: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4134: impossibile impostare DefaultToolsVersion dopo che un progetto è stato caricato nel motore.</target>
@@ -403,7 +403,7 @@
       </trans-unit>
       <trans-unit id="CannotSetPropertyDuringBuild">
         <source>A property cannot be set while building.</source>
-        <target state="translated">Impossibile impostare una proprietà durante la compilazione.</target>
+        <target state="translated">Non è possibile impostare una proprietà durante la compilazione.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">Impossibile impostare una proprietà durante la compilazione.</target>
@@ -430,7 +430,7 @@
       </trans-unit>
       <trans-unit id="ChildElementsBelowRemoveNotAllowed">
         <source>MSB4162: &lt;{0}&gt; is not valid. Child elements are not allowed below a item remove element.</source>
-        <target state="translated">MSB4162: &lt;{0}&gt; non è valido. Elementi figlio non consentiti al di sotto di un elemento rimosso.</target>
+        <target state="translated">MSB4162: &lt;{0}&gt; non è valido. Gli elementi figlio non sono consentiti al di sotto di un elemento rimosso.</target>
         <note>{StrBegin="MSB4162: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="mt-suggestion">MSB4162: &lt;{0}&gt; non è valido. Gli elementi figlio non sono consentiti di sotto di un elemento rimosso.</target>
@@ -467,7 +467,7 @@
       </trans-unit>
       <trans-unit id="CircularDependency">
         <source>MSB4006: There is a circular dependency in the target dependency graph involving target "{0}".</source>
-        <target state="translated">MSB4006: è presente una dipendenza circolare nel grafico di dipendenze che utilizza la destinazione "{0}".</target>
+        <target state="translated">MSB4006: è presente una dipendenza circolare nel grafico di dipendenze che usa la destinazione "{0}".</target>
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
@@ -549,7 +549,7 @@
       </trans-unit>
       <trans-unit id="ConflictingValuesOfMSBuildToolsPath">
         <source>MSB4142: MSBuildToolsPath is not the same as MSBuildBinPath for the ToolsVersion "{0}" defined at "{1}". If both are present they must have the same value.</source>
-        <target state="translated">MSB4142: il valore di MSBuildToolsPath non corrisponde al valore di MSBuildBinPath per il parametro ToolsVersion "{0}" definito in "{1}". Se entrambi presenti, devono avere lo stesso valore.</target>
+        <target state="translated">MSB4142: il valore di MSBuildToolsPath non corrisponde al valore di MSBuildBinPath per il parametro ToolsVersion "{0}" definito in "{1}". Se entrambi sono presenti, devono avere lo stesso valore.</target>
         <note>{StrBegin="MSB4142: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4142: il valore di MSBuildToolsPath non corrisponde al valore di MSBuildBinPath per il parametro ToolsVersion "{0}" definito in "{1}". Se entrambi presenti, devono avere lo stesso valore.</target>
@@ -599,7 +599,7 @@
       </trans-unit>
       <trans-unit id="DefaultToolsVersionNotFound">
         <source>MSB4133: A default tools version "{0}" was specified, but its definition could not be found.</source>
-        <target state="translated">MSB4133: impossibile trovare la definizione della versione strumenti predefinita "{0}" specificata.</target>
+        <target state="translated">MSB4133: la definizione della versione strumenti predefinita "{0}" specificata non è stata trovata.</target>
         <note>{StrBegin="MSB4133: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4133: impossibile trovare la definizione della versione strumenti predefinita "{0}" specificata.</target>
@@ -608,7 +608,7 @@
       </trans-unit>
       <trans-unit id="DollarSignInTaskOutputPropertyName">
         <source>MSB4080: The value "{0}" of the "PropertyName" attribute in element &lt;Output&gt; contains a "$" character. If you intended to use a property name then remove the $( ) around the property name.</source>
-        <target state="translated">MSB4080: il valore "{0}" dell'attributo "PropertyName" nell'elemento &lt;Output&gt; contiene un carattere "$". Se si desidera utilizzare un nome di proprietà, non racchiuderlo in $( ).</target>
+        <target state="translated">MSB4080: il valore "{0}" dell'attributo "PropertyName" nell'elemento &lt;Output&gt; contiene un carattere "$". Se si vuole usare un nome di proprietà, non racchiuderlo tra $( ).</target>
         <note>{StrBegin="MSB4080: "}UE: This message is shown when an output tag has an property name that contains an $. They probably typed $(foo) instead of foo in the PropertyName. LOCALIZATION: Output and PropertyName should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="mt-suggestion">MSB4080: Il valore "{0}" di "PropertyName" attributo nell'elemento &lt; Output &gt; contiene un carattere "$". Se si desidera utilizzare un nome di proprietà in $ () accanto al nome della proprietà.</target>
@@ -617,7 +617,7 @@
       </trans-unit>
       <trans-unit id="DuplicateImport">
         <source>MSB4011: There is a circular reference involving the import of file "{0}". This file may have been imported more than once, or you may have attempted to import the main project file. All except the first instance of this file will be ignored.</source>
-        <target state="translated">MSB4011: riferimento circolare che utilizza l'importazione del file "{0}". Il file potrebbe essere stato importato più volte oppure è possibile che si sia tentato di importare il file di progetto principale. Tutte le istanze del file, ad eccezione della prima, verranno ignorate.</target>
+        <target state="translated">MSB4011: è presente un riferimento circolare che usa l'importazione del file "{0}". Il file potrebbe essere stato importato più volte oppure è possibile che si sia tentato di importare il file di progetto principale. Tutte le istanze del file, ad eccezione della prima, verranno ignorate.</target>
         <note>{StrBegin="MSB4011: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4011: riferimento circolare che utilizza l'importazione del file "{0}". Il file potrebbe essere stato importato più volte oppure è possibile che si sia tentato di importare il file di progetto principale. Tutte le istanze del file, ad eccezione della prima, verranno ignorate.</target>
@@ -635,7 +635,7 @@
       </trans-unit>
       <trans-unit id="EmbeddedItemVectorCannotBeItemized">
         <source>MSB4012: The expression "{0}" cannot be used in this context. Item lists cannot be concatenated with other strings where an item list is expected. Use a semicolon to separate multiple item lists.</source>
-        <target state="translated">MSB4012: l'espressione "{0}" non può essere utilizzata in questo contesto. Gli elenchi di elementi non possono essere concatenati ad altre stringhe se è previsto un elenco di elementi. Utilizzare un punto e virgola per separare più elenchi di elementi.</target>
+        <target state="translated">MSB4012: l'espressione "{0}" non può essere usata in questo contesto. Gli elenchi di elementi non possono essere concatenati ad altre stringhe se è previsto un elenco di elementi. Usare un punto e virgola per separare più elenchi di elementi.</target>
         <note>{StrBegin="MSB4012: "}UE: This message is shown when the user does not properly specify an item list when an item list is expected
     e.g. "badprefix@(foo)badsuffix" instead of "prefix; @(foo); suffix"</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
@@ -691,7 +691,7 @@
       </trans-unit>
       <trans-unit id="ErrorEvaluatingToolsetPropertyExpression">
         <source>MSB4146: Cannot evaluate the property expression "{0}" found at "{1}". {2}</source>
-        <target state="translated">MSB4146: impossibile valutare l'espressione di proprietà "{0}" trovata in "{1}". {2}</target>
+        <target state="translated">MSB4146: non è possibile valutare l'espressione di proprietà "{0}" trovata in "{1}". {2}</target>
         <note>{StrBegin="MSB4146: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4146: impossibile valutare l'espressione di proprietà "{0}" trovata in "{1}". {2}</target>
@@ -799,7 +799,7 @@
       </trans-unit>
       <trans-unit id="IllFormedEqualsInCondition">
         <source>MSB4105: Found an unexpected character '{2}' at position {1} in condition "{0}". Did you intend to use "=="?</source>
-        <target state="translated">MSB4105: trovato carattere imprevisto '{2}' nella posizione {1} nella condizione "{0}". Si intendeva utilizzare "=="?</target>
+        <target state="translated">MSB4105: è stato trovato un carattere imprevisto '{2}' nella posizione {1} nella condizione "{0}". Si intendeva usare "=="?</target>
         <note>{StrBegin="MSB4105: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4105: trovato carattere imprevisto '{2}' nella posizione {1} nella condizione "{0}". Si intendeva utilizzare "=="?</target>
@@ -808,7 +808,7 @@
       </trans-unit>
       <trans-unit id="IllFormedItemListCloseParenthesisInCondition">
         <source>MSB4106: Expected an item list at position {1} in condition "{0}". Did you forget the closing parenthesis?</source>
-        <target state="translated">MSB4106: previsto un elenco di elementi nella posizione {1} nella condizione "{0}". Si è omessa la parentesi di chiusura?</target>
+        <target state="translated">MSB4106: è previsto un elenco di elementi nella posizione {1} nella condizione "{0}". Si è omessa la parentesi di chiusura?</target>
         <note>{StrBegin="MSB4106: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4106: previsto un elenco di elementi nella posizione {1} nella condizione "{0}". Si è omessa la parentesi di chiusura?</target>
@@ -817,7 +817,7 @@
       </trans-unit>
       <trans-unit id="IllFormedItemListOpenParenthesisInCondition">
         <source>MSB4107: Expected an item list at position {1} in condition "{0}". Did you forget the opening parenthesis after the '@'? To use a literal '@', use '%40' instead.</source>
-        <target state="translated">MSB4107: previsto un elenco di elementi nella posizione {1} nella condizione "{0}". Si è omessa la parentesi di chiusura dopo '@'? Per utilizzare un valore letterale '@', utilizzare '%40'.</target>
+        <target state="translated">MSB4107: è previsto un elenco di elementi nella posizione {1} nella condizione "{0}". Si è omessa la parentesi di chiusura dopo '@'? Per usare un valore letterale '@', specificare '%40'.</target>
         <note>{StrBegin="MSB4107: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4107: previsto un elenco di elementi nella posizione {1} nella condizione "{0}". Si è omessa la parentesi di chiusura dopo '@'? Per utilizzare un valore letterale '@', utilizzare '%40'.</target>
@@ -826,7 +826,7 @@
       </trans-unit>
       <trans-unit id="IllFormedItemListQuoteInCondition">
         <source>MSB4108: Expected an item list at position {1} in condition "{0}". Did you forget to close a quote inside the item list expression?</source>
-        <target state="translated">MSB4108: previsto un elenco di elementi nella posizione {1} nella condizione "{0}". Si è omessa una virgoletta di chiusura nell'espressione dell'elenco di elementi?</target>
+        <target state="translated">MSB4108: è previsto un elenco di elementi nella posizione {1} nella condizione "{0}". Si è omessa una virgoletta di chiusura nell'espressione dell'elenco di elementi?</target>
         <note>{StrBegin="MSB4108: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4108: previsto un elenco di elementi nella posizione {1} nella condizione "{0}". Si è omessa una virgoletta di chiusura nell'espressione dell'elenco di elementi?</target>
@@ -835,7 +835,7 @@
       </trans-unit>
       <trans-unit id="IllFormedPropertyCloseParenthesisInCondition">
         <source>MSB4109: Expected a property at position {1} in condition "{0}". Did you forget the closing parenthesis?</source>
-        <target state="translated">MSB4109: prevista una proprietà nella posizione {1} nella condizione "{0}". Si è omessa la parentesi di chiusura?</target>
+        <target state="translated">MSB4109: è prevista una proprietà nella posizione {1} nella condizione "{0}". Si è omessa la parentesi di chiusura?</target>
         <note>{StrBegin="MSB4109: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4109: prevista una proprietà nella posizione {1} nella condizione "{0}". Si è omessa la parentesi di chiusura?</target>
@@ -844,7 +844,7 @@
       </trans-unit>
       <trans-unit id="IllFormedPropertyOpenParenthesisInCondition">
         <source>MSB4110: Expected a property at position {1} in condition "{0}". Did you forget the opening parenthesis after the '$'? To use a literal '$', use '%24' instead.</source>
-        <target state="translated">MSB4110: prevista una proprietà nella posizione {1} nella condizione "{0}". Si è omessa la parentesi di apertura dopo il simbolo '$'? Per usare un valore letterale '$', usare '%24'.</target>
+        <target state="translated">MSB4110: è prevista una proprietà nella posizione {1} nella condizione "{0}". Si è omessa la parentesi di apertura dopo il simbolo '$'? Per usare un valore letterale '$', specificare '%24'.</target>
         <note>{StrBegin="MSB4110: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4110: prevista una proprietà nella posizione {1} nella condizione "{0}". Si è omessa la parentesi di apertura dopo il simbolo '$'? Per usare un valore letterale '$', usare '%24'.</target>
@@ -853,7 +853,7 @@
       </trans-unit>
       <trans-unit id="IllFormedQuotedStringInCondition">
         <source>MSB4101: Expected a closing quote after position {1} in condition "{0}".</source>
-        <target state="translated">MSB4101: prevista una virgoletta di chiusura dopo la posizione {1} nella condizione "{0}".</target>
+        <target state="translated">MSB4101: è prevista una virgoletta di chiusura dopo la posizione {1} nella condizione "{0}".</target>
         <note>{StrBegin="MSB4101: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4101: prevista una virgoletta di chiusura dopo la posizione {1} nella condizione "{0}".</target>
@@ -862,7 +862,7 @@
       </trans-unit>
       <trans-unit id="ImportedProjectNotFound">
         <source>MSB4019: The imported project "{0}" was not found. Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk.</source>
-        <target state="translated">MSB4019: progetto importato "{0}" non trovato. Verificare che il percorso nella dichiarazione &lt;Import&gt; sia corretto e che il file sia presente sul disco.</target>
+        <target state="translated">MSB4019: il progetto importato "{0}" non è stato trovato. Verificare che il percorso nella dichiarazione &lt;Import&gt; sia corretto e che il file sia presente sul disco.</target>
         <note>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="mt-suggestion">MSB4019: Il progetto importato "{0}" non è stato trovato. Verificare che il percorso della dichiarazione &lt; importazione &gt; sia corretto e che il file esista sul disco.</target>
@@ -871,7 +871,7 @@
       </trans-unit>
       <trans-unit id="IncorrectNumberOfFunctionArguments">
         <source>MSB4089: Incorrect number of arguments to function in condition "{0}". Found {1} argument(s) when expecting {2}.</source>
-        <target state="translated">MSB4089: numero di argomenti non corretto per la funzione nella condizione "{0}". N. di argomenti trovato: {1}, previsto: {2}.</target>
+        <target state="translated">MSB4089: il numero di argomenti non è corretto per la funzione nella condizione "{0}". Sono stati trovati {1} argomenti ma ne sono previsti {2}.</target>
         <note>{StrBegin="MSB4089: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4089: numero di argomenti non corretto per la funzione nella condizione "{0}". N. di argomenti trovato: {1}, previsto: {2}.</target>
@@ -937,7 +937,7 @@
       </trans-unit>
       <trans-unit id="InvalidEventCategory">
         <source>"{0}" is not a valid event category. To raise a custom event, use the "{1}" category.</source>
-        <target state="translated">"{0}" non è una categoria di eventi valida. Per generare un evento personalizzato, utilizzare la categoria "{1}".</target>
+        <target state="translated">"{0}" non è una categoria di eventi valida. Per generare un evento personalizzato, usare la categoria "{1}".</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">"{0}" non è una categoria di eventi valida. Per generare un evento personalizzato, utilizzare la categoria "{1}".</target>
@@ -964,7 +964,7 @@
       </trans-unit>
       <trans-unit id="InvalidImportedProjectFile">
         <source>MSB4024: The imported project file could not be loaded. {0}</source>
-        <target state="translated">MSB4024: impossibile caricare il file di progetto importato. {0}</target>
+        <target state="translated">MSB4024: non è stato possibile caricare il file di progetto importato. {0}</target>
         <note>{StrBegin="MSB4024: "}UE: This message is shown when an imported project file cannot be loaded because of incorrect XML. The project
     filename is not part of the message because it is provided separately to loggers.
     LOCALIZATION: {0} is a localized message from the CLR/FX explaining why the project is invalid.</note>
@@ -1008,7 +1008,7 @@
       </trans-unit>
       <trans-unit id="InvalidProjectFile">
         <source>MSB4025: The project file could not be loaded. {0}</source>
-        <target state="translated">MSB4025: impossibile caricare il file di progetto. {0}</target>
+        <target state="translated">MSB4025: non è stato possibile caricare il file di progetto. {0}</target>
         <note>{StrBegin="MSB4025: "}UE: This message is shown when the project file given to the engine cannot be loaded because the filename/path is
     invalid, or due to lack of permissions, or incorrect XML. The project filename is not part of the message because it is
     provided separately to loggers.
@@ -1038,7 +1038,7 @@
       </trans-unit>
       <trans-unit id="InvalidRegistryPropertyExpression">
         <source>MSB4143: The expression "{0}" cannot be evaluated. {1}</source>
-        <target state="translated">MSB4143: impossibile valutare l'espressione "{0}". {1}</target>
+        <target state="translated">MSB4143: non è possibile valutare l'espressione "{0}". {1}</target>
         <note>{StrBegin="MSB4143: "}
       UE: This message is shown when the user attempts to provide an expression like "$(Registry:HKEY_LOCAL_MACHINE\Software\Vendor\Tools@TaskLocation)"
       LOCALIZATION: "{0}" is the expression that was bad. "{1}" is a message from an FX exception that describes why the expression is bad.
@@ -1050,7 +1050,7 @@
       </trans-unit>
       <trans-unit id="InvalidFunctionPropertyExpression">
         <source>MSB4184: The expression "{0}" cannot be evaluated. {1}</source>
-        <target state="translated">MSB4184: impossibile valutare l'espressione "{0}". {1}</target>
+        <target state="translated">MSB4184: non è possibile valutare l'espressione "{0}". {1}</target>
         <note>{StrBegin="MSB4184: "}
       Single quotes as the expression will typically have double quotes in it.
       UE: This message is shown when the user attempts to provide an expression like "$(SomeProperty.ToLower())"
@@ -1075,7 +1075,7 @@
       </trans-unit>
       <trans-unit id="InvalidFunctionStaticMethodSyntax">
         <source>MSB4186: Invalid static method invocation syntax: "{0}". Static method invocation should be of the form: $([FullTypeName]::Method()), e.g. $([System.IO.Path]::Combine(`a`, `b`))</source>
-        <target state="translated">MSB4186: sintassi della chiamata al metodo statico non valida: '{0}'. Il formato della chiamata al metodo statico deve essere il seguente: $([FullTypeName]::Method()), ad esempio $([System.IO.Path]::Combine(`a`, `b`))</target>
+        <target state="translated">MSB4186: sintassi della chiamata al metodo statico non valida: "{0}". Il formato della chiamata al metodo statico deve essere il seguente: $([FullTypeName]::Method()), ad esempio $([System.IO.Path]::Combine(`a`, `b`))</target>
         <note>{StrBegin="MSB4186: "}
       UE: This message is shown when the user attempts to call a static method on a type, but has used the incorrect syntax
       LOCALIZATION: "{0}" is the function expression which is in error
@@ -1115,7 +1115,7 @@
       </trans-unit>
       <trans-unit id="InvalidTaskOutputSpecification">
         <source>MSB4029: The "{0}" task has an invalid output specification. The "TaskParameter" attribute is required, and either the "ItemName" or "PropertyName" attribute must be specified (but not both).</source>
-        <target state="translated">MSB4029: specifica dell'output dell'attività "{0}" non valida. L'attributo "TaskParameter" è obbligatorio ed è necessario specificare l'attributo "ItemName" o "PropertyName", ma non entrambi.</target>
+        <target state="translated">MSB4029: la specifica dell'output dell'attività "{0}" non è valida. L'attributo "TaskParameter" è obbligatorio ed è necessario specificare l'attributo "ItemName" o "PropertyName", ma non entrambi.</target>
         <note>{StrBegin="MSB4029: "}LOCALIZATION: "TaskParameter", "ItemName" and "PropertyName" should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4029: specifica dell'output dell'attività "{0}" non valida. L'attributo "TaskParameter" è obbligatorio ed è necessario specificare l'attributo "ItemName" o "PropertyName", ma non entrambi.</target>
@@ -1135,7 +1135,7 @@
       </trans-unit>
       <trans-unit id="InvalidToolsetValueInConfigFileValue">
         <source>MSB4137: Invalid value specified in the configuration file at "{0}". Property name or tools version name is an empty string.</source>
-        <target state="translated">MSB4137: valore non valido specificato nel file di configurazione in "{0}". Il nome della proprietà o il nome della versione degli strumenti è una stringa vuota.</target>
+        <target state="translated">MSB4137: è stato specificato un valore non valido nel file di configurazione in "{0}". Il nome della proprietà o il nome della versione degli strumenti è una stringa vuota.</target>
         <note>{StrBegin="MSB4137: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4137: valore non valido specificato nel file di configurazione in "{0}". Il nome della proprietà o il nome della versione degli strumenti è una stringa vuota.</target>
@@ -1171,7 +1171,7 @@
       </trans-unit>
       <trans-unit id="ItemDoesNotContainValueForUnqualifiedMetadata">
         <source>MSB4096: The item "{0}" in item list "{1}" does not define a value for metadata "{2}".  In order to use this metadata, either qualify it by specifying %({1}.{2}), or ensure that all items in this list define a value for this metadata.</source>
-        <target state="translated">MSB4096: l'elemento "{0}" nell'elenco di elementi "{1}" non definisce un valore per i metadati "{2}". Per poter utilizzare questi metadati, qualificarli specificando %({1}.{2}) o accertarsi che tutti gli elementi dell'elenco definiscano un valore per questi metadati.</target>
+        <target state="translated">MSB4096: l'elemento "{0}" nell'elenco di elementi "{1}" non definisce un valore per i metadati "{2}". Per poter usare questi metadati, qualificarli specificando %({1}.{2}) o assicurarsi che tutti gli elementi dell'elenco definiscano un valore per questi metadati.</target>
         <note>{StrBegin="MSB4096: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4096: l'elemento "{0}" nell'elenco di elementi "{1}" non definisce un valore per i metadati "{2}". Per poter utilizzare questi metadati, qualificarli specificando %({1}.{2}) o accertarsi che tutti gli elementi dell'elenco definiscano un valore per questi metadati.</target>
@@ -1198,7 +1198,7 @@
       </trans-unit>
       <trans-unit id="InternalLoggerExceptionOnlyThrownByEngine">
         <source>An InternalLoggerException can only be thrown by the MSBuild engine. The public constructors of this class cannot be used to create an instance of the exception.</source>
-        <target state="translated">InternalLoggerException può essere generato solo dal motore di MSBuild. I costruttori pubblici di questa classe non possono essere utilizzati per creare un'istanza dell'eccezione.</target>
+        <target state="translated">InternalLoggerException può essere generato solo dal motore di MSBuild. I costruttori pubblici di questa classe non possono essere usati per creare un'istanza dell'eccezione.</target>
         <note>UE: This message is shown when a user tries to instantiate a special exception called InternalLoggerException through the OM --
     only the engine is allowed to create and throw this exception.
     LOCALIZATION: "InternalLoggerException" and "MSBuild" should not be localized.</note>
@@ -1218,7 +1218,7 @@
       </trans-unit>
       <trans-unit id="MissingCondition">
         <source>MSB4083: Expected a Condition attribute on element "{0}".</source>
-        <target state="translated">MSB4083: previsto un attributo Condition per l'elemento "{0}".</target>
+        <target state="translated">MSB4083: è previsto un attributo Condition per l'elemento "{0}".</target>
         <note>{StrBegin="MSB4083: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4083: previsto un attributo Condition per l'elemento "{0}".</target>
@@ -1255,7 +1255,7 @@
       </trans-unit>
       <trans-unit id="MissingTaskError">
         <source>MSB4036: The "{0}" task was not found. Check the following: 1.) The name of the task in the project file is the same as the name of the task class. 2.) The task class is "public" and implements the Microsoft.Build.Framework.ITask interface. 3.) The task is correctly declared with &lt;UsingTask&gt; in the project file, or in the *.tasks files located in the "{1}" directory.</source>
-        <target state="translated">MSB4036: attività "{0}" non trovata. Verificare quanto segue: 1.) Il nome dell'attività nel file di progetto corrisponde al nome della classe dell'attività. 2.) La classe dell'attività è "public" e implementa l'interfaccia Microsoft.Build.Framework.ITask. 3.) L'attività è stata dichiarata correttamente con &lt;UsingTask&gt; nel file di progetto o nei file *.tasks presenti nella directory "{1}".</target>
+        <target state="translated">MSB4036: l'attività "{0}" non è stata trovata. Verificare quanto segue: 1.) Il nome dell'attività nel file di progetto corrisponde al nome della classe dell'attività. 2.) La classe dell'attività è "public" e implementa l'interfaccia Microsoft.Build.Framework.ITask. 3.) L'attività è stata dichiarata correttamente con &lt;UsingTask&gt; nel file di progetto o nei file *.tasks presenti nella directory "{1}".</target>
         <note>{StrBegin="MSB4036: "}LOCALIZATION: &lt;UsingTask&gt; and "*.tasks" should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="mt-suggestion">MSB4036: Il "{0}" non è stato trovato l'attività. Verificare quanto segue: 1.) il nome dell'attività nel file di progetto è lo stesso nome della classe dell'attività. . 2) la classe di attività "pubblico" e implementa l'interfaccia ITask. . 3) l'attività sia stata dichiarata correttamente con &lt; UsingTask &gt; nel file di progetto o nei file *. Tasks nella "{1}" directory.</target>
@@ -1429,7 +1429,7 @@
       </trans-unit>
       <trans-unit id="ProjectFileNotFound">
         <source>The project file "{0}" was not found.</source>
-        <target state="translated">File di progetto "{0}" non trovato.</target>
+        <target state="translated">Il file di progetto "{0}" non è stato trovato.</target>
         <note>UE: This message is shown when the user calls into the OM to build a project that doesn't exist on disk.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">File di progetto "{0}" non trovato.</target>
@@ -1610,7 +1610,7 @@
       </trans-unit>
       <trans-unit id="QualifiedMetadataInTransformNotAllowed">
         <source>MSB4043: The item metadata reference "{0}" is invalid because it is qualified with an item name. Item metadata referenced in transforms do not need to be qualified, because the item name is automatically deduced from the items being transformed. Change "{0}" to "%({1})".</source>
-        <target state="translated">MSB4043: riferimento "{0}" ai metadati dell'elemento non valido. È qualificato con un nome di elemento. I metadati degli elementi a cui si fa riferimento nelle trasformazioni non devono essere qualificati. Il nome dell'elemento viene dedotto automaticamente dagli elementi trasformati. Modificare "{0}" in "%({1})".</target>
+        <target state="translated">MSB4043: il riferimento "{0}" ai metadati dell'elemento non è valido. È qualificato con un nome di elemento. I metadati degli elementi a cui si fa riferimento nelle trasformazioni non devono essere qualificati. Il nome dell'elemento viene dedotto automaticamente dagli elementi trasformati. Modificare "{0}" in "%({1})".</target>
         <note>{StrBegin="MSB4043: "}UE: This message is shown when the user does something like this: @(foo-&gt;'%(foo.metadata)'). There is no need to specify
     "foo.metadata", because "foo" is automatically deduced. In corollary, "bar.metadata" is not allowed either, where "bar" is a different
     item list type.</note>
@@ -1659,7 +1659,7 @@
       </trans-unit>
       <trans-unit id="SecurityProjectBuildDisabled">
         <source>MSB4112: The targets in this project have been disabled by the host and therefore cannot be built at this time. This may have been done for security reasons. To enable the targets, the host must set Project.BuildEnabled to "true".</source>
-        <target state="translated">MSB4112: le destinazioni di questo progetto sono state disabilitate dall'host e pertanto non possono essere compilate. Questa scelta può essere dovuta a motivi di sicurezza. Per abilitare le destinazioni, Project.BuildEnabled deve essere impostato dall'host su "true".</target>
+        <target state="translated">MSB4112: le destinazioni di questo progetto sono state disabilitate dall'host e quindi non possono essere compilate. Questa scelta può essere dovuta a motivi di sicurezza. Per abilitare le destinazioni, l'host deve impostare Project.BuildEnabled su "true".</target>
         <note>{StrBegin="MSB4112: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4112: le destinazioni di questo progetto sono state disabilitate dall'host e pertanto non possono essere compilate. Questa scelta può essere dovuta a motivi di sicurezza. Per abilitare le destinazioni, Project.BuildEnabled deve essere impostato dall'host su "true".</target>
@@ -1678,7 +1678,7 @@
       </trans-unit>
       <trans-unit id="ShallowCloneNotAllowed">
         <source>A shallow clone of this object cannot be created.</source>
-        <target state="translated">Impossibile creare un duplicato superficiale dei riferimenti di questo oggetto.</target>
+        <target state="translated">Non è possibile creare un duplicato superficiale dei riferimenti di questo oggetto.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">Impossibile creare un duplicato superficiale dei riferimenti di questo oggetto.</target>
@@ -1750,7 +1750,7 @@
       </trans-unit>
       <trans-unit id="SolutionBuildingSolutionConfiguration">
         <source>Building solution configuration "{0}".</source>
-        <target state="translated">Compilazione della configurazione di soluzione "{0}" in corso</target>
+        <target state="translated">Compilazione della configurazione di soluzione "{0}" in corso.</target>
         <note>UE: This is not an error, so doesn't need an error code.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">Compilazione della configurazione di soluzione "{0}" in corso.</target>
@@ -1759,7 +1759,7 @@
       </trans-unit>
       <trans-unit id="SolutionCacheBeingUsed">
         <source>Using solution cache file "{0}" for configuration "{1}" and tools version "{2}".</source>
-        <target state="translated">Verrà utilizzato il file di cache "{0}" della soluzione per la configurazione "{1}" e la versione "{2}" degli strumenti.</target>
+        <target state="translated">Verrà usato il file di cache "{0}" della soluzione per la configurazione "{1}" e la versione "{2}" degli strumenti.</target>
         <note>UE: This is not an error, so doesn't need an error code.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">Verrà utilizzato il file di cache "{0}" della soluzione per la configurazione "{1}" e la versione "{2}" degli strumenti.</target>
@@ -1822,7 +1822,7 @@
       </trans-unit>
       <trans-unit id="SolutionInvalidSolutionConfiguration">
         <source>MSB4126: The specified solution configuration "{0}" is invalid. Please specify a valid solution configuration using the Configuration and Platform properties (e.g. MSBuild.exe Solution.sln /p:Configuration=Debug /p:Platform="Any CPU") or leave those properties blank to use the default solution configuration.</source>
-        <target state="translated">MSB4126: la configurazione di soluzione specificata "{0}" non è valida. Specificare una configurazione di soluzione valida utilizzando le proprietà Configuration e Platform (ad esempio MSBuild.exe Solution.sln /p:Configuration=Debug /p:Platform="Any CPU") oppure non specificare alcun valore per tali proprietà in modo da utilizzare la configurazione di soluzione predefinita.</target>
+        <target state="translated">MSB4126: la configurazione di soluzione specificata "{0}" non è valida. Specificare una configurazione di soluzione valida usando le proprietà Configuration e Platform (ad esempio MSBuild.exe Solution.sln /p:Configuration=Debug /p:Platform="Any CPU") oppure non specificare alcun valore per tali proprietà in modo da usare la configurazione di soluzione predefinita.</target>
         <note>{StrBegin="MSB4126: "}UE: The solution filename is provided separately to loggers.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4126: la configurazione di soluzione specificata "{0}" non è valida. Specificare una configurazione di soluzione valida utilizzando le proprietà Configuration e Platform (ad esempio MSBuild.exe Solution.sln /p:Configuration=Debug /p:Platform="Any CPU") oppure non specificare alcun valore per tali proprietà in modo da utilizzare la configurazione di soluzione predefinita.</target>
@@ -1831,7 +1831,7 @@
       </trans-unit>
       <trans-unit id="SolutionParseErrorReadingProject">
         <source>MSB4046: Error reading project file "{0}": {1}</source>
-        <target state="translated">MSB4046: errore durante la lettura del file di progetto "{0}". {1}</target>
+        <target state="translated">MSB4046: errore durante la lettura del file di progetto "{0}": {1}</target>
         <note>{StrBegin="MSB4046: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4046: errore durante la lettura del file di progetto "{0}". {1}</target>
@@ -1849,7 +1849,7 @@
       </trans-unit>
       <trans-unit id="SolutionParseProjectDepNotFoundError">
         <source>MSB4051: Project {0} is referencing a project with GUID {1}, but a project with this GUID was not found in the .SLN file.</source>
-        <target state="translated">MSB4051: il progetto {0} fa riferimento a un progetto con GUID {1} non trovato nel file SLN.</target>
+        <target state="translated">MSB4051: il progetto {0} fa riferimento a un progetto con GUID {1}, che non è stato trovato nel file SLN.</target>
         <note>{StrBegin="MSB4051: "}UE: The solution filename is provided separately to loggers.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4051: il progetto {0} fa riferimento a un progetto con GUID {1} non trovato nel file SLN.</target>
@@ -1858,7 +1858,7 @@
       </trans-unit>
       <trans-unit id="SolutionParseUnknownProjectType">
         <source>MSB4078: The project file "{0}" is not supported by MSBuild and cannot be built.</source>
-        <target state="translated">MSB4078: file di progetto "{0}" non supportato in MSBuild. Impossibile compilarlo.</target>
+        <target state="translated">MSB4078: file di progetto "{0}" non supportato in MSBuild. Non è possibile compilarlo.</target>
         <note>{StrBegin="MSB4078: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4078: file di progetto "{0}" non supportato in MSBuild. Impossibile compilarlo.</target>
@@ -1924,7 +1924,7 @@
       </trans-unit>
       <trans-unit id="SolutionVenusProjectNoPublish">
         <source>Web projects do not support the "Publish" target.  Continuing with remaining projects ...</source>
-        <target state="translated">I progetti Web non supportano la destinazione di pubblicazione. Verranno elaborati i progetti rimanenti...</target>
+        <target state="translated">I progetti Web non supportano la destinazione "Publish". Verranno elaborati i progetti rimanenti...</target>
         <note>UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do not localize "Publish".</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
@@ -1934,7 +1934,7 @@
       </trans-unit>
       <trans-unit id="SolutionVenusProjectSkipped">
         <source>Skipping because the "$(AspNetConfiguration)" configuration is not supported for this web project.  You can use the AspNetConfiguration property to override the configuration used for building web projects, by adding /p:AspNetConfiguration=&lt;value&gt; to the command line. Currently web projects only support Debug and Release configurations.</source>
-        <target state="translated">Operazione ignorata. La configurazione "$(AspNetConfiguration)" non è supportata per questo progetto Web. Per eseguire l'override della configurazione utilizzata per la compilazione dei progetti Web, è possibile utilizzare la proprietà AspNetConfiguration, aggiungendo /:pAspNetConfiguration=&lt;valore&gt; alla riga di comando. I progetti Web attualmente supportano solo le configurazioni versioni di debug e di rilascio.</target>
+        <target state="translated">L'operazione verrà ignorata. La configurazione "$(AspNetConfiguration)" non è supportata per questo progetto Web. Per eseguire l'override della configurazione usata per la compilazione dei progetti Web, è possibile usare la proprietà AspNetConfiguration, aggiungendo /p:AspNetConfiguration=&lt;valore&gt; alla riga di comando. I progetti Web attualmente supportano solo le configurazioni delle versioni di debug e di rilascio.</target>
         <note>
     UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do NOT localize "AspNetConfiguration", "Debug", "Release".
@@ -1964,7 +1964,7 @@
       </trans-unit>
       <trans-unit id="STARequired">
         <source>MSB4056: The MSBuild engine must be called on a single-threaded-apartment. Current threading model is "{0}". Proceeding, but some tasks may not function correctly.</source>
-        <target state="translated">MSB4056: il motore di MSBuild deve essere chiamato su un apartment a thread singolo. Il modello di threading corrente è '{0}'. Se si continua, alcune attività potrebbero non funzionare correttamente.</target>
+        <target state="translated">MSB4056: il motore di MSBuild deve essere chiamato su un apartment a thread singolo. Il modello di threading corrente è "{0}". Se si continua, alcune attività potrebbero non funzionare correttamente.</target>
         <note>{StrBegin="MSB4056: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4056: il motore di MSBuild deve essere chiamato su un apartment a thread singolo. Il modello di threading corrente è '{0}'. Se si continua, alcune attività potrebbero non funzionare correttamente.</target>
@@ -1985,7 +1985,7 @@
       </trans-unit>
       <trans-unit id="TargetAlreadyCompleteFailure">
         <source>Target "{0}" skipped. Previously built unsuccessfully.</source>
-        <target state="translated">Destinazione "{0}" ignorata. La compilazione non era riuscita in precedenza.</target>
+        <target state="translated">La destinazione "{0}" è stata ignorata. La compilazione non era riuscita in precedenza.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">Destinazione "{0}" ignorata. La compilazione non era riuscita in precedenza.</target>
@@ -1994,7 +1994,7 @@
       </trans-unit>
       <trans-unit id="TargetAlreadyCompleteSuccess">
         <source>Target "{0}" skipped. Previously built successfully.</source>
-        <target state="translated">Destinazione "{0}" ignorata. La compilazione era stata completata in precedenza.</target>
+        <target state="translated">La destinazione "{0}" è stata ignorata. La compilazione era stata completata in precedenza.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">Destinazione "{0}" ignorata. La compilazione era stata completata in precedenza.</target>
@@ -2057,7 +2057,7 @@
       </trans-unit>
       <trans-unit id="TargetOutputsSpecifiedAreMissing">
         <source>MSB4168: The item "{0}" of type "{1}" does not define a value for the metadata in the expression "{2}". This expression is used in the target output for target "{3}". If a target declares outputs that are transforms, all items in the transform must have a value for the metadata in the transform.</source>
-        <target state="translated">MSB4168: l'elemento "{0}" di tipo "{1}" non definisce un valore per i metadati inclusi nell'espressione "{2}". L'espressione viene utilizzata nell'output della destinazione "{3}". Se una destinazione dichiara output che corrispondono a trasformazioni, tutti gli elementi della trasformazione devono contenere un valore per i metadati inclusi nella trasformazione.</target>
+        <target state="translated">MSB4168: l'elemento "{0}" di tipo "{1}" non definisce un valore per i metadati inclusi nell'espressione "{2}". L'espressione viene usata nell'output della destinazione "{3}". Se una destinazione dichiara output che corrispondono a trasformazioni, tutti gli elementi della trasformazione devono contenere un valore per i metadati inclusi nella trasformazione.</target>
         <note>{StrBegin="MSB4168: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4168: l'elemento "{0}" di tipo "{1}" non definisce un valore per i metadati inclusi nell'espressione "{2}". L'espressione viene utilizzata nell'output della destinazione "{3}". Se una destinazione dichiara output che corrispondono a trasformazioni, tutti gli elementi della trasformazione devono contenere un valore per i metadati inclusi nella trasformazione.</target>
@@ -2138,7 +2138,7 @@
       </trans-unit>
       <trans-unit id="TaskDeclarationOrUsageError">
         <source>MSB4060: The "{0}" task has been declared or used incorrectly, or failed during construction. Check the spelling of the task name and the assembly name.</source>
-        <target state="translated">MSB4060: l'attività "{0}" è stata dichiarata o utilizzata in modo errato, oppure si è verificato un errore durante la costruzione. Verificare l'ortografia del nome dell'attività e dell'assembly.</target>
+        <target state="translated">MSB4060: l'attività "{0}" è stata dichiarata o usata in modo errato oppure si è verificato un errore durante la costruzione. Verificare l'ortografia del nome dell'attività e dell'assembly.</target>
         <note>{StrBegin="MSB4060: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4060: l'attività "{0}" è stata dichiarata o utilizzata in modo errato, oppure si è verificato un errore durante la costruzione. Verificare l'ortografia del nome dell'attività e dell'assembly.</target>
@@ -2183,7 +2183,7 @@
       </trans-unit>
       <trans-unit id="TaskFound">
         <source>Using "{0}" task from assembly "{1}".</source>
-        <target state="translated">Verrà utilizzata l'attività "{0}" dall'assembly "{1}".</target>
+        <target state="translated">Verrà usata l'attività "{0}" dall'assembly "{1}".</target>
         <note>UE: This informational message helps users determine which assemblies their tasks were loaded from.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">Verrà utilizzata l'attività "{0}" dall'assembly "{1}".</target>
@@ -2201,7 +2201,7 @@
       </trans-unit>
       <trans-unit id="TaskInstantiationFailureErrorInvalidCast">
         <source>MSB4127: The "{0}" task could not be instantiated from the assembly "{1}". Please verify the task assembly has been built using the same version of the Microsoft.Build.Framework assembly as the one installed on your computer and that your host application is not missing a binding redirect for Microsoft.Build.Framework. {2}</source>
-        <target state="translated">MSB4127: non è possibile creare un'istanza dell'attività "{0}" dall'assembly "{1}". Verificare che l'assembly dell'attività sia stato compilato con la stessa versione dell'assembly Microsoft.Build.Framework installata nel computer e che nell'applicazione host non manchi un reindirizzamento del binding per Microsoft.Build.Framework. {2}</target>
+        <target state="translated">MSB4127: non è stato possibile creare un'istanza dell'attività "{0}" dall'assembly "{1}". Verificare che l'assembly dell'attività sia stato compilato con la stessa versione dell'assembly Microsoft.Build.Framework installata nel computer e che nell'applicazione host non manchi un reindirizzamento del binding per Microsoft.Build.Framework. {2}</target>
         <note>{StrBegin="MSB4127: "}UE: This message is a specialized version of the TaskInstantiationFailureError message and can probably reuse some of its docs.
       LOCALIZATION: "{2}" is a localized message from a CLR/FX exception. Also, Microsoft.Build.Framework should not be localized</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
@@ -2294,7 +2294,7 @@
       </trans-unit>
       <trans-unit id="DeferredMessagesAvailiable">
         <source>Some messages did not display because they were not associated with any ProjectStarted events. Use diagnostic verbosity to view these messages.</source>
-        <target state="translated">Alcuni messaggi non sono stati visualizzati perché non associati ad alcun evento ProjectStarted. Utilizzare il livello di dettaglio diagnostico per visualizzare i messaggi.</target>
+        <target state="translated">Alcuni messaggi non sono stati visualizzati perché non associati ad alcun evento ProjectStarted. Usare il livello di dettaglio diagnostico per visualizzare i messaggi.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">Alcuni messaggi non sono stati visualizzati perché non associati ad alcun evento ProjectStarted. Utilizzare il livello di dettaglio diagnostico per visualizzare i messaggi.</target>
@@ -2321,7 +2321,7 @@
       </trans-unit>
       <trans-unit id="UnexpectedTaskAttribute">
         <source>MSB4064: The "{0}" parameter is not supported by the "{1}" task. Verify the parameter exists on the task, and it is a settable public instance property.</source>
-        <target state="translated">MSB4064: parametro "{0}" non supportato dall'attività "{1}". Verificare che il parametro sia presente per l'attività e che si tratti di un'istanza pubblica e impostabile della proprietà.</target>
+        <target state="translated">MSB4064: il parametro "{0}" non è supportato dall'attività "{1}". Verificare che il parametro sia presente per l'attività e che si tratti di un'istanza pubblica e impostabile della proprietà.</target>
         <note>{StrBegin="MSB4064: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4064: parametro "{0}" non supportato dall'attività "{1}". Verificare che il parametro sia presente per l'attività e che si tratti di un'istanza pubblica e impostabile della proprietà.</target>
@@ -2330,7 +2330,7 @@
       </trans-unit>
       <trans-unit id="UnexpectedTaskOutputAttribute">
         <source>MSB4131: The "{0}" parameter is not supported by the "{1}" task. Verify the parameter exists on the task, and it is a gettable public instance property.</source>
-        <target state="translated">MSB4131: il parametro "{0}" non è supportato dall'attività "{1}". Verificare che il parametro sia presente per l'attività e che si tratti di un'istanza pubblica e ottenibile della proprietà.</target>
+        <target state="translated">MSB4131: il parametro "{0}" non è supportato dall'attività "{1}". Verificare che il parametro sia presente per l'attività e che si tratti di un'istanza pubblica e recuperabile della proprietà.</target>
         <note>{StrBegin="MSB4131: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4131: il parametro "{0}" non è supportato dall'attività "{1}". Verificare che il parametro sia presente per l'attività e che si tratti di un'istanza pubblica e ottenibile della proprietà.</target>
@@ -2447,7 +2447,7 @@
       </trans-unit>
       <trans-unit id="MustCallInitializeBeforeApplyParameter">
         <source>MSB4150: Must initialize the console logger using the initialize method before using ApplyParameter</source>
-        <target state="translated">MSB4150: per potere utilizzare ApplyParameter è necessario inizializzare il logger di console mediante il metodo Initialize</target>
+        <target state="translated">MSB4150: per poter usare ApplyParameter è necessario inizializzare il logger di console mediante il metodo Initialize</target>
         <note>{StrBegin="MSB4150: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4150: per potere utilizzare ApplyParameter è necessario inizializzare il logger di console mediante il metodo Initialize</target>
@@ -2465,7 +2465,7 @@
       </trans-unit>
       <trans-unit id="FatalErrorOnChildNode">
         <source>MSB4152: An error occurred on the child node "{0}" and could not be passed to the parent node. {1}</source>
-        <target state="translated">MSB4152: errore sul nodo figlio "{0}". Impossibile passare al nodo padre. {1}</target>
+        <target state="translated">MSB4152: errore sul nodo figlio "{0}". Non è stato possibile passare al nodo padre. {1}</target>
         <note>{StrBegin="MSB4152: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4152: errore sul nodo figlio "{0}". Impossibile passare al nodo padre. {1}</target>
@@ -2501,7 +2501,7 @@
       </trans-unit>
       <trans-unit id="LoggerCreationError">
         <source>MSB1021: Cannot create an instance of the logger - {0}.</source>
-        <target state="translated">MSB1021: impossibile creare un'istanza del logger - {0}.</target>
+        <target state="translated">MSB1021: non è possibile creare un'istanza del logger - {0}.</target>
         <note>{StrBegin="MSB1021: "}The error code for this message is duplicated from MSBuild.exe. </note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB1021: impossibile creare un'istanza del logger - {0}.</target>
@@ -2510,7 +2510,7 @@
       </trans-unit>
       <trans-unit id="LoggerNotFoundError">
         <source>MSB1020: The logger {0} was not found. Check the following: 1.) The logger name specified is the same as the name of the logger class. 2.) The logger class is "public" and implements the Microsoft.Build.Framework.ILogger interface. 3.) The path to the logger assembly is correct, or the logger can be loaded using only the assembly name provided.</source>
-        <target state="translated">MSB1020: impossibile trovare il logger {0}. Verificare quanto segue: 1.) Il nome del logger specificato corrisponde al nome della classe logger. 2.) La classe logger è "public" e implementa l'interfaccia Microsoft.Build.Framework.ILogger. 3.) Il percorso dell'assembly logger è corretto o è possibile caricare il logger utilizzando esclusivamente il nome di assembly fornito.</target>
+        <target state="translated">MSB1020: il logger {0} non è stato trovato. Verificare quanto segue: 1.) Il nome del logger specificato corrisponde al nome della classe logger. 2.) La classe logger è "public" e implementa l'interfaccia Microsoft.Build.Framework.ILogger. 3.) Il percorso dell'assembly logger è corretto o è possibile caricare il logger usando esclusivamente il nome di assembly fornito.</target>
         <note>{StrBegin="MSB1020: "}The error code for this message is duplicated from MSBuild.exe.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB1020: impossibile trovare il logger {0}. Verificare quanto segue: 1.) Il nome del logger specificato corrisponde al nome della classe logger. 2.) La classe logger è "public" e implementa l'interfaccia Microsoft.Build.Framework.ILogger. 3.) Il percorso dell'assembly logger è corretto o è possibile caricare il logger utilizzando esclusivamente il nome di assembly fornito.</target>
