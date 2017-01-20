@@ -307,6 +307,12 @@ Copyright (c) .NET Foundation. All rights reserved.
       <!-- Add the references we computed -->
       <Reference Include="@(ResolvedCompileFileDefinitions)" />
       <Reference Include="@(ResolvedFrameworkAssemblies)" />
+
+      <!-- Remove simple name references if we're directly providing a reference assembly to the compiler. For example,
+           consider a project with an Reference Include="System", and some NuGet package is providing System.dll.
+           Simple references can also come from NuGet framework assemblies, hence this statement should occur after
+           including all computed references. -->
+      <Reference Remove="%(ResolvedCompileFileDefinitions.FileName)" />
     </ItemGroup>
   </Target>
 

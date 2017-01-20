@@ -27,11 +27,18 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public string MoreInformationLink { get; set; }
 
+        [Output]
+        public ITaskItem [] DeduplicatedItems { get; set; }
+
         protected override void ExecuteCore()
         {
+            DeduplicatedItems = Array.Empty<ITaskItem>();
+
             if (DefaultItemsEnabled && DefaultItemsOfThisTypeEnabled)
             {
-                var duplicateItems = Items.GroupBy(i => i.ItemSpec).Where(g => g.Count() > 1).ToList();
+                var itemGroups = Items.GroupBy(i => i.ItemSpec);
+
+                var duplicateItems = itemGroups.Where(g => g.Count() > 1).ToList();
                 if (duplicateItems.Any())
                 {
                     string duplicateItemsFormatted = string.Join("; ", duplicateItems.Select(d => $"'{d.Key}'"));
@@ -43,6 +50,8 @@ namespace Microsoft.NET.Build.Tasks
                         duplicateItemsFormatted);
 
                     Log.LogError(message);
+
+                    DeduplicatedItems = itemGroups.Select(g => g.First()).ToArray();
                 }
             }
         }
