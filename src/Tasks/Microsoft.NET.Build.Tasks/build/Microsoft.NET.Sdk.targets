@@ -210,17 +210,21 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="OutputFile" ItemName="FileWrites" />
     </WriteCodeFragment>
 
-    <GenerateSatelliteAssemblies EmbedResources="@(_SatelliteAssemblyResourceInputs)"
-                                 AssemblyInfoFile="$(_AssemblyInfoFile)"
-                                 OutputAssembly="$(_OutputAssembly)"
-                                 References="@(ReferencePath)"
-                                 KeyContainer="$(KeyContainerName)"
-                                 KeyFile="$(KeyOriginatorFile)"
-                                 PublicSign="$(PublicSign)"
-                                 DelaySign="$(DelaySign)">
+    <Csc Resources="@(_SatelliteAssemblyResourceInputs)"
+         Sources="$(_AssemblyInfoFile)"
+         OutputAssembly="$(_OutputAssembly)"
+         References="@(ReferencePath)"
+         KeyContainer="$(KeyContainerName)"
+         KeyFile="$(KeyOriginatorFile)"
+         PublicSign="$(PublicSign)"
+         DelaySign="$(DelaySign)"
+         Deterministic="$(Deterministic)"
+         TargetType="Library"
+         ToolExe="$(CscToolExe)"
+         ToolPath="$(CscToolPath)">
 
       <Output TaskParameter="OutputAssembly" ItemName="FileWrites"/>
-    </GenerateSatelliteAssemblies>
+    </Csc>
   </Target>
 
   <!--

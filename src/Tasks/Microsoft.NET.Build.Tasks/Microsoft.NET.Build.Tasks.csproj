@@ -30,9 +30,6 @@
     <PackageReference Include="Microsoft.Build.Utilities.Core">
       <Version>$(MsBuildPackagesVersion)</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp">
-      <Version>$(RoslynVersion)</Version>
-    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CheckForDuplicateItems.cs" />
@@ -59,7 +56,6 @@
     <Compile Include="CompilationOptionsConverter.cs" />
     <Compile Include="NuGetUtils.cs" />
     <Compile Include="GetAssemblyVersion.cs" />
-    <Compile Include="GenerateSatelliteAssemblies.cs" />
     <Compile Include="ResourceAssemblyInfo.cs" />
     <Compile Include="SingleProjectInfo.cs" />
     <Compile Include="ProjectContext.cs" />
