@@ -872,7 +872,7 @@ namespace Microsoft.Build.Construction
             // These are just dummies necessary to make the evaluation into a project instance succeed when 
             // any custom imported targets have declarations like BeforeTargets="Build"
             // They'll be replaced momentarily with the real ones.
-            foreach (string targetName in _defaultTargetNames.Union(_targetNames))
+            foreach (string targetName in _defaultTargetNames)
             {
                 traversalProject.AddTarget(targetName);
             }
@@ -897,7 +897,7 @@ namespace Microsoft.Build.Construction
                 );
 
             // Make way for the real ones                
-            foreach (string targetName in _defaultTargetNames.Union(_targetNames))
+            foreach (string targetName in _defaultTargetNames)
             {
                 traversalInstance.RemoveTarget(targetName);
             }
