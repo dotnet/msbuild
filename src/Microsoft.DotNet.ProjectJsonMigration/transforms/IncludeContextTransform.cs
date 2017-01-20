@@ -25,6 +25,16 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
                         && includeContext.IncludeFiles != null 
                         && includeContext.IncludeFiles.Count > 0);
 
+        private bool IsPatternBlackListed(string pattern)
+        {
+            if (_patternsBlackList == null)
+            {
+                return false;
+            }
+
+            return _patternsBlackList.Contains(pattern.Replace('\\', '/'));
+        }
+
         protected virtual Func<string, AddItemTransform<IncludeContext>> IncludeExcludeTransformGetter =>
             (itemName) => new AddItemTransform<IncludeContext>(
                 itemName,
@@ -34,6 +44,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
                     if (_emitBuiltInIncludes)
                     {
                         fullIncludeSet = fullIncludeSet.Union(includeContext.BuiltInsInclude.OrEmptyIfNull());
+                    }
+
+                    if (_patternsBlackList != null)
+                    {
+                        fullIncludeSet = fullIncludeSet.Where((pattern) => !IsPatternBlackListed(pattern));
                     }
 
                     return FormatGlobPatternsForMsbuild(fullIncludeSet, includeContext.SourceBasePath);
@@ -50,7 +65,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
                 {
                     return includeContext != null &&
                         ( 
-                            (includeContext.IncludePatterns != null && includeContext.IncludePatterns.Count > 0)
+                            (includeContext.IncludePatterns != null && includeContext.IncludePatterns.Where((pattern) => !IsPatternBlackListed(pattern)).Count() > 0)
                             ||
                             (_emitBuiltInIncludes && 
                              includeContext.BuiltInsInclude != null && 
@@ -68,6 +83,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
 
         private readonly string _itemName;
         private bool _transformMappings;
+        private string[] _patternsBlackList;
         private bool _emitBuiltInIncludes;
         private readonly List<ItemMetadataValue<IncludeContext>> _metadata = new List<ItemMetadataValue<IncludeContext>>();
 
@@ -75,11 +91,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
             string itemName,
             bool transformMappings = true,
             Func<IncludeContext, bool> condition = null,
-            bool emitBuiltInIncludes = true) : base(condition)
+            bool emitBuiltInIncludes = true,
+            string[] patternsBlackList = null) : base(condition)
         {
             _itemName = itemName;
             _transformMappings = transformMappings;
             _emitBuiltInIncludes = emitBuiltInIncludes;
+            _patternsBlackList = patternsBlackList;
 
             _mappingsToTransfrom = (addItemTransform, targetPath) =>
             {

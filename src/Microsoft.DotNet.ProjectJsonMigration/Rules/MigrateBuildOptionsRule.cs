@@ -110,10 +110,15 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     compilerOptions => projectFolderName,
                     compilerOptions => compilerOptions.OutputName != null);
 
+        private string[] _compilePatternsBlackList = new string[] {
+            "**/*.cs"
+        };
+
         private IncludeContextTransform CompileFilesTransform =>
             new IncludeContextTransform(
                 "Compile",
                 transformMappings: false,
+                patternsBlackList: _compilePatternsBlackList,
                 condition: ic => ic != null,
                 emitBuiltInIncludes: false);
 
