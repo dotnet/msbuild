@@ -213,6 +213,29 @@ elementFormDefault="qualified">
       </xs:complexContent>
     </xs:complexType>
   </xs:element>
+  <xs:element name="DotNetCliToolReference" substitutionGroup="msb:Item">
+    <xs:annotation>
+      <xs:documentation>
+        <!-- _locID_text="DotNetCliToolReference" _locComment="" -->A project-specific tool that can be ran from the command line. 
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="msb:SimpleItemType">
+          <xs:sequence>
+            <xs:element name="Version" />
+          </xs:sequence>
+          <xs:attribute name="Include" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>
+                <!-- _locID_text="DotNetCliToolReference_Include" _locComment="" -->Package name of the tool. This may differ from its associated reference package name.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
   <xs:element name="Xdcmake" substitutionGroup="msb:Item">
     <xs:complexType>
       <xs:complexContent>
@@ -1441,6 +1464,11 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="OutputType" _locComment="" -->Type of output to generate (WinExe, Exe, or Library)</xs:documentation>
         </xs:annotation>
     </xs:element>
+    <xs:element name="PackageTargetFallback" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="PackageTargetFallback" _locComment="" -->Allows packages using alternative monikers to be referenced in this project, which include older (e.g. dnxcore50, dotnet5.x) and Portable Class Library names.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
     <xs:element name="Platform" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="PlatformName" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="PlatformFamilyName" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>    
@@ -1456,7 +1484,12 @@ elementFormDefault="qualified">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="PreBuildEvent" _locComment="" -->Command line to be run at the start of build</xs:documentation>
         </xs:annotation>
-    </xs:element>        
+    </xs:element>
+    <xs:element name="PreserveCompilationContext" substitutionGroup="msb:Property" type="msb:boolean">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="PreserveCompilationContext" _locComment="" -->Allows reference assemblies to be used in dynamic compilation (e.g. ASP.NET Razor views).</xs:documentation>
+      </xs:annotation>
+    </xs:element>
     <xs:element name="ProductName" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="ProductVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="ProjectGuid" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -1506,7 +1539,7 @@ elementFormDefault="qualified">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="StartupObject" _locComment="" -->Type that contains the main entry point</xs:documentation>
         </xs:annotation>
-    </xs:element>        
+    </xs:element>
     <xs:element name="SuiteName" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="SupportUrl" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="TargetFrameworkProfile" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
