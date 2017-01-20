@@ -66,17 +66,6 @@ namespace Microsoft.Build.Construction
             );
 
         /// <summary>
-        /// Internal implementation targets that can't be used by users
-        /// </summary>
-        internal static readonly ISet<string> _solutionGeneratedTargetNames = ImmutableHashSet.Create<string>(StringComparer.OrdinalIgnoreCase,
-            "ValidateSolutionConfiguration",
-            "ValidateToolsVersions",
-            "ValidateProjects",
-            "GetSolutionConfigurationContents",
-            "GetFrameworkPathAndRedistList"
-            ).Union(_defaultTargetNames);
-
-        /// <summary>
         /// Version 2.0
         /// </summary>
         private readonly Version _version20 = new Version(2, 0);
@@ -162,25 +151,8 @@ namespace Microsoft.Build.Construction
 
             if (targetNames != null)
             {
-                _targetNames = GetUserTargets(targetNames, solution.ProjectsInOrder.Select(_ => _.ProjectName));
+                _targetNames = targetNames.Select(i => i.Split(new[] {':'}, 2, StringSplitOptions.RemoveEmptyEntries).Last()).ToList();
             }
-        }
-
-        private List<string> GetUserTargets(IReadOnlyCollection<string> targetNames, IEnumerable<string> projectNames)
-        {
-            // Special target names are generated for each project like My_Project:Clean.  If the user specified a value like
-            // that then we need to split by the first colon and assume the rest is a real target name.  This works unless the
-            // target has a colon in it and the user is not trying to run it in a specific project.  At the time of writing this
-            // we figured it unlikely that a target name would have a colon in it...
-
-            var userTargets =
-                targetNames.Select(i => i.Split(new[] {':'}, 2, StringSplitOptions.RemoveEmptyEntries).Last())
-                    // The known target names are also removed from the list in case something like /t:Build was specified it is just ignored
-                    .Except(_solutionGeneratedTargetNames, StringComparer.OrdinalIgnoreCase)
-                    // Ignore targets that have the same name as projects, since their meaning is special. Whatever else remains, it must be a user target (e.g. the MyBuild target)
-                    .Except(projectNames, StringComparer.OrdinalIgnoreCase).ToList();
-
-            return userTargets;
         }
 
         #endregion // Constructors
@@ -800,8 +772,9 @@ namespace Microsoft.Build.Construction
                 AddTraversalTargetForProject(traversalInstance, project, projectConfiguration, "Rebuild", "BuildOutput", canBuildDirectly);
                 AddTraversalTargetForProject(traversalInstance, project, projectConfiguration, "Publish", null, canBuildDirectly);
 
-                // Add any other targets specified by the user
-                foreach (string targetName in _targetNames)
+
+                // Add any other targets specified by the user that were not already added
+                foreach (string targetName in _targetNames.Where(i => !traversalInstance.Targets.ContainsKey(i)))
                 {
                     AddTraversalTargetForProject(traversalInstance, project, projectConfiguration, targetName, null, canBuildDirectly);
                 }
@@ -812,6 +785,12 @@ namespace Microsoft.Build.Construction
                     ProjectInstance metaProject = CreateMetaproject(traversalInstance, project, projectConfiguration);
                     projectInstances.Add(metaProject);
                 }
+            }
+
+            // Add any other targets specified by the user that were not already added
+            foreach (string targetName in _targetNames.Where(i => !traversalInstance.Targets.ContainsKey(i)))
+            {
+                AddTraversalReferencesTarget(traversalInstance, targetName, null);
             }
         }
 
@@ -828,10 +807,6 @@ namespace Microsoft.Build.Construction
             AddTraversalReferencesTarget(traversalInstance, "Clean", null);
             AddTraversalReferencesTarget(traversalInstance, "Rebuild", "CollectedBuildOutput");
             AddTraversalReferencesTarget(traversalInstance, "Publish", null);
-            foreach (string targetName in _targetNames)
-            {
-                AddTraversalReferencesTarget(traversalInstance, targetName, null);
-            }
         }
 
         /// <summary>
@@ -897,7 +872,7 @@ namespace Microsoft.Build.Construction
             // These are just dummies necessary to make the evaluation into a project instance succeed when 
             // any custom imported targets have declarations like BeforeTargets="Build"
             // They'll be replaced momentarily with the real ones.
-            foreach (string targetName in _defaultTargetNames.Union(_targetNames))
+            foreach (string targetName in _defaultTargetNames)
             {
                 traversalProject.AddTarget(targetName);
             }
@@ -922,7 +897,7 @@ namespace Microsoft.Build.Construction
                 );
 
             // Make way for the real ones                
-            foreach (string targetName in _defaultTargetNames.Union(_targetNames))
+            foreach (string targetName in _defaultTargetNames)
             {
                 traversalInstance.RemoveTarget(targetName);
             }
@@ -1116,7 +1091,7 @@ namespace Microsoft.Build.Construction
                 AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, "Rebuild");
                 AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, "Publish");
 
-                foreach (string targetName in _targetNames)
+                foreach (string targetName in _targetNames.Where(i => !metaprojectInstance.Targets.ContainsKey(i)))
                 {
                     AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, targetName);
                 }
@@ -1132,7 +1107,7 @@ namespace Microsoft.Build.Construction
                 AddMetaprojectTargetForManagedProject(traversalProject, metaprojectInstance, project, projectConfiguration, "Rebuild", targetOutputItemName);
                 AddMetaprojectTargetForManagedProject(traversalProject, metaprojectInstance, project, projectConfiguration, "Publish", null);
 
-                foreach (string targetName in _targetNames)
+                foreach (string targetName in _targetNames.Where(i => !metaprojectInstance.Targets.ContainsKey(i)))
                 {
                     AddMetaprojectTargetForManagedProject(traversalProject, metaprojectInstance, project, projectConfiguration, targetName, null);
                 }
@@ -1144,7 +1119,7 @@ namespace Microsoft.Build.Construction
                 AddMetaprojectTargetForUnknownProjectType(traversalProject, metaprojectInstance, project, "Rebuild", unknownProjectTypeErrorMessage);
                 AddMetaprojectTargetForUnknownProjectType(traversalProject, metaprojectInstance, project, "Publish", unknownProjectTypeErrorMessage);
 
-                foreach (string targetName in _targetNames)
+                foreach (string targetName in _targetNames.Where(i => !metaprojectInstance.Targets.ContainsKey(i)))
                 {
                     AddMetaprojectTargetForUnknownProjectType(traversalProject, metaprojectInstance, project, targetName, unknownProjectTypeErrorMessage);
                 }
@@ -1940,6 +1915,13 @@ namespace Microsoft.Build.Construction
             if (targetToBuild != null)
             {
                 actualTargetName += ":" + targetToBuild;
+            }
+
+            // Don't add the target again.  The user might have specified /t:Project:target which was already added but only this method knows about Project:Target so
+            // after coming up with that target name, it can check if it has already been added.
+            if (traversalProject.Targets.ContainsKey(actualTargetName))
+            {
+                return;
             }
 
             // The output item name is the concatenation of the project name with the specified outputItem.  In the typical case, if the
