@@ -235,6 +235,8 @@ namespace Microsoft.DotNet.Tools.Migrate
             }
 
             Reporter.Output.WriteLine(GetReportSummary(migrationReport));
+
+            Reporter.Output.WriteLine(LocalizableStrings.MigrationAdditionalHelp);
         }
 
         private string GetReportContent(MigrationReport migrationReport, bool colored = false)
