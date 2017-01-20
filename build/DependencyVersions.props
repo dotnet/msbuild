@@ -9,7 +9,6 @@
     <MsBuildPackagesVersion>0.1.0-preview-00028-160627</MsBuildPackagesVersion>
     <CoreSetupVersion>1.0.1-beta-000933</CoreSetupVersion>
     <NuGetVersion>4.0.0-rc3-2215</NuGetVersion>
-    <RoslynVersion>2.0.0-beta6-60922-08</RoslynVersion>
   </PropertyGroup>
 
   <!-- Dependencies from test projects -->
