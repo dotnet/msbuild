@@ -130,6 +130,29 @@
       <VSDesignTimeBuild Condition="'$(BuildingInsideVisualStudio)'=='true' and '$(BuildingOutOfProcess)'=='false'">true</VSDesignTimeBuild>
     </PropertyGroup>
   </Target>
-  
+
+  <Target Name="EditBin"
+          AfterTargets="CoreCompile"
+          BeforeTargets="OpenSourceSign"
+          Condition="'$(FullFrameworkBuild)' == 'true' and '$(PlatformTarget)' == 'x86'">
+    <PropertyGroup>
+      <!-- Native equivalent is /LARGEADDRESSAWARE on the linker -->
+      <EditBinFlags Condition="'$(LargeAddressAware)'=='true'">$(EditBinFlags) /LARGEADDRESSAWARE</EditBinFlags>
+
+      <!-- Don't require all developers to install C++ tools just to
+           get editbin.exe -->
+      <EditBinContinueOnError>WarnAndContinue</EditBinContinueOnError>
+      <!-- But DO fail the build on CI and official builds if we can't
+           produce the right outputs. Continuing on error to allow
+           test results even on a misconfigured build machine. -->
+      <EditBinContinueOnError Condition="'$(TF_BUILD)' == 'True' or '$(JENKINS_URI)' != ''">ErrorAndContinue</EditBinContinueOnError>
+    </PropertyGroup>
+
+    <Exec Condition="'$(EditBinFlags)'!=''"
+          Command="editbin.exe /NOLOGO $(EditBinFlags) @(IntermediateAssembly)"
+          ContinueOnError="$(EditBinContinueOnError)" />
+
+  </Target>
+
   <Import Project="$(NuGetConfigDir)\packageLoad.targets" />
 </Project>
