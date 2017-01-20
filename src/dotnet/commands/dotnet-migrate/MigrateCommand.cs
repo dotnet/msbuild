@@ -119,17 +119,17 @@ namespace Microsoft.DotNet.Tools.Migrate
             foreach (var report in migrationReport.ProjectMigrationReports)
             {
                 var reportPathWithTrailingSlash = PathUtility.EnsureTrailingSlash(report.ProjectDirectory);
-                var relReportPath = PathUtility.GetRelativePath(
+                var relativeReportPath = PathUtility.GetRelativePath(
                     slnPathWithTrailingSlash,
                     reportPathWithTrailingSlash);
 
-                var xprojPath = Path.Combine(relReportPath, report.ProjectName + ".xproj");
-                var projects = _slnFile.Projects.Where(p => p.FilePath == xprojPath);
+                var xprojPath = Path.Combine(relativeReportPath, report.ProjectName + ".xproj");
+                var xprojProjectsReferencedBySolution = _slnFile.Projects.Where(p => p.FilePath == xprojPath);
 
                 var migratedProjectName = report.ProjectName + ".csproj";
-                if (projects.Count() == 1)
+                if (xprojProjectsReferencedBySolution.Count() == 1)
                 {
-                    var slnProject = projects.Single();
+                    var slnProject = xprojProjectsReferencedBySolution.Single();
                     slnProject.FilePath = Path.Combine(
                         Path.GetDirectoryName(slnProject.FilePath),
                         migratedProjectName);
@@ -137,12 +137,12 @@ namespace Microsoft.DotNet.Tools.Migrate
                 }
                 else
                 {
-                    var csprojPath = Path.Combine(relReportPath, migratedProjectName);
-                    var slnAlreadyContainsMigratedCsproj = _slnFile.Projects
+                    var csprojPath = Path.Combine(relativeReportPath, migratedProjectName);
+                    var solutionContainsCsprojPriorToMigration = _slnFile.Projects
                         .Where(p => p.FilePath == csprojPath)
                         .Any();
 
-                    if (!slnAlreadyContainsMigratedCsproj)
+                    if (!solutionContainsCsprojPriorToMigration)
                     {
                         csprojFilesToAdd.Add(Path.Combine(report.ProjectDirectory, migratedProjectName));
                     }
@@ -299,7 +299,6 @@ namespace Microsoft.DotNet.Tools.Migrate
 
             if (projectMigrationReport.Errors.Any())
             {
-
                 sb.AppendLine(RedIfColored($"Project {projectMigrationReport.ProjectName} migration failed ({projectMigrationReport.ProjectDirectory})"));
 
                 foreach (var error in projectMigrationReport.Errors.Select(e => e.GetFormattedErrorMessage()))

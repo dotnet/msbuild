@@ -11,6 +11,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 {
     internal class MigrationBackupPlan
     {
+        private const string TempCsprojExtention = ".migration_in_place_backup";
+
         private readonly FileInfo globalJson;
 
         public MigrationBackupPlan(
@@ -57,7 +59,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                .Where(f => f.Name == "project.json"
                         || f.Extension == ".xproj"
                         || f.FullName.EndsWith(".xproj.user")
-                        || f.FullName.EndsWith(".lock.json"));
+                        || f.FullName.EndsWith(".lock.json")
+                        || f.FullName.EndsWith(TempCsprojExtention));
         }
 
         public DirectoryInfo ProjectBackupDirectory { get; }
@@ -81,10 +84,23 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
             foreach (var file in FilesToMove)
             {
+                var fileName = file.Name.EndsWith(TempCsprojExtention)
+                    ? Path.GetFileNameWithoutExtension(file.Name)
+                    : file.Name;
+
                 file.MoveTo(
-                    Path.Combine(
-                        ProjectBackupDirectory.FullName, file.Name));
+                    Path.Combine(ProjectBackupDirectory.FullName, fileName));
             }
+        }
+
+        public static void RenameCsprojFromMigrationOutputNameToTempName(string outputProject)
+        {
+            var backupFileName = $"{outputProject}{TempCsprojExtention}";
+            if (File.Exists(backupFileName))
+            {
+                File.Delete(backupFileName);
+            }
+            File.Move(outputProject, backupFileName);
         }
     }
 }
