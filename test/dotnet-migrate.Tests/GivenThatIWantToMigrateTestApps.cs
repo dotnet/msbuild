@@ -168,7 +168,7 @@ namespace Microsoft.DotNet.Migration.Tests
         {
             var solutionDirectory =
                 TestAssetsManager.CreateTestInstance("AppWithPackageNamedAfterFolder").Path;
-            var appProject = Path.Combine(solutionDirectory, "App", "App.csproj");
+            var appProject = Path.Combine(solutionDirectory, "src", "App", "App.csproj");
 
             MigrateProject(solutionDirectory);
 
