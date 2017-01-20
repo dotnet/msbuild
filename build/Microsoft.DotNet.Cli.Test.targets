@@ -86,40 +86,14 @@
   </Target>
 
   <Target Name="RestoreTests"
-          DependsOnTargets="CreateTestAssetPackageNuPkgs;
-                            CleanTestProjectsBinObj;
-                            SetupRestoreTestsInputs;"
-          Inputs="@(RestoreTestsInputs)"
-          Outputs="@(RestoreTestsInputs->'%(RelativeDir)/obj/project.assets.json');@(RestoreTestsInputs->'%(RelativeDir)/obj/%(Filename).csproj.nuget.g.props');@(RestoreTestsInputs->'%(RelativeDir)/obj/%(Filename).csproj.nuget.g.targets')">
+          DependsOnTargets="CreateTestAssetPackageNuPkgs;">
     <CallTarget Targets="CleanTestProjectsLockFiles"/>
 
     <DotNetRestore ToolPath="$(Stage0Directory)"
-                   ProjectPath="&quot;%(RestoreTestsInputs.FullPath)&quot;" />
+                   ProjectPath="&quot;$(TestDirectory)/Microsoft.DotNet.Cli.Tests.sln&quot;" />
   </Target>
 
-  <Target Name="CleanTestProjectsBinObj"
-          DependsOnTargets="SetupRestoreTestsInputs;">
-    <ItemGroup>
-      <FilesToDelete Include="$(TestDirectory)**/bin/**/project.assets.json;$(TestDirectory)**/bin/**/*.csproj.nuget.g.props;$(TestDirectory)**/bin/**/*.csproj.nuget.g.targets" />
-      <FilesToDelete Include="$(TestDirectory)**/obj/**/project.assets.json;$(TestDirectory)**/obj/**/*.csproj.nuget.g.props;$(TestDirectory)**/obj/**/*.csproj.nuget.g.targets" />
-    </ItemGroup>
-
-    <Delete Files="@(FilesToDelete)" />
-
-    <ItemGroup>
-      <FilesToDelete Remove="*" />
-    </ItemGroup>
-  </Target>
-
-  <Target Name="SetupRestoreTestsInputs"
-          DependsOnTargets="PrepareTests;" >
-    <ItemGroup>
-      <RestoreTestsInputs Include="$(TestDirectory)/**/*.csproj"
-                          Exclude="$(TestDirectory)/**/bin/**/*.csproj" />
-    </ItemGroup>
-  </Target>
-
-  <Target Name="BuildTestAssets"
+   <Target Name="BuildTestAssets"
           DependsOnTargets="BuildTestAssetProjects;
                             BuildDesktopTestAssetProjects;">
   </Target>

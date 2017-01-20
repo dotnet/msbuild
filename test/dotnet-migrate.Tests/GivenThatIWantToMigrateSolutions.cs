@@ -52,6 +52,35 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Fact]
+        public void ItOnlyMigratesProjectsInTheSlnFile()
+        {
+            var projectDirectory = TestAssets
+                .Get("NonRestoredTestProjects", "PJAppWithSlnAndXprojRefs")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root;
+
+            var solutionRelPath = Path.Combine("TestApp", "TestApp.sln");
+
+            new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .Execute($"migrate \"{solutionRelPath}\"")
+                .Should().Pass();
+
+            new DirectoryInfo(projectDirectory.FullName)
+                .Should().HaveFiles(new []
+                    {
+                        Path.Combine("TestApp", "TestApp.csproj"),
+                        Path.Combine("TestLibrary", "TestLibrary.csproj"),
+                        Path.Combine("TestApp", "src", "subdir", "subdir.csproj"),
+                        Path.Combine("TestApp", "TestAssets", "TestAsset", "project.json")
+                    });
+ 
+            new DirectoryInfo(projectDirectory.FullName)
+                .Should().NotHaveFile(Path.Combine("TestApp", "TestAssets", "TestAsset", "TestAsset.csproj"));
+        }
+
+        [Fact]
         public void WhenDirectoryAlreadyContainsCsprojFileItMigratesAndBuildsSln()
         {
             MigrateAndBuild(
