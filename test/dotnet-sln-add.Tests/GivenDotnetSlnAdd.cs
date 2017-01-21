@@ -35,8 +35,6 @@ VisualStudioVersion = 15.0.26006.2
 MinimumVisualStudioVersion = 10.0.40219.1
 Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""App"", ""App\App.csproj"", ""{7072A694-548F-4CAE-A58F-12D257D5F486}""
 EndProject
-Project(""{2150E333-8FDC-42A3-9474-1A3956D46DE8}"") = ""Lib"", ""Lib"", ""__LIB_FOLDER_GUID__""
-EndProject
 Project(""{13B669BE-BB05-4DDF-9536-439F39A36129}"") = ""Lib"", ""Lib\Lib.csproj"", ""__LIB_PROJECT_GUID__""
 EndProject
 Global
@@ -77,9 +75,6 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		__LIB_PROJECT_GUID__ = __LIB_FOLDER_GUID__
-	EndGlobalSection
 EndGlobal
 ";
 
@@ -88,8 +83,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26006.2
 MinimumVisualStudioVersion = 10.0.40219.1
-Project(""{2150E333-8FDC-42A3-9474-1A3956D46DE8}"") = ""Lib"", ""Lib"", ""__LIB_FOLDER_GUID__""
-EndProject
 Project(""{13B669BE-BB05-4DDF-9536-439F39A36129}"") = ""Lib"", ""Lib\Lib.csproj"", ""__LIB_PROJECT_GUID__""
 EndProject
 Global
@@ -115,9 +108,6 @@ Global
 		__LIB_PROJECT_GUID__.Release|x86.ActiveCfg = Release|x86
 		__LIB_PROJECT_GUID__.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		__LIB_PROJECT_GUID__ = __LIB_FOLDER_GUID__
-	EndGlobalSection
 EndGlobal
 ";
 
@@ -129,8 +119,6 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""App"", ""App.csproj"", ""{7072A694-548F-4CAE-A58F-12D257D5F486}""
 EndProject
 Project(""{2150E333-8FDC-42A3-9474-1A3956D46DE8}"") = ""src"", ""src"", ""__SRC_FOLDER_GUID__""
-EndProject
-Project(""{2150E333-8FDC-42A3-9474-1A3956D46DE8}"") = ""Lib"", ""Lib"", ""__LIB_FOLDER_GUID__""
 EndProject
 Project(""{13B669BE-BB05-4DDF-9536-439F39A36129}"") = ""Lib"", ""src\Lib\Lib.csproj"", ""__LIB_PROJECT_GUID__""
 EndProject
@@ -173,8 +161,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		__LIB_FOLDER_GUID__ = __SRC_FOLDER_GUID__
-		__LIB_PROJECT_GUID__ = __LIB_FOLDER_GUID__
+		__LIB_PROJECT_GUID__ = __SRC_FOLDER_GUID__
 	EndGlobalSection
 EndGlobal
 ";
@@ -343,6 +330,70 @@ EndGlobal
             var expectedSlnContents = GetExpectedSlnContents(slnPath, ExpectedSlnFileAfterAddingNestedProj);
             File.ReadAllText(slnPath)
                 .Should().BeVisuallyEquivalentTo(expectedSlnContents);
+        }
+
+        [Fact]
+        public void WhenProjectDirectoryIsAddedSolutionFoldersAreNotCreated()
+        {
+            var projectDirectory = TestAssets
+                .Get("TestAppWithSlnAndCsprojFiles")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+
+            var projectToAdd = Path.Combine("Lib", "Lib.csproj");
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput($"sln App.sln add {projectToAdd}");
+            cmd.Should().Pass();
+
+            var slnFile = SlnFile.Read(Path.Combine(projectDirectory, "App.sln"));
+            var solutionFolderProjects = slnFile.Projects.Where(
+                p => p.TypeGuid == ProjectTypeGuids.SolutionFolderGuid);
+            solutionFolderProjects.Count().Should().Be(0);
+            slnFile.Sections.GetSection("NestedProjects").Should().BeNull();
+        }
+
+        [Theory]
+        [InlineData(".")]
+        [InlineData("")]
+        public void WhenSolutionFolderExistsItDoesNotGetAdded(string firstComponent)
+        {
+            var projectDirectory = TestAssets
+                .Get("TestAppWithSlnAndSolutionFolders")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+
+            var projectToAdd = Path.Combine($"{firstComponent}", "src", "src", "Lib", "Lib.csproj");
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput($"sln App.sln add {projectToAdd}");
+            cmd.Should().Pass();
+
+            var slnFile = SlnFile.Read(Path.Combine(projectDirectory, "App.sln"));
+            slnFile.Projects.Count().Should().Be(4);
+
+            var solutionFolderProjects = slnFile.Projects.Where(
+                p => p.TypeGuid == ProjectTypeGuids.SolutionFolderGuid);
+            solutionFolderProjects.Count().Should().Be(2);
+
+            var solutionFolders = slnFile.Sections.GetSection("NestedProjects").Properties;
+            solutionFolders.Count.Should().Be(3);
+
+            solutionFolders["{DDF3765C-59FB-4AA6-BE83-779ED13AA64A}"]
+                .Should().Be("{72BFCA87-B033-4721-8712-4D12166B4A39}");
+
+            var newlyAddedSrcFolder = solutionFolderProjects.Where(
+                p => p.Id != "{72BFCA87-B033-4721-8712-4D12166B4A39}").Single();
+            solutionFolders[newlyAddedSrcFolder.Id]
+                .Should().Be("{72BFCA87-B033-4721-8712-4D12166B4A39}");
+
+            var libProject = slnFile.Projects.Where(p => p.Name == "Lib").Single();
+            solutionFolders[libProject.Id]
+                .Should().Be(newlyAddedSrcFolder.Id);
         }
 
         [Theory]
@@ -573,12 +624,6 @@ EndGlobal
                 expectedLibProjectGuid = slnProject.Id;
             }
             var slnContents = slnTemplate.Replace("__LIB_PROJECT_GUID__", expectedLibProjectGuid);
-
-            var matchingLibFolder = slnFile.Projects
-                    .Where((p) => p.FilePath == "Lib")
-                    .ToList();
-            matchingLibFolder.Count.Should().Be(1);
-            slnContents = slnContents.Replace("__LIB_FOLDER_GUID__", matchingLibFolder[0].Id);
 
             var matchingSrcFolder = slnFile.Projects
                     .Where((p) => p.FilePath == "src")

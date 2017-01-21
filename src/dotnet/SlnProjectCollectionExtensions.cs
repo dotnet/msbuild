@@ -10,34 +10,18 @@ namespace Microsoft.DotNet.Tools.Common
 {
     public static class SlnProjectCollectionExtensions
     {
-        public static HashSet<string> GetReferencedSolutionFolders(this SlnProjectCollection projects)
+        public static IEnumerable<SlnProject> GetProjectsByType(
+            this SlnProjectCollection projects,
+            string typeGuid)
         {
-            var referencedSolutionFolders = new HashSet<string>();
+            return projects.Where(p => p.TypeGuid == typeGuid);
+        }
 
-            var solutionFolderProjects = projects
-                .Where(p => p.TypeGuid == ProjectTypeGuids.SolutionFolderGuid)
-                .ToList();
-
-            if (solutionFolderProjects.Any())
-            {
-                var nonSolutionFolderProjects = projects
-                    .Where(p => p.TypeGuid != ProjectTypeGuids.SolutionFolderGuid)
-                    .ToList();
-
-                foreach (var project in nonSolutionFolderProjects)
-                {
-                    var solutionFolders = project.GetSolutionFoldersFromProject();
-                    foreach (var solutionFolder in solutionFolders)
-                    {
-                        if (!referencedSolutionFolders.Contains(solutionFolder))
-                        {
-                            referencedSolutionFolders.Add(solutionFolder);
-                        }
-                    }
-                }
-            }
-
-            return referencedSolutionFolders;
+        public static IEnumerable<SlnProject> GetProjectsNotOfType(
+            this SlnProjectCollection projects,
+            string typeGuid)
+        {
+            return projects.Where(p => p.TypeGuid != typeGuid);
         }
     }
 }

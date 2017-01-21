@@ -163,28 +163,61 @@ namespace Microsoft.DotNet.Tools.Sln.Add
                     "NestedProjects",
                     SlnSectionType.PreProcess);
 
+                var pathToGuidMap = GetSolutionFolderPaths(slnFile, nestedProjectsSection.Properties);
+
                 string parentDirGuid = null;
+                var solutionFolderHierarchy = string.Empty;
                 foreach (var dir in solutionFolders)
                 {
-                    var solutionFolder = new SlnProject
+                    solutionFolderHierarchy = Path.Combine(solutionFolderHierarchy, dir);
+                    if (pathToGuidMap.ContainsKey(solutionFolderHierarchy))
                     {
-                        Id = Guid.NewGuid().ToString("B").ToUpper(),
-                        TypeGuid = ProjectTypeGuids.SolutionFolderGuid,
-                        Name = dir,
-                        FilePath = dir
-                    };
-
-                    slnFile.Projects.Add(solutionFolder);
-
-                    if (parentDirGuid != null)
-                    {
-                        nestedProjectsSection.Properties[solutionFolder.Id] = parentDirGuid;
+                        parentDirGuid = pathToGuidMap[solutionFolderHierarchy];
                     }
-                    parentDirGuid = solutionFolder.Id;
+                    else
+                    {
+                        var solutionFolder = new SlnProject
+                        {
+                            Id = Guid.NewGuid().ToString("B").ToUpper(),
+                            TypeGuid = ProjectTypeGuids.SolutionFolderGuid,
+                            Name = dir,
+                            FilePath = dir
+                        };
+
+                        slnFile.Projects.Add(solutionFolder);
+
+                        if (parentDirGuid != null)
+                        {
+                            nestedProjectsSection.Properties[solutionFolder.Id] = parentDirGuid;
+                        }
+                        parentDirGuid = solutionFolder.Id;
+                    }
                 }
 
                 nestedProjectsSection.Properties[slnProject.Id] = parentDirGuid;
             }
+        }
+
+        private IDictionary<string, string> GetSolutionFolderPaths(SlnFile slnFile, SlnPropertySet nestedProjects)
+        {
+            var solutionFolderPaths = new Dictionary<string, string>();
+
+            var solutionFolderProjects = slnFile.Projects.GetProjectsByType(ProjectTypeGuids.SolutionFolderGuid);
+            foreach (var slnProject in solutionFolderProjects)
+            {
+                var path = slnProject.FilePath;
+                var id = slnProject.Id;
+                while (nestedProjects.ContainsKey(id))
+                {
+                    id = nestedProjects[id];
+                    var parentSlnProject = solutionFolderProjects.Where(p => p.Id == id).Single();
+                    path = Path.Combine(parentSlnProject.FilePath, path);
+                }
+
+                solutionFolderPaths[path] = slnProject.Id;
+            }
+
+            return solutionFolderPaths;
         }
     }
 }
