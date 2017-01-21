@@ -153,11 +153,29 @@ namespace Microsoft.DotNet.Tools.Migrate
                 _slnFile.MinimumVisualStudioVersion = MinimumVisualStudioVersion;
             }
 
+            RemoveReferencesToMigratedFiles(_slnFile);
+
             _slnFile.Write();
 
             foreach (var csprojFile in csprojFilesToAdd)
             {
                 AddProject(_slnFile.FullPath, csprojFile);
+            }
+        }
+
+        private void RemoveReferencesToMigratedFiles(SlnFile slnFile)
+        {
+            // TODO: Need to merge my PRs then I can call the ProjectCollection extension methods.
+            // And create new extension methods.
+            var solutionFolders = slnFile.Projects.Where(p => p.TypeGuid == ProjectTypeGuids.SolutionFolderGuid);
+
+            foreach (var solutionFolder in solutionFolders)
+            {
+                var solutionItems = solutionFolder.Sections.GetSection("SolutionItems");
+                if (solutionItems != null && solutionItems.Properties.ContainsKey("global.json"))
+                {
+                    solutionItems.Properties.Remove("global.json");
+                }
             }
         }
 
