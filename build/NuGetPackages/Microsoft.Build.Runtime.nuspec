@@ -35,58 +35,90 @@
     <!--
       contentFiles\any\net46
     -->
-    <file src="$configuration$\Output\MSBuild.exe" target="contentFiles\any\net46\" />
-    <file src="$configuration$\Output\MSBuild.exe.config" target="contentFiles\any\net46\" />
-    <file src="$configuration$\Output\Microsoft.Common.CrossTargeting.targets" target="contentFiles\any\net46\" />
-    <file src="$configuration$\Output\Microsoft.Common.CurrentVersion.targets" target="contentFiles\any\net46\" />
-    <file src="$configuration$\Output\Microsoft.Common.overridetasks" target="contentFiles\any\net46\" />
-    <file src="$configuration$\Output\Microsoft.Common.props" target="contentFiles\any\net46\$targetMSBuildToolsVersion$\" />
-    <file src="$configuration$\Output\Microsoft.Common.targets" target="contentFiles\any\net46\" />
-    <file src="$configuration$\Output\Microsoft.Common.tasks" target="contentFiles\any\net46\" />
-    <file src="$configuration$\Output\Microsoft.CSharp.CrossTargeting.targets" target="contentFiles\any\net46\" />
-    <file src="$configuration$\Output\Microsoft.CSharp.CurrentVersion.targets" target="contentFiles\any\net46\" />
-    <file src="$configuration$\Output\Microsoft.CSharp.targets" target="contentFiles\any\net46\" />
-    <file src="$configuration$\Output\Microsoft.Data.Entity.targets" target="contentFiles\any\net46\" />
-    <file src="$configuration$\Output\Microsoft.NETFramework.CurrentVersion.props" target="contentFiles\any\net46\" />
-    <file src="$configuration$\Output\Microsoft.NETFramework.CurrentVersion.targets" target="contentFiles\any\net46\" />
-    <file src="$configuration$\Output\Microsoft.NETFramework.props" target="contentFiles\any\net46\" />
-    <file src="$configuration$\Output\Microsoft.NETFramework.targets" target="contentFiles\any\net46\" />
-    <file src="$configuration$\Output\Microsoft.ServiceModel.targets" target="contentFiles\any\net46\" />
-    <file src="$configuration$\Output\Microsoft.VisualBasic.CrossTargeting.targets" target="contentFiles\any\net46\" />
-    <file src="$configuration$\Output\Microsoft.VisualBasic.CurrentVersion.targets" target="contentFiles\any\net46\" />
-    <file src="$configuration$\Output\Microsoft.VisualBasic.targets" target="contentFiles\any\net46\" />
-    <file src="$configuration$\Output\Microsoft.VisualStudioVersion.v11.Common.props" target="contentFiles\any\net46\" />
-    <file src="$configuration$\Output\Microsoft.VisualStudioVersion.v12.Common.props" target="contentFiles\any\net46\" />
-    <file src="$configuration$\Output\Microsoft.VisualStudioVersion.v14.Common.props" target="contentFiles\any\net46\" />
-    <file src="$configuration$\Output\Microsoft.WinFx.targets" target="contentFiles\any\net46\" />
-    <file src="$configuration$\Output\Microsoft.WorkflowBuildExtensions.targets" target="contentFiles\any\net46\" />
-    <file src="$configuration$\Output\Microsoft.Xaml.targets" target="contentFiles\any\net46\" />
-    <file src="$configuration$\Output\Workflow.Targets" target="contentFiles\any\net46\" />
-    <file src="$configuration$\Output\Workflow.VisualBasic.Targets" target="contentFiles\any\net46\" />
+    <file src="$configuration$\Output\MSBuild.exe" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$\Output\MSBuild.exe.config" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$\Output\Microsoft.Common.CrossTargeting.targets" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$\Output\Microsoft.Common.CurrentVersion.targets" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$\Output\Microsoft.Common.overridetasks" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$\Output\Microsoft.Common.props" target="contentFiles\any\net46\$targetMSBuildToolsVersion$\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$\Output\Microsoft.Common.targets" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$\Output\Microsoft.Common.tasks" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$\Output\Microsoft.CSharp.CrossTargeting.targets" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$\Output\Microsoft.CSharp.CurrentVersion.targets" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$\Output\Microsoft.CSharp.targets" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$\Output\Microsoft.Data.Entity.targets" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$\Output\Microsoft.NETFramework.CurrentVersion.props" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$\Output\Microsoft.NETFramework.CurrentVersion.targets" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$\Output\Microsoft.NETFramework.props" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$\Output\Microsoft.NETFramework.targets" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$\Output\Microsoft.ServiceModel.targets" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$\Output\Microsoft.VisualBasic.CrossTargeting.targets" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$\Output\Microsoft.VisualBasic.CurrentVersion.targets" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$\Output\Microsoft.VisualBasic.targets" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$\Output\Microsoft.VisualStudioVersion.v11.Common.props" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$\Output\Microsoft.VisualStudioVersion.v12.Common.props" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$\Output\Microsoft.VisualStudioVersion.v14.Common.props" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$\Output\Microsoft.WinFx.targets" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$\Output\Microsoft.WorkflowBuildExtensions.targets" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$\Output\Microsoft.Xaml.targets" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$\Output\Workflow.Targets" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$\Output\Workflow.VisualBasic.Targets" target="contentFiles\any\net46\" buildAction="None" copyToOutput="true"/>/>
 
     <!--
       contentFiles\any\netcoreapp1.0
     -->
-    <file src="$configuration$-NetCore\Output\MSBuild.dll" target="contentFiles\any\netcoreapp1.0\" />
-    <file src="$configuration$-NetCore\Output\MSBuild.runtimeconfig.json" target="contentFiles\any\netcoreapp1.0\" />
-    <file src="$configuration$-NetCore\Output\Microsoft.Common.CrossTargeting.targets" target="contentFiles\any\netcoreapp1.0\" />
-    <file src="$configuration$-NetCore\Output\Microsoft.Common.CurrentVersion.targets" target="contentFiles\any\netcoreapp1.0\" />
-    <file src="$configuration$-NetCore\Output\Microsoft.Common.overridetasks" target="contentFiles\any\netcoreapp1.0\" />
-    <file src="$configuration$-NetCore\Output\Microsoft.Common.props" target="contentFiles\any\netcoreapp1.0\$targetMSBuildToolsVersion$\" />
-    <file src="$configuration$-NetCore\Output\Microsoft.Common.targets" target="contentFiles\any\netcoreapp1.0\" />
-    <file src="$configuration$-NetCore\Output\Microsoft.Common.tasks" target="contentFiles\any\netcoreapp1.0\" />
-    <file src="$configuration$-NetCore\Output\Microsoft.CSharp.CrossTargeting.targets" target="contentFiles\any\netcoreapp1.0\" />
-    <file src="$configuration$-NetCore\Output\Microsoft.CSharp.CurrentVersion.targets" target="contentFiles\any\netcoreapp1.0\" />
-    <file src="$configuration$-NetCore\Output\Microsoft.CSharp.targets" target="contentFiles\any\netcoreapp1.0\" />
-    <file src="$configuration$-NetCore\Output\Microsoft.NETFramework.CurrentVersion.props" target="contentFiles\any\netcoreapp1.0\" />
-    <file src="$configuration$-NetCore\Output\Microsoft.NETFramework.CurrentVersion.targets" target="contentFiles\any\netcoreapp1.0\" />
-    <file src="$configuration$-NetCore\Output\Microsoft.NETFramework.props" target="contentFiles\any\netcoreapp1.0\" />
-    <file src="$configuration$-NetCore\Output\Microsoft.NETFramework.targets" target="contentFiles\any\netcoreapp1.0\" />
-    <file src="$configuration$-NetCore\Output\Microsoft.VisualBasic.CrossTargeting.targets" target="contentFiles\any\netcoreapp1.0\" />
-    <file src="$configuration$-NetCore\Output\Microsoft.VisualBasic.CurrentVersion.targets" target="contentFiles\any\netcoreapp1.0\" />
-    <file src="$configuration$-NetCore\Output\Microsoft.VisualBasic.targets" target="contentFiles\any\netcoreapp1.0\" />
-    <file src="$configuration$-NetCore\Output\Microsoft.VisualStudioVersion.v11.Common.props" target="contentFiles\any\netcoreapp1.0\" />
-    <file src="$configuration$-NetCore\Output\Microsoft.VisualStudioVersion.v12.Common.props" target="contentFiles\any\netcoreapp1.0\" />
-    <file src="$configuration$-NetCore\Output\Microsoft.VisualStudioVersion.v14.Common.props" target="contentFiles\any\netcoreapp1.0\" />
+    <file src="$configuration$-NetCore\Output\MSBuild.dll" target="contentFiles\any\netcoreapp1.0\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$-NetCore\Output\MSBuild.runtimeconfig.json" target="contentFiles\any\netcoreapp1.0\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$-NetCore\Output\Microsoft.Common.CrossTargeting.targets" target="contentFiles\any\netcoreapp1.0\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$-NetCore\Output\Microsoft.Common.CurrentVersion.targets" target="contentFiles\any\netcoreapp1.0\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$-NetCore\Output\Microsoft.Common.overridetasks" target="contentFiles\any\netcoreapp1.0\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$-NetCore\Output\Microsoft.Common.props" target="contentFiles\any\netcoreapp1.0\$targetMSBuildToolsVersion$\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$-NetCore\Output\Microsoft.Common.targets" target="contentFiles\any\netcoreapp1.0\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$-NetCore\Output\Microsoft.Common.tasks" target="contentFiles\any\netcoreapp1.0\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$-NetCore\Output\Microsoft.CSharp.CrossTargeting.targets" target="contentFiles\any\netcoreapp1.0\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$-NetCore\Output\Microsoft.CSharp.CurrentVersion.targets" target="contentFiles\any\netcoreapp1.0\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$-NetCore\Output\Microsoft.CSharp.targets" target="contentFiles\any\netcoreapp1.0\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$-NetCore\Output\Microsoft.NETFramework.CurrentVersion.props" target="contentFiles\any\netcoreapp1.0\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$-NetCore\Output\Microsoft.NETFramework.CurrentVersion.targets" target="contentFiles\any\netcoreapp1.0\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$-NetCore\Output\Microsoft.NETFramework.props" target="contentFiles\any\netcoreapp1.0\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$-NetCore\Output\Microsoft.NETFramework.targets" target="contentFiles\any\netcoreapp1.0\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$-NetCore\Output\Microsoft.VisualBasic.CrossTargeting.targets" target="contentFiles\any\netcoreapp1.0\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$-NetCore\Output\Microsoft.VisualBasic.CurrentVersion.targets" target="contentFiles\any\netcoreapp1.0\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$-NetCore\Output\Microsoft.VisualBasic.targets" target="contentFiles\any\netcoreapp1.0\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$-NetCore\Output\Microsoft.VisualStudioVersion.v11.Common.props" target="contentFiles\any\netcoreapp1.0\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$-NetCore\Output\Microsoft.VisualStudioVersion.v12.Common.props" target="contentFiles\any\netcoreapp1.0\" buildAction="None" copyToOutput="true"/>/>
+    <file src="$configuration$-NetCore\Output\Microsoft.VisualStudioVersion.v14.Common.props" target="contentFiles\any\netcoreapp1.0\" buildAction="None" copyToOutput="true"/>/>
+
+    <!--satellites; generated with: https://dotnetfiddle.net/NHfiJn and then hand edited-->
+    <file src="$configuration$\Output\cs\MSBuild.resources.dll" target="contentFiles\any\net46\cs\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$configuration$\Output\de\MSBuild.resources.dll" target="contentFiles\any\net46\de\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$configuration$\Output\en\MSBuild.resources.dll" target="contentFiles\any\net46\en\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$configuration$\Output\es\MSBuild.resources.dll" target="contentFiles\any\net46\es\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$configuration$\Output\fr\MSBuild.resources.dll" target="contentFiles\any\net46\fr\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$configuration$\Output\it\MSBuild.resources.dll" target="contentFiles\any\net46\it\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$configuration$\Output\ja\MSBuild.resources.dll" target="contentFiles\any\net46\ja\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$configuration$\Output\ko\MSBuild.resources.dll" target="contentFiles\any\net46\ko\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$configuration$\Output\pl\MSBuild.resources.dll" target="contentFiles\any\net46\pl\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$configuration$\Output\pt-BR\MSBuild.resources.dll" target="contentFiles\any\net46\pt-BR\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$configuration$\Output\ru\MSBuild.resources.dll" target="contentFiles\any\net46\ru\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$configuration$\Output\tr\MSBuild.resources.dll" target="contentFiles\any\net46\tr\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$configuration$\Output\zh-Hans\MSBuild.resources.dll" target="contentFiles\any\net46\zh-Hans\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$configuration$\Output\zh-Hant\MSBuild.resources.dll" target="contentFiles\any\net46\zh-Hant\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+
+    <file src="$configuration$\Output\cs\MSBuild.resources.dll" target="contentFiles\any\netcoreapp1.0\cs\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$configuration$\Output\de\MSBuild.resources.dll" target="contentFiles\any\netcoreapp1.0\de\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$configuration$\Output\en\MSBuild.resources.dll" target="contentFiles\any\netcoreapp1.0\en\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$configuration$\Output\es\MSBuild.resources.dll" target="contentFiles\any\netcoreapp1.0\es\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$configuration$\Output\fr\MSBuild.resources.dll" target="contentFiles\any\netcoreapp1.0\fr\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$configuration$\Output\it\MSBuild.resources.dll" target="contentFiles\any\netcoreapp1.0\it\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$configuration$\Output\ja\MSBuild.resources.dll" target="contentFiles\any\netcoreapp1.0\ja\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$configuration$\Output\ko\MSBuild.resources.dll" target="contentFiles\any\netcoreapp1.0\ko\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$configuration$\Output\pl\MSBuild.resources.dll" target="contentFiles\any\netcoreapp1.0\pl\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$configuration$\Output\pt-BR\MSBuild.resources.dll" target="contentFiles\any\netcoreapp1.0\pt-BR\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$configuration$\Output\ru\MSBuild.resources.dll" target="contentFiles\any\netcoreapp1.0\ru\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$configuration$\Output\tr\MSBuild.resources.dll" target="contentFiles\any\netcoreapp1.0\tr\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$configuration$\Output\zh-Hans\MSBuild.resources.dll" target="contentFiles\any\netcoreapp1.0\zh-Hans\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+    <file src="$configuration$\Output\zh-Hant\MSBuild.resources.dll" target="contentFiles\any\netcoreapp1.0\zh-Hant\MSBuild.resources.dll" buildAction="None" copyToOutput="true"/>
+
   </files>
 </package>
