@@ -10,8 +10,8 @@
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Command to list project to project references</source>
-        <target state="needs-review-translation">Comando para mostrar las referencias de proyecto a proyecto (p2p)</target>
-        <note></note>
+        <target state="translated">Comando para enumerar las referencias de proyecto a proyecto</target>
+        <note />
       </trans-unit>
       <trans-unit id="NoReferencesFound">
         <source>There are no {0} references in project {1}.

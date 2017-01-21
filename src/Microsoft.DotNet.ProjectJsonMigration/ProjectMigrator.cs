@@ -20,6 +20,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
     {
         private readonly IMigrationRule _ruleSet;
         private readonly ProjectDependencyFinder _projectDependencyFinder = new ProjectDependencyFinder();
+        private HashSet<string> _migratedProjects = new HashSet<string>();
 
         public ProjectMigrator() : this(new DefaultMigrationRuleSet()) { }
 
@@ -38,11 +39,19 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             // Try to read the project dependencies, ignore an unresolved exception for now
             MigrationRuleInputs rootInputs = ComputeMigrationRuleInputs(rootSettings);
             IEnumerable<ProjectDependency> projectDependencies = null;
+            var projectMigrationReports = new List<ProjectMigrationReport>();
 
             try
             {
                 // Verify up front so we can prefer these errors over an unresolved project dependency
                 VerifyInputs(rootInputs, rootSettings);
+
+                projectMigrationReports.Add(MigrateProject(rootSettings));
+                
+                if (skipProjectReferences)
+                {
+                    return new MigrationReport(projectMigrationReports);
+                }
 
                 projectDependencies = ResolveTransitiveClosureProjectDependencies(
                     rootSettings.ProjectDirectory, 
@@ -62,21 +71,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                     });
             }
 
-            var projectMigrationReports = new List<ProjectMigrationReport>();
-            projectMigrationReports.Add(MigrateProject(rootSettings));
-            
-            if (skipProjectReferences)
-            {
-                return new MigrationReport(projectMigrationReports);
-            }
-
             foreach(var project in projectDependencies)
             {
                 var projectDir = Path.GetDirectoryName(project.ProjectFilePath);
                 var settings = new MigrationSettings(projectDir,
                                                      projectDir,
                                                      rootSettings.MSBuildProjectTemplatePath);
-                MigrateProject(settings);
                 projectMigrationReports.Add(MigrateProject(settings));
             }
 
@@ -141,13 +141,28 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         {
             var migrationRuleInputs = ComputeMigrationRuleInputs(migrationSettings);
             var projectName = migrationRuleInputs.DefaultProjectContext.GetProjectName();
+            var outputProject = Path.Combine(migrationSettings.OutputDirectory, projectName + ".csproj");
 
             try
             {
-                if (IsMigrated(migrationSettings, migrationRuleInputs))
+                if (File.Exists(outputProject))
                 {
-                    MigrationTrace.Instance.WriteLine(String.Format(LocalizableStrings.SkipMigrationAlreadyMigrated, nameof(ProjectMigrator), migrationSettings.ProjectDirectory));
-                    return new ProjectMigrationReport(migrationSettings.ProjectDirectory, projectName, skipped: true);
+                    if (_migratedProjects.Contains(outputProject))
+                    {
+                        MigrationTrace.Instance.WriteLine(String.Format(
+                            LocalizableStrings.SkipMigrationAlreadyMigrated,
+                            nameof(ProjectMigrator),
+                            migrationSettings.ProjectDirectory));
+
+                        return new ProjectMigrationReport(
+                            migrationSettings.ProjectDirectory,
+                            projectName,
+                            skipped: true);
+                    }
+                    else
+                    {
+                        MigrationBackupPlan.RenameCsprojFromMigrationOutputNameToTempName(outputProject);
+                    }
                 }
 
                 VerifyInputs(migrationRuleInputs, migrationSettings);
@@ -185,7 +200,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 }
             }
 
-            var outputProject = Path.Combine(migrationSettings.OutputDirectory, projectName + ".csproj");
+            _migratedProjects.Add(outputProject);
+
             return new ProjectMigrationReport(
                 migrationSettings.ProjectDirectory,
                 projectName,
@@ -286,14 +302,5 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 File.Copy(sourceFilePath, destinationFilePath);
             }
         }
-
-        public bool IsMigrated(MigrationSettings migrationSettings, MigrationRuleInputs migrationRuleInputs)
-        {
-            var outputName = migrationRuleInputs.DefaultProjectContext.GetProjectName();
-
-            var outputProject = Path.Combine(migrationSettings.OutputDirectory, outputName + ".csproj");
-            return File.Exists(outputProject);
-        }
-
     }
 }

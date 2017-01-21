@@ -10,8 +10,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         public const string AspNetLTSPackagesVersion = "1.0.2";
         public const string EntityFrameworkLTSPackagesVersion = "1.0.2";
         public const string TestSdkPackageVersion = "15.0.0-preview-20170106-08";
-        public const string XUnitPackageVersion = "2.2.0-beta4-build3444";
-        public const string XUnitRunnerPackageVersion = "2.2.0-beta4-build1194";
+        public const string XUnitPackageVersion = "2.2.0-beta5-build3474";
+        public const string XUnitRunnerPackageVersion = "2.2.0-beta5-build1225";
         public const string MstestTestAdapterVersion = "1.1.8-rc";
         public const string MstestTestFrameworkVersion = "1.0.8-rc";
         public const string BundleMinifierToolVersion = "2.2.301";

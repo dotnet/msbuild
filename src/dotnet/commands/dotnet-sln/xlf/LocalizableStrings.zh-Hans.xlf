@@ -5,58 +5,58 @@
       <group id="src/dotnet/commands/dotnet-sln/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET modify solution file command</source>
-        <target state="new">.NET modify solution file command</target>
-        <note></note>
+        <target state="translated">.NET“修改解决方案文件”命令</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Command to add, remove, and list projects from the solution (SLN) file.</source>
-        <target state="new">Command to add, remove, and list projects from the solution (SLN) file.</target>
-        <note></note>
+        <target state="translated">从解决方案(SLN)文件添加、删除和列出项目的命令。</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppHelpText">
         <source>Projects to add or to remove from the solution.</source>
-        <target state="new">Projects to add or to remove from the solution.</target>
-        <note></note>
+        <target state="translated">要从解决方案添加或删除的项目。</target>
+        <note />
       </trans-unit>
       <trans-unit id="AddAppFullName">
         <source>.NET Add project(s) to a solution file Command</source>
-        <target state="new">.NET Add project(s) to a solution file Command</target>
-        <note></note>
+        <target state="translated">.NET“将项目添加到解决方案文件”命令</target>
+        <note />
       </trans-unit>
       <trans-unit id="AddSubcommandHelpText">
         <source>Add a specified project(s) to the solution.</source>
-        <target state="new">Add a specified project(s) to the solution.</target>
-        <note></note>
+        <target state="translated">将指定项目添加到解决方案。</target>
+        <note />
       </trans-unit>
       <trans-unit id="RemoveAppFullName">
         <source>.NET Remove project(s) from a solution file Command</source>
-        <target state="new">.NET Remove project(s) from a solution file Command</target>
-        <note></note>
+        <target state="translated">.NET“从解决方案文件删除项目”命令</target>
+        <note />
       </trans-unit>
       <trans-unit id="RemoveSubcommandHelpText">
         <source>Remove the specified project(s) from the solution. The project is not impacted.</source>
-        <target state="new">Remove the specified project(s) from the solution. The project is not impacted.</target>
-        <note></note>
+        <target state="translated">从解决方案删除指定项目。项目不受影响。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ListAppFullName">
         <source>.NET List project(s) in a solution file Command</source>
-        <target state="new">.NET List project(s) in a solution file Command</target>
-        <note></note>
+        <target state="translated">.NET“列出解决方案文件中项目”命令</target>
+        <note />
       </trans-unit>
       <trans-unit id="ListSubcommandHelpText">
         <source>List all projects in the solution.</source>
-        <target state="new">List all projects in the solution.</target>
-        <note></note>
+        <target state="translated">列出解决方案中的所有项目。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CreateAppFullName">
         <source>.NET Create a solution file Command</source>
-        <target state="new">.NET Create a solution file Command</target>
-        <note></note>
+        <target state="translated">.NET“创建解决方案文件”命令</target>
+        <note />
       </trans-unit>
       <trans-unit id="CreateSubcommandHelpText">
         <source>Create a solution file.</source>
-        <target state="new">Create a solution file.</target>
-        <note></note>
+        <target state="translated">创建解决方案文件。</target>
+        <note />
       </trans-unit>
     </body>
   </file>

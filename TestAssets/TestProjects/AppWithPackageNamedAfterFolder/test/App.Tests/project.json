@@ -1,0 +1,19 @@
+{
+  "frameworks": {
+    "netcoreapp1.0": {
+      "imports": [
+        "portable-net451+win8",
+        "dnxcore50"
+      ],
+      "buildOptions": {
+        "define": [ "ASYNC", "COREFX", "XUNIT2", "SQLITE" ]
+      },
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "version": "1.0.0",
+          "type": "platform"
+        }
+      }
+    }
+  }
+}

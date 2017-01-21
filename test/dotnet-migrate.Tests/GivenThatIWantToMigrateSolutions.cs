@@ -14,12 +14,70 @@ namespace Microsoft.DotNet.Migration.Tests
 {
     public class GivenThatIWantToMigrateSolutions : TestBase
     {
+        [Theory]
+        [InlineData("PJAppWithSlnVersion14", "Visual Studio 15", "15.0.26114.2", "10.0.40219.1")]
+        [InlineData("PJAppWithSlnVersion15", "Visual Studio 15 Custom", "15.9.12345.4", "10.9.1234.5")]
+        [InlineData("PJAppWithSlnVersionUnknown", "Visual Studio 15", "15.0.26114.2", "10.0.40219.1")]
+        public void ItMigratesSlnAndEnsuresAtLeastVS15(
+            string projectName,
+            string productDescription,
+            string visualStudioVersion,
+            string minVisualStudioVersion)
+        {
+            var projectDirectory = TestAssets
+                .Get("NonRestoredTestProjects", projectName)
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root;
+
+            var solutionRelPath = "TestApp.sln";
+
+            new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .Execute($"migrate \"{solutionRelPath}\"")
+                .Should().Pass();
+
+            SlnFile slnFile = SlnFile.Read(Path.Combine(projectDirectory.FullName, solutionRelPath));
+            slnFile.ProductDescription.Should().Be(productDescription);
+            slnFile.VisualStudioVersion.Should().Be(visualStudioVersion);
+            slnFile.MinimumVisualStudioVersion.Should().Be(minVisualStudioVersion);
+        }
+
         [Fact]
         public void ItMigratesAndBuildsSln()
         {
             MigrateAndBuild(
                 "NonRestoredTestProjects",
                 "PJAppWithSlnAndXprojRefs");
+        }
+
+        [Fact]
+        public void ItOnlyMigratesProjectsInTheSlnFile()
+        {
+            var projectDirectory = TestAssets
+                .Get("NonRestoredTestProjects", "PJAppWithSlnAndXprojRefs")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root;
+
+            var solutionRelPath = Path.Combine("TestApp", "TestApp.sln");
+
+            new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .Execute($"migrate \"{solutionRelPath}\"")
+                .Should().Pass();
+
+            new DirectoryInfo(projectDirectory.FullName)
+                .Should().HaveFiles(new []
+                    {
+                        Path.Combine("TestApp", "TestApp.csproj"),
+                        Path.Combine("TestLibrary", "TestLibrary.csproj"),
+                        Path.Combine("TestApp", "src", "subdir", "subdir.csproj"),
+                        Path.Combine("TestApp", "TestAssets", "TestAsset", "project.json")
+                    });
+ 
+            new DirectoryInfo(projectDirectory.FullName)
+                .Should().NotHaveFile(Path.Combine("TestApp", "TestAssets", "TestAsset", "TestAsset.csproj"));
         }
 
         [Fact]
@@ -36,6 +94,48 @@ namespace Microsoft.DotNet.Migration.Tests
             MigrateAndBuild(
                 "NonRestoredTestProjects",
                 "PJAppWithSlnAndXprojRefThatRefsCsprojWhereSlnDoesNotRefCsproj");
+        }
+
+        [Fact]
+        public void WhenSolutionContainsACsprojFileItGetsMovedToBackup()
+        {
+            var projectDirectory = TestAssets
+                .Get("NonRestoredTestProjects", "PJAppWithSlnAndOneAlreadyMigratedCsproj")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+
+            var solutionRelPath = Path.Combine("TestApp", "TestApp.sln");
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput($"migrate \"{solutionRelPath}\"");
+            cmd.Should().Pass();
+
+            File.Exists(Path.Combine(projectDirectory, "TestLibrary", "TestLibrary.csproj"))
+                .Should().BeTrue();
+            File.Exists(Path.Combine(projectDirectory, "TestLibrary", "TestLibrary.csproj.migration_in_place_backup"))
+                .Should().BeFalse();
+            File.Exists(Path.Combine(projectDirectory, "backup", "TestLibrary", "TestLibrary.csproj"))
+                .Should().BeTrue();
+        }
+
+        [Fact]
+        public void WhenSolutionContainsACsprojFileItDoesNotTryToAddItAgain()
+        {
+            var projectDirectory = TestAssets
+                .Get("NonRestoredTestProjects", "PJAppWithSlnAndOneAlreadyMigratedCsproj")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root;
+
+            var solutionRelPath = Path.Combine("TestApp", "TestApp.sln");
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput($"migrate \"{solutionRelPath}\"");
+            cmd.Should().Pass();
+            cmd.StdOut.Should().NotContain("already contains project");
+            cmd.StdErr.Should().BeEmpty();
         }
 
         private void MigrateAndBuild(string groupName, string projectName, [CallerMemberName] string callingMethod = "", string identifier = "")
