@@ -121,8 +121,8 @@
 
     <!-- Additional Shared Framework to be installed -->
     <PropertyGroup>
-      <AdditionalCoreSetupChannel>release/1.1.0</AdditionalCoreSetupChannel>
-      <AdditionalSharedFrameworkVersion>1.1.0</AdditionalSharedFrameworkVersion>
+      <AdditionalCoreSetupChannel>preview</AdditionalCoreSetupChannel>
+      <AdditionalSharedFrameworkVersion>1.0.3</AdditionalSharedFrameworkVersion>
       <AdditionalSharedHostVersion>1.1.0</AdditionalSharedHostVersion>
       <AdditionalHostFxrVersion>1.1.0</AdditionalHostFxrVersion>
 

@@ -129,7 +129,7 @@
         <VersionPrefix>1.0.0-rc-</VersionPrefix>
         <VersionSuffix>rc-$(TestPackageBuildVersionSuffix)</VersionSuffix>
         <Clean>True</Clean>
-        <Frameworks>net451;netcoreapp1.0</Frameworks>
+        <Frameworks>net451;netcoreapp1.1</Frameworks>
         <PackRuntime>$(CoreCLRRid)</PackRuntime>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-desktop-binding-redirects"
@@ -153,7 +153,7 @@
         <VersionPrefix>1.0.0</VersionPrefix>
         <VersionSuffix></VersionSuffix>
         <Clean>True</Clean>
-        <Frameworks>netcoreapp1.0</Frameworks>
+        <Frameworks>netcoreapp1.1</Frameworks>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-hello/v2/dotnet-hello">
         <Name>dotnet-hello</Name>
@@ -163,7 +163,7 @@
         <VersionPrefix>2.0.0</VersionPrefix>
         <VersionSuffix></VersionSuffix>
         <Clean>True</Clean>
-        <Frameworks>netcoreapp1.0</Frameworks>
+        <Frameworks>netcoreapp1.1</Frameworks>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-portable">
         <Name>dotnet-portable</Name>
