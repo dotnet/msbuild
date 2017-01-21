@@ -86,6 +86,8 @@
   <!-- Do not attempt to localize src/dirs.proj since it does not represent a C# project-->
   <Import Project="UpdateLocalizedResources.targets" Condition="'$(LocalizationBuildAssetsRequired)' == 'true' and '$(IsTestProject)' != 'true' and '$(DoNotLocalizeProject)' != 'true' and '$(AssemblyName)' != 'dirs'" />
 
+  <Import Project="CopySatellitesIntoNetcore.targets" Condition="'$(NetCoreBuild)' == 'true' and '$(LocalizedBuild)' == 'true'  and '$(IsTestProject)' != 'true' and '$(DoNotLocalizeProject)' != 'true' and '$(AssemblyName)' != 'dirs'" />
+
   <!-- Restore packages -->
   <PropertyGroup>
     <PackagesConfig Condition="Exists('$(MSBuildProjectDirectory)\packages.config')">$(MSBuildProjectDirectory)\packages.config</PackagesConfig>
