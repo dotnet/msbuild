@@ -3225,21 +3225,36 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void GetItemProvenanceMatchesLiteralsWithNonCanonicPaths()
         {
-            var project =
+            var projectContents =
                 @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <A Include=`1.foo;.\1.foo;.\.\1.foo`/>
+                    <B Include=`../../u/x/d11/d21/../d22/../../d12/2.foo`/>
                   </ItemGroup>
                 </Project>
                 ";
 
-            var expected = new ProvenanceResultTupleList
+            var expected1Foo = new ProvenanceResultTupleList
             {
                 Tuple.Create("A", Operation.Include, Provenance.StringLiteral, 3)
             };
 
-            AssertProvenanceResult(expected, project, "1.foo");
-            AssertProvenanceResult(expected, project, @".\1.foo");
+            AssertProvenanceResult(expected1Foo, projectContents, "1.foo");
+            AssertProvenanceResult(expected1Foo, projectContents, @".\1.foo");
+
+            using (var testFiles = new Helpers.TestProjectWithFiles(projectContents, new string[0], "u/x"))
+            using (var projectCollection = new ProjectCollection())
+            {
+                var project = new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection);
+
+                var expected2Foo = new ProvenanceResultTupleList
+                {
+                    Tuple.Create("B", Operation.Include, Provenance.StringLiteral, 1)
+                };
+
+                AssertProvenanceResult(expected2Foo, project.GetItemProvenance(@"../x/d13/../../x/d12/d23/../2.foo"));
+                AssertProvenanceResult(new ProvenanceResultTupleList(), project.GetItemProvenance(@"../x/d13/../x/d12/d23/../2.foo"));
+            }
         }
 
         [Fact]
