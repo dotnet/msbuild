@@ -74,7 +74,6 @@
     <file src="$configuration$\Output\$id$.xml" target="lib\net46\$id$.xml" />
     <file src="$configuration$-NetCore\Output\$id$.dll" target="lib\netstandard1.5\$id$.dll" />
     <file src="$configuration$-NetCore\Output\$id$.xml" target="lib\netstandard1.5\$id$.xml" />
-
     <!--satellites; generated with: https://dotnetfiddle.net/NHfiJn -->
     <file src="$configuration$\Output\cs\$id$.resources.dll" target="lib\net46\cs\$id$.resources.dll" />
     <file src="$configuration$\Output\de\$id$.resources.dll" target="lib\net46\de\$id$.resources.dll" />
@@ -90,7 +89,6 @@
     <file src="$configuration$\Output\tr\$id$.resources.dll" target="lib\net46\tr\$id$.resources.dll" />
     <file src="$configuration$\Output\zh-Hans\$id$.resources.dll" target="lib\net46\zh-Hans\$id$.resources.dll" />
     <file src="$configuration$\Output\zh-Hant\$id$.resources.dll" target="lib\net46\zh-Hant\$id$.resources.dll" />
-
     <file src="$configuration$\Output\cs\$id$.resources.dll" target="lib\netstandard1.3\cs\$id$.resources.dll" />
     <file src="$configuration$\Output\de\$id$.resources.dll" target="lib\netstandard1.3\de\$id$.resources.dll" />
     <file src="$configuration$\Output\en\$id$.resources.dll" target="lib\netstandard1.3\en\$id$.resources.dll" />
