@@ -155,10 +155,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <PropertyGroup>
       <_EnableRuleList>$(MsDeployDoNotDeleteRule)</_EnableRuleList>
-      <_EnableRuleList Condition="'$(_EnableRuleList)'=='' and '$(EnableMSDeployAppOffline)'=='true'">AppOffline</_EnableRuleList>
       <_EnableRuleList Condition="'$(_EnableRuleList)'!='' and '$(EnableMSDeployAppOffline)'=='true'">$(_EnableRuleList);AppOffline</_EnableRuleList>
-      <_EnableRuleList Condition="'$(_EnableRuleList)'=='' and '$(MSDeployEnableWebConfigEncryptRule)'=='true'">EncryptWebConfig</_EnableRuleList>
+      <_EnableRuleList Condition="'$(_EnableRuleList)'=='' and '$(EnableMSDeployAppOffline)'=='true'">AppOffline</_EnableRuleList>
       <_EnableRuleList Condition="'$(_EnableRuleList)'!='' and '$(MSDeployEnableWebConfigEncryptRule)'=='true'">$(_EnableRuleList);EncryptWebConfig</_EnableRuleList>
+      <_EnableRuleList Condition="'$(_EnableRuleList)'=='' and '$(MSDeployEnableWebConfigEncryptRule)'=='true'">EncryptWebConfig</_EnableRuleList>
+
     </PropertyGroup>
     <MSdeploy
           Condition="'$(UseMsdeployExe)' == 'true'"

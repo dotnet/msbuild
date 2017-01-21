@@ -6,6 +6,8 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
     using Diagnostics = System.Diagnostics;
     using Framework = Build.Framework;
     using Utilities = Build.Utilities;
+    using System.Linq;
+    using System.Collections.Generic;
 
 
     /// <summary>
@@ -938,13 +940,32 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             }
         }
 
+        /// <summary>
+        /// Sample for skipping directories
+        //   <ItemGroup>
+        //        <MsDeploySkipRules Include = "SkippingWWWRoot" >
+        //            <ObjectName>dirPath</ ObjectName >
+        //            <AbsolutePath>wwwroot</ AbsolutePath >
+        //        </MsDeploySkipRules>
+        //    </ ItemGroup >
+        /// </summary>
         void IVSMSDeployHost.UpdateDeploymentBaseOptions(VSMSDeployObject srcVsMsDeployobject, VSMSDeployObject destVsMsDeployobject)
         {
             Collections.Generic.List<string> enableSkipDirectiveList = MSDeployUtility.ConvertStringIntoList(EnableSkipDirective);
             Collections.Generic.List<string> disableSkipDirectiveList = MSDeployUtility.ConvertStringIntoList(DisableSkipDirective);
 
-            MsDeploy.Utility.AddSkipDirectiveToBaseOptions(srcVsMsDeployobject.BaseOptions, null, enableSkipDirectiveList, disableSkipDirectiveList, Log);
-            MsDeploy.Utility.AddSkipDirectiveToBaseOptions(destVsMsDeployobject.BaseOptions, null, enableSkipDirectiveList, disableSkipDirectiveList, Log);
+            VSHostObject hostObject = new VSHostObject(HostObject as System.Collections.Generic.IEnumerable<Framework.ITaskItem>);
+            Framework.ITaskItem[] srcSkipItems, destSkipsItems;
+
+            // Add FileSkip rules from Host Object
+            hostObject.GetFileSkips(out srcSkipItems, out destSkipsItems);
+            Utility.AddSkipDirectiveToBaseOptions(srcVsMsDeployobject.BaseOptions, srcSkipItems, enableSkipDirectiveList, disableSkipDirectiveList, Log);
+            Utility.AddSkipDirectiveToBaseOptions(destVsMsDeployobject.BaseOptions, destSkipsItems, enableSkipDirectiveList, disableSkipDirectiveList, Log);
+
+            //Add CustomSkip Rules + AppDataSkipRules
+            GetCustomAndAppDataSkips(out srcSkipItems, out destSkipsItems);
+            Utility.AddSkipDirectiveToBaseOptions(srcVsMsDeployobject.BaseOptions, srcSkipItems, enableSkipDirectiveList, disableSkipDirectiveList, Log);
+            Utility.AddSkipDirectiveToBaseOptions(destVsMsDeployobject.BaseOptions, destSkipsItems, enableSkipDirectiveList, disableSkipDirectiveList, Log);
 
             if (!string.IsNullOrEmpty(DeploymentTraceLevel))
             {
@@ -954,11 +975,34 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                 destVsMsDeployobject.BaseOptions.TraceLevel = deploymentTraceEventLevel;
             }
 
-            MsDeploy.Utility.AddSetParametersFilesVsMsDeployObject(srcVsMsDeployobject, ImportSetParametersItems); 
-            MsDeploy.Utility.AddSimpleSetParametersVsMsDeployObject(srcVsMsDeployobject, SimpleSetParameterItems, OptimisticParameterDefaultValue);
-            MsDeploy.Utility.AddSetParametersVsMsDeployObject(srcVsMsDeployobject, SetParameterItems, OptimisticParameterDefaultValue);
+            Utility.AddSetParametersFilesVsMsDeployObject(srcVsMsDeployobject, ImportSetParametersItems); 
+            Utility.AddSimpleSetParametersVsMsDeployObject(srcVsMsDeployobject, SimpleSetParameterItems, OptimisticParameterDefaultValue);
+            Utility.AddSetParametersVsMsDeployObject(srcVsMsDeployobject, SetParameterItems, OptimisticParameterDefaultValue);
 
             AddAdditionalProviderOptions(destVsMsDeployobject);
+        }
+        private void GetCustomAndAppDataSkips(out ITaskItem[] srcSkips, out ITaskItem[] destSkips)
+        {
+            srcSkips = null;
+            destSkips = null;
+
+            if (SkipRuleItems != null)
+            {
+                IEnumerable<ITaskItem> items;
+
+                items = from item in SkipRuleItems
+                        where (string.IsNullOrEmpty(item.GetMetadata(VSMsDeployTaskHostObject.SkipApplyMetadataName)) ||
+                               item.GetMetadata(VSMsDeployTaskHostObject.SkipApplyMetadataName) == VSMsDeployTaskHostObject.SourceDeployObject)
+                        select item;
+                srcSkips = items.ToArray();
+
+                items = from item in SkipRuleItems
+                        where (string.IsNullOrEmpty(item.GetMetadata(VSMsDeployTaskHostObject.SkipApplyMetadataName)) ||
+                               item.GetMetadata(VSMsDeployTaskHostObject.SkipApplyMetadataName) == VSMsDeployTaskHostObject.DestinationDeployObject)
+                        select item;
+
+                destSkips = items.ToArray();
+            }
         }
 
         private void AddAdditionalProviderOptions(VSMSDeployObject destVsMsDeployobject)
