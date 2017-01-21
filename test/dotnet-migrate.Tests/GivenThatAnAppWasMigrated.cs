@@ -19,9 +19,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .CreateTestInstance(testProjectName)
                 .Path;
 
-            var testRootParent = new DirectoryInfo(testRoot).Parent.FullName;
-
-            var backupRoot = Path.Combine(testRootParent, "backup");
+            var backupRoot = Path.Combine(testRoot, "backup");
 
             var migratableArtifacts = GetProjectJsonArtifacts(testRoot);
 
@@ -47,9 +45,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .CreateTestInstance(testProjectName)
                 .Path;
 
-            var testRootParent = new DirectoryInfo(testRoot).Parent.FullName;
-
-            var backupRoot = Path.Combine(testRootParent, "backup", testProjectName);
+            var backupRoot = Path.Combine(testRoot, "backup");
 
             var migratableArtifacts = GetProjectJsonArtifacts(testRoot);
 

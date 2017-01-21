@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.TestFramework
             var testDirectory = new DirectoryInfo(path);
 
             var migrationBackupDirectory = new DirectoryInfo(
-                System.IO.Path.Combine(testDirectory.Parent.FullName, "backup"));
+                System.IO.Path.Combine(testDirectory.FullName, "backup"));
 
             if (testDirectory.Exists)
             {

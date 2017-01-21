@@ -3,6 +3,7 @@
 
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.TestFramework;
+using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using System;
 using System.Collections.Generic;
@@ -573,7 +574,10 @@ namespace Microsoft.DotNet.Migration.Tests
 
         private void VerifyMigration(IEnumerable<string> expectedProjects, string rootDir)
          {
+             var backupDir = Path.Combine(rootDir, "backup");
+
              var migratedProjects = Directory.EnumerateFiles(rootDir, "*.csproj", SearchOption.AllDirectories)
+                                             .Where(s => !PathUtility.IsChildOfDirectory(backupDir, s))
                                              .Where(s => Directory.EnumerateFiles(Path.GetDirectoryName(s), "*.csproj").Count() == 1)
                                              .Where(s => Path.GetFileName(Path.GetDirectoryName(s)).Contains("Project"))
                                              .Select(s => Path.GetFileName(Path.GetDirectoryName(s)));
