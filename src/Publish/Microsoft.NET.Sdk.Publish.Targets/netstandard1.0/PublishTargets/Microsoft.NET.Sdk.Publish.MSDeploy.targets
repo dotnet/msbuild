@@ -68,8 +68,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <PublishDisableLinks Condition="'$(PublishDisableLinks)' == ''">AppPoolExtension;ContentExtension;CertificateExtension</PublishDisableLinks>
 
       <RetryAttemptsForDeployment Condition=" '$(RetryAttemptsForDeployment)' == '' ">2</RetryAttemptsForDeployment>
-      <MsDeployDoNotDeleteRule Condition="$(SkipExtraFilesOnServer) == 'true'">DoNotDeleteRule</MsDeployDoNotDeleteRule>
-      <_EnableRuleList>$(MsDeployDoNotDeleteRule)</_EnableRuleList>
 
       <MSDeployUseChecksum Condition=" '$(MSDeployUseChecksum)' == '' ">false</MSDeployUseChecksum>
       <AllowUntrustedCertificate Condition=" '$(AllowUntrustedCertificate)' == '' ">false</AllowUntrustedCertificate>
@@ -153,14 +151,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Output TaskParameter="Result" PropertyName="_PublishResult" />
     </VSMSDeploy>
 
-    <PropertyGroup>
-      <_EnableRuleList>$(MsDeployDoNotDeleteRule)</_EnableRuleList>
-      <_EnableRuleList Condition="'$(_EnableRuleList)'!='' and '$(EnableMSDeployAppOffline)'=='true'">$(_EnableRuleList);AppOffline</_EnableRuleList>
-      <_EnableRuleList Condition="'$(_EnableRuleList)'=='' and '$(EnableMSDeployAppOffline)'=='true'">AppOffline</_EnableRuleList>
-      <_EnableRuleList Condition="'$(_EnableRuleList)'!='' and '$(MSDeployEnableWebConfigEncryptRule)'=='true'">$(_EnableRuleList);EncryptWebConfig</_EnableRuleList>
-      <_EnableRuleList Condition="'$(_EnableRuleList)'=='' and '$(MSDeployEnableWebConfigEncryptRule)'=='true'">EncryptWebConfig</_EnableRuleList>
+    <ItemGroup>
+      <_EnableRuleListItems Condition="'$(SkipExtraFilesOnServer)' == 'true'" Include="DoNotDeleteRule" />
+      <_EnableRuleListItems Condition="'$(EnableMSDeployAppOffline)' == 'true'" Include="AppOffline" />
+      <_EnableRuleListItems Condition="'$(MSDeployEnableWebConfigEncryptRule)' == 'true'" Include="EncryptWebConfig" />
+    </ItemGroup>
 
+    <PropertyGroup>
+      <_EnableRuleList>@(_EnableRuleListItems)</_EnableRuleList>
     </PropertyGroup>
+    
     <MSdeploy
           Condition="'$(UseMsdeployExe)' == 'true'"
           Verb="sync"
