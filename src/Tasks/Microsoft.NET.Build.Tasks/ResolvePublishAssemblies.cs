@@ -29,7 +29,8 @@ namespace Microsoft.NET.Build.Tasks
         public string PlatformLibraryName { get; set; }
 
         public ITaskItem[] PrivateAssetsPackageReferences { get; set; }
-
+        
+        public bool PreserveCacheLayout { get; set; }
         /// <summary>
         /// All the assemblies to publish.
         /// </summary>
@@ -53,13 +54,14 @@ namespace Microsoft.NET.Build.Tasks
             IEnumerable<ResolvedFile> resolvedAssemblies = 
                 new PublishAssembliesResolver(packageResolver)
                     .WithPrivateAssets(privateAssetsPackageIds)
+                    .WithPreserveCacheLayout(PreserveCacheLayout)
                     .Resolve(projectContext);
 
             foreach (ResolvedFile resolvedAssembly in resolvedAssemblies)
             {
                 TaskItem item = new TaskItem(resolvedAssembly.SourcePath);
                 item.SetMetadata("DestinationSubPath", resolvedAssembly.DestinationSubPath);
-
+                item.SetMetadata("AssetType", resolvedAssembly.Asset.ToString().ToLower());
                 _assembliesToPublish.Add(item);
             }
         }

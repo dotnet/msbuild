@@ -234,7 +234,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                               TargetFramework="$(TargetFrameworkMoniker)"
                               RuntimeIdentifier="$(RuntimeIdentifier)"
                               PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
-                              PrivateAssetsPackageReferences="@(PrivateAssetsPackageReference)">
+                              PrivateAssetsPackageReferences="@(PrivateAssetsPackageReference)"
+                              PreserveCacheLayout="$(PreserveCacheLayout)">
 
       <Output TaskParameter="AssembliesToPublish" ItemName="ResolvedAssembliesToPublish" />
 

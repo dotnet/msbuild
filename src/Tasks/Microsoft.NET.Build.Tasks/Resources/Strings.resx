@@ -225,4 +225,10 @@
   <data name="NU1012" xml:space="preserve">
     <value>Dependency conflict. '{0}' expected '{1}' but received '{2}'</value>
   </data>
+  <data name="IncorrectPackageRoot" xml:space="preserve">
+    <value>Package Root {0} was incorrectly given for Resolved library {1}</value>
+  </data>
+  <data name="MultipleFilesResolved" xml:space="preserve">
+    <value>More than one file found for {0}</value>
+  </data>
 </root>
