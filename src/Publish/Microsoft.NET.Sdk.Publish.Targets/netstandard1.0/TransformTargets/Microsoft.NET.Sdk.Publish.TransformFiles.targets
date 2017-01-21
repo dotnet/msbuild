@@ -58,7 +58,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         IsPortable="$(_IsPortable)"
         IsAzure="$(_TransformWebConfigForAzure)"
         ProjectGuid="$(ProjectGuid)"
-        IgnoreProjectGuid="$(IgnoreProjectGuid)"/>
+        IgnoreProjectGuid="$(IgnoreProjectGuid)" 
+        ProjectFullPath="$(MSBuildProjectFullPath)" 
+        SolutionPath ="$(SolutionPath)"/> 
   </Target>
 
   <!--
