@@ -30,6 +30,12 @@
     <Compile Include="..\Microsoft.NETCore.Sdk.Publish.Tasks\AppSettingsTransform.cs">
       <Link>Transform\AppSettingsTransform.cs</Link>
     </Compile>
+    <Compile Include="..\Microsoft.NETCore.Sdk.Publish.Tasks\EnvironmentHelper.cs">
+      <Link>Transform\EnvironmentHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.NETCore.Sdk.Publish.Tasks\WebConfigTelemetry.cs">
+      <Link>Transform\WebConfigTelemetry.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Framework" Version="15.1.298-preview5" />
