@@ -46,22 +46,23 @@ namespace dotnet_new3
             return new DefaultTemplateEngineHost(HostIdentifier, HostVersion, CultureInfo.CurrentCulture.Name, preferences);
         }
 
-        private static void FirstRun(ITemplateEngineHost host, IInstaller installer)
+        private static void FirstRun(IEngineEnvironmentSettings environmentSettings, IInstaller installer)
         { 
             string[] packageList;
+            Paths paths = new Paths(environmentSettings);
 
-            if (Paths.Global.DefaultInstallPackageList.FileExists())
+            if (paths.FileExists(paths.Global.DefaultInstallPackageList))
             {
-                packageList = Paths.Global.DefaultInstallPackageList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                packageList = paths.ReadAllText(paths.Global.DefaultInstallPackageList).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
                 if (packageList.Length > 0)
                 {
                     installer.InstallPackages(packageList);
                 }
             }
 
-            if (Paths.Global.DefaultInstallTemplateList.FileExists())
+            if (paths.FileExists(paths.Global.DefaultInstallTemplateList))
             {
-                packageList = Paths.Global.DefaultInstallTemplateList.ReadAllText().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                packageList = paths.ReadAllText(paths.Global.DefaultInstallTemplateList).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
                 if (packageList.Length > 0)
                 {
                     installer.InstallPackages(packageList);

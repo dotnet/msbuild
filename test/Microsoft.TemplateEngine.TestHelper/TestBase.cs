@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Core.Contracts;
 using Microsoft.TemplateEngine.Utils;
 using Xunit;
@@ -9,14 +10,18 @@ namespace Microsoft.TemplateEngine.TestHelper
 {
     public abstract class TestBase
     {
+        protected IEngineEnvironmentSettings EngineEnvironmentSettings { get; }
+
         protected TestBase()
         {
-            EngineEnvironmentSettings.Host = new TestHost
+            ITemplateEngineHost host = new TestHost
             {
                 HostIdentifier = "TestRunner",
                 Version = "1.0.0.0",
                 Locale = "en-US"
             };
+
+            EngineEnvironmentSettings = new EngineEnvironmentSettings(host, x => null);
         }
 
         protected static void RunAndVerify(string originalValue, string expectedValue, IProcessor processor, int bufferSize, bool? changeOverride = null)
