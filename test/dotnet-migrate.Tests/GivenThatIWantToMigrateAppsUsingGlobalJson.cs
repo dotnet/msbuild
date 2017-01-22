@@ -14,13 +14,17 @@ namespace Microsoft.DotNet.Migration.Tests
         [Fact]
         public void ItMigratesWhenBeingPassedAFullPathToGlobalJson()
         {
-            var solutionDirectory =
-                TestAssetsManager.CreateTestInstance("AppWithPackageNamedAfterFolder").Path;
-            var globalJsonPath = Path.Combine(solutionDirectory, "global.json");
+            var solutionDirectory = TestAssets
+                .GetProjectJson("AppWithPackageNamedAfterFolder")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root;
+
+            var globalJsonPath = solutionDirectory.GetFile("global.json");
 
             new TestCommand("dotnet")
                     .WithForwardingToConsole()
-                    .Execute($"migrate {globalJsonPath}")
+                    .Execute($"migrate {globalJsonPath.FullName}")
                     .Should()
                     .Pass();
         }
@@ -28,17 +32,21 @@ namespace Microsoft.DotNet.Migration.Tests
         [Fact]
         public void WhenUsingGlobalJsonItOnlyMigratesProjectsInTheGlobalJsonNode()
         {
-            var solutionDirectory =
-                TestAssetsManager.CreateTestInstance("AppWithPackageNamedAfterFolder").Path;
-            var globalJsonPath = Path.Combine(solutionDirectory, "global.json");
+            var solutionDirectory = TestAssets
+                .GetProjectJson("AppWithPackageNamedAfterFolder")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root;
+
+            var globalJsonPath = solutionDirectory.GetFile("global.json");
 
             new TestCommand("dotnet")
                     .WithForwardingToConsole()
-                    .Execute($"migrate {globalJsonPath}")
+                    .Execute($"migrate {globalJsonPath.FullName}")
                     .Should()
                     .Pass();
 
-            new DirectoryInfo(solutionDirectory)
+            solutionDirectory
                 .Should().HaveFiles(new []
                     {
                         Path.Combine("src", "App", "App.csproj"),
@@ -46,15 +54,20 @@ namespace Microsoft.DotNet.Migration.Tests
                         Path.Combine("TestAssets", "TestAsset", "project.json")
                     });
 
-            new DirectoryInfo(solutionDirectory)
+            solutionDirectory
                 .Should().NotHaveFile(Path.Combine("TestAssets", "TestAsset", "TestAsset.csproj"));
         }
 
         [Fact]
         public void ItMigratesWhenBeingPassedJustGlobalJson()
         {
-            var solutionDirectory =
-                TestAssetsManager.CreateTestInstance("AppWithPackageNamedAfterFolder").Path;
+            var solutionDirectory = TestAssets
+                .GetProjectJson("AppWithPackageNamedAfterFolder")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root;
+
+            var globalJsonPath = solutionDirectory.GetFile("global.json");
 
             new TestCommand("dotnet")
                     .WithWorkingDirectory(solutionDirectory)

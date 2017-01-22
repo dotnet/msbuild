@@ -15,11 +15,13 @@ namespace Microsoft.DotNet.Migration.Tests
         [InlineData("TestAppWithLibrary")]
         public void WhenProjectMigrationSucceedsThenProjectJsonArtifactsGetMovedToBackup(string testProjectName)
         {
-            var testRoot = TestAssetsManager
-                .CreateTestInstance(testProjectName)
-                .Path;
+            var testRoot = TestAssets
+                .GetProjectJson(testProjectName)
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root;
 
-            var backupRoot = Path.Combine(testRoot, "backup");
+            var backupRoot = testRoot.GetDirectory("backup");
 
             var migratableArtifacts = GetProjectJsonArtifacts(testRoot);
 
@@ -32,20 +34,22 @@ namespace Microsoft.DotNet.Migration.Tests
 
             backupArtifacts.Should().Equal(migratableArtifacts, "Because all of and only these artifacts should have been moved");
 
-            new DirectoryInfo(testRoot).Should().NotHaveFiles(backupArtifacts.Keys);
+            testRoot.Should().NotHaveFiles(backupArtifacts.Keys);
 
-            new DirectoryInfo(backupRoot).Should().HaveTextFiles(backupArtifacts);
+            backupRoot.Should().HaveTextFiles(backupArtifacts);
         }
 
         [Theory]
         [InlineData("PJTestAppSimple")]
         public void WhenFolderMigrationSucceedsThenProjectJsonArtifactsGetMovedToBackup(string testProjectName)
         {
-            var testRoot = TestAssetsManager
-                .CreateTestInstance(testProjectName)
-                .Path;
+            var testRoot = TestAssets
+                .GetProjectJson(testProjectName)
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root;
 
-            var backupRoot = Path.Combine(testRoot, "backup");
+            var backupRoot = testRoot.GetDirectory("backup");
 
             var migratableArtifacts = GetProjectJsonArtifacts(testRoot);
 
@@ -58,20 +62,22 @@ namespace Microsoft.DotNet.Migration.Tests
 
             backupArtifacts.Should().Equal(migratableArtifacts, "Because all of and only these artifacts should have been moved");
 
-            new DirectoryInfo(testRoot).Should().NotHaveFiles(backupArtifacts.Keys);
+            testRoot.Should().NotHaveFiles(backupArtifacts.Keys);
 
-            new DirectoryInfo(backupRoot).Should().HaveTextFiles(backupArtifacts);
+            backupRoot.Should().HaveTextFiles(backupArtifacts);
         }
 
         [Theory]
         [InlineData("TestAppWithLibraryAndMissingP2P")]
         public void WhenMigrationFailsThenProjectJsonArtifactsDoNotGetMovedToBackup(string testProjectName)
         {
-            var testRoot = new TestAssetsManager(Path.Combine(RepoRoot, "TestAssets", "NonRestoredTestProjects"))
-                .CreateTestInstance(testProjectName, identifier: testProjectName)
-                .Path;
+            var testRoot = TestAssets
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, testProjectName)
+                .CreateInstance(identifier: testProjectName)
+                .WithSourceFiles()
+                .Root;
 
-            var backupRoot = Path.Combine(testRoot, "backup");
+            var backupRoot = testRoot.GetDirectory("backup");
 
             var migratableArtifacts = GetProjectJsonArtifacts(testRoot);
 
@@ -80,19 +86,23 @@ namespace Microsoft.DotNet.Migration.Tests
                 .Execute()
                 .Should().Fail();
 
-            new DirectoryInfo(backupRoot).Should().NotExist("Because migration failed and therefore no backup is needed.");
+            backupRoot.Should().NotExist("Because migration failed and therefore no backup is needed.");
 
-            new DirectoryInfo(testRoot).Should().HaveTextFiles(migratableArtifacts, "Because migration failed so nothing was moved to backup.");
+            testRoot.Should().HaveTextFiles(migratableArtifacts, "Because migration failed so nothing was moved to backup.");
         }
 
         [Theory]
         [InlineData("PJTestAppSimple")]
         public void WhenSkipbackupSpecifiedThenProjectJsonArtifactsDoNotGetMovedToBackup(string testProjectName)
         {
-            var testRoot = TestAssetsManager.CreateTestInstance(testProjectName, identifier: testProjectName).Path;
-
-            var backupRoot = Path.Combine(testRoot, "backup");
-
+            var testRoot = TestAssets
+                .GetProjectJson(testProjectName)
+                .CreateInstance(identifier: testProjectName)
+                .WithSourceFiles()
+                .Root;
+            
+            var backupRoot = testRoot.GetDirectory("backup");
+            
             var migratableArtifacts = GetProjectJsonArtifacts(testRoot);
 
             new MigrateCommand()
@@ -100,12 +110,12 @@ namespace Microsoft.DotNet.Migration.Tests
                 .Execute("--skip-backup")
                 .Should().Pass();
 
-            new DirectoryInfo(backupRoot).Should().NotExist("Because --skip-backup was specified.");
+            backupRoot.Should().NotExist("Because --skip-backup was specified.");
 
-            new DirectoryInfo(testRoot).Should().HaveTextFiles(migratableArtifacts, "Because --skip-backup was specified.");
+            testRoot.Should().HaveTextFiles(migratableArtifacts, "Because --skip-backup was specified.");
         }
 
-        private Dictionary<string, string> GetProjectJsonArtifacts(string rootPath)
+        private Dictionary<string, string> GetProjectJsonArtifacts(DirectoryInfo root)
         {
             var catalog = new Dictionary<string, string>();
 
@@ -113,23 +123,19 @@ namespace Microsoft.DotNet.Migration.Tests
 
             foreach (var pattern in patterns)
             {
-                AddArtifactsToCatalog(catalog, rootPath, pattern);
+                AddArtifactsToCatalog(catalog, root, pattern);
             }
 
             return catalog;
         }
 
-        private void AddArtifactsToCatalog(Dictionary<string, string> catalog, string basePath, string pattern)
+        private void AddArtifactsToCatalog(Dictionary<string, string> catalog, DirectoryInfo root, string pattern)
         {
-            basePath = PathUtility.EnsureTrailingSlash(basePath);
-
-            var baseDirectory = new DirectoryInfo(basePath);
-
-            var files = baseDirectory.GetFiles(pattern, SearchOption.AllDirectories);
+            var files = root.GetFiles(pattern, SearchOption.AllDirectories);
 
             foreach (var file in files)
             {
-                var key = PathUtility.GetRelativePath(basePath, file.FullName);
+                var key = PathUtility.GetRelativePath(root, file);
                 catalog.Add(key, File.ReadAllText(file.FullName));
             }
         }
