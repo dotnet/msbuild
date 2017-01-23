@@ -15,7 +15,7 @@
       </trans-unit>
       <trans-unit id="NoXprojFileGivenError">
         <source>{0}: No xproj file given.</source>
-        <target state="translated">{0}: xproj dosyası belirtilmedi.</target>
+        <target state="translated">{0}: Xproj dosyası belirtilmedi.</target>
         <note />
       </trans-unit>
       <trans-unit id="MultipleXprojFilesError">
@@ -195,7 +195,7 @@
       </trans-unit>
       <trans-unit id="SkipMigrationAlreadyMigrated">
         <source>{0}: Skip migrating {1}, it is already migrated.</source>
-        <target state="translated">{0}: {1} öğesini geçirmeyi atlayın, öğe zaten geçirildi.</target>
+        <target state="translated">{0}: {1} geçişini atlayın; öğe zaten geçirildi.</target>
         <note />
       </trans-unit>
       <trans-unit id="ExecutingRule">
@@ -205,7 +205,7 @@
       </trans-unit>
       <trans-unit id="NoConfigurationOrFrameworkFoundInProject">
         <source>{0}: No configuration or framework build options found in project</source>
-        <target state="translated">{0}: Projede herhangi bir yapılandırma veya çerçeve derleme seçeneği yok</target>
+        <target state="translated">{0}: Projede yapılandırma veya çerçeve derleme seçeneği bulunamadı</target>
         <note />
       </trans-unit>
       <trans-unit id="MigratingCountTargetFrameworks">
@@ -225,7 +225,7 @@
       </trans-unit>
       <trans-unit id="MigratingCountXprojToCsprojReferences">
         <source>{0}: Migrating {1} xproj to csproj references</source>
-        <target state="translated">{0}: {1} xproj, csproj başvurularına geçiriliyor</target>
+        <target state="translated">{0}: {1} xproj - csproj başvurusu geçiriliyor</target>
         <note />
       </trans-unit>
       <trans-unit id="ExecutingMigrationRule">
@@ -250,7 +250,7 @@
       </trans-unit>
       <trans-unit id="ItemTransformApplicatorAddItemHeader">
         <source>{0}: AddItemToItemGroup {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4}, Update: {5} }}</source>
-        <target state="translated">{0}: Öğe Grubuna Ekle {{ Öğe Türü: {1}, Koşul: {2}, Dahil Et: {3}, Dışla: {4}, Güncelleştir: {5} }}</target>
+        <target state="translated">{0}: Öğe Grubuna Öğe Ekle {{ Öğe Türü: {1}, Koşul: {2}, Dahil Et: {3}, Dışla: {4}, Güncelleştir: {5} }}</target>
         <note />
       </trans-unit>
       <trans-unit id="ItemTransformApplicatorMergingItemWithExistingItems">
@@ -280,7 +280,7 @@
       </trans-unit>
       <trans-unit id="ItemTransformApplicatorAddingMergedItem">
         <source>{0}: Adding Merged Item {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4} }}</source>
-        <target state="translated">{0}: Birleştirilen Öğe Ekleniyor {{ IÖğe Türü: {1}, Koşul: {2}, Dahil Et: {3}, Dışla: {4} }}</target>
+        <target state="translated">{0}: Birleştirilmiş Öğe Ekleniyor {{ Öğe Türü: {1}, Koşul: {2}, Dahil Et: {3}, Dışla: {4} }}</target>
         <note />
       </trans-unit>
       <trans-unit id="MergingProperty">

@@ -89,6 +89,8 @@ namespace Microsoft.DotNet.Tools.Build
                     msbuildArgs.Add($"/verbosity:{verbosityOption.Value()}");
                 }
 
+                msbuildArgs.Add($"/clp:Summary");
+
                 msbuildArgs.AddRange(app.RemainingArguments);
 
                 return new MSBuildForwardingApp(msbuildArgs).Execute();

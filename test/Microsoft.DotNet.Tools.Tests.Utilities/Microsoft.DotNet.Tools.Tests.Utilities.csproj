@@ -3,7 +3,7 @@
 
   <PropertyGroup>
     <Description>Microsoft.DotNet.Tools.Tests.Utilities Class Library</Description>
-    <TargetFrameworks>netcoreapp1.0;net46</TargetFrameworks>
+    <TargetFrameworks>netcoreapp1.0</TargetFrameworks>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <AssemblyName>Microsoft.DotNet.Tools.Tests.Utilities</AssemblyName>
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>

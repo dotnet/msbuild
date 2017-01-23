@@ -5,6 +5,7 @@ using FluentAssertions;
 using Microsoft.DotNet.Internal.ProjectModel.Utilities;
 using Microsoft.DotNet.ProjectJsonMigration;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Xunit;
@@ -14,81 +15,123 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
     public partial class MigrationBackupPlanTests
     {
         [Fact]
-        public void TheRootBackupDirectoryIsASiblingOfTheRootProject()
+        public void TheBackupDirectoryIsASubfolderOfTheMigratedProject()
         {
-            var dir = new DirectoryInfo(Path.Combine("src", "some-proj"));
+            var workspaceDirectory = Path.Combine("src", "root");
+            var projectDirectory = Path.Combine("src", "project1");
 
-            System.Console.WriteLine(dir.FullName);
-
-            WhenMigrating(
-                projectDirectory: dir.FullName,
-                workspaceDirectory: Path.Combine("src", "RootProject"))
-            .RootBackupDirectory
-            .FullName
-            .Should()
-            .Be(new DirectoryInfo(Path.Combine("src", "backup")).FullName.EnsureTrailingSlash());
+            WhenMigrating(projectDirectory, workspaceDirectory)
+                .RootBackupDirectory
+                .FullName
+                .Should()
+                .Be(new DirectoryInfo(Path.Combine("src", "project1", "backup")).FullName.EnsureTrailingSlash());
         }
 
         [Fact]
-        public void TheRootProjectsBackupDirectoryIsASubfolderOfTheRootBackupDirectory()
+        public void TheBackupDirectoryIsASubfolderOfTheMigratedProjectWhenInitiatedFromProjectFolder()
         {
-            WhenMigrating(
-                projectDirectory: Path.Combine("src", "RootProject"),
-                workspaceDirectory: Path.Combine("src", "RootProject"))
-            .ProjectBackupDirectory
-            .FullName
-            .Should()
-            .Be(new DirectoryInfo(Path.Combine("src", "backup", "RootProject")).FullName.EnsureTrailingSlash());
+            var workspaceDirectory = Path.Combine("src", "root");
+            var projectDirectory = Path.Combine("src", "root");
+
+            WhenMigrating(projectDirectory, workspaceDirectory)
+                .ProjectBackupDirectories.Single()
+                .FullName
+                .Should()
+                .Be(new DirectoryInfo(Path.Combine("src", "root", "backup")).FullName.EnsureTrailingSlash());
         }
 
         [Fact]
-        public void ADependentProjectsMigrationBackupDirectoryIsASubfolderOfTheRootBackupDirectory()
+        public void TheBackupDirectoryIsInTheCommonRootOfTwoProjectFoldersWhenInitiatedFromProjectFolder()
         {
-            WhenMigrating(
-                 projectDirectory: Path.Combine("src", "Dependency"),
-                 workspaceDirectory: Path.Combine("src", "RootProject"))
-             .ProjectBackupDirectory
-             .FullName
-             .Should()
-             .Be(new DirectoryInfo(Path.Combine("src", "backup", "Dependency")).FullName.EnsureTrailingSlash());
+            var projectDirectories = new []
+            {
+                Path.Combine("root", "project1"),
+                Path.Combine("root", "project2")
+            };
+
+            var workspaceDirectory = Path.Combine("root", "project1");
+
+            WhenMigrating(projectDirectories, workspaceDirectory)
+                .RootBackupDirectory
+                .FullName
+                .Should()
+                .Be(new DirectoryInfo(Path.Combine("root", "backup")).FullName.EnsureTrailingSlash());
         }
 
         [Fact]
-        public void FilesToBackUpAreIdentifiedInTheTheRootProjectDirectory()
+        public void TheBackupDirectoryIsInTheCommonRootOfTwoProjectFoldersWhenInitiatedFromCommonRoot()
         {
-            var root = new DirectoryInfo(Path.Combine("src", "RootProject"));
+            var projectDirectories = new []
+            {
+                Path.Combine("root", "project1"),
+                Path.Combine("root", "project2")
+            };
 
-            WhenMigrating(
-                projectDirectory: root.FullName,
-                workspaceDirectory: root.FullName)
-            .FilesToMove
-            .Should()
-            .Contain(_ => _.FullName == Path.Combine(root.FullName, "project.json"));
+            var workspaceDirectory = Path.Combine("root");
 
+            WhenMigrating(projectDirectories, workspaceDirectory)
+                .RootBackupDirectory
+                .FullName
+                .Should()
+                .Be(new DirectoryInfo(Path.Combine("root", "backup")).FullName.EnsureTrailingSlash());
         }
 
         [Fact]
-        public void FilesToBackUpAreIdentifiedInTheTheDependencyProjectDirectory()
+        public void TheBackupDirectoryIsInTheCommonRootOfTwoProjectFoldersAtDifferentLevelsWhenInitiatedFromProjectFolder()
         {
-            var root = new DirectoryInfo(Path.Combine("src", "RootProject"));
-            var dependency = new DirectoryInfo(Path.Combine("src", "RootProject"));
+            var projectDirectories = new []
+            {
+                Path.Combine("root", "tests", "inner", "project1"),
+                Path.Combine("root", "src", "project2")
+            };
 
-            WhenMigrating(
-                projectDirectory: dependency.FullName,
-                workspaceDirectory: root.FullName)
-            .FilesToMove
-            .Should()
-            .Contain(_ => _.FullName == Path.Combine(dependency.FullName, "project.json"));
+            var workspaceDirectory = Path.Combine("root", "tests", "inner");
 
+            WhenMigrating(projectDirectories, workspaceDirectory)
+                .RootBackupDirectory
+                .FullName
+                .Should()
+                .Be(new DirectoryInfo(Path.Combine("root", "backup")).FullName.EnsureTrailingSlash());
         }
 
-        private MigrationBackupPlan WhenMigrating(
-            string projectDirectory,
-            string workspaceDirectory) =>
+        [Fact]
+        public void FilesToBackUpAreIdentifiedInTheRootProjectDirectory()
+        {
+            var workspaceDirectory = Path.Combine("src", "root");
+            var projectDirectory = Path.Combine("src", "root");
+
+            var whenMigrating = WhenMigrating(projectDirectory, workspaceDirectory);
+
+            whenMigrating
+                .FilesToMove(whenMigrating.ProjectBackupDirectories.Single())
+                .Should()
+                .Contain(_ => _.FullName == Path.Combine(new DirectoryInfo(workspaceDirectory).FullName, "project.json"));
+        }
+
+        [Fact]
+        public void FilesToBackUpAreIdentifiedInTheDependencyProjectDirectory()
+        {
+            var workspaceDirectory = Path.Combine("src", "root");
+            var projectDirectory = Path.Combine("src", "root");
+
+            var whenMigrating = WhenMigrating(projectDirectory, workspaceDirectory);
+
+            whenMigrating
+                .FilesToMove(whenMigrating.ProjectBackupDirectories.Single())
+                .Should()
+                .Contain(_ => _.FullName == Path.Combine(new DirectoryInfo(projectDirectory).FullName, "project.json"));
+        }
+
+        private MigrationBackupPlan WhenMigrating(string projectDirectory, string workspaceDirectory) =>
             new MigrationBackupPlan(
-                new DirectoryInfo(projectDirectory),
+                new [] { new DirectoryInfo(projectDirectory) },
                 new DirectoryInfo(workspaceDirectory),
-                dir => new[] { new FileInfo(Path.Combine(dir.FullName, "project.json")) });
+                dir => new [] { new FileInfo(Path.Combine(dir.FullName, "project.json")) });
 
+        private MigrationBackupPlan WhenMigrating(string[] projectDirectories, string workspaceDirectory) =>
+            new MigrationBackupPlan(
+                projectDirectories.Select(p => new DirectoryInfo(p)),
+                new DirectoryInfo(workspaceDirectory),
+                dir => new [] { new FileInfo(Path.Combine(dir.FullName, "project.json")) });
     }
 }

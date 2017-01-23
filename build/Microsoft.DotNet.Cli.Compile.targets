@@ -270,8 +270,6 @@
     <ItemGroup>
       <TemplatesToBundle Include="build/Microsoft.DotNet.Cli.BundledTemplates.proj">
         <Properties>
-          CLIBuildDll=$(CLIBuildDll);
-          NuGetPackagesDir=$(NuGetPackagesDir);
           TemplateLayoutDirectory=$(SdkOutputDirectory)/Templates;
           TemplatePackageName=%(BundledTemplate.Identity);
           TemplatePackageVersion=%(BundledTemplate.Version);

@@ -138,50 +138,6 @@ namespace Microsoft.DotNet.TestFramework
             return new DirectoryInfo(Path.Combine(baseDirectory, callingMethod + identifier, _assetName));
         }
 
-        private IEnumerable<FileInfo> LoadInventory(FileInfo file)
-        {
-            if (!file.Exists)
-            {
-                return Enumerable.Empty<FileInfo>();
-            }
-
-            var inventory = new List<FileInfo>();
-
-            var lines = file.OpenText();
-
-            while (lines.Peek() > 0)
-            {
-                inventory.Add(new FileInfo(lines.ReadLine()));
-            }
-
-            return inventory;
-        }
-
-        private void SaveInventory(FileInfo file, IEnumerable<FileInfo> inventory)
-        {
-            FileUtility.ReplaceWithLock(
-                filePath =>
-                {
-                    if (!_dataDirectory.Exists)
-                    {
-                        _dataDirectory.Create();
-                    }
-
-                    using (var stream =
-                        new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
-                    {
-                        using (var writer = new StreamWriter(stream))
-                        {
-                            foreach (var path in inventory.Select(i => i.FullName))
-                            {
-                                writer.WriteLine(path);
-                            }
-                        }
-                    }
-                },
-                file.FullName);
-        }
-
         private IEnumerable<FileInfo> GetFileList()
         {
             return _root.GetFiles("*.*", SearchOption.AllDirectories)
@@ -195,15 +151,6 @@ namespace Microsoft.DotNet.TestFramework
             Action action)
         {
             var inventory = Enumerable.Empty<FileInfo>();
-            if (file.Exists)
-            {
-                inventory = LoadInventory(file);
-            }
-
-            if(inventory.Any())
-            {
-                return inventory;
-            }
 
             IEnumerable<FileInfo> preInventory;
 
@@ -216,26 +163,21 @@ namespace Microsoft.DotNet.TestFramework
                 preInventory = beforeAction();
             }
 
-            Task.Run(async () => await ConcurrencyUtilities.ExecuteWithFileLockedAsync<object>(
-                _dataDirectory.FullName, 
-                lockedToken =>
+            ExclusiveFolderAccess.Do(_dataDirectory, (folder) => {
+                file.Refresh();
+                if (file.Exists)
                 {
-                    if (file.Exists)
-                    {
-                        inventory = LoadInventory(file);
-                    }
-                    else
-                    {
-                        action();
+                    inventory = folder.LoadInventory(file);
+                }
+                else
+                {
+                    action();
 
-                        inventory = GetFileList().Where(i => !preInventory.Select(p => p.FullName).Contains(i.FullName));
+                    inventory = GetFileList().Where(i => !preInventory.Select(p => p.FullName).Contains(i.FullName));
 
-                        SaveInventory(file, inventory);
-                    }
-
-                    return Task.FromResult(new Object());
-                },
-                CancellationToken.None)).Wait();
+                    folder.SaveInventory(file, inventory);
+                }
+            });
 
             return inventory;
         }
@@ -310,7 +252,10 @@ namespace Microsoft.DotNet.TestFramework
                 return;
             }
 
-            var trackedFiles = _inventoryFiles.AllInventoryFiles.SelectMany(f => LoadInventory(f));
+            IEnumerable<FileInfo> trackedFiles = null;
+            ExclusiveFolderAccess.Do(_dataDirectory, (folder) => {
+                trackedFiles = _inventoryFiles.AllInventoryFiles.SelectMany(f => folder.LoadInventory(f));
+            });
 
             var assetFiles = GetFileList();
 
@@ -340,7 +285,7 @@ namespace Microsoft.DotNet.TestFramework
                 return;
             }
 
-            var updatedSourceFiles = LoadInventory(_inventoryFiles.Source)
+            var updatedSourceFiles = ExclusiveFolderAccess.Read(_inventoryFiles.Source)
                 .Where(f => f.LastWriteTime > earliestDataDirectoryTimestamp);
 
             if (updatedSourceFiles.Any())
@@ -363,6 +308,66 @@ namespace Microsoft.DotNet.TestFramework
             { 
                 throw new DirectoryNotFoundException($"Directory not found at '{_root.FullName}'"); 
             } 
+        }
+
+        private class ExclusiveFolderAccess
+        {
+            private DirectoryInfo _directory;
+
+            private ExclusiveFolderAccess(DirectoryInfo directory)
+            {
+                _directory = directory;
+            }
+
+            public static void Do(DirectoryInfo directory, Action<ExclusiveFolderAccess> action)
+            {
+                Task.Run(async () => await ConcurrencyUtilities.ExecuteWithFileLockedAsync<object>(
+                    directory.FullName, 
+                    lockedToken =>
+                    {
+                        action(new ExclusiveFolderAccess(directory));
+                        return Task.FromResult(new Object());
+                    },
+                    CancellationToken.None)).Wait();
+            }
+
+            public static IEnumerable<FileInfo> Read(FileInfo file)
+            {
+                IEnumerable<FileInfo> ret = null;
+                Do(file.Directory, (folder) => {
+                    ret = folder.LoadInventory(file);
+                });
+
+                return ret;
+            }
+
+            public IEnumerable<FileInfo> LoadInventory(FileInfo file)
+            {
+                file.Refresh();
+                if (!file.Exists)
+                {
+                    return Enumerable.Empty<FileInfo>();
+                }
+
+                var inventory = new List<FileInfo>();
+                foreach (var p in File.ReadAllLines(file.FullName))
+                {
+                    inventory.Add(new FileInfo(p));
+                }
+
+                return inventory;
+            }
+
+            public void SaveInventory(FileInfo file, IEnumerable<FileInfo> inventory)
+            {
+                _directory.Refresh();
+                if (!_directory.Exists)
+                {
+                    _directory.Create();
+                }
+
+                File.WriteAllLines(file.FullName, inventory.Select((fi) => fi.FullName).ToList());
+            }
         }
     }
 }

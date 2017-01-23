@@ -4,12 +4,12 @@
     <body>
       <group id="src/dotnet/commands/dotnet-add/dotnet-add-p2p/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
-        <source>.NET Add Project to Project (p2p) reference Command</source>
+        <source>.NET Add Project to Project reference Command</source>
         <target state="translated">Comando Aggiungi riferimento P2P (da progetto a progetto) .NET</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
-        <source>Command to add project to project (p2p) reference</source>
+        <source>Command to add project to project reference</source>
         <target state="translated">Comando per aggiungere il riferimento P2P (da progetto a progetto)</target>
         <note />
       </trans-unit>

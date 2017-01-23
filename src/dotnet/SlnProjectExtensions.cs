@@ -12,17 +12,44 @@ namespace Microsoft.DotNet.Tools.Common
     {
         public static IList<string> GetSolutionFoldersFromProject(this SlnProject project)
         {
-            var currentDirString = $".{Path.DirectorySeparatorChar}";
+            var solutionFolders = new List<string>();
 
-            var directoryPath = Path.GetDirectoryName(project.FilePath);
-            if (directoryPath.StartsWith(currentDirString))
+            var projectFilePath = project.FilePath;
+            if (IsPathInTreeRootedAtSolutionDirectory(projectFilePath))
             {
-                directoryPath = directoryPath.Substring(currentDirString.Length);
+                var currentDirString = $".{Path.DirectorySeparatorChar}";
+                if (projectFilePath.StartsWith(currentDirString))
+                {
+                    projectFilePath = projectFilePath.Substring(currentDirString.Length);
+                }
+
+                var projectDirectoryPath = TrimProject(projectFilePath);
+                if (!string.IsNullOrEmpty(projectDirectoryPath))
+                {
+                    var solutionFoldersPath = TrimProjectDirectory(projectDirectoryPath);
+                    if (!string.IsNullOrEmpty(solutionFoldersPath))
+                    {
+                        solutionFolders.AddRange(solutionFoldersPath.Split(Path.DirectorySeparatorChar));
+                    }
+                }
             }
 
-            return directoryPath.StartsWith("..")
-                ? new List<string>()
-                : new List<string>(directoryPath.Split(Path.DirectorySeparatorChar));
+            return solutionFolders;
+        }
+
+        private static bool IsPathInTreeRootedAtSolutionDirectory(string path)
+        {
+            return !path.StartsWith("..");
+        }
+
+        private static string TrimProject(string path)
+        {
+            return Path.GetDirectoryName(path);
+        }
+
+        private static string TrimProjectDirectory(string path)
+        {
+            return Path.GetDirectoryName(path);
         }
     }
 }

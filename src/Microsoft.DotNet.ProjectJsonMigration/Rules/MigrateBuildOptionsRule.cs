@@ -111,7 +111,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     compilerOptions => compilerOptions.OutputName != null);
 
         private IncludeContextTransform CompileFilesTransform =>
-            new IncludeContextTransform("Compile", transformMappings: false, condition: ic => ic != null);
+            new IncludeContextTransform(
+                "Compile",
+                transformMappings: false,
+                condition: ic => ic != null,
+                emitBuiltInIncludes: false);
 
         private IncludeContextTransform EmbedFilesTransform =>
             new IncludeContextTransform("EmbeddedResource", transformMappings: false, condition: ic => ic != null);
@@ -396,7 +400,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     "copyToOutput",
                     new JObject(),
                     null,
-                    ProjectFilesCollection.DefaultPublishExcludePatterns);
+                    null);
         }
 
         private string FormatLanguageVersion(string langVersion)

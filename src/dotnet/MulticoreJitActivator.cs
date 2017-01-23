@@ -4,6 +4,7 @@
 using System;
 using System.Runtime.Loader;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Cli.Utils.ExceptionExtensions;
 using Microsoft.DotNet.Tools.Common;
 
 namespace Microsoft.DotNet.Cli
@@ -51,8 +52,9 @@ namespace Microsoft.DotNet.Cli
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                e.ReportAsWarning();
                 return false;
             }
         }

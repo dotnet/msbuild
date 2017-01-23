@@ -130,7 +130,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             // From ProjectReader #L725 (Both are empty)
             var defaultIncludePatterns = Enumerable.Empty<string>();
-            var defaultExcludePatterns = ProjectFilesCollection.DefaultPublishExcludePatterns;
+            var defaultExcludePatterns = Enumerable.Empty<string>();
 
             foreach (var item in mockProj.Items.Where(i => i.ItemType.Equals("Content", StringComparison.Ordinal)))
             {
@@ -193,7 +193,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             // From ProjectReader #L725 (Both are empty)
             var defaultIncludePatterns = Enumerable.Empty<string>();
-            var defaultExcludePatterns = ProjectFilesCollection.DefaultPublishExcludePatterns;
+            var defaultExcludePatterns = Enumerable.Empty<string>();
 
             foreach (var item in mockProj.Items.Where(i => i.ItemType.Equals("Content", StringComparison.Ordinal)))
             {

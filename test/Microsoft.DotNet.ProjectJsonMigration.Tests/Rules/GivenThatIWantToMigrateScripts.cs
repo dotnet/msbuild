@@ -63,10 +63,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         {
             var scriptMigrationRule = new MigrateScriptsRule();
             ProjectRootElement mockProj = ProjectRootElement.Create();
+            ProjectPropertyGroupElement commonPropertyGroup = mockProj.AddPropertyGroup();
+
             var commands = new string[] { "fakecommand" };
 
             var target = scriptMigrationRule.MigrateScriptSet(
                 mockProj,
+                commonPropertyGroup,
                 commands,
                 scriptName,
                 IsMultiTFM);
@@ -83,10 +86,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         {
             var scriptMigrationRule = new MigrateScriptsRule();
             ProjectRootElement mockProj = ProjectRootElement.Create();
+            ProjectPropertyGroupElement commonPropertyGroup = mockProj.AddPropertyGroup();
             var commands = new[] { "fakecommand" };
 
             var target = scriptMigrationRule.MigrateScriptSet(
                 mockProj,
+                commonPropertyGroup,
                 commands,
                 scriptName,
                 IsMultiTFM);
@@ -103,12 +108,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         {
             var scriptMigrationRule = new MigrateScriptsRule();
             ProjectRootElement mockProj = ProjectRootElement.Create();
+            ProjectPropertyGroupElement commonPropertyGroup = mockProj.AddPropertyGroup();
 
             var commands = new[] { "fakecommand1", "fakecommand2", "mockcommand3" };
             var commandsInTask = commands.ToDictionary(c => c, c => false);
 
             var target = scriptMigrationRule.MigrateScriptSet(
                 mockProj,
+                commonPropertyGroup,
                 commands,
                 scriptName,
                 IsMultiTFM);
@@ -140,11 +147,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         {
             var scriptMigrationRule = new MigrateScriptsRule();
             ProjectRootElement mockProj = ProjectRootElement.Create();
+            ProjectPropertyGroupElement commonPropertyGroup = mockProj.AddPropertyGroup();
 
             var commands = new[] { "%compile:FullTargetFramework%", "%compile:Configuration%"};
 
             var target = scriptMigrationRule.MigrateScriptSet(
                 mockProj,
+                commonPropertyGroup,
                 commands,
                 scriptName,
                 IsMultiTFM);
@@ -167,6 +176,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         {
             var scriptMigrationRule = new MigrateScriptsRule();
             ProjectRootElement mockProj = ProjectRootElement.Create();
+            ProjectPropertyGroupElement commonPropertyGroup = mockProj.AddPropertyGroup();
 
             var commands = new[]
             {
@@ -175,10 +185,34 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var target = scriptMigrationRule.MigrateScriptSet(
                 mockProj,
+                commonPropertyGroup,
                 commands,
                 "postpublish",
                 IsMultiTFM);
             target.Tasks.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void MigratingScriptsReplacesRazorPrecompileWithProperty()
+        {
+            var scriptMigrationRule = new MigrateScriptsRule();
+            ProjectRootElement mockProj = ProjectRootElement.Create();
+            ProjectPropertyGroupElement commonPropertyGroup = mockProj.AddPropertyGroup();
+
+            var commands = new string[] { "dotnet razor-precompile --configuration %publish:Configuration% --framework %publish:TargetFramework% --output-path %publish:OutputPath% %publish:ProjectPath%" };
+
+            var target = scriptMigrationRule.MigrateScriptSet(
+                mockProj,
+                commonPropertyGroup,
+                commands,
+                "postpublish",
+                IsMultiTFM);
+
+            target.Tasks.Should().BeEmpty();
+            commonPropertyGroup.Properties.Count().Should().Be(1);
+            var propertyElement = commonPropertyGroup.Properties.First();
+            propertyElement.Name.Should().Be("MvcRazorCompileOnPublish");
+            propertyElement.Value.Should().Be("true");
         }
 
         [Fact]
@@ -193,11 +227,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         {
             var scriptMigrationRule = new MigrateScriptsRule();
             ProjectRootElement mockProj = ProjectRootElement.Create();
+            ProjectPropertyGroupElement commonPropertyGroup = mockProj.AddPropertyGroup();
 
             var commands = new[] { "compile:FullTargetFramework", "compile:Configuration"};
 
             var target = scriptMigrationRule.MigrateScriptSet(
                 mockProj,
+                commonPropertyGroup,
                 commands,
                 "prepublish",
                 IsMultiTFM);
@@ -209,11 +245,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         {
             var scriptMigrationRule = new MigrateScriptsRule();
             ProjectRootElement mockProj = ProjectRootElement.Create();
+            ProjectPropertyGroupElement commonPropertyGroup = mockProj.AddPropertyGroup();
 
             var commands = new[] { "compile:FullTargetFramework", "compile:Configuration"};
 
             var target = scriptMigrationRule.MigrateScriptSet(
                 mockProj,
+                commonPropertyGroup,
                 commands,
                 "prepublish",
                 false);
@@ -225,11 +263,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         {
             var scriptMigrationRule = new MigrateScriptsRule();
             ProjectRootElement mockProj = ProjectRootElement.Create();
+            ProjectPropertyGroupElement commonPropertyGroup = mockProj.AddPropertyGroup();
 
             var commands = new string[] { "fakecommand" };
 
             Action action = () => scriptMigrationRule.MigrateScriptSet(
                 mockProj,
+                commonPropertyGroup,
                 commands,
                 "invalidScriptSet",
                 IsMultiTFM);

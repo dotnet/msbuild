@@ -4,13 +4,13 @@
     <body>
       <group id="src/dotnet/commands/dotnet-add/dotnet-add-p2p/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
-        <source>.NET Add Project to Project (p2p) reference Command</source>
-        <target state="translated">.NET Add Project to Project (p2p) reference Komutu</target>
+        <source>.NET Add Project to Project reference Command</source>
+        <target state="translated">.NET Projeden Projeye başvuru ekle Komutu</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
-        <source>Command to add project to project (p2p) reference</source>
-        <target state="translated">Projeden projeye (p2p) başvuru ekleme komutu</target>
+        <source>Command to add project to project reference</source>
+        <target state="translated">Projeden Projeye başvuru ekleme komutu</target>
         <note />
       </trans-unit>
       <trans-unit id="AppHelpText">
