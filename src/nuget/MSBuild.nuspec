@@ -27,5 +27,21 @@
   <files>
     <!--<file src="_._" target="lib\net46" />-->
     <file src="MSBuild.exe" target="runtimes\any\native" />
+  
+    <!-- Satellite assemblies -->
+    <file src="cs\MSBuild.resources.dll" target="runtimes\any\native\cs" />
+    <file src="de\MSBuild.resources.dll" target="runtimes\any\native\de" />
+    <file src="en\MSBuild.resources.dll" target="runtimes\any\native\en" />
+    <file src="es\MSBuild.resources.dll" target="runtimes\any\native\es" />
+    <file src="fr\MSBuild.resources.dll" target="runtimes\any\native\fr" />
+    <file src="it\MSBuild.resources.dll" target="runtimes\any\native\it" />
+    <file src="ja\MSBuild.resources.dll" target="runtimes\any\native\ja" />
+    <file src="ko\MSBuild.resources.dll" target="runtimes\any\native\ko" />
+    <file src="pl\MSBuild.resources.dll" target="runtimes\any\native\pl" />
+    <file src="pt\MSBuild.resources.dll" target="runtimes\any\native\pt" />
+    <file src="ru\MSBuild.resources.dll" target="runtimes\any\native\ru" />
+    <file src="tr\MSBuild.resources.dll" target="runtimes\any\native\tr" />
+    <file src="zh-Hans\MSBuild.resources.dll" target="runtimes\any\native\zh-Hans" />
+    <file src="zh-Hant\MSBuild.resources.dll" target="runtimes\any\native\zh-Hant" />
   </files>
 </package>
