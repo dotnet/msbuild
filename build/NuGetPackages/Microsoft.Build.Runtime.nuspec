@@ -19,6 +19,7 @@
         <dependency id="Microsoft.Build.Framework" version="[$version$]" />
         <dependency id="Microsoft.Build.Tasks.Core" version="[$version$]" />
         <dependency id="Microsoft.Build.Utilities.Core" version="[$version$]" />
+        <dependency id="System.Text.Encoding.CodePages" version="4.0.1" />
       </group>
       <group targetFramework=".NETFramework4.6">
         <dependency id="Microsoft.Build" version="[$version$]" />
