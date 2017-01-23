@@ -55,5 +55,7 @@
 
         public const string RunSettingsArgsHelpText = @"Any extra commandline runsettings arguments that should be passed to vstest. See 'dotnet vstest --help' for available options.
                                         Example: -- RunConfiguration.ResultsDirectory=""C:\users\user\desktop\Results Directory"" MSTest.DeploymentEnabled=false";
+        public const string CmdResultsDirectoryDescription = @"Test results directory will be created in specified path if not exists.
+                                        Example: --results-directory <PATH_TO_RESULTS_DIRECTORY>";
     }
 }

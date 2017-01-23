@@ -14,8 +14,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration
     {
         public static string GetProjectName(this ProjectContext projectContext)
         {
-            // _ here is just an arbitrary configuration value so we can obtain the output name
-            return Path.GetFileNameWithoutExtension(projectContext.GetOutputPaths("_").CompilationFiles.Assembly);
+            var projectDirectory = projectContext.ProjectDirectory;
+            
+            return Path.GetFileName(projectDirectory);
         }
 
         public static bool HasRuntimes(this IEnumerable<ProjectContext> projectContexts)
@@ -38,9 +39,31 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             return projectContexts.Any(p => p.IsFullFramework());
         }
 
+        public static bool HasExeOutput(this IEnumerable<ProjectContext> projectContexts)
+        {
+            return projectContexts.Any(p => p.IsExe());
+        }
+
+        public static bool HasLibraryOutput(this IEnumerable<ProjectContext> projectContexts)
+        {
+            return projectContexts.Any(p => p.IsLibrary());
+        }
+
         public static bool IsFullFramework(this ProjectContext projectContext)
         {
             return !projectContext.TargetFramework.IsPackageBased;
+        }
+
+        public static bool IsExe(this ProjectContext projectContext)
+        {
+            var compilerOptions = projectContext.ProjectFile.GetCompilerOptions(null, null);
+            return (compilerOptions.EmitEntryPoint != null && compilerOptions.EmitEntryPoint.Value);
+        }
+
+        public static bool IsLibrary(this ProjectContext projectContext)
+        {
+            var compilerOptions = projectContext.ProjectFile.GetCompilerOptions(null, null);
+            return (compilerOptions.EmitEntryPoint == null || !compilerOptions.EmitEntryPoint.Value);
         }
     }
 }

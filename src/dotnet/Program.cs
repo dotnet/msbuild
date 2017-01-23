@@ -82,22 +82,6 @@ namespace Microsoft.DotNet.Cli
 
                 return 1;
             }
-            catch (Exception ex)
-            {
-#if DEBUG
-                Reporter.Error.WriteLine(ex.ToString());
-#else
-                if (Reporter.IsVerbose)
-                {
-                    Reporter.Error.WriteLine(ex.ToString());
-                }
-                else
-                {
-                    Reporter.Error.WriteLine(ex.Message);
-                }
-#endif
-                return 1;
-            }
             finally
             {
                 if (PerfTrace.Enabled)
@@ -134,7 +118,9 @@ namespace Microsoft.DotNet.Cli
                         PrintInfo();
                         return 0;
                     }
-                    else if (IsArg(args[lastArg], "h", "help"))
+                    else if (IsArg(args[lastArg], "h", "help") || 
+                        args[lastArg] == "-?" ||
+                        args[lastArg] == "/?")
                     {
                         HelpCommand.PrintHelp();
                         return 0;

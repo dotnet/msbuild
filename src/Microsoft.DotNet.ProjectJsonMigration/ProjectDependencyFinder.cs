@@ -316,22 +316,23 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 foreach (var projectDirectory in
                     Enumerable.Repeat(directory, 1).Union(directory.GetDirectories()))
                 {
-                    // Create the path to the project.json file.
-                    var projectFilePath = Path.Combine(projectDirectory.FullName, "project.json");
-
-                    // We INTENTIONALLY do not do an exists check here because it requires disk I/O
-                    // Instead, we'll do an exists check when we try to resolve
-
-                    // Check if we've already added this, just in case it was pre-loaded into the cache
-                    var project = new ProjectDependency(
-                        projectDirectory.Name,
-                        projectFilePath);
-
-                    projects.Add(project);
+                    AddIfProjectExists(projects, projectDirectory);
                 }
             }
 
             return projects;
+        }
+
+        private static void AddIfProjectExists(List<ProjectDependency> projects, DirectoryInfo projectDirectory)
+        {
+            var projectJSONFilePath = Path.Combine(projectDirectory.FullName, "project.json");
+            var csProjFilePath = Path.Combine(projectDirectory.FullName, $"{projectDirectory.Name}.csproj");
+
+            if (File.Exists(projectJSONFilePath) || File.Exists(csProjFilePath))
+            {
+                var project = new ProjectDependency(projectDirectory.Name, projectJSONFilePath);
+                projects.Add(project);
+            }
         }
 
         internal static List<string> GetGlobalPaths(string rootPath)

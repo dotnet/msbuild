@@ -74,9 +74,9 @@
       <trans-unit id="CmdLoggerDescription">
         <source>Specify a logger for test results. 
                                         Example: --logger "trx[;LogFileName=&lt;Defaults to unique file name&gt;]"</source>
-        <target state="needs-review-translation">Consente di specificare un logger per i risultati dei test.
-                                        Esempio: --logger:trx</target>
-        <note></note>
+        <target state="translated">Consente di specificare un logger per i risultati dei test. 
+                                        Esempio: --logger "trx[;LogFileName=&lt;l'impostazione predefinita è un nome file univoco&gt;]"</target>
+        <note />
       </trans-unit>
       <trans-unit id="CmdConfiguration">
         <source>CONFIGURATION</source>
@@ -128,9 +128,9 @@
       <trans-unit id="RunSettingsArgsHelpText">
         <source>Any extra commandline runsettings arguments that should be passed to vstest. See 'dotnet vstest --help' for available options.
                                         Example: -- RunConfiguration.ResultsDirectory="C:\users\user\desktop\Results Directory" MSTest.DeploymentEnabled=false</source>
-        <target state="new">Any extra commandline runsettings arguments that should be passed to vstest. See 'dotnet vstest --help' for available options.
-                                        Example: -- RunConfiguration.ResultsDirectory="C:\users\user\desktop\Results Directory" MSTest.DeploymentEnabled=false</target>
-        <note></note>
+        <target state="translated">Eventuali argomenti aggiuntivi di runsettings della riga di comando che devono essere passati a vstest. Per le opzioni disponibili, vedere 'dotnet vstest --help'.
+                                        Esempio: -- RunConfiguration.ResultsDirectory="C:\users\user\desktop\Results Directory" MSTest.DeploymentEnabled=false</target>
+        <note />
       </trans-unit>
     </body>
   </file>

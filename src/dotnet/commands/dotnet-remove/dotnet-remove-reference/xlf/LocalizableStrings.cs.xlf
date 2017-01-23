@@ -4,13 +4,13 @@
     <body>
       <group id="src/dotnet/commands/dotnet-remove/dotnet-remove-p2p/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
-        <source>.NET Remove Project to Project (p2p) reference Command</source>
-        <target state="translated">Příkaz rozhraní .NET pro odebrání odkazu mezi projekty (p2p)</target>
+        <source>.NET Remove Project to Project reference Command</source>
+        <target state="translated">Příkaz rozhraní .NET pro odebrání odkazu mezi projekty</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
-        <source>Command to remove project to project (p2p) reference</source>
-        <target state="translated">Příkaz pro odebrání odkazu mezi projekty (p2p)</target>
+        <source>Command to remove project to project reference</source>
+        <target state="translated">Příkaz pro odebrání odkazu mezi projekty</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">

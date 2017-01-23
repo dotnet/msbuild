@@ -126,10 +126,8 @@ namespace Microsoft.DotNet.Tools.Sln.Remove
 
         private void RemoveEmptySolutionFolders(SlnFile slnFile)
         {
-            var referencedSolutionFolders = slnFile.Projects.GetReferencedSolutionFolders();
-
             var solutionFolderProjects = slnFile.Projects
-                .Where(p => p.TypeGuid == ProjectTypeGuids.SolutionFolderGuid)
+                .GetProjectsByType(ProjectTypeGuids.SolutionFolderGuid)
                 .ToList();
 
             if (solutionFolderProjects.Any())
@@ -138,9 +136,13 @@ namespace Microsoft.DotNet.Tools.Sln.Remove
                     "NestedProjects",
                     SlnSectionType.PreProcess);
 
+                var solutionFoldersInUse = GetSolutionFoldersThatContainProjectsInItsHierarchy(
+                    slnFile,
+                    nestedProjectsSection.Properties);
+
                 foreach (var solutionFolderProject in solutionFolderProjects)
                 {
-                    if (!referencedSolutionFolders.Contains(solutionFolderProject.Name))
+                    if (!solutionFoldersInUse.Contains(solutionFolderProject.Id))
                     {
                         slnFile.Projects.Remove(solutionFolderProject);
                         nestedProjectsSection.Properties.Remove(solutionFolderProject.Id);
@@ -152,6 +154,28 @@ namespace Microsoft.DotNet.Tools.Sln.Remove
                     slnFile.Sections.Remove(nestedProjectsSection);
                 }
             }
+        }
+
+        private HashSet<string> GetSolutionFoldersThatContainProjectsInItsHierarchy(
+            SlnFile slnFile,
+            SlnPropertySet nestedProjects)
+        {
+            var solutionFoldersInUse = new HashSet<string>();
+
+            var nonSolutionFolderProjects = slnFile.Projects.GetProjectsNotOfType(
+                ProjectTypeGuids.SolutionFolderGuid);
+
+            foreach (var nonSolutionFolderProject in nonSolutionFolderProjects)
+            {
+                var id = nonSolutionFolderProject.Id;
+                while (nestedProjects.ContainsKey(id))
+                {
+                    id = nestedProjects[id];
+                    solutionFoldersInUse.Add(id);
+                }
+            }
+
+            return solutionFoldersInUse;
         }
     }
 }

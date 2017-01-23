@@ -40,18 +40,18 @@
       </trans-unit>
       <trans-unit id="ErrorMessageFormatString">
         <source>Invalid format in line {0}: {1}</source>
-        <target state="new">Invalid format in line {0}: {1}</target>
-        <note></note>
+        <target state="translated">Formato inválido na linha {0}: {1}</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectParsingErrorFormatString">
         <source>Project section is missing '{0}' when parsing the line starting at position {1}</source>
-        <target state="new">Project section is missing '{0}' when parsing the line starting at position {1}</target>
-        <note></note>
+        <target state="translated">A seção do projeto está sem o '{0}' ao analisar a linha na posição {1}</target>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidPropertySetFormatString">
         <source>Property set is missing '{0}'</source>
-        <target state="new">Property set is missing '{0}'</target>
-        <note></note>
+        <target state="translated">O conjunto de propriedade está sem '{0}'</target>
+        <note />
       </trans-unit>
     </body>
   </file>

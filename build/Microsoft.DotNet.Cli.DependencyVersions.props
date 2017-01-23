@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <CLI_MSBuild_Version>15.1.0-preview-000503-01</CLI_MSBuild_Version>
+    <CLI_MSBuild_Version>15.1.0-preview-000523-01</CLI_MSBuild_Version>
     <CLI_Roslyn_Version>2.0.0-rc3-61212-03</CLI_Roslyn_Version>
+    <CLI_NETSDK_Version>1.0.0-alpha-20170117-4</CLI_NETSDK_Version>
     <!-- non-official NuGet build taken from https://github.com/nuget/nuget.client/tree/release-4.0.0-rc3-netstandard2.0 to contain "2.0" TFMs -->
     <CLI_NuGet_Version>4.0.0-rc3-2193</CLI_NuGet_Version>
-    <CLI_NETSDK_Version>1.0.0-alpha-20170105-5</CLI_NETSDK_Version>
-    <CLI_WEBSDK_Version>1.0.0-alpha-20170106-1-203</CLI_WEBSDK_Version>
+    <CLI_WEBSDK_Version>1.0.0-alpha-20170120-3-249</CLI_WEBSDK_Version>
     <CLI_TestPlatform_Version>15.0.0-preview-20170106-08</CLI_TestPlatform_Version>
-    <TemplateEngineVersion>1.0.0-beta1-20170106-79</TemplateEngineVersion>
+    <TemplateEngineVersion>1.0.0-beta1-20170108-83</TemplateEngineVersion>
   </PropertyGroup>
 </Project>

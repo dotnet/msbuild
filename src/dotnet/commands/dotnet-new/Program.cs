@@ -27,19 +27,18 @@ namespace Microsoft.DotNet.Tools.New
                 {
                     // Check if other files from the template exists already, before extraction
                     IEnumerable<string> fileNames = archive.Entries.Select(e => e.FullName);
+                    string projectDirectory = Directory.GetCurrentDirectory();
+
                     foreach (var entry in fileNames)
                     {
-                        if (File.Exists(Path.Combine(Directory.GetCurrentDirectory(), entry)))
+                        if (File.Exists(Path.Combine(projectDirectory, entry)))
                         {
                             Reporter.Error.WriteLine(string.Format(LocalizableStrings.ProjectContainsError, languageName, entry));
                             return 1;
                         }
                     }
 
-                    string projectDirectory = Directory.GetCurrentDirectory();
-
                     archive.ExtractToDirectory(projectDirectory);
-
                     ReplaceFileTemplateNames(projectDirectory);
                 }
                 catch (IOException ex)
@@ -156,19 +155,7 @@ namespace Microsoft.DotNet.Tools.New
                 return dotnetNew.CreateEmptyProject(language.Name, fullTemplateName);
             });
 
-            try
-            {
-                return app.Execute(args);
-            }
-            catch (Exception ex)
-            {
-#if DEBUG
-                Reporter.Error.WriteLine(ex.ToString());
-#else
-                Reporter.Error.WriteLine(ex.Message);
-#endif
-                return 1;
-            }
+            return app.Execute(args);
         }
     }
 }

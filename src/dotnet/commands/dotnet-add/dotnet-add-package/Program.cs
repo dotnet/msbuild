@@ -1,12 +1,6 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
 using Microsoft.Build.Evaluation;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
@@ -15,6 +9,12 @@ using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.NuGet;
 using NuGet.Frameworks;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace Microsoft.DotNet.Tools.Add.PackageReference
 {
@@ -25,6 +25,7 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
         private CommandOption _noRestoreOption;
         private CommandOption _sourceOption;
         private CommandOption _packageDirectoryOption;
+        private CommandArgument _packageNameArgument;
 
         public static DotNetSubCommandBase Create()
         {
@@ -33,11 +34,15 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
                 Name = "package",
                 FullName = LocalizableStrings.AppFullName,
                 Description = LocalizableStrings.AppDescription,
-                HandleRemainingArguments = true,
-                ArgumentSeparatorHelpText = LocalizableStrings.AppHelpText,
+                HandleRemainingArguments = false
             };
 
             command.HelpOption("-h|--help");
+
+            command._packageNameArgument = command.Argument(
+                $"<{LocalizableStrings.CmdPackage}>",
+                LocalizableStrings.CmdPackageDescription,
+                multipleValues: false);
 
             command._versionOption = command.Option(
                 $"-v|--version <{LocalizableStrings.CmdVersion}>",
@@ -69,7 +74,7 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
 
         public override int Run(string fileOrDirectory)
         {
-            if (RemainingArguments.Count != 1)
+            if (_packageNameArgument.Values.Count != 1 || string.IsNullOrWhiteSpace(_packageNameArgument.Value) || RemainingArguments.Count > 0)
             {
                 throw new GracefulException(LocalizableStrings.SpecifyExactlyOnePackageReference);
             }
@@ -94,7 +99,7 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
                 GetProjectDependencyGraph(projectFilePath, tempDgFilePath);
             }
 
-            var result = NuGetCommand.Run(TransformArgs(RemainingArguments.First(), tempDgFilePath, projectFilePath));
+            var result = NuGetCommand.Run(TransformArgs(_packageNameArgument.Value, tempDgFilePath, projectFilePath));
             DisposeTemporaryFile(tempDgFilePath);
 
             return result;
