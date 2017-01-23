@@ -1038,7 +1038,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
     -->
   <PropertyGroup>
-    <PrepareForBuildDependsOn>GetFrameworkPaths;GetReferenceAssemblyPaths;AssignLinkMetadata</PrepareForBuildDependsOn>
+    <PrepareForBuildDependsOn>GetFrameworkPaths;GetReferenceAssemblyPaths</PrepareForBuildDependsOn>
   </PropertyGroup>
   <Target
       Name="PrepareForBuild"
