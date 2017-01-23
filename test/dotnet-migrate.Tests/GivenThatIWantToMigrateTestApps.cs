@@ -648,10 +648,9 @@ namespace Microsoft.DotNet.Migration.Tests
             var projectDirectory = TestAssets.Get(projectName)
                 .CreateInstance()
                 .WithSourceFiles()
-                .Root
-                .FullName;
+                .Root;
 
-            MigrateProject(projectDirectory);
+            MigrateProject(projectDirectory.FullName);
             Restore(projectDirectory, projectName);
             BuildMSBuild(projectDirectory, projectName);
         }
