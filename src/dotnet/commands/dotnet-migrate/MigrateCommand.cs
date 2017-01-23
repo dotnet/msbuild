@@ -113,22 +113,23 @@ namespace Microsoft.DotNet.Tools.Migrate
                 return;
             }
 
-            List<string> csprojFilesToAdd = new List<string>();
+            var csprojFilesToAdd = new HashSet<string>();
 
             var slnPathWithTrailingSlash = PathUtility.EnsureTrailingSlash(_slnFile.BaseDirectory);
             foreach (var report in migrationReport.ProjectMigrationReports)
             {
                 var reportPathWithTrailingSlash = PathUtility.EnsureTrailingSlash(report.ProjectDirectory);
-                var reportRelPath = Path.Combine(
-                    PathUtility.GetRelativePath(slnPathWithTrailingSlash, reportPathWithTrailingSlash),
-                    report.ProjectName + ".xproj");
+                var relativeReportPath = PathUtility.GetRelativePath(
+                    slnPathWithTrailingSlash,
+                    reportPathWithTrailingSlash);
 
-                var projects = _slnFile.Projects.Where(p => p.FilePath == reportRelPath);
+                var xprojPath = Path.Combine(relativeReportPath, report.ProjectName + ".xproj");
+                var xprojProjectsReferencedBySolution = _slnFile.Projects.Where(p => p.FilePath == xprojPath);
 
                 var migratedProjectName = report.ProjectName + ".csproj";
-                if (projects.Count() == 1)
+                if (xprojProjectsReferencedBySolution.Count() == 1)
                 {
-                    var slnProject = projects.Single();
+                    var slnProject = xprojProjectsReferencedBySolution.Single();
                     slnProject.FilePath = Path.Combine(
                         Path.GetDirectoryName(slnProject.FilePath),
                         migratedProjectName);
@@ -136,7 +137,15 @@ namespace Microsoft.DotNet.Tools.Migrate
                 }
                 else
                 {
-                    csprojFilesToAdd.Add(Path.Combine(report.ProjectDirectory, migratedProjectName));
+                    var csprojPath = Path.Combine(relativeReportPath, migratedProjectName);
+                    var solutionContainsCsprojPriorToMigration = _slnFile.Projects
+                        .Where(p => p.FilePath == csprojPath)
+                        .Any();
+
+                    if (!solutionContainsCsprojPriorToMigration)
+                    {
+                        csprojFilesToAdd.Add(Path.Combine(report.ProjectDirectory, migratedProjectName));
+                    }
                 }
 
                 foreach (var preExisting in report.PreExistingCsprojDependencies)
@@ -211,14 +220,19 @@ namespace Microsoft.DotNet.Tools.Migrate
 
         private void BackupProjects(MigrationReport migrationReport)
         {
+            var projectDirectories = new List<DirectoryInfo>();
             foreach (var report in migrationReport.ProjectMigrationReports)
             {
-                var backupPlan = new MigrationBackupPlan(
-                    new DirectoryInfo(report.ProjectDirectory),
-                    _workspaceDirectory);
-
-                backupPlan.PerformBackup();
+                projectDirectories.Add(new DirectoryInfo(report.ProjectDirectory));
             }
+
+            var backupPlan = new MigrationBackupPlan(
+                projectDirectories,
+                _workspaceDirectory);
+
+            backupPlan.PerformBackup();
+
+            Reporter.Output.WriteLine($"Files backed up to {backupPlan.RootBackupDirectory.FullName}");
         }
 
         private void WriteReport(MigrationReport migrationReport)
@@ -310,7 +324,6 @@ namespace Microsoft.DotNet.Tools.Migrate
 
             if (projectMigrationReport.Errors.Any())
             {
-
                 sb.AppendLine(RedIfColored($"Project {projectMigrationReport.ProjectName} migration failed ({projectMigrationReport.ProjectDirectory})"));
 
                 foreach (var error in projectMigrationReport.Errors.Select(e => e.GetFormattedErrorMessage()))

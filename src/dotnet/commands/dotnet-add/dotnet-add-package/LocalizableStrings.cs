@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
 
         public const string AppDescription = "Command to add package reference";
 
-        public const string AppHelpText = "Package references to add";
+        public const string CmdPackageDescription = "Package references to add";
 
         public const string SpecifyExactlyOnePackageReference = "Please specify one package reference to add.";
 
@@ -24,6 +24,8 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
         public const string CmdVersionDescription = "Version for the package to be added.";
 
         public const string CmdDGFileException = "Unable to Create Dependency graph file for project '{0}'. Cannot add package reference.";
+
+        public const string CmdPackage = "PACKAGE_NAME";
 
         public const string CmdVersion = "VERSION";
 

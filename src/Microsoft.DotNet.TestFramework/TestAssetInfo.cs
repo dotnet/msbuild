@@ -346,7 +346,7 @@ namespace Microsoft.DotNet.TestFramework
                 file.Refresh();
                 if (!file.Exists)
                 {
-                    throw new ArgumentException("Inventory file should exist.");
+                    return Enumerable.Empty<FileInfo>();
                 }
 
                 var inventory = new List<FileInfo>();
