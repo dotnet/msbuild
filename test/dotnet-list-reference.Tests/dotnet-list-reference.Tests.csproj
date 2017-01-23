@@ -45,7 +45,7 @@
       <Version>2.2.0-beta4-build3444</Version>
     </PackageReference>
     <PackageReference Include="FluentAssertions">
-      <Version>4.0.0</Version>
+      <Version>4.18.0</Version>
     </PackageReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
