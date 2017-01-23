@@ -128,8 +128,12 @@ namespace Microsoft.Build.Construction
                 using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildProjectConstructBegin, CodeMarkerEvent.perfMSBuildProjectConstructEnd))
 #endif
             {
+                Console.WriteLine("Before Parse()");
                 ProjectParser parser = new ProjectParser(document, projectRootElement);
+
                 parser.Parse();
+
+                Console.WriteLine("After Parse()");
             }
 #if MSBUILDENABLEVSPROFILING 
             }
