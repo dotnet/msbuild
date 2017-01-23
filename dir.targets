@@ -33,11 +33,12 @@
 
   <!-- Respect the traits set up by PlatformSpecific attribute. -->
   <PropertyGroup>
+    <XunitOptions>-notrait category=performance</XunitOptions>
     <XunitOptions Condition="'$(OS)'=='Windows_NT'">$(XunitOptions) -notrait category=nonwindowstests</XunitOptions>
     <XunitOptions Condition="'$(OS)'=='Unix'">$(XunitOptions) -notrait category=nonlinuxtests</XunitOptions>
-    <XunitOptions Condition="'$(OS)'=='Unix' and '$(NetCoreBuild)'=='true'">-notrait category=nonlinuxtests -notrait category=netcore-linux-failing</XunitOptions>
+    <XunitOptions Condition="'$(OS)'=='Unix' and '$(NetCoreBuild)'=='true'">$(XunitOptions) -notrait category=netcore-linux-failing</XunitOptions>
     <XunitOptions Condition="'$(OS)'=='OSX'">$(XunitOptions) -notrait category=nonosxtests</XunitOptions>
-    <XunitOptions Condition="'$(OS)'=='OSX' and '$(NetCoreBuild)'=='true'">-notrait category=nonosxtests -notrait category=netcore-osx-failing</XunitOptions>
+    <XunitOptions Condition="'$(OS)'=='OSX' and '$(NetCoreBuild)'=='true'">$(XunitOptions) -notrait category=netcore-osx-failing</XunitOptions>
     <XunitOptions Condition="'$(OS)'=='FreeBSD'">$(XunitOptions) -notrait category=nonfreebsdtests</XunitOptions>
 
     <XunitOptions Condition="'$(MonoBuild)' == 'true'">$(XunitOptions) -notrait category=non-mono-tests</XunitOptions>

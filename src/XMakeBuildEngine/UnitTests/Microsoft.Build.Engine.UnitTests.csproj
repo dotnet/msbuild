@@ -170,6 +170,7 @@
     <Compile Include="Instance\ProjectPropertyInstance_Internal_Tests.cs" />
     <Compile Include="Instance\TaskItem_Tests.cs" />
     <Compile Include="InvalidProjectFileException_Tests.cs" />
+    <Compile Include="PerformanceMeasurements.cs" />
     <Compile Include="LogFormatter_Tests.cs" />
     <Compile Include="LoggerDescription_Tests.cs" />
     <Compile Include="LoggerException_Tests.cs" />
