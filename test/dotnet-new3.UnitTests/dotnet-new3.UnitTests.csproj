@@ -5,16 +5,12 @@
     <TargetFramework>netcoreapp1.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20161123-03" />
-    <PackageReference Include="xunit" Version="2.2.0-beta4-build3444" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0-beta4-build1194" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20170113-02" />
+    <PackageReference Include="xunit" Version="2.2.0-beta5-build3474" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0-beta5-build1225" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\dotnet-new3\dotnet-new3.csproj" />
-    <ProjectReference Include="..\..\src\Microsoft.TemplateEngine.Utils\Microsoft.TemplateEngine.Utils.csproj" />
-    <ProjectReference Include="..\..\src\Microsoft.TemplateEngine.Abstractions\Microsoft.TemplateEngine.Abstractions.csproj" />
-    <ProjectReference Include="..\..\src\Microsoft.TemplateEngine.Edge\Microsoft.TemplateEngine.Edge.csproj" />
-    <ProjectReference Include="..\..\src\Microsoft.TemplateEngine.Cli\Microsoft.TemplateEngine.Cli.csproj" />
     <ProjectReference Include="..\..\test\Microsoft.TemplateEngine.Mocks\Microsoft.TemplateEngine.Mocks.csproj" />
     <ProjectReference Include="..\..\test\Microsoft.TemplateEngine.TestHelper\Microsoft.TemplateEngine.TestHelper.csproj" />
   </ItemGroup>

@@ -19,8 +19,6 @@ using Microsoft.TemplateEngine.Edge.Template;
 using Microsoft.TemplateEngine.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using static Microsoft.TemplateEngine.Utils.EngineEnvironmentSettings;
-using Paths = Microsoft.TemplateEngine.Edge.Paths;
 
 namespace Microsoft.TemplateEngine.Cli
 {
@@ -32,6 +30,10 @@ namespace Microsoft.TemplateEngine.Cli
         private IReadOnlyList<IFilteredTemplateInfo> _matchedTemplates;
         private CommandArgument _templateName;
         private ITemplateInfo _unambiguousTemplateToUse;
+        private readonly TemplateCreator _templateCreator;
+        private readonly TemplateCache _templateCache;
+        private readonly AliasRegistry _aliasRegistry;
+        private readonly Paths _paths;
 
         private static readonly Regex LocaleFormatRegex = new Regex(@"
                     ^
@@ -40,12 +42,18 @@ namespace Microsoft.TemplateEngine.Cli
                     $"
             , RegexOptions.IgnorePatternWhitespace);
         private bool _forceAmbiguousFlow;
-        private readonly Action<ITemplateEngineHost, IInstaller> _onFirstRun;
+        private readonly Action<IEngineEnvironmentSettings, IInstaller> _onFirstRun;
 
-        public New3Command(string commandName, ITemplateEngineHost host, Action<ITemplateEngineHost, IInstaller> onFirstRun, ExtendedCommandParser app, CommandArgument templateNames)
+        public New3Command(string commandName, ITemplateEngineHost host, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, ExtendedCommandParser app, CommandArgument templateNames)
         {
-            Host = new ExtendedTemplateEngineHost(host, this);
+            host = new ExtendedTemplateEngineHost(host, this);
+            EnvironmentSettings = new EngineEnvironmentSettings(host, x => new SettingsLoader(x));
+            Installer = new Installer(EnvironmentSettings);
+            _templateCreator = new TemplateCreator(EnvironmentSettings);
+            _templateCache = new TemplateCache(EnvironmentSettings);
+            _aliasRegistry = new AliasRegistry(EnvironmentSettings);
             CommandName = commandName;
+            _paths = new Paths(EnvironmentSettings);
             _app = app;
             _templateName = templateNames;
             _onFirstRun = onFirstRun;
@@ -61,7 +69,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         public IList<string> Install => _app.InternalParamValueList("--install");
 
-        public static IInstaller Installer { get; set; } = new Installer();
+        public static IInstaller Installer { get; set; }
 
         public bool InstallHasValue => _app.InternalParamHasValue("--install");
 
@@ -104,7 +112,7 @@ namespace Microsoft.TemplateEngine.Cli
                     return _unambiguousTemplateToUse = _matchedTemplates.First().Info;
                 }
 
-                if (Host.TryGetHostParamDefault("prefs:language", out string defaultLanguage))
+                if (EnvironmentSettings.Host.TryGetHostParamDefault("prefs:language", out string defaultLanguage))
                 {
                     IFilteredTemplateInfo match = null;
 
@@ -130,7 +138,9 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        public static int Run(string commandName, ITemplateEngineHost host, Action<ITemplateEngineHost, IInstaller> onFirstRun, string[] args)
+        public EngineEnvironmentSettings EnvironmentSettings { get; private set; }
+
+        public static int Run(string commandName, ITemplateEngineHost host, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, string[] args)
         {
             ExtendedCommandParser app = new ExtendedCommandParser()
             {
@@ -187,13 +197,13 @@ namespace Microsoft.TemplateEngine.Cli
 
         private void ConfigureEnvironment()
         {
-            _onFirstRun?.Invoke(Host, Installer);
+            _onFirstRun?.Invoke(EnvironmentSettings, Installer);
         }
 
         private async Task<int> CreateTemplateAsync(ITemplateInfo template)
         {
             string fallbackName = new DirectoryInfo(OutputPath ?? Directory.GetCurrentDirectory()).Name;
-            TemplateCreationResult instantiateResult = await TemplateCreator.InstantiateAsync(template, Name, fallbackName, OutputPath, _app.AllTemplateParams, SkipUpdateCheck).ConfigureAwait(false);
+            TemplateCreationResult instantiateResult = await _templateCreator.InstantiateAsync(template, Name, fallbackName, OutputPath, _app.AllTemplateParams, SkipUpdateCheck).ConfigureAwait(false);
             string resultTemplateName = string.IsNullOrEmpty(instantiateResult.TemplateFullName) ? _templateName.Value : instantiateResult.TemplateFullName;
 
             switch (instantiateResult.Status)
@@ -221,7 +231,7 @@ namespace Microsoft.TemplateEngine.Cli
             IEnumerable<ITemplateInfo> results = _matchedTemplates.Where(x => x.IsMatch).Select(x => x.Info);
 
             IEnumerable<IGrouping<string, ITemplateInfo>> grouped = results.GroupBy(x => x.GroupIdentity);
-            Host.TryGetHostParamDefault("prefs:language", out string defaultLanguage);
+            EnvironmentSettings.Host.TryGetHostParamDefault("prefs:language", out string defaultLanguage);
 
             Dictionary<ITemplateInfo, string> templatesVersusLanguages = new Dictionary<ITemplateInfo, string>();
 
@@ -245,7 +255,7 @@ namespace Microsoft.TemplateEngine.Cli
                 templatesVersusLanguages[grouping.First()] = string.Join(", ", languages);
             }
 
-            HelpFormatter<KeyValuePair<ITemplateInfo, string>> formatter = new HelpFormatter<KeyValuePair<ITemplateInfo, string>>(templatesVersusLanguages, 6, '-', false)
+            HelpFormatter<KeyValuePair<ITemplateInfo, string>> formatter = HelpFormatter.For(EnvironmentSettings, templatesVersusLanguages, 6, '-', false)
                 .DefineColumn(t => t.Key.Name, LocalizableStrings.Templates)
                 .DefineColumn(t => t.Key.ShortName, LocalizableStrings.ShortName)
                 .DefineColumn(t => t.Value, out object languageColumn, LocalizableStrings.Language)
@@ -344,7 +354,7 @@ namespace Microsoft.TemplateEngine.Cli
                     return -1;
                 }
 
-                AliasRegistry.SetTemplateAlias(Alias, UnambiguousTemplateToUse);
+                _aliasRegistry.SetTemplateAlias(Alias, UnambiguousTemplateToUse);
                 Reporter.Output.WriteLine(LocalizableStrings.AliasCreated);
                 return 0;
             }
@@ -423,7 +433,7 @@ namespace Microsoft.TemplateEngine.Cli
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.BadLocaleError, newLocale).Bold().Red());
                 }
 
-                Host.UpdateLocale(newLocale);
+                EnvironmentSettings.Host.UpdateLocale(newLocale);
             }
         }
 
@@ -436,8 +446,8 @@ namespace Microsoft.TemplateEngine.Cli
 
         private void GenerateUsageForTemplate(ITemplateInfo templateInfo)
         {
-            ITemplate template = SettingsLoader.LoadTemplate(templateInfo);
-            IParameterSet allParams = template.Generator.GetParametersForTemplate(template);
+            ITemplate template = EnvironmentSettings.SettingsLoader.LoadTemplate(templateInfo);
+            IParameterSet allParams = template.Generator.GetParametersForTemplate(EnvironmentSettings, template);
             HostSpecificTemplateData hostTemplateData = ReadHostSpecificTemplateData(template);
 
             Reporter.Output.Write($"    dotnet {CommandName} {template.ShortName}");
@@ -466,23 +476,30 @@ namespace Microsoft.TemplateEngine.Cli
 
         private bool Initialize()
         {
+            bool ephemeralHiveFlag = _app.RemainingArguments.Any(x => x == "--debug:ephemeral-hive");
+
+            if (ephemeralHiveFlag)
+            {
+                EnvironmentSettings.Host.VirtualizeDirectory(_paths.User.BaseDir);
+            }
+
             bool reinitFlag = _app.RemainingArguments.Any(x => x == "--debug:reinit");
             if (reinitFlag)
             {
-                Paths.User.FirstRunCookie.Delete();
+                _paths.Delete(_paths.User.FirstRunCookie);
             }
 
             // Note: this leaves things in a weird state. Might be related to the localized caches.
             // not sure, need to look into it.
             if (reinitFlag || _app.RemainingArguments.Any(x => x == "--debug:reset-config"))
             {
-                Paths.User.AliasesFile.Delete();
-                Paths.User.SettingsFile.Delete();
-                TemplateCache.DeleteAllLocaleCacheFiles();
+                _paths.Delete(_paths.User.AliasesFile);
+                _paths.Delete(_paths.User.SettingsFile);
+                _templateCache.DeleteAllLocaleCacheFiles();
                 return false;
             }
 
-            if (!Paths.User.BaseDir.Exists() || !Paths.User.FirstRunCookie.Exists())
+            if (!_paths.Exists(_paths.User.BaseDir) || !_paths.Exists(_paths.User.FirstRunCookie))
             {
                 if (!IsQuietFlagSpecified)
                 {
@@ -490,7 +507,7 @@ namespace Microsoft.TemplateEngine.Cli
                 }
 
                 ConfigureEnvironment();
-                Paths.User.FirstRunCookie.WriteAllText("");
+                _paths.WriteAllText(_paths.User.FirstRunCookie, "");
             }
 
             if (_app.RemainingArguments.Any(x => x == "--debug:showconfig"))
@@ -514,7 +531,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (filteredParams.Any())
             {
-                HelpFormatter<ITemplateParameter> formatter = new HelpFormatter<ITemplateParameter>(filteredParams, 2, null, true);
+                HelpFormatter<ITemplateParameter> formatter = new HelpFormatter<ITemplateParameter>(EnvironmentSettings, filteredParams, 2, null, true);
 
                 formatter.DefineColumn(
                     param =>
@@ -601,8 +618,8 @@ namespace Microsoft.TemplateEngine.Cli
 
         private void ParseTemplateArgs(ITemplateInfo templateInfo)
         {
-            ITemplate template = SettingsLoader.LoadTemplate(templateInfo);
-            IParameterSet allParams = template.Generator.GetParametersForTemplate(template);
+            ITemplate template = EnvironmentSettings.SettingsLoader.LoadTemplate(templateInfo);
+            IParameterSet allParams = template.Generator.GetParametersForTemplate(EnvironmentSettings, template);
             _hostSpecificTemplateData = ReadHostSpecificTemplateData(template);
             _app.SetupTemplateParameters(allParams, _hostSpecificTemplateData.LongNameOverrides, _hostSpecificTemplateData.ShortNameOverrides);
 
@@ -612,12 +629,12 @@ namespace Microsoft.TemplateEngine.Cli
 
         private Task PerformCoreTemplateQueryAsync()
         {
-            string outputPath = OutputPath ?? Host.FileSystem.GetCurrentDirectory();
+            string outputPath = OutputPath ?? EnvironmentSettings.Host.FileSystem.GetCurrentDirectory();
 
             string context = null;
             if (!IsShowAllFlagSpecified)
             {
-                if (Host.FileSystem.DirectoryExists(outputPath) && Host.FileSystem.EnumerateFiles(outputPath, "*.*proj", SearchOption.TopDirectoryOnly).Any())
+                if (EnvironmentSettings.Host.FileSystem.DirectoryExists(outputPath) && EnvironmentSettings.Host.FileSystem.EnumerateFiles(outputPath, "*.*proj", SearchOption.TopDirectoryOnly).Any())
                 {
                     context = "item";
                 }
@@ -628,7 +645,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             //Perform the core query to search for templates
-            IReadOnlyCollection<IFilteredTemplateInfo> templates = TemplateCreator.List
+            IReadOnlyCollection<IFilteredTemplateInfo> templates = _templateCreator.List
             (
                 false,
                 WellKnownSearchFilters.AliasFilter(_templateName.Value),
@@ -660,9 +677,9 @@ namespace Microsoft.TemplateEngine.Cli
             return Task.FromResult(true);
         }
 
-        private static HostSpecificTemplateData ReadHostSpecificTemplateData(ITemplate templateInfo)
+        private HostSpecificTemplateData ReadHostSpecificTemplateData(ITemplate templateInfo)
         {
-            if (SettingsLoader.TryGetFileFromIdAndPath(templateInfo.HostConfigMountPointId, templateInfo.HostConfigPlace, out IFile file))
+            if (EnvironmentSettings.SettingsLoader.TryGetFileFromIdAndPath(templateInfo.HostConfigMountPointId, templateInfo.HostConfigPlace, out IFile file))
             {
                 JObject jsonData;
                 using (Stream s = file.OpenRead())
@@ -701,11 +718,11 @@ namespace Microsoft.TemplateEngine.Cli
             appExt.HiddenInternalOption("--skip-update-check", "--skip-update-check", CommandOptionType.NoValue);
         }
 
-        private static void ShowConfig()
+        private void ShowConfig()
         {
             Reporter.Output.WriteLine(LocalizableStrings.CurrentConfiguration);
             Reporter.Output.WriteLine(" ");
-            TableFormatter.Print(SettingsLoader.MountPoints, LocalizableStrings.NoItems, "   ", '-', new Dictionary<string, Func<MountPointInfo, object>>
+            TableFormatter.Print(EnvironmentSettings.SettingsLoader.MountPoints, LocalizableStrings.NoItems, "   ", '-', new Dictionary<string, Func<MountPointInfo, object>>
             {
                 {LocalizableStrings.MountPoints, x => x.Place},
                 {LocalizableStrings.Id, x => x.MountPointId},
@@ -713,14 +730,14 @@ namespace Microsoft.TemplateEngine.Cli
                 {LocalizableStrings.Factory, x => x.MountPointFactoryId}
             });
 
-            TableFormatter.Print(SettingsLoader.Components.OfType<IMountPointFactory>(), LocalizableStrings.NoItems, "   ", '-', new Dictionary<string, Func<IMountPointFactory, object>>
+            TableFormatter.Print(EnvironmentSettings.SettingsLoader.Components.OfType<IMountPointFactory>(), LocalizableStrings.NoItems, "   ", '-', new Dictionary<string, Func<IMountPointFactory, object>>
             {
                 {LocalizableStrings.MountPointFactories, x => x.Id},
                 {LocalizableStrings.Type, x => x.GetType().FullName},
                 {LocalizableStrings.Assembly, x => x.GetType().GetTypeInfo().Assembly.FullName}
             });
 
-            TableFormatter.Print(SettingsLoader.Components.OfType<IGenerator>(), LocalizableStrings.NoItems, "   ", '-', new Dictionary<string, Func<IGenerator, object>>
+            TableFormatter.Print(EnvironmentSettings.SettingsLoader.Components.OfType<IGenerator>(), LocalizableStrings.NoItems, "   ", '-', new Dictionary<string, Func<IGenerator, object>>
             {
                 {LocalizableStrings.Generators, x => x.Id},
                 {LocalizableStrings.Type, x => x.GetType().FullName},
@@ -789,9 +806,9 @@ namespace Microsoft.TemplateEngine.Cli
                 Reporter.Output.WriteLine(string.Format(LocalizableStrings.Description, UnambiguousTemplateToUse.Description));
             }
 
-            ITemplate template = SettingsLoader.LoadTemplate(UnambiguousTemplateToUse);
-            IParameterSet allParams = TemplateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName, out IList<string> defaultParamsWithInvalidValues);
-            TemplateCreator.ResolveUserParameters(template, allParams, _app.AllTemplateParams, out IList<string> userParamsWithInvalidValues);
+            ITemplate template = EnvironmentSettings.SettingsLoader.LoadTemplate(UnambiguousTemplateToUse);
+            IParameterSet allParams = _templateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName, out IList<string> defaultParamsWithInvalidValues);
+            _templateCreator.ResolveUserParameters(template, allParams, _app.AllTemplateParams, out IList<string> userParamsWithInvalidValues);
 
             string additionalInfo = null;
             if (userParamsWithInvalidValues.Any())

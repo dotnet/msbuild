@@ -5,15 +5,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli
 {
     public class HelpFormatter
     {
-        public static HelpFormatter<T> For<T>(IEnumerable<T> items, int columnPadding, char? headerSeparator = null, bool blankLineBetweenRows = false)
+        public static HelpFormatter<T> For<T>(IEngineEnvironmentSettings environmentSettings, IEnumerable<T> items, int columnPadding, char? headerSeparator = null, bool blankLineBetweenRows = false)
         {
-            return new HelpFormatter<T>(items, columnPadding, headerSeparator, blankLineBetweenRows);
+            return new HelpFormatter<T>(environmentSettings, items, columnPadding, headerSeparator, blankLineBetweenRows);
         }
     }
 
@@ -25,24 +26,26 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly char? _headerSeparator;
         private readonly IEnumerable<T> _items;
         private readonly List<Tuple<int, bool, IComparer<string>>> _ordering = new List<Tuple<int, bool, IComparer<string>>>();
+        private readonly IEngineEnvironmentSettings _environmentSettings;
 
-        public HelpFormatter(IEnumerable<T> items, int columnPadding, char? headerSeparator, bool blankLineBetweenRows)
+        public HelpFormatter(IEngineEnvironmentSettings environmentSettings, IEnumerable<T> items, int columnPadding, char? headerSeparator, bool blankLineBetweenRows)
         {
             _items = items ?? Enumerable.Empty<T>();
             _columnPadding = columnPadding;
             _headerSeparator = headerSeparator;
             _blankLineBetweenRows = blankLineBetweenRows;
+            _environmentSettings = environmentSettings;
         }
 
         public HelpFormatter<T> DefineColumn(Func<T, string> binder, string header = null, int maxWidth = 0, bool alwaysMaximizeWidth = false)
         {
-            _columns.Add(new ColumnDefinition(header, binder, maxWidth, alwaysMaximizeWidth));
+            _columns.Add(new ColumnDefinition(_environmentSettings, header, binder, maxWidth, alwaysMaximizeWidth));
             return this;
         }
 
         public HelpFormatter<T> DefineColumn(Func<T, string> binder, out object column, string header = null, int maxWidth = 0, bool alwaysMaximizeWidth = false)
         {
-            ColumnDefinition c = new ColumnDefinition(header, binder, maxWidth, alwaysMaximizeWidth);
+            ColumnDefinition c = new ColumnDefinition(_environmentSettings, header, binder, maxWidth, alwaysMaximizeWidth);
             _columns.Add(c);
             column = c;
             return this;
@@ -58,7 +61,7 @@ namespace Microsoft.TemplateEngine.Cli
             int headerLines = 0;
             for (int i = 0; i < _columns.Count; ++i)
             {
-                header[i] = new TextWrapper(_columns[i].Header, _columns[i].MaxWidth, _columns[i].AlwaysMaximizeWidth);
+                header[i] = new TextWrapper(_environmentSettings, _columns[i].Header, _columns[i].MaxWidth, _columns[i].AlwaysMaximizeWidth);
                 headerLines = Math.Max(headerLines, header[i].LineCount);
                 widthLookup[i] = header[i].MaxWidth;
             }
@@ -170,13 +173,15 @@ namespace Microsoft.TemplateEngine.Cli
             private readonly string _header;
             private readonly Func<T, string> _binder;
             private readonly bool _alwaysMaximizeWidth;
+            private readonly IEngineEnvironmentSettings _environmentSettings;
 
-            public ColumnDefinition(string header, Func<T, string> binder, int maxWidth = -1, bool alwaysMaximizeWidth = false)
+            public ColumnDefinition(IEngineEnvironmentSettings environmentSettings, string header, Func<T, string> binder, int maxWidth = -1, bool alwaysMaximizeWidth = false)
             {
                 _header = header;
                 _maxWidth = maxWidth > 0 ? maxWidth : int.MaxValue;
                 _binder = binder;
                 _alwaysMaximizeWidth = alwaysMaximizeWidth && maxWidth > 0;
+                _environmentSettings = environmentSettings;
             }
 
             public string Header => _header;
@@ -187,7 +192,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             public TextWrapper GetCell(T value)
             {
-                return new TextWrapper(_binder(value), _maxWidth, _alwaysMaximizeWidth);
+                return new TextWrapper(_environmentSettings, _binder(value), _maxWidth, _alwaysMaximizeWidth);
             }
         }
 
@@ -195,7 +200,7 @@ namespace Microsoft.TemplateEngine.Cli
         {
             private readonly IReadOnlyList<string> _lines;
 
-            public TextWrapper(string text, int maxWidth, bool alwaysMax)
+            public TextWrapper(IEngineEnvironmentSettings environmentSettings, string text, int maxWidth, bool alwaysMax)
             {
                 List<string> lines = new List<string>();
                 int position = 0;
@@ -203,14 +208,14 @@ namespace Microsoft.TemplateEngine.Cli
 
                 while (position < text.Length)
                 {
-                    int newline = text.IndexOf(EngineEnvironmentSettings.Environment.NewLine, position, StringComparison.Ordinal);
+                    int newline = text.IndexOf(environmentSettings.Environment.NewLine, position, StringComparison.Ordinal);
 
                     if (newline > -1)
                     {
                         if (newline - position <= maxWidth)
                         {
                             lines.Add(text.Substring(position, newline - position).TrimEnd());
-                            position = newline + EngineEnvironmentSettings.Environment.NewLine.Length;
+                            position = newline + environmentSettings.Environment.NewLine.Length;
                         }
                         else
                         {

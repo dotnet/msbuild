@@ -1,19 +1,29 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
-using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli
 {
     internal class Installer : IInstaller
     {
+        private readonly IEngineEnvironmentSettings _environmentSettings;
+        private readonly Paths _paths;
+        private readonly TemplateCache _templateCache;
+
+        public Installer(IEngineEnvironmentSettings environmentSettings)
+        {
+            _environmentSettings = environmentSettings;
+            _paths = new Paths(environmentSettings);
+            _templateCache = new TemplateCache(_environmentSettings);
+        }
+
         public void InstallPackages(IEnumerable<string> installationRequests)
         {
             List<string> localSources = new List<string>();
@@ -55,8 +65,8 @@ namespace Microsoft.TemplateEngine.Cli
   </ItemGroup>
 </Project>";
 
-            Paths.User.ScratchDir.CreateDirectory();
-            string proj = Path.Combine(Paths.User.ScratchDir, "restore.csproj");
+            _paths.CreateDirectory(_paths.User.ScratchDir);
+            string proj = Path.Combine(_paths.User.ScratchDir, "restore.csproj");
             StringBuilder references = new StringBuilder();
 
             foreach (Package pkg in packages)
@@ -65,21 +75,21 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             string content = string.Format(projectFile, references.ToString());
-            proj.WriteAllText(content);
+            _paths.WriteAllText(proj, content);
 
-            Paths.User.Packages.CreateDirectory();
-            string restored = Path.Combine(Paths.User.ScratchDir, "Packages");
+            _paths.CreateDirectory(_paths.User.Packages);
+            string restored = Path.Combine(_paths.User.ScratchDir, "Packages");
             CommandResult commandResult = Command.CreateDotNet("restore", new[] { proj, "--packages", restored }).ForwardStdErr().Execute();
 
             List<string> newLocalPackages = new List<string>();
-            foreach (string packagePath in restored.EnumerateFiles("*.nupkg", SearchOption.AllDirectories))
+            foreach (string packagePath in _paths.EnumerateFiles(restored, "*.nupkg", SearchOption.AllDirectories))
             {
-                string path = Path.Combine(Paths.User.Packages, Path.GetFileName(packagePath));
-                packagePath.Copy(path);
+                string path = Path.Combine(_paths.User.Packages, Path.GetFileName(packagePath));
+                _paths.Copy(packagePath, path);
                 newLocalPackages.Add(path);
             }
 
-            Paths.User.ScratchDir.DeleteDirectory();
+            _paths.DeleteDirectory(_paths.User.ScratchDir);
             InstallLocalPackages(newLocalPackages);
         }
 
@@ -90,7 +100,7 @@ namespace Microsoft.TemplateEngine.Cli
             foreach (string package in packageNames)
             {
                 string pkg = package.Trim();
-                pkg = EngineEnvironmentSettings.Environment.ExpandEnvironmentVariables(pkg);
+                pkg = _environmentSettings.Environment.ExpandEnvironmentVariables(pkg);
                 string pattern = null;
 
                 int wildcardIndex = pkg.IndexOfAny(new[] { '*', '?' });
@@ -108,25 +118,25 @@ namespace Microsoft.TemplateEngine.Cli
                     {
                         string fullDirectory = new DirectoryInfo(pkg).FullName;
                         string fullPathGlob = Path.Combine(fullDirectory, pattern);
-                        TemplateCache.Scan(fullPathGlob);
+                        _templateCache.Scan(fullPathGlob);
                     }
-                    else if (EngineEnvironmentSettings.Host.FileSystem.DirectoryExists(pkg) || EngineEnvironmentSettings.Host.FileSystem.FileExists(pkg))
+                    else if (_environmentSettings.Host.FileSystem.DirectoryExists(pkg) || _environmentSettings.Host.FileSystem.FileExists(pkg))
                     {
                         string packageLocation = new DirectoryInfo(pkg).FullName;
-                        TemplateCache.Scan(packageLocation);
+                        _templateCache.Scan(packageLocation);
                     }
                     else
                     {
-                        EngineEnvironmentSettings.Host.OnNonCriticalError("InvalidPackageSpecification", string.Format(LocalizableStrings.BadPackageSpec, pkg), null, 0);
+                        _environmentSettings.Host.OnNonCriticalError("InvalidPackageSpecification", string.Format(LocalizableStrings.BadPackageSpec, pkg), null, 0);
                     }
                 }
                 catch
                 {
-                    EngineEnvironmentSettings.Host.OnNonCriticalError("InvalidPackageSpecification", string.Format(LocalizableStrings.BadPackageSpec, pkg), null, 0);
+                    _environmentSettings.Host.OnNonCriticalError("InvalidPackageSpecification", string.Format(LocalizableStrings.BadPackageSpec, pkg), null, 0);
                 }
             }
 
-            TemplateCache.WriteTemplateCaches();
+            _templateCache.WriteTemplateCaches();
         }
     }
 }
