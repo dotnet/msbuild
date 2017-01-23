@@ -38,7 +38,7 @@
           EnvironmentVariables=$(RunTestEnvironmentVariables);
           TestProject=%(TestProjects.Identity);
           TestResultXmlDir=$(TestResultXmlDir);
-          ToolPath=$(Stage0Directory);
+          ToolPath=$(Stage2Directory);
           WorkingDirectory=$([System.IO.Directory]::GetParent(%(TestProjects.Identity))) 
           ToolPath=$(Stage2Directory);
         </Properties>
