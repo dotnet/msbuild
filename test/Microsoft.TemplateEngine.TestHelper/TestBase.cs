@@ -22,6 +22,7 @@ namespace Microsoft.TemplateEngine.TestHelper
             };
 
             EngineEnvironmentSettings = new EngineEnvironmentSettings(host, x => null);
+            host.VirtualizeDirectory(Environment.ExpandEnvironmentVariables("%USERPROFILE%/.templateengine"));
         }
 
         protected static void RunAndVerify(string originalValue, string expectedValue, IProcessor processor, int bufferSize, bool? changeOverride = null)
