@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
+using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.TestHelper
 {
@@ -80,6 +81,11 @@ namespace Microsoft.TemplateEngine.TestHelper
 
         public void UpdateLocale(string newLocale)
         {
+        }
+
+        public void VirtualizeDirectory(string path)
+        {
+            FileSystem = new InMemoryFileSystem(path, FileSystem);
         }
     }
 }

@@ -64,6 +64,11 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
+        public void VirtualizeDirectory(string path)
+        {
+            _baseHost.VirtualizeDirectory(path);
+        }
+
         private bool GlobalJsonFileExistsInPath
         {
             get

@@ -476,6 +476,13 @@ namespace Microsoft.TemplateEngine.Cli
 
         private bool Initialize()
         {
+            bool ephemeralHiveFlag = _app.RemainingArguments.Any(x => x == "--debug:ephemeral-hive");
+
+            if (ephemeralHiveFlag)
+            {
+                EnvironmentSettings.Host.VirtualizeDirectory(_paths.User.BaseDir);
+            }
+
             bool reinitFlag = _app.RemainingArguments.Any(x => x == "--debug:reinit");
             if (reinitFlag)
             {
