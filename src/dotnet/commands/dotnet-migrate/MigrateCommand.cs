@@ -174,9 +174,7 @@ namespace Microsoft.DotNet.Tools.Migrate
 
         private void RemoveReferencesToMigratedFiles(SlnFile slnFile)
         {
-            // TODO: Need to merge my PRs then I can call the ProjectCollection extension methods.
-            // And create new extension methods.
-            var solutionFolders = slnFile.Projects.Where(p => p.TypeGuid == ProjectTypeGuids.SolutionFolderGuid);
+            var solutionFolders = slnFile.Projects.GetProjectsByType(ProjectTypeGuids.SolutionFolderGuid);
 
             foreach (var solutionFolder in solutionFolders)
             {
@@ -184,8 +182,14 @@ namespace Microsoft.DotNet.Tools.Migrate
                 if (solutionItems != null && solutionItems.Properties.ContainsKey("global.json"))
                 {
                     solutionItems.Properties.Remove("global.json");
+                    if (solutionItems.IsEmpty)
+                    {
+                        solutionFolder.Sections.Remove(solutionItems);
+                    }
                 }
             }
+
+            slnFile.RemoveEmptySolutionFolders();
         }
 
         private void AddProject(string slnPath, string csprojPath)

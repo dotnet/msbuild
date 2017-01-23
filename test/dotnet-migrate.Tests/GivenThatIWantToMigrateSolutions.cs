@@ -234,7 +234,7 @@ EndGlobal
             string expectedSlnContents)
         {
             var projectDirectory = TestAssets
-                .Get("NonRestoredTestProjects", "PJAppWithSlnAndSolutionItemsToMoveToBackup")
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithSlnAndSolutionItemsToMoveToBackup")
                 .CreateInstance(Path.GetFileNameWithoutExtension(slnFileName))
                 .WithSourceFiles()
                 .Root
