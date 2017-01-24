@@ -251,6 +251,8 @@ namespace Microsoft.DotNet.TestFramework
                 var restoreArgs = new string[] { "restore", projFile.FullName };
 
                 var commandResult = Command.Create(_dotnetExeFile.FullName, restoreArgs)
+                                    .CaptureStdOut()
+                                    .CaptureStdErr()
                                     .Execute();
 
                 int exitCode = commandResult.ExitCode;
@@ -265,8 +267,6 @@ namespace Microsoft.DotNet.TestFramework
 
                     throw new Exception(message);
                 }
-
-                Console.WriteLine($"TestAsset Restore '{_assetName}' for {projFile.FullName} exited with {exitCode}");
             }
         }
 
