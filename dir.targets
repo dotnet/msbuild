@@ -145,7 +145,7 @@
       <!-- But DO fail the build on CI and official builds if we can't
            produce the right outputs. Continuing on error to allow
            test results even on a misconfigured build machine. -->
-      <EditBinContinueOnError Condition="'$(TF_BUILD)' == 'True' or '$(JENKINS_URI)' != ''">ErrorAndContinue</EditBinContinueOnError>
+      <EditBinContinueOnError Condition="'$(TF_BUILD)' == 'True' or '$(JENKINS_URL)' != ''">ErrorAndContinue</EditBinContinueOnError>
     </PropertyGroup>
 
     <Exec Condition="'$(EditBinFlags)'!=''"
