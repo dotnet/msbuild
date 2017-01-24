@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Microsoft.DotNet.Tools.Common
 {
-    public static class SlnProjectCollectionExtensions
+    internal static class SlnProjectCollectionExtensions
     {
         public static IEnumerable<SlnProject> GetProjectsByType(
             this SlnProjectCollection projects,

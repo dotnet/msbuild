@@ -13,10 +13,15 @@ using System.Linq;
 
 namespace Microsoft.DotNet.Tools.Common
 {
-    public static class SlnFileExtensions
+    internal static class SlnFileExtensions
     {
         public static void AddProject(this SlnFile slnFile, string fullProjectPath)
         {
+            if (string.IsNullOrEmpty(fullProjectPath))
+            {
+                throw new ArgumentException();
+            }
+
             var relativeProjectPath = PathUtility.GetRelativePath(
                 PathUtility.EnsureTrailingSlash(slnFile.BaseDirectory),
                 fullProjectPath);
@@ -54,6 +59,11 @@ namespace Microsoft.DotNet.Tools.Common
 
         public static void AddDefaultBuildConfigurations(this SlnFile slnFile, SlnProject slnProject)
         {
+            if (slnProject == null)
+            {
+                throw new ArgumentException();
+            }
+
             var defaultConfigurations = new List<string>()
             {
                 "Debug|Any CPU",
@@ -110,6 +120,11 @@ namespace Microsoft.DotNet.Tools.Common
 
         public static void AddSolutionFolders(this SlnFile slnFile, SlnProject slnProject)
         {
+            if (slnProject == null)
+            {
+                throw new ArgumentException();
+            }
+
             var solutionFolders = slnProject.GetSolutionFoldersFromProject();
 
             if (solutionFolders.Any())
@@ -179,6 +194,11 @@ namespace Microsoft.DotNet.Tools.Common
 
         public static bool RemoveProject(this SlnFile slnFile, string projectPath)
         {
+            if (string.IsNullOrEmpty(projectPath))
+            {
+                throw new ArgumentException();
+            }
+
             var projectPathNormalized = PathUtility.GetPathWithDirectorySeparator(projectPath);
 
             var projectsToRemove = slnFile.Projects.Where((p) =>
