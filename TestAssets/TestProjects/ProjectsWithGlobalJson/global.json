@@ -1,0 +1,4 @@
+
+{
+    "projects": [ "src", "src with spaces", "src without projects" ]
+}
