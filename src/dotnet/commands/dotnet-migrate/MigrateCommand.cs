@@ -236,7 +236,9 @@ namespace Microsoft.DotNet.Tools.Migrate
 
             backupPlan.PerformBackup();
 
-            Reporter.Output.WriteLine($"Files backed up to {backupPlan.RootBackupDirectory.FullName}");
+            Reporter.Output.WriteLine(string.Format(
+                LocalizableStrings.MigrateFilesBackupLocation,
+                backupPlan.RootBackupDirectory.FullName));
         }
 
         private void WriteReport(MigrationReport migrationReport)
@@ -307,10 +309,15 @@ namespace Microsoft.DotNet.Tools.Migrate
         {
             StringBuilder sb = new StringBuilder();
 
-            sb.AppendLine("Summary");
-            sb.AppendLine($"Total Projects: {migrationReport.MigratedProjectsCount}");
-            sb.AppendLine($"Succeeded Projects: {migrationReport.SucceededProjectsCount}");
-            sb.AppendLine($"Failed Projects: {migrationReport.FailedProjectsCount}");
+            sb.AppendLine(LocalizableStrings.MigrationReportSummary);
+            sb.AppendLine(
+                string.Format(LocalizableStrings.MigrationReportTotalProjects, migrationReport.MigratedProjectsCount));
+            sb.AppendLine(string.Format(
+                LocalizableStrings.MigrationReportSucceededProjects,
+                migrationReport.SucceededProjectsCount));
+            sb.AppendLine(string.Format(
+                LocalizableStrings.MigrationReportFailedProjects,
+                migrationReport.FailedProjectsCount));
 
             return sb.ToString();
         }
@@ -318,7 +325,10 @@ namespace Microsoft.DotNet.Tools.Migrate
         private string GetProjectReportSuccessContent(ProjectMigrationReport projectMigrationReport, bool colored)
         {
             Func<string, string> GreenIfColored = (str) => colored ? str.Green() : str;
-            return GreenIfColored($"Project {projectMigrationReport.ProjectName} migration succeeded ({projectMigrationReport.ProjectDirectory})");
+            return GreenIfColored(string.Format(
+                LocalizableStrings.ProjectMigrationSucceeded,
+                projectMigrationReport.ProjectName,
+                projectMigrationReport.ProjectDirectory));
         }
 
         private string GetProjectReportErrorContent(ProjectMigrationReport projectMigrationReport, bool colored)
@@ -328,7 +338,10 @@ namespace Microsoft.DotNet.Tools.Migrate
 
             if (projectMigrationReport.Errors.Any())
             {
-                sb.AppendLine(RedIfColored($"Project {projectMigrationReport.ProjectName} migration failed ({projectMigrationReport.ProjectDirectory})"));
+                sb.AppendLine(RedIfColored(string.Format(
+                    LocalizableStrings.ProjectMigrationFailed,
+                    projectMigrationReport.ProjectName,
+                    projectMigrationReport.ProjectDirectory)));
 
                 foreach (var error in projectMigrationReport.Errors.Select(e => e.GetFormattedErrorMessage()))
                 {
@@ -358,7 +371,7 @@ namespace Microsoft.DotNet.Tools.Migrate
 
                 if (!projects.Any())
                 {
-                    throw new GracefulException("Unable to find any projects in global.json");
+                    throw new GracefulException(LocalizableStrings.MigrationFailedToFindProjectInGlobalJson);
                 }
             }
             else if (File.Exists(projectArg) && 
@@ -368,7 +381,8 @@ namespace Microsoft.DotNet.Tools.Migrate
 
                 if (!projects.Any())
                 {
-                    throw new GracefulException($"Unable to find any projects in {projectArg}");
+                    throw new GracefulException(
+                        string.Format(LocalizableStrings.MigrationUnableToFindProjects, projectArg));
                 }
             }
             else if (Directory.Exists(projectArg))
@@ -377,12 +391,14 @@ namespace Microsoft.DotNet.Tools.Migrate
 
                 if (!projects.Any())
                 {
-                    throw new GracefulException($"No project.json file found in '{projectArg}'");
+                    throw new GracefulException(
+                        string.Format(LocalizableStrings.MigrationProjectJsonNotFound, projectArg));
                 }
             }
             else
             {
-                throw new GracefulException($"Invalid project argument - '{projectArg}' is not a project.json, global.json, or solution.sln file and a directory named '{projectArg}' doesn't exist.");
+                throw new GracefulException(
+                    string.Format(LocalizableStrings.MigrationInvalidProjectArgument, projectArg));
             }
 
             foreach (var project in projects)
@@ -408,7 +424,7 @@ namespace Microsoft.DotNet.Tools.Migrate
                 return projectJson;
             }
 
-            throw new GracefulException($"Unable to find project file at {projectJson}");
+            throw new GracefulException(string.Format(LocalizableStrings.MigratonUnableToFindProjectJson, projectJson));
         }
 
         private IEnumerable<string> GetProjectsFromGlobalJson(string globalJson)
@@ -440,7 +456,8 @@ namespace Microsoft.DotNet.Tools.Migrate
         {
             if (!File.Exists(globalJson))
             {
-                throw new GracefulException($"Unable to find global settings file at {globalJson}");
+                throw new GracefulException(
+                    string.Format(LocalizableStrings.MigrationUnableToFindGlobalJson, globalJson));
             }
 
             var globalJsonDirectory = Path.GetDirectoryName(globalJson);
@@ -451,7 +468,8 @@ namespace Microsoft.DotNet.Tools.Migrate
         {
             if (!File.Exists(slnPath))
             {
-                throw new GracefulException($"Unable to find the solution file at {slnPath}");
+                throw new GracefulException(
+                    string.Format(LocalizableStrings.MigrationUnableToFindSolutionFile, slnPath));
             }
 
             _slnFile = SlnFile.Read(slnPath);
