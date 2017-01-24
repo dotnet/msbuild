@@ -25,6 +25,7 @@
          two files should be generated from a single source. -->
     <AppConfig Condition="'$(Platform)' == 'x64'">app.amd64.config</AppConfig>
     <ApplicationIcon>MSBuild.ico</ApplicationIcon>
+    <LargeAddressAware>true</LargeAddressAware>
   </PropertyGroup>
   <PropertyGroup Condition="'$(MonoBuild)' == 'true'">
     <TargetExt>.dll</TargetExt>
