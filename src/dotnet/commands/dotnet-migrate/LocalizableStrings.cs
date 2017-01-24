@@ -32,5 +32,33 @@ Defaults to current directory if nothing is specified.";
         public const string MigrationFailedError = "Migration failed.";
 
         public const string MigrationAdditionalHelp = "Your project has been migrated to the .csproj format and can be used with this build of the .NET Core Tools.  Please visit https://aka.ms/coremigration to report issues or ask for help.";
+
+        public const string MigrationReportSummary = "Summary";
+
+        public const string MigrationReportTotalProjects = "Total Projects: {0}";
+
+        public const string MigrationReportSucceededProjects = "Succeeded Projects: {0}";
+
+        public const string MigrationReportFailedProjects = "Failed Projects: {0}";
+
+        public const string ProjectMigrationSucceeded = "Project {0} migration succeeded ({1}).";
+
+        public const string ProjectMigrationFailed = "Project {0} migration failed ({1}).";
+
+        public const string MigrationFailedToFindProjectInGlobalJson = "Unable to find any projects in global.json.";
+
+        public const string MigrationUnableToFindProjects = "Unable to find any projects in {0}.";
+
+        public const string MigrationProjectJsonNotFound = "No project.json file found in '{0}'.";
+
+        public const string MigrationInvalidProjectArgument = "Invalid project argument - '{0}' is not a project.json, global.json, or solution.sln file and a directory named '{0}' doesn't exist.";
+
+        public const string MigratonUnableToFindProjectJson = "Unable to find project.json file at {0}.";
+
+        public const string MigrationUnableToFindGlobalJson = "Unable to find global settings file at {0}.";
+
+        public const string MigrationUnableToFindSolutionFile = "Unable to find the solution file at {0}.";
+
+        public const string MigrateFilesBackupLocation = "Files backed up to {0}";
     }
 }
