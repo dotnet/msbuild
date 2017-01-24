@@ -149,7 +149,7 @@
     </PropertyGroup>
 
     <Exec Condition="'$(EditBinFlags)'!=''"
-          Command="editbin.exe /NOLOGO $(EditBinFlags) @(IntermediateAssembly)"
+          Command="call &quot;$(VS140COMNTOOLS)..\tools\vsvars32.bat&quot; && editbin.exe /NOLOGO $(EditBinFlags) @(IntermediateAssembly)"
           ContinueOnError="$(EditBinContinueOnError)" />
 
   </Target>
