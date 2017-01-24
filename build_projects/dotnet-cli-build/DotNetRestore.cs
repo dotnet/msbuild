@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         protected override string Args
         {
-            get { return $"{GetProjectPath()} {GetConfigFile()} {GetSource()} {GetPackages()} {GetSkipInvalidConfigurations()} {GetRuntime()} {GetAdditionalParameters()}"; }
+            get { return $"{GetProjectPath()} {GetConfigFile()} {GetSource()} {GetPackages()} {GetIgnoreMissingSources()} {GetSkipInvalidConfigurations()} {GetRuntime()} {GetAdditionalParameters()}"; }
         }
 
         public string ConfigFile { get; set; }
@@ -26,6 +26,8 @@ namespace Microsoft.DotNet.Cli.Build
         public string Packages { get; set; }
 
         public bool SkipInvalidConfigurations { get; set; }
+
+        public bool IgnoreMissingSources { get; set; }
         
         public string Runtime { get; set; }
 
@@ -74,6 +76,16 @@ namespace Microsoft.DotNet.Cli.Build
             if (SkipInvalidConfigurations)
             {
                 return "/p:SkipInvalidConfigurations=true";
+            }
+
+            return null;
+        }
+
+        private string GetIgnoreMissingSources()
+        {
+            if (IgnoreMissingSources)
+            {
+                return "--ignore-failed-sources";
             }
 
             return null;

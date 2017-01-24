@@ -67,15 +67,31 @@
         <NuGetPackagesArchiveDirectory Include="$(NuGetPackagesArchiveFolder)" />
       </ItemGroup>
 
+      <PropertyGroup>
+        <NuGetConfigContent>
+          &lt;configuration&gt;
+            &lt;packageSources&gt;
+              &lt;add key="configurable.source" value="%CLI_LZMA_PACKAGE_SOURCE%" /&gt;
+            &lt;/packageSources&gt;
+          &lt;/configuration&gt;
+        </NuGetConfigContent>
+        <LZMANuGetConfigFilePath>$(NuGetPackagesArchiveProject)/Nuget.config</LZMANuGetConfigFilePath>
+      </PropertyGroup>
+
       <Delete Files="@(FilesToClean)" />
       <RemoveDir Directories="@(NuGetPackagesArchiveDirectory)" />
       <MakeDir Directories="@(NuGetPackagesArchiveDirectory)"/>
+
+      <WriteLinesToFile Condition=" 'CLI_LZMA_PACKAGE_SOURCE' != '' "
+                        File="$(LZMANuGetConfigFilePath)" 
+                        Lines="$(NuGetConfigContent)" />
 
       <DotNetNew ToolPath="$(Stage2Directory)"
                  TemplateType="Web"
                  WorkingDirectory="$(NuGetPackagesArchiveProject)/Web" />
 
       <DotNetRestore ToolPath="$(Stage2Directory)"
+                     IgnoreMissingSources="True"
                      Packages="$(NuGetPackagesArchiveFolder)"
                      SkipInvalidConfigurations="True"
                      WorkingDirectory="$(NuGetPackagesArchiveProject)/Web" />
@@ -85,6 +101,7 @@
                  WorkingDirectory="$(NuGetPackagesArchiveProject)/Web1.1" />
 
       <DotNetRestore ToolPath="$(Stage2Directory)"
+                     IgnoreMissingSources="True"
                      Packages="$(NuGetPackagesArchiveFolder)"
                      SkipInvalidConfigurations="True"
                      WorkingDirectory="$(NuGetPackagesArchiveProject)/Web1.1" />
