@@ -97,7 +97,6 @@
     </PropertyGroup>
 
     <DotNetRestore ToolPath="$(Stage2Directory)"
-                   Source="$(TestPackagesDir)"
                    ConfigFile="$(RepoRoot)\NuGet.Config"
                    ProjectPath="%(TestPackageProject.ProjectPath)" />
 
