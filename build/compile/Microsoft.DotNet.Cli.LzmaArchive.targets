@@ -91,7 +91,6 @@
                  WorkingDirectory="$(NuGetPackagesArchiveProject)/Web" />
 
       <DotNetRestore ToolPath="$(Stage2Directory)"
-                     IgnoreMissingSources="True"
                      Packages="$(NuGetPackagesArchiveFolder)"
                      SkipInvalidConfigurations="True"
                      WorkingDirectory="$(NuGetPackagesArchiveProject)/Web" />
@@ -101,7 +100,6 @@
                  WorkingDirectory="$(NuGetPackagesArchiveProject)/Web1.1" />
 
       <DotNetRestore ToolPath="$(Stage2Directory)"
-                     IgnoreMissingSources="True"
                      Packages="$(NuGetPackagesArchiveFolder)"
                      SkipInvalidConfigurations="True"
                      WorkingDirectory="$(NuGetPackagesArchiveProject)/Web1.1" />
