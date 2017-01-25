@@ -611,7 +611,7 @@ namespace Microsoft.Build.Shared
             return fullPath;
         }
 
-        private static bool PathIsInvalid(string path)
+        internal static bool PathIsInvalid(string path)
         {
             if (path.IndexOfAny(InvalidPathChars) >= 0)
             {
