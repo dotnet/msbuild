@@ -76,6 +76,8 @@ namespace Microsoft.Build.UnitTests
                 private set;
             }
 
+            internal Action<ProcessStartInfo> DoProcessStartInfoMutation {get; set;}
+
             protected override string ToolName
             {
                 get { return Path.GetFileName(_fullToolName); }
@@ -95,6 +97,26 @@ namespace Microsoft.Build.UnitTests
             {
                 // Default is nothing. This is useful for tools where all the parameters can go into a response file.
                 return _commandLineCommands;
+            }
+
+            override protected ProcessStartInfo GetProcessStartInfo
+            (
+                string pathToTool,
+                string commandLineCommands,
+                string responseFileSwitch
+            )
+            {
+                var basePSI = base.GetProcessStartInfo(
+                    pathToTool, 
+                    commandLineCommands, 
+                    responseFileSwitch);
+                
+                if (DoProcessStartInfoMutation != null)
+                {
+                    DoProcessStartInfoMutation(basePSI);
+                }
+
+                return basePSI;
             }
 
             override protected void LogEventsFromTextOutput
@@ -126,7 +148,7 @@ namespace Microsoft.Build.UnitTests
                     commandLineCommands = " -c \"echo\"";
                 }
                 int result = base.ExecuteTool(pathToTool, responseFileCommands, commandLineCommands);
-                StartInfo = base.GetProcessStartInfo(
+                StartInfo = GetProcessStartInfo(
                     GenerateFullPathToTool(),
                     NativeMethodsShared.IsWindows ? "/x" : string.Empty,
                     null);
@@ -663,6 +685,31 @@ namespace Microsoft.Build.UnitTests
                 task.StartInfo.Environment["PATH"].Length > 0);
 #else
                 task.StartInfo.EnvironmentVariables["PATH"].Length > 0);
+#endif
+        }
+
+        /// <summary>
+        /// Equals sign in value
+        /// </summary>
+        [Fact]
+        public void GetProcessStartInfoCanOverrideEnvironmentVariables()
+        {
+            MyTool task = new MyTool();
+#if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
+            task.DoProcessStartInfoMutation = (p) => p.Environment.Remove("a");
+#else
+            task.DoProcessStartInfoMutation = (p) => p.EnvironmentVariables.Remove("a");
+#endif
+            
+            task.BuildEngine = new MockEngine();
+            task.EnvironmentVariables = new string[] { "a=b" };
+            bool result = task.Execute();
+
+            Assert.Equal(true, result);
+#if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
+            Assert.Equal(false, task.StartInfo.Environment.ContainsKey("a"));
+#else
+            Assert.Equal(false, task.StartInfo.EnvironmentVariables.ContainsKey("a"));
 #endif
         }
     }
