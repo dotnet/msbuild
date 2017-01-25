@@ -229,19 +229,42 @@ elementFormDefault="qualified">
     <xs:complexType>
       <xs:complexContent>
         <xs:extension base="msb:SimpleItemType">
-          <xs:sequence>
-            <xs:element name="Version">
-              <xs:annotation>
-                <xs:documentation>
-                  <!-- _locID_text="DotNetCliToolReference_Version" _locComment="" -->Version of the tool
-                </xs:documentation>
-              </xs:annotation>
-            </xs:element>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:choice>
+              <xs:element name="IncludeAssets">
+                <xs:annotation>
+                  <xs:documentation>
+                    <!-- _locID_text="DotNetCliToolReference_IncludeAssets" _locComment="" -->Assets to include from this reference
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="ExcludeAssets">
+                <xs:annotation>
+                  <xs:documentation>
+                    <!-- _locID_text="DotNetCliToolReference_ExcludeAssets" _locComment="" -->Assets to exclude from this reference
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="PrivateAssets">
+                <xs:annotation>
+                  <xs:documentation>
+                    <!-- _locID_text="DotNetCliToolReference_PrivateAssets" _locComment="" -->Assets that are private in this reference
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:choice>
           </xs:sequence>
           <xs:attribute name="Include" type="xs:string">
             <xs:annotation>
               <xs:documentation>
                 <!-- _locID_text="DotNetCliToolReference_Include" _locComment="" -->Package name of the tool. This may differ from its associated reference package name.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Version" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                <!-- _locID_text="DotNetCliToolReference_Version" _locComment="" -->Version of dependency
               </xs:documentation>
             </xs:annotation>
           </xs:attribute>
@@ -569,6 +592,27 @@ elementFormDefault="qualified">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="ProjectReference_EmbedInteropTypes" _locComment="" -->Whether the types in this reference need to embedded into the target assembly - interop asemblies only (optional, boolean)</xs:documentation>
                                 </xs:annotation>
+                            </xs:element>
+                            <xs:element name="IncludeAssets">
+                              <xs:annotation>
+                                <xs:documentation>
+                                  <!-- _locID_text="ProjectReference_IncludeAssets" _locComment="" -->Assets to include from this reference
+                                </xs:documentation>
+                              </xs:annotation>
+                            </xs:element>
+                            <xs:element name="ExcludeAssets">
+                              <xs:annotation>
+                                <xs:documentation>
+                                  <!-- _locID_text="ProjectReference_ExcludeAssets" _locComment="" -->Assets to exclude from this reference
+                                </xs:documentation>
+                              </xs:annotation>
+                            </xs:element>
+                            <xs:element name="PrivateAssets">
+                              <xs:annotation>
+                                <xs:documentation>
+                                  <!-- _locID_text="ProjectReference_PrivateAssets" _locComment="" -->Assets that are private in this reference
+                                </xs:documentation>
+                              </xs:annotation>
                             </xs:element>
                         </xs:choice>
                     </xs:sequence>
@@ -1383,6 +1427,11 @@ elementFormDefault="qualified">
     </xs:element>     
     <xs:element name="GenerateManifests" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="GenerateLibraryLayout" type="msb:boolean" substitutionGroup="msb:Property"/>
+    <xs:element name="GeneratePackageOnBuild" type="msb:boolean" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="GeneratePackageOnBuild" _locComment="" -->Value indicating whether a NuGet package will be generated when the project is built</xs:documentation>
+      </xs:annotation>
+    </xs:element>
     <xs:element name="DisableXbfGeneration" type="msb:boolean" substitutionGroup="msb:Property"/>
     <xs:element name="SuppressXamlWarnings" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="XamlRootsLog" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -1500,7 +1549,7 @@ elementFormDefault="qualified">
     </xs:element>
     <xs:element name="PreserveCompilationContext" substitutionGroup="msb:Property" type="msb:boolean">
       <xs:annotation>
-        <xs:documentation><!-- _locID_text="PreserveCompilationContext" _locComment="" -->Allows reference assemblies to be used in dynamic compilation (e.g. ASP.NET Razor views).</xs:documentation>
+        <xs:documentation><!-- _locID_text="PreserveCompilationContext" _locComment="" -->Value indicating whether reference assemblies can be used in dynamic compilation</xs:documentation>
       </xs:annotation>
     </xs:element>
     <xs:element name="ProductName" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -1521,8 +1570,28 @@ elementFormDefault="qualified">
     <xs:element name="RemoteDebugMachine" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="RemoveIntegerChecks" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="ReportAnalyzer" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+      <xs:element name="RepositoryType" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="RepositoryType" _locComment="" -->The type of the repository where the project is stored (e.g. git)</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="RepositoryUrl" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="RepositoryUrl" _locComment="" -->The URL for the repository where the project is stored</xs:documentation>
+      </xs:annotation>
+    </xs:element>
     <xs:element name="ResponseFile" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="RootNamespace" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="RuntimeIdentifier" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="RuntimeIdentifier" _locComment="" -->Runtime identifier supported by the project (e.g. win10-x64)</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="RuntimeIdentifiers" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="RuntimeIdentifiers" _locComment="" -->Semi-colon separated list of runtime identifiers supported by the project (e.g. win10-x64;osx.10.11-x64;ubuntu.16.04-x64)</xs:documentation>
+      </xs:annotation>
+    </xs:element>
     <xs:element name="SccProjectName" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="SccLocalPath" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="SccProvider" type="msb:StringPropertyType" substitutionGroup="msb:Property" />
@@ -1557,7 +1626,16 @@ elementFormDefault="qualified">
     <xs:element name="SupportUrl" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="TargetFrameworkProfile" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="TargetCulture" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
-    <xs:element name="TargetFramework" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="TargetFramework" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="TargetFramework" _locComment="" -->Framework that this project targets. Must be a Target Framework Moniker (e.g. netcoreapp1.0)</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="TargetFrameworks" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="TargetFrameworks" _locComment="" -->Semi-colon separated list of frameworks that this project targets. Must be a Target Framework Moniker (e.g. netcoreapp1.0;net461)</xs:documentation>
+      </xs:annotation>
+    </xs:element>
     <xs:element name="TargetFrameworkVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>    
     <xs:element name="TargetPlatformIdentifier" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>  
     <xs:element name="TargetPlatformVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>   
@@ -1619,6 +1697,96 @@ elementFormDefault="qualified">
     <xs:element name="WebPage" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="Win32ResourceFile" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="WholeProgramOptimization" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+
+    <!-- ======================== DOTNET PACK PROPERTIES =====================================-->
+    <xs:element name="AssemblyCompany" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="AssemblyCompany" _locComment="" -->Company name for the assembly manifest</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="AssemblyTitle" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="AssemblyTitle" _locComment="" -->Description for the assembly manifest</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="AssemblyVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="AssemblyVersion" _locComment="" -->Numeric value of the assembly manifest in the format major.minor.patch (e.g. 2.4.0)</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="Authors" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="Copyright" _locComment="" -->A comma-separated list of NuGet packages authors</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="Copyright" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="Copyright" _locComment="" -->Copyright details for the NuGet package</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="Description" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="Description" _locComment="" -->A long description of the NuGet package for UI display</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="FileVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="FileVersion" _locComment="" -->Numeric value of the assembly manifest in the format major.minor.patch (e.g. 2.4.0)</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="NeutralLanguage" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="NeutralLanguage" _locComment="" -->The locale ID for the NuGet package</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="PackageIconUrl" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="PackageIconUrl" _locComment="" -->The URL for a 64x64 image with transparenty background to use as the icon for the NuGet package in UI display</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="PackageId" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_textPackageId _locComment="" -->The case-insensitive NuGet package identifier, which must be unique across nuget.org or whatever gallery the NuGet package will reside in. IDs may not contain spaces or characters that are not valid for a URL, and generally follow .NET namespace rules.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="PackageLicenseUrl" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="PackageLicenseUrl" _locComment="" -->The URL for the NuGet package's license, often shown in UI displays as well as nuget.org</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="PackageProjectUrl" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="PackageProjectUrl" _locComment="" -->The URL for the NuGet package's home page, often shown in UI displays as well as nuget.org</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="PackageReleaseNotes" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="PackageReleaseNotes" _locComment="" -->A description of the changes made in this release of the NuGet package, often used in UI like the Updates tab of the Visual Studio Package Manager in place of the package description</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="PackageRequireLicenseAcceptance" type="msb:boolean" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="PackageRequireLicenseAcceptance" _locComment="" -->Value indicating whether the client must prompt the consumer to accept the NuGet package license before installing the package</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="PackageTags" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="PackageTags" _locComment="" -->A space-delimited list of tags and keywords that describe the NuGet package and aid discoverability of NuGet packages through search and filtering mechanisms</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="PackageVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="PackageVersion" _locComment="" -->Numeric value of the NuGet package in the format major.minor.patch pattern (e.g. 1.0.1). Version numbers may include a pre-release suffix (e.g. 1.0.1-beta)</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="Product" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="Product" _locComment="" -->Product name information for the assembly manifest</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="Version" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="VersionPrefix" type="msb:StringPropertyType" substitutionGroup="msb:Property" />
+    <xs:element name="VersionSufix" type="msb:StringPropertyType" substitutionGroup="msb:Property" />
 
     <!-- ======================== TASKS =====================================-->
     <xs:element name="AL" substitutionGroup="msb:Task">
