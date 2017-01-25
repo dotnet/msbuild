@@ -1,0 +1,11 @@
+<Project DefaultTargets="RunValidation">
+    <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+    <Import Project="$(RepoRoot)/build/Microsoft.DotNet.Cli.tasks" />
+    
+    <Target Name="RunValidation">
+        <Message Text="================================"/>
+        <DotNetMSBuild Arguments='$(MSBuildThisFileDirectory)/InvokeWithStage2.proj /p:ToolPath="$(Stage2Dir)"  /v:diag'
+                       ToolPath="$(Stage2Dir)" />
+        <Message Text="================================"/>
+    </Target>
+</Project>

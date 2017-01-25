@@ -1,0 +1,25 @@
+<Project DefaultTargets="RunValidation">
+        
+    <PropertyGroup>
+        <MSBuildExtensionsPathInToolPath>false</MSBuildExtensionsPathInToolPath>
+        <MSBuildExtensionsPathInToolPath Condition="$(MSBuildExtensionsPath.StartsWith('$(ToolPath)'))">true</MSBuildExtensionsPathInToolPath>
+        <CscToolExeInToolPath>false</CscToolExeInToolPath>
+        <CscToolExeInToolPath Condition="$(CscToolExe.StartsWith('$(ToolPath)'))">true</CscToolExeInToolPath>
+        <MSBuildSDKsPathInToolPath>false</MSBuildSDKsPathInToolPath>
+        <MSBuildSDKsPathInToolPath Condition="$(MSBuildSDKsPath.StartsWith('$(ToolPath)'))">true</MSBuildSDKsPathInToolPath>
+    </PropertyGroup>
+    
+    <Target Name="RunValidation">
+        <Error Condition=" '$(ToolPath)' == '' "
+            Text="ToolPath not set" />
+
+        <Error Condition=" '$(MSBuildExtensionsPathInToolPath)' == 'false' "
+               Text="MSBuildExtensionsPath '$(MSBuildExtensionsPath)' not in ToolPath '$(ToolPath)'" />
+
+        <Error Condition=" '$(CscToolExeInToolPath)' == 'false' "
+               Text="CscToolExe '$(CscToolExe)' not in ToolPath '$(ToolPath)'" />
+
+        <Error Condition=" '$(MSBuildSDKsPathInToolPath)' == 'false' "
+               Text="MSBuildSDKsPath '$(MSBuildSDKsPath)' not in ToolPath '$(ToolPath)'" />
+    </Target>
+</Project>
