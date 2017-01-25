@@ -48,12 +48,12 @@ namespace Microsoft.DotNet.Tools.Sln.Remove
             bool slnChanged = false;
             foreach (var path in relativeProjectPaths)
             {
-                slnChanged |= RemoveProject(slnFile, path);
+                slnChanged |= slnFile.RemoveProject(path);
             }
 
-            RemoveEmptyConfigurationSections(slnFile);
+            slnFile.RemoveEmptyConfigurationSections();
 
-            RemoveEmptySolutionFolders(slnFile);
+            slnFile.RemoveEmptySolutionFolders();
 
             if (slnChanged)
             {
@@ -61,121 +61,6 @@ namespace Microsoft.DotNet.Tools.Sln.Remove
             }
 
             return 0;
-        }
-
-        private bool RemoveProject(SlnFile slnFile, string projectPath)
-        {
-            var projectPathNormalized = PathUtility.GetPathWithDirectorySeparator(projectPath);
-
-            var projectsToRemove = slnFile.Projects.Where((p) =>
-                    string.Equals(p.FilePath, projectPathNormalized, StringComparison.OrdinalIgnoreCase)).ToList();
-
-            bool projectRemoved = false;
-            if (projectsToRemove.Count == 0)
-            {
-                Reporter.Output.WriteLine(string.Format(
-                    CommonLocalizableStrings.ProjectReferenceCouldNotBeFound,
-                    projectPath));
-            }
-            else
-            {
-                foreach (var slnProject in projectsToRemove)
-                {
-                    var buildConfigsToRemove = slnFile.ProjectConfigurationsSection.GetPropertySet(slnProject.Id);
-                    if (buildConfigsToRemove != null)
-                    {
-                        slnFile.ProjectConfigurationsSection.Remove(buildConfigsToRemove);
-                    }
-
-                    var nestedProjectsSection = slnFile.Sections.GetSection(
-                        "NestedProjects",
-                        SlnSectionType.PreProcess);
-                    if (nestedProjectsSection != null && nestedProjectsSection.Properties.ContainsKey(slnProject.Id))
-                    {
-                        nestedProjectsSection.Properties.Remove(slnProject.Id);
-                    }
-
-                    slnFile.Projects.Remove(slnProject);
-                    Reporter.Output.WriteLine(
-                        string.Format(CommonLocalizableStrings.ProjectReferenceRemoved, slnProject.FilePath));
-                }
-
-                projectRemoved = true;
-            }
-
-            return projectRemoved;
-        }
-
-        private void RemoveEmptyConfigurationSections(SlnFile slnFile)
-        {
-            if (slnFile.Projects.Count == 0)
-            {
-                var solutionConfigs = slnFile.Sections.GetSection("SolutionConfigurationPlatforms");
-                if (solutionConfigs != null)
-                {
-                    slnFile.Sections.Remove(solutionConfigs);
-                }
-
-                var projectConfigs = slnFile.Sections.GetSection("ProjectConfigurationPlatforms");
-                if (projectConfigs != null)
-                {
-                    slnFile.Sections.Remove(projectConfigs);
-                }
-            }
-        }
-
-        private void RemoveEmptySolutionFolders(SlnFile slnFile)
-        {
-            var solutionFolderProjects = slnFile.Projects
-                .GetProjectsByType(ProjectTypeGuids.SolutionFolderGuid)
-                .ToList();
-
-            if (solutionFolderProjects.Any())
-            {
-                var nestedProjectsSection = slnFile.Sections.GetSection(
-                    "NestedProjects",
-                    SlnSectionType.PreProcess);
-
-                var solutionFoldersInUse = GetSolutionFoldersThatContainProjectsInItsHierarchy(
-                    slnFile,
-                    nestedProjectsSection.Properties);
-
-                foreach (var solutionFolderProject in solutionFolderProjects)
-                {
-                    if (!solutionFoldersInUse.Contains(solutionFolderProject.Id))
-                    {
-                        slnFile.Projects.Remove(solutionFolderProject);
-                        nestedProjectsSection.Properties.Remove(solutionFolderProject.Id);
-                    }
-                }
-
-                if (nestedProjectsSection.IsEmpty)
-                {
-                    slnFile.Sections.Remove(nestedProjectsSection);
-                }
-            }
-        }
-
-        private HashSet<string> GetSolutionFoldersThatContainProjectsInItsHierarchy(
-            SlnFile slnFile,
-            SlnPropertySet nestedProjects)
-        {
-            var solutionFoldersInUse = new HashSet<string>();
-
-            var nonSolutionFolderProjects = slnFile.Projects.GetProjectsNotOfType(
-                ProjectTypeGuids.SolutionFolderGuid);
-
-            foreach (var nonSolutionFolderProject in nonSolutionFolderProjects)
-            {
-                var id = nonSolutionFolderProject.Id;
-                while (nestedProjects.ContainsKey(id))
-                {
-                    id = nestedProjects[id];
-                    solutionFoldersInUse.Add(id);
-                }
-            }
-
-            return solutionFoldersInUse;
         }
     }
 }
