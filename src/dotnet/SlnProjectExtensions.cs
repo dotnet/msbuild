@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Microsoft.DotNet.Tools.Common
 {
-    public static class SlnProjectExtensions
+    internal static class SlnProjectExtensions
     {
         public static IList<string> GetSolutionFoldersFromProject(this SlnProject project)
         {
