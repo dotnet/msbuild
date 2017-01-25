@@ -1699,11 +1699,6 @@ elementFormDefault="qualified">
     <xs:element name="WholeProgramOptimization" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
 
     <!-- ======================== DOTNET PACK PROPERTIES =====================================-->
-    <xs:element name="AssemblyCompany" type="msb:StringPropertyType" substitutionGroup="msb:Property">
-      <xs:annotation>
-        <xs:documentation><!-- _locID_text="AssemblyCompany" _locComment="" -->Company name for the assembly manifest</xs:documentation>
-      </xs:annotation>
-    </xs:element>
     <xs:element name="AssemblyTitle" type="msb:StringPropertyType" substitutionGroup="msb:Property">
       <xs:annotation>
         <xs:documentation><!-- _locID_text="AssemblyTitle" _locComment="" -->Description for the assembly manifest</xs:documentation>
@@ -1711,12 +1706,17 @@ elementFormDefault="qualified">
     </xs:element>
     <xs:element name="AssemblyVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property">
       <xs:annotation>
-        <xs:documentation><!-- _locID_text="AssemblyVersion" _locComment="" -->Numeric value of the assembly manifest in the format major.minor.patch (e.g. 2.4.0)</xs:documentation>
+        <xs:documentation><!-- _locID_text="AssemblyVersion" _locComment="" -->Numeric value of the version for the assembly manifest in the format major.minor.patch (e.g. 2.4.0)</xs:documentation>
       </xs:annotation>
     </xs:element>
     <xs:element name="Authors" type="msb:StringPropertyType" substitutionGroup="msb:Property">
       <xs:annotation>
         <xs:documentation><!-- _locID_text="Copyright" _locComment="" -->A comma-separated list of NuGet packages authors</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="Company" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="Company" _locComment="" -->Company name for the assembly manifest</xs:documentation>
       </xs:annotation>
     </xs:element>
     <xs:element name="Copyright" type="msb:StringPropertyType" substitutionGroup="msb:Property">
@@ -1731,7 +1731,12 @@ elementFormDefault="qualified">
     </xs:element>
     <xs:element name="FileVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property">
       <xs:annotation>
-        <xs:documentation><!-- _locID_text="FileVersion" _locComment="" -->Numeric value of the assembly manifest in the format major.minor.patch (e.g. 2.4.0)</xs:documentation>
+        <xs:documentation><!-- _locID_text="FileVersion" _locComment="" -->Numeric value of the version for the assembly manifest in the format major.minor.build.revision (e.g. 2.4.0.1)</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="InformationalVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="InformationalVersion" _locComment="" -->Product version of the assembly for UI display (e.g. 1.0 Beta)</xs:documentation>
       </xs:annotation>
     </xs:element>
     <xs:element name="NeutralLanguage" type="msb:StringPropertyType" substitutionGroup="msb:Property">
@@ -1776,7 +1781,7 @@ elementFormDefault="qualified">
     </xs:element>
     <xs:element name="PackageVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property">
       <xs:annotation>
-        <xs:documentation><!-- _locID_text="PackageVersion" _locComment="" -->Numeric value of the NuGet package in the format major.minor.patch pattern (e.g. 1.0.1). Version numbers may include a pre-release suffix (e.g. 1.0.1-beta)</xs:documentation>
+        <xs:documentation><!-- _locID_text="PackageVersion" _locComment="" -->Numeric value of the NuGet package version in the format major.minor.patch pattern (e.g. 1.0.1). Version numbers may include a pre-release suffix (e.g. 1.0.1-beta)</xs:documentation>
       </xs:annotation>
     </xs:element>
     <xs:element name="Product" type="msb:StringPropertyType" substitutionGroup="msb:Property">
@@ -1784,9 +1789,21 @@ elementFormDefault="qualified">
         <xs:documentation><!-- _locID_text="Product" _locComment="" -->Product name information for the assembly manifest</xs:documentation>
       </xs:annotation>
     </xs:element>
-    <xs:element name="Version" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
-    <xs:element name="VersionPrefix" type="msb:StringPropertyType" substitutionGroup="msb:Property" />
-    <xs:element name="VersionSufix" type="msb:StringPropertyType" substitutionGroup="msb:Property" />
+    <xs:element name="Version" type="msb:StringPropertyType" substitutionGroup="msb:Property" >
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="Version" _locComment="" -->Numeric value of the version in the format major.minor.patch (e.g. 2.4.0)</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="VersionPrefix" type="msb:StringPropertyType" substitutionGroup="msb:Property" >
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="VersionPrefix" _locComment="" -->Prefix that can indicate additional information at the end of the verion (i.e. beta)</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="VersionSufix" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="VersionSufix" _locComment="" -->Suffix that can indicate additional information at the end of the verion (i.e. beta)</xs:documentation>
+      </xs:annotation>
+    </xs:element>
 
     <!-- ======================== TASKS =====================================-->
     <xs:element name="AL" substitutionGroup="msb:Task">
