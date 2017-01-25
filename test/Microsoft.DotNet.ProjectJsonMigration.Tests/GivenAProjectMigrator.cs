@@ -39,27 +39,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void ItHasErrorWhenMigratingADeprecatedProjectJson()
-        {
-            var testProjectDirectory =
-                TestAssetsManager.CreateTestInstance("TestLibraryWithDeprecatedProjectFile", callingMethod: "z")
-                    .Path;
-
-            var mockProj = ProjectRootElement.Create();
-            var testSettings = MigrationSettings.CreateMigrationSettingsTestHook(testProjectDirectory, testProjectDirectory, mockProj);
-
-            var projectMigrator = new ProjectMigrator(new FakeEmptyMigrationRule());
-            var report = projectMigrator.Migrate(testSettings);
-
-            var projectReport = report.ProjectMigrationReports.First();
-
-            var errorMessage = projectReport.Errors.First().GetFormattedErrorMessage();
-            errorMessage.Should().Contain("MIGRATE1011::Deprecated Project:");
-            errorMessage.Should().Contain("The 'packInclude' option is deprecated. Use 'files' in 'packOptions' instead. (line: 6, file:");
-            errorMessage.Should().Contain("The 'compilationOptions' option is deprecated. Use 'buildOptions' instead. (line: 3, file:");
-        }
-
-        [Fact]
         public void ItHasErrorWhenMigratingANonCsharpApp()
         {
             var testProjectDirectory =
