@@ -47,7 +47,8 @@ namespace Microsoft.NET.Build.Tasks
                         ItemName,
                         PropertyNameToDisableDefaultItems,
                         PropertyValueToDisableDefaultItems,
-                        duplicateItemsFormatted);
+                        duplicateItemsFormatted,
+                        MoreInformationLink);
 
                     Log.LogError(message);
 
