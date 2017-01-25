@@ -8,7 +8,7 @@
     
     <MsBuildPackagesVersion>0.1.0-preview-00028-160627</MsBuildPackagesVersion>
     <CoreSetupVersion>1.0.1-beta-000933</CoreSetupVersion>
-    <NuGetVersion>4.0.0-rc3-2215</NuGetVersion>
+    <NuGetVersion>4.0.0-rtm-2241</NuGetVersion>
   </PropertyGroup>
 
   <!-- Dependencies from test projects -->
