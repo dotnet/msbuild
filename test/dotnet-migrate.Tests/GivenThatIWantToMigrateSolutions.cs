@@ -149,6 +149,41 @@ namespace Microsoft.DotNet.Migration.Tests
             cmd.StdErr.Should().BeEmpty();
         }
 
+        [Theory]
+        [InlineData("NoSolutionItemsAfterMigration.sln", false)]
+        [InlineData("ReadmeSolutionItemAfterMigration.sln", true)]
+        public void WhenMigratingAnSlnLinksReferencingItemsMovedToBackupAreRemoved(
+            string slnFileName,
+            bool solutionItemsContainsReadme)
+        {
+            var projectDirectory = TestAssets
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithSlnAndSolutionItemsToMoveToBackup")
+                .CreateInstance(Path.GetFileNameWithoutExtension(slnFileName))
+                .WithSourceFiles()
+                .Root
+                .FullName;
+
+            new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .Execute($"migrate \"{slnFileName}\"")
+                .Should().Pass();
+
+            var slnFile = SlnFile.Read(Path.Combine(projectDirectory, slnFileName));
+            var solutionFolders = slnFile.Projects.Where(p => p.TypeGuid == ProjectTypeGuids.SolutionFolderGuid);
+            if (solutionItemsContainsReadme)
+            {
+                solutionFolders.Count().Should().Be(1);
+                var solutionItems = solutionFolders.Single().Sections.GetSection("SolutionItems");
+                solutionItems.Should().NotBeNull();
+                solutionItems.Properties.Count().Should().Be(1);
+                solutionItems.Properties["readme.txt"].Should().Be("readme.txt");
+            }
+            else
+            {
+                solutionFolders.Count().Should().Be(0);
+            }
+        }
+
         private void MigrateAndBuild(string groupName, string projectName, [CallerMemberName] string callingMethod = "", string identifier = "")
         {
             var projectDirectory = TestAssets
