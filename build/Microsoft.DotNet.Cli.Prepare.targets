@@ -123,8 +123,8 @@
     <PropertyGroup>
       <AdditionalCoreSetupChannel>preview</AdditionalCoreSetupChannel>
       <AdditionalSharedFrameworkVersion>1.0.3</AdditionalSharedFrameworkVersion>
-      <AdditionalSharedHostVersion>1.1.0</AdditionalSharedHostVersion>
-      <AdditionalHostFxrVersion>1.1.0</AdditionalHostFxrVersion>
+      <AdditionalSharedHostVersion>1.0.1</AdditionalSharedHostVersion>
+      <AdditionalHostFxrVersion>1.0.1</AdditionalHostFxrVersion>
 
       <!-- Additional Downloaded Installers + Archives -->
       <AdditionalDownloadedSharedHostInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-host-$(ProductMonikerRid).$(AdditionalSharedHostVersion)$(InstallerExtension)</AdditionalDownloadedSharedHostInstallerFileName>
