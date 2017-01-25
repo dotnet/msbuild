@@ -29,10 +29,21 @@ namespace Microsoft.NET.TestFramework.Commands
 
         private ICommand CreateCommand(params string[] args)
         {
-            var newArgs = args.ToList();
-            newArgs.Insert(0, $"msbuild");
+            ICommand command;
 
-            ICommand command = Command.Create(DotNetHostPath, newArgs);
+            //  Run tests on full framework MSBuild if environment variable is set pointing to it
+            string msbuildPath = Environment.GetEnvironmentVariable("DOTNET_SDK_TEST_MSBUILD_PATH");
+            if (!string.IsNullOrEmpty(msbuildPath))
+            {
+                command = Command.Create(msbuildPath, args);
+            }
+            else
+            {
+                var newArgs = args.ToList();
+                newArgs.Insert(0, $"msbuild");
+
+                command = Command.Create(DotNetHostPath, newArgs);
+            }
 
             //  Set NUGET_PACKAGES environment variable to match value from build.ps1
             command = command.EnvironmentVariable("NUGET_PACKAGES", Path.Combine(RepoInfo.RepoRoot, "packages"));
