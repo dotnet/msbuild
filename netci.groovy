@@ -7,11 +7,13 @@ def project = GithubProject
 // Generate the builds for branches: xplat, master and PRs (which aren't branch specific)
 ['*/master', '*/xplat', 'pr'].each { branch ->
     ['Windows_NT', 'OSX', 'Ubuntu14.04', 'Ubuntu16.04'].each {osName ->
-        def runtimes = ['CoreCLR', 'Mono']
+        def runtimes = ['CoreCLR']
 
         if (osName == 'Windows_NT') {
             runtimes.add('Desktop')
         }
+
+        // TODO: Mono
 
         runtimes.each { runtime ->
             def isPR = false
@@ -53,11 +55,7 @@ def project = GithubProject
                 case 'OSX':
                     newJob.with{
                         steps{
-                            buildCmd="./cibuild.sh --scope Test --target ${runtime}"
-                            if (runtime == "Mono") {
-                                buildCmd += " --host Mono"
-                            }
-                            shell(buildCmd)
+                            shell("./cibuild.sh --scope Test --target ${runtime}")
                         }
                     }
 
@@ -65,11 +63,7 @@ def project = GithubProject
                 case { it.startsWith('Ubuntu') }:
                     newJob.with{
                         steps{
-                            buildCmd="./cibuild.sh --scope Test --target ${runtime}"
-                            if (runtime == "Mono") {
-                                buildCmd += " --host Mono"
-                            }
-                            shell(buildCmd)
+                            shell("./cibuild.sh --scope Test --target ${runtime}")
                         }
                     }
 
