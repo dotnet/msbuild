@@ -19,11 +19,10 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DefaultOutputPaths.targets" />
   
   <!-- 
-    Expand TargetFramework (if set) to TargetFrameworkIdentifier and TargetFrameworkVersion,
+    Expand TargetFramework to TargetFrameworkIdentifier and TargetFrameworkVersion,
     and adjust intermediate and output paths to include it.
   -->
-  <Import Condition="'$(TargetFramework)' != ''"
-        Project="$(MSBuildThisFileDirectory)Microsoft.NET.TargetFrameworkInference.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.TargetFrameworkInference.targets" />
 
   <!--
     Use RuntimeIdentifier to determine PlatformTarget.

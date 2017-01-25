@@ -59,6 +59,13 @@ namespace Microsoft.NET.TestFramework.Assertions
                 .FailWith(AppendDiagnosticsTo($"The command output did not contain expected result: {pattern}{Environment.NewLine}"));
             return new AndConstraint<CommandResultAssertions>(this);
         }
+        
+        public AndConstraint<CommandResultAssertions> NotHaveStdOutContaining(string pattern)
+        {
+            Execute.Assertion.ForCondition(!_commandResult.StdOut.Contains(pattern))
+                .FailWith(AppendDiagnosticsTo($"The command output contained a result it should not have contained: {pattern}{Environment.NewLine}"));
+            return new AndConstraint<CommandResultAssertions>(this);
+        }
 
         public AndConstraint<CommandResultAssertions> HaveStdOutContainingIgnoreCase(string pattern)
         {

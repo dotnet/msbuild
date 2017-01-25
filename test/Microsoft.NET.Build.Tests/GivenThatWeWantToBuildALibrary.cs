@@ -521,5 +521,33 @@ namespace Microsoft.NET.Build.Tests
 
             definedConstants.Should().BeEquivalentTo(new[] { "DEBUG", "TRACE" }.Concat(expectedDefines).ToArray());
         }
+
+        [Fact]
+        public void It_fails_gracefully_if_targetframework_is_empty()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("AppWithLibrary", "EmptyTargetFramework")
+                .WithSource()
+                .WithProjectChanges(project => 
+                {
+                    project.Root
+                        .Elements("PropertyGroup")
+                        .Elements("TargetFramework")
+                        .Single()
+                        .SetValue("");
+                })
+                .Restore(relativePath: "TestLibrary");
+
+            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
+            var buildCommand = new BuildCommand(Stage0MSBuild, libraryProjectDirectory);
+
+            buildCommand
+                .CaptureStdOut()
+                .Execute()
+                .Should()
+                .Fail()
+                .And.HaveStdOutContaining("TargetFramework=''") // new deliberate error
+                .And.NotHaveStdOutContaining(">="); // old error about comparing empty string to version
+        }
     }
 }
