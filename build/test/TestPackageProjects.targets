@@ -129,7 +129,7 @@
         <VersionPrefix>1.0.0-rc-</VersionPrefix>
         <VersionSuffix>rc-$(TestPackageBuildVersionSuffix)</VersionSuffix>
         <Clean>True</Clean>
-        <Frameworks>net451;netcoreapp1.1</Frameworks>
+        <Frameworks>net451;netcoreapp1.0</Frameworks>
         <PackRuntime>$(CoreCLRRid)</PackRuntime>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-desktop-binding-redirects"
