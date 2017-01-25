@@ -9,6 +9,7 @@ using Microsoft.Build.Construction;
 using Microsoft.DotNet.Internal.ProjectModel;
 using Microsoft.DotNet.Internal.ProjectModel.Graph;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Cli.Utils.ExceptionExtensions;
 using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.ProjectJsonMigration.Rules;
@@ -251,9 +252,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             var diagnostics = defaultProjectContext.ProjectFile.Diagnostics;
             if (diagnostics.Any())
             {
-                MigrationErrorCodes.MIGRATE1011(
-                        String.Format("{0}{1}{2}", projectDirectory, Environment.NewLine, string.Join(Environment.NewLine, diagnostics.Select(d => FormatDiagnosticMessage(d)))))
-                    .Throw();
+                var deprecatedProjectJsonWarnings = string.Join(
+                    Environment.NewLine,
+                    diagnostics.Select(d => FormatDiagnosticMessage(d)));
+                var warnings = $"{projectDirectory}{Environment.NewLine}{deprecatedProjectJsonWarnings}";
+                Reporter.Output.WriteLine(warnings.Yellow());
             }
 
             var compilerName =

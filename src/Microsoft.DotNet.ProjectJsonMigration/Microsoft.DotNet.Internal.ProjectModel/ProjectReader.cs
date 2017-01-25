@@ -809,50 +809,243 @@ namespace Microsoft.DotNet.Internal.ProjectModel
 
         private static void AddProjectFilesCollectionDiagnostics(JObject rawProject, Project project)
         {
-            var compileWarning = "'compile' in 'buildOptions'";
-            AddDiagnosticMesage(rawProject, project, "compile", compileWarning);
-            AddDiagnosticMesage(rawProject, project, "compileExclude", compileWarning);
-            AddDiagnosticMesage(rawProject, project, "compileFiles", compileWarning);
-            AddDiagnosticMesage(rawProject, project, "compileBuiltIn", compileWarning);
+            ConvertDeprecatedCompileOptions(rawProject, project);
+            ConvertDeprecatedContentOptions(rawProject, project);
+            ConvertDeprecatedResourceOptions(rawProject, project);
 
-            var resourceWarning = "'embed' in 'buildOptions'";
-            AddDiagnosticMesage(rawProject, project, "resource", resourceWarning);
-            AddDiagnosticMesage(rawProject, project, "resourceExclude", resourceWarning);
-            AddDiagnosticMesage(rawProject, project, "resourceFiles", resourceWarning);
-            AddDiagnosticMesage(rawProject, project, "resourceBuiltIn", resourceWarning);
-            AddDiagnosticMesage(rawProject, project, "namedResource", resourceWarning);
+            ConvertFromDeprecatedFormat(
+                rawProject,
+                project,
+                "'files' in 'packOptions'",
+                "packInclude",
+                new string[] { "packOptions" },
+                "files");
 
-            var contentWarning = "'publishOptions' to publish or 'copyToOutput' in 'buildOptions' to copy to build output";
-            AddDiagnosticMesage(rawProject, project, "content", contentWarning);
-            AddDiagnosticMesage(rawProject, project, "contentExclude", contentWarning);
-            AddDiagnosticMesage(rawProject, project, "contentFiles", contentWarning);
-            AddDiagnosticMesage(rawProject, project, "contentBuiltIn", contentWarning);
-
-            AddDiagnosticMesage(rawProject, project, "packInclude", "'files' in 'packOptions'");
-            AddDiagnosticMesage(rawProject, project, "publishExclude", "'publishOptions'");
-            AddDiagnosticMesage(rawProject, project, "exclude", "'exclude' within 'compile' or 'embed'");
+            ConvertFromDeprecatedFormat(
+                rawProject,
+                project,
+                "'publishOptions'",
+                "publishExclude",
+                new string[] { "publishOptions" },
+                "excludeFiles");
         }
 
-        private static void AddDiagnosticMesage(
+        private static void ConvertDeprecatedCompileOptions(JObject rawProject, Project project)
+        {
+            var compileWarning = "'compile' in 'buildOptions'";
+            var compileObjectHierarchy = new string[] { "buildOptions", "compile" };
+
+            ConvertFromDeprecatedFormat(
+                rawProject,
+                project,
+                compileWarning,
+                "compile",
+                compileObjectHierarchy,
+                "includeFiles");
+
+            ConvertFromDeprecatedFormat(
+                rawProject,
+                project,
+                compileWarning,
+                "compileExclude",
+                compileObjectHierarchy,
+                "excludeFiles");
+
+            ConvertFromDeprecatedFormat(
+                rawProject,
+                project,
+                compileWarning,
+                "compileFiles",
+                compileObjectHierarchy,
+                "includeFiles");
+
+            ConvertFromDeprecatedFormat(
+                rawProject,
+                project,
+                compileWarning,
+                "compileBuiltIn",
+                compileObjectHierarchy,
+                "builtIns");
+
+            ConvertFromDeprecatedFormat(
+                rawProject,
+                project,
+                compileWarning,
+                "exclude",
+                compileObjectHierarchy,
+                "exclude");
+        }
+
+        private static void ConvertDeprecatedContentOptions(JObject rawProject, Project project)
+        {
+            var contentWarning = "'publishOptions' to publish or 'copyToOutput' in 'buildOptions' to copy to build output";
+            var copyToOutputObjectHierarchy = new string[] { "buildOptions", "copyToOutput" };
+            var publishObjectHierarchy = new string[] { "publishOptions" };
+
+            ConvertFromDeprecatedFormat(
+                rawProject,
+                project,
+                contentWarning,
+                "content",
+                copyToOutputObjectHierarchy,
+                "includeFiles");
+            ConvertFromDeprecatedFormat(
+                rawProject,
+                project,
+                contentWarning,
+                "content",
+                publishObjectHierarchy,
+                "includeFiles");
+
+            ConvertFromDeprecatedFormat(
+                rawProject,
+                project,
+                contentWarning,
+                "contentExclude",
+                copyToOutputObjectHierarchy,
+                "excludeFiles");
+            ConvertFromDeprecatedFormat(
+                rawProject,
+                project,
+                contentWarning,
+                "contentExclude",
+                publishObjectHierarchy,
+                "excludeFiles");
+
+            ConvertFromDeprecatedFormat(
+                rawProject,
+                project,
+                contentWarning,
+                "contentFiles",
+                copyToOutputObjectHierarchy,
+                "includeFiles");
+            ConvertFromDeprecatedFormat(
+                rawProject,
+                project,
+                contentWarning,
+                "contentFiles",
+                publishObjectHierarchy,
+                "includeFiles");
+
+            ConvertFromDeprecatedFormat(
+                rawProject,
+                project,
+                contentWarning,
+                "contentFiles",
+                copyToOutputObjectHierarchy,
+                "contentBuiltIn");
+            ConvertFromDeprecatedFormat(
+                rawProject,
+                project,
+                contentWarning,
+                "contentBuiltIn",
+                publishObjectHierarchy,
+                "builtIns");
+        }
+
+        private static void ConvertDeprecatedResourceOptions(JObject rawProject, Project project)
+        {
+            var resourceWarning = "'embed' in 'buildOptions'";
+            var embedObjectHierarchy = new string[] { "buildOptions", "embed" };
+
+            ConvertFromDeprecatedFormat(
+                rawProject,
+                project,
+                resourceWarning,
+                "resource",
+                embedObjectHierarchy,
+                "includeFiles");
+
+            ConvertFromDeprecatedFormat(
+                rawProject,
+                project,
+                resourceWarning,
+                "resourceExclude",
+                embedObjectHierarchy,
+                "excludeFiles");
+
+            ConvertFromDeprecatedFormat(
+                rawProject,
+                project,
+                resourceWarning,
+                "resourceFiles",
+                embedObjectHierarchy,
+                "includeFiles");
+
+            ConvertFromDeprecatedFormat(
+                rawProject,
+                project,
+                resourceWarning,
+                "resourceBuiltIn",
+                embedObjectHierarchy,
+                "builtIns");
+
+            ConvertFromDeprecatedFormat(
+                rawProject,
+                project,
+                resourceWarning,
+                "namedResource",
+                embedObjectHierarchy,
+                "mappings");
+
+            ConvertFromDeprecatedFormat(
+                rawProject,
+                project,
+                resourceWarning,
+                "exclude",
+                embedObjectHierarchy,
+                "exclude");
+        }
+
+        private static void ConvertFromDeprecatedFormat(
             JObject rawProject,
             Project project,
-            string option,
-            string message)
+            string message,
+            string deprecatedKey,
+            string[] newKeyObjectHierarchy,
+            string newKey
+            )
         {
-            var lineInfo = rawProject.Value<IJsonLineInfo>(option);
-            if (lineInfo == null)
+            var deprecatedValue = rawProject.Value<IJsonLineInfo>(deprecatedKey);
+            if (deprecatedValue != null)
             {
-                return;
-            }
+                var currentObject = rawProject;
+                foreach (var key in newKeyObjectHierarchy)
+                {
+                    var childObject = currentObject.Value<JToken>(key) as JObject;
+                    if (childObject == null)
+                    {
+                        childObject = new JObject();
+                        currentObject[key] = childObject;
+                    }
 
-            project.Diagnostics.Add(
-                new DiagnosticMessage(
-                    ErrorCodes.DOTNET1015,
-                    $"The '{option}' option is deprecated. Use {message} instead.",
-                    project.ProjectFilePath,
-                    DiagnosticMessageSeverity.Warning,
-                    lineInfo.LineNumber,
-                    lineInfo.LinePosition));
+                    currentObject = childObject;
+                }
+
+                if (deprecatedValue is JObject)
+                {
+                    currentObject[newKey] = (deprecatedValue as JObject).DeepClone();
+                    //(currentObject[newKey] as JObject).Merge((deprecatedValue as JObject).DeepClone(), new JsonMergeSettings
+                    //{
+                    //    // union array values together to avoid duplicates
+                    //    MergeArrayHandling = MergeArrayHandling.Union
+                    //});
+                }
+                else if (deprecatedValue is JToken)
+                {
+                    currentObject[newKey] = (deprecatedValue as JToken).DeepClone();
+                    //JToken.FromObject(x.Concat(x))
+                }
+
+                project.Diagnostics.Add(
+                    new DiagnosticMessage(
+                        ErrorCodes.DOTNET1015,
+                        $"The '{deprecatedKey}' option is deprecated. Use {message} instead.",
+                        project.ProjectFilePath,
+                        DiagnosticMessageSeverity.Warning,
+                        deprecatedValue.LineNumber,
+                        deprecatedValue.LinePosition));
+            }
         }
 
         private static bool TryGetStringEnumerable(JToken token, out IEnumerable<string> result)
