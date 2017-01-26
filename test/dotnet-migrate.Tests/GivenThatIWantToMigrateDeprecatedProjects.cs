@@ -246,5 +246,143 @@ namespace Microsoft.DotNet.Migration.Tests
             Directory.Exists(Path.Combine(publishDir.FullName, "IncludeThis2.txt")).Should().BeFalse();
             Directory.Exists(Path.Combine(publishDir.FullName, "ExcludeThis.txt")).Should().BeFalse();
         }
+
+        [Fact]
+        public void WhenMigratingAProjectWithDeprecatedCompileOptionsWarningsArePrinted()
+        {
+            var projectDirectory = TestAssets
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedCompileOptions")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root;
+
+            var cmd = new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .ExecuteWithCapturedOutput("migrate");
+
+            cmd.Should().Pass();
+
+            cmd.StdOut.Should().Contain(
+                "The 'compile' option is deprecated. Use 'compile' in 'buildOptions' instead.");
+            cmd.StdOut.Should().Contain(
+                "The 'compileFiles' option is deprecated. Use 'compile' in 'buildOptions' instead.");
+        }
+
+        [Fact]
+        public void WhenMigratingAProjectWithDeprecatedCompileOptionsItSucceeds()
+        {
+            var projectDirectory = TestAssets
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedCompileOptions")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .GetDirectory("project");
+
+            new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .Execute("migrate")
+                 .Should().Pass();
+
+            new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .Execute("restore")
+                 .Should().Pass();
+
+            new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .Execute("build")
+                 .Should().Pass();
+        }
+
+        [Fact]
+        public void WhenMigratingAProjectWithDeprecatedCompileBuiltInOptionsWarningsArePrinted()
+        {
+            var projectDirectory = TestAssets
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedCompileBuiltInOptions")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root;
+
+            var cmd = new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .ExecuteWithCapturedOutput("migrate");
+
+            cmd.Should().Pass();
+
+            cmd.StdOut.Should().Contain(
+                "The 'compileBuiltIn' option is deprecated. Use 'compile' in 'buildOptions' instead.");
+        }
+
+        [Fact]
+        public void WhenMigratingAProjectWithDeprecatedCompileBuiltInOptionsItSucceeds()
+        {
+            var projectDirectory = TestAssets
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedCompileBuiltInOptions")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .GetDirectory("project");
+
+            new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .Execute("migrate")
+                 .Should().Pass();
+
+            new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .Execute("restore")
+                 .Should().Pass();
+
+            //Issue: https://github.com/dotnet/cli/issues/5467
+            //new DotnetCommand()
+            //     .WithWorkingDirectory(projectDirectory)
+            //     .Execute("build")
+            //     .Should().Pass();
+        }
+
+        [Fact]
+        public void WhenMigratingAProjectWithDeprecatedCompileExcludeOptionsWarningsArePrinted()
+        {
+            var projectDirectory = TestAssets
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedCompileExcludeOptions")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root;
+
+            var cmd = new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .ExecuteWithCapturedOutput("migrate");
+
+            cmd.Should().Pass();
+
+            cmd.StdOut.Should().Contain(
+                "The 'compileExclude' option is deprecated. Use 'compile' in 'buildOptions' instead.");
+        }
+
+        [Fact]
+        public void WhenMigratingAProjectWithDeprecatedCompileExcludeOptionsItSucceeds()
+        {
+            var projectDirectory = TestAssets
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedCompileExcludeOptions")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root;
+
+            new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .Execute("migrate")
+                 .Should().Pass();
+
+            new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .Execute("restore")
+                 .Should().Pass();
+
+            // Issue: https://github.com/dotnet/cli/issues/5461
+            //new DotnetCommand()
+            //     .WithWorkingDirectory(projectDirectory)
+            //     .Execute("build")
+            //     .Should().Pass();
+        }
     }
 }
