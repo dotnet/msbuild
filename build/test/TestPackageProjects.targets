@@ -78,7 +78,6 @@
         <VersionPrefix>$(CliVersionPrefix)-</VersionPrefix>
         <VersionSuffix>rc4-$(TestPackageBuildVersionSuffix)</VersionSuffix>
         <Clean>False</Clean>
-        <Frameworks>netstandard1.5</Frameworks>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="src/Microsoft.DotNet.InternalAbstractions">
         <Name>Microsoft.DotNet.InternalAbstractions</Name>
@@ -88,9 +87,9 @@
         <VersionPrefix>2.0.0-beta-</VersionPrefix>
         <VersionSuffix>beta-$(TestPackageBuildVersionSuffix)</VersionSuffix>
         <Clean>False</Clean>
-        <Frameworks>netstandard1.3</Frameworks>
       </BaseTestPackageProject>
-      <BaseTestPackageProject Include="TestAssets/TestPackages/PackageWithFakeNativeDep">
+      <BaseTestPackageProject Include="TestAssets/TestPackages/PackageWithFakeNativeDep"
+                              Condition=" '$(IsDesktopAvailable)' == 'True' " >
         <Name>PackageWithFakeNativeDep</Name>
         <ProjectName>PackageWithFakeNativeDep.csproj</ProjectName>
         <IsTool>False</IsTool>
@@ -98,7 +97,6 @@
         <VersionPrefix>1.0.0</VersionPrefix>
         <VersionSuffix></VersionSuffix>
         <Clean>True</Clean>
-        <Frameworks>net45</Frameworks>
         <PackRuntime>$(CoreCLRRid)</PackRuntime>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-dependency-context-test">
@@ -109,7 +107,6 @@
         <VersionPrefix>1.0.0-rc-</VersionPrefix>
         <VersionSuffix>rc-$(TestPackageBuildVersionSuffix)</VersionSuffix>
         <Clean>True</Clean>
-        <Frameworks>netcoreapp1.0</Frameworks>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-dependency-tool-invoker">
         <Name>dotnet-dependency-tool-invoker</Name>
@@ -119,9 +116,9 @@
         <VersionPrefix>1.0.0-rc-</VersionPrefix>
         <VersionSuffix>rc-$(TestPackageBuildVersionSuffix)</VersionSuffix>
         <Clean>True</Clean>
-        <Frameworks>netcoreapp1.0</Frameworks>
       </BaseTestPackageProject>
-      <BaseTestPackageProject Condition=" '$(IsDesktopAvailable)' == 'True' " Include="TestAssets/TestPackages/dotnet-desktop-and-portable">
+      <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-desktop-and-portable"
+                              Condition=" '$(IsDesktopAvailable)' == 'True' " >
         <Name>dotnet-desktop-and-portable</Name>
         <ProjectName>dotnet-desktop-and-portable.csproj</ProjectName>
         <IsTool>True</IsTool>
@@ -129,7 +126,6 @@
         <VersionPrefix>1.0.0-rc-</VersionPrefix>
         <VersionSuffix>rc-$(TestPackageBuildVersionSuffix)</VersionSuffix>
         <Clean>True</Clean>
-        <Frameworks>net451;netcoreapp1.1</Frameworks>
         <PackRuntime>$(CoreCLRRid)</PackRuntime>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-desktop-binding-redirects"
@@ -142,7 +138,6 @@
         <VersionPrefix>1.0.0-rc-</VersionPrefix>
         <VersionSuffix>rc-$(TestPackageBuildVersionSuffix)</VersionSuffix>
         <Clean>True</Clean>
-        <Frameworks>net451</Frameworks>
         <PackRuntime>$(CoreCLRRid)</PackRuntime>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-hello/v1/dotnet-hello">
@@ -153,7 +148,6 @@
         <VersionPrefix>1.0.0</VersionPrefix>
         <VersionSuffix></VersionSuffix>
         <Clean>True</Clean>
-        <Frameworks>netcoreapp1.1</Frameworks>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-hello/v2/dotnet-hello">
         <Name>dotnet-hello</Name>
@@ -163,7 +157,6 @@
         <VersionPrefix>2.0.0</VersionPrefix>
         <VersionSuffix></VersionSuffix>
         <Clean>True</Clean>
-        <Frameworks>netcoreapp1.1</Frameworks>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-portable">
         <Name>dotnet-portable</Name>
@@ -173,7 +166,6 @@
         <VersionPrefix>1.0.0</VersionPrefix>
         <VersionSuffix></VersionSuffix>
         <Clean>True</Clean>
-        <Frameworks>netcoreapp1.0</Frameworks>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-prefercliruntime">
         <Name>dotnet-prefercliruntime</Name>
@@ -183,7 +175,6 @@
         <VersionPrefix>1.0.0</VersionPrefix>
         <VersionSuffix></VersionSuffix>
         <Clean>True</Clean>
-        <Frameworks>netcoreapp1.0</Frameworks>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/ToolWithOutputName">
         <Name>dotnet-tool-with-output-name</Name>
@@ -194,7 +185,6 @@
         <VersionPrefix>1.0.0</VersionPrefix>
         <VersionSuffix></VersionSuffix>
         <Clean>True</Clean>
-        <Frameworks>netcoreapp1.0</Frameworks>
       </BaseTestPackageProject>
 
       <TestPackageProjectFrameworksExcludes Condition=" '$(IsDesktopAvailable)' != 'True' " Include="net45" />
