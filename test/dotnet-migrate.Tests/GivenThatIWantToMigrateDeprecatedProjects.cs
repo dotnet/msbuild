@@ -228,10 +228,10 @@ namespace Microsoft.DotNet.Migration.Tests
                         "ContentFile2.txt",
                         "ContentFileBuiltIn1.txt",
                         "ContentFileBuiltIn2.txt",
-                        "IncludeThis1.txt",
+                        "IncludeThis.txt",
                     });
-            Directory.Exists(Path.Combine(outputDir.FullName, "IncludeThis2.txt")).Should().BeFalse();
-            Directory.Exists(Path.Combine(outputDir.FullName, "ExcludeThis.txt")).Should().BeFalse();
+            Directory.Exists(Path.Combine(outputDir.FullName, "ExcludeThis1.txt")).Should().BeFalse();
+            Directory.Exists(Path.Combine(outputDir.FullName, "ExcludeThis2.txt")).Should().BeFalse();
 
             var publishDir = projectDirectory.GetDirectory("bin", "Debug", "netcoreapp1.0", "publish");
             publishDir.Should().Exist()
@@ -241,10 +241,10 @@ namespace Microsoft.DotNet.Migration.Tests
                         "ContentFile2.txt",
                         "ContentFileBuiltIn1.txt",
                         "ContentFileBuiltIn2.txt",
-                        "IncludeThis1.txt",
+                        "IncludeThis.txt",
                     });
-            Directory.Exists(Path.Combine(publishDir.FullName, "IncludeThis2.txt")).Should().BeFalse();
-            Directory.Exists(Path.Combine(publishDir.FullName, "ExcludeThis.txt")).Should().BeFalse();
+            Directory.Exists(Path.Combine(publishDir.FullName, "ExcludeThis1.txt")).Should().BeFalse();
+            Directory.Exists(Path.Combine(publishDir.FullName, "ExcludeThis2.txt")).Should().BeFalse();
         }
 
         [Fact]
