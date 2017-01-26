@@ -2126,7 +2126,7 @@ EndGlobal
 
                 Assert.Equal(1, instances.Length);
 
-                Assert.Equal(12, instances[0].TargetsCount);
+                Assert.Equal(12, instances[0].Targets.Select(kvp => kvp.Value).Where(t => t.FullPath.Contains(".sln.metaproj")).Count());
             }
 
 
@@ -2134,7 +2134,7 @@ EndGlobal
 
             Assert.Equal(1, instances.Length);
 
-            Assert.Equal(14, instances[0].TargetsCount);
+            Assert.Equal(14, instances[0].Targets.Select(kvp => kvp.Value).Where(t => t.FullPath.Contains(".sln.metaproj")).Count());
         }
 
         /// <summary>
