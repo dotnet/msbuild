@@ -8,6 +8,7 @@ param(
     [string]$Platform="Any CPU",
     [string]$Verbosity="minimal",
     [switch]$SkipTests,
+    [switch]$FullMSBuild,
     [switch]$RealSign,
     [switch]$Help)
 
@@ -20,6 +21,7 @@ if($Help)
     Write-Host "  -Platform <PLATFORM>               Build the specified Platform (Any CPU)"
     Write-Host "  -Verbosity <VERBOSITY>             Build console output verbosity (minimal or diagnostic, default: minimal)"
     Write-Host "  -SkipTests                         Skip executing unit tests"
+    Write-Host "  -FullMSBuild                       Run tests with the full .NET Framework version of MSBuild instead of the .NET Core version"
     Write-Host "  -RealSign                          Sign the output DLLs"
     Write-Host "  -Help                              Display this help message"
     exit 0
@@ -70,6 +72,12 @@ if ($RealSign) {
 $buildTarget = 'Build'
 if ($SkipTests) {
     $buildTarget = 'BuildWithoutTesting'
+}
+
+if ($FullMSBuild)
+{
+    $msbuildPath = join-path $env:vs150comntools "..\..\MSBuild\15.0\bin\MSBuild.exe"
+    $env:DOTNET_SDK_TEST_MSBUILD_PATH = [System.IO.Path]::GetFullPath($msbuildPath)
 }
 
 $commonBuildArgs = echo $RepoRoot\build\build.proj /t:$buildTarget /m /nologo /p:Configuration=$Configuration /p:Platform=$Platform /p:SignType=$signType /verbosity:$Verbosity

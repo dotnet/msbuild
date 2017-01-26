@@ -10,7 +10,7 @@ def project = GithubProject
 def branch = GithubBranchName
 def isPR = true
 
-def osList = ['Windows_NT', 'Ubuntu14.04']
+def osList = ['Windows_NT', 'Windows_NT_FullFramework', 'Ubuntu14.04']
 def configList = ['Release', 'Debug']
 
 def static getBuildJobName(def configuration, def os) {
@@ -26,6 +26,8 @@ osList.each { os ->
         // Calculate the build command
         if (os == 'Windows_NT') {
             buildCommand = ".\\build.cmd -Configuration $config"
+        } else if (os == 'Windows_NT_FullFramework') {
+            buildCommand = ".\\build.cmd -Configuration $config -FullMSBuild"
         } else {
             // Jenkins non-Ubuntu CI machines don't have docker
             buildCommand = "./build.sh --configuration $config"

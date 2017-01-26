@@ -76,6 +76,12 @@ namespace Microsoft.NET.Build.Tests
                 return;
             }
 
+            //  Disable this test when using full Framework MSBuild, as the paths to the props and targets are different
+            if (UsingFullFrameworkMSBuild)
+            {
+                return;
+            }
+
             List<string> expectedAllProjects = new List<string>();
             string baseIntermediateDirectory = null;
 
