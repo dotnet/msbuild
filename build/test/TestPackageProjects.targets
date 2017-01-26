@@ -55,7 +55,7 @@
         <VersionPrefix>1.0.0</VersionPrefix>
         <VersionSuffix></VersionSuffix>
         <Clean>True</Clean>
-        <PackRuntime>$(CoreCLRRid)</PackRuntime>
+        <MsbuildArgs>/p:RuntimeIdentifier=$(CoreCLRRid)</MsbuildArgs>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-dependency-context-test">
         <Name>dotnet-dependency-context-test</Name>
@@ -84,7 +84,7 @@
         <VersionPrefix>1.0.0-rc-</VersionPrefix>
         <VersionSuffix>rc-$(TestPackageBuildVersionSuffix)</VersionSuffix>
         <Clean>True</Clean>
-        <PackRuntime>$(CoreCLRRid)</PackRuntime>
+        <MsbuildArgs>/p:RuntimeIdentifier=$(CoreCLRRid)</MsbuildArgs>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-desktop-binding-redirects"
                               Condition=" '$(IsDesktopAvailable)' == 'True' ">
@@ -96,7 +96,7 @@
         <VersionPrefix>1.0.0-rc-</VersionPrefix>
         <VersionSuffix>rc-$(TestPackageBuildVersionSuffix)</VersionSuffix>
         <Clean>True</Clean>
-        <PackRuntime>$(CoreCLRRid)</PackRuntime>
+        <MsbuildArgs>/p:RuntimeIdentifier=$(CoreCLRRid)</MsbuildArgs>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-hello/v1/dotnet-hello">
         <Name>dotnet-hello</Name>
