@@ -41,7 +41,10 @@ osList.each { os ->
             steps {
                 if (osBase == 'Windows_NT') {
                     // Batch
-                    batchFile(buildCommand)
+                    batchFile("""SET VS150COMNTOOLS=%ProgramFiles(x86)%\\Microsoft Visual Studio\\2017\\Enterprise\\Common7\\Tools\\
+SET VSSDK150Install=%ProgramFiles(x86)%\\Microsoft Visual Studio\\2017\\Enterprise\\VSSDK\\
+SET VSSDKInstall=%ProgramFiles(x86)%\\Microsoft Visual Studio\\2017\\Enterprise\\VSSDK\\
+${buildCommand}""")
                 }
                 else {
                     // Shell
