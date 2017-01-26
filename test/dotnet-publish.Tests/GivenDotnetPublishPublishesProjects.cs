@@ -3,6 +3,8 @@
 
 using System;
 using System.IO;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.PlatformAbstractions;
@@ -69,6 +71,12 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             var outputProgram = testProjectDirectory
                 .GetDirectory("bin", configuration, "netcoreapp1.0", rid, "publish", $"{testAppName}{Constants.ExeSuffix}")
                 .FullName;
+
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                //Workaround for https://github.com/dotnet/corefx/issues/15516
+                Process.Start("chmod", $"u+x {outputProgram}").WaitForExit();
+            }
 
             new TestCommand(outputProgram)
                 .ExecuteWithCapturedOutput()
