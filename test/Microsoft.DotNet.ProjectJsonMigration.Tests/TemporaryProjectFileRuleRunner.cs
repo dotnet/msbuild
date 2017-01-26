@@ -30,7 +30,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             if (!File.Exists(globalJson))
             {
                 var file = new FileInfo(globalJson);
-                File.WriteAllText(file.FullName, @"{}");
+                try
+                {
+                    File.WriteAllText(file.FullName, @"{}");
+                }
+                catch (IOException)
+                {
+                    //this means there is someone else writing to the file already. So, just ignore it.
+                }
             }
 
             var testPj = new ProjectJsonBuilder(null)
