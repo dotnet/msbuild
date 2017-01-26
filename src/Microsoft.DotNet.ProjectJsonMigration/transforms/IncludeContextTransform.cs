@@ -25,14 +25,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
                         && includeContext.IncludeFiles != null 
                         && includeContext.IncludeFiles.Count > 0);
 
-        private bool IsPatternBlackListed(string pattern)
+        private bool IsPatternExcluded(string pattern)
         {
-            if (_patternsBlackList == null)
-            {
-                return false;
-            }
-
-            return _patternsBlackList.Contains(pattern.Replace('\\', '/'));
+            return _patternsToExclude.Contains(pattern.Replace('\\', '/'));
         }
 
         protected virtual Func<string, AddItemTransform<IncludeContext>> IncludeExcludeTransformGetter =>
@@ -46,10 +41,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
                         fullIncludeSet = fullIncludeSet.Union(includeContext.BuiltInsInclude.OrEmptyIfNull());
                     }
 
-                    if (_patternsBlackList != null)
-                    {
-                        fullIncludeSet = fullIncludeSet.Where((pattern) => !IsPatternBlackListed(pattern));
-                    }
+                    fullIncludeSet = fullIncludeSet.Where((pattern) => !IsPatternExcluded(pattern));
 
                     return FormatGlobPatternsForMsbuild(fullIncludeSet, includeContext.SourceBasePath);
                 },
@@ -65,7 +57,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
                 {
                     return includeContext != null &&
                         ( 
-                            (includeContext.IncludePatterns != null && includeContext.IncludePatterns.Where((pattern) => !IsPatternBlackListed(pattern)).Count() > 0)
+                            (includeContext.IncludePatterns != null && includeContext.IncludePatterns.Where((pattern) => !IsPatternExcluded(pattern)).Count() > 0)
                             ||
                             (_emitBuiltInIncludes && 
                              includeContext.BuiltInsInclude != null && 
@@ -83,7 +75,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
 
         private readonly string _itemName;
         private bool _transformMappings;
-        private string[] _patternsBlackList;
+        private string[] _patternsToExclude;
         private bool _emitBuiltInIncludes;
         private readonly List<ItemMetadataValue<IncludeContext>> _metadata = new List<ItemMetadataValue<IncludeContext>>();
 
@@ -92,12 +84,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
             bool transformMappings = true,
             Func<IncludeContext, bool> condition = null,
             bool emitBuiltInIncludes = true,
-            string[] patternsBlackList = null) : base(condition)
+            string[] patternsToExclude = null) : base(condition)
         {
             _itemName = itemName;
             _transformMappings = transformMappings;
             _emitBuiltInIncludes = emitBuiltInIncludes;
-            _patternsBlackList = patternsBlackList;
+            _patternsToExclude = patternsToExclude ?? Array.Empty<string>();
 
             _mappingsToTransfrom = (addItemTransform, targetPath) =>
             {
