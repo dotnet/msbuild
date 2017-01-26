@@ -76,8 +76,7 @@ if ($SkipTests) {
 
 if ($FullMSBuild)
 {
-    $msbuildPath = join-path $env:vs150comntools "..\..\MSBuild\15.0\bin\MSBuild.exe"
-    $env:DOTNET_SDK_TEST_MSBUILD_PATH = [System.IO.Path]::GetFullPath($msbuildPath)
+    $env:DOTNET_SDK_TEST_MSBUILD_PATH = join-path $env:VSInstallDir "MSBuild\15.0\bin\MSBuild.exe"
 }
 
 $commonBuildArgs = echo $RepoRoot\build\build.proj /t:$buildTarget /m /nologo /p:Configuration=$Configuration /p:Platform=$Platform /p:SignType=$signType /verbosity:$Verbosity
