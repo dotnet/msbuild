@@ -617,7 +617,13 @@ namespace Microsoft.Build.Utilities
             if (Encoding.UTF8.GetByteCount(path) > path.Length &&
                 s_FileTrackerFilename.Equals(filename, StringComparison.OrdinalIgnoreCase))
             {
-                // TODO: get programfiles path
+                string progfilesPath = Path.Combine(FrameworkLocationHelper.GenerateProgramFiles32(), "MSBuild", "15.1",
+                    "FileTracker", s_FileTrackerFilename);
+
+                if (!File.Exists(progfilesPath))
+                {
+                    return null;
+                }
             }
 
             return path;
