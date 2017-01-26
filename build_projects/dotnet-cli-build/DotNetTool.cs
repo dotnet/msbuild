@@ -15,22 +15,6 @@ namespace Microsoft.DotNet.Cli.Build
     {
         public DotNetTool()
         {
-            // var ev2r = new EnvironmentFilter()
-            //     .GetEnvironmentVariableNamesToRemove();
-
-            // foreach (var ev in ev2r)
-            // {
-            //     Console.WriteLine($"EV {ev}");
-            // }
-
-            // EnvironmentVariables = ev2r
-            //     .Select(e => $"{e}=")
-            //     .ToArray();
-
-            // foreach (var ev in EnvironmentVariables)
-            // {
-            //     Console.WriteLine($"EV {ev}");
-            // }
         }
 
         protected abstract string Command { get; }
@@ -41,8 +25,15 @@ namespace Microsoft.DotNet.Cli.Build
         {
             get
             {
-                return new EnvironmentFilter()
-                    .GetEnvironmentVariableNamesToRemove()
+                var ev2r = new EnvironmentFilter()
+                    .GetEnvironmentVariableNamesToRemove();
+
+                foreach (var ev in ev2r)
+                {
+                    Console.WriteLine($"EV {ev}");
+                }
+
+                return ev2r
                     .ToDictionary(e => e, e => (string)null);
             }
         }
@@ -76,14 +67,6 @@ namespace Microsoft.DotNet.Cli.Build
 
         protected override string GetWorkingDirectory()
         {
-            
-Log.LogMessage(MessageImportance.High, "OVERRIDING "); 
-
-            foreach (var ev in EnvironmentVariables)
-            {
-                Log.LogMessage(MessageImportance.High, $"{ev}");
-            }
-
             return WorkingDirectory ?? base.GetWorkingDirectory();
         }
 

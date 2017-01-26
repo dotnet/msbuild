@@ -4,7 +4,7 @@
     
     <Target Name="RunValidation">
         <Message Text="================================"/>
-        <DotNetMSBuild Arguments='$(MSBuildThisFileDirectory)/InvokeWithStage2.proj /p:ToolPath="$(Stage2Dir)"  /v:diag'
+        <DotNetMSBuild Arguments="  /v:diag $(MSBuildThisFileDirectory)/InvokeWithStage2.proj /p:ToolPath=&quot;$(Stage2Dir)&quot;"
                        ToolPath="$(Stage2Dir)" />
         <Message Text="================================"/>
     </Target>
