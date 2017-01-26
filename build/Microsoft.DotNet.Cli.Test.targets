@@ -85,15 +85,9 @@
   </Target>
 
   <Target Name="CreateTestAssetPackageNuPkgs"
-          DependsOnTargets="SetupTestPackageProjectData;"
-          Inputs="%(TestPackageProject.PackInputs)"
-          Outputs="%(TestPackageProject.PackOutputs)">
+          DependsOnTargets="SetupTestPackageProjectData;">
 
-    <PropertyGroup>
-      <DotNetPackMsbuildArgs Condition=" '%(TestPackageProject.PackRuntime' != '' ">/p:RuntimeIdentifier=%(TestPackageProject.PackRuntime)</DotNetPackMsbuildArgs>
-    </PropertyGroup>
-
-    <DotNetRestore ToolPath="$(Stage2Directory)"
+    <DotNetRestore ToolPath="$(Stage0Directory)"
                    Source="$(TestPackagesDir)"
                    ConfigFile="$(RepoRoot)\NuGet.Config"
                    ProjectPath="%(TestPackageProject.ProjectPath)" />
@@ -103,6 +97,7 @@
                 ProjectPath="%(TestPackageProject.ProjectPath)"
                 ToolPath="$(Stage0Directory)"
                 VersionSuffix="%(TestPackageProject.VersionSuffix)"
-                MsbuildArgs="$(DotNetPackMsbuildArgs) /p:SdkNuGetVersion=$(SdkNugetVersion)" />
+                MsbuildArgs="%(TestPackageProject.MsbuildArgs) /p:SdkNuGetVersion=$(SdkNugetVersion)" />
+
   </Target>
 </Project>

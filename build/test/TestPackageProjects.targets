@@ -1,76 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Target Name="SetupTestPackageProjectData"
-          DependsOnTargets="AssociateSourceFilesWithProjects;
-                            AssociateOutputsWithProjects;">
+          DependsOnTargets="SetupTestPackageProjectFrameworks">
     <ItemGroup>
-      <TestPackageProject>
-        <NuPkgName Condition=" '%(NuPkgName)' == '' ">%(Name)</NuPkgName>
-      </TestPackageProject>
-
-      <TestPackageProject>
-        <PackInputs>%(BuildOutputs)</PackInputs>
-        <PackOutputs>$(TestPackagesDir)%(NuPkgName).%(VersionPrefix)%(VersionSuffix).nupkg</PackOutputs>
-      </TestPackageProject>
-    </ItemGroup>
-  </Target>
-
-  <Target Name="AssociateOutputsWithProjects"
-          DependsOnTargets="SetupTestPackageProjectFrameworks"
-          Outputs="%(TestPackageProject.ProjectPath)">
-    <ItemGroup>
-      <TestPackageProject>
-        <BuildOutputs>%(TestPackageProject.OutputPath)%(TestPackageProject.Name).dll</BuildOutputs>
-      </TestPackageProject>
     </ItemGroup>
   </Target>
 
   <Target Name="SetupTestPackageProjectFrameworks"
-          DependsOnTargets="SetupTestPackageProjectBaseData;
-                            AssociateSourceFilesWithProjects;"
-          Outputs="%(TestPackageProjectFrameworks.Identity)">
-    <PropertyGroup>
-      <CurrentBuildFramework>%(TestPackageProjectFrameworks.Identity)</CurrentBuildFramework>
-    </PropertyGroup>
-
+          DependsOnTargets="SetupTestPackageProjectBaseData">
     <ItemGroup>
-      <TestPackageProject Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(Frameworks)', '(^|;)$(CurrentBuildFramework)($|;)'))"
-                          Include="@(BaseTestPackageProject)">
-        <Framework>$(CurrentBuildFramework)</Framework>
-        <Runtime Condition=" '$(CurrentBuildFramework)' == 'net45' Or '$(CurrentBuildFramework)' == 'net451' ">$(CoreCLRRid)</Runtime>
-        <OutputPath>%(OutputPath)$(CurrentBuildFramework)/</OutputPath>
+      <TestPackageProject Include="@(BaseTestPackageProject)">
       </TestPackageProject>
-    </ItemGroup>
-  </Target>
-
-  <Target Name="AssociateSourceFilesWithProjects"
-          DependsOnTargets="FindSourceFiles"
-          Outputs="%(BaseTestPackageProject.ProjectPath)">
-    <PropertyGroup>
-      <CurrentProject>%(BaseTestPackageProject.ProjectPath)</CurrentProject>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <BaseTestPackageProject Condition=" '%(ProjectPath)' == '$(CurrentProject)' ">
-        <BuildInputs>@(__TestPackageProjectInputs)</BuildInputs>
-      </BaseTestPackageProject>
-    </ItemGroup>
-  </Target>
-
-  <Target Name="FindSourceFiles"
-          DependsOnTargets="SetupTestPackageProjectBaseData;"
-          Outputs="%(BaseTestPackageProject.Identity)">
-    <ItemGroup>
-      <__TestPackageProjectInputs Include="%(BaseTestPackageProject.BuildInputIncludeFilter)"
-                                  Exclude="%(BaseTestPackageProject.BuildInputExcludeFilter)">
-        <ProjectPath>%(BaseTestPackageProject.ProjectPath)</ProjectPath>
-      </__TestPackageProjectInputs>
     </ItemGroup>
   </Target>
 
   <Target Name="SetupTestPackageProjectBaseData">
     <ItemGroup>
-      <BaseTestPackageProject Include="src/Microsoft.DotNet.Cli.Utils">
+      <BaseTestPackageProject Include="src/Microsoft.DotNet.Cli.Utils"
+                              Condition=" '$(IsDesktopAvailable)' == 'True' " >
         <Name>Microsoft.DotNet.Cli.Utils</Name>
         <ProjectName>Microsoft.DotNet.Cli.Utils.csproj</ProjectName>
         <IsTool>True</IsTool>
@@ -78,6 +25,18 @@
         <VersionPrefix>$(CliVersionPrefix)-</VersionPrefix>
         <VersionSuffix>rc4-$(TestPackageBuildVersionSuffix)</VersionSuffix>
         <Clean>False</Clean>
+        <MsbuildArgs>/p:RuntimeIdentifier=$(CoreCLRRid)</MsbuildArgs>
+      </BaseTestPackageProject>
+      <BaseTestPackageProject Include="src/Microsoft.DotNet.Cli.Utils"
+                              Condition=" '$(IsDesktopAvailable)' == 'False' " >
+        <Name>Microsoft.DotNet.Cli.Utils</Name>
+        <ProjectName>Microsoft.DotNet.Cli.Utils.csproj</ProjectName>
+        <IsTool>True</IsTool>
+        <IsApplicable>True</IsApplicable>
+        <VersionPrefix>$(CliVersionPrefix)-</VersionPrefix>
+        <VersionSuffix>rc4-$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <Clean>False</Clean>
+        <MsbuildArgs>/p:TargetFramework=netstandard1.5</MsbuildArgs>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="src/Microsoft.DotNet.InternalAbstractions">
         <Name>Microsoft.DotNet.InternalAbstractions</Name>
@@ -187,10 +146,6 @@
         <Clean>True</Clean>
       </BaseTestPackageProject>
 
-      <TestPackageProjectFrameworksExcludes Condition=" '$(IsDesktopAvailable)' != 'True' " Include="net45" />
-      <TestPackageProjectFrameworksExcludes Condition=" '$(IsDesktopAvailable)' != 'True' " Include="net451" />
-      <TestPackageProjectFrameworks Include="%(BaseTestPackageProject.Frameworks)" Exclude="@(TestPackageProjectFrameworksExcludes)" />
-
       <BaseTestPackageProject>
         <ProjectDir>$(RepoRoot)%(Identity)/</ProjectDir>
         <OutputPath>$(TestPackagesBuildDir)%(Identity)/bin/$(Configuration)/</OutputPath>
@@ -198,8 +153,6 @@
 
       <BaseTestPackageProject>
         <ProjectPath>%(ProjectDir)%(ProjectName)</ProjectPath>
-        <BuildInputIncludeFilter>%(ProjectDir)**/*.*</BuildInputIncludeFilter>
-        <BuildInputExcludeFilter>%(ProjectDir)bin/**/*.*;%(ProjectDir)obj/**/*.*</BuildInputExcludeFilter>
       </BaseTestPackageProject>
     </ItemGroup>
   </Target>
