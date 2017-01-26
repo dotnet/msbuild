@@ -38,7 +38,7 @@
           EnvironmentVariables=$(RunTestEnvironmentVariables);
           TestProject=%(TestProjects.Identity);
           TestResultXmlDir=$(TestResultXmlDir);
-          ToolPath=$(Stage0Directory);
+          ToolPath=$(Stage2Directory);
           WorkingDirectory=$([System.IO.Directory]::GetParent(%(TestProjects.Identity))) 
         </Properties>
       </ProjectsToTest>
@@ -81,6 +81,7 @@
   <Target Name="BuildTests"
           DependsOnTargets="RestoreTests;">
     <DotNetBuild ToolPath="$(Stage0Directory)"
+                 MaxCpuCount="1"
                  ProjectPath="&quot;$(TestDirectory)/Microsoft.DotNet.Cli.Tests.sln&quot;" />
   </Target>
 

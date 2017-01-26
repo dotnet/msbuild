@@ -8,6 +8,7 @@ using Microsoft.DotNet.Tools.Test.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Xunit;
 using FluentAssertions;
 using System.IO;
@@ -291,6 +292,12 @@ namespace Microsoft.DotNet.Migration.Tests
         [InlineData("PJTestLibraryWithConfiguration")]
         public void ItMigratesALibrary(string projectName)
         {
+            // running into https://github.com/dotnet/coreclr/issues/9118 with crossgen'd csc on non-Windows 
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && projectName == "TestLibraryWithAnalyzer")
+            {
+                return;
+            }
+
             var projectDirectory = TestAssets
                 .GetProjectJson(projectName)
                 .CreateInstance(identifier: projectName)

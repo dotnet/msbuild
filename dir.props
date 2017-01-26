@@ -20,5 +20,7 @@
     <BranchName>master</BranchName>
     <CliVersionPrefix>$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(ReleaseSuffix)</CliVersionPrefix>
 
+    <CliTargetFramework>netcoreapp2.0</CliTargetFramework>
+
   </PropertyGroup>
 </Project>

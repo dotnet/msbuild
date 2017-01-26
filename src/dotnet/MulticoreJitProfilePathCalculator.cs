@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Cli
 
             var version = Product.Version;
 
-            var rid = RuntimeEnvironment.GetRuntimeIdentifier();
+            var rid = PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier();
 
             _multicoreJitProfilePath = Path.Combine(profileRoot, "optimizationdata", version, rid);
         }
