@@ -27,7 +27,8 @@ namespace Microsoft.DotNet.Cli.Build
 
         private IEnumerable<string> _environmentVariablesToKeep = new string []
         {
-            "DOTNET_CLI_TELEMETRY_SESSIONID"
+            "DOTNET_CLI_TELEMETRY_SESSIONID",
+            "NUGET_PACKAGES"
         };
 
         public IEnumerable<string> GetEnvironmentVariableNamesToRemove()
@@ -36,19 +37,39 @@ namespace Microsoft.DotNet.Cli.Build
                 .GetEnvironmentVariables()
                 .Keys
                 .Cast<string>();
+            
+            foreach (var envVar in allEnvironmentVariableNames)
+            {
+                Console.WriteLine($"ev: {envVar}");
+            }
 
             var environmentVariablesToRemoveByPrefix = allEnvironmentVariableNames
                 .Where(e => _prefixesOfEnvironmentVariablesToRemove.Any(p => e.StartsWith(p)));
             
+            foreach (var envVar in environmentVariablesToRemoveByPrefix)
+            {
+                Console.WriteLine($"evp: {envVar}");
+            }
+            
             var environmentVariablesToRemoveByName = allEnvironmentVariableNames
                 .Where(e => _environmentVariablesToRemove.Contains(e));
+            
+            foreach (var envVar in environmentVariablesToRemoveByName)
+            {
+                Console.WriteLine($"evn: {envVar}");
+            }
             
             var environmentVariablesToRemove = environmentVariablesToRemoveByName
                 .Concat(environmentVariablesToRemoveByPrefix)
                 .Distinct()
                 .Except(_environmentVariablesToKeep);
+            
+            foreach (var envVar in environmentVariablesToRemove)
+            {
+                Console.WriteLine($"evr: {envVar}");
+            }
 
-            return environmentVariablesToRemoveByName;
+            return environmentVariablesToRemove;
         }
     }
 }

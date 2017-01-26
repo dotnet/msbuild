@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Microsoft.Build.Framework;
@@ -14,25 +15,37 @@ namespace Microsoft.DotNet.Cli.Build
     {
         public DotNetTool()
         {
-Log.LogMessage(MessageImportance.High, "STARTING "); 
-            EnvironmentVariables = new EnvironmentFilter()
-                .GetEnvironmentVariableNamesToRemove()
-                .Select(e => $"{e}=")
-                .ToArray();
-            
-Log.LogMessage(MessageImportance.High, "OVERRIDING "); 
+            // var ev2r = new EnvironmentFilter()
+            //     .GetEnvironmentVariableNamesToRemove();
 
-            foreach (var ev in EnvironmentVariables)
-            {
-                Log.LogMessage(MessageImportance.High, $"{ev}");
-            }
+            // foreach (var ev in ev2r)
+            // {
+            //     Console.WriteLine($"EV {ev}");
+            // }
 
-            throw new Exception($"{EnvironmentVariables.Count()}");
+            // EnvironmentVariables = ev2r
+            //     .Select(e => $"{e}=")
+            //     .ToArray();
+
+            // foreach (var ev in EnvironmentVariables)
+            // {
+            //     Console.WriteLine($"EV {ev}");
+            // }
         }
 
         protected abstract string Command { get; }
 
         protected abstract string Args { get; }
+
+        protected override Dictionary<string, string> EnvironmentOverride
+        {
+            get
+            {
+                return new EnvironmentFilter()
+                    .GetEnvironmentVariableNamesToRemove()
+                    .ToDictionary(e => e, e => (string)null);
+            }
+        }
 
         public string WorkingDirectory { get; set; }
 
@@ -63,6 +76,14 @@ Log.LogMessage(MessageImportance.High, "OVERRIDING ");
 
         protected override string GetWorkingDirectory()
         {
+            
+Log.LogMessage(MessageImportance.High, "OVERRIDING "); 
+
+            foreach (var ev in EnvironmentVariables)
+            {
+                Log.LogMessage(MessageImportance.High, $"{ev}");
+            }
+
             return WorkingDirectory ?? base.GetWorkingDirectory();
         }
 
