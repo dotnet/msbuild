@@ -1746,7 +1746,7 @@ elementFormDefault="qualified">
     </xs:element>
     <xs:element name="PackageIconUrl" type="msb:StringPropertyType" substitutionGroup="msb:Property">
       <xs:annotation>
-        <xs:documentation><!-- _locID_text="PackageIconUrl" _locComment="" -->The URL for a 64x64 image with transparenty background to use as the icon for the NuGet package in UI display</xs:documentation>
+        <xs:documentation><!-- _locID_text="PackageIconUrl" _locComment="" -->The URL for a 64x64 image with transparent background to use as the icon for the NuGet package in UI display</xs:documentation>
       </xs:annotation>
     </xs:element>
     <xs:element name="PackageId" type="msb:StringPropertyType" substitutionGroup="msb:Property">
