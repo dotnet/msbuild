@@ -713,7 +713,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="commandLineCommands"></param>
         /// <param name="responseFileSwitch"></param>
         /// <returns>The information required to start the process.</returns>
-        protected ProcessStartInfo GetProcessStartInfo
+        virtual protected ProcessStartInfo GetProcessStartInfo
         (
             string pathToTool,
             string commandLineCommands,
