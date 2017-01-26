@@ -6,6 +6,7 @@ using FluentAssertions;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectJsonMigration.Rules;
 using Microsoft.DotNet.Internal.ProjectModel;
+using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using NuGet.Frameworks;
@@ -36,6 +37,31 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             {
                 File.Exists(Path.Combine(outputDirectory, projectDirectoryRelativeFilePath)).Should().BeTrue();
             }
+        }
+
+        [Fact]
+        public void ItHasErrorWhenMigratingADeprecatedNamedResourceOptionProjectJson()
+        {
+            var testProjectDirectory = TestAssets
+               .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedNamedResourceOption")
+               .CreateInstance()
+               .WithSourceFiles()
+               .Root
+               .FullName;
+
+            var mockProj = ProjectRootElement.Create();
+            var testSettings = MigrationSettings.CreateMigrationSettingsTestHook(
+                testProjectDirectory,
+                testProjectDirectory,
+                mockProj);
+
+            var projectMigrator = new ProjectMigrator(new FakeEmptyMigrationRule());
+            var report = projectMigrator.Migrate(testSettings);
+
+            var projectReport = report.ProjectMigrationReports.First();
+            var errorMessage = projectReport.Errors.First().GetFormattedErrorMessage();
+            errorMessage.Should().Contain("MIGRATE1011::Deprecated Project:");
+            errorMessage.Should().Contain("The 'namedResource' option is deprecated. Use 'embed' in 'buildOptions' instead. (line: 3, file:");
         }
 
         [Fact]

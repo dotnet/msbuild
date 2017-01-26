@@ -825,7 +825,14 @@ namespace Microsoft.DotNet.Internal.ProjectModel
             AddDeprecatedDiagnosticMessage(rawProject, project, "resourceExclude", resourceWarning);
             AddDeprecatedDiagnosticMessage(rawProject, project, "resourceFiles", resourceWarning);
             AddDeprecatedDiagnosticMessage(rawProject, project, "resourceBuiltIn", resourceWarning);
-            AddDeprecatedDiagnosticMessage(rawProject, project, "namedResource", resourceWarning);
+            // Issue: https://github.com/dotnet/cli/issues/5471
+            // This is why we mark it as an error which will fail migration.
+            AddDeprecatedDiagnosticMessage(
+                rawProject,
+                project,
+                "namedResource",
+                resourceWarning,
+                DiagnosticMessageSeverity.Error);
 
             var contentWarning = "'publishOptions' to publish or 'copyToOutput' in 'buildOptions' to copy to build output";
             AddDeprecatedDiagnosticMessage(rawProject, project, "content", contentWarning);
@@ -842,7 +849,8 @@ namespace Microsoft.DotNet.Internal.ProjectModel
             JObject rawProject,
             Project project,
             string option,
-            string message)
+            string message,
+            DiagnosticMessageSeverity severity = DiagnosticMessageSeverity.Warning)
         {
             var lineInfo = rawProject.Value<IJsonLineInfo>(option);
             if (lineInfo == null)
@@ -855,7 +863,7 @@ namespace Microsoft.DotNet.Internal.ProjectModel
                     ErrorCodes.DOTNET1015,
                     $"The '{option}' option is deprecated. Use {message} instead.",
                     project.ProjectFilePath,
-                    DiagnosticMessageSeverity.Warning,
+                    severity,
                     lineInfo.LineNumber,
                     lineInfo.LinePosition));
         }
@@ -896,7 +904,6 @@ namespace Microsoft.DotNet.Internal.ProjectModel
             ConvertFromDeprecatedFormat(rawProject, jpath, "exclude", "exclude");
             ConvertFromDeprecatedFormat(rawProject, jpath, "resourceExclude", "excludeFiles");
             ConvertFromDeprecatedFormat(rawProject, jpath, "resourceFiles", "includeFiles");
-            ConvertFromDeprecatedFormat(rawProject, jpath, "namedResource", "mappings");
             ConvertFromDeprecatedFormat(rawProject, $"{jpath}.builtIns", "resourceBuiltIn", "include");
         }
 

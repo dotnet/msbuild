@@ -252,11 +252,26 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             var diagnostics = defaultProjectContext.ProjectFile.Diagnostics;
             if (diagnostics.Any())
             {
-                var deprecatedProjectJsonWarnings = string.Join(
-                    Environment.NewLine,
-                    diagnostics.Select(d => FormatDiagnosticMessage(d)));
-                var warnings = $"{projectDirectory}{Environment.NewLine}{deprecatedProjectJsonWarnings}";
-                Reporter.Output.WriteLine(warnings.Yellow());
+                var warnings = diagnostics.Where(d => d.Severity == DiagnosticMessageSeverity.Warning);
+                if (warnings.Any())
+                {
+                    var deprecatedProjectJsonWarnings = string.Join(
+                        Environment.NewLine,
+                        diagnostics.Select(d => FormatDiagnosticMessage(d)));
+                    var warningMessage = $"{projectDirectory}{Environment.NewLine}{deprecatedProjectJsonWarnings}";
+                    Reporter.Output.WriteLine(warningMessage.Yellow());
+                }
+
+                var errors = diagnostics.Where(d => d.Severity == DiagnosticMessageSeverity.Error);
+                if (errors.Any())
+                {
+                    MigrationErrorCodes.MIGRATE1011(String.Format(
+                        "{0}{1}{2}",
+                        projectDirectory,
+                        Environment.NewLine,
+                        string.Join(Environment.NewLine, diagnostics.Select(d => FormatDiagnosticMessage(d)))))
+                        .Throw();
+                }
             }
 
             var compilerName =
