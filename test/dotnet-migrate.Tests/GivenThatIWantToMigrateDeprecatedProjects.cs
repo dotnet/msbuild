@@ -161,7 +161,7 @@ namespace Microsoft.DotNet.Migration.Tests
 
             new DotnetCommand()
                  .WithWorkingDirectory(projectDirectory)
-                 .Execute("build")
+                 .Execute("build -c Debug")
                  .Should().Pass();
         }
 
@@ -290,7 +290,7 @@ namespace Microsoft.DotNet.Migration.Tests
 
             new DotnetCommand()
                  .WithWorkingDirectory(projectDirectory)
-                 .Execute("build")
+                 .Execute("build -c Debug")
                  .Should().Pass();
         }
 
@@ -336,7 +336,7 @@ namespace Microsoft.DotNet.Migration.Tests
             //Issue: https://github.com/dotnet/cli/issues/5467
             //new DotnetCommand()
             //     .WithWorkingDirectory(projectDirectory)
-            //     .Execute("build")
+            //     .Execute("build -c Debug")
             //     .Should().Pass();
         }
 
@@ -381,7 +381,7 @@ namespace Microsoft.DotNet.Migration.Tests
             // Issue: https://github.com/dotnet/cli/issues/5461
             //new DotnetCommand()
             //     .WithWorkingDirectory(projectDirectory)
-            //     .Execute("build")
+            //     .Execute("build -c Debug")
             //     .Should().Pass();
         }
 
@@ -429,12 +429,12 @@ namespace Microsoft.DotNet.Migration.Tests
 
             new DotnetCommand()
                  .WithWorkingDirectory(projectDirectory)
-                 .Execute("build")
+                 .Execute("build -c Debug")
                  .Should().Pass();
 
             var cmd = new DotnetCommand()
                  .WithWorkingDirectory(projectDirectory)
-                 .ExecuteWithCapturedOutput("run");
+                 .ExecuteWithCapturedOutput("run -c Debug");
             cmd.Should().Pass();
             cmd.StdOut.Should().Contain("3 Resources Found:");
         }
@@ -481,12 +481,12 @@ namespace Microsoft.DotNet.Migration.Tests
 
             new DotnetCommand()
                  .WithWorkingDirectory(projectDirectory)
-                 .Execute("build")
+                 .Execute("build -c Debug")
                  .Should().Pass();
 
             var cmd = new DotnetCommand()
                  .WithWorkingDirectory(projectDirectory)
-                 .ExecuteWithCapturedOutput("run");
+                 .ExecuteWithCapturedOutput("run -c Debug");
             cmd.Should().Pass();
             // Issue: https://github.com/dotnet/cli/issues/5467
             //cmd.StdOut.Should().Contain("2 Resources Found:");
@@ -533,12 +533,12 @@ namespace Microsoft.DotNet.Migration.Tests
             // Issue: https://github.com/dotnet/cli/issues/5461
             //new DotnetCommand()
             //     .WithWorkingDirectory(projectDirectory)
-            //     .Execute("build")
+            //     .Execute("build -c Debug")
             //     .Should().Pass();
 
             //var cmd = new DotnetCommand()
             //     .WithWorkingDirectory(projectDirectory)
-            //     .ExecuteWithCapturedOutput("run");
+            //     .ExecuteWithCapturedOutput("run -c Debug");
             //cmd.Should().Pass();
             //cmd.StdOut.Should().Contain("0 Resources Found:");
         }
