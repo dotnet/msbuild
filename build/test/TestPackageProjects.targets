@@ -121,7 +121,7 @@
         <Clean>True</Clean>
         <Frameworks>netcoreapp1.0</Frameworks>
       </BaseTestPackageProject>
-      <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-desktop-and-portable">
+      <BaseTestPackageProject Condition=" '$(IsDesktopAvailable)' == 'True' " Include="TestAssets/TestPackages/dotnet-desktop-and-portable">
         <Name>dotnet-desktop-and-portable</Name>
         <ProjectName>dotnet-desktop-and-portable.csproj</ProjectName>
         <IsTool>True</IsTool>
