@@ -8,8 +8,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Xml;
 
@@ -51,6 +54,16 @@ namespace Microsoft.Build.Construction
         /// The set of properties which identify the configuration and platform to build a project with
         /// </summary>
         private const string SolutionConfigurationAndPlatformProperties = "Configuration=$(Configuration); Platform=$(Platform)";
+
+        /// <summary>
+        /// A known list of target names to create.  This is for backwards compatibility.
+        /// </summary>
+        internal static readonly ISet<string> _defaultTargetNames = ImmutableHashSet.Create<string>(StringComparer.OrdinalIgnoreCase,
+            "Build",
+            "Clean",
+            "Rebuild",
+            "Publish"
+            );
 
         /// <summary>
         /// Version 2.0
@@ -104,6 +117,11 @@ namespace Microsoft.Build.Construction
         private ILoggingService _loggingService;
 
         /// <summary>
+        /// The list of targets specified to use.
+        /// </summary>
+        private readonly IReadOnlyCollection<string> _targetNames = new Collection<string>();
+
+        /// <summary>
         /// The solution configuration selected for this build.
         /// </summary>
         private string _selectedSolutionConfiguration;
@@ -121,7 +139,8 @@ namespace Microsoft.Build.Construction
             IDictionary<string, string> globalProperties,
             string toolsVersionOverride,
             BuildEventContext projectBuildEventContext,
-            ILoggingService loggingService
+            ILoggingService loggingService,
+            IReadOnlyCollection<string> targetNames
             )
         {
             _solutionFile = solution;
@@ -129,6 +148,11 @@ namespace Microsoft.Build.Construction
             _toolsVersionOverride = toolsVersionOverride;
             _projectBuildEventContext = projectBuildEventContext;
             _loggingService = loggingService;
+
+            if (targetNames != null)
+            {
+                _targetNames = targetNames.Select(i => i.Split(new[] {':'}, 2, StringSplitOptions.RemoveEmptyEntries).Last()).ToList();
+            }
         }
 
         #endregion // Constructors
@@ -144,6 +168,7 @@ namespace Microsoft.Build.Construction
         /// <param name="toolsVersionOverride">Tools Version override (may be null).  This should be any tools version explicitly passed to the command-line or from an MSBuild ToolsVersion parameter.</param>
         /// <param name="projectBuildEventContext">The logging context for this project.</param>
         /// <param name="loggingService">The logging service.</param>
+        /// <param name="targetNames">A collection of target names the user requested to be built.</param>
         /// <returns>An array of ProjectInstances.  The first instance is the traversal project, the remaining are the metaprojects for each project referenced in the solution.</returns>
         internal static ProjectInstance[] Generate
             (
@@ -151,7 +176,8 @@ namespace Microsoft.Build.Construction
             IDictionary<string, string> globalProperties,
             string toolsVersionOverride,
             BuildEventContext projectBuildEventContext,
-            ILoggingService loggingService
+            ILoggingService loggingService,
+            IReadOnlyCollection<string> targetNames = default(IReadOnlyCollection<string>)
             )
         {
             SolutionProjectGenerator projectGenerator = new SolutionProjectGenerator
@@ -160,7 +186,8 @@ namespace Microsoft.Build.Construction
                 globalProperties,
                 toolsVersionOverride,
                 projectBuildEventContext,
-                loggingService
+                loggingService,
+                targetNames
                 );
 
             return projectGenerator.Generate();
@@ -745,12 +772,25 @@ namespace Microsoft.Build.Construction
                 AddTraversalTargetForProject(traversalInstance, project, projectConfiguration, "Rebuild", "BuildOutput", canBuildDirectly);
                 AddTraversalTargetForProject(traversalInstance, project, projectConfiguration, "Publish", null, canBuildDirectly);
 
+
+                // Add any other targets specified by the user that were not already added
+                foreach (string targetName in _targetNames.Where(i => !traversalInstance.Targets.ContainsKey(i)))
+                {
+                    AddTraversalTargetForProject(traversalInstance, project, projectConfiguration, targetName, null, canBuildDirectly);
+                }
+
                 // If we cannot build the project directly, then we need to generate a metaproject for it.
                 if (!canBuildDirectly)
                 {
                     ProjectInstance metaProject = CreateMetaproject(traversalInstance, project, projectConfiguration);
                     projectInstances.Add(metaProject);
                 }
+            }
+
+            // Add any other targets specified by the user that were not already added
+            foreach (string targetName in _targetNames.Where(i => !traversalInstance.Targets.ContainsKey(i)))
+            {
+                AddTraversalReferencesTarget(traversalInstance, targetName, null);
             }
         }
 
@@ -832,10 +872,10 @@ namespace Microsoft.Build.Construction
             // These are just dummies necessary to make the evaluation into a project instance succeed when 
             // any custom imported targets have declarations like BeforeTargets="Build"
             // They'll be replaced momentarily with the real ones.
-            traversalProject.AddTarget("Build");
-            traversalProject.AddTarget("Rebuild");
-            traversalProject.AddTarget("Clean");
-            traversalProject.AddTarget("Publish");
+            foreach (string targetName in _defaultTargetNames)
+            {
+                traversalProject.AddTarget(targetName);
+            }
 
             // For debugging purposes: some information is lost when evaluating into a project instance,
             // so make it possible to see what we have at this point.
@@ -857,10 +897,10 @@ namespace Microsoft.Build.Construction
                 );
 
             // Make way for the real ones                
-            traversalInstance.RemoveTarget("Build");
-            traversalInstance.RemoveTarget("Rebuild");
-            traversalInstance.RemoveTarget("Clean");
-            traversalInstance.RemoveTarget("Publish");
+            foreach (string targetName in _defaultTargetNames)
+            {
+                traversalInstance.RemoveTarget(targetName);
+            }
 
             AddStandardTraversalTargets(traversalInstance, projectsInOrder);
 
@@ -1050,6 +1090,11 @@ namespace Microsoft.Build.Construction
                 AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, "Clean");
                 AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, "Rebuild");
                 AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, "Publish");
+
+                foreach (string targetName in _targetNames.Where(i => !metaprojectInstance.Targets.ContainsKey(i)))
+                {
+                    AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, targetName);
+                }
             }
             else if ((project.ProjectType == SolutionProjectType.KnownToBeMSBuildFormat) ||
                      (project.CanBeMSBuildProjectFile(out unknownProjectTypeErrorMessage)))
@@ -1061,6 +1106,11 @@ namespace Microsoft.Build.Construction
                 AddMetaprojectTargetForManagedProject(traversalProject, metaprojectInstance, project, projectConfiguration, null, targetOutputItemName);
                 AddMetaprojectTargetForManagedProject(traversalProject, metaprojectInstance, project, projectConfiguration, "Rebuild", targetOutputItemName);
                 AddMetaprojectTargetForManagedProject(traversalProject, metaprojectInstance, project, projectConfiguration, "Publish", null);
+
+                foreach (string targetName in _targetNames.Where(i => !metaprojectInstance.Targets.ContainsKey(i)))
+                {
+                    AddMetaprojectTargetForManagedProject(traversalProject, metaprojectInstance, project, projectConfiguration, targetName, null);
+                }
             }
             else
             {
@@ -1068,6 +1118,11 @@ namespace Microsoft.Build.Construction
                 AddMetaprojectTargetForUnknownProjectType(traversalProject, metaprojectInstance, project, "Clean", unknownProjectTypeErrorMessage);
                 AddMetaprojectTargetForUnknownProjectType(traversalProject, metaprojectInstance, project, "Rebuild", unknownProjectTypeErrorMessage);
                 AddMetaprojectTargetForUnknownProjectType(traversalProject, metaprojectInstance, project, "Publish", unknownProjectTypeErrorMessage);
+
+                foreach (string targetName in _targetNames.Where(i => !metaprojectInstance.Targets.ContainsKey(i)))
+                {
+                    AddMetaprojectTargetForUnknownProjectType(traversalProject, metaprojectInstance, project, targetName, unknownProjectTypeErrorMessage);
+                }
             }
 
             return metaprojectInstance;
@@ -1860,6 +1915,13 @@ namespace Microsoft.Build.Construction
             if (targetToBuild != null)
             {
                 actualTargetName += ":" + targetToBuild;
+            }
+
+            // Don't add the target again.  The user might have specified /t:Project:target which was already added but only this method knows about Project:Target so
+            // after coming up with that target name, it can check if it has already been added.
+            if (traversalProject.Targets.ContainsKey(actualTargetName))
+            {
+                return;
             }
 
             // The output item name is the concatenation of the project name with the specified outputItem.  In the typical case, if the

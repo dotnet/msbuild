@@ -2979,6 +2979,26 @@
         <target state="translated">MSB3891: "{0}" und "{1}" wurden in der Projektdatei angegeben. Verwenden Sie nur einen dieser Werte.</target>
         <note />
       </trans-unit>
+      <trans-unit id="WriteLinesToFile.ErrorReadingFile">
+        <source>MSB3492: Could not read existing file "{0}" to determine whether its contents are up to date. Overwriting it.</source>
+        <target state="translated">MSB3492: Die vorhandene Datei "{0}" konnte nicht gelesen werden, um zu bestimmen, ob ihr Inhalt aktuell ist. Die Datei wird überschrieben.</target>
+        <note>{StrBegin="MSB3491: "}</note>
+      </trans-unit>
+      <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
+        <source>MSB3493: </source>
+        <target state="translated">MSB3493: </target>
+        <note>{StrBegin="Skipping write to file "{0}" because content would not change."}</note>
+      </trans-unit>
+      <trans-unit id="Telemetry.IllegalEventDataString">
+        <source>The property "{0}" in the telemetry event data property list "{1}" is malformed.  Please only pass in a semicolon-delimited list of constant string values separated by "=", e.g., "Property1=Value1;Property2=Value2".</source>
+        <target state="translated">Die Eigenschaft "{0}" in der Eigenschaftenliste der Telemetrieereignisdaten "{1}" ist fehlerhaft. Übergeben Sie nur eine durch Semikolons getrennte Liste mit konstanten Zeichenfolgewerten, die durch "=" getrennt sind, z. B. "Property1=Value1;Property2=Value2".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorAndWarning.EmptyMessage">
+        <source>(No message specified)</source>
+        <target state="translated">(Keine Meldung festgelegt)</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

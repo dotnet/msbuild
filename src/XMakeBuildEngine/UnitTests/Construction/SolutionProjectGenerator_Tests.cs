@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 using System.IO;
@@ -352,23 +353,23 @@ namespace Microsoft.Build.UnitTests.Construction
                     Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""ClassLibrary2"", ""ClassLibrary2.csproj"", ""{84AA5584-4B0F-41DE-95AA-589E1447EDA0}""
                     EndProject
                     Global
-	                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		                    Debug|Any CPU = Debug|Any CPU
-		                    Release|Any CPU = Release|Any CPU
-	                    EndGlobalSection
-	                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		                    {A437DBE9-DCAA-46D8-9D80-A50EDB2244FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		                    {A437DBE9-DCAA-46D8-9D80-A50EDB2244FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		                    {A437DBE9-DCAA-46D8-9D80-A50EDB2244FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                    {A437DBE9-DCAA-46D8-9D80-A50EDB2244FD}.Release|Any CPU.Build.0 = Release|Any CPU
-		                    {84AA5584-4B0F-41DE-95AA-589E1447EDA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		                    {84AA5584-4B0F-41DE-95AA-589E1447EDA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		                    {84AA5584-4B0F-41DE-95AA-589E1447EDA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                    {84AA5584-4B0F-41DE-95AA-589E1447EDA0}.Release|Any CPU.Build.0 = Release|Any CPU
-	                    EndGlobalSection
-	                    GlobalSection(SolutionProperties) = preSolution
-		                    HideSolutionNode = FALSE
-	                    EndGlobalSection
+                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                            Debug|Any CPU = Debug|Any CPU
+                            Release|Any CPU = Release|Any CPU
+                        EndGlobalSection
+                        GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                            {A437DBE9-DCAA-46D8-9D80-A50EDB2244FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                            {A437DBE9-DCAA-46D8-9D80-A50EDB2244FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                            {A437DBE9-DCAA-46D8-9D80-A50EDB2244FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                            {A437DBE9-DCAA-46D8-9D80-A50EDB2244FD}.Release|Any CPU.Build.0 = Release|Any CPU
+                            {84AA5584-4B0F-41DE-95AA-589E1447EDA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                            {84AA5584-4B0F-41DE-95AA-589E1447EDA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                            {84AA5584-4B0F-41DE-95AA-589E1447EDA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                            {84AA5584-4B0F-41DE-95AA-589E1447EDA0}.Release|Any CPU.Build.0 = Release|Any CPU
+                        EndGlobalSection
+                        GlobalSection(SolutionProperties) = preSolution
+                            HideSolutionNode = FALSE
+                        EndGlobalSection
                     EndGlobal
                 ";
 
@@ -516,30 +517,30 @@ namespace Microsoft.Build.UnitTests.Construction
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 11
 Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `B`, `Project2\B.csproj`, `{881C1674-4ECA-451D-85B6-D7C59B7F16FA}`
-	ProjectSection(ProjectDependencies) = postProject
-		{4A727FF8-65F2-401E-95AD-7C8BBFBE3167} = {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}
-	EndProjectSection
+    ProjectSection(ProjectDependencies) = postProject
+        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167} = {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}
+    EndProjectSection
 EndProject
 Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Debug|x64 = Debug|x64
-		Release|Any CPU = Release|Any CPU
-		Release|x64 = Release|x64
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = preSolution
-		{881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|x64.Build.0 = Debug|Any CPU
-		{881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|x64.ActiveCfg = Release|Any CPU
-		{881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|x64.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
+    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+        Debug|Any CPU = Debug|Any CPU
+        Debug|x64 = Debug|x64
+        Release|Any CPU = Release|Any CPU
+        Release|x64 = Release|x64
+    EndGlobalSection
+    GlobalSection(ProjectConfigurationPlatforms) = preSolution
+        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|x64.ActiveCfg = Debug|Any CPU
+        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|x64.Build.0 = Debug|Any CPU
+        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|Any CPU.Build.0 = Release|Any CPU
+        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|x64.ActiveCfg = Release|Any CPU
+        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|x64.Build.0 = Release|Any CPU
+    EndGlobalSection
+    GlobalSection(SolutionProperties) = preSolution
+        HideSolutionNode = FALSE
+    EndGlobalSection
 EndGlobal
 ".Replace("`", "\"");
 
@@ -562,48 +563,48 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `A`, `Project1\A.csproj`, `{786E302A-96CE-43DC-B640-D6B6CC9BF6C0}`
 EndProject
 Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `B`, `Project2\B.csproj`, `{881C1674-4ECA-451D-85B6-D7C59B7F16FA}`
-	ProjectSection(ProjectDependencies) = postProject
-		{4A727FF8-65F2-401E-95AD-7C8BBFBE3167} = {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}
-	EndProjectSection
+    ProjectSection(ProjectDependencies) = postProject
+        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167} = {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}
+    EndProjectSection
 EndProject
 Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `C`, `Project3\C.csproj`, `{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}`
 EndProject
 Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Debug|x64 = Debug|x64
-		Release|Any CPU = Release|Any CPU
-		Release|x64 = Release|x64
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = preSolution
-		{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Debug|x64.Build.0 = Debug|Any CPU
-		{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Release|x64.ActiveCfg = Release|Any CPU
-		{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Release|x64.Build.0 = Release|Any CPU
-		{786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Debug|x64.Build.0 = Debug|Any CPU
-		{786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Release|x64.ActiveCfg = Release|Any CPU
-		{786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Release|x64.Build.0 = Release|Any CPU
-		{881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|x64.Build.0 = Debug|Any CPU
-		{881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|x64.ActiveCfg = Release|Any CPU
-		{881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|x64.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
+    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+        Debug|Any CPU = Debug|Any CPU
+        Debug|x64 = Debug|x64
+        Release|Any CPU = Release|Any CPU
+        Release|x64 = Release|x64
+    EndGlobalSection
+    GlobalSection(ProjectConfigurationPlatforms) = preSolution
+        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Debug|x64.ActiveCfg = Debug|Any CPU
+        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Debug|x64.Build.0 = Debug|Any CPU
+        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Release|Any CPU.Build.0 = Release|Any CPU
+        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Release|x64.ActiveCfg = Release|Any CPU
+        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Release|x64.Build.0 = Release|Any CPU
+        {786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Debug|x64.ActiveCfg = Debug|Any CPU
+        {786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Debug|x64.Build.0 = Debug|Any CPU
+        {786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Release|Any CPU.Build.0 = Release|Any CPU
+        {786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Release|x64.ActiveCfg = Release|Any CPU
+        {786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Release|x64.Build.0 = Release|Any CPU
+        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|x64.ActiveCfg = Debug|Any CPU
+        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|x64.Build.0 = Debug|Any CPU
+        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|Any CPU.Build.0 = Release|Any CPU
+        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|x64.ActiveCfg = Release|Any CPU
+        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|x64.Build.0 = Release|Any CPU
+    EndGlobalSection
+    GlobalSection(SolutionProperties) = preSolution
+        HideSolutionNode = FALSE
+    EndGlobalSection
 EndGlobal
 ".Replace("`", "\"");
 
@@ -651,29 +652,29 @@ EndGlobal
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 11
 Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `B`, `B.csproj`, `{881C1674-4ECA-451D-85B6-D7C59B7F16FA}`
-	ProjectSection(ProjectDependencies) = postProject
-		{4A727FF8-65F2-401E-95AD-7C8BBFBE3167} = {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}
-	EndProjectSection
+    ProjectSection(ProjectDependencies) = postProject
+        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167} = {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}
+    EndProjectSection
 EndProject
 Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `C`, `C.csproj`, `{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}`
 EndProject
 Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `D`, `D.csproj`, `{B6E7E06F-FC0B-48F1-911A-55E0E1566F00}`
 EndProject
 Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = preSolution
-		{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B6E7E06F-FC0B-48F1-911A-55E0E1566F00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B6E7E06F-FC0B-48F1-911A-55E0E1566F00}.Debug|Any CPU.Build.0 = Debug|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
+    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+        Debug|Any CPU = Debug|Any CPU
+    EndGlobalSection
+    GlobalSection(ProjectConfigurationPlatforms) = preSolution
+        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {B6E7E06F-FC0B-48F1-911A-55E0E1566F00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {B6E7E06F-FC0B-48F1-911A-55E0E1566F00}.Debug|Any CPU.Build.0 = Debug|Any CPU
+    EndGlobalSection
+    GlobalSection(SolutionProperties) = preSolution
+        HideSolutionNode = FALSE
+    EndGlobalSection
 EndGlobal
 ";
             const string projectBravoFileContents =
@@ -1109,30 +1110,30 @@ EndGlobal
                 @"
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ConsoleApplication2', 'ConsoleApplication2\ConsoleApplication2.csproj', '{5B97A3C7-3DEE-47A4-870F-5CB6384FE6A4}'
-	ProjectSection(ProjectDependencies) = postProject
-		{E0D295A1-CAFA-4E68-9929-468657DAAC6C} = {E0D295A1-CAFA-4E68-9929-468657DAAC6C}
-	EndProjectSection
+    ProjectSection(ProjectDependencies) = postProject
+        {E0D295A1-CAFA-4E68-9929-468657DAAC6C} = {E0D295A1-CAFA-4E68-9929-468657DAAC6C}
+    EndProjectSection
 EndProject
 Project('{F184B08F-C81C-45F6-A57F-5ABD9991F28F}') = 'ConsoleApplication1', 'ConsoleApplication1\ConsoleApplication1.vbproj', '{E0D295A1-CAFA-4E68-9929-468657DAAC6C}'
 EndProject
 Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{5B97A3C7-3DEE-47A4-870F-5CB6384FE6A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5B97A3C7-3DEE-47A4-870F-5CB6384FE6A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5B97A3C7-3DEE-47A4-870F-5CB6384FE6A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5B97A3C7-3DEE-47A4-870F-5CB6384FE6A4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E0D295A1-CAFA-4E68-9929-468657DAAC6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E0D295A1-CAFA-4E68-9929-468657DAAC6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E0D295A1-CAFA-4E68-9929-468657DAAC6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E0D295A1-CAFA-4E68-9929-468657DAAC6C}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
+    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+        Debug|Any CPU = Debug|Any CPU
+        Release|Any CPU = Release|Any CPU
+    EndGlobalSection
+    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+        {5B97A3C7-3DEE-47A4-870F-5CB6384FE6A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {5B97A3C7-3DEE-47A4-870F-5CB6384FE6A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {5B97A3C7-3DEE-47A4-870F-5CB6384FE6A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {5B97A3C7-3DEE-47A4-870F-5CB6384FE6A4}.Release|Any CPU.Build.0 = Release|Any CPU
+        {E0D295A1-CAFA-4E68-9929-468657DAAC6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {E0D295A1-CAFA-4E68-9929-468657DAAC6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {E0D295A1-CAFA-4E68-9929-468657DAAC6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {E0D295A1-CAFA-4E68-9929-468657DAAC6C}.Release|Any CPU.Build.0 = Release|Any CPU
+    EndGlobalSection
+    GlobalSection(SolutionProperties) = preSolution
+        HideSolutionNode = FALSE
+    EndGlobalSection
 EndGlobal
                 ";
 
@@ -1788,37 +1789,37 @@ EndGlobal
                             @"Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project('{E24C65DC-7377-472B-9ABA-BC803B73C61A}') = 'WebSite1', '..\WebSite1\', '{6B8F98F2-C976-4029-9321-5CCD73A174DA}'
-	ProjectSection(WebsiteProperties) = preProject
-		TargetFrameworkMoniker = 'SuperCoolReallyAwesomeFramework,Version=v1.0'
-		Debug.AspNetCompiler.VirtualPath = '/WebSite1'
-		Debug.AspNetCompiler.PhysicalPath = '..\WebSite1\'
-		Debug.AspNetCompiler.TargetPath = 'PrecompiledWeb\WebSite1\'
-		Debug.AspNetCompiler.Updateable = 'true'
-		Debug.AspNetCompiler.ForceOverwrite = 'true'
-		Debug.AspNetCompiler.FixedNames = 'false'
-		Debug.AspNetCompiler.Debug = 'True'
-		Release.AspNetCompiler.VirtualPath = '/WebSite1'
-		Release.AspNetCompiler.PhysicalPath = '..\WebSite1\'
-		Release.AspNetCompiler.TargetPath = 'PrecompiledWeb\WebSite1\'
-		Release.AspNetCompiler.Updateable = 'true'
-		Release.AspNetCompiler.ForceOverwrite = 'true'
-		Release.AspNetCompiler.FixedNames = 'false'
-		Release.AspNetCompiler.Debug = 'False'
-		VWDPort = '45602'
-		DefaultWebSiteLanguage = 'Visual Basic'
-	EndProjectSection
+    ProjectSection(WebsiteProperties) = preProject
+        TargetFrameworkMoniker = 'SuperCoolReallyAwesomeFramework,Version=v1.0'
+        Debug.AspNetCompiler.VirtualPath = '/WebSite1'
+        Debug.AspNetCompiler.PhysicalPath = '..\WebSite1\'
+        Debug.AspNetCompiler.TargetPath = 'PrecompiledWeb\WebSite1\'
+        Debug.AspNetCompiler.Updateable = 'true'
+        Debug.AspNetCompiler.ForceOverwrite = 'true'
+        Debug.AspNetCompiler.FixedNames = 'false'
+        Debug.AspNetCompiler.Debug = 'True'
+        Release.AspNetCompiler.VirtualPath = '/WebSite1'
+        Release.AspNetCompiler.PhysicalPath = '..\WebSite1\'
+        Release.AspNetCompiler.TargetPath = 'PrecompiledWeb\WebSite1\'
+        Release.AspNetCompiler.Updateable = 'true'
+        Release.AspNetCompiler.ForceOverwrite = 'true'
+        Release.AspNetCompiler.FixedNames = 'false'
+        Release.AspNetCompiler.Debug = 'False'
+        VWDPort = '45602'
+        DefaultWebSiteLanguage = 'Visual Basic'
+    EndProjectSection
 EndProject
 Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{6B8F98F2-C976-4029-9321-5CCD73A174DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6B8F98F2-C976-4029-9321-5CCD73A174DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
+    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+        Debug|Any CPU = Debug|Any CPU
+    EndGlobalSection
+    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+        {6B8F98F2-C976-4029-9321-5CCD73A174DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {6B8F98F2-C976-4029-9321-5CCD73A174DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+    EndGlobalSection
+    GlobalSection(SolutionProperties) = preSolution
+        HideSolutionNode = FALSE
+    EndGlobalSection
 EndGlobal
                 ";
 
@@ -1880,37 +1881,37 @@ EndGlobal
                             @"Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project('{E24C65DC-7377-472B-9ABA-BC803B73C61A}') = 'WebSite1', '..\WebSite1\', '{6B8F98F2-C976-4029-9321-5CCD73A174DA}'
-	ProjectSection(WebsiteProperties) = preProject
-		TargetFrameworkMoniker = 'Oscar the grouch'
-		Debug.AspNetCompiler.VirtualPath = '/WebSite1'
-		Debug.AspNetCompiler.PhysicalPath = '..\WebSite1\'
-		Debug.AspNetCompiler.TargetPath = 'PrecompiledWeb\WebSite1\'
-		Debug.AspNetCompiler.Updateable = 'true'
-		Debug.AspNetCompiler.ForceOverwrite = 'true'
-		Debug.AspNetCompiler.FixedNames = 'false'
-		Debug.AspNetCompiler.Debug = 'True'
-		Release.AspNetCompiler.VirtualPath = '/WebSite1'
-		Release.AspNetCompiler.PhysicalPath = '..\WebSite1\'
-		Release.AspNetCompiler.TargetPath = 'PrecompiledWeb\WebSite1\'
-		Release.AspNetCompiler.Updateable = 'true'
-		Release.AspNetCompiler.ForceOverwrite = 'true'
-		Release.AspNetCompiler.FixedNames = 'false'
-		Release.AspNetCompiler.Debug = 'False'
-		VWDPort = '45602'
-		DefaultWebSiteLanguage = 'Visual Basic'
-	EndProjectSection
+    ProjectSection(WebsiteProperties) = preProject
+        TargetFrameworkMoniker = 'Oscar the grouch'
+        Debug.AspNetCompiler.VirtualPath = '/WebSite1'
+        Debug.AspNetCompiler.PhysicalPath = '..\WebSite1\'
+        Debug.AspNetCompiler.TargetPath = 'PrecompiledWeb\WebSite1\'
+        Debug.AspNetCompiler.Updateable = 'true'
+        Debug.AspNetCompiler.ForceOverwrite = 'true'
+        Debug.AspNetCompiler.FixedNames = 'false'
+        Debug.AspNetCompiler.Debug = 'True'
+        Release.AspNetCompiler.VirtualPath = '/WebSite1'
+        Release.AspNetCompiler.PhysicalPath = '..\WebSite1\'
+        Release.AspNetCompiler.TargetPath = 'PrecompiledWeb\WebSite1\'
+        Release.AspNetCompiler.Updateable = 'true'
+        Release.AspNetCompiler.ForceOverwrite = 'true'
+        Release.AspNetCompiler.FixedNames = 'false'
+        Release.AspNetCompiler.Debug = 'False'
+        VWDPort = '45602'
+        DefaultWebSiteLanguage = 'Visual Basic'
+    EndProjectSection
 EndProject
 Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{6B8F98F2-C976-4029-9321-5CCD73A174DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6B8F98F2-C976-4029-9321-5CCD73A174DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
+    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+        Debug|Any CPU = Debug|Any CPU
+    EndGlobalSection
+    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+        {6B8F98F2-C976-4029-9321-5CCD73A174DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {6B8F98F2-C976-4029-9321-5CCD73A174DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+    EndGlobalSection
+    GlobalSection(SolutionProperties) = preSolution
+        HideSolutionNode = FALSE
+    EndGlobalSection
 EndGlobal
                 ";
 
@@ -1973,37 +1974,37 @@ EndGlobal
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project('{E24C65DC-7377-472B-9ABA-BC803B73C61A}') = 'WebSite1', '..\WebSite1\', '{6B8F98F2-C976-4029-9321-5CCD73A174DA}'
-	ProjectSection(WebsiteProperties) = preProject
-		TargetFrameworkMoniker = '.NETFramework,Version=v4.34'
-		Debug.AspNetCompiler.VirtualPath = '/WebSite1'
-		Debug.AspNetCompiler.PhysicalPath = '..\WebSite1\'
-		Debug.AspNetCompiler.TargetPath = 'PrecompiledWeb\WebSite1\'
-		Debug.AspNetCompiler.Updateable = 'true'
-		Debug.AspNetCompiler.ForceOverwrite = 'true'
-		Debug.AspNetCompiler.FixedNames = 'false'
-		Debug.AspNetCompiler.Debug = 'True'
-		Release.AspNetCompiler.VirtualPath = '/WebSite1'
-		Release.AspNetCompiler.PhysicalPath = '..\WebSite1\'
-		Release.AspNetCompiler.TargetPath = 'PrecompiledWeb\WebSite1\'
-		Release.AspNetCompiler.Updateable = 'true'
-		Release.AspNetCompiler.ForceOverwrite = 'true'
-		Release.AspNetCompiler.FixedNames = 'false'
-		Release.AspNetCompiler.Debug = 'False'
-		VWDPort = '45602'
-		DefaultWebSiteLanguage = 'Visual Basic'
-	EndProjectSection
+    ProjectSection(WebsiteProperties) = preProject
+        TargetFrameworkMoniker = '.NETFramework,Version=v4.34'
+        Debug.AspNetCompiler.VirtualPath = '/WebSite1'
+        Debug.AspNetCompiler.PhysicalPath = '..\WebSite1\'
+        Debug.AspNetCompiler.TargetPath = 'PrecompiledWeb\WebSite1\'
+        Debug.AspNetCompiler.Updateable = 'true'
+        Debug.AspNetCompiler.ForceOverwrite = 'true'
+        Debug.AspNetCompiler.FixedNames = 'false'
+        Debug.AspNetCompiler.Debug = 'True'
+        Release.AspNetCompiler.VirtualPath = '/WebSite1'
+        Release.AspNetCompiler.PhysicalPath = '..\WebSite1\'
+        Release.AspNetCompiler.TargetPath = 'PrecompiledWeb\WebSite1\'
+        Release.AspNetCompiler.Updateable = 'true'
+        Release.AspNetCompiler.ForceOverwrite = 'true'
+        Release.AspNetCompiler.FixedNames = 'false'
+        Release.AspNetCompiler.Debug = 'False'
+        VWDPort = '45602'
+        DefaultWebSiteLanguage = 'Visual Basic'
+    EndProjectSection
 EndProject
 Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{6B8F98F2-C976-4029-9321-5CCD73A174DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6B8F98F2-C976-4029-9321-5CCD73A174DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
+    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+        Debug|Any CPU = Debug|Any CPU
+    EndGlobalSection
+    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+        {6B8F98F2-C976-4029-9321-5CCD73A174DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {6B8F98F2-C976-4029-9321-5CCD73A174DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+    EndGlobalSection
+    GlobalSection(SolutionProperties) = preSolution
+        HideSolutionNode = FALSE
+    EndGlobalSection
 EndGlobal
                 ";
 
@@ -2028,6 +2029,167 @@ EndGlobal
             finally
             {
                 File.Delete(projectFilePath);
+            }
+        }
+
+        /// <summary>
+        /// Verifies that when target names are specified they end up in the metaproj.
+        /// </summary>
+        [Fact]
+        public void CustomTargetNamesAreInInMetaproj()
+        {
+            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper
+            (@"
+                Microsoft Visual Studio Solution File, Format Version 14.00
+                # Visual Studio 2015
+                Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""ClassLibrary1"", ""ClassLibrary1.csproj"", ""{6185CC21-BE89-448A-B3C0-D1C27112E595}""
+                EndProject
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Release|Any CPU = Release|Any CPU
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Mixed Platforms.ActiveCfg = CSConfig1|Any CPU
+                        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Mixed Platforms.Build.0 = CSConfig1|Any CPU
+                        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = CSConfig2|Any CPU
+                    EndGlobalSection
+                EndGlobal
+            ");
+
+            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, null, new List<string> { "One" });
+
+            Assert.Equal(1, instances[0].Targets.Count(target => String.Compare(target.Value.Name, "One", StringComparison.OrdinalIgnoreCase) == 0));
+
+            instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, null, new List<string> { "Two", "Three", "Four" });
+
+            Assert.Equal(1, instances[0].Targets.Count(target => String.Compare(target.Value.Name, "Two", StringComparison.OrdinalIgnoreCase) == 0));
+            Assert.Equal(1, instances[0].Targets.Count(target => String.Compare(target.Value.Name, "Three", StringComparison.OrdinalIgnoreCase) == 0));
+            Assert.Equal(1, instances[0].Targets.Count(target => String.Compare(target.Value.Name, "Four", StringComparison.OrdinalIgnoreCase) == 0));
+
+            instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, null, new List<string> { "Build" });
+
+            Assert.Equal(1, instances[0].Targets.Count(target => String.Compare(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase) == 0));
+
+            instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, null, new List<string> { "Five", "Rebuild" });
+
+            Assert.Equal(1, instances[0].Targets.Count(target => String.Compare(target.Value.Name, "Five", StringComparison.OrdinalIgnoreCase) == 0));
+            Assert.Equal(1, instances[0].Targets.Count(target => String.Compare(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase) == 0));
+
+            instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, null, new List<string> { "My_Project:Six" });
+
+            Assert.Equal(1, instances[0].Targets.Count(target => String.Compare(target.Value.Name, "Six", StringComparison.OrdinalIgnoreCase) == 0));
+        }
+
+        /// <summary>
+        /// Verifies that illegal user target names (the ones already used internally) don't crash the SolutionProjectGenerator
+        /// </summary>
+        [Fact]
+        public void IllegalUserTargetNamesDoNotThrow()
+        {
+            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper
+            (@"
+                Microsoft Visual Studio Solution File, Format Version 14.00
+                # Visual Studio 2015
+                Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""ClassLibrary1"", ""ClassLibrary1.csproj"", ""{6185CC21-BE89-448A-B3C0-D1C27112E595}""
+                EndProject
+                Global
+	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		                Debug|Any CPU = Debug|Any CPU
+		                Release|Any CPU = Release|Any CPU
+	                EndGlobalSection
+	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
+	                EndGlobalSection
+                EndGlobal
+            ");
+
+            ProjectInstance[] instances;
+
+            foreach (string builtInTargetName in new[]
+            {
+                null,
+                "Build",
+                "Rebuild",
+                "Clean",
+                "Publish",
+                "ClassLibrary1",
+                "ClassLibrary1:Clean",
+                "ClassLibrary1:Rebuild",
+                "GetSolutionConfigurationContents",
+                "ValidateProjects",
+            })
+            {
+                instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, null, builtInTargetName == null ? null : new [] { builtInTargetName });
+
+                Assert.Equal(1, instances.Length);
+
+                Assert.Equal(12, instances[0].TargetsCount);
+            }
+
+
+            instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, null, new[] { "Foo" });
+
+            Assert.Equal(1, instances.Length);
+
+            Assert.Equal(14, instances[0].TargetsCount);
+        }
+
+        /// <summary>
+        /// Verifies that when a user has an after.solution.sln.targets that the targets are not overridden by the solution project generator.
+        /// </summary>
+        [Fact]
+        public void AfterTargetsComeFromImport()
+        {
+            string baseDirectory = Guid.NewGuid().ToString("N");
+
+            string solutionFilePath = ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, $"{Guid.NewGuid():N}.sln"), @"
+                Microsoft Visual Studio Solution File, Format Version 14.00
+                # Visual Studio 2015
+                Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""ClassLibrary1"", ""ClassLibrary1.csproj"", ""{6185CC21-BE89-448A-B3C0-D1C27112E595}""
+                EndProject
+                Global
+	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		                Debug|Any CPU = Debug|Any CPU
+		                Release|Any CPU = Release|Any CPU
+	                EndGlobalSection
+	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
+	                EndGlobalSection
+                EndGlobal
+            ");
+
+            ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, $"after.{Path.GetFileName(solutionFilePath)}.targets"), @"
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+                    <Target Name=""MyTarget"">
+                        <MyTask />
+                    </Target>
+                </Project>");
+
+            try
+            {
+                var solutionFile = SolutionFile.Parse(solutionFilePath);
+
+                ProjectInstance projectInstance = SolutionProjectGenerator.Generate(solutionFile, null, null, BuildEventContext.Invalid, null, new[] { "MyTarget" }).FirstOrDefault();
+
+                Assert.NotNull(projectInstance);
+
+                Assert.True(projectInstance.Targets.ContainsKey("MyTarget"));
+
+                Assert.Equal(1, projectInstance.Targets["MyTarget"].Children.Count);
+
+                ProjectTaskInstance task = Assert.IsType<ProjectTaskInstance>(projectInstance.Targets["MyTarget"].Children[0]);
+
+                Assert.Equal("MyTask", task.Name);
+            }
+            finally
+            {
+                ObjectModelHelpers.DeleteTempProjectDirectory();
             }
         }
 

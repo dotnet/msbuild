@@ -40,12 +40,12 @@
       </trans-unit>
       <trans-unit id="ToolLocationHelper.UnsupportedFrameworkVersionForWindowsSdk">
         <source>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</source>
-        <target state="translated">La versione "{0}" di .NET Framework non è supportata se è destinata in modo esplicito a Windows SDK, che è supportato solo da .NET 4.5 e versioni successive.  Specificare un valore dell'enumerazione Microsoft.Build.Utilities.TargetDotNetFrameworkVersion che sia Version45 o successivo.</target>
+        <target state="translated">La versione "{0}" di .NET Framework non è supportata se è destinata in modo esplicito a Windows SDK, che è supportato solo da .NET 4.5 e versioni successive. Specificare un valore dell'enumerazione Microsoft.Build.Utilities.TargetDotNetFrameworkVersion che sia Version45 o successivo.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolLocationHelper.UnsupportedVisualStudioVersion">
         <source>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</source>
-        <target state="translated">La versione "{0}" di Visual Studio non è supportata.  Specificare un valore dall'enumerazione Microsoft.Build.Utilities.VisualStudioVersion.</target>
+        <target state="translated">La versione "{0}" di Visual Studio non è supportata. Specificare un valore dall'enumerazione Microsoft.Build.Utilities.VisualStudioVersion.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolTask.CommandTooLong">
@@ -125,7 +125,7 @@
       </trans-unit>
       <trans-unit id="Tracking_WriteTrackingCached">
         <source>Using cached output dependency table built from:</source>
-        <target state="translated">Utilizzata tabella delle dipendenze di output memorizzata nella cache compilata da:</target>
+        <target state="translated">Uso della tabella delle dipendenze di output memorizzata nella cache compilata da:</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_TrackingLogs">
@@ -135,7 +135,7 @@
       </trans-unit>
       <trans-unit id="Tracking_TrackingCached">
         <source>Using cached dependency table built from:</source>
-        <target state="translated">Utilizzata tabella delle dipendenze memorizzata nella cache compilata da:</target>
+        <target state="translated">Uso della tabella delle dipendenze memorizzata nella cache compilata da:</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_OutputsFor">
@@ -164,28 +164,28 @@
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledAsNoTrackingLog">
-        <source>{0} will be compiled as the tracking log is not available.</source>
-        <target state="translated">Verrà eseguita la compilazione di {0} poiché il log di rilevamento non è disponibile.</target>
+        <source>{0} will be compiled because the tracking log is not available.</source>
+        <target state="translated">Verrà eseguita la compilazione di {0} perché il log di rilevamento non è disponibile.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceNotInTrackingLog">
-        <source>{0} will be compiled as it was not found in the tracking log.</source>
-        <target state="translated">Verrà eseguita la compilazione di {0} poiché non presente nel log di rilevamento.</target>
+        <source>{0} will be compiled because it was not found in the tracking log.</source>
+        <target state="translated">Verrà eseguita la compilazione di {0} perché non è stato trovato nel log di rilevamento.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceOutputsNotAvailable">
-        <source>{0} will be compiled as not all outputs are available.</source>
-        <target state="translated">Verrà eseguita la compilazione di {0} poiché non tutti gli output sono disponibili.</target>
+        <source>{0} will be compiled because not all outputs are available.</source>
+        <target state="translated">Verrà eseguita la compilazione di {0} perché non tutti gli output sono disponibili.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledMissingDependency">
-        <source>{0} will be compiled as dependency {1} was missing.</source>
-        <target state="translated">Verrà eseguita la compilazione di {0} poiché la dipendenza {1} è mancante.</target>
+        <source>{0} will be compiled because dependency {1} was missing.</source>
+        <target state="translated">Verrà eseguita la compilazione di {0} perché manca la dipendenza {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledDependencyWasModifiedAt">
-        <source>{0} will be compiled as {1} was modified at {2}.</source>
-        <target state="translated">Verrà eseguita la compilazione di {0} poiché {1} è stato modificato in {2}.</target>
+        <source>{0} will be compiled because {1} was modified at {2}.</source>
+        <target state="translated">Verrà eseguita la compilazione di {0} perché {1} è stato modificato in {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiled">
@@ -209,8 +209,8 @@
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledOutputDoesNotExist">
-        <source>{0} will be compiled as output {1} does not exist.</source>
-        <target state="translated">Verrà eseguita la compilazione di {0} poiché l'output {1} non esiste.</target>
+        <source>{0} will be compiled because output {1} does not exist.</source>
+        <target state="translated">Verrà eseguita la compilazione di {0} perché l'output {1} non esiste.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_ReadTrackingLogs">
@@ -220,7 +220,7 @@
       </trans-unit>
       <trans-unit id="Tracking_ReadTrackingCached">
         <source>Using cached input dependency table built from:</source>
-        <target state="translated">Utilizzata tabella delle dipendenze di input memorizzata nella cache compilata da:</target>
+        <target state="translated">Uso della tabella delle dipendenze di input memorizzata nella cache compilata da:</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_OutputForRootNotFound">
@@ -235,12 +235,12 @@
       </trans-unit>
       <trans-unit id="Tracking_WriteLogEntryNotFound">
         <source>Could not find {0} in the write tracking log.</source>
-        <target state="translated">Impossibile trovare {0} nel log di rilevamento delle operazioni di scrittura.</target>
+        <target state="translated">{0} non è stato trovato nel log di rilevamento delle operazioni di scrittura.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_ReadLogEntryNotFound">
         <source>Could not find {0} in the read tracking log.</source>
-        <target state="translated">Impossibile trovare {0} nel log di rilevamento delle operazioni di lettura.</target>
+        <target state="translated">{0} non è stato trovato nel log di rilevamento delle operazioni di lettura.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourcesAndCorrespondingOutputMismatch">
@@ -260,7 +260,7 @@
       </trans-unit>
       <trans-unit id="Tracking_RebuildingDueToInvalidTLogContents">
         <source>MSB6009: Forcing a rebuild of all source files due to the contents of "{0}" being invalid.</source>
-        <target state="translated">MSB6009: verrà imposta una ricompilazione di tutti i file di origine poiché i contenuti di "{0}" non sono validi.</target>
+        <target state="translated">MSB6009: verrà imposta una ricompilazione di tutti i file di origine perché i contenuti di "{0}" non sono validi.</target>
         <note>{StrBegin="MSB6009: "}</note>
       </trans-unit>
       <trans-unit id="MuxLogger_BuildFinishedFailure">

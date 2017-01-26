@@ -329,6 +329,7 @@ namespace Microsoft.Build.UnitTests
 #else
         [Fact]
 #endif
+        [Trait("Category", "mono-osx-failing")]
         public void PropertyOverridesContainSemicolon()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();

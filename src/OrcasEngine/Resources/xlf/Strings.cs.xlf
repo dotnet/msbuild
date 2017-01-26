@@ -330,7 +330,7 @@
       </trans-unit>
       <trans-unit id="CannotReferenceItemMetadataWithoutItemName">
         <source>MSB4095: The item metadata %({0}) is being referenced without an item name.  Specify the item name by using %(itemname.{0}).</source>
-        <target state="translated">MSB4095: Na metadata položky %({0}) se odkazuje bez názvu položky. Zadejte název položky ve formátu %(itemname.{0}).</target>
+        <target state="translated">MSB4095: Na metadata položky %({0}) se odkazuje bez názvu položky.  Zadejte název položky ve formátu %(název_položky.{0}).</target>
         <note>{StrBegin="MSB4095: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4095: Na metadata položky %({0}) se odkazuje bez názvu položky. Zadejte název položky ve formátu %(itemname.{0}).</target>
@@ -700,7 +700,7 @@
       </trans-unit>
       <trans-unit id="ErrorWarningMessageNotSupported">
         <source>The &lt;{0}&gt; tag is no longer supported as a child of the &lt;Project&gt; element. Place this tag within a target, and add the name of the target to the "InitialTargets" attribute of the &lt;Project&gt; element.</source>
-        <target state="translated">Značka &lt;{0}&gt; již není podporována jako podřízený element elementu &lt;Project&gt;. Umístěte tuto značku v rámci cíle a přidejte název cíle do atributu InitialTargets elementu &lt;Project&gt;.</target>
+        <target state="translated">Značka &lt;{0}&gt; už není podporovaná jako podřízený element elementu &lt;Project&gt;. Umístěte tuto značku v rámci cíle a přidejte název cíle do atributu InitialTargets elementu &lt;Project&gt;.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="mt-suggestion">&lt;{0}&gt; Značka není podporován jako podřízený element &lt; Projekt &gt;. Umístěte tuto značku v rámci cíle a přidejte název cíle "InitialTargets" atribut elementu &lt; aplikace &gt; Project.</target>
@@ -844,7 +844,7 @@
       </trans-unit>
       <trans-unit id="IllFormedPropertyOpenParenthesisInCondition">
         <source>MSB4110: Expected a property at position {1} in condition "{0}". Did you forget the opening parenthesis after the '$'? To use a literal '$', use '%24' instead.</source>
-        <target state="translated">MSB4110: Na pozici {1} v podmínce {0} byla očekávána vlastnost. Nezapomněli jste zadat levou závorku za znakem $? Chcete-li použít literál $, použijte místo toho znak %24.</target>
+        <target state="translated">MSB4110: Na pozici {1} v podmínce {0} byla očekávána vlastnost. Nezapomněli jste zadat levou závorku za znak $? Chcete-li použít literál $, použijte místo toho znak %24.</target>
         <note>{StrBegin="MSB4110: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4110: Na pozici {1} v podmínce {0} byla očekávána vlastnost. Nezapomněli jste zadat levou závorku za znakem $? Chcete-li použít literál $, použijte místo toho znak %24.</target>
@@ -862,7 +862,7 @@
       </trans-unit>
       <trans-unit id="ImportedProjectNotFound">
         <source>MSB4019: The imported project "{0}" was not found. Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk.</source>
-        <target state="translated">MSB4019: Naimportovaný projekt {0} nebyl nalezen. Zkontrolujte, zda je cesta v deklaraci &lt;Import&gt; správná a zda soubor na disku existuje.</target>
+        <target state="translated">MSB4019: Naimportovaný projekt {0} nebyl nalezen. Zkontrolujte, jestli je cesta v deklaraci &lt;Import&gt; správná a jestli soubor na disku existuje.</target>
         <note>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="mt-suggestion">MSB4019: Importovaný projekt "{0}" nebyl nalezen. Zkontrolujte správnost cesty v &lt; Import &gt; prohlášení a zda soubor existuje na disku.</target>
@@ -2147,7 +2147,7 @@
       </trans-unit>
       <trans-unit id="TaskNotMarshalByRef">
         <source>MSB4077: The "{0}" task has been marked with the attribute LoadInSeparateAppDomain, but does not derive from MarshalByRefObject. Check that the task derives from MarshalByRefObject or AppDomainIsolatedTask.</source>
-        <target state="translated">MSB4077: Úloha {0} byla označena atributem LoadInSeparateAppDomain, není však odvozena od třídy MarshalByRefObject. Zkontrolujte, zda je úloha odvozena od třídy MarshalByRefObject nebo AppDomainIsolatedTask.</target>
+        <target state="translated">MSB4077: Úloha {0} byla označena atributem LoadInSeparateAppDomain, není ale odvozena od třídy MarshalByRefObject. Zkontrolujte, jestli je úloha odvozena od třídy MarshalByRefObject nebo AppDomainIsolatedTask.</target>
         <note>{StrBegin="MSB4077: "}LOCALIZATION: &lt;LoadInSeparateAppDomain&gt;, &lt;MarshalByRefObject&gt;, &lt;AppDomainIsolatedTask&gt; should not be localized.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="leveraged-tm">MSB4077: Úloha {0} byla označena atributem LoadInSeparateAppDomain, není však odvozena od třídy MarshalByRefObject. Zkontrolujte, zda je úloha odvozena od třídy MarshalByRefObject nebo AppDomainIsolatedTask.</target>
@@ -2618,7 +2618,7 @@
       </trans-unit>
       <trans-unit id="PropertyOutputOverridden">
         <source>The property "{0}" with value "{1}" is being overridden by another batch. The property is now: "{2}"</source>
-        <target state="translated">Probíhá přepsání vlastnosti {0} s hodnotou {1} jinou dávkou. Nová hodnota vlastnosti: {2}</target>
+        <target state="translated">Probíhá přepsání vlastnosti {0} s hodnotou {1} jinou dávkou. Nová hodnota vlastnosti: {2}.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">Probíhá přepsání vlastnosti {0} s hodnotou {1} jinou dávkou. Nová hodnota vlastnosti: {2}</target>

@@ -1947,6 +1947,41 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <target state="translated">요청된 작업을 수행하려면 {0} 위치에서 항목 요소를 개별 요소로 분할해야 하지만 {1}에서 항목 요소 분할을 사용할 수 없습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidSdkFormat">
+        <source>MSB4229: The value "{0}" is not valid for an Sdk specification. The attribute should be a semicolon-delimited list of Sdk-name/minimum-version pairs, separated by a forward slash.</source>
+        <target state="translated">MSB4229: SDK 사양에 대한 "{0}" 값이 잘못되었습니다. 이 특성은 세미콜론으로 구분된 SDK 이름/최소 버전 쌍(슬래시로 구분됨) 목록이어야 합니다.</target>
+        <note>{StrBegin="MSB4229: "}</note>
+      </trans-unit>
+      <trans-unit id="TaskFactoryNotSupportedFailure">
+        <source>MSB4801: The task factory "{0}" could not be loaded because this version of MSBuild does not support it.</source>
+        <target state="translated">MSB4801: 작업 팩터리 "{0}"은(는) 이 버전의 MSBuild에서 지원되지 않으므로 로드할 수 없습니다.</target>
+        <note>{StrBegin="MSB4801: "}</note>
+      </trans-unit>
+      <trans-unit id="TaskInstantiationFailureNotSupported">
+        <source>MSB4802: The "{0}" task could not be instantiated from "{1}". This version of MSBuild does not support {2}.</source>
+        <target state="translated">MSB4802: "{1}"에서 "{0}" 작업을 인스턴스화할 수 없습니다. 이 버전의 MSBuild는 {2}을(를) 지원하지 않습니다.</target>
+        <note>{StrBegin="MSB4802: "}</note>
+      </trans-unit>
+      <trans-unit id="InvalidGetPathOfFileAboveParameter">
+        <source>The parameter '{0}' can only be a file name and cannot include a directory.</source>
+        <target state="translated">'{0}' 매개 변수는 파일 이름일 수만 있으며 디렉터리를 포함할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileToReloadFromDoesNotExist">
+        <source>MSB4229: File to reload from does not exist: {0}</source>
+        <target state="translated">MSB4229: 다시 로드할 파일이 없음: {0}</target>
+        <note>{StrBegin="MSB4229: "}</note>
+      </trans-unit>
+      <trans-unit id="ValueNotSet">
+        <source>MSB4230: Value not set: {0}</source>
+        <target state="translated">MSB4230: 값이 설정되지 않음: {0}</target>
+        <note>{StrBegin="MSB4230: "}</note>
+      </trans-unit>
+      <trans-unit id="NoReloadOnUnsavedChanges">
+        <source>MSB4231: ProjectRootElement can't reload if it contains unsaved changes.</source>
+        <target state="translated">MSB4231: ProjectRootElement는 저장되지 않은 변경 내용이 있으므로 다시 로드할 수 없습니다.</target>
+        <note>{StrBegin="MSB4231: "}</note>
+      </trans-unit>
     </body>
   </file>
 </xliff>

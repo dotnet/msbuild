@@ -23,7 +23,7 @@
       <group id="XMAKECONVERSION/RESOURCES/STRINGS.RESX" datatype="resx" />
       <trans-unit id="CouldNotFindCompleteSolutionFile">
         <source>MSB2013: The project-to-project reference with GUID {0} could not be converted because a valid .SLN file containing all projects could not be found.</source>
-        <target state="translated">MSB2013: impossibile convertire il riferimento da progetto a progetto con GUID {0} perché non è stato trovato un file con estensione sln valido contenente tutti i progetti.</target>
+        <target state="translated">MSB2013: non è stato possibile convertire il riferimento da progetto a progetto con GUID {0} perché non è stato trovato un file con estensione sln valido contenente tutti i progetti.</target>
         <note>{StrBegin="MSB2013: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB2013: impossibile convertire il riferimento da progetto a progetto con GUID {0} perché non è stato trovato un file con estensione sln valido contenente tutti i progetti.</target>
@@ -104,7 +104,7 @@
       </trans-unit>
       <trans-unit id="ProjectFileNotFound">
         <source>MSB2007: Visual Studio cannot find the project file "{0}".</source>
-        <target state="translated">MSB2007: impossibile trovare il file di progetto "{0}".</target>
+        <target state="translated">MSB2007: il file di progetto "{0}" non è stato trovato.</target>
         <note>{StrBegin="MSB2007: "}This error shouldn't be possible when converting through Visual Studio, but we have it just in case.</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB2007: impossibile trovare il file di progetto "{0}".</target>
@@ -113,7 +113,7 @@
       </trans-unit>
       <trans-unit id="ProjectNotListingInSolutionFile">
         <source>MSB2014: The project-to-project reference with GUID {0} cannot be converted because it is not listed in the file '{1}'.</source>
-        <target state="translated">MSB2014: impossibile convertire il riferimento da progetto a progetto con GUID {0} perché non è elencato nel file '{1}'.</target>
+        <target state="translated">MSB2014: non è possibile convertire il riferimento da progetto a progetto con GUID {0} perché non è elencato nel file '{1}'.</target>
         <note>{StrBegin="MSB2014: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB2014: impossibile convertire il riferimento da progetto a progetto con GUID {0} perché non è elencato nel file '{1}'.</target>
@@ -122,7 +122,7 @@
       </trans-unit>
       <trans-unit id="ProjectTypeCannotBeConverted">
         <source>MSB2008: This Visual Studio project system cannot convert "{0}" projects.  It can only be used to convert C#, VB, and VJ# client projects.</source>
-        <target state="translated">MSB2008: impossibile convertire "{0}" progetti con il sistema del progetto Visual Studio. Tale sistema può essere utilizzato solo per convertire progetti client C#, VB e VJ#.</target>
+        <target state="translated">MSB2008: non è possibile convertire "{0}" progetti con il sistema del progetto Visual Studio. Tale sistema può essere usato solo per convertire progetti client C#, VB e VJ#.</target>
         <note>{StrBegin="MSB2008: "}It appears we've been asked to convert a project that either wasn't created by the Visual Studio managed client project system (C#, VB, J#), or that has been hand-modified or corrupted.  You would get this error if this conversion utility was invoked on a VC++ project (.VCPROJ) for example.  In this case, the {0} would be replaced with "Visual C++".</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB2008: impossibile convertire "{0}" progetti con il sistema del progetto Visual Studio. Tale sistema può essere utilizzato solo per convertire progetti client C#, VB e VJ#.</target>

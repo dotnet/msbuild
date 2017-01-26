@@ -5,7 +5,7 @@
       <group id="MICROSOFT.BUILD.TASKS/MANIFESTUTIL/RESOURCES/STRINGS.RESX" datatype="resx" />
       <trans-unit id="ComImporter.LocalServerNotSupported">
         <source>Out of process servers are not supported</source>
-        <target state="translated">I server out-of-process non sono supportati.</target>
+        <target state="translated">I server out-of-process non sono supportati</target>
         <note />
       </trans-unit>
       <trans-unit id="ComImporter.MissingValue">
@@ -25,7 +25,7 @@
       </trans-unit>
       <trans-unit id="ComImporter.TypeLibraryLoadFailure">
         <source>Could not load type library.</source>
-        <target state="translated">Impossibile caricare la libreria dei tipi.</target>
+        <target state="translated">Non è stato possibile caricare la libreria dei tipi.</target>
         <note />
       </trans-unit>
       <trans-unit id="ComImporter.SubKeyNotImported">
@@ -40,7 +40,7 @@
       </trans-unit>
       <trans-unit id="SecurityUtil.SignTargetNotFound">
         <source>The file to be signed {0} could not be found.</source>
-        <target state="translated">Impossibile trovare il file da firmare {0}.</target>
+        <target state="translated">Il file da firmare {0} non è stato trovato.</target>
         <note />
       </trans-unit>
       <trans-unit id="SecurityUtil.SigntoolFail">
@@ -60,12 +60,12 @@
       </trans-unit>
       <trans-unit id="SecurityUtil.TimestampUrlNotFound">
         <source>Timestamp URL server name or address could not be resolved.</source>
-        <target state="translated">Impossibile risolvere il nome o l'indirizzo del server degli URL di timestamp.</target>
+        <target state="translated">Non è stato possibile risolvere il nome o l'indirizzo del server degli URL di timestamp.</target>
         <note />
       </trans-unit>
       <trans-unit id="SecurityUtil.OnlyRSACertsAreAllowed">
         <source>Only certificates using RSA encryption are valid for signing ClickOnce manifests.</source>
-        <target state="translated">Per la firma di manifesti ClickOnce è possibile utilizzare solo i certificati con crittografia RSA.</target>
+        <target state="translated">Per la firma di manifesti ClickOnce è possibile usare solo i certificati con crittografia RSA.</target>
         <note />
       </trans-unit>
       <trans-unit id="TrustInfo.RequestedExecutionLevelComment">

@@ -2487,6 +2487,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")] // https://github.com/Microsoft/msbuild/issues/309
+        [Trait("Category", "mono-osx-failing")] // https://github.com/Microsoft/msbuild/issues/677
         public void DontLockP2PReferenceWhenResolvingSystemTypes()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -2666,6 +2667,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")] // https://github.com/Microsoft/msbuild/issues/309
+        [Trait("Category", "mono-osx-failing")] // https://github.com/Microsoft/msbuild/issues/677
         public void ReferencedAssemblySpecifiedUsingRelativePath()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting

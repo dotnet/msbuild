@@ -1947,6 +1947,41 @@ Utilização:          {0} Utilização Média: {1:###.0}</target>
         <target state="translated">A operação solicitada precisa dividir o elemento do item no local {0} em elementos individuais, mas a divisão de elemento de item está desabilitada com {1}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidSdkFormat">
+        <source>MSB4229: The value "{0}" is not valid for an Sdk specification. The attribute should be a semicolon-delimited list of Sdk-name/minimum-version pairs, separated by a forward slash.</source>
+        <target state="translated">MSB4229: o valor "{0}" não é válido para uma especificação de SDK. O atributo deve ser uma lista delimitada por ponto e vírgula de pares de nome de SDK/versão mínima, separados por uma barra.</target>
+        <note>{StrBegin="MSB4229: "}</note>
+      </trans-unit>
+      <trans-unit id="TaskFactoryNotSupportedFailure">
+        <source>MSB4801: The task factory "{0}" could not be loaded because this version of MSBuild does not support it.</source>
+        <target state="translated">MSB4801: o alocador de tarefa "{0}" não pôde ser carregado pois essa versão do MSBuild não dá suporte a ele.</target>
+        <note>{StrBegin="MSB4801: "}</note>
+      </trans-unit>
+      <trans-unit id="TaskInstantiationFailureNotSupported">
+        <source>MSB4802: The "{0}" task could not be instantiated from "{1}". This version of MSBuild does not support {2}.</source>
+        <target state="translated">MSB4802: a tarefa "{0}" não pôde ser instanciada de "{1}". Essa versão do MSBuild não dá suporte ao {2}.</target>
+        <note>{StrBegin="MSB4802: "}</note>
+      </trans-unit>
+      <trans-unit id="InvalidGetPathOfFileAboveParameter">
+        <source>The parameter '{0}' can only be a file name and cannot include a directory.</source>
+        <target state="translated">O parâmetro '{0}' pode ser somente um nome de arquivo e não pode incluir um diretório.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileToReloadFromDoesNotExist">
+        <source>MSB4229: File to reload from does not exist: {0}</source>
+        <target state="translated">MSB4229: o arquivo do qual recarregar não existe: {0}</target>
+        <note>{StrBegin="MSB4229: "}</note>
+      </trans-unit>
+      <trans-unit id="ValueNotSet">
+        <source>MSB4230: Value not set: {0}</source>
+        <target state="translated">MSB4230: valor não definido: {0}</target>
+        <note>{StrBegin="MSB4230: "}</note>
+      </trans-unit>
+      <trans-unit id="NoReloadOnUnsavedChanges">
+        <source>MSB4231: ProjectRootElement can't reload if it contains unsaved changes.</source>
+        <target state="translated">MSB4231: o ProjectRootElement não poderá ser recarregado se ele contiver mudanças não salvas.</target>
+        <note>{StrBegin="MSB4231: "}</note>
+      </trans-unit>
     </body>
   </file>
 </xliff>

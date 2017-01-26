@@ -1947,6 +1947,41 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <target state="translated">请求的操作需要将 {0} 处的项元素拆分为单个元素，但 {1} 禁用了项元素拆分。</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidSdkFormat">
+        <source>MSB4229: The value "{0}" is not valid for an Sdk specification. The attribute should be a semicolon-delimited list of Sdk-name/minimum-version pairs, separated by a forward slash.</source>
+        <target state="translated">MSB4229: 值“{0}”对 Sdk 规范无效。此属性应该是以分号分隔的Sdk-name/minimum-version 对（用正斜杠分隔）的列表。</target>
+        <note>{StrBegin="MSB4229: "}</note>
+      </trans-unit>
+      <trans-unit id="TaskFactoryNotSupportedFailure">
+        <source>MSB4801: The task factory "{0}" could not be loaded because this version of MSBuild does not support it.</source>
+        <target state="translated">MSB4801: 无法加载任务工厂“{0}”，因为此版本的 MSBuild 不支持它。</target>
+        <note>{StrBegin="MSB4801: "}</note>
+      </trans-unit>
+      <trans-unit id="TaskInstantiationFailureNotSupported">
+        <source>MSB4802: The "{0}" task could not be instantiated from "{1}". This version of MSBuild does not support {2}.</source>
+        <target state="translated">MSB4802: 无法从“{1}”实例化“{0}”任务。此版本的 MSBuild 不支持 {2}。</target>
+        <note>{StrBegin="MSB4802: "}</note>
+      </trans-unit>
+      <trans-unit id="InvalidGetPathOfFileAboveParameter">
+        <source>The parameter '{0}' can only be a file name and cannot include a directory.</source>
+        <target state="translated">参数“{0}”只能是文件名，不能包含目录。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileToReloadFromDoesNotExist">
+        <source>MSB4229: File to reload from does not exist: {0}</source>
+        <target state="translated">MSB4229: 要重新加载的文件不存在: {0}</target>
+        <note>{StrBegin="MSB4229: "}</note>
+      </trans-unit>
+      <trans-unit id="ValueNotSet">
+        <source>MSB4230: Value not set: {0}</source>
+        <target state="translated">MSB4230: 未设置值: {0}</target>
+        <note>{StrBegin="MSB4230: "}</note>
+      </trans-unit>
+      <trans-unit id="NoReloadOnUnsavedChanges">
+        <source>MSB4231: ProjectRootElement can't reload if it contains unsaved changes.</source>
+        <target state="translated">MSB4231: 如果 ProjectRootElement 包含未保存的更改，则无法重新加载。</target>
+        <note>{StrBegin="MSB4231: "}</note>
+      </trans-unit>
     </body>
   </file>
 </xliff>

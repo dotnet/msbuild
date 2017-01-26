@@ -644,7 +644,7 @@
       </trans-unit>
       <trans-unit id="ItemDoesNotContainValueForUnqualifiedMetadata">
         <source>MSB4096: The item "{0}" in item list "{1}" does not define a value for metadata "{2}".  In order to use this metadata, either qualify it by specifying %({1}.{2}), or ensure that all items in this list define a value for this metadata.</source>
-        <target state="translated">MSB4096: Položka {0} v seznamu položek {1} nedefinuje hodnotu pro metadata {2}.  Chcete-li používat tato metadata, kvalifikujte je zadáním %({1}.{2}) nebo zajistěte, aby všechny položky v tomto seznamu definovaly hodnotu pro tato metadata.</target>
+        <target state="translated">MSB4096: Položka {0} v seznamu položek {1} nedefinuje hodnotu pro metadata {2}. Chcete-li používat tato metadata, kvalifikujte je zadáním %({1}.{2}) nebo zajistěte, aby všechny položky v tomto seznamu definovaly hodnotu pro tato metadata.</target>
         <note>{StrBegin="MSB4096: "}</note>
       </trans-unit>
       <trans-unit id="ItemListNotAllowedInThisConditional">
@@ -697,7 +697,7 @@
       </trans-unit>
       <trans-unit id="MissingTaskError">
         <source>MSB4036: The "{0}" task was not found. Check the following: 1.) The name of the task in the project file is the same as the name of the task class. 2.) The task class is "public" and implements the Microsoft.Build.Framework.ITask interface. 3.) The task is correctly declared with &lt;UsingTask&gt; in the project file, or in the *.tasks files located in the "{1}" directory.</source>
-        <target state="translated">MSB4036: Nebyla nalezena úloha {0}. Zkontrolujte, zda platí následující skutečnosti: 1.) Název úlohy v souboru projektu je stejný jako název třídy úloh. 2.) Třída úloh je veřejná (public) a implementuje rozhraní Microsoft.Build.Framework.ITask. 3.) Úloha je správně deklarována s elementem v souboru projektu nebo v souborech *.tasks v adresáři {1}.</target>
+        <target state="translated">MSB4036: Nebyla nalezena úloha {0}. Zkontrolujte, zda platí následující skutečnosti: 1.) Název úlohy v souboru projektu je stejný jako název třídy úloh. 2.) Třída úloh je veřejná (public) a implementuje rozhraní Microsoft.Build.Framework.ITask. 3.) Úloha je správně deklarována s elementem &lt;UsingTask&gt; v souboru projektu nebo v souborech *.tasks v adresáři {1}.</target>
         <note>{StrBegin="MSB4036: "}LOCALIZATION: &lt;UsingTask&gt; and "*.tasks" should not be localized.</note>
       </trans-unit>
       <trans-unit id="MSBuildToolsPathIsNotSpecified">
@@ -1023,19 +1023,19 @@
       </trans-unit>
       <trans-unit id="SolutionVenusProjectNoClean">
         <source>Web projects do not support the "Clean" target.  Continuing with remaining projects ...</source>
-        <target state="translated">Webové projekty nepodporují cíl Clean.  Pokračuje zpracování zbývajících projektů...</target>
+        <target state="translated">Webové projekty nepodporují cíl Clean. Pokračuje zpracování zbývajících projektů...</target>
         <note>UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do not localize "Clean".</note>
       </trans-unit>
       <trans-unit id="SolutionVenusProjectNoPublish">
         <source>Web projects do not support the "Publish" target.  Continuing with remaining projects ...</source>
-        <target state="translated">Webové projekty nepodporují cíl Publish.  Pokračuje zpracování zbývajících projektů...</target>
+        <target state="translated">Webové projekty nepodporují cíl Publish. Pokračuje zpracování zbývajících projektů...</target>
         <note>UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do not localize "Publish".</note>
       </trans-unit>
       <trans-unit id="SolutionVenusProjectSkipped">
         <source>Skipping because the "$(AspNetConfiguration)" configuration is not supported for this web project.  You can use the AspNetConfiguration property to override the configuration used for building web projects, by adding /p:AspNetConfiguration=&lt;value&gt; to the command line. Currently web projects only support Debug and Release configurations.</source>
-        <target state="translated">Vynecháno, protože konfigurace $(AspNetConfiguration) není pro tento webový projekt podporována.  Pomocí vlastnosti AspNetConfiguration můžete přepsat konfiguraci používanou k sestavování webových projektů, a to přidáním příkazu /p:AspNetConfiguration= do příkazového řádku. Webové projekty nyní podporují pouze konfigurace Debug a Release.</target>
+        <target state="translated">Vynecháno, protože konfigurace $(AspNetConfiguration) není pro tento webový projekt podporována. Pomocí vlastnosti AspNetConfiguration můžete přepsat konfiguraci používanou k sestavování webových projektů, a to přidáním příkazu /p:AspNetConfiguration=&lt;hodnota&gt; do příkazového řádku. Webové projekty nyní podporují pouze konfigurace Debug a Release.</target>
         <note>
     UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do NOT localize "AspNetConfiguration", "Debug", "Release".
@@ -1043,7 +1043,7 @@
       </trans-unit>
       <trans-unit id="TargetAlreadyCompleteFailure">
         <source>Target "{0}" skipped. Previously built unsuccessfully.</source>
-        <target state="translated">Cíl {0} byl vynechán. Předchozí sestavení se nepovedlo.</target>
+        <target state="translated">Cíl {0} byl vynechán. Předchozí sestavení se nezdařilo.</target>
         <note />
       </trans-unit>
       <trans-unit id="TargetAlreadyCompleteSuccess">
@@ -1946,6 +1946,41 @@ Využití:          Průměrné využití {0}: {1:###.0}</target>
         <source>The requested operation needs to split the item element at location {0} into individual elements but item element splitting is disabled with {1}.</source>
         <target state="translated">Požadovaná operace potřebuje rozdělit element položky v umístění {0} na jednotlivé elementy, ale {1} dělení elementů položek zakazuje.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="InvalidSdkFormat">
+        <source>MSB4229: The value "{0}" is not valid for an Sdk specification. The attribute should be a semicolon-delimited list of Sdk-name/minimum-version pairs, separated by a forward slash.</source>
+        <target state="translated">MSB4229: Hodnota {0} není pro specifikaci Sdk platná. Atribut by měl být seznam párů název-Sdk/minimální-verze s lomítkem oddělených středníkem.</target>
+        <note>{StrBegin="MSB4229: "}</note>
+      </trans-unit>
+      <trans-unit id="TaskFactoryNotSupportedFailure">
+        <source>MSB4801: The task factory "{0}" could not be loaded because this version of MSBuild does not support it.</source>
+        <target state="translated">MSB4801: Objekt pro vytváření úloh {0} nešlo načíst, protože tato verze MSBuildu ho nepodporuje.</target>
+        <note>{StrBegin="MSB4801: "}</note>
+      </trans-unit>
+      <trans-unit id="TaskInstantiationFailureNotSupported">
+        <source>MSB4802: The "{0}" task could not be instantiated from "{1}". This version of MSBuild does not support {2}.</source>
+        <target state="translated">MSB4802: Z úlohy {0} nešlo z {1} vytvořit instanci. Tato verze MSBuildu nepodporuje {2}.</target>
+        <note>{StrBegin="MSB4802: "}</note>
+      </trans-unit>
+      <trans-unit id="InvalidGetPathOfFileAboveParameter">
+        <source>The parameter '{0}' can only be a file name and cannot include a directory.</source>
+        <target state="translated">Parametr {0} může být jenom název souboru a nemůže obsahovat adresář.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileToReloadFromDoesNotExist">
+        <source>MSB4229: File to reload from does not exist: {0}</source>
+        <target state="translated">MSB4229: Soubor, z kterého se mají data znovu načíst, neexistuje: {0}</target>
+        <note>{StrBegin="MSB4229: "}</note>
+      </trans-unit>
+      <trans-unit id="ValueNotSet">
+        <source>MSB4230: Value not set: {0}</source>
+        <target state="translated">MSB4230: Hodnota není nastavená: {0}</target>
+        <note>{StrBegin="MSB4230: "}</note>
+      </trans-unit>
+      <trans-unit id="NoReloadOnUnsavedChanges">
+        <source>MSB4231: ProjectRootElement can't reload if it contains unsaved changes.</source>
+        <target state="translated">MSB4231: ProjectRootElement se nemůže znovu načíst, když obsahuje neuložené změny.</target>
+        <note>{StrBegin="MSB4231: "}</note>
       </trans-unit>
     </body>
   </file>

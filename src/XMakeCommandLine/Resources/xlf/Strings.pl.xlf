@@ -49,9 +49,9 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" and "MSBuild" should not be localized.</note>
       </trans-unit>
       <trans-unit id="HelpMessage_1_Syntax">
-        <source>Syntax:              MSBuild.exe [options] [project file]
+        <source>Syntax:              MSBuild.exe [options] [project file | directory]
 </source>
-        <target state="translated">Składnia:              MSBuild.exe [opcje] [plik projektu]
+        <target state="translated">Składnia:              MSBuild.exe [opcje] [plik projektu | katalog]
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -66,12 +66,16 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
         <source>Description:         Builds the specified targets in the project file. If
                      a project file is not specified, MSBuild searches the
                      current working directory for a file that has a file
-                     extension that ends in "proj" and uses that file.
+                     extension that ends in "proj" and uses that file.  If
+                     a directory is specified, MSBuild searches that
+                     directory for a project file.
 </source>
         <target state="translated">Opis:         Kompiluje określone elementy docelowe w pliku projektu. Jeśli
                      nie określono pliku projektu, program MSBuild wyszukuje w
                      bieżącym katalogu roboczym plik, którego rozszerzenie
-                     kończy się na „proj”, i używa tego pliku.
+                     kończy się na „proj”, i używa tego pliku. Jeśli
+                     określono katalog, program MSBuild wyszuka
+                     plik projektu w tym katalogu.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -1179,6 +1183,86 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
         <source>{0} ({1},{2})</source>
         <target state="translated">{0} ({1},{2})</target>
         <note>A file location to be embedded in a string.</note>
+      </trans-unit>
+      <trans-unit id="AmbiguousProjectDirectoryError">
+        <source>MSBUILD : error MSB1050: Specify which project or solution file to use because the folder "{0}" contains more than one project or solution file.</source>
+        <target state="translated">MSBUILD: błąd MSB1050: określ plik projektu lub rozwiązania, który zostanie użyty, ponieważ folder „{0}” zawiera więcej niż jeden plik projektu lub rozwiązania.</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1050: "}UE: If no project or solution file is explicitly specified on the MSBuild.exe command-line, then the engine searches for a
+      project or solution file in the current directory by looking for *.*PROJ and *.SLN. If more than one file is found that matches this wildcard, we
+      fire this error.
+      LOCALIZATION: The prefix "MSB1050 : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_28_WarnAsErrorSwitch">
+        <source>  /warnaserror[:code[;code2]]
+                     List of warning codes to treats as errors.  Use a semicolon
+                     or a comma to separate multiple warning codes. To treat all
+                     warnings as errors use the switch with no values.
+                     (Short form: /err[:c;[c2]])
+
+                     Example:
+                       /warnaserror:MSB4130
+
+                     When a warning is treated as an error the target will
+                     continue to execute as if it was a warning but the overall
+                     build will fail.
+    </source>
+        <target state="translated">  /warnaserror[:code[;code2]]
+                     Lista kodów ostrzeżeń traktowanych jak błędy. Oddziel
+                     kody ostrzeżeń średnikami lub przecinkami. Aby
+                     traktować wszystkie ostrzeżenia jak błędy, użyj przełącznika bez wartości.
+                     (Skrócona forma: /err[:c;[c2]])
+
+                     Przykład:
+                       /warnaserror:MSB4130
+
+                     Gdy ostrzeżenie zostanie potraktowane jak błąd, element
+                     docelowy będzie nadal wykonywany jak w przypadku
+                     ostrzeżenia, ale kompilacja nie powiedzie się.
+    </target>
+        <note>
+      LOCALIZATION: "/warnaserror" and "/err" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_29_WarnAsMessageSwitch">
+        <source>  /warnasmessage[:code[;code2]]
+                     List of warning codes to treats as low importance
+                     messages.  Use a semicolon or a comma to separate
+                     multiple warning codes.
+                     (Short form: /nowarn[:c;[c2]])
+
+                     Example:
+                       /warnasmessage:MSB3026
+    </source>
+        <target state="translated">  /warnasmessage[:code[;code2]]
+                     Lista kodów ostrzeżeń traktowanych jak komunikaty o małej
+                     ważności. Oddziel kody ostrzeżeń średnikami
+                     lub przecinkami.
+                     (Skrócona forma: /nowarn[:c;[c2]])
+
+                     Przykład:
+                       /warnasmessage:MSB3026
+    </target>
+        <note>
+      LOCALIZATION: "/warnasmessage" and "/nowarn" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="ParameterRequiredError">
+        <source>MSBUILD : error MSB1049: The {0} parameter must be specified</source>
+        <target state="translated">MSBUILD: błąd MSB1049: konieczne jest określenie parametru {0}</target>
+        <note>{StrBegin="MSBUILD : error MSB1049: "}</note>
+      </trans-unit>
+      <trans-unit id="MissingWarnAsMessageParameterError">
+        <source>MSBUILD : error MSB1051: Specify one or more warning codes to treat as low importance messages when using the /warnasmessage switch.</source>
+        <target state="translated">MSBUILD: błąd MSB1051: określ kody ostrzeżeń traktowane jak komunikaty o małej ważności podczas używania przełącznika /warnasmessage.</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1051: "}
+      UE: This happens if the user does something like "msbuild.exe /warnasmessage:" without any codes.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
       </trans-unit>
     </body>
   </file>

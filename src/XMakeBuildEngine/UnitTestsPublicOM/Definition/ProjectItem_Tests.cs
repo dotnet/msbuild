@@ -643,6 +643,96 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Theory]
+        [InlineData(ItemWithIncludeAndExclude,
+            @"**\*",
+            @"excludes\**.*",
+            new[]
+            {
+                @"a.cs",
+                @"excludes\b.cs",
+                @"excludes\subdir\c.cs",
+            },
+            new[]
+            {
+                @"a.cs",
+                "build.proj",
+                @"excludes\b.cs",
+                @"excludes\subdir\c.cs",
+            })]
+        [InlineData(ItemWithIncludeAndExclude,
+            @"**\*",
+            @"excludes\**..\*",
+            new[]
+            {
+                @"a.cs",
+                @"excludes\b.cs",
+                @"excludes\subdir\c.cs",
+            },
+            new[]
+            {
+                @"a.cs",
+                "build.proj",
+                @"excludes\b.cs",
+                @"excludes\subdir\c.cs",
+            })]
+        [InlineData(ItemWithIncludeAndExclude,
+            @"**\*",
+            @"**.*",
+            new[]
+            {
+                @"a.cs",
+                @"excludes\b.cs",
+                @"excludes\subdir\c.cs",
+            },
+            new[]
+            {
+                @"a.cs",
+                "build.proj",
+                @"excludes\b.cs",
+                @"excludes\subdir\c.cs",
+            })]
+        [InlineData(ItemWithIncludeAndExclude,
+            "*;**a",
+            "**a",
+            new[]
+            {
+                "a",
+            },
+            new[]
+            {
+                "a",
+                "build.proj"
+            })]
+        [InlineData(ItemWithIncludeAndExclude,
+            @"**1;**2",
+            @"**1",
+            new[]
+            {
+                @"1",
+                @"2",
+                @"excludes\1",
+                @"excludes\2",
+                @"excludes\subdir\1",
+                @"excludes\subdir\2",
+            },
+            new[]
+            {
+                "**2"
+            })]
+        [InlineData(ItemWithIncludeAndExclude,
+            @":||;||:",
+            @"||:",
+            new string[0],
+            new[]
+            {
+                ":||"
+            })]
+        public void ExcludeAndIncludeConsideredAsLiteralsWhenFilespecIsIllegal(string projectContents, string includeString, string excludeString, string[] inputFiles, string[] expectedInclude)
+        {
+            TestIncludeExclude(projectContents, inputFiles, expectedInclude, includeString, excludeString, normalizeSlashes: true);
+        }
+
+        [Theory]
         [PlatformSpecific(Xunit.PlatformID.Windows)]
         [InlineData(ItemWithIncludeAndExclude,
             @"src/**/*.cs",

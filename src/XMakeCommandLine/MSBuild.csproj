@@ -25,6 +25,7 @@
     <AppConfig Condition="'$(Platform)' == 'x64'">app.amd64.config</AppConfig>
     <ApplicationIcon>MSBuild.ico</ApplicationIcon>
     <TargetExt>.dll</TargetExt>
+    <LargeAddressAware>true</LargeAddressAware>
   </PropertyGroup>
   <PropertyGroup Condition="'$(MonoBuild)' == 'true'">
     <TargetExt>.dll</TargetExt>

@@ -2979,6 +2979,26 @@
         <target state="translated">MSB3891: в файле проекта указан как "{0}", так и "{1}". Укажите только один из них.</target>
         <note />
       </trans-unit>
+      <trans-unit id="WriteLinesToFile.ErrorReadingFile">
+        <source>MSB3492: Could not read existing file "{0}" to determine whether its contents are up to date. Overwriting it.</source>
+        <target state="translated">MSB3492: не удалось считать данные из существующего файла ("{0}") и определить, актуально ли его содержимое. Файл перезаписывается.</target>
+        <note>{StrBegin="MSB3491: "}</note>
+      </trans-unit>
+      <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
+        <source>MSB3493: </source>
+        <target state="translated">MSB3493: </target>
+        <note>{StrBegin="Skipping write to file "{0}" because content would not change."}</note>
+      </trans-unit>
+      <trans-unit id="Telemetry.IllegalEventDataString">
+        <source>The property "{0}" in the telemetry event data property list "{1}" is malformed.  Please only pass in a semicolon-delimited list of constant string values separated by "=", e.g., "Property1=Value1;Property2=Value2".</source>
+        <target state="translated">свойство "{0}" в списке свойств с данными событий телеметрии "{1}" имеет неправильный формат. Список, разделенный точками с запятой, должен содержать только константные строковые значения, разделенные "=", например "Свойство_1=Значение_1;Свойство_2=Значение_2".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorAndWarning.EmptyMessage">
+        <source>(No message specified)</source>
+        <target state="translated">(текст сообщения не указан)</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

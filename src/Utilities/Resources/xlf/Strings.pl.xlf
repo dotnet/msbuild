@@ -164,28 +164,28 @@
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledAsNoTrackingLog">
-        <source>{0} will be compiled as the tracking log is not available.</source>
+        <source>{0} will be compiled because the tracking log is not available.</source>
         <target state="translated">Plik {0} zostanie skompilowany, ponieważ dziennik śledzenia jest niedostępny.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceNotInTrackingLog">
-        <source>{0} will be compiled as it was not found in the tracking log.</source>
+        <source>{0} will be compiled because it was not found in the tracking log.</source>
         <target state="translated">Plik {0} zostanie skompilowany, ponieważ nie odnaleziono go w dzienniku śledzenia.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceOutputsNotAvailable">
-        <source>{0} will be compiled as not all outputs are available.</source>
+        <source>{0} will be compiled because not all outputs are available.</source>
         <target state="translated">Plik {0} zostanie skompilowany, ponieważ nie wszystkie dane wyjściowe są dostępne.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledMissingDependency">
-        <source>{0} will be compiled as dependency {1} was missing.</source>
-        <target state="translated">{0} zostanie skompilowany, ponieważ brakuje zależności {1}.</target>
+        <source>{0} will be compiled because dependency {1} was missing.</source>
+        <target state="translated">Plik {0} zostanie skompilowany, ponieważ brakuje zależności {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledDependencyWasModifiedAt">
-        <source>{0} will be compiled as {1} was modified at {2}.</source>
-        <target state="translated">{0} zostanie skompilowany, ponieważ {1} został zmodyfikowany w {2}.</target>
+        <source>{0} will be compiled because {1} was modified at {2}.</source>
+        <target state="translated">Plik {0} zostanie skompilowany, ponieważ element {1} został zmodyfikowany w {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiled">
@@ -209,8 +209,8 @@
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledOutputDoesNotExist">
-        <source>{0} will be compiled as output {1} does not exist.</source>
-        <target state="translated">{0} zostanie skompilowany, ponieważ obiekt wyjściowy {1} nie istnieje.</target>
+        <source>{0} will be compiled because output {1} does not exist.</source>
+        <target state="translated">Plik {0} zostanie skompilowany, ponieważ obiekt wyjściowy {1} nie istnieje.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_ReadTrackingLogs">

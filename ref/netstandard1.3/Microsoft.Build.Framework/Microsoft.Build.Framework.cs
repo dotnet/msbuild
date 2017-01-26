@@ -184,6 +184,10 @@ namespace Microsoft.Build.Framework
         void RegisterTaskObject(object key, object obj, Microsoft.Build.Framework.RegisteredTaskObjectLifetime lifetime, bool allowEarlyCollection);
         object UnregisterTaskObject(object key, Microsoft.Build.Framework.RegisteredTaskObjectLifetime lifetime);
     }
+    public partial interface IBuildEngine5 : Microsoft.Build.Framework.IBuildEngine, Microsoft.Build.Framework.IBuildEngine2, Microsoft.Build.Framework.IBuildEngine3, Microsoft.Build.Framework.IBuildEngine4
+    {
+        void LogTelemetry(string eventName, System.Collections.Generic.IDictionary<string, string> properties);
+    }
     public partial interface ICancelableTask : Microsoft.Build.Framework.ITask
     {
         void Cancel();
@@ -208,6 +212,10 @@ namespace Microsoft.Build.Framework
         event Microsoft.Build.Framework.TaskFinishedEventHandler TaskFinished;
         event Microsoft.Build.Framework.TaskStartedEventHandler TaskStarted;
         event Microsoft.Build.Framework.BuildWarningEventHandler WarningRaised;
+    }
+    public partial interface IEventSource2 : Microsoft.Build.Framework.IEventSource
+    {
+        event Microsoft.Build.Framework.TelemetryEventHandler TelemetryLogged;
     }
     public partial interface IForwardingLogger : Microsoft.Build.Framework.ILogger, Microsoft.Build.Framework.INodeLogger
     {
@@ -436,4 +444,11 @@ namespace Microsoft.Build.Framework
         public string TaskName { get { throw null; } }
     }
     public delegate void TaskStartedEventHandler(object sender, Microsoft.Build.Framework.TaskStartedEventArgs e);
+    public sealed partial class TelemetryEventArgs : Microsoft.Build.Framework.BuildEventArgs
+    {
+        public TelemetryEventArgs() { }
+        public string EventName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public System.Collections.Generic.IDictionary<string, string> Properties { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+    }
+    public delegate void TelemetryEventHandler(object sender, Microsoft.Build.Framework.TelemetryEventArgs e);
 }

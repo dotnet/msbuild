@@ -1475,18 +1475,24 @@ namespace Microsoft.Build.Shared
             {
                 foreach (string excludeSpec in excludeSpecsUnescaped)
                 {
-                    //  The FileMatch method always creates a Regex to check if the file matches the pattern
-                    //  Creating a Regex is relatively expensive, so we may want to avoid doing so if possible
-                    Result match = FileMatch(excludeSpec, filespecUnescaped);
+
+                    // Try a path equality check first to:
+                    // - avoid the expensive regex
+                    // - maintain legacy behaviour where an illegal filespec is treated as a normal string
+                    if (FileUtilities.PathsEqual(filespecUnescaped, excludeSpec))
+                    {
+                        return new string[0];
+                    }
+
+                    var match = FileMatch(excludeSpec, filespecUnescaped);
 
                     if (match.isLegalFileSpec && match.isMatch)
                     {
-                        //  This file is excluded
                         return new string[0];
                     }
                 }
             }
-            return new string[] { filespecUnescaped };
+            return new[] { filespecUnescaped };
         }
 
         /// <summary>
@@ -1569,6 +1575,8 @@ namespace Microsoft.Build.Shared
                             resultsToExclude = new HashSet<string>();
                         }
                         resultsToExclude.Add(excludeSpec);
+
+                        continue;
                     }
                     else if (excludeAction == SearchAction.ReturnEmptyList)
                     {

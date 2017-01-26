@@ -164,28 +164,28 @@
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledAsNoTrackingLog">
-        <source>{0} will be compiled as the tracking log is not available.</source>
-        <target state="translated">추적 로그를 사용할 수 없기 때문에 {0}이(가) 컴파일됩니다.</target>
+        <source>{0} will be compiled because the tracking log is not available.</source>
+        <target state="translated">추적 로그를 사용할 수 없으므로 {0}이(가) 컴파일됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceNotInTrackingLog">
-        <source>{0} will be compiled as it was not found in the tracking log.</source>
-        <target state="translated">{0}이(가) 추적 로그에 없기 때문에 컴파일됩니다.</target>
+        <source>{0} will be compiled because it was not found in the tracking log.</source>
+        <target state="translated">{0}이(가) 추적 로그에 없으므로 컴파일됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceOutputsNotAvailable">
-        <source>{0} will be compiled as not all outputs are available.</source>
-        <target state="translated">일부 출력만 사용할 수 있기 때문에 {0}이(가) 컴파일됩니다.</target>
+        <source>{0} will be compiled because not all outputs are available.</source>
+        <target state="translated">일부 출력만 사용할 수 있으므로 {0}이(가) 컴파일됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledMissingDependency">
-        <source>{0} will be compiled as dependency {1} was missing.</source>
-        <target state="translated">{1} 종속성이 없기 때문에 {0}이(가) 컴파일됩니다.</target>
+        <source>{0} will be compiled because dependency {1} was missing.</source>
+        <target state="translated">{1} 종속성이 없으므로 {0}이(가) 컴파일됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledDependencyWasModifiedAt">
-        <source>{0} will be compiled as {1} was modified at {2}.</source>
-        <target state="translated">{1}이(가) {2}에서 수정되었기 때문에 {0}이(가) 컴파일됩니다.</target>
+        <source>{0} will be compiled because {1} was modified at {2}.</source>
+        <target state="translated">{1}이(가) {2}에서 수정되었으므로 {0}이(가) 컴파일됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiled">
@@ -209,8 +209,8 @@
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledOutputDoesNotExist">
-        <source>{0} will be compiled as output {1} does not exist.</source>
-        <target state="translated">{1} 출력이 없기 때문에 {0}이(가) 컴파일됩니다.</target>
+        <source>{0} will be compiled because output {1} does not exist.</source>
+        <target state="translated">{1} 출력이 없으므로 {0}이(가) 컴파일됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_ReadTrackingLogs">

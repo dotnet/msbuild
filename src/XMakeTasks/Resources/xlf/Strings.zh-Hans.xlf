@@ -2979,6 +2979,26 @@
         <target state="translated">MSB3891: 项目文件中同时指定了“{0}”和“{1}”。请任选其一。</target>
         <note />
       </trans-unit>
+      <trans-unit id="WriteLinesToFile.ErrorReadingFile">
+        <source>MSB3492: Could not read existing file "{0}" to determine whether its contents are up to date. Overwriting it.</source>
+        <target state="translated">MSB3492: 无法读取现有文件“{0}”以确定其内容是否是最新的。覆盖此文件。</target>
+        <note>{StrBegin="MSB3491: "}</note>
+      </trans-unit>
+      <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
+        <source>MSB3493: </source>
+        <target state="translated">MSB3493: </target>
+        <note>{StrBegin="Skipping write to file "{0}" because content would not change."}</note>
+      </trans-unit>
+      <trans-unit id="Telemetry.IllegalEventDataString">
+        <source>The property "{0}" in the telemetry event data property list "{1}" is malformed.  Please only pass in a semicolon-delimited list of constant string values separated by "=", e.g., "Property1=Value1;Property2=Value2".</source>
+        <target state="translated">遥测事件数据属性列表“{1}”中的属性“{0}”格式错误。请仅传递以分号分隔的常量字符串值列表，其中常量字符串值由“=”分隔，例如“Property1=Value1;Property2=Value2”。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorAndWarning.EmptyMessage">
+        <source>(No message specified)</source>
+        <target state="translated">（未指定任何消息）</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

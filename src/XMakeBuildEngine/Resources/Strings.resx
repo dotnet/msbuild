@@ -614,6 +614,10 @@
     <comment>{StrBegin="MSB4035: "}UE: This message is shown when a user leaves off a required attribute from a project element
     e.g. &lt;UsingTask AssemblyName="foo"&gt; -- this is missing the "TaskName" attribute.</comment>
   </data>
+  <data name="IncludeRemoveOrUpdate" UESanitized="false" Visibility="Public">
+    <value>MSB4232: Items that are outside Target elements must have one of the following operations: Include, Update, or Remove.</value>
+    <comment>{StrBegin="MSB4232: "} Target, Include, Update, and Remove should not be localized and their casing should not be changed</comment>
+  </data>
   <data name="MissingTaskError" UESanitized="false" Visibility="Public">
     <value>MSB4036: The "{0}" task was not found. Check the following: 1.) The name of the task in the project file is the same as the name of the task class. 2.) The task class is "public" and implements the Microsoft.Build.Framework.ITask interface. 3.) The task is correctly declared with &lt;UsingTask&gt; in the project file, or in the *.tasks files located in the "{1}" directory.</value>
     <comment>{StrBegin="MSB4036: "}LOCALIZATION: &lt;UsingTask&gt; and "*.tasks" should not be localized.</comment>
@@ -1560,13 +1564,28 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="InvalidGetPathOfFileAboveParameter">
     <value>The parameter '{0}' can only be a file name and cannot include a directory.</value>
   </data>
+
+  <data name="FileToReloadFromDoesNotExist">
+    <value>MSB4229: File to reload from does not exist: {0}</value>
+    <comment>{StrBegin="MSB4229: "}</comment>
+  </data>
+
+  <data name="ValueNotSet">
+    <value>MSB4230: Value not set: {0}</value>
+    <comment>{StrBegin="MSB4230: "}</comment>
+  </data>
+
+  <data name="NoReloadOnUnsavedChanges">
+    <value>MSB4231: ProjectRootElement can't reload if it contains unsaved changes.</value>
+    <comment>{StrBegin="MSB4231: "}</comment>
+  </data>
   <!--
         The engine message bucket is: MSB4001 - MSB4999
         
         MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
         MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
 
-        Next message code should be MSB4229.
+        Next message code should be MSB4233.
               
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>

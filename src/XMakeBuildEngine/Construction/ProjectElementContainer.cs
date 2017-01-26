@@ -455,11 +455,6 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal void AddToXml(ProjectElement child)
         {
-            if (child.IsImplicit)
-            {
-                return;
-            }
-
             if (child.ExpressedAsAttribute)
             {
                 // todo children represented as attributes need to be placed in order too
@@ -485,7 +480,7 @@ namespace Microsoft.Build.Construction
                 // If none is found, then the node being added is inserted as the only node of its kind
 
                 ProjectElement referenceSibling;
-                Predicate<ProjectElement> siblingIsExplicitElement = _ => _.ExpressedAsAttribute == false && _.IsImplicit == false;
+                Predicate<ProjectElement> siblingIsExplicitElement = _ => _.ExpressedAsAttribute == false;
 
                 if (TrySearchLeftSiblings(child.PreviousSibling, siblingIsExplicitElement, out referenceSibling))
                 {
@@ -567,11 +562,6 @@ namespace Microsoft.Build.Construction
 
         internal void RemoveFromXml(ProjectElement child)
         {
-            if (child.IsImplicit)
-            {
-                return;
-            }
-
             if (child.ExpressedAsAttribute)
             {
                 XmlElement.RemoveAttribute(child.XmlElement.Name);
@@ -630,10 +620,7 @@ namespace Microsoft.Build.Construction
 
             _count++;
 
-            if (!child.IsImplicit)
-            {
-                MarkDirty("Add child element named '{0}'", child.ElementName);
-            }
+            MarkDirty("Add child element named '{0}'", child.ElementName);
         }
 
         /// <summary>

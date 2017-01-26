@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -23,45 +24,7 @@ using Microsoft.Build.Utilities;
 using Microsoft.CodeAnalysis.BuildTasks;
 using Xunit;
 
-#if FEATURE_COMPILE_IN_TESTS
 namespace Microsoft.Build.UnitTests.BackEnd
-{
-    public class TaskAssemblyFixture : IDisposable
-    {
-        public string TestTaskLocation { get; }
-
-        /// <summary>
-        /// Set up this test class -- generate the test task assembly used by 
-        /// several of the tests. 
-        /// </summary>
-        public TaskAssemblyFixture()
-        {
-            TestTaskLocation = GetTestTaskAssemblyLocation();
-        }
-
-        /// <summary>
-        /// Clean this test class up -- make sure the test task assembly we 
-        /// generated has been deleted. 
-        /// </summary>
-        public void Dispose()
-        {
-            if (File.Exists(TestTaskLocation))
-            {
-                FileUtilities.DeleteNoThrow(TestTaskLocation);
-            }
-        }
-
-        /// <summary>
-        /// Generates a test task assembly containing a single task named "TestTask"
-        /// and returns the path to that assembly.  
-        /// </summary>
-        private static string GetTestTaskAssemblyLocation()
-        {
-            string codeContent = @"
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-
-namespace TestTask
 {
     public class TestTask : Task
     {
@@ -70,59 +33,11 @@ namespace TestTask
             return true;
         }
     }
-}";
-
-            var codeFile = FileUtilities.GetTemporaryFile();
-            var outputFile = FileUtilities.GetTemporaryFile(".dll");
-
-            // Setting the current directory to the MSBuild running location. It *should* be this
-            // already, but if it's not some other test changed it and didn't change it back. If
-            // the directory does not include the reference dlls the compilation will fail.
-            Directory.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
-
-            try
-            {
-                File.WriteAllText(codeFile, codeContent);
-                var csc = new Csc
-                {
-                    BuildEngine = new MockEngine(),
-                    Sources = new ITaskItem[] {new TaskItem(codeFile)},
-                    OutputAssembly = new TaskItem(outputFile),
-                    References =
-                        new ITaskItem[]
-                        {
-                            new TaskItem("Microsoft.Build.Framework.dll"),
-                            new TaskItem("Microsoft.Build.Utilities.Core.dll")
-                        },
-                    Platform = "AnyCPU",
-                    TargetType = "Library",
-                    Prefer32Bit = false
-                };
-                var succeeded = csc.Execute();
-
-                if (succeeded)
-                {
-                    return outputFile;
-                }
-
-                throw new Exception($"CSC task failed creating custom task: {csc.ErrorLog}");
-            }
-            catch (Exception)
-            {
-                FileUtilities.DeleteNoThrow(outputFile);
-                throw;
-            }
-            finally
-            {
-                FileUtilities.DeleteNoThrow(codeFile);
-            }
-        }
-    }
 
     /// <summary>
     /// Test the task registry
     /// </summary>
-    public class TaskRegistry_Tests : IClassFixture<TaskAssemblyFixture>
+    public class TaskRegistry_Tests
     {
         /// <summary>
         /// Expander to expand the registry entires
@@ -163,9 +78,9 @@ namespace TestTask
         /// <summary>
         /// Setup some logging services so we can see what is going on.
         /// </summary>
-        public TaskRegistry_Tests(TaskAssemblyFixture fixture)
+        public TaskRegistry_Tests()
         {
-            _testTaskLocation = fixture.TestTaskLocation;
+            _testTaskLocation = typeof(TaskRegistry_Tests).GetTypeInfo().Assembly.ManifestModule.FullyQualifiedName;
 
             _loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             _targetLoggingContext = new TargetLoggingContext(_loggingService, _loggerContext);
@@ -2254,4 +2169,3 @@ namespace TestTask
         #endregion
     }
 }
-#endif

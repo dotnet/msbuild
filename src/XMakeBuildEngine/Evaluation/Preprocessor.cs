@@ -35,17 +35,17 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Project to preprocess
         /// </summary>
-        private Project _project;
+        private readonly Project _project;
 
         /// <summary>
         /// Table to resolve import tags
         /// </summary>
-        private Dictionary<XmlElement, IList<ProjectRootElement>> _importTable;
+        private readonly Dictionary<string, IList<ProjectRootElement>> _importTable;
 
         /// <summary>
         /// Stack of file paths pushed as we follow imports
         /// </summary>
-        private Stack<string> _filePaths = new Stack<string>();
+        private readonly Stack<string> _filePaths = new Stack<string>();
 
         /// <summary>
         /// Constructor
@@ -56,15 +56,15 @@ namespace Microsoft.Build.Evaluation
 
             IList<ResolvedImport> imports = project.Imports;
 
-            _importTable = new Dictionary<XmlElement, IList<ProjectRootElement>>(imports.Count);
+            _importTable = new Dictionary<string, IList<ProjectRootElement>>(imports.Count);
 
             foreach (ResolvedImport entry in imports)
             {
                 IList<ProjectRootElement> list;
-                if (!_importTable.TryGetValue(entry.ImportingElement.XmlElement, out list))
+                if (!_importTable.TryGetValue(entry.ImportingElement.XmlElement.OuterXml, out list))
                 {
                     list = new List<ProjectRootElement>();
-                    _importTable[entry.ImportingElement.XmlElement] = list;
+                    _importTable[entry.ImportingElement.XmlElement.OuterXml] = list;
                 }
 
                 list.Add(entry.ImportedProject);
@@ -91,9 +91,44 @@ namespace Microsoft.Build.Evaluation
         {
             XmlDocument outerDocument = _project.Xml.XmlDocument;
 
-            XmlDocument destinationDocument = (XmlDocument)outerDocument.CloneNode(false /* shallow */);
+            int implicitImportCount = _project.Imports.Count(i => i.ImportingElement.ImplicitImportLocation != ImplicitImportLocation.None);
+            // At the time of adding this feature, cloning is buggy.  The implicit imports are added to the XML document and removed after
+            // processing.  This variable keeps track of the nodes that were added
+            IList<XmlNode> addedNodes = new List<XmlNode>(implicitImportCount);
+            XmlElement documentElement = outerDocument.DocumentElement;
 
-            //  TODO: Remove Sdk attribute from destination document and put it in a comment (so that if you do a build on a preprocessed file it won't try to import the Sdk imports twice)
+            if (implicitImportCount > 0 && documentElement != null)
+            {
+                // Top implicit imports need to be added in the correct order by adding the first one at the top and each one after the first
+                // one.  This variable keeps track of the last import that was added.
+                XmlNode lastImplicitImportAdded = null;
+
+                // Add the implicit top imports
+                //
+                foreach (var import in _project.Imports.Where(i => i.ImportingElement.ImplicitImportLocation == ImplicitImportLocation.Top))
+                {
+                    XmlNode node = outerDocument.ImportNode(import.ImportingElement.XmlElement, false);
+                    if (lastImplicitImportAdded == null)
+                    {
+                        documentElement.InsertBefore(node, documentElement.FirstChild);
+                        lastImplicitImportAdded = node;
+                    }
+                    else
+                    {
+                        documentElement.InsertAfter(node, lastImplicitImportAdded);
+                    }
+                    addedNodes.Add(node);
+                }
+
+                // Add the implicit bottom imports
+                //
+                foreach (var import in _project.Imports.Where(i => i.ImportingElement.ImplicitImportLocation == ImplicitImportLocation.Bottom))
+                {
+                    addedNodes.Add(documentElement.InsertAfter(outerDocument.ImportNode(import.ImportingElement.XmlElement, false), documentElement.LastChild));
+                }
+            }
+
+            XmlDocument destinationDocument = (XmlDocument)outerDocument.CloneNode(false /* shallow */);
 
             _filePaths.Push(_project.FullPath);
 
@@ -103,6 +138,13 @@ namespace Microsoft.Build.Evaluation
             }
 
             CloneChildrenResolvingImports(outerDocument, destinationDocument);
+
+            // Remove the nodes that were added as implicit imports
+            //
+            foreach (XmlNode addedNode in addedNodes)
+            {
+                documentElement?.RemoveChild(addedNode);
+            }
 
             return destinationDocument;
         }
@@ -174,7 +216,7 @@ namespace Microsoft.Build.Evaluation
                     string sdk = importSdk.Length > 0 ? $" {XMakeAttributes.sdk}=\"{importSdk}\"" : String.Empty;
 
                     IList<ProjectRootElement> resolvedList;
-                    if (!_importTable.TryGetValue(child as XmlElement, out resolvedList))
+                    if (!_importTable.TryGetValue(((XmlElement)child).OuterXml, out resolvedList))
                     {
                         // Import didn't resolve to anything; just display as a comment and move on
                         string closedImportTag =
@@ -192,10 +234,10 @@ namespace Microsoft.Build.Evaluation
                         string importTag =
                             $"  <Import Project=\"{importProject}\"{sdk}{condition}>";
 
-                        if (((XmlElement)child).GetAttribute(XMakeAttributes.@implicit).Length > 0)
+                        if (!String.IsNullOrWhiteSpace(importSdk) && _project.Xml.Sdk.IndexOf(importSdk, StringComparison.OrdinalIgnoreCase) >= 0)
                         {
-                            importTag =
-                                $"  Import of \"{importProject.Replace("--", "__")}\" from Sdk \"{importSdk}\" was implied by the {XMakeElements.project} element's {XMakeAttributes.sdk} attribute.";
+                            importTag +=
+                                $"\r\n  This import was added implicitly because of the {XMakeElements.project} element's {XMakeAttributes.sdk} attribute specified \"{importSdk}\".";
                         }
 
                         destination.AppendChild(destinationDocument.CreateComment(
@@ -235,6 +277,11 @@ namespace Microsoft.Build.Evaluation
 
                 // Node doesn't need special treatment, clone and append
                 XmlNode clone = destinationDocument.ImportNode(child, false /* shallow */); // ImportNode does a clone but unlike CloneNode it works across XmlDocuments
+
+                if (clone.NodeType == XmlNodeType.Element && String.Equals(XMakeElements.project, child.Name, StringComparison.Ordinal) && clone.Attributes?[XMakeAttributes.sdk] != null)
+                {
+                    clone.Attributes.Remove(clone.Attributes[XMakeAttributes.sdk]);
+                }
 
                 destination.AppendChild(clone);
 

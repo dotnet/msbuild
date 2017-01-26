@@ -164,28 +164,28 @@
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledAsNoTrackingLog">
-        <source>{0} will be compiled as the tracking log is not available.</source>
-        <target state="translated">{0} 將進行編譯，因為追蹤記錄檔無法使用。</target>
+        <source>{0} will be compiled because the tracking log is not available.</source>
+        <target state="translated">因為追蹤記錄無法使用，所以將編譯 {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceNotInTrackingLog">
-        <source>{0} will be compiled as it was not found in the tracking log.</source>
-        <target state="translated">{0} 將進行編譯，因為在追蹤記錄檔中找不到。</target>
+        <source>{0} will be compiled because it was not found in the tracking log.</source>
+        <target state="translated">因為在追蹤記錄中找不到 {0}，所以將對其進行編譯。</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceOutputsNotAvailable">
-        <source>{0} will be compiled as not all outputs are available.</source>
-        <target state="translated">{0} 將進行編譯，因為並非所有輸出都可使用。</target>
+        <source>{0} will be compiled because not all outputs are available.</source>
+        <target state="translated">因為並非所有輸出皆可使用，所以將編譯 {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledMissingDependency">
-        <source>{0} will be compiled as dependency {1} was missing.</source>
-        <target state="translated">{0} 將進行編譯，因為遺漏相依性 {1}。</target>
+        <source>{0} will be compiled because dependency {1} was missing.</source>
+        <target state="translated">因為缺少相依性 {1}，所以將編譯 {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledDependencyWasModifiedAt">
-        <source>{0} will be compiled as {1} was modified at {2}.</source>
-        <target state="translated">{0} 將進行編譯，因為 {1} 已於 {2} 修改。</target>
+        <source>{0} will be compiled because {1} was modified at {2}.</source>
+        <target state="translated">因為 {1} 已於 {2} 修改，所以將編譯 {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiled">
@@ -209,8 +209,8 @@
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledOutputDoesNotExist">
-        <source>{0} will be compiled as output {1} does not exist.</source>
-        <target state="translated">{0} 將進行編譯，因為輸出 {1} 不存在。</target>
+        <source>{0} will be compiled because output {1} does not exist.</source>
+        <target state="translated">因為沒有輸出 {1}，所以將編譯 {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_ReadTrackingLogs">

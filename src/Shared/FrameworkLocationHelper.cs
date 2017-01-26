@@ -1189,27 +1189,7 @@ namespace Microsoft.Build.Shared
             }
         }
 
-#if FEATURE_SYSTEM_CONFIGURATION
-        /// <summary>
-        /// Reads the application configuration file.
-        /// </summary>
-        private static Configuration ReadApplicationConfiguration()
-        {
-            var msbuildExeConfig = BuildEnvironmentHelper.Instance.CurrentMSBuildConfigurationFile;
-
-            // When running from the command-line or from VS, use the msbuild.exe.config file
-            if (!BuildEnvironmentHelper.Instance.RunningTests && File.Exists(msbuildExeConfig))
-            {
-                var configFile = new ExeConfigurationFileMap { ExeConfigFilename = msbuildExeConfig };
-                return ConfigurationManager.OpenMappedExeConfiguration(configFile, ConfigurationUserLevel.None);
-            }
-
-            // When running tests or the expected config file doesn't exist, fall-back to default
-            return ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-        }
-#endif
-
-        #endregion
+#endregion
 
         private class VisualStudioSpec
         {

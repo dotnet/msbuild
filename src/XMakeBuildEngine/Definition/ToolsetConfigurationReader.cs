@@ -258,12 +258,12 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static Configuration ReadApplicationConfiguration()
         {
-            var msbuildExeConfig = BuildEnvironmentHelper.Instance.CurrentMSBuildConfigurationFile;
-
-            // When running from the command-line or from VS, use the msbuild.exe.config file
-            if (!BuildEnvironmentHelper.Instance.RunningTests && File.Exists(msbuildExeConfig))
+            // When running from the command-line or from VS, use the msbuild.exe.config file.
+            if (BuildEnvironmentHelper.Instance.Mode != BuildEnvironmentMode.None &&
+                !BuildEnvironmentHelper.Instance.RunningTests &&
+                File.Exists(BuildEnvironmentHelper.Instance.CurrentMSBuildConfigurationFile))
             {
-                var configFile = new ExeConfigurationFileMap { ExeConfigFilename = msbuildExeConfig };
+                var configFile = new ExeConfigurationFileMap { ExeConfigFilename = BuildEnvironmentHelper.Instance.CurrentMSBuildConfigurationFile };
                 return ConfigurationManager.OpenMappedExeConfiguration(configFile, ConfigurationUserLevel.None);
             }
 

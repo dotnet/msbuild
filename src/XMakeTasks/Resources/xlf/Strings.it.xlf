@@ -30,7 +30,7 @@
       </trans-unit>
       <trans-unit id="AssignProjectConfiguration.IllegalMappingString">
         <source>The platform mapping "{0}" in the platform mapping list "{1}" is malformed.  Please only pass in a semicolon-delimited list of constant string values separated by "=", e.g., "foo=bar;foo2=bar2".</source>
-        <target state="translated">Il mapping di piattaforma "{0}" nell'elenco dei mapping di piattaforma "{1}" non è valido.  Passare solo un elenco di valori stringa costanti delimitati da punti e virgola e separati da "=", ad esempio "foo=bar;foo2=bar2".</target>
+        <target state="translated">Il mapping di piattaforma "{0}" nell'elenco dei mapping di piattaforma "{1}" non è valido. Passare solo un elenco di valori stringa costanti delimitati da punti e virgola e separati da "=", ad esempio "foo=bar;foo2=bar2".</target>
         <note />
       </trans-unit>
       <trans-unit id="AssignProjectConfiguration.ProjectConfigurationUnresolved">
@@ -49,7 +49,7 @@
       </trans-unit>
       <trans-unit id="AspNetCompiler.CannotCombineMetabaseAndVirtualPathOrPhysicalPath">
         <source>MSB3461: The MetabasePath parameter cannot be combined with VirtualPath or PhysicalPath.</source>
-        <target state="translated">MSB3461: impossibile combinare il parametro MetabasePath con VirtualPath o PhysicalPath.</target>
+        <target state="translated">MSB3461: non è possibile combinare il parametro MetabasePath con VirtualPath o PhysicalPath.</target>
         <note>{StrBegin="MSB3461: "}</note>
       </trans-unit>
       <trans-unit id="AspNetCompiler.MissingMetabasePathAndVirtualPath">
@@ -69,7 +69,7 @@
       </trans-unit>
       <trans-unit id="AssignCulture.CannotExtractCulture">
         <source>MSB3001: Cannot extract culture information from file name "{0}". {1}</source>
-        <target state="translated">MSB3001: impossibile estrarre informazioni relative alle impostazioni cultura dal file con nome "{0}". {1}</target>
+        <target state="translated">MSB3001: non è possibile estrarre informazioni relative alle impostazioni cultura dal file con nome "{0}". {1}</target>
         <note>{StrBegin="MSB3001: "}</note>
       </trans-unit>
       <trans-unit id="AssignCulture.Comment">
@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="AxTlbBaseTask.CannotSpecifyBothKeyFileAndKeyContainer">
         <source>MSB3646: Cannot specify values for both KeyFile and KeyContainer.</source>
-        <target state="translated">MSB3646: impossibile specificare i valori sia per KeyFile che per KeyContainer.</target>
+        <target state="translated">MSB3646: non è possibile specificare i valori sia per KeyFile che per KeyContainer.</target>
         <note>{StrBegin="MSB3646: "}</note>
       </trans-unit>
       <trans-unit id="AxTlbBaseTask.CannotSpecifyDelaySignWithoutEitherKeyFileOrKeyContainer">
@@ -99,7 +99,7 @@
       </trans-unit>
       <trans-unit id="AxTlbBaseTask.SdkOrToolPathNotSpecifiedOrInvalid">
         <source>MSB3650: Neither SDKToolsPath '{0}' nor ToolPath '{1}' is a valid directory.  One of these must be set.</source>
-        <target state="translated">MSB3650: SDKToolsPath '{0}' o ToolPath '{1}' non corrisponde a una directory valida.  È necessario impostarne uno dei due.</target>
+        <target state="translated">MSB3650: SDKToolsPath '{0}' o ToolPath '{1}' non corrisponde a una directory valida. È necessario impostarne uno dei due.</target>
         <note>{StrBegin="MSB3650: "}</note>
       </trans-unit>
       <trans-unit id="AxTlbBaseTask.StrongNameUtils.NoKeyPairInContainer">
@@ -119,7 +119,7 @@
       </trans-unit>
       <trans-unit id="AxTlbBaseTask.StrongNameUtils.NoPublicKeySpecified">
         <source>MSB3654: Delay signing requires that at least a public key be specified.  Please either supply a public key using the KeyFile or KeyContainer properties, or disable delay signing.</source>
-        <target state="translated">MSB3654: la firma ritardata richiede che sia specificata almeno una chiave pubblica.  Fornire una chiave pubblica usando le proprietà KeyFile o KeyContainer oppure disabilitare la firma ritardata.</target>
+        <target state="translated">MSB3654: la firma ritardata richiede che sia specificata almeno una chiave pubblica. Fornire una chiave pubblica usando le proprietà KeyFile o KeyContainer oppure disabilitare la firma ritardata.</target>
         <note>{StrBegin="MSB3654: "}</note>
       </trans-unit>
       <trans-unit id="Compiler.FatalArguments">
@@ -154,12 +154,12 @@
       </trans-unit>
       <trans-unit id="Copy.DidNotCopyBecauseOfFileMatch">
         <source>Did not copy from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</source>
-        <target state="translated">Impossibile eseguire la copia dal file "{0}" al file "{1}". Il parametro "{2}" è stato impostato su "{3}" nel progetto e la dimensione e il timestamp dei file corrispondono.</target>
+        <target state="translated">Non è possibile eseguire la copia dal file "{0}" al file "{1}". Il parametro "{2}" è stato impostato su "{3}" nel progetto e la dimensione e il timestamp dei file corrispondono.</target>
         <note />
       </trans-unit>
       <trans-unit id="Copy.Error">
         <source>MSB3021: Unable to copy file "{0}" to "{1}". {2}</source>
-        <target state="translated">MSB3021: impossibile copiare il file "{0}" in "{1}". {2}</target>
+        <target state="translated">MSB3021: non è possibile copiare il file "{0}" in "{1}". {2}</target>
         <note>{StrBegin="MSB3021: "}</note>
       </trans-unit>
       <trans-unit id="Copy.ExactlyOneTypeOfDestination">
@@ -194,7 +194,7 @@
       </trans-unit>
       <trans-unit id="Copy.SourceIsDirectory">
         <source>MSB3025: The source file "{0}" is actually a directory.  The "Copy" task does not support copying directories.</source>
-        <target state="translated">MSB3025: il file di origine "{0}" è in realtà una directory.  L'attività "Copia" non supporta la copia di directory.</target>
+        <target state="translated">MSB3025: il file di origine "{0}" è in realtà una directory. L'attività "Copia" non supporta la copia di directory.</target>
         <note>{StrBegin="MSB3025: "}</note>
       </trans-unit>
       <trans-unit id="Copy.Retrying">
@@ -219,12 +219,12 @@
       </trans-unit>
       <trans-unit id="Copy.SourceFileNotFound">
         <source>MSB3030: Could not copy the file "{0}" because it was not found.</source>
-        <target state="translated">MSB3030: impossibile copiare il file "{0}" perché non è stato trovato.</target>
+        <target state="translated">MSB3030: non è stato possibile copiare il file "{0}" perché non è stato trovato.</target>
         <note>{StrBegin="MSB3030: "} LOCALIZATION: {0} is a number.</note>
       </trans-unit>
       <trans-unit id="CreateItem.AdditionalMetadataError">
         <source>MSB3031: Could not set additional metadata. "{0}" is a reserved metadata name and cannot be modified.</source>
-        <target state="translated">MSB3031: impossibile impostare metadati aggiuntivi. "{0}" è un nome di metadati riservato e non può essere modificato.</target>
+        <target state="translated">MSB3031: non è stato possibile impostare metadati aggiuntivi. "{0}" è un nome di metadati riservato e non può essere modificato.</target>
         <note>{StrBegin="MSB3031: "} UE: Tasks and OM users are not allowed to remove or change the value of the built-in meta-data on items e.g. the meta-data "FullPath", "RelativeDir", etc. are reserved.</note>
       </trans-unit>
       <trans-unit id="CreateManifestResourceName.AssignedName">
@@ -234,7 +234,7 @@
       </trans-unit>
       <trans-unit id="CreateManifestResourceName.DefinitionFoundWithinConditionalDirective">
         <source>MSB3042: A namespace or class definition was found within a conditional compilation directive in the file "{0}".  This may lead to an incorrect choice for the manifest resource name for resource "{1}".</source>
-        <target state="translated">MSB3042: è stata trovata una definizione di spazio dei nomi o di classe in una direttiva di compilazione condizionale nel file "{0}".  La scelta del nome della risorsa manifesto per la risorsa "{1}" potrebbe quindi risultare non corretta.</target>
+        <target state="translated">MSB3042: è stata trovata una definizione di spazio dei nomi o di classe in una direttiva di compilazione condizionale nel file "{0}". La scelta del nome della risorsa manifesto per la risorsa "{1}" potrebbe quindi risultare non corretta.</target>
         <note>{StrBegin="MSB3042: "}</note>
       </trans-unit>
       <trans-unit id="CreateManifestResourceName.DependsUpon">
@@ -249,7 +249,7 @@
       </trans-unit>
       <trans-unit id="CreateManifestResourceName.Error">
         <source>MSB3041: Unable to create a manifest resource name for "{0}". {1}</source>
-        <target state="translated">MSB3041: impossibile creare un nome di risorsa di manifesto per "{0}". {1}</target>
+        <target state="translated">MSB3041: non è possibile creare un nome di risorsa di manifesto per "{0}". {1}</target>
         <note>{StrBegin="MSB3041: "}</note>
       </trans-unit>
       <trans-unit id="CreateManifestResourceName.NoRootNamespace">
@@ -284,7 +284,7 @@
       </trans-unit>
       <trans-unit id="Delete.Error">
         <source>MSB3061: Unable to delete file "{0}". {1}</source>
-        <target state="translated">MSB3061: impossibile eliminare il file "{0}". {1}</target>
+        <target state="translated">MSB3061: non è possibile eliminare il file "{0}". {1}</target>
         <note>{StrBegin="MSB3061: "}</note>
       </trans-unit>
       <trans-unit id="Delete.SkippingNonexistentFile">
@@ -349,7 +349,7 @@
       </trans-unit>
       <trans-unit id="General.CouldNotDeleteStateFile">
         <source>MSB3102: Could not delete state file "{0}". {1}</source>
-        <target state="translated">MSB3102: impossibile eliminare il file di stato "{0}". {1}</target>
+        <target state="translated">MSB3102: non è stato possibile eliminare il file di stato "{0}". {1}</target>
         <note>{StrBegin="MSB3102: "}</note>
       </trans-unit>
       <trans-unit id="General.CouldNotLocateAssembly">
@@ -359,12 +359,12 @@
       </trans-unit>
       <trans-unit id="General.CouldNotReadStateFile">
         <source>MSB3088: Could not read state file "{0}". {1}</source>
-        <target state="translated">MSB3088: impossibile leggere il file di stato "{0}". {1}</target>
+        <target state="translated">MSB3088: non è stato possibile leggere il file di stato "{0}". {1}</target>
         <note>{StrBegin="MSB3088: "}</note>
       </trans-unit>
       <trans-unit id="General.CouldNotReadStateFileMessage">
         <source>Could not read state file "{0}". {1}</source>
-        <target state="translated">Impossibile leggere il file di stato "{0}". {1}</target>
+        <target state="translated">Non è stato possibile leggere il file di stato "{0}". {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="General.CouldNotSetHostObjectParameter">
@@ -374,17 +374,17 @@
       </trans-unit>
       <trans-unit id="General.CouldNotWriteStateFile">
         <source>MSB3101: Could not write state file "{0}". {1}</source>
-        <target state="translated">MSB3101: impossibile scrivere il file di stato "{0}". {1}</target>
+        <target state="translated">MSB3101: non è stato possibile scrivere il file di stato "{0}". {1}</target>
         <note>{StrBegin="MSB3101: "}</note>
       </trans-unit>
       <trans-unit id="General.DuplicateItemsNotSupported">
         <source>MSB3105: The item "{0}" was specified more than once in the "{1}" parameter.  Duplicate items are not supported by the "{1}" parameter.</source>
-        <target state="translated">MSB3105: l'elemento "{0}" è stato specificato più di una volta nel parametro "{1}".  Il parametro "{1}" non supporta elementi duplicati.</target>
+        <target state="translated">MSB3105: l'elemento "{0}" è stato specificato più di una volta nel parametro "{1}". Il parametro "{1}" non supporta elementi duplicati.</target>
         <note>{StrBegin="MSB3105: "}</note>
       </trans-unit>
       <trans-unit id="General.DuplicateItemsNotSupportedWithMetadata">
         <source>MSB3083: The item "{0}" was specified more than once in the "{1}" parameter and both items had the same value "{2}" for the "{3}" metadata.  Duplicate items are not supported by the "{1}" parameter unless they have different values for the "{3}" metadata.</source>
-        <target state="translated">MSB3083: l'elemento "{0}" è stato specificato più di una volta nel parametro "{1}" ed entrambi gli elementi hanno lo stesso valore "{2}" per i metadati di "{3}".  Il parametro "{1}" non supporta gli elementi duplicati a meno che non includano valori diversi per i metadati di "{3}".</target>
+        <target state="translated">MSB3083: l'elemento "{0}" è stato specificato più di una volta nel parametro "{1}" ed entrambi gli elementi hanno lo stesso valore "{2}" per i metadati di "{3}". Il parametro "{1}" non supporta gli elementi duplicati a meno che non includano valori diversi per i metadati di "{3}".</target>
         <note>{StrBegin="MSB3083: "}</note>
       </trans-unit>
       <trans-unit id="General.ErrorExecutingTask">
@@ -404,12 +404,12 @@
       </trans-unit>
       <trans-unit id="General.FrameworksFileNotFound">
         <source>MSB3082: Task failed because "{0}" was not found, or the .NET Framework {1} is not installed.  Please install the .NET Framework {1}.</source>
-        <target state="translated">MSB3082: l'attività non è riuscita perché "{0}" non è stato trovato oppure perché .NET Framework {1} non è installato.  Installare .NET Framework {1}.</target>
+        <target state="translated">MSB3082: l'attività non è riuscita perché "{0}" non è stato trovato oppure perché .NET Framework {1} non è installato. Installare .NET Framework {1}.</target>
         <note>{StrBegin="MSB3082: "}</note>
       </trans-unit>
       <trans-unit id="General.IncorrectHostObject">
         <source>MSB3087: An incompatible host object was passed into the "{0}" task.  The host object for this task must implement the "{1}" interface.</source>
-        <target state="translated">MSB3087: all'attività "{0}" è stato passato un oggetto host incompatibile.  L'oggetto host di questa attività deve implementare l'interfaccia "{1}".</target>
+        <target state="translated">MSB3087: all'attività "{0}" è stato passato un oggetto host incompatibile. L'oggetto host di questa attività deve implementare l'interfaccia "{1}".</target>
         <note>{StrBegin="MSB3087: "}</note>
       </trans-unit>
       <trans-unit id="General.IncompatibleStateFileType">
@@ -517,7 +517,7 @@
       </trans-unit>
       <trans-unit id="General.SdkToolsPathError">
         <source>MSB3666: The SDK tool "{0}" could not be found. {1}</source>
-        <target state="translated">MSB3666: impossibile trovare lo strumento SDK "{0}". {1}</target>
+        <target state="translated">MSB3666: lo strumento SDK "{0}" non è stato trovato. {1}</target>
         <note>{StrBegin="MSB3666: "} The {1} will be the exception message</note>
       </trans-unit>
       <trans-unit id="General.ReferenceDoesNotExist">
@@ -637,7 +637,7 @@
       </trans-unit>
       <trans-unit id="GenerateBootstrapper.MissingSetupBin">
         <source>MSB3147: Could not find required file '{0}' in '{1}'.</source>
-        <target state="translated">MSB3147: Impossibile trovare il file richiesto '{0}' in '{1}'.</target>
+        <target state="translated">MSB3147: il file richiesto '{0}' non è stato trovato in '{1}'.</target>
         <note>{StrBegin="MSB3147: "}</note>
       </trans-unit>
       <trans-unit id="GenerateBootstrapper.MissingVerificationInformation">
@@ -672,7 +672,7 @@
       </trans-unit>
       <trans-unit id="GenerateBootstrapper.PackageResourceFileNotFound">
         <source>MSB3166: Could not find required file '{0}' for item '{1}'.</source>
-        <target state="translated">MSB3166: impossibile trovare il file richiesto '{0}' per l'elemento '{1}'.</target>
+        <target state="translated">MSB3166: il file richiesto '{0}' per l'elemento '{1}' non è stato trovato.</target>
         <note>{StrBegin="MSB3166: "}</note>
       </trans-unit>
       <trans-unit id="GenerateBootstrapper.PackageHomeSiteMissing">
@@ -687,12 +687,12 @@
       </trans-unit>
       <trans-unit id="GenerateBootstrapper.ProductCultureNotFound">
         <source>MSB3154: Could not find string resources for item '{0}'.</source>
-        <target state="translated">MSB3154: impossibile trovare le risorse di tipo stringa per l'elemento '{0}'.</target>
+        <target state="translated">MSB3154: le risorse di tipo stringa per l'elemento '{0}' non sono state trovate.</target>
         <note>{StrBegin="MSB3154: "}</note>
       </trans-unit>
       <trans-unit id="GenerateBootstrapper.ProductNotFound">
         <source>MSB3155: Item '{0}' could not be located in '{1}'.</source>
-        <target state="translated">MSB3155: impossibile trovare l'elemento '{0}' in '{1}'.</target>
+        <target state="translated">MSB3155: l'elemento '{0}' non è stato trovato in '{1}'.</target>
         <note>{StrBegin="MSB3155: "}</note>
       </trans-unit>
       <trans-unit id="GenerateBootstrapper.ProductValidation">
@@ -792,7 +792,7 @@
       </trans-unit>
       <trans-unit id="GenerateManifest.FileAssociationsNoEntryPoint">
         <source>MSB3125: The application is using file associations but has no EntryPoint build parameter.</source>
-        <target state="translated">MSB3125: l'applicazione utilizza le associazioni di file ma non include alcun parametro di compilazione EntryPoint.</target>
+        <target state="translated">MSB3125: l'applicazione usa le associazioni di file ma non include alcun parametro di compilazione EntryPoint.</target>
         <note>{StrBegin="MSB3125: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.FileAssociationsNotInstalled">
@@ -887,22 +887,22 @@
       </trans-unit>
       <trans-unit id="GenerateManifest.ReadInputManifestFailed">
         <source>MSB3172: Unable to read manifest '{0}'. {1}</source>
-        <target state="translated">MSB3172: impossibile leggere il manifesto '{0}'. {1}</target>
+        <target state="translated">MSB3172: non è possibile leggere il manifesto '{0}'. {1}</target>
         <note>{StrBegin="MSB3172: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.ResolveFailedInReadOnlyMode">
         <source>MSB3114: Could not find file '{0}' referenced by assembly '{1}'.</source>
-        <target state="translated">MSB3114: impossibile trovare il file '{0}' a cui fa riferimento l'assembly '{1}'.</target>
+        <target state="translated">MSB3114: il file '{0}' a cui fa riferimento l'assembly '{1}' non è stato trovato.</target>
         <note>{StrBegin="MSB3114: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.ResolveFailedInReadWriteMode">
         <source>MSB3113: Could not find file '{0}'.</source>
-        <target state="translated">MSB3113: impossibile trovare il file '{0}'.</target>
+        <target state="translated">MSB3113: il file '{0}' non è stato trovato.</target>
         <note>{StrBegin="MSB3113: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.ManifestsSignedHashExcluded">
         <source>MSB3128: The ClickOnce manifests cannot be signed because they contain one or more references that are not hashed.</source>
-        <target state="translated">MSB3128: impossibile firmare i manifesti ClickOnce perché contengono uno o più riferimenti senza hash.</target>
+        <target state="translated">MSB3128: non è possibile firmare i manifesti ClickOnce perché contengono uno o più riferimenti senza hash.</target>
         <note>{StrBegin="MSB3128: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.TargetPathTooLong">
@@ -917,7 +917,7 @@
       </trans-unit>
       <trans-unit id="GenerateManifest.WriteOutputManifestFailed">
         <source>MSB3173: Unable to write manifest '{0}'. {1}</source>
-        <target state="translated">MSB3173: impossibile scrivere il manifesto '{0}'. {1}</target>
+        <target state="translated">MSB3173: non è possibile scrivere il manifesto '{0}'. {1}</target>
         <note>{StrBegin="MSB3173: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.InvalidRequestedExecutionLevel">
@@ -927,7 +927,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.ResourceNotFound">
         <source>MSB3552: Resource file "{0}" cannot be found.</source>
-        <target state="translated">MSB3552: impossibile trovare il file di risorse "{0}".</target>
+        <target state="translated">MSB3552: il file di risorse "{0}" non è stato trovato.</target>
         <note>{StrBegin="MSB3552: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.InvalidFilename">
@@ -937,7 +937,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.CannotWriteOutput">
         <source>MSB3554: Cannot write to the output file "{0}". {1}</source>
-        <target state="translated">MSB3554: impossibile scrivere nel file di output "{0}". {1}</target>
+        <target state="translated">MSB3554: non è possibile scrivere nel file di output "{0}". {1}</target>
         <note>{StrBegin="MSB3554: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CorruptOutput">
@@ -967,7 +967,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.DeleteCorruptOutputFailed">
         <source>MSB3560: Could not delete the possibly corrupt output file "{0}". {1}</source>
-        <target state="translated">MSB3560: impossibile eliminare il file di output "{0}" perché probabilmente è danneggiato. {1}</target>
+        <target state="translated">MSB3560: non è stato possibile eliminare il file di output "{0}" perché probabilmente è danneggiato. {1}</target>
         <note>{StrBegin="MSB3560: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.ObsoleteStringsTag">
@@ -997,12 +997,12 @@
       </trans-unit>
       <trans-unit id="GenerateResource.CodeDomError">
         <source>MSB3567: Could not generate property on class "{0}".</source>
-        <target state="translated">MSB3567: impossibile generare la proprietà nella classe "{0}".</target>
+        <target state="translated">MSB3567: non è stato possibile generare la proprietà nella classe "{0}".</target>
         <note>{StrBegin="MSB3567: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CouldNotLoadType">
         <source>Could not load type {0} which is used in the .RESX file.  Ensure that the necessary references have been added to your project.</source>
-        <target state="translated">Non è stato possibile caricare il tipo {0}, usato nel file RESX.  Verificare di aver aggiunto al progetto i riferimenti necessari.</target>
+        <target state="translated">Non è stato possibile caricare il tipo {0}, usato nel file RESX. Verificare di aver aggiunto al progetto i riferimenti necessari.</target>
         <note />
       </trans-unit>
       <trans-unit id="GenerateResource.DuplicateResourceName">
@@ -1017,7 +1017,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.CannotWriteSTRFile">
         <source>MSB3570: Cannot write to the Strongly Typed Resource class file "{0}". {1}</source>
-        <target state="translated">MSB3570: impossibile scrivere nel file della classe di risorse fortemente tipizzata "{0}". {1}</target>
+        <target state="translated">MSB3570: non è possibile scrivere nel file della classe di risorse fortemente tipizzata "{0}". {1}</target>
         <note>{StrBegin="MSB3570: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.STRClassNamespaceOrFilenameWithoutLanguage">
@@ -1074,17 +1074,17 @@
       </trans-unit>
       <trans-unit id="GenerateResource.AdditionalInputNewerThanTLog">
         <source>Additional input "{0}" has been updated since the last build.  Forcing regeneration of all resources.</source>
-        <target state="translated">L'input aggiuntivo "{0}" è stato aggiornato dopo l'ultima compilazione.  Verrà imposta la rigenerazione di tutte le risorse.</target>
+        <target state="translated">L'input aggiuntivo "{0}" è stato aggiornato dopo l'ultima compilazione. Verrà imposta la rigenerazione di tutte le risorse.</target>
         <note />
       </trans-unit>
       <trans-unit id="GenerateResource.SeparateAppDomainBecauseNeverLockTypeAssembliesTrue">
         <source>Creating a separate AppDomain because "NeverLockTypeAssemblies" evaluated to 'true'.</source>
-        <target state="translated">Verrà creato un AppDomain separato poiché "NeverLockTypeAssemblies" ha restituito 'true'.</target>
+        <target state="translated">Verrà creato un AppDomain separato perché "NeverLockTypeAssemblies" ha restituito 'true'.</target>
         <note />
       </trans-unit>
       <trans-unit id="GenerateResource.SeparateAppDomainBecauseOfErrorDeserializingLineNumber">
         <source>Creating a separate AppDomain because while parsing "{0}" the serialized type "{1}" on line {2} could not be loaded. {3}</source>
-        <target state="translated">Verrà creato un AppDomain separato poiché durante l'analisi di "{0}" non è stato possibile caricare il tipo "{1}" alla riga {2}. {3}</target>
+        <target state="translated">Verrà creato un AppDomain separato perché durante l'analisi di "{0}" non è stato possibile caricare il tipo "{1}" alla riga {2}. {3}</target>
         <note />
       </trans-unit>
       <trans-unit id="GenerateResource.SeparateAppDomainBecauseOfException">
@@ -1119,7 +1119,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.CreatingCultureInfoFailed">
         <source>MSB3576: Creating the CultureInfo failed for assembly "{2}". Note the set of cultures supported is Operating System-dependent, and the Operating System has removed some cultures from time to time (ie, some Serbian cultures are split up in Windows 7).  The culture may be a user-defined custom culture that we can't currently load on this machine.  Exception info: {0}: {1}</source>
-        <target state="translated">MSB3576: la creazione di CultureInfo non è riuscita per l'assembly "{2}". Il set di impostazioni cultura supportate dipende dal sistema operativo che, a volte, rimuove alcune impostazioni cultura, ad esempio alcune impostazioni cultura serbe sono suddivise in Windows 7.  Le impostazioni cultura potrebbero essere impostazioni personalizzate definite dall'utente che non possono essere attualmente caricate nel computer.  Informazioni sull'eccezione: {0}: {1}</target>
+        <target state="translated">MSB3576: la creazione di CultureInfo non è riuscita per l'assembly "{2}". Il set di impostazioni cultura supportate dipende dal sistema operativo che, a volte, rimuove alcune impostazioni cultura, ad esempio alcune impostazioni cultura serbe sono suddivise in Windows 7. Le impostazioni cultura potrebbero essere impostazioni personalizzate definite dall'utente che non possono essere attualmente caricate nel computer. Informazioni sull'eccezione: {0}: {1}</target>
         <note>{StrBegin="MSB3576: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.DuplicateOutputFilenames">
@@ -1134,22 +1134,22 @@
       </trans-unit>
       <trans-unit id="GenerateResource.NoResourcesFileInAssembly">
         <source>MSB3579: Couldn't find the linked resources file "{0}" listed in the assembly manifest.</source>
-        <target state="translated">MSB3579: impossibile trovare il file delle risorse collegato "{0}" presente nell'elenco del manifesto dell'assembly.</target>
+        <target state="translated">MSB3579: il file delle risorse collegato "{0}" presente nell'elenco del manifesto dell'assembly non è stato trovato.</target>
         <note>{StrBegin="MSB3579: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.SatelliteOrMalformedAssembly">
         <source>MSB3580: The assembly in file "{0}" has an assembly culture, indicating it is a satellite assembly for culture "{1}".  But satellite assembly simple names must end in ".resources", while this one's simple name is "{2}".  This is either a main assembly with the culture incorrectly set, or a satellite assembly with an incorrect simple name.</source>
-        <target state="translated">MSB3580: l'assembly nel file "{0}" include impostazioni cultura che lo indicano come assembly satellite per le impostazioni cultura "{1}".  Tuttavia i nomi semplici dell'assembly satellite devono terminare con ".resources", mentre il nome semplice di questo assembly è "{2}".  Si tratta, quindi, di un assembly principale con le impostazioni cultura impostate in modo non corretto o di un assembly satellite con un nome semplice non corretto.</target>
+        <target state="translated">MSB3580: l'assembly nel file "{0}" include impostazioni cultura che lo indicano come assembly satellite per le impostazioni cultura "{1}". Tuttavia i nomi semplici dell'assembly satellite devono terminare con ".resources", mentre il nome semplice di questo assembly è "{2}". Si tratta, quindi, di un assembly principale con le impostazioni cultura impostate in modo non corretto o di un assembly satellite con un nome semplice non corretto.</target>
         <note>{StrBegin="MSB3580: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.SatelliteAssemblyContainsCode">
         <source>MSB3811: The assembly "{0}" says it is a satellite assembly, but it contains code. Main assemblies shouldn't specify the assembly culture in their manifest, and satellites should not contain code.  This is almost certainly an error in your build process.</source>
-        <target state="translated">MSB3811: l'assembly "{0}" si presenta come assembly satellite, ma contiene codice. Gli assembly principali non devono specificare le impostazioni cultura dell'assembly nel manifesto e i satelliti non devono contenere codice.  Probabilmente si tratta di un errore del processo di compilazione.</target>
+        <target state="translated">MSB3811: l'assembly "{0}" si presenta come assembly satellite, ma contiene codice. Gli assembly principali non devono specificare le impostazioni cultura dell'assembly nel manifesto e i satelliti non devono contenere codice. Probabilmente si tratta di un errore del processo di compilazione.</target>
         <note>{StrBegin="MSB3811: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.SatelliteAssemblyContainsNoResourcesFile">
         <source>MSB3812: This assembly claims to be a satellite assembly, but doesn't contain any properly named .resources files as manifest resources. The name of the files should end in {0}.resources.  There is probably a build-related problem with this assembly.</source>
-        <target state="translated">MSB3812: l'assembly si presenta come assembly satellite, ma non contiene alcun file .resources correttamente denominato come risorse manifesto. Il nome dei file deve terminare con {0}.resources.  Probabilmente si tratta di un problema relativo alla compilazione dell'assembly.</target>
+        <target state="translated">MSB3812: l'assembly si presenta come assembly satellite, ma non contiene alcun file .resources correttamente denominato come risorse manifesto. Il nome dei file deve terminare con {0}.resources. Probabilmente si tratta di un problema relativo alla compilazione dell'assembly.</target>
         <note>{StrBegin="MSB3812: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.UnrecognizedUltimateResourceFallbackLocation">
@@ -1164,7 +1164,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.ImproperlyBuiltSatelliteAssembly">
         <source>MSB3815: Satellite assembly "{2}" was built improperly. The manifest resource "{0}" will not be found by the ResourceManager.  It must end in "{1}".</source>
-        <target state="translated">MSB3815: l'assembly satellite "{2}" non è stato compilato correttamente. La risorsa manifesto "{0}" non è stata trovata da ResourceManager.  Deve terminare con "{1}".</target>
+        <target state="translated">MSB3815: l'assembly satellite "{2}" non è stato compilato correttamente. La risorsa manifesto "{0}" non è stata trovata da ResourceManager. Deve terminare con "{1}".</target>
         <note>{StrBegin="MSB3815: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CannotLoadAssemblyLoadFromFailed">
@@ -1184,17 +1184,17 @@
       </trans-unit>
       <trans-unit id="GenerateResource.MissingFile">
         <source>MSB3819: Cannot find assembly "{0}", which may contain managed resources that need to be included in this app package.  Please ensure that this assembly exists.</source>
-        <target state="translated">MSB3819: non è possibile trovare l'assembly "{0}" che può contenere le risorse gestite che devono essere incluse nel pacchetto dell'app.  Verificare che l'assembly esista.</target>
+        <target state="translated">MSB3819: non è possibile trovare l'assembly "{0}" che può contenere le risorse gestite che devono essere incluse nel pacchetto dell'app. Verificare che l'assembly esista.</target>
         <note>{StrBegin="MSB3819: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.PathTooLong">
         <source>MSB3820: The path needed to store build-related temporary files is too long.  Try your project in a shorter directory, or rename some of your resources.  The full path was "{0}".</source>
-        <target state="translated">MSB3820: il percorso necessario per archiviare i file temporanei relativi alla compilazione è troppo lungo.  Provare una directory più breve per il progetto o rinominare alcune risorse.  Percorso completo: "{0}".</target>
+        <target state="translated">MSB3820: il percorso necessario per archiviare i file temporanei relativi alla compilazione è troppo lungo. Provare una directory più breve per il progetto o rinominare alcune risorse. Percorso completo: "{0}".</target>
         <note>{StrBegin="MSB3820: "}</note>
       </trans-unit>
       <trans-unit id="GetAssemblyIdentity.CouldNotGetAssemblyName">
         <source>MSB3441: Cannot get assembly name for "{0}". {1}</source>
-        <target state="translated">MSB3441: impossibile ottenere il nome dell'assembly per "{0}". {1}</target>
+        <target state="translated">MSB3441: non è possibile ottenere il nome dell'assembly per "{0}". {1}</target>
         <note>{StrBegin="MSB3441: "}</note>
       </trans-unit>
       <trans-unit id="GetFrameworkSdkPath.CouldNotFindSDK">
@@ -1214,7 +1214,7 @@
       </trans-unit>
       <trans-unit id="MakeDir.Error">
         <source>MSB3191: Unable to create directory "{0}". {1}</source>
-        <target state="translated">MSB3191: impossibile creare la directory "{0}". {1}</target>
+        <target state="translated">MSB3191: non è possibile creare la directory "{0}". {1}</target>
         <note>{StrBegin="MSB3191: "}</note>
       </trans-unit>
       <trans-unit id="Message.InvalidImportance">
@@ -1239,7 +1239,7 @@
       </trans-unit>
       <trans-unit id="Move.Error">
         <source>MSB3677: Unable to move file "{0}" to "{1}". {2}</source>
-        <target state="translated">MSB3677: impossibile spostare il file "{0}" in "{1}". {2}</target>
+        <target state="translated">MSB3677: non è possibile spostare il file "{0}" in "{1}". {2}</target>
         <note>{StrBegin="MSB3677: "}</note>
       </trans-unit>
       <trans-unit id="Move.ExactlyOneTypeOfDestination">
@@ -1269,18 +1269,18 @@
       </trans-unit>
       <trans-unit id="MSBuild.CannotRebaseOutputItemPath">
         <source>MSB3203: The output path "{0}" cannot be rebased. {1}</source>
-        <target state="translated">MSB3203: impossibile riassegnare il percorso di output "{0}". {1}</target>
+        <target state="translated">MSB3203: non è possibile riassegnare il percorso di output "{0}". {1}</target>
         <note>{StrBegin="MSB3203: "}UE: This message is shown when the user asks the "MSBuild" task to rebase the paths of its output items relative to the project from where the "MSBuild" task is called (as opposed to the project(s) on which the "MSBuild" task is called), and one of the output item paths is invalid. LOCALIZATION: "{1}" is a localized message from a CLR/FX exception explaining the problem.</note>
       </trans-unit>
       <trans-unit id="MSBuild.ProjectFileNotFound">
         <source>MSB3202: The project file "{0}" was not found.</source>
-        <target state="translated">MSB3202: file di progetto "{0}" non trovato.</target>
+        <target state="translated">MSB3202: il file di progetto "{0}" non è stato trovato.</target>
         <note>{StrBegin="MSB3202: "}UE: This message is shown when the user passes a non-existent project file to the MSBuild task, in the "Projects" parameter.
              and they have not specified the SkipNonexistentProjects parameter, or it is set to false.</note>
       </trans-unit>
       <trans-unit id="MSBuild.ProjectFileNotFoundMessage">
         <source>Skipping project "{0}" because it was not found.</source>
-        <target state="translated">Impossibile trovare il progetto "{0}". Verrà ignorato.</target>
+        <target state="translated">Il progetto "{0}" non è stato trovato e verrà ignorato.</target>
         <note>UE: This message is shown when the user passes a non-existent project file to the MSBuild task, in the "Projects" parameter, and they have specified the SkipNonexistentProjects parameter.</note>
       </trans-unit>
       <trans-unit id="MSBuild.ProjectUpgradeNeededToVcxProj">
@@ -1315,7 +1315,7 @@
       </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">
         <source>MSB3501: Could not read lines from file "{0}". {1}</source>
-        <target state="translated">MSB3501: impossibile leggere le righe dal file "{0}". {1}</target>
+        <target state="translated">MSB3501: non è stato possibile leggere le righe dal file "{0}". {1}</target>
         <note>{StrBegin="MSB3501: "}</note>
       </trans-unit>
       <trans-unit id="RegisterAssembly.AssemblyNotRegisteredForComInterop">
@@ -1325,17 +1325,17 @@
       </trans-unit>
       <trans-unit id="RegisterAssembly.CantExportTypeLib">
         <source>MSB3212: The assembly "{0}" could not be converted to a type library. {1}</source>
-        <target state="translated">MSB3212: impossibile convertire l'assembly "{0}" in una libreria dei tipi. {1}</target>
+        <target state="translated">MSB3212: non è stato possibile convertire l'assembly "{0}" in una libreria dei tipi. {1}</target>
         <note>{StrBegin="MSB3212: "}</note>
       </trans-unit>
       <trans-unit id="RegisterAssembly.CantRegisterAssembly">
         <source>MSB3217: Cannot register assembly "{0}". {1}</source>
-        <target state="translated">MSB3217: impossibile registrare l'assembly "{0}". {1}</target>
+        <target state="translated">MSB3217: non è possibile registrare l'assembly "{0}". {1}</target>
         <note>{StrBegin="MSB3217: "}</note>
       </trans-unit>
       <trans-unit id="RegisterAssembly.CantRegisterTypeLib">
         <source>MSB3213: Cannot register type library "{0}". {1}</source>
-        <target state="translated">MSB3213: impossibile registrare la libreria dei tipi "{0}". {1}</target>
+        <target state="translated">MSB3213: non è possibile registrare la libreria dei tipi "{0}". {1}</target>
         <note>{StrBegin="MSB3213: "}</note>
       </trans-unit>
       <trans-unit id="RegisterAssembly.NoValidTypes">
@@ -1345,7 +1345,7 @@
       </trans-unit>
       <trans-unit id="RegisterAssembly.RegisterAsmFileDoesNotExist">
         <source>MSB3215: Cannot register assembly "{0}" - file doesn't exist.</source>
-        <target state="translated">MSB3215: impossibile registrare l'assembly "{0}". Il file non esiste.</target>
+        <target state="translated">MSB3215: non è possibile registrare l'assembly "{0}". Il file non esiste.</target>
         <note>{StrBegin="MSB3215: "}</note>
       </trans-unit>
       <trans-unit id="RegisterAssembly.RegisteringAssembly">
@@ -1370,7 +1370,7 @@
       </trans-unit>
       <trans-unit id="RemoveDir.Error">
         <source>MSB3231: Unable to remove directory "{0}". {1}</source>
-        <target state="translated">MSB3231: impossibile rimuovere la directory "{0}". {1}</target>
+        <target state="translated">MSB3231: non è possibile rimuovere la directory "{0}". {1}</target>
         <note>{StrBegin="MSB3231: "}</note>
       </trans-unit>
       <trans-unit id="RemoveDir.Removing">
@@ -1390,7 +1390,7 @@
       </trans-unit>
       <trans-unit id="ResGen.SdkOrToolPathNotSpecifiedOrInvalid">
         <source>MSB3451: Neither SDKToolsPath '{0}' nor ToolPath '{1}' is a valid directory.  One of these must be set.</source>
-        <target state="translated">MSB3451: SDKToolsPath '{0}' o ToolPath '{1}' non corrisponde a una directory valida.  È necessario impostarne uno dei due.</target>
+        <target state="translated">MSB3451: SDKToolsPath '{0}' o ToolPath '{1}' non corrisponde a una directory valida. È necessario impostarne uno dei due.</target>
         <note>{StrBegin="MSB3451: "}</note>
       </trans-unit>
       <trans-unit id="ResGen.STRClassNamespaceOrFilenameWithoutLanguage">
@@ -1405,7 +1405,7 @@
       </trans-unit>
       <trans-unit id="ResGen.TrackerNotFound">
         <source>MSB3454: Tracker.exe is required to correctly incrementally generate resources in some circumstances, such as when building on a 64-bit OS using 32-bit MSBuild. This build requires Tracker.exe, but it could not be found.  The task is looking for Tracker.exe beneath the {0} value of the registry key {1}.  To solve the problem, either: 1) Install the Microsoft Windows SDK v7.0A or later. 2) Install Microsoft Visual Studio 2010. 3) Manually set the above registry key to the correct location. Alternatively, you can turn off incremental resource generation by setting the "TrackFileAccess" property to "false".</source>
-        <target state="translated">MSB3454: Tracker.exe è necessario per generare correttamente le risorse in modo incrementale in situazioni quali la compilazione in un sistema operativo a 64 bit che usa MSBuild a 32 bit. Questa compilazione richiede Tracker.exe, che però non è stato trovato.  L'attività cerca Tracker.exe nel valore {0} della chiave del Registro di sistema {1}.  Per risolvere il problema: 1) Installare Microsoft Windows SDK v7.0A o successiva. 2) Installare Microsoft Visual Studio 2010. 3) Impostare manualmente la chiave del Registro di sistema indicata sul percorso corretto. In alternativa, è possibile disattivare la generazione incrementale delle risorse impostando la proprietà "TrackFileAccess" su "false".</target>
+        <target state="translated">MSB3454: Tracker.exe è necessario per generare correttamente le risorse in modo incrementale in situazioni quali la compilazione in un sistema operativo a 64 bit che usa MSBuild a 32 bit. Questa compilazione richiede Tracker.exe, che però non è stato trovato. L'attività cerca Tracker.exe nel valore {0} della chiave del Registro di sistema {1}. Per risolvere il problema: 1) Installare Microsoft Windows SDK v7.0A o successiva. 2) Installare Microsoft Visual Studio 2010. 3) Impostare manualmente la chiave del Registro di sistema indicata sul percorso corretto. In alternativa, è possibile disattivare la generazione incrementale delle risorse impostando la proprietà "TrackFileAccess" su "false".</target>
         <note>{StrBegin="MSB3454: "}</note>
       </trans-unit>
       <trans-unit id="ResGen.CommandTooLong">
@@ -1544,12 +1544,12 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.FailedToFindDependentFiles">
         <source>MSB3244: Could not find dependent files. {0}</source>
-        <target state="translated">MSB3244: impossibile trovare file dipendenti. {0}</target>
+        <target state="translated">MSB3244: non sono stati trovati file dipendenti. {0}</target>
         <note>{StrBegin="MSB3244: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.FailedToResolveReference">
         <source>MSB3245: Could not resolve this reference. {0} If this reference is required by your code, you may get compilation errors.</source>
-        <target state="translated">MSB3245: impossibile risolvere il riferimento. {0} Se il riferimento è richiesto dal codice, potrebbero essere generati errori di compilazione.</target>
+        <target state="translated">MSB3245: non è stato possibile risolvere il riferimento. {0} Se il riferimento è richiesto dal codice, potrebbero essere generati errori di compilazione.</target>
         <note>{StrBegin="MSB3245: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.FailedWithException">
@@ -1599,7 +1599,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.NoSubsetsFound">
         <source>MSB3255: Could not find any Target Framework Subset files in the Target Framework Directories or at the locations specified in the InstalledAssemblySubsetTables.</source>
-        <target state="translated">MSB3255: impossibile trovare i file di sottoinsieme .NET Framework di destinazione nelle relative directory o nei percorsi specificati in InstalledAssemblySubsetTables.</target>
+        <target state="translated">MSB3255: i file di sottoinsieme .NET Framework di destinazione non sono stati trovati nelle relative directory o nei percorsi specificati in InstalledAssemblySubsetTables.</target>
         <note>{StrBegin="MSB3255: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.NoRedistAssembliesToGenerateExclusionList">
@@ -1614,7 +1614,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.DependencyReferenceOutsideOfFramework">
         <source>MSB3258: The primary reference "{0}" could not be resolved because it has an indirect dependency on the .NET Framework assembly "{1}" which has a higher version "{2}" than the version "{3}" in the current target framework.</source>
-        <target state="translated">MSB3258: impossibile risolvere il riferimento primario "{0}" perché include una dipendenza indiretta all'assembly .NET Framework "{1}" la cui versione "{2}" è successiva alla versione "{3}" nel framework di destinazione corrente.</target>
+        <target state="translated">MSB3258: non è stato possibile risolvere il riferimento primario "{0}" perché include una dipendenza indiretta all'assembly .NET Framework "{1}" la cui versione "{2}" è successiva alla versione "{3}" nel framework di destinazione corrente.</target>
         <note>{StrBegin="MSB3258: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.CannotSetProfileAndSubSet">
@@ -1624,7 +1624,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.NoProfilesFound">
         <source>MSB3260: Could not find any target framework profile redist files in the FullFrameworkFolders locations.</source>
-        <target state="translated">MSB3260: impossibile trovare file redist del profilo del framework di destinazione nei percorsi FullFrameworkFolders.</target>
+        <target state="translated">MSB3260: non sono stati trovati file redist del profilo del framework di destinazione nei percorsi FullFrameworkFolders.</target>
         <note>{StrBegin="MSB3260: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.FrameworkDirectoryOnProfiles">
@@ -1654,7 +1654,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.ProblemDeterminingFrameworkMembership">
         <source>MSB3269: Could not determine if resolved references are part of the targeted framework because of an error. "{0}"</source>
-        <target state="translated">MSB3269: impossibile stabilire se i riferimenti risolti fanno parte del framework di destinazione a causa di un errore. "{0}"</target>
+        <target state="translated">MSB3269: non è stato possibile stabilire se i riferimenti risolti fanno parte del framework di destinazione a causa di un errore. "{0}"</target>
         <note>{StrBegin="MSB3269: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.MismatchBetweenTargetedAndReferencedArch">
@@ -1817,12 +1817,12 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnificationByAppConfig">
         <source>Using this version instead of original version "{0}" in "{2}" because of a binding redirect entry in the file "{1}".</source>
-        <target state="translated">Verrà utilizzata questa versione anziché la versione originale "{0}" in "{2}" a causa di una voce di reindirizzamento dell'associazione nel file "{1}".</target>
+        <target state="translated">Verrà usata questa versione anziché la versione originale "{0}" in "{2}" a causa di una voce di reindirizzamento dell'associazione nel file "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnificationByAutoUnify">
         <source>Using this version instead of original version "{0}" in "{1}" because AutoUnify is 'true'.</source>
-        <target state="translated">Verrà utilizzata questa versione anziché la versione originale "{0}" in "{1}". AutoUnify è 'true'.</target>
+        <target state="translated">Verrà usata questa versione anziché la versione originale "{0}" in "{1}". AutoUnify è 'true'.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.RemappedReference">
@@ -1832,7 +1832,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnificationByFrameworkRetarget">
         <source>Using this version instead of original version "{0}" in "{1}" because there is a more recent version of this framework file.</source>
-        <target state="translated">Verrà utilizzata questa versione anziché la versione originale "{0}" in "{1}". È presente una versione più recente del file del framework.</target>
+        <target state="translated">Verrà usata questa versione anziché la versione originale "{0}" in "{1}". È presente una versione più recente del file del framework.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnifiedDependency">
@@ -1847,7 +1847,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.ProblemFindingSatelliteAssemblies">
         <source>Could not find satellite assemblies for reference "{0}". {1}</source>
-        <target state="translated">Impossibile trovare gli assembly satellite per il riferimento "{0}". {1}</target>
+        <target state="translated">Gli assembly satellite per il riferimento "{0}" non sono stati trovati. {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UsingExclusionList">
@@ -1932,7 +1932,7 @@
       </trans-unit>
       <trans-unit id="ResolveComReference.CannotAccessTypeLibName">
         <source>MSB3282: Cannot access type library name for library "{0}". {1}</source>
-        <target state="translated">MSB3282: impossibile accedere al nome della libreria dei tipi per la libreria "{0}". {1}</target>
+        <target state="translated">MSB3282: non è possibile accedere al nome della libreria dei tipi per la libreria "{0}". {1}</target>
         <note>{StrBegin="MSB3282: "}</note>
       </trans-unit>
       <trans-unit id="ResolveComReference.CannotFindWrapperForTypeLib">
@@ -1942,32 +1942,32 @@
       </trans-unit>
       <trans-unit id="ResolveComReference.CannotGetPathForTypeLib">
         <source>MSB3284: Cannot get the file path for type library "{0}" version {1}.{2}. {3}</source>
-        <target state="translated">MSB3284: impossibile ottenere il percorso file per la libreria dei tipi "{0}" versione {1}.{2}. {3}</target>
+        <target state="translated">MSB3284: non è possibile ottenere il percorso file per la libreria dei tipi "{0}" versione {1}.{2}. {3}</target>
         <note>{StrBegin="MSB3284: "}</note>
       </trans-unit>
       <trans-unit id="ResolveComReference.CannotGetTypeLibAttrForTypeLib">
         <source>MSB3285: Cannot get type library attributes for a dependent type library!</source>
-        <target state="translated">MSB3285: impossibile ottenere gli attributi della libreria per una libreria dei tipi dipendente.</target>
+        <target state="translated">MSB3285: non è possibile ottenere gli attributi della libreria per una libreria dei tipi dipendente.</target>
         <note>{StrBegin="MSB3285: "}</note>
       </trans-unit>
       <trans-unit id="ResolveComReference.CannotLoadTypeLib">
         <source>MSB3286: Cannot load type library "{0}" version {1}.{2}. {3}</source>
-        <target state="translated">MSB3286: impossibile caricare la libreria dei tipi "{0}" versione {1}.{2}. {3}</target>
+        <target state="translated">MSB3286: non è possibile caricare la libreria dei tipi "{0}" versione {1}.{2}. {3}</target>
         <note>{StrBegin="MSB3286: "}</note>
       </trans-unit>
       <trans-unit id="ResolveComReference.CannotLoadTypeLibItemSpec">
         <source>MSB3287: Cannot load type library for reference "{0}". {1}</source>
-        <target state="translated">MSB3287: impossibile caricare la libreria dei tipi per il riferimento "{0}". {1}</target>
+        <target state="translated">MSB3287: non è possibile caricare la libreria dei tipi per il riferimento "{0}". {1}</target>
         <note>{StrBegin="MSB3287: "}</note>
       </trans-unit>
       <trans-unit id="ResolveComReference.CannotRetrieveTypeInformation">
         <source>MSB3302: Cannot retrieve information about a dependent type.</source>
-        <target state="translated">MSB3302: impossibile recuperare le informazioni su un tipo dipendente.</target>
+        <target state="translated">MSB3302: non è possibile recuperare le informazioni su un tipo dipendente.</target>
         <note>{StrBegin="MSB3302: "}</note>
       </trans-unit>
       <trans-unit id="ResolveComReference.CannotSpecifyBothKeyFileAndKeyContainer">
         <source>MSB3300: Cannot specify values for both KeyFile and KeyContainer.</source>
-        <target state="translated">MSB3300: impossibile specificare i valori per KeyFile e KeyContainer.</target>
+        <target state="translated">MSB3300: non è possibile specificare i valori per KeyFile e KeyContainer.</target>
         <note>{StrBegin="MSB3300: "}</note>
       </trans-unit>
       <trans-unit id="ResolveComReference.CannotSpecifyDelaySignWithoutEitherKeyFileOrKeyContainer">
@@ -1997,22 +1997,22 @@
       </trans-unit>
       <trans-unit id="ResolveComReference.FailedToResolveComReference">
         <source>MSB3303: Could not resolve COM reference "{0}" version {1}.{2}. {3}</source>
-        <target state="translated">MSB3303: impossibile risolvere il riferimento COM "{0}" versione {1}.{2}. {3}</target>
+        <target state="translated">MSB3303: non è stato possibile risolvere il riferimento COM "{0}" versione {1}.{2}. {3}</target>
         <note>{StrBegin="MSB3303: "}</note>
       </trans-unit>
       <trans-unit id="ResolveComReference.FailedToResolveDependentComReference">
         <source>MSB3293: Could not resolve dependent COM reference "{0}" version {1}.{2}.</source>
-        <target state="translated">MSB3293: impossibile risolvere il riferimento COM dipendente "{0}" versione {1}.{2}.</target>
+        <target state="translated">MSB3293: non è stato possibile risolvere il riferimento COM dipendente "{0}" versione {1}.{2}.</target>
         <note>{StrBegin="MSB3293: "}</note>
       </trans-unit>
       <trans-unit id="ResolveComReference.FailedToResolveDependentComReferenceByAssemblyName">
         <source>MSB3294: Could not resolve dependent COM reference "{0}".</source>
-        <target state="translated">MSB3294: impossibile risolvere il riferimento COM dipendente "{0}".</target>
+        <target state="translated">MSB3294: non è stato possibile risolvere il riferimento COM dipendente "{0}".</target>
         <note>{StrBegin="MSB3294: "}</note>
       </trans-unit>
       <trans-unit id="ResolveComReference.FailedToScanDependencies">
         <source>MSB3304: Could not determine the dependencies of the COM reference "{0}". {1}</source>
-        <target state="translated">MSB3304: impossibile determinare le dipendenze del riferimento COM "{0}". {1}</target>
+        <target state="translated">MSB3304: non è stato possibile determinare le dipendenze del riferimento COM "{0}". {1}</target>
         <note>{StrBegin="MSB3304: "}</note>
       </trans-unit>
       <trans-unit id="ResolveComReference.ResolutionWarning">
@@ -2097,17 +2097,17 @@
       </trans-unit>
       <trans-unit id="ResolveKeySource.KeyMD5SumError">
         <source>MSB3322: Unable to get MD5 checksum for the key file "{0}". {1}</source>
-        <target state="translated">MSB3322: impossibile ottenere il checksum dell'hash MD5 per il file di chiave "{0}". {1}</target>
+        <target state="translated">MSB3322: non è possibile ottenere il checksum dell'hash MD5 per il file di chiave "{0}". {1}</target>
         <note>{StrBegin="MSB3322: "}</note>
       </trans-unit>
       <trans-unit id="ResolveKeySource.MsgBoxTitleImportKeyError">
         <source>Error importing key</source>
-        <target state="translated">Errore durante l'importazione della chiave.</target>
+        <target state="translated">Si è verificato un errore durante l'importazione della chiave</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveKeySource.CertificateNotInStore">
         <source>MSB3323: Unable to find manifest signing certificate in the certificate store.</source>
-        <target state="translated">MSB3323: impossibile trovare il certificato di firma del manifesto nell'archivio certificati.</target>
+        <target state="translated">MSB3323: il certificato di firma del manifesto non è stato trovato nell'archivio certificati.</target>
         <note>{StrBegin="MSB3323: "}</note>
       </trans-unit>
       <trans-unit id="ResolveKeySource.InvalidKeyName">
@@ -2132,7 +2132,7 @@
       </trans-unit>
       <trans-unit id="ResolveManifestFiles.PublishFileNotFound">
         <source>MSB3331: Unable to apply publish properties for item "{0}".</source>
-        <target state="translated">MSB3331: impossibile applicare le proprietà di pubblicazione per l'elemento "{0}".</target>
+        <target state="translated">MSB3331: non è possibile applicare le proprietà di pubblicazione per l'elemento "{0}".</target>
         <note>{StrBegin="MSB3331: "}</note>
       </trans-unit>
       <trans-unit id="ResolveNativeReference.Comment">
@@ -2152,7 +2152,7 @@
       </trans-unit>
       <trans-unit id="ResolveNonMSBuildProjectOutput.ProjectReferenceResolutionFailure">
         <source>MSB3582: Could not resolve project reference "{0}".</source>
-        <target state="translated">MSB3582: impossibile risolvere il riferimento al progetto "{0}".</target>
+        <target state="translated">MSB3582: non è stato possibile risolvere il riferimento al progetto "{0}".</target>
         <note>{StrBegin="MSB3582: "}</note>
       </trans-unit>
       <trans-unit id="ResolveNonMSBuildProjectOutput.ProjectReferenceUnresolved">
@@ -2181,7 +2181,7 @@
       </trans-unit>
       <trans-unit id="SGen.CouldNotDeleteSerializer">
         <source>MSB3472: We were unable to delete the existing serializer "{0}" before creating a new one: {1}  </source>
-        <target state="translated">MSB3472: impossibile eliminare il serializzatore esistente "{0}" prima di crearne uno nuovo: {1}  </target>
+        <target state="translated">MSB3472: non è possibile eliminare il serializzatore esistente "{0}" prima di crearne uno nuovo: {1}  </target>
         <note>{StrBegin="MSB3472: "}</note>
       </trans-unit>
       <trans-unit id="SGen.InvalidPath">
@@ -2206,7 +2206,7 @@
       </trans-unit>
       <trans-unit id="SignFile.TargetFileNotFound">
         <source>MSB3484: Signing target '{0}' could not be found.</source>
-        <target state="translated">MSB3484: impossibile trovare la destinazione di firma '{0}'.</target>
+        <target state="translated">MSB3484: la destinazione di firma '{0}' non è stata trovata.</target>
         <note>{StrBegin="MSB3484: "}</note>
       </trans-unit>
       <trans-unit id="SignFile.CertMissingPrivateKey">
@@ -2216,12 +2216,12 @@
       </trans-unit>
       <trans-unit id="StrongNameUtils.BadKeyContainer">
         <source>MSB3351: Unable to create a strong name key pair from key container '{0}'.</source>
-        <target state="translated">MSB3351: impossibile creare una coppia di chiavi con nome sicuro dal contenitore di chiavi '{0}'.</target>
+        <target state="translated">MSB3351: non è possibile creare una coppia di chiavi con nome sicuro dal contenitore di chiavi '{0}'.</target>
         <note>{StrBegin="MSB3351: "}</note>
       </trans-unit>
       <trans-unit id="StrongNameUtils.KeyFileReadFailure">
         <source>MSB3352: The specified key file '{0}' could not be read.</source>
-        <target state="translated">MSB3352: impossibile leggere il file di chiave specificato '{0}'.</target>
+        <target state="translated">MSB3352: non è stato possibile leggere il file di chiave specificato '{0}'.</target>
         <note>{StrBegin="MSB3352: "}</note>
       </trans-unit>
       <trans-unit id="StrongNameUtils.NoPublicKeySpecified">
@@ -2241,7 +2241,7 @@
       </trans-unit>
       <trans-unit id="Touch.CannotCreateFile">
         <source>MSB3371: The file "{0}" cannot be created. {1}</source>
-        <target state="translated">MSB3371: impossibile creare il file '{0}'. {1}</target>
+        <target state="translated">MSB3371: non è possibile creare il file "{0}". {1}</target>
         <note>{StrBegin="MSB3371: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CannotMakeFileWritable">
@@ -2251,12 +2251,12 @@
       </trans-unit>
       <trans-unit id="Touch.CannotRestoreAttributes">
         <source>MSB3373: The attributes on file "{0}" cannot be restored to their original value. {1}</source>
-        <target state="translated">MSB3373: impossibile ripristinare il valore originale degli attributi del file "{0}". {1}</target>
+        <target state="translated">MSB3373: non è possibile ripristinare il valore originale degli attributi del file "{0}". {1}</target>
         <note>{StrBegin="MSB3373: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CannotTouch">
         <source>MSB3374: The last access/last write time on file "{0}" cannot be set. {1}</source>
-        <target state="translated">MSB3374: impossibile impostare l'ora dell'ultimo accesso o dell'ultima scrittura per il file "{0}". {1}</target>
+        <target state="translated">MSB3374: non è possibile impostare l'ora dell'ultimo accesso o dell'ultima scrittura per il file "{0}". {1}</target>
         <note>{StrBegin="MSB3374: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CreatingFile">
@@ -2286,7 +2286,7 @@
       </trans-unit>
       <trans-unit id="UnregisterAssembly.CantUnregisterAssembly">
         <source>MSB3395: Cannot unregister assembly "{0}". {1}</source>
-        <target state="translated">MSB3395: impossibile annullare la registrazione dell'assembly "{0}". {1}</target>
+        <target state="translated">MSB3395: non è possibile annullare la registrazione dell'assembly "{0}". {1}</target>
         <note>{StrBegin="MSB3395: "}</note>
       </trans-unit>
       <trans-unit id="UnregisterAssembly.NoValidTypes">
@@ -2301,7 +2301,7 @@
       </trans-unit>
       <trans-unit id="UnregisterAssembly.UnregisterAsmFileDoesNotExist">
         <source>MSB3393: Cannot unregister assembly "{0}" - file doesn't exist.</source>
-        <target state="translated">MSB3393: impossibile annullare la registrazione dell'assembly "{0}". Il file non esiste.</target>
+        <target state="translated">MSB3393: non è possibile annullare la registrazione dell'assembly "{0}". Il file non esiste.</target>
         <note>{StrBegin="MSB3393: "}</note>
       </trans-unit>
       <trans-unit id="UnregisterAssembly.UnregisteringAssembly">
@@ -2316,12 +2316,12 @@
       </trans-unit>
       <trans-unit id="UnregisterAssembly.UnregisterTlbCantLoadFile">
         <source>MSB3397: Cannot unregister type library "{0}" - cannot load file, check to make sure it's a valid type library.</source>
-        <target state="translated">MSB3397: impossibile annullare la registrazione della libreria dei tipi "{0}". Il file non può essere caricato. Verificare che la libreria dei tipi sia valida.</target>
+        <target state="translated">MSB3397: non è possibile annullare la registrazione della libreria dei tipi "{0}". Il file non può essere caricato. Verificare che la libreria dei tipi sia valida.</target>
         <note>{StrBegin="MSB3397: "}</note>
       </trans-unit>
       <trans-unit id="UnregisterAssembly.UnregisterTlbFileDoesNotExist">
         <source>Cannot unregister type library "{0}" - file doesn't exist.</source>
-        <target state="translated">Impossibile annullare la registrazione della libreria dei tipi "{0}". Il file non esiste.</target>
+        <target state="translated">Non è possibile annullare la registrazione della libreria dei tipi "{0}". Il file non esiste.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnregisterAssembly.UnregisterTlbFileNotRegistered">
@@ -2331,7 +2331,7 @@
       </trans-unit>
       <trans-unit id="Vbc.EnumParameterHasInvalidValue">
         <source>MSB3401: "{1}" is an invalid value for the "{0}" parameter.  The valid values are: {2}</source>
-        <target state="translated">MSB3401: "{1}" è un valore non valido per il parametro "{0}".  I valori validi sono: {2}</target>
+        <target state="translated">MSB3401: "{1}" è un valore non valido per il parametro "{0}". I valori validi sono: {2}</target>
         <note>{StrBegin="MSB3401: "}</note>
       </trans-unit>
       <trans-unit id="VBC.RenamePDB">
@@ -2346,7 +2346,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">
         <source>MSB3491: Could not write lines to file "{0}". {1}</source>
-        <target state="translated">MSB3491: impossibile scrivere righe nel file "{0}". {1}</target>
+        <target state="translated">MSB3491: non è stato possibile scrivere righe nel file "{0}". {1}</target>
         <note>{StrBegin="MSB3491: "}</note>
       </trans-unit>
       <trans-unit id="GetReferenceAssemblyPaths.InvalidTargetFrameworkMoniker">
@@ -2376,32 +2376,32 @@
       </trans-unit>
       <trans-unit id="Xaml.TaskCreationFailed">
         <source>MSB3686: Unable to create Xaml task.  Compilation failed.  {0}</source>
-        <target state="translated">MSB3686: non è possibile creare l'attività XAML.  La compilazione non è riuscita. {0}</target>
+        <target state="translated">MSB3686: non è possibile creare l'attività XAML. La compilazione non è riuscita. {0}</target>
         <note>{StrBegin="MSB3686: "}</note>
       </trans-unit>
       <trans-unit id="Xaml.RuleParseFailed">
         <source>MSB3687: Unable to parse Xaml rule.  {0}</source>
-        <target state="translated">MSB3687: impossibile analizzare la regola XAML. {0}</target>
+        <target state="translated">MSB3687: non è possibile analizzare la regola XAML. {0}</target>
         <note>{StrBegin="MSB3687: "}</note>
       </trans-unit>
       <trans-unit id="Xaml.RuleFileNotFound">
         <source>MSB3688: Unable to create Xaml task.  File not found: {0}.</source>
-        <target state="translated">MSB3688: non è possibile creare l'attività XAML.  Il file non è stato trovato: {0}.</target>
+        <target state="translated">MSB3688: non è possibile creare l'attività XAML. Il file non è stato trovato: {0}.</target>
         <note>{StrBegin="MSB3688: "}</note>
       </trans-unit>
       <trans-unit id="Xaml.RuleMissingToolName">
         <source>MSB3689: Unable to execute Xaml task.  If the CommandLineTemplate task parameter is not specified, then the ToolName attribute must be specified in the Rule or the ToolExe task parameter must be set.</source>
-        <target state="translated">MSB3689: non è possibile eseguire l'attività XAML.  Se il parametro dell'attività CommandLineTemplate non è specificato, è necessario specificare l'attributo ToolName nella regola oppure impostare il parametro dell'attività ToolExe.</target>
+        <target state="translated">MSB3689: non è possibile eseguire l'attività XAML. Se il parametro dell'attività CommandLineTemplate non è specificato, è necessario specificare l'attributo ToolName nella regola oppure impostare il parametro dell'attività ToolExe.</target>
         <note>{StrBegin="MSB3689: "}</note>
       </trans-unit>
       <trans-unit id="Xaml.RuleNotFound">
         <source>MSB3690: Unable to create Xaml task.  The Rule "{0}" was not found.</source>
-        <target state="translated">MSB3690: non è possibile creare l'attività XAML.  La regola "{0}" non è stata trovata.</target>
+        <target state="translated">MSB3690: non è possibile creare l'attività XAML. La regola "{0}" non è stata trovata.</target>
         <note>{StrBegin="MSB3690: "}</note>
       </trans-unit>
       <trans-unit id="Xaml.InvalidRootObject">
         <source>MSB3691: Unable to create Xaml task.  The root object was not of type ProjectSchemaDefinitions.</source>
-        <target state="translated">MSB3691: non è possibile creare l'attività XAML.  L'oggetto radice non è di tipo ProjectSchemaDefinitions.</target>
+        <target state="translated">MSB3691: non è possibile creare l'attività XAML. L'oggetto radice non è di tipo ProjectSchemaDefinitions.</target>
         <note>{StrBegin="MSB3691: "}</note>
       </trans-unit>
       <trans-unit id="Xaml.MissingTaskBody">
@@ -2411,12 +2411,12 @@
       </trans-unit>
       <trans-unit id="Xaml.ArgumentOutOfRange">
         <source>MSB3693: Unable to execute Xaml task.  The value "{1}" specified for task parameter "{0}" is not valid.</source>
-        <target state="translated">MSB3693: non è possibile creare l'attività XAML.  Il valore "{1}" specificato per il parametro dell'attività "{0}" non è valido.</target>
+        <target state="translated">MSB3693: non è possibile creare l'attività XAML. Il valore "{1}" specificato per il parametro dell'attività "{0}" non è valido.</target>
         <note>{StrBegin="MSB3693: "}</note>
       </trans-unit>
       <trans-unit id="Xaml.MissingSwitchValue">
         <source>MSB3694: Unable to create Xaml task.  The EnumValue "{1}" on EnumProperty "{0}" is missing the SwitchValue attribute.</source>
-        <target state="translated">MSB3694: non è possibile creare l'attività XAML.  L'attributo SwitchValue non è presente in EnumValue "{1}" di EnumProperty "{0}".</target>
+        <target state="translated">MSB3694: non è possibile creare l'attività XAML. L'attributo SwitchValue non è presente in EnumValue "{1}" di EnumProperty "{0}".</target>
         <note>{StrBegin="MSB3694: "}</note>
       </trans-unit>
       <trans-unit id="Xaml.CommandFailed">
@@ -2446,7 +2446,7 @@
       </trans-unit>
       <trans-unit id="XslTransform.TransformError">
         <source>MSB3703: Unable to execute transformation. {0}</source>
-        <target state="translated">MSB3703: impossibile eseguire la trasformazione. {0}</target>
+        <target state="translated">MSB3703: non è possibile eseguire la trasformazione. {0}</target>
         <note>{StrBegin="MSB3703: "}</note>
       </trans-unit>
       <trans-unit id="XslTransform.XmlInput.TooMany">
@@ -2471,7 +2471,7 @@
       </trans-unit>
       <trans-unit id="XslTransform.XsltLoadError">
         <source>MSB3704: Unable to load the specified Xslt. {0}</source>
-        <target state="translated">MSB3704: Impossibile caricare il parametro Xslt specificato. {0}</target>
+        <target state="translated">MSB3704: non è possibile caricare il parametro Xslt specificato. {0}</target>
         <note>{StrBegin="MSB3704: "}</note>
       </trans-unit>
       <trans-unit id="XslTransform.MustSpecifyType">
@@ -2491,7 +2491,7 @@
       </trans-unit>
       <trans-unit id="XslTransform.UseTrustedSettings">
         <source>The usage of the document() method and embedded scripts is prohibited by default, due to risks of foreign code execution.  If "{0}" is a trusted source that requires those constructs, please set the "UseTrustedSettings" parameter to "true" to allow their execution.</source>
-        <target state="translated">L'utilizzo del metodo document() e degli script incorporati è proibito per impostazione predefinita a causa dei rischi di esecuzione di codice esterno.  Se "{0}" è un'origine attendibile che richiede questi costrutti, impostare il parametro "UseTrustedSettings" su "true" per consentirne l'esecuzione.</target>
+        <target state="translated">L'utilizzo del metodo document() e degli script incorporati è proibito per impostazione predefinita a causa dei rischi di esecuzione di codice esterno. Se "{0}" è un'origine attendibile che richiede questi costrutti, impostare il parametro "UseTrustedSettings" su "true" per consentirne l'esecuzione.</target>
         <note />
       </trans-unit>
       <trans-unit id="XmlPoke.NamespacesError">
@@ -2521,17 +2521,17 @@
       </trans-unit>
       <trans-unit id="XmlPoke.XPathContextError">
         <source>MSB3732: Unable to set XPath expression's Context. {0}</source>
-        <target state="translated">MSB3732: impossibile impostare il contesto dell'espressione XPath. {0}</target>
+        <target state="translated">MSB3732: non è possibile impostare il contesto dell'espressione XPath. {0}</target>
         <note>{StrBegin="MSB3732: "}</note>
       </trans-unit>
       <trans-unit id="XmlPeekPoke.InputFileError">
         <source>MSB3733: Input file "{0}" cannot be opened. {1}</source>
-        <target state="translated">MSB3733: impossibile aprire il file "{0}" di input. {1}</target>
+        <target state="translated">MSB3733: non è possibile aprire il file "{0}" di input. {1}</target>
         <note>{StrBegin="MSB3733: "}</note>
       </trans-unit>
       <trans-unit id="XmlPeekPoke.XPathError">
         <source>MSB3734: XPath Query "{0}" cannot be loaded. {1}</source>
-        <target state="translated">MSB3734: impossibile caricare la query XPath "{0}". {1}</target>
+        <target state="translated">MSB3734: non è possibile caricare la query XPath "{0}". {1}</target>
         <note>{StrBegin="MSB3734: "}</note>
       </trans-unit>
       <trans-unit id="XmlPoke.PokeError">
@@ -2551,7 +2551,7 @@
       </trans-unit>
       <trans-unit id="XmlPeek.XPathContextError">
         <source>MSB3743: Unable to set XPath expression's Context. {0}</source>
-        <target state="translated">MSB3743: impossibile impostare il contesto dell'espressione XPath. {0}</target>
+        <target state="translated">MSB3743: non è possibile impostare il contesto dell'espressione XPath. {0}</target>
         <note>{StrBegin="MSB3743: "}</note>
       </trans-unit>
       <trans-unit id="XmlPeek.XmlInput.TooMany">
@@ -2591,12 +2591,12 @@
       </trans-unit>
       <trans-unit id="WriteCodeFragment.CouldNotCreateProvider">
         <source>MSB3712: Code for the language "{0}" could not be generated. {1}</source>
-        <target state="translated">MSB3712: impossibile generare codice per il linguaggio "{0}". {1}</target>
+        <target state="translated">MSB3712: non è stato possibile generare codice per il linguaggio "{0}". {1}</target>
         <note>{StrBegin="MSB3712: "}</note>
       </trans-unit>
       <trans-unit id="WriteCodeFragment.CouldNotWriteOutput">
         <source>MSB3713: The file "{0}" could not be created. {1}</source>
-        <target state="translated">MSB3713: impossibile creare il file "{0}". {1}</target>
+        <target state="translated">MSB3713: non è stato possibile creare il file "{0}". {1}</target>
         <note>{StrBegin="MSB3713: "}</note>
       </trans-unit>
       <trans-unit id="WriteCodeFragment.SkippedNumberedParameter">
@@ -2706,7 +2706,7 @@
       </trans-unit>
       <trans-unit id="ResolveSDKReference.CouldNotFindFrameworkIdentity">
         <source>Could not find "FrameworkIdentity" attribute "{0}" in the SDK manifest. </source>
-        <target state="translated">Impossibile trovare l'attributo "FrameworkIdentity" "{0}" nel manifesto dell'SDK. </target>
+        <target state="translated">L'attributo "FrameworkIdentity" "{0}" non è stato trovato nel manifesto dell'SDK. </target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveSDKReference.NoFrameworkIdentitiesFound">
@@ -2736,7 +2736,7 @@
       </trans-unit>
       <trans-unit id="ResolveSDKReference.NoSDKLocationsSpecified">
         <source>Cannot resolve "SDKReference" items because no installed SDK locations were passed into the property "InstalledSdks".</source>
-        <target state="translated">Impossibile risolvere gli elementi "SDKReference" perché nella proprietà "InstalledSdks" non è stato specificato alcun percorso di installazione SDK.</target>
+        <target state="translated">Non è possibile risolvere gli elementi "SDKReference" perché nella proprietà "InstalledSdks" non è stato specificato alcun percorso di installazione SDK.</target>
         <note>"SDKReference" and "InstalledSDKs" are property names on the task and should not be localized</note>
       </trans-unit>
       <trans-unit id="ResolveSDKReference.CannotReferenceTwoSDKsSameFamily">
@@ -2951,7 +2951,7 @@
       </trans-unit>
       <trans-unit id="FindInvalidProjectReferences.WarnWhenVersionIsIncompatible">
         <source>MSB3851: This project targets "{0}, Version={1}", but it is attempting to reference "{2}" targeting "{3}", which is invalid.</source>
-        <target state="translated">MSB3851: la destinazione di questo progetto è "{0}, Versione={1}", ma si tenta di fare riferimento a "{2}" la cui destinazione è "{3}", che non è valida.</target>
+        <target state="translated">MSB3851: la destinazione di questo progetto è "{0}, Versione={1}", ma si prova a fare riferimento a "{2}" la cui destinazione è "{3}", che non è valida.</target>
         <note>{StrBegin="MSB3851: "}</note>
       </trans-unit>
       <trans-unit id="ErrorFromResources.LogErrorFailure">
@@ -2961,7 +2961,7 @@
       </trans-unit>
       <trans-unit id="CodeSharing.CannotBuildSharedProject">
         <source>MSB3871: Shared projects cannot be built on their own.  Please either build a project that references this project, or build the entire solution.</source>
-        <target state="translated">MSB3871: non è possibile compilare direttamente i progetti condivisi.  Compilare un progetto che fa riferimento a questo progetto o l'intera soluzione.</target>
+        <target state="translated">MSB3871: non è possibile compilare direttamente i progetti condivisi. Compilare un progetto che fa riferimento a questo progetto o l'intera soluzione.</target>
         <note>{StrBegin="MSB3871: "}</note>
       </trans-unit>
       <trans-unit id="Copy.SymbolicLinkComment">
@@ -2977,6 +2977,26 @@
       <trans-unit id="Copy.ExactlyOneTypeOfLink">
         <source>MSB3891: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</source>
         <target state="translated">MSB3891: nel file di progetto sono stati specificati sia "{0}" che "{1}". Sceglierne uno.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WriteLinesToFile.ErrorReadingFile">
+        <source>MSB3492: Could not read existing file "{0}" to determine whether its contents are up to date. Overwriting it.</source>
+        <target state="translated">MSB3492: non è stato possibile leggere il file esistente "{0}" per determinare se il relativo contenuto è aggiornato. Verrà sovrascritto.</target>
+        <note>{StrBegin="MSB3491: "}</note>
+      </trans-unit>
+      <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
+        <source>MSB3493: </source>
+        <target state="translated">MSB3493: </target>
+        <note>{StrBegin="Skipping write to file "{0}" because content would not change."}</note>
+      </trans-unit>
+      <trans-unit id="Telemetry.IllegalEventDataString">
+        <source>The property "{0}" in the telemetry event data property list "{1}" is malformed.  Please only pass in a semicolon-delimited list of constant string values separated by "=", e.g., "Property1=Value1;Property2=Value2".</source>
+        <target state="translated">la proprietà "{0}" nell'elenco "{1}" delle proprietà di dati degli eventi di telemetria non è valida. Passare solo un elenco di valori stringa costanti delimitati da punti e virgola e separati da "=", ad esempio "Proprietà1=Valore1;Proprietà2=Valore2".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorAndWarning.EmptyMessage">
+        <source>(No message specified)</source>
+        <target state="translated">(Nessun messaggio specificato)</target>
         <note />
       </trans-unit>
     </body>

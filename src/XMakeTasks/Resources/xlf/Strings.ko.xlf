@@ -2979,6 +2979,26 @@
         <target state="translated">MSB3891: 프로젝트 파일에서 "{0}" 및 "{1}"을(를) 모두 지정했습니다. 둘 중 하나만 선택하세요.</target>
         <note />
       </trans-unit>
+      <trans-unit id="WriteLinesToFile.ErrorReadingFile">
+        <source>MSB3492: Could not read existing file "{0}" to determine whether its contents are up to date. Overwriting it.</source>
+        <target state="translated">MSB3492: 기존 파일 "{0}"을(를) 읽을 수 없어 콘텐츠가 최신 상태인지 확인할 수 없습니다. 덮어씁니다.</target>
+        <note>{StrBegin="MSB3491: "}</note>
+      </trans-unit>
+      <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
+        <source>MSB3493: </source>
+        <target state="translated">MSB3493: </target>
+        <note>{StrBegin="Skipping write to file "{0}" because content would not change."}</note>
+      </trans-unit>
+      <trans-unit id="Telemetry.IllegalEventDataString">
+        <source>The property "{0}" in the telemetry event data property list "{1}" is malformed.  Please only pass in a semicolon-delimited list of constant string values separated by "=", e.g., "Property1=Value1;Property2=Value2".</source>
+        <target state="translated">원격 분석 이벤트 데이터 속성 목록 "{1}"에서 "{0}" 속성의 형식이 잘못되었습니다. 세미콜론으로 구분된 상수 문자열 값("="로 구분됨) 목록만 전달하세요(예: "Property1=Value1;Property2=Value2").</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorAndWarning.EmptyMessage">
+        <source>(No message specified)</source>
+        <target state="translated">(메시지가 지정되지 않음)</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

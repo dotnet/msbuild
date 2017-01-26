@@ -1947,6 +1947,41 @@ Kullanım:             {0} Ortalama Kullanım: {1:###.0}</target>
         <target state="translated">İstenen işlemin item öğesini {0} konumunda ayrı öğelere bölmesi gerekiyor ancak item öğesini bölme {1} ile devre dışı bırakılmış.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidSdkFormat">
+        <source>MSB4229: The value "{0}" is not valid for an Sdk specification. The attribute should be a semicolon-delimited list of Sdk-name/minimum-version pairs, separated by a forward slash.</source>
+        <target state="translated">MSB4229: "{0}" değeri, Sdk belirtimi için geçerli değil. Öznitelik, eğik çizgiyle ayrılmış Sdk-adı/en-düşük-sürüm çiftlerinden oluşan, noktalı virgülle ayrılmış bir liste olmalıdır.</target>
+        <note>{StrBegin="MSB4229: "}</note>
+      </trans-unit>
+      <trans-unit id="TaskFactoryNotSupportedFailure">
+        <source>MSB4801: The task factory "{0}" could not be loaded because this version of MSBuild does not support it.</source>
+        <target state="translated">MSB4801: "{0}" görev fabrikası, MSBuild’in bu sürümü tarafından desteklenmediği için yüklenemedi.</target>
+        <note>{StrBegin="MSB4801: "}</note>
+      </trans-unit>
+      <trans-unit id="TaskInstantiationFailureNotSupported">
+        <source>MSB4802: The "{0}" task could not be instantiated from "{1}". This version of MSBuild does not support {2}.</source>
+        <target state="translated">MSB4802: "{0}" görevinin örneği "{1}" üzerinden oluşturulamadı. {2}, MSBuild’in bu sürümü tarafından desteklenmiyor</target>
+        <note>{StrBegin="MSB4802: "}</note>
+      </trans-unit>
+      <trans-unit id="InvalidGetPathOfFileAboveParameter">
+        <source>The parameter '{0}' can only be a file name and cannot include a directory.</source>
+        <target state="translated">'{0}' yalnızca bir dosya adı olabilir ve dizin içeremez.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileToReloadFromDoesNotExist">
+        <source>MSB4229: File to reload from does not exist: {0}</source>
+        <target state="translated">MSB4229: Yeniden yükleneme kaynağı olarak kullanılacak dosya mevcut değil: {0}</target>
+        <note>{StrBegin="MSB4229: "}</note>
+      </trans-unit>
+      <trans-unit id="ValueNotSet">
+        <source>MSB4230: Value not set: {0}</source>
+        <target state="translated">MSB4230: Değer ayarlanmadı: {0}</target>
+        <note>{StrBegin="MSB4230: "}</note>
+      </trans-unit>
+      <trans-unit id="NoReloadOnUnsavedChanges">
+        <source>MSB4231: ProjectRootElement can't reload if it contains unsaved changes.</source>
+        <target state="translated">MSB4231: ProjectRootElement, kaydedilmemiş değişiklikler içeriyorsa yeniden yüklenemez.</target>
+        <note>{StrBegin="MSB4231: "}</note>
+      </trans-unit>
     </body>
   </file>
 </xliff>

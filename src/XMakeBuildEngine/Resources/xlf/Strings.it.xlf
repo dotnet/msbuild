@@ -5,7 +5,7 @@
       <group id="MICROSOFT.BUILD/RESOURCES/STRINGS.RESX" datatype="resx" />
       <trans-unit id="AmbiguousTaskParameterError">
         <source>MSB4001: The "{0}" task has more than one parameter called "{1}".</source>
-        <target state="translated">MSB4001: più di un parametro dell'attività "{0}" è denominato "{1}".</target>
+        <target state="translated">MSB4001: l'attività "{0}" contiene più di un parametro denominato "{1}".</target>
         <note>{StrBegin="MSB4001: "}UE: This message is shown when a task has more than one .NET property with the same name -- it's unclear which of
     those properties the task wants to use as a parameter in project files.</note>
       </trans-unit>
@@ -24,27 +24,27 @@
       </trans-unit>
       <trans-unit id="BuildInProgress">
         <source>The operation cannot be completed because a build is already in progress.</source>
-        <target state="translated">Impossibile completare l'operazione perché è già in corso una compilazione.</target>
+        <target state="translated">Non è possibile completare l'operazione perché è già in corso una compilazione.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildInProgress">
         <source>The operation cannot be completed because BeginBuild has not yet been called.</source>
-        <target state="translated">Impossibile completare l'operazione perché BeginBuild non è stato ancora chiamato.</target>
+        <target state="translated">Non è possibile completare l'operazione perché BeginBuild non è stato ancora chiamato.</target>
         <note />
       </trans-unit>
       <trans-unit id="WaitingForEndOfBuild">
         <source>The operation cannot be completed because EndBuild has already been called but existing submissions have not yet completed.</source>
-        <target state="translated">Impossibile completare l'operazione perché EndBuild è già stato chiamato ma gli invii esistenti non sono stati ancora completati.</target>
+        <target state="translated">Non è possibile completare l'operazione perché EndBuild è già stato chiamato ma gli invii esistenti non sono stati ancora completati.</target>
         <note />
       </trans-unit>
       <trans-unit id="SubmissionAlreadyComplete">
         <source>The operation cannot be completed because the submission has already been executed.</source>
-        <target state="translated">Impossibile completare l'operazione perché l'invio è già stato eseguito.</target>
+        <target state="translated">Non è possibile completare l'operazione perché l'invio è già stato eseguito.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShouldNotDisposeWhenBuildManagerActive">
         <source>Cannot dispose the build manager because it is not idle.</source>
-        <target state="translated">Impossibile eliminare il gestore compilazioni perché non è in inattività.</target>
+        <target state="translated">Non è possibile eliminare il gestore compilazioni perché non è in inattività.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildAbortedWithMessage">
@@ -94,7 +94,7 @@
       </trans-unit>
       <trans-unit id="BuildTargetPartially">
         <source>Building target "{0}" partially, because some output files are out of date with respect to their input files.</source>
-        <target state="translated">Compilazione parziale della destinazione "{0}" poiché alcuni file di output sono obsoleti rispetto ai file di input corrispondenti.</target>
+        <target state="translated">Compilazione parziale della destinazione "{0}" perché alcuni file di output sono obsoleti rispetto ai file di input corrispondenti.</target>
         <note>{0} is the name of the target.</note>
       </trans-unit>
       <trans-unit id="BuildTargetPartiallyInputNewer">
@@ -114,12 +114,12 @@
       </trans-unit>
       <trans-unit id="CannotAccessKnownAttributes">
         <source>The attribute "{0}" is a known MSBuild attribute, and cannot be accessed using this method.</source>
-        <target state="translated">L'attributo "{0}" è un attributo MSBuild noto. Non è possibile accedervi utilizzando questo metodo.</target>
+        <target state="translated">L'attributo "{0}" è un attributo MSBuild noto. Non è possibile accedervi usando questo metodo.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotEvaluateItemMetadata">
         <source>MSB4023: Cannot evaluate the item metadata "%({0})". {1}</source>
-        <target state="translated">MSB4023: impossibile valutare i metadati dell'elemento "%({0})". {1}</target>
+        <target state="translated">MSB4023: non è possibile valutare i metadati dell'elemento "%({0})". {1}</target>
         <note>{StrBegin="MSB4023: "}UE: This message is shown when the value of an item metadata cannot be computed for some reason e.g. trying to apply
     %(RootDir) to an item-spec that's not a valid path, would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
@@ -136,17 +136,17 @@
       </trans-unit>
       <trans-unit id="CannotModifyReservedItem">
         <source>MSB4117: The "{0}" item name is reserved, and cannot be used.</source>
-        <target state="translated">MSB4117: il nome di elemento "{0}" è riservato e non può essere utilizzato.</target>
+        <target state="translated">MSB4117: il nome di elemento "{0}" è riservato e non può essere usato.</target>
         <note>{StrBegin="MSB4117: "}UE: This message is shown when the user tries to redefine one of the reserved MSBuild items e.g. @(Choose)</note>
       </trans-unit>
       <trans-unit id="CannotModifyReservedItemMetadata">
         <source>MSB4118: The "{0}" item metadata name is reserved, and cannot be used.</source>
-        <target state="translated">MSB4118: il nome dei metadati dell'elemento "{0}" è riservato e non può essere utilizzato.</target>
+        <target state="translated">MSB4118: il nome dei metadati dell'elemento "{0}" è riservato e non può essere usato.</target>
         <note>{StrBegin="MSB4118: "}UE: This message is shown when the user tries to redefine one of the reserved MSBuild item metadata names e.g. %(FullPath). Only MSBuild can set those.</note>
       </trans-unit>
       <trans-unit id="CannotModifyReservedProperty">
         <source>MSB4004: The "{0}" property is reserved, and cannot be modified.</source>
-        <target state="translated">MSB4004: impossibile modificare la proprietà "{0}". È riservata.</target>
+        <target state="translated">MSB4004: non è possibile modificare la proprietà "{0}". È riservata.</target>
         <note>{StrBegin="MSB4004: "}UE: This message is shown when the user tries to redefine one of the reserved MSBuild properties e.g. $(MSBuildProjectFile)</note>
       </trans-unit>
       <trans-unit id="CannotPassMultipleItemsIntoScalarParameter">
@@ -165,7 +165,7 @@
       </trans-unit>
       <trans-unit id="CannotReferenceItemMetadataWithoutItemName">
         <source>MSB4095: The item metadata %({0}) is being referenced without an item name.  Specify the item name by using %(itemname.{0}).</source>
-        <target state="translated">MSB4095: riferimento ai metadati dell'elemento %({0}) senza un nome di elemento.  Specificare il nome dell'elemento usando il formato %(itemname.{0}).</target>
+        <target state="translated">MSB4095: riferimento ai metadati dell'elemento %({0}) senza un nome di elemento. Specificare il nome dell'elemento usando il formato %(itemname.{0}).</target>
         <note>{StrBegin="MSB4095: "}</note>
       </trans-unit>
       <trans-unit id="ChildElementsBelowRemoveNotAllowed">
@@ -191,7 +191,7 @@
       </trans-unit>
       <trans-unit id="CircularDependency">
         <source>MSB4006: There is a circular dependency in the target dependency graph involving target "{0}".</source>
-        <target state="translated">MSB4006: è presente una dipendenza circolare nel grafico di dipendenze che utilizza la destinazione "{0}".</target>
+        <target state="translated">MSB4006: è presente una dipendenza circolare nel grafico di dipendenze che usa la destinazione "{0}".</target>
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
@@ -304,7 +304,7 @@
       </trans-unit>
       <trans-unit id="DefaultToolsVersionNotFound">
         <source>MSB4133: A default tools version "{0}" was specified, but its definition could not be found.</source>
-        <target state="translated">MSB4133: impossibile trovare la definizione della versione strumenti predefinita "{0}" specificata.</target>
+        <target state="translated">MSB4133: la definizione della versione strumenti predefinita "{0}" specificata non è stata trovata.</target>
         <note>{StrBegin="MSB4133: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateImport">
@@ -314,7 +314,7 @@
       </trans-unit>
       <trans-unit id="UsedUninitializedProperty">
         <source>MSB4211: The property "{0}" is being set to a value for the first time, but it was already consumed at "{1}".</source>
-        <target state="translated">MSB4211: la proprietà "{0}" verrà impostata su un valore per la prima volta, tuttavia è già stata utilizzata in "{1}".</target>
+        <target state="translated">MSB4211: la proprietà "{0}" verrà impostata su un valore per la prima volta, tuttavia è già stata usata in "{1}".</target>
         <note>{StrBegin="MSB4211: "}</note>
       </trans-unit>
       <trans-unit id="SelfImport">
@@ -356,7 +356,7 @@
       </trans-unit>
       <trans-unit id="ErrorEvaluatingToolsetPropertyExpression">
         <source>MSB4146: Cannot evaluate the property expression "{0}" found at "{1}". {2}</source>
-        <target state="translated">MSB4146: impossibile valutare l'espressione di proprietà "{0}" trovata in "{1}". {2}</target>
+        <target state="translated">MSB4146: non è possibile valutare l'espressione di proprietà "{0}" trovata in "{1}". {2}</target>
         <note>{StrBegin="MSB4146: "}</note>
       </trans-unit>
       <trans-unit id="ErrorWarningMessageNotSupported">
@@ -435,7 +435,7 @@
       </trans-unit>
       <trans-unit id="IllFormedItemListOpenParenthesisInCondition">
         <source>MSB4107: Expected an item list at position {1} in condition "{0}". Did you forget the opening parenthesis after the '@'? To use a literal '@', use '%40' instead.</source>
-        <target state="translated">MSB4107: è previsto un elenco di elementi nella posizione {1} nella condizione "{0}". Si è omessa la parentesi di apertura dopo il simbolo '@'? Per usare un valore letterale '@', usare '%40'.</target>
+        <target state="translated">MSB4107: è previsto un elenco di elementi nella posizione {1} nella condizione "{0}". Si è omessa la parentesi di chiusura dopo '@'? Per usare un valore letterale '@', specificare '%40'.</target>
         <note>{StrBegin="MSB4107: "}</note>
       </trans-unit>
       <trans-unit id="IllFormedItemListQuoteInCondition">
@@ -450,12 +450,12 @@
       </trans-unit>
       <trans-unit id="IllFormedPropertyOpenParenthesisInCondition">
         <source>MSB4110: Expected a property at position {1} in condition "{0}". Did you forget the opening parenthesis after the '$'? To use a literal '$', use '%24' instead.</source>
-        <target state="translated">MSB4110: è prevista una proprietà nella posizione {1} nella condizione "{0}". Si è omessa la parentesi di apertura dopo il simbolo '$'? Per usare un valore letterale '$', usare '%24'.</target>
+        <target state="translated">MSB4110: è prevista una proprietà nella posizione {1} nella condizione "{0}". Si è omessa la parentesi di apertura dopo il simbolo '$'? Per usare un valore letterale '$', specificare '%24'.</target>
         <note>{StrBegin="MSB4110: "}</note>
       </trans-unit>
       <trans-unit id="IllFormedQuotedStringInCondition">
         <source>MSB4101: Expected a closing quote after position {1} in condition "{0}".</source>
-        <target state="translated">MSB4101: prevista una virgoletta di chiusura dopo la posizione {1} nella condizione "{0}".</target>
+        <target state="translated">MSB4101: è prevista una virgoletta di chiusura dopo la posizione {1} nella condizione "{0}".</target>
         <note>{StrBegin="MSB4101: "}</note>
       </trans-unit>
       <trans-unit id="ImportedProjectNotFound">
@@ -475,7 +475,7 @@
       </trans-unit>
       <trans-unit id="IncorrectNumberOfFunctionArguments">
         <source>MSB4089: Incorrect number of arguments to function in condition "{0}". Found {1} argument(s) when expecting {2}.</source>
-        <target state="translated">MSB4089: il numero di argomenti non è corretto per la funzione nella condizione "{0}". N. di argomenti trovati: {1}, previsto: {2}.</target>
+        <target state="translated">MSB4089: il numero di argomenti non è corretto per la funzione nella condizione "{0}". Sono stati trovati {1} argomenti ma ne sono previsti {2}.</target>
         <note>{StrBegin="MSB4089: "}</note>
       </trans-unit>
       <trans-unit id="InvalidAttributeValue">
@@ -508,7 +508,7 @@
       </trans-unit>
       <trans-unit id="InvalidImportedProjectFile">
         <source>MSB4024: The imported project file "{0}" could not be loaded. {1}</source>
-        <target state="translated">MSB4024: impossibile caricare il file di progetto importato "{0}". {1}</target>
+        <target state="translated">MSB4024: non è stato possibile caricare il file di progetto importato "{0}". {1}</target>
         <note>{StrBegin="MSB4024: "}UE: This message is shown when an imported project file cannot be loaded because of incorrect XML. The project
     filename is not part of the message because it is provided separately to loggers.
     LOCALIZATION: {0} is a localized message from the CLR/FX explaining why the project is invalid.</note>
@@ -526,7 +526,7 @@
       </trans-unit>
       <trans-unit id="InvalidRegistryPropertyExpression">
         <source>MSB4143: The registry expression "{0}" cannot be evaluated. {1}</source>
-        <target state="translated">MSB4143: impossibile valutare l'espressione "{0}" del Registro di sistema. {1}</target>
+        <target state="translated">MSB4143: non è possibile valutare l'espressione "{0}" del Registro di sistema. {1}</target>
         <note>{StrBegin="MSB4143: "}
       UE: This message is shown when the user attempts to provide an expression like "$(Registry:HKEY_LOCAL_MACHINE\Software\Vendor\Tools@TaskLocation)"
       LOCALIZATION: "{0}" is the expression that was bad. "{1}" is a message from an FX exception that describes why the expression is bad.
@@ -534,7 +534,7 @@
       </trans-unit>
       <trans-unit id="InvalidFunctionPropertyExpression">
         <source>MSB4184: The expression "{0}" cannot be evaluated. {1}</source>
-        <target state="translated">MSB4184: impossibile valutare l'espressione "{0}". {1}</target>
+        <target state="translated">MSB4184: non è possibile valutare l'espressione "{0}". {1}</target>
         <note>{StrBegin="MSB4184: "}
       Double quotes as the expression will typically have single quotes in it.
       UE: This message is shown when the user attempts to provide an expression like "$(SomeProperty.ToLower())" or "@(Foo-&gt;Bar())"
@@ -584,7 +584,7 @@
       </trans-unit>
       <trans-unit id="InvalidItemFunctionExpression">
         <source>MSB4198: The expression "{0}" cannot be evaluated on item "{1}". {2}</source>
-        <target state="translated">MSB4198: impossibile valutare l'espressione "{0}" sull'elemento "{1}". {2}</target>
+        <target state="translated">MSB4198: non è possibile valutare l'espressione "{0}" sull'elemento "{1}". {2}</target>
         <note>
       {StrBegin="MSB4198: "}
       Double quotes as the expression will typically have single quotes in it.
@@ -644,7 +644,7 @@
       </trans-unit>
       <trans-unit id="ItemDoesNotContainValueForUnqualifiedMetadata">
         <source>MSB4096: The item "{0}" in item list "{1}" does not define a value for metadata "{2}".  In order to use this metadata, either qualify it by specifying %({1}.{2}), or ensure that all items in this list define a value for this metadata.</source>
-        <target state="translated">MSB4096: l'elemento "{0}" nell'elenco di elementi "{1}" non definisce un valore per i metadati "{2}".  Per poter usare questi metadati, qualificarli specificando %({1}.{2}) o accertarsi che tutti gli elementi dell'elenco definiscano un valore per questi metadati.</target>
+        <target state="translated">MSB4096: l'elemento "{0}" nell'elenco di elementi "{1}" non definisce un valore per i metadati "{2}". Per poter usare questi metadati, qualificarli specificando %({1}.{2}) o assicurarsi che tutti gli elementi dell'elenco definiscano un valore per questi metadati.</target>
         <note>{StrBegin="MSB4096: "}</note>
       </trans-unit>
       <trans-unit id="ItemListNotAllowedInThisConditional">
@@ -777,7 +777,7 @@
       </trans-unit>
       <trans-unit id="ProjectFileNotFound">
         <source>The project file "{0}" was not found.</source>
-        <target state="translated">File di progetto "{0}" non trovato.</target>
+        <target state="translated">Il file di progetto "{0}" non è stato trovato.</target>
         <note>UE: This message is shown when the user calls into the OM to build a project that doesn't exist on disk.</note>
       </trans-unit>
       <trans-unit id="ProjectFinishedFailure">
@@ -951,12 +951,12 @@
       </trans-unit>
       <trans-unit id="OldWrapperGeneratedExplicitToolsVersion">
         <source>Using the MSBuild v3.5 solution wrapper generator because the tools version was set to {0}.</source>
-        <target state="translated">Verrà utilizzato il generatore di wrapper per soluzioni MSBuild 3.5 perché la versione degli strumenti è stata impostata su {0}.</target>
+        <target state="translated">Verrà usato il generatore di wrapper per soluzioni MSBuild 3.5 perché la versione degli strumenti è stata impostata su {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="OldWrapperGeneratedOldSolutionVersion">
         <source>Using the MSBuild v3.5 solution wrapper generator with a tools version of {0} because the solution file format was version {1} and no tools version was supplied.</source>
-        <target state="translated">Verrà utilizzato il generatore di wrapper per soluzioni MSBuild 3.5 con la versione {0} degli strumenti perché la versione del formato del file di soluzione è {1} e non è stata indicata alcuna versione per gli strumenti.</target>
+        <target state="translated">Verrà usato il generatore di wrapper per soluzioni MSBuild 3.5 con la versione {0} degli strumenti perché la versione del formato del file di soluzione è {1} e non è stata indicata alcuna versione per gli strumenti.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionBuildingSolutionConfiguration">
@@ -976,7 +976,7 @@
       </trans-unit>
       <trans-unit id="SolutionParseErrorReadingProject">
         <source>MSB4046: Error reading project file "{0}": {1}</source>
-        <target state="translated">MSB4046: errore durante la lettura del file di progetto "{0}". {1}</target>
+        <target state="translated">MSB4046: errore durante la lettura del file di progetto "{0}": {1}</target>
         <note>{StrBegin="MSB4046: "}</note>
       </trans-unit>
       <trans-unit id="SolutionParseInvalidProjectFileName">
@@ -986,12 +986,12 @@
       </trans-unit>
       <trans-unit id="SolutionParseProjectDepNotFoundError">
         <source>MSB4051: Project {0} is referencing a project with GUID {1}, but a project with this GUID was not found in the .SLN file.</source>
-        <target state="translated">MSB4051: il progetto {0} fa riferimento a un progetto con GUID {1} non trovato nel file SLN.</target>
+        <target state="translated">MSB4051: il progetto {0} fa riferimento a un progetto con GUID {1}, che non è stato trovato nel file SLN.</target>
         <note>{StrBegin="MSB4051: "}UE: The solution filename is provided separately to loggers.</note>
       </trans-unit>
       <trans-unit id="SolutionParseUnknownProjectType">
         <source>MSB4078: The project file "{0}" is not supported by MSBuild and cannot be built.</source>
-        <target state="translated">MSB4078: file di progetto "{0}" non supportato in MSBuild. Impossibile compilarlo.</target>
+        <target state="translated">MSB4078: file di progetto "{0}" non supportato in MSBuild. Non è possibile compilarlo.</target>
         <note>{StrBegin="MSB4078: "}</note>
       </trans-unit>
       <trans-unit id="SolutionParseUpgradeNeeded">
@@ -1023,19 +1023,19 @@
       </trans-unit>
       <trans-unit id="SolutionVenusProjectNoClean">
         <source>Web projects do not support the "Clean" target.  Continuing with remaining projects ...</source>
-        <target state="translated">I progetti Web non supportano la destinazione "Clean".  Verranno elaborati i progetti rimanenti...</target>
+        <target state="translated">I progetti Web non supportano la destinazione "Clean". Verranno elaborati i progetti rimanenti...</target>
         <note>UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do not localize "Clean".</note>
       </trans-unit>
       <trans-unit id="SolutionVenusProjectNoPublish">
         <source>Web projects do not support the "Publish" target.  Continuing with remaining projects ...</source>
-        <target state="translated">I progetti Web non supportano la destinazione "Publish".  Verranno elaborati i progetti rimanenti...</target>
+        <target state="translated">I progetti Web non supportano la destinazione "Publish". Verranno elaborati i progetti rimanenti...</target>
         <note>UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do not localize "Publish".</note>
       </trans-unit>
       <trans-unit id="SolutionVenusProjectSkipped">
         <source>Skipping because the "$(AspNetConfiguration)" configuration is not supported for this web project.  You can use the AspNetConfiguration property to override the configuration used for building web projects, by adding /p:AspNetConfiguration=&lt;value&gt; to the command line. Currently web projects only support Debug and Release configurations.</source>
-        <target state="translated">L'operazione verrà ignorata. La configurazione "$(AspNetConfiguration)" non è supportata per questo progetto Web.  Per eseguire l'override della configurazione usata per la compilazione dei progetti Web, è possibile usare la proprietà AspNetConfiguration, aggiungendo /p:AspNetConfiguration=&lt;value&gt; alla riga di comando. I progetti Web attualmente supportano solo le configurazioni delle versioni di debug e di rilascio.</target>
+        <target state="translated">L'operazione verrà ignorata. La configurazione "$(AspNetConfiguration)" non è supportata per questo progetto Web. Per eseguire l'override della configurazione usata per la compilazione dei progetti Web, è possibile usare la proprietà AspNetConfiguration, aggiungendo /p:AspNetConfiguration=&lt;valore&gt; alla riga di comando. I progetti Web attualmente supportano solo le configurazioni delle versioni di debug e di rilascio.</target>
         <note>
     UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do NOT localize "AspNetConfiguration", "Debug", "Release".
@@ -1218,7 +1218,7 @@
       </trans-unit>
       <trans-unit id="TaskExistsButHasMismatchedIdentityError">
         <source>MSB4214: The "{0}" task has been defined, but cannot be used due to the fact that the identity defined in the UsingTask declaration (Runtime="{1}", Architecture="{2}") does not match the identity specified by the task invocation (MSBuildRuntime="{3}", MSBuildArchitecture="{4}").</source>
-        <target state="translated">MSB4214: l'attività "{0}" è stata definita, ma non può essere utilizzata perché l'identità definita nella dichiarazione UsingTask (Runtime="{1}", Architecture="{2}") non corrisponde all'identità specificata dalla chiamata dell'attività (MSBuildRuntime="{3}", MSBuildArchitecture="{4}").</target>
+        <target state="translated">MSB4214: l'attività "{0}" è stata definita, ma non può essere usata perché l'identità definita nella dichiarazione UsingTask (Runtime="{1}", Architecture="{2}") non corrisponde all'identità specificata dalla chiamata dell'attività (MSBuildRuntime="{3}", MSBuildArchitecture="{4}").</target>
         <note>{StrBegin="MSB4214: "}LOCALIZATION: Runtime, Architecture, MSBuildRuntime, and MSBuildArchitecture should not be localized.</note>
       </trans-unit>
       <trans-unit id="TaskFinishedFailure">
@@ -1238,12 +1238,12 @@
       </trans-unit>
       <trans-unit id="TaskFound">
         <source>Using "{0}" task from assembly "{1}".</source>
-        <target state="translated">Verrà utilizzata l'attività "{0}" dall'assembly "{1}".</target>
+        <target state="translated">Verrà usata l'attività "{0}" dall'assembly "{1}".</target>
         <note>UE: This informational message helps users determine which assemblies their tasks were loaded from.</note>
       </trans-unit>
       <trans-unit id="TaskFoundFromFactory">
         <source>Using "{0}" task from the task factory "{1}".</source>
-        <target state="translated">Verrà utilizzata l'attività "{0}" dalla factory delle attività "{1}".</target>
+        <target state="translated">Verrà usata l'attività "{0}" dalla factory delle attività "{1}".</target>
         <note>UE: This informational message helps users determine which assemblies their tasks were loaded from.</note>
       </trans-unit>
       <trans-unit id="TaskNeedsSTA">
@@ -1272,7 +1272,7 @@
       </trans-unit>
       <trans-unit id="LoggerCreationError">
         <source>MSB1021: Cannot create an instance of the logger. {0}</source>
-        <target state="translated">MSB1021: impossibile creare un'istanza del logger. {0}</target>
+        <target state="translated">MSB1021: non è possibile creare un'istanza del logger. {0}</target>
         <note>{StrBegin="MSB1021: "}
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: The prefix "MSBxxxx: " should not be localized. {0} contains a message explaining why the
@@ -1326,17 +1326,17 @@
       </trans-unit>
       <trans-unit id="TaskHostAcquireFailed">
         <source>MSB4216: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}".  Please ensure that (1) the requested runtime and/or architecture are available on the machine, and (2) that the required executable "{3}" exists and can be run.</source>
-        <target state="translated">MSB4216: non è stato possibile eseguire l'attività "{0}" perché MSBuild non è riuscito a creare o connettersi a un host attività con runtime "{1}" e architettura "{2}".  Assicurarsi che (1) il runtime e/o l'architettura richiesti siano disponibili nel computer e (2) che l'eseguibile richiesto "{3}" esista e possa essere eseguito.</target>
+        <target state="translated">MSB4216: non è stato possibile eseguire l'attività "{0}" perché MSBuild non è riuscito a creare o connettersi a un host attività con runtime "{1}" e architettura "{2}". Assicurarsi che (1) il runtime e/o l'architettura richiesti siano disponibili nel computer e (2) che l'eseguibile richiesto "{3}" esista e possa essere eseguito.</target>
         <note>{StrBegin="MSB4216: "}</note>
       </trans-unit>
       <trans-unit id="TaskHostNodeFailedToLaunch">
         <source>MSB4221: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}".  Please ensure that (1) the requested runtime and/or architecture are available on the machine, and (2) that the required executable "{3}" exists and can be run. Error {4} {5}.</source>
-        <target state="translated">MSB4221: non è stato possibile eseguire l'attività "{0}" perché MSBuild non è riuscito a creare o connettersi a un host attività con runtime "{1}" e architettura "{2}".  Assicurarsi che (1) il runtime e/o l'architettura richiesti siano disponibili nel computer e (2) che l'eseguibile richiesto "{3}" esista e possa essere eseguito. Errore {4} {5}.</target>
+        <target state="translated">MSB4221: non è stato possibile eseguire l'attività "{0}" perché MSBuild non è riuscito a creare o connettersi a un host attività con runtime "{1}" e architettura "{2}". Assicurarsi che (1) il runtime e/o l'architettura richiesti siano disponibili nel computer e (2) che l'eseguibile richiesto "{3}" esista e possa essere eseguito. Errore {4} {5}.</target>
         <note>{StrBegin="MSB4221: "}</note>
       </trans-unit>
       <trans-unit id="TaskHostNodeFailedToLaunchErrorCodeNet35NotInstalled">
         <source>A task requested launch of the .NET 3.5 version of the MSBuild task host, but .NET 3.5 is not installed on this machine so the task host could not be launched.  To fix this error, please either install .NET 3.5 or retarget your project.</source>
-        <target state="translated">Un'attività ha richiesto l'avvio della versione .NET 3.5 dell'host attività MSBuild, ma .NET 3.5 non è installato nel computer e quindi l'host attività non è stato avviato.  Per correggere l'errore, installare .NET 3.5 o specificare un'altra destinazione per il progetto.</target>
+        <target state="translated">Un'attività ha richiesto l'avvio della versione .NET 3.5 dell'host attività MSBuild, ma .NET 3.5 non è installato nel computer e quindi l'host attività non è stato avviato. Per correggere l'errore, installare .NET 3.5 o specificare un'altra destinazione per il progetto.</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskHostExitedPrematurely">
@@ -1431,7 +1431,7 @@
       </trans-unit>
       <trans-unit id="InvalidChildElementDueToDuplication">
         <source>MSB4173: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is invalid because a child element with that name already exists</source>
-        <target state="translated">MSB4173: l'elemento &lt;{0}&gt; sotto l'elemento &lt;{1}&gt; non è valido perché esiste già un elemento figlio con tale nome.</target>
+        <target state="translated">MSB4173: l'elemento &lt;{0}&gt; sotto l'elemento &lt;{1}&gt; non è valido perché esiste già un elemento figlio con tale nome</target>
         <note>{StrBegin="MSB4173: "}</note>
       </trans-unit>
       <trans-unit id="UnrecognizedParentElement">
@@ -1466,12 +1466,12 @@
       </trans-unit>
       <trans-unit id="MustCallInitializeBeforeApplyParameter">
         <source>MSB4150: Must initialize the console logger using the initialize method before using ApplyParameter</source>
-        <target state="translated">MSB4150: per potere utilizzare ApplyParameter è necessario inizializzare il logger di console mediante il metodo Initialize</target>
+        <target state="translated">MSB4150: per poter usare ApplyParameter è necessario inizializzare il logger di console mediante il metodo Initialize</target>
         <note>{StrBegin="MSB4150: "}</note>
       </trans-unit>
       <trans-unit id="InvalidHostObjectOnOutOfProcProject">
         <source>MSB4206: A non-null host object cannot be specified for a project which has an affinity set to out-of-process.</source>
-        <target state="translated">MSB4206: impossibile specificare un oggetto host non Null per un progetto che ha un'affinità impostata su out-of-process.</target>
+        <target state="translated">MSB4206: non è possibile specificare un oggetto host non Null per un progetto che ha un'affinità impostata su out-of-process.</target>
         <note>{StrBegin="MSB4206: "}</note>
       </trans-unit>
       <trans-unit id="InvalidAffinityForProjectWithHostObject">
@@ -1491,7 +1491,7 @@
       </trans-unit>
       <trans-unit id="UnableToCreateNode">
         <source>MSB4223: A node of the required type {0} could not be created.</source>
-        <target state="translated">MSB4223: impossibile creare un nodo del tipo richiesto {0}.</target>
+        <target state="translated">MSB4223: non è stato possibile creare un nodo del tipo richiesto {0}.</target>
         <note>{StrBegin="MSB4223: "}</note>
       </trans-unit>
       <trans-unit id="KeepAndRemoveMetadataMutuallyExclusive">
@@ -1576,7 +1576,7 @@
       </trans-unit>
       <trans-unit id="MainThreadInUse">
         <source>MSB4202: The request to build submission {0} cannot proceed because submission {1} is already using the main thread.</source>
-        <target state="translated">MSB4202: la richiesta di compilazione dell'invio {0} non può proseguire perché nell'invio {1} viene già utilizzato il thread principale.</target>
+        <target state="translated">MSB4202: la richiesta di compilazione dell'invio {0} non può proseguire perché nell'invio {1} viene già usato il thread principale.</target>
         <note>{StrBegin="MSB4202: "}</note>
       </trans-unit>
       <trans-unit id="ProjectAlreadyBuilding">
@@ -1596,24 +1596,24 @@
       </trans-unit>
       <trans-unit id="CantWriteBuildPlan">
         <source>The build plan could not be written.  Check that the build process has permissions to write to {0}.</source>
-        <target state="translated">Non è stato possibile scrivere il piano di compilazione.  Verificare che il processo di compilazione abbia autorizzazioni di scrittura su {0}.</target>
+        <target state="translated">Non è stato possibile scrivere il piano di compilazione. Verificare che il processo di compilazione abbia autorizzazioni di scrittura su {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="CacheFileInaccessible">
         <source>The MSBuild cache file "{0}" is inaccessible.  Ensure you have access to the directory and that this file is not deleted during the build.  {1}</source>
-        <target state="translated">Non è possibile accedere al file di cache MSBuild "{0}".  Assicurarsi che l'accesso alla directory sia disponibile e che il file non venga eliminato durante la compilazione. {1}</target>
+        <target state="translated">Non è possibile accedere al file di cache MSBuild "{0}". Assicurarsi che l'accesso alla directory sia disponibile e che il file non venga eliminato durante la compilazione. {1}</target>
         <note>
       LOCALIZATION: "{1}" is a localized message from a CLR/FX exception.
     </note>
       </trans-unit>
       <trans-unit id="CantReadBuildPlan">
         <source>The build plan could not be read.  Check that the build process has permissions to read {0}.</source>
-        <target state="translated">Non è stato possibile leggere il piano di compilazione.  Verificare che il processo di compilazione abbia autorizzazioni di lettura per {0}.</target>
+        <target state="translated">Non è stato possibile leggere il piano di compilazione. Verificare che il processo di compilazione abbia autorizzazioni di lettura per {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildPlanCorrupt">
         <source>The build plan at {0} appears to be corrupt and cannot be used.</source>
-        <target state="translated">Il piano di compilazione in {0} potrebbe essere danneggiato e non è possibile utilizzarlo.</target>
+        <target state="translated">Il piano di compilazione in {0} potrebbe essere danneggiato e non è possibile usarlo.</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailedSummaryHeader">
@@ -1723,17 +1723,17 @@ Utilizzo:          {0} Utilizzo medio: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="OM_SelfAncestor">
         <source>Cannot make a node or an ancestor of that node a child of itself.</source>
-        <target state="translated">Impossibile impostare un nodo o un predecessore di tale nodo come figlio di se stesso.</target>
+        <target state="translated">Non è possibile impostare un nodo o un predecessore di tale nodo come figlio di se stesso.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_MustBeSameProject">
         <source>Cannot create a relationship between nodes that were created from different projects.</source>
-        <target state="translated">Impossibile creare una relazione tra nodi creati da progetti diversi.</target>
+        <target state="translated">Non è possibile creare una relazione tra nodi creati da progetti diversi.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_ParentNotParented">
         <source>The parent node is not itself parented.</source>
-        <target state="translated">Impossibile definire il nodo padre come padre di se stesso.</target>
+        <target state="translated">Non è possibile definire il nodo padre come padre di se stesso.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_CannotAcceptParent">
@@ -1748,7 +1748,7 @@ Utilizzo:          {0} Utilizzo medio: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="OM_NoOtherwiseBeforeWhenOrOtherwise">
         <source>An &lt;Otherwise&gt; element cannot be located before a &lt;When&gt; or &lt;Otherwise&gt; element.</source>
-        <target state="translated">Impossibile posizionare un elemento &lt;Otherwise&gt; prima di un elemento &lt;When&gt; o &lt;Otherwise&gt;.</target>
+        <target state="translated">Non è possibile posizionare un elemento &lt;Otherwise&gt; prima di un elemento &lt;When&gt; o &lt;Otherwise&gt;.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_MustSetFileNameBeforeSave">
@@ -1763,7 +1763,7 @@ Utilizzo:          {0} Utilizzo medio: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="OM_CannotSaveFileLoadedAsReadOnly">
         <source>Project or targets file "{0}" was loaded in read-only mode, and cannot be saved.</source>
-        <target state="translated">Il file di destinazioni o progetto "{0}" è stato caricato in modalità di sola lettura. Impossibile salvarlo.</target>
+        <target state="translated">Il file di destinazioni o progetto "{0}" è stato caricato in modalità di sola lettura. Non è possibile salvarlo.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_IncorrectObjectAssociation">
@@ -1773,12 +1773,12 @@ Utilizzo:          {0} Utilizzo medio: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="OM_ReservedName">
         <source>The "{0}" name is reserved, and cannot be used.</source>
-        <target state="translated">Il nome "{0}" è riservato e non può essere utilizzato.</target>
+        <target state="translated">Il nome "{0}" è riservato e non può essere usato.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_GlobalProperty">
         <source>The "{0}" property is a global property, and cannot be modified.</source>
-        <target state="translated">Impossibile modificare la proprietà "{0}" perché è globale.</target>
+        <target state="translated">Non è possibile modificare la proprietà "{0}" perché è globale.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_MatchingProjectAlreadyInCollection">
@@ -1793,12 +1793,12 @@ Utilizzo:          {0} Utilizzo medio: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="OM_CannotModifyEvaluatedObjectInImportedFile">
         <source>Cannot modify an evaluated object originating in an imported file "{0}".</source>
-        <target state="translated">Impossibile modificare un oggetto valutato la cui origine è un file importato "{0}".</target>
+        <target state="translated">Non è possibile modificare un oggetto valutato la cui origine è un file importato "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_CannotRemoveMetadataOriginatingFromItemDefinition">
         <source>Cannot remove the metadata named "{0}" as it originates from an item definition, rather than being directly defined on this item.</source>
-        <target state="translated">Impossibile rimuovere i metadati denominati "{0}" perché derivano da una definizione dell'elemento anziché essere definiti direttamente sull'elemento.</target>
+        <target state="translated">Non è possibile rimuovere i metadati denominati "{0}" perché derivano da una definizione dell'elemento anziché essere definiti direttamente sull'elemento.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_ProjectIsNoLongerActive">
@@ -1813,7 +1813,7 @@ Utilizzo:          {0} Utilizzo medio: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="OM_ProjectXmlCannotBeUnloadedDueToLoadedProjects">
         <source>The project XML file "{0}" cannot be unloaded because at least one project "{1}" is still loaded which references that project XML.</source>
-        <target state="translated">Impossibile scaricare il file XML "{0}" del progetto perché è ancora caricato almeno un progetto "{1}" che fa riferimento al codice XML del progetto specifico.</target>
+        <target state="translated">Non è possibile scaricare il file XML "{0}" del progetto perché è ancora caricato almeno un progetto "{1}" che fa riferimento al codice XML del progetto specifico.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_ProjectInstanceImmutable">
@@ -1838,12 +1838,12 @@ Utilizzo:          {0} Utilizzo medio: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="MSBuild.CannotRebaseOutputItemPath">
         <source>MSB3203: The output path "{0}" cannot be rebased. {1}</source>
-        <target state="translated">MSB3203: impossibile riassegnare il percorso di output "{0}". {1}</target>
+        <target state="translated">MSB3203: non è possibile riassegnare il percorso di output "{0}". {1}</target>
         <note>{StrBegin="MSB3203: "}UE: This message is shown when the user asks the "MSBuild" task to rebase the paths of its output items relative to the project from where the "MSBuild" task is called (as opposed to the project(s) on which the "MSBuild" task is called), and one of the output item paths is invalid. LOCALIZATION: "{1}" is a localized message from a CLR/FX exception explaining the problem.</note>
       </trans-unit>
       <trans-unit id="MSBuild.ProjectFileNotFound">
         <source>MSB3202: The project file "{0}" was not found.</source>
-        <target state="translated">MSB3202: file di progetto "{0}" non trovato.</target>
+        <target state="translated">MSB3202: il file di progetto "{0}" non è stato trovato.</target>
         <note>
       {StrBegin="MSB3202: "}UE: This message is shown when the user passes a non-existent project file to the MSBuild task, in the "Projects" parameter.
       and they have not specified the SkipNonexistentProjects parameter, or it is set to false.
@@ -1851,7 +1851,7 @@ Utilizzo:          {0} Utilizzo medio: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="MSBuild.ProjectFileNotFoundMessage">
         <source>Skipping project "{0}" because it was not found.</source>
-        <target state="translated">Impossibile trovare il progetto "{0}". Verrà ignorato.</target>
+        <target state="translated">Il progetto "{0}" non è stato trovato e verrà ignorato.</target>
         <note>UE: This message is shown when the user passes a non-existent project file to the MSBuild task, in the "Projects" parameter, and they have specified the SkipNonexistentProjects parameter.</note>
       </trans-unit>
       <trans-unit id="MSBuild.ProjectUpgradeNeededToVcxProj">
@@ -1946,6 +1946,41 @@ Utilizzo:          {0} Utilizzo medio: {1:###.0}</target>
         <source>The requested operation needs to split the item element at location {0} into individual elements but item element splitting is disabled with {1}.</source>
         <target state="translated">L'operazione richiesta deve dividere l'elemento item alla posizione {0} in singoli elementi, ma la suddivisione di elementi item è disabilitata con {1}.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="InvalidSdkFormat">
+        <source>MSB4229: The value "{0}" is not valid for an Sdk specification. The attribute should be a semicolon-delimited list of Sdk-name/minimum-version pairs, separated by a forward slash.</source>
+        <target state="translated">MSB4229: il valore "{0}" non è valido per una specifica di SDK. L'attributo deve essere un elenco di coppie nome SDK/versione minima delimitate da punti e virgola e separati da una barra.</target>
+        <note>{StrBegin="MSB4229: "}</note>
+      </trans-unit>
+      <trans-unit id="TaskFactoryNotSupportedFailure">
+        <source>MSB4801: The task factory "{0}" could not be loaded because this version of MSBuild does not support it.</source>
+        <target state="translated">MSB4801: non è stato possibile caricare la factory delle attività "{0}" perché non è supportata in questa versione di MSBuild.</target>
+        <note>{StrBegin="MSB4801: "}</note>
+      </trans-unit>
+      <trans-unit id="TaskInstantiationFailureNotSupported">
+        <source>MSB4802: The "{0}" task could not be instantiated from "{1}". This version of MSBuild does not support {2}.</source>
+        <target state="translated">MSB4802: non è stato possibile creare l'istanza dell'attività "{0}" da "{1}". Questa versione di MSBuild non supporta {2}.</target>
+        <note>{StrBegin="MSB4802: "}</note>
+      </trans-unit>
+      <trans-unit id="InvalidGetPathOfFileAboveParameter">
+        <source>The parameter '{0}' can only be a file name and cannot include a directory.</source>
+        <target state="translated">Il parametro '{0}' può solo essere un nome file e non può includere una directory.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileToReloadFromDoesNotExist">
+        <source>MSB4229: File to reload from does not exist: {0}</source>
+        <target state="translated">MSB4229: il file {0} da cui eseguire il ricaricamento non esiste</target>
+        <note>{StrBegin="MSB4229: "}</note>
+      </trans-unit>
+      <trans-unit id="ValueNotSet">
+        <source>MSB4230: Value not set: {0}</source>
+        <target state="translated">MSB4230: il valore {0} non è stato impostato</target>
+        <note>{StrBegin="MSB4230: "}</note>
+      </trans-unit>
+      <trans-unit id="NoReloadOnUnsavedChanges">
+        <source>MSB4231: ProjectRootElement can't reload if it contains unsaved changes.</source>
+        <target state="translated">MSB4231: non è possibile ricaricare l'elemento radice del progetto se contiene modifiche non salvate.</target>
+        <note>{StrBegin="MSB4231: "}</note>
       </trans-unit>
     </body>
   </file>
