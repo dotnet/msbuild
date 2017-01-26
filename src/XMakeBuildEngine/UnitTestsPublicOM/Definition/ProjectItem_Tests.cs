@@ -921,6 +921,63 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             runTest(true, true);
         }
 
+        [Theory]
+        // exclude globbing cone at project level;
+        [InlineData(
+            "../a.cs;b.cs", // include string
+            "**/*.cs", // exclude string
+            new[] {"a.cs", "ProjectDir/b.cs"}, // files to create relative to the test root dir
+            "ProjectDir", // relative path from test root to project
+            new[] {"../a.cs"} // expected items
+            )]
+        // exclude globbing cone below project level;
+        [InlineData(
+            "a.cs;a/b.cs",
+            "a/**/*.cs",
+            new[] { "a.cs", "a/b.cs" },
+            "",
+            new[] {"a.cs"}
+            )]
+        // exclude globbing above project level;
+        [InlineData(
+            "a.cs;../b.cs;../../c.cs",
+            "../**/*.cs",
+            new[] { "a/ProjectDir/a.cs", "a/b.cs", "c.cs"},
+            "a/ProjectDir",
+            new[] { "../../c.cs" }
+            )]
+        public void ExcludeWithMissmatchingGlobCones(string includeString, string excludeString, string[] files, string relativePathFromRootToProject, string[] expectedInclude)
+        {
+            var projectContents = string.Format(ItemWithIncludeAndExclude, includeString, excludeString);
+
+            using (var testFiles = new Helpers.TestProjectWithFiles(projectContents, files, relativePathFromRootToProject))
+            using (var projectCollection = new ProjectCollection())
+            {
+                ObjectModelHelpers.AssertItems(expectedInclude, new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection).Items.ToList());
+            }
+
+        }
+
+        [Theory(Skip = "https://github.com/Microsoft/msbuild/issues/1576")]
+        [InlineData(
+            "../**/*.cs", // include string
+            "a.cs", // exclude string
+            new[] {"ProjectDir/a.cs", "b.cs"}, // files to create relative to the test root dir
+            "ProjectDir", // relative path from test root to project
+            new[] {"../b.cs"} // expected items
+            )]
+        public void ExcludingRelativeItemToCurrentDirectoryShouldWorkWithAboveTheConeIncludes(string includeString, string excludeString, string[] files, string relativePathFromRootToProject, string[] expectedInclude)
+        {
+            var projectContents = string.Format(ItemWithIncludeAndExclude, includeString, excludeString);
+
+            using (var testFiles = new Helpers.TestProjectWithFiles(projectContents, files, relativePathFromRootToProject))
+            using (var projectCollection = new ProjectCollection())
+            {
+                ObjectModelHelpers.AssertItems(expectedInclude, new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection).Items.ToList());
+            }
+
+        }
+
         /// <summary>
         /// Expression like @(x) should clone metadata, but metadata should still point at the original XML objects
         /// </summary>
