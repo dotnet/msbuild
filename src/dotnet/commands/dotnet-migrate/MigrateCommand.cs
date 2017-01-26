@@ -262,6 +262,8 @@ namespace Microsoft.DotNet.Tools.Migrate
             {
                 var errorContent = GetProjectReportErrorContent(projectMigrationReport, colored: true);
                 var successContent = GetProjectReportSuccessContent(projectMigrationReport, colored: true);
+                var warningContent = GetProjectReportWarningContent(projectMigrationReport, colored: true);
+                Reporter.Output.WriteLine(warningContent);
                 if (!string.IsNullOrEmpty(errorContent))
                 {
                     Reporter.Error.WriteLine(errorContent);
@@ -290,6 +292,8 @@ namespace Microsoft.DotNet.Tools.Migrate
             {
                 var errorContent = GetProjectReportErrorContent(projectMigrationReport, colored: colored);
                 var successContent = GetProjectReportSuccessContent(projectMigrationReport, colored: colored);
+                var warningContent = GetProjectReportWarningContent(projectMigrationReport, colored: colored);
+                sb.AppendLine(warningContent);
                 if (!string.IsNullOrEmpty(errorContent))
                 {
                     sb.AppendLine(errorContent);
@@ -329,6 +333,19 @@ namespace Microsoft.DotNet.Tools.Migrate
                 LocalizableStrings.ProjectMigrationSucceeded,
                 projectMigrationReport.ProjectName,
                 projectMigrationReport.ProjectDirectory));
+        }
+
+        private string GetProjectReportWarningContent(ProjectMigrationReport projectMigrationReport, bool colored)
+        {
+            StringBuilder sb = new StringBuilder();
+            Func<string, string> YellowIfColored = (str) => colored ? str.Yellow() : str;
+
+            foreach (var warning in projectMigrationReport.Warnings)
+            {
+                sb.AppendLine(YellowIfColored(warning));
+            }
+
+            return sb.ToString();
         }
 
         private string GetProjectReportErrorContent(ProjectMigrationReport projectMigrationReport, bool colored)

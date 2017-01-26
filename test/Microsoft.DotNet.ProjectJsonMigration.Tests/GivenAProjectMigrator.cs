@@ -40,6 +40,32 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
+        public void ItHasWarningWhenMigratingADeprecatedProjectJson()
+        {
+            var testProjectDirectory = TestAssets
+               .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedCompileOptions")
+               .CreateInstance()
+               .WithSourceFiles()
+               .Root
+               .GetDirectory("project")
+               .FullName;
+
+            var mockProj = ProjectRootElement.Create();
+            var testSettings = MigrationSettings.CreateMigrationSettingsTestHook(
+                testProjectDirectory,
+                testProjectDirectory,
+                mockProj);
+
+            var projectMigrator = new ProjectMigrator(new FakeEmptyMigrationRule());
+            var report = projectMigrator.Migrate(testSettings);
+
+            var projectReport = report.ProjectMigrationReports.First();
+            var warningMessage = projectReport.Warnings.First();
+            warningMessage.Should().Contain("MIGRATE1011::Deprecated Project:");
+            warningMessage.Should().Contain("The 'compile' option is deprecated. Use 'compile' in 'buildOptions' instead. (line: 3, file:");
+        }
+
+        [Fact]
         public void ItHasErrorWhenMigratingADeprecatedNamedResourceOptionProjectJson()
         {
             var testProjectDirectory = TestAssets

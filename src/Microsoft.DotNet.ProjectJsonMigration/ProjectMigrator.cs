@@ -42,10 +42,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             IEnumerable<ProjectDependency> projectDependencies = null;
             var projectMigrationReports = new List<ProjectMigrationReport>();
 
+            List<string> warnings = null;
             try
             {
                 // Verify up front so we can prefer these errors over an unresolved project dependency
-                VerifyInputs(rootInputs, rootSettings);
+                VerifyInputs(rootInputs, rootSettings, out warnings);
 
                 projectMigrationReports.Add(MigrateProject(rootSettings));
                 
@@ -68,7 +69,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                             rootSettings.ProjectDirectory,
                             rootInputs?.DefaultProjectContext?.GetProjectName(),
                             new List<MigrationError> {e.Error},
-                            null)
+                            warnings)
                     });
             }
 
@@ -144,6 +145,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             var projectName = migrationRuleInputs.DefaultProjectContext.GetProjectName();
             var outputProject = Path.Combine(migrationSettings.OutputDirectory, projectName + ".csproj");
 
+            List<string> warnings = null;
             try
             {
                 if (File.Exists(outputProject))
@@ -166,7 +168,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                     }
                 }
 
-                VerifyInputs(migrationRuleInputs, migrationSettings);
+                VerifyInputs(migrationRuleInputs, migrationSettings, out warnings);
 
                 SetupOutputDirectory(migrationSettings.ProjectDirectory, migrationSettings.OutputDirectory);
 
@@ -179,7 +181,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                     exc.Error
                 };
 
-                return new ProjectMigrationReport(migrationSettings.ProjectDirectory, projectName, error, null);
+                return new ProjectMigrationReport(migrationSettings.ProjectDirectory, projectName, error, warnings);
             }
 
             List<string> csprojDependencies = null;
@@ -208,7 +210,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 projectName,
                 outputProject,
                 null,
-                null,
+                warnings,
                 csprojDependencies);
         }
 
@@ -235,13 +237,22 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             return new MigrationRuleInputs(projectContexts, templateMSBuildProject, itemGroup, propertyGroup, xproj);
         }
 
-        private void VerifyInputs(MigrationRuleInputs migrationRuleInputs, MigrationSettings migrationSettings)
+        private void VerifyInputs(
+            MigrationRuleInputs migrationRuleInputs,
+            MigrationSettings migrationSettings,
+            out List<string> warningMessages
+            )
         {
-            VerifyProject(migrationRuleInputs.ProjectContexts, migrationSettings.ProjectDirectory);
+            VerifyProject(migrationRuleInputs.ProjectContexts, migrationSettings.ProjectDirectory, out warningMessages);
         }
 
-        private void VerifyProject(IEnumerable<ProjectContext> projectContexts, string projectDirectory)
+        private void VerifyProject(
+            IEnumerable<ProjectContext> projectContexts,
+            string projectDirectory,
+            out List<string> warningMessages)
         {
+            warningMessages = null;
+
             if (!projectContexts.Any())
             {
                 MigrationErrorCodes.MIGRATE1013(String.Format(LocalizableStrings.MIGRATE1013Arg, projectDirectory)).Throw();
@@ -255,11 +266,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 var warnings = diagnostics.Where(d => d.Severity == DiagnosticMessageSeverity.Warning);
                 if (warnings.Any())
                 {
-                    var deprecatedProjectJsonWarnings = string.Join(
+                    var migrationError = MigrationErrorCodes.MIGRATE1011(String.Format(
+                        "{0}{1}{2}",
+                        projectDirectory,
                         Environment.NewLine,
-                        diagnostics.Select(d => FormatDiagnosticMessage(d)));
-                    var warningMessage = $"{projectDirectory}{Environment.NewLine}{deprecatedProjectJsonWarnings}";
-                    Reporter.Output.WriteLine(warningMessage.Yellow());
+                        string.Join(Environment.NewLine, diagnostics.Select(d => FormatDiagnosticMessage(d)))));
+
+                    warningMessages = new List<string>();
+                    warningMessages.Add(migrationError.GetFormattedErrorMessage());
                 }
 
                 var errors = diagnostics.Where(d => d.Severity == DiagnosticMessageSeverity.Error);

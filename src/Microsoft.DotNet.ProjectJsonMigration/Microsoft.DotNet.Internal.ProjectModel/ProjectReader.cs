@@ -955,6 +955,21 @@ namespace Microsoft.DotNet.Internal.ProjectModel
             return (rawProject.SelectToken(jpathToNewFormatObject) != null);
         }
 
+        private static void ConvertFromDeprecatedFormat(
+            JObject rawProject,
+            string jpathToObject,
+            string deprecatedKey,
+            string newKey
+            )
+        {
+            var deprecatedValue = rawProject.Value<JToken>(deprecatedKey);
+            if (deprecatedValue != null)
+            {
+                var objectNode = GetOrCreateObjectHierarchy(rawProject, jpathToObject);
+                objectNode[newKey] = deprecatedValue.DeepClone();
+            }
+        }
+
         private static JObject GetOrCreateObjectHierarchy(JObject rawProject, string jpath)
         {
             var currentObject = rawProject as JObject;
@@ -972,21 +987,6 @@ namespace Microsoft.DotNet.Internal.ProjectModel
             }
 
             return currentObject;
-        }
-        
-        private static void ConvertFromDeprecatedFormat(
-            JObject rawProject,
-            string jpathToObject,
-            string deprecatedKey,
-            string newKey
-            )
-        {
-            var deprecatedValue = rawProject.Value<JToken>(deprecatedKey);
-            if (deprecatedValue != null)
-            {
-                var objectNode = GetOrCreateObjectHierarchy(rawProject, jpathToObject);
-                objectNode[newKey] = deprecatedValue.DeepClone();
-            }
         }
 
         private static bool TryGetStringEnumerable(JToken token, out IEnumerable<string> result)

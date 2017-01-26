@@ -72,12 +72,12 @@ namespace Microsoft.DotNet.Migration.Tests
 
             new DotnetCommand()
                  .WithWorkingDirectory(projectDirectory)
-                 .Execute("build")
+                 .Execute("build -c Debug")
                  .Should().Pass();
 
             new DotnetCommand()
                  .WithWorkingDirectory(projectDirectory)
-                 .Execute("pack")
+                 .Execute("pack -c Debug")
                  .Should().Pass();
 
             var outputDir = projectDirectory.GetDirectory("bin", "Debug");
@@ -212,12 +212,12 @@ namespace Microsoft.DotNet.Migration.Tests
 
             new DotnetCommand()
                  .WithWorkingDirectory(projectDirectory)
-                 .Execute("build")
+                 .Execute("build -c Debug")
                  .Should().Pass();
 
             new DotnetCommand()
                  .WithWorkingDirectory(projectDirectory)
-                 .Execute("publish")
+                 .Execute("publish -c Debug")
                  .Should().Pass();
 
             var outputDir = projectDirectory.GetDirectory("bin", "Debug", "netcoreapp1.0");
