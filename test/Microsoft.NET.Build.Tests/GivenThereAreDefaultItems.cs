@@ -370,6 +370,13 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void Compile_items_can_be_explicitly_specified_while_default_EmbeddedResource_items_are_used()
         {
+            if (UsingFullFrameworkMSBuild)
+            {
+                //  Disable this test on full framework, as generating strong named satellite assemblies with AL.exe requires Admin permissions
+                //  See https://github.com/dotnet/sdk/issues/732
+                return;
+            }
+
             Action<XDocument> projectChanges = project =>
             {
                 var ns = project.Root.Name.Namespace;
