@@ -24,7 +24,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                     .Where(i => i.ItemType == "PackageReference")
                     .Where(i => string.IsNullOrEmpty(packageTFM) || i.ConditionChain().Any(c => c.Contains(packageTFM)))
                     .Where(i => i.Include == packageName)
-                    .Where(i => i.GetMetadataWithName("Version").Value == packageVersion);
+                    .Where(i => i.GetMetadataWithName("Version").Value == packageVersion &&
+                                i.GetMetadataWithName("Version").ExpressedAsAttribute);
 
                 items.Should().HaveCount(1);
             }
@@ -40,7 +41,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 var items = mockProj.Items
                     .Where(i => i.ItemType == "DotNetCliToolReference")
                     .Where(i => i.Include == packageName)
-                    .Where(i => i.GetMetadataWithName("Version").Value == packageVersion);
+                    .Where(i => i.GetMetadataWithName("Version").Value == packageVersion &&
+                                i.GetMetadataWithName("Version").ExpressedAsAttribute);
 
                 items.Should().HaveCount(1);
             }
@@ -51,6 +53,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             testDirectory =
                 testDirectory ??
                 Temp.CreateDirectory().DirectoryInfo.CreateSubdirectory("project").FullName;
+
             return TemporaryProjectFileRuleRunner.RunRules(new IMigrationRule[]
             {
                 new MigratePackageDependenciesAndToolsRule()
