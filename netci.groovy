@@ -24,6 +24,7 @@ osList.each { os ->
         def buildCommand = '';
 
         def osBase = os
+        def machineAffinity = 'latest-or-auto'
 
         // Calculate the build command
         if (os == 'Windows_NT') {
@@ -31,6 +32,7 @@ osList.each { os ->
         } else if (os == 'Windows_NT_FullFramework') {
             buildCommand = ".\\build.cmd -Configuration $config -FullMSBuild"
             osBase = 'Windows_NT'
+            machineAffinity = 'latest-or-auto-dev15-rc'
         } else {
             // Jenkins non-Ubuntu CI machines don't have docker
             buildCommand = "./build.sh --configuration $config"
@@ -59,7 +61,7 @@ ${buildCommand}""")
         archiveSettings.setFailIfNothingArchived()
         archiveSettings.setArchiveOnFailure()
         Utilities.addArchival(newJob, archiveSettings)
-        Utilities.setMachineAffinity(newJob, osBase, 'latest-or-auto')
+        Utilities.setMachineAffinity(newJob, osBase, machineAffinity)
         Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
         Utilities.addXUnitDotNETResults(newJob, "bin/$config/Tests/TestResults.xml", false)
         Utilities.addGithubPRTriggerForBranch(newJob, branch, "$os $config")
