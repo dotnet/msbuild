@@ -25,7 +25,6 @@
         <VersionPrefix>$(CliVersionPrefix)-</VersionPrefix>
         <VersionSuffix>rc4-$(TestPackageBuildVersionSuffix)</VersionSuffix>
         <Clean>False</Clean>
-        <MsbuildArgs>/p:RuntimeIdentifier=$(CoreCLRRid)</MsbuildArgs>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="src/Microsoft.DotNet.Cli.Utils"
                               Condition=" '$(IsDesktopAvailable)' == 'False' " >
