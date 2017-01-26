@@ -88,7 +88,6 @@
 
         <RuntimeAssetsToRemoveFromDeps Remove="*" />
         <RuntimeAssetsToRemoveFromDeps Include="redist" />
-        <RuntimeAssetsToRemoveFromDeps Include="tool_csc" />
         <RuntimeAssetsToRemoveFromDeps Include="tool_msbuild" />
         <RuntimeAssetsToRemoveFromDeps Include="tool_nuget" />
       </ItemGroup>
@@ -173,7 +172,6 @@
 
       <!-- cleanup project output we don't need -->
       <Delete Files="$(SdkOutputDirectory)/redist%(PublishOutputExtensions.Identity)" />
-      <Delete Files="$(SdkOutputDirectory)/tool_csc%(PublishOutputExtensions.Identity)" />
       <Delete Files="$(SdkOutputDirectory)/tool_msbuild%(PublishOutputExtensions.Identity)" />
       <Delete Files="$(SdkOutputDirectory)/tool_nuget%(PublishOutputExtensions.Identity)" />
 
