@@ -13,7 +13,7 @@ The current official release of the csproj-enabled CLI tools is **CLI Preview 4*
 There are a couple of things to keep in mind:
 
 * Preview 4 CLI bits are still **in development** so some rough edges are to be expected. 
-* Preview 4 bits **do not support** project.json so you will have to either keep Preview 2 tools around or migrate your project. You can find more information on this using the [project.json to csproj instructions](https://github.com/dotnet/cli/blob/rel/1.0.0/Documentation/ProjectJsonToCSProj.md). 
+* Preview 4 bits **do not support** project.json so you will have to either keep Preview 2 tools around or migrate your project or add a global.json file to your project to target preview2. You can find more information on this using the [project.json to csproj instructions](https://github.com/dotnet/cli/blob/rel/1.0.0/Documentation/ProjectJsonToCSProj.md). 
 * Preview 4 refers to the **CLI tools only** and does not cover Visual Studio, VS Code or Visual Studio for Mac. 
 * We welcome any and all issues that relate to MSBuild-based tools, so feel free to try them out and leave comments and file any bugs/problems.
 
