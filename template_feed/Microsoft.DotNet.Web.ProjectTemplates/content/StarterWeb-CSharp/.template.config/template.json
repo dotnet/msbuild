@@ -90,6 +90,10 @@
       ],
       "defaultValue": "1.0"
     },
+    "FrameworkIs1_1": {
+      "type": "computed",
+      "value": "(Framework == \"1.1\")"
+    },
     "sdkVersion": {
       "type": "bind",
       "binding": "dotnet-cli-version",

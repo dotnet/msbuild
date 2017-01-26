@@ -88,7 +88,14 @@ namespace Company.WebApplication1
 #if (IndividualAuth)
                 app.UseDatabaseErrorPage();
 #endif
+#if (FrameworkIs1_1)
+
+                // Browser Link is not compatible with ASP.NET Core [1.1.0 - 1.1.1]
+                // For details on enabling Browser Link, see https://go.microsoft.com/fwlink/?linkid=840936
+                // app.UseBrowserLink();
+#else
                 app.UseBrowserLink();
+#endif
             }
             else
             {
