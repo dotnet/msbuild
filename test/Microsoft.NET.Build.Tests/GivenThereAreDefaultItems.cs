@@ -490,8 +490,10 @@ namespace Microsoft.NET.Build.Tests
 
                     var itemGroup = new XElement(ns + "ItemGroup");
                     project.Root.Add(itemGroup);
+
+                    //  Use non-standard casing for the explicit package reference to verify that comparison is case-insensitive
                     itemGroup.Add(new XElement(ns + "PackageReference",
-                        new XAttribute("Include", "NETStandard.Library"), new XAttribute("Version", "1.6.1")));
+                        new XAttribute("Include", "netstandard.Library"), new XAttribute("Version", "1.6.1")));
                 })
                 .Restore(testProject.Name);
 

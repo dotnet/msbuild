@@ -22,7 +22,7 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
-            var duplicateItems = PackageReferenceItems.GroupBy(i => i.ItemSpec).Where(g => g.Count() > 1);
+            var duplicateItems = PackageReferenceItems.GroupBy(i => i.ItemSpec.ToLowerInvariant()).Where(g => g.Count() > 1);
             var duplicateItemsToRemove = duplicateItems.SelectMany(g => g.Where(
                 item => item.GetMetadata(MetadataKeyForItemsToRemove).Equals("true", StringComparison.OrdinalIgnoreCase)));
 
