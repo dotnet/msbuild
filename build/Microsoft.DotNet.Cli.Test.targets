@@ -85,7 +85,8 @@
   </Target>
 
   <Target Name="CreateTestAssetPackageNuPkgs"
-          DependsOnTargets="SetupTestPackageProjectData;">
+          DependsOnTargets="SetupTestPackageProjectData;"
+          Outputs="%(TestPackageProject.Identity)">
 
     <DotNetRestore ToolPath="$(Stage0Directory)"
                    Source="$(TestPackagesDir)"
