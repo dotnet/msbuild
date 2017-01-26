@@ -23,11 +23,14 @@ osList.each { os ->
         def jobName = getBuildJobName(config, os)
         def buildCommand = '';
 
+        def osBase = os
+
         // Calculate the build command
         if (os == 'Windows_NT') {
             buildCommand = ".\\build.cmd -Configuration $config"
         } else if (os == 'Windows_NT_FullFramework') {
             buildCommand = ".\\build.cmd -Configuration $config -FullMSBuild"
+            osBase = 'Windows_NT'
         } else {
             // Jenkins non-Ubuntu CI machines don't have docker
             buildCommand = "./build.sh --configuration $config"
@@ -36,7 +39,7 @@ osList.each { os ->
         def newJob = job(Utilities.getFullJobName(project, jobName, isPR)) {
             // Set the label.
             steps {
-                if (os == 'Windows_NT') {
+                if (osBase == 'Windows_NT') {
                     // Batch
                     batchFile(buildCommand)
                 }
@@ -47,7 +50,7 @@ osList.each { os ->
             }
         }
 
-        Utilities.setMachineAffinity(newJob, os, 'latest-or-auto-internal')
+        Utilities.setMachineAffinity(newJob, osBase, 'latest-or-auto-internal')
         InternalUtilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
         Utilities.addXUnitDotNETResults(newJob, "bin/$config/Tests/TestResults.xml", false)
         Utilities.addGithubPRTriggerForBranch(newJob, branch, "$os $config")
