@@ -460,7 +460,7 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Fact]
-        public void WhenMigratingAProjectWithDeprecatedResourceBuiltInOptionsItSucceeds()
+        public void WhenMigratingDeprecatedBuiltInResItSucceeds()
         {
             var projectDirectory = TestAssets
                 .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedResourceBuiltInOptions")
