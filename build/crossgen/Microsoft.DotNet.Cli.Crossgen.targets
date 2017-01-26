@@ -12,9 +12,9 @@
       <LibCLRJitPackageName>runtime.$(CoreCLRRid).microsoft.netcore.jit</LibCLRJitPackageName>
       <CoreCLRPackageName>runtime.$(CoreCLRRid).microsoft.netcore.runtime.coreclr</CoreCLRPackageName>
 
-      <CoreCLRLibsDir>$(NuGetPackagesDir)/$(CoreCLRPackageName)/$(CoreCLRVersion)/runtimes/$(CoreCLRRid)/lib/netstandard1.0</CoreCLRLibsDir>
-      <CrossgenPath>$(NuGetPackagesDir)/$(CrossGenPackageName)/$(CoreCLRVersion)/tools/crossgen$(ExeExtension)</CrossgenPath>
-      <LibCLRJitPath>$(NuGetPackagesDir)/$(LibCLRJitPackageName)/$(CoreCLRVersion)/runtimes/$(CoreCLRRid)/native/$(DynamicLibPrefix)clrjit$(DynamicLibExtension)</LibCLRJitPath>
+      <CoreCLRLibsDir>$(NuGetPackagesDir)/$(CoreCLRPackageName)/$(CLI_CoreCLRVersion)/runtimes/$(CoreCLRRid)/lib/netstandard1.0</CoreCLRLibsDir>
+      <CrossgenPath>$(NuGetPackagesDir)/$(CrossGenPackageName)/$(CLI_CoreCLRVersion)/tools/crossgen$(ExeExtension)</CrossgenPath>
+      <LibCLRJitPath>$(NuGetPackagesDir)/$(LibCLRJitPackageName)/$(CLI_CoreCLRVersion)/runtimes/$(CoreCLRRid)/native/$(DynamicLibPrefix)clrjit$(DynamicLibExtension)</LibCLRJitPath>
     </PropertyGroup>
 
     <ItemGroup>
