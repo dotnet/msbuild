@@ -10,7 +10,7 @@ def project = GithubProject
 def branch = GithubBranchName
 def isPR = true
 
-def osList = ['Windows_NT', 'Ubuntu14.04']
+def osList = ['Windows_NT', 'Windows_NT_FullFramework', 'Ubuntu14.04']
 def configList = ['Release', 'Debug']
 
 def static getBuildJobName(def configuration, def os) {
@@ -23,9 +23,14 @@ osList.each { os ->
         def jobName = getBuildJobName(config, os)
         def buildCommand = '';
 
+        def osBase = os
+
         // Calculate the build command
         if (os == 'Windows_NT') {
             buildCommand = ".\\build.cmd -Configuration $config"
+        } else if (os == 'Windows_NT_FullFramework') {
+            buildCommand = ".\\build.cmd -Configuration $config -FullMSBuild"
+            osBase = 'Windows_NT'
         } else {
             // Jenkins non-Ubuntu CI machines don't have docker
             buildCommand = "./build.sh --configuration $config"
@@ -34,12 +39,9 @@ osList.each { os ->
         def newJob = job(Utilities.getFullJobName(project, jobName, isPR)) {
             // Set the label.
             steps {
-                if (os == 'Windows_NT') {
+                if (osBase == 'Windows_NT') {
                     // Batch
-                    batchFile("""SET VS150COMNTOOLS=%ProgramFiles(x86)%\\Microsoft Visual Studio\\2017\\Enterprise\\Common7\\Tools\\
-SET VSSDK150Install=%ProgramFiles(x86)%\\Microsoft Visual Studio\\2017\\Enterprise\\VSSDK\\
-SET VSSDKInstall=%ProgramFiles(x86)%\\Microsoft Visual Studio\\2017\\Enterprise\\VSSDK\\
-${buildCommand}""")
+                    batchFile(buildCommand)
                 }
                 else {
                     // Shell
@@ -48,7 +50,7 @@ ${buildCommand}""")
             }
         }
 
-        Utilities.setMachineAffinity(newJob, os, 'latest-or-auto-internal')
+        Utilities.setMachineAffinity(newJob, osBase, 'latest-or-auto-internal')
         InternalUtilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
         Utilities.addXUnitDotNETResults(newJob, "bin/$config/Tests/TestResults.xml", false)
         Utilities.addGithubPRTriggerForBranch(newJob, branch, "$os $config")
