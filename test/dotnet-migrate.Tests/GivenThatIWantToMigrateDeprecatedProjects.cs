@@ -47,6 +47,8 @@ namespace Microsoft.DotNet.Migration.Tests
                 "The 'requireLicenseAcceptance' option in the root is deprecated. Use it in 'packOptions' instead.");
             cmd.StdOut.Should().Contain(
                 "The 'summary' option in the root is deprecated. Use it in 'packOptions' instead.");
+            cmd.StdOut.Should().Contain(
+                "The 'packInclude' option is deprecated. Use 'files' in 'packOptions' instead.");
         }
 
         [Fact]
@@ -85,7 +87,9 @@ namespace Microsoft.DotNet.Migration.Tests
             var outputPackage = outputDir.GetFile("PJAppWithDeprecatedPackOptions.1.0.0.nupkg");
 
             var zip = ZipFile.Open(outputPackage.FullName, ZipArchiveMode.Read);
-            zip.Entries.Should().Contain(e => e.FullName == "PJAppWithDeprecatedPackOptions.nuspec");
+            zip.Entries.Should().Contain(e => e.FullName == "PJAppWithDeprecatedPackOptions.nuspec")
+                .And.Contain(e => e.FullName == "content/Content1.txt")
+                .And.Contain(e => e.FullName == "content/Content2.txt");
 
             var manifestReader = new StreamReader(
                 zip.Entries.First(e => e.FullName == "PJAppWithDeprecatedPackOptions.nuspec").Open());
@@ -159,6 +163,88 @@ namespace Microsoft.DotNet.Migration.Tests
                  .WithWorkingDirectory(projectDirectory)
                  .Execute("build")
                  .Should().Pass();
+        }
+
+        [Fact]
+        public void WhenMigratingAProjectWithDeprecatedContentOptionsWarningsArePrinted()
+        {
+            var projectDirectory = TestAssets
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedContentOptions")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root;
+
+            var cmd = new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .ExecuteWithCapturedOutput("migrate");
+
+            cmd.Should().Pass();
+
+            cmd.StdOut.Should().Contain(
+                "The 'content' option is deprecated. Use 'publishOptions' to publish or 'copyToOutput' in 'buildOptions' to copy to build output instead.");
+            cmd.StdOut.Should().Contain(
+                "The 'contentExclude' option is deprecated. Use 'publishOptions' to publish or 'copyToOutput' in 'buildOptions' to copy to build output instead.");
+            cmd.StdOut.Should().Contain(
+                "The 'contentFiles' option is deprecated. Use 'publishOptions' to publish or 'copyToOutput' in 'buildOptions' to copy to build output instead.");
+            cmd.StdOut.Should().Contain(
+                "The 'contentBuiltIn' option is deprecated. Use 'publishOptions' to publish or 'copyToOutput' in 'buildOptions' to copy to build output instead.");
+        }
+
+        [Fact]
+        public void WhenMigratingAProjectWithDeprecatedContentOptionsItSucceeds()
+        {
+            var projectDirectory = TestAssets
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedContentOptions")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .GetDirectory("project");
+
+            new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .Execute("migrate")
+                 .Should().Pass();
+
+            new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .Execute("restore")
+                 .Should().Pass();
+
+            new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .Execute("build")
+                 .Should().Pass();
+
+            new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .Execute("publish")
+                 .Should().Pass();
+
+            var outputDir = projectDirectory.GetDirectory("bin", "Debug", "netcoreapp1.0");
+            outputDir.Should().Exist()
+                .And.HaveFiles(new[]
+                    {
+                        "ContentFile1.txt",
+                        "ContentFile2.txt",
+                        "ContentFileBuiltIn1.txt",
+                        "ContentFileBuiltIn2.txt",
+                        "IncludeThis1.txt",
+                    });
+            Directory.Exists(Path.Combine(outputDir.FullName, "IncludeThis2.txt")).Should().BeFalse();
+            Directory.Exists(Path.Combine(outputDir.FullName, "ExcludeThis.txt")).Should().BeFalse();
+
+            var publishDir = projectDirectory.GetDirectory("bin", "Debug", "netcoreapp1.0", "publish");
+            publishDir.Should().Exist()
+                .And.HaveFiles(new[]
+                    {
+                        "ContentFile1.txt",
+                        "ContentFile2.txt",
+                        "ContentFileBuiltIn1.txt",
+                        "ContentFileBuiltIn2.txt",
+                        "IncludeThis1.txt",
+                    });
+            Directory.Exists(Path.Combine(publishDir.FullName, "IncludeThis2.txt")).Should().BeFalse();
+            Directory.Exists(Path.Combine(publishDir.FullName, "ExcludeThis.txt")).Should().BeFalse();
         }
     }
 }
