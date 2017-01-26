@@ -133,7 +133,7 @@
         <PackRuntime>$(CoreCLRRid)</PackRuntime>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-desktop-binding-redirects"
-                          Condition=" '$(IsDesktopAvailable)' == 'True' ">
+                              Condition=" '$(IsDesktopAvailable)' == 'True' ">
         <Name>dotnet-desktop-binding-redirects</Name>
         <ProjectName>dotnet-desktop-binding-redirects.csproj</ProjectName>
         <IsTool>True</IsTool>
