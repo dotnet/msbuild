@@ -4,7 +4,7 @@
     <id>Microsoft.DotNet.Web.ProjectTemplates</id>
     <version>$version$</version>
     <authors>Microsoft</authors>
-    <description>ASP.NET Web Template Pack for Microsoft Template Engine</description>
+    <description>ASP.NET Core Web Template Pack for Microsoft Template Engine</description>
     <language>en-US</language>
     <projectUrl>https://github.com/dotnet/templating</projectUrl>
     <licenseUrl>https://www.microsoft.com/web/webpi/eula/net_library_eula_enu.htm</licenseUrl>

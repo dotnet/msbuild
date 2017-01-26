@@ -1,7 +1,7 @@
 {
   "author": "Microsoft",
   "classifications": ["Web", "MVC"],
-  "name": "MVC ASP.NET Web Application",
+  "name": "MVC ASP.NET Core Web Application",
   "groupIdentity": "Microsoft.Web.Mvc",
   "identity": "Microsoft.Web.Mvc.FSharp",
   "shortName": "mvc",

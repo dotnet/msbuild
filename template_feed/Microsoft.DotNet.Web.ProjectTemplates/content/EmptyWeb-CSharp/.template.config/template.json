@@ -1,7 +1,7 @@
 {
   "author": "Microsoft",
   "classifications": ["Web", "Empty"],
-  "name": "Empty ASP.NET Web Application",
+  "name": "Empty ASP.NET Core Web Application",
   "groupIdentity": "Microsoft.Web.Empty",
   "identity": "Microsoft.Web.Empty.CSharp",
   "shortName": "web",

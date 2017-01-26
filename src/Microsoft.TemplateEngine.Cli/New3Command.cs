@@ -272,6 +272,14 @@ namespace Microsoft.TemplateEngine.Cli
 
         private Task<int> EnterAmbiguousTemplateManipulationFlowAsync()
         {
+            if (!string.IsNullOrEmpty(_templateName.Value))
+            {
+                ShowTemplateNameMismatchHelp();
+                ShowUsageHelp();
+                DisplayTemplateList();
+                return Task.FromResult(-1);
+            }
+
             if (!ValidateRemainingParameters())
             {
                 ShowUsageHelp();
@@ -826,6 +834,71 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             ParameterHelp(allParams, additionalInfo, _hostSpecificTemplateData.HiddenParameterNames);
+        }
+
+        private void ShowTemplateNameMismatchHelp()
+        {
+            IDictionary<string, IFilteredTemplateInfo> contextProblemMatches = new Dictionary<string, IFilteredTemplateInfo>();
+            IDictionary<string, IFilteredTemplateInfo> remainingPartialMatches = new Dictionary<string, IFilteredTemplateInfo>();
+
+            // this filtering / grouping ignores language differences.
+            foreach (IFilteredTemplateInfo template in _matchedTemplates)
+            {
+                if (contextProblemMatches.ContainsKey(template.Info.Name) || remainingPartialMatches.ContainsKey(template.Info.Name))
+                {
+                    continue;
+                }
+
+                if (template.MatchDisposition.Any(x => x.Location == MatchLocation.Context && x.Kind != MatchKind.Exact))
+                {
+                    contextProblemMatches.Add(template.Info.Name, template);
+                }
+                else if(template.MatchDisposition.Any(t => t.Location != MatchLocation.Context && t.Kind != MatchKind.Mismatch && t.Kind != MatchKind.Unspecified))
+                {
+                    remainingPartialMatches.Add(template.Info.Name, template);
+                }
+            }
+
+            if (contextProblemMatches.Keys.Count + remainingPartialMatches.Keys.Count > 1)
+            {
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.AmbiguousInputTemplateName, _templateName.Value));
+            }
+            else if (contextProblemMatches.Keys.Count + remainingPartialMatches.Keys.Count == 0)
+            {
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.NoTemplatesMatchName, _templateName.Value));
+                Reporter.Error.WriteLine();
+                return;
+            }
+
+            foreach (IFilteredTemplateInfo template in contextProblemMatches.Values)
+            {
+                if (template.Info.Tags != null && template.Info.Tags.TryGetValue("type", out string type))
+                {
+                    if (string.Equals(type, "item"))
+                    {
+                        Reporter.Error.WriteLine("\t- " + string.Format(LocalizableStrings.ItemTemplateNotInProjectContext, template.Info.Name));
+                    }
+                    else
+                    {   // project template
+                        Reporter.Error.WriteLine("\t- " + string.Format(LocalizableStrings.ProjectTemplateInProjectContext, template.Info.Name));
+                    }
+                }
+                else
+                {   // this really shouldn't ever happen. But better to have a generic error than quietly ignore the partial match.
+                    Reporter.Error.WriteLine("\t- " + string.Format(LocalizableStrings.GenericPlaceholderTemplateContextError, template.Info.Name));
+                }
+            }
+
+            if (remainingPartialMatches.Keys.Count > 0)
+            {
+                Reporter.Error.WriteLine(LocalizableStrings.TemplateMultiplePartialNameMatches);
+                foreach (IFilteredTemplateInfo template in remainingPartialMatches.Values)
+                {
+                    Reporter.Error.WriteLine($"\t{template.Info.Name}");
+                }
+            }
+
+            Reporter.Error.WriteLine();
         }
 
         private void ShowUsageHelp()

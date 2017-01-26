@@ -1,7 +1,7 @@
 {
   "author": "Microsoft",
   "classifications": ["Web", "WebAPI"],
-  "name": "Web API ASP.NET Web Application",
+  "name": "Web API ASP.NET Core Web Application",
   "groupIdentity": "Microsoft.Web.WebApi",
   "identity": "Microsoft.Web.WebApi.CSharp",
   "shortName": "webapi",

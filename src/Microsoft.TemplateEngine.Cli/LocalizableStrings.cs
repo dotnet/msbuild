@@ -124,5 +124,17 @@ namespace Microsoft.TemplateEngine.Cli
         public const string DefaultValue = "Default: {0}";
 
         public const string NoParameters = "    (No Parameters)";
+
+        public const string AmbiguousInputTemplateName = "Unable to determine the desired template from the input template name: [{0}]";
+
+        public const string NoTemplatesMatchName = "No templates matched the input template name: [{0}]";
+
+        public const string ItemTemplateNotInProjectContext = "[{0}] is an item template. By default it's only created in a target location containing a project. Force creation with the -all flag.";
+
+        public const string ProjectTemplateInProjectContext = "[{0}] is a project template. By default it's not created in a target location containing a project. Force creation with the -all flag.";
+
+        public const string GenericPlaceholderTemplateContextError = "[{0}] cannot be created in the target location.";
+
+        public const string TemplateMultiplePartialNameMatches = "The following templates partially match the input. Please be more specific with the template name and/or language.";
     }
 }
