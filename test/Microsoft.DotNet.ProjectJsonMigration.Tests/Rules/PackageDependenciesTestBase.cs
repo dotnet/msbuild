@@ -48,7 +48,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
         protected ProjectRootElement RunPackageDependenciesRuleOnPj(string s, string testDirectory = null)
         {
-            testDirectory = testDirectory ?? Temp.CreateDirectory().Path;
+            testDirectory =
+                testDirectory ??
+                Temp.CreateDirectory().DirectoryInfo.CreateSubdirectory("project").FullName;
             return TemporaryProjectFileRuleRunner.RunRules(new IMigrationRule[]
             {
                 new MigratePackageDependenciesAndToolsRule()

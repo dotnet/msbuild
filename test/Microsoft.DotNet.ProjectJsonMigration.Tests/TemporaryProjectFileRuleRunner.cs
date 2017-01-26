@@ -3,7 +3,9 @@ using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectJsonMigration.Rules;
 using Microsoft.DotNet.Internal.ProjectModel;
+using Microsoft.DotNet.TestFramework;
 using NuGet.Frameworks;
+using System.IO;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 {
@@ -23,6 +25,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             string projectDirectory,
             string json)
         {
+
+            var globalJson = Path.Combine(new DirectoryInfo(projectDirectory).Parent.FullName, "global.json");
+            if (!File.Exists(globalJson))
+            {
+                var file = new FileInfo(globalJson);
+                File.WriteAllText(file.FullName, @"{}");
+            }
+
             var testPj = new ProjectJsonBuilder(null)
                 .FromStringBase(json)
                 .SaveToDisk(projectDirectory);

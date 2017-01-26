@@ -9,12 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="**\*.cs" />
-    <EmbeddedResource Include="**\*.resx" Exclude="@(EmbeddedResource)" />
-    <EmbeddedResource Include="compiler\resources\**\*" Exclude="@(EmbeddedResource)" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="NETStandard.Library">
       <Version>1.6.0</Version>
     </PackageReference>
