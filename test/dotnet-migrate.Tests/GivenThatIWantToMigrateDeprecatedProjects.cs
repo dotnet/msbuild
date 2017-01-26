@@ -384,5 +384,163 @@ namespace Microsoft.DotNet.Migration.Tests
             //     .Execute("build")
             //     .Should().Pass();
         }
+
+        [Fact]
+        public void WhenMigratingAProjectWithDeprecatedResourceOptionsWarningsArePrinted()
+        {
+            var projectDirectory = TestAssets
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedResourceOptions")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .GetDirectory("project");
+
+            var cmd = new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .ExecuteWithCapturedOutput("migrate");
+
+            cmd.Should().Pass();
+
+            cmd.StdOut.Should().Contain(
+                "The 'resource' option is deprecated. Use 'embed' in 'buildOptions' instead.");
+            cmd.StdOut.Should().Contain(
+                "The 'resourceFiles' option is deprecated. Use 'embed' in 'buildOptions' instead.");
+        }
+
+        [Fact]
+        public void WhenMigratingAProjectWithDeprecatedResourceOptionsItSucceeds()
+        {
+            var projectDirectory = TestAssets
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedResourceOptions")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .GetDirectory("project");
+
+            new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .Execute("migrate")
+                 .Should().Pass();
+
+            new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .Execute("restore")
+                 .Should().Pass();
+
+            new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .Execute("build")
+                 .Should().Pass();
+
+            var cmd = new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .ExecuteWithCapturedOutput("run");
+            cmd.Should().Pass();
+            cmd.StdOut.Should().Contain("3 Resources Found:");
+        }
+
+        [Fact]
+        public void WhenMigratingAProjectWithDeprecatedResourceBuiltInOptionsWarningsArePrinted()
+        {
+            var projectDirectory = TestAssets
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedResourceBuiltInOptions")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .GetDirectory("project");
+
+            var cmd = new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .ExecuteWithCapturedOutput("migrate");
+
+            cmd.Should().Pass();
+
+            cmd.StdOut.Should().Contain(
+                "The 'resourceBuiltIn' option is deprecated. Use 'embed' in 'buildOptions' instead.");
+        }
+
+        [Fact]
+        public void WhenMigratingAProjectWithDeprecatedResourceBuiltInOptionsItSucceeds()
+        {
+            var projectDirectory = TestAssets
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedResourceBuiltInOptions")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .GetDirectory("project");
+
+            new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .Execute("migrate")
+                 .Should().Pass();
+
+            new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .Execute("restore")
+                 .Should().Pass();
+
+            new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .Execute("build")
+                 .Should().Pass();
+
+            var cmd = new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .ExecuteWithCapturedOutput("run");
+            cmd.Should().Pass();
+            // Issue: https://github.com/dotnet/cli/issues/5467
+            //cmd.StdOut.Should().Contain("2 Resources Found:");
+        }
+
+        [Fact]
+        public void WhenMigratingAProjectWithDeprecatedResourceExcludeOptionsWarningsArePrinted()
+        {
+            var projectDirectory = TestAssets
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedResourceExcludeOptions")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root;
+
+            var cmd = new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .ExecuteWithCapturedOutput("migrate");
+
+            cmd.Should().Pass();
+
+            cmd.StdOut.Should().Contain(
+                "The 'resourceExclude' option is deprecated. Use 'embed' in 'buildOptions' instead.");
+        }
+
+        [Fact]
+        public void WhenMigratingAProjectWithDeprecatedResourceExcludeOptionsItSucceeds()
+        {
+            var projectDirectory = TestAssets
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedResourceExcludeOptions")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root;
+
+            new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .Execute("migrate")
+                 .Should().Pass();
+
+            new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .Execute("restore")
+                 .Should().Pass();
+
+            // Issue: https://github.com/dotnet/cli/issues/5461
+            //new DotnetCommand()
+            //     .WithWorkingDirectory(projectDirectory)
+            //     .Execute("build")
+            //     .Should().Pass();
+
+            //var cmd = new DotnetCommand()
+            //     .WithWorkingDirectory(projectDirectory)
+            //     .ExecuteWithCapturedOutput("run");
+            //cmd.Should().Pass();
+            //cmd.StdOut.Should().Contain("0 Resources Found:");
+        }
     }
 }
