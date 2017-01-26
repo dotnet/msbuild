@@ -27,6 +27,7 @@ using Microsoft.DotNet.Tools.Run;
 using Microsoft.DotNet.Tools.Sln;
 using Microsoft.DotNet.Tools.Test;
 using Microsoft.DotNet.Tools.VSTest;
+using Microsoft.DotNet.Tools.Cache;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Cli
@@ -37,6 +38,7 @@ namespace Microsoft.DotNet.Cli
         {
             ["add"] = AddCommand.Run,
             ["build"] = BuildCommand.Run,
+            ["cache"] = CacheCommand.Run,
             ["clean"] = CleanCommand.Run,
             ["help"] = HelpCommand.Run,
             ["list"] = ListCommand.Run,
