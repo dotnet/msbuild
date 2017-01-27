@@ -1,0 +1,21 @@
+{
+  "version": "1.0.0-*",
+  "exclude": "Exclude1.resx",
+  "resourceExclude": [ "Exclude2.resx" ],
+  "buildOptions": {
+    "debugType": "portable",
+    "emitEntryPoint": true
+  },
+  "dependencies": {},
+  "frameworks": {
+    "netcoreapp1.0": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "type": "platform",
+          "version": "1.0.0"
+        }
+      },
+      "imports": "dnxcore50"
+    }
+  }
+}

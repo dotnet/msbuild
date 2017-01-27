@@ -1,0 +1,32 @@
+{
+    "version": "1.0.0-*",
+    "projectUrl": "http://projecturl/",
+    "licenseUrl": "http://licenseurl/",
+    "iconUrl": "http://iconurl/",
+    "owners": [ "owner1", "owner2" ],
+    "tags": [ "tag1", "tag2" ],
+    "releaseNotes": "releaseNotes",
+    "requireLicenseAcceptance": true,
+    "summary": "summary",
+    "repository": {
+        "type": "git",
+        "url": "http://url/"
+    },
+    "packInclude": [ "Content1.txt", "Content2.txt" ],
+    "buildOptions": {
+        "debugType": "portable",
+        "emitEntryPoint": true
+    },
+    "dependencies": {},
+    "frameworks": {
+        "netcoreapp1.0": {
+            "dependencies": {
+                "Microsoft.NETCore.App": {
+                    "type": "platform",
+                    "version": "1.0.1"
+                }
+            },
+            "imports": "dnxcore50"
+        }
+    }
+}
