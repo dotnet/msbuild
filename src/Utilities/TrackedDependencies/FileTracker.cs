@@ -612,8 +612,9 @@ namespace Microsoft.Build.Utilities
             var path = ToolLocationHelper.GetPathToBuildToolsFile(filename, ToolLocationHelper.CurrentToolsVersion, bitness);
 
             // Due to a Detours limitation, the path to FileTracker32.dll must be
-            // representable in ANSI characters. If the local copy is not, fall back to
-            // the globally-installed version.
+            // representable in ANSI characters. Look for it first in the global
+            // shared location which is guaranteed to be ANSI. Fall back to
+            // current folder.
             if (s_FileTrackerFilename.Equals(filename, StringComparison.OrdinalIgnoreCase))
             {
                 string progfilesPath = Path.Combine(FrameworkLocationHelper.GenerateProgramFiles32(),
