@@ -43,6 +43,10 @@
       <IntermediateDirectory>$(BaseOutputDirectory)/intermediate</IntermediateDirectory>
       <PackagesDirectory>$(BaseOutputDirectory)/packages</PackagesDirectory>
       <SharedFrameworkPublishDirectory>$(IntermediateDirectory)/sharedFrameworkPublish</SharedFrameworkPublishDirectory>
+      <CoreCLRRid>$(Rid)</CoreCLRRid>
+      <CoreCLRRid Condition=" '$(OSName)' == 'win' ">win7-$(Architecture)</CoreCLRRid>
+      <CoreCLRRid Condition=" '$(OSName)' == 'osx' ">osx.10.10-x64</CoreCLRRid>
+      <CoreCLRRid Condition=" '$(OSName)' == 'centos' OR '$(OSName)' == 'rhel' ">rhel.7-x64</CoreCLRRid>
     </PropertyGroup>
 
     <GetCommitHash RepoRoot="$(RepoRoot)">
@@ -121,10 +125,10 @@
 
     <!-- Additional Shared Framework to be installed -->
     <PropertyGroup>
-      <AdditionalCoreSetupChannel>release/1.1.0</AdditionalCoreSetupChannel>
-      <AdditionalSharedFrameworkVersion>1.1.0</AdditionalSharedFrameworkVersion>
-      <AdditionalSharedHostVersion>1.1.0</AdditionalSharedHostVersion>
-      <AdditionalHostFxrVersion>1.1.0</AdditionalHostFxrVersion>
+      <AdditionalCoreSetupChannel>preview</AdditionalCoreSetupChannel>
+      <AdditionalSharedFrameworkVersion>1.0.3</AdditionalSharedFrameworkVersion>
+      <AdditionalSharedHostVersion>1.0.1</AdditionalSharedHostVersion>
+      <AdditionalHostFxrVersion>1.0.1</AdditionalHostFxrVersion>
 
       <!-- Additional Downloaded Installers + Archives -->
       <AdditionalDownloadedSharedHostInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-host-$(ProductMonikerRid).$(AdditionalSharedHostVersion)$(InstallerExtension)</AdditionalDownloadedSharedHostInstallerFileName>

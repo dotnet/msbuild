@@ -6,6 +6,7 @@ using FluentAssertions;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.ProjectJsonMigration.Rules;
 using Microsoft.DotNet.Internal.ProjectModel;
+using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using NuGet.Frameworks;
@@ -39,24 +40,54 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void ItHasErrorWhenMigratingADeprecatedProjectJson()
+        public void ItHasWarningWhenMigratingADeprecatedProjectJson()
         {
-            var testProjectDirectory =
-                TestAssetsManager.CreateTestInstance("TestLibraryWithDeprecatedProjectFile", callingMethod: "z")
-                    .Path;
+            var testProjectDirectory = TestAssets
+               .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedCompileOptions")
+               .CreateInstance()
+               .WithSourceFiles()
+               .Root
+               .GetDirectory("project")
+               .FullName;
 
             var mockProj = ProjectRootElement.Create();
-            var testSettings = MigrationSettings.CreateMigrationSettingsTestHook(testProjectDirectory, testProjectDirectory, mockProj);
+            var testSettings = MigrationSettings.CreateMigrationSettingsTestHook(
+                testProjectDirectory,
+                testProjectDirectory,
+                mockProj);
 
             var projectMigrator = new ProjectMigrator(new FakeEmptyMigrationRule());
             var report = projectMigrator.Migrate(testSettings);
 
             var projectReport = report.ProjectMigrationReports.First();
+            var warningMessage = projectReport.Warnings.First();
+            warningMessage.Should().Contain("MIGRATE1011::Deprecated Project:");
+            warningMessage.Should().Contain("The 'compile' option is deprecated. Use 'compile' in 'buildOptions' instead. (line: 3, file:");
+        }
 
+        [Fact]
+        public void ItHasErrorWhenMigratingADeprecatedNamedResourceOptionProjectJson()
+        {
+            var testProjectDirectory = TestAssets
+               .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedNamedResourceOption")
+               .CreateInstance()
+               .WithSourceFiles()
+               .Root
+               .FullName;
+
+            var mockProj = ProjectRootElement.Create();
+            var testSettings = MigrationSettings.CreateMigrationSettingsTestHook(
+                testProjectDirectory,
+                testProjectDirectory,
+                mockProj);
+
+            var projectMigrator = new ProjectMigrator(new FakeEmptyMigrationRule());
+            var report = projectMigrator.Migrate(testSettings);
+
+            var projectReport = report.ProjectMigrationReports.First();
             var errorMessage = projectReport.Errors.First().GetFormattedErrorMessage();
             errorMessage.Should().Contain("MIGRATE1011::Deprecated Project:");
-            errorMessage.Should().Contain("The 'packInclude' option is deprecated. Use 'files' in 'packOptions' instead. (line: 6, file:");
-            errorMessage.Should().Contain("The 'compilationOptions' option is deprecated. Use 'buildOptions' instead. (line: 3, file:");
+            errorMessage.Should().Contain("The 'namedResource' option is deprecated. Use 'embed' in 'buildOptions' instead. (line: 3, file:");
         }
 
         [Fact]

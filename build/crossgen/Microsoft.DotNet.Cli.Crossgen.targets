@@ -3,14 +3,9 @@
   <Target Name="InitCrossgenProps"
           DependsOnTargets="Init">
     <PropertyGroup>
-      <CoreCLRRid>$(Rid)</CoreCLRRid>
-      <CoreCLRRid Condition=" '$(OSName)' == 'win' ">win7-$(Architecture)</CoreCLRRid>
-      <CoreCLRRid Condition=" '$(OSName)' == 'osx' ">osx.10.10-x64</CoreCLRRid>
-      <CoreCLRRid Condition=" '$(OSName)' == 'centos' OR '$(OSName)' == 'rhel' ">rhel.7-x64</CoreCLRRid>
-
+      <CoreCLRPackageName>runtime.$(CoreCLRRid).microsoft.netcore.runtime.coreclr</CoreCLRPackageName>
       <CrossGenPackageName>runtime.$(CoreCLRRid).microsoft.netcore.runtime.coreclr</CrossGenPackageName>
       <LibCLRJitPackageName>runtime.$(CoreCLRRid).microsoft.netcore.jit</LibCLRJitPackageName>
-      <CoreCLRPackageName>runtime.$(CoreCLRRid).microsoft.netcore.runtime.coreclr</CoreCLRPackageName>
 
       <CoreCLRLibsDir>$(NuGetPackagesDir)/$(CoreCLRPackageName)/$(CoreCLRVersion)/runtimes/$(CoreCLRRid)/lib/netstandard1.0</CoreCLRLibsDir>
       <CrossgenPath>$(NuGetPackagesDir)/$(CrossGenPackageName)/$(CoreCLRVersion)/tools/crossgen$(ExeExtension)</CrossgenPath>

@@ -38,7 +38,8 @@ namespace Microsoft.DotNet.New3.Tests
 
             if (useNuGetConfigForAspNet)
             {
-                File.Copy("NuGet.tempaspnetpatch.config", Path.Combine(rootPath, "NuGet.Config"));
+                var configFile = new FileInfo(Path.Combine(rootPath,"..","..","..","..","NuGet.tempaspnetpatch.config"));
+                File.Copy(configFile.FullName, Path.Combine(rootPath, "NuGet.Config"));
             }
 
             string globalJsonPath = Path.Combine(rootPath, "global.json");

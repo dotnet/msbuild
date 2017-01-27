@@ -17,14 +17,14 @@
 
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
 
-    <CoreSetupChannel>preview</CoreSetupChannel>
+    <CoreSetupChannel>release/1.1.0</CoreSetupChannel>
     <SharedFrameworkName>Microsoft.NETCore.App</SharedFrameworkName>
-    <SharedFrameworkVersion>1.0.3</SharedFrameworkVersion>
-    <SharedHostVersion>1.0.1</SharedHostVersion>
-    <HostFxrVersion>1.0.1</HostFxrVersion>
+    <SharedFrameworkVersion>1.1.0</SharedFrameworkVersion>
+    <SharedHostVersion>1.1.0</SharedHostVersion>
+    <HostFxrVersion>1.1.0</HostFxrVersion>
 
-    <CoreCLRVersion>1.0.5</CoreCLRVersion>
-    <JitVersion>1.0.5</JitVersion>
+    <CoreCLRVersion>1.1.0</CoreCLRVersion>
+    <JitVersion>1.1.0</JitVersion>
 
     <ExeExtension>.exe</ExeExtension>
     <ExeExtension Condition=" '$(OS)' != 'Windows_NT' "></ExeExtension>
@@ -54,7 +54,7 @@
           DependsOnTargets="MSBuildWorkaroundTarget;
                             RestoreDotnetCliBuildFramework">
 
-    <Exec Command="$(DotnetStage0) publish -o $(DotnetCliBuildDirectory)/bin --framework netcoreapp1.0" 
+    <Exec Command="$(DotnetStage0) publish -o $(DotnetCliBuildDirectory)/bin --framework netcoreapp1.1" 
           WorkingDirectory="$(DotnetCliBuildDirectory)"/>
   </Target>
   
