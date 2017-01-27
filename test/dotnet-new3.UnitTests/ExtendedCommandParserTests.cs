@@ -5,7 +5,7 @@ using Xunit;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.TemplateEngine.Cli;
 
-namespace dotnet_new3.UnitTests
+namespace DotnetNew3.UnitTests
 {
     public class ExtendedCommandParserTests
     {

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Xunit;
 using Microsoft.Extensions.CommandLineUtils;
 
-namespace dotnet_new3.UnitTests
+namespace DotnetNew3.UnitTests
 {
     public class ProgramTests
     {
@@ -16,7 +16,7 @@ namespace dotnet_new3.UnitTests
         [Fact]
         public void TestTest()
         {
-            string command = "";
+            //string command = "";
         }
     }
 }

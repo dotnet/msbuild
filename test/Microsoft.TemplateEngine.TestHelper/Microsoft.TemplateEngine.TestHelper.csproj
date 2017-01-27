@@ -1,7 +1,6 @@
 ﻿<Project ToolsVersion="15.0" Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\Version.props" />
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp1.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
@@ -10,8 +9,8 @@
     <ProjectReference Include="..\..\src\Microsoft.TemplateEngine.Utils\Microsoft.TemplateEngine.Utils.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20170113-02" />
+    <PackageReference Update="Microsoft.NETCore.App" Version="1.0.3" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20170113-02" PrivateAssets="All" />
     <PackageReference Include="xunit" Version="2.2.0-beta5-build3474" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0-beta5-build1225" />
   </ItemGroup>
 </Project>

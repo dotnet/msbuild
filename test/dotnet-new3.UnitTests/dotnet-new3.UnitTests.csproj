@@ -5,6 +5,7 @@
     <TargetFramework>netcoreapp1.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Update="Microsoft.NETCore.App" Version="1.0.3" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20170113-02" />
     <PackageReference Include="xunit" Version="2.2.0-beta5-build3474" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0-beta5-build1225" />

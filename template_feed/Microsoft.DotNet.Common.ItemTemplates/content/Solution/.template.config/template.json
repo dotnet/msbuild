@@ -1,0 +1,9 @@
+{
+  "author": "Microsoft",
+  "classifications": ["Solution"],
+  "name": "Solution File",
+  "groupIdentity": "ItemSolution",
+  "identity": "Microsoft.Standard.QuickStarts.Solution",
+  "shortName": "sln",
+  "sourceName": "Solution1"
+}

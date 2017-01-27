@@ -10,7 +10,7 @@
 //using Microsoft.TemplateEngine.Utils;
 //using Xunit;
 
-//namespace dotnet_new3.UnitTests
+//namespace DotnetNew3.UnitTests
 //{
 //    public class AllProjectsWork
 //    {
