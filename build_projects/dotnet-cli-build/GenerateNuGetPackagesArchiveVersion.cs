@@ -21,13 +21,15 @@ namespace Microsoft.DotNet.Cli.Build
         [Required]
         public string RepoRoot { get; set; }
 
+        [Required]
+        public string SharedFrameworkVersion { get; set; }
+
         [Output]
         public String Version { get; set; }
 
         private static string[] s_TemplatesToArchive = new string[]
         {
-            "CSharp_Web",
-            "CSharp_Web1.1",
+            "CSharp_Console",
         };
 
         public override bool Execute()
@@ -59,6 +61,8 @@ namespace Microsoft.DotNet.Cli.Build
                         }
                     }
                 }
+
+                dataToHash += SharedFrameworkVersion;
             }
 
             Log.LogMessage($"NuGet Packages Archive Data To Hash: '{dataToHash}'");

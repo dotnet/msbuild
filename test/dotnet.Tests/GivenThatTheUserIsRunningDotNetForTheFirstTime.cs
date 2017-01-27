@@ -91,6 +91,13 @@ A command is running to initially populate your local package cache, to improve 
             List<string> expectedDirectories = new List<string>()
             {
                 "microsoft.netcore.app",
+                "microsoft.netcore.platforms",
+                "netstandard.library",
+            };
+
+            // https://github.com/dotnet/cli/issues/5505 - add the "2.0" asp.net packages into the offline cache
+            List<string> unexpectedDirectories = new List<string>()
+            {
                 "microsoft.aspnetcore.diagnostics",
                 "microsoft.aspnetcore.mvc",
                 "microsoft.aspnetcore.routing",
@@ -111,12 +118,8 @@ A command is running to initially populate your local package cache, to improve 
                 .HaveDirectories(expectedDirectories);
 
             _nugetCacheFolder
-                .GetDirectory("system.runtime")
-                .Should().HaveDirectories(new string[] { "4.1.0", "4.3.0" });
-
-            _nugetCacheFolder
-                .GetDirectory("microsoft.aspnetcore.mvc")
-                .Should().HaveDirectories(new string[] { "1.0.2", "1.1.0" });
+                .Should()
+                .NotHaveDirectories(unexpectedDirectories);
         }
 
         private string GetDotnetVersion()

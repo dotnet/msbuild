@@ -62,10 +62,19 @@ namespace Microsoft.DotNet.Tools.New
                 if (Path.GetFileNameWithoutExtension(file) == "$projectName$")
                 {
                     string extension = Path.GetExtension(file);
+                    string newFileName = Path.Combine(Path.GetDirectoryName(file), $"{projectName}{extension}");
 
-                    File.Move(
-                        file,
-                        Path.Combine(Path.GetDirectoryName(file), $"{projectName}{extension}"));
+                    File.Move(file, newFileName);
+
+                    // for perf reasons, only projects can have replacement values in them
+                    string originalProjectText = File.ReadAllText(newFileName);
+                    string replacedProjectText = originalProjectText
+                        .Replace("$CurrentSharedFrameworkVersion$", new Muxer().SharedFxVersion);
+
+                    if (replacedProjectText != originalProjectText)
+                    {
+                        File.WriteAllText(newFileName, replacedProjectText);
+                    }
                 }
             }
         }
@@ -84,7 +93,6 @@ namespace Microsoft.DotNet.Tools.New
                                Templates = new[] 
                                { 
                                    new { Name = "Console" }, 
-                                   new { Name = "Console1.1" }, 
                                    new { Name = "Web" }, 
                                    new { Name = "Web1.1" },
                                    new { Name = "Lib" },

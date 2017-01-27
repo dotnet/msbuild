@@ -12,8 +12,7 @@ namespace Microsoft.DotNet.Configurer
     {
         private static string[] s_TemplatesUsedToPrimeCache = new string[]
         {
-            "Web",
-            "Web1.1"
+            "Console",
         };
 
         private readonly ICommandFactory _commandFactory;

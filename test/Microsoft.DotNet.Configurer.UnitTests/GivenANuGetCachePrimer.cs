@@ -62,10 +62,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             _dotnetNewCommandMock = new Mock<ICommand>();
             SetupCommandMock(_dotnetNewCommandMock);
             commandFactoryMock
-                .Setup(c => c.Create("new", new[] { "-t", "Web" }, null, Constants.DefaultConfiguration))
-                .Returns(_dotnetNewCommandMock.Object);
-            commandFactoryMock
-                .Setup(c => c.Create("new", new[] { "-t", "Web1.1" }, null, Constants.DefaultConfiguration))
+                .Setup(c => c.Create("new", new[] { "-t", "Console" }, null, Constants.DefaultConfiguration))
                 .Returns(_dotnetNewCommandMock.Object);
 
             _dotnetRestoreCommandMock = new Mock<ICommand>();
@@ -127,25 +124,25 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         [Fact]
         public void It_runs_dotnet_new_using_the_temporary_folder()
         {
-            _dotnetNewCommandMock.Verify(c => c.WorkingDirectory(TEMPORARY_FOLDER_PATH), Times.Exactly(2));
+            _dotnetNewCommandMock.Verify(c => c.WorkingDirectory(TEMPORARY_FOLDER_PATH), Times.Exactly(1));
         }
 
         [Fact]
         public void It_runs_dotnet_new_capturing_stdout()
         {
-            _dotnetNewCommandMock.Verify(c => c.CaptureStdOut(), Times.Exactly(2));
+            _dotnetNewCommandMock.Verify(c => c.CaptureStdOut(), Times.Exactly(1));
         }
 
         [Fact]
         public void It_runs_dotnet_new_capturing_stderr()
         {
-            _dotnetNewCommandMock.Verify(c => c.CaptureStdErr(), Times.Exactly(2));
+            _dotnetNewCommandMock.Verify(c => c.CaptureStdErr(), Times.Exactly(1));
         }
 
         [Fact]
         public void It_actually_runs_dotnet_new()
         {
-            _dotnetNewCommandMock.Verify(c => c.Execute(), Times.Exactly(2));
+            _dotnetNewCommandMock.Verify(c => c.Execute(), Times.Exactly(1));
         }
 
         [Fact]
@@ -157,7 +154,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                     new [] {"-s", $"{PACKAGES_ARCHIVE_PATH}"},
                     null,
                     Constants.DefaultConfiguration),
-                Times.Exactly(2));
+                Times.Exactly(1));
         }
 
         [Fact]
@@ -187,25 +184,25 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         [Fact]
         public void It_runs_dotnet_restore_using_the_temporary_folder()
         {
-            _dotnetRestoreCommandMock.Verify(c => c.WorkingDirectory(TEMPORARY_FOLDER_PATH), Times.Exactly(2));
+            _dotnetRestoreCommandMock.Verify(c => c.WorkingDirectory(TEMPORARY_FOLDER_PATH), Times.Exactly(1));
         }
 
         [Fact]
         public void It_runs_dotnet_restore_capturing_stdout()
         {
-            _dotnetRestoreCommandMock.Verify(c => c.CaptureStdOut(), Times.Exactly(2));
+            _dotnetRestoreCommandMock.Verify(c => c.CaptureStdOut(), Times.Exactly(1));
         }
 
         [Fact]
         public void It_runs_dotnet_restore_capturing_stderr()
         {
-            _dotnetRestoreCommandMock.Verify(c => c.CaptureStdErr(), Times.Exactly(2));
+            _dotnetRestoreCommandMock.Verify(c => c.CaptureStdErr(), Times.Exactly(1));
         }
 
         [Fact]
         public void It_actually_runs_dotnet_restore()
         {
-            _dotnetRestoreCommandMock.Verify(c => c.Execute(), Times.Exactly(2));
+            _dotnetRestoreCommandMock.Verify(c => c.Execute(), Times.Exactly(1));
         }
 
         [Fact]
