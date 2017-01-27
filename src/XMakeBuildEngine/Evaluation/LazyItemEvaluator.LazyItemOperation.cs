@@ -21,6 +21,7 @@ namespace Microsoft.Build.Evaluation
             protected readonly ItemSpec<P, I> _itemSpec;
             protected readonly EvaluatorData _evaluatorData;
             protected readonly Expander<P, I> _expander;
+            protected readonly bool _conditionResult;
 
             //  This is used only when evaluating an expression, which instantiates
             //  the items and then removes them
@@ -32,6 +33,7 @@ namespace Microsoft.Build.Evaluation
                 _itemType = builder.ItemType;
                 _itemSpec = builder.ItemSpec;
                 _referencedItemLists = builder.ReferencedItemLists.ToImmutable();
+                _conditionResult = builder.ConditionResult;
 
                 _lazyEvaluator = lazyEvaluator;
 
