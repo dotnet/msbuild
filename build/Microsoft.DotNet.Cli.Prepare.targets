@@ -53,11 +53,8 @@
       <Output TaskParameter="VersionMajor" PropertyName="VersionMajor" />
       <Output TaskParameter="VersionMinor" PropertyName="VersionMinor" />
       <Output TaskParameter="VersionPatch" PropertyName="VersionPatch" />
-      <Output TaskParameter="CommitCount" PropertyName="CommitCount" />
+      <Output TaskParameter="CommitCount" PropertyName="DefaultCommitCount" />
       <Output TaskParameter="ReleaseSuffix" PropertyName="ReleaseSuffix" />
-      <Output TaskParameter="VersionSuffix" PropertyName="VersionSuffix" />
-      <Output TaskParameter="SimpleVersion" PropertyName="SimpleVersion" />
-      <Output TaskParameter="NugetVersion" PropertyName="NugetVersion" />
       <Output TaskParameter="MsiVersion" PropertyName="MsiVersion" />
       <Output TaskParameter="VersionBadgeMoniker" PropertyName="VersionBadgeMoniker" />
       <Output TaskParameter="Channel" PropertyName="Channel" />
@@ -69,6 +66,12 @@
     </GenerateNuGetPackagesArchiveVersion>
 
     <PropertyGroup>
+      <CommitCount Condition=" '$(CommitCount)' == '' ">$(DefaultCommitCount)</CommitCount>
+
+      <SimpleVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch).$(CommitCount)</SimpleVersion>
+      <VersionSuffix>$(ReleaseSuffix)-$(CommitCount)</VersionSuffix>
+      <NugetVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(VersionSuffix)</NugetVersion>
+
       <VersionBadge>$(BaseOutputDirectory)/$(VersionBadgeMoniker)_$(Configuration)_version_badge.svg</VersionBadge>
       <SdkVersion>$(NugetVersion)</SdkVersion>
 
