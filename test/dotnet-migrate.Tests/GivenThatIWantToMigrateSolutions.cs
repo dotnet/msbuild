@@ -28,6 +28,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, projectName)
                 .CreateInstance(identifier: projectName)
                 .WithSourceFiles()
+                .WithEmptyGlobalJson()
                 .Root;
 
             var solutionRelPath = "TestApp.sln";
@@ -58,6 +59,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithSlnAndXprojRefs")
                 .CreateInstance()
                 .WithSourceFiles()
+                .WithEmptyGlobalJson()
                 .Root;
 
             var solutionRelPath = Path.Combine("TestApp", "TestApp.sln");
@@ -103,6 +105,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .GetProjectJson("NonRestoredTestProjects", "PJAppWithSlnAndOneAlreadyMigratedCsproj")
                 .CreateInstance()
                 .WithSourceFiles()
+                .WithEmptyGlobalJson()
                 .Root;
 
             var solutionRelPath = Path.Combine("TestApp", "TestApp.sln");
@@ -136,6 +139,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithSlnAndOneAlreadyMigratedCsproj")
                 .CreateInstance()
                 .WithSourceFiles()
+                .WithEmptyGlobalJson()
                 .Root;
 
             var solutionRelPath = Path.Combine("TestApp", "TestApp.sln");
@@ -184,12 +188,61 @@ namespace Microsoft.DotNet.Migration.Tests
             }
         }
 
+        [Fact]
+        public void ItMigratesSolutionInTheFolderWhenWeRunMigrationInThatFolder()
+        {
+            var projectDirectory = TestAssets
+                .Get("NonRestoredTestProjects", "PJAppWithSlnAndXprojRefs")
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithEmptyGlobalJson()
+                .Root;
+
+            var workingDirectory = new DirectoryInfo(Path.Combine(projectDirectory.FullName, "TestApp"));
+            var solutionRelPath = Path.Combine("TestApp", "TestApp.sln");
+
+            new DotnetCommand()
+                .WithWorkingDirectory(workingDirectory)
+                .Execute($"migrate")
+                .Should().Pass();
+
+            SlnFile slnFile = SlnFile.Read(Path.Combine(projectDirectory.FullName, solutionRelPath));
+
+            var nonSolutionFolderProjects = slnFile.Projects
+                .Where(p => p.TypeGuid != ProjectTypeGuids.SolutionFolderGuid);
+
+            nonSolutionFolderProjects.Count().Should().Be(4);
+
+            var slnProject = nonSolutionFolderProjects.Where((p) => p.Name == "TestApp").Single();
+            slnProject.TypeGuid.Should().Be(ProjectTypeGuids.CSharpProjectTypeGuid);
+            slnProject.FilePath.Should().Be("TestApp.csproj");
+
+            slnProject = nonSolutionFolderProjects.Where((p) => p.Name == "TestLibrary").Single();
+            slnProject.TypeGuid.Should().Be(ProjectTypeGuids.CSharpProjectTypeGuid);
+            slnProject.FilePath.Should().Be(Path.Combine("..", "TestLibrary", "TestLibrary.csproj"));
+
+            slnProject = nonSolutionFolderProjects.Where((p) => p.Name == "subdir").Single();
+            slnProject.FilePath.Should().Be(Path.Combine("src", "subdir", "subdir.csproj"));
+
+            new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .Execute($"restore \"{solutionRelPath}\"")
+                .Should().Pass();
+
+            //ISSUE: https://github.com/dotnet/cli/issues/5205
+            //new DotnetCommand()
+            //    .WithWorkingDirectory(projectDirectory)
+            //    .Execute($"build \"{solutionRelPath}\"")
+            //    .Should().Pass();
+        }
+
         private void MigrateAndBuild(string groupName, string projectName, [CallerMemberName] string callingMethod = "", string identifier = "")
         {
             var projectDirectory = TestAssets
                 .Get(groupName, projectName)
                 .CreateInstance(callingMethod: callingMethod, identifier: identifier)
                 .WithSourceFiles()
+                .WithEmptyGlobalJson()
                 .Root;
 
             var solutionRelPath = Path.Combine("TestApp", "TestApp.sln");

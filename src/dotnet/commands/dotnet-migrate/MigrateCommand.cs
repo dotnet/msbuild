@@ -103,7 +103,24 @@ namespace Microsoft.DotNet.Tools.Migrate
 
         private void UpdateSolutionFile(MigrationReport migrationReport)
         {
-            if (_slnFile == null)
+            if(_slnFile != null)
+            {
+                UpdateSolutionFile(migrationReport, _slnFile);
+            }
+            else
+            {
+                foreach (var slnPath in _workspaceDirectory.EnumerateFiles("*.sln"))
+                {
+                    var slnFile = SlnFile.Read(slnPath.FullName);
+
+                    UpdateSolutionFile(migrationReport, slnFile);
+                }
+            }
+        }
+
+        private void UpdateSolutionFile(MigrationReport migrationReport, SlnFile slnFile)
+        {
+            if (slnFile == null)
             {
                 return;
             }
@@ -115,7 +132,7 @@ namespace Microsoft.DotNet.Tools.Migrate
 
             var csprojFilesToAdd = new HashSet<string>();
 
-            var slnPathWithTrailingSlash = PathUtility.EnsureTrailingSlash(_slnFile.BaseDirectory);
+            var slnPathWithTrailingSlash = PathUtility.EnsureTrailingSlash(slnFile.BaseDirectory);
             foreach (var report in migrationReport.ProjectMigrationReports)
             {
                 var reportPathWithTrailingSlash = PathUtility.EnsureTrailingSlash(report.ProjectDirectory);
@@ -124,7 +141,7 @@ namespace Microsoft.DotNet.Tools.Migrate
                     reportPathWithTrailingSlash);
 
                 var xprojPath = Path.Combine(relativeReportPath, report.ProjectName + ".xproj");
-                var xprojProjectsReferencedBySolution = _slnFile.Projects.Where(p => p.FilePath == xprojPath);
+                var xprojProjectsReferencedBySolution = slnFile.Projects.Where(p => p.FilePath == xprojPath);
 
                 var migratedProjectName = report.ProjectName + ".csproj";
                 if (xprojProjectsReferencedBySolution.Count() == 1)
@@ -138,7 +155,7 @@ namespace Microsoft.DotNet.Tools.Migrate
                 else
                 {
                     var csprojPath = Path.Combine(relativeReportPath, migratedProjectName);
-                    var solutionContainsCsprojPriorToMigration = _slnFile.Projects
+                    var solutionContainsCsprojPriorToMigration = slnFile.Projects
                         .Where(p => p.FilePath == csprojPath)
                         .Any();
 
@@ -155,20 +172,20 @@ namespace Microsoft.DotNet.Tools.Migrate
             }
 
             Version version;
-            if (!Version.TryParse(_slnFile.VisualStudioVersion, out version) || version.Major < 15)
+            if (!Version.TryParse(slnFile.VisualStudioVersion, out version) || version.Major < 15)
             {
-                _slnFile.ProductDescription = ProductDescription;
-                _slnFile.VisualStudioVersion = VisualStudioVersion;
-                _slnFile.MinimumVisualStudioVersion = MinimumVisualStudioVersion;
+                slnFile.ProductDescription = ProductDescription;
+                slnFile.VisualStudioVersion = VisualStudioVersion;
+                slnFile.MinimumVisualStudioVersion = MinimumVisualStudioVersion;
             }
 
-            RemoveReferencesToMigratedFiles(_slnFile);
+            RemoveReferencesToMigratedFiles(slnFile);
 
-            _slnFile.Write();
+            slnFile.Write();
 
             foreach (var csprojFile in csprojFilesToAdd)
             {
-                AddProject(_slnFile.FullPath, csprojFile);
+                AddProject(slnFile.FullPath, csprojFile);
             }
         }
 

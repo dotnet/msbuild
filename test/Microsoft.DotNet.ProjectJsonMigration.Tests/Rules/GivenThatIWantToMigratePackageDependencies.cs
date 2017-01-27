@@ -435,50 +435,5 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             mockProj.Items.Should().ContainSingle(
                 i => (i.Include == "NETStandard.Library" && i.ItemType == "PackageReference"));
         }
-
-        new private void EmitsPackageReferences(ProjectRootElement mockProj, params Tuple<string, string, string>[] packageSpecs)
-        {
-            foreach (var packageSpec in packageSpecs)
-            {
-                var packageName = packageSpec.Item1;
-                var packageVersion = packageSpec.Item2;
-                var packageTFM = packageSpec.Item3;
-
-                var items = mockProj.Items
-                    .Where(i => i.ItemType == "PackageReference")
-                    .Where(i => string.IsNullOrEmpty(packageTFM) || i.ConditionChain().Any(c => c.Contains(packageTFM)))
-                    .Where(i => i.Include == packageName)
-                    .Where(i => i.GetMetadataWithName("Version").Value == packageVersion &&
-                                i.GetMetadataWithName("Version").ExpressedAsAttribute);
-
-                items.Should().HaveCount(1);
-            }
-        }
-
-        new private void EmitsToolReferences(ProjectRootElement mockProj, params Tuple<string, string>[] toolSpecs)
-        {
-            foreach (var toolSpec in toolSpecs)
-            {
-                var packageName = toolSpec.Item1;
-                var packageVersion = toolSpec.Item2;
-
-                var items = mockProj.Items
-                    .Where(i => i.ItemType == "DotNetCliToolReference")
-                    .Where(i => i.Include == packageName)
-                    .Where(i => i.GetMetadataWithName("Version").Value == packageVersion &&
-                                i.GetMetadataWithName("Version").ExpressedAsAttribute);
-
-                items.Should().HaveCount(1);
-            }
-        }
-
-        new private ProjectRootElement RunPackageDependenciesRuleOnPj(string s, string testDirectory = null)
-        {
-            testDirectory = testDirectory ?? Temp.CreateDirectory().Path;
-            return TemporaryProjectFileRuleRunner.RunRules(new IMigrationRule[]
-            {
-                new MigratePackageDependenciesAndToolsRule()
-            }, s, testDirectory);
-        }
     }
 }
