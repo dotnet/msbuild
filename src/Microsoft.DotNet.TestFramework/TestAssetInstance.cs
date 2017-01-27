@@ -104,6 +104,15 @@ namespace Microsoft.DotNet.TestFramework
             return this;
         }
 
+        public TestAssetInstance WithEmptyGlobalJson()
+        {
+            var file = Root.Parent.GetFile("global.json");
+
+            File.WriteAllText(file.FullName, @"{}");
+
+            return this;
+        }
+
         private void CopyFiles(IEnumerable<FileInfo> filesToCopy)
         {
             foreach (var file in filesToCopy)
