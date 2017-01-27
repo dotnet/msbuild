@@ -9,6 +9,7 @@
   <UsingTask TaskName="Crossgen" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="DotNetBuild" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="DotNetBuildPJ" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="DotNetMSBuild" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="DotNetNew" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="DotNetPack" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="DotNetPublish" AssemblyFile="$(CLIBuildDll)" />

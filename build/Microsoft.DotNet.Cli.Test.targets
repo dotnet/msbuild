@@ -11,7 +11,8 @@
 
   <Target Name="Test"
           Condition=" '$(CLIBUILD_SKIP_TESTS)' != 'true' "
-          DependsOnTargets="BuildTests;">
+          DependsOnTargets="EnsureStageSeparation;
+                            BuildTests;">
 
     <PropertyGroup>
       <PathListSeparator>:</PathListSeparator>
@@ -100,5 +101,10 @@
                 VersionSuffix="%(TestPackageProject.VersionSuffix)"
                 MsbuildArgs="%(TestPackageProject.MsbuildArgs) /p:SdkNuGetVersion=$(SdkNugetVersion)" />
 
+  </Target>
+
+  <Target Name="EnsureStageSeparation">
+    <DotNetMSBuild Arguments="/v:diag $(RepoRoot)/build_projects/Microsoft.DotNet.Cli.Build.SelfTest/InvokeWithStage0.proj /p:Stage2Directory=&quot;$(Stage2Directory)&quot;"
+                   ToolPath="$(Stage0Directory)" />
   </Target>
 </Project>
