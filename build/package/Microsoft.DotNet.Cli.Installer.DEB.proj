@@ -90,23 +90,23 @@
       Outputs="$(DebianTestResultsXmlFile)" >
 
       <!-- Install Dependencies and SDK Packages -->
-      <Exec Command="sudo dpkg -i $(DownloadedSharedHostInstallerFile)" />
-      <Exec Command="sudo dpkg -i $(DownloadedHostFxrInstallerFile)" />
-      <Exec Command="sudo dpkg -i $(DownloadedSharedFrameworkInstallerFile)" />
-
       <Exec Command="sudo dpkg -i $(AdditionalDownloadedSharedHostInstallerFile)" />
       <Exec Command="sudo dpkg -i $(AdditionalDownloadedHostFxrInstallerFile)" />
       <Exec Command="sudo dpkg -i $(AdditionalDownloadedSharedFrameworkInstallerFile)" />
 
+      <Exec Command="sudo dpkg -i $(DownloadedSharedHostInstallerFile)" />
+      <Exec Command="sudo dpkg -i $(DownloadedHostFxrInstallerFile)" />
+      <Exec Command="sudo dpkg -i $(DownloadedSharedFrameworkInstallerFile)" />
+
       <Exec Command="sudo dpkg -i $(SdkInstallerFile)" />
 
       <!-- Run E2E -->
-      <DotNetRestore ProjectPath="$(EndToEndTestProject)" 
-                     ToolPath="$(Stage0Directory)" /> 
- 
-      <DotNetTest ProjectPath="$(EndToEndTestProject)"
-                  EnvironmentVariables="@(TestSdkDebTaskEnvironmentVariables)"
-                  ToolPath="$(Stage0Directory)" />
+      <DotNetRestore ProjectPath="$(EndToEndTestProject)"  
+                     ToolPath="$(DebianInstalledDirectory)" />  
+
+      <DotNetTest ProjectPath="$(EndToEndTestProject)" 
+                  EnvironmentVariables="@(TestSdkDebTaskEnvironmentVariables)" 
+                  ToolPath="$(DebianInstalledDirectory)" /> 
 
       <!-- Clean up Packages -->
       <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" />
