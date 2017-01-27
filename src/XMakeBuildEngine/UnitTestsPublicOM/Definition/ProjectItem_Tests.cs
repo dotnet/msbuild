@@ -1996,6 +1996,38 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Assert.Empty(items);
         }
+		
+		[Fact]
+        public void RemoveShouldRespectCondition()
+        {
+            var projectContents = ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(
+                @"<i Include='a;b;c' />" +
+                @"<i Condition='0 == 1' Remove='b' />" +
+                @"<i Condition='1 == 1' Remove='c' />"
+                );
+
+            var project = ObjectModelHelpers.CreateInMemoryProject(projectContents);
+
+            Assert.Equal(@"a;b", string.Join(";", project.Items.Select(i => i.EvaluatedInclude)));
+        }
+
+        /// <summary>
+        /// See comment for details: https://github.com/Microsoft/msbuild/issues/1475#issuecomment-275520394
+        /// </summary>
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1616")]
+        public void RemoveWithConditionShouldNotApplyOnItemsIgnoringCondition()
+        {
+            var projectContents = ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(
+                @"<i Include='a;b;c;d' />" +
+                @"<i Condition='0 == 1' Remove='b' />" +
+                @"<i Condition='1 == 1' Remove='c' />" +
+                @"<i Remove='d' />"
+                );
+
+            var project = ObjectModelHelpers.CreateInMemoryProject(projectContents);
+
+            Assert.Equal(@"a;b;c", string.Join(";", project.ItemsIgnoringCondition.Select(i => i.EvaluatedInclude)));
+        }
 
         [Fact]
         public void UpdateMetadataShouldAddOrReplace()
@@ -2033,14 +2065,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 , items[1]);
         }
 
-        /// <summary>
-        /// Project evaluation is a design time evaluation. Conditions on items are ignored
-        /// Conditions on metadata on the other hand appear to be respected on the other hand (don't know why, but that's what the code does).
-        /// </summary>
         [Fact]
-        public void UpdateShouldNotRespectConditionsOnItems()
+        public void UpdateShouldRespectCondition()
         {
-            string content = @"<i Include='a;b;c'>
+            string projectContents = @"<i Include='a;b;c'>
                                   <m1>m1_contents</m1>
                               </i>
                               <i Update='a' Condition='1 == 1'>
@@ -2052,8 +2080,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                               <i Update='c'>
                                   <m1 Condition='1 == 0'>from_false_metadata</m1>
                               </i>";
-
-            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content);
+            
+            var project = ObjectModelHelpers.CreateInMemoryProject(ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(projectContents));
 
             var expectedInitial = new Dictionary<string, string>
             {
@@ -2065,15 +2093,56 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 {"m1", "from_true"}
             };
 
-            var expectedUpdateFromFalseOnItem = new Dictionary<string, string>
-            {
-                {"m1", "from_false_item"}
-            };
+            var items = project.Items.ToList();
 
             ObjectModelHelpers.AssertItemHasMetadata(expectedUpdateFromTrue, items[0]);
-            ObjectModelHelpers.AssertItemHasMetadata(expectedUpdateFromFalseOnItem, items[1]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedInitial, items[1]);
             ObjectModelHelpers.AssertItemHasMetadata(expectedInitial, items[2]);
         }
+
+        /// <summary>
+        /// See comment for details: https://github.com/Microsoft/msbuild/issues/1475#issuecomment-275520394
+        /// Conditions on metadata on appear to be respected even for items ignoring condition (don't know why, but that's what the code does).
+        /// </summary>
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1616")]
+        public void UpdateWithConditionShouldNotApplyOnItemsIgnoringCondition()
+        {
+            string projectContents = @"<i Include='a;b;c;d'>
+                                  <m1>m1_contents</m1>
+                              </i>
+                              <i Update='a' Condition='1 == 1'>
+                                  <m1>from_true</m1>
+                              </i>
+                              <i Update='b' Condition='1 == 0'>
+                                  <m1>from_false_item</m1>
+                              </i>
+                              <i Update='c'>
+                                  <m1 Condition='1 == 0'>from_false_metadata</m1>
+                              </i>
+                              <i Update='d'>
+                                  <m1>from_uncoditioned_update</m1>
+                              </i>";
+
+            var project = ObjectModelHelpers.CreateInMemoryProject(ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(projectContents));
+
+            var expectedInitial = new Dictionary<string, string>
+            {
+                {"m1", "m1_contents"}
+            };
+
+            var expectedUpdateFromUnconditionedElement = new Dictionary<string, string>
+            {
+                {"m1", "from_uncoditioned_update"}
+            };
+
+            var itemsIgnoringCondition = project.ItemsIgnoringCondition.ToList();
+
+            ObjectModelHelpers.AssertItemHasMetadata(expectedInitial, itemsIgnoringCondition[0]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedInitial, itemsIgnoringCondition[1]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedInitial, itemsIgnoringCondition[2]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedUpdateFromUnconditionedElement, itemsIgnoringCondition[3]);
+        }
+
 
         [Fact]
         public void LastUpdateWins()
