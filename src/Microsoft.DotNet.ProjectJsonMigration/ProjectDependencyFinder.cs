@@ -314,7 +314,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 }
 
                 foreach (var projectDirectory in
-                    Enumerable.Repeat(directory, 1).Union(directory.GetDirectories()))
+                    Enumerable.Repeat(directory, 1).Union(directory.GetDirectories("*", SearchOption.AllDirectories)))
                 {
                     AddIfProjectExists(projects, projectDirectory);
                 }

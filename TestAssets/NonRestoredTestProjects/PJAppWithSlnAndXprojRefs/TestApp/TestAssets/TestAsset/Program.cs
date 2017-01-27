@@ -2,9 +2,9 @@ using System;
 
 namespace App.Tests
 {
-    public class Program
+    public class TestAssetProgram
     {
-        public static void Main(string[] args)
+        public static void TestAssetMain(string[] args)
         {
             Console.WriteLine("Hello World!");
         }
