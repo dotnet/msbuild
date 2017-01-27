@@ -1,12 +1,16 @@
 <Project DefaultTargets="RunValidation">
-        
+    
+    <PropertyGroup>
+        <NormalizedToolPath>$([System.IO.Path]::GetDirectoryName($(ToolPath)/))</NormalizedToolPath>
+    </PropertyGroup>
+
     <PropertyGroup>
         <MSBuildExtensionsPathInToolPath>false</MSBuildExtensionsPathInToolPath>
-        <MSBuildExtensionsPathInToolPath Condition="$(MSBuildExtensionsPath.StartsWith('$(ToolPath)'))">true</MSBuildExtensionsPathInToolPath>
+        <MSBuildExtensionsPathInToolPath Condition="$(MSBuildExtensionsPath.StartsWith('$(NormalizedToolPath)'))">true</MSBuildExtensionsPathInToolPath>
         <CscToolExeInToolPath>false</CscToolExeInToolPath>
-        <CscToolExeInToolPath Condition="$(CscToolExe.StartsWith('$(ToolPath)'))">true</CscToolExeInToolPath>
+        <CscToolExeInToolPath Condition="$(CscToolExe.StartsWith('$(NormalizedToolPath)'))">true</CscToolExeInToolPath>
         <MSBuildSDKsPathInToolPath>false</MSBuildSDKsPathInToolPath>
-        <MSBuildSDKsPathInToolPath Condition="$(MSBuildSDKsPath.StartsWith('$(ToolPath)'))">true</MSBuildSDKsPathInToolPath>
+        <MSBuildSDKsPathInToolPath Condition="$(MSBuildSDKsPath.StartsWith('$(NormalizedToolPath)'))">true</MSBuildSDKsPathInToolPath>
     </PropertyGroup>
     
     <Target Name="RunValidation">
@@ -14,12 +18,12 @@
             Text="ToolPath not set" />
 
         <Error Condition=" '$(MSBuildExtensionsPathInToolPath)' == 'false' "
-               Text="MSBuildExtensionsPath '$(MSBuildExtensionsPath)' not in ToolPath '$(ToolPath)'" />
+               Text="MSBuildExtensionsPath '$(MSBuildExtensionsPath)' not in ToolPath '$(NormalizedToolPath)'" />
 
         <Error Condition=" '$(CscToolExeInToolPath)' == 'false' "
-               Text="CscToolExe '$(CscToolExe)' not in ToolPath '$(ToolPath)'" />
+               Text="CscToolExe '$(CscToolExe)' not in ToolPath '$(NormalizedToolPath)'" />
 
         <Error Condition=" '$(MSBuildSDKsPathInToolPath)' == 'false' "
-               Text="MSBuildSDKsPath '$(MSBuildSDKsPath)' not in ToolPath '$(ToolPath)'" />
+               Text="MSBuildSDKsPath '$(MSBuildSDKsPath)' not in ToolPath '$(NormalizedToolPath)'" />
     </Target>
 </Project>
