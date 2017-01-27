@@ -1,0 +1,498 @@
+{
+  "build": [
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Install Signing Plugin",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "30666190-6959-11e5-9f96-f56098202fef",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "signType": "$(PB_SignType)",
+        "zipSources": "false",
+        "version": "",
+        "feedSource": "https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Compile",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "bfc8bf76-e7ac-4a8c-9a55-a944a9f632fd",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "build.cmd",
+        "arguments": "-Architecture $(BuildArchitecture) /p:Configuration=$(BuildConfiguration) /t:Compile /v:normal",
+        "modifyEnvironment": "false",
+        "workingFolder": "",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Sign Assemblies",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "c6c4c611-aa2e-4a33-b606-5eaba2196824",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "solution": "build\\Microsoft.DotNet.Cli.Signing.proj",
+        "platform": "",
+        "configuration": "$(BuildConfiguration)",
+        "msbuildArguments": "/t:PostCompileSign $(MsbuildSigningArguments)",
+        "clean": "false",
+        "maximumCpuCount": "false",
+        "restoreNugetPackages": "false",
+        "logProjectEvents": "false",
+        "createLogFile": "false",
+        "msbuildLocationMethod": "version",
+        "msbuildVersion": "15.0",
+        "msbuildArchitecture": "$(BuildArchitecture)",
+        "msbuildLocation": ""
+      }
+    },
+    {
+      "enabled": false,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Test",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "bfc8bf76-e7ac-4a8c-9a55-a944a9f632fd",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "build.cmd",
+        "arguments": "-Architecture $(BuildArchitecture) /p:Configuration=$(BuildConfiguration) /t:Compile /v:normal",
+        "modifyEnvironment": "false",
+        "workingFolder": "",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Package",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "bfc8bf76-e7ac-4a8c-9a55-a944a9f632fd",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "build.cmd",
+        "arguments": "-Architecture $(BuildArchitecture) /p:Configuration=$(BuildConfiguration) /t:Package /v:normal",
+        "modifyEnvironment": "false",
+        "workingFolder": "",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Sign MSI and CAB",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "c6c4c611-aa2e-4a33-b606-5eaba2196824",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "solution": "build\\Microsoft.DotNet.Cli.Signing.proj",
+        "platform": "",
+        "configuration": "$(BuildConfiguration)",
+        "msbuildArguments": "/t:SignMsiAndCab $(MsbuildSigningArguments)",
+        "clean": "false",
+        "maximumCpuCount": "false",
+        "restoreNugetPackages": "false",
+        "logProjectEvents": "false",
+        "createLogFile": "false",
+        "msbuildLocationMethod": "version",
+        "msbuildVersion": "15.0",
+        "msbuildArchitecture": "$(BuildArchitecture)",
+        "msbuildLocation": ""
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Generate Bundle",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "bfc8bf76-e7ac-4a8c-9a55-a944a9f632fd",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "build.cmd",
+        "arguments": "-Architecture $(BuildArchitecture) /p:Configuration=$(BuildConfiguration) /t:Package /v:normal",
+        "modifyEnvironment": "false",
+        "workingFolder": "",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Extract Engine from Bundle",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "bfc8bf76-e7ac-4a8c-9a55-a944a9f632fd",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "build.cmd",
+        "arguments": "-Architecture $(BuildArchitecture) /p:Configuration=$(BuildConfiguration) /t:ExtractEngineFromSdkBundle /v:normal",
+        "modifyEnvironment": "false",
+        "workingFolder": "",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Sign Engine",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "c6c4c611-aa2e-4a33-b606-5eaba2196824",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "solution": "build\\Microsoft.DotNet.Cli.Signing.proj",
+        "platform": "",
+        "configuration": "$(BuildConfiguration)",
+        "msbuildArguments": "/t:SignEngine $(MsbuildSigningArguments)",
+        "clean": "false",
+        "maximumCpuCount": "false",
+        "restoreNugetPackages": "false",
+        "logProjectEvents": "false",
+        "createLogFile": "false",
+        "msbuildLocationMethod": "version",
+        "msbuildVersion": "15.0",
+        "msbuildArchitecture": "$(BuildArchitecture)",
+        "msbuildLocation": ""
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Reattach Engine to Bundle",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "bfc8bf76-e7ac-4a8c-9a55-a944a9f632fd",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "build.cmd",
+        "arguments": "-Architecture $(BuildArchitecture) /p:Configuration=$(BuildConfiguration) /t:ReattachEngineToSdkBundle /v:normal",
+        "modifyEnvironment": "false",
+        "workingFolder": "",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Sign Bundle",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "c6c4c611-aa2e-4a33-b606-5eaba2196824",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "solution": "build\\Microsoft.DotNet.Cli.Signing.proj",
+        "platform": "",
+        "configuration": "$(BuildConfiguration)",
+        "msbuildArguments": "/t:SignCliBundle $(MsbuildSigningArguments)",
+        "clean": "false",
+        "maximumCpuCount": "false",
+        "restoreNugetPackages": "false",
+        "logProjectEvents": "false",
+        "createLogFile": "false",
+        "msbuildLocationMethod": "version",
+        "msbuildVersion": "15.0",
+        "msbuildArchitecture": "$(BuildArchitecture)",
+        "msbuildLocation": ""
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Perform Cleanup Tasks",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "521a94ea-9e68-468a-8167-6dcf361ea776",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": { }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Publish Build Artifacts",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "bfc8bf76-e7ac-4a8c-9a55-a944a9f632fd",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "build.cmd",
+        "arguments": "-Architecture $(BuildArchitecture) /p:Configuration=$(BuildConfiguration) /t:Publish  /v:normal",
+        "modifyEnvironment": "false",
+        "workingFolder": "",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Download NuGet.exe",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "scriptType": "inlineScript",
+        "scriptName": "",
+        "arguments": "",
+        "inlineScript": "# Download nuget.exe to .nuget/nuget.exe\n$NuGetDir = Join-Path $env:BUILD_REPOSITORY_LOCALPATH \".nuget\"\n$NuGetExe = Join-Path $NuGetDir \"nuget.exe\"\n \nif (-not (Test-Path  $NuGetDir))\n{\n    New-Item -ItemType Directory -Force -Path $NuGetDir | Out-Null\n}\n\nif (-not (Test-Path $NuGetExe)) {\n    Write-Host 'Downloading nuget.exe to ' + $NuGetExe\n    wget https://dist.nuget.org/win-x86-commandline/v3.5.0-rc1/NuGet.exe -OutFile $NuGetExe\n}",
+        "workingFolder": "",
+        "failOnStandardError": "true"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Publish Windows Installer Nupkg to VS Feed",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "scriptType": "inlineScript",
+        "scriptName": "",
+        "arguments": "$(VS_FEED_PASSWORD)",
+        "inlineScript": "$NuGetExe = Join-Path $env:BUILD_REPOSITORY_LOCALPATH \".nuget\\nuget.exe\"\n$Nupkg = Join-Path $env:BUILD_REPOSITORY_LOCALPATH \"artifacts\\$env:RID\\packages\\VS.Redist.Common.Net.Core.SDK.x86*.nupkg\"\n\n& $NuGetExe sources Add -Name \"VS\" -Source $env:VS_FEED_URL -username foobar -password $args[0]\n\n& $NuGetExe push -Source \"VS\" -ApiKey VSTS $Nupkg",
+        "workingFolder": "",
+        "failOnStandardError": "true"
+      }
+    }
+  ],
+  "options": [
+    {
+      "enabled": false,
+      "definition": {
+        "id": "5bc3cfb7-6b54-4a4b-b5d2-a3905949f8a6"
+      },
+      "inputs": {
+        "additionalFields": "{}"
+      }
+    },
+    {
+      "enabled": false,
+      "definition": {
+        "id": "7c555368-ca64-4199-add6-9ebaf0b0137d"
+      },
+      "inputs": {
+        "multipliers": "[]",
+        "parallel": "false",
+        "continueOnError": "true",
+        "additionalFields": "{}"
+      }
+    },
+    {
+      "enabled": false,
+      "definition": {
+        "id": "a9db38f9-9fdc-478c-b0f9-464221e58316"
+      },
+      "inputs": {
+        "workItemType": "4777",
+        "assignToRequestor": "true",
+        "additionalFields": "{}"
+      }
+    },
+    {
+      "enabled": false,
+      "definition": {
+        "id": "57578776-4c22-4526-aeb0-86b6da17ee9c"
+      },
+      "inputs": {
+        "additionalFields": "{}"
+      }
+    }
+  ],
+  "variables": {
+    "BuildConfiguration": {
+      "value": "Release",
+      "allowOverride": true
+    },
+    "BuildArguments": {
+      "value": "-Configuration ${BuildConfiguration} -Targets Default -NoPackage",
+      "allowOverride": true
+    },
+    "COREHOST_TRACE": {
+      "value": "0",
+      "allowOverride": true
+    },
+    "ARTIFACT_STORAGE_ACCOUNT": {
+      "value": "dotnetcli"
+    },
+    "ARTIFACT_STORAGE_CONTAINER": {
+      "value": "dotnet"
+    },
+    "CONNECTION_STRING": {
+      "value": "PassedViaPipeBuild"
+    },
+    "PUBLISH_TO_AZURE_BLOB": {
+      "value": "true",
+      "allowOverride": true
+    },
+    "BuildArchitecture": {
+      "value": "x86"
+    },
+    "GITHUB_PASSWORD": {
+      "value": "PassedViaPipeBuild"
+    },
+    "ARTIFACT_STORAGE_KEY": {
+      "value": "PassedViaPipeBuild"
+    },
+    "ProductMoniker": {
+      "value": "Microsoft .NET Core 1.0.1 - SDK 1.0.0 Preview 4 (x86)"
+    },
+    "VS_FEED_URL": {
+      "value": "https://devdiv.pkgs.visualstudio.com/_packaging/VS/nuget/v3/index.json"
+    },
+    "VS_FEED_PASSWORD": {
+      "value": null,
+      "isSecret": true
+    },
+    "CHECKSUM_STORAGE_KEY": {
+      "value": "PassedViaPipeBuild"
+    },
+    "CHECKSUM_STORAGE_ACCOUNT": {
+      "value": "dotnetclichecksums"
+    },
+    "CHECKSUM_STORAGE_CONTAINER": {
+      "value": "dotnet"
+    },
+    "CLIBUILD_SKIP_TESTS": {
+      "value": "true"
+    },
+    "InternalCertificateId": {
+      "value": "400"
+    },
+    "ExternalCertificateId": {
+      "value": "135020001"
+    },
+    "RID": {
+      "value": "win81-x86"
+    },
+    "MsbuildSigningArguments": {
+      "value": "/p:Rid=$(RID) /p:Architecture=x86 /v:detailed"
+    },
+    "TeamName": {
+      "value": "DotNetCore"
+    },
+    "system.debug": {
+      "value": "false"
+    }
+  },
+  "demands": [
+    "Agent.OS -equals Windows_NT"
+  ],
+  "retentionRules": [
+    {
+      "branches": [
+        "+refs/heads/*"
+      ],
+      "artifacts": [
+        "build.SourceLabel"
+      ],
+      "artifactTypesToDelete": [ ],
+      "daysToKeep": 2,
+      "minimumToKeep": 1,
+      "deleteBuildRecord": true,
+      "deleteTestResults": true
+    }
+  ],
+  "buildNumberFormat": "$(Date:yyyMMdd)$(Rev:.r)",
+  "jobAuthorizationScope": "projectCollection",
+  "jobTimeoutInMinutes": 120,
+  "badgeEnabled": true,
+  "repository": {
+    "properties": {
+      "connectedServiceId": "f4c31735-42d2-4c3a-bc47-7ac06fd0dccc",
+      "apiUrl": "https://api.github.com/repos/dotnet/cli",
+      "branchesUrl": "https://api.github.com/repos/dotnet/cli/branches",
+      "cloneUrl": "https://github.com/dotnet/cli.git",
+      "refsUrl": "https://api.github.com/repos/dotnet/cli/git/refs",
+      "gitLfsSupport": "false",
+      "skipSyncSource": "false",
+      "fetchDepth": "0",
+      "cleanOptions": "0"
+    },
+    "id": "https://github.com/dotnet/cli.git",
+    "type": "GitHub",
+    "name": "dotnet/cli",
+    "url": "https://github.com/dotnet/cli.git",
+    "defaultBranch": "rel/1.0.0",
+    "clean": "true",
+    "checkoutSubmodules": false
+  },
+  "quality": "definition",
+  "queue": {
+    "pool": {
+      "id": 39,
+      "name": "DotNet-Build"
+    },
+    "id": 36,
+    "name": "DotNet-Build"
+  },
+  "path": "\\",
+  "type": "build",
+  "id": 1,
+  "name": "Dotnet-CLI-Signing-Windows-x86",
+  "project": {
+    "id": "0bdbc590-a062-4c3f-b0f6-9383f67865ee",
+    "name": "DevDiv",
+    "description": "Visual Studio and DevDiv team project for git source code repositories.  Work items will be added for Adams, Dev14 work items are tracked in vstfdevdiv.  ",
+    "url": "https://devdiv.visualstudio.com/DefaultCollection/_apis/projects/0bdbc590-a062-4c3f-b0f6-9383f67865ee",
+    "state": "wellFormed",
+    "revision": 418097459
+  }
+}

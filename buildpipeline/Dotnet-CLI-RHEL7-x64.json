@@ -1,0 +1,189 @@
+{
+  "build": [
+    {
+      "enabled": true,
+      "continueOnError": true,
+      "alwaysRun": false,
+      "displayName": "Clean docker containers",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "bash",
+        "arguments": "-c \"docker ps -a -q -f status=exited | xargs --no-run-if-empty docker rm -v\"",
+        "workingFolder": "",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Run docker",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "docker",
+        "arguments": "run -t --rm --sig-proxy=true --name $(Build.BuildId) -v $(Build.SourcesDirectory):/opt/code -w /opt/code -e CHANNEL -e CONNECTION_STRING -e REPO_ID -e REPO_USER -e REPO_PASS -e REPO_SERVER -e DOTNET_BUILD_SKIP_CROSSGEN -e PUBLISH_TO_AZURE_BLOB -e NUGET_FEED_URL -e NUGET_API_KEY -e GITHUB_PASSWORD -e ARTIFACT_STORAGE_KEY -e ARTIFACT_STORAGE_ACCOUNT -e ARTIFACT_STORAGE_CONTAINER -e CHECKSUM_STORAGE_KEY -e CHECKSUM_STORAGE_ACCOUNT -e CHECKSUM_STORAGE_CONTAINER chcosta/dotnetcore:rhel7_prereqs /bin/bash -c \"git clean -X -d -f; ./build.sh $(BuildArguments)\"",
+        "workingFolder": "",
+        "failOnStandardError": "false"
+      }
+    }
+  ],
+  "options": [
+    {
+      "enabled": false,
+      "definition": {
+        "id": "5bc3cfb7-6b54-4a4b-b5d2-a3905949f8a6"
+      },
+      "inputs": {
+        "additionalFields": "{}"
+      }
+    },
+    {
+      "enabled": false,
+      "definition": {
+        "id": "7c555368-ca64-4199-add6-9ebaf0b0137d"
+      },
+      "inputs": {
+        "multipliers": "[]",
+        "parallel": "false",
+        "continueOnError": "true",
+        "additionalFields": "{}"
+      }
+    },
+    {
+      "enabled": false,
+      "definition": {
+        "id": "a9db38f9-9fdc-478c-b0f9-464221e58316"
+      },
+      "inputs": {
+        "workItemType": "4777",
+        "assignToRequestor": "true",
+        "additionalFields": "{}"
+      }
+    },
+    {
+      "enabled": false,
+      "definition": {
+        "id": "57578776-4c22-4526-aeb0-86b6da17ee9c"
+      },
+      "inputs": {
+        "additionalFields": "{}"
+      }
+    }
+  ],
+  "variables": {
+    "BuildConfiguration": {
+      "value": "Release",
+      "allowOverride": true
+    },
+    "BuildArguments": {
+      "value": "--skip-prereqs --configuration $(BuildConfiguration) --targets Default",
+      "allowOverride": true
+    },
+    "CONNECTION_STRING": {
+      "value": "PassedViaPipeBuild"
+    },
+    "PUBLISH_TO_AZURE_BLOB": {
+      "value": "true",
+      "allowOverride": true
+    },
+    "GITHUB_PASSWORD": {
+      "value": "PassedViaPipeBuild"
+    },
+    "ARTIFACT_STORAGE_KEY": {
+      "value": "PassedViaPipeBuild"
+    },
+    "ARTIFACT_STORAGE_ACCOUNT": {
+      "value": "dotnetcli"
+    },
+    "ARTIFACT_STORAGE_CONTAINER": {
+      "value": "dotnet"
+    },
+    "CHECKSUM_STORAGE_KEY": {
+      "value": "PassedViaPipeBuild"
+    },
+    "CHECKSUM_STORAGE_ACCOUNT": {
+      "value": "dotnetclichecksums"
+    },
+    "CHECKSUM_STORAGE_CONTAINER": {
+      "value": "dotnet"
+    },
+    "CLIBUILD_SKIP_TESTS": {
+      "value": "true",
+      "allowOverride": true
+    }
+  },
+  "demands": [
+    "Agent.OS -equals linux"
+  ],
+  "retentionRules": [
+    {
+      "branches": [
+        "+refs/heads/*"
+      ],
+      "artifacts": [ ],
+      "artifactTypesToDelete": [
+        "FilePath",
+        "SymbolStore"
+      ],
+      "daysToKeep": 2,
+      "minimumToKeep": 1,
+      "deleteBuildRecord": true,
+      "deleteTestResults": true
+    }
+  ],
+  "buildNumberFormat": "$(Date:yyyMMdd)$(Rev:.r)",
+  "jobAuthorizationScope": "projectCollection",
+  "jobTimeoutInMinutes": 90,
+  "badgeEnabled": true,
+  "repository": {
+    "properties": {
+      "connectedServiceId": "f4c31735-42d2-4c3a-bc47-7ac06fd0dccc",
+      "apiUrl": "https://api.github.com/repos/dotnet/cli",
+      "branchesUrl": "https://api.github.com/repos/dotnet/cli/branches",
+      "cloneUrl": "https://github.com/dotnet/cli.git",
+      "refsUrl": "https://api.github.com/repos/dotnet/cli/git/refs",
+      "gitLfsSupport": "false",
+      "skipSyncSource": "false",
+      "fetchDepth": "0",
+      "cleanOptions": "0"
+    },
+    "id": "https://github.com/dotnet/cli.git",
+    "type": "GitHub",
+    "name": "dotnet/cli",
+    "url": "https://github.com/dotnet/cli.git",
+    "defaultBranch": "rel/1.0.0",
+    "clean": "true",
+    "checkoutSubmodules": false
+  },
+  "quality": "definition",
+  "queue": {
+    "pool": {
+      "id": 39,
+      "name": "DotNet-Build"
+    },
+    "id": 36,
+    "name": "DotNet-Build"
+  },
+  "path": "\\",
+  "type": "build",
+  "id": 1,
+  "name": "Dotnet-CLI-RHEL7-x64",
+  "project": {
+    "id": "0bdbc590-a062-4c3f-b0f6-9383f67865ee",
+    "name": "DevDiv",
+    "description": "Visual Studio and DevDiv team project for git source code repositories.  Work items will be added for Adams, Dev14 work items are tracked in vstfdevdiv.  ",
+    "url": "https://devdiv.visualstudio.com/DefaultCollection/_apis/projects/0bdbc590-a062-4c3f-b0f6-9383f67865ee",
+    "state": "wellFormed",
+    "revision": 418097459
+  }
+}
