@@ -458,7 +458,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     { MetadataKeys.ResolvedPath, "some resolved path" },
                     { MetadataKeys.Type, "Package" },
                     { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" },
-                    { PreprocessPackageDependenciesDesignTime.DependenciesMetadata, "ChildPackage1/1.0.0;ChildPackage2/2.0.0" }
+                    { PreprocessPackageDependenciesDesignTime.DependenciesMetadata, "ChildPackage1/1.0.0;ChildPackage2/2.0.0" },
+                    { MetadataKeys.IsTopLevelDependency, "True" }
                 });
 
             var mockChildPackage1 = new MockTaskItem(
@@ -471,7 +472,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     { MetadataKeys.ResolvedPath, "some resolved path" },
                     { MetadataKeys.Type, "Package" },
                     { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" },
-                    { PreprocessPackageDependenciesDesignTime.DependenciesMetadata, "ChildPackage11/1.0.0" }
+                    { PreprocessPackageDependenciesDesignTime.DependenciesMetadata, "ChildPackage11/1.0.0" },
+                    { MetadataKeys.IsTopLevelDependency, "False" }
                 });
 
             var mockChildPackage11 = new MockTaskItem(
@@ -483,7 +485,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     { MetadataKeys.Path, "some path" },
                     { MetadataKeys.ResolvedPath, "some resolved path" },
                     { MetadataKeys.Type, "Package" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" }
+                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" },
+                    { MetadataKeys.IsTopLevelDependency, "False" }
                 });
 
             var mockChildPackage2 = new MockTaskItem(
@@ -495,7 +498,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     { MetadataKeys.Path, "some path" },
                     { MetadataKeys.ResolvedPath, "some resolved path" },
                     { MetadataKeys.Type, "Package" },
-                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" }
+                    { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" },
+                    { MetadataKeys.IsTopLevelDependency, "False" }
                 });
 
             // package dependencies
@@ -529,6 +533,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" },
                     { MetadataKeys.ParentPackage, "Package3/1.0.0" }
                 });
+
             var task = new PreprocessPackageDependenciesDesignTime();
             task.TargetDefinitions = new[] { mockTarget };
             task.PackageDefinitions = new ITaskItem[] {

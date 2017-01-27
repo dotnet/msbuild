@@ -1,0 +1,97 @@
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Collections.Generic;
+using System.Linq;
+using FluentAssertions;
+using Microsoft.Build.Framework;
+using Xunit;
+
+namespace Microsoft.NET.Build.Tasks.UnitTests
+{
+    public class GivenUnresolvedSDKProjectItemsAndImplicitPackages
+    {
+        [Fact]
+        public void ItShouldCombineSdkReferencesWithImplicitPackageReferences()
+        {
+            // Arrange 
+            var sdkReference1 = new MockTaskItem(
+                itemSpec: "SdkReference1",
+                metadata: new Dictionary<string, string>
+                {
+                    { MetadataKeys.Version, "2.0.1" }
+                });
+
+            var sdkReference2 = new MockTaskItem(
+                itemSpec: "SdkReference2",
+                metadata: new Dictionary<string, string>
+                {
+                    { MetadataKeys.Version, "1.0.1" }
+                });
+
+            var packageReference1 = new MockTaskItem(
+                itemSpec: "PackageReference1",
+                metadata: new Dictionary<string, string>
+                {
+                    { MetadataKeys.IsImplicitlyDefined, "True" },
+                    { MetadataKeys.SDKPackageItemSpec, "" },
+                    { MetadataKeys.Name, "PackageReference1" }
+                });
+
+            var packageReference2 = new MockTaskItem(
+                itemSpec: "PackageReference2",
+                metadata: new Dictionary<string, string>
+                {
+                    { MetadataKeys.IsImplicitlyDefined, "aaa" },
+                    { MetadataKeys.Version, "3.0.1" }
+                });
+
+            var packageReference3 = new MockTaskItem(
+                itemSpec: "PackageReference3",
+                metadata: new Dictionary<string, string>
+                {
+                    { MetadataKeys.IsImplicitlyDefined, "False" },
+                    { MetadataKeys.Version, "1.0.1" }
+                });
+            
+            var task = new CollectSDKReferencesDesignTime();
+            task.SdkReferences = new[] {
+                sdkReference1,
+                sdkReference2
+            };
+            task.PackageReferences = new ITaskItem[] {
+                packageReference1,
+                packageReference2,
+                packageReference3
+            };
+
+            // Act
+            var result = task.Execute();
+
+            // Assert
+            result.Should().BeTrue();
+            task.SDKReferencesDesignTime.Count().Should().Be(3);
+
+            VerifyTaskItem(sdkReference1, task.SDKReferencesDesignTime[0]);
+            VerifyTaskItem(sdkReference2, task.SDKReferencesDesignTime[1]);
+            VerifyTaskItem(packageReference1, task.SDKReferencesDesignTime[2]);
+        }
+
+        private void VerifyTaskItem(ITaskItem input, ITaskItem output)
+        {
+            // remove unnecessary metadata to keep only ones that would be in result task items
+            var removeMetadata = new[] { MetadataKeys.IsImplicitlyDefined };
+            foreach(var rm in removeMetadata)
+            {
+                output.RemoveMetadata(rm);
+                input.RemoveMetadata(rm);
+            }
+
+            input.ItemSpec.Should().Be(output.ItemSpec);
+            foreach (var metadata in input.MetadataNames)
+            {
+                input.GetMetadata(metadata.ToString()).Should().Be(output.GetMetadata(metadata.ToString()));
+            }
+        }
+    }
+}
