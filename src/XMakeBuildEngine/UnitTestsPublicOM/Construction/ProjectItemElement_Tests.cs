@@ -72,9 +72,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
         private const string UpdateInTarget = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
-                            <ItemGroup>
-                                <i Update='i'/>
-                            </ItemGroup>
+                            <Target Name='t'>
+                                <ItemGroup>
+                                    <i Update='i'/>
+                                </ItemGroup>
+                            </Target>
                     </Project>
                 ";
 
@@ -597,16 +599,27 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         }
 
         /// <summary>
-        /// Read item with Remove inside of Target
+        /// Read item with Update outside of Target
         /// </summary>
-        [Theory]
-        [InlineData(UpdateInTarget)]
-        [InlineData(UpdateOutsideTarget)]
-        public void ReadValidUpdate(string project)
+        [Fact]
+        public void ReadValidUpdate()
         {
-            var item = GetItemFromContent(project);
+            var item = GetItemFromContent(UpdateOutsideTarget);
 
             Assert.Equal("i", item.Update);
+        }
+        
+        /// <summary>
+        /// Update can't appear inside a target
+        /// </summary>
+        [Fact]
+        public void ReadInvalidUpdateInTarget()
+        {
+            Assert.Throws<InvalidProjectFileException>(
+                () =>
+                {
+                    GetItemFromContent(UpdateInTarget);
+                });
         }
 
         /// <summary>
@@ -857,16 +870,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
            );
         }
 
-        /// 
         /// <summary>
         /// Set the Update on an item
         /// </summary>
-        [Theory]
-        [InlineData(UpdateInTarget)]
-        [InlineData(UpdateOutsideTarget)]
-        public void SetUpdate(string project)
+        [Fact]
+        public void SetUpdate()
         {
-            ProjectItemElement item = GetItemFromContent(project);
+            ProjectItemElement item = GetItemFromContent(UpdateOutsideTarget);
 
             item.Update = "ib";
 
@@ -876,12 +886,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set empty Update: this removes it
         /// </summary>
-        [Theory]
-        [InlineData(UpdateInTarget)]
-        [InlineData(UpdateOutsideTarget)]
-        public void SetEmptyUpdate(string project)
+        [Fact]
+        public void SetEmptyUpdate()
         {
-            ProjectItemElement item = GetItemFromContent(project);
+            ProjectItemElement item = GetItemFromContent(UpdateOutsideTarget);
 
             item.Update = String.Empty;
 
@@ -891,12 +899,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set null Update: this removes it
         /// </summary>
-        [Theory]
-        [InlineData(UpdateInTarget)]
-        [InlineData(UpdateOutsideTarget)]
-        public void SetNullUpdate(string project)
+        [Fact]
+        public void SetNullUpdate()
         {
-            ProjectItemElement item = GetItemFromContent(project);
+            ProjectItemElement item = GetItemFromContent(UpdateOutsideTarget);
 
             item.Update = null;
 
@@ -906,14 +912,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set Include when Update is present
         /// </summary>
-        [Theory]
-        [InlineData(UpdateInTarget)]
-        [InlineData(UpdateOutsideTarget)]
-        public void SetInvalidIncludeWithUpdate(string project)
+        [Fact]
+        public void SetInvalidIncludeWithUpdate()
         {
             Assert.Throws<InvalidOperationException>(() =>
             {
-                ProjectItemElement item = GetItemFromContent(project);
+                ProjectItemElement item = GetItemFromContent(UpdateOutsideTarget);
 
                 item.Include = "i1";
             }
@@ -924,7 +928,6 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Set Exclude when Update is present
         /// </summary>
         [Theory]
-        [InlineData(UpdateInTarget)]
         [InlineData(UpdateOutsideTarget)]
         public void SetInvalidExcludeWithUpdate(string project)
         {
@@ -940,12 +943,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set the condition on an item
         /// </summary>
-        [Theory]
-        [InlineData(UpdateInTarget)]
-        [InlineData(UpdateOutsideTarget)]
-        public void SetCondition(string project)
+        [Fact]
+        public void SetCondition()
         {
-            ProjectItemElement item = GetItemFromContent(project);
+            ProjectItemElement item = GetItemFromContent(UpdateOutsideTarget);
 
             item.Condition = "c";
 

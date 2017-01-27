@@ -312,6 +312,7 @@ namespace Microsoft.Build.Construction
         private ProjectItemElement ParseProjectItemElement(XmlElementWithLocation element, ProjectItemGroupElement parent)
         {
             bool belowTarget = parent.Parent is ProjectTargetElement;
+            bool belowProject = parent.Parent is ProjectRootElement;
 
             string itemType = element.Name;
             string include = element.GetAttribute(XMakeAttributes.include);
@@ -349,6 +350,9 @@ namespace Microsoft.Build.Construction
 
             // Exclude must be missing, unless Include exists
             ProjectXmlUtilities.VerifyThrowProjectInvalidAttribute(exclude.Length == 0 || include.Length > 0, (XmlAttributeWithLocation)element.Attributes[XMakeAttributes.exclude]);
+
+            // Update must be missing, unless inside a target and Include is missing
+            ProjectXmlUtilities.VerifyThrowProjectInvalidAttribute(update.Length == 0 || belowProject, (XmlAttributeWithLocation)element.Attributes[XMakeAttributes.update]);
 
             // If we have an Include attribute at all, it must have non-zero length
             ProjectErrorUtilities.VerifyThrowInvalidProject(include.Length > 0 || element.Attributes[XMakeAttributes.include] == null, element.Location, "MissingRequiredAttribute", XMakeAttributes.include, itemType);

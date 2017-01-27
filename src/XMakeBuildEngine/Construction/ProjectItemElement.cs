@@ -434,6 +434,8 @@ namespace Microsoft.Build.Construction
         {
             ErrorUtilities.VerifyThrowInvalidOperation(parent.Parent is ProjectTargetElement || (Include.Length > 0 || Update.Length > 0 || Remove.Length > 0), "OM_ItemsOutsideTargetMustHaveIncludeOrUpdateOrRemove");
             ErrorUtilities.VerifyThrowInvalidOperation(parent.Parent is ProjectRootElement || parent.Parent is ProjectTargetElement || parent.Parent is ProjectWhenElement || parent.Parent is ProjectOtherwiseElement, "OM_CannotAcceptParent");
+
+            ErrorUtilities.VerifyThrowInvalidOperation(Update.Length == 0 || parent.Parent is ProjectRootElement, "OM_UpdateOnlyUnderProject");
         }
 
         /// <summary>
