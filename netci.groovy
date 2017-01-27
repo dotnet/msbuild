@@ -29,6 +29,7 @@ osList.each { os ->
         // Calculate the build command
         if (os == 'Windows_NT') {
             buildCommand = ".\\build.cmd -Configuration $config"
+            machineAffinity = 'latest-or-auto-dev15-rc'
         } else if (os == 'Windows_NT_FullFramework') {
             buildCommand = ".\\build.cmd -Configuration $config -FullMSBuild"
             osBase = 'Windows_NT'
