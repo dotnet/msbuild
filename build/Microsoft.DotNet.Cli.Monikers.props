@@ -3,8 +3,8 @@
   <PropertyGroup>
     <SdkBrandName>Microsoft .NET Core 1.0.3 - SDK RC 4</SdkBrandName>
     <SharedFrameworkBrandName>Microsoft .NET Core 1.0.3 - Runtime</SharedFrameworkBrandName>
-    <SharedHostBrandName>Microsoft .NET Core 1.0.1 - Host</SharedHostBrandName>
-    <HostFxrBrandName>Microsoft .NET Core 1.0.1 - Host FX Resolver</HostFxrBrandName>
+    <SharedHostBrandName>Microsoft .NET Core 1.1.0 - Host</SharedHostBrandName>
+    <HostFxrBrandName>Microsoft .NET Core 1.1.0 - Host FX Resolver</HostFxrBrandName>
     
     <AdditionalSharedFrameworkBrandName>Microsoft .NET Core 1.1.0 - Runtime</AdditionalSharedFrameworkBrandName>
     <AdditionalSharedHostBrandName>Microsoft .NET Core 1.1.0 - Host</AdditionalSharedHostBrandName>
