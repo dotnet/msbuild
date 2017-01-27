@@ -44,6 +44,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public string UserRuntimeConfig { get; set; }
 
+        public ITaskItem[] HostConfigurationOptions { get; set; }
+
         List<ITaskItem> _filesWritten = new List<ITaskItem>();
 
         [Output]
@@ -75,6 +77,11 @@ namespace Microsoft.NET.Build.Tasks
 
             AddFramework(config.RuntimeOptions, projectContext);
             AddUserRuntimeOptions(config.RuntimeOptions);
+
+            // HostConfigurationOptions are added after AddUserRuntimeOptions so if there are
+            // conflicts the HostConfigurationOptions win. The reasoning is that HostConfigurationOptions
+            // can be changed using MSBuild properties, which can be specified at build time.
+            AddHostConfigurationOptions(config.RuntimeOptions);
 
             WriteToJsonFile(RuntimeConfigPath, config);
             _filesWritten.Add(new TaskItem(RuntimeConfigPath));
@@ -117,6 +124,54 @@ namespace Microsoft.NET.Build.Tasks
             {
                 runtimeOptions.RawOptions.Add(runtimeOption.Key, runtimeOption.Value);
             }
+        }
+
+        private void AddHostConfigurationOptions(RuntimeOptions runtimeOptions)
+        {
+            if (HostConfigurationOptions == null || !HostConfigurationOptions.Any())
+            {
+                return;
+            }
+
+            JObject configProperties = GetConfigProperties(runtimeOptions);
+
+            foreach (var hostConfigurationOption in HostConfigurationOptions)
+            {
+                configProperties[hostConfigurationOption.ItemSpec] = GetConfigPropertyValue(hostConfigurationOption);
+            }
+        }
+
+        private static JObject GetConfigProperties(RuntimeOptions runtimeOptions)
+        {
+            JToken configProperties;
+            if (!runtimeOptions.RawOptions.TryGetValue("configProperties", out configProperties)
+                || configProperties == null
+                || configProperties.Type != JTokenType.Object)
+            {
+                configProperties = new JObject();
+                runtimeOptions.RawOptions["configProperties"] = configProperties;
+            }
+
+            return (JObject)configProperties;
+        }
+
+        private static JToken GetConfigPropertyValue(ITaskItem hostConfigurationOption)
+        {
+            string valueString = hostConfigurationOption.GetMetadata("Value");
+
+            bool boolValue;
+            if (bool.TryParse(valueString, out boolValue))
+            {
+                return new JValue(boolValue);
+            }
+
+            int intValue;
+            if (int.TryParse(valueString, out intValue))
+            {
+                return new JValue(intValue);
+            }
+
+            return new JValue(valueString);
         }
 
         private void WriteDevRuntimeConfig(ProjectContext projectContext)

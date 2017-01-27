@@ -117,7 +117,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                                        RuntimeIdentifier="$(RuntimeIdentifier)"
                                        PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                                        RuntimeFrameworkVersion="$(RuntimeFrameworkVersion)"
-                                       UserRuntimeConfig="$(UserRuntimeConfig)">
+                                       UserRuntimeConfig="$(UserRuntimeConfig)"
+                                       HostConfigurationOptions="@(RuntimeHostConfigurationOption)">
       
     </GenerateRuntimeConfigurationFiles>
     
@@ -130,6 +131,36 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   </Target>
 
+  <!--
+    ============================================================
+                                        DefaultRuntimeHostConfigurationOptions
+
+    Defaults @(RuntimeHostConfigurationOption) items based on MSBuild properties.
+    ============================================================
+    -->
+
+  <ItemGroup>
+    <RuntimeHostConfigurationOption Include="System.GC.Concurrent"
+                                    Condition="'$(ConcurrentGarbageCollection)' != ''"
+                                    Value="$(ConcurrentGarbageCollection)" />
+    
+    <RuntimeHostConfigurationOption Include="System.GC.Server"
+                                    Condition="'$(ServerGarbageCollection)' != ''"
+                                    Value="$(ServerGarbageCollection)" />
+    
+    <RuntimeHostConfigurationOption Include="System.GC.RetainVM"
+                                    Condition="'$(RetainVMGarbageCollection)' != ''"
+                                    Value="$(RetainVMGarbageCollection)" />
+    
+    <RuntimeHostConfigurationOption Include="System.Threading.ThreadPool.MinThreads"
+                                    Condition="'$(ThreadPoolMinThreads)' != ''"
+                                    Value="$(ThreadPoolMinThreads)" />
+    
+    <RuntimeHostConfigurationOption Include="System.Threading.ThreadPool.MaxThreads"
+                                    Condition="'$(ThreadPoolMaxThreads)' != ''"
+                                    Value="$(ThreadPoolMaxThreads)" />
+  </ItemGroup>
+  
   <!--
     ============================================================
                                         Run Information
