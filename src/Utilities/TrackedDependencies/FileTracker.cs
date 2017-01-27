@@ -614,15 +614,15 @@ namespace Microsoft.Build.Utilities
             // Due to a Detours limitation, the path to FileTracker32.dll must be
             // representable in ANSI characters. If the local copy is not, fall back to
             // the globally-installed version.
-            if (Encoding.UTF8.GetByteCount(path) > path.Length &&
-                s_FileTrackerFilename.Equals(filename, StringComparison.OrdinalIgnoreCase))
+            if (s_FileTrackerFilename.Equals(filename, StringComparison.OrdinalIgnoreCase))
             {
-                string progfilesPath = Path.Combine(FrameworkLocationHelper.GenerateProgramFiles32(), "MSBuild", "15.1",
+                string progfilesPath = Path.Combine(FrameworkLocationHelper.GenerateProgramFiles32(),
+                    "Microsoft Visual Studio", "Shared", "Common", "MSBuild", MSBuildConstants.CurrentProductVersion,
                     "FileTracker", s_FileTrackerFilename);
 
-                if (!File.Exists(progfilesPath))
+                if (File.Exists(progfilesPath))
                 {
-                    return null;
+                    return progfilesPath;
                 }
             }
 
