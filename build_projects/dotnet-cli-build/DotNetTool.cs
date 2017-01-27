@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 using Microsoft.Build.Framework;
@@ -21,21 +22,22 @@ namespace Microsoft.DotNet.Cli.Build
 
         protected abstract string Args { get; }
 
-        protected override Dictionary<string, string> EnvironmentOverride
+        protected override ProcessStartInfo GetProcessStartInfo(
+            string pathToTool,
+            string commandLineCommands, 
+            string responseFileSwitch)
         {
-            get
+            var psi = base.GetProcessStartInfo(
+                pathToTool,
+                commandLineCommands,
+                responseFileSwitch);
+                
+            foreach (var environmentVariableName in new EnvironmentFilter().GetEnvironmentVariableNamesToRemove())
             {
-                var ev2r = new EnvironmentFilter()
-                    .GetEnvironmentVariableNamesToRemove();
-
-                foreach (var ev in ev2r)
-                {
-                    Console.WriteLine($"EV {ev}");
-                }
-
-                return ev2r
-                    .ToDictionary(e => e, e => (string)null);
+                psi.Environment.Remove(environmentVariableName);
             }
+
+            return psi;
         }
 
         public string WorkingDirectory { get; set; }
