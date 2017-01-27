@@ -89,7 +89,7 @@
           DependsOnTargets="SetupTestPackageProjectData;"
           Outputs="%(TestPackageProject.Identity)">
 
-    <DotNetRestore ToolPath="$(Stage0Directory)"
+    <DotNetRestore ToolPath="$(Stage2Directory)"
                    Source="$(TestPackagesDir)"
                    ConfigFile="$(RepoRoot)\NuGet.Config"
                    ProjectPath="%(TestPackageProject.ProjectPath)" />
