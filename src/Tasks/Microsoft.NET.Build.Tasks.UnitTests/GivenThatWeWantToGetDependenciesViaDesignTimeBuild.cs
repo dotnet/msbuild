@@ -69,6 +69,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             task.FileDefinitions = new ITaskItem[] { };
             task.PackageDependencies = new ITaskItem[] { };
             task.FileDependencies = new ITaskItem[] { };
+            task.PackageReferences = new ITaskItem[] { };
 
             // Act
             var result = task.Execute();
@@ -144,6 +145,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             task.FileDefinitions = new ITaskItem[] { };
             task.PackageDependencies = new ITaskItem[] { mockPackageDepNoType, mockPackageDepUnknown };
             task.FileDependencies = new ITaskItem[] { };
+            task.PackageReferences = new ITaskItem[] { };
 
             // Act
             var result = task.Execute();
@@ -201,6 +203,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             task.FileDefinitions = new ITaskItem[] { };
             task.PackageDependencies = new ITaskItem[] { mockPackageDepUnresolved };
             task.FileDependencies = new ITaskItem[] { };
+            task.PackageReferences = new ITaskItem[] { };
 
             // Act
             var result = task.Execute();
@@ -412,6 +415,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 mockPackageReferenceDep
             };
             task.FileDependencies = new ITaskItem[] { };
+            task.PackageReferences = new ITaskItem[] { };
 
             // Act
             var result = task.Execute();
@@ -541,6 +545,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 mockChildPackageDep2
             };
             task.FileDependencies = new ITaskItem[] { };
+            task.PackageReferences = new ITaskItem[] { };
 
             // Act
             var result = task.Execute();
@@ -750,6 +755,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 mockWinmdDep,
                 mockReferenceDep
             };
+            task.PackageReferences = new ITaskItem[] { };
 
             // Act
             var result = task.Execute();
@@ -793,7 +799,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     { MetadataKeys.Type, "Package" },
                     { PreprocessPackageDependenciesDesignTime.ResolvedMetadata, "True" },
                     { PreprocessPackageDependenciesDesignTime.DependenciesMetadata,
-                      @"mockChildAssembly1;somepath/mockChildAssembly2;somepath/mockChildAnalyzerAssembly" }
+                      @"mockChildAssembly1;somepath/mockChildAssembly2;somepath/mockChildAnalyzerAssembly" },
+                    { MetadataKeys.IsImplicitlyDefined, "True" }
                 });
 
             var mockChildAssembly1 = new MockTaskItem(
@@ -845,7 +852,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 itemSpec: "Package3/1.0.0",
                 metadata: new Dictionary<string, string>
                 {
-                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
+                    { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" },
+                    { MetadataKeys.IsImplicitlyDefined, "True" }
                 });
 
             var mockChildAssemblyDep1 = new MockTaskItem(
@@ -901,6 +909,13 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 mockChildAssemblyDep2,
                 mockChildAssemblyNoCompileMetadataDep,
                 mockChildAnalyzerAssemblyDep
+            };
+            task.PackageReferences = new ITaskItem[] { new MockTaskItem(
+                itemSpec: "Package3",
+                metadata: new Dictionary<string, string>
+                {
+                    { MetadataKeys.IsImplicitlyDefined, "True" }
+                })
             };
 
             // Act
