@@ -663,6 +663,20 @@ namespace Microsoft.DotNet.Migration.Tests
             Restore(projectDirectory, projectName);
             BuildMSBuild(projectDirectory, projectName);
         }
+
+        [Fact]
+        public void ItMigratesAndBuildsAppWithExplicitIncludeGlob()
+        {
+            const string projectName = "TestAppWithExplicitIncludeGlob";
+            var projectDirectory = TestAssets.Get(projectName)
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root;
+
+            MigrateProject(projectDirectory.FullName);
+            Restore(projectDirectory, projectName);
+            BuildMSBuild(projectDirectory, projectName);
+        }
         
         private void VerifyAutoInjectedDesktopReferences(DirectoryInfo projectDirectory, string projectName, bool shouldBePresent)
         {

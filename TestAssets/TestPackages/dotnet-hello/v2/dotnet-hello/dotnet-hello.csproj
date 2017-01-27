@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <VersionPrefix>2.0.0</VersionPrefix>
-    <TargetFramework>netcoreapp1.0</TargetFramework>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
     <AssemblyName>dotnet-hello</AssemblyName>
     <OutputType>Exe</OutputType>
     <RuntimeIdentifiers>win7-x64;win7-x86;osx.10.10-x64;osx.10.11-x64;ubuntu.14.04-x64;ubuntu.16.04-x64;centos.7-x64;rhel.7.2-x64;debian.8-x64;fedora.23-x64;opensuse.13.2-x64</RuntimeIdentifiers>
@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.3</Version>
+      <Version>1.1.0</Version>
     </PackageReference>
   </ItemGroup>
 

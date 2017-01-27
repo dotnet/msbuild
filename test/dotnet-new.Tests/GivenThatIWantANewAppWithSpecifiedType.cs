@@ -41,7 +41,8 @@ namespace Microsoft.DotNet.New.Tests
 
             if (useNuGetConfigForAspNet)
             {
-                File.Copy("NuGet.tempaspnetpatch.config", Path.Combine(rootPath, "NuGet.Config"));
+                var configFile = new FileInfo(Path.Combine(rootPath,"..","..","..","..","NuGet.tempaspnetpatch.config"));
+                File.Copy(configFile.FullName, Path.Combine(rootPath, "NuGet.Config"));
             }
 
             new TestCommand("dotnet")

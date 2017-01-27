@@ -38,7 +38,7 @@
           EnvironmentVariables=$(RunTestEnvironmentVariables);
           TestProject=%(TestProjects.Identity);
           TestResultXmlDir=$(TestResultXmlDir);
-          ToolPath=$(Stage0Directory);
+          ToolPath=$(Stage2Directory);
           WorkingDirectory=$([System.IO.Directory]::GetParent(%(TestProjects.Identity))) 
         </Properties>
       </ProjectsToTest>
@@ -86,32 +86,19 @@
 
   <Target Name="CreateTestAssetPackageNuPkgs"
           DependsOnTargets="SetupTestPackageProjectData;"
-          Inputs="%(TestPackageProject.PackInputs)"
-          Outputs="%(TestPackageProject.PackOutputs)">
+          Outputs="%(TestPackageProject.Identity)">
 
-    <PropertyGroup>
-      <Framework>%(TestPackageProject.Framework)</Framework>
-      <DoPackRuntime Condition=" '$(Framework)' == 'net45' Or '$(Framework)' == 'net451' ">true</DoPackRuntime>
-      <DotNetPackMsbuildArgs>/p:TargetFramework=$(Framework)</DotNetPackMsbuildArgs>
-      <DotNetPackMsbuildArgs Condition=" '$(IsDesktopAvailable)' == 'True' And '%(TestPackageProject.PackRuntime)' != '' And '$(DoPackRuntime)' != '' ">/p:RuntimeIdentifier=%(TestPackageProject.PackRuntime)</DotNetPackMsbuildArgs>
-    </PropertyGroup>
-
-    <DotNetRestore ToolPath="$(Stage2Directory)"
+    <DotNetRestore ToolPath="$(Stage0Directory)"
                    Source="$(TestPackagesDir)"
                    ConfigFile="$(RepoRoot)\NuGet.Config"
                    ProjectPath="%(TestPackageProject.ProjectPath)" />
-
-    <DotNetBuild Framework="$(Framework)"
-                 Runtime="%(TestPackageProject.Runtime)"
-                 ProjectPath="%(TestPackageProject.ProjectPath)"
-                 ToolPath="$(Stage0Directory)" />
-    
+ 
     <!-- https://github.com/NuGet/Home/issues/4063 -->
-    <DotNetPack NoBuild="True"
-                Output="$(TestPackagesDir)"
+    <DotNetPack Output="$(TestPackagesDir)"
                 ProjectPath="%(TestPackageProject.ProjectPath)"
                 ToolPath="$(Stage0Directory)"
                 VersionSuffix="%(TestPackageProject.VersionSuffix)"
-                MsbuildArgs="$(DotNetPackMsbuildArgs) /p:SdkNuGetVersion=$(SdkNugetVersion)" />
+                MsbuildArgs="%(TestPackageProject.MsbuildArgs) /p:SdkNuGetVersion=$(SdkNugetVersion)" />
+
   </Target>
 </Project>
