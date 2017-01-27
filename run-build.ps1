@@ -103,8 +103,8 @@ if ($LastExitCode -ne 0)
 # install the post-PJnistic stage0
 $dotnetInstallPath = Join-Path $toolsLocalPath "dotnet-install.ps1"
 
-Write-Host "$dotnetInstallPath -Channel ""rel-1.0.0"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
-Invoke-Expression "$dotnetInstallPath -Channel ""rel-1.0.0"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
+Write-Host "$dotnetInstallPath -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
+Invoke-Expression "$dotnetInstallPath -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
 if ($LastExitCode -ne 0)
 {
     Write-Output "The .NET CLI installation failed with exit code $LastExitCode"
