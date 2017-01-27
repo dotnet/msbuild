@@ -1,0 +1,138 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ImportByWildcardBeforeMicrosoftCommonMultiTargetingTargets Condition="'$(ImportByWildcardBeforeMicrosoftCommonMultiTargetingTargets)' == ''">true</ImportByWildcardBeforeMicrosoftCommonMultiTargetingTargets>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.MultiTargeting.targets\ImportBefore\*.targets"
+          Condition="'$(ImportByWildcardBeforeMicrosoftCommonMultiTargetingTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.MultiTargeting.targets\ImportBefore')"/>
+
+  <Import Project="$(CustomBeforeMicrosoftCommonMultiTargetingTargets)" Condition="'$(CustomBeforeMicrosoftCommonMultiTargetingTargets)' != '' and Exists('$(CustomBeforeMicrosoftCommonMultiTargetingTargets)')"/>
+
+  <!--
+  ============================================================
+                                       DispatchToInnerBuilds
+
+     Builds this project with /t:$(InnerTarget) /p:TargetFramework=X for each
+     value X in $(TargetFrameworks)
+
+     [IN]
+     $(TargetFrameworks) - Semicolon delimited list of target frameworks.
+     $(InnerTargets) - The targets to build for each target framework
+
+     [OUT]
+     @(InnerOutput) - The combined output items of the inner targets across
+                      all target frameworks..
+  ============================================================
+  -->
+  <Target Name="DispatchToInnerBuilds" Returns="@(InnerOutput)">
+    <ItemGroup>
+      <_TargetFramework Include="$(TargetFrameworks)" />
+    </ItemGroup>
+    <MSBuild Projects="$(MSBuildProjectFile)"
+             Condition="'$(TargetFrameworks)' != '' "
+             Targets="$(InnerTargets)"
+             Properties="TargetFramework=%(_TargetFramework.Identity)">
+      <Output ItemName="InnerOutput" TaskParameter="TargetOutputs" />
+    </MSBuild>
+  </Target>
+
+  <!--
+  ============================================================
+                                       Build
+
+   Multi-targeting version of Build.
+
+   [IN]
+   $(TargetFrameworks) - Semicolon delimited list of target frameworks.
+
+   $(InnerTargets)     - The targets to build for each target framework. Defaults
+                         to 'Build' if unset, but allows override to support
+                         `msbuild /p:InnerTargets=X;Y;Z` which will build X, Y,
+                         and Z targets for each target framework.
+
+   [OUT]
+   @(InnerOutput) - The combined output items of the inner targets across
+                    all builds.
+  ============================================================
+  -->
+  <Target Name="Build" DependsOnTargets="_SetBuildInnerTarget;DispatchToInnerBuilds" />
+
+  <Target Name="_SetBuildInnerTarget" Returns="@(InnerOutput)">
+    <PropertyGroup  Condition="'$(InnerTargets)' == ''">
+      <InnerTargets>Build</InnerTargets>
+    </PropertyGroup>
+  </Target>
+
+
+  <!--
+  ============================================================
+                                       Clean
+
+   Multi-targeting version of clean.
+  ============================================================
+  -->
+  <Target Name="Clean" DependsOnTargets="_SetCleanInnerTarget;DispatchToInnerBuilds" />
+  <Target Name="_SetCleanInnerTarget">
+    <PropertyGroup>
+      <InnerTargets>Clean</InnerTargets>
+    </PropertyGroup>
+  </Target>
+
+  <!--
+  ============================================================
+                                       Rebuild
+
+   Multi-targeting version of rebuild.
+  ============================================================
+  -->
+  <Target Name="Rebuild" DependsOnTargets="_SetRebuildInnerTarget;DispatchToInnerBuilds" />
+  <Target Name="_SetRebuildInnerTarget">
+    <PropertyGroup>
+      <InnerTargets>Rebuild</InnerTargets>
+    </PropertyGroup>
+  </Target>
+
+  <!--
+    This will import NuGet restore targets, which is a special case separate from the package -> project extension 
+    mechanism below. For obvious reasons,  we need restore to work before any package assets are available.
+
+    TODO: https://github.com/Microsoft/msbuild/issues/1061: This is now generalized with less coupling to nuget, 
+          but this codepath should remain as a compat shim until NuGet and the CLI use the MultiTargeting imports.
+  -->
+  <PropertyGroup>
+    <ImportByWildcardAfterMicrosoftCommonTargets Condition="'$(ImportByWildcardAfterMicrosoftCommonTargets)' == ''">true</ImportByWildcardAfterMicrosoftCommonTargets>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportAfter\*.NuGet.*.targets"
+          Condition="'$(ImportByWildcardAfterMicrosoftCommonTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportAfter')"/>
+
+  <Import Project="$(CustomAfterMicrosoftCommonMultiTargetingTargets)" Condition="'$(CustomAfterMicrosoftCommonMultiTargetingTargets)' != '' and Exists('$(CustomAfterMicrosoftCommonMultiTargetingTargets)')"/>
+
+  <!--
+    Allow extensions like NuGet restore to work before any package assets are available.
+  -->
+  <PropertyGroup>
+    <ImportByWildcardAfterMicrosoftCommonMultiTargetingTargets Condition="'$(ImportByWildcardAfterMicrosoftCommonMultiTargetingTargets)' == ''">true</ImportByWildcardAfterMicrosoftCommonMultiTargetingTargets>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.MultiTargeting.targets\ImportAfter\*.targets" 
+          Condition="'$(ImportByWildcardAfterMicrosoftCommonMultiTargetingTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.MultiTargeting.targets\ImportAfter')"/>
+
+  <!--
+    Import project extensions which usually come from packages.  Package management systems will create a file at:
+      $(MSBuildProjectExtensionsPath)\$(MSBuildProjectFile).<SomethingUnique>.targets
+
+    Each package management system should use a unique moniker to avoid collisions.  It is a wild-card iport so the package
+    management system can write out multiple files but the order of the import is alphabetic because MSBuild sorts the list.
+
+    This is the same import that would happen in an inner (non-multi targeting) build. Package management systems are responsible for generating 
+    appropriate conditions based on $(IsMultiTargetingBuild) to pull in only those package targets that are meant to participate in a multi-targeting 
+    build.
+  -->
+  <PropertyGroup>
+    <ImportProjectExtensionTargets Condition="'$(ImportProjectExtensionTargets)' == ''">true</ImportProjectExtensionTargets>
+  </PropertyGroup>
+
+  <Import Project="$(MSBuildProjectExtensionsPath)$(MSBuildProjectFile).*.targets" Condition="'$(ImportProjectExtensionTargets)' == 'true' and exists('$(MSBuildProjectExtensionsPath)')" />
+
+  <!-- TODO: https://github.com/Microsoft/msbuild/issues/1062: Remove this temporary hook when possible. -->
+  <Import Project="$(CoreMultiTargetingTargetsPath)" 
+          Condition="'$(CoreMultiTargetingTargetsPath)' != '' and Exists('$(CoreMultiTargetingTargetsPath)')" />
+</Project>

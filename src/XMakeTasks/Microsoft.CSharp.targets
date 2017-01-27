@@ -17,11 +17,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
    <!-- 
-        We are doing a cross-targeting build if there is no list of target frameworks specified
+        We are doing a multi-targeting build if there is no list of target frameworks specified
         nor is there a current target framework being built individually. In that case, this import is
-        redirected to Microsoft.CSharp.CrossTargeting.targets.
+        redirected to Microsoft.CSharp.MultiTargeting.targets.
    -->
    <PropertyGroup Condition="'$(TargetFrameworks)' != '' and '$(TargetFramework)' == ''">
+      <IsMultiTargetingBuild>true</IsMultiTargetingBuild>
+      <!-- back-compat for deprecated IsCrossTargetingBuild property -->
       <IsCrossTargetingBuild>true</IsCrossTargetingBuild>
    </PropertyGroup>
 
@@ -49,9 +51,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             <CscToolPath Condition="'$(CscToolPath)' == '' and '$(BuildingInsideVisualStudio)' != 'true'">$(MsBuildFrameworkToolsPath)</CscToolPath>
          </PropertyGroup>
       </When>
-      <When Condition="'$(IsCrossTargetingBuild)' == 'true'">
+      <When Condition="'$(IsMultiTargetingBuild)' == 'true'">
          <PropertyGroup>
-            <CSharpTargetsPath>$(MSBuildToolsPath)\Microsoft.CSharp.CrossTargeting.targets</CSharpTargetsPath>
+            <CSharpTargetsPath>$(MSBuildToolsPath)\Microsoft.CSharp.MultiTargeting.targets</CSharpTargetsPath>
           </PropertyGroup>
       </When>
       <Otherwise>
