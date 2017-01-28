@@ -1566,7 +1566,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </MSBuild>
 
     <ItemGroup>
-      <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.Identity)' == '%(Identity)'">
+      <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.Identity)' == '%(Identity)' and '$(_ProjectReferenceTargetFrameworkProperties)' != ''">
         <SetTargetFramework>$(_ProjectReferenceTargetFrameworkProperties)</SetTargetFramework>
       </_MSBuildProjectReferenceExistent>
     </ItemGroup>
