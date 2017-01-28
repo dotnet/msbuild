@@ -24,6 +24,7 @@ namespace Microsoft.NET.Build.Tasks
         // SDK Metadata
         public const string SDKPackageItemSpec = "SDKPackageItemSpec";
         public const string OriginalItemSpec = "OriginalItemSpec";
+        public const string SDKRootFolder = "SDKRootFolder";
 
         // Foreign Keys
         public const string ParentTarget = "ParentTarget";

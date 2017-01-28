@@ -143,6 +143,10 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             VerifyTaskItem(sdkReference1, task.ResolvedSDKReferencesDesignTime[0]);
             VerifyTaskItem(sdkReference2, task.ResolvedSDKReferencesDesignTime[1]);
+
+            var path = packageReference1.GetMetadata(MetadataKeys.Path);
+            packageReference1.RemoveMetadata(MetadataKeys.Path);
+            packageReference1.SetMetadata(MetadataKeys.SDKRootFolder, path);
             VerifyTaskItem(packageReference1, task.ResolvedSDKReferencesDesignTime[2], "PackageReference1");
         }
 

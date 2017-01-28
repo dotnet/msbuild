@@ -58,7 +58,7 @@ namespace Microsoft.NET.Build.Tasks
                 newTaskItem.SetMetadata(MetadataKeys.SDKPackageItemSpec, dependencyItem.ItemSpec);
                 newTaskItem.SetMetadata(MetadataKeys.Name, itemName);
                 newTaskItem.SetMetadata(MetadataKeys.Version, dependencyItem.GetMetadata(MetadataKeys.Version));
-                newTaskItem.SetMetadata(MetadataKeys.Path, dependencyItem.GetMetadata(MetadataKeys.Path));
+                newTaskItem.SetMetadata(MetadataKeys.SDKRootFolder, dependencyItem.GetMetadata(MetadataKeys.Path));
                 newTaskItem.SetMetadata(MetadataKeys.OriginalItemSpec, itemName);
                 
                 topLevelPackages.Add(newTaskItem);
