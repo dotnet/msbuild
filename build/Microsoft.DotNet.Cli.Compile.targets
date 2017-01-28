@@ -222,6 +222,11 @@
         <Output TaskParameter="Filtered" ItemName="CompileStageSdkDirectories" />
       </RemoveDuplicates>
 
+      <!-- Ensure crossgen tool is executable.  See https://github.com/NuGet/Home/issues/4424 -->
+      <Chmod Condition=" '$(OSName)' != 'win' "
+             File="$(CrossgenPath)"
+             Mode="u+x" />
+
       <Crossgen Condition=" '$(DISABLE_CROSSGEN)' != '1' "
                 SourceAssembly="%(CrossgenTargets.FullPath)"
                 DestinationPath="%(CrossgenTargets.FullPath)"
