@@ -3,7 +3,7 @@
 
 namespace Microsoft.DotNet.Cli.Build
 {
-    public class DotNetPack : DotNetTool
+    public class DotNetPack : DotNetMSBuildTool
     {
         protected override string Command
         {
@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         protected override string Args
         {
-            get { return $"{GetProjectPath()} {GetConfiguration()} {GetNoBuild()} {GetOutput()} {GetVersionSuffix()} {GetRuntime()} {MsbuildArgs}"; }
+            get { return $"{base.Args} {GetProjectPath()} {GetConfiguration()} {GetNoBuild()} {GetOutput()} {GetVersionSuffix()} {GetRuntime()} {MsbuildArgs}"; }
         }
 
         public string Configuration { get; set; }

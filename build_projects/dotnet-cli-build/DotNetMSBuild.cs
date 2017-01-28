@@ -3,7 +3,7 @@
 
 namespace Microsoft.DotNet.Cli.Build
 {
-    public class DotNetMSBuild : DotNetTool
+    public class DotNetMSBuild : DotNetMSBuildTool
     {
         protected override string Command
         {
@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         protected override string Args
         {
-            get { return $"{GetArguments()}"; }
+            get { return $"{base.Args} {GetArguments()}"; }
         }
 
         public string Arguments { get; set; }
