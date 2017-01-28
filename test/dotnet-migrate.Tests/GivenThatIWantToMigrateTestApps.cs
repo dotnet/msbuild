@@ -665,6 +665,20 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Fact]
+        public void ItMigratesAndBuildsAppWithExplicitInclude()
+        {
+            const string projectName = "TestAppWithExplicitInclude";
+            var projectDirectory = TestAssets.Get(projectName)
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root;
+
+            MigrateProject(projectDirectory.FullName);
+            Restore(projectDirectory, projectName);
+            BuildMSBuild(projectDirectory, projectName);
+        }
+
+        [Fact]
         public void ItMigratesAndBuildsAppWithExplicitIncludeGlob()
         {
             const string projectName = "TestAppWithExplicitIncludeGlob";

@@ -19,16 +19,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
             (itemName) =>
                 new AddItemTransform<IncludeContext>(
                     itemName,
-                    includeContext => FormatGlobPatternsForMsbuild(includeContext.IncludeFiles, includeContext.SourceBasePath),
+                    includeContext => FormatGlobPatternsForMsbuild(includeContext.IncludeFiles.OrEmptyIfNull()
+                                                                       .Where((pattern) => !_excludePatternRule(pattern)),
+                                                                   includeContext.SourceBasePath),
                     includeContext => FormatGlobPatternsForMsbuild(includeContext.ExcludeFiles, includeContext.SourceBasePath),
                     includeContext => includeContext != null 
                         && includeContext.IncludeFiles != null 
-                        && includeContext.IncludeFiles.Count > 0);
-
-        private bool IsPatternExcluded(string pattern)
-        {
-            return _patternsToExclude.Contains(pattern.Replace('\\', '/'));
-        }
+                        && includeContext.IncludeFiles.Where((pattern) => !_excludePatternRule(pattern)).Count() > 0);
 
         protected virtual Func<string, AddItemTransform<IncludeContext>> IncludeExcludeTransformGetter =>
             (itemName) => new AddItemTransform<IncludeContext>(
@@ -41,7 +38,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
                         fullIncludeSet = fullIncludeSet.Union(includeContext.BuiltInsInclude.OrEmptyIfNull());
                     }
 
-                    fullIncludeSet = fullIncludeSet.Where((pattern) => !IsPatternExcluded(pattern));
+                    fullIncludeSet = fullIncludeSet.Where((pattern) => !_excludePatternRule(pattern));
 
                     return FormatGlobPatternsForMsbuild(fullIncludeSet, includeContext.SourceBasePath);
                 },
@@ -57,7 +54,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
                 {
                     return includeContext != null &&
                         ( 
-                            (includeContext.IncludePatterns != null && includeContext.IncludePatterns.Where((pattern) => !IsPatternExcluded(pattern)).Count() > 0)
+                            (includeContext.IncludePatterns != null && includeContext.IncludePatterns.Where((pattern) => !_excludePatternRule(pattern)).Count() > 0)
                             ||
                             (_emitBuiltInIncludes && 
                              includeContext.BuiltInsInclude != null && 
@@ -75,7 +72,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
 
         private readonly string _itemName;
         private bool _transformMappings;
-        private string[] _patternsToExclude;
+        private Func<string, bool> _excludePatternRule;
         private bool _emitBuiltInIncludes;
         private readonly List<ItemMetadataValue<IncludeContext>> _metadata = new List<ItemMetadataValue<IncludeContext>>();
 
@@ -84,12 +81,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
             bool transformMappings = true,
             Func<IncludeContext, bool> condition = null,
             bool emitBuiltInIncludes = true,
-            string[] patternsToExclude = null) : base(condition)
+            Func<string, bool> excludePatternsRule = null) : base(condition)
         {
             _itemName = itemName;
             _transformMappings = transformMappings;
             _emitBuiltInIncludes = emitBuiltInIncludes;
-            _patternsToExclude = patternsToExclude ?? Array.Empty<string>();
+            _excludePatternRule = excludePatternsRule ?? ((pattern) => false);
 
             _mappingsToTransfrom = (addItemTransform, targetPath) =>
             {

@@ -114,11 +114,22 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             "**/*.cs"
         };
 
+        private static bool IsPlainFileName(string fileName)
+        {
+            return !fileName.Contains('/') && !fileName.Contains('\\');
+        }
+
+        private bool CompileFilesExcludeRule(string pattern)
+        {
+            return _compilePatternsToExclude.Contains(pattern.Replace('\\', '/'))
+                || IsPlainFileName(pattern);
+        }
+
         private IncludeContextTransform CompileFilesTransform =>
             new IncludeContextTransform(
                 "Compile",
                 transformMappings: false,
-                patternsToExclude: _compilePatternsToExclude,
+                excludePatternsRule: CompileFilesExcludeRule,
                 condition: ic => ic != null,
                 emitBuiltInIncludes: false);
 
