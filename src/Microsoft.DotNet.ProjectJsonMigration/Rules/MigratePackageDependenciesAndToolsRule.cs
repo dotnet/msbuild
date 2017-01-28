@@ -53,10 +53,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             // Migrate Direct Deps first
             MigrateDependencies(
                 project,
-                migrationRuleInputs.OutputMSBuildProject,
+                migrationRuleInputs,
                 null, 
                 project.Dependencies,
-                migrationRuleInputs.ProjectXproj,
                 migrationSettings.SolutionFile,
                 itemGroup: noFrameworkPackageReferenceItemGroup);
             
@@ -72,10 +71,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
                 MigrateDependencies(
                     project,
-                    migrationRuleInputs.OutputMSBuildProject,
+                    migrationRuleInputs,
                     targetFramework.FrameworkName, 
                     targetFramework.Dependencies,
-                    migrationRuleInputs.ProjectXproj,
                     migrationSettings.SolutionFile);
             }
 
@@ -147,21 +145,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                             mergeExisting: false);
                     }
                     break;
-                case ProjectType.Library:
-                    if (!project.HasDependency(
-                        (dep) => dep.Name.Trim().ToLower() == SupportedPackageVersions.NetStandardPackageName.ToLower()))
-                    {
-                        _transformApplicator.Execute(
-                            PackageDependencyInfoTransform().Transform(
-                                new PackageDependencyInfo
-                                {
-                                    Name = SupportedPackageVersions.NetStandardPackageName,
-                                    Version = SupportedPackageVersions.NetStandardPackageVersion
-                                }),
-                            noFrameworkPackageReferenceItemGroup,
-                            mergeExisting: true);
-                    }
-                    break;
                 default:
                     break;
             }
@@ -221,20 +204,23 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
         private void MigrateDependencies(
             Project project,
-            ProjectRootElement output,
+            MigrationRuleInputs migrationRuleInputs,
             NuGetFramework framework,
-            IEnumerable<ProjectLibraryDependency> dependencies, 
-            ProjectRootElement xproj,
+            IEnumerable<ProjectLibraryDependency> dependencies,
             SlnFile solutionFile,
             ProjectItemGroupElement itemGroup=null)
         {
-            var projectDependencies = new HashSet<string>(GetAllProjectReferenceNames(project, framework, xproj, solutionFile));
+            var projectDependencies = new HashSet<string>(GetAllProjectReferenceNames(
+                project,
+                framework,
+                migrationRuleInputs.ProjectXproj,
+                solutionFile));
             var packageDependencies = dependencies.Where(d => !projectDependencies.Contains(d.Name)).ToList();
 
             string condition = framework?.GetMSBuildCondition() ?? "";
             itemGroup = itemGroup 
-                ?? output.ItemGroups.FirstOrDefault(i => i.Condition == condition) 
-                ?? output.AddItemGroup();
+                ?? migrationRuleInputs.OutputMSBuildProject.ItemGroups.FirstOrDefault(i => i.Condition == condition)
+                ?? migrationRuleInputs.OutputMSBuildProject.AddItemGroup();
             itemGroup.Condition = condition;
 
             AutoInjectImplicitProjectJsonAssemblyReferences(framework, packageDependencies);
@@ -268,12 +254,36 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     }
                 }
 
-                _transformApplicator.Execute(
-                    transform.Transform(ToPackageDependencyInfo(
+                var packageDependencyInfo = ToPackageDependencyInfo(
                         packageDependency,
-                        _supportedPackageVersions.ProjectDependencyPackages)),
-                    itemGroup,
-                    mergeExisting: true);
+                        _supportedPackageVersions.ProjectDependencyPackages);
+
+                if (packageDependencyInfo != null && packageDependencyInfo.IsMetaPackage)
+                {
+                    var metaPackageTransform = RuntimeFrameworkVersionTransformation.Transform(packageDependencyInfo);
+                    if(metaPackageTransform == null)
+                    {
+                        metaPackageTransform =
+                            NetStandardImplicitPackageVersionTransformation.Transform(packageDependencyInfo);
+                    }
+
+                    if (migrationRuleInputs.IsMultiTFM)
+                    {
+                        metaPackageTransform.Condition = condition;
+                    }
+
+                    _transformApplicator.Execute(
+                        metaPackageTransform,
+                        migrationRuleInputs.CommonPropertyGroup,
+                        mergeExisting: true);
+                }
+                else
+                {
+                    _transformApplicator.Execute(
+                        transform.Transform(packageDependencyInfo),
+                        itemGroup,
+                        mergeExisting: true);
+                }
             }
         }
 
@@ -432,5 +442,17 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 "PackageTargetFallback",
                 t => $"$(PackageTargetFallback);{string.Join(";", t.Imports)}",
                 t => t.Imports.OrEmptyIfNull().Any());
+
+        private AddPropertyTransform<PackageDependencyInfo> RuntimeFrameworkVersionTransformation =>
+            new AddPropertyTransform<PackageDependencyInfo>(
+                "RuntimeFrameworkVersion",
+                p => p.Version,
+                p => p.Name.Equals("Microsoft.NETCore.App", StringComparison.OrdinalIgnoreCase));
+
+        private AddPropertyTransform<PackageDependencyInfo> NetStandardImplicitPackageVersionTransformation =>
+            new AddPropertyTransform<PackageDependencyInfo>(
+                "NetStandardImplicitPackageVersion",
+                p => p.Version,
+                p => p.Name.Equals("NETStandard.Library", StringComparison.OrdinalIgnoreCase));
     }
 }
