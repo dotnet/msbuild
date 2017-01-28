@@ -18,6 +18,11 @@
       <Version>1.0.0-*</Version>
     </DotNetCliToolReference>
   </ItemGroup>
+  <!--The below package ref is added as a workaround to issue : https://github.com/NuGet/Home/issues/4416
+      This should be removed when the issue is fixed-->
+  <ItemGroup>
+    <PackageReference Include="NewtonSoft.Json" Version="9.0.1" />
+  </ItemGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DefineConstants>$(DefineConstants);RELEASE;TRACE</DefineConstants>
     <Optimize>true</Optimize>
