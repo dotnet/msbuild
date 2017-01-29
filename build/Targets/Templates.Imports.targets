@@ -43,7 +43,7 @@
       TemplatePath="@(ProjectTemplate)" 
       RewritePath="%(ProjectTemplate.TargetPath)"
       Token="$$buildversion$$" 
-      Replacement="$(ProjectSystemVsixVersion)"/>
+      Replacement="$(Version)"/>
 
   </Target>
 
