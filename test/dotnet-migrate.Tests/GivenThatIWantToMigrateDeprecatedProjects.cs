@@ -15,10 +15,10 @@ namespace Microsoft.DotNet.Migration.Tests
     public class GivenThatIWantToMigrateDeprecatedProjects : TestBase
     {
         [Fact]
-        public void WhenMigratingAProjectWithDeprecatedPackOptionsWarningsArePrinted()
+        public void WhenMigratingDeprecatedPackOptionsWarningsArePrinted()
         {
             var projectDirectory = TestAssets
-                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedPackOptions")
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJDeprecatedPack")
                 .CreateInstance()
                 .WithSourceFiles()
                 .Root;
@@ -52,10 +52,10 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Fact]
-        public void WhenMigratingAProjectWithDeprecatedPackOptionsItSucceeds()
+        public void MigrateDeprecatedPack()
         {
             var projectDirectory = TestAssets
-                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedPackOptions")
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJDeprecatedPack")
                 .CreateInstance()
                 .WithSourceFiles()
                 .Root;
@@ -82,17 +82,17 @@ namespace Microsoft.DotNet.Migration.Tests
 
             var outputDir = projectDirectory.GetDirectory("bin", "Debug");
             outputDir.Should().Exist()
-                .And.HaveFile("PJAppWithDeprecatedPackOptions.1.0.0.nupkg");
+                .And.HaveFile("PJDeprecatedPack.1.0.0.nupkg");
 
-            var outputPackage = outputDir.GetFile("PJAppWithDeprecatedPackOptions.1.0.0.nupkg");
+            var outputPackage = outputDir.GetFile("PJDeprecatedPack.1.0.0.nupkg");
 
             var zip = ZipFile.Open(outputPackage.FullName, ZipArchiveMode.Read);
-            zip.Entries.Should().Contain(e => e.FullName == "PJAppWithDeprecatedPackOptions.nuspec")
+            zip.Entries.Should().Contain(e => e.FullName == "PJDeprecatedPack.nuspec")
                 .And.Contain(e => e.FullName == "content/Content1.txt")
                 .And.Contain(e => e.FullName == "content/Content2.txt");
 
             var manifestReader = new StreamReader(
-                zip.Entries.First(e => e.FullName == "PJAppWithDeprecatedPackOptions.nuspec").Open());
+                zip.Entries.First(e => e.FullName == "PJDeprecatedPack.nuspec").Open());
 
             // NOTE: Commented out those that are not migrated.
             // https://microsoft.sharepoint.com/teams/netfx/corefx/_layouts/15/WopiFrame.aspx?sourcedoc=%7B0cfbc196-0645-4781-84c6-5dffabd76bee%7D&action=edit&wd=target%28Planning%2FMSBuild%20CLI%20integration%2Eone%7C41D470DD-CF44-4595-8E05-0CE238864B55%2FProject%2Ejson%20Migration%7CA553D979-EBC6-484B-A12E-036E0730864A%2F%29
@@ -120,10 +120,10 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Fact]
-        public void WhenMigratingAProjectWithDeprecatedCompilationOptionsWarningsArePrinted()
+        public void WhenMigratingDeprecatedCompilationOptionsWarningsArePrinted()
         {
             var projectDirectory = TestAssets
-                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedCompilationOptions")
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJDeprecatedCompilation")
                 .CreateInstance()
                 .WithSourceFiles()
                 .Root;
@@ -141,10 +141,10 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Fact]
-        public void WhenMigratingAProjectWithDeprecatedCompilationOptionsItSucceeds()
+        public void MigratingDeprecatedCompilation()
         {
             var projectDirectory = TestAssets
-                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedCompilationOptions")
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJDeprecatedCompilation")
                 .CreateInstance()
                 .WithSourceFiles()
                 .Root;
@@ -166,10 +166,10 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Fact]
-        public void WhenMigratingAProjectWithDeprecatedContentOptionsWarningsArePrinted()
+        public void WhenMigratingDeprecatedContentOptionsWarningsArePrinted()
         {
             var projectDirectory = TestAssets
-                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedContentOptions")
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJDeprecatedContent")
                 .CreateInstance()
                 .WithSourceFiles()
                 .Root;
@@ -191,10 +191,10 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Fact]
-        public void WhenMigratingAProjectWithDeprecatedContentOptionsItSucceeds()
+        public void MigratingDeprecatedContent()
         {
             var projectDirectory = TestAssets
-                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedContentOptions")
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJDeprecatedContent")
                 .CreateInstance()
                 .WithSourceFiles()
                 .Root
@@ -248,10 +248,10 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Fact]
-        public void WhenMigratingAProjectWithDeprecatedCompileOptionsWarningsArePrinted()
+        public void WhenMigratingDeprecatedCompileOptionsWarningsArePrinted()
         {
             var projectDirectory = TestAssets
-                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedCompileOptions")
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJDeprecatedCompile")
                 .CreateInstance()
                 .WithSourceFiles()
                 .Root;
@@ -269,10 +269,10 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Fact]
-        public void WhenMigratingAProjectWithDeprecatedCompileOptionsItSucceeds()
+        public void MigratingDeprecatedCompile()
         {
             var projectDirectory = TestAssets
-                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedCompileOptions")
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJDeprecatedCompile")
                 .CreateInstance()
                 .WithSourceFiles()
                 .Root
@@ -295,10 +295,10 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Fact]
-        public void WhenMigratingAProjectWithDeprecatedCompileBuiltInOptionsWarningsArePrinted()
+        public void WhenMigratingDeprecatedCompileBuiltInOptionsWarningsArePrinted()
         {
             var projectDirectory = TestAssets
-                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedCompileBuiltInOptions")
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJDeprecatedCompileBuiltIn")
                 .CreateInstance()
                 .WithSourceFiles()
                 .Root;
@@ -314,10 +314,10 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Fact]
-        public void WhenMigratingAProjectWithDeprecatedCompileBuiltInOptionsItSucceeds()
+        public void MigratingDeprecatedCompileBuiltIn()
         {
             var projectDirectory = TestAssets
-                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedCompileBuiltInOptions")
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJDeprecatedCompileBuiltIn")
                 .CreateInstance()
                 .WithSourceFiles()
                 .Root
@@ -341,10 +341,10 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Fact]
-        public void WhenMigratingAProjectWithDeprecatedCompileExcludeOptionsWarningsArePrinted()
+        public void WhenMigratingDeprecatedCompileExcludeOptionsWarningsArePrinted()
         {
             var projectDirectory = TestAssets
-                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedCompileExcludeOptions")
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJDeprecatedCompileExclude")
                 .CreateInstance()
                 .WithSourceFiles()
                 .Root;
@@ -360,10 +360,10 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Fact]
-        public void WhenMigratingAProjectWithDeprecatedCompileExcludeOptionsItSucceeds()
+        public void MigratingDeprecatedCompileExclude()
         {
             var projectDirectory = TestAssets
-                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedCompileExcludeOptions")
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJDeprecatedCompileExclude")
                 .CreateInstance()
                 .WithSourceFiles()
                 .Root;
@@ -378,18 +378,17 @@ namespace Microsoft.DotNet.Migration.Tests
                  .Execute("restore")
                  .Should().Pass();
 
-            // Issue: https://github.com/dotnet/cli/issues/5461
-            //new DotnetCommand()
-            //     .WithWorkingDirectory(projectDirectory)
-            //     .Execute("build -c Debug")
-            //     .Should().Pass();
+            new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .Execute("build -c Debug")
+                 .Should().Pass();
         }
 
         [Fact]
-        public void WhenMigratingAProjectWithDeprecatedResourceOptionsWarningsArePrinted()
+        public void WhenMigratingDeprecatedResourceOptionsWarningsArePrinted()
         {
             var projectDirectory = TestAssets
-                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedResourceOptions")
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJDeprecatedResource")
                 .CreateInstance()
                 .WithSourceFiles()
                 .Root
@@ -408,10 +407,10 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Fact]
-        public void WhenMigratingAProjectWithDeprecatedResourceOptionsItSucceeds()
+        public void MigratingDeprecatedResource()
         {
             var projectDirectory = TestAssets
-                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedResourceOptions")
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJDeprecatedResource")
                 .CreateInstance()
                 .WithSourceFiles()
                 .Root
@@ -440,10 +439,10 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Fact]
-        public void WhenMigratingAProjectWithDeprecatedResourceBuiltInOptionsWarningsArePrinted()
+        public void WhenMigratingDeprecatedResourceBuiltInOptionsWarningsArePrinted()
         {
             var projectDirectory = TestAssets
-                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedResourceBuiltInOptions")
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJDeprecatedResourceBuiltIn")
                 .CreateInstance()
                 .WithSourceFiles()
                 .Root
@@ -460,10 +459,10 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Fact]
-        public void WhenMigratingDeprecatedBuiltInResItSucceeds()
+        public void MigratingDeprecatedResourceBuiltIn()
         {
             var projectDirectory = TestAssets
-                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedResourceBuiltInOptions")
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJDeprecatedResourceBuiltIn")
                 .CreateInstance()
                 .WithSourceFiles()
                 .Root
@@ -493,10 +492,10 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Fact]
-        public void WhenMigratingAProjectWithDeprecatedResourceExcludeOptionsWarningsArePrinted()
+        public void WhenMigratingDeprecatedResourceExcludeOptionsWarningsArePrinted()
         {
             var projectDirectory = TestAssets
-                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedResourceExcludeOptions")
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJDeprecatedResourceExclude")
                 .CreateInstance()
                 .WithSourceFiles()
                 .Root;
@@ -512,10 +511,10 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [Fact]
-        public void WhenMigratingAProjectWithDeprecatedResourceExcludeOptionsItSucceeds()
+        public void MigratingDeprecatedResourceExclude()
         {
             var projectDirectory = TestAssets
-                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedResourceExcludeOptions")
+                .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJDeprecatedResourceExclude")
                 .CreateInstance()
                 .WithSourceFiles()
                 .Root;
@@ -530,17 +529,16 @@ namespace Microsoft.DotNet.Migration.Tests
                  .Execute("restore")
                  .Should().Pass();
 
-            // Issue: https://github.com/dotnet/cli/issues/5461
-            //new DotnetCommand()
-            //     .WithWorkingDirectory(projectDirectory)
-            //     .Execute("build -c Debug")
-            //     .Should().Pass();
+            new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .Execute("build -c Debug")
+                 .Should().Pass();
 
-            //var cmd = new DotnetCommand()
-            //     .WithWorkingDirectory(projectDirectory)
-            //     .ExecuteWithCapturedOutput("run -c Debug");
-            //cmd.Should().Pass();
-            //cmd.StdOut.Should().Contain("0 Resources Found:");
+            var cmd = new DotnetCommand()
+                 .WithWorkingDirectory(projectDirectory)
+                 .ExecuteWithCapturedOutput("run -c Debug");
+            cmd.Should().Pass();
+            cmd.StdOut.Should().Contain("0 Resources Found:");
         }
     }
 }

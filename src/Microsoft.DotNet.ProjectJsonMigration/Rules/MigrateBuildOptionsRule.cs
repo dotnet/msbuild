@@ -133,8 +133,16 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 condition: ic => ic != null,
                 emitBuiltInIncludes: false);
 
+        private RemoveContextTransform RemoveCompileFilesTransform =>
+            new RemoveContextTransform(
+                "Compile",
+                condition: ic => ic != null);
+
         private IncludeContextTransform EmbedFilesTransform =>
             new IncludeContextTransform("EmbeddedResource", transformMappings: false, condition: ic => ic != null);
+
+        private RemoveContextTransform RemoveEmbedFilesTransform =>
+            new RemoveContextTransform("EmbeddedResource", condition: ic => ic != null);
 
         private IncludeContextTransform CopyToOutputFilesTransform =>
             new IncludeContextTransform("Content", transformMappings: true)
@@ -157,13 +165,21 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 projectContext => string.Empty,
                 projectContext => File.Exists(Path.Combine(projectContext.ProjectDirectory, "App.config")));
 
-        private Func<CommonCompilerOptions, string, ProjectType, IEnumerable<ProjectItemElement>>CompileFilesTransformExecute =>
+        private Func<CommonCompilerOptions, string, ProjectType, IEnumerable<ProjectItemElement>> CompileFilesTransformExecute =>
             (compilerOptions, projectDirectory, projectType) =>
                     CompileFilesTransform.Transform(compilerOptions.CompileInclude);
+
+        private Func<CommonCompilerOptions, string, ProjectType, IEnumerable<ProjectItemElement>> RemoveCompileFilesTransformExecute =>
+            (compilerOptions, projectDirectory, projectType) =>
+                    RemoveCompileFilesTransform.Transform(compilerOptions.CompileInclude);
 
         private Func<CommonCompilerOptions, string, ProjectType, IEnumerable<ProjectItemElement>> EmbedFilesTransformExecute =>
             (compilerOptions, projectDirectory, projectType) =>
                     EmbedFilesTransform.Transform(GetEmbedIncludeContext(compilerOptions));
+
+        private Func<CommonCompilerOptions, string, ProjectType, IEnumerable<ProjectItemElement>> RemoveEmbedFilesTransformExecute =>
+            (compilerOptions, projectDirectory, projectType) =>
+                    RemoveEmbedFilesTransform.Transform(GetEmbedIncludeContext(compilerOptions));
 
         private Func<CommonCompilerOptions, string, ProjectType, IEnumerable<ProjectItemElement>> CopyToOutputFilesTransformExecute =>
             (compilerOptions, projectDirectory, projectType) =>
@@ -183,6 +199,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         private readonly CommonCompilerOptions _configurationBuildOptions;
 
         private List<AddPropertyTransform<CommonCompilerOptions>> _propertyTransforms;
+        private List<Func<CommonCompilerOptions, string, ProjectType, IEnumerable<ProjectItemElement>>> _removeContextTransformExecutes;
         private List<Func<CommonCompilerOptions, string, ProjectType, IEnumerable<ProjectItemElement>>> _includeContextTransformExecutes;
 
         private readonly ITransformApplicator _transformApplicator;
@@ -228,6 +245,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
             _propertyTransforms.AddRange(EmitEntryPointTransforms);
             _propertyTransforms.AddRange(KeyFileTransforms);
+
+            _removeContextTransformExecutes =
+                new List<Func<CommonCompilerOptions, string, ProjectType, IEnumerable<ProjectItemElement>>>()
+                {
+                    RemoveCompileFilesTransformExecute,
+                    RemoveEmbedFilesTransformExecute
+                };
 
             _includeContextTransformExecutes =
                 new List<Func<CommonCompilerOptions, string, ProjectType, IEnumerable<ProjectItemElement>>>()
@@ -311,6 +335,19 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 }
             }
 
+            foreach (var removeContextTransformExecutes in _removeContextTransformExecutes)
+            {
+                var nonConfigurationOutput =
+                    removeContextTransformExecutes(compilerOptions, projectDirectory, projectType);
+                var configurationOutput =
+                    removeContextTransformExecutes(configurationCompilerOptions, projectDirectory, projectType);
+
+                if (configurationOutput != null)
+                {
+                    transformApplicator.Execute(configurationOutput, itemGroup, mergeExisting: true);
+                }
+            }
+
             foreach (var includeContextTransformExecute in _includeContextTransformExecutes)
             {
                 var nonConfigurationOutput =
@@ -318,29 +355,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 var configurationOutput =
                     includeContextTransformExecute(configurationCompilerOptions, projectDirectory, projectType);
 
-
                 if (configurationOutput != null)
                 {
                     transformApplicator.Execute(configurationOutput, itemGroup, mergeExisting: true);
-                }
-            }
-        }
-
-        private void RemoveCommonIncludes(IEnumerable<ProjectItemElement> itemsToRemoveFrom,
-            IEnumerable<ProjectItemElement> otherItems)
-        {
-            foreach (var item1 in itemsToRemoveFrom)
-            {
-                if (item1 == null)
-                {
-                    continue;
-                }
-                foreach (
-                    var item2 in
-                    otherItems.Where(
-                        i => i != null && string.Equals(i.ItemType, item1.ItemType, StringComparison.Ordinal)))
-                {
-                    item1.Include = string.Join(";", item1.Includes().Except(item2.Includes()));
                 }
             }
         }
@@ -367,6 +384,19 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             foreach (var transform in _propertyTransforms)
             {
                 transformApplicator.Execute(transform.Transform(compilerOptions), propertyGroup, mergeExisting: true);
+            }
+
+            foreach (var removeContextTransformExecutes in _removeContextTransformExecutes)
+            {
+                var transform = removeContextTransformExecutes(compilerOptions, projectDirectory, projectType);
+
+                if (transform != null)
+                {
+                    transformApplicator.Execute(
+                        transform,
+                        itemGroup,
+                        mergeExisting: true);
+                }
             }
 
             foreach (var includeContextTransformExecute in _includeContextTransformExecutes)

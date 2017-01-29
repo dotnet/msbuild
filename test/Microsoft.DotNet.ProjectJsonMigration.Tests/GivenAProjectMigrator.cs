@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         public void ItHasWarningWhenMigratingADeprecatedProjectJson()
         {
             var testProjectDirectory = TestAssets
-               .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedCompileOptions")
+               .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJDeprecatedCompile")
                .CreateInstance()
                .WithSourceFiles()
                .Root
@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         public void ItHasErrorWhenMigratingADeprecatedNamedResourceOptionProjectJson()
         {
             var testProjectDirectory = TestAssets
-               .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJAppWithDeprecatedNamedResourceOption")
+               .GetProjectJson(TestAssetKinds.NonRestoredTestProjects, "PJDeprecatedNamedResource")
                .CreateInstance()
                .WithSourceFiles()
                .Root
