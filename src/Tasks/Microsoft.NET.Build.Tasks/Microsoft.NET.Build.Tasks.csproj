@@ -40,6 +40,8 @@
     <Compile Include="LockFileLookup.cs" />
     <Compile Include="FrameworkReferenceResolver.cs" />
     <Compile Include="BuildErrorException.cs" />
+    <Compile Include="CollectSDKReferencesDesignTime.cs" />
+    <Compile Include="CollectResolvedSDKReferencesDesignTime.cs" />
     <Compile Include="ReferenceInfo.cs" />
     <Compile Include="Resources\Strings.Designer.cs">
       <DesignTime>True</DesignTime>
