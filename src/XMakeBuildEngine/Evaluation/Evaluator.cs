@@ -812,6 +812,8 @@ namespace Microsoft.Build.Evaluation
             DataCollection.CommentMarkProfile(8818, endPass2);
 #endif
             LazyItemEvaluator<P, I, M, D> lazyEvaluator = null;
+
+            // comment next line to turn off lazy Evaluation
             lazyEvaluator = new LazyItemEvaluator<P, I, M, D>(_data, _itemFactory, _buildEventContext, _loggingService);
 
             // Pass3: evaluate project items
@@ -1700,6 +1702,7 @@ namespace Microsoft.Build.Evaluation
                 return;
             }
 
+            // legacy, dead code beyond this point. Runs only if the lazy evaluator is null. Also, the interpretation of Remove is not implemented
             if (!string.IsNullOrEmpty(itemElement.Include))
             {
                 EvaluateItemElementInclude(itemGroupConditionResult, itemConditionResult, itemElement);
@@ -1707,6 +1710,10 @@ namespace Microsoft.Build.Evaluation
             else if (!string.IsNullOrEmpty(itemElement.Update))
             {
                 EvaluateItemElementUpdate(itemElement);
+            }
+            else
+            {
+                ErrorUtilities.ThrowInternalError("Unexpected item operation");
             }
         }
 

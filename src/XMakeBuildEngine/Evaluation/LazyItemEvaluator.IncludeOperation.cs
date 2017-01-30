@@ -18,8 +18,6 @@ namespace Microsoft.Build.Evaluation
             readonly int _elementOrder;
             
             readonly string _rootDirectory;
-            
-            readonly bool _conditionResult;
 
             readonly ImmutableList<string> _excludes;
 
@@ -30,8 +28,6 @@ namespace Microsoft.Build.Evaluation
             {
                 _elementOrder = builder.ElementOrder;
                 _rootDirectory = builder.RootDirectory;
-                
-                _conditionResult = builder.ConditionResult;
 
                 _excludes = builder.Excludes.ToImmutable();
                 _metadata = builder.Metadata.ToImmutable();
@@ -164,12 +160,10 @@ namespace Microsoft.Build.Evaluation
         {
             public int ElementOrder { get; set; }
             public string RootDirectory { get; set; }
-            
-            public bool ConditionResult { get; set; }
-            
+
             public ImmutableList<string>.Builder Excludes { get; set; } = ImmutableList.CreateBuilder<string>();
 
-            public IncludeOperationBuilder(ProjectItemElement itemElement) : base(itemElement)
+            public IncludeOperationBuilder(ProjectItemElement itemElement, bool conditionResult) : base(itemElement, conditionResult)
             {
             }
         }
