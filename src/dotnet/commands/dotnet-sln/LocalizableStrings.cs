@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.Tools.Sln
         
         public const string AddAppFullName = ".NET Add project(s) to a solution file Command";
 
-        public const string AddSubcommandHelpText = "Add one or more specified project(s) to the solution.";
+        public const string AddSubcommandHelpText = "Add one or more specified projects to the solution.";
 
         public const string RemoveAppFullName = ".NET Remove project(s) from a solution file Command";
 

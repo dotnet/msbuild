@@ -9,6 +9,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.Sln.Add.Tests
 {
@@ -25,8 +26,14 @@ Options:
   -h|--help  Show help information
 
 Additional Arguments:
- Add a specified project(s) to the solution.
+ Add one or more specified projects to the solution.
 ";
+        private ITestOutputHelper _output;
+
+        public GivenDotnetSlnAdd(ITestOutputHelper output)
+        {
+            _output = output;
+        }
 
         private const string ExpectedSlnFileAfterAddingLibProj = @"
 Microsoft Visual Studio Solution File, Format Version 12.00
@@ -269,6 +276,12 @@ EndGlobal
                 .ExecuteWithCapturedOutput(@"sln App.sln add");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be("You must specify at least one project to add.");
+
+            _output.WriteLine("[STD OUT]");
+            _output.WriteLine(cmd.StdOut);
+            _output.WriteLine("[HelpText]");
+            _output.WriteLine(HelpText);
+
             cmd.StdOut.Should().BeVisuallyEquivalentTo(HelpText);
         }
 
