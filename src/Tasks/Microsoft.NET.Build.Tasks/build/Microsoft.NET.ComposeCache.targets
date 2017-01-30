@@ -39,7 +39,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <PropertyGroup>
       <PreserveCacheLayout Condition="'$(PreserveCacheLayout)' == ''">true</PreserveCacheLayout>
-      <SkipCrossgen Condition="'$(RuntimeIdentifier)' == ''">true</SkipCrossgen>
+      <SkipOptimization Condition="'$(RuntimeIdentifier)' == ''">true</SkipOptimization>
       <_TFM Condition="'$(_TFM)' == ''">$(TargetFramework)</_TFM>
       <FX_Version Condition="'$(FX_Version)' == ''">$(_ShortFrameworkVersion)</FX_Version>
       <PathSeparator>$([System.IO.Path]::PathSeparator)</PathSeparator>
@@ -54,18 +54,16 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PropertyGroup>
       <DefaultComposeDir>$(HOME)</DefaultComposeDir>
       <DefaultComposeDir Condition="$(OS.ToUpper().Contains('WINDOWS'))">$(USERPROFILE)</DefaultComposeDir>
-      <DefaultComposeDir>$([System.IO.Path]::Combine($(DefaultComposeDir), '.dotnet', 'packages'))</DefaultComposeDir>
+      <DefaultComposeDir>$([System.IO.Path]::Combine($(DefaultComposeDir), '.dotnet', $(PlatformTarget), 'packages'))</DefaultComposeDir>
+      <ComposeDir Condition="'$(ComposeDir)' != '' and '$(DoNotDecorateComposeDir)' == ''">$([System.IO.Path]::Combine($(ComposeDir), $(PlatformTarget)))</ComposeDir>
       <ComposeDir Condition="'$(ComposeDir)' == ''">$(DefaultComposeDir)</ComposeDir>
-      <ComposeDir Condition="'$(DoNotDecorateComposeDir)' == ''">$(ComposeDir)$(PlatformTarget)\$(_TFM)\</ComposeDir>
+      <ComposeDir Condition="'$(DoNotDecorateComposeDir)' == ''">$([System.IO.Path]::Combine($(ComposeDir), $(_TFM)))</ComposeDir>
       <PublishDir>$([System.IO.Path]::GetFullPath($(ComposeDir)))</PublishDir>
       <_CrossProjFileDir>$([System.IO.Path]::Combine($(MSBuildProjectExtensionsPath),"Optimize"))</_CrossProjFileDir>
       <!-- Ensure any PublishDir has a trailing slash, so it can be concatenated -->
       <PublishDir Condition="!HasTrailingSlash('$(PublishDir)')">$(PublishDir)\</PublishDir>
     </PropertyGroup>
 
-    <RemoveDir
-        Condition="Exists($(PublishDir))"
-        Directories="$(PublishDir)" />
 
     <RemoveDir
         Condition="Exists($(_CrossProjFileDir))"
@@ -189,7 +187,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <Target Name="_SplitResolvedFiles"
-           Condition="$(SkipCrossgen) !='true' "
+           Condition="$(SkipOptimization) !='true' "
            DependsOnTargets="_GetResolvedFilesToCache">
     <ItemGroup>
       <_ManagedResolvedFileToPublishCandidates Include="@(ResolvedFileToPublish)"
@@ -200,7 +198,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
 
     <PropertyGroup>
-      <SkipCrossgen Condition="'@(_ManagedResolvedFileToPublishCandidates)'==''">true</SkipCrossgen>
+      <SkipOptimization Condition="'@(_ManagedResolvedFileToPublishCandidates)'==''">true</SkipOptimization>
     </PropertyGroup>
     
   </Target>
@@ -213,7 +211,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <Target Name="_GetResolvedFilesToCache"
-           Condition="$(SkipCrossgen) == 'true' ">
+           Condition="$(SkipOptimization) == 'true' ">
     <ItemGroup>
             <_UnOptimizedResolvedFileToPublish Include="@(ResolvedFileToPublish)" />
     </ItemGroup>
@@ -256,7 +254,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                             _GenerateCrossgenProj;
                             _SetupCrossgenStage;
                             _RestoreCrossgen"
-          Condition="$(SkipCrossgen) != 'true' ">
+          Condition="$(SkipOptimization) != 'true' ">
     <!-- Get the coreclr path -->
     <ItemGroup>
       <_CoreclrResolvedPath Include="@(CrossgenResolvedAssembliesToPublish)"
