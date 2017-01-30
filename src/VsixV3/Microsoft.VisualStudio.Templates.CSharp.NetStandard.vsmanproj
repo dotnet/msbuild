@@ -16,7 +16,10 @@
   <Import Project="$(NuGet_Packages)\MicroBuild.Core\$(MicroBuildVersion)\build\MicroBuild.Core.targets" />
 
   <Target Name="BeforeBuild">
-    <MSBuild Projects="Microsoft.VisualStudio.Templates.CSharp.NetStandard.swixproj" Targets="Build" />
+    <ItemGroup>
+      <TemplatesVsixFilesToCopy Include="$(OutDir)\Microsoft.VisualStudio.Templates.CSharp.NetStandard.json;$(OutDir)\Microsoft.VisualStudio.ProjectSystem.CSharp.NetStandard.Templates.vsix" />
+    </ItemGroup>
+    <Copy SourceFiles="@(TemplatesVsixFilesToCopy)" DestinationFolder="$(OutputPath)" />
   </Target>
 
   <ItemGroup>
