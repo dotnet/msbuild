@@ -124,7 +124,7 @@ namespace Microsoft.DotNet.Tools.Run
                     var project = "--project";
 
                     throw new InvalidOperationException(
-                        $"Couldn\'t find a project to run. Ensure a project exists in  {directory}, or pass the path to the project using {project}")
+                        $"Couldn't find a project to run. Ensure a project exists in  {directory}, or pass the path to the project using {project}")
                             .DisplayAsError();
                 }
                 else if (projectFiles.Length > 1)
