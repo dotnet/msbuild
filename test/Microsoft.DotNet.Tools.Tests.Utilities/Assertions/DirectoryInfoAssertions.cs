@@ -156,6 +156,25 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return new AndConstraint<DirectoryInfoAssertions>(this);
         }
 
+        public AndConstraint<DirectoryInfoAssertions> NotHaveDirectory(string unexpectedDir)
+        {
+            var dir = _dirInfo.EnumerateDirectories(unexpectedDir, SearchOption.TopDirectoryOnly).SingleOrDefault();
+            Execute.Assertion.ForCondition(dir == null)
+                .FailWith("Directory {0} should not be found in directory {1}.", unexpectedDir, _dirInfo.FullName);
+
+            return new AndConstraint<DirectoryInfoAssertions>(new DirectoryInfoAssertions(dir));
+        }
+
+        public AndConstraint<DirectoryInfoAssertions> NotHaveDirectories(IEnumerable<string> unexpectedDirs)
+        {
+            foreach (var unexpectedDir in unexpectedDirs)
+            {
+                NotHaveDirectory(unexpectedDir);
+            }
+
+            return new AndConstraint<DirectoryInfoAssertions>(this);
+        }
+
         public AndConstraint<DirectoryInfoAssertions> OnlyHaveFiles(IEnumerable<string> expectedFiles)
         {
             var actualFiles = _dirInfo.EnumerateFiles("*", SearchOption.TopDirectoryOnly).Select(f => f.Name);

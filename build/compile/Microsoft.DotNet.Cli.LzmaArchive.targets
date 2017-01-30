@@ -62,8 +62,7 @@
         <FilesToClean Include="$(NuGetPackagesArchiveProject)/**/*" />
         <FilesToClean Include="$(NuGetPackagesArchiveFolder)/**/*" />
 
-        <NuGetPackagesArchiveDirectory Include="$(NuGetPackagesArchiveProject)/Web" />
-        <NuGetPackagesArchiveDirectory Include="$(NuGetPackagesArchiveProject)/Web1.1" />
+        <NuGetPackagesArchiveDirectory Include="$(NuGetPackagesArchiveProject)/Console" />
         <NuGetPackagesArchiveDirectory Include="$(NuGetPackagesArchiveFolder)" />
       </ItemGroup>
 
@@ -72,22 +71,13 @@
       <MakeDir Directories="@(NuGetPackagesArchiveDirectory)"/>
 
       <DotNetNew ToolPath="$(Stage2Directory)"
-                 TemplateType="Web"
-                 WorkingDirectory="$(NuGetPackagesArchiveProject)/Web" />
+                 TemplateType="Console"
+                 WorkingDirectory="$(NuGetPackagesArchiveProject)/Console" />
 
       <DotNetRestore ToolPath="$(Stage2Directory)"
                      Packages="$(NuGetPackagesArchiveFolder)"
                      SkipInvalidConfigurations="True"
-                     WorkingDirectory="$(NuGetPackagesArchiveProject)/Web" />
-
-      <DotNetNew ToolPath="$(Stage2Directory)"
-                 TemplateType="Web1.1"
-                 WorkingDirectory="$(NuGetPackagesArchiveProject)/Web1.1" />
-
-      <DotNetRestore ToolPath="$(Stage2Directory)"
-                     Packages="$(NuGetPackagesArchiveFolder)"
-                     SkipInvalidConfigurations="True"
-                     WorkingDirectory="$(NuGetPackagesArchiveProject)/Web1.1" />
+                     WorkingDirectory="$(NuGetPackagesArchiveProject)/Console" />
 
       <Delete Files="$(IntermediateArchive);$(IntermediateArchive).zip" />
 

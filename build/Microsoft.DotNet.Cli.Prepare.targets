@@ -62,7 +62,8 @@
       <Output TaskParameter="VersionBadgeMoniker" PropertyName="VersionBadgeMoniker" />
     </GenerateBuildVersionInfo>
 
-    <GenerateNuGetPackagesArchiveVersion RepoRoot="$(RepoRoot)">
+    <GenerateNuGetPackagesArchiveVersion RepoRoot="$(RepoRoot)"
+                                         SharedFrameworkVersion="$(CLI_SharedFrameworkVersion)">
       <Output TaskParameter="Version" PropertyName="NuGetPackagesArchiveVersion"/>
     </GenerateNuGetPackagesArchiveVersion>
 
