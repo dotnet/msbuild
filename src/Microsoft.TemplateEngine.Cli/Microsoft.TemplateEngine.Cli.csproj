@@ -1,17 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\Version.props" />
+
   <PropertyGroup>
     <TargetFrameworks>netcoreapp1.1</TargetFrameworks>
     <Description>Template creation for the dotnet CLI</Description>
   </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.TemplateEngine.Edge\Microsoft.TemplateEngine.Edge.csproj" />
     <ProjectReference Include="..\Microsoft.TemplateEngine.Abstractions\Microsoft.TemplateEngine.Abstractions.csproj" />
     <ProjectReference Include="..\Microsoft.TemplateEngine.Utils\Microsoft.TemplateEngine.Utils.csproj" />
   </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
   </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp1.1'">
     <PackageReference Update="Microsoft.NETCore.App" Version="1.1.0" />
     <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="1.0.0-rc3-004530" />
