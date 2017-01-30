@@ -618,8 +618,7 @@ namespace Microsoft.Build.Utilities
             if (s_FileTrackerFilename.Equals(filename, StringComparison.OrdinalIgnoreCase))
             {
                 string progfilesPath = Path.Combine(FrameworkLocationHelper.GenerateProgramFiles32(),
-                    "Microsoft Visual Studio", "Shared", "Common", "MSBuild", MSBuildConstants.CurrentProductVersion,
-                    "FileTracker", s_FileTrackerFilename);
+                    "MSBuild", MSBuildConstants.CurrentProductVersion, "FileTracker", s_FileTrackerFilename);
 
                 if (File.Exists(progfilesPath))
                 {
