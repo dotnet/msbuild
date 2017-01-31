@@ -134,6 +134,9 @@
     <Copy SourceFiles="@(Net46OutputAssembly)"
       DestinationFolder="$(PackagesLayoutToolsNet46Dir)" />
 
+    <Copy SourceFiles="$(NuGet_Packages)\newtonsoft.json\6.0.4\lib\net45\NewtonSoft.Json.dll"
+          DestinationFolder="$(PackagesLayoutToolsNet46Dir)NewtonSoft.Json.6.0.4"/>
+
     <Copy SourceFiles="%(NetCoreAppCopyLocalAssembly.FullFilePath)"
           DestinationFolder="$(PackagesLayoutToolsNetCoreAppDir)" />
 

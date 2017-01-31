@@ -17,6 +17,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net46'">
     <OutDir>$(OutDir)net46\</OutDir>
+    <DefineConstants>$(DefineConstants);NET46</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Sdk">
@@ -37,10 +38,6 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net46'">
     <Reference Include="System" />
-
-    <!-- Downgrade NewtonSoft.Json reference to the version NuGet uses for .NET Framework,
-         even though Microsoft.Extensions.DependencyModel depends on version 9.0.1 -->
-    <PackageReference Include="NewtonSoft.Json" Version="$(NewtonsoftJsonOnNetFrameworkVersion)" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CheckForDuplicateItems.cs" />
