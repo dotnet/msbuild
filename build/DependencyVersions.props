@@ -17,6 +17,7 @@
     <FluentAssertionsVersion>4.0.0</FluentAssertionsVersion>
     <FluentAssertionsJsonVersion>4.12.0</FluentAssertionsJsonVersion>
     <NewtonsoftJsonVersion>9.0.1</NewtonsoftJsonVersion>
+    <NewtonsoftJsonOnNetFrameworkVersion>6.0.4</NewtonsoftJsonOnNetFrameworkVersion>
     <DotNetCliUtilsVersion>1.0.0-preview2-003121</DotNetCliUtilsVersion>
   </PropertyGroup>
   

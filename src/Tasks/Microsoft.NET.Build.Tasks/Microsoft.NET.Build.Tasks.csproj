@@ -10,9 +10,14 @@
     <RootNamespace>Microsoft.NET.Build.Tasks</RootNamespace>
     <AssemblyName>Microsoft.NET.Build.Tasks</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
-    <TargetFramework>netstandard1.3</TargetFramework>
+    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netstandard1.3</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">netstandard1.3;net46</TargetFrameworks>
     <GenerateDependencyFile>false</GenerateDependencyFile>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net46'">
+    <OutDir>$(OutDir)net46\</OutDir>
+    <DefineConstants>$(DefineConstants);NET46</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Sdk">
@@ -30,6 +35,9 @@
     <PackageReference Include="Microsoft.Build.Utilities.Core">
       <Version>$(MsBuildPackagesVersion)</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net46'">
+    <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CheckForDuplicateItems.cs" />
@@ -72,6 +80,16 @@
     <Compile Include="RuntimeConfig.cs" />
     <Compile Include="RuntimeConfigFramework.cs" />
     <Compile Include="RuntimeOptions.cs" />
+    <Compile Include="DependencyContextBuilder.cs" />
+    <Compile Include="GenerateDepsFile.cs" />
+    <Compile Include="GenerateRuntimeConfigurationFiles.cs" />
+    <Compile Include="LockFileCache.cs" />
+    <Compile Include="FileGroup.cs" />
+    <Compile Include="MetadataKeys.cs" />
+    <Compile Include="ResolvePackageDependencies.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' != 'net46'">
     <None Include="buildCrossTargeting\Microsoft.NET.Sdk.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -138,14 +156,6 @@
     <None Include="sdk\Sdk.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <Compile Include="DependencyContextBuilder.cs" />
-    <Compile Include="GenerateDepsFile.cs" />
-    <Compile Include="GenerateRuntimeConfigurationFiles.cs" />
-    <Compile Include="LockFileCache.cs" />
-    <Compile Include="FileGroup.cs" />
-    <Compile Include="MetadataKeys.cs" />
-    <Compile Include="ResolvePackageDependencies.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Strings.resx">
