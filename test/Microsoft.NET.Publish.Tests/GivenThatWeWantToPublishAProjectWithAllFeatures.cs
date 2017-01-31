@@ -6,10 +6,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
+using FluentAssertions.Json;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
+using Newtonsoft.Json.Linq;
 using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 using System.Xml.Linq;
@@ -18,7 +20,7 @@ namespace Microsoft.NET.Publish.Tests
 {
     public class GivenThatWeWantToPublishAProjectWithAllFeatures : SdkTest
     {
-        //[Theory]
+        [Theory]
         [MemberData("PublishData")]
         public void It_publishes_the_project_correctly(string targetFramework, string [] expectedPublishFiles)
         {
@@ -69,6 +71,33 @@ namespace Microsoft.NET.Publish.Tests
                 VerifyDependency(dependencyContext, "System.Spatial", "lib/portable-net45+wp8+win8+wpa/",
                     "de", "es", "fr", "it", "ja", "ko", "ru", "zh-Hans", "zh-Hant");
             }
+
+            var runtimeConfigJsonContents = File.ReadAllText(Path.Combine(publishDirectory.FullName, "TestApp.runtimeconfig.json"));
+            var runtimeConfigJsonObject = JObject.Parse(runtimeConfigJsonContents);
+
+            var baselineConfigJsonObject = JObject.Parse(@"{
+    ""runtimeOptions"": {
+        ""configProperties"": {
+            ""System.GC.Concurrent"": false,
+            ""System.GC.Server"": true,
+            ""System.GC.RetainVM"": false,
+            ""System.Threading.ThreadPool.MinThreads"": 2,
+            ""System.Threading.ThreadPool.MaxThreads"": 9,
+            ""extraProperty"": true
+        },
+        ""framework"": {
+            ""name"": ""Microsoft.NETCore.App"",
+            ""version"": ""set below""
+        },
+        ""applyPatches"": true
+    }
+}");
+            baselineConfigJsonObject["runtimeOptions"]["framework"]["version"] = 
+                targetFramework == "netcoreapp1.0" ? "1.0.0" : "1.1.0";
+
+            runtimeConfigJsonObject
+                .Should()
+                .BeEquivalentTo(baselineConfigJsonObject);
         }
 
         private static void VerifyDependency(DependencyContext dependencyContext, string name, string path, params string[] locales)

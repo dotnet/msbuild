@@ -533,7 +533,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                                        RuntimeIdentifier="$(RuntimeIdentifier)"
                                        PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                                        RuntimeFrameworkVersion="$(RuntimeFrameworkVersion)"
-                                       UserRuntimeConfig="$(UserRuntimeConfig)" />
+                                       UserRuntimeConfig="$(UserRuntimeConfig)"
+                                       HostConfigurationOptions="@(RuntimeHostConfigurationOption)" />
 
   </Target>
 

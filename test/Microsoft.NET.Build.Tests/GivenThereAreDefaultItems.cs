@@ -14,6 +14,7 @@ using System.Text;
 using System.Xml.Linq;
 using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
+using Microsoft.NET.TestFramework.ProjectConstruction;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -161,6 +162,44 @@ namespace Microsoft.NET.Build.Tests
             {
                 "Helper.cs",
                 @"Code\Class1.cs",
+            }
+            .Select(item => item.Replace('\\', Path.DirectorySeparatorChar))
+            .ToArray();
+
+            compileItems.Should().BeEquivalentTo(expectedItems);
+        }
+
+        [Fact]
+        public void It_allows_files_in_the_obj_folder_to_be_explicitly_included()
+        {
+            Action<GetValuesCommand> setup = getValuesCommand =>
+            {
+                WriteFile(Path.Combine(getValuesCommand.ProjectRootPath, "Code", "Class1.cs"),
+                    "public class Class1 {}");
+                WriteFile(Path.Combine(getValuesCommand.ProjectRootPath, "obj", "Class2.cs"),
+                    "public class Class2 {}");
+                WriteFile(Path.Combine(getValuesCommand.ProjectRootPath, "obj", "Excluded.cs"),
+                    "!InvalidCSharp!");
+            };
+
+            Action<XDocument> projectChanges = project =>
+            {
+                var ns = project.Root.Name.Namespace;
+
+                XElement itemGroup = new XElement(ns + "ItemGroup");
+                project.Root.Add(itemGroup);
+                itemGroup.Add(new XElement(ns + "Compile", new XAttribute("Include", "obj\\Class2.cs")));
+            };
+
+            var compileItems = GivenThatWeWantToBuildALibrary.GetValuesFromTestLibrary(_testAssetsManager, "Compile", setup, projectChanges: projectChanges);
+
+            RemoveGeneratedCompileItems(compileItems);
+
+            var expectedItems = new[]
+            {
+                "Helper.cs",
+                @"Code\Class1.cs",
+                @"obj\Class2.cs"
             }
             .Select(item => item.Replace('\\', Path.DirectorySeparatorChar))
             .ToArray();
@@ -331,6 +370,13 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void Compile_items_can_be_explicitly_specified_while_default_EmbeddedResource_items_are_used()
         {
+            if (UsingFullFrameworkMSBuild)
+            {
+                //  Disable this test on full framework, as generating strong named satellite assemblies with AL.exe requires Admin permissions
+                //  See https://github.com/dotnet/sdk/issues/732
+                return;
+            }
+
             Action<XDocument> projectChanges = project =>
             {
                 var ns = project.Root.Name.Namespace;
@@ -352,6 +398,123 @@ namespace Microsoft.NET.Build.Tests
             GivenThatWeWantAllResourcesInSatellite.TestSatelliteResources(_testAssetsManager, projectChanges, setup, "ExplicitCompileDefaultEmbeddedResource");
         }
 
+        [Fact]
+        public void It_gives_an_error_message_if_duplicate_compile_items_are_included()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DuplicateCompileItems",
+                TargetFrameworks = "netstandard1.6",
+                IsSdkProject = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    project.Root.Add(itemGroup);
+                    itemGroup.Add(new XElement(ns + "Compile", new XAttribute("Include", @"**\*.cs")));
+                })
+                .Restore(testProject.Name);
+
+            var buildCommand = new BuildCommand(Stage0MSBuild, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            WriteFile(Path.Combine(buildCommand.ProjectRootPath, "Class1.cs"), "public class Class1 {}");
+
+            buildCommand
+                .CaptureStdOut()
+                .Execute()
+                .Should()
+                .Fail()
+                .And.HaveStdOutContaining("DuplicateCompileItems.cs")
+                .And.HaveStdOutContaining("Class1.cs")
+                .And.HaveStdOutContaining("EnableDefaultCompileItems");
+        }
+
+        [Fact]
+        public void It_gives_the_correct_error_if_duplicate_compile_items_are_included_and_default_items_are_disabled()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DuplicateCompileItems",
+                TargetFrameworks = "netstandard1.6",
+                IsSdkProject = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, "DuplicateCompileItemsWithDefaultItemsDisabled")
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+
+                    project.Root.Element(ns + "PropertyGroup").Add(
+                        new XElement(ns + "EnableDefaultCompileItems", "false"));
+
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    project.Root.Add(itemGroup);
+                    itemGroup.Add(new XElement(ns + "Compile", new XAttribute("Include", @"**\*.cs")));
+                    itemGroup.Add(new XElement(ns + "Compile", new XAttribute("Include", @"DuplicateCompileItems.cs")));
+                })
+                .Restore(testProject.Name);
+
+            var buildCommand = new BuildCommand(Stage0MSBuild, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            WriteFile(Path.Combine(buildCommand.ProjectRootPath, "Class1.cs"), "public class Class1 {}");
+
+            buildCommand
+                .CaptureStdOut()
+                .Execute()
+                .Should()
+                .Fail()
+                .And.HaveStdOutContaining("DuplicateCompileItems.cs")
+                //  Class1.cs wasn't included multiple times, so it shouldn't be mentioned
+                .And.NotHaveStdOutMatching("Class1.cs")
+                //  Default items weren't enabled, so the error message should come from the C# compiler and shouldn't include the information about default compile items
+                .And.HaveStdOutContaining("MSB3105")
+                .And.NotHaveStdOutMatching("EnableDefaultCompileItems");
+        }
+
+        [Fact]
+        public void Implicit_package_references_are_overridden_by_PackageReference_includes_in_the_project_file()
+        {
+            var testProject = new TestProject()
+            {
+                //  Underscore is in the project name so we can verify that the warning message output contained "PackageReference"
+                Name = "DeduplicatePackage_Reference",
+                TargetFrameworks = "netstandard1.6",
+                IsSdkProject = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, "DeduplicatePackage_Reference")
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+
+                    //  Set the implicit package reference version to something that doesn't exist to verify that the Include
+                    //  in the project file overrides the implicit one
+                    project.Root.Element(ns + "PropertyGroup").Add(
+                        new XElement(ns + "NetStandardImplicitPackageVersion", "0.1.0-does-not-exist"));
+
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    project.Root.Add(itemGroup);
+
+                    //  Use non-standard casing for the explicit package reference to verify that comparison is case-insensitive
+                    itemGroup.Add(new XElement(ns + "PackageReference",
+                        new XAttribute("Include", "netstandard.Library"), new XAttribute("Version", "1.6.1")));
+                })
+                .Restore(testProject.Name);
+
+            var buildCommand = new BuildCommand(Stage0MSBuild, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .CaptureStdOut()
+                .Execute()
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining("PackageReference")
+                .And.HaveStdOutContaining("'NETStandard.Library'");
+        }
+        
         void RemoveGeneratedCompileItems(List<string> compileItems)
         {
             //  Remove auto-generated compile items.

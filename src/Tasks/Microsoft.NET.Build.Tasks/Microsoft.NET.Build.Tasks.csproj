@@ -30,17 +30,18 @@
     <PackageReference Include="Microsoft.Build.Utilities.Core">
       <Version>$(MsBuildPackagesVersion)</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp">
-      <Version>$(RoslynVersion)</Version>
-    </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CheckForDuplicateItems.cs" />
+    <Compile Include="CheckForImplicitPackageReferenceOverrides.cs" />
     <Compile Include="DiagnosticMessageSeverity.cs" />
     <Compile Include="DiagnosticsHelper.cs" />
     <Compile Include="NETSdkError.cs" />
     <Compile Include="LockFileLookup.cs" />
     <Compile Include="FrameworkReferenceResolver.cs" />
     <Compile Include="BuildErrorException.cs" />
+    <Compile Include="CollectSDKReferencesDesignTime.cs" />
+    <Compile Include="CollectResolvedSDKReferencesDesignTime.cs" />
     <Compile Include="ReferenceInfo.cs" />
     <Compile Include="Resources\Strings.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -57,7 +58,6 @@
     <Compile Include="CompilationOptionsConverter.cs" />
     <Compile Include="NuGetUtils.cs" />
     <Compile Include="GetAssemblyVersion.cs" />
-    <Compile Include="GenerateSatelliteAssemblies.cs" />
     <Compile Include="ResourceAssemblyInfo.cs" />
     <Compile Include="SingleProjectInfo.cs" />
     <Compile Include="ProjectContext.cs" />

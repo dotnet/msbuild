@@ -28,8 +28,8 @@
     <PackageReference Include="Microsoft.DotNet.Cli.Utils">
       <Version>$(DotNetCliUtilsVersion)</Version>
     </PackageReference>
-    <PackageReference Include="FluentAssertions">
-      <Version>$(FluentAssertionsVersion)</Version>
+    <PackageReference Include="FluentAssertions.Json">
+      <Version>$(FluentAssertionsJsonVersion)</Version>
     </PackageReference>
     <PackageReference Include="xunit">
       <Version>$(xunitVersion)</Version>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="de" original="src/Tasks/Microsoft.NET.Build.Tasks/Resources/Strings.resx">
     <body>
@@ -181,6 +181,16 @@
       <trans-unit id="NU1012">
         <source>Dependency conflict. '{0}' expected '{1}' but received '{2}'</source>
         <target state="new">Abhängigkeitskonflikt. „{0}“ erwartete „{1}“, empfing jedoch „{2}“.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="DuplicateItemsError">
+        <source>Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. The duplicate items were: {3}</source>
+        <target state="new">Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. The duplicate items were: {3}</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="PackageReferenceOverrideWarning">
+        <source>A PackageReference for '{0}' was included in your project. This package is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</source>
+        <target state="new">A PackageReference for '{0}' was included in your project. This package is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</target>
         <note></note>
       </trans-unit>
     </body>

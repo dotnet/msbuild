@@ -118,7 +118,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                                        RuntimeIdentifier="$(RuntimeIdentifier)"
                                        PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                                        RuntimeFrameworkVersion="$(RuntimeFrameworkVersion)"
-                                       UserRuntimeConfig="$(UserRuntimeConfig)">
+                                       UserRuntimeConfig="$(UserRuntimeConfig)"
+                                       HostConfigurationOptions="@(RuntimeHostConfigurationOption)">
       
     </GenerateRuntimeConfigurationFiles>
     
@@ -131,6 +132,36 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   </Target>
 
+  <!--
+    ============================================================
+                                        DefaultRuntimeHostConfigurationOptions
+
+    Defaults @(RuntimeHostConfigurationOption) items based on MSBuild properties.
+    ============================================================
+    -->
+
+  <ItemGroup>
+    <RuntimeHostConfigurationOption Include="System.GC.Concurrent"
+                                    Condition="'$(ConcurrentGarbageCollection)' != ''"
+                                    Value="$(ConcurrentGarbageCollection)" />
+    
+    <RuntimeHostConfigurationOption Include="System.GC.Server"
+                                    Condition="'$(ServerGarbageCollection)' != ''"
+                                    Value="$(ServerGarbageCollection)" />
+    
+    <RuntimeHostConfigurationOption Include="System.GC.RetainVM"
+                                    Condition="'$(RetainVMGarbageCollection)' != ''"
+                                    Value="$(RetainVMGarbageCollection)" />
+    
+    <RuntimeHostConfigurationOption Include="System.Threading.ThreadPool.MinThreads"
+                                    Condition="'$(ThreadPoolMinThreads)' != ''"
+                                    Value="$(ThreadPoolMinThreads)" />
+    
+    <RuntimeHostConfigurationOption Include="System.Threading.ThreadPool.MaxThreads"
+                                    Condition="'$(ThreadPoolMaxThreads)' != ''"
+                                    Value="$(ThreadPoolMaxThreads)" />
+  </ItemGroup>
+  
   <!--
     ============================================================
                                         Run Information
@@ -211,25 +242,21 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="OutputFile" ItemName="FileWrites" />
     </WriteCodeFragment>
 
-    <GenerateSatelliteAssemblies EmbedResources="@(_SatelliteAssemblyResourceInputs)"
-                                 AssemblyInfoFile="$(_AssemblyInfoFile)"
-                                 OutputAssembly="$(_OutputAssembly)"
-                                 References="@(ReferencePath)"
-                                 KeyContainer="$(KeyContainerName)"
-                                 KeyFile="$(KeyOriginatorFile)"
-                                 PublicSign="$(PublicSign)"
-                                 DelaySign="$(DelaySign)">
+    <Csc Resources="@(_SatelliteAssemblyResourceInputs)"
+         Sources="$(_AssemblyInfoFile)"
+         OutputAssembly="$(_OutputAssembly)"
+         References="@(ReferencePath)"
+         KeyContainer="$(KeyContainerName)"
+         KeyFile="$(KeyOriginatorFile)"
+         PublicSign="$(PublicSign)"
+         DelaySign="$(DelaySign)"
+         Deterministic="$(Deterministic)"
+         TargetType="Library"
+         ToolExe="$(CscToolExe)"
+         ToolPath="$(CscToolPath)">
 
       <Output TaskParameter="OutputAssembly" ItemName="FileWrites"/>
-    </GenerateSatelliteAssemblies>
-  </Target>
-
-  <!-- TODO: Remove this target and put the property in a .props file once https://github.com/NuGet/Home/issues/4046 is fixed
-      The value may also change as a result of https://github.com/NuGet/Home/issues/4047 -->
-  <Target Name="OverrideProjectRestoreType" AfterTargets="_GetProjectRestoreType">
-    <PropertyGroup>
-      <_ProjectRestoreType>NETCore</_ProjectRestoreType>
-    </PropertyGroup>
+    </Csc>
   </Target>
 
   <!--

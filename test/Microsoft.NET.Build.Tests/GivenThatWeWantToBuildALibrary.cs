@@ -76,6 +76,12 @@ namespace Microsoft.NET.Build.Tests
                 return;
             }
 
+            //  Disable this test when using full Framework MSBuild, as the paths to the props and targets are different
+            if (UsingFullFrameworkMSBuild)
+            {
+                return;
+            }
+
             List<string> expectedAllProjects = new List<string>();
             string baseIntermediateDirectory = null;
 
@@ -520,6 +526,34 @@ namespace Microsoft.NET.Build.Tests
             var definedConstants = getValuesCommand.GetValues();
 
             definedConstants.Should().BeEquivalentTo(new[] { "DEBUG", "TRACE" }.Concat(expectedDefines).ToArray());
+        }
+
+        [Fact]
+        public void It_fails_gracefully_if_targetframework_is_empty()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("AppWithLibrary", "EmptyTargetFramework")
+                .WithSource()
+                .WithProjectChanges(project => 
+                {
+                    project.Root
+                        .Elements("PropertyGroup")
+                        .Elements("TargetFramework")
+                        .Single()
+                        .SetValue("");
+                })
+                .Restore(relativePath: "TestLibrary");
+
+            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
+            var buildCommand = new BuildCommand(Stage0MSBuild, libraryProjectDirectory);
+
+            buildCommand
+                .CaptureStdOut()
+                .Execute()
+                .Should()
+                .Fail()
+                .And.HaveStdOutContaining("TargetFramework=''") // new deliberate error
+                .And.NotHaveStdOutContaining(">="); // old error about comparing empty string to version
         }
     }
 }
