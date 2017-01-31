@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 compilerOptions => compilerOptions.PreserveCompilationContext != null && compilerOptions.PreserveCompilationContext.Value);
 
         private AddPropertyTransform<CommonCompilerOptions> WarningsAsErrorsTransform =>
-            new AddPropertyTransform<CommonCompilerOptions>("WarningsAsErrors",
+            new AddPropertyTransform<CommonCompilerOptions>("TreatWarningsAsErrors",
                 compilerOptions => compilerOptions.WarningsAsErrors.ToString().ToLower(),
                 compilerOptions => compilerOptions.WarningsAsErrors != null && compilerOptions.WarningsAsErrors.Value);
 

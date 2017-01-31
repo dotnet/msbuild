@@ -193,8 +193,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                     }
                 }");
 
-            mockProj.Properties.Count(p => p.Name == "WarningsAsErrors").Should().Be(1);
-            mockProj.Properties.First(p => p.Name == "WarningsAsErrors").Value.Should().Be("true");
+            mockProj.Properties.Count(p => p.Name == "TreatWarningsAsErrors").Should().Be(1);
+            mockProj.Properties.First(p => p.Name == "TreatWarningsAsErrors").Value.Should().Be("true");
 
             mockProj = RunBuildOptionsRuleOnPj(@"
                 {
@@ -203,7 +203,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                     }
                 }");
 
-            mockProj.Properties.Count(p => p.Name == "WarningsAsErrors").Should().Be(0);
+            mockProj.Properties.Count(p => p.Name == "TreatWarningsAsErrors").Should().Be(0);
         }
 
         [Fact]
