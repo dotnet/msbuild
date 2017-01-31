@@ -80,7 +80,7 @@ if ($FullMSBuild)
     $env:DOTNET_SDK_TEST_MSBUILD_PATH = join-path $env:VSInstallDir "MSBuild\15.0\bin\MSBuild.exe"
 }
 
-$commonBuildArgs = echo $RepoRoot\build\build.proj /t:$buildTarget /m /nologo /p:Configuration=$Configuration /p:Platform=$Platform /p:SignType=$signType /verbosity:$Verbosity
+$commonBuildArgs = echo $RepoRoot\build\build.proj /t:$buildTarget /m:1 /nologo /p:Configuration=$Configuration /p:Platform=$Platform /p:SignType=$signType /verbosity:$Verbosity
 
 # NET Core Build 
 $msbuildSummaryLog = Join-Path -path $logPath -childPath "sdk.log"
