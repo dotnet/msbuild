@@ -226,9 +226,19 @@ namespace Microsoft.TemplateEngine.Cli
             return instantiateResult.ResultCode;
         }
 
-        private void DisplayTemplateList()
+        private void DisplayTemplateList(bool showAll = false)
         {
-            IEnumerable<ITemplateInfo> results = _matchedTemplates.Where(x => x.IsMatch).Select(x => x.Info);
+            IEnumerable<ITemplateInfo> results;
+
+            if (showAll)
+            {
+                results = PerformAllTemplatesInContextQueryAsync().Result.Where(x => x.IsMatch).Select(x => x.Info);
+            }
+            else
+            {
+                results = _matchedTemplates.Where(x => x.IsMatch).Select(x => x.Info);
+            }
+
 
             IEnumerable<IGrouping<string, ITemplateInfo>> grouped = results.GroupBy(x => x.GroupIdentity);
             EnvironmentSettings.Host.TryGetHostParamDefault("prefs:language", out string defaultLanguage);
@@ -274,9 +284,9 @@ namespace Microsoft.TemplateEngine.Cli
         {
             if (!string.IsNullOrEmpty(_templateName.Value))
             {
-                ShowTemplateNameMismatchHelp();
+                bool anyPartialMatchesDisplayed = ShowTemplateNameMismatchHelp();
                 ShowUsageHelp();
-                DisplayTemplateList();
+                DisplayTemplateList(!anyPartialMatchesDisplayed);
                 return Task.FromResult(-1);
             }
 
@@ -635,7 +645,7 @@ namespace Microsoft.TemplateEngine.Cli
             _app.ParseArgs(_app.InternalParamValueList("--extra-args"));
         }
 
-        private Task PerformCoreTemplateQueryAsync()
+        private string DetermineTemplateContext()
         {
             string outputPath = OutputPath ?? EnvironmentSettings.Host.FileSystem.GetCurrentDirectory();
 
@@ -651,6 +661,13 @@ namespace Microsoft.TemplateEngine.Cli
                     context = "project";
                 }
             }
+
+            return context;
+        }
+
+        private Task PerformCoreTemplateQueryAsync()
+        {
+            string context = DetermineTemplateContext();
 
             //Perform the core query to search for templates
             IReadOnlyCollection<IFilteredTemplateInfo> templates = _templateCreator.List
@@ -683,6 +700,20 @@ namespace Microsoft.TemplateEngine.Cli
             _matchedTemplates = matchedTemplates;
 
             return Task.FromResult(true);
+        }
+
+        // Lists all the templtes, filtered only by the context (item, project, etc)
+        private Task<IReadOnlyCollection<IFilteredTemplateInfo>> PerformAllTemplatesInContextQueryAsync()
+        {
+            string context = DetermineTemplateContext();
+
+            IReadOnlyCollection<IFilteredTemplateInfo> templates = _templateCreator.List(
+                false,
+                WellKnownSearchFilters.ContextFilter(context),
+                WellKnownSearchFilters.NameFilter(string.Empty)
+            );
+
+            return Task.FromResult(templates);
         }
 
         private HostSpecificTemplateData ReadHostSpecificTemplateData(ITemplate templateInfo)
@@ -836,7 +867,8 @@ namespace Microsoft.TemplateEngine.Cli
             ParameterHelp(allParams, additionalInfo, _hostSpecificTemplateData.HiddenParameterNames);
         }
 
-        private void ShowTemplateNameMismatchHelp()
+        // Returns true if any partial matches were displayed, false otherwise
+        private bool ShowTemplateNameMismatchHelp()
         {
             IDictionary<string, IFilteredTemplateInfo> contextProblemMatches = new Dictionary<string, IFilteredTemplateInfo>();
             IDictionary<string, IFilteredTemplateInfo> remainingPartialMatches = new Dictionary<string, IFilteredTemplateInfo>();
@@ -867,7 +899,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 Reporter.Error.WriteLine(string.Format(LocalizableStrings.NoTemplatesMatchName, _templateName.Value));
                 Reporter.Error.WriteLine();
-                return;
+                return false;
             }
 
             foreach (IFilteredTemplateInfo template in contextProblemMatches.Values)
@@ -899,6 +931,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             Reporter.Error.WriteLine();
+            return true;
         }
 
         private void ShowUsageHelp()
