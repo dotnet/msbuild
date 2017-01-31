@@ -27,19 +27,18 @@ namespace Microsoft.DotNet.Tools.New
                 {
                     // Check if other files from the template exists already, before extraction
                     IEnumerable<string> fileNames = archive.Entries.Select(e => e.FullName);
+                    string projectDirectory = Directory.GetCurrentDirectory();
+
                     foreach (var entry in fileNames)
                     {
-                        if (File.Exists(Path.Combine(Directory.GetCurrentDirectory(), entry)))
+                        if (File.Exists(Path.Combine(projectDirectory, entry)))
                         {
                             Reporter.Error.WriteLine(string.Format(LocalizableStrings.ProjectContainsError, languageName, entry));
                             return 1;
                         }
                     }
 
-                    string projectDirectory = Directory.GetCurrentDirectory();
-
                     archive.ExtractToDirectory(projectDirectory);
-
                     ReplaceFileTemplateNames(projectDirectory);
                 }
                 catch (IOException ex)
@@ -63,10 +62,19 @@ namespace Microsoft.DotNet.Tools.New
                 if (Path.GetFileNameWithoutExtension(file) == "$projectName$")
                 {
                     string extension = Path.GetExtension(file);
+                    string newFileName = Path.Combine(Path.GetDirectoryName(file), $"{projectName}{extension}");
 
-                    File.Move(
-                        file,
-                        Path.Combine(Path.GetDirectoryName(file), $"{projectName}{extension}"));
+                    File.Move(file, newFileName);
+
+                    // for perf reasons, only projects can have replacement values in them
+                    string originalProjectText = File.ReadAllText(newFileName);
+                    string replacedProjectText = originalProjectText
+                        .Replace("$CurrentSharedFrameworkVersion$", new Muxer().SharedFxVersion);
+
+                    if (replacedProjectText != originalProjectText)
+                    {
+                        File.WriteAllText(newFileName, replacedProjectText);
+                    }
                 }
             }
         }
@@ -85,7 +93,6 @@ namespace Microsoft.DotNet.Tools.New
                                Templates = new[] 
                                { 
                                    new { Name = "Console" }, 
-                                   new { Name = "Console1.1" }, 
                                    new { Name = "Web" }, 
                                    new { Name = "Web1.1" },
                                    new { Name = "Lib" },
@@ -156,19 +163,7 @@ namespace Microsoft.DotNet.Tools.New
                 return dotnetNew.CreateEmptyProject(language.Name, fullTemplateName);
             });
 
-            try
-            {
-                return app.Execute(args);
-            }
-            catch (Exception ex)
-            {
-#if DEBUG
-                Reporter.Error.WriteLine(ex.ToString());
-#else
-                Reporter.Error.WriteLine(ex.Message);
-#endif
-                return 1;
-            }
+            return app.Execute(args);
         }
     }
 }

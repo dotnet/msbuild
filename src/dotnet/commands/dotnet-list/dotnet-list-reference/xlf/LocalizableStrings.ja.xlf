@@ -9,8 +9,8 @@
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
-        <source>Command to list project to project (p2p) references</source>
-        <target state="translated">プロジェクト間 (p2p) 参照を一覧表示するコマンド</target>
+        <source>Command to list project to project references</source>
+        <target state="translated">プロジェクト間参照を一覧表示するコマンド</target>
         <note />
       </trans-unit>
       <trans-unit id="NoReferencesFound">

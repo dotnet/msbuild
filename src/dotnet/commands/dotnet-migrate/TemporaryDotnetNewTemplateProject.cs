@@ -3,6 +3,7 @@ using Microsoft.DotNet.Cli;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectJsonMigration;
 using Microsoft.Build.Evaluation;
 
@@ -77,7 +78,7 @@ namespace Microsoft.DotNet.Tools.Migrate
                 MigrationTrace.Instance.WriteLine(commandResult.StdOut);
                 MigrationTrace.Instance.WriteLine(commandResult.StdErr);
                 
-                throw new Exception($"Failed to run {commandToExecute} in directory: {workingDirectory}");
+                throw new GracefulException($"Failed to run {commandToExecute} in directory: {workingDirectory}");
             }
         }
     }

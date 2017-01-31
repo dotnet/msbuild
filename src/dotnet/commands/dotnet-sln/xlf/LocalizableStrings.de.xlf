@@ -5,58 +5,58 @@
       <group id="src/dotnet/commands/dotnet-sln/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET modify solution file command</source>
-        <target state="new">.NET modify solution file command</target>
-        <note></note>
+        <target state="translated">.NET-Befehl zum Ändern von Projektmappendateien</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Command to add, remove, and list projects from the solution (SLN) file.</source>
-        <target state="new">Command to add, remove, and list projects from the solution (SLN) file.</target>
-        <note></note>
+        <target state="translated">Befehl zum Hinzufügen, Entfernen und Auflisten von Projekten aus der Projektmappendatei (SLN-Datei).</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppHelpText">
         <source>Projects to add or to remove from the solution.</source>
-        <target state="new">Projects to add or to remove from the solution.</target>
-        <note></note>
+        <target state="translated">Hinzuzufügende oder zu entfernende Projekte.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AddAppFullName">
         <source>.NET Add project(s) to a solution file Command</source>
-        <target state="new">.NET Add project(s) to a solution file Command</target>
-        <note></note>
+        <target state="translated">.NET-Befehl zum Hinzufügen von Projekten zu einer Projektmappendatei</target>
+        <note />
       </trans-unit>
       <trans-unit id="AddSubcommandHelpText">
         <source>Add a specified project(s) to the solution.</source>
-        <target state="new">Add a specified project(s) to the solution.</target>
-        <note></note>
+        <target state="translated">Fügt der Projektmappe bestimmte Projekte hinzu.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RemoveAppFullName">
         <source>.NET Remove project(s) from a solution file Command</source>
-        <target state="new">.NET Remove project(s) from a solution file Command</target>
-        <note></note>
+        <target state="translated">.NET-Befehl zum Entfernen von Projekten aus einer Projektmappendatei</target>
+        <note />
       </trans-unit>
       <trans-unit id="RemoveSubcommandHelpText">
         <source>Remove the specified project(s) from the solution. The project is not impacted.</source>
-        <target state="new">Remove the specified project(s) from the solution. The project is not impacted.</target>
-        <note></note>
+        <target state="translated">Entfernt bestimmte Projekte aus der Projektmappe. Dies hat keine Auswirkungen auf das Projekt.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ListAppFullName">
         <source>.NET List project(s) in a solution file Command</source>
-        <target state="new">.NET List project(s) in a solution file Command</target>
-        <note></note>
+        <target state="translated">.NET-Befehl zum Auflisten von Projekten in einer Projektmappendatei</target>
+        <note />
       </trans-unit>
       <trans-unit id="ListSubcommandHelpText">
         <source>List all projects in the solution.</source>
-        <target state="new">List all projects in the solution.</target>
-        <note></note>
+        <target state="translated">Listet alle Projekte in der Projektmappe auf.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CreateAppFullName">
         <source>.NET Create a solution file Command</source>
-        <target state="new">.NET Create a solution file Command</target>
-        <note></note>
+        <target state="translated">.NET-Befehl zum Erstellen von Projektmappendateien</target>
+        <note />
       </trans-unit>
       <trans-unit id="CreateSubcommandHelpText">
         <source>Create a solution file.</source>
-        <target state="new">Create a solution file.</target>
-        <note></note>
+        <target state="translated">Erstellt eine Projektmappendatei.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

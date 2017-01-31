@@ -1,32 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Target Name="SetupTestProjectData" 
-          DependsOnTargets="AssociateTestInputFilesWithProject">                          
-  </Target>
-
-  <Target Name="AssociateTestInputFilesWithProject" 
-          DependsOnTargets="IdentifyTestInputFilesForProject;" 
-          Outputs="%(TestProjects.ProjectPath)">
-    <PropertyGroup>
-      <CurrentProject>%(TestProjects.ProjectPath)</CurrentProject>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <TestProjects Condition=" '%(ProjectPath)' == '$(CurrentProject)' ">
-        <BuildInputs>@(TestProjectInputs)</BuildInputs>
-      </TestProjects>
-    </ItemGroup>
-  </Target>
-
-  <Target Name="IdentifyTestInputFilesForProject" 
-          DependsOnTargets="SetupBuildTestProjectInputs;" 
-          Outputs="%(TestProjects.ProjectPath)">
-    <ItemGroup>
-      <TestProjectInputs Include="%(TestProjects.BuildInputIncludeFilter)" 
-                         Exclude="%(TestProjects.BuildInputExcludeFilter)">
-        <ProjectPath>%(TestProjects.ProjectPath)</ProjectPath>
-      </TestProjectInputs>
-    </ItemGroup>
+          DependsOnTargets="SetupBuildTestProjectInputs">                          
   </Target>
 
   <Target Name="SetupBuildTestProjectInputs">
@@ -37,53 +12,21 @@
       -->
       <PreTestProjectsToExclude Include="test$(PathSeparator)binding-redirects.Tests$(PathSeparator)binding-redirects.Tests.csproj;" />
 
-      <PreTestProjectsToExclude Condition=" 'https://github.com/dotnet/cli/issues/3216' != 'fixed' "
-                             Include="test$(PathSeparator)Kestrel.Tests$(PathSeparator)Kestrel.Tests.csproj" />
-      
       <PreTestProjectsToExclude Condition=" 'Non-test projects in test directory' != 'consider moving elsewhere' "
                              Include="test$(PathSeparator)ArgumentsReflector$(PathSeparator)ArgumentsReflector.csproj;
                                       test$(PathSeparator)Microsoft.DotNet.Tools.Tests.Utilities$(PathSeparator)Microsoft.DotNet.Tools.Tests.Utilities.csproj;
-                                      test$(PathSeparator)TestingAbstractions$(PathSeparator)TestAppWithFullPdbs$(PathSeparator)TestAppWithFullPdbs.csproj;
-                                      test$(PathSeparator)TestingAbstractions$(PathSeparator)TestAppWithPortablePdbs$(PathSeparator)TestAppWithPortablePdbs.csproj;
-                                      test$(PathSeparator)Msbuild.Tests.Utilities$(PathSeparator)Msbuild.Tests.Utilities.csproj" />
+                                      test$(PathSeparator)Msbuild.Tests.Utilities$(PathSeparator)Msbuild.Tests.Utilities.csproj;
+                                      test$(PathSeparator)Performance$(PathSeparator)Performance.csproj" />
 
       <PreTestProjectsToExclude Condition=" 'Executed after primary test phase.' != ' Consider moving.' "
                              Include="test$(PathSeparator)Installer$(PathSeparator)Microsoft.DotNet.Cli.Msi.Tests$(PathSeparator)Microsoft.DotNet.Cli.Msi.Tests.csproj;" />
 
-      <PreTestProjectsToExclude Include="test$(PathSeparator)**$(PathSeparator)bin$(PathSeparator)**$(PathSeparator)*.csproj" />
-
-      <!-- The current ResolveNuGetAssets target does not work on case-sensitive file systems.  We need https://github.com/dotnet/sdk/pull/10 -->
-      <PreTestProjectsToExclude Condition="'$(OSName)' != 'win' and '$(OSName)' != 'osx'"
-                                Include="test$(PathSeparator)dotnet-build3.Tests$(PathSeparator)dotnet-build3.Tests.csproj" />
-
       <TestProjectsToExclude Include="%(PreTestProjectsToExclude.Fullpath)" />
 
-      <PreTestProjects Include="test$(PathSeparator)**$(PathSeparator)*.csproj;" />
+      <PreTestProjects Include="test$(PathSeparator)*$(PathSeparator)*.csproj;" />
 
       <TestProjects Include="%(PreTestProjects.Fullpath)"
                     Exclude="@(TestProjectsToExclude)" />
-
-      <TestProjects>
-        <BuildInputIncludeFilter>%(RelativeDir)**/*.*</BuildInputIncludeFilter>
-        <BuildInputExcludeFilter>%(RelativeDir)bin/**/*.*;%(RelativeDir)obj/**/*.*</BuildInputExcludeFilter>
-        <ProjectDir>$([System.IO.Directory]::GetParent(%(Identity)))</ProjectDir>
-        <ProjectPath>%(Identity)</ProjectPath>
-        <Framework>netcoreapp1.0</Framework>
-      </TestProjects>
-
-      <TestProjects>
-        <OutputName>$([System.IO.Path]::GetFileName(%(ProjectDir)))</OutputName>
-      </TestProjects>
-
-      <TestProjects>
-        <BuildOutput>$(RepoRoot)%(TestProjects.RelativeDir)bin/$(Configuration)/%(TestProjects.Framework)/%(TestProjects.OutputName).dll</BuildOutput>
-      </TestProjects>
-
-      <TestProjects Condition=" '%(RelativeDir)' == 'test\Installer\Microsoft.DotNet.Cli.Msi.Tests\' ">
-        <Framework>net46</Framework>
-      </TestProjects>
     </ItemGroup>
-
-    <Message Text="%(TestProjects.Identity) %(TestProjects.RelativeDir) %(TestProjects.Framework)" />
   </Target>
 </Project>

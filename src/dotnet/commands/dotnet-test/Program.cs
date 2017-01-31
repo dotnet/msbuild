@@ -83,6 +83,11 @@ namespace Microsoft.DotNet.Tools.Test
                LocalizableStrings.CmdNoBuildDescription,
                CommandOptionType.NoValue);
 
+            var resultsDirectoryOption = cmd.Option(
+                "-r|--results-directory",
+                LocalizableStrings.CmdResultsDirectoryDescription,
+                CommandOptionType.SingleValue);
+
             CommandOption verbosityOption = MSBuildForwardingApp.AddVerbosityOption(cmd);
 
             cmd.OnExecute(() =>
@@ -127,6 +132,11 @@ namespace Microsoft.DotNet.Tools.Test
                 if (frameworkOption.HasValue())
                 {
                     msbuildArgs.Add($"/p:TargetFramework={frameworkOption.Value()}");
+                }
+
+                if (resultsDirectoryOption.HasValue())
+                {
+                    msbuildArgs.Add($"/p:VSTestResultsDirectory={resultsDirectoryOption.Value()}");
                 }
 
                 if (outputOption.HasValue())

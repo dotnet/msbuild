@@ -17,14 +17,11 @@
 
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
 
-    <CoreSetupChannel>preview</CoreSetupChannel>
+    <CoreSetupChannel>master</CoreSetupChannel>
     <SharedFrameworkName>Microsoft.NETCore.App</SharedFrameworkName>
-    <SharedFrameworkVersion>1.0.3</SharedFrameworkVersion>
-    <SharedHostVersion>1.0.1</SharedHostVersion>
-    <HostFxrVersion>1.0.1</HostFxrVersion>
-
-    <CoreCLRVersion>1.0.5</CoreCLRVersion>
-    <JitVersion>1.0.5</JitVersion>
+    <SharedFrameworkVersion>$(CLI_SharedFrameworkVersion)</SharedFrameworkVersion>
+    <SharedHostVersion>$(CLI_SharedFrameworkVersion)</SharedHostVersion>
+    <HostFxrVersion>$(CLI_SharedFrameworkVersion)</HostFxrVersion>
 
     <ExeExtension>.exe</ExeExtension>
     <ExeExtension Condition=" '$(OS)' != 'Windows_NT' "></ExeExtension>

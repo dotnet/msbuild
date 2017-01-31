@@ -26,6 +26,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{89905EC4
 	ProjectSection(SolutionItems) = preProject
 		build\Microsoft.DotNet.Cli.BundledSdks.props = build\Microsoft.DotNet.Cli.BundledSdks.props
 		build\Microsoft.DotNet.Cli.Compile.targets = build\Microsoft.DotNet.Cli.Compile.targets
+		build\Microsoft.DotNet.Cli.DependencyVersions.props = build\Microsoft.DotNet.Cli.DependencyVersions.props
 		build\Microsoft.DotNet.Cli.Monikers.props = build\Microsoft.DotNet.Cli.Monikers.props
 		build\Microsoft.DotNet.Cli.Package.targets = build\Microsoft.DotNet.Cli.Package.targets
 		build\Microsoft.DotNet.Cli.Prepare.targets = build\Microsoft.DotNet.Cli.Prepare.targets

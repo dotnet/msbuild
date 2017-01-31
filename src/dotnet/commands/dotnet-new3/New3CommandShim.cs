@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli;
 using Microsoft.TemplateEngine.Edge;
@@ -51,7 +52,8 @@ namespace Microsoft.DotNet.Tools.New3
 
             var preferences = new Dictionary<string, string>
             {
-                { "prefs:language", "C#" }
+                { "prefs:language", "C#" },
+                { "dotnet-cli-version", Product.Version }
             };
 
             return new DefaultTemplateEngineHost(HostIdentifier, HostVersion, CultureInfo.CurrentCulture.Name, preferences, builtIns);

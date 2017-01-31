@@ -30,8 +30,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
                 itemName,
                 includeContext => 
                 {
-                    var fullIncludeSet = includeContext.IncludePatterns.OrEmptyIfNull()
-                                         .Union(includeContext.BuiltInsInclude.OrEmptyIfNull());
+                    var fullIncludeSet = includeContext.IncludePatterns.OrEmptyIfNull();
+                    if (_emitBuiltInIncludes)
+                    {
+                        fullIncludeSet = fullIncludeSet.Union(includeContext.BuiltInsInclude.OrEmptyIfNull());
+                    }
 
                     return FormatGlobPatternsForMsbuild(fullIncludeSet, includeContext.SourceBasePath);
                 },
@@ -49,7 +52,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
                         ( 
                             (includeContext.IncludePatterns != null && includeContext.IncludePatterns.Count > 0)
                             ||
-                            (includeContext.BuiltInsInclude != null && includeContext.BuiltInsInclude.Count > 0)
+                            (_emitBuiltInIncludes && 
+                             includeContext.BuiltInsInclude != null && 
+                             includeContext.BuiltInsInclude.Count > 0)
                         );
                 });
 
@@ -63,15 +68,18 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
 
         private readonly string _itemName;
         private bool _transformMappings;
+        private bool _emitBuiltInIncludes;
         private readonly List<ItemMetadataValue<IncludeContext>> _metadata = new List<ItemMetadataValue<IncludeContext>>();
 
         public IncludeContextTransform(
             string itemName,
             bool transformMappings = true,
-            Func<IncludeContext, bool> condition = null) : base(condition)
+            Func<IncludeContext, bool> condition = null,
+            bool emitBuiltInIncludes = true) : base(condition)
         {
             _itemName = itemName;
             _transformMappings = transformMappings;
+            _emitBuiltInIncludes = emitBuiltInIncludes;
 
             _mappingsToTransfrom = (addItemTransform, targetPath) =>
             {

@@ -5,58 +5,58 @@
       <group id="src/dotnet/commands/dotnet-sln/LocalizableStrings.resx" />
       <trans-unit id="AppFullName">
         <source>.NET modify solution file command</source>
-        <target state="new">.NET modify solution file command</target>
-        <note></note>
+        <target state="translated">Commande .NET Modifier un fichier solution</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Command to add, remove, and list projects from the solution (SLN) file.</source>
-        <target state="new">Command to add, remove, and list projects from the solution (SLN) file.</target>
-        <note></note>
+        <target state="translated">Commande permettant d'ajouter, de supprimer et de répertorier des projets à partir du fichier solution (SLN).</target>
+        <note />
       </trans-unit>
       <trans-unit id="AppHelpText">
         <source>Projects to add or to remove from the solution.</source>
-        <target state="new">Projects to add or to remove from the solution.</target>
-        <note></note>
+        <target state="translated">Projets à ajouter ou supprimer dans la solution.</target>
+        <note />
       </trans-unit>
       <trans-unit id="AddAppFullName">
         <source>.NET Add project(s) to a solution file Command</source>
-        <target state="new">.NET Add project(s) to a solution file Command</target>
-        <note></note>
+        <target state="translated">Commande .NET Ajouter un ou des projets à un fichier solution</target>
+        <note />
       </trans-unit>
       <trans-unit id="AddSubcommandHelpText">
         <source>Add a specified project(s) to the solution.</source>
-        <target state="new">Add a specified project(s) to the solution.</target>
-        <note></note>
+        <target state="translated">Ajoutez un ou des projets spécifiés à la solution.</target>
+        <note />
       </trans-unit>
       <trans-unit id="RemoveAppFullName">
         <source>.NET Remove project(s) from a solution file Command</source>
-        <target state="new">.NET Remove project(s) from a solution file Command</target>
-        <note></note>
+        <target state="translated">Commande .NET Supprimer un ou des projets dans un fichier solution</target>
+        <note />
       </trans-unit>
       <trans-unit id="RemoveSubcommandHelpText">
         <source>Remove the specified project(s) from the solution. The project is not impacted.</source>
-        <target state="new">Remove the specified project(s) from the solution. The project is not impacted.</target>
-        <note></note>
+        <target state="translated">Supprimez le ou les projets spécifiés dans la solution. Le projet n'est pas affecté.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ListAppFullName">
         <source>.NET List project(s) in a solution file Command</source>
-        <target state="new">.NET List project(s) in a solution file Command</target>
-        <note></note>
+        <target state="translated">Commande .NET Répertorier un ou des projets dans un fichier solution</target>
+        <note />
       </trans-unit>
       <trans-unit id="ListSubcommandHelpText">
         <source>List all projects in the solution.</source>
-        <target state="new">List all projects in the solution.</target>
-        <note></note>
+        <target state="translated">Répertoriez tous les projets de la solution.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CreateAppFullName">
         <source>.NET Create a solution file Command</source>
-        <target state="new">.NET Create a solution file Command</target>
-        <note></note>
+        <target state="translated">Commande .NET Créer un fichier solution</target>
+        <note />
       </trans-unit>
       <trans-unit id="CreateSubcommandHelpText">
         <source>Create a solution file.</source>
-        <target state="new">Create a solution file.</target>
-        <note></note>
+        <target state="translated">Créez un fichier solution.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

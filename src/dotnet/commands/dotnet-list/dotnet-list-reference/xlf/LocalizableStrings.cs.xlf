@@ -9,8 +9,8 @@
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
-        <source>Command to list project to project (p2p) references</source>
-        <target state="translated">Příkaz pro zobrazení seznamu závislostí mezi projekty (p2p)</target>
+        <source>Command to list project to project references</source>
+        <target state="translated">Příkaz pro zobrazení seznamu odkazů mezi projekty</target>
         <note />
       </trans-unit>
       <trans-unit id="NoReferencesFound">

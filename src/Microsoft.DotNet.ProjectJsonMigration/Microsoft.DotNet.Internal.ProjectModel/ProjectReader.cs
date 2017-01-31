@@ -664,20 +664,20 @@ namespace Microsoft.DotNet.Internal.ProjectModel
                     project,
                     rawOptions,
                     "compile",
-                    defaultBuiltInInclude: ProjectFilesCollection.DefaultCompileBuiltInPatterns,
+                    defaultBuiltInInclude: ProjectFilesCollection.SdkInjectedDefaultCompileBuiltInPatterns,
                     defaultBuiltInExclude: ProjectFilesCollection.DefaultBuiltInExcludePatterns),
                 EmbedInclude = GetIncludeContext(
                     project,
                     rawOptions,
                     "embed",
-                    defaultBuiltInInclude: ProjectFilesCollection.DefaultResourcesBuiltInPatterns,
+                    defaultBuiltInInclude: null,
                     defaultBuiltInExclude: ProjectFilesCollection.DefaultBuiltInExcludePatterns),
                 CopyToOutputInclude = GetIncludeContext(
                     project,
                     rawOptions,
                     "copyToOutput",
                     defaultBuiltInInclude: null,
-                    defaultBuiltInExclude: ProjectFilesCollection.DefaultPublishExcludePatterns)
+                    defaultBuiltInExclude: null)
             };
         }
 
@@ -794,7 +794,7 @@ namespace Microsoft.DotNet.Internal.ProjectModel
                     "publishOptions",
                     rawProject,
                     defaultBuiltInInclude: null,
-                    defaultBuiltInExclude: ProjectFilesCollection.DefaultPublishExcludePatterns);
+                    defaultBuiltInExclude: null);
             }
 
             return null;

@@ -81,10 +81,13 @@
         <SharedFramework Remove="*" />
         <SharedFramework Include="$(SharedFrameworkPublishDirectory)/**/*" />
 
-        <AssetsToRemoveFromDeps Remove="*" />
-        <AssetsToRemoveFromDeps Include="csc" />
-        <AssetsToRemoveFromDeps Include="vbc" />
-        <AssetsToRemoveFromDeps Include="MSBuild" />
+        <RuntimeTargetsAssetsToRemoveFromDeps Remove="*" />
+        <RuntimeTargetsAssetsToRemoveFromDeps Include="MSBuild" />
+        
+        <RuntimeAssetsToRemoveFromDeps Remove="*" />
+        <RuntimeAssetsToRemoveFromDeps Include="redist" />
+        <RuntimeAssetsToRemoveFromDeps Include="tool_msbuild" />
+        <RuntimeAssetsToRemoveFromDeps Include="tool_nuget" />
       </ItemGroup>
 
       <Delete Files="@(BinObj)" />
@@ -146,7 +149,11 @@
 
       <RemoveAssetFromDepsPackages DepsFile="$(SdkOutputDirectory)/redist.deps.json"
                                    SectionName="runtimeTargets"
-                                   AssetPath="$(BinaryToCorehostifyRelDir)/%(AssetsToRemoveFromDeps.Identity).exe" />
+                                   AssetPath="$(BinaryToCorehostifyRelDir)/%(RuntimeTargetsAssetsToRemoveFromDeps.Identity).exe" />
+
+      <RemoveAssetFromDepsPackages DepsFile="$(SdkOutputDirectory)/redist.deps.json"
+                                   SectionName="runtime"
+                                   AssetPath="%(RuntimeAssetsToRemoveFromDeps.Identity).dll" />
 
       <Copy SourceFiles="$(SdkOutputDirectory)/redist.deps.json"
             DestinationFiles="$(SdkOutputDirectory)/%(BundledTools.Identity).deps.json" />
@@ -161,6 +168,7 @@
       <!-- cleanup project output we don't need -->
       <Delete Files="$(SdkOutputDirectory)/redist%(PublishOutputExtensions.Identity)" />
       <Delete Files="$(SdkOutputDirectory)/tool_msbuild%(PublishOutputExtensions.Identity)" />
+      <Delete Files="$(SdkOutputDirectory)/tool_nuget%(PublishOutputExtensions.Identity)" />
 
       <!-- Copy Host to SDK Directory -->
       <Copy SourceFiles="$(SharedFrameworkNameVersionPath)/$(DotnetHostBaseName)"
@@ -176,12 +184,25 @@
       <Copy SourceFiles="@(MSBuildImportsContent)"
             DestinationFolder="$(SdkOutputDirectory)/%(RecursiveDir)" />
 
-      <!-- Crossgen the Shared Framework -->
+      <ItemGroup>
+        <NETCore10Assemblies Include="$(SdkOutputDirectory)/System.ComponentModel.Primitives.dll;
+                                      $(SdkOutputDirectory)/System.Collections.Specialized.dll;
+                                      $(SdkOutputDirectory)/System.Collections.NonGeneric.dll" />
+      </ItemGroup>
+    
+      <!-- Move these "1.0" assemblies that TestPlatform lays down out of the way so crossgen doesn't pick them up.
+           We need https://github.com/dotnet/cli/issues/5464 fixed, so test platform is in a separate directory -->
+      <Move SourceFiles="@(NETCore10Assemblies)"
+            DestinationFiles="@(NETCore10Assemblies->'$(SdkOutputDirectory)/%(Filename)%(Extension).bak')" />
+
+      <!-- Crossgen the CLI -->
       <ItemGroup>
         <SdkFiles Remove="*" />
 
         <!-- Removing Full CLR built TestHost assemblies from getting Crossgen as it is throwing error -->
         <SdkFilesExclude Include="$(SdkOutputDirectory)/TestHost*/**/*" />
+        <!-- Remove NuGet.LibraryModel due to https://github.com/dotnet/coreclr/issues/9118 -->
+        <SdkFilesExclude Include="$(SdkOutputDirectory)/NuGet.LibraryModel.dll" />
         <SdkFiles Include="$(SdkOutputDirectory)/**/*" Exclude="@(SdkFilesExclude)" />
         <SdkFilesWithPEMarker Remove="*" />
       </ItemGroup>
@@ -201,6 +222,11 @@
         <Output TaskParameter="Filtered" ItemName="CompileStageSdkDirectories" />
       </RemoveDuplicates>
 
+      <!-- Ensure crossgen tool is executable.  See https://github.com/NuGet/Home/issues/4424 -->
+      <Chmod Condition=" '$(OSName)' != 'win' "
+             File="$(CrossgenPath)"
+             Mode="u+x" />
+
       <Crossgen Condition=" '$(DISABLE_CROSSGEN)' != '1' "
                 SourceAssembly="%(CrossgenTargets.FullPath)"
                 DestinationPath="%(CrossgenTargets.FullPath)"
@@ -210,6 +236,10 @@
                 PlatformAssemblyPaths="@(PlatformAssemblies);
                                        @(CompileStageSdkDirectories);
                                        $(SharedFrameworkNameVersionPath)" />
+
+      <!-- Move the "1.0" assemblies back -->
+      <Move SourceFiles="@(NETCore10Assemblies->'$(SdkOutputDirectory)/%(Filename)%(Extension).bak')"
+            DestinationFiles="@(NETCore10Assemblies)" />
 
       <!-- Generate .version file -->
       <WriteLinesToFile File="$(SdkOutputDirectory)/.version"
@@ -270,8 +300,6 @@
     <ItemGroup>
       <TemplatesToBundle Include="build/Microsoft.DotNet.Cli.BundledTemplates.proj">
         <Properties>
-          CLIBuildDll=$(CLIBuildDll);
-          NuGetPackagesDir=$(NuGetPackagesDir);
           TemplateLayoutDirectory=$(SdkOutputDirectory)/Templates;
           TemplatePackageName=%(BundledTemplate.Identity);
           TemplatePackageVersion=%(BundledTemplate.Version);

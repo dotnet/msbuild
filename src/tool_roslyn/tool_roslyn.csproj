@@ -4,11 +4,12 @@
 
   <PropertyGroup>
     <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
-    <TargetFramework>netcoreapp1.0</TargetFramework>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+	<RuntimeFrameworkVersion>$(CLI_SharedFrameworkVersion)</RuntimeFrameworkVersion>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NetCore.App" Version="1.0.3" />
+    <PackageReference Include="Microsoft.NetCore.App" Version="$(CLI_SharedFrameworkVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(CLI_Roslyn_Version)" />
     <PackageReference Include="Microsoft.CodeAnalysis.Build.Tasks" Version="$(CLI_Roslyn_Version)" />
     <PackageReference Include="Microsoft.Net.Compilers.netcore" Version="$(CLI_Roslyn_Version)" />
@@ -44,6 +45,10 @@
     <RemoveAssetFromDepsPackages DepsFile="$(PublishDir)/$(TargetName).deps.json"
                                  SectionName="runtimeTargets"
                                  AssetPath="runtimes/any/native/%(AssetsToRemoveFromDeps.Identity).exe" />
+
+    <RemoveAssetFromDepsPackages DepsFile="$(PublishDir)/$(TargetName).deps.json"
+                                 SectionName="runtime"
+                                 AssetPath="$(TargetName).dll" />
 
     <Copy SourceFiles="$(PublishDir)/runtimes/any/native/csc.exe;
                        $(PublishDir)/$(TargetName).runtimeconfig.json;
