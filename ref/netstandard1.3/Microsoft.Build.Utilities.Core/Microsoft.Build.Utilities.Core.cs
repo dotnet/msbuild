@@ -381,7 +381,7 @@ namespace Microsoft.Build.Utilities
         protected virtual string GenerateCommandLineCommands() { throw null; }
         protected abstract string GenerateFullPathToTool();
         protected virtual string GenerateResponseFileCommands() { throw null; }
-        protected System.Diagnostics.ProcessStartInfo GetProcessStartInfo(string pathToTool, string commandLineCommands, string responseFileSwitch) { throw null; }
+        protected virtual System.Diagnostics.ProcessStartInfo GetProcessStartInfo(string pathToTool, string commandLineCommands, string responseFileSwitch) { throw null; }
         protected virtual string GetResponseFileSwitch(string responseFilePath) { throw null; }
         protected virtual string GetWorkingDirectory() { throw null; }
         protected virtual bool HandleTaskExecutionErrors() { throw null; }

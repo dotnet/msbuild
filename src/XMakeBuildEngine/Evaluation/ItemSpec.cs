@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -195,7 +196,7 @@ namespace Microsoft.Build.Evaluation
         public string ItemSpecFragment { get; }
 
         /// <summary>
-        /// Path of the projet the itemspec is coming from
+        /// Path of the project the itemspec is coming from
         /// </summary>
         protected string ProjectPath { get; }
 
@@ -208,8 +209,19 @@ namespace Microsoft.Build.Evaluation
             : this(
                 itemSpecFragment,
                 projectPath,
-                new Lazy<Func<string, bool>>(() => EngineFileUtilities.GetFileSpecMatchTester(itemSpecFragment, projectPath)))
+                CreateFileMatcher(itemSpecFragment, projectPath))
         {
+        }
+
+        private static Lazy<Func<string, bool>> CreateFileMatcher(string itemSpecFragment, string projectPath)
+        {
+            var projectDirectory = string.IsNullOrEmpty(projectPath)
+                ? string.Empty
+                : Path.GetDirectoryName(projectPath);
+
+            return
+                new Lazy<Func<string, bool>>(
+                    () => EngineFileUtilities.GetFileSpecMatchTester(itemSpecFragment, projectDirectory));
         }
 
         protected ItemFragment(string itemSpecFragment, string projectPath, Lazy<Func<string, bool>> fileMatcher)
