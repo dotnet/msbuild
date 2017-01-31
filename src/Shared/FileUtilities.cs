@@ -413,8 +413,8 @@ namespace Microsoft.Build.Shared
                 return value;
             }
 
-            // For Unix-like systems, we may want to convert backslashes to slashes
-            string newValue = Regex.Replace(value, @"[\\/]+", "/");
+            // For Unix-like systems, we want to convert backslashes to slashes
+            string newValue = value.ToSlash();
 
             string quote = string.Empty;
             // Find the part of the name we want to check, that is remove quotes, if present
