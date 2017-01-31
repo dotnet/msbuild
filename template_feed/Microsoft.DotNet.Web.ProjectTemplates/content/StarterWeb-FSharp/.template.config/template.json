@@ -17,19 +17,19 @@
       "datatype": "choice",
       "choices": [
         {
-          "choice": "1.0",
+          "choice": "netcoreapp1.0",
           "description": "Target netcoreapp1.0"
         },
         {
-          "choice": "1.1",
+          "choice": "netcoreapp1.1",
           "description": "Target netcoreapp1.1"
         }
       ],
-      "defaultValue": "1.0"
+      "defaultValue": "netcoreapp1.0"
     },
     "FrameworkIs1_1": {
       "type": "computed",
-      "value": "(Framework == \"1.1\")"
+      "value": "(Framework == \"netcoreapp1.1\")"
     },
     "sdkVersion": {
       "type": "bind",
