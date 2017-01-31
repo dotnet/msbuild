@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.DotNet.Cli.Utils.ExceptionExtensions
+namespace Microsoft.DotNet.Cli.Utils
 {
     internal static class ExceptionExtensions
     {
@@ -11,5 +11,10 @@ namespace Microsoft.DotNet.Cli.Utils.ExceptionExtensions
         {
             Reporter.Verbose.WriteLine($"Warning: Ignoring exception: {e.ToString().Yellow()}");
         }
+
+        public static bool ShouldBeDisplayedAsError(this Exception e) =>
+            e.Data.Contains(CLI_User_Displayed_Exception);
+
+        internal const string CLI_User_Displayed_Exception = "CLI_User_Displayed_Exception";
     }
 }

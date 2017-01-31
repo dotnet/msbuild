@@ -4,10 +4,6 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public class CommandUnknownException : GracefulException
     {
-        public CommandUnknownException()
-        {
-        }
-
         public CommandUnknownException(string commandName) : base(string.Format(
             LocalizableStrings.NoExecutableFoundMatchingCommand,
             commandName))

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
 
 namespace Microsoft.DotNet.Cli.CommandLine
@@ -18,6 +19,8 @@ namespace Microsoft.DotNet.Cli.CommandLine
         {
             Command = command;
             _isRequireSubCommandMissing = isRequireSubCommandMissing;
+
+            Data.Add("CLI_User_Displayed_Exception", true);
         }
 
         public CommandLineApplication Command { get; }
