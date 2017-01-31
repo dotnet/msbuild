@@ -302,6 +302,27 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 item => item.ItemType == "ProjectReference" && item.Include == projectReferenceInclude);
         }
 
+        [Fact]
+        public void ItDoesNotReferenceTheProjectUnderBackupWhenMigratingAPartiallyMigratedStructure()
+        {
+            var testAssetsManager = GetTestGroupTestAssetsManager("NonRestoredTestProjects");
+            var solutionDirectory = testAssetsManager.CreateTestInstance("PJHalfMigrated").Path;
+
+            var appDirectory = Path.Combine(solutionDirectory, "ProjectB");
+
+            var projectContext = ProjectContext.Create(appDirectory, FrameworkConstants.CommonFrameworks.NetCoreApp10);
+            var mockProj = ProjectRootElement.Create();
+            var testSettings = MigrationSettings.CreateMigrationSettingsTestHook(appDirectory, appDirectory, mockProj, null);
+            var testInputs = new MigrationRuleInputs(new[] {projectContext}, mockProj, mockProj.AddItemGroup(),
+                mockProj.AddPropertyGroup());
+            new MigrateProjectDependenciesRule().Apply(testSettings, testInputs);
+
+            var projectReferences = mockProj.Items.Where(
+                item => item.ItemType.Equals("ProjectReference", StringComparison.Ordinal));
+            projectReferences.Should().ContainSingle();
+            projectReferences.Single().Include.Should().Be("../src/ProjectA/ProjectA.csproj");
+        }
+
         private ProjectRootElement MigrateProject(string solution, string project)
         {
             return MigrateProject(solution, project, FrameworkConstants.CommonFrameworks.NetCoreApp10);

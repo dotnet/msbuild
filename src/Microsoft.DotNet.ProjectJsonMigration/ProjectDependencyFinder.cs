@@ -230,10 +230,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             projectSearchPaths.Add(projectRootDirectory);
 
             var globalPaths = GetGlobalPaths(projectRootDirectory);
-            projectSearchPaths = projectSearchPaths.Union(globalPaths).ToList();
+            projectSearchPaths = globalPaths.Union(projectSearchPaths).ToList();
 
             var solutionPaths = GetSolutionPaths(slnFile);
-            projectSearchPaths = projectSearchPaths.Union(solutionPaths).ToList();
+            projectSearchPaths = solutionPaths.Union(projectSearchPaths).ToList();
 
             var projects = new Dictionary<string, ProjectDependency>(StringComparer.Ordinal);
 
@@ -328,9 +328,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             var projectJSONFilePath = Path.Combine(projectDirectory.FullName, "project.json");
             var csProjFilePath = Path.Combine(projectDirectory.FullName, $"{projectDirectory.Name}.csproj");
 
-            if (File.Exists(projectJSONFilePath) || File.Exists(csProjFilePath))
+            if (File.Exists(projectJSONFilePath))
             {
                 var project = new ProjectDependency(projectDirectory.Name, projectJSONFilePath);
+                projects.Add(project);
+            }
+            else if (File.Exists(csProjFilePath))
+            {
+                var project = new ProjectDependency(projectDirectory.Name, csProjFilePath);
                 projects.Add(project);
             }
         }
