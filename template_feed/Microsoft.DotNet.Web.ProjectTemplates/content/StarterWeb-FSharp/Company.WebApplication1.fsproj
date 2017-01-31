@@ -1,8 +1,8 @@
 <Project Sdk="FSharp.NET.Sdk;Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework Condition="'$(Framework)' != '1.1'">netcoreapp1.0</TargetFramework>
-    <TargetFramework Condition="'$(Framework)' == '1.1'">netcoreapp1.1</TargetFramework>
+    <TargetFramework Condition="'$(Framework)' != 'netcoreapp1.1'">netcoreapp1.0</TargetFramework>
+    <TargetFramework Condition="'$(Framework)' == 'netcoreapp1.1'">netcoreapp1.1</TargetFramework>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
 
@@ -14,7 +14,7 @@
     <None Remove="**/*.fs" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(Framework)' != '1.1'">
+  <ItemGroup Condition="'$(Framework)' != 'netcoreapp1.1'">
     <PackageReference Include="FSharp.NET.Sdk" Version="1.0.0-beta-*" PrivateAssets="All" />
     <PackageReference Include="Microsoft.AspNetCore" Version="1.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="1.0.2" />
@@ -23,7 +23,7 @@
     <PackageReference Include="Microsoft.FSharp.Core.netcore" Version="1.0.0-alpha-161023" />
     <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="1.0.1" />
   </ItemGroup>
-  <ItemGroup Condition="'$(Framework)' == '1.1'">
+  <ItemGroup Condition="'$(Framework)' == 'netcoreapp1.1'">
     <PackageReference Include="FSharp.NET.Sdk" Version="1.0.0-beta-*" PrivateAssets="All" />
     <PackageReference Include="Microsoft.AspNetCore" Version="1.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="1.1.1" />

@@ -1,17 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework Condition="'$(Framework)' != '1.1'">netcoreapp1.0</TargetFramework>
-    <TargetFramework Condition="'$(Framework)' == '1.1'">netcoreapp1.1</TargetFramework>
+    <TargetFramework Condition="'$(Framework)' != 'netcoreapp1.1'">netcoreapp1.0</TargetFramework>
+    <TargetFramework Condition="'$(Framework)' == 'netcoreapp1.1'">netcoreapp1.1</TargetFramework>
     <UserSecretsId Condition="'$(IndividualAuth)' == 'True'">aspnet-Company.WebApplication1-53bc9b9d-9d6a-45d4-8429-2a2761773502</UserSecretsId>
-    <MvcRazorCompileOnPublish Condition="'$(Framework)' == '1.1'">false</MvcRazorCompileOnPublish>
+    <MvcRazorCompileOnPublish Condition="'$(Framework)' == 'netcoreapp1.1'">false</MvcRazorCompileOnPublish>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' != 'True' ">
     <None Update="Company.WebApplication1.db" CopyToOutputDirectory="CopyIfNewer" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(Framework)' != '1.1'">
+  <ItemGroup Condition="'$(Framework)' != 'netcoreapp1.1'">
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.0.0-beta1" Condition="'$(IncludeApplicationInsights)' == 'True'" />
     <PackageReference Include="Microsoft.AspNetCore" Version="1.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="1.0.1" Condition="'$(IndividualAuth)' == 'True'" />
@@ -29,7 +29,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.0.1" />
     <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="1.0.1" />
   </ItemGroup>
-  <ItemGroup Condition="'$(Framework)' == '1.1'">
+  <ItemGroup Condition="'$(Framework)' == 'netcoreapp1.1'">
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.0.0-beta1" Condition="'$(IncludeApplicationInsights)' == 'True'" />
     <PackageReference Include="Microsoft.AspNetCore" Version="1.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="1.1.0" Condition="'$(IndividualAuth)' == 'True'" />
