@@ -133,5 +133,6 @@ docker run $INTERACTIVE -t --rm --sig-proxy=true \
     -e CHECKSUM_STORAGE_ACCOUNT \
     -e CHECKSUM_STORAGE_CONTAINER \
     -e CLIBUILD_SKIP_TESTS \
+    -e CommitCount \
     $DOTNET_BUILD_CONTAINER_TAG \
     $BUILD_COMMAND "$@"

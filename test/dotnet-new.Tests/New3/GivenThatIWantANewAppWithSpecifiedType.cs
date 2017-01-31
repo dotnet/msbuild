@@ -42,10 +42,6 @@ namespace Microsoft.DotNet.New3.Tests
                 File.Copy(configFile.FullName, Path.Combine(rootPath, "NuGet.Config"));
             }
 
-            string globalJsonPath = Path.Combine(rootPath, "global.json");
-            Assert.True(File.Exists(globalJsonPath));
-            Assert.Contains(Product.Version, File.ReadAllText(globalJsonPath));
-
             new TestCommand("dotnet")
                 .WithWorkingDirectory(rootPath)
                 .Execute($"restore")
