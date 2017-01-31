@@ -148,6 +148,11 @@
                Looks up a localized string similar to Argument cannot be null or empty.
             </summary>
         </member>
+        <member name="P:NuGet.Common.Strings.Error_FailedToCreateRandomFile">
+            <summary>
+               Looks up a localized string similar to Failed to create random file for dotnet add pkg command..
+            </summary>
+        </member>
         <member name="P:NuGet.Common.Strings.NoPackageFoldersFound">
             <summary>
                Looks up a localized string similar to At least one package folder path must be provided..
@@ -173,22 +178,6 @@
                Looks up a localized string similar to Hash algorithm &apos;{0}&apos; is unsupported. Supported algorithms include: SHA512 and SHA256..
             </summary>
         </member>
-        <member name="M:NuGet.Common.StringUtility.Split(System.String)">
-            <summary>
-            Split on ; and trim. Null or empty inputs will return an
-            empty array.
-            </summary>
-        </member>
-        <member name="M:NuGet.Common.StringUtility.TrimAndGetNullForEmpty(System.String)">
-            <summary>
-            Trims the provided string and converts empty strings to null.
-            </summary>
-        </member>
-        <member name="M:NuGet.Common.StringUtility.TrimAndExcludeNullOrEmpty(System.String[])">
-            <summary>
-            Trims the provided strings and excludes empty or null strings.
-            </summary>
-        </member>
         <member name="M:NuGet.Common.UriUtility.CreateSourceUri(System.String,System.UriKind)">
             <summary>
             Same as "new Uri" except that it can handle UNIX style paths that start with '/'
@@ -211,6 +200,49 @@
             <returns>If the input can be parsed this will return Uri.LocalPath, if the input 
             is not a URI or fails to parse the original string will be returned.</returns>
             <param name="localOrUriPath">Possible file:// URI path or local path.</param>
+        </member>
+        <member name="T:NuGet.Common.AggregateEnumerableAsync`1">
+            <summary>
+            Aggregates from a list of already ordered enumerables
+            The ordered result will contain only unique values
+            If comparer/EqualityComparer are not provided the default ones for that type will be used.
+            If the provided enumerables are not sorted already, the behavior is undefined
+            </summary>
+        </member>
+        <member name="T:NuGet.Common.AggregateEnumeratorAsync`1">
+            <summary>
+            Aggregates from a list of already ordered enumerables
+            The ordered result will contain only unique values
+            If comparer/EqualityComparer are not provided the default ones for that type will be used.
+            If the provided enumerables are not sorted already, the behavior is undefined
+            </summary>
+        </member>
+        <member name="T:NuGet.Common.IEnumeratorAsync`1">
+            <summary>
+            Supports async iteration over a generic collection.
+            Prior to calling Current, MoveNextAsync needs to be called otherwise the behavior is undefined 
+            </summary>
+            <typeparam name="T">The type of objects to enumerate.This type parameter is covariant. That is, you can use either the type you specified or any type that is more derived. For more information about covariance and contravariance, see Covariance and Contravariance in Generics.</typeparam><filterpriority>1</filterpriority>
+        </member>
+        <member name="P:NuGet.Common.IEnumeratorAsync`1.Current">
+            <summary>
+            Gets the element in the collection at the current position of the enumerator.
+            If <ref>MoveNextAsync</ref> has not been called prior to calling current the behavior is undefined
+            If the last <ref>MoveNextAsync</ref> call returned false then the next call to Current should throw an InvalidOperationException
+            </summary>
+            
+            <returns>
+            The element in the collection at the current position of the enumerator.
+            </returns>
+        </member>
+        <member name="M:NuGet.Common.IEnumeratorAsync`1.MoveNextAsync">
+            <summary>
+            Moves the pointer to the next element in the collection. 
+            </summary>
+            
+            <returns>
+            Success status of the pointer move
+            </returns>
         </member>
         <member name="M:NuGet.Common.CollectorLogger.#ctor(NuGet.Common.ILogger)">
             <summary>
@@ -238,6 +270,17 @@
         <member name="T:NuGet.Common.ILogger">
             <summary>
             A generic interface for logging.
+            </summary>
+        </member>
+        <member name="T:NuGet.Common.DirectoryUtility">
+            <summary>
+            Directory operation helpers.
+            </summary>
+        </member>
+        <member name="M:NuGet.Common.DirectoryUtility.CreateSharedDirectory(System.String)">
+            <summary>
+            Creates all directories and subdirectories in the specified path unless they already exist.
+            New directories can be read and written by all users.
             </summary>
         </member>
         <member name="T:NuGet.Common.FileUtility">

@@ -46,11 +46,6 @@
             Dependency package Id
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Core.PackageDependency.VersionRange">
-            <summary>
-            Range of versions allowed for the depenency
-            </summary>
-        </member>
         <member name="P:NuGet.Packaging.Core.PackageDependency.Include">
             <summary>
             Types to include from the dependency package.
@@ -59,6 +54,11 @@
         <member name="P:NuGet.Packaging.Core.PackageDependency.Exclude">
             <summary>
             Types to exclude from the dependency package.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Core.PackageDependency.VersionRange">
+            <summary>
+            Range of versions allowed for the depenency
             </summary>
         </member>
         <member name="M:NuGet.Packaging.Core.PackageDependency.GetHashCode">

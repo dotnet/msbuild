@@ -886,6 +886,16 @@
             Convert a V2 feed package into a V3 PackageDependencyInfo
             </summary>
         </member>
+        <member name="T:NuGet.Protocol.LegacyFeedCapabilityResourceV2Feed">
+            <summary>
+            A resource for detecting a V2 feed's capabilities based on the metadata document.
+            </summary>
+        </member>
+        <member name="T:NuGet.Protocol.LegacyFeedCapabilityResourceV2Feed.DataServiceMetadataExtractor">
+            <summary>
+            This implementation is copied from NuGet 2.x.
+            </summary>
+        </member>
         <member name="P:NuGet.Protocol.ODataServiceDocumentResourceV2Provider.MaxCacheDuration">
             <summary>
             Maximum amount of time to store index.json
@@ -912,6 +922,11 @@
             Parses Dependencies into actual groups
             </summary>
         </member>
+        <member name="T:NuGet.Protocol.V2FeedPage">
+            <summary>
+            A page of items from a V2 feed as well as a link to get the next page.
+            </summary>
+        </member>
         <member name="T:NuGet.Protocol.V2FeedParser">
             <summary>
             A light weight XML parser for NuGet V2 Feeds
@@ -924,7 +939,7 @@
             <param name="httpSource">HttpSource and message handler containing auth/proxy support</param>
             <param name="baseAddress">base address for all services from this OData service</param>
         </member>
-        <member name="M:NuGet.Protocol.V2FeedParser.#ctor(NuGet.Protocol.HttpSource,System.String,NuGet.Configuration.PackageSource)">
+        <member name="M:NuGet.Protocol.V2FeedParser.#ctor(NuGet.Protocol.HttpSource,System.String,System.String)">
             <summary>
             Creates a V2 parser
             </summary>
@@ -960,6 +975,11 @@
         <member name="M:NuGet.Protocol.V2FeedParser.GetValue(System.Xml.Linq.XElement,System.Xml.Linq.XName)">
             <summary>
             Retrieve an XML value safely
+            </summary>
+        </member>
+        <member name="T:NuGet.Protocol.V2FeedQueryBuilder">
+            <summary>
+            Build the path part of a V2 feed URL. These values are appended to the V2 base URL.
             </summary>
         </member>
         <member name="T:NuGet.Protocol.FindLocalPackagesResourcePackagesConfig">
@@ -1074,6 +1094,26 @@
         <member name="M:NuGet.Protocol.LocalPackageSearchMetadata.Convert(System.String)">
             <summary>
             Convert a string to a URI safely. This will return null if there are errors.
+            </summary>
+        </member>
+        <member name="T:NuGet.Protocol.ServiceIndexEntry">
+            <summary>
+            index.json entry for v3
+            </summary>
+        </member>
+        <member name="P:NuGet.Protocol.ServiceIndexEntry.Uri">
+            <summary>
+            Service Uri
+            </summary>
+        </member>
+        <member name="P:NuGet.Protocol.ServiceIndexEntry.Type">
+            <summary>
+            Service Type
+            </summary>
+        </member>
+        <member name="P:NuGet.Protocol.ServiceIndexEntry.ClientVersion">
+            <summary>
+            Client version
             </summary>
         </member>
         <member name="T:NuGet.Protocol.DependencyInfoResourceV3Provider">
@@ -1263,19 +1303,40 @@
             Time the index was requested
             </summary>
         </member>
-        <member name="P:NuGet.Protocol.ServiceIndexResourceV3.Empty">
+        <member name="P:NuGet.Protocol.ServiceIndexResourceV3.Entries">
             <summary>
-            Empty set of endpoints - needed to efficiently meet indexer contract
+            All service index entries.
             </summary>
         </member>
-        <member name="P:NuGet.Protocol.ServiceIndexResourceV3.Item(System.String)">
+        <member name="M:NuGet.Protocol.ServiceIndexResourceV3.GetServiceEntries(System.String[])">
             <summary>
-            A list of endpoints for a service type
+            Get the list of service entries that best match the current clientVersion and type.
             </summary>
         </member>
-        <member name="P:NuGet.Protocol.ServiceIndexResourceV3.Item(System.String[])">
+        <member name="M:NuGet.Protocol.ServiceIndexResourceV3.GetServiceEntries(NuGet.Versioning.NuGetVersion,System.String[])">
             <summary>
-            A list of endpoints for a service type - in priority order
+            Get the list of service entries that best match the clientVersion and type.
+            </summary>
+        </member>
+        <member name="M:NuGet.Protocol.ServiceIndexResourceV3.GetServiceEntryUri(System.String[])">
+            <summary>
+            Get the best match service URI.
+            </summary>
+        </member>
+        <member name="M:NuGet.Protocol.ServiceIndexResourceV3.GetServiceEntryUris(System.String[])">
+            <summary>
+            Get the list of service URIs that best match the current clientVersion and type.
+            </summary>
+        </member>
+        <member name="M:NuGet.Protocol.ServiceIndexResourceV3.GetServiceEntryUris(NuGet.Versioning.NuGetVersion,System.String[])">
+            <summary>
+            Get the list of service URIs that best match the clientVersion and type.
+            </summary>
+        </member>
+        <member name="M:NuGet.Protocol.ServiceIndexResourceV3.GetValues(Newtonsoft.Json.Linq.JToken)">
+            <summary>
+            Read string values from an array or string.
+            Returns an empty enumerable if the value is null.
             </summary>
         </member>
         <member name="M:NuGet.Protocol.FeedTypeUtility.GetFeedType(NuGet.Configuration.PackageSource)">
@@ -1518,6 +1579,22 @@
         <member name="M:NuGet.Protocol.LocalFolderUtility.GetNupkgsFromDirectory(System.IO.DirectoryInfo,NuGet.Common.ILogger)">
             <summary>
             Find all nupkgs in the top level of a directory.
+            </summary>
+        </member>
+        <member name="M:NuGet.Protocol.StreamExtensions.AsSeekableStreamAsync(System.IO.Stream)">
+            <summary>
+            Read a stream into a memory stream if CanSeek is false.
+            This method is used to ensure that network streams
+            can be read by non-async reads without hanging.
+            
+            Closes the original stream by default.
+            </summary>
+        </member>
+        <member name="M:NuGet.Protocol.StreamExtensions.AsSeekableStreamAsync(System.IO.Stream,System.Boolean)">
+            <summary>
+            Read a stream into a memory stream if CanSeek is false.
+            This method is used to ensure that network streams
+            can be read by non-async reads without hanging.
             </summary>
         </member>
         <member name="M:NuGet.Protocol.TimeoutUtility.StartWithTimeout``1(System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task{``0}},System.TimeSpan,System.String,System.Threading.CancellationToken)">

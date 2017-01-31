@@ -253,7 +253,7 @@
             <param name="packageSpec">A <c>PackageSpec</c> instance.</param>
             <param name="filePath">A file path to write to.</param>
         </member>
-        <member name="P:NuGet.ProjectModel.ProjectRestoreMetadata.OutputType">
+        <member name="P:NuGet.ProjectModel.ProjectRestoreMetadata.ProjectStyle">
             <summary>
             Restore behavior type.
             </summary>
@@ -321,6 +321,34 @@
             instead of lowercase.
             </summary>
         </member>
+        <member name="P:NuGet.ProjectModel.ProjectRestoreMetadata.Files">
+            <summary>
+            Asset files. These should be equivalent to the files that would be
+            in the nupkg after packing the project.
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.ProjectRestoreMetadata.ValidateRuntimeAssets">
+            <summary>
+            Compatibility check for runtime framework assets.
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.ProjectRestoreMetadata.SkipContentFileWrite">
+            <summary>
+            True if this is an XPlat PackageReference project.
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.ProjectRestoreMetadataFile.PackagePath">
+            <summary>
+            Relative path that would be used within a package.
+            This will be used to determine the asset type.
+            Example: lib/net45/a.dll
+            </summary>
+        </member>
+        <member name="P:NuGet.ProjectModel.ProjectRestoreMetadataFile.AbsolutePath">
+            <summary>
+            Absolute path on disk.
+            </summary>
+        </member>
         <member name="P:NuGet.ProjectModel.ProjectRestoreMetadataFrameworkInfo.FrameworkName">
             <summary>
             Target framework
@@ -347,32 +375,32 @@
             Full path to the msbuild project file.
             </summary>
         </member>
-        <member name="F:NuGet.ProjectModel.RestoreOutputType.Unknown">
+        <member name="F:NuGet.ProjectModel.ProjectStyle.Unknown">
             <summary>
             Unknown
             </summary>
         </member>
-        <member name="F:NuGet.ProjectModel.RestoreOutputType.UAP">
+        <member name="F:NuGet.ProjectModel.ProjectStyle.ProjectJson">
             <summary>
             UAP style, project.lock.json is generated next to project.json
             </summary>
         </member>
-        <member name="F:NuGet.ProjectModel.RestoreOutputType.NETCore">
+        <member name="F:NuGet.ProjectModel.ProjectStyle.PackageReference">
             <summary>
             MSBuild style, project.assets.json is generated in the RestoreOutputPath folder
             </summary>
         </member>
-        <member name="F:NuGet.ProjectModel.RestoreOutputType.DotnetCliTool">
+        <member name="F:NuGet.ProjectModel.ProjectStyle.DotnetCliTool">
             <summary>
             Tool
             </summary>
         </member>
-        <member name="F:NuGet.ProjectModel.RestoreOutputType.Standalone">
+        <member name="F:NuGet.ProjectModel.ProjectStyle.Standalone">
             <summary>
             Non-MSBuild project with no project dependencies.
             </summary>
         </member>
-        <member name="F:NuGet.ProjectModel.RestoreOutputType.PackagesConfig">
+        <member name="F:NuGet.ProjectModel.ProjectStyle.PackagesConfig">
             <summary>
             Packages.config project
             </summary>

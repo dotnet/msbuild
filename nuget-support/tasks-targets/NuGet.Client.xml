@@ -46,7 +46,7 @@
             Pattern used to identify MSBuild targets and props files
             </summary>
         </member>
-        <member name="P:NuGet.Client.ManagedCodeConventions.ManagedCodePatterns.MSBuildCrossTargetingFiles">
+        <member name="P:NuGet.Client.ManagedCodeConventions.ManagedCodePatterns.MSBuildMultiTargetingFiles">
             <summary>
             Pattern used to identify MSBuild global targets and props files
             </summary>

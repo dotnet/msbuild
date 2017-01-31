@@ -55,6 +55,47 @@
             Output items
             </summary>
         </member>
+        <member name="T:NuGet.Build.Tasks.GetRestoreProjectFrameworks">
+            <summary>
+            Determine the project's targetframework(s) based
+            on the available properties.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreProjectFrameworks.ProjectPath">
+            <summary>
+            Full path to the msbuild project.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreProjectFrameworks.TargetFrameworkMoniker">
+            <summary>
+            Optional TargetFrameworkMoniker property value.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreProjectFrameworks.TargetPlatformIdentifier">
+            <summary>
+            Optional TargetPlatformIdentifier property value.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreProjectFrameworks.TargetPlatformVersion">
+            <summary>
+            Optional TargetPlatformVersion property value.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreProjectFrameworks.TargetFrameworks">
+            <summary>
+            Optional TargetFrameworks property value.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreProjectFrameworks.TargetFramework">
+            <summary>
+            Optional TargetFrameworks property value.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreProjectFrameworks.ProjectTargetFrameworks">
+            <summary>
+            ; delimited list of target frameworks for the project.
+            </summary>
+        </member>
         <member name="P:NuGet.Build.Tasks.GetRestoreProjectJsonPathTask.ProjectPath">
             <summary>
             Full path to the msbuild project.
@@ -68,6 +109,11 @@
         <member name="P:NuGet.Build.Tasks.GetRestoreProjectReferencesTask.ProjectUniqueName">
             <summary>
             Full path to the msbuild project.
+            </summary>
+        </member>
+        <member name="P:NuGet.Build.Tasks.GetRestoreProjectReferencesTask.ParentProjectPath">
+            <summary>
+            Root project path used for resolving the absolute path.
             </summary>
         </member>
         <member name="P:NuGet.Build.Tasks.GetRestoreProjectReferencesTask.TargetFrameworks">

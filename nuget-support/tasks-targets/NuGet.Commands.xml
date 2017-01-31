@@ -403,12 +403,12 @@
         </member>
         <member name="P:NuGet.Commands.Strings.Log_RestoreComplete">
             <summary>
-               Looks up a localized string similar to Restore completed in {0}ms for {1}..
+               Looks up a localized string similar to Restore completed in {0} for {1}..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Log_RestoreFailed">
             <summary>
-               Looks up a localized string similar to Restore failed in {0}ms for {1}..
+               Looks up a localized string similar to Restore failed in {0} for {1}..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Log_RestoringPackages">
@@ -716,6 +716,17 @@
             Shared code to run the "push" command from the command line projects
             </summary>
         </member>
+        <member name="T:NuGet.Commands.ListCommandRunner">
+            <summary>
+            Command Runner used to run the business logic for nuget list command
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.ListCommandRunner.ExecuteCommand(NuGet.Commands.ListArgs)">
+            <summary>
+            Executes the logic for nuget list command.
+            </summary>
+            <returns></returns>
+        </member>
         <member name="M:NuGet.Commands.CompatibilityIssue.FormatMessage(System.String,System.String,System.String)">
             <summary>
             Build a incompatible error message for either a package or project
@@ -737,60 +748,51 @@
             The existing lock file. This is null if no lock file was provided on the <see cref="T:NuGet.Commands.RestoreRequest"/>.
             </summary>
         </member>
+        <member name="P:NuGet.Commands.IRestoreResult.MSBuildOutputFiles">
+            <summary>
+            Props and targets files to be written to disk.
+            </summary>
+        </member>
         <member name="M:NuGet.Commands.LockFileBuilder.IsAllowedLibraryFile(System.String)">
             <summary>
             True if the file should be added to the lock file library
             Fale if it is an OPC file or empty directory
             </summary>
         </member>
-        <member name="P:NuGet.Commands.MSBuildRestoreImportGroup.Position">
+        <member name="P:NuGet.Commands.MSBuildOutputFile.Path">
+            <summary>
+            Output path on disk.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.MSBuildOutputFile.Content">
+            <summary>
+            MSBuild file content. This will be null for files
+            that should be removed.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.MSBuildRestoreItemGroup.Position">
             <summary>
             Optional position arguement used when ordering groups in the output file.
             </summary>
         </member>
-        <member name="P:NuGet.Commands.MSBuildRestoreImportGroup.Conditions">
+        <member name="P:NuGet.Commands.MSBuildRestoreItemGroup.Conditions">
             <summary>
             Conditions applied to the item group. These will be AND'd together.
             </summary>
         </member>
-        <member name="P:NuGet.Commands.MSBuildRestoreImportGroup.Imports">
+        <member name="P:NuGet.Commands.MSBuildRestoreItemGroup.Items">
             <summary>
-            Project paths to import.
+            Items or imports.
             </summary>
         </member>
-        <member name="P:NuGet.Commands.MSBuildRestoreImportGroup.Condition">
+        <member name="P:NuGet.Commands.MSBuildRestoreItemGroup.RootName">
+            <summary>
+            Root element name.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.MSBuildRestoreItemGroup.Condition">
             <summary>
             Combined conditions
-            </summary>
-        </member>
-        <member name="F:NuGet.Commands.MSBuildRestoreResult.MacroCandidates">
-            <summary>
-            The macros that we may use in MSBuild to replace path roots.
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.MSBuildRestoreResult.Success">
-            <summary>
-            Gets a boolean indicating if the necessary MSBuild file could be generated
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.MSBuildRestoreResult.RepositoryRoot">
-            <summary>
-            Gets the root of the repository containing packages with MSBuild files
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.MSBuildRestoreResult.Props">
-            <summary>
-            Gets a list of MSBuild props files provided by packages during this restore
-            </summary>
-        </member>
-        <member name="P:NuGet.Commands.MSBuildRestoreResult.Targets">
-            <summary>
-            Gets a list of MSBuild targets files provided by packages during this restore
-            </summary>
-        </member>
-        <member name="M:NuGet.Commands.MSBuildRestoreResult.HasChanges(System.Xml.Linq.XDocument,System.String,NuGet.Common.ILogger)">
-            <summary>
-            Check if the file has changes compared to the original on disk.
             </summary>
         </member>
         <member name="T:NuGet.Commands.RestoreCommandProviders">
@@ -896,7 +898,7 @@
             This includes both remote and local package providers.
             </summary>
         </member>
-        <member name="P:NuGet.Commands.RestoreRequest.RestoreOutputType">
+        <member name="P:NuGet.Commands.RestoreRequest.ProjectStyle">
             <summary>
             Defines the paths and behavior for outputs
             </summary>
@@ -904,6 +906,11 @@
         <member name="P:NuGet.Commands.RestoreRequest.RestoreOutputPath">
             <summary>
             Restore output path
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.RestoreRequest.ValidateRuntimeAssets">
+            <summary>
+            Compatibility options
             </summary>
         </member>
         <member name="P:NuGet.Commands.RestoreResult.LockFilePath">
@@ -914,6 +921,16 @@
         <member name="P:NuGet.Commands.RestoreResult.RestoreGraphs">
             <summary>
             Gets the resolved dependency graphs produced by the restore operation
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.RestoreResult.MSBuildOutputFiles">
+            <summary>
+            Props and targets files to be written to disk.
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.RestoreResult.ProjectStyle">
+            <summary>
+            Restore type.
             </summary>
         </member>
         <member name="P:NuGet.Commands.RestoreResult.LockFile">
@@ -972,12 +989,17 @@
             Shared code to run the "restore" command for dotnet restore, nuget.exe, and VS.
             </summary>
         </member>
+        <member name="M:NuGet.Commands.RestoreRunner.RunAsync(NuGet.Commands.RestoreArgs,System.Threading.CancellationToken)">
+            <summary>
+            Create requests, execute requests, and commit restore results.
+            </summary>
+        </member>
         <member name="M:NuGet.Commands.RestoreRunner.Run(NuGet.Commands.RestoreArgs)">
             <summary>
             Create requests, execute requests, and commit restore results.
             </summary>
         </member>
-        <member name="M:NuGet.Commands.RestoreRunner.Run(System.Collections.Generic.IEnumerable{NuGet.Commands.RestoreSummaryRequest},NuGet.Commands.RestoreArgs)">
+        <member name="M:NuGet.Commands.RestoreRunner.RunAsync(System.Collections.Generic.IEnumerable{NuGet.Commands.RestoreSummaryRequest},NuGet.Commands.RestoreArgs,System.Threading.CancellationToken)">
             <summary>
             Execute and commit restore requests.
             </summary>
@@ -1138,20 +1160,46 @@
             DG v2 related validation error.
             </summary>
         </member>
-        <member name="M:NuGet.Commands.BuildAssetsUtils.ForceWriteTargets">
+        <member name="F:NuGet.Commands.BuildAssetsUtils.MacroCandidates">
             <summary>
-            Check if NUGET_XPROJ_WRITE_TARGETS is true.
+            The macros that we may use in MSBuild to replace path roots.
             </summary>
         </member>
-        <member name="M:NuGet.Commands.BuildAssetsUtils.GetMSBuildAssets(NuGet.DependencyResolver.RemoteWalkContext,NuGet.Commands.RestoreTargetGraph,NuGet.ProjectModel.PackageSpec,System.Collections.Generic.Dictionary{NuGet.Commands.RestoreTargetGraph,System.Collections.Generic.Dictionary{System.String,NuGet.LibraryModel.LibraryIncludeFlags}},NuGet.ContentModel.PatternSet)">
+        <member name="M:NuGet.Commands.BuildAssetsUtils.WriteFiles(System.Collections.Generic.IEnumerable{NuGet.Commands.MSBuildOutputFile},NuGet.Common.ILogger)">
             <summary>
-            Find all included msbuild assets for a graph.
+            Write XML to disk.
+            Delete files which do not have new XML.
             </summary>
         </member>
-        <member name="M:NuGet.Commands.BuildAssetsUtils.AddPropsAndTargets(System.Collections.Generic.IReadOnlyList{NuGet.Repositories.NuGetv3LocalRepository},NuGet.Packaging.Core.PackageIdentity,NuGet.ContentModel.ContentItemGroup,NuGet.Commands.BuildAssetsUtils.TargetsAndProps)">
+        <member name="M:NuGet.Commands.BuildAssetsUtils.GenerateMultiTargetFailureFiles(System.String,System.String,NuGet.ProjectModel.ProjectStyle)">
             <summary>
-            Add all valid targets and props to the passed in lists.
-            Modifies targetsAndProps
+            Create MSBuild targets and props files.
+            Null will be returned for files that should be removed.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.BuildAssetsUtils.AddNuGetPropertiesToFirstImport(System.Collections.Generic.IEnumerable{NuGet.Commands.MSBuildOutputFile},System.Collections.Generic.IEnumerable{System.String},System.String,NuGet.ProjectModel.ProjectStyle,System.String,System.Boolean)">
+            <summary>
+            Add standard properties to only props file if it exists, otherwise the targets.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.BuildAssetsUtils.AddNuGetProperties(System.Xml.Linq.XDocument,System.Collections.Generic.IEnumerable{System.String},System.String,NuGet.ProjectModel.ProjectStyle,System.String,System.Boolean)">
+            <summary>
+            Apply standard properties in a property group.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.BuildAssetsUtils.GenerateEmptyImportsFile">
+            <summary>
+            Get empty file with the base properties.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.BuildAssetsUtils.GenerateMSBuildFile(System.Collections.Generic.List{NuGet.Commands.MSBuildRestoreItemGroup},NuGet.ProjectModel.ProjectStyle)">
+            <summary>
+            Returns null if the result should not exist on disk.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.BuildAssetsUtils.HasChanges(System.Xml.Linq.XDocument,System.String,NuGet.Common.ILogger)">
+            <summary>
+            Check if the file has changes compared to the original on disk.
             </summary>
         </member>
         <member name="M:NuGet.Commands.IncludeFlagUtils.GetDependencyType(NuGet.DependencyResolver.GraphNode{NuGet.DependencyResolver.RemoteResolveResult},NuGet.DependencyResolver.GraphNode{NuGet.DependencyResolver.RemoteResolveResult})">
@@ -1182,11 +1230,26 @@
             Node item
             </summary>
         </member>
+        <member name="M:NuGet.Commands.LockFileUtils.CreateLockFileTargetProject(NuGet.DependencyResolver.GraphItem{NuGet.DependencyResolver.RemoteResolveResult},NuGet.LibraryModel.LibraryIdentity,NuGet.LibraryModel.LibraryIncludeFlags,NuGet.Commands.RestoreTargetGraph,NuGet.ProjectModel.ProjectStyle)">
+            <summary>
+            Create a library for a project.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.LockFileUtils.ConvertToProjectPaths(System.Collections.Generic.Dictionary{System.String,NuGet.ProjectModel.ProjectRestoreMetadataFile},System.String,System.Collections.Generic.IEnumerable{NuGet.ProjectModel.LockFileItem})">
+            <summary>
+            Convert from the expected nupkg path to the on disk path.
+            </summary>
+        </member>
         <member name="M:NuGet.Commands.LockFileUtils.GetLockFileItems(System.Collections.Generic.IReadOnlyList{NuGet.ContentModel.SelectionCriteria},NuGet.ContentModel.ContentItemCollection,NuGet.ContentModel.PatternSet[])">
             <summary>
             Create lock file items for the best matching group.
             </summary>
             <remarks>Enumerate this once after calling.</remarks>
+        </member>
+        <member name="M:NuGet.Commands.LockFileUtils.GetBuildItemsForPackageId(System.Collections.Generic.IEnumerable{NuGet.ProjectModel.LockFileItem},System.String)">
+            <summary>
+            Get packageId.targets and packageId.props
+            </summary>
         </member>
         <member name="M:NuGet.Commands.LockFileUtils.CreateCriteria(NuGet.Commands.RestoreTargetGraph,NuGet.Frameworks.NuGetFramework)">
             <summary>
@@ -1218,6 +1281,17 @@
             <param name="groups">Library items grouped by RID.</param>
             <param name="assetType">Lock file section the items apply to.</param>
         </member>
+        <member name="M:NuGet.Commands.LockFileUtils.ToDirectorySeparator(System.String)">
+            <summary>
+            Replace / with the local directory separator if needed.
+            For OSX and Linux the same string is returned.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.LockFileUtils.ExcludeItems(NuGet.ProjectModel.LockFileTargetLibrary,NuGet.LibraryModel.LibraryIncludeFlags)">
+            <summary>
+            Replace excluded asset groups with _._ if they have > 0 items.
+            </summary>
+        </member>
         <member name="T:NuGet.Commands.MSBuildRestoreUtility">
             <summary>
             Helpers for dealing with dg files and processing msbuild related inputs.
@@ -1241,6 +1315,11 @@
         <member name="M:NuGet.Commands.MSBuildRestoreUtility.GetPackageSpec(System.Collections.Generic.IEnumerable{NuGet.Commands.IMSBuildItem})">
             <summary>
             Convert MSBuild items to a PackageSpec.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.MSBuildRestoreUtility.AddPlaceHolderFiles(NuGet.ProjectModel.PackageSpec,System.String)">
+            <summary>
+            Add placeholder files, these will be used under the compile and runtime sections.
             </summary>
         </member>
         <member name="M:NuGet.Commands.MSBuildRestoreUtility.GetVersion(NuGet.Commands.IMSBuildItem)">
@@ -1351,7 +1430,7 @@
         </member>
         <member name="P:NuGet.Commands.Rules.AnalysisResources.DefaultSpecValueSolution">
             <summary>
-               Looks up a localized string similar to Replace with an appropriate value or remove and it and rebuild your package..
+               Looks up a localized string similar to Replace it with an appropriate value or remove it and rebuild your package..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Rules.AnalysisResources.DefaultSpecValueTitle">
@@ -1372,6 +1451,21 @@
         <member name="P:NuGet.Commands.Rules.AnalysisResources.InvalidFrameworkTitle">
             <summary>
                Looks up a localized string similar to Invalid framework folder..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Rules.AnalysisResources.InvalidPrereleaseDependency_Description">
+            <summary>
+               Looks up a localized string similar to A stable release of a package should not have a prerelease dependency..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Rules.AnalysisResources.InvalidPrereleaseDependency_Solution">
+            <summary>
+               Looks up a localized string similar to Either modify the version spec of dependency &quot;{0}&quot; or update the version field in the nuspec..
+            </summary>
+        </member>
+        <member name="P:NuGet.Commands.Rules.AnalysisResources.InvalidPrereleaseDependency_Title">
+            <summary>
+               Looks up a localized string similar to Prerelease dependency in stable package..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Rules.AnalysisResources.LegacyVersionDescription">
@@ -1523,6 +1617,52 @@
         <member name="T:NuGet.Commands.CommandRunnerUtility">
             <summary>
             Helper functions for shared command runners (push, delete, etc)
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.MSBuildProjectFrameworkUtility.GetProjectFrameworkStrings(System.String,System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            Determine the target framework of an msbuild project.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.MSBuildProjectFrameworkUtility.GetProjectFrameworkStrings(System.String,System.String,System.String,System.String,System.String,System.String,System.Boolean,System.Boolean)">
+            <summary>
+            Determine the target framework of an msbuild project.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.MSBuildProjectFrameworkUtility.GetProjectFrameworks(System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Parse project framework strings into NuGetFrameworks.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.MSBuildProjectFrameworkUtility.GetProjectFrameworkReplacement(NuGet.Frameworks.NuGetFramework)">
+            <summary>
+            Parse existing nuget framework for .net core 4.5.1 or 4.5 and return compatible framework instance
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.MSBuildStringUtility.Split(System.String)">
+            <summary>
+            Split on ; and trim. Null or empty inputs will return an
+            empty array.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.MSBuildStringUtility.TrimAndGetNullForEmpty(System.String)">
+            <summary>
+            Trims the provided string and converts empty strings to null.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.MSBuildStringUtility.TrimAndExcludeNullOrEmpty(System.String[])">
+            <summary>
+            Trims the provided strings and excludes empty or null strings.
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.MSBuildStringUtility.IsTrue(System.String)">
+            <summary>
+            True if the property is set to true
+            </summary>
+        </member>
+        <member name="M:NuGet.Commands.MSBuildStringUtility.IsTrueOrEmpty(System.String)">
+            <summary>
+            True if the property is set to true or empty.
             </summary>
         </member>
         <member name="M:NuGet.Commands.RequestRuntimeUtility.GetRestoreRuntimes(NuGet.Commands.RestoreRequest)">

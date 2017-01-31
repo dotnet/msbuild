@@ -752,6 +752,29 @@
             Order dependencies by children first.
             </summary>
         </member>
+        <member name="P:NuGet.Packaging.VersionFolderPathResolver.RootPath">
+            <summary>
+            Packages directory root folder.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.VersionFolderPathResolver.IsLowerCase">
+            <summary>
+            True if package id and versions are made lowercase.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.VersionFolderPathResolver.#ctor(System.String)">
+            <summary>
+            VersionFolderPathResolver
+            </summary>
+            <param name="rootPath">Packages directory root folder.</param>
+        </member>
+        <member name="M:NuGet.Packaging.VersionFolderPathResolver.#ctor(System.String,System.Boolean)">
+            <summary>
+            VersionFolderPathResolver
+            </summary>
+            <param name="rootPath">Packages directory root folder.</param>
+            <param name="isLowercase">True if package id and versions are made lowercase.</param>
+        </member>
         <member name="T:NuGet.Packaging.INuspecReader">
             <summary>
             A development package nuspec reader
@@ -1066,11 +1089,6 @@
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_InvalidMinClientVersion">
             <summary>
                Looks up a localized string similar to The &apos;minClientVersion&apos; attribute in the package manifest has invalid value. It must be a valid version string..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_InvalidPrereleaseDependency">
-            <summary>
-               Looks up a localized string similar to A stable release of a package should not have a prerelease dependency. Either modify the version spec of dependency &quot;{0}&quot; or update the version field in the nuspec..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_InvalidReference">
