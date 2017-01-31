@@ -294,12 +294,22 @@ namespace Microsoft.Build.Shared
             return FileUtilities.CombinePaths(visualStudioRoot, "MSBuild", CurrentToolsVersion, "Bin", "MSBuild.exe");
         }
 
+        private static string GetProcessFromCommandLine()
+        {
+#if FEATURE_GET_COMMANDLINE
+            return Environment.GetCommandLineArgs()[0];
+#else
+            return null;
+#endif
+        }
+
         private static bool CheckIfRunningTests()
         {
             var runningProcess = s_getProcessFromRunningProcess();
+            var processCommandLine = s_getProcessFromCommandLine();
 
             // First check if we're running in a known test runner.
-            if (IsProcessInList(runningProcess, s_testRunners))
+            if (IsProcessInList(runningProcess, s_testRunners) || (processCommandLine != null && IsProcessInList(processCommandLine, s_testRunners)))
             {
 #if FEATURE_APPDOMAIN
                 // If we are, then ensure we're running MSBuild's tests by seeing if any of our assemblies are loaded.
@@ -356,10 +366,12 @@ namespace Microsoft.Build.Shared
         /// Resets the current singleton instance (for testing).
         /// </summary>
         internal static void ResetInstance_ForUnitTestsOnly(Func<string> getProcessFromRunningProcess = null,
+            Func<string> getProcessFromCommandLine = null,
             Func<string> getExecutingAssemblyPath = null, Func<string> getAppContextBaseDirectory = null,
             Func<IEnumerable<VisualStudioInstance>> getVisualStudioInstances = null)
         {
             s_getProcessFromRunningProcess = getProcessFromRunningProcess ?? GetProcessFromRunningProcess;
+            s_getProcessFromCommandLine = getProcessFromCommandLine ?? GetProcessFromCommandLine;
             s_getExecutingAssemblyPath = getExecutingAssemblyPath ?? GetExecutingAssemblyPath;
             s_getAppContextBaseDirectory = getAppContextBaseDirectory ?? GetAppContextBaseDirectory;
             s_getVisualStudioInstances = getVisualStudioInstances ?? VisualStudioLocationHelper.GetInstances;
@@ -368,6 +380,7 @@ namespace Microsoft.Build.Shared
         }
 
         private static Func<string> s_getProcessFromRunningProcess = GetProcessFromRunningProcess;
+        private static Func<string> s_getProcessFromCommandLine = GetProcessFromCommandLine;
         private static Func<string> s_getExecutingAssemblyPath = GetExecutingAssemblyPath;
         private static Func<string> s_getAppContextBaseDirectory = GetAppContextBaseDirectory;
         private static Func<IEnumerable<VisualStudioInstance>> s_getVisualStudioInstances = VisualStudioLocationHelper.GetInstances;
