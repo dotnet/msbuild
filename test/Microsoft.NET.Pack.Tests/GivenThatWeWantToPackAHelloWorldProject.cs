@@ -37,10 +37,14 @@ namespace Microsoft.NET.Pack.Tests
             XElement filesSection = nuspec.Root.Element(ns + "files");
 
             var fileTargets = filesSection.Elements().Select(files => files.Attribute("target").Value).ToList();
-            fileTargets.Should().BeEquivalentTo(
+
+            var expectedFileTargets = new[]
+            {
                 @"lib\netcoreapp1.0\HelloWorld.runtimeconfig.json",
                 @"lib\netcoreapp1.0\HelloWorld.dll"
-                );
+            }.Select(p => p.Replace('\\', Path.DirectorySeparatorChar));
+
+            fileTargets.Should().BeEquivalentTo(expectedFileTargets);
         }
     }
 }
