@@ -1546,10 +1546,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!--
       Select the moniker to send to each project reference  if not already set. NugetTargetMoniker (NTM) is preferred by default over 
       TargetFrameworkMoniker (TFM) because it is required to disambiguate the UWP case where TFM is fixed at .NETCore,Version=v5.0 and 
-      has floating NTM=UAP,Version=vX.Y.Z
+      has floating NTM=UAP,Version=vX.Y.Z. However, in other cases (classic PCLs), NTM contains multiple values and that will cause the MSBuild
+      invocation below to fail by passing invalid properties. Therefore we do not use the NTM if it contains a semicolon.
     -->
     <PropertyGroup Condition="'$(ReferringTargetFrameworkForProjectReferences)' == ''">
-      <ReferringTargetFrameworkForProjectReferences Condition="'$(NugetTargetMoniker)' != ''">$(NugetTargetMoniker)</ReferringTargetFrameworkForProjectReferences>
+      <ReferringTargetFrameworkForProjectReferences Condition="'$(NugetTargetMoniker)' != '' and !$(NuGetTargetMoniker.Contains(';'))">$(NugetTargetMoniker)</ReferringTargetFrameworkForProjectReferences>
       <ReferringTargetFrameworkForProjectReferences Condition="'$(NugetTargetMoniker)' == ''">$(TargetFrameworkMoniker)</ReferringTargetFrameworkForProjectReferences>
     </PropertyGroup>
 
