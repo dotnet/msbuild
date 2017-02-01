@@ -2098,7 +2098,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 <Target Name='t'>
                     <ItemGroup>
                         <i1 Include='" + files.First() + ";" + files.ElementAt(1) + @";other'/> 
-                        <i1 Remove='$(temp)" + Path.DirectorySeparatorChar + @"*.tmp'/>
+                        <i1 Remove='$(temp)*.tmp'/>
                     </ItemGroup>
                 </Target></Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
@@ -2106,7 +2106,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 properties.Set(
                     ProjectPropertyInstance.Create(
                         "TEMP",
-                        NativeMethodsShared.IsWindows ? Environment.GetEnvironmentVariable("TEMP") : Path.GetTempPath()));
+                        NativeMethodsShared.IsWindows ? Environment.GetEnvironmentVariable("TEMP") + Path.DirectorySeparatorChar : Path.GetTempPath()));
                 Lookup lookup = LookupHelpers.CreateLookup(properties);
                 ExecuteTask(task, lookup);
 
