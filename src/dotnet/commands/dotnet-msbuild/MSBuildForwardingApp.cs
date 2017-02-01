@@ -41,10 +41,12 @@ namespace Microsoft.DotNet.Tools.MSBuild
                 {
                     Type loggerType = typeof(MSBuildLogger);
 
-                    argsToForward = argsToForward.Concat(new[]
-                    {
-                        $"/Logger:{loggerType.FullName},{loggerType.GetTypeInfo().Assembly.Location}"
-                    });
+                    argsToForward = argsToForward
+                        .Select(Escape)
+                        .Concat(new[]
+                        {
+                            $"/Logger:{loggerType.FullName},{loggerType.GetTypeInfo().Assembly.Location}"
+                        });
                 }
                 catch (Exception)
                 {
@@ -76,6 +78,11 @@ namespace Microsoft.DotNet.Tools.MSBuild
         {
             return app.Option("-v|--verbosity", LocalizableStrings.VerbosityOptionDescription, CommandOptionType.SingleValue);
         }
+
+        private static string Escape(string arg) =>
+             (arg.StartsWith("/p:RestoreSources=", StringComparison.OrdinalIgnoreCase)) ?
+                arg.Replace(";", "%3B") : // <-- this is a workaround for https://github.com/Microsoft/msbuild/issues/1622
+                arg;
 
         private static string GetMSBuildExePath()
         {

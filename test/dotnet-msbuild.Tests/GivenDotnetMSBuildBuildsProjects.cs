@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using FluentAssertions;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Tools.MSBuild;
@@ -77,6 +78,30 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         }
 
         [Fact]
+        public void WhenRestoreSourcesStartsWithUnixPathThenHttpsSourceIsParsedCorrectly()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
+            // this is a workaround for https://github.com/Microsoft/msbuild/issues/1622
+            var testInstance = TestAssets.Get("MSBuildTestApp")
+                                        .CreateInstance()
+                                        .WithSourceFiles()
+                                        .WithRestoreFiles();
+
+            var root = testInstance.Root;
+            var somePathThatExists = "/usr/local/bin";
+
+            var result = new DotnetCommand()
+                .WithWorkingDirectory(root)
+                .Execute($"msbuild /p:RestoreSources={somePathThatExists};https://api.nuget.org/v3/index.json /t:restore MSBuildTestApp.csproj");
+         
+            result.Should().Pass();
+        }
+
+        [Fact]
         public void WhenDotnetRunHelpIsInvokedAppArgumentsTextIsIncludedInOutput()
         {
             const string AppArgumentsText = "Arguments passed to the application that is being run.";
@@ -85,7 +110,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             var result = new TestCommand("dotnet")
                 .WithWorkingDirectory(projectDirectory.Path)
                 .ExecuteWithCapturedOutput("run --help");
-            
+
             result.ExitCode.Should().Be(0);
             result.StdOut.Should().Contain(AppArgumentsText);
         }
