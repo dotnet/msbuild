@@ -13,7 +13,6 @@
     <PackageTargetFallback>dotnet5.4;portable-net451+win8</PackageTargetFallback>
     <OutDir>$(OutDir)Tests\</OutDir>
     <GenerateDependencyFile>false</GenerateDependencyFile>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <NonShipping>true</NonShipping>
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>

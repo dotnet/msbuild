@@ -13,7 +13,6 @@
     <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netstandard1.3</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">netstandard1.3;net46</TargetFrameworks>
     <GenerateDependencyFile>false</GenerateDependencyFile>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net46'">
