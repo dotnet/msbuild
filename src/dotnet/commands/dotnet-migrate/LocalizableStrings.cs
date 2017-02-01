@@ -17,11 +17,11 @@ Defaults to current directory if nothing is specified.";
 
         public const string CmdTemplateDescription = "Base MSBuild template to use for migrated app. The default is the project included in dotnet new.";
 
-        public const string CmdVersionDescription = "The version of the sdk package that will be referenced in the migrated app. The default is the version of the sdk in dotnet new.";
+        public const string CmdVersionDescription = "The version of the SDK package that will be referenced in the migrated app. The default is the version of the SDK in dotnet new.";
 
         public const string CmdXprojFileDescription = "The path to the xproj file to use. Required when there is more than one xproj in a project directory.";
 
-        public const string CmdSkipProjectReferencesDescription = "Skip migrating project references. By default project references are migrated recursively.";
+        public const string CmdSkipProjectReferencesDescription = "Skip migrating project references. By default, project references are migrated recursively.";
 
         public const string CmdReportFileDescription = "Output migration report to the given file in addition to the console.";
 
@@ -31,6 +31,6 @@ Defaults to current directory if nothing is specified.";
 
         public const string MigrationFailedError = "Migration failed.";
 
-        public const string MigrationAdditionalHelp = "Your project has been migrated to the .csproj format and can be used with this build of the .NET Core Tools.  Please visit https://aka.ms/coremigration to report issues or ask for help.";
+        public const string MigrationAdditionalHelp = "Your project has been migrated to the .csproj format and can be used with this build of the .NET Core Tools.  Visit https://aka.ms/coremigration to report issues or ask for help.";
     }
 }
