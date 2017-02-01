@@ -54,7 +54,4 @@
 
     <Copy SourceFiles="%(TestCopyLocalAssembly.FullPath)" DestinationFolder="$(OutDir)" />
   </Target>
-
-  <Import Project="..\..\..\build\Targets\ProducesNoOutput.Imports.props" />
-
 </Project>
