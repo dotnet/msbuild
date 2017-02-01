@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <VSTemplate Version="3.0.0" Type="Project" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" xmlns:sdk="http://schemas.microsoft.com/developer/vstemplate-sdkextension/2010">
   <TemplateData>
-    <Name>xUnit Test Project (.NET Core)</Name>
-    <Description>A project that contains xunit tests that can run on .NET Core on Windows, Linux and MacOS</Description>
+    <Name Package="{860A27C0-B665-47F3-BC12-637E16A1050A}" ID="11" />
+    <Description Package="{860A27C0-B665-47F3-BC12-637E16A1050A}" ID="12" />
     <Icon Package="{52CBD135-1F97-2580-011F-C7CD052E44DE}" ID="531"/>
     <ProjectType>CSharp</ProjectType>
     <RequiredFrameworkVersion>2.0</RequiredFrameworkVersion>
