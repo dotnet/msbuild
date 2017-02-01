@@ -1512,61 +1512,23 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   -->
   <Target Name="_GetProjectReferenceTargetFrameworkProperties"
           Outputs="%(_MSBuildProjectReferenceExistent.Identity)">
-    <!--
-      Honor SkipGetTargetFrameworkProperties=true metadata on project references
-      to mean that the project reference is known not to target multiple frameworks
-      and the mechanism here for selecting the best one can be skipped as an optimization.
-
-      We give this treatment to .vcxproj by default since no .vcxproj can target more
-      than one framework.
-   -->
-   <ItemGroup>
-      <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' == '' and '%(Extension)' == '.vcxproj'">
-        <SkipGetTargetFrameworkProperties>true</SkipGetTargetFrameworkProperties>
-      </_MSBuildProjectReferenceExistent>
-   </ItemGroup>
-
-    <!--
-       Allow project references to specify which target framework properties to set and their values
-       without consulting the referenced project. This has two use cases:
-
-       1. A caller may wish to pick a compatible but sub-optimal target framework. For example,
-          to unit test the .NETStandard implementation using a .NETFramework caller even though
-          there is also a .NETFramework implementation.
-
-       2. As an escape hatch for cases where the compatibility check performed by 
-          GetTargetFrameworkProperties is faulty.
-    -->
-    <ItemGroup>
-      <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.SetTargetFramework)' != ''">
-        <SkipGetTargetFrameworkProperties>true</SkipGetTargetFrameworkProperties>
-      </_MSBuildProjectReferenceExistent>
-    </ItemGroup>
-
-    <!--
-      Select the moniker to send to each project reference  if not already set. NugetTargetMoniker (NTM) is preferred by default over 
-      TargetFrameworkMoniker (TFM) because it is required to disambiguate the UWP case where TFM is fixed at .NETCore,Version=v5.0 and 
-      has floating NTM=UAP,Version=vX.Y.Z
-    -->
-    <PropertyGroup Condition="'$(ReferringTargetFrameworkForProjectReferences)' == ''">
-      <ReferringTargetFrameworkForProjectReferences Condition="'$(NugetTargetMoniker)' != ''">$(NugetTargetMoniker)</ReferringTargetFrameworkForProjectReferences>
-      <ReferringTargetFrameworkForProjectReferences Condition="'$(NugetTargetMoniker)' == ''">$(TargetFrameworkMoniker)</ReferringTargetFrameworkForProjectReferences>
-    </PropertyGroup>
-
+    <!-- As a mitigation for https://github.com/Microsoft/msbuild/issues/1276
+       .vcxproj is treated specially to avoid the cost of double-evaluating
+       for easily-identifiable-as-not-cross-targeting C++ projects. -->
     <MSBuild
         Projects="%(_MSBuildProjectReferenceExistent.Identity)"
         Targets="GetTargetFrameworkProperties"
         BuildInParallel="$(BuildInParallel)"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); ReferringTargetFramework=$(ReferringTargetFrameworkForProjectReferences)"
+        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); ReferringTargetFramework=$(TargetFrameworkMoniker)"
         ContinueOnError="!$(BuildingProject)"
         RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework"
-        Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' != 'true'">
+        Condition="'%(_MSBuildProjectReferenceExistent.Extension)' != '.vcxproj'">
 
       <Output TaskParameter="TargetOutputs" PropertyName="_ProjectReferenceTargetFrameworkProperties" />
     </MSBuild>
 
     <ItemGroup>
-      <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.Identity)' == '%(Identity)' and '$(_ProjectReferenceTargetFrameworkProperties)' != ''">
+      <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.Identity)' == '%(Identity)'">
         <SetTargetFramework>$(_ProjectReferenceTargetFrameworkProperties)</SetTargetFramework>
       </_MSBuildProjectReferenceExistent>
     </ItemGroup>
