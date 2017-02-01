@@ -42,7 +42,6 @@ namespace Microsoft.DotNet.Tools.MSBuild
                     Type loggerType = typeof(MSBuildLogger);
 
                     argsToForward = argsToForward
-                        .Select(Escape)
                         .Concat(new[]
                         {
                             $"/Logger:{loggerType.FullName},{loggerType.GetTypeInfo().Assembly.Location}"
@@ -56,7 +55,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
 
             _forwardingApp = new ForwardingApp(
                 GetMSBuildExePath(),
-                _msbuildRequiredParameters.Concat(argsToForward),
+                _msbuildRequiredParameters.Concat(argsToForward.Select(Escape)),
                 environmentVariables: _msbuildRequiredEnvironmentVariables);
         }
 
