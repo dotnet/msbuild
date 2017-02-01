@@ -80,8 +80,10 @@ namespace Microsoft.DotNet.Tools.MSBuild
         }
 
         private static string Escape(string arg) =>
+            // this is a workaround for https://github.com/Microsoft/msbuild/issues/1622
              (arg.StartsWith("/p:RestoreSources=", StringComparison.OrdinalIgnoreCase)) ?
-                arg.Replace(";", "%3B") : // <-- this is a workaround for https://github.com/Microsoft/msbuild/issues/1622
+                arg.Replace(";", "%3B") 
+                   .Replace("://", ":%2F%2F") : 
                 arg;
 
         private static string GetMSBuildExePath()
