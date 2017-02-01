@@ -181,6 +181,10 @@ vs.localizedResources
       <SdkSwrLines Include='$(SdkSwrBlankLine)folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\net46"' />
       <SdkSwrLines Include='%20%20file source="%(LaidOutSdk_ToolsNet46Files.Identity)"' />
 
+      <LaidOutSdk_ToolsNet46NewtonSoftJsonFiles Include="$(PackagesLayoutDir)tools\net46\Newtonsoft.Json.6.0.4\**" />
+      <SdkSwrLines Include='$(SdkSwrBlankLine)folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\net46\Newtonsoft.Json.6.0.4"' />
+      <SdkSwrLines Include='%20%20file source="%(LaidOutSdk_ToolsNet46NewtonSoftJsonFiles.Identity)"' />
+
       <LaidOutSdk_ToolsNetCoreAppFiles Include="$(PackagesLayoutDir)tools\netcoreapp1.0\**" />
       <SdkSwrLines Include='$(SdkSwrBlankLine)folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\netcoreapp1"' />
       <SdkSwrLines Include='%20%20file source="%(LaidOutSdk_ToolsNetCoreAppFiles.Identity)"' />
