@@ -11,8 +11,7 @@
 
   <Target Name="Test"
           Condition=" '$(CLIBUILD_SKIP_TESTS)' != 'true' "
-          DependsOnTargets="EnsureStageSeparation;
-                            BuildTests;">
+          DependsOnTargets="BuildTests;">
 
     <PropertyGroup>
       <PathListSeparator>:</PathListSeparator>
