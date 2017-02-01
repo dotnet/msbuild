@@ -35,7 +35,7 @@
       </trans-unit>
       <trans-unit id="CannotFindProjectInfo">
         <source>Cannot find project info for '{0}'. This can indicate a missing project reference.</source>
-        <target state="translated">'{0}' için proje bilgisi bulunamıyor. Bu durum, eksik bir proje başvurusu olduğunu gösteriyor olabilie.</target>
+        <target state="translated">'{0}' için proje bilgisi bulunamıyor. Bu durum, eksik bir proje başvurusu olduğunu gösteriyor olabilir.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContentFileDoesNotContainExpectedParentPackageInformation">
@@ -185,13 +185,13 @@
       </trans-unit>
       <trans-unit id="DuplicateItemsError">
         <source>Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. The duplicate items were: {3}</source>
-        <target state="new">Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. The duplicate items were: {3}</target>
-        <note></note>
+        <target state="translated">Yinelenen '{0}' öğeleri eklendi. .NET SDK, proje dizininizdeki '{0}' öğelerini varsayılan olarak içeriyor. Bu öğeleri proje dosyanızdan kaldırabilir veya bunları proje dosyanıza açıkça dahil etmek istiyorsanız '{1}' özelliğini '{2}' olarak ayarlayabilirsiniz. Yinelenen öğeler: {3}</target>
+        <note />
       </trans-unit>
       <trans-unit id="PackageReferenceOverrideWarning">
         <source>A PackageReference for '{0}' was included in your project. This package is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</source>
-        <target state="new">A PackageReference for '{0}' was included in your project. This package is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</target>
-        <note></note>
+        <target state="translated">Projenize '{0}' için bir paket başvurusu eklendi. .NET SDK bu pakete örtük olarak başvuruyor; buna projenizden başvurmanız genellikle gerekli değildir. Daha fazla bilgi için bkz. {1}</target>
+        <note />
       </trans-unit>
     </body>
   </file>
