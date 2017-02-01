@@ -136,7 +136,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
         public int Execute(params string[] args)
         {
             CommandLineApplication command = this;
-            IEnumerator<CommandArgument> arguments = null;
+            CommandArgumentEnumerator arguments = null;
 
             if (HandleResponseFiles)
             {
@@ -181,9 +181,9 @@ namespace Microsoft.DotNet.Cli.CommandLine
                     }
                     else
                     {
-                        if (arguments == null)
+                        if (arguments == null || arguments.CommandName != command.Name)
                         {
-                            arguments = new CommandArgumentEnumerator(command.Arguments.GetEnumerator());
+                            arguments = new CommandArgumentEnumerator(command.Arguments.GetEnumerator(), command.Name);
                         }
 
                         if (arguments.MoveNext())
@@ -629,10 +629,15 @@ namespace Microsoft.DotNet.Cli.CommandLine
         {
             private readonly IEnumerator<CommandArgument> _enumerator;
 
-            public CommandArgumentEnumerator(IEnumerator<CommandArgument> enumerator)
+            public CommandArgumentEnumerator(
+                IEnumerator<CommandArgument> enumerator,
+                string commandName)
             {
+                CommandName = commandName;
                 _enumerator = enumerator;
             }
+
+            public string CommandName { get; }
 
             public CommandArgument Current
             {
