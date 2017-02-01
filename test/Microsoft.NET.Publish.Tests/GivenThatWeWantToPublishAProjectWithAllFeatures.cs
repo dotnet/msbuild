@@ -92,6 +92,7 @@ namespace Microsoft.NET.Publish.Tests
         ""applyPatches"": true
     }
 }");
+            baselineConfigJsonObject["runtimeOptions"]["tfm"] = targetFramework;
             baselineConfigJsonObject["runtimeOptions"]["framework"]["version"] = 
                 targetFramework == "netcoreapp1.0" ? "1.0.0" : "1.1.0";
 
