@@ -19,31 +19,38 @@ namespace Microsoft.DotNet.Cli.Build
         }
 
         [Required]
-        public string RepoRoot { get; set; }
+        public string ToolPath { get; set; }
 
         [Output]
         public String Version { get; set; }
 
-        private static string[] s_TemplatesToArchive = new string[]
+        private static string[][] _templatesAndArgs = new string[][]
         {
-            "CSharp_Web",
-            "CSharp_Web1.1",
+            new string[] { "mvc", "-au Individual -f netcoreapp1.0" },
+            new string[] { "mvc", "-au Individual -f netcoreapp1.1" }
         };
 
         public override bool Execute()
         {
             var dataToHash = string.Empty;
 
-            foreach (string templateToArchive in s_TemplatesToArchive)
+            foreach (var newArgs in _templatesAndArgs)
             {
-                var templatePath = Path.Combine(
-                    RepoRoot,
-                    "src",
-                    "dotnet",
-                    "commands",
-                    "dotnet-new",
-                    templateToArchive,
-                    "$projectName$.csproj");
+                var targetDir = Path.GetTempFileName();
+                File.Delete(targetDir);
+                Directory.CreateDirectory(targetDir);
+                var outputDir = Path.Combine(targetDir, newArgs[0]);
+                Directory.CreateDirectory(outputDir);
+                var newTask = new DotNetNew
+                {
+                    ToolPath = ToolPath,
+                    TemplateType = newArgs[0],
+                    TemplateArgs = newArgs[1] + $" --debug:ephemeral-hive -n TempProject -o \"{outputDir}\"",
+                    HostObject = HostObject,
+                    BuildEngine = BuildEngine
+                };
+                newTask.Execute();
+                var templatePath = Path.Combine(outputDir, "TempProject.csproj");
 
                 var rootElement = ProjectRootElement.Open(templatePath);
                 var packageRefs = rootElement.Items.Where(i => i.ItemType == "PackageReference").ToList();
@@ -59,6 +66,8 @@ namespace Microsoft.DotNet.Cli.Build
                         }
                     }
                 }
+
+                Directory.Delete(targetDir, true);
             }
 
             Log.LogMessage($"NuGet Packages Archive Data To Hash: '{dataToHash}'");

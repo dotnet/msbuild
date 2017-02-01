@@ -10,10 +10,10 @@ namespace Microsoft.DotNet.Configurer
 {
     public class NuGetCachePrimer : INuGetCachePrimer
     {
-        private static string[] s_TemplatesUsedToPrimeCache = new string[]
+        private static IReadOnlyList<IReadOnlyList<string>> _templatesUsedToPrimeCache = new List<IReadOnlyList<string>>()
         {
-            "Web",
-            "Web1.1"
+            new List<string>() { "mvc", "-f", "netcoreapp1.0", "-au", "Individual", "--debug:ephemeral-hive" },
+            new List<string>() { "mvc", "-f", "netcoreapp1.1", "-au", "Individual", "--debug:ephemeral-hive" }
         };
 
         private readonly ICommandFactory _commandFactory;
@@ -77,7 +77,7 @@ namespace Microsoft.DotNet.Configurer
         {
             bool succeeded = true;
 
-            foreach (string template in s_TemplatesUsedToPrimeCache)
+            foreach (IReadOnlyList<string> templateInfo in _templatesUsedToPrimeCache)
             {
                 if (succeeded)
                 {
@@ -85,7 +85,7 @@ namespace Microsoft.DotNet.Configurer
                     {
                         var workingDirectory = temporaryDotnetNewDirectory.DirectoryPath;
 
-                        succeeded &= CreateTemporaryProject(workingDirectory, template);
+                        succeeded &= CreateTemporaryProject(workingDirectory, templateInfo);
 
                         if (succeeded)
                         {
@@ -101,11 +101,11 @@ namespace Microsoft.DotNet.Configurer
             }
         }
 
-        private bool CreateTemporaryProject(string workingDirectory, string templateName)
+        private bool CreateTemporaryProject(string workingDirectory, IReadOnlyList<string> templateInfo)
         {
             return RunCommand(
                 "new",
-                new[] { "-t", templateName },
+                templateInfo,
                 workingDirectory);
         }
 

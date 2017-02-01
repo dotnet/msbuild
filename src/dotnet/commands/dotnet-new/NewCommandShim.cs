@@ -16,13 +16,12 @@ using Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Config;
 using Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Macros;
 using Microsoft.TemplateEngine.Utils;
 
-namespace Microsoft.DotNet.Tools.New3
+namespace Microsoft.DotNet.Tools.New
 {
-    internal class New3CommandShim
+    internal class NewCommandShim
     {
         private const string HostIdentifier = "dotnetcli";
-        private const string HostVersion = "1.0.0";
-        private const string CommandName = "new3";
+        private const string CommandName = "new";
 
         public static int Run(string[] args)
         {
@@ -56,16 +55,17 @@ namespace Microsoft.DotNet.Tools.New3
                 { "dotnet-cli-version", Product.Version }
             };
 
-            return new DefaultTemplateEngineHost(HostIdentifier, HostVersion, CultureInfo.CurrentCulture.Name, preferences, builtIns);
+            return new DefaultTemplateEngineHost(HostIdentifier, "v" + Product.Version, CultureInfo.CurrentCulture.Name, preferences, builtIns);
         }
 
-        private static void FirstRun(ITemplateEngineHost host, IInstaller installer)
-        { 
-            var templatesDir = Path.Combine(Paths.Global.BaseDir, "Templates");
+        private static void FirstRun(IEngineEnvironmentSettings environmentSettings, IInstaller installer)
+        {
+            Paths paths = new Paths(environmentSettings);
+            var templatesDir = Path.Combine(paths.Global.BaseDir, "Templates");
 
-            if (templatesDir.Exists())
+            if (paths.Exists(templatesDir))
             {
-                var layoutIncludedPackages = host.FileSystem.EnumerateFiles(templatesDir, "*.nupkg", SearchOption.TopDirectoryOnly);
+                var layoutIncludedPackages = environmentSettings.Host.FileSystem.EnumerateFiles(templatesDir, "*.nupkg", SearchOption.TopDirectoryOnly);
                 installer.InstallPackages(layoutIncludedPackages);
             }
         }
