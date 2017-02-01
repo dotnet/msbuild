@@ -28,7 +28,7 @@ using System.Runtime.CompilerServices;
 
 #if STATIC_VERSION_NUMBER
 [assembly: AssemblyVersion(Microsoft.Build.Shared.MSBuildConstants.CurrentAssemblyVersion)]
-[assembly: AssemblyFileVersion(Microsoft.Build.Shared.MSBuildConstants.CurrentAssemblyVersion)]
+[assembly: AssemblyFileVersion(Microsoft.Build.Shared.MSBuildConstants.CurrentAssemblyFileVersion)]
 #endif
 
 #if (LOCALIZED_BUILD)
