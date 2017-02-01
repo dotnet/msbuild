@@ -225,4 +225,10 @@
   <data name="NU1012" xml:space="preserve">
     <value>Konflikt zależności. Element „{0}” oczekiwał elementu „{1}”, ale otrzymał element „{2}”</value>
   </data>
+  <data name="DuplicateItemsError" xml:space="preserve">
+    <value>Zostały uwzględnione zduplikowane elementy „{0}”. Zestaw .NET SDK dołącza domyślnie elementy „{0}” z katalogu projektu. Możesz usunąć te elementy z pliku projektu lub ustawić właściwość „{1}” na wartość „{2}”, aby jawnie uwzględnić je w pliku projektu. Zduplikowane elementy: {3}</value>
+  </data>
+  <data name="PackageReferenceOverrideWarning" xml:space="preserve">
+    <value>Odwołanie do pakietu dla „{0}” zostało uwzględnione w projekcie. Ten pakiet jest jawnie przywoływany przez zestaw .NET SDK i zwykle nie ma potrzeby tworzenia odwołania do niego z projektu. Aby uzyskać więcej informacji, zobacz {1}</value>
+  </data>
 </root>

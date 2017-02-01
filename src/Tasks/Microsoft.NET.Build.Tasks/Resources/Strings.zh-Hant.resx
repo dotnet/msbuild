@@ -225,4 +225,10 @@
   <data name="NU1012" xml:space="preserve">
     <value>相依性衝突。'{0}' 需要 '{1}' 但收到 '{2}'</value>
   </data>
+  <data name="DuplicateItemsError" xml:space="preserve">
+    <value>包含重複的 '{0}' 項目。根據預設，.NET SDK 會包含來自您專案目錄的 '{0}' 項目。您可以從專案檔移除這些項目，如果您想在專案檔中明確納入這些項目，也可以將 '{1}' 屬性設為 '{2}'。重複的項目為: {3}</value>
+  </data>
+  <data name="PackageReferenceOverrideWarning" xml:space="preserve">
+    <value>您的專案中包含 '{0}' 的 PackageReference。.NET SDK 會隱含參考此套件，您通常不需要從專案加以參考。如需詳細資訊，請參閱 {1}</value>
+  </data>
 </root>

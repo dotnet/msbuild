@@ -187,42 +187,48 @@
     <value>Framework nicht installiert: {0} in {1}</value>
   </data>
   <data name="DOTNET1012" xml:space="preserve">
-    <value>Das Verweisassemblysverzeichnis wurde nicht angegeben. Sie können den Speicherort mit der Umgebungsvariablen DOTNET_REFERENCE_ASSEMBLIES_PATH festlegen.</value>
+    <value>Das Verzeichnis für Verweisassemblys wurde nicht angegeben. Sie können den Speicherort mit der Umgebungsvariablen DOTNET_REFERENCE_ASSEMBLIES_PATH festlegen.</value>
   </data>
   <data name="DOTNET1013" xml:space="preserve">
-    <value>Die folgenden Abhängigkeiten sind mit dem Typ „platform“ gekennzeichnet, doch nur eine Abhängigkeit kann diesen Typ haben: {0}</value>
+    <value>Die folgenden Abhängigkeiten sind mit dem Typ "platform" gekennzeichnet, doch nur eine Abhängigkeit kann diesen Typ haben: {0}.</value>
   </data>
   <data name="DOTNET1014" xml:space="preserve">
-    <value>Fehler beim Lesen der Sperrdatei.</value>
+    <value>Fehler beim Lesen der Sperrdatei</value>
   </data>
   <data name="DOTNET1017" xml:space="preserve">
-    <value>Die Projektdatei ist nicht vorhanden: „{0}“.</value>
+    <value>Die Projektdatei ist nicht vorhanden: "{0}".</value>
   </data>
   <data name="NU1001" xml:space="preserve">
-    <value>Die Abhängigkeit „{0}“ konnte nicht aufgelöst werden.</value>
+    <value>Die Abhängigkeit "{0}" konnte nicht aufgelöst werden.</value>
   </data>
   <data name="NU1002" xml:space="preserve">
-    <value>Die Abhängigkeit „{0}“ in Projekt „{1}“ unterstützt nicht Framework „{2}“.</value>
+    <value>Die Abhängigkeit "{0}" in Projekt "{1}" unterstützt das Framework "{2}" nicht.</value>
   </data>
   <data name="NU1006" xml:space="preserve">
-    <value>{0}. Bitte führen Sie „dotnet restore“ aus, um eine neue Ressourcendatei zu erzeugen.</value>
+    <value>{0}. Bitte führen Sie "dotnet restore" aus, um eine neue Ressourcendatei zu erzeugen.</value>
   </data>
   <data name="NU1007" xml:space="preserve">
-    <value>Die angegebene Abhängigkeit war „{0}“, aber es endete mit „{1}“.</value>
+    <value>Die angegebene Abhängigkeit war "{0}", das Ende war jedoch "{1}".</value>
   </data>
   <data name="NU1008" xml:space="preserve">
     <value>{0} ist ein nicht unterstütztes Framework.</value>
   </data>
   <data name="NU1009" xml:space="preserve">
-    <value>Die erwartete Ressourcendatei ist nicht vorhanden. Bitte führen Sie „dotnet restore“ aus, um eine neue Ressourcendatei zu erzeugen.</value>
+    <value>Die erwartete Ressourcendatei ist nicht vorhanden. Bitte führen Sie "dotnet restore" aus, um eine neue Ressourcendatei zu erzeugen.</value>
   </data>
   <data name="NU1010" xml:space="preserve">
     <value>Der Abhängigkeitstyp wurde geändert.</value>
   </data>
   <data name="NU1011" xml:space="preserve">
-    <value>Das Abhängigkeitsziel „{0}“ wird nicht unterstützt.</value>
+    <value>Das Abhängigkeitsziel "{0}" wird nicht unterstützt.</value>
   </data>
   <data name="NU1012" xml:space="preserve">
-    <value>Abhängigkeitskonflikt. „{0}“ erwartete „{1}“, empfing jedoch „{2}“.</value>
+    <value>Abhängigkeitskonflikt. "{0}" hat "{1}" erwartet, empfangen wurde jedoch "{2}".</value>
+  </data>
+  <data name="DuplicateItemsError" xml:space="preserve">
+    <value>Doppelte "{0}"-Elemente sind vorhanden. Das .NET SDK enthält standardmäßig "{0}"-Elemente aus ihrem Projektverzeichnis. Sie können entweder diese Elemente aus der Projektdatei entfernen oder die Eigenschaft "{1}" auf "{2}" festlegen, wenn Sie sie explizit in Ihre Projektdatei einbeziehen möchten. Die doppelten Elemente waren: {3}.</value>
+  </data>
+  <data name="PackageReferenceOverrideWarning" xml:space="preserve">
+    <value>Ein Paketverweis für "{0}" war in Ihrem Projekt vorhanden. Auf dieses Paket wird vom .NET SDK implizit verwiesen, und Sie müssen in der Regel nicht von Ihrem Projekt aus darauf verweisen. Weitere Informationen finden Sie unter {1}.</value>
   </data>
 </root>

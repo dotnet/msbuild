@@ -208,7 +208,7 @@
     <value>{0}。请运行“dotnet restore”以生成新的资产文件。</value>
   </data>
   <data name="NU1007" xml:space="preserve">
-    <value>指定的依赖项为“{0}”，但以“'{1}”结尾。</value>
+    <value>指定的依赖项为“{0}”，但以“{1}”结尾。</value>
   </data>
   <data name="NU1008" xml:space="preserve">
     <value>{0} 是不受支持的框架。</value>
@@ -223,6 +223,12 @@
     <value>不支持依赖项目标“{0}”。</value>
   </data>
   <data name="NU1012" xml:space="preserve">
-    <value>依赖项冲突。“{0}”预期“'{1}”，但接收到“{2}”</value>
+    <value>依赖项冲突。“{0}”预期“{1}”，但接收到“{2}”</value>
+  </data>
+  <data name="DuplicateItemsError" xml:space="preserve">
+    <value>包含了重复的“{0}”项。.NET SDK 默认情况下包括你项目中的“{0}”项。可以从项目文件中删除这些项，或者如果希望将其显示包含在项目文件中，则可以将“{1}”属性设置为“{2}”。重复项为: {3}</value>
+  </data>
+  <data name="PackageReferenceOverrideWarning" xml:space="preserve">
+    <value>项目中包含了“{0}”的 PackageReference。此包由 .NET SDK 隐式引用，且通常情况下你无需从项目中对其进行引用。有关详细信息，请参阅 {1}</value>
   </data>
 </root>

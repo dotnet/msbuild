@@ -184,9 +184,9 @@
         <note />
       </trans-unit>
       <trans-unit id="DuplicateItemsError">
-        <source>Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. The duplicate items were: {3}</source>
-        <target state="translated">중복 '{0}' 항목이 포함되었습니다. .NET SDK에는 기본적으로 프로젝트 디렉터리의 '{0}' 항목이 포함됩니다. 프로젝트 파일에서 이러한 항목을 제거하거나, 프로젝트 파일에 명시적으로 포함하려면 '{1}' 속성을 '{2}'(으)로 설정할 수 있습니다. 중복 항목은 다음과 같습니다. {3}</target>
-        <note />
+        <source>Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. For more information, see {4}. The duplicate items were: {3}</source>
+        <target state="needs-review-translation">중복 '{0}' 항목이 포함되었습니다. .NET SDK에는 기본적으로 프로젝트 디렉터리의 '{0}' 항목이 포함됩니다. 프로젝트 파일에서 이러한 항목을 제거하거나, 프로젝트 파일에 명시적으로 포함하려면 '{1}' 속성을 '{2}'(으)로 설정할 수 있습니다. 중복 항목은 다음과 같습니다. {3}</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="PackageReferenceOverrideWarning">
         <source>A PackageReference for '{0}' was included in your project. This package is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</source>

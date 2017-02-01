@@ -225,4 +225,10 @@
   <data name="NU1012" xml:space="preserve">
     <value>依存関係の競合。'{0}' には '{1}' が必要ですが、'{2}' を受信しました。</value>
   </data>
+  <data name="DuplicateItemsError" xml:space="preserve">
+    <value>重複する '{0}' 個のアイテムが含められました。.NET SDK には、既定でプロジェクト ディレクトリからのアイテムが '{0}' 個含まれています。これらのアイテムをプロジェクト ファイルから削除するか、プロジェクト ファイルに明示的に含める場合は '{1}' プロパティを '{2}' に設定します。重複するアイテムは、{3} でした。</value>
+  </data>
+  <data name="PackageReferenceOverrideWarning" xml:space="preserve">
+    <value>'{0}' の PackageReference がプロジェクトに含められました。このパッケージは .NET SDK によって暗黙的に参照されるため、通常はプロジェクトから参照する必要がありません。詳細については、{1} をご覧ください。</value>
+  </data>
 </root>

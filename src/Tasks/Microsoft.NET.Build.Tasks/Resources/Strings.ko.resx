@@ -225,4 +225,10 @@
   <data name="NU1012" xml:space="preserve">
     <value>종속성 충돌. '{0}'에서 '{1}'을(를) 예상했지만 '{2}'을(를) 수신했습니다.</value>
   </data>
+  <data name="DuplicateItemsError" xml:space="preserve">
+    <value>중복 '{0}' 항목이 포함되었습니다. .NET SDK에는 기본적으로 프로젝트 디렉터리의 '{0}' 항목이 포함됩니다. 프로젝트 파일에서 이러한 항목을 제거하거나, 프로젝트 파일에 명시적으로 포함하려면 '{1}' 속성을 '{2}'(으)로 설정할 수 있습니다. 중복 항목은 다음과 같습니다. {3}</value>
+  </data>
+  <data name="PackageReferenceOverrideWarning" xml:space="preserve">
+    <value>'{0}'에 대한 PackageReference가 프로젝트에 포함되어 있습니다. 이 패키지는 .NET SDK에서 암시적으로 참조되며, 일반적으로 사용자가 프로젝트에서 참조할 필요가 없습니다. 자세한 내용은 {1}을(를) 참조하세요.</value>
+  </data>
 </root>

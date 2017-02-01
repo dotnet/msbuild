@@ -184,9 +184,9 @@
         <note />
       </trans-unit>
       <trans-unit id="DuplicateItemsError">
-        <source>Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. The duplicate items were: {3}</source>
-        <target state="translated">Se incluyeron "{0}" elementos duplicados. El SDK de .NET incluye "{0}" elementos de su directorio de proyecto de manera predeterminada. Puede quitar esos elementos del archivo de proyecto o establecer la propiedad "{1}" en "{2}" si desea incluirlos explícitamente en el archivo de proyecto. Los elementos duplicados eran: {3}</target>
-        <note />
+        <source>Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. For more information, see {4}. The duplicate items were: {3}</source>
+        <target state="needs-review-translation">Se incluyeron "{0}" elementos duplicados. El SDK de .NET incluye "{0}" elementos de su directorio de proyecto de manera predeterminada. Puede quitar esos elementos del archivo de proyecto o establecer la propiedad "{1}" en "{2}" si desea incluirlos explícitamente en el archivo de proyecto. Los elementos duplicados eran: {3}</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="PackageReferenceOverrideWarning">
         <source>A PackageReference for '{0}' was included in your project. This package is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</source>

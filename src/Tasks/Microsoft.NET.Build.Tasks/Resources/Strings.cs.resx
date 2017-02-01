@@ -225,4 +225,10 @@
   <data name="NU1012" xml:space="preserve">
     <value>Konflikt závislostí. {0} očekával {1}, ale přijal {2}.</value>
   </data>
+  <data name="DuplicateItemsError" xml:space="preserve">
+    <value>Byl zahrnut tento počet duplicitních položek: {0}. Sada .NET SDK obsahuje standardně tento počet položek z adresáře vašeho projektu: {0}. Buď můžete tyto položky odebrat ze souboru projektu, nebo vlastnost {1} nastavit na {2}, pokud je chcete ze souboru projektu explicitně vyloučit. Duplicitní položky: {3}</value>
+  </data>
+  <data name="PackageReferenceOverrideWarning" xml:space="preserve">
+    <value>Do projektu byl zahrnut odkaz na balíček pro {0}. Na tento balíček implicitně odkazuje sada .NET SDK, takže na něj zpravidla nemusíte odkazovat z projektu. Další informace najdete na adrese {1}.</value>
+  </data>
 </root>

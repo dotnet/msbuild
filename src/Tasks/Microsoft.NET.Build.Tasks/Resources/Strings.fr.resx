@@ -225,4 +225,10 @@
   <data name="NU1012" xml:space="preserve">
     <value>Conflit de dépendances. '{0}' attendait '{1}' mais a reçu '{2}'</value>
   </data>
+  <data name="DuplicateItemsError" xml:space="preserve">
+    <value>Des éléments '{0}' dupliqués ont été inclus. Le SDK .NET inclut les éléments '{0}' de votre répertoire de projet par défaut. Vous pouvez supprimer ces éléments de votre fichier projet ou affecter à la propriété '{1}' la valeur '{2}', si vous souhaitez les inclure explicitement dans votre fichier projet. Les éléments dupliqués sont les suivants : {3}</value>
+  </data>
+  <data name="PackageReferenceOverrideWarning" xml:space="preserve">
+    <value>Un PackageReference pour '{0}' a été inclus dans votre projet. Comme ce package est implicitement référencé par le SDK .NET, vous n'avez généralement pas besoin de le référencer à partir de votre projet. Pour plus d'informations, consultez {1}</value>
+  </data>
 </root>
