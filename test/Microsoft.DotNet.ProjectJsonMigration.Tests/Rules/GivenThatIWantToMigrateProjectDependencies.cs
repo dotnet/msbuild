@@ -320,7 +320,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var projectReferences = mockProj.Items.Where(
                 item => item.ItemType.Equals("ProjectReference", StringComparison.Ordinal));
             projectReferences.Should().ContainSingle();
-            projectReferences.Single().Include.Should().Be("../src/ProjectA/ProjectA.csproj");
+            projectReferences.Single().Include.Should().Be(Path.Combine("..", "src", "ProjectA", "ProjectA.csproj"));
         }
 
         private ProjectRootElement MigrateProject(string solution, string project)
