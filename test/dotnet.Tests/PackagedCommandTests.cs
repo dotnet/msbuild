@@ -41,7 +41,6 @@ namespace Microsoft.DotNet.Tests
                 };
             }
         }
-
         public static IEnumerable<object[]> LibraryDependencyToolArguments
         {
             get
