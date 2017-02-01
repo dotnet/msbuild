@@ -17,7 +17,21 @@
                 "Raw/ru/Microsoft.NET.Build.Tasks.resources.dll",
                 "Raw/tr/Microsoft.NET.Build.Tasks.resources.dll",
                 "Raw/zh-Hans/Microsoft.NET.Build.Tasks.resources.dll",
-                "Raw/zh-Hant/Microsoft.NET.Build.Tasks.resources.dll"
+                "Raw/zh-Hant/Microsoft.NET.Build.Tasks.resources.dll",
+                "Raw/net46/Microsoft.NET.Build.Tasks.dll",
+                "Raw/net46/cs/Microsoft.NET.Build.Tasks.resources.dll",
+                "Raw/net46/de/Microsoft.NET.Build.Tasks.resources.dll",
+                "Raw/net46/es/Microsoft.NET.Build.Tasks.resources.dll",
+                "Raw/net46/fr/Microsoft.NET.Build.Tasks.resources.dll",
+                "Raw/net46/it/Microsoft.NET.Build.Tasks.resources.dll",
+                "Raw/net46/ja/Microsoft.NET.Build.Tasks.resources.dll",
+                "Raw/net46/ko/Microsoft.NET.Build.Tasks.resources.dll",
+                "Raw/net46/pl/Microsoft.NET.Build.Tasks.resources.dll",
+                "Raw/net46/pt-BR/Microsoft.NET.Build.Tasks.resources.dll",
+                "Raw/net46/ru/Microsoft.NET.Build.Tasks.resources.dll",
+                "Raw/net46/tr/Microsoft.NET.Build.Tasks.resources.dll",
+                "Raw/net46/zh-Hans/Microsoft.NET.Build.Tasks.resources.dll",
+                "Raw/net46/zh-Hant/Microsoft.NET.Build.Tasks.resources.dll"
             ]
         }
     ]
