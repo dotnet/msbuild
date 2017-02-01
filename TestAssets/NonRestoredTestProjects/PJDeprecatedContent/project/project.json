@@ -1,0 +1,24 @@
+{
+    "version": "1.0.0-*",
+    "content": "*.txt",
+    "contentExclude": "ExcludeThis1.txt",
+    "contentFiles": [ "../ContentFile1.txt", "../ContentFile2.txt" ],
+    "contentBuiltIn": [ "../ContentFileBuiltIn1.txt", "../ContentFileBuiltIn2.txt" ],
+    "publishExclude": "ExcludeThis2.txt",
+    "buildOptions": {
+        "debugType": "portable",
+        "emitEntryPoint": true
+    },
+    "dependencies": {},
+    "frameworks": {
+        "netcoreapp1.0": {
+            "dependencies": {
+                "Microsoft.NETCore.App": {
+                    "type": "platform",
+                    "version": "1.0.1"
+                }
+            },
+            "imports": "dnxcore50"
+        }
+    }
+}

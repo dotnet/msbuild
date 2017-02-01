@@ -3,7 +3,7 @@
 
 namespace Microsoft.DotNet.Cli.Build
 {
-    public class DotNetBuild : DotNetTool
+    public class DotNetBuild : DotNetMSBuildTool
     {
         protected override string Command
         {
@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         protected override string Args
         {
-            get { return $"{GetProjectPath()} {GetConfiguration()} {GetFramework()} {GetRuntime()} {GetOutputPath()} {GetMaxCpuCount()}"; }
+            get { return $"{base.Args} {GetProjectPath()} {GetConfiguration()} {GetFramework()} {GetRuntime()} {GetOutputPath()}"; }
         }
 
         public string BuildBasePath { get; set; }
@@ -26,9 +26,7 @@ namespace Microsoft.DotNet.Cli.Build
         public string ProjectPath { get; set; }
 
         public string OutputPath { get; set; }
-
-        public string MaxCpuCount { get; set; }
-
+        
         private string GetOutputPath()
         {
             if (!string.IsNullOrEmpty(OutputPath))
@@ -74,16 +72,6 @@ namespace Microsoft.DotNet.Cli.Build
             if (!string.IsNullOrEmpty(ProjectPath))
             {
                 return $"{ProjectPath}";
-            }
-
-            return null;
-        }
-
-        private string GetMaxCpuCount()
-        {
-            if (!string.IsNullOrEmpty(MaxCpuCount))
-            {
-                return $"/maxcpucount:{MaxCpuCount}";
             }
 
             return null;

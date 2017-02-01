@@ -108,12 +108,12 @@
 
       <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateBundlePowershellScript)
                       '$(SdkInstallerFile)'
-                      '$(DownloadedSharedFrameworkInstallerFile)'
-                      '$(DownloadedHostFxrInstallerFile)'
-                      '$(DownloadedSharedHostInstallerFile)'
                       '$(AdditionalDownloadedSharedFrameworkInstallerFile)'
                       '$(AdditionalDownloadedHostFxrInstallerFile)'
                       '$(AdditionalDownloadedSharedHostInstallerFile)'
+                      '$(DownloadedSharedFrameworkInstallerFile)'
+                      '$(DownloadedHostFxrInstallerFile)'
+                      '$(DownloadedSharedHostInstallerFile)'
                       '$(CombinedFrameworkSdkHostInstallerFile)'
                       '$(WixRoot)'
                       '$(SdkBrandName)'

@@ -13,7 +13,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(CLI_Roslyn_Version)" />
     <PackageReference Include="Microsoft.CodeAnalysis.Build.Tasks" Version="$(CLI_Roslyn_Version)" />
     <PackageReference Include="Microsoft.Net.Compilers.netcore" Version="$(CLI_Roslyn_Version)" />
-    <PackageReference Include="Microsoft.DiaSymReader.Native" Version="1.4.0-rc2" />
+    <PackageReference Include="Microsoft.DiaSymReader.Native" Version="1.4.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -38,18 +38,18 @@
           AfterTargets="Publish"
           BeforeTargets="RemoveFilesAfterPublish">
     <ItemGroup>
-      <AssetsToRemoveFromDeps Include="csc" />
-      <AssetsToRemoveFromDeps Include="vbc" />
+      <AssetsToRemoveFromDeps Include="runtimes/any/native/csc.exe" 
+                              SectionName="runtimeTargets" />
+      <AssetsToRemoveFromDeps Include="runtimes/any/native/vbc.exe" 
+                              SectionName="runtimeTargets" />
+      <AssetsToRemoveFromDeps Include="tool_roslyn.dll" 
+                              SectionName="runtime"/>
     </ItemGroup>
     
     <RemoveAssetFromDepsPackages DepsFile="$(PublishDir)/$(TargetName).deps.json"
-                                 SectionName="runtimeTargets"
-                                 AssetPath="runtimes/any/native/%(AssetsToRemoveFromDeps.Identity).exe" />
-
-    <RemoveAssetFromDepsPackages DepsFile="$(PublishDir)/$(TargetName).deps.json"
-                                 SectionName="runtime"
-                                 AssetPath="$(TargetName).dll" />
-
+                                 SectionName="%(AssetsToRemoveFromDeps.SectionName)"
+                                 AssetPath="%(AssetsToRemoveFromDeps.Identity)" />
+   
     <Copy SourceFiles="$(PublishDir)/runtimes/any/native/csc.exe;
                        $(PublishDir)/$(TargetName).runtimeconfig.json;
                        $(PublishDir)/$(TargetName).deps.json;"

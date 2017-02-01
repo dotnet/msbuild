@@ -3,7 +3,7 @@
 
 namespace Microsoft.DotNet.Cli.Build
 {
-    public class DotNetTest : DotNetTool
+    public class DotNetTest : DotNetMSBuildTool
     {
         protected override string Command
         {
@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         protected override string Args
         {
-            get { return $"{GetProjectPath()} {GetConfiguration()} {GetLogger()} {GetNoBuild()}"; }
+            get { return $"{base.Args} {GetProjectPath()} {GetConfiguration()} {GetLogger()} {GetNoBuild()}"; }
         }
 
         public string Configuration { get; set; }

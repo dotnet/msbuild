@@ -11,7 +11,8 @@
 
   <Target Name="Test"
           Condition=" '$(CLIBUILD_SKIP_TESTS)' != 'true' "
-          DependsOnTargets="BuildTests;">
+          DependsOnTargets="EnsureStageSeparation;
+                            BuildTests;">
 
     <PropertyGroup>
       <PathListSeparator>:</PathListSeparator>
@@ -81,37 +82,29 @@
   <Target Name="BuildTests"
           DependsOnTargets="RestoreTests;">
     <DotNetBuild ToolPath="$(Stage0Directory)"
-                 MaxCpuCount="1"
-                 ProjectPath="&quot;$(TestDirectory)/Microsoft.DotNet.Cli.Tests.sln&quot;" />
+                 ProjectPath="&quot;$(TestDirectory)/Microsoft.DotNet.Cli.Tests.sln&quot;"
+                 MaxCpuCount="1" />
   </Target>
 
   <Target Name="CreateTestAssetPackageNuPkgs"
           DependsOnTargets="SetupTestPackageProjectData;"
-          Inputs="%(TestPackageProject.PackInputs)"
-          Outputs="%(TestPackageProject.PackOutputs)">
-
-    <PropertyGroup>
-      <Framework>%(TestPackageProject.Framework)</Framework>
-      <DoPackRuntime Condition=" '$(Framework)' == 'net45' Or '$(Framework)' == 'net451' ">true</DoPackRuntime>
-      <DotNetPackMsbuildArgs>/p:TargetFramework=$(Framework)</DotNetPackMsbuildArgs>
-      <DotNetPackMsbuildArgs Condition=" '$(IsDesktopAvailable)' == 'True' And '%(TestPackageProject.PackRuntime)' != '' And '$(DoPackRuntime)' != '' ">/p:RuntimeIdentifier=%(TestPackageProject.PackRuntime)</DotNetPackMsbuildArgs>
-    </PropertyGroup>
+          Outputs="%(TestPackageProject.Identity)">
 
     <DotNetRestore ToolPath="$(Stage2Directory)"
                    ConfigFile="$(RepoRoot)\NuGet.Config"
                    ProjectPath="%(TestPackageProject.ProjectPath)" />
-
-    <DotNetBuild Framework="$(Framework)"
-                 Runtime="%(TestPackageProject.Runtime)"
-                 ProjectPath="%(TestPackageProject.ProjectPath)"
-                 ToolPath="$(Stage0Directory)" />
-    
+ 
     <!-- https://github.com/NuGet/Home/issues/4063 -->
-    <DotNetPack NoBuild="True"
-                Output="$(TestPackagesDir)"
+    <DotNetPack Output="$(TestPackagesDir)"
                 ProjectPath="%(TestPackageProject.ProjectPath)"
                 ToolPath="$(Stage0Directory)"
                 VersionSuffix="%(TestPackageProject.VersionSuffix)"
-                MsbuildArgs="$(DotNetPackMsbuildArgs) /p:SdkNuGetVersion=$(SdkNugetVersion)" />
+                MsbuildArgs="%(TestPackageProject.MsbuildArgs) /p:SdkNuGetVersion=$(SdkNugetVersion)" />
+
+  </Target>
+
+  <Target Name="EnsureStageSeparation">
+    <DotNetMSBuild Arguments="/v:diag $(RepoRoot)/build_projects/Microsoft.DotNet.Cli.Build.SelfTest/InvokeWithStage0.proj /p:Stage2Directory=&quot;$(Stage2Directory)&quot;"
+                   ToolPath="$(Stage0Directory)" />
   </Target>
 </Project>

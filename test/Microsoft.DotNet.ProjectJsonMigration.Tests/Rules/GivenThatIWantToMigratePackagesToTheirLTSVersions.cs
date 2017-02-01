@@ -12,20 +12,38 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
     public class GivenThatIWantToMigratePackagesToTheirLTSVersions : PackageDependenciesTestBase
     {
         [Theory]
-        [InlineData("Microsoft.NETCore.App", "1.0.0", "Microsoft.NETCore.App", "1.0.3")]
-        [InlineData("Microsoft.NETCore.App", "1.0.3-preview2", "Microsoft.NETCore.App", "1.0.3")]
-        [InlineData("NETStandard.Library", "1.4.0", "NETStandard.Library", "1.6.0")]
-        public void ItUpliftsMetaPackages(
-            string sourcePackageName,
+        [InlineData("1.0.0", "1.0.3")]
+        [InlineData("1.0.3-preview2", "1.0.3")]
+        public void ItUpliftsMicrosoftNETCoreAppMetaPackages(
             string sourceVersion,
-            string targetPackageName,
             string targetVersion)
         {
-            ValidatePackageMigration(sourcePackageName, sourceVersion, targetPackageName, targetVersion);
+            ValidateNetCoreAppMetaPackageMigration(sourceVersion, targetVersion);
+        }
+
+        [Fact]
+        public void ItDoesNotDropMicrosoftNETCoreAppMetapackageThatDoNotHaveAMatchingVersionInTheMapping()
+        {
+            ValidateNetCoreAppMetaPackageMigration("1.2.0-*", "1.2.0-*");
         }
 
         [Theory]
-        [InlineData("NETStandard.Library", "1.6.2-*", "NETStandard.Library", "1.6.2-*")]
+        [InlineData("1.4.0", "1.6.0")]
+        [InlineData("1.5.0", "1.6.0")]
+        public void ItUpliftsNetStandardMetaPackages(
+            string sourceVersion,
+            string targetVersion)
+        {
+            ValidateNetStandardMetaPackageMigration(sourceVersion, targetVersion);
+        }
+
+        [Fact]
+        public void ItDoesNotDropNetStandardMetapackageThatDoNotHaveAMatchingVersionInTheMapping()
+        {
+            ValidateNetStandardMetaPackageMigration("1.6.2-*", "1.6.2-*");
+        }
+
+        [Theory]
         [InlineData("System.Text.Encodings.Web", "4.4.0-*", "System.Text.Encodings.Web", "4.4.0-*")]
         public void ItDoesNotDropDependenciesThatDoNotHaveAMatchingVersionInTheMapping(
             string sourcePackageName,
@@ -235,6 +253,32 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var packageRef = mockProj.Items.First(i => i.Include == targetPackageName && i.ItemType == "PackageReference");
 
             packageRef.GetMetadataWithName("Version").Value.Should().Be(targetVersion);
+        }
+
+        private void ValidateNetStandardMetaPackageMigration(
+            string sourceVersion,
+            string targetVersion)
+        {
+            var mockProj = RunPackageDependenciesRuleOnPj("{ \"dependencies\": { \"NETStandard.Library\" : { \"version\": \"" + sourceVersion + "\", \"type\": \"build\" } } }");
+
+            mockProj.Items.Should().NotContain(
+                i => i.Include == "NETStandard.Library" && i.ItemType == "PackageReference");
+            mockProj.Properties
+                .Should().ContainSingle(p => p.Name == "NetStandardImplicitPackageVersion")
+                .Which.Value.Should().Be(targetVersion);
+        }
+
+        private void ValidateNetCoreAppMetaPackageMigration(
+            string sourceVersion,
+            string targetVersion)
+        {
+            var mockProj = RunPackageDependenciesRuleOnPj("{ \"dependencies\": { \"Microsoft.NETCore.App\" : { \"version\": \"" + sourceVersion + "\", \"type\": \"build\" } } }");
+
+            mockProj.Items.Should().NotContain(
+                i => i.Include == "Microsoft.NETCore.App" && i.ItemType == "PackageReference");
+            mockProj.Properties
+                .Should().ContainSingle(p => p.Name == "RuntimeFrameworkVersion")
+                .Which.Value.Should().Be(targetVersion);
         }
     }
 }

@@ -267,7 +267,6 @@ namespace Microsoft.DotNet.Tests
 
             new BuildCommand()
                 .WithWorkingDirectory(testInstance.Root)
-                .WithFramework(NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NetCoreApp10)
                 .Execute()
                 .Should().Pass();
 

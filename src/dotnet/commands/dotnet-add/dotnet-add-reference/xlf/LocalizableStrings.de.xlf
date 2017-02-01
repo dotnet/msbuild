@@ -10,7 +10,7 @@
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Command to add project to project reference</source>
-        <target state="translated">Befehl zum Hinzufügen des Projekts zum Projektverweis</target>
+        <target state="translated">Befehl zum Hinzufügen eines Projekt-zu-Projekt-Verweises</target>
         <note />
       </trans-unit>
       <trans-unit id="AppHelpText">

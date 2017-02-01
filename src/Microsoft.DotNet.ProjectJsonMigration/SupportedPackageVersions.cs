@@ -12,6 +12,16 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         public string Name { get; set; }
         public string Version { get; set; }
         public string PrivateAssets { get; set; }
+
+        public bool IsMetaPackage
+        {
+            get
+            {
+                return !string.IsNullOrEmpty(Name) && 
+                    (Name.Equals("Microsoft.NETCore.App", StringComparison.OrdinalIgnoreCase) ||
+                     Name.Equals("NETStandard.Library", StringComparison.OrdinalIgnoreCase));
+            }
+        }
     }
 
     internal class SupportedPackageVersions
