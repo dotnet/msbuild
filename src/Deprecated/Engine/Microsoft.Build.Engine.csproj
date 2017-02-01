@@ -20,7 +20,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'" />
   <ItemGroup>
-    <Compile Include="..\Shared\Constants.cs" />
+    <Compile Include="..\..\Shared\Constants.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Caching\BuildResultCacheEntry.cs" />
     <Compile Include="Caching\CacheEntry.cs" />
@@ -207,7 +207,7 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
 
-    <EmbeddedResource Include="..\Shared\Resources\Strings.shared.resx">
+    <EmbeddedResource Include="..\..\Shared\Resources\Strings.shared.resx">
       <Link>Resources\Strings.shared.resx</Link>
       <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
       <SubType>Designer</SubType>
@@ -218,7 +218,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Configuration" />
-    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj">
+    <ProjectReference Include="..\..\Framework\Microsoft.Build.Framework.csproj">
       <Project>{571F09DB-A81A-4444-945C-6F7B530054CD}</Project>
       <Name>Microsoft.Build.Framework</Name>
     </ProjectReference>
