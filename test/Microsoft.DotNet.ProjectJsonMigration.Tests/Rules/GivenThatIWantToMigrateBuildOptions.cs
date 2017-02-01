@@ -618,6 +618,61 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             mockProj.Items.Count(i => i.ItemType.Equals("Compile", StringComparison.Ordinal)).Should().Be(0);
         }
 
+        [Fact]
+        public void MigratingProjectWithCompileResourcesPopulatesAppropriateProjectItemElements()
+        {
+            var testDirectory = Temp.CreateDirectory().Path;
+            WriteCompileResourceFiles(testDirectory);
+
+            var pj = @"
+                {
+                  ""version"": ""1.0.0-*"",
+                  ""dependencies"": {
+                    ""NETStandard.Library"": ""1.6.0""
+                  },
+                  ""frameworks"": {
+                    ""netstandard1.5"": {}
+                  }
+                }";
+
+            var mockProj = RunBuildOptionsRuleOnPj(pj, testDirectory);
+
+            var compileItems = mockProj.Items.Where(i => i.ItemType.Equals("Compile", StringComparison.Ordinal));
+            compileItems.Count().Should().Be(1);
+            var compileItem = compileItems.Single();
+            compileItem.Include.Should().BeEmpty();
+            compileItem.Exclude.Should().BeEmpty();
+            compileItem.Remove.Should().Be(@"compiler\resources\*");
+
+            var embeddedResourceItems = mockProj.Items.Where(
+                i => i.ItemType.Equals("EmbeddedResource", StringComparison.Ordinal));
+            embeddedResourceItems.Count().Should().Be(1);
+            var embeddedResourceItem = embeddedResourceItems.Single();
+            embeddedResourceItem.Include.Should().Be(@"compiler\resources\*");
+            embeddedResourceItem.Exclude.Should().BeEmpty();
+            embeddedResourceItem.Remove.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void MigratingProjectWithoutCompileResourcesDoesNotAddProjectItemElements()
+        {
+            var testDirectory = Temp.CreateDirectory().Path;
+
+            var pj = @"
+                {
+                  ""version"": ""1.0.0-*"",
+                  ""dependencies"": {
+                    ""NETStandard.Library"": ""1.6.0""
+                  },
+                  ""frameworks"": {
+                    ""netstandard1.5"": {}
+                  }
+                }";
+
+            var mockProj = RunBuildOptionsRuleOnPj(pj, testDirectory);
+            mockProj.Items.Count.Should().Be(0);
+        }
+
         private static IEnumerable<string> GetDefaultExcludePatterns(string group)
         {
             var defaultExcludePatterns = new List<string>(group == "copyToOutput" ?
@@ -656,6 +711,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             File.WriteAllText(Path.Combine(directory, "src", "file2.cs"), "content");
             File.WriteAllText(Path.Combine(directory, "src", "file3.cs"), "content");
             File.WriteAllText(Path.Combine(directory, "rootfile.cs"), "content");
+        }
+
+        private void WriteCompileResourceFiles(string directory)
+        {
+            Directory.CreateDirectory(Path.Combine(directory, "compiler"));
+            Directory.CreateDirectory(Path.Combine(directory, "compiler", "resources"));
+            File.WriteAllText(Path.Combine(directory, "compiler", "resources", "file.cs"), "content");
         }
 
         private ProjectRootElement RunBuildOptionsRuleOnPj(string s, string testDirectory = null)
