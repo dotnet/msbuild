@@ -52,7 +52,7 @@
     <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
     <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
     <FileVersion Condition="'$(BUILD_BUILDNUMBER)' == ''">$(VersionPrefix).0</FileVersion>
-    <FileVersion Condition="'$(BUILD_BUILDNUMBER)' != ''">$(VersionPrefix).$([MSBuild]::Subtract($(BuildNumberPart1), $(BuildEpoch))</FileVersion>
+    <FileVersion Condition="'$(BUILD_BUILDNUMBER)' != ''">$(VersionPrefix).$([MSBuild]::Subtract($(BuildNumberPart1), $(BuildEpoch)))</FileVersion>
     <InformationalVersion>$(VersionPrefix).$(BuildNumber)</InformationalVersion>
     <InformationalVersion Condition="'$(BUILD_SOURCEVERSION)' != ''">$(InformationalVersion). Commit Hash: $(BUILD_SOURCEVERSION)</InformationalVersion>
 
