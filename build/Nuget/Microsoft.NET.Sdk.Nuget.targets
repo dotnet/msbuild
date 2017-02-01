@@ -142,6 +142,54 @@
 
     <Copy SourceFiles="@(CopyLocalBuildFile)"
           DestinationFiles="$(PackagesLayoutDir)%(CopyLocalBuildFile.RelativePath)\%(CopyLocalBuildFile.Filename)%(CopyLocalBuildFile.Extension)" />
+
+
+    <PropertyGroup>
+      <SdkSwrHeader>
+        <![CDATA[  
+use vs
+
+package name=Microsoft.NET.Sdk
+        version=$(Version)
+
+vs.localizedResources
+  vs.localizedResource language=en-us
+                       title="Microsoft Net Sdk"
+                       description="SDK for .NET projects"
+
+]]>
+      </SdkSwrHeader>
+      <SdkSwrBlankLine>%0D</SdkSwrBlankLine>
+    </PropertyGroup>
+    
+    <ItemGroup>
+      <SdkSwrLines Include="$(SdkSwrHeader)" />
+      
+      <LaidOutSdk_SdkFiles Include="$(PackagesLayoutDir)Sdk\**" />
+      <SdkSwrLines Include='$(SdkSwrBlankLine)folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\Sdk"' />
+      <SdkSwrLines Include='%20%20file source="%(LaidOutSdk_SdkFiles.Identity)"' />
+
+      <LaidOutSdk_BuildFiles Include="$(PackagesLayoutDir)build\**" />
+      <SdkSwrLines Include='$(SdkSwrBlankLine)folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\build"' />
+      <SdkSwrLines Include='%20%20file source="%(LaidOutSdk_BuildFiles.Identity)"' />
+
+      <LaidOutSdk_BuildCrossTargetingFiles Include="$(PackagesLayoutDir)buildCrossTargeting\**" />
+      <SdkSwrLines Include='$(SdkSwrBlankLine)folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\buildCrossTargeting"' />
+      <SdkSwrLines Include='%20%20file source="%(LaidOutSdk_BuildCrossTargetingFiles.Identity)"' />
+
+      <LaidOutSdk_ToolsNet46Files Include="$(PackagesLayoutDir)tools\net46\**" />
+      <SdkSwrLines Include='$(SdkSwrBlankLine)folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\net46"' />
+      <SdkSwrLines Include='%20%20file source="%(LaidOutSdk_ToolsNet46Files.Identity)"' />
+
+      <LaidOutSdk_ToolsNetCoreAppFiles Include="$(PackagesLayoutDir)tools\netcoreapp1.0\**" />
+      <SdkSwrLines Include='$(SdkSwrBlankLine)folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\netcoreapp1"' />
+      <SdkSwrLines Include='%20%20file source="%(LaidOutSdk_ToolsNetCoreAppFiles.Identity)"' />
+    </ItemGroup>
+
+    <WriteLinesToFile File="$(OutputPath)Microsoft.Net.Sdk.swr"
+                      Lines="@(SdkSwrLines)" 
+                      Overwrite="true"/>
+    
   </Target>
 
 </Project>

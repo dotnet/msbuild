@@ -20,7 +20,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Package Include="Microsoft.NET.Sdk.swr" />
+    <Package Include="$(OutDir)\Microsoft.NET.Sdk.swr" />
   </ItemGroup>
 
   <Import Project="$(NuGet_Packages)\MicroBuild.Core\$(MicroBuildVersion)\build\MicroBuild.Core.targets" />
