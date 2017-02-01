@@ -113,6 +113,7 @@
 
       <CopyLocalBuildFile Include="@(CopyLocalBuildCrossTargetingFile)" />
       <CopyLocalBuildFile Include="@(CopyLocalSdkFile)" />
+      <CopyLocalBuildFile Include="@(CopyLocalSatelliteAssembly)" />
 
       <!-- Use the contents of the output directory of the net46 build of the SDK tasks, except
            for MSBuild and Roslyn DLLs and their dependencies-->
@@ -172,6 +173,7 @@ vs.localizedResources
     </PropertyGroup>
     
     <ItemGroup>
+      <SatelliteLanguage Include="cs;de;es;fr;it;ja;ko;pl;pt-BR;ru;tr;zh-Hans;zh-Hant" />
       <SdkSwrLines Include="$(SdkSwrHeader)" />
       
       <LaidOutSdk_SdkFiles Include="$(PackagesLayoutDir)Sdk\*" />
@@ -189,6 +191,7 @@ vs.localizedResources
       <LaidOutSdk_ToolsNet46Files Include="$(PackagesLayoutDir)tools\net46\*" />
       <SdkSwrLines Include='$(SdkSwrBlankLine)folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\net46"' />
       <SdkSwrLines Include='%20%20file source="%24(OutputPath)PackagesLayout\tools\net46\%(LaidOutSdk_ToolsNet46Files.Filename)%(LaidOutSdk_ToolsNet46Files.Extension)"' />
+      <SdkSwrLines Include='$(SdkSwrBlankLine)folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\net46\%(SatelliteLanguage.Identity);%20%20file source="%24(OutputPath)PackagesLayout\tools\net46\%(SatelliteLanguage.Identity)\Microsoft.NET.Build.Tasks.resources.dll"' />
 
       <LaidOutSdk_ToolsNet46NewtonSoftJsonFiles Include="$(PackagesLayoutDir)tools\net46\Newtonsoft.Json.6.0.4\*" />
       <SdkSwrLines Include='$(SdkSwrBlankLine)folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\net46\Newtonsoft.Json.6.0.4"' />
@@ -197,6 +200,7 @@ vs.localizedResources
       <LaidOutSdk_ToolsNetCoreAppFiles Include="$(PackagesLayoutDir)tools\netcoreapp1.0\*" />
       <SdkSwrLines Include='$(SdkSwrBlankLine)folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\netcoreapp1"' />
       <SdkSwrLines Include='%20%20file source="%24(OutputPath)PackagesLayout\tools\netcoreapp1.0\%(LaidOutSdk_ToolsNetCoreAppFiles.Filename)%(LaidOutSdk_ToolsNetCoreAppFiles.Extension)"' />
+      <SdkSwrLines Include='$(SdkSwrBlankLine)folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\netcoreapp1.0\%(SatelliteLanguage.Identity);%20%20file source="%24(OutputPath)PackagesLayout\tools\net46\%(SatelliteLanguage.Identity)\Microsoft.NET.Build.Tasks.resources.dll"' />
     </ItemGroup>
 
     <WriteLinesToFile File="$(OutputPath)Microsoft.Net.Sdk.swr"
