@@ -165,27 +165,27 @@ vs.localizedResources
     <ItemGroup>
       <SdkSwrLines Include="$(SdkSwrHeader)" />
       
-      <LaidOutSdk_SdkFiles Include="$(PackagesLayoutDir)Sdk\**" />
+      <LaidOutSdk_SdkFiles Include="$(PackagesLayoutDir)Sdk\*" />
       <SdkSwrLines Include='$(SdkSwrBlankLine)folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\Sdk"' />
       <SdkSwrLines Include='%20%20file source="%(LaidOutSdk_SdkFiles.Identity)"' />
 
-      <LaidOutSdk_BuildFiles Include="$(PackagesLayoutDir)build\**" />
+      <LaidOutSdk_BuildFiles Include="$(PackagesLayoutDir)build\*" />
       <SdkSwrLines Include='$(SdkSwrBlankLine)folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\build"' />
       <SdkSwrLines Include='%20%20file source="%(LaidOutSdk_BuildFiles.Identity)"' />
 
-      <LaidOutSdk_BuildCrossTargetingFiles Include="$(PackagesLayoutDir)buildCrossTargeting\**" />
+      <LaidOutSdk_BuildCrossTargetingFiles Include="$(PackagesLayoutDir)buildCrossTargeting\*" />
       <SdkSwrLines Include='$(SdkSwrBlankLine)folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\buildCrossTargeting"' />
       <SdkSwrLines Include='%20%20file source="%(LaidOutSdk_BuildCrossTargetingFiles.Identity)"' />
 
-      <LaidOutSdk_ToolsNet46Files Include="$(PackagesLayoutDir)tools\net46\**" />
+      <LaidOutSdk_ToolsNet46Files Include="$(PackagesLayoutDir)tools\net46\*" />
       <SdkSwrLines Include='$(SdkSwrBlankLine)folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\net46"' />
       <SdkSwrLines Include='%20%20file source="%(LaidOutSdk_ToolsNet46Files.Identity)"' />
 
-      <LaidOutSdk_ToolsNet46NewtonSoftJsonFiles Include="$(PackagesLayoutDir)tools\net46\Newtonsoft.Json.6.0.4\**" />
+      <LaidOutSdk_ToolsNet46NewtonSoftJsonFiles Include="$(PackagesLayoutDir)tools\net46\Newtonsoft.Json.6.0.4\*" />
       <SdkSwrLines Include='$(SdkSwrBlankLine)folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\net46\Newtonsoft.Json.6.0.4"' />
       <SdkSwrLines Include='%20%20file source="%(LaidOutSdk_ToolsNet46NewtonSoftJsonFiles.Identity)"' />
 
-      <LaidOutSdk_ToolsNetCoreAppFiles Include="$(PackagesLayoutDir)tools\netcoreapp1.0\**" />
+      <LaidOutSdk_ToolsNetCoreAppFiles Include="$(PackagesLayoutDir)tools\netcoreapp1.0\*" />
       <SdkSwrLines Include='$(SdkSwrBlankLine)folder "InstallDir:MSBuild\Sdks\Microsoft.NET.Sdk\tools\netcoreapp1"' />
       <SdkSwrLines Include='%20%20file source="%(LaidOutSdk_ToolsNetCoreAppFiles.Identity)"' />
     </ItemGroup>
