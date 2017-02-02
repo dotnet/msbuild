@@ -190,7 +190,8 @@
       <ItemGroup>
         <NETCore10Assemblies Include="$(SdkOutputDirectory)/System.ComponentModel.Primitives.dll;
                                       $(SdkOutputDirectory)/System.Collections.Specialized.dll;
-                                      $(SdkOutputDirectory)/System.Collections.NonGeneric.dll" />
+                                      $(SdkOutputDirectory)/System.Collections.NonGeneric.dll;
+                                      $(SdkOutputDirectory)/System.Private.DataContractSerialization.dll" />
       </ItemGroup>
     
       <!-- Move these "1.0" assemblies that TestPlatform lays down out of the way so crossgen doesn't pick them up.
