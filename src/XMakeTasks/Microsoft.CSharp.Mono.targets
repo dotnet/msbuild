@@ -18,8 +18,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <Choose>
         <When Condition="$(TargetFramework.StartsWith('netcoreapp')) or $(TargetFramework.StartsWith('netstandard'))">
-            <!-- For .net core and netstandard projects, we use the csc.exe bundled with msbuild -->
+            <!-- For .net core and netstandard projects, we csc.exe -->
             <PropertyGroup>
+                <CscToolPath Condition="'$(CscToolPath)' == '' and '$(MSBuildRuntimeType)' == 'Mono' and Exists('$(MSBuildFrameworkToolsPath)\csc.exe')">$(MSBuildFrameworkToolsPath)\</CscToolPath>
+                <!-- fallback to the bundled csc.exe -->
                 <CscToolPath Condition="'$(CscToolPath)' == ''">$(RoslynTargetsPath)\</CscToolPath>
 
                 <!-- Writing full pdbs is not supported on !windows platforms, so use portable
