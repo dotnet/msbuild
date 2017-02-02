@@ -46,5 +46,17 @@
         "format": "yyyy"
       }
     }
-  }
+  },
+  "PostActions": [
+    {
+      "Description": "Run dotnet restore",
+      "ActionId": "210D431B-A78B-4D2F-B762-4ED3E3EA9025",
+      "ContinueOnError": "false",
+      "ManualInstructions": [
+        {
+          "Text": "Run 'dotnet restore' in the directory the template was created in."
+        }
+      ]
+    }
+  ]
 }
