@@ -131,9 +131,15 @@
     </PropertyGroup>
   </Target>
 
+  <!-- We want this target to be incremental, but editbin affects the file in place, as does
+       OpenSourceSign. So run this target when the assembly has been updated since the last
+       time it was signed. Signing will run immediately after this, flipping another bit and
+       dropping the marker file. -->
   <Target Name="EditBin"
           AfterTargets="CoreCompile"
           BeforeTargets="OpenSourceSign"
+          Inputs="@(IntermediateAssembly)"
+          Outputs="@(IntermediateAssembly->'%(Identity).oss_signed')"
           Condition="'$(FullFrameworkBuild)' == 'true' and '$(PlatformTarget)' == 'x86'">
     <PropertyGroup>
       <!-- Native equivalent is /LARGEADDRESSAWARE on the linker -->
