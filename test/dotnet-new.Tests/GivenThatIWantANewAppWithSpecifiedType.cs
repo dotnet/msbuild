@@ -1,13 +1,9 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using System.Text;
+using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Xunit;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
@@ -17,26 +13,27 @@ namespace Microsoft.DotNet.New.Tests
     public class GivenThatIWantANewAppWithSpecifiedType : TestBase
     {
         [Theory]
-        [InlineData("C#", "Console", false)]
-        [InlineData("C#", "Lib", false)]
-        [InlineData("C#", "Web", true)]
-        [InlineData("C#", "Mstest", false)]
-        [InlineData("C#", "XUnittest", false)]
-        [InlineData("F#", "Console", false)]
-        [InlineData("F#", "Lib", false)]
-        [InlineData("F#", "Web", true)]
-        [InlineData("F#", "Mstest", false)]
-        [InlineData("F#", "XUnittest", false)]
+        [InlineData("C#", "console", false)]
+        [InlineData("C#", "classlib", false)]
+        [InlineData("C#", "mstest", false)]
+        [InlineData("C#", "xunit", false)]
+        [InlineData("C#", "web", true)]
+        [InlineData("C#", "mvc", true)]
+        [InlineData("C#", "webapi", true)]
+        [InlineData("F#", "console", false)]
+        [InlineData("F#", "classlib", false)]
+        [InlineData("F#", "mstest", false)]
+        [InlineData("F#", "xunit", false)]
+        [InlineData("F#", "mvc", true)]
         public void TemplateRestoresAndBuildsWithoutWarnings(
             string language,
             string projectType,
             bool useNuGetConfigForAspNet)
         {
-            var rootPath = TestAssetsManager.CreateTestDirectory(identifier: $"{language}_{projectType}").Path;
+            string rootPath = TestAssetsManager.CreateTestDirectory(identifier: $"{language}_{projectType}").Path;
 
-            new TestCommand("dotnet") 
-                .WithWorkingDirectory(rootPath)
-                .Execute($"new --type {projectType} --lang {language}")
+            new TestCommand("dotnet") { WorkingDirectory = rootPath }
+                .Execute($"new {projectType} -lang {language} -o {rootPath} --debug:ephemeral-hive")
                 .Should().Pass();
 
             if (useNuGetConfigForAspNet)

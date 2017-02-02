@@ -11,9 +11,11 @@ using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using FluentAssertions;
 
+[assembly: CollectionBehavior(DisableTestParallelization = true)]
+
 namespace Microsoft.DotNet.Tests
 {
-	public class GivenThatTheUserIsRunningDotNetForTheFirstTime : TestBase
+    public class GivenThatTheUserIsRunningDotNetForTheFirstTime : TestBase
     {
         private static CommandResult _firstDotnetNonVerbUseCommandResult;
         private static CommandResult _firstDotnetVerbUseCommandResult;
@@ -31,7 +33,7 @@ namespace Microsoft.DotNet.Tests
             command.Environment["SkipInvalidConfigurations"] = "true";
 
             _firstDotnetNonVerbUseCommandResult = command.ExecuteWithCapturedOutput("--info");
-            _firstDotnetVerbUseCommandResult = command.ExecuteWithCapturedOutput("new");
+            _firstDotnetVerbUseCommandResult = command.ExecuteWithCapturedOutput("new --debug:ephemeral-hive");
 
             _nugetCacheFolder = new DirectoryInfo(testNugetCache);
         }        
@@ -77,9 +79,9 @@ A command is running to initially populate your local package cache, to improve 
                      .And.NotContain("Restore completed in");
         }
 
-    	[Fact]
-    	public void ItCreatesASentinelFileUnderTheNuGetCacheFolder()
-    	{
+        [Fact]
+        public void ItCreatesASentinelFileUnderTheNuGetCacheFolder()
+        {
             _nugetCacheFolder
                 .Should()
                 .HaveFile($"{GetDotnetVersion()}.dotnetSentinel");
@@ -120,10 +122,10 @@ A command is running to initially populate your local package cache, to improve 
         }
 
         private string GetDotnetVersion()
-    	{
-    		return new DotnetCommand().ExecuteWithCapturedOutput("--version").StdOut
-    			.TrimEnd(Environment.NewLine.ToCharArray());
-    	}
+        {
+            return new DotnetCommand().ExecuteWithCapturedOutput("--version").StdOut
+                .TrimEnd(Environment.NewLine.ToCharArray());
+        }
 
         private static string NormalizeLineEndings(string s)
         {

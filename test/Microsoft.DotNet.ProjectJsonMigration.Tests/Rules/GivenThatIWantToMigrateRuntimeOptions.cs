@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         private static readonly string s_runtimeConfigFileName = "runtimeconfig.template.json";
 
         [Fact]
-        public void RuntimeOptions_are_copied_from_projectJson_to_runtimeconfig_template_json_file()
+        public void RuntimeOptionsAreCopiedFromProjectJsonToRuntimeConfigTemplateJsonFile()
         {
             var testInstance = TestAssetsManager.CreateTestInstance("TestAppWithRuntimeOptions");
             var projectDir = testInstance.Path;
@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void Migrating_ProjectJson_with_no_RuntimeOptions_produces_no_runtimeconfig_template_json_file()
+        public void MigratingProjectJsonWithNoRuntimeOptionsProducesNoRuntimeConfigTemplateJsonFile()
         {
             var testInstance = TestAssetsManager.CreateTestInstance("PJTestAppSimple");
             var projectDir = testInstance.Path;
@@ -61,6 +61,174 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var migratedRuntimeOptionsPath = Path.Combine(projectDir, s_runtimeConfigFileName);
 
             File.Exists(migratedRuntimeOptionsPath).Should().BeFalse();
+        }
+
+        [Fact]
+        public void MigratingProjectJsonWithOnlyServerGCRuntimeOptionsProducesNoRuntimeConfigTemplateJsonFile()
+        {
+            var testDirectory = Temp.CreateDirectory().Path;
+
+            var pj = @"
+                {
+                  ""runtimeOptions"": {
+                    ""configProperties"": {
+                      ""System.GC.Server"": true
+                    }
+                  }
+                }";
+
+            RunMigrateRuntimeOptionsRulePj(pj, testDirectory);
+            var migratedRuntimeOptionsPath = Path.Combine(testDirectory, s_runtimeConfigFileName);
+            File.Exists(migratedRuntimeOptionsPath).Should().BeFalse();
+        }
+
+        [Fact]
+        public void MigratingProjectJsonWithServerGCAndOtherConfigPropertiesProducesRuntimeConfigTemplateJsonFile()
+        {
+            var testDirectory = Temp.CreateDirectory().Path;
+
+            var pj = @"
+                {
+                  ""runtimeOptions"": {
+                    ""configProperties"": {
+                      ""System.GC.Server"": false,
+                      ""Other"": false
+                    }
+                  }
+                }";
+
+            RunMigrateRuntimeOptionsRulePj(pj, testDirectory);
+            var migratedRuntimeOptionsPath = Path.Combine(testDirectory, s_runtimeConfigFileName);
+            File.Exists(migratedRuntimeOptionsPath).Should().BeTrue();
+
+            var root = JObject.Parse(File.ReadAllText(migratedRuntimeOptionsPath));
+            var configProperties = root.Value<JObject>("configProperties");
+            configProperties.Should().NotBeNull();
+            configProperties["System.GC.Server"].Should().BeNull();
+            configProperties["Other"].Should().NotBeNull();
+        }
+
+        [Fact]
+        public void MigratingProjectJsonWithServerGCAndOtherRuntimeOptionsProducesRuntimeConfigTemplateJsonFile()
+        {
+            var testDirectory = Temp.CreateDirectory().Path;
+
+            var pj = @"
+                {
+                  ""runtimeOptions"": {
+                    ""configProperties"": {
+                      ""System.GC.Server"": false
+                    },
+                    ""Other"": false
+                  }
+                }";
+
+            RunMigrateRuntimeOptionsRulePj(pj, testDirectory);
+            var migratedRuntimeOptionsPath = Path.Combine(testDirectory, s_runtimeConfigFileName);
+            File.Exists(migratedRuntimeOptionsPath).Should().BeTrue();
+
+            var root = JObject.Parse(File.ReadAllText(migratedRuntimeOptionsPath));
+            root.Value<JObject>("configProperties").Should().BeNull();
+        }
+
+        [Fact]
+        public void MigratingProjectJsonWithServerGCTrueProducesServerGarbageCollectionProperty()
+        {
+            var testDirectory = Temp.CreateDirectory().Path;
+
+            var pj = @"
+                {
+                  ""runtimeOptions"": {
+                    ""configProperties"": {
+                      ""System.GC.Server"": true
+                    }
+                  }
+                }";
+
+            var mockProj = RunMigrateRuntimeOptionsRulePj(pj, testDirectory);
+            var props = mockProj.Properties.Where(p => p.Name.Equals("ServerGarbageCollection", StringComparison.Ordinal));
+            props.Count().Should().Be(1);
+            props.First().Value.Should().Be("true");
+        }
+
+        [Fact]
+        public void MigratingProjectJsonWithServerGCFalseProducesServerGarbageCollectionProperty()
+        {
+            var testDirectory = Temp.CreateDirectory().Path;
+
+            var pj = @"
+                {
+                  ""runtimeOptions"": {
+                    ""configProperties"": {
+                      ""System.GC.Server"": false
+                    }
+                  }
+                }";
+
+            var mockProj = RunMigrateRuntimeOptionsRulePj(pj, testDirectory);
+            var props = mockProj.Properties.Where(p => p.Name.Equals("ServerGarbageCollection", StringComparison.Ordinal));
+            props.Count().Should().Be(1);
+            props.First().Value.Should().Be("false");
+        }
+
+        [Fact]
+        public void MigratingWebProjectJsonWithServerGCTrueDoesNotProduceServerGarbageCollectionProperty()
+        {
+            var testDirectory = Temp.CreateDirectory().Path;
+
+            var pj = @"
+                {
+                  ""buildOptions"": {
+                    ""emitEntryPoint"": true
+                  },
+                  ""dependencies"": {
+                    ""Microsoft.AspNetCore.Mvc"": ""1.0.0""
+                  },
+                  ""runtimeOptions"": {
+                    ""configProperties"": {
+                      ""System.GC.Server"": true
+                    }
+                  }
+                }";
+
+            var mockProj = RunMigrateRuntimeOptionsRulePj(pj, testDirectory);
+            var props = mockProj.Properties.Where(p => p.Name.Equals("ServerGarbageCollection", StringComparison.Ordinal));
+            props.Count().Should().Be(0);
+        }
+
+        [Fact]
+        public void MigratingWebProjectJsonWithServerGCFalseProducesServerGarbageCollectionProperty()
+        {
+            var testDirectory = Temp.CreateDirectory().Path;
+
+            var pj = @"
+                {
+                  ""buildOptions"": {
+                    ""emitEntryPoint"": true
+                  },
+                  ""dependencies"": {
+                    ""Microsoft.AspNetCore.Mvc"": ""1.0.0""
+                  },
+                  ""runtimeOptions"": {
+                    ""configProperties"": {
+                      ""System.GC.Server"": false
+                    }
+                  }
+                }";
+
+            var mockProj = RunMigrateRuntimeOptionsRulePj(pj, testDirectory);
+            var props = mockProj.Properties.Where(p => p.Name.Equals("ServerGarbageCollection", StringComparison.Ordinal));
+            props.Count().Should().Be(1);
+            props.First().Value.Should().Be("false");
+        }
+
+        private ProjectRootElement RunMigrateRuntimeOptionsRulePj(string s, string testDirectory = null)
+        {
+            testDirectory = testDirectory ?? Temp.CreateDirectory().Path;
+            return TemporaryProjectFileRuleRunner.RunRules(new IMigrationRule[]
+            {
+                new MigrateRuntimeOptionsRule()
+            }, s, testDirectory);
         }
     }
 }

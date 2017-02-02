@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.Tools.Migrate
             }
             Directory.CreateDirectory(tempDir);
 
-            RunCommand("new", new string[] {}, tempDir);
+            RunCommand("new", new string[] { "console", "-o", tempDir, "--debug:ephemeral-hive" }, tempDir);
 
             return tempDir;
         }
@@ -77,8 +77,9 @@ namespace Microsoft.DotNet.Tools.Migrate
             {
                 MigrationTrace.Instance.WriteLine(commandResult.StdOut);
                 MigrationTrace.Instance.WriteLine(commandResult.StdErr);
-                
-                throw new GracefulException($"Failed to run {commandToExecute} in directory: {workingDirectory}");
+
+                string argList = string.Join(", ", args);
+                throw new GracefulException($"Failed to run {commandToExecute} with args: {argList} ... workingDirectory = {workingDirectory}");
             }
         }
     }

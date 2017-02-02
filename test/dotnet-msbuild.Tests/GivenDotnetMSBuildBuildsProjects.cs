@@ -5,18 +5,27 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using FluentAssertions;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using NuGet.Protocol;
 using Xunit;
+using Xunit.Abstractions;
 using MSBuildCommand = Microsoft.DotNet.Tools.Test.Utilities.MSBuildCommand;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
     public class GivenDotnetMSBuildBuildsProjects : TestBase
     {
+        private readonly ITestOutputHelper _output;
+
+        public GivenDotnetMSBuildBuildsProjects(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         [Fact]
         public void ItRunsSpecifiedTargetsWithPropertiesCorrectly()
         {
@@ -77,6 +86,37 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         }
 
         [Fact]
+        public void WhenRestoreSourcesStartsWithUnixPathThenHttpsSourceIsParsedCorrectly()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
+            // this is a workaround for https://github.com/Microsoft/msbuild/issues/1622
+            var testInstance = TestAssets.Get("LibraryWithUnresolvablePackageReference")
+                                        .CreateInstance()
+                                        .WithSourceFiles();
+
+            var root = testInstance.Root;
+            var somePathThatExists = "/usr/local/bin";
+
+            var result = new DotnetCommand()
+                .WithWorkingDirectory(root)
+                .Execute($"msbuild /p:RestoreSources={somePathThatExists};https://api.nuget.org/v3/index.json /t:restore LibraryWithUnresolvablePackageReference.csproj");
+
+            _output.WriteLine($"[STDOUT]\n{result.StdOut}\n[STDERR]\n{result.StdErr}");
+
+            result.Should().Fail();
+
+            result.StdOut.Should()
+                         .ContainVisuallySameFragment(
+@"Feeds used:
+      /usr/local/bin
+      https://api.nuget.org/v3/index.json");
+        }
+
+        [Fact]
         public void WhenDotnetRunHelpIsInvokedAppArgumentsTextIsIncludedInOutput()
         {
             const string AppArgumentsText = "Arguments passed to the application that is being run.";
@@ -85,7 +125,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             var result = new TestCommand("dotnet")
                 .WithWorkingDirectory(projectDirectory.Path)
                 .ExecuteWithCapturedOutput("run --help");
-            
+
             result.ExitCode.Should().Be(0);
             result.StdOut.Should().Contain(AppArgumentsText);
         }

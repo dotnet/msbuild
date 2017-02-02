@@ -55,9 +55,10 @@ Additional Arguments:
 
             try
             {
-                new NewCommand()
+                string newArgs = $"classlib -o \"{dir.Path}\"";
+                new NewCommandShim()
                     .WithWorkingDirectory(dir.Path)
-                    .ExecuteWithCapturedOutput("-t Lib")
+                    .ExecuteWithCapturedOutput(newArgs)
                 .Should().Pass();
             }
             catch (System.ComponentModel.Win32Exception e)

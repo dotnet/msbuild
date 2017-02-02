@@ -3,10 +3,7 @@
 
 using FluentAssertions;
 using Microsoft.DotNet.Tools.Test.Utilities;
-using System;
-using System.Linq;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.New.Tests
 {
@@ -18,9 +15,18 @@ namespace Microsoft.DotNet.New.Tests
             var cmd = new DotnetCommand().Execute("new Web1.1");
 
             cmd.ExitCode.Should().NotBe(0);
-            
-			cmd.StdErr.Should().Be("Unrecognized command or argument 'Web1.1'");
-            cmd.StdOut.Should().Be("Specify --help for a list of available options and commands.");
-		}
-	}
+
+            cmd.StdErr.Should().StartWith("No templates matched the input template name: [Web1.1]");
+        }
+
+        [Fact]
+        public void WhenTemplateNameIsNotUniquelyMatchedThenItIndicatesProblemToUser()
+        {
+            var cmd = new DotnetCommand().Execute("new c");
+
+            cmd.ExitCode.Should().NotBe(0);
+
+            cmd.StdErr.Should().StartWith("Unable to determine the desired template from the input template name: [c]");
+        }
+    }
 }

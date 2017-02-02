@@ -121,12 +121,14 @@ namespace Microsoft.DotNet.Tools.Run
                 {
                     throw new InvalidOperationException(
                         $"{LocalizableStrings.RunCommandInvalidOperationException1} {directory}." + Environment.NewLine +
-                        LocalizableStrings.RunCommandInvalidOperationException2);
+                        LocalizableStrings.RunCommandInvalidOperationException2)
+                               .DisplayAsError();
                 }
                 else if (projectFiles.Length > 1)
                 {
                     throw new InvalidOperationException(
-                        $"{LocalizableStrings.RunCommandInvalidOperationException3}'{directory}'{LocalizableStrings.RunCommandInvalidOperationException4}");
+                        $"{LocalizableStrings.RunCommandInvalidOperationException3}'{directory}'{LocalizableStrings.RunCommandInvalidOperationException4}")
+                               .DisplayAsError();
                 }
 
                 Project = projectFiles[0];
