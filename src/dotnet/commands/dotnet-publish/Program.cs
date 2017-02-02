@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Tools.Publish
 
             CommandOption filterProjOption = app.Option(
                $"--filter <{LocalizableStrings.FilterProjOption}>", LocalizableStrings.FilterProjOptionDescription,
-                CommandOptionType.SingleValue);
+                CommandOptionType.MultipleValue);
 
             CommandOption verbosityOption = AddVerbosityOption(app);
 
@@ -95,9 +95,9 @@ namespace Microsoft.DotNet.Tools.Publish
                     msbuildArgs.Add($"/p:VersionSuffix={versionSuffixOption.Value()}");
                 }
 
-                if (!string.IsNullOrEmpty(filterProjOption.Value()))
+                if (filterProjOption.HasValue())
                 {
-                    msbuildArgs.Add($"/p:FilterProjectFiles={filterProjOption.Value()}");
+                    msbuildArgs.Add($"/p:FilterProjectFiles={string.Join("%3B", filterProjOption.Values)}");
                 }
 
                 if (!string.IsNullOrEmpty(verbosityOption.Value()))
