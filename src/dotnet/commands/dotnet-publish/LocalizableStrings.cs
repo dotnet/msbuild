@@ -16,7 +16,7 @@
 
         public const string RuntimeOption = "RUNTIME_IDENTIFIER";
 
-        public const string RuntimeOptionDescription = "Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependented app.";
+        public const string RuntimeOptionDescription = "Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependent app.";
 
         public const string OutputOption = "OUTPUT_DIR";
 
