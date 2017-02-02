@@ -2,14 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-
-namespace TestLibrary
+namespace TestApp
 {
-    public static class Helper
+    public class Program
     {
-        public static void SayHi()
+        public static int Main(string[] args)
         {
-            Console.WriteLine("Hello there!");
+            Console.WriteLine("Hello World!");
+            return 0;
         }
     }
 }

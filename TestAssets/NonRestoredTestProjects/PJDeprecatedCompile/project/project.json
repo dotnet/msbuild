@@ -1,0 +1,21 @@
+{
+    "version": "1.0.0-*",
+    "compile": "../Helper1.cs",
+    "compileFiles": "../Helper2.cs",
+    "buildOptions": {
+        "debugType": "portable",
+        "emitEntryPoint": true
+    },
+    "dependencies": {},
+    "frameworks": {
+        "netcoreapp1.0": {
+            "dependencies": {
+                "Microsoft.NETCore.App": {
+                    "type": "platform",
+                    "version": "1.0.1"
+                }
+            },
+            "imports": "dnxcore50"
+        }
+    }
+}

@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Tools.Build
             CommandOption runtimeOption = app.Option(
                 $"-r|--runtime <{LocalizableStrings.RuntimeOptionName}>", LocalizableStrings.RuntimeOptionDescription,
                 CommandOptionType.SingleValue);
-            CommandOption configurationOption = app.Option($"-c|--configuration <{LocalizableStrings.ConfigurationOptionName}>", LocalizableStrings.FrameworkOptionDescription, CommandOptionType.SingleValue);
+            CommandOption configurationOption = app.Option($"-c|--configuration <{LocalizableStrings.ConfigurationOptionName}>", LocalizableStrings.ConfigurationOptionDescription, CommandOptionType.SingleValue);
             CommandOption versionSuffixOption = app.Option($"--version-suffix <{LocalizableStrings.VersionSuffixOptionName}>", LocalizableStrings.VersionSuffixOptionDescription, CommandOptionType.SingleValue);
 
             CommandOption noIncrementalOption = app.Option("--no-incremental", LocalizableStrings.NoIncrementialOptionDescription, CommandOptionType.NoValue);

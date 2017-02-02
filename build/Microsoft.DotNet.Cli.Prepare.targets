@@ -43,6 +43,10 @@
       <IntermediateDirectory>$(BaseOutputDirectory)/intermediate</IntermediateDirectory>
       <PackagesDirectory>$(BaseOutputDirectory)/packages</PackagesDirectory>
       <SharedFrameworkPublishDirectory>$(IntermediateDirectory)/sharedFrameworkPublish</SharedFrameworkPublishDirectory>
+      <CoreCLRRid>$(Rid)</CoreCLRRid>
+      <CoreCLRRid Condition=" '$(OSName)' == 'win' ">win7-$(Architecture)</CoreCLRRid>
+      <CoreCLRRid Condition=" '$(OSName)' == 'osx' ">osx.10.10-x64</CoreCLRRid>
+      <CoreCLRRid Condition=" '$(OSName)' == 'centos' OR '$(OSName)' == 'rhel' ">rhel.7-x64</CoreCLRRid>
     </PropertyGroup>
 
     <GetCommitHash RepoRoot="$(RepoRoot)">
@@ -54,10 +58,7 @@
                               VersionMinor="$(VersionMinor)"
                               VersionPatch="$(VersionPatch)"
                               ReleaseSuffix="$(ReleaseSuffix)">
-      <Output TaskParameter="CommitCount" PropertyName="CommitCount" />
-      <Output TaskParameter="VersionSuffix" PropertyName="VersionSuffix" />
-      <Output TaskParameter="SimpleVersion" PropertyName="SimpleVersion" />
-      <Output TaskParameter="NugetVersion" PropertyName="NugetVersion" />
+      <Output TaskParameter="CommitCount" PropertyName="DefaultCommitCount" />
       <Output TaskParameter="MsiVersion" PropertyName="MsiVersion" />
       <Output TaskParameter="VersionBadgeMoniker" PropertyName="VersionBadgeMoniker" />
     </GenerateBuildVersionInfo>
@@ -68,6 +69,12 @@
     </GenerateNuGetPackagesArchiveVersion>
 
     <PropertyGroup>
+      <CommitCount Condition=" '$(CommitCount)' == '' ">$(DefaultCommitCount)</CommitCount>
+
+      <SimpleVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch).$(CommitCount)</SimpleVersion>
+      <VersionSuffix>$(ReleaseSuffix)-$(CommitCount)</VersionSuffix>
+      <NugetVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(VersionSuffix)</NugetVersion>
+
       <VersionBadge>$(BaseOutputDirectory)/$(VersionBadgeMoniker)_$(Configuration)_version_badge.svg</VersionBadge>
       <SdkVersion>$(NugetVersion)</SdkVersion>
 

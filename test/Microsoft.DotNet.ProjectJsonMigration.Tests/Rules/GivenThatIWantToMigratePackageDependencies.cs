@@ -406,79 +406,116 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 i => (i.Include == "xunit.runner.visualstudio" && i.ItemType == "PackageReference"));
         }
 
-        [Theory]
-        [InlineData(@"
+        [Fact]
+        public void ItMigratesMicrosoftNETCoreAppMetaPackageToRuntimeFrameworkVersionProperty()
+        {
+            var mockProj = RunPackageDependenciesRuleOnPj(
+                @"{ ""dependencies"": { ""Microsoft.NETCore.App"" : { ""version"": ""1.1.0"", ""type"": ""build"" } } }");
+
+            mockProj.Items.Should().NotContain(
+                i => i.Include == "Microsoft.NETCore.App" && i.ItemType == "PackageReference");
+            mockProj.Properties.Should().ContainSingle(p => p.Name == "RuntimeFrameworkVersion").Which.Value.Should().Be("1.1.0");
+        }
+
+        [Fact]
+        public void ItMigratesMicrosoftNETCoreAppMetaPackageToRuntimeFrameworkVersionPropertyConditionedOnTFMWhenMultiTFM()
+        {
+            var mockProj = RunPackageDependenciesRuleOnPj(@"
+            {
+              ""frameworks"": {
+                ""netcoreapp1.0"": {
+                    ""dependencies"": {
+                        ""Microsoft.NETCore.App"": ""1.1.0""
+                    }
+                },
+                ""netcoreapp1.1"": {
+                }
+              }
+            }");
+
+            mockProj.Items.Should().NotContain(
+                i => i.Include == "Microsoft.NETCore.App" && i.ItemType == "PackageReference");
+            var runtimeFrameworkVersion = mockProj.Properties.Should().ContainSingle(p => p.Name == "RuntimeFrameworkVersion").Which;
+            runtimeFrameworkVersion.Value.Should().Be("1.1.0");
+            runtimeFrameworkVersion.Condition.Should().Contain("netcoreapp1.0");
+        }
+
+        [Fact]
+        public void ItMigratesMicrosoftNETCoreAppMetaPackageToRuntimeFrameworkVersionPropertyWithNoConditionedOnTFMWhenSingleTFM()
+        {
+            var mockProj = RunPackageDependenciesRuleOnPj(@"
+            {
+              ""frameworks"": {
+                ""netcoreapp1.0"": {
+                    ""dependencies"": {
+                        ""Microsoft.NETCore.App"": ""1.1.0""
+                    }
+                }
+              }
+            }");
+
+            mockProj.Items.Should().NotContain(
+                i => i.Include == "Microsoft.NETCore.App" && i.ItemType == "PackageReference");
+            var runtimeFrameworkVersion = mockProj.Properties.Should().ContainSingle(p => p.Name == "RuntimeFrameworkVersion").Which;
+            runtimeFrameworkVersion.Value.Should().Be("1.1.0");
+            runtimeFrameworkVersion.Condition.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void ItMigratesNETStandardLibraryMetaPackageToNetStandardImplicitPackageVersionProperty()
+        {
+            var mockProj = RunPackageDependenciesRuleOnPj(
+                @"{ ""dependencies"": { ""NETStandard.Library"" : { ""version"": ""1.6.0"", ""type"": ""build"" } } }");
+
+            mockProj.Items.Should().NotContain(
+                i => i.Include == "NETStandard.Library" && i.ItemType == "PackageReference");
+            mockProj.Properties.Should().ContainSingle(p => p.Name == "NetStandardImplicitPackageVersion").Which.Value.Should().Be("1.6.0");
+        }
+
+        [Fact]
+        public void ItMigratesNETStandardLibraryMetaPackageToNetStandardImplicitPackageVersionPropertyConditionedOnTFMWhenMultiTFM()
+        {
+            var mockProj = RunPackageDependenciesRuleOnPj(@"
             {
               ""frameworks"": {
                 ""netstandard1.3"": {
                     ""dependencies"": {
-                        ""System.AppContext"": ""4.1.0"",
-                        ""NETStandard.Library"": ""1.5.0""
+                        ""NETStandard.Library"": ""1.6.0""
                     }
+                },
+                ""netstandard1.5"": {
                 }
               }
-            }")]
-        [InlineData(@"
+            }");
+
+            mockProj.Items.Should().NotContain(
+                i => i.Include == "NETStandard.Library" && i.ItemType == "PackageReference");
+            var netStandardImplicitPackageVersion =
+                mockProj.Properties.Should().ContainSingle(p => p.Name == "NetStandardImplicitPackageVersion").Which;
+            netStandardImplicitPackageVersion.Value.Should().Be("1.6.0");
+            netStandardImplicitPackageVersion.Condition.Should().Contain("netstandard1.3");
+        }
+
+        [Fact]
+        public void ItMigratesNETStandardLibraryMetaPackageToNetStandardImplicitPackageVersionPropertyWithNoConditionOnTFMWhenSingleTFM()
+        {
+            var mockProj = RunPackageDependenciesRuleOnPj(@"
             {
               ""frameworks"": {
                 ""netstandard1.3"": {
                     ""dependencies"": {
-                        ""System.AppContext"": ""4.1.0""
+                        ""NETStandard.Library"": ""1.6.0""
                     }
                 }
               }
-            }")]
-        public void ItMigratesLibraryAndDoesNotDoubleNetstandardRef(string pjContent)
-        {
-            var mockProj = RunPackageDependenciesRuleOnPj(pjContent);
+            }");
 
-            mockProj.Items.Should().ContainSingle(
-                i => (i.Include == "NETStandard.Library" && i.ItemType == "PackageReference"));
-        }
-
-        new private void EmitsPackageReferences(ProjectRootElement mockProj, params Tuple<string, string, string>[] packageSpecs)
-        {
-            foreach (var packageSpec in packageSpecs)
-            {
-                var packageName = packageSpec.Item1;
-                var packageVersion = packageSpec.Item2;
-                var packageTFM = packageSpec.Item3;
-
-                var items = mockProj.Items
-                    .Where(i => i.ItemType == "PackageReference")
-                    .Where(i => string.IsNullOrEmpty(packageTFM) || i.ConditionChain().Any(c => c.Contains(packageTFM)))
-                    .Where(i => i.Include == packageName)
-                    .Where(i => i.GetMetadataWithName("Version").Value == packageVersion &&
-                                i.GetMetadataWithName("Version").ExpressedAsAttribute);
-
-                items.Should().HaveCount(1);
-            }
-        }
-
-        new private void EmitsToolReferences(ProjectRootElement mockProj, params Tuple<string, string>[] toolSpecs)
-        {
-            foreach (var toolSpec in toolSpecs)
-            {
-                var packageName = toolSpec.Item1;
-                var packageVersion = toolSpec.Item2;
-
-                var items = mockProj.Items
-                    .Where(i => i.ItemType == "DotNetCliToolReference")
-                    .Where(i => i.Include == packageName)
-                    .Where(i => i.GetMetadataWithName("Version").Value == packageVersion &&
-                                i.GetMetadataWithName("Version").ExpressedAsAttribute);
-
-                items.Should().HaveCount(1);
-            }
-        }
-
-        new private ProjectRootElement RunPackageDependenciesRuleOnPj(string s, string testDirectory = null)
-        {
-            testDirectory = testDirectory ?? Temp.CreateDirectory().Path;
-            return TemporaryProjectFileRuleRunner.RunRules(new IMigrationRule[]
-            {
-                new MigratePackageDependenciesAndToolsRule()
-            }, s, testDirectory);
+            mockProj.Items.Should().NotContain(
+                i => i.Include == "NETStandard.Library" && i.ItemType == "PackageReference");
+            var netStandardImplicitPackageVersion =
+                mockProj.Properties.Should().ContainSingle(p => p.Name == "NetStandardImplicitPackageVersion").Which;
+            netStandardImplicitPackageVersion.Value.Should().Be("1.6.0");
+            netStandardImplicitPackageVersion.Condition.Should().BeEmpty();
         }
     }
 }

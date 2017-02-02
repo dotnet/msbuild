@@ -1,5 +1,6 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+using System.Diagnostics;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -17,6 +18,24 @@ namespace Microsoft.DotNet.Cli.Build
         protected abstract string Command { get; }
 
         protected abstract string Args { get; }
+
+        protected override ProcessStartInfo GetProcessStartInfo(
+            string pathToTool,
+            string commandLineCommands, 
+            string responseFileSwitch)
+        {
+            var psi = base.GetProcessStartInfo(
+                pathToTool,
+                commandLineCommands,
+                responseFileSwitch);
+                
+            foreach (var environmentVariableName in new EnvironmentFilter().GetEnvironmentVariableNamesToRemove())
+            {
+                psi.Environment.Remove(environmentVariableName);
+            }
+
+            return psi;
+        }
 
         public string WorkingDirectory { get; set; }
 

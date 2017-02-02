@@ -82,7 +82,7 @@ A command is running to initially populate your local package cache, to improve 
     	{
             _nugetCacheFolder
                 .Should()
-                .HaveFile($"{GetDotnetVersion()}.dotnetSentinel");            
+                .HaveFile($"{GetDotnetVersion()}.dotnetSentinel");
     	}
 
         [Fact]

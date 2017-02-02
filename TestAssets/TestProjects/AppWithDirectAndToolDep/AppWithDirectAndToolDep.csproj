@@ -1,13 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <TargetFramework>netcoreapp1.0</TargetFramework>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.3</Version>
-    </PackageReference>
     <PackageReference Include="dotnet-hello">
       <Version>1.0.0</Version>
     </PackageReference>
@@ -17,7 +14,4 @@
       <Version>1.0.0</Version>
     </DotNetCliToolReference>
   </ItemGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
-  </PropertyGroup>
 </Project>

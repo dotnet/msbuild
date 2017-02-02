@@ -6,7 +6,7 @@
     <TargetFrameworks>netcoreapp1.0</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <OutputPath>bin\$(Configuration)</OutputPath>
-    <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">$(PackageTargetFallback);portable-net45+win8+wp8+wpa81</PackageTargetFallback>
+    <PackageTargetFallback>$(PackageTargetFallback);portable-net45+win8+wp8+wpa81</PackageTargetFallback> 
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\shared-build-targets-utils\shared-build-targets-utils.csproj" />

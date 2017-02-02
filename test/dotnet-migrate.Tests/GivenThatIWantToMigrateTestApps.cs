@@ -35,6 +35,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .CreateInstance(identifier: projectName)
                 .WithSourceFiles()
                 .WithRestoreFiles()
+                .WithEmptyGlobalJson()
                 .Root;
 
             CleanBinObj(projectDirectory);
@@ -69,6 +70,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .CreateInstance(identifier: projectName)
                 .WithSourceFiles()
                 .WithRestoreFiles()
+                .WithEmptyGlobalJson()
                 .Root;
 
             CleanBinObj(projectDirectory);
@@ -88,6 +90,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .CreateInstance()
                 .WithSourceFiles()
                 .WithRestoreFiles()
+                .WithEmptyGlobalJson()
                 .Root;
 
             CleanBinObj(projectDirectory);
@@ -116,6 +119,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .GetProjectJson("ProjectJsonConsoleTemplate")
                 .CreateInstance()
                 .WithSourceFiles()
+                .WithEmptyGlobalJson()
                 .Root;
 
             var outputComparisonData = GetComparisonData(projectDirectory);
@@ -141,6 +145,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .CreateInstance()
                 .WithSourceFiles()
                 .WithRestoreFiles()
+                .WithEmptyGlobalJson()
                 .Root;
 
             var globalDirectory = projectDirectory.Parent;
@@ -169,6 +174,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .GetProjectJson(projectName)
                     .CreateInstance()
                     .WithSourceFiles()
+                    .WithEmptyGlobalJson()
                     .Root;
             
             File.Copy("NuGet.tempaspnetpatch.config", projectDirectory.GetFile("NuGet.Config").FullName);
@@ -186,6 +192,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .GetProjectJson("AppWithPackageNamedAfterFolder")
                 .CreateInstance()
                 .WithSourceFiles()
+                .WithEmptyGlobalJson()
                 .Root;
 
             var appProject = solutionDirectory
@@ -210,6 +217,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .GetProjectJson("TestAppDependencyGraph")
                 .CreateInstance()
                 .WithSourceFiles()
+                .WithEmptyGlobalJson()
                 .Root;
 
             MigrateProject(projectDirectory.GetDirectory(dependencyProject).FullName);
@@ -225,6 +233,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .CreateInstance()
                 .WithSourceFiles()
                 .WithRestoreFiles()
+                .WithEmptyGlobalJson()
                 .Root;
 
             var globalDirectory = projectDirectory.Parent;
@@ -246,6 +255,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .CreateInstance(identifier: projectName)
                 .WithSourceFiles()
                 .WithRestoreFiles()
+                .WithEmptyGlobalJson()
                 .Root;
 
             var outputComparisonData = BuildProjectJsonMigrateBuildMSBuild(projectDirectory, projectName);
@@ -271,6 +281,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .CreateInstance(identifier: projectName)
                 .WithSourceFiles()
                 .WithRestoreFiles()
+                .WithEmptyGlobalJson()
                 .Root;
 
             var outputComparisonData = BuildProjectJsonMigrateBuildMSBuild(projectDirectory, projectName);
@@ -303,6 +314,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .CreateInstance(identifier: projectName)
                 .WithSourceFiles()
                 .WithRestoreFiles()
+                .WithEmptyGlobalJson()
                 .Root;
 
             var outputComparisonData = BuildProjectJsonMigrateBuildMSBuild(
@@ -333,6 +345,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .GetProjectJson("TestAppDependencyGraph")
                 .CreateInstance(identifier: $"{projectName}.RefsTest")
                 .WithSourceFiles()
+                .WithEmptyGlobalJson()
                 .Root;
 
             MigrateProject(new [] { projectDirectory.GetDirectory(projectName).FullName });
@@ -354,6 +367,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .GetProjectJson("TestAppDependencyGraph")
                 .CreateInstance($"{projectName}.SkipRefsTest")
                 .WithSourceFiles()
+                .WithEmptyGlobalJson()
                 .Root;
                 
             MigrateProject(new [] { projectDirectory.GetDirectory(projectName).FullName, "--skip-project-references" });
@@ -370,6 +384,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .GetProjectJson("TestAppDependencyGraph")
                 .CreateInstance(callingMethod: $"MigrateDirectory.SkipRefs.{skipRefs}")
                 .WithSourceFiles()
+                .WithEmptyGlobalJson()
                 .Root;
 
             if (skipRefs)
@@ -393,6 +408,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .GetProjectJson("TestAppDependencyGraph")
                 .CreateInstance()
                 .WithSourceFiles()
+                .WithEmptyGlobalJson()
                 .Root;
 
             var project = projectDirectory
@@ -415,6 +431,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .CreateInstance()
                 .WithSourceFiles()
                 .WithRestoreFiles()
+                .WithEmptyGlobalJson()
                 .Root;
 
             var projectDirectory = assetsDir.GetDirectory("ProjectF");
@@ -450,6 +467,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .CreateInstance(identifier: projectNameSuffix)
                 .WithSourceFiles()
                 .WithRestoreFiles()
+                .WithEmptyGlobalJson()
                 .Root;
 
             var projectName = $"Project{projectNameSuffix}";
@@ -539,6 +557,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .CreateInstance()
                 .WithSourceFiles()
                 .WithRestoreFiles()
+                .WithEmptyGlobalJson()
                 .Root;
 
             CleanBinObj(projectDirectory);
@@ -558,6 +577,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .CreateInstance()
                 .WithSourceFiles()
                 .WithRestoreFiles()
+                .WithEmptyGlobalJson()
                 .Root;
 
             CleanBinObj(projectDirectory);
@@ -577,6 +597,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .GetProjectJson("TestAppDependencyGraph")
                 .CreateInstance()
                 .WithSourceFiles()
+                .WithEmptyGlobalJson()
                 .Root;
 
             var projectDirectory = solutionDirectory.GetDirectory(projectName);
@@ -601,6 +622,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .CreateInstance()
                 .WithSourceFiles()
                 .WithRestoreFiles()
+                .WithEmptyGlobalJson()
                 .Root;
 
             var expectedCsprojPath = projectDirectory.GetFile($"{projectName}.csproj");
@@ -640,6 +662,35 @@ namespace Microsoft.DotNet.Migration.Tests
             var projectDirectory = TestAssets
                 .GetProjectJson(projectName)
                 .CreateInstance(identifier: projectName)
+                .WithSourceFiles()
+                .WithEmptyGlobalJson()
+                .Root;
+
+            MigrateProject(projectDirectory.FullName);
+            Restore(projectDirectory, projectName);
+            BuildMSBuild(projectDirectory, projectName);
+        }
+
+        [Fact]
+        public void ItMigratesAndBuildsAppWithExplicitInclude()
+        {
+            const string projectName = "TestAppWithExplicitInclude";
+            var projectDirectory = TestAssets.Get(projectName)
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root;
+
+            MigrateProject(projectDirectory.FullName);
+            Restore(projectDirectory, projectName);
+            BuildMSBuild(projectDirectory, projectName);
+        }
+
+        [Fact]
+        public void ItMigratesAndBuildsAppWithExplicitIncludeGlob()
+        {
+            const string projectName = "TestAppWithExplicitIncludeGlob";
+            var projectDirectory = TestAssets.Get(projectName)
+                .CreateInstance()
                 .WithSourceFiles()
                 .Root;
 

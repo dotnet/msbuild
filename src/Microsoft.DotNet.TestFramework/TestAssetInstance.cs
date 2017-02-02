@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
 
@@ -104,6 +105,57 @@ namespace Microsoft.DotNet.TestFramework
             return this;
         }
 
+        public TestAssetInstance WithEmptyGlobalJson()
+        {
+            var file = Root.Parent.GetFile("global.json");
+
+            File.WriteAllText(file.FullName, @"{}");
+
+            return this;
+        }
+
+        public TestAssetInstance WithProjectChanges(Action<XDocument> xmlAction)
+        {
+            return WithProjectChanges((path, project) => xmlAction(project));
+        }
+
+        public TestAssetInstance WithProjectChanges(Action<string, XDocument> xmlAction)
+        {
+            var projectFileInfos = Root.GetFiles("*.*proj", SearchOption.AllDirectories);
+
+            foreach (var projectFileInfo in projectFileInfos)
+            {
+                var projectFile = projectFileInfo.FullName;
+                var project = XDocument.Load(projectFile);
+
+                xmlAction(projectFile, project);
+
+                using (var file = File.CreateText(projectFile))
+                {
+                    project.Save(file);
+                }
+            }
+
+            return this;
+        }
+
+        public TestAssetInstance UseCurrentRuntimeFrameworkVersion()
+        {
+            return WithProjectChanges(project =>
+            {
+                var ns = project.Root.Name.Namespace;
+
+                var propertyGroup = project.Root.Elements(ns + "PropertyGroup").LastOrDefault();
+                if (propertyGroup == null)
+                {
+                    propertyGroup = new XElement(ns + "PropertyGroup");
+                    project.Root.Add(propertyGroup);
+                }
+
+                propertyGroup.Add(new XElement(ns + "RuntimeFrameworkVersion", new Muxer().SharedFxVersion));
+            });
+        }
+
         private void CopyFiles(IEnumerable<FileInfo> filesToCopy)
         {
             foreach (var file in filesToCopy)
@@ -118,7 +170,6 @@ namespace Microsoft.DotNet.TestFramework
 
                 file.CopyTo(newPath);
             }
-
         }
     }
 }
