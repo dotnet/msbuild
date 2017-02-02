@@ -81,7 +81,7 @@
       <RemoveDir Directories="@(NuGetPackagesArchiveDirectory)" />
       <MakeDir Directories="@(NuGetPackagesArchiveDirectory)"/>
 
-      <WriteLinesToFile Condition=" 'CLI_LZMA_PACKAGE_SOURCE' != '' "
+      <WriteLinesToFile Condition=" '$(CLI_LZMA_PACKAGE_SOURCE)' != '' "
                         File="$(LZMANuGetConfigFilePath)" 
                         Lines="$(NuGetConfigContent)" />
 

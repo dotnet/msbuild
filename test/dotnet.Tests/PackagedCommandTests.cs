@@ -59,14 +59,25 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Theory]
-        [InlineData("AppWithDirectAndToolDep")]
-        [InlineData("AppWithToolDependency")]
-        public void TestProjectToolIsAvailableThroughDriver(string appName)
+        [InlineData("AppWithDirectAndToolDep", true)]
+        [InlineData("AppWithToolDependency", false)]
+        public void TestProjectToolIsAvailableThroughDriver(string appName, bool useCurrentFrameworkRuntimeVersion)
         {
             var testInstance = TestAssets.Get(appName)
                 .CreateInstance()
                 .WithSourceFiles()
                 .WithRestoreFiles();
+
+            if (useCurrentFrameworkRuntimeVersion)
+            {
+                testInstance = testInstance.UseCurrentRuntimeFrameworkVersion();
+
+                // restore again now that the project has changed
+                new RestoreCommand()
+                    .WithWorkingDirectory(testInstance.Root)
+                    .Execute()
+                    .Should().Pass();
+            }
 
             new BuildCommand()
                 .WithProjectDirectory(testInstance.Root)
@@ -263,7 +274,14 @@ namespace Microsoft.DotNet.Tests
             var testInstance = TestAssets.Get("AppWithDirectDep")
                 .CreateInstance()
                 .WithSourceFiles()
-                .WithRestoreFiles();
+                .WithRestoreFiles()
+                .UseCurrentRuntimeFrameworkVersion();
+
+            // restore again now that the project has changed
+            new RestoreCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .Execute()
+                .Should().Pass();
 
             new BuildCommand()
                 .WithWorkingDirectory(testInstance.Root)
