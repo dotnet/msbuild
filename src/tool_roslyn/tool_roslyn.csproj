@@ -5,7 +5,7 @@
   <PropertyGroup>
     <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-	<RuntimeFrameworkVersion>$(CLI_SharedFrameworkVersion)</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion>$(CLI_SharedFrameworkVersion)</RuntimeFrameworkVersion>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
   </PropertyGroup>
   <ItemGroup>
@@ -14,6 +14,12 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Build.Tasks" Version="$(CLI_Roslyn_Version)" />
     <PackageReference Include="Microsoft.Net.Compilers.netcore" Version="$(CLI_Roslyn_Version)" />
     <PackageReference Include="Microsoft.DiaSymReader.Native" Version="1.4.0" />
+
+    <!-- workaround for https://github.com/dotnet/standard/issues/191 so OpenSsl native assets aren't published -->
+    <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.2.0" />
+    <PackageReference Include="System.Security.Cryptography.Encoding" Version="4.0.0" />
+    <PackageReference Include="System.Security.Cryptography.OpenSsl" Version="4.0.0" />
+    <PackageReference Include="System.Security.Cryptography.X509Certificates" Version="4.1.0" />
   </ItemGroup>
 
   <ItemGroup>
