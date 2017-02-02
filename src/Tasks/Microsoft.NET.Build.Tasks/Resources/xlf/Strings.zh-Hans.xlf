@@ -155,7 +155,7 @@
       </trans-unit>
       <trans-unit id="NU1007">
         <source>Dependency specified was '{0}' but ended up with '{1}'.</source>
-        <target state="translated">指定的依赖项为“{0}”，但以“'{1}”结尾。</target>
+        <target state="translated">指定的依赖项为“{0}”，但以“{1}”结尾。</target>
         <note />
       </trans-unit>
       <trans-unit id="NU1008">
@@ -180,18 +180,18 @@
       </trans-unit>
       <trans-unit id="NU1012">
         <source>Dependency conflict. '{0}' expected '{1}' but received '{2}'</source>
-        <target state="translated">依赖项冲突。“{0}”预期“'{1}”，但接收到“{2}”</target>
+        <target state="translated">依赖项冲突。“{0}”预期“{1}”，但接收到“{2}”</target>
         <note />
       </trans-unit>
       <trans-unit id="DuplicateItemsError">
-        <source>Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. The duplicate items were: {3}</source>
-        <target state="new">Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. The duplicate items were: {3}</target>
+        <source>Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. For more information, see {4}. The duplicate items were: {3}</source>
+        <target state="needs-review-translation">包含了重复的“{0}”项。.NET SDK 默认情况下包括你项目中的“{0}”项。可以从项目文件中删除这些项，或者如果希望将其显示包含在项目文件中，则可以将“{1}”属性设置为“{2}”。重复项为: {3}</target>
         <note></note>
       </trans-unit>
       <trans-unit id="PackageReferenceOverrideWarning">
         <source>A PackageReference for '{0}' was included in your project. This package is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</source>
-        <target state="new">A PackageReference for '{0}' was included in your project. This package is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</target>
-        <note></note>
+        <target state="translated">项目中包含了“{0}”的 PackageReference。此包由 .NET SDK 隐式引用，且通常情况下你无需从项目中对其进行引用。有关详细信息，请参阅 {1}</target>
+        <note />
       </trans-unit>
     </body>
   </file>

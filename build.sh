@@ -77,4 +77,4 @@ export PATH="$DOTNET_INSTALL_DIR:$PATH"
 # Disable first run since we want to control all package sources
 export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
-dotnet build $REPOROOT/build/build.proj /m /nologo /p:Configuration=$CONFIGURATION /p:Platform="$PLATFORM" "${args[@]}"
+dotnet build $REPOROOT/build/build.proj /m:1 /nologo /p:Configuration=$CONFIGURATION /p:Platform="$PLATFORM" "${args[@]}"

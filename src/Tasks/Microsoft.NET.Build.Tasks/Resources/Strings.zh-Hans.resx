@@ -1,0 +1,234 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AtLeastOneTargetFrameworkMustBeSpecified" xml:space="preserve">
+    <value>必须指定至少一个可能的目标框架。</value>
+  </data>
+  <data name="NoCompatibleTargetFramework" xml:space="preserve">
+    <value>项目“{0}”没有与“{1}”兼容的目标框架。</value>
+  </data>
+  <data name="InvalidFrameworkName" xml:space="preserve">
+    <value>无效的框架名称:“{0}”。</value>
+  </data>
+  <data name="AssetsFileNotFound" xml:space="preserve">
+    <value>找不到资产文件“{0}”。运行 NuGet 程序包还原以生成此文件。</value>
+  </data>
+  <data name="AssetsFileMissingTarget" xml:space="preserve">
+    <value>资产文件“{0}”没有“{1}”的目标。确保已针对 TargetFramework=“{2}”和 RuntimeIdentifier=“{3}”还原此项目。</value>
+  </data>
+  <data name="AssetsFilePathNotRooted" xml:space="preserve">
+    <value>资产文件路径“{0}”不是根路径。仅支持完整路径。</value>
+  </data>
+  <data name="CannotFindProjectInfo" xml:space="preserve">
+    <value>找不到“{0}”的项目信息。这可以指示缺少一个项目引用。</value>
+  </data>
+  <data name="ContentFileDoesNotContainExpectedParentPackageInformation" xml:space="preserve">
+    <value>内容文件“{0}”不包含预期的父包信息。</value>
+  </data>
+  <data name="MissingItemMetadata" xml:space="preserve">
+    <value>在“{1}”项“{2}”上缺少“{0}”元数据。</value>
+  </data>
+  <data name="UnrecognizedPreprocessorToken" xml:space="preserve">
+    <value>“{1}”中无法识别的预处理器标记“{0}”。</value>
+  </data>
+  <data name="ContentPreproccessorParameterRequired" xml:space="preserve">
+    <value>必须向“{0}”任务提供参数“{1}”的值以便使用预处理的内容。</value>
+  </data>
+  <data name="ProjectAssetsConsumedWithoutMSBuildProjectPath" xml:space="preserve">
+    <value>从项目“{0}”消耗资产，但在“{1}”中找不到相应的 MSBuild 项目路径。</value>
+  </data>
+  <data name="UnexpectedFileType" xml:space="preserve">
+    <value>“{0}”的意外文件类型。类型是“{1}”和“{2}”。</value>
+  </data>
+  <data name="CannotInferTargetFrameworkIdentiferAndVersion" xml:space="preserve">
+    <value>无法从 TargetFramework=“{0}”推断 TargetFrameworkIdentifier 和/或 TargetFrameworkVersion。必须显式指定这两项。</value>
+  </data>
+  <data name="ContentItemDoesNotProvideOutputPath" xml:space="preserve">
+    <value>“{0}”的内容项设置“{1}”，但不提供“{2}”或“{3}”。</value>
+  </data>
+  <data name="DuplicatePreprocessorToken" xml:space="preserve">
+    <value>已向预处理器标记“{0}”提供多个值。选择“{1}”作为值。</value>
+  </data>
+  <data name="ErrorsOccurredWhenEmittingSatelliteAssembly" xml:space="preserve">
+    <value>发出附属程序集“{0}”时出错。</value>
+  </data>
+  <data name="UnableToFindResolvedPath" xml:space="preserve">
+    <value>找不到“{0}”的已解析路径。</value>
+  </data>
+  <data name="UnexpectedDependencyWithNoVersionNumber" xml:space="preserve">
+    <value>不具有版本号的意外依赖项“{0}”。</value>
+  </data>
+  <data name="RuntimeIdentifierMustBeSetForNETFramework" xml:space="preserve">
+    <value>必须为 .NETFramework 可执行文件设置 RuntimeIdentifier。请考虑 RuntimeIdentifier=win7-x86 或 RuntimeIdentifier=win7-x64。</value>
+  </data>
+  <data name="AssetPreprocessorMustBeConfigured" xml:space="preserve">
+    <value>必须在处理资产之前配置资产预处理器。</value>
+  </data>
+  <data name="InvalidNuGetVersionString" xml:space="preserve">
+    <value>无效的 NuGet 版本字符串:“{0}”。</value>
+  </data>
+  <data name="DOTNET1011" xml:space="preserve">
+    <value>未安装的框架: {1} 中的 {0}</value>
+  </data>
+  <data name="DOTNET1012" xml:space="preserve">
+    <value>未指定引用程序集目录。可以使用 DOTNET_REFERENCE_ASSEMBLIES_PATH 环境变量设置位置。</value>
+  </data>
+  <data name="DOTNET1013" xml:space="preserve">
+    <value>以下依赖项使用类型“platform”标记，但只有一个依赖项可以具有此类型: {0}</value>
+  </data>
+  <data name="DOTNET1014" xml:space="preserve">
+    <value>未能读取锁定文件</value>
+  </data>
+  <data name="DOTNET1017" xml:space="preserve">
+    <value>项目文件不存在“{0}”。</value>
+  </data>
+  <data name="NU1001" xml:space="preserve">
+    <value>无法解析依赖项“{0}”。</value>
+  </data>
+  <data name="NU1002" xml:space="preserve">
+    <value>项目“{1}”中的依赖项“{0}”不支持框架“{2}”。</value>
+  </data>
+  <data name="NU1006" xml:space="preserve">
+    <value>{0}。请运行“dotnet restore”以生成新的资产文件。</value>
+  </data>
+  <data name="NU1007" xml:space="preserve">
+    <value>指定的依赖项为“{0}”，但以“{1}”结尾。</value>
+  </data>
+  <data name="NU1008" xml:space="preserve">
+    <value>{0} 是不受支持的框架。</value>
+  </data>
+  <data name="NU1009" xml:space="preserve">
+    <value>预期资产文件不存在。请运行“dotnet restore”以生成新的资产文件。</value>
+  </data>
+  <data name="NU1010" xml:space="preserve">
+    <value>依赖项类型已更改</value>
+  </data>
+  <data name="NU1011" xml:space="preserve">
+    <value>不支持依赖项目标“{0}”。</value>
+  </data>
+  <data name="NU1012" xml:space="preserve">
+    <value>依赖项冲突。“{0}”预期“{1}”，但接收到“{2}”</value>
+  </data>
+  <data name="DuplicateItemsError" xml:space="preserve">
+    <value>包含了重复的“{0}”项。.NET SDK 默认情况下包括你项目中的“{0}”项。可以从项目文件中删除这些项，或者如果希望将其显示包含在项目文件中，则可以将“{1}”属性设置为“{2}”。重复项为: {3}</value>
+  </data>
+  <data name="PackageReferenceOverrideWarning" xml:space="preserve">
+    <value>项目中包含了“{0}”的 PackageReference。此包由 .NET SDK 隐式引用，且通常情况下你无需从项目中对其进行引用。有关详细信息，请参阅 {1}</value>
+  </data>
+</root>

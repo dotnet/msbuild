@@ -80,14 +80,14 @@ if ($FullMSBuild)
     $env:DOTNET_SDK_TEST_MSBUILD_PATH = join-path $env:VSInstallDir "MSBuild\15.0\bin\MSBuild.exe"
 }
 
-$commonBuildArgs = echo $RepoRoot\build\build.proj /t:$buildTarget /m /nologo /p:Configuration=$Configuration /p:Platform=$Platform /p:SignType=$signType /verbosity:$Verbosity
+$commonBuildArgs = echo $RepoRoot\build\build.proj /m:1 /nologo /p:Configuration=$Configuration /p:Platform=$Platform /p:SignType=$signType /verbosity:$Verbosity
 
 # NET Core Build 
 $msbuildSummaryLog = Join-Path -path $logPath -childPath "sdk.log"
 $msbuildWarningLog = Join-Path -path $logPath -childPath "sdk.wrn"
 $msbuildFailureLog = Join-Path -path $logPath -childPath "sdk.err"
 
-dotnet msbuild $commonBuildArgs /flp1:Summary`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildSummaryLog /flp2:WarningsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildWarningLog /flp3:ErrorsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildFailureLog
+dotnet msbuild /t:$buildTarget $commonBuildArgs /flp1:Summary`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildSummaryLog /flp2:WarningsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildWarningLog /flp3:ErrorsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildFailureLog
 if($LASTEXITCODE -ne 0) { throw "Failed to build" }
 
 # Template Build
@@ -98,5 +98,14 @@ $msbuildFailureLog = Join-Path -path $logPath -childPath "templates.err"
 msbuild /t:restore /p:RestorePackagesPath=$PackagesPath $RepoRoot\sdk-templates.sln /verbosity:$Verbosity
 if($LASTEXITCODE -ne 0) { throw "Failed to restore nuget packages for templates" }
 
-msbuild $commonBuildArgs /nr:false /p:BuildTemplates=true /flp1:Summary`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildSummaryLog /flp2:WarningsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildWarningLog /flp3:ErrorsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildFailureLog
+msbuild  /t:$buildTarget $commonBuildArgs /nr:false /p:BuildTemplates=true /flp1:Summary`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildSummaryLog /flp2:WarningsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildWarningLog /flp3:ErrorsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildFailureLog
 if($LASTEXITCODE -ne 0) { throw "Failed to build templates" }
+
+# Modern VSIX build
+$msbuildSummaryLog = Join-Path -path $logPath -childPath "modernvsix.log"
+$msbuildWarningLog = Join-Path -path $logPath -childPath "modernvsix.wrn"
+$msbuildFailureLog = Join-Path -path $logPath -childPath "modernvsix.err"
+
+msbuild /t:BuildModernVsixPackages $commonBuildArgs /nr:false /p:BuildTemplates=true /flp1:Summary`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildSummaryLog /flp2:WarningsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildWarningLog /flp3:ErrorsOnly`;Verbosity=diagnostic`;Encoding=UTF-8`;LogFile=$msbuildFailureLog
+if($LASTEXITCODE -ne 0) { throw "Failed to build modern vsix packages" }
+

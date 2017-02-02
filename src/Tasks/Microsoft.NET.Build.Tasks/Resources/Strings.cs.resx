@@ -1,0 +1,234 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AtLeastOneTargetFrameworkMustBeSpecified" xml:space="preserve">
+    <value>Je potřeba zadat alespoň jednu možnou cílovou platformu</value>
+  </data>
+  <data name="NoCompatibleTargetFramework" xml:space="preserve">
+    <value>Cílová platforma projektu {0} není kompatibilní s {1}.</value>
+  </data>
+  <data name="InvalidFrameworkName" xml:space="preserve">
+    <value>Neplatný název platformy: {0}</value>
+  </data>
+  <data name="AssetsFileNotFound" xml:space="preserve">
+    <value>Soubor prostředků {0} se nenašel. Pokud chcete tento soubor vygenerovat, spusťte obnovení balíčku NuGet.</value>
+  </data>
+  <data name="AssetsFileMissingTarget" xml:space="preserve">
+    <value>Soubor prostředků {0} nemá cíl pro {1}. Ověřte, že jste projekt obnovili pro hodnoty TargetFramework={2} a RuntimeIdentifier={3}.</value>
+  </data>
+  <data name="AssetsFilePathNotRooted" xml:space="preserve">
+    <value>Cesta k souboru prostředků {0} není uvedena od kořene. Podporované jsou jen celé cesty.</value>
+  </data>
+  <data name="CannotFindProjectInfo" xml:space="preserve">
+    <value>Nelze najít informace o projektu pro {0}. Může to znamenat chybějící odkaz na projekt.</value>
+  </data>
+  <data name="ContentFileDoesNotContainExpectedParentPackageInformation" xml:space="preserve">
+    <value>V souboru obsahu {0} nejsou očekávané informace o nadřízeném balíčku.</value>
+  </data>
+  <data name="MissingItemMetadata" xml:space="preserve">
+    <value>Chybí metadata {0} o {1} položky {2}.</value>
+  </data>
+  <data name="UnrecognizedPreprocessorToken" xml:space="preserve">
+    <value>Nerozpoznaný token preprocesoru {0} v {1}.</value>
+  </data>
+  <data name="ContentPreproccessorParameterRequired" xml:space="preserve">
+    <value>Úloha {0} musí mít hodnotu parametru {1}, aby mohla použít předem zpracovaný obsah.</value>
+  </data>
+  <data name="ProjectAssetsConsumedWithoutMSBuildProjectPath" xml:space="preserve">
+    <value>Prostředky se použijí z projektu {0}, ale v {1} se nenašla odpovídající cesta k projektu MSBuildu.</value>
+  </data>
+  <data name="UnexpectedFileType" xml:space="preserve">
+    <value>Nečekaný typ souboru {0}. Typ je {1} i {2}.</value>
+  </data>
+  <data name="CannotInferTargetFrameworkIdentiferAndVersion" xml:space="preserve">
+    <value>Z údaje TargetFramework={0} nejde odvodit hodnota TargetFrameworkIdentifier ani hodnota TargetFrameworkVersion. Musí být výslovně zadané.</value>
+  </data>
+  <data name="ContentItemDoesNotProvideOutputPath" xml:space="preserve">
+    <value>Položka obsahu pro {0} nastaví {1}, ale neposkytuje {2} ani {3}.</value>
+  </data>
+  <data name="DuplicatePreprocessorToken" xml:space="preserve">
+    <value>Token preprocesoru {0} získal víc hodnot než jednu. Volba hodnoty {1}.</value>
+  </data>
+  <data name="ErrorsOccurredWhenEmittingSatelliteAssembly" xml:space="preserve">
+    <value>Při generování satelitního sestavení {0} došlo k chybám.</value>
+  </data>
+  <data name="UnableToFindResolvedPath" xml:space="preserve">
+    <value>Nepodařilo se najít vyhodnocenou cestu pro {0}.</value>
+  </data>
+  <data name="UnexpectedDependencyWithNoVersionNumber" xml:space="preserve">
+    <value>Nečekaná závislost {0} bez čísla verze.</value>
+  </data>
+  <data name="RuntimeIdentifierMustBeSetForNETFramework" xml:space="preserve">
+    <value>Hodnota RuntimeIdentifier musí být nastavena pro spustitelné soubory .NET Frameworku. Můžete použít hodnotu RuntimeIdentifier=win7-x86 nebo RuntimeIdentifier=win7-x64.</value>
+  </data>
+  <data name="AssetPreprocessorMustBeConfigured" xml:space="preserve">
+    <value>Před zpracováním prostředků je potřeba nakonfigurovat preprocesor prostředků.</value>
+  </data>
+  <data name="InvalidNuGetVersionString" xml:space="preserve">
+    <value>Neplatný řetězec verze NuGet: {0}</value>
+  </data>
+  <data name="DOTNET1011" xml:space="preserve">
+    <value>Nenainstalovaná platforma: {0} v {1}</value>
+  </data>
+  <data name="DOTNET1012" xml:space="preserve">
+    <value>Není zadaný adresář referenčních sestavení. K nastavení umístění použijte proměnnou prostředí DOTNET_REFERENCE_ASSEMBLIES_PATH.</value>
+  </data>
+  <data name="DOTNET1013" xml:space="preserve">
+    <value>Následující závislosti jsou označené typem „platform“, ale tento typ může mít jenom jedna závislost: {0}</value>
+  </data>
+  <data name="DOTNET1014" xml:space="preserve">
+    <value>Soubor zámku se nedá přečíst.</value>
+  </data>
+  <data name="DOTNET1017" xml:space="preserve">
+    <value>Soubor projektu neexistuje {0}.</value>
+  </data>
+  <data name="NU1001" xml:space="preserve">
+    <value>Závislost {0} se nepodařilo vyřešit.</value>
+  </data>
+  <data name="NU1002" xml:space="preserve">
+    <value>Závislost {0} v projektu {1} nepodporuje platformu {2}.</value>
+  </data>
+  <data name="NU1006" xml:space="preserve">
+    <value>{0}. Ke generování nového souboru prostředků prosím použijte příkaz „dotnet restore“.</value>
+  </data>
+  <data name="NU1007" xml:space="preserve">
+    <value>Zadaná závislost byla {0}, ale skončila s {1}.</value>
+  </data>
+  <data name="NU1008" xml:space="preserve">
+    <value>{0} není podporovaná platforma.</value>
+  </data>
+  <data name="NU1009" xml:space="preserve">
+    <value>Očekávaný soubor prostředků neexistuje. Ke generování nového souboru prostředků prosím použijte příkaz „dotnet restore“.</value>
+  </data>
+  <data name="NU1010" xml:space="preserve">
+    <value>Typ závislosti se změnil.</value>
+  </data>
+  <data name="NU1011" xml:space="preserve">
+    <value>Cíl závislosti {0} není podporovaný.</value>
+  </data>
+  <data name="NU1012" xml:space="preserve">
+    <value>Konflikt závislostí. {0} očekával {1}, ale přijal {2}.</value>
+  </data>
+  <data name="DuplicateItemsError" xml:space="preserve">
+    <value>Byl zahrnut tento počet duplicitních položek: {0}. Sada .NET SDK obsahuje standardně tento počet položek z adresáře vašeho projektu: {0}. Buď můžete tyto položky odebrat ze souboru projektu, nebo vlastnost {1} nastavit na {2}, pokud je chcete ze souboru projektu explicitně vyloučit. Duplicitní položky: {3}</value>
+  </data>
+  <data name="PackageReferenceOverrideWarning" xml:space="preserve">
+    <value>Do projektu byl zahrnut odkaz na balíček pro {0}. Na tento balíček implicitně odkazuje sada .NET SDK, takže na něj zpravidla nemusíte odkazovat z projektu. Další informace najdete na adrese {1}.</value>
+  </data>
+</root>

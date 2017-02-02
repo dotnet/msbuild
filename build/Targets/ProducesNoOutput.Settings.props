@@ -12,5 +12,6 @@
     <ResolvePackageDependenciesForBuild>false</ResolvePackageDependenciesForBuild>
     <NonShipping>true</NonShipping>
     <NoStdLib>true</NoStdLib>
+    <LanguageTargets>$(MSBuildThisFileDirectory)ProducesNoOutput.Imports.props</LanguageTargets>
   </PropertyGroup>
 </Project>
