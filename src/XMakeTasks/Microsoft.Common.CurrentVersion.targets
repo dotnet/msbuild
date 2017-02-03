@@ -1569,6 +1569,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup>
       <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.Identity)' == '%(Identity)' and '$(_ProjectReferenceTargetFrameworkProperties)' != ''">
         <SetTargetFramework>$(_ProjectReferenceTargetFrameworkProperties)</SetTargetFramework>
+
+        <UndefineProperties Condition="$(_ProjectReferenceTargetFrameworkProperties.Contains(`ProjectHasSingleTargetFramework=true`))">%(_MSBuildProjectReferenceExistent.UndefineProperties);TargetFramework;ProjectHasSingleTargetFramework</UndefineProperties>
+        <!-- Unconditionally remove the property that was set as a marker to indicate that for this call we should remove TargetFramework -->
+        <UndefineProperties Condition="!$(_ProjectReferenceTargetFrameworkProperties.Contains(`ProjectHasSingleTargetFramework=true`))">%(_MSBuildProjectReferenceExistent.UndefineProperties);ProjectHasSingleTargetFramework</UndefineProperties>
       </_MSBuildProjectReferenceExistent>
     </ItemGroup>
 
