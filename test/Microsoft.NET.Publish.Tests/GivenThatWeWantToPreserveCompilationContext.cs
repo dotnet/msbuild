@@ -80,8 +80,10 @@ namespace Microsoft.NET.Publish.Tests
                     dependencyContext.CompilationOptions.EmitEntryPoint.Should().Be(true);
                     dependencyContext.CompilationOptions.DebugType.Should().Be("portable");
 
-                    var compileLibraryNames = dependencyContext.CompileLibraries.Select(cl => cl.Name).ToList();
-                    compileLibraryNames.Should().BeEquivalentTo(targetFramework == "net46" ? Net46CompileLibraryNames : NetCoreAppCompileLibraryNames);
+                    var compileLibraryNames = dependencyContext.CompileLibraries.Select(cl => cl.Name).Distinct().ToList();
+                    var expectedCompileLibraryNames = targetFramework == "net46" ? Net46CompileLibraryNames.Distinct() : NetCoreAppCompileLibraryNames.Distinct();
+
+                    compileLibraryNames.Should().BeEquivalentTo(expectedCompileLibraryNames);
 
                     // Ensure P2P references are specified correctly
                     var testLibrary = dependencyContext
@@ -267,24 +269,11 @@ runtime.any.system.text.encoding
 runtime.any.system.text.encoding.extensions
 runtime.any.system.threading.tasks
 runtime.any.system.threading.timer
-runtime.debian.8-x64.runtime.native.system.security.cryptography.openssl
-runtime.fedora.23-x64.runtime.native.system.security.cryptography.openssl
-runtime.fedora.24-x64.runtime.native.system.security.cryptography.openssl
 runtime.native.system
 runtime.native.system.io.compression
 runtime.native.system.net.http
 runtime.native.system.net.security
 runtime.native.system.security.cryptography
-runtime.native.system.security.cryptography.apple
-runtime.native.system.security.cryptography.openssl
-runtime.opensuse.13.2-x64.runtime.native.system.security.cryptography.openssl
-runtime.opensuse.42.1-x64.runtime.native.system.security.cryptography.openssl
-runtime.osx.10.10-x64.runtime.native.system.security.cryptography.apple
-runtime.osx.10.10-x64.runtime.native.system.security.cryptography.openssl
-runtime.rhel.7-x64.runtime.native.system.security.cryptography.openssl
-runtime.ubuntu.14.04-x64.runtime.native.system.security.cryptography.openssl
-runtime.ubuntu.16.04-x64.runtime.native.system.security.cryptography.openssl
-runtime.ubuntu.16.10-x64.runtime.native.system.security.cryptography.openssl
 runtime.win.microsoft.win32.primitives
 runtime.win.system.console
 runtime.win.system.diagnostics.debug

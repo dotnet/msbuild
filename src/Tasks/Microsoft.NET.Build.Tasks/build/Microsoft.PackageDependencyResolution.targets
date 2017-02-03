@@ -154,7 +154,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ResolvePackageDependencies
       ProjectPath="$(MSBuildProjectFullPath)"
       ProjectAssetsFile="$(ProjectAssetsFile)"
-      ProjectLanguage="$(Language)">
+      ProjectLanguage="$(Language)"
+      ContinueOnError="ErrorAndContinue">
 
       <Output TaskParameter="TargetDefinitions" ItemName="TargetDefinitions" />
       <Output TaskParameter="PackageDefinitions" ItemName="PackageDefinitions" />

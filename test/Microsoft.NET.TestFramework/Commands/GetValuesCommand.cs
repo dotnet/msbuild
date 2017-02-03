@@ -60,7 +60,7 @@ namespace Microsoft.NET.TestFramework.Commands
   </PropertyGroup>
   <Target Name=`WriteValuesToFile` " + (ShouldCompile ? "DependsOnTargets=`Compile`" : "") + $@">
     <WriteLinesToFile
-      File=`$(OutputPath)\{_valueName}Values.txt`
+      File=`bin\$(Configuration)\$(TargetFramework)\{_valueName}Values.txt`
       {linesAttribute}
       Overwrite=`true`
       Encoding=`Unicode`

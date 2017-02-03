@@ -8,18 +8,25 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <NetStandardImplicitPackageVersion>1.6.0</NetStandardImplicitPackageVersion>
     <RepositoryRootDirectory>$(MSBuildThisFileDirectory)</RepositoryRootDirectory>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
 
     <OutputPath>$([System.IO.Path]::GetFullPath('$(RepositoryRootDirectory)bin\$(Configuration)'))\</OutputPath>
     <OutDir>$(OutputPath)</OutDir>
-    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' == ''">$([System.IO.Path]::GetFullPath('$(RepositoryRootDirectory)bin\obj\$(MSBuildProjectName)'))\</BaseIntermediateOutputPath>
+    <RootOutDir>$(OutDir)</RootOutDir>
+    <BaseIntermediateOutputPath>$([System.IO.Path]::GetFullPath('$(RepositoryRootDirectory)bin\obj\$(MSBuildProjectName)'))\</BaseIntermediateOutputPath>
+    <RawOutDir>$(OutDir)Raw\</RawOutDir>
     <PackagesLayoutDir>$(OutDir)PackagesLayout\</PackagesLayoutDir>
     <PackagesLayoutToolsDir>$(PackagesLayoutDir)tools\</PackagesLayoutToolsDir>
     <PackagesLayoutToolsNet46Dir>$(PackagesLayoutToolsDir)net46\</PackagesLayoutToolsNet46Dir>
     <PackagesLayoutToolsNetCoreAppDir>$(PackagesLayoutToolsDir)netcoreapp1.0\</PackagesLayoutToolsNetCoreAppDir>
-    
+
+    <!-- Reset $(BuildEpoch) whenever $(VersionPrefix) increments. We subtract this from YYYYMMDD portion of build
+         number below to obtain the fourth part of file version that must fit in 16 bits. We can produce builds 
+         for seven years from every epoch reset. -->
     <VersionPrefix Condition="'$(VersionPrefix)' == ''">1.1.0</VersionPrefix>
+    <BuildEpoch>20170101</BuildEpoch>
     <VersionPrereleasePrefix Condition="'$(VersionPrereleasePrefix)' == ''">alpha</VersionPrereleasePrefix>
     <!-- When running on VSO (for official builds) use a real number. -->
     <BuildNumber Condition="'$(BuildNumber)' == ''">$(BUILD_BUILDNUMBER)</BuildNumber>
@@ -40,6 +47,15 @@
       -->    
     <VsixVersion Condition="'$(VsixVersion)' == ''">2.0.0.$(BuildNumberPart1)$(BuildNumberPart2)</VsixVersion>
 
+    <!-- Prepare assembly metadata -->
+    <Authors>Microsoft Corporation</Authors>
+    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
+    <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
+    <FileVersion Condition="'$(BUILD_BUILDNUMBER)' == ''">$(VersionPrefix).0</FileVersion>
+    <FileVersion Condition="'$(BUILD_BUILDNUMBER)' != ''">$(VersionPrefix).$([MSBuild]::Subtract($(BuildNumberPart1), $(BuildEpoch)))</FileVersion>
+    <InformationalVersion>$(VersionPrefix).$(BuildNumber)</InformationalVersion>
+    <InformationalVersion Condition="'$(BUILD_SOURCEVERSION)' != ''">$(InformationalVersion). Commit Hash: $(BUILD_SOURCEVERSION)</InformationalVersion>
+
     <DotNet_Install_Dir Condition=" '$(DotNet_Install_Dir)' == ''">$(RepositoryRootDirectory).dotnet_cli\</DotNet_Install_Dir>
     <DotNetTool>$(DotNet_Install_Dir)\dotnet</DotNetTool>
 
@@ -49,7 +65,7 @@
 
   <PropertyGroup>
     <!-- Assembly signing isn't supported by non-Windows MSBuild. Disable until supported. See #55 (https://github.com/dotnet/sdk/issues/55) -->
-    <SignAssembly Condition="'$(SignAssembly)'=='' AND '$(OS)'=='Windows_NT'">true</SignAssembly>
+    <SignAssembly Condition="'$(OS)'=='Windows_NT'">true</SignAssembly>
   </PropertyGroup>
 
   <Import Project="build\DependencyVersions.props" />

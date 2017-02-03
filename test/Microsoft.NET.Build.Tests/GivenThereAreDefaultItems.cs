@@ -51,6 +51,44 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Fact]
+        public void It_excludes_items_in_a_custom_outputpath()
+        {
+            Action<GetValuesCommand> setup = getValuesCommand =>
+            {
+
+                WriteFile(Path.Combine(getValuesCommand.ProjectRootPath, "Output", "CSharpInOutput.cs"),
+                    "!InvalidCSharp!");
+
+                WriteFile(Path.Combine(getValuesCommand.ProjectRootPath, "Code", "Class1.cs"),
+                    "public class Class1 {}");
+            };
+
+            Action<XDocument> projectChanges = project =>
+            {
+                var ns = project.Root.Name.Namespace;
+
+                var propertyGroup = new XElement(ns + "PropertyGroup");
+                project.Root.Add(propertyGroup);
+                propertyGroup.Add(new XElement(ns + "OutputPath", "Output"));
+            };
+
+
+            var compileItems = GivenThatWeWantToBuildALibrary.GetValuesFromTestLibrary(_testAssetsManager, "Compile", setup, projectChanges: projectChanges);
+
+            RemoveGeneratedCompileItems(compileItems);
+
+            var expectedItems = new[]
+            {
+                "Helper.cs",
+                @"Code\Class1.cs"
+            }
+            .Select(item => item.Replace('\\', Path.DirectorySeparatorChar))
+            .ToArray();
+
+            compileItems.Should().BeEquivalentTo(expectedItems);
+        }
+
+        [Fact]
         public void It_allows_excluded_folders_to_be_overridden()
         {
             Action<GetValuesCommand> setup = getValuesCommand =>
