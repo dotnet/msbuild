@@ -28,7 +28,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         <LangVersion>$(LangVersion)</LangVersion>
         <PlatformTarget>$(PlatformTarget)</PlatformTarget>
         <AllowUnsafeBlocks>$(AllowUnsafeBlocks)</AllowUnsafeBlocks>
-        <WarningsAsErrors>$(WarningsAsErrors)</WarningsAsErrors>
+        <TreatWarningsAsErrors>$(TreatWarningsAsErrors)</TreatWarningsAsErrors>
         <Optimize>$(Optimize)</Optimize>
         <AssemblyOriginatorKeyFile>$(AssemblyOriginatorKeyFile)</AssemblyOriginatorKeyFile>
         <DelaySign>$(DelaySign)</DelaySign>

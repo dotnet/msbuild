@@ -21,7 +21,7 @@ namespace Microsoft.NET.Build.Tasks
                 compilerOptionsItem.GetMetadata("LangVersion"),
                 compilerOptionsItem.GetMetadata("PlatformTarget"),
                 compilerOptionsItem.GetBooleanMetadata("AllowUnsafeBlocks"),
-                compilerOptionsItem.GetBooleanMetadata("WarningsAsErrors"),
+                compilerOptionsItem.GetBooleanMetadata("TreatWarningsAsErrors"),
                 compilerOptionsItem.GetBooleanMetadata("Optimize"),
                 compilerOptionsItem.GetMetadata("AssemblyOriginatorKeyFile"),
                 compilerOptionsItem.GetBooleanMetadata("DelaySign"),
