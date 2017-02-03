@@ -39,6 +39,8 @@ namespace Microsoft.TemplateEngine.TestHelper
 
         public string HostIdentifier { get; set; }
 
+        public IReadOnlyList<string> FallbackHostTemplateConfigNames { get; set; }
+
         public string Version { get; set; }
 
         public IReadOnlyList<KeyValuePair<Guid, Func<Type>>> BuiltInComponents { get; set; }

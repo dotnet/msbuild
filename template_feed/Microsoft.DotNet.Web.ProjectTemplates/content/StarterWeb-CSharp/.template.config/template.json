@@ -119,5 +119,10 @@
         }
       ]
     }
+  ],
+  "PrimaryOutputs": [
+    {
+      "Path": "Company.WebApplication1.csproj"
+    }
   ]
 }

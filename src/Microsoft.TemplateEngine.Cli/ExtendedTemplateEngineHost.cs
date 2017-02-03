@@ -27,6 +27,8 @@ namespace Microsoft.TemplateEngine.Cli
 
         public string HostIdentifier => _baseHost.HostIdentifier;
 
+        public IReadOnlyList<string> FallbackHostTemplateConfigNames => _baseHost.FallbackHostTemplateConfigNames;
+
         public string Version => _baseHost.Version;
 
         public virtual IReadOnlyList<KeyValuePair<Guid, Func<Type>>> BuiltInComponents => _baseHost.BuiltInComponents;

@@ -198,9 +198,14 @@ namespace Microsoft.TemplateEngine.Cli
         private void ConfigureEnvironment()
         {
             _onFirstRun?.Invoke(EnvironmentSettings, Installer);
+
+            foreach (Type type in typeof(New3Command).GetTypeInfo().Assembly.GetTypes())
+            {
+                EnvironmentSettings.SettingsLoader.Components.Register(type);
+            }
         }
 
-        private async Task<int> CreateTemplateAsync(ITemplateInfo template)
+        private async Task<CreationResultStatus> CreateTemplateAsync(ITemplateInfo template)
         {
             string fallbackName = new DirectoryInfo(OutputPath ?? Directory.GetCurrentDirectory()).Name;
             TemplateCreationResult instantiateResult = await _templateCreator.InstantiateAsync(template, Name, fallbackName, OutputPath, _app.AllTemplateParams, SkipUpdateCheck).ConfigureAwait(false);
@@ -208,22 +213,38 @@ namespace Microsoft.TemplateEngine.Cli
 
             switch (instantiateResult.Status)
             {
-                case CreationResultStatus.CreateSucceeded:
+                case CreationResultStatus.Success:
                     Reporter.Output.WriteLine(string.Format(LocalizableStrings.CreateSuccessful, resultTemplateName));
+                    HandlePostActions(instantiateResult);
                     break;
                 case CreationResultStatus.CreateFailed:
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.CreateFailed, resultTemplateName, instantiateResult.Message).Bold().Red());
                     break;
                 case CreationResultStatus.MissingMandatoryParam:
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingRequiredParameter, instantiateResult.Message, resultTemplateName).Bold().Red());
                     break;
+                case CreationResultStatus.OperationNotSpecified:
+                    break;
                 case CreationResultStatus.InvalidParamValues:
+                case CreationResultStatus.NotFound:
                     ShowTemplateHelp();
                     break;
                 default:
                     break;
             }
 
-            return instantiateResult.ResultCode;
+            return instantiateResult.Status;
+        }
+
+        private void HandlePostActions(TemplateCreationResult creationResult)
+        {
+            if (creationResult.Status != CreationResultStatus.Success)
+            {
+                return;
+            }
+
+            PostActionDispatcher postActionDispatcher = new PostActionDispatcher(creationResult, EnvironmentSettings.SettingsLoader.Components);
+            postActionDispatcher.Process();
         }
 
         private void DisplayTemplateList(bool showAll = false)
@@ -280,34 +301,34 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        private Task<int> EnterAmbiguousTemplateManipulationFlowAsync()
+        private Task<CreationResultStatus> EnterAmbiguousTemplateManipulationFlowAsync()
         {
             if (!string.IsNullOrEmpty(_templateName.Value))
             {
                 bool anyPartialMatchesDisplayed = ShowTemplateNameMismatchHelp();
                 ShowUsageHelp();
                 DisplayTemplateList(!anyPartialMatchesDisplayed);
-                return Task.FromResult(-1);
+                return Task.FromResult(CreationResultStatus.NotFound);
             }
 
             if (!ValidateRemainingParameters())
             {
                 ShowUsageHelp();
-                return Task.FromResult(-1);
+                return Task.FromResult(CreationResultStatus.InvalidParamValues);
             }    
 
             if (!string.IsNullOrWhiteSpace(Alias))
             {
                 Reporter.Error.WriteLine(LocalizableStrings.InvalidInputSwitch.Bold().Red());
                 Reporter.Error.WriteLine("  " + _app.TemplateParamInputFormat("--alias").Bold().Red());
-                return Task.FromResult(-1);
+                return Task.FromResult(CreationResultStatus.NotFound);
             }
 
             if (IsHelpFlagSpecified)
             {
                 ShowUsageHelp();
                 DisplayTemplateList();
-                return Task.FromResult(0);
+                return Task.FromResult(CreationResultStatus.Success);
             }
             else
             {
@@ -316,36 +337,36 @@ namespace Microsoft.TemplateEngine.Cli
                 //If we're showing the list because we were asked to, exit with success, otherwise, exit with failure
                 if (IsListFlagSpecified)
                 {
-                    return Task.FromResult(0);
+                    return Task.FromResult(CreationResultStatus.Success);
                 }
                 else
                 {
-                    return Task.FromResult(-1);
+                    return Task.FromResult(CreationResultStatus.OperationNotSpecified);
                 }
             }
         }
 
-        private Task<int> EnterInstallFlowAsync()
+        private Task<CreationResultStatus> EnterInstallFlowAsync()
         {
             Installer.InstallPackages(Install.ToList());
             //TODO: When an installer that directly calls into NuGet is available,
             //  return a more accurate representation of the outcome of the operation
-            return Task.FromResult(0);
+            return Task.FromResult(CreationResultStatus.Success);
         }
 
-        private async Task<int> EnterMaintenanceFlowAsync()
+        private async Task<CreationResultStatus> EnterMaintenanceFlowAsync()
         {
             if (!ValidateRemainingParameters())
             {
                 ShowUsageHelp();
-                return -1;
+                return CreationResultStatus.InvalidParamValues;
             }
 
             if (InstallHasValue)
             {
-                int installResult = await EnterInstallFlowAsync().ConfigureAwait(false);
+                CreationResultStatus installResult = await EnterInstallFlowAsync().ConfigureAwait(false);
 
-                if(installResult == 0)
+                if(installResult == CreationResultStatus.Success)
                 {                    
                     await PerformCoreTemplateQueryAsync().ConfigureAwait(false);
                     DisplayTemplateList();
@@ -359,33 +380,33 @@ namespace Microsoft.TemplateEngine.Cli
             await PerformCoreTemplateQueryAsync().ConfigureAwait(false);
             DisplayTemplateList();
 
-            return 0;
+            return CreationResultStatus.Success;
         }
 
-        private async Task<int> EnterSingularTemplateManipulationFlowAsync()
+        private async Task<CreationResultStatus> EnterSingularTemplateManipulationFlowAsync()
         {
             if (!string.IsNullOrWhiteSpace(Alias))
             {
                 if (!ValidateRemainingParameters())
                 {
                     ShowUsageHelp();
-                    return -1;
+                    return CreationResultStatus.InvalidParamValues;
                 }
 
                 _aliasRegistry.SetTemplateAlias(Alias, UnambiguousTemplateToUse);
                 Reporter.Output.WriteLine(LocalizableStrings.AliasCreated);
-                return 0;
+                return CreationResultStatus.Success;
             }
             else if(IsListFlagSpecified)
             {
                 if (!ValidateRemainingParameters())
                 {
                     ShowUsageHelp();
-                    return -1;
+                    return CreationResultStatus.InvalidParamValues;
                 }
 
                 DisplayTemplateList();
-                return 0;
+                return CreationResultStatus.Success;
             }
             
             //If we've made it here, we need the actual template's args
@@ -396,7 +417,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 ShowUsageHelp();
                 ShowTemplateHelp();
-                return argsError ? -1 : 0;
+                return argsError ? CreationResultStatus.InvalidParamValues : CreationResultStatus.Success;
             }
             else
             {
@@ -404,7 +425,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        private async Task<int> EnterTemplateManipulationFlowAsync()
+        private async Task<CreationResultStatus> EnterTemplateManipulationFlowAsync()
         {
             await PerformCoreTemplateQueryAsync().ConfigureAwait(false);
 
@@ -416,7 +437,7 @@ namespace Microsoft.TemplateEngine.Cli
             return await EnterAmbiguousTemplateManipulationFlowAsync().ConfigureAwait(false);
         }
 
-        private async Task<int> ExecuteAsync()
+        private async Task<CreationResultStatus> ExecuteAsync()
         {
             //Parse non-template specific arguments
             _app.ParseArgs();
