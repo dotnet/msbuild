@@ -87,7 +87,7 @@
       "allowOverride": true
     },
     "BuildArguments": {
-      "value": "--skip-prereqs --configuration $(BuildConfiguration) --targets Default",
+      "value": "--skip-prereqs --configuration $(BuildConfiguration) --targets Default /p:BranchName=sandbox",
       "allowOverride": true
     },
     "CONNECTION_STRING": {
@@ -107,7 +107,7 @@
       "value": "dotnetcli"
     },
     "ARTIFACT_STORAGE_CONTAINER": {
-      "value": "dotnet"
+      "value": "mlorbe"
     },
     "CHECKSUM_STORAGE_KEY": {
       "value": "PassedViaPipeBuild"
@@ -116,7 +116,7 @@
       "value": "dotnetclichecksums"
     },
     "CHECKSUM_STORAGE_CONTAINER": {
-      "value": "dotnet"
+      "value": "mlorbe"
     },
     "CLIBUILD_SKIP_TESTS": {
       "value": "true",

@@ -266,7 +266,7 @@
       },
       "inputs": {
         "filename": "build.cmd",
-        "arguments": "-Architecture $(BuildArchitecture) /p:Configuration=$(BuildConfiguration) /t:Publish  /v:normal",
+        "arguments": "-Architecture $(BuildArchitecture) /p:Configuration=$(BuildConfiguration) /p:BranchName=sandbox /t:Publish  /v:normal",
         "modifyEnvironment": "false",
         "workingFolder": "",
         "failOnStandardError": "false"
@@ -373,7 +373,7 @@
       "value": "dotnetcli"
     },
     "ARTIFACT_STORAGE_CONTAINER": {
-      "value": "dotnet"
+      "value": "mlorbe"
     },
     "CONNECTION_STRING": {
       "value": "PassedViaPipeBuild"
@@ -395,7 +395,7 @@
       "value": "Microsoft .NET Core 1.0.1 - SDK 1.0.0 Preview 4 (x86)"
     },
     "VS_FEED_URL": {
-      "value": "https://devdiv.pkgs.visualstudio.com/_packaging/VS/nuget/v3/index.json"
+      "value": "https://devdiv.pkgs.visualstudio.com/_packaging/dotnet-cli-test/nuget/v3/index.json"
     },
     "VS_FEED_PASSWORD": {
       "value": null,
@@ -408,7 +408,7 @@
       "value": "dotnetclichecksums"
     },
     "CHECKSUM_STORAGE_CONTAINER": {
-      "value": "dotnet"
+      "value": "mlorbe"
     },
     "CLIBUILD_SKIP_TESTS": {
       "value": "true"

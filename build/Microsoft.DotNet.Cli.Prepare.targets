@@ -62,7 +62,7 @@
       <Output TaskParameter="MsiVersion" PropertyName="MsiVersion" />
       <Output TaskParameter="VersionBadgeMoniker" PropertyName="VersionBadgeMoniker" />
       <Output TaskParameter="Channel" PropertyName="Channel" />
-      <Output TaskParameter="BranchName" PropertyName="BranchName" />
+      <Output TaskParameter="BranchName" PropertyName="BranchName" Condition=" '$(BranchName)' == '' " />
     </GenerateBuildVersionInfo>
 
     <PropertyGroup>

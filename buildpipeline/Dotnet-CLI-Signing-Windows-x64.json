@@ -315,7 +315,7 @@
         "scriptType": "inlineScript",
         "scriptName": "",
         "arguments": "$(MygetApiKey)",
-        "inlineScript": "$NuGetExe = Join-Path $env:BUILD_REPOSITORY_LOCALPATH \".nuget\\nuget.exe\"\n\n& $NuGetExe push -Source https://dotnet.myget.org/F/dotnet-cli/ -ApiKey $args[0] artifacts\\$env:RID\\packages\\Microsoft*.nupkg",
+        "inlineScript": "$NuGetExe = Join-Path $env:BUILD_REPOSITORY_LOCALPATH \".nuget\\nuget.exe\"\n\n& $NuGetExe push -Source https://dotnet.myget.org/F/dotnet-cli-private/ -ApiKey $args[0] artifacts\\$env:RID\\packages\\Microsoft*.nupkg",
         "workingFolder": "",
         "failOnStandardError": "true"
       }
@@ -333,7 +333,7 @@
       },
       "inputs": {
         "filename": "build.cmd",
-        "arguments": "/p:Configuration=$(BuildConfiguration) /t:Publish",
+        "arguments": "/p:Configuration=$(BuildConfiguration) /p:BranchName=sandbox /t:Publish",
         "modifyEnvironment": "false",
         "workingFolder": "",
         "failOnStandardError": "false"
@@ -420,7 +420,7 @@
       "value": "dotnetcli"
     },
     "ARTIFACT_STORAGE_CONTAINER": {
-      "value": "dotnet"
+      "value": "mlorbe"
     },
     "CONNECTION_STRING": {
       "value": "PassedViaPipeBuild"
@@ -439,7 +439,7 @@
       "value": "Microsoft .NET Core 1.0.1 - SDK 1.0.0 Preview 4 (x64)"
     },
     "VS_FEED_URL": {
-      "value": "https://devdiv.pkgs.visualstudio.com/_packaging/VS/nuget/v3/index.json"
+      "value": "https://devdiv.pkgs.visualstudio.com/_packaging/dotnet-cli-test/nuget/v3/index.json"
     },
     "VS_FEED_PASSWORD": {
       "value": null,
@@ -456,7 +456,7 @@
       "value": "dotnetclichecksums"
     },
     "CHECKSUM_STORAGE_CONTAINER": {
-      "value": "dotnet"
+      "value": "mlorbe"
     },
     "CLIBUILD_SKIP_TESTS": {
       "value": "true",

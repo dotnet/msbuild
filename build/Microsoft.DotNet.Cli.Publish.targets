@@ -52,7 +52,7 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="PublishDebFilesToDebianRepo" Condition=" '$(OSName)' == 'ubuntu' ">
+  <Target Name="PublishDebFilesToDebianRepo" Condition=" '$(OSName)' == 'ubuntu' AND '$(SkipPublishToDebianRepo)' != 'true' ">
     <Error Condition="'$(REPO_ID)' == ''" Text="REPO_ID must be set as an environment variable for debian publishing." />
     <Error Condition="'$(REPO_USER)' == ''" Text="REPO_USER must be set as an environment variable for debian publishing." />
     <Error Condition="'$(REPO_PASS)' == ''" Text="REPO_PASS must be set as an environment variable for debian publishing." />
