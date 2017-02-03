@@ -911,13 +911,47 @@
 
 
         }
-        
+
+        internal static void IncorporateSettingsFromHostObject(ref Framework.ITaskItem[] skipRuleItems, Framework.ITaskItem[] destProviderSetting, System.Collections.Generic.IEnumerable<Framework.ITaskItem> hostObject)
+        {
+            if (hostObject != null)
+            {
+                //retrieve user credentials
+                Framework.ITaskItem credentialItem = hostObject.FirstOrDefault<Framework.ITaskItem>(p => p.ItemSpec == VSMsDeployTaskHostObject.CredentailItemSpecName);
+                if (credentialItem != null && destProviderSetting != null && destProviderSetting[0] != null)
+                {
+                    Framework.ITaskItem destSettings = destProviderSetting[0];
+                    string userName = credentialItem.GetMetadata(VSMsDeployTaskHostObject.UserMetaDataName);
+                    if (!string.IsNullOrEmpty(userName))
+                    {
+                        destSettings.SetMetadata(VSMsDeployTaskHostObject.UserMetaDataName, userName);
+                        destSettings.SetMetadata(VSMsDeployTaskHostObject.PasswordMetaDataName, credentialItem.GetMetadata(VSMsDeployTaskHostObject.PasswordMetaDataName));
+                    }
+                }
+
+                //retrieve skip rules
+                System.Collections.Generic.IEnumerable<Framework.ITaskItem> skips = from item in hostObject where (item.ItemSpec == VSMsDeployTaskHostObject.SkipFileItemSpecName) select item;
+                if (skips != null)
+                {
+                    if (skipRuleItems != null)
+                    {
+                        skipRuleItems = skips.Concat(skipRuleItems).ToArray();
+                    }
+                    else
+                    {
+                        skipRuleItems = skips.ToArray();
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Generates command line arguments for msdeploy.exe
         /// </summary>
         protected override string GenerateCommandLineCommands()
         {           
             Utilities.CommandLineBuilder commandLine = new Utilities.CommandLineBuilder();
+            IncorporateSettingsFromHostObject(ref m_skipRuleItemsITaskItem, this.Destination, HostObject as System.Collections.Generic.IEnumerable<Framework.ITaskItem>);
             AddDestinationProviderSettingToObject(commandLine, "-source:", this.Source, m_strValueQuote, null, this );
             AddDestinationProviderSettingToObject(commandLine, "-dest:", this.Destination, m_strValueQuote, AdditionalDestinationProviderOptions, this);
             
