@@ -45,6 +45,15 @@ Copyright (c) .NET Foundation. All rights reserved.
     </Otherwise>
   </Choose>
 
+  <!--
+    Append $(RuntimeIdentifier) directory to output and intermediate paths to prevent bin clashes between
+    targets.
+   -->
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' != ''">
+    <IntermediateOutputPath>$(IntermediateOutputPath)$(RuntimeIdentifier)\</IntermediateOutputPath>
+    <OutputPath>$(OutputPath)$(RuntimeIdentifier)\</OutputPath>
+  </PropertyGroup>
+
   <Target Name="_CheckRuntimeIdentifier" BeforeTargets="_CheckForInvalidConfigurationAndPlatform">
     <NetSdkError Condition="'$(RuntimeIdentifier)' == '' and '$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(OutputType)' == 'Exe'"
                  ResourceName="RuntimeIdentifierMustBeSetForNETFramework" />
