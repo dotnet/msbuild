@@ -4,7 +4,12 @@
 using System;
 using System.Reflection;
 
+// This file is compiled into both Microsoft.Build.Framework and Microsoft.Build.Tasks which can cause collisions.
+#if MICROSOFT_BUILD_TASKS 
+namespace Microsoft.Build.Tasks
+#else
 namespace Microsoft.Build.Shared
+#endif
 {
     /// <summary>
     /// Constants that we want to be shareable across all our assemblies. 
@@ -53,6 +58,8 @@ namespace Microsoft.Build.Shared
 #else
         internal const string CurrentAssemblyVersion = Microsoft.VisualStudio.Internal.BrandNames.VSGeneralAssemblyVersion;
 #endif
+
+        internal const string CurrentAssemblyFileVersion = "15.2.0.0";
 
         /// <summary>
         /// Current version of this MSBuild Engine assembly in the form, e.g, "12.0"

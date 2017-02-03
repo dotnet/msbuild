@@ -37,6 +37,31 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         }
 
         [Fact]
+        public void SdkImportsAreInLogicalProject()
+        {
+            File.WriteAllText(_sdkPropsPath, "<Project><PropertyGroup><InitialImportProperty>Hello</InitialImportProperty></PropertyGroup></Project>");
+            File.WriteAllText(_sdkTargetsPath, "<Project><PropertyGroup><FinalImportProperty>World</FinalImportProperty></PropertyGroup></Project>");
+
+            using (new Helpers.TemporaryEnvironment("MSBuildSDKsPath", _testSdkRoot))
+            {
+                string content = $@"
+                    <Project Sdk=""{SdkName}"">
+                        <PropertyGroup>
+                            <UsedToTestIfImplicitImportsAreInTheCorrectLocation>null</UsedToTestIfImplicitImportsAreInTheCorrectLocation>
+                        </PropertyGroup>
+                    </Project>";
+
+                ProjectRootElement projectRootElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+
+                Project project = new Project(projectRootElement);
+
+                IList<ProjectElement> children = project.GetLogicalProject().ToList();
+                
+                Assert.Equal(6, children.Count);
+            }
+        }
+
+        [Fact]
         public void SdkImportsAreInImportList()
         {
             File.WriteAllText(_sdkPropsPath, "<Project><PropertyGroup><InitialImportProperty>Hello</InitialImportProperty></PropertyGroup></Project>");

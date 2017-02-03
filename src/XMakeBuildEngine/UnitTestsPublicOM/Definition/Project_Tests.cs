@@ -2776,6 +2776,27 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
+        public void GetItemProvenanceSimpleGlob()
+        {
+            var project =
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`*`/>
+                  </ItemGroup>
+                </Project>
+            ";
+
+            var expected = new ProvenanceResultTupleList
+            {
+                Tuple.Create("A", Operation.Include, Provenance.Glob, 1),
+            };
+
+            AssertProvenanceResult(expected, project, "a");
+            AssertProvenanceResult(expected, project, "2.foo");
+            AssertProvenanceResult(new ProvenanceResultTupleList(), project, "a/2.foo");
+        }
+
+        [Fact]
         public void GetItemProvenanceOnlyGlob()
         {
             var project =
@@ -3225,21 +3246,36 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void GetItemProvenanceMatchesLiteralsWithNonCanonicPaths()
         {
-            var project =
+            var projectContents =
                 @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <A Include=`1.foo;.\1.foo;.\.\1.foo`/>
+                    <B Include=`../../u/x/d11/d21/../d22/../../d12/2.foo`/>
                   </ItemGroup>
                 </Project>
                 ";
 
-            var expected = new ProvenanceResultTupleList
+            var expected1Foo = new ProvenanceResultTupleList
             {
                 Tuple.Create("A", Operation.Include, Provenance.StringLiteral, 3)
             };
 
-            AssertProvenanceResult(expected, project, "1.foo");
-            AssertProvenanceResult(expected, project, @".\1.foo");
+            AssertProvenanceResult(expected1Foo, projectContents, "1.foo");
+            AssertProvenanceResult(expected1Foo, projectContents, @".\1.foo");
+
+            using (var testFiles = new Helpers.TestProjectWithFiles(projectContents, new string[0], "u/x"))
+            using (var projectCollection = new ProjectCollection())
+            {
+                var project = new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection);
+
+                var expected2Foo = new ProvenanceResultTupleList
+                {
+                    Tuple.Create("B", Operation.Include, Provenance.StringLiteral, 1)
+                };
+
+                AssertProvenanceResult(expected2Foo, project.GetItemProvenance(@"../x/d13/../../x/d12/d23/../2.foo"));
+                AssertProvenanceResult(new ProvenanceResultTupleList(), project.GetItemProvenance(@"../x/d13/../x/d12/d23/../2.foo"));
+            }
         }
 
         [Fact]
@@ -3497,6 +3533,232 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             };
 
             AssertProvenanceResult(expected, project, "1.foo");
+        }
+
+        [Theory]
+        // recursive globing cone is at the project directory
+        [InlineData(
+            // item include glob
+            "**/*.cs",
+            // argument to GetItemProvenance
+            "a/a.cs",
+            // subdirectory path the project file should be placed in, relative to the test directory root.
+            // Subdirs are necessary if .. appears in any of the test paths.
+            // This is to ensure that Path.GetFullpath has enough path fragments to eat into, and to keep the glob inside the test directory root
+            "", 
+            true // should GetItemProvenance find a match
+            )]
+        [InlineData(
+            "**/*.cs",
+            "../a/a.cs",
+            "ProjectDirectory",
+            false
+            )]
+        // recursive globing cone is a superset of the project directory via relative path
+        [InlineData(
+            "../**/*.cs",
+            "../a/a.cs",
+            "ProjectDirectory",
+            true
+            )]
+        [InlineData(
+            "../**/*.cs",
+            "a/a.cs",
+            "ProjectDirectory",
+            true
+            )]
+        [InlineData(
+            "../**/*.cs",
+            "../../a/a.cs",
+            "dir/ProjectDirectory",
+            false
+            )]
+        // recursive globing cone is a subset of the project directory via relative path
+        [InlineData(
+            "a/**/*.cs",
+            "b/a.cs",
+            "",
+            false
+            )]
+        [InlineData(
+            "a/**/*.cs",
+            "a/b/a.cs",
+            "",
+            true
+            )]
+        [InlineData(
+            "a/**/*.cs",
+            "../a.cs",
+            "dir/ProjectDirectory",
+            false
+            )]
+        // recursive globing cone is disjoint of the project directory via relative path
+        [InlineData(
+            "../a/**/*.cs",
+            "../a/b/a.cs",
+            "dir/ProjectDirectory",
+            true
+            )]
+        [InlineData(
+            "../a/**/*.cs",
+            "../b/c/a.cs",
+            "dir/ProjectDirectory",
+            false
+            )]
+        [InlineData(
+            "../a/**/*.cs",
+            "a/a.cs",
+            "dir/ProjectDirectory",
+            false
+            )]
+        // directory name glob is at the project directory
+        [InlineData(
+            "a*a/*.cs",
+            "aba/a.cs",
+            "",
+            true
+            )]
+        [InlineData(
+            "a*a/*.cs",
+            "aba/aba/a.cs",
+            "",
+            false
+            )]
+        [InlineData(
+            "a*a/*.cs",
+            "../aba/a.cs",
+            "dir/ProjectDirectory",
+            false
+            )]
+        // directory name glob is inside the project directory
+        [InlineData(
+            "a/a*a/*.cs",
+            "a/aba/a.cs",
+            "",
+            true
+            )]
+        [InlineData(
+            "a/a*a/*.cs",
+            "a/aba/a/a.cs",
+            "",
+            false
+            )]
+        [InlineData(
+            "a/a*a/*.cs",
+            "../a/aba/a.cs",
+            "dir/ProjectDirectory",
+            false
+            )]
+        // directory name glob is disjoing to the project directory
+        [InlineData(
+            "../a/a*a/*.cs",
+            ".././a/aba/a.cs",
+            "dir/ProjectDirectory",
+            true
+            )]
+        [InlineData(
+            "../a/a*a/*.cs",
+            "../a/a/aba/a.cs",
+            "dir/ProjectDirectory",
+            false
+            )]
+        [InlineData(
+            "../a/a*a/*.cs",
+            "../../a/aba/a.cs",
+            "dir/ProjectDirectory",
+            false
+            )]
+        // filename glob is at the project directory
+        [InlineData(
+            "*.cs",
+            "a.cs",
+            "",
+            true
+            )]
+        [InlineData(
+            "*.cs",
+            "a/a.cs",
+            "",
+            false
+            )]
+        [InlineData(
+            "*.cs",
+            "../a.cs",
+            "dir/ProjectDirectory",
+            false
+            )]
+        // filename glob is under the project directory
+        [InlineData(
+            "a/*.cs",
+            "a/a.cs",
+            "",
+            true
+            )]
+        [InlineData(
+            "a/*.cs",
+            "a/b/a.cs",
+            "",
+            false
+            )]
+        [InlineData(
+            "a/*.cs",
+            "b/a.cs",
+            "",
+            false
+            )]
+        [InlineData(
+            "a/*.cs",
+            "../a.cs",
+            "dir/ProjectDirectory",
+            false
+            )]
+        // filename glob is disjoing to the project directory
+        [InlineData(
+            ".././a/*.cs",
+            "../a/a.cs",
+            "dir/ProjectDirectory",
+            true
+            )]
+        [InlineData(
+            "../a/*.cs",
+            "a.cs",
+            "dir/ProjectDirectory",
+            false
+            )]
+        [InlineData(
+            "../a/*.cs",
+            "../a/a/a.cs",
+            "dir/ProjectDirectory",
+            false
+            )]
+        public void GetItemProvenanceShouldBeSensitiveToGlobbingCone(string includeGlob, string getItemProvenanceArgument, string relativePathOfProjectFile, bool provenanceShouldFindAMatch)
+        {
+            var projectContents =
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                  <ItemGroup>
+                    <A Include=`{0}`/>
+                  </ItemGroup>
+                </Project>
+                ";
+
+            projectContents = string.Format(projectContents, includeGlob);
+
+            using (var testFiles = new Helpers.TestProjectWithFiles(projectContents, new string[0], relativePathOfProjectFile))
+            using (var projectCollection = new ProjectCollection())
+            {
+                var project = new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection);
+
+                ProvenanceResultTupleList expectedProvenance = null;
+
+                expectedProvenance = provenanceShouldFindAMatch
+                    ? new ProvenanceResultTupleList
+                    {
+                        Tuple.Create("A", Operation.Include, Provenance.Glob, 1)
+                    }
+                    : new ProvenanceResultTupleList();
+
+                AssertProvenanceResult(expectedProvenance, project.GetItemProvenance(getItemProvenanceArgument));
+            }
         }
 
         [Fact]

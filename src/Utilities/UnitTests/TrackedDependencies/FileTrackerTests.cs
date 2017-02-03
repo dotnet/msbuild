@@ -1437,7 +1437,9 @@ class X
 
                 BackEndNativeMethods.PROCESS_INFORMATION pInfo = new BackEndNativeMethods.PROCESS_INFORMATION();
 
-                string appName = NativeMethodsShared.FindOnPath("findstr.exe");
+                string appName = Path.Combine(Environment.SystemDirectory, "findstr.exe");
+
+                Assert.True(File.Exists(appName));
 
                 string cmdLine = null;
                 bool created = BackEndNativeMethods.CreateProcess(appName, cmdLine,

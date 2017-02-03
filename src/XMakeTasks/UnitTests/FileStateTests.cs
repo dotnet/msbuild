@@ -163,60 +163,6 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-#if FEATURE_SPECIAL_FOLDERS
-        [Fact]
-        public void AccessDenied()
-        {
-            string locked = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "system32\\notepad.exe");
-
-            FileInfo info = new FileInfo(locked);
-            FileState state = new FileState(locked);
-
-            Assert.Equal(info.Exists, state.FileExists);
-
-            if (!info.Exists)
-            {
-                // meh, somewhere else
-                return;
-            }
-
-            Assert.Equal(info.Length, state.Length);
-            Assert.Equal(info.LastWriteTime, state.LastWriteTime);
-            Assert.Equal(info.LastWriteTimeUtc, state.LastWriteTimeUtcFast);
-        }
-#endif
-
-#if CHECKING4GBFILESWORK
-        [Test]
-        public void LengthHuge()
-        {
-            var bigFile = @"d:\proj\hugefile";
-            //var dummy = new string('x', 10000000);
-            //using (StreamWriter w = new StreamWriter(bigFile))
-            //{
-            //    for (int i = 0; i < 450; i++)
-            //    {
-            //        w.Write(dummy);
-            //    }
-            //}
-
-            Console.WriteLine((new FileState(bigFile)).Length);
-
-            FileInfo info = new FileInfo(bigFile);
-            FileState state = new FileState(bigFile);
-
-            Assert.AreEqual(info.Exists, state.Exists);
-
-            if (!info.Exists)
-            {
-                // meh, somewhere else  
-                return;
-            }
-
-            Assert.AreEqual(info.Length, state.Length);
-        }
-#endif
-
         [Fact]
         public void ReadOnly()
         {

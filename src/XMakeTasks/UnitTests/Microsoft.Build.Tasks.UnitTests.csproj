@@ -12,6 +12,7 @@
     <RootNamespace>Microsoft.Build.Tasks.UnitTests</RootNamespace>
     <AssemblyName>Microsoft.Build.Tasks.UnitTests</AssemblyName>
     <IsTestProject>true</IsTestProject>
+    <DefineConstants>$(DefineConstants);MICROSOFT_BUILD_TASKS_UNITTESTS</DefineConstants>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />

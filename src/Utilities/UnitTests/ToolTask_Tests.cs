@@ -76,6 +76,8 @@ namespace Microsoft.Build.UnitTests
                 private set;
             }
 
+            internal Action<ProcessStartInfo> DoProcessStartInfoMutation {get; set;}
+
             protected override string ToolName
             {
                 get { return Path.GetFileName(_fullToolName); }
@@ -95,6 +97,26 @@ namespace Microsoft.Build.UnitTests
             {
                 // Default is nothing. This is useful for tools where all the parameters can go into a response file.
                 return _commandLineCommands;
+            }
+
+            override protected ProcessStartInfo GetProcessStartInfo
+            (
+                string pathToTool,
+                string commandLineCommands,
+                string responseFileSwitch
+            )
+            {
+                var basePSI = base.GetProcessStartInfo(
+                    pathToTool, 
+                    commandLineCommands, 
+                    responseFileSwitch);
+                
+                if (DoProcessStartInfoMutation != null)
+                {
+                    DoProcessStartInfoMutation(basePSI);
+                }
+
+                return basePSI;
             }
 
             override protected void LogEventsFromTextOutput
@@ -126,7 +148,7 @@ namespace Microsoft.Build.UnitTests
                     commandLineCommands = " -c \"echo\"";
                 }
                 int result = base.ExecuteTool(pathToTool, responseFileCommands, commandLineCommands);
-                StartInfo = base.GetProcessStartInfo(
+                StartInfo = GetProcessStartInfo(
                     GenerateFullPathToTool(),
                     NativeMethodsShared.IsWindows ? "/x" : string.Empty,
                     null);
@@ -663,6 +685,100 @@ namespace Microsoft.Build.UnitTests
                 task.StartInfo.Environment["PATH"].Length > 0);
 #else
                 task.StartInfo.EnvironmentVariables["PATH"].Length > 0);
+#endif
+        }
+
+        /// <summary>
+        /// Verifies that if a directory with the same name of the tool exists that the tool task correctly
+        /// ignores the directory.
+        /// </summary>
+        [Fact]
+        public void ToolPathIsFoundWhenDirectoryExistsWithNameOfTool()
+        {
+            string toolName = NativeMethodsShared.IsWindows ? "cmd" : "sh";
+
+            string savedCurrentDirectory = Directory.GetCurrentDirectory();
+
+            string tempDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"))).FullName;
+
+            try
+            {
+                using (new Helpers.TemporaryEnvironment("PATH", $"{tempDirectory}{Path.PathSeparator}{Environment.GetEnvironmentVariable("PATH")}"))
+                {
+                    Directory.SetCurrentDirectory(tempDirectory);
+
+                    string directoryNamedSameAsTool = Directory.CreateDirectory(Path.Combine(tempDirectory, toolName)).FullName;
+
+                    MyTool task = new MyTool
+                    {
+                        BuildEngine = new MockEngine(),
+                        FullToolName = toolName,
+                    };
+                    bool result = task.Execute();
+
+                    Assert.NotEqual(directoryNamedSameAsTool, task.PathToToolUsed);
+
+                    Assert.True(result);
+                }
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(savedCurrentDirectory);
+
+                FileUtilities.DeleteDirectoryNoThrow(tempDirectory, recursive: true);
+            }
+        }
+
+        /// <summary>
+        /// Confirms we can find a file on the PATH.
+        /// </summary>
+        [Fact]
+        public void FindOnPathSucceeds()
+        {
+            string expectedCmdPath;
+            string shellName;
+            if (NativeMethodsShared.IsWindows)
+            {
+#if FEATURE_SPECIAL_FOLDERS
+                expectedCmdPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe");
+#else
+                expectedCmdPath = Path.Combine(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.System), "cmd.exe");
+#endif
+                shellName = "cmd.exe";
+            }
+            else
+            {
+                expectedCmdPath = "/bin/sh";
+                shellName = "sh";
+            }
+
+            string cmdPath = ToolTask.FindOnPath(shellName);
+
+            Assert.Equal(expectedCmdPath, cmdPath, StringComparer.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Equals sign in value
+        /// </summary>
+        [Fact]
+        public void GetProcessStartInfoCanOverrideEnvironmentVariables()
+        {
+            MyTool task = new MyTool();
+#if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
+            task.DoProcessStartInfoMutation = (p) => p.Environment.Remove("a");
+#else
+            task.DoProcessStartInfoMutation = (p) => p.EnvironmentVariables.Remove("a");
+#endif
+            
+            task.BuildEngine = new MockEngine();
+            task.EnvironmentVariables = new string[] { "a=b" };
+            bool result = task.Execute();
+
+            Assert.Equal(true, result);
+#if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
+            Assert.Equal(false, task.StartInfo.Environment.ContainsKey("a"));
+#else
+            Assert.Equal(false, task.StartInfo.EnvironmentVariables.ContainsKey("a"));
 #endif
         }
     }

@@ -3608,9 +3608,13 @@ namespace Microsoft.Build.Evaluation
                         }
                     }
                 }
+                // The coercion failed therefore we return null
                 catch (InvalidCastException)
                 {
-                    // The coercion failed therefore we return null
+                    return null;
+                }
+                catch (FormatException)
+                {
                     return null;
                 }
 
