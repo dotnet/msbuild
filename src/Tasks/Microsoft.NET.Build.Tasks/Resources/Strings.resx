@@ -237,4 +237,7 @@
   <data name="PackageReferenceOverrideWarning" xml:space="preserve">
     <value>A PackageReference for '{0}' was included in your project. This package is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</value>
   </data>
+  <data name="FolderAlreadyExists" xml:space="preserve">
+    <value>Folder '{0}' already exists either delete it or provide a different ComposeWorkingDir</value>
+  </data>
 </root>

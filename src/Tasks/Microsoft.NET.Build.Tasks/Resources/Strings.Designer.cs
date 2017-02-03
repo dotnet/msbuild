@@ -221,7 +221,16 @@ namespace Microsoft.NET.Build.Tasks {
                 return ResourceManager.GetString("ErrorsOccurredWhenEmittingSatelliteAssembly", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Folder &apos;{0}&apos; already exists either delete it or provide a different ComposeWorkingDir.
+        /// </summary>
+        internal static string FolderAlreadyExists {
+            get {
+                return ResourceManager.GetString("FolderAlreadyExists", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Package Root {0} was incorrectly given for Resolved library {1}.
         /// </summary>
