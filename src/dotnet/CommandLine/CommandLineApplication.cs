@@ -156,7 +156,10 @@ namespace Microsoft.DotNet.Cli.CommandLine
                 else if (isLongOption || arg.StartsWith("-"))
                 {
                     CommandOption option;
+
                     var result = ParseOption(isLongOption, command, args, ref index, out option);
+                  
+
                     if (result == ParseOptionResult.ShowHelp)
                     {
                         command.ShowHelp();
@@ -285,14 +288,24 @@ namespace Microsoft.DotNet.Cli.CommandLine
                     else
                     {
                         index++;
-                        arg = args[index];
-                        if (!option.TryParse(arg))
+
+                        if (index < args.Length)
+                        {
+                            arg = args[index];
+                            if (!option.TryParse(arg))
+                            {
+                                command.ShowHint();
+                                throw new CommandParsingException(
+                                    command,
+                                    String.Format(LocalizableStrings.UnexpectedValueForOptionError, arg, optionName));
+                            }
+                        }
+                        else
                         {
                             command.ShowHint();
                             throw new CommandParsingException(
                                 command,
-                                String.Format(LocalizableStrings.UnexpectedValueForOptionError, arg, optionName));
-
+                                String.Format(LocalizableStrings.OptionRequiresSingleValueWhichIsMissing, arg, optionName));
                         }
                     }
                 }
