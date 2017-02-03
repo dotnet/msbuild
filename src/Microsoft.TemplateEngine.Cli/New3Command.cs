@@ -362,7 +362,8 @@ namespace Microsoft.TemplateEngine.Cli
                 return CreationResultStatus.InvalidParamValues;
             }
 
-            if (InstallHasValue)
+            if (InstallHasValue && 
+                ((Install.Count > 0) && (Install[0] != null)))
             {
                 CreationResultStatus installResult = await EnterInstallFlowAsync().ConfigureAwait(false);
 
