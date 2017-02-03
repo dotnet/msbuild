@@ -40,7 +40,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                             { "LangVersion", "6" },
                             { "PlatformTarget", "x64" },
                             { "AllowUnsafeBlocks", "true" },
-                            { "WarningsAsErrors", "false" },
+                            { "TreatWarningsAsErrors", "false" },
                             //{ "Optimize", "" }, Explicitly not setting Optmize
                             { "AssemblyOriginatorKeyFile", "../keyfile.snk" },
                             { "DelaySign", "" },
