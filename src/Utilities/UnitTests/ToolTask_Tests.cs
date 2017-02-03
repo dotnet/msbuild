@@ -703,20 +703,23 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                Directory.SetCurrentDirectory(tempDirectory);
-
-                string directoryNamedSameAsTool = Directory.CreateDirectory(Path.Combine(tempDirectory, toolName)).FullName;
-
-                MyTool task = new MyTool
+                using (new Helpers.TemporaryEnvironment("PATH", $"{tempDirectory}{Path.PathSeparator}{Environment.GetEnvironmentVariable("PATH")}"))
                 {
-                    BuildEngine = new MockEngine(),
-                    FullToolName = toolName,
-                };
-                bool result = task.Execute();
+                    Directory.SetCurrentDirectory(tempDirectory);
 
-                Assert.NotEqual(directoryNamedSameAsTool, task.PathToToolUsed);
+                    string directoryNamedSameAsTool = Directory.CreateDirectory(Path.Combine(tempDirectory, toolName)).FullName;
 
-                Assert.True(result);
+                    MyTool task = new MyTool
+                    {
+                        BuildEngine = new MockEngine(),
+                        FullToolName = toolName,
+                    };
+                    bool result = task.Execute();
+
+                    Assert.NotEqual(directoryNamedSameAsTool, task.PathToToolUsed);
+
+                    Assert.True(result);
+                }
             }
             finally
             {
@@ -750,13 +753,8 @@ namespace Microsoft.Build.UnitTests
             }
 
             string cmdPath = ToolTask.FindOnPath(shellName);
-            Assert.NotNull(cmdPath);
 
-            // for the NUnit "Standard Out" tab
-            Console.WriteLine("Expected location of \"" + shellName + "\": " + expectedCmdPath);
-            Console.WriteLine("Found \"" + shellName + "\" here: " + cmdPath);
-
-            Assert.Equal(0, String.Compare(cmdPath, expectedCmdPath, StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(expectedCmdPath, cmdPath, StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
