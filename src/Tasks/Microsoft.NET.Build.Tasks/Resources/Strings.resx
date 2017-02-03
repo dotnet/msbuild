@@ -231,4 +231,7 @@
   <data name="MultipleFilesResolved" xml:space="preserve">
     <value>More than one file found for {0}</value>
   </data>
+  <data name="FolderAlreadyExists" xml:space="preserve">
+    <value>Folder '{0}' already exists either delete it or provide a different ComposeWorkingDir</value>
+  </data>
 </root>
