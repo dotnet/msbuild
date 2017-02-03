@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Xml;
 
 using Microsoft.Build.Evaluation;
@@ -37,13 +38,17 @@ namespace Microsoft.Build.UnitTests.Evaluation
             GC.Collect();
         }
 
-        [Fact]
-        public void MultipleForwardSlashesShouldNotGetCollapsedWhenPathLooksLikeUnixPath()
+        [Theory]
+        [InlineData(@"/bin/a//x\\c;ba://", new string[0], true)]
+        [InlineData(@"/shouldNotExistAtRootLevel/a//x\\c;ba://", new string[0], false)]
+        [InlineData(@"a/b//x\\c;ba://", new[] { "b/a.txt" }, false)]
+        [InlineData(@"a/b//x\\c;ba://", new[] { "a/a.txt" }, true)]
+        public void MultipleForwardSlashesShouldNotGetCollapsedWhenPathLooksLikeUnixPath(string stringLookingLikeUnixPath, string[] intermediateFiles, bool firstPathFragmentExists)
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
                              <Project>
                                     <PropertyGroup>
-                                            <P>/tmp/a//x\\c;ba://</P>
+                                            <P>{0}</P>
                                     </PropertyGroup>
                                     <ItemGroup>
                                             <I Include=""$(p)""/>
@@ -60,26 +65,32 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                     </Target>
                             </Project>");
 
+            content = string.Format(content, stringLookingLikeUnixPath);
 
-            IDictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            globalProperties.Add("GP", @"/tmp/a//x\\c;ba://");
+            using (var testFiles = new Helpers.TestProjectWithFiles(content, intermediateFiles))
+            {
+                IDictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                globalProperties.Add("GP", stringLookingLikeUnixPath);
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)), globalProperties, null);
+                Project project = new Project(testFiles.ProjectFile, globalProperties, null);
 
-            MockLogger logger = new MockLogger();
-            bool result = project.Build(logger);
-            Assert.Equal(true, result);
+                MockLogger logger = new MockLogger();
+                bool result = project.Build(logger);
+                Assert.Equal(true, result);
 
-            var expectedString = NativeMethodsShared.IsWindows ? @"/tmp/a//x\\c;ba://" : @"/tmp/a//x//c;ba://";
+                var expectedString = firstPathFragmentExists
+                    ? NativeMethodsShared.IsWindows ? stringLookingLikeUnixPath : stringLookingLikeUnixPath.ToSlash()
+                    : stringLookingLikeUnixPath;
 
-            logger.AssertLogContains($"GP[{expectedString}]");
-            logger.AssertLogContains($"P[{expectedString}]");
-            logger.AssertLogContains($"I[{expectedString}]");
-            logger.AssertLogContains($"T[{expectedString}]");
+                logger.AssertLogContains($"GP[{expectedString}]");
+                logger.AssertLogContains($"P[{expectedString}]");
+                logger.AssertLogContains($"I[{expectedString}]");
+                logger.AssertLogContains($"T[{expectedString}]");
 
-            Assert.Equal(expectedString, project.GetPropertyValue("GP"));
-            Assert.Equal(expectedString, project.GetPropertyValue("P"));
-            Assert.Equal(expectedString, string.Join(";", project.Items.Select(i => i.EvaluatedInclude)));
+                Assert.Equal(expectedString, project.GetPropertyValue("GP"));
+                Assert.Equal(expectedString, project.GetPropertyValue("P"));
+                Assert.Equal(expectedString, string.Join(";", project.Items.Select(i => i.EvaluatedInclude)));
+            }
         }
 
         [Fact]
