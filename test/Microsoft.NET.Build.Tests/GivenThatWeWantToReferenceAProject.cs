@@ -128,7 +128,7 @@ namespace Microsoft.NET.Build.Tests
             else
             {
                 result.Should().Fail()
-                    .And.HaveStdOutContaining("has no target framework compatible with");
+                    .And.HaveStdOutContaining("It cannot be referenced by a project that targets");
             }
         }
 
