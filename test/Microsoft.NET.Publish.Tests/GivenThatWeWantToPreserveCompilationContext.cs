@@ -80,8 +80,10 @@ namespace Microsoft.NET.Publish.Tests
                     dependencyContext.CompilationOptions.EmitEntryPoint.Should().Be(true);
                     dependencyContext.CompilationOptions.DebugType.Should().Be("portable");
 
-                    var compileLibraryNames = dependencyContext.CompileLibraries.Select(cl => cl.Name).ToList();
-                    compileLibraryNames.Should().BeEquivalentTo(targetFramework == "net46" ? Net46CompileLibraryNames : NetCoreAppCompileLibraryNames);
+                    var compileLibraryNames = dependencyContext.CompileLibraries.Select(cl => cl.Name).Distinct().ToList();
+                    var expectedCompileLibraryNames = targetFramework == "net46" ? Net46CompileLibraryNames.Distinct() : NetCoreAppCompileLibraryNames.Distinct();
+
+                    compileLibraryNames.Should().BeEquivalentTo(expectedCompileLibraryNames);
 
                     // Ensure P2P references are specified correctly
                     var testLibrary = dependencyContext
