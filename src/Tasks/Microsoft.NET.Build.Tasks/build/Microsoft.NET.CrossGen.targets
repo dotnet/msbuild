@@ -41,20 +41,20 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
 
     <NETSdkError Condition="'@(_CoreclrResolvedPath->Count())' &gt; 1"
-    ResourceName="MultipleFilesResolved"
-    FormatArguments="coreclr" />
+                 ResourceName="MultipleFilesResolved"
+                 FormatArguments="coreclr" />
 
     <NETSdkError Condition="'@(_CoreclrResolvedPath)'== ''"
-    ResourceName="UnableToFindResolvedPath"
-    FormatArguments="coreclr" />
+                 ResourceName="UnableToFindResolvedPath"
+                 FormatArguments="coreclr" />
 
     <NETSdkError Condition="'@(_JitResolvedPath->Count())' &gt; 1"
-    ResourceName="MultipleFilesResolved"
-    FormatArguments="jit" />
+                 ResourceName="MultipleFilesResolved"
+                 FormatArguments="jit" />
 
     <NETSdkError Condition="'@(_JitResolvedPath)'== ''"
-    ResourceName="UnableToFindResolvedPath"
-    FormatArguments="jit" />
+                 ResourceName="UnableToFindResolvedPath"
+                 FormatArguments="jit" />
     
     
     

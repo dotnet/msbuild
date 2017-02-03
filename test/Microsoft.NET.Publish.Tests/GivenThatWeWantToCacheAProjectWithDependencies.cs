@@ -78,10 +78,14 @@ namespace Microsoft.NET.Publish.Tests
             var rid = RuntimeEnvironment.GetRuntimeIdentifier();
             var tfm = "netcoreapp1.0";
             var OutputFolder = Path.Combine(simpleDependenciesAsset.TestRoot, "outdir");
+            var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "composedir");
             cacheCommand
-                .Execute($"/p:RuntimeIdentifier={rid}", $"/p:TargetFramework={tfm}", $"/p:ComposeDir={OutputFolder}", $"/p:DoNotDecorateComposeDir=true", $"/p:SkipCrossgen=true")
+                .Execute($"/p:RuntimeIdentifier={rid}", $"/p:TargetFramework={tfm}", $"/p:ComposeDir={OutputFolder}", $"/p:DoNotDecorateComposeDir=true", "/p:SkipCrossgen=true", $"/p:ComposeWorkingDir={WorkingDir}", "/p:PreserveComposeWorkingDir=true")
                 .Should()
                 .Pass();
+                        
+            DirectoryInfo workingDirectory = new DirectoryInfo(WorkingDir);
+            workingDirectory.Should().HaveFile("project.assets.json");
 
             DirectoryInfo cacheDirectory = new DirectoryInfo(OutputFolder);
 

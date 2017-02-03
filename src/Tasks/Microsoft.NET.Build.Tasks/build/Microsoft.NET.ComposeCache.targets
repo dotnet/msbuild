@@ -46,10 +46,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     </PropertyGroup>
 
     <NETSdkError Condition="'$(RuntimeIdentifier)' =='' and '$(_PureManagedAssets)' == ''"
-    ResourceName="RuntimeIdentifierMustBeSetForNETFramework"/>
+                 ResourceName="RuntimeIdentifierMustBeSetForNETFramework"/>
 
     <NETSdkError Condition="'$(_TFM)' ==''"
-    ResourceName="AtLeastOneTargetFrameworkMustBeSpecified"/>
+                 ResourceName="AtLeastOneTargetFrameworkMustBeSpecified"/>
       
     <PropertyGroup>
       <DefaultComposeDir>$(HOME)</DefaultComposeDir>
@@ -59,15 +59,20 @@ Copyright (c) .NET Foundation. All rights reserved.
       <ComposeDir Condition="'$(ComposeDir)' == ''">$(DefaultComposeDir)</ComposeDir>
       <ComposeDir Condition="'$(DoNotDecorateComposeDir)' != 'true'">$([System.IO.Path]::Combine($(ComposeDir), $(_TFM)))</ComposeDir>
       <PublishDir>$([System.IO.Path]::GetFullPath($(ComposeDir)))</PublishDir>
-      <_CrossProjFileDir>$([System.IO.Path]::Combine($(MSBuildProjectExtensionsPath),"Optimize"))</_CrossProjFileDir>
+      <TEMP Condition="'$(TEMP)' == ''">$([System.IO.Path]::GetTempPath())</TEMP>
+      <_RandomFileName>$([System.IO.Path]::GetRandomFileName())</_RandomFileName>
+      <ComposeWorkingDir Condition="'$(ComposeWorkingDir)' == ''">$([System.IO.Path]::Combine($(TEMP), $(_RandomFileName)))</ComposeWorkingDir>
+      <ComposeWorkingDir>$([System.IO.Path]::GetFullPath($(ComposeWorkingDir)))</ComposeWorkingDir>
+      <_CrossProjFileDir>$([System.IO.Path]::Combine($(ComposeWorkingDir),"Optimize"))</_CrossProjFileDir>
       <!-- Ensure any PublishDir has a trailing slash, so it can be concatenated -->
       <PublishDir Condition="!HasTrailingSlash('$(PublishDir)')">$(PublishDir)\</PublishDir>
     </PropertyGroup>
 
 
-    <RemoveDir
-        Condition="Exists($(_CrossProjFileDir))"
-        Directories="$(_CrossProjFileDir)" />
+    <NETSdkError Condition="Exists($(ComposeWorkingDir))"
+                 ResourceName="FolderAlreadyExists"
+                 FormatArguments="$(ComposeWorkingDir)" />
+
 
     <MakeDir Directories="$(PublishDir)" />
 
@@ -82,10 +87,15 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <Target Name="RestoreForComposeCache">
 
+    <PropertyGroup>
+      <ProjectAssetsFile>$(ComposeWorkingDir)\project.assets.json</ProjectAssetsFile>
+    </PropertyGroup>
+
     <MSBuild Projects="$(MSBuildProjectFullPath)"
                  Targets="Restore"
                  Properties="RestoreGraphProjectInput=$(MSBuildProjectFullPath);
                              DisableImplicitFrameworkReferences=true;
+                             RestoreOutputPath=$(ComposeWorkingDir);
                              TargetFramework=$(_TFM);"/>
 
   </Target>
@@ -115,6 +125,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <Message Text="Files were composed in $(PublishDir)"
              Importance="high"/>
+    <RemoveDir
+        Condition="'$(PreserveComposeWorkingDir)' != 'true'"
+        Directories="$(ComposeWorkingDir)" />
   </Target>
 
   <!--
