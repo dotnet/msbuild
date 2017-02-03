@@ -366,11 +366,13 @@ namespace Microsoft.Build.Evaluation
             public ItemSpec<P,I> ItemSpec { get; set; }
 
             public ImmutableDictionary<string, LazyItemList>.Builder ReferencedItemLists { get; } = ImmutableDictionary.CreateBuilder<string, LazyItemList>();
+            public bool ConditionResult { get; set; }
 
-            public OperationBuilder(ProjectItemElement itemElement)
+            public OperationBuilder(ProjectItemElement itemElement, bool conditionResult)
             {
                 ItemElement = itemElement;
                 ItemType = itemElement.ItemType;
+                ConditionResult = conditionResult;
             }
         }
 
@@ -378,7 +380,7 @@ namespace Microsoft.Build.Evaluation
         {
             public ImmutableList<ProjectMetadataElement>.Builder Metadata = ImmutableList.CreateBuilder<ProjectMetadataElement>();
 
-            public OperationBuilderWithMetadata(ProjectItemElement itemElement) : base(itemElement)
+            public OperationBuilderWithMetadata(ProjectItemElement itemElement, bool conditionResult) : base(itemElement, conditionResult)
             {
             }
         }
@@ -419,11 +421,11 @@ namespace Microsoft.Build.Evaluation
             }
             else if (itemElement.RemoveLocation != null)
             {
-                operation = BuildRemoveOperation(rootDirectory, itemElement);
+                operation = BuildRemoveOperation(rootDirectory, itemElement, conditionResult);
             }
             else if (itemElement.UpdateLocation != null)
             {
-                operation = BuildUpdateOperation(rootDirectory, itemElement);
+                operation = BuildUpdateOperation(rootDirectory, itemElement, conditionResult);
             }
             else
             {
@@ -435,9 +437,9 @@ namespace Microsoft.Build.Evaluation
             _itemLists[itemElement.ItemType] = newList;
         }
 
-        private UpdateOperation BuildUpdateOperation(string rootDirectory, ProjectItemElement itemElement)
+        private UpdateOperation BuildUpdateOperation(string rootDirectory, ProjectItemElement itemElement, bool conditionResult)
         {
-            OperationBuilderWithMetadata operationBuilder = new OperationBuilderWithMetadata(itemElement);
+            OperationBuilderWithMetadata operationBuilder = new OperationBuilderWithMetadata(itemElement, conditionResult);
 
             // Proces Update attribute
             ProcessItemSpec(itemElement.Update, itemElement.UpdateLocation, operationBuilder);
@@ -449,7 +451,7 @@ namespace Microsoft.Build.Evaluation
 
         private IncludeOperation BuildIncludeOperation(string rootDirectory, ProjectItemElement itemElement, bool conditionResult)
         {
-            IncludeOperationBuilder operationBuilder = new IncludeOperationBuilder(itemElement);
+            IncludeOperationBuilder operationBuilder = new IncludeOperationBuilder(itemElement, conditionResult);
             operationBuilder.ElementOrder = _nextElementOrder++;
             operationBuilder.RootDirectory = rootDirectory;
             operationBuilder.ConditionResult = conditionResult;
@@ -485,9 +487,9 @@ namespace Microsoft.Build.Evaluation
             return new IncludeOperation(operationBuilder, this);
         }
 
-        private RemoveOperation BuildRemoveOperation(string rootDirectory, ProjectItemElement itemElement)
+        private RemoveOperation BuildRemoveOperation(string rootDirectory, ProjectItemElement itemElement, bool conditionResult)
         {
-            OperationBuilder operationBuilder = new OperationBuilder(itemElement);
+            OperationBuilder operationBuilder = new OperationBuilder(itemElement, conditionResult);
 
             ProcessItemSpec(itemElement.Remove, itemElement.RemoveLocation, operationBuilder);
 

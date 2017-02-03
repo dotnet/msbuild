@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 using System.IO;
@@ -2077,6 +2078,119 @@ EndGlobal
             instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, null, new List<string> { "My_Project:Six" });
 
             Assert.Equal(1, instances[0].Targets.Count(target => String.Compare(target.Value.Name, "Six", StringComparison.OrdinalIgnoreCase) == 0));
+        }
+
+        /// <summary>
+        /// Verifies that illegal user target names (the ones already used internally) don't crash the SolutionProjectGenerator
+        /// </summary>
+        [Fact]
+        public void IllegalUserTargetNamesDoNotThrow()
+        {
+            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper
+            (@"
+                Microsoft Visual Studio Solution File, Format Version 14.00
+                # Visual Studio 2015
+                Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""ClassLibrary1"", ""ClassLibrary1.csproj"", ""{6185CC21-BE89-448A-B3C0-D1C27112E595}""
+                EndProject
+                Global
+	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		                Debug|Any CPU = Debug|Any CPU
+		                Release|Any CPU = Release|Any CPU
+	                EndGlobalSection
+	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
+	                EndGlobalSection
+                EndGlobal
+            ");
+
+            ProjectInstance[] instances;
+
+            foreach (string builtInTargetName in new[]
+            {
+                null,
+                "Build",
+                "Rebuild",
+                "Clean",
+                "Publish",
+                "ClassLibrary1",
+                "ClassLibrary1:Clean",
+                "ClassLibrary1:Rebuild",
+                "GetSolutionConfigurationContents",
+                "ValidateProjects",
+            })
+            {
+                instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, null, builtInTargetName == null ? null : new [] { builtInTargetName });
+
+                Assert.Equal(1, instances.Length);
+
+                Assert.Equal(12, instances[0].TargetsCount);
+            }
+
+
+            instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, null, new[] { "Foo" });
+
+            Assert.Equal(1, instances.Length);
+
+            Assert.Equal(14, instances[0].TargetsCount);
+        }
+
+        /// <summary>
+        /// Verifies that when a user has an after.solution.sln.targets that the targets are not overridden by the solution project generator.
+        /// </summary>
+        [Fact]
+        public void AfterTargetsComeFromImport()
+        {
+            string baseDirectory = Guid.NewGuid().ToString("N");
+
+            string solutionFilePath = ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, $"{Guid.NewGuid():N}.sln"), @"
+                Microsoft Visual Studio Solution File, Format Version 14.00
+                # Visual Studio 2015
+                Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""ClassLibrary1"", ""ClassLibrary1.csproj"", ""{6185CC21-BE89-448A-B3C0-D1C27112E595}""
+                EndProject
+                Global
+	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		                Debug|Any CPU = Debug|Any CPU
+		                Release|Any CPU = Release|Any CPU
+	                EndGlobalSection
+	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
+	                EndGlobalSection
+                EndGlobal
+            ");
+
+            ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, $"after.{Path.GetFileName(solutionFilePath)}.targets"), @"
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+                    <Target Name=""MyTarget"">
+                        <MyTask />
+                    </Target>
+                </Project>");
+
+            try
+            {
+                var solutionFile = SolutionFile.Parse(solutionFilePath);
+
+                ProjectInstance projectInstance = SolutionProjectGenerator.Generate(solutionFile, null, null, BuildEventContext.Invalid, null, new[] { "MyTarget" }).FirstOrDefault();
+
+                Assert.NotNull(projectInstance);
+
+                Assert.True(projectInstance.Targets.ContainsKey("MyTarget"));
+
+                Assert.Equal(1, projectInstance.Targets["MyTarget"].Children.Count);
+
+                ProjectTaskInstance task = Assert.IsType<ProjectTaskInstance>(projectInstance.Targets["MyTarget"].Children[0]);
+
+                Assert.Equal("MyTask", task.Name);
+            }
+            finally
+            {
+                ObjectModelHelpers.DeleteTempProjectDirectory();
+            }
         }
 
         #region Helper Functions

@@ -23,13 +23,24 @@ namespace Microsoft.Build.Evaluation
 
             protected override void SaveItems(ICollection<I> items, ImmutableList<ItemData>.Builder listBuilder)
             {
+                if (!_conditionResult)
+                {
+                    return;
+                }
+
                 listBuilder.RemoveAll(itemData => items.Contains(itemData.Item));
             }
 
             public ImmutableHashSet<string>.Builder GetRemovedGlobs()
             {
-                var globs = _itemSpec.Fragments.OfType<GlobFragment>().Select(g => g.ItemSpecFragment);
                 var builder = ImmutableHashSet.CreateBuilder<string>();
+
+                if (!_conditionResult)
+                {
+                    return builder;
+                }
+
+                var globs = _itemSpec.Fragments.OfType<GlobFragment>().Select(g => g.ItemSpecFragment);
 
                 builder.UnionWith(globs);
 

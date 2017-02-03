@@ -22,6 +22,11 @@ namespace Microsoft.Build.Evaluation
 
             public override void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
+                if (!_conditionResult)
+                {
+                    return;
+                }
+
                 var matchedItems = ImmutableList.CreateBuilder<I>();
 
                 for (int i = 0; i < listBuilder.Count; i++)

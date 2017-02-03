@@ -609,7 +609,24 @@ namespace Microsoft.Build.Utilities
 
             // Look for FileTracker.dll/Tracker.exe in the MSBuild tools directory. They may exist elsewhere on disk,
             // but other copies aren't guaranteed to be compatible with the latest.
-            return ToolLocationHelper.GetPathToBuildToolsFile(filename, ToolLocationHelper.CurrentToolsVersion, bitness);
+            var path = ToolLocationHelper.GetPathToBuildToolsFile(filename, ToolLocationHelper.CurrentToolsVersion, bitness);
+
+            // Due to a Detours limitation, the path to FileTracker32.dll must be
+            // representable in ANSI characters. Look for it first in the global
+            // shared location which is guaranteed to be ANSI. Fall back to
+            // current folder.
+            if (s_FileTrackerFilename.Equals(filename, StringComparison.OrdinalIgnoreCase))
+            {
+                string progfilesPath = Path.Combine(FrameworkLocationHelper.GenerateProgramFiles32(),
+                    "MSBuild", MSBuildConstants.CurrentProductVersion, "FileTracker", s_FileTrackerFilename);
+
+                if (File.Exists(progfilesPath))
+                {
+                    return progfilesPath;
+                }
+            }
+
+            return path;
         }
 
         /// <summary>

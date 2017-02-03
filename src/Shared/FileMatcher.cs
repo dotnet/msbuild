@@ -1167,14 +1167,9 @@ namespace Microsoft.Build.Shared
                 out matchFileExpression, out needsRecursion, out isLegalFileSpec,
                 getFileSystemEntries);
 
-            if (isLegalFileSpec)
-            {
-                regexFileMatch = new Regex(matchFileExpression, RegexOptions.IgnoreCase);
-            }
-            else
-            {
-                regexFileMatch = null;
-            }
+            regexFileMatch = isLegalFileSpec
+                ? new Regex(matchFileExpression, RegexOptions.IgnoreCase)
+                : null;
         }
 
         /// <summary>
@@ -1188,7 +1183,7 @@ namespace Microsoft.Build.Shared
         /// <param name="needsRecursion">Receives the flag that is true if recursion is required.</param>
         /// <param name="isLegalFileSpec">Receives the flag that is true if the filespec is legal.</param>
         /// <param name="getFileSystemEntries">Delegate.</param>
-        private static void GetFileSpecInfo
+        internal static void GetFileSpecInfo
         (
             string filespec,
             out string fixedDirectoryPart,

@@ -81,7 +81,7 @@ namespace Microsoft.Build.Tasks
             string[] nameParts = args.Name.Split(',');
             Assembly assembly = null;
 
-            if (args.RequestingAssembly != null)
+            if (args.RequestingAssembly != null && !string.IsNullOrEmpty(args.RequestingAssembly.Location) && nameParts.Length > 0)
             {
                 var location = args.RequestingAssembly.Location;
                 var newLocation = Path.Combine(Path.GetDirectoryName(location), nameParts[0].Trim() + ".dll");
