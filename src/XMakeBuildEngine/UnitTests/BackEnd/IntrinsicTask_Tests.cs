@@ -2106,7 +2106,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 properties.Set(
                     ProjectPropertyInstance.Create(
                         "TEMP",
-                        NativeMethodsShared.IsWindows ? Environment.GetEnvironmentVariable("TEMP") + Path.DirectorySeparatorChar : Path.GetTempPath()));
+                        FileUtilities.EnsureTrailingSlash(NativeMethodsShared.IsWindows ? Environment.GetEnvironmentVariable("TEMP") : Path.GetTempPath())));
                 Lookup lookup = LookupHelpers.CreateLookup(properties);
                 ExecuteTask(task, lookup);
 

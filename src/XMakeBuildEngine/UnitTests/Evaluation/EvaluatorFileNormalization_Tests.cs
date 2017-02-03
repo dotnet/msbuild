@@ -9,20 +9,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Threading;
 using System.Xml;
 
-using Microsoft.Build.Collections;
-using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Xunit;
-
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using ProjectHelpers = Microsoft.Build.UnitTests.BackEnd.ProjectHelpers;
 
 namespace Microsoft.Build.UnitTests.Evaluation
 {
@@ -46,10 +37,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
             GC.Collect();
         }
 
-        /// <summary>
-        /// Basic verification -- with TreatAsLocalProperty set, but to a different property than is being passed as a global, the 
-        /// global property overrides the local property.  
-        /// </summary>
         [Fact]
         public void MultipleForwardSlashesShouldNotGetCollapsedWhenPathLooksLikeUnixPath()
         {
@@ -93,6 +80,48 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal(expectedString, project.GetPropertyValue("GP"));
             Assert.Equal(expectedString, project.GetPropertyValue("P"));
             Assert.Equal(expectedString, string.Join(";", project.Items.Select(i => i.EvaluatedInclude)));
+        }
+
+        [Fact]
+        public void DoubleSlashCausesItemMissmatchForExcludeAndRemove()
+        {
+            var content = ObjectModelHelpers.CleanupFileContents(
+@"<Project>
+    <ItemGroup>
+        <I Include='a//b//**' Exclude='a/b/*.foo'/>
+        <I2 Include='a/b/**' Exclude='a//b/*.foo'/>
+    </ItemGroup>
+
+    <Target Name='Build'>
+        <ItemGroup>
+            <T Include='a/b/**'/>
+            <T Remove='a//b/*.foo'/>
+            <T Remove='a/b//*.foo'/>
+        </ItemGroup>
+        <Message Text='I[@(I)]' Importance='High'/>
+        <Message Text='I2[@(I2)]' Importance='High'/>
+        <Message Text='T[@(T)]' Importance='High'/>
+    </Target>
+</Project>");
+
+            using (var testFiles = new Helpers.TestProjectWithFiles(content, new[] { "a/b/a.cs", "a/b/b.foo" }))
+            {
+                var project = new Project(testFiles.ProjectFile);
+
+                var logger = new MockLogger();
+                var result = project.Build(logger);
+                Assert.Equal(true, result);
+
+                var expectedI = @"a//b//a.cs;a//b//b.foo";
+                var expectedI2 = @"a/b/a.cs;a/b/b.foo";
+
+                Assert.Equal(expectedI, string.Join(";", project.GetItems("I").Select(_ => _.EvaluatedInclude)));
+                Assert.Equal(expectedI2, string.Join(";", project.GetItems("I2").Select(_ => _.EvaluatedInclude)));
+
+                logger.AssertLogContains($"I[{expectedI}]");
+                logger.AssertLogContains($"I2[{expectedI2}]");
+                logger.AssertLogContains($"T[{expectedI2}]");
+            }
         }
     }
 }
