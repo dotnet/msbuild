@@ -1,0 +1,234 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AtLeastOneTargetFrameworkMustBeSpecified" xml:space="preserve">
+    <value>En az bir olası hedef çerçeve belirtilmelidir.</value>
+  </data>
+  <data name="NoCompatibleTargetFramework" xml:space="preserve">
+    <value>'{0}' projesinde '{1}' ile uyumlu bir hedef çerçeve yok.</value>
+  </data>
+  <data name="InvalidFrameworkName" xml:space="preserve">
+    <value>Geçersiz çerçeve adı: '{0}'.</value>
+  </data>
+  <data name="AssetsFileNotFound" xml:space="preserve">
+    <value>'{0}' varlık dosyası bulunamadı. Bu dosyayı oluşturmak için, NuGet paketi geri yükleme işlemi gerçekleştirin.</value>
+  </data>
+  <data name="AssetsFileMissingTarget" xml:space="preserve">
+    <value>'{0}' varlık dosyasında '{1}' için hedef yok. TargetFramework='{2}' ve RuntimeIdentifier='{3}' için bu projeyi geri yüklediğinizden emin olun.</value>
+  </data>
+  <data name="AssetsFilePathNotRooted" xml:space="preserve">
+    <value>'{0}' varlık dosya yolunun kökü belirtilmemiş. Yalnızca tam yollar desteklenir.</value>
+  </data>
+  <data name="CannotFindProjectInfo" xml:space="preserve">
+    <value>'{0}' için proje bilgisi bulunamıyor. Bu durum, eksik bir proje başvurusu olduğunu gösteriyor olabilir.</value>
+  </data>
+  <data name="ContentFileDoesNotContainExpectedParentPackageInformation" xml:space="preserve">
+    <value>'{0}' içerik dosyası beklenen üst paket bilgilerini içermiyor.</value>
+  </data>
+  <data name="MissingItemMetadata" xml:space="preserve">
+    <value>'{1}' öğesi '{2}' üzerinde '{0}' meta verileri eksik.</value>
+  </data>
+  <data name="UnrecognizedPreprocessorToken" xml:space="preserve">
+    <value>'{1}' içinde tanınmayan ön işlemci belirteci: '{0}'.</value>
+  </data>
+  <data name="ContentPreproccessorParameterRequired" xml:space="preserve">
+    <value>Önceden işlenen içeriği kullanabilmesi için '{0}' görevine, '{1}' parametresine ilişkin bir değer verilmelidir.</value>
+  </data>
+  <data name="ProjectAssetsConsumedWithoutMSBuildProjectPath" xml:space="preserve">
+    <value>'{0}' projesindeki varlıklar kullanılıyor, ancak '{1}' içinde karşılık gelen bir MSBuild projesi bulunamadı.</value>
+  </data>
+  <data name="UnexpectedFileType" xml:space="preserve">
+    <value>'{0}' için beklenmeyen dosya türü. Tür, hem '{1}' hem de '{2}'.</value>
+  </data>
+  <data name="CannotInferTargetFrameworkIdentiferAndVersion" xml:space="preserve">
+    <value>TargetFrameworkIdentifier ve/veya TargetFrameworkVersion, TargetFramework='{0}' içinden çıkarsanamıyor. Bunlar açıkça belirtilmelidir.</value>
+  </data>
+  <data name="ContentItemDoesNotProvideOutputPath" xml:space="preserve">
+    <value>'{0}' için içerik öğesi, '{1}' değerini ayarlıyor ancak '{2}' veya '{3}' sağlamıyor.</value>
+  </data>
+  <data name="DuplicatePreprocessorToken" xml:space="preserve">
+    <value>'{0}' ön işlemci belirtecine birden fazla değer verildi. Değer olarak '{1}' seçiliyor.</value>
+  </data>
+  <data name="ErrorsOccurredWhenEmittingSatelliteAssembly" xml:space="preserve">
+    <value>'{0}' uydu bütünleştirilmiş kodu yayılırken hatalar oluştu.</value>
+  </data>
+  <data name="UnableToFindResolvedPath" xml:space="preserve">
+    <value>'{0}' için çözümlenmiş yol bulunamıyor.</value>
+  </data>
+  <data name="UnexpectedDependencyWithNoVersionNumber" xml:space="preserve">
+    <value>Sürüm numarası olmayan, beklenmeyen bağımlılık: '{0}'.</value>
+  </data>
+  <data name="RuntimeIdentifierMustBeSetForNETFramework" xml:space="preserve">
+    <value>.NETFramework yürütülebilir dosyaları için RuntimeIdentifier ayarlanmalıdır. RuntimeIdentifier=win7-x86 veya RuntimeIdentifier=win7-x64 ayarlanabilir.</value>
+  </data>
+  <data name="AssetPreprocessorMustBeConfigured" xml:space="preserve">
+    <value>Varlıkların işlenebilmesi için varlık ön işlemcisi yapılandırılmalıdır.</value>
+  </data>
+  <data name="InvalidNuGetVersionString" xml:space="preserve">
+    <value>Geçersiz NuGet sürüm dizesi: '{0}'.</value>
+  </data>
+  <data name="DOTNET1011" xml:space="preserve">
+    <value>Çerçeve yüklenmedi: {1} içinde {0}</value>
+  </data>
+  <data name="DOTNET1012" xml:space="preserve">
+    <value>Başvuru bütünleştirilmiş kodları dizini belirtilmedi. DOTNET_REFERENCE_ASSEMBLIES_PATH ortam değişkenini kullanarak konumu ayarlayabilirsiniz.</value>
+  </data>
+  <data name="DOTNET1013" xml:space="preserve">
+    <value>Aşağıdaki bağımlılıklar 'platform' türüyle işaretlendi ancak yalnızca bir bağımlılık bu türe sahip olabilir: {0}</value>
+  </data>
+  <data name="DOTNET1014" xml:space="preserve">
+    <value>Kilit dosyası okunamadı</value>
+  </data>
+  <data name="DOTNET1017" xml:space="preserve">
+    <value>Proje dosyası yok: '{0}'.</value>
+  </data>
+  <data name="NU1001" xml:space="preserve">
+    <value>'{0}' bağımlılığı çözülemedi.</value>
+  </data>
+  <data name="NU1002" xml:space="preserve">
+    <value>'{1}' projesi içindeki '{0}' bağımlılığı '{2}' çerçevesini desteklemiyor.</value>
+  </data>
+  <data name="NU1006" xml:space="preserve">
+    <value>{0}. Yeni bir varlık dosyası oluşturmak için 'dotnet restore' çalıştırın.</value>
+  </data>
+  <data name="NU1007" xml:space="preserve">
+    <value>Belirtilen bağımlılık '{0}' ancak '{1}' alındı.</value>
+  </data>
+  <data name="NU1008" xml:space="preserve">
+    <value>{0} çerçevesi desteklenmiyor.</value>
+  </data>
+  <data name="NU1009" xml:space="preserve">
+    <value>Beklenen varlık dosyası yok.Yeni bir varlık dosyası oluşturmak için 'dotnet restore' çalıştırın.</value>
+  </data>
+  <data name="NU1010" xml:space="preserve">
+    <value>Bağımlılık türü değiştirildi</value>
+  </data>
+  <data name="NU1011" xml:space="preserve">
+    <value>Bağımlılık hedefi ('{0}') desteklenmiyor.</value>
+  </data>
+  <data name="NU1012" xml:space="preserve">
+    <value>Bağımlılık çakışması. '{0}' '{1}' bekliyordu ancak '{2}' alındı</value>
+  </data>
+  <data name="DuplicateItemsError" xml:space="preserve">
+    <value>Yinelenen '{0}' öğeleri eklendi. .NET SDK, proje dizininizdeki '{0}' öğelerini varsayılan olarak içeriyor. Bu öğeleri proje dosyanızdan kaldırabilir veya bunları proje dosyanıza açıkça dahil etmek istiyorsanız '{1}' özelliğini '{2}' olarak ayarlayabilirsiniz. Yinelenen öğeler: {3}</value>
+  </data>
+  <data name="PackageReferenceOverrideWarning" xml:space="preserve">
+    <value>Projenize '{0}' için bir paket başvurusu eklendi. .NET SDK bu pakete örtük olarak başvuruyor; buna projenizden başvurmanız genellikle gerekli değildir. Daha fazla bilgi için bkz. {1}</value>
+  </data>
+</root>

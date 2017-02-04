@@ -8,5 +8,4 @@
     <PackageReference Include="RoslynTools.Microsoft.SignTool" Version="0.2.0-beta" />
     <PackageReference Include="Microbuild.Core" Version="0.2.0" />
   </ItemGroup>
-  <Import Project="..\..\..\build\Targets\ProducesNoOutput.Imports.props" />
 </Project>

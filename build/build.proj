@@ -176,8 +176,8 @@
 
   </Target>
 
-  <Target Name="BuildWithoutTesting" DependsOnTargets="RestorePackages;BuildSolution;SignPackages;BuildNuGetPackages;BuildModernVsixPackages;DeployMSBuildSdks" />
-  <Target Name="RebuildWithoutTesting" DependsOnTargets="RestorePackages;RebuildSolution;SignPackages;RebuildNuGetPackages;RebuildModernVsixPackages;DeployMSBuildSdks" />
+  <Target Name="BuildWithoutTesting" DependsOnTargets="RestorePackages;BuildSolution;SignPackages;BuildNuGetPackages;DeployMSBuildSdks" />
+  <Target Name="RebuildWithoutTesting" DependsOnTargets="RestorePackages;RebuildSolution;SignPackages;RebuildNuGetPackages;DeployMSBuildSdks" />
 
   <Target Name="Build" DependsOnTargets="BuildWithoutTesting;Test" />
   <Target Name="Rebuild" DependsOnTargets="RebuildWithoutTesting;Test" />

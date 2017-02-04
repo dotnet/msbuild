@@ -93,59 +93,67 @@
       </trans-unit>
       <trans-unit id="DOTNET1011">
         <source>Framework not installed: {0} in {1}</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="DOTNET1012">
         <source>The reference assemblies directory was not specified. You can set the location using the DOTNET_REFERENCE_ASSEMBLIES_PATH environment variable.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="DOTNET1013">
         <source>The following dependencies are marked with type 'platform', however only one dependency can have this type: {0}</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="DOTNET1014">
         <source>Failed to read lock file</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="DOTNET1017">
         <source>Project file does not exist '{0}'.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="NU1001">
         <source>The dependency '{0}' could not be resolved.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="NU1002">
         <source>The dependency '{0}' in project '{1}' does not support framework '{2}'.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="NU1006">
         <source>{0}. Please run 'dotnet restore' to generate a new asset file.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="NU1007">
         <source>Dependency specified was '{0}' but ended up with '{1}'.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="NU1008">
         <source>{0} is an unsupported framework.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="NU1009">
         <source>The expected asset file does not exist. Please run 'dotnet restore' to generate a new asset file.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="NU1010">
         <source>The dependency type was changed</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="NU1011">
         <source>The dependency target '{0}' is unsupported.</source>
-        <note></note>
+        <note />
       </trans-unit>
       <trans-unit id="NU1012">
         <source>Dependency conflict. '{0}' expected '{1}' but received '{2}'</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="DuplicateItemsError">
+        <source>Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. For more information, see {4}. The duplicate items were: {3}</source>
         <note></note>
+      </trans-unit>
+      <trans-unit id="PackageReferenceOverrideWarning">
+        <source>A PackageReference for '{0}' was included in your project. This package is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</source>
+        <note />
       </trans-unit>
     </body>
   </file>

@@ -18,7 +18,7 @@ namespace Microsoft.NET.Publish.Tests
 {
     public class GivenThatWeWantToPreserveCompilationContext : SdkTest
     {
-        //[Fact]
+        [Fact]
         public void It_publishes_the_project_with_a_refs_folder_and_correct_deps_file()
         {
             var testAsset = _testAssetsManager
@@ -80,8 +80,10 @@ namespace Microsoft.NET.Publish.Tests
                     dependencyContext.CompilationOptions.EmitEntryPoint.Should().Be(true);
                     dependencyContext.CompilationOptions.DebugType.Should().Be("portable");
 
-                    var compileLibraryNames = dependencyContext.CompileLibraries.Select(cl => cl.Name).ToList();
-                    compileLibraryNames.Should().BeEquivalentTo(targetFramework == "net46" ? Net46CompileLibraryNames : NetCoreAppCompileLibraryNames);
+                    var compileLibraryNames = dependencyContext.CompileLibraries.Select(cl => cl.Name).Distinct().ToList();
+                    var expectedCompileLibraryNames = targetFramework == "net46" ? Net46CompileLibraryNames.Distinct() : NetCoreAppCompileLibraryNames.Distinct();
+
+                    compileLibraryNames.Should().BeEquivalentTo(expectedCompileLibraryNames);
 
                     // Ensure P2P references are specified correctly
                     var testLibrary = dependencyContext
@@ -105,6 +107,12 @@ namespace Microsoft.NET.Publish.Tests
                             .FirstOrDefault(l => string.Equals(l.Name, "system.core", StringComparison.OrdinalIgnoreCase));
                         systemCoreLibrary.Assemblies.Count.Should().Be(1);
                         systemCoreLibrary.Assemblies[0].Should().Be(".NETFramework/v4.6/System.Core.dll");
+
+                        var systemCollectionsLibrary = dependencyContext
+                            .CompileLibraries
+                            .FirstOrDefault(l => string.Equals(l.Name, "system.collections", StringComparison.OrdinalIgnoreCase));
+                        systemCollectionsLibrary.Assemblies.Count.Should().Be(1);
+                        systemCollectionsLibrary.Assemblies[0].Should().Be(".NETFramework/v4.6/Facades/System.Collections.dll");
                     }
                 }
             }
@@ -122,6 +130,58 @@ system.numerics
 system.runtime.serialization
 system.xml
 system.xml.linq
+system.collections.concurrent
+system.collections
+system.componentmodel.annotations
+system.componentmodel
+system.componentmodel.eventbasedasync
+system.diagnostics.contracts
+system.diagnostics.debug
+system.diagnostics.tools
+system.diagnostics.tracing
+system.dynamic.runtime
+system.globalization
+system.io
+system.linq
+system.linq.expressions
+system.linq.parallel
+system.linq.queryable
+system.net.networkinformation
+system.net.primitives
+system.net.requests
+system.net.webheadercollection
+system.objectmodel
+system.reflection
+system.reflection.emit
+system.reflection.emit.ilgeneration
+system.reflection.emit.lightweight
+system.reflection.extensions
+system.reflection.primitives
+system.resources.resourcemanager
+system.runtime
+system.runtime.extensions
+system.runtime.handles
+system.runtime.interopservices
+system.runtime.interopservices.windowsruntime
+system.runtime.numerics
+system.runtime.serialization.json
+system.runtime.serialization.primitives
+system.runtime.serialization.xml
+system.security.principal
+system.servicemodel.duplex
+system.servicemodel.http
+system.servicemodel.nettcp
+system.servicemodel.primitives
+system.servicemodel.security
+system.text.encoding
+system.text.encoding.extensions
+system.text.regularexpressions
+system.threading
+system.threading.tasks
+system.threading.tasks.parallel
+system.threading.timer
+system.xml.xdocument
+system.xml.xmlserializer
 microsoft.netcore.platforms
 microsoft.win32.primitives
 netstandard.library
@@ -209,24 +269,11 @@ runtime.any.system.text.encoding
 runtime.any.system.text.encoding.extensions
 runtime.any.system.threading.tasks
 runtime.any.system.threading.timer
-runtime.debian.8-x64.runtime.native.system.security.cryptography.openssl
-runtime.fedora.23-x64.runtime.native.system.security.cryptography.openssl
-runtime.fedora.24-x64.runtime.native.system.security.cryptography.openssl
 runtime.native.system
 runtime.native.system.io.compression
 runtime.native.system.net.http
 runtime.native.system.net.security
 runtime.native.system.security.cryptography
-runtime.native.system.security.cryptography.apple
-runtime.native.system.security.cryptography.openssl
-runtime.opensuse.13.2-x64.runtime.native.system.security.cryptography.openssl
-runtime.opensuse.42.1-x64.runtime.native.system.security.cryptography.openssl
-runtime.osx.10.10-x64.runtime.native.system.security.cryptography.apple
-runtime.osx.10.10-x64.runtime.native.system.security.cryptography.openssl
-runtime.rhel.7-x64.runtime.native.system.security.cryptography.openssl
-runtime.ubuntu.14.04-x64.runtime.native.system.security.cryptography.openssl
-runtime.ubuntu.16.04-x64.runtime.native.system.security.cryptography.openssl
-runtime.ubuntu.16.10-x64.runtime.native.system.security.cryptography.openssl
 runtime.win.microsoft.win32.primitives
 runtime.win.system.console
 runtime.win.system.diagnostics.debug

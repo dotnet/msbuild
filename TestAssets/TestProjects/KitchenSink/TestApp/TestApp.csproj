@@ -6,6 +6,16 @@
     <PackageTargetFallback>portable-net45+wp8+win8+wpa</PackageTargetFallback>
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
+
+  <!-- Host configuration properties -->
+  <PropertyGroup>
+    <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+    <RetainVMGarbageCollection>false</RetainVMGarbageCollection>
+    <ThreadPoolMinThreads>2</ThreadPoolMinThreads>
+    <ThreadPoolMaxThreads>9</ThreadPoolMaxThreads>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="CompileCopyToOutput.cs">

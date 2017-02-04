@@ -12,12 +12,19 @@ namespace Microsoft.NET.Build.Tasks
         public const string FileGroup = "FileGroup";
         public const string Path = "Path";
         public const string ResolvedPath = "ResolvedPath";
+        public const string IsImplicitlyDefined = "IsImplicitlyDefined";
+        public const string IsTopLevelDependency = "IsTopLevelDependency";
 
         // Target Metadata
         public const string RuntimeIdentifier = "RuntimeIdentifier";
         public const string TargetFrameworkMoniker = "TargetFrameworkMoniker";
         public const string FrameworkName = "FrameworkName";
         public const string FrameworkVersion = "FrameworkVersion";
+
+        // SDK Metadata
+        public const string SDKPackageItemSpec = "SDKPackageItemSpec";
+        public const string OriginalItemSpec = "OriginalItemSpec";
+        public const string SDKRootFolder = "SDKRootFolder";
 
         // Foreign Keys
         public const string ParentTarget = "ParentTarget";

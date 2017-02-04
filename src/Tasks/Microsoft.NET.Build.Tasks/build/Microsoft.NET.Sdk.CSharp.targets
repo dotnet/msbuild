@@ -12,6 +12,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <AppDesignerFolder Condition="'$(AppDesignerFolder)' == ''">Properties</AppDesignerFolder>
   </PropertyGroup>
   <PropertyGroup Condition="'$(DisableImplicitConfigurationDefines)' != 'true'">
     <ImplicitConfigurationDefine>$(Configuration.ToUpperInvariant())</ImplicitConfigurationDefine>
@@ -28,5 +29,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ImplicitConfigurationDefine>$(ImplicitConfigurationDefine.Replace('-', '_'))</ImplicitConfigurationDefine>
     <ImplicitConfigurationDefine>$(ImplicitConfigurationDefine.Replace('.', '_'))</ImplicitConfigurationDefine>
     <DefineConstants>$(DefineConstants);$(ImplicitConfigurationDefine)</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);$(ImplicitFrameworkDefine)</DefineConstants>
   </PropertyGroup>
 </Project>

@@ -47,7 +47,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <!-- Split $(TargetFramework) (e.g. net45) into short identifier and short version (e.g. 'net' and '45'). -->
-  <PropertyGroup Condition="!$(TargetFramework.Contains(',')) and !$(TargetFramework.Contains('+'))">
+  <PropertyGroup Condition="'$(TargetFramework)' != '' and !$(TargetFramework.Contains(',')) and !$(TargetFramework.Contains('+'))">
    <_ShortFrameworkIdentifier>$(TargetFramework.TrimEnd('.0123456789'))</_ShortFrameworkIdentifier>
    <_ShortFrameworkVersion>$(TargetFramework.Substring($(_ShortFrameworkIdentifier.Length)))</_ShortFrameworkVersion>
   </PropertyGroup>
@@ -86,11 +86,35 @@ Copyright (c) .NET Foundation. All rights reserved.
                  FormatArguments="$(TargetFramework)" />
   </Target>
 
+  <!-- 
+    Don't leave TargetFrameworkVersion empty if it still hasn't been determined. We will trigger the error above,
+    but we need this to be a valid version so that our error message does not get pre-empted by failure to interpret
+    version comparison expressions, which is currently unrecoverable in VS.
+
+    This is also an extra safeguard to ensure we never end up with common targets default of .NetFramework,Version=v4.0
+  -->
+  <PropertyGroup Condition="'$(TargetFrameworkVersion)' == ''">
+    <TargetFrameworkVersion >v0.0</TargetFrameworkVersion>
+  </PropertyGroup>
+
+
+  <!-- Exclude files from OutputPath and IntermediateOutputPath from default item globs.  Use the value
+       of these properties before the TargetFramework is appended, so that if these values are specified
+       in the project file, the specified value will be used for the exclude.
+       
+       We may be able to move this to Microsoft.NET.Sdk.DefaultItems.targets (where the other DefaultItemExcludes
+       are defined) if we fix https://github.com/dotnet/sdk/issues/550
+       -->
+  <PropertyGroup>
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(OutputPath)/**</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(IntermediateOutputPath)/**</DefaultItemExcludes>
+  </PropertyGroup>
+  
   <!--
     Append $(TargetFramework) directory to output and intermediate paths to prevent bin clashes between
     targets.
    -->
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' != '' and '$(_UnsupportedTargetFrameworkError)' != 'true'">
     <IntermediateOutputPath>$(IntermediateOutputPath)$(TargetFramework)\</IntermediateOutputPath>
     <OutputPath>$(OutputPath)$(TargetFramework)\</OutputPath>
   </PropertyGroup>

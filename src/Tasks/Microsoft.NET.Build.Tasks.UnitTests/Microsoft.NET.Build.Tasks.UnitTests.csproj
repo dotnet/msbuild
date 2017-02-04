@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), 'Common.props'))\Common.props" />
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
     <ProjectGuid>{6A698C1D-F604-4295-B6FC-7FC726F9FE5F}</ProjectGuid>
@@ -14,7 +13,7 @@
     <PackageTargetFallback>dotnet5.4;portable-net451+win8</PackageTargetFallback>
     <OutDir>$(OutDir)Tests\</OutDir>
     <GenerateDependencyFile>false</GenerateDependencyFile>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <EnableDefaultItems>false</EnableDefaultItems>
     <NonShipping>true</NonShipping>
     <StartAction>Program</StartAction>
     <StartProgram>$(DotNetTool).exe</StartProgram>
@@ -23,10 +22,6 @@
     <DebugEngines>{2E36F1D4-B23C-435D-AB41-18E608940038}</DebugEngines>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Sdk">
-      <Version>$(SdkStage0Version)</Version>
-      <PrivateAssets>All</PrivateAssets>
-    </PackageReference>
     <PackageReference Include="NuGet.ProjectModel">
       <Version>$(NuGetVersion)</Version>
     </PackageReference>
@@ -51,6 +46,8 @@
     <Compile Include="GivenACompilationOptionsConverter.cs" />
     <Compile Include="GivenAProduceContentsAssetsTask.cs" />
     <Compile Include="GivenAResolvePackageDependenciesTask.cs" />
+    <Compile Include="GivenResolvedSDKProjectItemsAndImplicitPackages.cs" />
+    <Compile Include="GivenUnresolvedSDKProjectItemsAndImplicitPackages.cs" />
     <Compile Include="LockFileSnippets.cs" />
     <Compile Include="Mocks\MockContentAssetPreprocessor.cs" />
     <Compile Include="Mocks\MockPackageResolver.cs" />
@@ -101,8 +98,7 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="..\..\..\build\Targets\Signing.Imports.targets" />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="AfterBuild">
+  <Target Name="CustomAfterBuild" AfterTargets="Build">
     <ItemGroup>
       <CopyLocalAssembly Include="Microsoft.Build.Framework">
         <Version>$(MsBuildPackagesVersion)</Version>

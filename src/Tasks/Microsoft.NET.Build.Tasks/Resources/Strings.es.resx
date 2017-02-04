@@ -1,0 +1,234 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AtLeastOneTargetFrameworkMustBeSpecified" xml:space="preserve">
+    <value>Debe especificarse al menos una plataforma de destino posible.</value>
+  </data>
+  <data name="NoCompatibleTargetFramework" xml:space="preserve">
+    <value>El proyecto '{0}' no tiene una plataforma de destino compatible con '{1}'.</value>
+  </data>
+  <data name="InvalidFrameworkName" xml:space="preserve">
+    <value>Nombre de plataforma no válido: '{0}'.</value>
+  </data>
+  <data name="AssetsFileNotFound" xml:space="preserve">
+    <value>No se encuentra el archivo de recursos '{0}'. Ejecute una restauración de paquetes NuGet para generar el archivo.</value>
+  </data>
+  <data name="AssetsFileMissingTarget" xml:space="preserve">
+    <value>El archivo de recursos '{0}' no tiene un destino para '{1}'. Asegúrese de que ha restaurado el proyecto para TargetFramework='{2}' y RuntimeIdentifier='{3}'.</value>
+  </data>
+  <data name="AssetsFilePathNotRooted" xml:space="preserve">
+    <value>La ruta de acceso del archivo de recursos '{0}' no tiene raíz. Solo se admiten rutas de acceso completas.</value>
+  </data>
+  <data name="CannotFindProjectInfo" xml:space="preserve">
+    <value>No se encuentra la información de proyecto de '{0}'. Esto puede indicar que falta una referencia de proyecto.</value>
+  </data>
+  <data name="ContentFileDoesNotContainExpectedParentPackageInformation" xml:space="preserve">
+    <value>El archivo de contenido '{0}' no tiene la información de paquete primario que se esperaba.</value>
+  </data>
+  <data name="MissingItemMetadata" xml:space="preserve">
+    <value>Faltan los metadatos de '{0}' en el elemento de '{1}' '{2}'.</value>
+  </data>
+  <data name="UnrecognizedPreprocessorToken" xml:space="preserve">
+    <value>Token de preprocesador no reconocido '{0}' en '{1}'.</value>
+  </data>
+  <data name="ContentPreproccessorParameterRequired" xml:space="preserve">
+    <value>Debe darse un valor al parámetro '{1}' de la tarea '{0}' para poder consumir contenido preprocesado.</value>
+  </data>
+  <data name="ProjectAssetsConsumedWithoutMSBuildProjectPath" xml:space="preserve">
+    <value>Los recursos se consumen desde el proyecto '{0}', pero no se ha encontrado la ruta de acceso de proyecto de MSBuild correspondiente en '{1}'.</value>
+  </data>
+  <data name="UnexpectedFileType" xml:space="preserve">
+    <value>Tipo de archivo no esperado para '{0}'. El tipo es tanto '{1}' como '{2}'.</value>
+  </data>
+  <data name="CannotInferTargetFrameworkIdentiferAndVersion" xml:space="preserve">
+    <value>No se puede inferir TargetFrameworkIdentifier y/o TargetFrameworkVersion de TargetFramework='{0}'. Deben especificarse de forma explícita.</value>
+  </data>
+  <data name="ContentItemDoesNotProvideOutputPath" xml:space="preserve">
+    <value>El elemento de contenido de '{0}' establece '{1}', pero no proporciona '{2}' ni '{3}'.</value>
+  </data>
+  <data name="DuplicatePreprocessorToken" xml:space="preserve">
+    <value>Se han dado varios valores para el token de preprocesador '{0}'. Se va a elegir '{1}' como valor.</value>
+  </data>
+  <data name="ErrorsOccurredWhenEmittingSatelliteAssembly" xml:space="preserve">
+    <value>Se han producido errores al emitir el ensamblado satélite '{0}'.</value>
+  </data>
+  <data name="UnableToFindResolvedPath" xml:space="preserve">
+    <value>No se encuentra la ruta de acceso resuelta para '{0}'.</value>
+  </data>
+  <data name="UnexpectedDependencyWithNoVersionNumber" xml:space="preserve">
+    <value>Dependencia '{0}' sin número de versión no esperada.</value>
+  </data>
+  <data name="RuntimeIdentifierMustBeSetForNETFramework" xml:space="preserve">
+    <value>RuntimeIdentifier debe establecerse para archivos ejecutables de .NET Framework. Considere usar RuntimeIdentifier=win7-x86 o RuntimeIdentifier=win7-x64.</value>
+  </data>
+  <data name="AssetPreprocessorMustBeConfigured" xml:space="preserve">
+    <value>Debe configurarse el preprocesador de recursos antes de que se procesen los recursos.</value>
+  </data>
+  <data name="InvalidNuGetVersionString" xml:space="preserve">
+    <value>Cadena de versión de NuGet no válida: '{0}'.</value>
+  </data>
+  <data name="DOTNET1011" xml:space="preserve">
+    <value>Plataforma no instalada: {0} en {1}</value>
+  </data>
+  <data name="DOTNET1012" xml:space="preserve">
+    <value>No se especificó el directorio de ensamblados de referencia. Puede establecer la ubicación mediante la variable de entorno DOTNET_REFERENCE_ASSEMBLIES_PATH.</value>
+  </data>
+  <data name="DOTNET1013" xml:space="preserve">
+    <value>Las dependencias siguientes están marcadas con el tipo "plataforma"; sin embargo, solo una dependencia puede tener este tipo: {0}</value>
+  </data>
+  <data name="DOTNET1014" xml:space="preserve">
+    <value>No se pudo leer el archivo de bloqueo</value>
+  </data>
+  <data name="DOTNET1017" xml:space="preserve">
+    <value>El archivo de proyecto no existe "{0}".</value>
+  </data>
+  <data name="NU1001" xml:space="preserve">
+    <value>No se pudo resolver la dependencia "{0}".</value>
+  </data>
+  <data name="NU1002" xml:space="preserve">
+    <value>La dependencia "{0}" del proyecto "{1}" no es compatible con la plataforma "{2}".</value>
+  </data>
+  <data name="NU1006" xml:space="preserve">
+    <value>{0}. Ejecute "dotnet restore" para generar un nuevo archivo de recurso.</value>
+  </data>
+  <data name="NU1007" xml:space="preserve">
+    <value>La dependencia especificada era "{0}", pero finalizaba con "{1}".</value>
+  </data>
+  <data name="NU1008" xml:space="preserve">
+    <value>{0} es una plataforma no compatible.</value>
+  </data>
+  <data name="NU1009" xml:space="preserve">
+    <value>El archivo de recurso esperado no existe. Ejecute "dotnet restore" para generar un nuevo archivo de recurso.</value>
+  </data>
+  <data name="NU1010" xml:space="preserve">
+    <value>El tipo de dependencia cambió</value>
+  </data>
+  <data name="NU1011" xml:space="preserve">
+    <value>El destino de dependencia"{0}" no es compatible.</value>
+  </data>
+  <data name="NU1012" xml:space="preserve">
+    <value>Conflicto de dependencia. "{0}" esperaba "{1}", pero recibió "{2}"</value>
+  </data>
+  <data name="DuplicateItemsError" xml:space="preserve">
+    <value>Se incluyeron "{0}" elementos duplicados. El SDK de .NET incluye "{0}" elementos de su directorio de proyecto de manera predeterminada. Puede quitar esos elementos del archivo de proyecto o establecer la propiedad "{1}" en "{2}" si desea incluirlos explícitamente en el archivo de proyecto. Los elementos duplicados eran: {3}</value>
+  </data>
+  <data name="PackageReferenceOverrideWarning" xml:space="preserve">
+    <value>Se incluyó un elemento PackageReference para "{0}" en su proyecto. El SDK de .NET hace referencia implícita a este paquete y normalmente no tiene que hacer referencia a él desde su proyecto. Para obtener más información, consulte {1}</value>
+  </data>
+</root>

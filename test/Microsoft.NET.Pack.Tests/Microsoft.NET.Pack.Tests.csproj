@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), 'Common.props'))\Common.props" />
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
     <ProjectGuid>{588516D7-96AD-4447-A1EB-244D737A3C87}</ProjectGuid>
@@ -12,7 +11,7 @@
     <PackageTargetFallback>dotnet5.4;portable-net451+win8</PackageTargetFallback>
     <OutDir>$(OutDir)Tests\</OutDir>
     <GenerateDependencyFile>false</GenerateDependencyFile>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <EnableDefaultItems>false</EnableDefaultItems>
     <NonShipping>true</NonShipping>
     <StartAction>Program</StartAction>
     <StartProgram>$(DotNetTool).exe</StartProgram>
@@ -21,10 +20,6 @@
     <DebugEngines>{2E36F1D4-B23C-435D-AB41-18E608940038}</DebugEngines>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Sdk">
-      <Version>$(SdkStage0Version)</Version>
-      <PrivateAssets>All</PrivateAssets>
-    </PackageReference>
     <PackageReference Include="Microsoft.DotNet.Cli.Utils">
       <Version>$(DotNetCliUtilsVersion)</Version>
     </PackageReference>
@@ -36,6 +31,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GivenThatWeWantToPackAHelloWorldProject.cs" />
     <Compile Include="GivenThatWeWantToPackASimpleLibrary.cs" />
     <Compile Include="GivenThatWeWantToPackACrossTargetedLibrary.cs" />
     <EmbeddedResource Include="**\*.resx" Exclude="$(GlobalExclude)" />
@@ -47,5 +43,4 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="..\..\build\Targets\Signing.Imports.targets" />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

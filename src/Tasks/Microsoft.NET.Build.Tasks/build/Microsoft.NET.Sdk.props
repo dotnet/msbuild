@@ -64,7 +64,12 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- This will turn off the base UWP-specific 'ResolveNuGetPackages' target -->
     <ResolveNuGetPackages>false</ResolveNuGetPackages>
-
+    
+    <!-- NuGet should always restore .NET SDK projects with "PackageReference" style restore.  Setting this property will
+         cause the right thing to happen even if there aren't any PackageReference items in the project, such as when
+         a project targets .NET Framework and doesn't have any direct package dependencies. -->
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+    
     <!-- Exclude GAC, registry, output directory from search paths. -->
     <AssemblySearchPaths>{CandidateAssemblyFiles};{HintPathFromItem};{TargetFrameworkDirectory};{RawFileName}</AssemblySearchPaths>
     <DesignTimeAssemblySearchPaths>$(AssemblySearchPaths)</DesignTimeAssemblySearchPaths>
@@ -78,22 +83,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PackageRequireLicenseAcceptance Condition="'$(PackageRequireLicenseAcceptance)'==''">false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
   
-  <!-- Default glob settings -->
+  <!-- Default item includes (globs and implicit references) -->
   <Import Project="Microsoft.NET.Sdk.DefaultItems.props" />
   
-  <!-- Automatically reference NETStandard.Library or Microsoft.NETCore.App package if targeting the corresponding target framework.
-      We can refer here in the .props file to properties set in the .targets files because items and their conditions are
-      evaluated in the second pass of evaluation, after all properties have been evaluated. -->
-  <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETStandard'">
-    <PackageReference Include="NETStandard.Library" Version="$(NetStandardImplicitPackageVersion)"/>
-  </ItemGroup>
-
-  <!-- The reference to the Microsoft.NETCore.App currently needs to match the target framework version.  So mark it as
-       ReadOnly so it won't show updates to the package in the package manager UI. -->
-  <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
-    <PackageReference Include="Microsoft.NETCore.App" Version="$(NetCoreAppImplicitPackageVersion)" ReadOnly="true" />
-  </ItemGroup>
-
   <!-- Temporary workarounds -->
   <PropertyGroup>
     <!-- Workaround: https://github.com/dotnet/roslyn/issues/12167 -->

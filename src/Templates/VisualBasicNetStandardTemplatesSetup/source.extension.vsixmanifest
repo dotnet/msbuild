@@ -5,6 +5,7 @@
     <Identity Id="36A64A59-07DB-4410-84EF-C11DD98C77E2" Version="|%CurrentProject%;GetBuildVersion|" Language="en-US" Publisher="Microsoft" />
     <DisplayName>Visual Basic NetStandard Templates</DisplayName>
     <Description xml:space="preserve">Visual Basic NetStandard Templates</Description>
+    <PackageId>Microsoft.VisualStudio.Templates.VisualBasic.NetStandard</PackageId>
   </Metadata>
   <Installation SystemComponent="true" >
     <InstallationTarget Version="[15.0,]" Id="Microsoft.VisualStudio.Pro" />
@@ -12,6 +13,9 @@
     <InstallationTarget Version="[15.0,]" Id="Microsoft.VisualStudio.VWDExpress" />
     <InstallationTarget Version="[15.0,]" Id="Microsoft.VisualStudio.VSWinExpress" />
   </Installation>
+  <Prerequisites>
+    <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[15.0,16.0)" DisplayName="Visual Studio core editor" />
+  </Prerequisites>
   <Dependencies>
     <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.6,)" />
   </Dependencies>

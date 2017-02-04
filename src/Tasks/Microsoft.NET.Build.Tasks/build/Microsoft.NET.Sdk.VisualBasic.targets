@@ -10,19 +10,11 @@ Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-
-  <!--
-    TODO: The VB compiler outputs foo.dll.exe when the output type is Exe even when we pass in /o:foo.dll. 
-    We workaround that here by changing the extension. However we really should change the compiler (maybe add a flag).
-    https://github.com/dotnet/roslyn/issues/13681 tracks the compiler bug.
-    -->
   <PropertyGroup>
-    <TargetsTriggeredByCompilation Condition="'$(OutputType)' == 'exe'">ChangeExtensionOfOutputAssembly;$(TargetsTriggeredByCompilation)</TargetsTriggeredByCompilation>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <AppDesignerFolder Condition="'$(AppDesignerFolder)' == ''">My Project</AppDesignerFolder>
   </PropertyGroup>
-
-  <Target Name="ChangeExtensionOfOutputAssembly">
-    <Move SourceFiles="$(IntermediateOutputPath)$(TargetName)$(TargetExt).exe" DestinationFiles="$(IntermediateOutputPath)$(TargetName)$(TargetExt)" Condition="Exists('$(IntermediateOutputPath)$(TargetName)$(TargetExt).exe')" />
-    <Move SourceFiles="$(IntermediateOutputPath)$(TargetName)$(TargetExt).pdb" DestinationFiles="$(IntermediateOutputPath)$(TargetName).pdb" Condition="Exists('$(IntermediateOutputPath)$(TargetName)$(TargetExt).pdb')" />
-  </Target>
-  
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants),$(ImplicitFrameworkDefine)</DefineConstants>
+  </PropertyGroup>
 </Project>
