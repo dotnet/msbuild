@@ -4,6 +4,8 @@ namespace Microsoft.DotNet.Cli.CommandLine
     {
         public const string LastArgumentMultiValueError = "The last argument '{0}' accepts multiple values. No more argument can be added.";
 
+        public const string OptionRequiresSingleValueWhichIsMissing = "Required value for option '{0}' was not provided.";
+
         public const string UnexpectedValueForOptionError = "Unexpected value '{0}' for option '{1}'";
 
         public const string UnexpectedArgumentError = "Unrecognized {0} '{1}'";
