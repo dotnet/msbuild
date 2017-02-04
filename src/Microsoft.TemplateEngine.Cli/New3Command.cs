@@ -436,7 +436,26 @@ namespace Microsoft.TemplateEngine.Cli
             }
             else
             {
-                return await CreateTemplateAsync(UnambiguousTemplateToUse).ConfigureAwait(false);
+                try
+                {
+                    return await CreateTemplateAsync(UnambiguousTemplateToUse).ConfigureAwait(false);
+                }
+                catch (ContentGenerationException cx)
+                {
+                    Reporter.Error.WriteLine(cx.Message.Bold().Red());
+                    if(cx.InnerException != null)
+                    {
+                        Reporter.Error.WriteLine(cx.InnerException.Message.Bold().Red());
+                    }
+
+                    return CreationResultStatus.CreateFailed;
+                }
+                catch (Exception ex)
+                {
+                    Reporter.Error.WriteLine(ex.Message.Bold().Red());
+                }
+
+                return CreationResultStatus.CreateFailed;
             }
         }
 

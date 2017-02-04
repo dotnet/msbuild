@@ -57,11 +57,11 @@ namespace Microsoft.TemplateEngine.Cli
 
         public const string CreateSuccessful = "The template \"{0}\" created successfully.";
 
-        public const string CreateFailed = "Template \"{0}\" could not be created. Error returned was: {1}";
+        public const string CreateFailed = "Template \"{0}\" could not be created.\n{1}";
 
         public const string InstallSuccessful = "\"{0}\" was installed successfully.";
 
-        public const string InstallFailed = "\"{0}\" could not be installed. Error returned was: {1}.";
+        public const string InstallFailed = "\"{0}\" could not be installed.\n{1}.";
 
         public const string MissingRequiredParameter = "Mandatory parameter {0} missing for template {1}.";
 
