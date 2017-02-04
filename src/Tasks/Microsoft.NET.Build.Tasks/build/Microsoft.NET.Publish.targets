@@ -520,11 +520,6 @@ Copyright (c) .NET Foundation. All rights reserved.
           BeforeTargets="CopyFilesToPublishDirectory"
           Condition="'$(RenamePublishedHost)' == 'true'">
 
-    <PropertyGroup>
-      <_DotNetHostExecutableName>dotnet</_DotNetHostExecutableName>
-      <_DotNetHostExecutableName Condition="$(RuntimeIdentifier.StartsWith('win'))">$(_DotNetHostExecutableName).exe</_DotNetHostExecutableName>
-    </PropertyGroup>
-
     <ItemGroup>
 
       <ResolvedFileToPublish Condition="'%(ResolvedFileToPublish.RelativePath)' == '$(_DotNetHostExecutableName)'">
