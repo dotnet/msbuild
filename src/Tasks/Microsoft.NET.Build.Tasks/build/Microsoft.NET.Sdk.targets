@@ -200,7 +200,12 @@ Copyright (c) .NET Foundation. All rights reserved.
           BeforeTargets="AssignTargetPaths"
           Condition="'$(ComputeNETCoreBuildOutputFiles)' == 'true'">
 
-    <!-- Adds the host assemblies for self-contained apps -->
+    <!--
+    During "build" and "run" of .NET Core projects, the assemblies coming from NuGet packages
+    are loaded from the NuGet cache. But, in order for a self-contained app to be runnable,
+    it requires a host in the output directory to load the app.
+    During "publish", all required assets are copied to the publish directory.
+    -->
     <ItemGroup Condition="'$(RuntimeIdentifier)' != '' and '$(OutputType)' == 'Exe'">
       <_NETCoreNativeFileItems Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'NativeLibrary'))" />
       <__NETCoreNativeItems Include="@(FileDefinitions)" Exclude="@(_NETCoreNativeFileItems)" />

@@ -45,11 +45,17 @@ Copyright (c) .NET Foundation. All rights reserved.
     </Otherwise>
   </Choose>
 
+  <PropertyGroup>
+    <!-- AppendRuntimeIdentifierToOutputPath defaults to false since it is a breaking change to change the output path -->
+    <!-- Projects that build for multiple RIDs can set this to true to get a RID folder in their output path -->
+    <AppendRuntimeIdentifierToOutputPath Condition="'$(AppendRuntimeIdentifierToOutputPath)' == ''">false</AppendRuntimeIdentifierToOutputPath>
+  </PropertyGroup>
+
   <!--
     Append $(RuntimeIdentifier) directory to output and intermediate paths to prevent bin clashes between
     targets.
    -->
-  <PropertyGroup Condition="'$(RuntimeIdentifier)' != ''">
+  <PropertyGroup Condition="'$(AppendRuntimeIdentifierToOutputPath)' == 'true' and '$(RuntimeIdentifier)' != ''">
     <IntermediateOutputPath>$(IntermediateOutputPath)$(RuntimeIdentifier)\</IntermediateOutputPath>
     <OutputPath>$(OutputPath)$(RuntimeIdentifier)\</OutputPath>
   </PropertyGroup>

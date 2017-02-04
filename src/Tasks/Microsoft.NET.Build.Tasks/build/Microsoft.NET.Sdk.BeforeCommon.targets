@@ -64,6 +64,10 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Set PublishDir here, before Microsoft.Common.targets, to avoid a competing default there. -->
   <PropertyGroup>
     <PublishDirName Condition="'$(PublishDirName)' == ''">publish</PublishDirName>
+    <!-- ensure the PublishDir is RID specific-->
+    <PublishDir Condition="'$(PublishDir)' == '' and
+                           '$(AppendRuntimeIdentifierToOutputPath)' != 'true' and
+                           '$(RuntimeIdentifier)' != ''">$(OutputPath)$(RuntimeIdentifier)\$(PublishDirName)\</PublishDir>
     <PublishDir Condition="'$(PublishDir)' == ''">$(OutputPath)$(PublishDirName)\</PublishDir>
   </PropertyGroup>
 
