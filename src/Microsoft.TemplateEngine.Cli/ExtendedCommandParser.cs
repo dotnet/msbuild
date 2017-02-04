@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Edge.Template;
 
 namespace Microsoft.TemplateEngine.Cli
 {
@@ -104,9 +105,9 @@ namespace Microsoft.TemplateEngine.Cli
             return _app.Execute(args);
         }
 
-        public void OnExecute(Func<Task<int>> invoke)
+        public void OnExecute(Func<Task<CreationResultStatus>> invoke)
         {
-            _app.OnExecute(invoke);
+            _app.OnExecute(async () => (int) await invoke().ConfigureAwait(false));
         }
 
         // Returns the "standard" args that were input - the ones handled by the CommandLineApplication

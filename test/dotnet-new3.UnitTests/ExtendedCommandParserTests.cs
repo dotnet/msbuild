@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Xunit;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.TemplateEngine.Cli;
+using Microsoft.TemplateEngine.Edge.Template;
 
 namespace DotnetNew3.UnitTests
 {
@@ -48,7 +49,7 @@ namespace DotnetNew3.UnitTests
             app.OnExecute(() =>
             {
                 app.ParseArgs();
-                return Task.FromResult(0);
+                return Task.FromResult(CreationResultStatus.Success);
             });
             app.Execute(inputArgArray);
 
