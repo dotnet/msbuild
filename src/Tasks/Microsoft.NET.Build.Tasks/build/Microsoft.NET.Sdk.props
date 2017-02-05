@@ -81,6 +81,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DelaySign Condition="'$(DelaySign)'==''">false</DelaySign>
     <GeneratePackageOnBuild Condition="'$(GeneratePackageOnBuild)'==''">false</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance Condition="'$(PackageRequireLicenseAcceptance)'==''">false</PackageRequireLicenseAcceptance>
+    <DebugSymbols Condition="'$(DebugSymbols)'==''">false</DebugSymbols>
+    <CheckForOverflowUnderflow Condition="'$(CheckForOverflowUnderflow)'==''">false</CheckForOverflowUnderflow>
   </PropertyGroup>
   
   <!-- Default item includes (globs and implicit references) -->
