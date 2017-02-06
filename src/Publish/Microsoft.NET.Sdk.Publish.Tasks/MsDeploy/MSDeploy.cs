@@ -930,7 +930,7 @@
                 }
 
                 //retrieve skip rules
-                System.Collections.Generic.IEnumerable<Framework.ITaskItem> skips = from item in hostObject where (item.ItemSpec == VSMsDeployTaskHostObject.SkipFileItemSpecName) select item;
+                System.Collections.Generic.IEnumerable<Framework.ITaskItem> skips = hostObject.Where(item => item.ItemSpec == VSMsDeployTaskHostObject.SkipFileItemSpecName);
                 if (skips != null)
                 {
                     if (skipRuleItems != null)
