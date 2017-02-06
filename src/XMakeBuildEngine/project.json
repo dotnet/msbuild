@@ -1,5 +1,6 @@
 ﻿{
   "dependencies": {
+    "System.Threading.Tasks.Dataflow": "4.6.0"
   },
   "frameworks": {
     "net46": {
@@ -25,7 +26,6 @@
         "System.Runtime": "4.1.0",
         "System.Runtime.Loader": "4.0.0",
         "System.Runtime.Serialization.Primitives": "4.1.1",
-        "System.Threading.Tasks.Dataflow": "4.6.0",
         "System.Threading.Thread": "4.0.0",
         "System.Threading.ThreadPool": "4.0.10",
         "System.Xml.XmlDocument": "4.0.1",

@@ -16,6 +16,7 @@
     <CopyNuGetImplementations>true</CopyNuGetImplementations>
     <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
     <UpdateNuGetPackageDependencies>true</UpdateNuGetPackageDependencies>
+    <DefineConstants>$(DefineConstants);MICROSOFT_BUILD_TASKS</DefineConstants>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />

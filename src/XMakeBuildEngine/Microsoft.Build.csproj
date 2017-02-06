@@ -740,9 +740,6 @@
     <!-- Assemblies Files we depend on -->
     <!-- Be conservative when adding references... adding System.Xml.Linq can add .47 sec cold start time to our launch time, or 80 ms to warm start time -->
     <Reference Include="System" />
-    <Reference Include="System.Threading.Tasks.Dataflow">
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Configuration" />
