@@ -123,9 +123,10 @@ namespace Microsoft.DotNet.Cli.Run.Tests
             string dir = "pkgs";
             string args = $"--packages {dir}";
 
-            new NewCommand()
+            string newArgs = $"console -o \"{rootPath}\"";
+            new NewCommandShim()
                 .WithWorkingDirectory(rootPath)
-                .Execute()
+                .Execute(newArgs)
                 .Should()
                 .Pass();
 

@@ -2,18 +2,23 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using FluentAssertions;
-using Microsoft.Build.Construction;
-using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using System;
 using System.IO;
 using System.Linq;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.Package.Add.Tests
 {
     public class GivenDotnetPackageAdd : TestBase
     {
+        private readonly ITestOutputHelper _output;
+
+        public GivenDotnetPackageAdd(ITestOutputHelper output)
+        {
+            _output = output;
+        }
 
         [Fact]
         public void WhenValidPackageIsPassedBeforeVersionItGetsAdded()
@@ -34,6 +39,35 @@ namespace Microsoft.DotNet.Cli.Package.Add.Tests
             cmd.Should().Pass();
             cmd.StdOut.Should().Contain($"PackageReference for package '{packageName}' version '{packageVersion}' " +
                 $"added to file '{projectDirectory + Path.DirectorySeparatorChar + testAsset}.csproj'.");
+            cmd.StdErr.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void 
+            WhenValidProjectAndPackageArePassedItGetsAdded()
+        {
+            var testAsset = "TestAppSimple";
+            var projectDirectory = TestAssets
+                .Get(testAsset)
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+
+            var csproj = $"{projectDirectory + Path.DirectorySeparatorChar + testAsset}.csproj";
+            var packageName = "Newtonsoft.Json";
+            var packageVersion = "9.0.1";
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput($"add {csproj} package {packageName} --version {packageVersion}");
+
+            _output.WriteLine($"[STDOUT] {cmd.StdOut}\n[STDERR]{cmd.StdErr}\n");
+
+            cmd.Should().Pass();
+
+            cmd.StdOut.Should()
+               .Contain($"PackageReference for package \'{packageName}\' version \'{packageVersion}\' added to file '{csproj}'.");
+
             cmd.StdErr.Should().BeEmpty();
         }
 

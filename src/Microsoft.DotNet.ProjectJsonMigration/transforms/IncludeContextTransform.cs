@@ -23,16 +23,17 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
                                                                        .Where((pattern) => !_excludePatternRule(pattern)),
                                                                    includeContext.SourceBasePath),
                     includeContext => FormatGlobPatternsForMsbuild(includeContext.ExcludeFiles, includeContext.SourceBasePath),
-                    includeContext => includeContext != null 
-                        && includeContext.IncludeFiles != null 
+                    includeContext => includeContext != null
+                        && includeContext.IncludeFiles != null
                         && includeContext.IncludeFiles.Where((pattern) => !_excludePatternRule(pattern)).Count() > 0);
 
         protected virtual Func<string, AddItemTransform<IncludeContext>> IncludeExcludeTransformGetter =>
             (itemName) => new AddItemTransform<IncludeContext>(
                 itemName,
-                includeContext => 
+                includeContext =>
                 {
-                    var fullIncludeSet = includeContext.IncludePatterns.OrEmptyIfNull();
+                    var fullIncludeSet = includeContext.IncludePatterns.OrEmptyIfNull()
+                                         .Union(includeContext.CustomIncludePatterns.OrEmptyIfNull());
                     if (_emitBuiltInIncludes)
                     {
                         fullIncludeSet = fullIncludeSet.Union(includeContext.BuiltInsInclude.OrEmptyIfNull());
@@ -50,11 +51,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
 
                     return FormatGlobPatternsForMsbuild(fullExcludeSet, includeContext.SourceBasePath);
                 },
-                includeContext => 
+                includeContext =>
                 {
                     return includeContext != null &&
-                        ( 
+                        (
                             (includeContext.IncludePatterns != null && includeContext.IncludePatterns.Where((pattern) => !_excludePatternRule(pattern)).Count() > 0)
+                            ||
+                            (includeContext.CustomIncludePatterns != null && includeContext.CustomIncludePatterns.Where((pattern) => !_excludePatternRule(pattern)).Count() > 0)
                             ||
                             (_emitBuiltInIncludes && 
                              includeContext.BuiltInsInclude != null && 
