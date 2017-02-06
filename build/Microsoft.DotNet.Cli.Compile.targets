@@ -205,8 +205,6 @@
 
         <!-- Removing Full CLR built TestHost assemblies from getting Crossgen as it is throwing error -->
         <SdkFilesExclude Include="$(SdkOutputDirectory)/TestHost*/**/*" />
-        <!-- Remove NuGet.LibraryModel due to https://github.com/dotnet/coreclr/issues/9118 -->
-        <SdkFilesExclude Include="$(SdkOutputDirectory)/NuGet.LibraryModel.dll" />
         <SdkFiles Include="$(SdkOutputDirectory)/**/*" Exclude="@(SdkFilesExclude)" />
         <SdkFilesWithPEMarker Remove="*" />
       </ItemGroup>
