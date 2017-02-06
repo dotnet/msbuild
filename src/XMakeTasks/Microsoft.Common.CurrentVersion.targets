@@ -3423,7 +3423,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="GenerateSatelliteAssemblies"
           Inputs="$(MSBuildAllProjects);@(_SatelliteAssemblyResourceInputs);$(IntermediateOutputPath)$(TargetName)$(TargetExt)"
           Outputs="$(IntermediateOutputPath)%(Culture)\$(TargetName).resources.dll"
-          Condition="'@(_SatelliteAssemblyResourceInputs)' != '' and '$(MSBuildRuntimeType)' != 'Core'">
+          Condition="'@(_SatelliteAssemblyResourceInputs)' != ''">
 
     <MakeDir
         Directories="@(EmbeddedResource->'$(IntermediateOutputPath)%(Culture)')" />
