@@ -87,7 +87,7 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
         /// This is a critical scenario for the driver.
         /// </summary>
         /// <param name="testUserArgument"></param>
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData(@"""abc"" d e")]
         [InlineData(@"""abc""      d e")]
         [InlineData("\"abc\"\t\td\te")]
@@ -101,11 +101,6 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
         [InlineData(@"a b c""def")]
         public void TestArgumentForwardingCmd(string testUserArgument)
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
             // Get Baseline Argument Evaluation via Reflector
             // This does not need to be different for cmd because
             // it only establishes what the string[] args should be
@@ -148,18 +143,13 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
             }
         }
 
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData(@"a\""b c d")]
         [InlineData(@"a\\\""b c d")]
         [InlineData(@"""\a\"" \\""\\\ b c")]
         [InlineData(@"a\""b \\ cd ""\e f\"" \\""\\\")]
         public void TestArgumentForwardingCmdFailsWithUnbalancedQuote(string testArgString)
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
             // Get Baseline Argument Evaluation via Reflector
             // This does not need to be different for cmd because
             // it only establishes what the string[] args should be
