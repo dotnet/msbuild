@@ -6,7 +6,7 @@ This repo contains the source code for cross-platform [.NET Core](http://github.
 
 Preview 4 release - MSBuild based tools
 ---------------------------------------
-As was outlined in the ["Changes to project.json" blog post](https://blogs.msdn.microsoft.com/dotnet/2016/05/23/changes-to-project-json/), we have started work to move away from project.json to csproj and MSBuild. All the new `latest` releases from this repo (from `rel/1.0.0` branch) are MSBuild-enabled tools. 
+As was outlined in the ["Changes to project.json" blog post](https://blogs.msdn.microsoft.com/dotnet/2016/05/23/changes-to-project-json/), we have started work to move away from project.json to csproj and MSBuild. All the new `latest` releases from this repo (from `rel/1.0.0` branch) are MSBuild-enabled tools.
 
 The current official release of the csproj-enabled CLI tools is **CLI Preview 4**. 
 
