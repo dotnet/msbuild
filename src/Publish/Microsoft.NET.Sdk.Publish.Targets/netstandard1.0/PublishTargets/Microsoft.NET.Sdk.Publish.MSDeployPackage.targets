@@ -54,7 +54,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ParameterName="DeployIisAppPath"
     ParameterValue="$(DeployIisAppPath)"/>
 
-    <PropertyGroup>     
+    <PropertyGroup>
       <MSDeployPublishSourceType>manifest</MSDeployPublishSourceType>
       <MSDeployPublishSourceRoot>$(_MsDeploySourceManifestPath)</MSDeployPublishSourceRoot>
 
