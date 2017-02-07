@@ -22,7 +22,8 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_builds_a_runnable_output()
         {
-            var runtimeIdentifier = RuntimeEnvironment.GetRuntimeIdentifier();
+            var targetFramework = "netcoreapp1.0";
+            var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework);
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
                 .WithSource()
@@ -43,7 +44,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp1.0", runtimeIdentifier: runtimeIdentifier);
+            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: runtimeIdentifier);
             var selfContainedExecutable = $"HelloWorld{Constants.ExeSuffix}";
 
             var libPrefix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "" : "lib";
