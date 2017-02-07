@@ -6,7 +6,13 @@ namespace App
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            var valueFromNativeDependency = Library.NativeCode.InvokeNativeCodeAndReturnAString();
+
+            var compileTimeRid = Library.NativeCode.GetRidStoredInAssemblyDescriptionAttribute();
+
+            var valueFromPortableDependency = LibraryWithoutRid.PortableClass.GetHelloWorld();
+
+            Console.WriteLine($"{valueFromNativeDependency} {compileTimeRid} {valueFromPortableDependency}");
         }
     }
 }

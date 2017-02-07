@@ -1,7 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard1.4</TargetFramework>
+    <RuntimeIdentifiers>osx.10.11-x64</RuntimeIdentifiers>
+    <Description>'$(RuntimeIdentifier)'</Description>
   </PropertyGroup>
-
+  <ItemGroup>
+    <PackageReference Include="SQLite">
+      <Version>3.13.0</Version>
+    </PackageReference>
+  </ItemGroup>
 </Project>

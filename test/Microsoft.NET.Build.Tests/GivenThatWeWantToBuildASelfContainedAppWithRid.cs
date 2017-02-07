@@ -8,9 +8,6 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.Assertions;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Xml.Linq;
 using Xunit;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 
@@ -41,8 +38,8 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp1.0", runtimeIdentifier: runtimeIdentifier);
-            var selfContainedExecutable = $"HelloWorld{Constants.ExeSuffix}";
+            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp1.0");
+            var selfContainedExecutable = $"App{Constants.ExeSuffix}";
 
             Command.Create(Path.Combine(outputDirectory.FullName, selfContainedExecutable), new string[] { })
                 .CaptureStdOut()
@@ -50,7 +47,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass()
                 .And
-                .HaveStdOutContaining("Hello World!");
+                .HaveStdOutContaining($"3.13.0 '{runtimeIdentifier}' Hello World");
         }
     }
 }
