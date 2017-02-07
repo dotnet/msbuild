@@ -1,0 +1,39 @@
+<Project ToolsVersion="15.0">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.tasks))\dir.tasks" />
+
+  <Target Name="WriteBuildInfoProps"
+          Condition=" !Exists('$(BuildInfoProps)') ">
+    <GetCommitHash RepoRoot="$(RepoRoot)">
+      <Output TaskParameter="CommitHash" PropertyName="CommitHash" />
+    </GetCommitHash>
+
+    <GenerateBuildVersionInfo RepoRoot="$(RepoRoot)"
+                              VersionMajor="$(VersionMajor)"
+                              VersionMinor="$(VersionMinor)"
+                              VersionPatch="$(VersionPatch)"
+                              ReleaseSuffix="$(ReleaseSuffix)">
+      <Output TaskParameter="CommitCount" PropertyName="CommitCount" />
+      <Output TaskParameter="MsiVersion" PropertyName="MsiVersion" />
+      <Output TaskParameter="VersionBadgeMoniker" PropertyName="VersionBadgeMoniker" />
+    </GenerateBuildVersionInfo>
+
+    <PropertyGroup>
+      <BuildInfoPropsContent>
+&lt;Project ToolsVersion=&quot;15.0&quot;&gt;
+    &lt;PropertyGroup&gt;
+        &lt;BuildCommitHash&gt;$(CommitHash)&lt;/BuildCommitHash&gt;
+        &lt;BuildCommitCount&gt;$(CommitCount)&lt;/BuildCommitCount&gt;
+        &lt;BuildMsiVersion&gt;$(MsiVersion)&lt;/BuildMsiVersion&gt;
+        &lt;BuildVersionBadgeMoniker&gt;$(VersionBadgeMoniker)&lt;/BuildVersionBadgeMoniker&gt;
+    &lt;/PropertyGroup&gt;
+&lt;/Project&gt;
+      </BuildInfoPropsContent>
+    </PropertyGroup>
+
+    <MakeDir Directories="$(RepoRoot)/obj"/>
+
+    <WriteLinesToFile File="$(BuildInfoProps)"
+                      Lines="$(BuildInfoPropsContent)" />
+  </Target>
+</Project>

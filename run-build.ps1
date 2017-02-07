@@ -114,6 +114,8 @@ if ($NoBuild)
 }
 else
 {
+    dotnet msbuild build\Microsoft.DotNet.Cli.BuildInfo.targets /t:WriteBuildInfoProps
+	dotnet msbuild build\Microsoft.DotNet.Cli.HostInfo.targets /t:WriteHostInfoProps
     dotnet msbuild build.proj /m /v:diag /p:Architecture=$Architecture $ExtraParameters
     if($LASTEXITCODE -ne 0) { throw "Failed to build" } 
 }

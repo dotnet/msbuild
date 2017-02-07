@@ -1,10 +1,17 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Condition=" Exists('obj/Microsoft.DotNet.Cli.BuildInfo.props') "
+          Project="obj/Microsoft.DotNet.Cli.BuildInfo.props" />
+  <Import Condition=" Exists('obj/Microsoft.DotNet.Cli.HostInfo.props') "
+          Project="obj/Microsoft.DotNet.Cli.HostInfo.props" />
   <Import Project="build/Microsoft.DotNet.Cli.DependencyVersions.props" />
 
   <!-- NuGet Information -->
   <PropertyGroup>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
-    
+
+    <BuildInfoProps>$(RepoRoot)/obj/BuildInfo.props</BuildInfoProps>
+    <HostInfoProps>$(RepoRoot)/obj/HostInfo.props</HostInfoProps>
+
     <NuGetPackagesDir>$(NUGET_PACKAGES)</NuGetPackagesDir>
     <NuGetPackagesDir Condition=" '$(NuGetPackagesDir)' == '' ">$(RepoRoot)/.nuget/packages</NuGetPackagesDir>
 
@@ -21,6 +28,5 @@
     <CliVersionPrefix>$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(ReleaseSuffix)</CliVersionPrefix>
 
     <CliTargetFramework>netcoreapp2.0</CliTargetFramework>
-
   </PropertyGroup>
 </Project>
