@@ -411,18 +411,51 @@ namespace Microsoft.TemplateEngine.Cli
             }
             
             //If we've made it here, we need the actual template's args
-            ParseTemplateArgs(UnambiguousTemplateToUse);
+            string commandParseFailureMessage = null;
+            try
+            {
+                ParseTemplateArgs(UnambiguousTemplateToUse);
+            }
+            catch (CommandParserException ex)
+            {
+                commandParseFailureMessage = ex.Message;
+            }
+
             bool argsError = !ValidateRemainingParameters();
 
             if (argsError || IsHelpFlagSpecified)
             {
+                if(argsError)
+                {
+                    Reporter.Error.WriteLine(commandParseFailureMessage.Bold().Red());
+                }
+
                 ShowUsageHelp();
                 ShowTemplateHelp();
                 return argsError ? CreationResultStatus.InvalidParamValues : CreationResultStatus.Success;
             }
             else
             {
-                return await CreateTemplateAsync(UnambiguousTemplateToUse).ConfigureAwait(false);
+                try
+                {
+                    return await CreateTemplateAsync(UnambiguousTemplateToUse).ConfigureAwait(false);
+                }
+                catch (ContentGenerationException cx)
+                {
+                    Reporter.Error.WriteLine(cx.Message.Bold().Red());
+                    if(cx.InnerException != null)
+                    {
+                        Reporter.Error.WriteLine(cx.InnerException.Message.Bold().Red());
+                    }
+
+                    return CreationResultStatus.CreateFailed;
+                }
+                catch (Exception ex)
+                {
+                    Reporter.Error.WriteLine(ex.Message.Bold().Red());
+                }
+
+                return CreationResultStatus.CreateFailed;
             }
         }
 
@@ -441,10 +474,27 @@ namespace Microsoft.TemplateEngine.Cli
         private async Task<CreationResultStatus> ExecuteAsync()
         {
             //Parse non-template specific arguments
-            _app.ParseArgs();
+            try
+            {
+                _app.ParseArgs();
+            }
+            catch (CommandParserException ex)
+            {
+                Reporter.Error.WriteLine(ex.Message.Bold().Red());
+                return CreationResultStatus.InvalidParamValues;
+            }
+
             if (ExtraArgsHasValue)
             {
-                _app.ParseArgs(_app.InternalParamValueList("--extra-args"));
+                try
+                {
+                    _app.ParseArgs(_app.InternalParamValueList("--extra-args"));
+                }
+                catch (CommandParserException ex)
+                {
+                    Reporter.Error.WriteLine(ex.Message.Bold().Red());
+                    return CreationResultStatus.InvalidParamValues;
+                }
             }
 
             if (DebugAttachHasValue)

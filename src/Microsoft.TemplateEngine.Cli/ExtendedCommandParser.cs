@@ -120,7 +120,7 @@ namespace Microsoft.TemplateEngine.Cli
         {
             if (IsParameterNameTaken(parameter))
             {
-                throw new Exception($"Parameter name {parameter} cannot be used for multiple purposes");
+                throw new CommandParserException($"Parameter name {parameter} cannot be used for multiple purposes", parameter);
             }
 
             _defaultCommandOptions.Add(parameter);
@@ -147,7 +147,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 if (IsParameterNameTaken(parameters[i]))
                 {
-                    throw new Exception($"Parameter name {parameters[i]} cannot be used for multiple purposes");
+                    throw new CommandParserException($"Parameter name {parameters[i]} cannot be used for multiple purposes", parameters[i]);
                 }
 
                 _hiddenCommandCanonicalMapping.Add(parameters[i], canonical);
@@ -242,14 +242,14 @@ namespace Microsoft.TemplateEngine.Cli
                     {
                         if (param.Value.Count != 1)
                         {
-                            throw new Exception($"Multiple values specified for single value parameter: {canonicalName}");
+                            throw new CommandParserException($"Multiple values specified for single value parameter: {canonicalName}", canonicalName);
                         }
                     }
                     else // NoValue
                     {
                         if (param.Value.Count != 1 || param.Value[0] != null)
                         {
-                            throw new Exception($"Value specified for valueless parameter: {canonicalName}");
+                            throw new CommandParserException($"Value specified for valueless parameter: {canonicalName}", canonicalName);
                         }
                     }
 
@@ -260,13 +260,13 @@ namespace Microsoft.TemplateEngine.Cli
                     if (_parsedTemplateParams.ContainsKey(canonicalName))
                     {
                         // error, the same param was specified twice
-                        throw new Exception($"Parameter [{canonicalName}] was specified multiple times, including with the flag [{param.Key}]");
+                        throw new CommandParserException($"Parameter [{canonicalName}] was specified multiple times, including with the flag [{param.Key}]", canonicalName);
                     }
                     else
                     {
                         if ((param.Value[0] == null) && (_templateParamDataTypeMapping[canonicalName] != "bool"))
                         {
-                            throw new Exception($"Parameter [{param.Key}] ({canonicalName}) must be given a value");
+                            throw new CommandParserException($"Parameter [{param.Key}] ({canonicalName}) must be given a value", canonicalName);
                         }
 
                         // TODO: allow for multi-valued params
@@ -411,7 +411,7 @@ namespace Microsoft.TemplateEngine.Cli
         {
             if (_templateParamCanonicalMapping.TryGetValue(variant, out string existingCanonical))
             {
-                throw new Exception($"Option variant {variant} for canonical {canonical} was already defined for canonical {existingCanonical}");
+                throw new CommandParserException($"Option variant {variant} for canonical {canonical} was already defined for canonical {existingCanonical}", canonical);
             }
 
             _templateParamCanonicalMapping[variant] = canonical;

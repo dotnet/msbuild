@@ -27,7 +27,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
             foreach (ICreationPath output in templateCreationResult.PrimaryOutputs)
             {
-                string pathToRestore = Path.Combine(outputBasePath, output.Path);
+                string pathToRestore = !string.IsNullOrEmpty(outputBasePath) ? Path.Combine(outputBasePath, output.Path) : output.Path;
                 Command restoreCommand = Command.CreateDotNet("restore", new[] { pathToRestore });
                 restoreCommand.CaptureStdOut();
                 restoreCommand.CaptureStdErr();
