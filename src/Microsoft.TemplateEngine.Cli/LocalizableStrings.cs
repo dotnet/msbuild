@@ -5,27 +5,27 @@ namespace Microsoft.TemplateEngine.Cli
 {
     internal class LocalizableStrings
     {
-        public const string ShowsAllTemplates = "Shows all templates";
+        public const string ShowsAllTemplates = "Shows all templates.";
 
         public const string DisplaysHelp = "Displays help for this command.";
 
-        public const string ParameterNamePrefixError = "Parameter names must start with -- or -";
+        public const string ParameterNamePrefixError = "Parameter names must start with -- or -.";
 
-        public const string ParameterReuseError = "Parameter name {0} cannot be used for multiple purposes";
+        public const string ParameterReuseError = "Parameter name {0} cannot be used for multiple purposes.";
 
-        public const string MultipleValuesSpecifiedForSingleValuedParameter = "Multiple values specified for single value parameter: {0}";
+        public const string MultipleValuesSpecifiedForSingleValuedParameter = "Multiple values specified for single value parameter: {0}.";
 
-        public const string ValueSpecifiedForValuelessParameter = "Value specified for valueless parameter: {0}";
+        public const string ValueSpecifiedForValuelessParameter = "Value specified for valueless parameter: {0}.";
 
-        public const string ParameterSpecifiedMultipleTimes = "Parameter [{0}] was specified multiple times, including with the flag [{1}]";
+        public const string ParameterSpecifiedMultipleTimes = "Parameter [{0}] was specified multiple times, including with the flag [{1}].";
 
-        public const string ParameterMissingValue = "Parameter [{0}] ({1}) must be given a value";
+        public const string ParameterMissingValue = "Parameter [{0}] ({1}) must be given a value.";
 
-        public const string TemplateMalformedDueToBadParameters = "Template is malformed. The following parameter names are invalid: {0}";
+        public const string TemplateMalformedDueToBadParameters = "Template is malformed. The following parameter names are invalid: {0}.";
 
         public const string OptionVariantAlreadyDefined = "Option variant {0} for canonical {1} was already defined for canonical {2}";
 
-        public const string ListsTemplates = "List templates containing the specified name.";
+        public const string ListsTemplates = "Lists templates containing the specified name. If no name is specified, lists all templates.";
 
         public const string NameOfOutput = "The name for the output being created. If no name is specified, the name of the current directory is used.";
 
@@ -37,7 +37,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         public const string ExtraArgsFileHelp = "Specifies a file containing additional parameters.";
 
-        public const string LocaleHelp = "The locale to use";
+        public const string LocaleHelp = "The locale to use.";
 
         public const string QuietModeHelp = "Doesn't output any status information.";
 
@@ -45,17 +45,17 @@ namespace Microsoft.TemplateEngine.Cli
 
         public const string UpdateHelp = "Update matching templates.";
 
-        public const string CommandDescription = "Template Instantiation Commands for .NET Core CLI.";
+        public const string CommandDescription = "Template Instantiation Commands for .NET Core CLI";
 
         public const string TemplateArgumentHelp = "The template to instantiate.";
 
-        public const string BadLocaleError = "Invalid format for input locale: \"{0}\". Example valid formats: [en] [en-US]";
+        public const string BadLocaleError = "Invalid format for input locale: \"{0}\". Example valid formats: [en] [en-US].";
 
-        public const string AliasCreated = "Alias creation successful";
+        public const string AliasCreated = "Alias creation successful.";
 
         public const string AliasAlreadyExists = "Specified alias \"{0}\" already exists. Please specify a different alias.";
 
-        public const string CreateSuccessful = "The template \"{0}\" created successfully.";
+        public const string CreateSuccessful = "The template \"{0}\" was created successfully.";
 
         public const string CreateFailed = "Template \"{0}\" could not be created. Error returned was: {1}";
 
@@ -91,7 +91,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         public const string Language = "Language";
 
-        public const string LanguageParameter = "Specifies the language of the template to create";
+        public const string LanguageParameter = "Specifies the language of the template to create.";
 
         public const string CurrentConfiguration = "Current configuration:";
 
@@ -125,16 +125,16 @@ namespace Microsoft.TemplateEngine.Cli
 
         public const string NoParameters = "    (No Parameters)";
 
-        public const string AmbiguousInputTemplateName = "Unable to determine the desired template from the input template name: [{0}]";
+        public const string AmbiguousInputTemplateName = "Unable to determine the desired template from the input template name: [{0}].";
 
-        public const string NoTemplatesMatchName = "No templates matched the input template name: [{0}]";
+        public const string NoTemplatesMatchName = "No templates matched the input template name: [{0}].";
 
-        public const string ItemTemplateNotInProjectContext = "[{0}] is an item template. By default it's only created in a target location containing a project. Force creation with the -all flag.";
+        public const string ItemTemplateNotInProjectContext = "[{0}] is an item template. By default, it's only created in a target location containing a project. Force creation with the -all flag.";
 
-        public const string ProjectTemplateInProjectContext = "[{0}] is a project template. By default it's not created in a target location containing a project. Force creation with the -all flag.";
+        public const string ProjectTemplateInProjectContext = "[{0}] is a project template. By default, it's not created in a target location containing a project. Force creation with the -all flag.";
 
         public const string GenericPlaceholderTemplateContextError = "[{0}] cannot be created in the target location.";
 
-        public const string TemplateMultiplePartialNameMatches = "The following templates partially match the input. Please be more specific with the template name and/or language.";
+        public const string TemplateMultiplePartialNameMatches = "The following templates partially match the input. Be more specific with the template name and/or language.";
     }
 }
