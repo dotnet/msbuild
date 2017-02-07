@@ -92,7 +92,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                              _CGenJit=$(_JitPath);
                              _CGenInputAssembly=%(_AssembliestoCrossGen.Fullpath);
                              _CGenOutputAssembly=$([System.IO.Path]::Combine($(_RuntimeOptimizedDir),%(RecursiveDir)%(Filename)%(Extension)));
-                             _CGenPlatformAssembliesPath=$(_RuntimeRefDir)$(PathSeparator)$(_NetCoreRefDir);" />
+                             _CGenPlatformAssembliesPath=$(_NetCoreRefDir)$(PathSeparator)$(_RuntimeRefDir);" />
 
 
     <!-- Copy by proxy the directory structure to PublishDir-->
@@ -135,12 +135,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
       <TargetFramework>$(_TFM)</TargetFramework>
       <RuntimeIdentifier>$(RuntimeIdentifier)</RuntimeIdentifier>
-      <DisableImplicitFrameworkReferences Condition="'$(FX_Version)' != ''">true</DisableImplicitFrameworkReferences>  <!-- Preserve this is, as netcoreapp version may be provided by the user -->
+      <RuntimeFrameworkVersion Condition="'$(FX_Version)' != ''">$(FX_Version)</RuntimeFrameworkVersion>
   </PropertyGroup>
-  <ItemGroup Condition="'$(FX_Version)' != ''">
-       <PackageReference Include="Microsoft.NETCore.App" Version="$(FX_Version)" />
-  </ItemGroup>
-
 </Project>        
 
 ]]>
@@ -152,7 +148,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_RuntimeRefDir>$([System.IO.Path]::Combine($(_CrossProjFileDir), "runtimeref"))</_RuntimeRefDir> <!-- flat app managed assemblies -->
       <_NetCoreRefDir>$([System.IO.Path]::Combine($(_CrossProjFileDir), "netcoreapp"))</_NetCoreRefDir> <!-- flat netcore app assemblies-->
       <_RuntimeOptimizedDir>$([System.IO.Path]::Combine($(_CrossProjFileDir), "runtimopt"))</_RuntimeOptimizedDir> <!-- optimized app managed assemblies in nuget cache layout -->
-      <_CrossProjFile>$([System.IO.Path]::Combine($(_CrossProjFileDir), "Optimize_Crossgen_$(RuntimeIdentifier)_$(_TFM)_$(FX_Version).csproj"))</_CrossProjFile>
+      <_CrossProjFile>$([System.IO.Path]::Combine($(_CrossProjFileDir), "Optimize_Crossgen_$(RuntimeIdentifier)_$(_TFM).csproj"))</_CrossProjFile>
       <_CrossProjAssetsFile>$([System.IO.Path]::Combine($(_CrossProjFileDir), "obj", project.assets.json))</_CrossProjAssetsFile>
     </PropertyGroup>
 
