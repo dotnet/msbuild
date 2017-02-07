@@ -40,7 +40,7 @@ namespace Microsoft.NET.Build.Tasks
         /// The version of the shared framework that should be used.  If not specified, it will
         /// be the package version of the <see cref="PlatformLibraryName"/> package.
         /// </summary>
-        public string RuntimeFrameworkVersion { get; set; }
+        public string FrameworkVersion { get; set; }
 
         public string UserRuntimeConfig { get; set; }
 
@@ -96,9 +96,9 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     RuntimeConfigFramework framework = new RuntimeConfigFramework();
                     framework.Name = platformLibrary.Name;
-                    if (!string.IsNullOrEmpty(RuntimeFrameworkVersion))
+                    if (!string.IsNullOrEmpty(FrameworkVersion))
                     {
-                        framework.Version = RuntimeFrameworkVersion;
+                        framework.Version = FrameworkVersion;
                     }
                     else
                     {
