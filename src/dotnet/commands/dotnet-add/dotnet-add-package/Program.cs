@@ -46,8 +46,8 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
 
             command._versionOption = command.Option(
                 $"-v|--version <{LocalizableStrings.CmdVersion}>",
-                LocalizableStrings.CmdVersionDescription,
-                CommandOptionType.SingleValue);
+                description: LocalizableStrings.CmdVersionDescription,
+                optionType: CommandOptionType.SingleValue);
 
             command._frameworkOption = command.Option(
                $"-f|--framework <{LocalizableStrings.CmdFramework}>",

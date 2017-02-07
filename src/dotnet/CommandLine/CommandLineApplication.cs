@@ -385,11 +385,11 @@ namespace Microsoft.DotNet.Cli.CommandLine
                 if (cmd != this && cmd.Arguments.Any())
                 {
                     var args = string.Join(" ", cmd.Arguments.Select(arg => arg.Name));
-                    headerBuilder.Insert(usagePrefixLength, string.Format(LocalizableStrings.UsageItemWithArgs, cmd.Name, args));
+                    headerBuilder.Insert(usagePrefixLength, string.Format(" {0} {1}", cmd.Name, args));
                 }
                 else
                 {
-                    headerBuilder.Insert(usagePrefixLength, string.Format(LocalizableStrings.UsageItemWithoutArgs, cmd.Name));
+                    headerBuilder.Insert(usagePrefixLength, string.Format(" {0}", cmd.Name));
                 }
             }
 
@@ -405,7 +405,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
 
                 if (target != null)
                 {
-                    headerBuilder.AppendFormat(LocalizableStrings.CommandItem, commandName);
+                    headerBuilder.AppendFormat(" {0}", commandName);
                 }
                 else
                 {
@@ -444,11 +444,10 @@ namespace Microsoft.DotNet.Cli.CommandLine
             {
                 if (cmd.Arguments.Any())
                 {
-                    var outputFormat = LocalizableStrings.UsageArgumentItem;
                     foreach (var arg in cmd.Arguments)
                     {
                         argumentsBuilder.AppendFormat(
-                            outputFormat, 
+                            "  {0}{1}", 
                             arg.Name.PadRight(maxArgLen + 2), 
                             arg.Description);
                         argumentsBuilder.AppendLine();
@@ -463,7 +462,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
                 optionsBuilder.AppendLine();
                 optionsBuilder.AppendLine(LocalizableStrings.UsageOptionsHeader);
                 var maxOptLen = MaxOptionTemplateLength(target.Options);
-                var outputFormat = string.Format(LocalizableStrings.UsageOptionsItem, maxOptLen + 2);
+                var outputFormat = string.Format("  {{0, -{0}}}{{1}}", maxOptLen + 2);
                 foreach (var opt in target.Options)
                 {
                     optionsBuilder.AppendFormat(outputFormat, opt.Template, opt.Description);
@@ -478,7 +477,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
                 commandsBuilder.AppendLine();
                 commandsBuilder.AppendLine(LocalizableStrings.UsageCommandsHeader);
                 var maxCmdLen = MaxCommandLength(target.Commands);
-                var outputFormat = string.Format(LocalizableStrings.UsageCommandsItem, maxCmdLen + 2);
+                var outputFormat = string.Format("  {{0, -{0}}}{{1}}", maxCmdLen + 2);
                 foreach (var cmd in target.Commands.OrderBy(c => c.Name))
                 {
                     commandsBuilder.AppendFormat(outputFormat, cmd.Name, cmd.Description);
@@ -508,7 +507,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
                 {
                     argumentSeparatorBuilder.AppendLine();
                     argumentSeparatorBuilder.AppendLine(LocalizableStrings.UsageCommandsAdditionalArgsHeader);
-                    argumentSeparatorBuilder.AppendLine(String.Format(LocalizableStrings.UsageCommandsAdditionalArgsItem, target.ArgumentSeparatorHelpText));
+                    argumentSeparatorBuilder.AppendLine(String.Format(" {0}", target.ArgumentSeparatorHelpText));
                     argumentSeparatorBuilder.AppendLine();
                 }
             }
@@ -535,7 +534,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
 
         public string GetFullNameAndVersion()
         {
-            return ShortVersionGetter == null ? FullName : string.Format(LocalizableStrings.ShortVersionTemplate, FullName, ShortVersionGetter());
+            return ShortVersionGetter == null ? FullName : string.Format("{0} {1}", FullName, ShortVersionGetter());
         }
 
         public void ShowRootCommandFullNameAndVersion()

@@ -20,27 +20,17 @@ namespace Microsoft.DotNet.Cli.CommandLine
 
         public const string UsageHeader = "Usage:";
 
-        public const string UsageItemWithoutArgs = " {0}";
-
-        public const string UsageItemWithArgs = " {0} {1}";
-
         public const string UsageArgumentsToken = " [arguments]";
 
         public const string UsageArgumentsHeader = "Arguments:";
-
-        public const string UsageArgumentItem = "  {0}{1}";
 
         public const string UsageOptionsToken = " [options]";
 
         public const string UsageOptionsHeader = "Options:";
 
-        public const string UsageOptionsItem = "  {{0, -{0}}}{{1}}";
-
         public const string UsageCommandToken = " [command]";
 
         public const string UsageCommandsHeader = "Commands:";
-
-        public const string UsageCommandsItem = "  {{0, -{0}}}{{1}}";
 
         public const string UsageCommandsDetailHelp = "Use \"{0} [command] --help\" for more information about a command.";
 
@@ -49,12 +39,6 @@ namespace Microsoft.DotNet.Cli.CommandLine
         public const string UsageCommandAdditionalArgs = " [[--] <additional arguments>...]]";
 
         public const string UsageCommandsAdditionalArgsHeader = "Additional Arguments:";
-
-        public const string UsageCommandsAdditionalArgsItem = " {0}";
-
-        public const string CommandItem = " {0}";
-
-        public const string ShortVersionTemplate = "{0} {1}";
 
         public const string InvalidTemplateError = "Invalid template pattern '{0}'";
 

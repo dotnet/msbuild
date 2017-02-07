@@ -67,36 +67,38 @@ namespace Microsoft.DotNet.Tools.Run
 
         private ICommand GetRunCommand()
         {
-            Dictionary<string, string> globalProperties = new Dictionary<string, string>()
+            var globalProperties = new Dictionary<string, string>
             {
-                { LocalizableStrings.RunCommandMSBuildExtensionsPath, AppContext.BaseDirectory }
+                { Constants.MSBuildExtensionsPath, AppContext.BaseDirectory }
             };
 
             if (!string.IsNullOrWhiteSpace(Configuration))
             {
-                globalProperties.Add(LocalizableStrings.RunCommandConfiguration, Configuration);
+                globalProperties.Add("Configuration", Configuration);
             }
 
             if (!string.IsNullOrWhiteSpace(Framework))
             {
-                globalProperties.Add(LocalizableStrings.RunCommandTargetFramework, Framework);
+                globalProperties.Add("TargetFramework", Framework);
             }
 
             ProjectInstance projectInstance = new ProjectInstance(Project, globalProperties, null);
 
-            string runProgram = projectInstance.GetPropertyValue(LocalizableStrings.RunCommandProjectInstance);
+            string runProgram = projectInstance.GetPropertyValue("RunCommand");
             if (string.IsNullOrEmpty(runProgram))
             {
-                string outputType = projectInstance.GetPropertyValue(LocalizableStrings.RunCommandOutputType);
+                string outputType = projectInstance.GetPropertyValue("OutputType");
 
-                throw new GracefulException(string.Join(Environment.NewLine,
-                    LocalizableStrings.RunCommandExceptionUnableToRun1,
-                    LocalizableStrings.RunCommandExceptionUnableToRun2,
-                    $"{LocalizableStrings.RunCommandExceptionUnableToRun3}'{outputType}'."));
+                throw new GracefulException(
+                    string.Format(
+                        LocalizableStrings.RunCommandExceptionUnableToRun,
+                        "dotnet run",
+                        "OutputType",
+                        outputType));
             }
 
-            string runArguments = projectInstance.GetPropertyValue(LocalizableStrings.RunCommandRunArguments);
-            string runWorkingDirectory = projectInstance.GetPropertyValue(LocalizableStrings.RunCommandRunWorkingDirectory);
+            string runArguments = projectInstance.GetPropertyValue("RunArguments");
+            string runWorkingDirectory = projectInstance.GetPropertyValue("RunWorkingDirectory");
 
             string fullArguments = runArguments;
             if (_args.Any())
@@ -119,16 +121,17 @@ namespace Microsoft.DotNet.Tools.Run
 
                 if (projectFiles.Length == 0)
                 {
+                    var project = "--project";
+
                     throw new InvalidOperationException(
-                        $"{LocalizableStrings.RunCommandInvalidOperationException1} {directory}." + Environment.NewLine +
-                        LocalizableStrings.RunCommandInvalidOperationException2)
-                               .DisplayAsError();
+                        $"Couldn\'t find a project to run. Ensure a project exists in  {directory}, or pass the path to the project using {project}")
+                            .DisplayAsError();
                 }
                 else if (projectFiles.Length > 1)
                 {
                     throw new InvalidOperationException(
-                        $"{LocalizableStrings.RunCommandInvalidOperationException3}'{directory}'{LocalizableStrings.RunCommandInvalidOperationException4}")
-                               .DisplayAsError();
+                        $"Specify which project file to use because {directory} contains more than one project file.")
+                            .DisplayAsError();
                 }
 
                 Project = projectFiles[0];
