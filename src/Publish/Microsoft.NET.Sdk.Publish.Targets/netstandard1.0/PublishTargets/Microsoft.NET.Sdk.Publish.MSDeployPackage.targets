@@ -41,6 +41,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <MSDeployPackagePublishDependsOn>
       $(MSDeployPackagePublishDependsOn);
+      _InitMSDeployPackageLocation;
       _PrepareForMsDeployPublish;
       _CreateManifestFiles;
       _CreateParameterFiles;
@@ -59,7 +60,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
       <!--Destination is alway a manifest-->
       <MSDeployPublishDestinationType>Package</MSDeployPublishDestinationType>
-      <MSDeployPublishDestinationRoot>$(DesktopBuildPackageLocation)</MSDeployPublishDestinationRoot>
+      <MSDeployPublishDestinationRoot>$(PackageLocation)</MSDeployPublishDestinationRoot>
 
       <RetryAttemptsForDeployment Condition=" '$(RetryAttemptsForDeployment)' == '' ">2</RetryAttemptsForDeployment>
 
@@ -111,6 +112,24 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       ExePath="$(MSDeployPath)"
       />
   </Target>
+
+  <!--
+  ***********************************************************************************************
+  TARGET : _InitMSDeployPackageLocation
+  ***********************************************************************************************
+ -->
+
+  <Target Name="_InitMSDeployPackageLocation">
+   
+    <PropertyGroup>
+      <DefaultPackageFileName Condition="'$(DefaultPackageFileName)'==''">MSDeployPackage.zip</DefaultPackageFileName>
+      <PackageLocation Condition="'$(PackageLocation)' == ''">$(DesktopBuildPackageLocation)</PackageLocation>
+      <PackageLocation Condition="'$(PackageLocation)' == ''">$(OutputPath)</PackageLocation>
+      <PackageLocation Condition="'$([System.IO.Path]::GetExtension($(PackageLocation)))' == '' And !HasTrailingSlash('$(PackageLocation)')">$(PackageLocation)\</PackageLocation>
+      <PackageLocation Condition="'$([System.IO.Path]::GetExtension($(PackageLocation)))' == '' ">$(PackageLocation)$(DefaultPackageFileName)</PackageLocation>
+    </PropertyGroup>
+
+  </Target>
   
   <!--
   ***********************************************************************************************
@@ -121,7 +140,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="_PrepareForMsDeployPublish">
 
     <PropertyGroup>
-      <_destinationFolder Condition="'$(_destinationFolder)' == ''">$([System.IO.Path]::GetDirectoryName($(DesktopBuildPackageLocation)))\</_destinationFolder>
+      <_destinationFolder Condition="'$(_destinationFolder)' == ''">$([System.IO.Path]::GetDirectoryName($(PackageLocation)))\</_destinationFolder>
       <_MsDeploySourceManifestPath Condition="'$(_MsDeploySourceManifestPath)' == ''">$(_destinationFolder)$(MSBuildProjectName).SourceManifest.xml</_MsDeploySourceManifestPath>
       <_MSDeployParametersFilePath Condition="'$(_MSDeployParametersFilePath)' == ''">$(_destinationFolder)$(MSBuildProjectName).Parameters.xml</_MSDeployParametersFilePath>
     </PropertyGroup>
