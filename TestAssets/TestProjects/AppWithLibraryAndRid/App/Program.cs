@@ -6,13 +6,21 @@ namespace App
     {
         static void Main(string[] args)
         {
-            var valueFromNativeDependency = Library.NativeCode.InvokeNativeCodeAndReturnAString();
+            var libraryWithRidNativeOutput = LibraryWithRid.NativeCode.InvokeNativeCodeAndReturnAString();
 
-            var compileTimeRid = Library.NativeCode.GetRidStoredInAssemblyDescriptionAttribute();
+            var libraryWithRidsNativeOutput = LibraryWithRid.NativeCode.InvokeNativeCodeAndReturnAString();
 
-            var valueFromPortableDependency = LibraryWithoutRid.PortableClass.GetHelloWorld();
+            var libraryWithRidCompileTimeRid = LibraryWithRid.NativeCode.GetRidStoredInAssemblyDescriptionAttribute();
 
-            Console.WriteLine($"{valueFromNativeDependency} {compileTimeRid} {valueFromPortableDependency}");
+            var libraryWithRidsCompileTimeRid = LibraryWithRids.NativeCode.GetRidStoredInAssemblyDescriptionAttribute();
+
+            var libraryWithRidStatus = $"{libraryWithRidNativeOutput} {libraryWithRidCompileTimeRid}";
+
+            var libraryWithRidsStatus = $"{libraryWithRidsNativeOutput} {libraryWithRidsCompileTimeRid}";
+
+            var portableLibraryStatus = LibraryWithoutRid.PortableClass.GetHelloWorld();
+
+            Console.WriteLine($"{libraryWithRidStatus} {libraryWithRidsStatus} {portableLibraryStatus}");
         }
     }
 }

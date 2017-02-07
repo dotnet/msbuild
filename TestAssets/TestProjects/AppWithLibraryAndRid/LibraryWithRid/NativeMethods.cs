@@ -1,8 +1,7 @@
-
 using System;
 using System.Runtime.InteropServices;
 
-namespace Library
+namespace LibraryWithRid
 {
     public static class NativeMethod
     {

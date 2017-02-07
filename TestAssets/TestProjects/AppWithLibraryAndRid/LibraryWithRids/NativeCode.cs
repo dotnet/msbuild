@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-namespace Library
+namespace LibraryWithRids
 {
     public class NativeCode
     {

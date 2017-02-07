@@ -13,10 +13,10 @@ using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
 
 namespace Microsoft.NET.Build.Tests
 {
-    public class GivenThatWeWantToBuildASelfContainedAppWithRid : SdkTest
+    public class GivenThatWeWantToBuildASelfContainedAppWithLibrariesAndRid : SdkTest
     {
         [Fact]
-        public void It_builds_a_runnable_output()
+        public void It_builds_a_RID_specific_runnable_output()
         {
             var runtimeIdentifier = RuntimeEnvironment.GetRuntimeIdentifier();
             var testAsset = _testAssetsManager
@@ -27,14 +27,14 @@ namespace Microsoft.NET.Build.Tests
 
             var restoreCommand = new RestoreCommand(Stage0MSBuild, projectPath, "App.csproj"); 
             restoreCommand 
-                .Execute() 
+                .Execute($"/p:TestRuntimeIdentifier={runtimeIdentifier}") 
                 .Should() 
                 .Pass(); 
 
             var buildCommand = new BuildCommand(Stage0MSBuild, projectPath);
 
             buildCommand
-                .Execute($"/p:RuntimeIdentifier={runtimeIdentifier}")
+                .Execute($"/p:RuntimeIdentifier={runtimeIdentifier}", $"/p:TestRuntimeIdentifier={runtimeIdentifier}")
                 .Should()
                 .Pass();
 
@@ -47,7 +47,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass()
                 .And
-                .HaveStdOutContaining($"3.13.0 '{runtimeIdentifier}' Hello World");
+                .HaveStdOutContaining($"3.13.0 '{runtimeIdentifier}' 3.13.0 '{runtimeIdentifier}' Hello World");
         }
     }
 }

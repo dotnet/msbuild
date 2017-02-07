@@ -54,10 +54,10 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="GetTargetFrameworkProperties" Returns="TargetFramework=$(NearestTargetFramework);ProjectHasSingleTargetFramework=$(_HasSingleTargetFramework);RuntimeIdentifier=$(NearestRuntimeIdentifier)">
 
     <PropertyGroup>
-      <!-- If this project is not RID-specific, specify that an empty RuntimeIdentifier should be passed. Otherwise, pass through the dependant's RuntimeIdentifier -->
+      <!-- If this project is not RID-specific, specify that an empty RuntimeIdentifier should be passed. Otherwise, pass through the referring RuntimeIdentifier -->
       <NearestRuntimeIdentifier>$(ReferringRuntimeIdentifier)</NearestRuntimeIdentifier>
       <NearestRuntimeIdentifier Condition=" '$(RuntimeIdentifier)' == '' and $(RuntimeIdentifiers) == '' "></NearestRuntimeIdentifier>
-      
+
       <!-- If a ReferringTargetFramework was not specified, and we only have one TargetFramework, then don't try to check compatibility -->
       <_SkipNearestTargetFrameworkResolution Condition="'$(TargetFramework)' != '' and '$(ReferringTargetFramework)' == ''">true</_SkipNearestTargetFrameworkResolution>
       <NearestTargetFramework Condition="'$(_SkipNearestTargetFrameworkResolution)' == 'true'">$(TargetFramework)</NearestTargetFramework>
