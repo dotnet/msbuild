@@ -41,7 +41,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       <PreserveCacheLayout Condition="'$(PreserveCacheLayout)' == ''">true</PreserveCacheLayout>
       <SkipOptimization Condition="'$(RuntimeIdentifier)' == ''">true</SkipOptimization>
       <_TFM Condition="'$(_TFM)' == ''">$(TargetFramework)</_TFM>
-      <FX_Version Condition="'$(FX_Version)' == ''">$(_ShortFrameworkVersion)</FX_Version>
       <PathSeparator>$([System.IO.Path]::PathSeparator)</PathSeparator>
     </PropertyGroup>
 
