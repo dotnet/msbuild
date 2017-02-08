@@ -54,10 +54,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="GetTargetFrameworkProperties" Returns="TargetFramework=$(NearestTargetFramework);ProjectHasSingleTargetFramework=$(_HasSingleTargetFramework)$(RuntimeIdentifierOverride)">
 
     <PropertyGroup>
-      <!-- If this project is not RID-specific, specify that an empty RuntimeIdentifier should be passed. Otherwise, pass through the referring RuntimeIdentifier -->
-      <NearestRuntimeIdentifier>$(ReferringRuntimeIdentifier)</NearestRuntimeIdentifier>
-      <NearestRuntimeIdentifier Condition=" '$(RuntimeIdentifier)' == '' and $(RuntimeIdentifiers) == '' "></NearestRuntimeIdentifier>
-      <RuntimeIdentifierOverride Condition=" '$(ReferringRuntimeIdentifier)' != '' ">;RuntimeIdentifier=$(NearestRuntimeIdentifier)</RuntimeIdentifierOverride>
+      <!-- If this project is not RID-specific, specify that an empty RuntimeIdentifier should be passed. -->
+      <RuntimeIdentifierOverride Condition=" '$(ReferringRuntimeIdentifier)' != '' and $(RuntimeIdentifier)' == '' and $(RuntimeIdentifiers) == '' ">;RuntimeIdentifier=</RuntimeIdentifierOverride>
 
       <!-- If a ReferringTargetFramework was not specified, and we only have one TargetFramework, then don't try to check compatibility -->
       <_SkipNearestTargetFrameworkResolution Condition="'$(TargetFramework)' != '' and '$(ReferringTargetFramework)' == ''">true</_SkipNearestTargetFrameworkResolution>
