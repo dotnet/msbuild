@@ -6,6 +6,8 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
     using Framework = Microsoft.Build.Framework;
     using Utilities = Microsoft.Build.Utilities;
     using Xml = System.Xml;
+    using System.Text.RegularExpressions;
+
     public class CreateParameterFile : Task
     {
         private Framework.ITaskItem[] m_parameters = null;
@@ -166,6 +168,11 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                         for (int i = 1; i < parameterIdentitiesCount; i++)
                         {
                             identityValues[i] = item.GetMetadata(parameterIdentities[i]);
+                            if (string.Equals(parameterIdentities[i], ExistingDeclareParameterMetadata.Match.ToString().ToLowerInvariant()))
+                            {
+                                string unEscapedString = item.GetMetadata(parameterIdentities[i]);
+                                identityValues[i] = $"^{Regex.Escape(unEscapedString)}$";
+                            }
                         }
 
                         if (!fCreateNew)
