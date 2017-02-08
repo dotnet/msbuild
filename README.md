@@ -5,25 +5,39 @@ ASP.NET Web Sdk targets contains the tasks, targets and packages required to bui
 
 Publish Commandline Usage:
 
-1. Folder publish without a profile (Default Publish):
-    - msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishUrl="C:\deployedApp\newapp"
-    or
-    - dotnet msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishUrl="C:\deployedApp\newapp"
+- Folder publish without a profile (Default Publish):
 
-2. Folder Publish with a profile:
-    - msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishProfile=<FolderProfileName>
-    or
-    - dotnet msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishUrl="C:\deployedApp\newapp"
+```
+msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishUrl="C:\deployedApp\newapp"
+```
+or
+```
+dotnet msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishUrl="C:\deployedApp\newapp"
+```
 
-3. MSDeploy Publish with a profile:
-    - msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishProfile=<MsDeployProfileName> /p:Password=<DeploymentPassword>
-    (Not available on DotNet Core yet)
+- Folder Publish with a profile:
+```
+msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishProfile=<FolderProfileName>
+````
+or
+```
+`dotnet msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishUrl="C:\deployedApp\newapp"
+```
 
-4. MsDeploy Package Publish with a profile:
-    - msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishProfile=<MsDeployProfileName>
-    (Not available on DotNet Core yet)
+ - MSDeploy Publish with a profile:
+```
+msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishProfile=<MsDeployProfileName> /p:Password=<DeploymentPassword>
+```
+(Not available on DotNet Core yet)
+
+ - MsDeploy Package Publish with a profile:
+```
+msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishProfile=<MsDeployProfileName>
+```
+(Not available on DotNet Core yet)
 
 Sample EF Migrations section:
+```xml
 <ItemGroup>
     <DestinationConnectionStrings Include="ShoppingCartConnection">
       <Value>Data Source=tcp:dbserver.database.windows.net,1433;Initial Catalog=shoppingcartdbdb_db;User Id=appUser@dbserver;Password=password</Value>
@@ -34,10 +48,10 @@ Sample EF Migrations section:
       <Value>Data Source=tcp:dbserver.database.windows.net,1433;Initial Catalog=shoppingcartdbdb_db;User Id=efMigrationUser@dbserver;Password=password</Value>
     </EFMigrations>
 </ItemGroup>
-
+```
  
 Sample Folder Profile:
-
+```xml
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
@@ -50,9 +64,10 @@ Sample Folder Profile:
     <DeleteExistingFiles>False</DeleteExistingFiles>
   </PropertyGroup>  
 </Project>
+```
 
 Sample MsDeploy Publish Profile:
-
+```xml
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
@@ -72,9 +87,9 @@ Sample MsDeploy Publish Profile:
 	<Password>DeployPassword</Password>
   </PropertyGroup>
 </Project>
-
+```
 Sample MsDeploy Package Publish Profile
-
+```xml
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
@@ -86,10 +101,10 @@ Sample MsDeploy Package Publish Profile
     <DeployIisAppPath>Default Web Site/WebAppWithDB</DeployIisAppPath>
   </PropertyGroup>
 </Project>
-
+```
 
 Sample MsDeploy Profile With Destination Connection String & EF Migrations
-
+```xml
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
@@ -119,5 +134,5 @@ Sample MsDeploy Profile With Destination Connection String & EF Migrations
     </EFMigrations>
   </ItemGroup>
 </Project>
-
+```
 
