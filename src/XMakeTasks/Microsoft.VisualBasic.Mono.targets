@@ -1,0 +1,35 @@
+﻿<!--
+***********************************************************************************************
+Microsoft.VisualBasic.Mono.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+This file defines the steps in the standard build process specific for C# .NET projects.
+For example, it contains the step that actually calls the C# compiler.  The remainder
+of the build process is defined in Microsoft.Common.targets, which is imported by 
+this file.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <!-- Using _VbcToolExeTmp instead of VbcToolExe directly here, as we don't want to override it
+             for !mono case -->
+        <_VbcToolExeTmp Condition="'$(VbcToolExe)' != ''">$(VbcToolExe)</_VbcToolExeTmp>
+        <_VbcToolExeTmp Condition="'$(_VbcToolExeTmp)' == '' and '$(MSBuildRuntimeType)' == 'Mono'">vbnc.exe</_VbcToolExeTmp>
+
+        <VbcDebugFileExt Condition="'$(VbcDebugFileExt)' == '' and ('$(_VbcToolExeTmp)' == 'vbnc' or '$(_VbcToolExeTmp)' == 'vbnc.exe')">.mdb</VbcDebugFileExt>
+        <_DebugFileExt Condition="'$(VbcDebugFileExt)' != ''">$(VbcDebugFileExt)</_DebugFileExt>
+
+        <!-- Select a default VB compiler here, if unspecified, instead of in the Vbc task, so that we can also
+             decide on the debug extension to be used. Don't do this for the !mono case.
+             -->
+        <VbcToolExe Condition="'$(VbcToolExe)' == '' and '$(MSBuildRuntimeType)' == 'Mono'">vbnc.exe</VbcToolExe>
+
+        <UseSharedCompilation Condition="'$(UseSharedCompilation)' == '' and '$(MSBuildRuntimeType)' == 'Mono'">false</UseSharedCompilation>
+    </PropertyGroup>
+</Project>

@@ -47,6 +47,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <AppDesignerFolder Condition="'$(AppDesignerFolder)' == ''">My Project</AppDesignerFolder>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <VisualBasicMonoTargetsPath Condition="'$(VisualBasicMonoTargetsPath)' == ''">Microsoft.VisualBasic.Mono.targets</VisualBasicMonoTargetsPath>
+    </PropertyGroup>
+
+    <Import Project="$(VisualBasicMonoTargetsPath)" Condition="'$(MSBuildRuntimeType)' == 'Mono'" />
+
     <ItemGroup>
         <PropertyPageSchema Include="$(CommonXamlResourcesDirectory)VisualBasic.ProjectItemsSchema.xaml;"/>
         <PropertyPageSchema Include="$(CommonXamlResourcesDirectory)VisualBasic.xaml;">
@@ -162,7 +168,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup Condition="'$(_DebugSymbolsProduced)' == 'true' and '$(PdbFile)' != ''">
         <_DebugSymbolsIntermediatePathTemporary Include="$(PdbFile)"/>
         <!-- Add any missing .pdb extension, as the compiler does -->
-        <_DebugSymbolsIntermediatePath Include="@(_DebugSymbolsIntermediatePathTemporary->'%(RootDir)%(Directory)%(Filename).pdb')"/>
+        <_DebugSymbolsIntermediatePath Include="@(_DebugSymbolsIntermediatePathTemporary->'%(RootDir)%(Directory)%(Filename)$(_DebugFileExt)')" Condition="'$(_DebugFileExt)' == '.pdb'"/>
+        <!-- Mono's compilers use foo.dll.mdb as the debug filename for an assembly named foo.dll -->
+        <_DebugSymbolsIntermediatePath Include="@(_DebugSymbolsIntermediatePathTemporary->'%(RootDir)%(Directory)%(Filename)%(Extension)$(_DebugFileExt)')" Condition="'$(_DebugFileExt)' != '.pdb'"/>
     </ItemGroup>
 
     <PropertyGroup>
