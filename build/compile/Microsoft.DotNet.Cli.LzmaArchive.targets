@@ -107,7 +107,7 @@
     </Target>
 
     <Target Name="SetupNuGetPackagesArchiveInputsOutputs"
-            DependsOnTargets="Prepare;SetupStage;SetupAzureBlobInformation">
+            DependsOnTargets="Prepare;SetupAzureBlobInformation">
       <PropertyGroup>
         <NugetPackagesArchiveName>nuGetPackagesArchive.$(NuGetPackagesArchiveVersion).lzma</NugetPackagesArchiveName>
         <NuGetPackagesArchiveProject>$(IntermediateDirectory)/NuGetPackagesArchiveProject</NuGetPackagesArchiveProject>
