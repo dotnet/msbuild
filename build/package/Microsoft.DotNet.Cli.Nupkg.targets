@@ -4,7 +4,6 @@
   <Target Name="SetupProjectsToPack"
           DependsOnTargets="Init">
     <PropertyGroup>
-      <NupkgVersionSuffix>$(CommitCount)</NupkgVersionSuffix>
       <ProjectsSrcDirectory>$(RepoRoot)/src</ProjectsSrcDirectory>
       <PackagingBuildBasePath>$(Stage2CompilationDirectory)/forPackaging</PackagingBuildBasePath>
       <NupkgOutputDirectory>$(PackagesDirectory)</NupkgOutputDirectory>
@@ -26,7 +25,7 @@
                 Output="$(NupkgOutputDirectory)"
                 ProjectPath="%(ProjectsToPack.Identity)/%(ProjectsToPack.ProjectName).csproj"
                 ToolPath="$(Stage0Directory)"
-                VersionSuffix="rc4-$(NupkgVersionSuffix)"
+                VersionSuffix="$(VersionSuffix)"
                 Configuration="$(Configuration)" />
   </Target>
 

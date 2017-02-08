@@ -22,8 +22,8 @@
         <ProjectName>Microsoft.DotNet.Cli.Utils.csproj</ProjectName>
         <IsTool>True</IsTool>
         <IsApplicable>True</IsApplicable>
-        <VersionPrefix>$(CliVersionPrefix)-</VersionPrefix>
-        <VersionSuffix>rc4-$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
+        <VersionSuffix>$(VersionSuffix)</VersionSuffix>
         <Clean>False</Clean>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="src/Microsoft.DotNet.Cli.Utils"
@@ -32,8 +32,8 @@
         <ProjectName>Microsoft.DotNet.Cli.Utils.csproj</ProjectName>
         <IsTool>True</IsTool>
         <IsApplicable>True</IsApplicable>
-        <VersionPrefix>$(CliVersionPrefix)-</VersionPrefix>
-        <VersionSuffix>rc4-$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
+        <VersionSuffix>$(VersionSuffix)</VersionSuffix>
         <Clean>False</Clean>
         <MsbuildArgs>/p:TargetFramework=netstandard1.5</MsbuildArgs>
       </BaseTestPackageProject>
@@ -42,8 +42,8 @@
         <ProjectName>Microsoft.DotNet.InternalAbstractions.csproj</ProjectName>
         <IsTool>True</IsTool>
         <IsApplicable>True</IsApplicable>
-        <VersionPrefix>2.0.0-beta-</VersionPrefix>
-        <VersionSuffix>beta-$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <VersionPrefix>2.0.0</VersionPrefix>
+        <VersionSuffix>$(VersionSuffix)</VersionSuffix>
         <Clean>False</Clean>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/PackageWithFakeNativeDep"
@@ -62,8 +62,8 @@
         <ProjectName>dotnet-dependency-context-test.csproj</ProjectName>
         <IsTool>True</IsTool>
         <IsApplicable>True</IsApplicable>
-        <VersionPrefix>1.0.0-rc-</VersionPrefix>
-        <VersionSuffix>rc-$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
+        <VersionSuffix>$(VersionSuffix)</VersionSuffix>
         <Clean>True</Clean>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-dependency-tool-invoker">
@@ -71,8 +71,8 @@
         <ProjectName>dotnet-dependency-tool-invoker.csproj</ProjectName>
         <IsTool>True</IsTool>
         <IsApplicable>True</IsApplicable>
-        <VersionPrefix>1.0.0-rc-</VersionPrefix>
-        <VersionSuffix>rc-$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
+        <VersionSuffix>$(VersionSuffix)</VersionSuffix>
         <Clean>True</Clean>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-desktop-and-portable"
@@ -81,8 +81,8 @@
         <ProjectName>dotnet-desktop-and-portable.csproj</ProjectName>
         <IsTool>True</IsTool>
         <IsApplicable>True</IsApplicable>
-        <VersionPrefix>1.0.0-rc-</VersionPrefix>
-        <VersionSuffix>rc-$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
+        <VersionSuffix>$(VersionSuffix)</VersionSuffix>
         <Clean>True</Clean>
         <MsbuildArgs>/p:RuntimeIdentifier=$(CoreCLRRid)</MsbuildArgs>
       </BaseTestPackageProject>
@@ -93,8 +93,8 @@
         <IsTool>True</IsTool>
         <IsMsbuild>True</IsMsbuild>
         <IsApplicable>$(DesktopAvailable)</IsApplicable>
-        <VersionPrefix>1.0.0-rc-</VersionPrefix>
-        <VersionSuffix>rc-$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
+        <VersionSuffix>$(VersionSuffix)</VersionSuffix>
         <Clean>True</Clean>
         <MsbuildArgs>/p:RuntimeIdentifier=$(CoreCLRRid)</MsbuildArgs>
       </BaseTestPackageProject>

@@ -68,16 +68,18 @@
     <PropertyGroup>
       <CommitCount Condition=" '$(CommitCount)' == '' ">$(DefaultCommitCount)</CommitCount>
 
-      <SimpleVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch).$(CommitCount)</SimpleVersion>
-      <VersionSuffix>$(ReleaseSuffix)-$(CommitCount)</VersionSuffix>
-      <NugetVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(VersionSuffix)</NugetVersion>
+      <SimpleVersion Condition=" '$(DropSuffix)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch).$(CommitCount)</SimpleVersion>
+      <SimpleVersion Condition=" '$(SimpleVersion)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch)</SimpleVersion>
+
+      <VersionSuffix Condition=" '$(DropSuffix)' == '' ">$(ReleaseSuffix)-$(CommitCount)</VersionSuffix>
+
+      <NugetVersion Condition=" '$(DropSuffix)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(VersionSuffix)</NugetVersion>
+      <NugetVersion Condition=" '$(NugetVersion)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch)</NugetVersion>
+
+      <SdkVersion>$(NugetVersion)</SdkVersion>
+      <SdkNugetVersion>$(NugetVersion)</SdkNugetVersion>
 
       <VersionBadge>$(BaseOutputDirectory)/$(VersionBadgeMoniker)_$(Configuration)_version_badge.svg</VersionBadge>
-      <SdkVersion>$(NugetVersion)</SdkVersion>
-
-      <SdkNugetVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)-rc4-$(CommitCount)</SdkNugetVersion>
-      <ProjectModelNugetVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)-rc4-$(CommitCount)</ProjectModelNugetVersion>
-      <DependencyModelAndInternalAbstractionsNugetVersion>$(VersionMajor).$(VersionMinor).1-beta-$(CommitCount)</DependencyModelAndInternalAbstractionsNugetVersion>
 
       <ArchiveExtension Condition=" '$(OSName)' == 'win' ">.zip</ArchiveExtension>
       <ArchiveExtension Condition=" '$(OSName)' != 'win' ">.tar.gz</ArchiveExtension>
