@@ -25,6 +25,7 @@
         <dependency id="Microsoft.Build.Framework" version="[$version$]" />
         <dependency id="Microsoft.Build.Tasks.Core" version="[$version$]" />
         <dependency id="Microsoft.Build.Utilities.Core" version="[$version$]" />
+        <dependency id="Microsoft.VisualStudio.Setup.Configuration.Interop" version="1.2.304-preview5" />
       </group>
     </dependencies>
     <contentFiles>

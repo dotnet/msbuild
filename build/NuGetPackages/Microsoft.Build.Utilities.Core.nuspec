@@ -53,6 +53,7 @@
       </group>
       <group targetFramework=".NETFramework4.6">
         <dependency id="Microsoft.Build.Framework" version="[$version$]" />
+        <dependency id="Microsoft.VisualStudio.Setup.Configuration.Interop" version="1.2.304-preview5" />
       </group>
     </dependencies>
   </metadata>
