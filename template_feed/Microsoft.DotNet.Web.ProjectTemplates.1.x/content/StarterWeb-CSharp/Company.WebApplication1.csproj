@@ -45,4 +45,11 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="1.1.0" Condition="'$(IndividualAuth)' == 'True'" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.1.0" />
   </ItemGroup>
+
+  <ItemGroup Condition="'$(IndividualAuth)' == 'True'">
+    <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="1.0.0-msbuild3-final" />
+    <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="1.0.0-msbuild3-final" />
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="1.0.0-msbuild3-final" />
+  </ItemGroup>
+
 </Project>
