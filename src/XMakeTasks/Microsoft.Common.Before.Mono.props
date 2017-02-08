@@ -1,0 +1,6 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="'$(MSBuildRuntimeType)' == 'Mono'">
+    <IsOSX Condition="Exists('/usr/lib/libc.dylib')">true</IsOSX>
+    <TargetFrameworkFallbackSearchPaths Condition="$(IsOSX) == 'true' and '$(TargetFrameworkFallbackSearchPaths)' == ''">/Library/Frameworks/Mono.framework/External/xbuild-frameworks</TargetFrameworkFallbackSearchPaths>
+  </PropertyGroup>
+</Project>

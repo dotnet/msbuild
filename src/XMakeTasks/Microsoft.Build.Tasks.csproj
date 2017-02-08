@@ -769,6 +769,9 @@
     <Content Include="Microsoft.Common.props">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Microsoft.Common.Before.Mono.props" Condition="'$(MonoBuild)' == 'true'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Microsoft.Common.tasks">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
