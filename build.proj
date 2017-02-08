@@ -73,8 +73,15 @@
           WorkingDirectory="$(DotnetCliBuildDirectory)"/>
   </Target>
 
+  <Target Name="WriteDynamicPropsToStaticPropsFiles"
+          DependsOnTargets="BuildDotnetCliBuildFramework;
+                            WriteBuildInfoProps;
+                            WriteHostInfoProps"/>
+
   <Target DependsOnTargets="$(CLITargets)" Name="BuildTheWholeCli"></Target>
 
+  <Import Project="build/Microsoft.DotNet.Cli.BuildInfo.targets" />
+  <Import Project="build/Microsoft.DotNet.Cli.HostInfo.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.Prepare.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.Compile.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.Package.targets" />

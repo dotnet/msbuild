@@ -3,7 +3,8 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.tasks))\dir.tasks" />
 
   <Target Name="WriteBuildInfoProps"
-          Condition=" !Exists('$(BuildInfoProps)') ">
+          Condition=" !Exists('$(BuildInfoProps)') "
+          DependsOnTargets="BuildDotnetCliBuildFramework">
     <GetCommitHash RepoRoot="$(RepoRoot)">
       <Output TaskParameter="CommitHash" PropertyName="CommitHash" />
     </GetCommitHash>

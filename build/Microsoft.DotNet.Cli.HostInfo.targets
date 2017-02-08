@@ -3,7 +3,8 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.tasks))\dir.tasks" />
 
   <Target Name="WriteHostInfoProps"
-          Condition=" !Exists('$(HostInfoProps)') ">
+          Condition=" !Exists('$(HostInfoProps)') "
+          DependsOnTargets="BuildDotnetCliBuildFramework">
     <GetCurrentRuntimeInformation>
       <Output TaskParameter="Rid" PropertyName="Rid" />
       <Output TaskParameter="Architecture" PropertyName="Architecture" />
