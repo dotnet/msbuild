@@ -179,7 +179,7 @@ export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 echo "${args[@]}"
 
 if [ $BUILD -eq 1 ]; then
-    dotnet msbuild build.proj /t:WriteDynamicPropsToStaticPropsFiles
+    dotnet msbuild build.proj /p:Architecture=$ARCHITECTURE /t:WriteDynamicPropsToStaticPropsFiles
     dotnet msbuild build.proj /m /v:diag /p:Architecture=$ARCHITECTURE "${args[@]}"
 else
     echo "Not building due to --nobuild"

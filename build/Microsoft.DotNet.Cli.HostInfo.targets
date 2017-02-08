@@ -23,7 +23,7 @@
       </HostInfoPropsContent>
     </PropertyGroup>
 
-    <MakeDir Directories="$(RepoRoot)/obj"/>
+    <MakeDir Directories="$(GeneratedPropsDir)" />
 
     <WriteLinesToFile File="$(HostInfoProps)"
                       Lines="$(HostInfoPropsContent)" />

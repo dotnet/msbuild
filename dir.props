@@ -9,8 +9,10 @@
   <PropertyGroup>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
 
-    <BuildInfoProps>$(RepoRoot)/obj/BuildInfo.props</BuildInfoProps>
-    <HostInfoProps>$(RepoRoot)/obj/HostInfo.props</HostInfoProps>
+    <GeneratedPropsDir>$(RepoRoot)/obj</GeneratedPropsDir>
+
+    <BuildInfoProps>$(GeneratedPropsDir)/BuildInfo.props</BuildInfoProps>
+    <HostInfoProps>$(GeneratedPropsDir)/HostInfo.props</HostInfoProps>
 
     <NuGetPackagesDir>$(NUGET_PACKAGES)</NuGetPackagesDir>
     <NuGetPackagesDir Condition=" '$(NuGetPackagesDir)' == '' ">$(RepoRoot)/.nuget/packages</NuGetPackagesDir>

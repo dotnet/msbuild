@@ -32,7 +32,7 @@
       </BuildInfoPropsContent>
     </PropertyGroup>
 
-    <MakeDir Directories="$(RepoRoot)/obj"/>
+    <MakeDir Directories="$(GeneratedPropsDir)" />
 
     <WriteLinesToFile File="$(BuildInfoProps)"
                       Lines="$(BuildInfoPropsContent)" />
