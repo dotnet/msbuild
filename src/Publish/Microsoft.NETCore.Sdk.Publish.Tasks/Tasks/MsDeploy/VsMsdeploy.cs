@@ -8,6 +8,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
     using Utilities = Build.Utilities;
     using System.Linq;
     using System.Collections.Generic;
+    using Microsoft.NETCore.Sdk.Publish.Tasks.Properties;
 
 
     /// <summary>
@@ -336,7 +337,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         }
         
         Collections.Specialized.HybridDictionary m_hybridDictionary = new System.Collections.Specialized.HybridDictionary(10);
-        #region IDictionary Members 
+#region IDictionary Members 
         // Delegate everything to m_hybridDictionary
 
         public void Add(object key, object value)
@@ -390,9 +391,9 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             set { m_hybridDictionary[key] = value; }
         }
 
-        #endregion
+#endregion
 
-        #region ICollection Members
+#region ICollection Members
 
         public void CopyTo(System.Array array, int index)
         {
@@ -414,15 +415,15 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             get { return m_hybridDictionary.SyncRoot; }
         }
 
-        #endregion
+#endregion
 
-        #region IEnumerable Members
+#region IEnumerable Members
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
         }
-        #endregion
+#endregion
     }
 
 
@@ -434,7 +435,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
     {
         protected override void BeforeSync()
         {
-            string strMsg = string.Format(System.Globalization.CultureInfo.CurrentCulture,SR.VSMSDEPLOY_Start, _src.ToString(), _dest.ToString());
+            string strMsg = string.Format(System.Globalization.CultureInfo.CurrentCulture,Resources.VSMSDEPLOY_Start, _src.ToString(), _dest.ToString());
             _host.Log.LogMessage(strMsg);
         }
 
@@ -576,7 +577,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         /// </summary>
         protected override void AfterSync()
         {
-            string strMsg = SR.VSMSDEPLOY_Succeeded;
+            string strMsg = Resources.VSMSDEPLOY_Succeeded;
             _host.Log.LogMessage(strMsg);
         }
 
@@ -899,7 +900,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                 System.Type eType = e.GetType();
                 if (MsDeploy.Utility.IsType( eType, MSWebDeploymentAssembly.DynamicAssembly.GetType("Microsoft.Web.Deployment.DeploymentCanceledException")))
                 {
-                    Log.LogMessageFromText(SR.VSMSDEPLOY_Canceled, Microsoft.Build.Framework.MessageImportance.High);
+                    Log.LogMessageFromText(Resources.VSMSDEPLOY_Canceled, Microsoft.Build.Framework.MessageImportance.High);
                 }
                 else if (MsDeploy.Utility.IsType(eType, MSWebDelegationAssembly.DynamicAssembly.GetType("Microsoft.Web.Deployment.DeploymentException"))
                     || MsDeploy.Utility.IsType(eType, MSWebDeploymentAssembly.DynamicAssembly.GetType("Microsoft.Web.Deployment.DeploymentFatalException")))
@@ -909,7 +910,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                 else
                 {
                     if (!driver.IsCancelOperation)
-                        Log.LogError(string.Format(System.Globalization.CultureInfo.CurrentCulture, SR.VSMSDEPLOY_FailedWithException, e.Message));
+                        Log.LogError(string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.VSMSDEPLOY_FailedWithException, e.Message));
                 }
             }
 
@@ -917,7 +918,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             return Result;
         }
 
-        #region IVSMSDeployHost Members
+#region IVSMSDeployHost Members
 
         string IVsPublishMsBuildTaskHost.TaskName
         {
@@ -1059,9 +1060,9 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             }
         }
 
-        #endregion
+#endregion
 
-        #region ICancelableTask Members
+#region ICancelableTask Members
 
         public void Cancel()
         {
@@ -1080,7 +1081,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             }
         }
 
-        #endregion
+#endregion
 
 
         public object GetProperty(string propertyName)

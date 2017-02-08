@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System;
 using System.IO;
 using System.Collections.Generic;
+using Microsoft.NETCore.Sdk.Publish.Tasks.Properties;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
 {
@@ -76,14 +77,14 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
         {
             if (String.IsNullOrEmpty(PublishIntermediateOutputPath))
             {
-                Log.LogError(SR.KUDUDEPLOY_DeployOutputPathEmpty);
+                Log.LogError(Resources.KUDUDEPLOY_DeployOutputPathEmpty);
                 return false;
             }
 
             KuduConnectionInfo connectionInfo = GetConnectionInfo();
             if (String.IsNullOrEmpty(connectionInfo.UserName) || String.IsNullOrEmpty(connectionInfo.Password) || String.IsNullOrEmpty(connectionInfo.DestinationUrl))
             {
-                Log.LogError(SR.KUDUDEPLOY_ConnectionInfoMissing);
+                Log.LogError(Resources.KUDUDEPLOY_ConnectionInfoMissing);
                 return false;
             }
 
@@ -91,11 +92,11 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
 
             if (publishStatus)
             {
-                Log.LogMessage(Microsoft.Build.Framework.MessageImportance.High, SR.KUDUDEPLOY_PublishSucceeded);
+                Log.LogMessage(Microsoft.Build.Framework.MessageImportance.High, Resources.KUDUDEPLOY_PublishSucceeded);
             }
             else
             {
-                Log.LogError(SR.KUDUDEPLOY_PublishFailed);
+                Log.LogError(Resources.KUDUDEPLOY_PublishFailed);
             }
 
             return publishStatus;
@@ -119,12 +120,12 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
                 success = deployTask.Wait(TimeoutMilliseconds);
                 if (!success)
                 {
-                    Log.LogError(String.Format(SR.KUDUDEPLOY_AzurePublishErrorReason, SR.KUDUDEPLOY_OperationTimeout));
+                    Log.LogError(String.Format(Resources.KUDUDEPLOY_AzurePublishErrorReason, Resources.KUDUDEPLOY_OperationTimeout));
                 }
             }
             catch (AggregateException ae)
             {
-                Log.LogError(String.Format(SR.KUDUDEPLOY_AzurePublishErrorReason, ae.Flatten().Message));
+                Log.LogError(String.Format(Resources.KUDUDEPLOY_AzurePublishErrorReason, ae.Flatten().Message));
                 success = false;
             }
 
@@ -145,12 +146,12 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
                 success = zipTask.Wait(TimeoutMilliseconds);
                 if (!success)
                 {
-                    Log.LogError(String.Format(SR.KUDUDEPLOY_AzurePublishErrorReason, SR.KUDUDEPLOY_OperationTimeout));
+                    Log.LogError(String.Format(Resources.KUDUDEPLOY_AzurePublishErrorReason, Resources.KUDUDEPLOY_OperationTimeout));
                 }
             }
             catch(AggregateException ae)
             {
-                Log.LogError(String.Format(SR.KUDUDEPLOY_AzurePublishErrorReason, ae.Flatten().Message));
+                Log.LogError(String.Format(Resources.KUDUDEPLOY_AzurePublishErrorReason, ae.Flatten().Message));
                 success = false;
             }
 
@@ -164,7 +165,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
         {
             // Zip the files from PublishOutput path.
             string zipFileFullPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), String.Format("Publish{0}.zip", new Random().Next(Int32.MaxValue)));
-            Log.LogMessage(Microsoft.Build.Framework.MessageImportance.High, String.Format(SR.KUDUDEPLOY_CopyingToTempLocation, zipFileFullPath));
+            Log.LogMessage(Microsoft.Build.Framework.MessageImportance.High, String.Format(Resources.KUDUDEPLOY_CopyingToTempLocation, zipFileFullPath));
 
             try
             {
@@ -172,12 +173,12 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
             }
             catch(Exception e)
             {
-                Log.LogError(String.Format(SR.KUDUDEPLOY_AzurePublishErrorReason, e.Message));
+                Log.LogError(String.Format(Resources.KUDUDEPLOY_AzurePublishErrorReason, e.Message));
                 // If we are unable to zip the file, then we fail.
                 return null;
             }
 
-            Log.LogMessage(Microsoft.Build.Framework.MessageImportance.High, SR.KUDUDEPLOY_CopyingToTempLocationCompleted);
+            Log.LogMessage(Microsoft.Build.Framework.MessageImportance.High, Resources.KUDUDEPLOY_CopyingToTempLocationCompleted);
 
             return zipFileFullPath;
         }

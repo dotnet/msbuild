@@ -5,6 +5,7 @@
     using Framework = Microsoft.Build.Framework;
     using Utilities = Microsoft.Build.Utilities;
     using System.Linq;
+    using Microsoft.NETCore.Sdk.Publish.Tasks.Properties;
 
     /// <summary>
     /// The MSDeploy task, which is a wrapper around msdeploy.exe
@@ -522,21 +523,21 @@
                 {
                     return false;
                 }
-                Log.LogMessage(Framework.MessageImportance.Low, SR.MSDEPLOY_EXE_PreviewOnly);
+                Log.LogMessage(Framework.MessageImportance.Low, Resources.MSDEPLOY_EXE_PreviewOnly);
                 return true;
             }
 
             try
             {               
-                Log.LogMessage( Framework.MessageImportance.Normal, SR.MSDEPLOY_EXE_Start);
+                Log.LogMessage( Framework.MessageImportance.Normal, Resources.MSDEPLOY_EXE_Start);
                 bSuccess = base.Execute();
                 if (bSuccess)
-                    Log.LogMessage(Framework.MessageImportance.Normal, SR.MSDEPLOY_EXE_Succeeded);
+                    Log.LogMessage(Framework.MessageImportance.Normal, Resources.MSDEPLOY_EXE_Succeeded);
             }
             catch (System.Exception ex)
             {
                 // Log Failure
-                Log.LogMessage(Framework.MessageImportance.High, SR.MSDEPLOY_EXE_Failed);
+                Log.LogMessage(Framework.MessageImportance.High, Resources.MSDEPLOY_EXE_Failed);
                 Log.LogErrorFromException(ex);
                 bSuccess = false;
             }
@@ -1042,13 +1043,13 @@
         {
             if (this.Source != null && this.Source.GetLength(0) > 1)
             {
-                Log.LogError(string.Format(System.Globalization.CultureInfo.CurrentCulture,SR.MSDEPLOY_InvalidSourceCount, Source.GetLength(0)), null);
+                Log.LogError(string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.MSDEPLOY_InvalidSourceCount, Source.GetLength(0)), null);
                 return false;
             }
             
             if (this.Destination != null &&  this.Destination.GetLength(0) > 1)
             {
-                Log.LogError(string.Format(System.Globalization.CultureInfo.CurrentCulture,SR.MSDEPLOY_InvalidDestinationCount, Destination.GetLength(0)), null);
+                Log.LogError(string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.MSDEPLOY_InvalidDestinationCount, Destination.GetLength(0)), null);
                 return false;
             }
             else 
@@ -1089,7 +1090,7 @@
                         }
                     }
                 }
-                Log.LogError(string.Format(System.Globalization.CultureInfo.CurrentCulture,SR.MSDEPLOY_InvalidVerbForTheInput, this.Verb, this.Source[0].ItemSpec, (fNullDestination) ? null : this.Destination[0].ItemSpec), null);
+                Log.LogError(string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.MSDEPLOY_InvalidVerbForTheInput, this.Verb, this.Source[0].ItemSpec, (fNullDestination) ? null : this.Destination[0].ItemSpec), null);
                 return false;
             }
         }

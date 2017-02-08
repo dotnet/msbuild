@@ -8,8 +8,9 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Microsoft.NET.Sdk.Publish.Tasks {
+namespace Microsoft.NETCore.Sdk.Publish.Tasks.Properties {
     using System;
+    using System.Reflection;
     
     
     /// <summary>
@@ -22,24 +23,24 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class SR {
+    public class Resources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal SR() {
+        internal Resources() {
         }
         
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Microsoft.NET.Sdk.Publish.Tasks.SR", typeof(SR).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Microsoft.NETCore.Sdk.Publish.Tasks.Properties.Resources", typeof(Resources).GetTypeInfo().Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -51,7 +52,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +64,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to The root folder for cllecting files is not a valid directory.({0}).
         /// </summary>
-        internal static string BUILDTASK_ColectFilesInFolder_RootIsNotValid {
+        public static string BUILDTASK_ColectFilesInFolder_RootIsNotValid {
             get {
                 return ResourceManager.GetString("BUILDTASK_ColectFilesInFolder_RootIsNotValid", resourceCulture);
             }
@@ -72,7 +73,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Copying file {0} to {1} failed. {2}.
         /// </summary>
-        internal static string BUILDTASK_CopyFilesToFolders_CopyFailed {
+        public static string BUILDTASK_CopyFilesToFolders_CopyFailed {
             get {
                 return ResourceManager.GetString("BUILDTASK_CopyFilesToFolders_CopyFailed", resourceCulture);
             }
@@ -81,7 +82,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Copying {0} to {1}..
         /// </summary>
-        internal static string BUILDTASK_CopyFilesToFolders_Copying {
+        public static string BUILDTASK_CopyFilesToFolders_Copying {
             get {
                 return ResourceManager.GetString("BUILDTASK_CopyFilesToFolders_Copying", resourceCulture);
             }
@@ -90,7 +91,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Deleting file {0} failed. {1}.
         /// </summary>
-        internal static string BUILDTASK_CopyFilesToFolders_DeleteFailed {
+        public static string BUILDTASK_CopyFilesToFolders_DeleteFailed {
             get {
                 return ResourceManager.GetString("BUILDTASK_CopyFilesToFolders_DeleteFailed", resourceCulture);
             }
@@ -99,7 +100,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Deleting {0}..
         /// </summary>
-        internal static string BUILDTASK_CopyFilesToFolders_Deleting {
+        public static string BUILDTASK_CopyFilesToFolders_Deleting {
             get {
                 return ResourceManager.GetString("BUILDTASK_CopyFilesToFolders_Deleting", resourceCulture);
             }
@@ -108,7 +109,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to RetryDelay should be greater than zero..
         /// </summary>
-        internal static string BUILDTASK_CopyFilesToFolders_RetryDelayOutOfRange {
+        public static string BUILDTASK_CopyFilesToFolders_RetryDelayOutOfRange {
             get {
                 return ResourceManager.GetString("BUILDTASK_CopyFilesToFolders_RetryDelayOutOfRange", resourceCulture);
             }
@@ -117,7 +118,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Skip copying {0} to {1}, File {1} is up to date.
         /// </summary>
-        internal static string BUILDTASK_CopyFilesToFolders_UpToDate {
+        public static string BUILDTASK_CopyFilesToFolders_UpToDate {
             get {
                 return ResourceManager.GetString("BUILDTASK_CopyFilesToFolders_UpToDate", resourceCulture);
             }
@@ -126,7 +127,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Create Folder {0} failed. {1}.
         /// </summary>
-        internal static string BUILDTASK_CreateFolder_Failed {
+        public static string BUILDTASK_CreateFolder_Failed {
             get {
                 return ResourceManager.GetString("BUILDTASK_CreateFolder_Failed", resourceCulture);
             }
@@ -135,7 +136,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Your hosting provider does not yet support ASP.NET 4.6, which your application is configured to use. To learn more about this please visit: http://go.microsoft.com/fwlink/?LinkID=615797&amp;clcid=0x409.
         /// </summary>
-        internal static string BUILDTASK_DetectAntaresCLR45Error {
+        public static string BUILDTASK_DetectAntaresCLR45Error {
             get {
                 return ResourceManager.GetString("BUILDTASK_DetectAntaresCLR45Error", resourceCulture);
             }
@@ -145,7 +146,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///   Looks up a localized string similar to Failed to load this version Microsoft.Web.Deployment ({0}) reason: {1}.
         /// Trying the next one specified in $(_MSDeployVersionsToTry)...
         /// </summary>
-        internal static string BUILDTASK_FailedToLoadThisVersionMsDeployTryingTheNext {
+        public static string BUILDTASK_FailedToLoadThisVersionMsDeployTryingTheNext {
             get {
                 return ResourceManager.GetString("BUILDTASK_FailedToLoadThisVersionMsDeployTryingTheNext", resourceCulture);
             }
@@ -154,7 +155,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to To include IIS setting, it is required to have assembly Microsoft.Web.Administration installed on the machine..
         /// </summary>
-        internal static string BUILDTASK_IISSetting_RequireWebAdminDLL {
+        public static string BUILDTASK_IISSetting_RequireWebAdminDLL {
             get {
                 return ResourceManager.GetString("BUILDTASK_IISSetting_RequireWebAdminDLL", resourceCulture);
             }
@@ -163,7 +164,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Existing package/archiveDir is created by different version of Msdeploy. It is not compatible for incremental build. Mark as Clean needed({0})..
         /// </summary>
-        internal static string BUILDTASK_IsCleanMSDeployPackageNeeded_PackageByDifferentVersion {
+        public static string BUILDTASK_IsCleanMSDeployPackageNeeded_PackageByDifferentVersion {
             get {
                 return ResourceManager.GetString("BUILDTASK_IsCleanMSDeployPackageNeeded_PackageByDifferentVersion", resourceCulture);
             }
@@ -172,7 +173,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Validation failure.IIS Setting should be the first element in the Manifest file.({0}).
         /// </summary>
-        internal static string BUILDTASK_ManifestFile_IISSettingNotInFirst {
+        public static string BUILDTASK_ManifestFile_IISSettingNotInFirst {
             get {
                 return ResourceManager.GetString("BUILDTASK_ManifestFile_IISSettingNotInFirst", resourceCulture);
             }
@@ -181,7 +182,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to The project URL is not well formed.({0}).
         /// </summary>
-        internal static string BUILDTASK_MapProjectURLToIisWeb_InvalidProjectURL {
+        public static string BUILDTASK_MapProjectURLToIisWeb_InvalidProjectURL {
             get {
                 return ResourceManager.GetString("BUILDTASK_MapProjectURLToIisWeb_InvalidProjectURL", resourceCulture);
             }
@@ -190,7 +191,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to The project URL url host name type is not supported.({0}).
         /// </summary>
-        internal static string BUILDTASK_MapProjectURLToIisWeb_UnsupportedProjectURL {
+        public static string BUILDTASK_MapProjectURLToIisWeb_UnsupportedProjectURL {
             get {
                 return ResourceManager.GetString("BUILDTASK_MapProjectURLToIisWeb_UnsupportedProjectURL", resourceCulture);
             }
@@ -199,7 +200,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Retrieving local IIS properties from the URI requires Administrator permission.  Please elevate to Administrator before executing the program..
         /// </summary>
-        internal static string BUILDTASK_MapURIToIisWebServer_AdminRequired {
+        public static string BUILDTASK_MapURIToIisWebServer_AdminRequired {
             get {
                 return ResourceManager.GetString("BUILDTASK_MapURIToIisWebServer_AdminRequired", resourceCulture);
             }
@@ -208,7 +209,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Deleting empty directory {0}..
         /// </summary>
-        internal static string BUILDTASK_RemoveEmptyDirectories_Deleting {
+        public static string BUILDTASK_RemoveEmptyDirectories_Deleting {
             get {
                 return ResourceManager.GetString("BUILDTASK_RemoveEmptyDirectories_Deleting", resourceCulture);
             }
@@ -217,7 +218,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Scanning sql command variable(s) from sql script ({0})..
         /// </summary>
-        internal static string BUILDTASK_SqlScriptPreprocessFile {
+        public static string BUILDTASK_SqlScriptPreprocessFile {
             get {
                 return ResourceManager.GetString("BUILDTASK_SqlScriptPreprocessFile", resourceCulture);
             }
@@ -226,7 +227,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Found {0} sql command variable(s){1}..
         /// </summary>
-        internal static string BUILDTASK_SqlScriptPreprocessFileDone {
+        public static string BUILDTASK_SqlScriptPreprocessFileDone {
             get {
                 return ResourceManager.GetString("BUILDTASK_SqlScriptPreprocessFileDone", resourceCulture);
             }
@@ -235,7 +236,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Failed to parse sql command variable sql script ({0})..
         /// </summary>
-        internal static string BUILDTASK_SqlScriptPreprocessFileFailed {
+        public static string BUILDTASK_SqlScriptPreprocessFileFailed {
             get {
                 return ResourceManager.GetString("BUILDTASK_SqlScriptPreprocessFileFailed", resourceCulture);
             }
@@ -245,7 +246,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///   Looks up a localized string similar to Found {0} unsupported sql command(s) in {1}. The unsupported sql command(s) are: {2}.
         ///Please note &apos;:EXIT&apos; without argument is treated as &apos;:QUIT&apos; command..
         /// </summary>
-        internal static string BUILDTASK_SqlScriptPreprocessFoundMsDeployUnsupportedCommands {
+        public static string BUILDTASK_SqlScriptPreprocessFoundMsDeployUnsupportedCommands {
             get {
                 return ResourceManager.GetString("BUILDTASK_SqlScriptPreprocessFoundMsDeployUnsupportedCommands", resourceCulture);
             }
@@ -256,7 +257,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///Detail:
         ///{1}..
         /// </summary>
-        internal static string BUILDTASK_SqlScriptPreprocessInvalidSqlScript {
+        public static string BUILDTASK_SqlScriptPreprocessInvalidSqlScript {
             get {
                 return ResourceManager.GetString("BUILDTASK_SqlScriptPreprocessInvalidSqlScript", resourceCulture);
             }
@@ -265,7 +266,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Could not write Destination file: {0}.
         /// </summary>
-        internal static string BUILDTASK_TransformXml_DestinationWriteFailed {
+        public static string BUILDTASK_TransformXml_DestinationWriteFailed {
             get {
                 return ResourceManager.GetString("BUILDTASK_TransformXml_DestinationWriteFailed", resourceCulture);
             }
@@ -274,7 +275,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Could not open Source file: {0}.
         /// </summary>
-        internal static string BUILDTASK_TransformXml_SourceLoadFailed {
+        public static string BUILDTASK_TransformXml_SourceLoadFailed {
             get {
                 return ResourceManager.GetString("BUILDTASK_TransformXml_SourceLoadFailed", resourceCulture);
             }
@@ -283,7 +284,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Applying Transform File: {0}.
         /// </summary>
-        internal static string BUILDTASK_TransformXml_TransformationApply {
+        public static string BUILDTASK_TransformXml_TransformationApply {
             get {
                 return ResourceManager.GetString("BUILDTASK_TransformXml_TransformationApply", resourceCulture);
             }
@@ -292,7 +293,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Transformation failed.
         /// </summary>
-        internal static string BUILDTASK_TransformXml_TransformationFailed {
+        public static string BUILDTASK_TransformXml_TransformationFailed {
             get {
                 return ResourceManager.GetString("BUILDTASK_TransformXml_TransformationFailed", resourceCulture);
             }
@@ -301,7 +302,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to No transformation occurred, not saving output file.
         /// </summary>
-        internal static string BUILDTASK_TransformXml_TransformationNoChange {
+        public static string BUILDTASK_TransformXml_TransformationNoChange {
             get {
                 return ResourceManager.GetString("BUILDTASK_TransformXml_TransformationNoChange", resourceCulture);
             }
@@ -310,7 +311,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Transforming Source File: {0}.
         /// </summary>
-        internal static string BUILDTASK_TransformXml_TransformationStart {
+        public static string BUILDTASK_TransformXml_TransformationStart {
             get {
                 return ResourceManager.GetString("BUILDTASK_TransformXml_TransformationStart", resourceCulture);
             }
@@ -319,7 +320,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Transformation succeeded.
         /// </summary>
-        internal static string BUILDTASK_TransformXml_TransformationSucceeded {
+        public static string BUILDTASK_TransformXml_TransformationSucceeded {
             get {
                 return ResourceManager.GetString("BUILDTASK_TransformXml_TransformationSucceeded", resourceCulture);
             }
@@ -328,7 +329,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Could not open Transform file: {0}.
         /// </summary>
-        internal static string BUILDTASK_TransformXml_TransformLoadFailed {
+        public static string BUILDTASK_TransformXml_TransformLoadFailed {
             get {
                 return ResourceManager.GetString("BUILDTASK_TransformXml_TransformLoadFailed", resourceCulture);
             }
@@ -337,7 +338,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Output File: {0}.
         /// </summary>
-        internal static string BUILDTASK_TransformXml_TransformOutput {
+        public static string BUILDTASK_TransformXml_TransformOutput {
             get {
                 return ResourceManager.GetString("BUILDTASK_TransformXml_TransformOutput", resourceCulture);
             }
@@ -346,7 +347,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Failded to copy file from &apos;{0}&apos; to &apos;{1}&apos; for SQLExpress Data Publish.
         /// </summary>
-        internal static string CREATEPROVIDERLIST_FailToCopyFile {
+        public static string CREATEPROVIDERLIST_FailToCopyFile {
             get {
                 return ResourceManager.GetString("CREATEPROVIDERLIST_FailToCopyFile", resourceCulture);
             }
@@ -355,7 +356,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Publish Database Setting Source Verification Error: The publish profile specified &apos;{1} ({2})&apos; for &apos;{0}&apos; does not have a corresponding connection string in &apos;{3}&apos;. Because of this publishing has been blocked. If this was intended you can disable this check by specifying the value of &quot;True&quot; for the MSBuild property &quot;IgnoreDatabaseSettingOutOfSync.&quot; If this was not intended, open the Publish dialog in Visual Studio with this profile to correct the discrepancy. For more information visit http://go.microsoft.com/ [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string CREATEPROVIDERLIST_ImportPublishDatabaseSettingNotFound {
+        public static string CREATEPROVIDERLIST_ImportPublishDatabaseSettingNotFound {
             get {
                 return ResourceManager.GetString("CREATEPROVIDERLIST_ImportPublishDatabaseSettingNotFound", resourceCulture);
             }
@@ -364,7 +365,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Publish Database Setting Source Verification Error: The source connection string for &apos;{0}&apos; no longer exists in the source &apos;{1}&apos;. Because of this publishing has been blocked. If this was intended you can disable this check by specifying the value of &quot;True&quot; for the MSBuild property &quot;IgnoreDatabaseSettingOutOfSync.&quot; If this was not intended, open the Publish dialog in Visual Studio with this profile to correct the discrepancy. For more information visit http://go.microsoft.com/fwlink/?LinkId=241526 .
         /// </summary>
-        internal static string CREATEPROVIDERLIST_ImportValidationSourceNotFound {
+        public static string CREATEPROVIDERLIST_ImportValidationSourceNotFound {
             get {
                 return ResourceManager.GetString("CREATEPROVIDERLIST_ImportValidationSourceNotFound", resourceCulture);
             }
@@ -373,7 +374,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Publish Database Setting Source Verification Error: The publish profile specified &apos;{1}&apos; for &apos;{0}&apos; is not valid and could not be loaded. Review the file for any errors and try again..
         /// </summary>
-        internal static string CREATEPROVIDERLIST_InvalidMSBuildFormat {
+        public static string CREATEPROVIDERLIST_InvalidMSBuildFormat {
             get {
                 return ResourceManager.GetString("CREATEPROVIDERLIST_InvalidMSBuildFormat", resourceCulture);
             }
@@ -382,7 +383,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Publish Database Setting Source Verification Error:The publish profile specified &apos;{1} ({2})&apos; for &apos;{0}&apos; does not have valid $(PublishDatabaseSettings) value. Because of this publishing has been blocked. If this was intended you can disable this check by specifying the value of &quot;True&quot; for the MSBuild property &quot;IgnoreDatabaseSettingOutOfSync.&quot; If this was not intended, open the Publish dialog in Visual Studio with this profile to correct the discrepancy. For more information visit http://go.microsoft.com/fwlin [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string CREATEPROVIDERLIST_InvalidPublishDatabaseSetting {
+        public static string CREATEPROVIDERLIST_InvalidPublishDatabaseSetting {
             get {
                 return ResourceManager.GetString("CREATEPROVIDERLIST_InvalidPublishDatabaseSetting", resourceCulture);
             }
@@ -391,7 +392,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to CreateProviderList expected either ProvidersXml or ProvidersFile parameter.
         /// </summary>
-        internal static string CREATEPROVIDERLIST_MustProviderProvidersXMLorProvidersFile {
+        public static string CREATEPROVIDERLIST_MustProviderProvidersXMLorProvidersFile {
             get {
                 return ResourceManager.GetString("CREATEPROVIDERLIST_MustProviderProvidersXMLorProvidersFile", resourceCulture);
             }
@@ -400,7 +401,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Publish Database Setting encountered an unexpected error. The provider &apos;{0}&apos; doesn&apos;t expect any addition arguments &apos;{1}&apos;..
         /// </summary>
-        internal static string CREATEPROVIDERLIST_NotExpectingAdditionalParameter {
+        public static string CREATEPROVIDERLIST_NotExpectingAdditionalParameter {
             get {
                 return ResourceManager.GetString("CREATEPROVIDERLIST_NotExpectingAdditionalParameter", resourceCulture);
             }
@@ -409,7 +410,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to CreateProviderList does not support ProvidersXml and ProvidersFile parameters at the same time.
         /// </summary>
-        internal static string CREATEPROVIDERLIST_NotSupportBothProvidersXMLAndProvidersFile {
+        public static string CREATEPROVIDERLIST_NotSupportBothProvidersXMLAndProvidersFile {
             get {
                 return ResourceManager.GetString("CREATEPROVIDERLIST_NotSupportBothProvidersXMLAndProvidersFile", resourceCulture);
             }
@@ -418,7 +419,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Publish Database Setting Source Verification Error: The connection &apos;{0}&apos; in the publish profile has changed from what is currently declared for &apos;{1} ({2})&apos;. Because of this publishing has been blocked. If this was intended you can disable this check by specifying the value of &quot;True&quot; for the MSBuild property &quot;IgnoreDatabaseSettingOutOfSync.&quot; If this was not intended, open the Publish dialog in Visual Studio with this profile to correct the discrepancy. For more information visit http://go.microsoft.com/fwlin [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string CREATEPROVIDERLIST_OutofSyncWithSourcePublishDatabaseSetting {
+        public static string CREATEPROVIDERLIST_OutofSyncWithSourcePublishDatabaseSetting {
             get {
                 return ResourceManager.GetString("CREATEPROVIDERLIST_OutofSyncWithSourcePublishDatabaseSetting", resourceCulture);
             }
@@ -427,7 +428,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to SQL Server Express LocalDB is required in order to publish one or more of your databases. To learn more and install it, follow this link http://go.microsoft.com/fwlink/?LinkId=245956 .
         /// </summary>
-        internal static string CREATEPROVIDERLIST_SqlExpressPublishRequireLocalDB {
+        public static string CREATEPROVIDERLIST_SqlExpressPublishRequireLocalDB {
             get {
                 return ResourceManager.GetString("CREATEPROVIDERLIST_SqlExpressPublishRequireLocalDB", resourceCulture);
             }
@@ -438,7 +439,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///
         ///FWLink: http://go.microsoft.com/fwlink/?LinkId=246068.
         /// </summary>
-        internal static string DeploymentError_MissingDbDacFx {
+        public static string DeploymentError_MissingDbDacFx {
             get {
                 return ResourceManager.GetString("DeploymentError_MissingDbDacFx", resourceCulture);
             }
@@ -447,7 +448,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Adding file ({0})..
         /// </summary>
-        internal static string KUDUDEPLOY_AddingFile {
+        public static string KUDUDEPLOY_AddingFile {
             get {
                 return ResourceManager.GetString("KUDUDEPLOY_AddingFile", resourceCulture);
             }
@@ -456,7 +457,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Adding file ({0}) failed. Reason: {1}..
         /// </summary>
-        internal static string KUDUDEPLOY_AddingFileFailed {
+        public static string KUDUDEPLOY_AddingFileFailed {
             get {
                 return ResourceManager.GetString("KUDUDEPLOY_AddingFileFailed", resourceCulture);
             }
@@ -465,7 +466,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Unable to publish to Azure. Error Details : &apos;{0}&apos;..
         /// </summary>
-        internal static string KUDUDEPLOY_AzurePublishErrorReason {
+        public static string KUDUDEPLOY_AzurePublishErrorReason {
             get {
                 return ResourceManager.GetString("KUDUDEPLOY_AzurePublishErrorReason", resourceCulture);
             }
@@ -474,7 +475,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Azure connection information cannot be empty..
         /// </summary>
-        internal static string KUDUDEPLOY_ConnectionInfoMissing {
+        public static string KUDUDEPLOY_ConnectionInfoMissing {
             get {
                 return ResourceManager.GetString("KUDUDEPLOY_ConnectionInfoMissing", resourceCulture);
             }
@@ -483,7 +484,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Copying all files to temporary location for publish: &apos;{0}&apos;..
         /// </summary>
-        internal static string KUDUDEPLOY_CopyingToTempLocation {
+        public static string KUDUDEPLOY_CopyingToTempLocation {
             get {
                 return ResourceManager.GetString("KUDUDEPLOY_CopyingToTempLocation", resourceCulture);
             }
@@ -492,7 +493,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Copying all files to temporary location completed..
         /// </summary>
-        internal static string KUDUDEPLOY_CopyingToTempLocationCompleted {
+        public static string KUDUDEPLOY_CopyingToTempLocationCompleted {
             get {
                 return ResourceManager.GetString("KUDUDEPLOY_CopyingToTempLocationCompleted", resourceCulture);
             }
@@ -501,7 +502,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to DeployOutputPath property cannot be empty..
         /// </summary>
-        internal static string KUDUDEPLOY_DeployOutputPathEmpty {
+        public static string KUDUDEPLOY_DeployOutputPathEmpty {
             get {
                 return ResourceManager.GetString("KUDUDEPLOY_DeployOutputPathEmpty", resourceCulture);
             }
@@ -510,7 +511,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Publish operation timed out..
         /// </summary>
-        internal static string KUDUDEPLOY_OperationTimeout {
+        public static string KUDUDEPLOY_OperationTimeout {
             get {
                 return ResourceManager.GetString("KUDUDEPLOY_OperationTimeout", resourceCulture);
             }
@@ -519,7 +520,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Publishing to Azure..
         /// </summary>
-        internal static string KUDUDEPLOY_PublishAzure {
+        public static string KUDUDEPLOY_PublishAzure {
             get {
                 return ResourceManager.GetString("KUDUDEPLOY_PublishAzure", resourceCulture);
             }
@@ -528,7 +529,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Publish Failed..
         /// </summary>
-        internal static string KUDUDEPLOY_PublishFailed {
+        public static string KUDUDEPLOY_PublishFailed {
             get {
                 return ResourceManager.GetString("KUDUDEPLOY_PublishFailed", resourceCulture);
             }
@@ -537,7 +538,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Publish Succeeded..
         /// </summary>
-        internal static string KUDUDEPLOY_PublishSucceeded {
+        public static string KUDUDEPLOY_PublishSucceeded {
             get {
                 return ResourceManager.GetString("KUDUDEPLOY_PublishSucceeded", resourceCulture);
             }
@@ -546,7 +547,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Publishing to site &apos;{0}&apos; failed. Reason: &apos;{1}&apos;..
         /// </summary>
-        internal static string KUDUDEPLOY_PublishZipFailedReason {
+        public static string KUDUDEPLOY_PublishZipFailedReason {
             get {
                 return ResourceManager.GetString("KUDUDEPLOY_PublishZipFailedReason", resourceCulture);
             }
@@ -555,7 +556,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Failed to execute msdeploy.exe..
         /// </summary>
-        internal static string MSDEPLOY_EXE_Failed {
+        public static string MSDEPLOY_EXE_Failed {
             get {
                 return ResourceManager.GetString("MSDEPLOY_EXE_Failed", resourceCulture);
             }
@@ -564,7 +565,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Generate msdeploy.exe command line for preview only..
         /// </summary>
-        internal static string MSDEPLOY_EXE_PreviewOnly {
+        public static string MSDEPLOY_EXE_PreviewOnly {
             get {
                 return ResourceManager.GetString("MSDEPLOY_EXE_PreviewOnly", resourceCulture);
             }
@@ -573,7 +574,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Running msdeploy.exe..
         /// </summary>
-        internal static string MSDEPLOY_EXE_Start {
+        public static string MSDEPLOY_EXE_Start {
             get {
                 return ResourceManager.GetString("MSDEPLOY_EXE_Start", resourceCulture);
             }
@@ -582,7 +583,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Successfully execute msdeploy.exe..
         /// </summary>
-        internal static string MSDEPLOY_EXE_Succeeded {
+        public static string MSDEPLOY_EXE_Succeeded {
             get {
                 return ResourceManager.GetString("MSDEPLOY_EXE_Succeeded", resourceCulture);
             }
@@ -591,7 +592,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Invalidate destination item count: {0}.
         /// </summary>
-        internal static string MSDEPLOY_InvalidDestinationCount {
+        public static string MSDEPLOY_InvalidDestinationCount {
             get {
                 return ResourceManager.GetString("MSDEPLOY_InvalidDestinationCount", resourceCulture);
             }
@@ -600,7 +601,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Invalidate source items count: {0}.
         /// </summary>
-        internal static string MSDEPLOY_InvalidSourceCount {
+        public static string MSDEPLOY_InvalidSourceCount {
             get {
                 return ResourceManager.GetString("MSDEPLOY_InvalidSourceCount", resourceCulture);
             }
@@ -609,7 +610,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Invalid verb({0}) for supplied source ({1}) and destination ({2})..
         /// </summary>
-        internal static string MSDEPLOY_InvalidVerbForTheInput {
+        public static string MSDEPLOY_InvalidVerbForTheInput {
             get {
                 return ResourceManager.GetString("MSDEPLOY_InvalidVerbForTheInput", resourceCulture);
             }
@@ -618,7 +619,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Unable to parse the pubxml file {0}..
         /// </summary>
-        internal static string POWERSHELL_PublishProfileParsingError {
+        public static string POWERSHELL_PublishProfileParsingError {
             get {
                 return ResourceManager.GetString("POWERSHELL_PublishProfileParsingError", resourceCulture);
             }
@@ -627,7 +628,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to The publish profile used for publishing was created in a newer version of the Visual Studio Web Publish features. In order to publish using this profile you will need to update your web publish components. To learn more about this, please visit http://go.microsoft.com/fwlink/?LinkId=256245.
         /// </summary>
-        internal static string Publich_InvalidPublishToolsVersion_Error {
+        public static string Publich_InvalidPublishToolsVersion_Error {
             get {
                 return ResourceManager.GetString("Publich_InvalidPublishToolsVersion_Error", resourceCulture);
             }
@@ -636,7 +637,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Invalid Web Deploy service URL.
         /// </summary>
-        internal static string PublishArgumentError_InvalidRemoteServiceUrl {
+        public static string PublishArgumentError_InvalidRemoteServiceUrl {
             get {
                 return ResourceManager.GetString("PublishArgumentError_InvalidRemoteServiceUrl", resourceCulture);
             }
@@ -645,7 +646,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Invalid site/application name.
         /// </summary>
-        internal static string PublishArgumentError_InvalidSiteAppName {
+        public static string PublishArgumentError_InvalidSiteAppName {
             get {
                 return ResourceManager.GetString("PublishArgumentError_InvalidSiteAppName", resourceCulture);
             }
@@ -654,7 +655,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Auto ConnectionString Transformed {0} into {1}..
         /// </summary>
-        internal static string PublishLocalizedString_AutoConnectionStringTransformConfigToTransformOutputFile {
+        public static string PublishLocalizedString_AutoConnectionStringTransformConfigToTransformOutputFile {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_AutoConnectionStringTransformConfigToTransformOutputFile", resourceCulture);
             }
@@ -663,7 +664,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to $({0}) is {1}. Validating....
         /// </summary>
-        internal static string PublishLocalizedString_CheckingForValidMsBuildPropertyValue {
+        public static string PublishLocalizedString_CheckingForValidMsBuildPropertyValue {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_CheckingForValidMsBuildPropertyValue", resourceCulture);
             }
@@ -672,7 +673,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Connection string for setting up this application database..
         /// </summary>
-        internal static string PublishLocalizedString_DatabaseConnectionStringParameterDescription {
+        public static string PublishLocalizedString_DatabaseConnectionStringParameterDescription {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_DatabaseConnectionStringParameterDescription", resourceCulture);
             }
@@ -681,7 +682,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Exclude *.out files under root folder..
         /// </summary>
-        internal static string PublishLocalizedString_DefaultExcludeFileExtentionOutMessage {
+        public static string PublishLocalizedString_DefaultExcludeFileExtentionOutMessage {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_DefaultExcludeFileExtentionOutMessage", resourceCulture);
             }
@@ -690,7 +691,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Exclude all files under obj folder..
         /// </summary>
-        internal static string PublishLocalizedString_DefaultExcludeIntermediateOutputFolderMessage {
+        public static string PublishLocalizedString_DefaultExcludeIntermediateOutputFolderMessage {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_DefaultExcludeIntermediateOutputFolderMessage", resourceCulture);
             }
@@ -699,7 +700,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Set all .scc .vspscc file as _IgnorableFilesInProjectFolder.  Set _CollectFiles_IncludeIgnorableFile to True to include in the packaging..
         /// </summary>
-        internal static string PublishLocalizedString_DefaultExcludeSourceControlItems {
+        public static string PublishLocalizedString_DefaultExcludeSourceControlItems {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_DefaultExcludeSourceControlItems", resourceCulture);
             }
@@ -708,7 +709,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Connection String used by Entity Framework Code First Model to deploy the database..
         /// </summary>
-        internal static string PublishLocalizedString_EFCodeFirstConnectionStringParameterDescription {
+        public static string PublishLocalizedString_EFCodeFirstConnectionStringParameterDescription {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_EFCodeFirstConnectionStringParameterDescription", resourceCulture);
             }
@@ -717,7 +718,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Deploy with IIS Setting from a IIS 7 or above to a lower verstion of IIS server is not supported. To fix the problem, please set the %24(IncludeIisSettings) to false. Your current setting are $(IncludeIisSettings) is {0}, $(DestinationIisVersion) is {1} and $(LocalIisVersion) is  {2}..
         /// </summary>
-        internal static string PublishLocalizedString_ErrorCannotDeployFromIIS7AboveToLowerIIS {
+        public static string PublishLocalizedString_ErrorCannotDeployFromIIS7AboveToLowerIIS {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_ErrorCannotDeployFromIIS7AboveToLowerIIS", resourceCulture);
             }
@@ -726,7 +727,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to @({0}) have {1} item(s) in the collection. It should only have {2} item(s)..
         /// </summary>
-        internal static string PublishLocalizedString_ErrorInvalidMSBuildItemCollectionCount {
+        public static string PublishLocalizedString_ErrorInvalidMSBuildItemCollectionCount {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_ErrorInvalidMSBuildItemCollectionCount", resourceCulture);
             }
@@ -735,7 +736,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Invalid $({0}): When $({1}) is set True. It is required to have a valid $({0}) to be use for creating parameters correctly..
         /// </summary>
-        internal static string PublishLocalizedString_ErrorInvalidPropertyWhenSettingPropertyIsTrue {
+        public static string PublishLocalizedString_ErrorInvalidPropertyWhenSettingPropertyIsTrue {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_ErrorInvalidPropertyWhenSettingPropertyIsTrue", resourceCulture);
             }
@@ -744,7 +745,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; exists as a folder. You can&apos;t package as a single file to be the same path as an existing folder. Please delete the folder before packaging. Alternative,you can call msbuild with /t:CleanWebsitesPackage target to remove it..
         /// </summary>
-        internal static string PublishLocalizedString_ErrorPackageAsFilePointToAnExistingFolder {
+        public static string PublishLocalizedString_ErrorPackageAsFilePointToAnExistingFolder {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_ErrorPackageAsFilePointToAnExistingFolder", resourceCulture);
             }
@@ -753,7 +754,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; exists as a file. You can&apos;t package as an archive directory to be the same path as an existing file. Please delete the file before packaging. Alternative,you can call msbuild with /t:CleanWebsitesPackage target to remove it..
         /// </summary>
-        internal static string PublishLocalizedString_ErrorPackageAsFolderPointToAnExistingFile {
+        public static string PublishLocalizedString_ErrorPackageAsFolderPointToAnExistingFile {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_ErrorPackageAsFolderPointToAnExistingFile", resourceCulture);
             }
@@ -762,7 +763,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to IisUrl property is required when UseIis property is True.
         /// </summary>
-        internal static string PublishLocalizedString_ErrorUseIisIsTrueButIisUrlIsEmpty {
+        public static string PublishLocalizedString_ErrorUseIisIsTrueButIisUrlIsEmpty {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_ErrorUseIisIsTrueButIisUrlIsEmpty", resourceCulture);
             }
@@ -773,7 +774,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///Please correct the problem by either set $(Disable_CopyWebApplication) to true or set $(PipelineDependsOnBuild) to false to break the circular build dependency.
         ///Detail: $(UseWPP_CopyWebApplication) make the publsih pipeline (WPP) to be Part of the build and $(PipelineDependsOnBuild) make the WPP depend on build thus cause the build circular build dependency..
         /// </summary>
-        internal static string PublishLocalizedString_ErrorUseWPP_CopyWebApplicationAndPipelineDependsOnBuildBothTrue {
+        public static string PublishLocalizedString_ErrorUseWPP_CopyWebApplicationAndPipelineDependsOnBuildBothTrue {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_ErrorUseWPP_CopyWebApplicationAndPipelineDependsOnBuildBot" +
                         "hTrue", resourceCulture);
@@ -783,7 +784,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Exclude All Debug Symbols.
         /// </summary>
-        internal static string PublishLocalizedString_ExcludeAllDebugSymbols {
+        public static string PublishLocalizedString_ExcludeAllDebugSymbols {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_ExcludeAllDebugSymbols", resourceCulture);
             }
@@ -792,7 +793,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Exclude All files under {0}.
         /// </summary>
-        internal static string PublishLocalizedString_ExcludeAllFilesUnderFolder {
+        public static string PublishLocalizedString_ExcludeAllFilesUnderFolder {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_ExcludeAllFilesUnderFolder", resourceCulture);
             }
@@ -804,7 +805,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///For this sample script, you can change the deploy parameters by changing the following file: 
         ///{1}.
         /// </summary>
-        internal static string PublishLocalizedString_FinishGenerateSampleMsDeployBatchScript {
+        public static string PublishLocalizedString_FinishGenerateSampleMsDeployBatchScript {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_FinishGenerateSampleMsDeployBatchScript", resourceCulture);
             }
@@ -814,7 +815,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///   Looks up a localized string similar to Found The following for Config tranformation:
         ///{0}.
         /// </summary>
-        internal static string PublishLocalizedString_FoundApplicationConfigForTransformation {
+        public static string PublishLocalizedString_FoundApplicationConfigForTransformation {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_FoundApplicationConfigForTransformation", resourceCulture);
             }
@@ -823,7 +824,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Gather all files from project folder except in the exclusion list..
         /// </summary>
-        internal static string PublishLocalizedString_GatherAllFilesInProjectFolderExceptExclusion {
+        public static string PublishLocalizedString_GatherAllFilesInProjectFolderExceptExclusion {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_GatherAllFilesInProjectFolderExceptExclusion", resourceCulture);
             }
@@ -832,7 +833,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Gather all files from Project items @({0}). Adding:.
         /// </summary>
-        internal static string PublishLocalizedString_GatherSpecificItemsFromProject {
+        public static string PublishLocalizedString_GatherSpecificItemsFromProject {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_GatherSpecificItemsFromProject", resourceCulture);
             }
@@ -841,7 +842,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Gather all files from Project items @({0})..
         /// </summary>
-        internal static string PublishLocalizedString_GatherSpecificItemsFromProjectNoDetail {
+        public static string PublishLocalizedString_GatherSpecificItemsFromProjectNoDetail {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_GatherSpecificItemsFromProjectNoDetail", resourceCulture);
             }
@@ -850,7 +851,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Gather all files from Project output ({0}). Adding:.
         /// </summary>
-        internal static string PublishLocalizedString_GatherSpecificOutputsFromProject {
+        public static string PublishLocalizedString_GatherSpecificOutputsFromProject {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_GatherSpecificOutputsFromProject", resourceCulture);
             }
@@ -859,7 +860,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Generate source manifest file for Web Deploy package/publish ....
         /// </summary>
-        internal static string PublishLocalizedString_GenerateMsdeploySourceManifestFile {
+        public static string PublishLocalizedString_GenerateMsdeploySourceManifestFile {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_GenerateMsdeploySourceManifestFile", resourceCulture);
             }
@@ -868,7 +869,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Generating a sample batch commandline script for deploying this package....
         /// </summary>
-        internal static string PublishLocalizedString_GenerateSampleMsdeployBatchScript {
+        public static string PublishLocalizedString_GenerateSampleMsdeployBatchScript {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_GenerateSampleMsdeployBatchScript", resourceCulture);
             }
@@ -877,7 +878,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to IIS Web Site/Application name.
         /// </summary>
-        internal static string PublishLocalizedString_IISAppParameterDescription {
+        public static string PublishLocalizedString_IISAppParameterDescription {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_IISAppParameterDescription", resourceCulture);
             }
@@ -886,7 +887,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Physical path for this Web Application..
         /// </summary>
-        internal static string PublishLocalizedString_IISAppPhysicalPathDescription {
+        public static string PublishLocalizedString_IISAppPhysicalPathDescription {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_IISAppPhysicalPathDescription", resourceCulture);
             }
@@ -895,7 +896,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Insert additional ConnectionString Transformed {0} into {1}..
         /// </summary>
-        internal static string PublishLocalizedString_InsertAdditionalConnectionStringTransformConfigToTransformOutputFile {
+        public static string PublishLocalizedString_InsertAdditionalConnectionStringTransformConfigToTransformOutputFile {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_InsertAdditionalConnectionStringTransformConfigToTransform" +
                         "OutputFile", resourceCulture);
@@ -905,7 +906,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Insert additional EFCodeFirst Database Deployment Transformed {0} into {1}..
         /// </summary>
-        internal static string PublishLocalizedString_InsertEFCodeFirstDeployContextTransformConfigToTransformOutputFile {
+        public static string PublishLocalizedString_InsertEFCodeFirstDeployContextTransformConfigToTransformOutputFile {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_InsertEFCodeFirstDeployContextTransformConfigToTransformOu" +
                         "tputFile", resourceCulture);
@@ -915,7 +916,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to GetPublishingLocalizedString Task encounter invalid argument ID;.
         /// </summary>
-        internal static string PublishLocalizedString_InvalidArgument {
+        public static string PublishLocalizedString_InvalidArgument {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_InvalidArgument", resourceCulture);
             }
@@ -924,7 +925,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to $({0}) is {1}.
         /// </summary>
-        internal static string PublishLocalizedString_MsBuildPropertySettingValue {
+        public static string PublishLocalizedString_MsBuildPropertySettingValue {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_MsBuildPropertySettingValue", resourceCulture);
             }
@@ -933,7 +934,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Target {0} failed..
         /// </summary>
-        internal static string PublishLocalizedString_MSBuildTargetFailed {
+        public static string PublishLocalizedString_MSBuildTargetFailed {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_MSBuildTargetFailed", resourceCulture);
             }
@@ -942,7 +943,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Packaging into {0}..
         /// </summary>
-        internal static string PublishLocalizedString_PackagingIntoLocation {
+        public static string PublishLocalizedString_PackagingIntoLocation {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_PackagingIntoLocation", resourceCulture);
             }
@@ -955,7 +956,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///--------------------------
         ///.
         /// </summary>
-        internal static string PublishLocalizedString_SampleScriptHelpEnviroment {
+        public static string PublishLocalizedString_SampleScriptHelpEnviroment {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_SampleScriptHelpEnviroment", resourceCulture);
             }
@@ -966,7 +967,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///	To customize application-specific settings for each deployment environment (for example, the IIS application name, the physical path, and any connection strings), edit the settings in the following file: 
         ///		 &quot;{0}&quot;.
         /// </summary>
-        internal static string PublishLocalizedString_SampleScriptHelpEnviromentExplained {
+        public static string PublishLocalizedString_SampleScriptHelpEnviromentExplained {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_SampleScriptHelpEnviromentExplained", resourceCulture);
             }
@@ -978,7 +979,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///For more information on this deploy script visit:	{0}
         ///.
         /// </summary>
-        internal static string PublishLocalizedString_SampleScriptHelpMoreInfo {
+        public static string PublishLocalizedString_SampleScriptHelpMoreInfo {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_SampleScriptHelpMoreInfo", resourceCulture);
             }
@@ -992,7 +993,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// By Default, this script deploy on the current machine where this script is called with current user credential without agent service. Only pass the following value for advance scenario.
         ///.
         /// </summary>
-        internal static string PublishLocalizedString_SampleScriptHelpOptional {
+        public static string PublishLocalizedString_SampleScriptHelpOptional {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_SampleScriptHelpOptional", resourceCulture);
             }
@@ -1005,7 +1006,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///	Alternatively, you can specify additional flags by setting the &quot;_MsDeployAdditionalFlags&quot; environment variable. These settings are used by this batch file.
         ///	Note: Any flag value that includes an equal sign (=) must be enclosed in double quotation marks, as shown in t [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string PublishLocalizedString_SampleScriptHelpOptionalExplainedAdditionalFlags {
+        public static string PublishLocalizedString_SampleScriptHelpOptionalExplainedAdditionalFlags {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_SampleScriptHelpOptionalExplainedAdditionalFlags", resourceCulture);
             }
@@ -1017,7 +1018,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///	Specifies the type of authentication to be used. The possible values are NTLM and Basic. If the wmsvc provider setting is specified, the default authentication type is Basic; otherwise, the default authentication type is NTLM. 
         ///.
         /// </summary>
-        internal static string PublishLocalizedString_SampleScriptHelpOptionalExplainedFlagA {
+        public static string PublishLocalizedString_SampleScriptHelpOptionalExplainedFlagA {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_SampleScriptHelpOptionalExplainedFlagA", resourceCulture);
             }
@@ -1029,7 +1030,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///	Specifies that the package is deployed by creating a temporary listener on the destination server. This requires no special installation on the destination server, but it requires you to be an administrator on that server. The default value of this flag is False. 
         ///.
         /// </summary>
-        internal static string PublishLocalizedString_SampleScriptHelpOptionalExplainedFlagG {
+        public static string PublishLocalizedString_SampleScriptHelpOptionalExplainedFlagG {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_SampleScriptHelpOptionalExplainedFlagG", resourceCulture);
             }
@@ -1041,7 +1042,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///	Specifies that the package is deployed to local IISExpress user instance.
         ///.
         /// </summary>
-        internal static string PublishLocalizedString_SampleScriptHelpOptionalExplainedFlagL {
+        public static string PublishLocalizedString_SampleScriptHelpOptionalExplainedFlagL {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_SampleScriptHelpOptionalExplainedFlagL", resourceCulture);
             }
@@ -1057,7 +1058,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///		http://&lt;DestinationServer&gt;/MSDeployAgentService 
         ///	Thi [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string PublishLocalizedString_SampleScriptHelpOptionalExplainedFlagM {
+        public static string PublishLocalizedString_SampleScriptHelpOptionalExplainedFlagM {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_SampleScriptHelpOptionalExplainedFlagM", resourceCulture);
             }
@@ -1068,7 +1069,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ////U:&lt;UserName&gt;
         ////P:&lt;Password&gt;.
         /// </summary>
-        internal static string PublishLocalizedString_SampleScriptHelpOptionalExplainedFlagUP {
+        public static string PublishLocalizedString_SampleScriptHelpOptionalExplainedFlagUP {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_SampleScriptHelpOptionalExplainedFlagUP", resourceCulture);
             }
@@ -1084,7 +1085,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///This batch file requires that the package file &quot;{1}&quot; and optionally provided the parameters file &quot;{2}&quot; in the same folder or destination folder by environment variable.
         ///.
         /// </summary>
-        internal static string PublishLocalizedString_SampleScriptHelpPrerequisites {
+        public static string PublishLocalizedString_SampleScriptHelpPrerequisites {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_SampleScriptHelpPrerequisites", resourceCulture);
             }
@@ -1096,7 +1097,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///Required Flags:
         ///--------------------------.
         /// </summary>
-        internal static string PublishLocalizedString_SampleScriptHelpRequired {
+        public static string PublishLocalizedString_SampleScriptHelpRequired {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_SampleScriptHelpRequired", resourceCulture);
             }
@@ -1107,7 +1108,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ////T:
         ///	Calls msdeploy.exe with the &quot;-whatif&quot; flag, which simulates deployment. This does not deploy the package. Instead, it creates a report of what will happen when you actually deploy the package..
         /// </summary>
-        internal static string PublishLocalizedString_SampleScriptHelpRequiredExplainedFlagT {
+        public static string PublishLocalizedString_SampleScriptHelpRequiredExplainedFlagT {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_SampleScriptHelpRequiredExplainedFlagT", resourceCulture);
             }
@@ -1121,7 +1122,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///Note: Do not use /T and /Y in the same command.
         ///.
         /// </summary>
-        internal static string PublishLocalizedString_SampleScriptHelpRequiredExplainedFlagY {
+        public static string PublishLocalizedString_SampleScriptHelpRequiredExplainedFlagY {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_SampleScriptHelpRequiredExplainedFlagY", resourceCulture);
             }
@@ -1136,7 +1137,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///
         ///.
         /// </summary>
-        internal static string PublishLocalizedString_SampleScriptHelpSection1 {
+        public static string PublishLocalizedString_SampleScriptHelpSection1 {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_SampleScriptHelpSection1", resourceCulture);
             }
@@ -1145,7 +1146,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Sql Command Variable for setting up this application database..
         /// </summary>
-        internal static string PublishLocalizedString_SqlCommandVariableParameterDescription {
+        public static string PublishLocalizedString_SqlCommandVariableParameterDescription {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_SqlCommandVariableParameterDescription", resourceCulture);
             }
@@ -1154,7 +1155,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Start Web Deploy Publish the Application/package to {0} ....
         /// </summary>
-        internal static string PublishLocalizedString_StartMsDeployPublishToRemote {
+        public static string PublishLocalizedString_StartMsDeployPublishToRemote {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_StartMsDeployPublishToRemote", resourceCulture);
             }
@@ -1163,7 +1164,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Test deploy this Web Deploy package onto current machine..
         /// </summary>
-        internal static string PublishLocalizedString_TestDeployPackageOnCurrentMachine {
+        public static string PublishLocalizedString_TestDeployPackageOnCurrentMachine {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_TestDeployPackageOnCurrentMachine", resourceCulture);
             }
@@ -1172,7 +1173,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Transformed {0} using {1} into {2}..
         /// </summary>
-        internal static string PublishLocalizedString_TransformConfigUsingTransformFileToTransformOutputFile {
+        public static string PublishLocalizedString_TransformConfigUsingTransformFileToTransformOutputFile {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_TransformConfigUsingTransformFileToTransformOutputFile", resourceCulture);
             }
@@ -1181,7 +1182,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Web Deploy publish/package validating error: Missing or Invalid property value for $({0}).
         /// </summary>
-        internal static string PublishLocalizedString_ValidateErrorMsDeployPublishSetting {
+        public static string PublishLocalizedString_ValidateErrorMsDeployPublishSetting {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_ValidateErrorMsDeployPublishSetting", resourceCulture);
             }
@@ -1190,7 +1191,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Validating Web Deploy package/publish related properties....
         /// </summary>
-        internal static string PublishLocalizedString_ValidatingMsDeployPublishSettings {
+        public static string PublishLocalizedString_ValidatingMsDeployPublishSettings {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_ValidatingMsDeployPublishSettings", resourceCulture);
             }
@@ -1199,7 +1200,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Setting both property values of DeployAsIisApp and IncludeIisSettingsOnPublish to true is not recommended, as IncludeIisSettingsOnPublish is a superset of DeployAsIisApp.
         /// </summary>
-        internal static string PublishLocalizedString_WarningOnSettingBothIncludeIisSettingsOnPublishAndDeployAsIisApp {
+        public static string PublishLocalizedString_WarningOnSettingBothIncludeIisSettingsOnPublishAndDeployAsIisApp {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_WarningOnSettingBothIncludeIisSettingsOnPublishAndDeployAs" +
                         "IisApp", resourceCulture);
@@ -1209,7 +1210,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Setting value to $(RemoteSitePhysicalPath) might not work if IIS setting is not included.
         /// </summary>
-        internal static string PublishLocalizedString_WarningOnSettingRemoteSitePhysicalPathWhenIISSettingIsNotInclude {
+        public static string PublishLocalizedString_WarningOnSettingRemoteSitePhysicalPathWhenIISSettingIsNotInclude {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_WarningOnSettingRemoteSitePhysicalPathWhenIISSettingIsNotI" +
                         "nclude", resourceCulture);
@@ -1219,7 +1220,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Connection String used in web.config by the application to access the database..
         /// </summary>
-        internal static string PublishLocalizedString_WebConfigConnectionStringParameterDescription {
+        public static string PublishLocalizedString_WebConfigConnectionStringParameterDescription {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_WebConfigConnectionStringParameterDescription", resourceCulture);
             }
@@ -1228,7 +1229,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to The value for PublishProfile is set to &apos;{0}&apos;, expected to find the file at &apos;{1}&apos; but it could not be found..
         /// </summary>
-        internal static string PublishLocalizedString_WebPublishInvalidatePublishProfileSettings {
+        public static string PublishLocalizedString_WebPublishInvalidatePublishProfileSettings {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_WebPublishInvalidatePublishProfileSettings", resourceCulture);
             }
@@ -1237,7 +1238,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to This specific WebPublishMethod({0}) is not yet supported on msbuild command line.  Please use Visual Studio to publish..
         /// </summary>
-        internal static string PublishLocalizedString_WebPublishMethodIsNotSupportedInCmdLine {
+        public static string PublishLocalizedString_WebPublishMethodIsNotSupportedInCmdLine {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_WebPublishMethodIsNotSupportedInCmdLine", resourceCulture);
             }
@@ -1246,7 +1247,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Publish Pipeline Collect Files Phase.
         /// </summary>
-        internal static string PublishLocalizedString_WebPublishPipelineCollectFilesPhase {
+        public static string PublishLocalizedString_WebPublishPipelineCollectFilesPhase {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_WebPublishPipelineCollectFilesPhase", resourceCulture);
             }
@@ -1255,7 +1256,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Copying Web Application Project Files for {0} to {1}..
         /// </summary>
-        internal static string PublishLocalizedString_WebPublishPipelineCopyWebApplication {
+        public static string PublishLocalizedString_WebPublishPipelineCopyWebApplication {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_WebPublishPipelineCopyWebApplication", resourceCulture);
             }
@@ -1264,7 +1265,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Publish Pipeline Deploy Phase.
         /// </summary>
-        internal static string PublishLocalizedString_WebPublishPipelineDeployPhase {
+        public static string PublishLocalizedString_WebPublishPipelineDeployPhase {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_WebPublishPipelineDeployPhase", resourceCulture);
             }
@@ -1273,7 +1274,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Publish Pipeline Deploy phase Stage {0}.
         /// </summary>
-        internal static string PublishLocalizedString_WebPublishPipelineDeployPhaseStage1 {
+        public static string PublishLocalizedString_WebPublishPipelineDeployPhaseStage1 {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_WebPublishPipelineDeployPhaseStage1", resourceCulture);
             }
@@ -1283,7 +1284,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///   Looks up a localized string similar to Copying all files to temporary location below for package/publish:
         ///{0}..
         /// </summary>
-        internal static string PublishLocalizedString_WebPublishPipelineMaterializeAllFilesToTempDir {
+        public static string PublishLocalizedString_WebPublishPipelineMaterializeAllFilesToTempDir {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_WebPublishPipelineMaterializeAllFilesToTempDir", resourceCulture);
             }
@@ -1292,7 +1293,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Invoking Web Deploy to generate the package with the following settings:.
         /// </summary>
-        internal static string PublishLocalizedString_WebPublishPipelineMSDeploySettings {
+        public static string PublishLocalizedString_WebPublishPipelineMSDeploySettings {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_WebPublishPipelineMSDeploySettings", resourceCulture);
             }
@@ -1301,7 +1302,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Publish Pipeline {0} Phase.
         /// </summary>
-        internal static string PublishLocalizedString_WebPublishPipelinePhase {
+        public static string PublishLocalizedString_WebPublishPipelinePhase {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_WebPublishPipelinePhase", resourceCulture);
             }
@@ -1310,7 +1311,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Publish Pipeline Transform Phase.
         /// </summary>
-        internal static string PublishLocalizedString_WebPublishPipelineTransformPhase {
+        public static string PublishLocalizedString_WebPublishPipelineTransformPhase {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_WebPublishPipelineTransformPhase", resourceCulture);
             }
@@ -1319,7 +1320,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to PublishProfile({0}) is set. But the $({1}) does not have a valid value.  Current Value is &quot;{2}&quot;..
         /// </summary>
-        internal static string PublishLocalizedString_WebPublishProfileInvalidPropertyValue {
+        public static string PublishLocalizedString_WebPublishProfileInvalidPropertyValue {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_WebPublishProfileInvalidPropertyValue", resourceCulture);
             }
@@ -1328,7 +1329,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Validating PublishProfile({0}) settings..
         /// </summary>
-        internal static string PublishLocalizedString_WebPublishValidatePublishProfileSettings {
+        public static string PublishLocalizedString_WebPublishValidatePublishProfileSettings {
             get {
                 return ResourceManager.GetString("PublishLocalizedString_WebPublishValidatePublishProfileSettings", resourceCulture);
             }
@@ -1337,7 +1338,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Property &apos;{0}&apos; must be non-empty..
         /// </summary>
-        internal static string ValidateParameter_ArgumentNullError {
+        public static string ValidateParameter_ArgumentNullError {
             get {
                 return ResourceManager.GetString("ValidateParameter_ArgumentNullError", resourceCulture);
             }
@@ -1346,7 +1347,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Adding Parameter ({0}) with value ({1}) into to object ({2})..
         /// </summary>
-        internal static string VSMSDEPLOY_AddParameterIntoObject {
+        public static string VSMSDEPLOY_AddParameterIntoObject {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_AddParameterIntoObject", resourceCulture);
             }
@@ -1355,7 +1356,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to User cancel Web deployment operation..
         /// </summary>
-        internal static string VSMSDEPLOY_Canceled {
+        public static string VSMSDEPLOY_Canceled {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_Canceled", resourceCulture);
             }
@@ -1364,7 +1365,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to The following two items have duplicate item metadata %({0}). The two items data are {1} and {2}..
         /// </summary>
-        internal static string VSMSDEPLOY_DuplicateItemMetadata {
+        public static string VSMSDEPLOY_DuplicateItemMetadata {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_DuplicateItemMetadata", resourceCulture);
             }
@@ -1376,7 +1377,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///In team build or command line, password can be provided by setting MsBuild $(DeployEncryptKey) property.
         ///Error details:.
         /// </summary>
-        internal static string VSMSDEPLOY_EncryptionExceptionMessage {
+        public static string VSMSDEPLOY_EncryptionExceptionMessage {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_EncryptionExceptionMessage", resourceCulture);
             }
@@ -1385,7 +1386,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Publish failed to deploy..
         /// </summary>
-        internal static string VSMSDEPLOY_FailedDeploy {
+        public static string VSMSDEPLOY_FailedDeploy {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_FailedDeploy", resourceCulture);
             }
@@ -1394,7 +1395,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Package failed..
         /// </summary>
-        internal static string VSMSDEPLOY_FailedPackage {
+        public static string VSMSDEPLOY_FailedPackage {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_FailedPackage", resourceCulture);
             }
@@ -1403,7 +1404,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Web deployment task failed. ({0}).
         /// </summary>
-        internal static string VSMSDEPLOY_FailedWithException {
+        public static string VSMSDEPLOY_FailedWithException {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_FailedWithException", resourceCulture);
             }
@@ -1413,7 +1414,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///   Looks up a localized string similar to Web deployment task failed. ({0})
         ///{1}.
         /// </summary>
-        internal static string VSMSDEPLOY_FailedWithExceptionWithDetail {
+        public static string VSMSDEPLOY_FailedWithExceptionWithDetail {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_FailedWithExceptionWithDetail", resourceCulture);
             }
@@ -1422,7 +1423,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Source ({0}) and destination ({1}) are not compatible for given operation..
         /// </summary>
-        internal static string VSMSDEPLOY_InvalidOperation {
+        public static string VSMSDEPLOY_InvalidOperation {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_InvalidOperation", resourceCulture);
             }
@@ -1431,7 +1432,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Provider({0})is not a recognized provider..
         /// </summary>
-        internal static string VSMSDEPLOY_InvalidProviderName {
+        public static string VSMSDEPLOY_InvalidProviderName {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_InvalidProviderName", resourceCulture);
             }
@@ -1440,7 +1441,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Unknown ProviderOption:{0}. Known ProviderOptions are:{1}..
         /// </summary>
-        internal static string VSMSDEPLOY_InvalidProviderOption {
+        public static string VSMSDEPLOY_InvalidProviderOption {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_InvalidProviderOption", resourceCulture);
             }
@@ -1449,7 +1450,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Failed to load publish certificate dialog due to error of {0}.
         /// </summary>
-        internal static string VSMSDEPLOY_LoadVSCertUIFailed {
+        public static string VSMSDEPLOY_LoadVSCertUIFailed {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_LoadVSCertUIFailed", resourceCulture);
             }
@@ -1458,7 +1459,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to For x86(32 bit): http://go.microsoft.com/fwlink/?LinkId=109365..
         /// </summary>
-        internal static string VSMSDEPLOY_MSDEPLOY32bit {
+        public static string VSMSDEPLOY_MSDEPLOY32bit {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_MSDEPLOY32bit", resourceCulture);
             }
@@ -1467,7 +1468,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to For x64(64 bit): http://go.microsoft.com/fwlink/?LinkId=109366..
         /// </summary>
-        internal static string VSMSDEPLOY_MSDEPLOY64bit {
+        public static string VSMSDEPLOY_MSDEPLOY64bit {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_MSDEPLOY64bit", resourceCulture);
             }
@@ -1476,7 +1477,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Package/Publish task {0} failed to load Web Deploy assemblies. Microsoft Web Deploy is not correctly installed on this machine. Microsoft Web Deploy v3 or higher is recommended..
         /// </summary>
-        internal static string VSMSDEPLOY_MSDEPLOYASSEMBLYLOAD_FAIL {
+        public static string VSMSDEPLOY_MSDEPLOYASSEMBLYLOAD_FAIL {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_MSDEPLOYASSEMBLYLOAD_FAIL", resourceCulture);
             }
@@ -1486,7 +1487,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///   Looks up a localized string similar to Failed to invoke or execute {0} provider on the web server.  The Web Deployment Tool&apos;s {0} provider is either not enabled or failed to executed specific commands on the server.  Please contact your server administrator for assistance. (Web Deploy Provider is &quot;{0}&quot;).
         ///Error details:.
         /// </summary>
-        internal static string VSMSDEPLOY_MsDeployExceptionFwlink1Message {
+        public static string VSMSDEPLOY_MsDeployExceptionFwlink1Message {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_MsDeployExceptionFwlink1Message", resourceCulture);
             }
@@ -1496,7 +1497,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///   Looks up a localized string similar to Make sure you have appropriate permissions on the server to publish IIS settings. Alternatively, exclude settings that require administrative permissions on the server. (Web Deploy Provider is &quot;{0}&quot;).
         ///Error details:.
         /// </summary>
-        internal static string VSMSDEPLOY_MsDeployExceptionFwlink1SiteMessage {
+        public static string VSMSDEPLOY_MsDeployExceptionFwlink1SiteMessage {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_MsDeployExceptionFwlink1SiteMessage", resourceCulture);
             }
@@ -1506,7 +1507,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///   Looks up a localized string similar to Make sure the database connection string for the server is correct and that you have appropriate permission to access the database. (Web Deploy Provider is &quot;{0}&quot;).
         ///Error details:.
         /// </summary>
-        internal static string VSMSDEPLOY_MsDeployExceptionFwlink1SQLMessage {
+        public static string VSMSDEPLOY_MsDeployExceptionFwlink1SQLMessage {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_MsDeployExceptionFwlink1SQLMessage", resourceCulture);
             }
@@ -1516,7 +1517,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///   Looks up a localized string similar to Make sure you have appropriate permissions on the server to publish IIS settings. Alternatively, exclude settings that require administrative permission on the server.
         ///Error details:.
         /// </summary>
-        internal static string VSMSDEPLOY_MsDeployExceptionFwlink2Message {
+        public static string VSMSDEPLOY_MsDeployExceptionFwlink2Message {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_MsDeployExceptionFwlink2Message", resourceCulture);
             }
@@ -1526,7 +1527,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///   Looks up a localized string similar to This can occur if the publish process cannot connect to the database on the server. Make sure the database connection string is correct.
         ///Error details:.
         /// </summary>
-        internal static string VSMSDEPLOY_MsDeployExceptionFwlink3Message {
+        public static string VSMSDEPLOY_MsDeployExceptionFwlink3Message {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_MsDeployExceptionFwlink3Message", resourceCulture);
             }
@@ -1536,7 +1537,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///   Looks up a localized string similar to Failed to publish the database. This can happen if the remote database cannot run the script. Try modifying the database scripts, or disabling database publishing in the Package/Publish Web properties page. If the script failed due to database tables already exist, try dropping existing database objects before creating new ones. For more information on doing these options from Visual Studio, see http://go.microsoft.com/fwlink/?LinkId=179181.
         ///Error details:.
         /// </summary>
-        internal static string VSMSDEPLOY_MsDeployExceptionFwlink4Message {
+        public static string VSMSDEPLOY_MsDeployExceptionFwlink4Message {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_MsDeployExceptionFwlink4Message", resourceCulture);
             }
@@ -1545,7 +1546,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Package/Publish depends on Microsoft Web Deploy technology. Microsoft Web Deploy is not correctly installed on this machine. Please install from following link: {0}{1}. ({2}).
         /// </summary>
-        internal static string VSMSDEPLOY_MSDEPLOYLOADFAIL {
+        public static string VSMSDEPLOY_MSDEPLOYLOADFAIL {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_MSDEPLOYLOADFAIL", resourceCulture);
             }
@@ -1554,7 +1555,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Package/Publish depends on Microsoft Web Deployment technology. Microsoft Web Deployment is installed but doesn&apos;t meet the minimum version requirement. Please reinstall from following link: {0}{1}. (Current Version:{2}, Minimum Version needed:{3}).
         /// </summary>
-        internal static string VSMSDEPLOY_MSDEPLOYMinVersion {
+        public static string VSMSDEPLOY_MSDEPLOYMinVersion {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_MSDEPLOYMinVersion", resourceCulture);
             }
@@ -1563,7 +1564,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Package/Publish task {0} load assembly {1}.
         /// </summary>
-        internal static string VSMSDEPLOY_MSDEPLOYVERSIONLOAD {
+        public static string VSMSDEPLOY_MSDEPLOYVERSIONLOAD {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_MSDEPLOYVERSIONLOAD", resourceCulture);
             }
@@ -1572,7 +1573,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to {0}({1}).
         /// </summary>
-        internal static string VSMSDEPLOY_ObjectIdentity {
+        public static string VSMSDEPLOY_ObjectIdentity {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_ObjectIdentity", resourceCulture);
             }
@@ -1581,7 +1582,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Skip Directive {0} enable state is changed to {1}..
         /// </summary>
-        internal static string VSMSDEPLOY_SkipDirectiveSetEnable {
+        public static string VSMSDEPLOY_SkipDirectiveSetEnable {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_SkipDirectiveSetEnable", resourceCulture);
             }
@@ -1590,7 +1591,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Generate schema/data sql scripts from SQLCE require Web Deploy 2.0 and up to function properly.  Please install the latest Web Deploy from {0}..
         /// </summary>
-        internal static string VSMSDEPLOY_SQLCEMigrationNeedLatestMSDeploy {
+        public static string VSMSDEPLOY_SQLCEMigrationNeedLatestMSDeploy {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_SQLCEMigrationNeedLatestMSDeploy", resourceCulture);
             }
@@ -1599,7 +1600,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Starting Web deployment task from source: {0} to Destination: {1}..
         /// </summary>
-        internal static string VSMSDEPLOY_Start {
+        public static string VSMSDEPLOY_Start {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_Start", resourceCulture);
             }
@@ -1609,7 +1610,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///   Looks up a localized string similar to Package is successfully created as archive directory at the following location:
         ///{0}.
         /// </summary>
-        internal static string VSMSDEPLOY_SucceedArchiveDir {
+        public static string VSMSDEPLOY_SucceedArchiveDir {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_SucceedArchiveDir", resourceCulture);
             }
@@ -1618,7 +1619,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Publish Succeeded..
         /// </summary>
-        internal static string VSMSDEPLOY_SucceedDeploy {
+        public static string VSMSDEPLOY_SucceedDeploy {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_SucceedDeploy", resourceCulture);
             }
@@ -1627,7 +1628,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Successfully executed Web deployment task..
         /// </summary>
-        internal static string VSMSDEPLOY_Succeeded {
+        public static string VSMSDEPLOY_Succeeded {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_Succeeded", resourceCulture);
             }
@@ -1637,7 +1638,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///   Looks up a localized string similar to Package &quot;{0}&quot; is successfully created as single file at the following location:
         ///{1}.
         /// </summary>
-        internal static string VSMSDEPLOY_SucceedPackage {
+        public static string VSMSDEPLOY_SucceedPackage {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_SucceedPackage", resourceCulture);
             }
@@ -1646,7 +1647,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Unknown Parameter {0}. Source Known Parameters are: {1}..
         /// </summary>
-        internal static string VSMSDEPLOY_UnknownParameter {
+        public static string VSMSDEPLOY_UnknownParameter {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_UnknownParameter", resourceCulture);
             }
@@ -1655,7 +1656,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Skip Directive {0} can not be identified..
         /// </summary>
-        internal static string VSMSDEPLOY_UnknownSkipDirective {
+        public static string VSMSDEPLOY_UnknownSkipDirective {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_UnknownSkipDirective", resourceCulture);
             }
@@ -1665,7 +1666,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///   Looks up a localized string similar to Make sure the site name, user name, and password are correct. If the issue is not resolved, please contact your local or server administrator.
         ///Error details:.
         /// </summary>
-        internal static string VSMSDEPLOY_WebException401Message {
+        public static string VSMSDEPLOY_WebException401Message {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_WebException401Message", resourceCulture);
             }
@@ -1675,7 +1676,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///   Looks up a localized string similar to The requested resource does not exist, or the requested URL is incorrect.
         ///Error details:.
         /// </summary>
-        internal static string VSMSDEPLOY_WebException404Message {
+        public static string VSMSDEPLOY_WebException404Message {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_WebException404Message", resourceCulture);
             }
@@ -1685,7 +1686,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///   Looks up a localized string similar to Make sure firewall and network settings on your computer and on the server are configured to allow connections between them. If the issue is not resolved, please contact your local or server administrator.
         ///Error details:.
         /// </summary>
-        internal static string VSMSDEPLOY_WebException502Message {
+        public static string VSMSDEPLOY_WebException502Message {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_WebException502Message", resourceCulture);
             }
@@ -1695,7 +1696,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///   Looks up a localized string similar to Make sure the site that you are deploying to is a valid site on the destination server. If the issue is not resolved, please contact your server administrator.
         ///Error details:.
         /// </summary>
-        internal static string VSMSDEPLOY_WebException550Message {
+        public static string VSMSDEPLOY_WebException550Message {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_WebException550Message", resourceCulture);
             }
@@ -1705,7 +1706,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///   Looks up a localized string similar to Make sure the appliction that you are deploying to is a valide application on the destination server. If the issue is not resolved, please contact your server administrator.
         ///Error details:.
         /// </summary>
-        internal static string VSMSDEPLOY_WebException551Message {
+        public static string VSMSDEPLOY_WebException551Message {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_WebException551Message", resourceCulture);
             }
@@ -1715,7 +1716,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         ///   Looks up a localized string similar to This error indicates that you cannot connect to the server. Make sure the service URL is correct, firewall and network settings on this computer and on the server computer are configured properly, and the appropriate services have been started on the server.
         ///Error details:.
         /// </summary>
-        internal static string VSMSDEPLOY_WebExceptionConnectFailureMessage {
+        public static string VSMSDEPLOY_WebExceptionConnectFailureMessage {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_WebExceptionConnectFailureMessage", resourceCulture);
             }
@@ -1724,7 +1725,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to http://go.microsoft.com/fwlink/?LinkId=124618.
         /// </summary>
-        internal static string VSMSDEPLOY_WebPackageHelpLink {
+        public static string VSMSDEPLOY_WebPackageHelpLink {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_WebPackageHelpLink", resourceCulture);
             }
@@ -1733,7 +1734,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to To get the instructions on how to deploy the web package please visit the following link:.
         /// </summary>
-        internal static string VSMSDEPLOY_WebPackageHelpLinkMessage {
+        public static string VSMSDEPLOY_WebPackageHelpLinkMessage {
             get {
                 return ResourceManager.GetString("VSMSDEPLOY_WebPackageHelpLinkMessage", resourceCulture);
             }
@@ -1742,7 +1743,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Setting {0}.
         /// </summary>
-        internal static string WEBDEPLOY_AssemblyInfo_Attribute {
+        public static string WEBDEPLOY_AssemblyInfo_Attribute {
             get {
                 return ResourceManager.GetString("WEBDEPLOY_AssemblyInfo_Attribute", resourceCulture);
             }
@@ -1751,7 +1752,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Failed to Generate AssemblyInfo file..
         /// </summary>
-        internal static string WEBDEPLOY_AssemblyInfo_Failed {
+        public static string WEBDEPLOY_AssemblyInfo_Failed {
             get {
                 return ResourceManager.GetString("WEBDEPLOY_AssemblyInfo_Failed", resourceCulture);
             }
@@ -1760,7 +1761,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Generating AssemblyInfo..
         /// </summary>
-        internal static string WEBDEPLOY_AssemblyInfo_Start {
+        public static string WEBDEPLOY_AssemblyInfo_Start {
             get {
                 return ResourceManager.GetString("WEBDEPLOY_AssemblyInfo_Start", resourceCulture);
             }
@@ -1769,7 +1770,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Successfully generated AssemblyInfo file..
         /// </summary>
-        internal static string WEBDEPLOY_AssemblyInfo_Succeeded {
+        public static string WEBDEPLOY_AssemblyInfo_Succeeded {
             get {
                 return ResourceManager.GetString("WEBDEPLOY_AssemblyInfo_Succeeded", resourceCulture);
             }
@@ -1778,7 +1779,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Missing ApplicationPath parameter (the physical path of the precompiled application)..
         /// </summary>
-        internal static string WEBDEPLOY_MERGE_ApplicationPath {
+        public static string WEBDEPLOY_MERGE_ApplicationPath {
             get {
                 return ResourceManager.GetString("WEBDEPLOY_MERGE_ApplicationPath", resourceCulture);
             }
@@ -1787,7 +1788,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to ContentAssembly parameter cannot be combined with the Prefix or NameSingleAssemblyName parameter. If specified, the entire application will be merged to a single assembly with the given name..
         /// </summary>
-        internal static string WEBDEPLOY_MERGE_ContentAssemblyName {
+        public static string WEBDEPLOY_MERGE_ContentAssemblyName {
             get {
                 return ResourceManager.GetString("WEBDEPLOY_MERGE_ContentAssemblyName", resourceCulture);
             }
@@ -1796,7 +1797,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Failed to merge &apos;{0}&apos;..
         /// </summary>
-        internal static string WEBDEPLOY_MERGE_Failed {
+        public static string WEBDEPLOY_MERGE_Failed {
             get {
                 return ResourceManager.GetString("WEBDEPLOY_MERGE_Failed", resourceCulture);
             }
@@ -1805,7 +1806,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to SingleAssemblyName parameter cannot be combined with the Prefix or ContentAssemblyName parameter. If specified, the entire application will be merged to a single assembly with the given name..
         /// </summary>
-        internal static string WEBDEPLOY_MERGE_SingleAssemblyName {
+        public static string WEBDEPLOY_MERGE_SingleAssemblyName {
             get {
                 return ResourceManager.GetString("WEBDEPLOY_MERGE_SingleAssemblyName", resourceCulture);
             }
@@ -1814,7 +1815,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Running aspnet_merge.exe..
         /// </summary>
-        internal static string WEBDEPLOY_MERGE_Start {
+        public static string WEBDEPLOY_MERGE_Start {
             get {
                 return ResourceManager.GetString("WEBDEPLOY_MERGE_Start", resourceCulture);
             }
@@ -1823,7 +1824,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks {
         /// <summary>
         ///   Looks up a localized string similar to Successfully merged &apos;{0}&apos;..
         /// </summary>
-        internal static string WEBDEPLOY_MERGE_Succeeded {
+        public static string WEBDEPLOY_MERGE_Succeeded {
             get {
                 return ResourceManager.GetString("WEBDEPLOY_MERGE_Succeeded", resourceCulture);
             }

@@ -51,7 +51,7 @@
 [cmdletbinding()]
 param(
    [string]$Channel="preview",
-   [string]$Version="1.0.0-preview5-004275",
+   [string]$Version="1.0.0-rc4-004777",
    [string]$InstallDir="<auto>",
    [string]$Architecture="x64",
    [switch]$SharedRuntime,
