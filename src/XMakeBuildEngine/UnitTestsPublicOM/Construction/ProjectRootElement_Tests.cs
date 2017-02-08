@@ -1630,6 +1630,60 @@ true, true, true)]
         }
 
         [Fact]
+        public void ReloadFromPathShouldHaveNoUnsavedChanges()
+        {
+            var projectContents = ObjectModelHelpers.CleanupFileContents(
+@"
+<!-- new comment -->
+<Project xmlns=`msbuildnamespace`>
+
+  <!-- new comment -->
+  <ItemGroup>
+    <i Include=`itemValue`>
+      <!-- new comment -->
+      <m>metadata value</m>
+    </i>
+  </ItemGroup>
+
+</Project>");
+
+            using (var testFiles = new Helpers.TestProjectWithFiles("", new []{"build.proj"}))
+            using (var projectCollection = new ProjectCollection())
+            {
+                var projectPath = testFiles.CreatedFiles.First();
+
+                var projectElement = ObjectModelHelpers.CreateInMemoryProjectRootElement(projectContents, projectCollection, preserveFormatting: true);
+                projectElement.Save(projectPath);
+                Assert.False(projectElement.HasUnsavedChanges);
+
+                File.WriteAllText(projectPath, ObjectModelHelpers.CleanupFileContents(projectContents.Replace("itemValue", "itemValue2")));
+
+                projectElement.Reload(true, null);
+                Assert.False(projectElement.HasUnsavedChanges);
+
+                projectElement.Reload(true, null);
+                Assert.False(projectElement.HasUnsavedChanges);
+
+                File.WriteAllText(projectPath, ObjectModelHelpers.CleanupFileContents(projectContents.Replace("itemValue2", "itemValue3")));
+
+                projectElement.ReloadFrom(projectPath, true, null);
+                Assert.False(projectElement.HasUnsavedChanges);
+
+                projectElement.ReloadFrom(projectPath, true, null);
+                Assert.False(projectElement.HasUnsavedChanges);
+
+                projectElement.ReloadFrom(
+                    XmlReader.Create(
+                        new StringReader(
+                            ObjectModelHelpers.CleanupFileContents(projectContents.Replace("itemValue3", "itemValue4")))),
+                    true,
+                    null);
+                // reloading from xmlreader marks the object as having unsaved changes
+                Assert.True(projectElement.HasUnsavedChanges);
+            }
+        }
+
+        [Fact]
         public void ReloadThrowsOnInvalidXmlSyntax()
         {
             var missingClosingTag =

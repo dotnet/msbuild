@@ -1806,7 +1806,7 @@ namespace Microsoft.Build.Construction
                         _lastWriteTimeWhenRead = fileInfo.LastWriteTime;
                     }
 
-                    _versionOnDisk = Version;
+                    MarkAsUpToDateWithDisk();
                 }
             }
 #if MSBUILDENABLEVSPROFILING 
@@ -1856,6 +1856,11 @@ namespace Microsoft.Build.Construction
                 XmlDocument.Save(projectWriter);
             }
 
+            MarkAsUpToDateWithDisk();
+        }
+
+        private void MarkAsUpToDateWithDisk()
+        {
             _versionOnDisk = Version;
         }
 
@@ -1892,7 +1897,11 @@ namespace Microsoft.Build.Construction
             ErrorUtilities.VerifyThrowInvalidOperation(File.Exists(path), "FileToReloadFromDoesNotExist", path);
 
             Func<bool, XmlDocumentWithLocation> documentProducer = shouldPreserveFormatting => LoadDocument(path, shouldPreserveFormatting);
+
             ReloadFrom(documentProducer, throwIfUnsavedChanges, preserveFormatting);
+
+            // Reloads from a file leave this object up to date wrt to that file, so mark the object as up to date
+            MarkAsUpToDateWithDisk();
         }
 
         /// <summary>

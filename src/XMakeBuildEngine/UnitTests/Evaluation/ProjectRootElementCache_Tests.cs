@@ -13,7 +13,7 @@ using Microsoft.Build.Framework;
 using System.Collections;
 using System;
 using System.IO;
-
+using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
 using Xunit;
@@ -173,6 +173,62 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
 
                 ProjectRootElement xml2 = cache.TryGet(path);
                 Assert.Equal(true, Object.ReferenceEquals(xml0, xml2));
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+
+        /// <summary>
+        /// This test replicates the scenario in https://devdiv.visualstudio.com/DevDiv/_workitems?id=366077
+        /// Two different caches can interfere with each other when auto reloading from disk is turned on.
+        /// </summary>
+        [Fact]
+        public void GetProjectRootElementChangedOnDisk3()
+        {
+            string path = null;
+
+            try
+            {
+                var nonReloadingCache = new ProjectRootElementCache(autoReloadFromDisk: false);
+                var reloadingCache = new ProjectRootElementCache(autoReloadFromDisk: true);
+
+                path = FileUtilities.GetTemporaryFile();
+
+                var nonReloadingProject = ProjectRootElement.Create(path);
+                nonReloadingCache.AddEntry(nonReloadingProject);
+
+                nonReloadingProject.Save();
+
+                var previousReloadingProject = ProjectRootElement.Open(path, reloadingCache, true, null);
+                Assert.NotSame(nonReloadingProject, previousReloadingProject);
+
+                for (int i = 0; i < 30; i++)
+                {
+                    var newItemType = $"i_{i}";
+                    var newItemValue = $"{i}";
+
+                    nonReloadingProject = ProjectRootElement.Open(path, nonReloadingCache, true, null);
+                    nonReloadingProject.AddItem(newItemType, newItemValue);
+                    nonReloadingProject.Save();
+                    Assert.False(nonReloadingProject.HasUnsavedChanges);
+
+                    DateTime lastWrite = new FileInfo(path).LastWriteTimeUtc;
+                    File.SetLastWriteTime(path, lastWrite + new TimeSpan(i + 1, 0, 0));
+
+                    var reloadingProject = ProjectRootElement.Open(path, reloadingCache, true, null);
+                    Assert.False(reloadingProject.HasUnsavedChanges);
+                    Assert.Same(previousReloadingProject, reloadingProject);
+
+                    Assert.Equal(i + 1, reloadingProject.Items.Count);
+
+                    var lastItemElement = reloadingProject.Items.Last();
+                    Assert.Equal(newItemType, lastItemElement.ItemType);
+                    Assert.Equal(newItemValue, lastItemElement.Include);
+
+                    previousReloadingProject = reloadingProject;
+                }
             }
             finally
             {
