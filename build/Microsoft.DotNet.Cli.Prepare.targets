@@ -18,13 +18,6 @@
   <Target Name="InitializeCommonProps"
           DependsOnTargets="BuildDotnetCliBuildFramework" >
 
-    <!-- Current Runtime Information -->
-    <GetCurrentRuntimeInformation OverrideRid="$(OverrideRid)">
-      <Output TaskParameter="Rid" PropertyName="Rid" />
-      <Output TaskParameter="Architecture" PropertyName="Architecture" />
-      <Output TaskParameter="OSName" PropertyName="OSName" />
-    </GetCurrentRuntimeInformation>
-    
     <!-- Common Properties -->
     <PropertyGroup>
       <IsDesktopAvailable>False</IsDesktopAvailable>

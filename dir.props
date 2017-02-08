@@ -1,17 +1,13 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Condition=" Exists('obj/Microsoft.DotNet.Cli.BuildInfo.props') "
-          Project="obj/Microsoft.DotNet.Cli.BuildInfo.props" />
-  <Import Condition=" Exists('obj/Microsoft.DotNet.Cli.HostInfo.props') "
-          Project="obj/Microsoft.DotNet.Cli.HostInfo.props" />
   <Import Project="build/Microsoft.DotNet.Cli.DependencyVersions.props" />
 
   <!-- NuGet Information -->
   <PropertyGroup>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
 
-    <GeneratedPropsDir>$(RepoRoot)/obj</GeneratedPropsDir>
+    <GeneratedPropsDir>$(RepoRoot)/artifacts/obj</GeneratedPropsDir>
 
-    <BuildInfoProps>$(GeneratedPropsDir)/BuildInfo.props</BuildInfoProps>
+    <GitCommitInfoProps>$(GeneratedPropsDir)/GitCommitInfo.props</GitCommitInfoProps>
     <HostInfoProps>$(GeneratedPropsDir)/HostInfo.props</HostInfoProps>
 
     <NuGetPackagesDir>$(NUGET_PACKAGES)</NuGetPackagesDir>

@@ -2,6 +2,16 @@
 <Project ToolsVersion="14.0" DefaultTargets="BuildTheWholeCli" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <Import Project="build/Microsoft.DotNet.Cli.Monikers.props" />
+  <ImportGroup Condition=" '$(GeneratingPropsFile)' == 'true' ">
+    <Import Condition=" Exists('$(GitCommitInfoProps)') "
+            Project="$(GitCommitInfoProps)" />
+    <Import Condition=" Exists('$(HostInfoProps)') "
+            Project="$(HostInfoProps)" />
+  </ImportGroup>
+  <ImportGroup Condition=" '$(GeneratingPropsFile)' != 'true' ">
+    <Import Project="$(GitCommitInfoProps)" />
+    <Import Project="$(HostInfoProps)" />
+  </ImportGroup>
 
   <PropertyGroup>
     <!--
@@ -75,12 +85,12 @@
 
   <Target Name="WriteDynamicPropsToStaticPropsFiles"
           DependsOnTargets="BuildDotnetCliBuildFramework;
-                            WriteBuildInfoProps;
+                            WriteGitCommitInfoProps;
                             WriteHostInfoProps"/>
 
   <Target DependsOnTargets="$(CLITargets)" Name="BuildTheWholeCli"></Target>
 
-  <Import Project="build/Microsoft.DotNet.Cli.BuildInfo.targets" />
+  <Import Project="build/Microsoft.DotNet.Cli.GitCommitInfo.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.HostInfo.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.Prepare.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.Compile.targets" />
@@ -88,4 +98,5 @@
   <Import Project="build/Microsoft.DotNet.Cli.Test.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.Publish.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.Run.targets" />
+
 </Project>

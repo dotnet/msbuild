@@ -1,23 +1,21 @@
 <Project ToolsVersion="15.0">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.tasks))\dir.tasks" />
-
   <Target Name="WriteHostInfoProps"
           Condition=" !Exists('$(HostInfoProps)') "
           DependsOnTargets="BuildDotnetCliBuildFramework">
-    <GetCurrentRuntimeInformation>
-      <Output TaskParameter="Rid" PropertyName="Rid" />
-      <Output TaskParameter="Architecture" PropertyName="Architecture" />
-      <Output TaskParameter="OSName" PropertyName="OSName" />
+    <!-- Current Runtime Information -->
+    <GetCurrentRuntimeInformation OverrideRid="$(OverrideRid)">
+      <Output TaskParameter="Rid" PropertyName="HostRid" />
+      <Output TaskParameter="Architecture" PropertyName="HostArchitecture" />
+      <Output TaskParameter="OSName" PropertyName="HostOSName" />
     </GetCurrentRuntimeInformation>
 
     <PropertyGroup>
       <HostInfoPropsContent>
 &lt;Project ToolsVersion=&quot;15.0&quot;&gt;
     &lt;PropertyGroup&gt;
-        &lt;HostRid&gt;$(Rid)&lt;/HostRid&gt;
-        &lt;HostArchitecture&gt;$(Architecture)&lt;/HostArchitecture&gt;
-        &lt;HostOSName&gt;$(OSName)&lt;/HostOSName&gt;
+        &lt;Rid&gt;$(HostRid)&lt;/Rid&gt;
+        &lt;Architecture&gt;$(HostArchitecture)&lt;/Architecture&gt;
+        &lt;OSName&gt;$(HostOSName)&lt;/OSName&gt;
     &lt;/PropertyGroup&gt;
 &lt;/Project&gt;
       </HostInfoPropsContent>
