@@ -22,14 +22,6 @@
     <IncludeNuGetImports Condition="'$(IncludeNuGetImports)' == ''">false</IncludeNuGetImports>
   </PropertyGroup>
 
-  <!-- Localization switches -->
-  <PropertyGroup>
-    <LocalizationBuildAssetsRequired Condition="'$(LocalizedBuild)' == 'true' or '$(SyncXlf)' == 'true'">true</LocalizationBuildAssetsRequired>
-
-    <!-- Syncing xlf files in parallel leads to races because of the shared resources under /Shared/Resources/xlf -->
-    <BuildInParallel Condition="'$(SyncXlf)' == 'true'">false</BuildInParallel>
-  </PropertyGroup>
-
   <PropertyGroup>
     <SerializeProjects>false</SerializeProjects>
   </PropertyGroup>
@@ -415,5 +407,18 @@
   <PropertyGroup>
     <IBCMergeSubPath>x86/MSBuild</IBCMergeSubPath>
   </PropertyGroup>
+
+    <!-- Localization switches -->
+  <PropertyGroup>
+    <!--.net core can't generate the assets. It instead copies them form a full framework build-->
+    <LocalizationBuildAssetsRequired Condition="'$(NetCoreBuild)' != 'true' and ('$(LocalizedBuild)' == 'true' or '$(SyncXlf)' == 'true')">true</LocalizationBuildAssetsRequired>
+
+    <!-- Syncing xlf files in parallel leads to races because of the shared resources under /Shared/Resources/xlf -->
+    <BuildInParallel Condition="'$(SyncXlf)' == 'true'">false</BuildInParallel>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Languages Include="cs;de;en;es;fr;it;ja;ko;pl;pt-BR;ru;tr;zh-Hans;zh-Hant"/>
+  </ItemGroup>
 
 </Project>

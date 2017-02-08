@@ -74,5 +74,34 @@
     <file src="$configuration$\Output\$id$.xml" target="lib\net46\$id$.xml" />
     <file src="$configuration$-NetCore\Output\$id$.dll" target="lib\netstandard1.5\$id$.dll" />
     <file src="$configuration$-NetCore\Output\$id$.xml" target="lib\netstandard1.5\$id$.xml" />
+    <!--satellites; generated with: https://dotnetfiddle.net/NHfiJn -->
+    <file src="$configuration$\Output\cs\$id$.resources.dll" target="lib\net46\cs\$id$.resources.dll" />
+    <file src="$configuration$\Output\de\$id$.resources.dll" target="lib\net46\de\$id$.resources.dll" />
+    <file src="$configuration$\Output\en\$id$.resources.dll" target="lib\net46\en\$id$.resources.dll" />
+    <file src="$configuration$\Output\es\$id$.resources.dll" target="lib\net46\es\$id$.resources.dll" />
+    <file src="$configuration$\Output\fr\$id$.resources.dll" target="lib\net46\fr\$id$.resources.dll" />
+    <file src="$configuration$\Output\it\$id$.resources.dll" target="lib\net46\it\$id$.resources.dll" />
+    <file src="$configuration$\Output\ja\$id$.resources.dll" target="lib\net46\ja\$id$.resources.dll" />
+    <file src="$configuration$\Output\ko\$id$.resources.dll" target="lib\net46\ko\$id$.resources.dll" />
+    <file src="$configuration$\Output\pl\$id$.resources.dll" target="lib\net46\pl\$id$.resources.dll" />
+    <file src="$configuration$\Output\pt-BR\$id$.resources.dll" target="lib\net46\pt-BR\$id$.resources.dll" />
+    <file src="$configuration$\Output\ru\$id$.resources.dll" target="lib\net46\ru\$id$.resources.dll" />
+    <file src="$configuration$\Output\tr\$id$.resources.dll" target="lib\net46\tr\$id$.resources.dll" />
+    <file src="$configuration$\Output\zh-Hans\$id$.resources.dll" target="lib\net46\zh-Hans\$id$.resources.dll" />
+    <file src="$configuration$\Output\zh-Hant\$id$.resources.dll" target="lib\net46\zh-Hant\$id$.resources.dll" />
+    <file src="$configuration$\Output\cs\$id$.resources.dll" target="lib\netstandard1.3\cs\$id$.resources.dll" />
+    <file src="$configuration$\Output\de\$id$.resources.dll" target="lib\netstandard1.3\de\$id$.resources.dll" />
+    <file src="$configuration$\Output\en\$id$.resources.dll" target="lib\netstandard1.3\en\$id$.resources.dll" />
+    <file src="$configuration$\Output\es\$id$.resources.dll" target="lib\netstandard1.3\es\$id$.resources.dll" />
+    <file src="$configuration$\Output\fr\$id$.resources.dll" target="lib\netstandard1.3\fr\$id$.resources.dll" />
+    <file src="$configuration$\Output\it\$id$.resources.dll" target="lib\netstandard1.3\it\$id$.resources.dll" />
+    <file src="$configuration$\Output\ja\$id$.resources.dll" target="lib\netstandard1.3\ja\$id$.resources.dll" />
+    <file src="$configuration$\Output\ko\$id$.resources.dll" target="lib\netstandard1.3\ko\$id$.resources.dll" />
+    <file src="$configuration$\Output\pl\$id$.resources.dll" target="lib\netstandard1.3\pl\$id$.resources.dll" />
+    <file src="$configuration$\Output\pt-BR\$id$.resources.dll" target="lib\netstandard1.3\pt-BR\$id$.resources.dll" />
+    <file src="$configuration$\Output\ru\$id$.resources.dll" target="lib\netstandard1.3\ru\$id$.resources.dll" />
+    <file src="$configuration$\Output\tr\$id$.resources.dll" target="lib\netstandard1.3\tr\$id$.resources.dll" />
+    <file src="$configuration$\Output\zh-Hans\$id$.resources.dll" target="lib\netstandard1.3\zh-Hans\$id$.resources.dll" />
+    <file src="$configuration$\Output\zh-Hant\$id$.resources.dll" target="lib\netstandard1.3\zh-Hant\$id$.resources.dll" />
   </files>
 </package>

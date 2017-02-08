@@ -1323,7 +1323,14 @@ namespace Microsoft.Build.CommandLine
                 )
             {
                 thisThread.CurrentUICulture = new CultureInfo("en-US");
+                return;
             }
+#endif
+#if RUNTIME_TYPE_NETCORE
+            // https://github.com/dotnet/roslyn/issues/10785#issuecomment-238940601
+            // by default, .NET Core doesn't have all code pages needed for Console apps.
+            // see the .NET Core Notes in https://msdn.microsoft.com/en-us/library/system.diagnostics.process(v=vs.110).aspx
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 #endif
         }
 
