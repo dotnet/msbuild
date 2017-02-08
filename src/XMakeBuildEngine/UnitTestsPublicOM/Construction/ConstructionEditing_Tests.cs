@@ -677,6 +677,28 @@ namespace Microsoft.Build.UnitTests.OM.Construction
            );
         }
         /// <summary>
+        /// Attempt to insert an update operation inside a target itemgroup
+        /// </summary>
+        [Fact]
+        public void InvalidAttemptToAddItemWithUpdateToTarget()
+        {
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                ProjectRootElement project = ProjectRootElement.Create();
+                ProjectTargetElement target = project.CreateTargetElement("t");
+                ProjectItemGroupElement itemgroup = project.CreateItemGroupElement();
+                ProjectItemElement item = project.CreateItemElement("i");
+
+                item.Update = "a";
+
+                project.AppendChild(target);
+                target.AppendChild(itemgroup);
+
+                itemgroup.AppendChild(item);
+            }
+           );
+        }
+        /// <summary>
         /// Attempt to insert item without include in itemgroup in project
         /// </summary>
         [Fact]
