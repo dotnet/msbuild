@@ -49,7 +49,6 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
                 ITaskItem sqlScriptItem = new TaskItem(outputFileFullPath);
                 sqlScriptItem.SetMetadata("DBContext", dbContext.ItemSpec);
                 sqlScriptItem.SetMetadata("ConnectionString", dbContext.GetMetadata("Value"));
-                sqlScriptItem.SetMetadata("EscapedPath", Regex.Escape(outputFileFullPath));
                 EFSQLScripts[index] = sqlScriptItem;
 
                 index++;
