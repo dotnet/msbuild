@@ -1,48 +1,38 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework Condition="'$(Framework)' != 'netcoreapp1.1'">netcoreapp1.0</TargetFramework>
-    <TargetFramework Condition="'$(Framework)' == 'netcoreapp1.1'">netcoreapp1.1</TargetFramework>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <RuntimeFrameworkVersion>2.0.0-beta-001507</RuntimeFrameworkVersion>
     <UserSecretsId Condition="'$(IndividualAuth)' == 'True'">aspnet-Company.WebApplication1-53bc9b9d-9d6a-45d4-8429-2a2761773502</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' != 'True' ">
-    <None Update="Company.WebApplication1.db" CopyToOutputDirectory="CopyIfNewer" />
+    <None Update="Company.WebApplication1.db" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(Framework)' != 'netcoreapp1.1'">
+  <ItemGroup>
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.0.0-beta1" Condition="'$(IncludeApplicationInsights)' == 'True'" />
-    <PackageReference Include="Microsoft.AspNetCore" Version="1.0.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="1.0.1" Condition="'$(IndividualAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="1.0.1" Condition="'$(IndividualAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="1.0.1" Condition="'$(IndividualAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="1.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="1.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="1.0.2" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="1.0.2" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' != 'True' " />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Design" Version="1.0.2" PrivateAssets="All" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' != 'True' " />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="1.0.2" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' == 'True' " />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.Design" Version="1.0.2" PrivateAssets="All" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' == 'True' " />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="1.0.0-msbuild3-final" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="1.0.1" Condition="'$(IndividualAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.0.1" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="1.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="1.2.0-preview1-23339" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="1.2.0-preview1-23339" Condition="'$(IndividualAuth)' == 'True'" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="1.2.0-preview1-23339" Condition="'$(IndividualAuth)' == 'True'" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="1.2.0-preview1-23339" Condition="'$(IndividualAuth)' == 'True'" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="1.2.0-preview1-23339" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="1.2.0-preview1-23339" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="1.2.0-preview1-23339" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="1.2.0-preview1-23339" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' != 'True' " />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Design" Version="1.2.0-preview1-23339" PrivateAssets="All" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' != 'True' " />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="1.2.0-preview1-23339" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' == 'True' " />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.Design" Version="1.2.0-preview1-23339" PrivateAssets="All" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' == 'True' " />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="1.2.0-preview1-23339" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="1.2.0-preview1-23339" Condition="'$(IndividualAuth)' == 'True'" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.2.0-preview1-23339" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="1.2.0-preview1-23339" />
   </ItemGroup>
-  <ItemGroup Condition="'$(Framework)' == 'netcoreapp1.1'">
-    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.0.0-beta1" Condition="'$(IncludeApplicationInsights)' == 'True'" />
-    <PackageReference Include="Microsoft.AspNetCore" Version="1.1.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="1.1.0" Condition="'$(IndividualAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="1.1.0" Condition="'$(IndividualAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="1.1.0" Condition="'$(IndividualAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="1.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="1.1.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="1.1.0" Condition="'$(IndividualAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="1.1.0" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' != 'True' " />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Design" Version="1.1.0" PrivateAssets="All" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' != 'True' " />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="1.1.0" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' == 'True' " />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.Design" Version="1.1.0" PrivateAssets="All" Condition=" '$(IndividualAuth)' == 'True' AND '$(UseLocalDB)' == 'True' " />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="1.0.0-msbuild3-final" PrivateAssets="All" Condition="'$(IndividualAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="1.1.0" Condition="'$(IndividualAuth)' == 'True'" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.1.0" />
+
+  <ItemGroup>
+    <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="1.2.0-preview1-23339" />
+    <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="1.0.1-alpha-23339" />
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="1.2.0-preview4-23180" />
   </ItemGroup>
+
 </Project>

@@ -1,7 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.4</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <NetStandardImplicitPackageVersion>2.0.0-beta-001507</NetStandardImplicitPackageVersion>
   </PropertyGroup>
 
 </Project>

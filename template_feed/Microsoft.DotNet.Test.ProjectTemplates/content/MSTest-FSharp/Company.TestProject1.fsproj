@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework Condition="'$(Framework)' != 'netcoreapp1.1'">netcoreapp1.0</TargetFramework>
-    <TargetFramework Condition="'$(Framework)' == 'netcoreapp1.1'">netcoreapp1.1</TargetFramework>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <RuntimeFrameworkVersion>2.0.0-beta-001507</RuntimeFrameworkVersion>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
 

@@ -1,7 +1,8 @@
 ﻿<Project Sdk="FSharp.NET.Sdk;Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.6</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <NetStandardImplicitPackageVersion>2.0.0-beta-001507</NetStandardImplicitPackageVersion>
     <Version>1.0.0-alpha</Version>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
