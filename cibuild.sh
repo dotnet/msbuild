@@ -322,7 +322,7 @@ if [ "$host" = "Mono" ]; then
     MS_COMPILER_DIR="$PACKAGES_DIR/microsoft.net.compilers/2.0.0-rc3-61110-06/tools/"
     rm -f $MS_COMPILER_DIR/System.Runtime.InteropServices.RuntimeInformation.dll
 
-    CSC_ARGS="/p:CscToolExe=csc.exe /p:CscToolPath=$MS_COMPILER_DIR /p:DebugType=portable"
+    CSC_ARGS="/p:CscToolExe=csc.exe /p:CscToolPath=$MS_COMPILER_DIR /p:DebugType=portable /p:CscDebugFileExt=.pdb"
 fi
 
 # The set of warnings to suppress for now
