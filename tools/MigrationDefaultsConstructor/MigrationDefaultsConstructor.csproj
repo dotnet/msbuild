@@ -8,9 +8,6 @@
     <PackageTargetFallback>$(PackageTargetFallback);dnxcore50;portable-net45+win8</PackageTargetFallback>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="**\*.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\src\dotnet\dotnet.csproj" />
     <PackageReference Include="Microsoft.NETCore.App">
       <Version>$(CLI_SharedFrameworkVersion)</Version>
