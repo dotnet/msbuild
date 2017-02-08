@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net.Http;
 using Microsoft.Build.Utilities;
+using Microsoft.NETCore.Sdk.Publish.Tasks.Properties;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
 {
@@ -29,7 +30,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
             if (!File.Exists(zipFileFullPath))
             {
                 // If the source file directory does not exist quit early.
-                _logger.LogError(String.Format(SR.KUDUDEPLOY_AzurePublishErrorReason, SR.KUDUDEPLOY_DeployOutputPathEmpty));
+                _logger.LogError(String.Format(Resources.KUDUDEPLOY_AzurePublishErrorReason, Resources.KUDUDEPLOY_DeployOutputPathEmpty));
                 return false;
             }
 
@@ -56,12 +57,12 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
                         req.Headers.Add("Authorization", "Basic " + AuthorizationInfo);
                         req.Content = content;
 
-                        _logger.LogMessage(Microsoft.Build.Framework.MessageImportance.High, SR.KUDUDEPLOY_PublishAzure);
+                        _logger.LogMessage(Microsoft.Build.Framework.MessageImportance.High, Resources.KUDUDEPLOY_PublishAzure);
                         using (var response = await client.SendAsync(req))
                         {
                             if (!response.IsSuccessStatusCode)
                             {
-                                _logger.LogError(String.Format(SR.KUDUDEPLOY_PublishZipFailedReason, ConnectionInfo.SiteName, response.ReasonPhrase));
+                                _logger.LogError(String.Format(Resources.KUDUDEPLOY_PublishZipFailedReason, ConnectionInfo.SiteName, response.ReasonPhrase));
                                 return false;
                             }
                         }

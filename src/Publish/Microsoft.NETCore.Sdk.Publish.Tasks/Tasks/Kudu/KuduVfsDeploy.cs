@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using Microsoft.Build.Utilities;
+using Microsoft.NETCore.Sdk.Publish.Tasks.Properties;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
 {
@@ -74,14 +75,14 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
                                     {
                                         lock (_syncObject)
                                         {
-                                            _logger.LogMessage(Microsoft.Build.Framework.MessageImportance.High, String.Format(SR.KUDUDEPLOY_AddingFileFailed, ConnectionInfo.SiteName + "/" + relUrl, response.ReasonPhrase));
+                                            _logger.LogMessage(Microsoft.Build.Framework.MessageImportance.High, String.Format(Resources.KUDUDEPLOY_AddingFileFailed, ConnectionInfo.SiteName + "/" + relUrl, response.ReasonPhrase));
                                         }
                                     }
                                     else
                                     {
                                         lock (_syncObject)
                                         {
-                                            _logger.LogMessage(Microsoft.Build.Framework.MessageImportance.High, String.Format(SR.KUDUDEPLOY_AddingFile, ConnectionInfo.SiteName + "/" + relUrl));
+                                            _logger.LogMessage(Microsoft.Build.Framework.MessageImportance.High, String.Format(Resources.KUDUDEPLOY_AddingFile, ConnectionInfo.SiteName + "/" + relUrl));
                                         }
                                     }
                                 }

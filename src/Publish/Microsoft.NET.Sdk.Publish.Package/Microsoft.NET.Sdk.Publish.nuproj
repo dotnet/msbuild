@@ -6,12 +6,12 @@
     <NuSpecFile>$(MSBuildProjectName).nuspec</NuSpecFile>
     <OutputPath>$(WebSdkRootDir)bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>$(WebSdkRootDir)obj\$(Configuration)\</IntermediateOutputPath>
-    <CoreSdkVersion Condition="'$(CoreSdkVersion)' ==''">1.0.0-rc2</CoreSdkVersion>
+    <CoreSdkVersion Condition="'$(CoreSdkVersion)' ==''">1.0.0</CoreSdkVersion>
     <WebSdkVersion Condition="'$(WebSdkVersion)' ==''">$(CoreSdkVersion)</WebSdkVersion>
     <NuSpecProperties>CoreSdkVersion=$(CoreSdkVersion);WebSdkVersion=$(WebSdkVersion)</NuSpecProperties>
   </PropertyGroup>
   <ItemGroup>
-    <NuGetContent Include="$(WebSdkRootDir)\bin\$(Configuration)\net46\Microsoft.NET.Sdk.Publish.Tasks.dll" >
+    <NuGetContent Include="$(WebSdkRootDir)\bin\$(Configuration)\net46\Microsoft.NETCore.Sdk.Publish.Tasks.dll" >
       <Destination>tools\net46</Destination>
     </NuGetContent>
     <NuGetContent Include="$(WebSdkRootDir)\bin\$(Configuration)\net46\Newtonsoft.Json.dll" >

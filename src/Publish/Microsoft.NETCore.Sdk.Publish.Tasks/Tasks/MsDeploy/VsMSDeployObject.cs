@@ -11,6 +11,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
     using Diagnostics = System.Diagnostics;
     // using Deployment = Microsoft.Web.Deployment;
     using RegularExpressions = System.Text.RegularExpressions;
+    using Microsoft.NETCore.Sdk.Publish.Tasks.Properties;
 
     // we need to think of a way to split the MSDeployment to other dll
     // using VSMSDeploySyncOption = Deployment.DeploymentSyncOptions;
@@ -328,7 +329,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         public override string ToString()
         {
             string root = m_fNoDisplayRoot ? "******" : m_root;
-            return string.Format(System.Globalization.CultureInfo.CurrentCulture,SR.VSMSDEPLOY_ObjectIdentity, m_provider.ToString(), root);
+            return string.Format(System.Globalization.CultureInfo.CurrentCulture,Resources.VSMSDEPLOY_ObjectIdentity, m_provider.ToString(), root);
         }
         
 

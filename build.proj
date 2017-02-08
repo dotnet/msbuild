@@ -84,7 +84,7 @@
     <PropertyGroup>
       <WebSdkBuildVersion Condition="'$(WebSdkVersion)' == ''">$(CoreSdkBuildVersion)</WebSdkBuildVersion>
       <CiBuildPostfix Condition="'$(BUILD_NUMBER)' != ''">-$(BUILD_NUMBER)</CiBuildPostfix>
-      <WebSdkVersion Condition="'$(WebSdkVersion)' == ''">$(VersionPrefix)-$(VersionPrereleasePrefix)-$(WebSdkBuildVersion)$(CiBuildPostfix)</WebSdkVersion>
+      <WebSdkVersion Condition="'$(WebSdkVersion)' == ''">$(VersionPrefix)-final</WebSdkVersion>
     </PropertyGroup>
   </Target>
   

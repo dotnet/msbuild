@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using Microsoft.Build.Framework;
+using Microsoft.NETCore.Sdk.Publish.Tasks.Properties;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks
 {
@@ -15,7 +16,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
         {
             if (String.IsNullOrEmpty(ParameterValue))
             {
-                Log.LogError(String.Format(CultureInfo.CurrentCulture, SR.ValidateParameter_ArgumentNullError, ParameterName));
+                Log.LogError(String.Format(CultureInfo.CurrentCulture, Resources.ValidateParameter_ArgumentNullError, ParameterName));
                 return false;
             }
 

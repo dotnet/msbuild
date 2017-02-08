@@ -19,6 +19,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
     using Generic = System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using Microsoft.NETCore.Sdk.Publish.Tasks.Properties;
 
     internal enum PipelineMetadata
     {
@@ -412,9 +413,9 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                         _isMSDeployInstalled = CheckMSDeploymentVersion();
                     }
                     catch (System.IO.FileNotFoundException ex) {
-                        _strErrorMessage = string.Format(System.Globalization.CultureInfo.CurrentCulture,SR.VSMSDEPLOY_MSDEPLOYLOADFAIL,
-                            SR.VSMSDEPLOY_MSDEPLOY32bit,
-                            SR.VSMSDEPLOY_MSDEPLOY64bit,
+                        _strErrorMessage = string.Format(System.Globalization.CultureInfo.CurrentCulture,Resources.VSMSDEPLOY_MSDEPLOYLOADFAIL,
+                            Resources.VSMSDEPLOY_MSDEPLOY32bit,
+                            Resources.VSMSDEPLOY_MSDEPLOY64bit,
                             ex.Message);
                         _isMSDeployInstalled = false;
                     }
@@ -504,9 +505,9 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 
                 if (fMinVersionNotMeet)
                 {
-                    _strErrorMessage = string.Format(System.Globalization.CultureInfo.CurrentCulture, SR.VSMSDEPLOY_MSDEPLOYLOADFAIL,
-                        SR.VSMSDEPLOY_MSDEPLOY32bit,
-                        SR.VSMSDEPLOY_MSDEPLOY64bit,
+                    _strErrorMessage = string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.VSMSDEPLOY_MSDEPLOYLOADFAIL,
+                        Resources.VSMSDEPLOY_MSDEPLOY32bit,
+                        Resources.VSMSDEPLOY_MSDEPLOY64bit,
                         assemblyVersion,
                         currentMinVersion);
                     return false;
@@ -516,9 +517,9 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             }
             else
             {
-                _strErrorMessage = string.Format(System.Globalization.CultureInfo.CurrentCulture, SR.VSMSDEPLOY_MSDEPLOYLOADFAIL,
-                 SR.VSMSDEPLOY_MSDEPLOY32bit,
-                 SR.VSMSDEPLOY_MSDEPLOY64bit,
+                _strErrorMessage = string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.VSMSDEPLOY_MSDEPLOYLOADFAIL,
+                 Resources.VSMSDEPLOY_MSDEPLOY32bit,
+                 Resources.VSMSDEPLOY_MSDEPLOY64bit,
                  new System.Version(),
                  currentMinVersion);
                 return false;
@@ -653,32 +654,32 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                     string dir = IO.Path.GetDirectoryName(destRoot);
                     string dirUri = ConvertAbsPhysicalPathToAbsUriPath(dir);
                     if (IsOneof(destType, ArchiveDirOnly, System.StringComparison.InvariantCultureIgnoreCase))
-                        strSucceedFailMsg = string.Format(System.Globalization.CultureInfo.CurrentCulture, SR.VSMSDEPLOY_SucceedArchiveDir, string.IsNullOrEmpty(dirUri) ? destRoot : dirUri);
+                        strSucceedFailMsg = string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.VSMSDEPLOY_SucceedArchiveDir, string.IsNullOrEmpty(dirUri) ? destRoot : dirUri);
                     else
-                        strSucceedFailMsg = string.Format(System.Globalization.CultureInfo.CurrentCulture, SR.VSMSDEPLOY_SucceedPackage, IO.Path.GetFileName(destRoot), string.IsNullOrEmpty(dirUri) ? destRoot : dirUri);
+                        strSucceedFailMsg = string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.VSMSDEPLOY_SucceedPackage, IO.Path.GetFileName(destRoot), string.IsNullOrEmpty(dirUri) ? destRoot : dirUri);
                     fNeedUnpackageHelpLink = true;
                 }
                 else
                 {
-                    strSucceedFailMsg = SR.VSMSDEPLOY_SucceedDeploy;
+                    strSucceedFailMsg = Resources.VSMSDEPLOY_SucceedDeploy;
                 }
             }
             else
             {
                 if (IsOneof(destType, packageArchivedir, System.StringComparison.InvariantCultureIgnoreCase))
                 {
-                    strSucceedFailMsg = SR.VSMSDEPLOY_FailedPackage;
+                    strSucceedFailMsg = Resources.VSMSDEPLOY_FailedPackage;
                 }
                 else
                 {
-                    strSucceedFailMsg = SR.VSMSDEPLOY_FailedDeploy;
+                    strSucceedFailMsg = Resources.VSMSDEPLOY_FailedDeploy;
                 }
             }
             Log.LogMessage(Framework.MessageImportance.High, strSucceedFailMsg);
             if (fNeedUnpackageHelpLink)
             {
-                Log.LogMessage(Framework.MessageImportance.High, SR.VSMSDEPLOY_WebPackageHelpLinkMessage);
-                Log.LogMessage(Framework.MessageImportance.High, SR.VSMSDEPLOY_WebPackageHelpLink);
+                Log.LogMessage(Framework.MessageImportance.High, Resources.VSMSDEPLOY_WebPackageHelpLinkMessage);
+                Log.LogMessage(Framework.MessageImportance.High, Resources.VSMSDEPLOY_WebPackageHelpLink);
             }
         }
       
@@ -719,14 +720,14 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                     string dir = IO.Path.GetDirectoryName(destRoot);
                     string dirUri = ConvertAbsPhysicalPathToAbsUriPath(dir);
                     if (wellKnownProvider.Equals(MSWebDeploymentAssembly.DynamicAssembly.GetEnumValue(MSDeploy.TypeName.DeploymentWellKnownProvider, MSDeploy.Provider.ArchiveDir)))
-                        strSucceedFailMsg = string.Format(System.Globalization.CultureInfo.CurrentCulture,SR.VSMSDEPLOY_SucceedArchiveDir, string.IsNullOrEmpty(dirUri) ? destRoot : dirUri);
+                        strSucceedFailMsg = string.Format(System.Globalization.CultureInfo.CurrentCulture,Resources.VSMSDEPLOY_SucceedArchiveDir, string.IsNullOrEmpty(dirUri) ? destRoot : dirUri);
                     else
-                        strSucceedFailMsg = string.Format(System.Globalization.CultureInfo.CurrentCulture,SR.VSMSDEPLOY_SucceedPackage, IO.Path.GetFileName(destRoot), string.IsNullOrEmpty(dirUri) ? destRoot : dirUri);
+                        strSucceedFailMsg = string.Format(System.Globalization.CultureInfo.CurrentCulture,Resources.VSMSDEPLOY_SucceedPackage, IO.Path.GetFileName(destRoot), string.IsNullOrEmpty(dirUri) ? destRoot : dirUri);
                     fNeedUnpackageHelpLink = true;
                 }
                 else
                 {
-                    strSucceedFailMsg = SR.VSMSDEPLOY_SucceedDeploy;
+                    strSucceedFailMsg = Resources.VSMSDEPLOY_SucceedDeploy;
                 }
 
                  
@@ -736,18 +737,18 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                 if (wellKnownProvider.Equals(MSWebDeploymentAssembly.DynamicAssembly.GetEnumValue(MSDeploy.TypeName.DeploymentWellKnownProvider, MSDeploy.Provider.ArchiveDir)) ||
                     wellKnownProvider.Equals(MSWebDeploymentAssembly.DynamicAssembly.GetEnumValue(MSDeploy.TypeName.DeploymentWellKnownProvider, MSDeploy.Provider.Package)))
                 {
-                    strSucceedFailMsg = SR.VSMSDEPLOY_FailedPackage;
+                    strSucceedFailMsg = Resources.VSMSDEPLOY_FailedPackage;
                 }
                 else
                 {
-                    strSucceedFailMsg = SR.VSMSDEPLOY_FailedDeploy;
+                    strSucceedFailMsg = Resources.VSMSDEPLOY_FailedDeploy;
                 }
             }
             Log.LogMessage(Framework.MessageImportance.High, strSucceedFailMsg);
             if (fNeedUnpackageHelpLink)
             {
-                Log.LogMessage(Framework.MessageImportance.High, SR.VSMSDEPLOY_WebPackageHelpLinkMessage);
-                Log.LogMessage(Framework.MessageImportance.High, SR.VSMSDEPLOY_WebPackageHelpLink);
+                Log.LogMessage(Framework.MessageImportance.High, Resources.VSMSDEPLOY_WebPackageHelpLinkMessage);
+                Log.LogMessage(Framework.MessageImportance.High, Resources.VSMSDEPLOY_WebPackageHelpLink);
             }
         }
 
@@ -817,11 +818,11 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                             {
                                 skipDirective.Enabled = enabled;
                             }
-                            log.LogMessage(string.Format(System.Globalization.CultureInfo.CurrentCulture,SR.VSMSDEPLOY_SkipDirectiveSetEnable, skipDirective.Name, enabled.ToString()));
+                            log.LogMessage(string.Format(System.Globalization.CultureInfo.CurrentCulture,Resources.VSMSDEPLOY_SkipDirectiveSetEnable, skipDirective.Name, enabled.ToString()));
 
                         }
                     }
-                    log.LogWarning(string.Format(System.Globalization.CultureInfo.CurrentCulture,SR.VSMSDEPLOY_UnknownSkipDirective, name));
+                    log.LogWarning(string.Format(System.Globalization.CultureInfo.CurrentCulture,Resources.VSMSDEPLOY_UnknownSkipDirective, name));
                 }
             }
         }
@@ -1089,7 +1090,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                     dynamic parameter = null;
                     // deploymentObject.SyncParameters.TryGetValue(name, out parameter);
                     MSWebDeploymentAssembly.DeploymentTryGetValueContains(deploymentObject.SyncParameters, name, out parameter);
-                    string msg = string.Format(System.Globalization.CultureInfo.CurrentCulture,SR.VSMSDEPLOY_AddParameterIntoObject, name, value, deploymentObject.Name);
+                    string msg = string.Format(System.Globalization.CultureInfo.CurrentCulture,Resources.VSMSDEPLOY_AddParameterIntoObject, name, value, deploymentObject.Name);
                     host.Log.LogMessage(msg);
                     if (parameter != null)
                     {
@@ -1108,7 +1109,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                             sb.Append(param.Name);
                         }
                         // To do, change this to resource
-                        string errMessage = string.Format(System.Globalization.CultureInfo.CurrentCulture,SR.VSMSDEPLOY_UnknownParameter, name, sb.ToString());
+                        string errMessage = string.Format(System.Globalization.CultureInfo.CurrentCulture,Resources.VSMSDEPLOY_UnknownParameter, name, sb.ToString());
                         if (host != null)
                         {
                             throw new System.InvalidOperationException(errMessage);
@@ -1364,7 +1365,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                     dirinfo.Delete();
                     if (log != null)
                     {
-                        log.LogMessage(Microsoft.Build.Framework.MessageImportance.Normal, string.Format(System.Globalization.CultureInfo.CurrentCulture,SR.BUILDTASK_RemoveEmptyDirectories_Deleting, dirinfo.FullName));
+                        log.LogMessage(Microsoft.Build.Framework.MessageImportance.Normal, string.Format(System.Globalization.CultureInfo.CurrentCulture,Resources.BUILDTASK_RemoveEmptyDirectories_Deleting, dirinfo.FullName));
                     }
                     
                 }
@@ -1532,7 +1533,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             if (IsType(t, MSWebDeploymentAssembly.DynamicAssembly.GetType( MSDeploy.TypeName.DeploymentEncryptionException)))
             {
                 // dev10 695263 OGF: Encryption Error message needs more information for packaging
-                strBuilder.Append(SR.VSMSDEPLOY_EncryptionExceptionMessage);
+                strBuilder.Append(Resources.VSMSDEPLOY_EncryptionExceptionMessage);
             }
             else if (IsType(t,MSWebDelegationAssembly.DynamicAssembly.GetType(MSDeploy.TypeName.DeploymentException)))
             {
@@ -1556,33 +1557,33 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                     {
                         if (webException.Message.LastIndexOf("401", System.StringComparison.Ordinal) >= 0)
                         {
-                            strBuilder.Append(SR.VSMSDEPLOY_WebException401Message);
+                            strBuilder.Append(Resources.VSMSDEPLOY_WebException401Message);
                         }
                         else if (webException.Message.LastIndexOf("404", System.StringComparison.Ordinal) >= 0)
                         {
-                            strBuilder.Append(SR.VSMSDEPLOY_WebException404Message);
+                            strBuilder.Append(Resources.VSMSDEPLOY_WebException404Message);
                         }
                         else if (webException.Message.LastIndexOf("502", System.StringComparison.Ordinal) >= 0)
                         {
-                            strBuilder.Append(SR.VSMSDEPLOY_WebException502Message);
+                            strBuilder.Append(Resources.VSMSDEPLOY_WebException502Message);
                         }
                         else if (webException.Message.LastIndexOf("550", System.StringComparison.Ordinal) >= 0)
                         {
-                            strBuilder.Append(SR.VSMSDEPLOY_WebException550Message);
+                            strBuilder.Append(Resources.VSMSDEPLOY_WebException550Message);
                         }
                         else if (webException.Message.LastIndexOf("551", System.StringComparison.Ordinal) >= 0)
                         {
-                            strBuilder.Append(SR.VSMSDEPLOY_WebException551Message);
+                            strBuilder.Append(Resources.VSMSDEPLOY_WebException551Message);
                         }
                     }
                     else if (webException.Status == System.Net.WebExceptionStatus.ConnectFailure)
                     {
-                        strBuilder.Append(SR.VSMSDEPLOY_WebExceptionConnectFailureMessage);
+                        strBuilder.Append(Resources.VSMSDEPLOY_WebExceptionConnectFailureMessage);
                     }
                 }
                 else if (rootException is System.Net.Sockets.SocketException)
                 {
-                    strBuilder.Append(SR.VSMSDEPLOY_WebExceptionConnectFailureMessage);
+                    strBuilder.Append(Resources.VSMSDEPLOY_WebExceptionConnectFailureMessage);
                 }
                 else
                 {
@@ -1597,10 +1598,10 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                         // fwdlink1
                         if (index == 0)
                         {
-                            string srErrorMessage = SR.VSMSDEPLOY_MsDeployExceptionFwlink1Message;
+                            string srErrorMessage = Resources.VSMSDEPLOY_MsDeployExceptionFwlink1Message;
                             if (provider.LastIndexOf("sql", System.StringComparison.OrdinalIgnoreCase) >= 0)
                             {
-                                srErrorMessage = SR.VSMSDEPLOY_MsDeployExceptionFwlink1SQLMessage;
+                                srErrorMessage = Resources.VSMSDEPLOY_MsDeployExceptionFwlink1SQLMessage;
                             }
                             else
                             {
@@ -1616,22 +1617,22 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                                 if (wellKnownProvider.Equals(MSWebDeploymentAssembly.DynamicAssembly.GetEnumValue(MSDeploy.TypeName.DeploymentWellKnownProvider, MSDeploy.Provider.MetaKey))
                                     || wellKnownProvider.Equals(MSWebDeploymentAssembly.DynamicAssembly.GetEnumValue(MSDeploy.TypeName.DeploymentWellKnownProvider, MSDeploy.Provider.AppHostConfig)))
                                 {
-                                    srErrorMessage = SR.VSMSDEPLOY_MsDeployExceptionFwlink1SiteMessage;
+                                    srErrorMessage = Resources.VSMSDEPLOY_MsDeployExceptionFwlink1SiteMessage;
                                 }
                             }
                             strBuilder.Append(string.Format(System.Globalization.CultureInfo.CurrentCulture,srErrorMessage, provider));
                         }
                         else if (index == 1)
                         {
-                            strBuilder.Append(SR.VSMSDEPLOY_MsDeployExceptionFwlink2Message);
+                            strBuilder.Append(Resources.VSMSDEPLOY_MsDeployExceptionFwlink2Message);
                         }
                         else if (index == 2)
                         {
-                            strBuilder.Append(SR.VSMSDEPLOY_MsDeployExceptionFwlink3Message);
+                            strBuilder.Append(Resources.VSMSDEPLOY_MsDeployExceptionFwlink3Message);
                         }
                         else if (index == 3)
                         {
-                            strBuilder.Append(SR.VSMSDEPLOY_MsDeployExceptionFwlink4Message);
+                            strBuilder.Append(Resources.VSMSDEPLOY_MsDeployExceptionFwlink4Message);
                         }
                         else
                         {
@@ -1644,7 +1645,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             if (e.InnerException == null)
             {
                 strBuilder.Append(e.Message);
-                Log.LogError(string.Format(System.Globalization.CultureInfo.CurrentCulture,SR.VSMSDEPLOY_FailedWithException, strBuilder.ToString()));
+                Log.LogError(string.Format(System.Globalization.CultureInfo.CurrentCulture,Resources.VSMSDEPLOY_FailedWithException, strBuilder.ToString()));
             }
             else
             {
@@ -1656,7 +1657,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                     strBuilder.Append(currentException.Message);
                     currentException = currentException.InnerException;
                 }
-                Log.LogError(string.Format(System.Globalization.CultureInfo.CurrentCulture,SR.VSMSDEPLOY_FailedWithExceptionWithDetail, e.Message, strBuilder.ToString()));
+                Log.LogError(string.Format(System.Globalization.CultureInfo.CurrentCulture,Resources.VSMSDEPLOY_FailedWithExceptionWithDetail, e.Message, strBuilder.ToString()));
             }
             strBuilder.Append(System.Environment.NewLine);
             strBuilder.Append(e.StackTrace);
@@ -1809,17 +1810,17 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                     }
 
                     MSWebDelegationAssembly.SetVersion(webDelegationAssemblyVersion);
-                    task.Log.LogMessage(Microsoft.Build.Framework.MessageImportance.Low, string.Format(System.Globalization.CultureInfo.CurrentCulture,SR.VSMSDEPLOY_MSDEPLOYVERSIONLOAD, task.ToString(), MSWebDeploymentAssembly.DynamicAssembly.AssemblyFullName));
-                    task.Log.LogMessage(Microsoft.Build.Framework.MessageImportance.Low, string.Format(System.Globalization.CultureInfo.CurrentCulture,SR.VSMSDEPLOY_MSDEPLOYVERSIONLOAD, task.ToString(), MSWebDelegationAssembly.DynamicAssembly.AssemblyFullName));
+                    task.Log.LogMessage(Microsoft.Build.Framework.MessageImportance.Low, string.Format(System.Globalization.CultureInfo.CurrentCulture,Resources.VSMSDEPLOY_MSDEPLOYVERSIONLOAD, task.ToString(), MSWebDeploymentAssembly.DynamicAssembly.AssemblyFullName));
+                    task.Log.LogMessage(Microsoft.Build.Framework.MessageImportance.Low, string.Format(System.Globalization.CultureInfo.CurrentCulture,Resources.VSMSDEPLOY_MSDEPLOYVERSIONLOAD, task.ToString(), MSWebDelegationAssembly.DynamicAssembly.AssemblyFullName));
                     return;
                 }
                 catch (System.Exception e)
                 {
-                    task.Log.LogMessage(Microsoft.Build.Framework.MessageImportance.Low, string.Format(System.Globalization.CultureInfo.CurrentCulture,SR.BUILDTASK_FailedToLoadThisVersionMsDeployTryingTheNext, versionArray[i], e.Message));
+                    task.Log.LogMessage(Microsoft.Build.Framework.MessageImportance.Low, string.Format(System.Globalization.CultureInfo.CurrentCulture,Resources.BUILDTASK_FailedToLoadThisVersionMsDeployTryingTheNext, versionArray[i], e.Message));
                 }
             }
             // if it not return by now, it is definite a error
-            throw new System.InvalidOperationException(string.Format(System.Globalization.CultureInfo.CurrentCulture, SR.VSMSDEPLOY_MSDEPLOYASSEMBLYLOAD_FAIL, task.ToString()));
+            throw new System.InvalidOperationException(string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.VSMSDEPLOY_MSDEPLOYASSEMBLYLOAD_FAIL, task.ToString()));
         }
 
 

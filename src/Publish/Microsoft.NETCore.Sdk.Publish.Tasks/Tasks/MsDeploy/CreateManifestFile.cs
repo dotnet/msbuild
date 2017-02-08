@@ -133,8 +133,8 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                 finally
                 {
                     //logger.EndSection(string.Format(System.Globalization.CultureInfo.CurrentCulture,succeeded ?
-                    //    SR.BUILDTASK_TransformXml_TransformationSucceeded :
-                    //    SR.BUILDTASK_TransformXml_TransformationFailed));
+                    //    Resources.BUILDTASK_TransformXml_TransformationSucceeded :
+                    //    Resources.BUILDTASK_TransformXml_TransformationFailed));
                 }
             }
             return succeeded;
