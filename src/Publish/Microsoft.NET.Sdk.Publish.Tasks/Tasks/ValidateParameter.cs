@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using Microsoft.Build.Framework;
-using Microsoft.NETCore.Sdk.Publish.Tasks.Properties;
+using Microsoft.NET.Sdk.Publish.Tasks.Properties;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks
 {

@@ -8,8 +8,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
     using Utilities = Build.Utilities;
     using System.Linq;
     using System.Collections.Generic;
-    using Microsoft.NETCore.Sdk.Publish.Tasks.Properties;
-
+    using Microsoft.NET.Sdk.Publish.Tasks.Properties;
 
     /// <summary>
     /// WrapperClass for Microsoft.Web.Deployment

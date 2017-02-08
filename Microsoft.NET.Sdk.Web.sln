@@ -43,7 +43,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{4927120B-89F
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.NET.Sdk.Publish.Package", "src\Publish\Microsoft.NET.Sdk.Publish.Package\Microsoft.NET.Sdk.Publish.Package.csproj", "{66A79C91-8FB7-4F46-8B43-3D4CD32F5736}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NETCore.Sdk.Publish.Tasks", "src\Publish\Microsoft.NETCore.Sdk.Publish.Tasks\Microsoft.NETCore.Sdk.Publish.Tasks.csproj", "{F81ED1C2-3D7A-46A9-9E39-F2B718CA940F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Sdk.Publish.Tasks", "src\Publish\Microsoft.NET.Sdk.Publish.Tasks\Microsoft.NET.Sdk.Publish.Tasks.csproj", "{F81ED1C2-3D7A-46A9-9E39-F2B718CA940F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Microsoft.NET.Sdk.Publish.Targets", "Microsoft.NET.Sdk.Publish.Targets", "{569AAC15-FF3C-49CE-9CFF-AD1628E48057}"
 	ProjectSection(SolutionItems) = preProject

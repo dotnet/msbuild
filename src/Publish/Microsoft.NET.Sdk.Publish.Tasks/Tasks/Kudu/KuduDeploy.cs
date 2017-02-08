@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using System;
 using System.IO;
 using System.Collections.Generic;
-using Microsoft.NETCore.Sdk.Publish.Tasks.Properties;
+using Microsoft.NET.Sdk.Publish.Tasks.Properties;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
 {

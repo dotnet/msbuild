@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using Microsoft.Build.Utilities;
-using Microsoft.NETCore.Sdk.Publish.Tasks.Properties;
+using Microsoft.NET.Sdk.Publish.Tasks.Properties;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
 {
