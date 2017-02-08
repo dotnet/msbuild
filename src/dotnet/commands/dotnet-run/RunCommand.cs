@@ -124,14 +124,12 @@ namespace Microsoft.DotNet.Tools.Run
                     var project = "--project";
 
                     throw new InvalidOperationException(
-                        $"Couldn't find a project to run. Ensure a project exists in  {directory}, or pass the path to the project using {project}")
-                            .DisplayAsError();
+                        $"Couldn't find a project to run. Ensure a project exists in  {directory}, or pass the path to the project using {project}");
                 }
                 else if (projectFiles.Length > 1)
                 {
                     throw new InvalidOperationException(
-                        $"Specify which project file to use because {directory} contains more than one project file.")
-                            .DisplayAsError();
+                        $"Specify which project file to use because {directory} contains more than one project file.");
                 }
 
                 Project = projectFiles[0];
