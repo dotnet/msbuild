@@ -70,8 +70,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
     <!-- Default to use the version of the framework runtime matching the target framework version-->
     <RuntimeFrameworkVersion Condition="'$(RuntimeFrameworkVersion)' == ''">$(_TargetFrameworkVersionWithoutV)</RuntimeFrameworkVersion>
-
-    <NetCoreAppImplicitPackageVersion Condition="'$(NetCoreAppImplicitPackageVersion)' == ''">$(RuntimeFrameworkVersion)</NetCoreAppImplicitPackageVersion>
   </PropertyGroup>
 
   <UsingTask TaskName="CheckForImplicitPackageReferenceOverrides" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />

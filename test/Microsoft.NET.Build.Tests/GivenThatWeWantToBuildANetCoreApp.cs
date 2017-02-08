@@ -21,13 +21,12 @@ namespace Microsoft.NET.Build.Tests
     public class GivenThatWeWantToBuildANetCoreApp : SdkTest
     {
         [Theory]
-        //  TargetFramework, RuntimeFrameworkVersion, NETCoreAppPackageVersion, ExpectedPackageVersion, ExpectedRuntimeFrameworkVersion
-        [InlineData("netcoreapp1.0", null, null, "1.0.0", "1.0.0")]
-        [InlineData("netcoreapp1.1", null, null, "1.1.0", "1.1.0")]
-        [InlineData("netcoreapp1.0", null, "1.0.3", "1.0.3", "1.0.3")]
-        [InlineData("netcoreapp1.0", "1.0.1", null, "1.0.1", "1.0.1")]
-        [InlineData("netcoreapp1.0", "1.0.1", "1.0.3", "1.0.3", "1.0.3")]
-        public void It_targets_the_right_shared_framework(string targetFramework, string runtimeFrameworkVersion, string netCoreAppPackageVersion, 
+        //  TargetFramework, RuntimeFrameworkVersion, ExpectedPackageVersion, ExpectedRuntimeFrameworkVersion
+        [InlineData("netcoreapp1.0", null, "1.0.0", "1.0.0")]
+        [InlineData("netcoreapp1.1", null, "1.1.0", "1.1.0")]
+        [InlineData("netcoreapp1.0", "1.0.1", "1.0.1", "1.0.1")]
+        [InlineData("netcoreapp1.0", "1.0.3", "1.0.3", "1.0.3")]
+        public void It_targets_the_right_shared_framework(string targetFramework, string runtimeFrameworkVersion,
             string expectedPackageVersion, string expectedRuntimeVersion)
         {
             var testProject = new TestProject()
@@ -38,7 +37,7 @@ namespace Microsoft.NET.Build.Tests
                 IsExe = true
             };
 
-            string testIdentifier = string.Join("_", targetFramework, runtimeFrameworkVersion ?? "null", netCoreAppPackageVersion ?? "null");
+            string testIdentifier = string.Join("_", targetFramework, runtimeFrameworkVersion ?? "null");
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, nameof(It_targets_the_right_shared_framework), testIdentifier);
 
@@ -51,11 +50,6 @@ namespace Microsoft.NET.Build.Tests
                 if (runtimeFrameworkVersion != null)
                 {
                     propertyGroup.Add(new XElement(ns + "RuntimeFrameworkVersion", runtimeFrameworkVersion));
-                }
-
-                if (netCoreAppPackageVersion != null)
-                {
-                    propertyGroup.Add(new XElement(ns + "NetCoreAppImplicitPackageVersion", netCoreAppPackageVersion));
                 }
             });
 

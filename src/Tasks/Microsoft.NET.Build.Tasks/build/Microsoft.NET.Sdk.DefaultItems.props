@@ -34,7 +34,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </ItemGroup>
 
   <ItemGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
-    <PackageReference Include="Microsoft.NETCore.App" Version="$(NetCoreAppImplicitPackageVersion)" IsImplicitlyDefined="true" />
+    <PackageReference Include="Microsoft.NETCore.App" Version="$(RuntimeFrameworkVersion)" IsImplicitlyDefined="true" />
   </ItemGroup>
 
 </Project>
