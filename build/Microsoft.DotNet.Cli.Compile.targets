@@ -15,44 +15,16 @@
   </ItemGroup>
 
   <Target Name="Compile" DependsOnTargets="Prepare;
-                                           SetupStage;
-                                           CompileStage;
+                                           CompileCLI;
                                            PublishSdks;
                                            PublishTemplates;
                                            BuildProjectsForNuGetPackages;
                                            GetNuGetPackagesArchive;" />
 
-  <Target Name="SetupStage"
-          DependsOnTargets="Prepare">
-    <PropertyGroup>
-      <SrcDirectory>$(RepoRoot)/src</SrcDirectory>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <CompileStageInputs Include="$(SrcDirectory)/**/*.cs" Exclude="$(SrcDirectory)/**/obj/**/*.cs" />
-      <CompileStageInputs Include="$(SrcDirectory)/**/*.csproj;$(SrcDirectory)/**/project.assets.json" />
-
-      <Stage Include="Stage1">
-        <Inputs>@(CompileStageInputs)</Inputs>
-        <StageDirectory>$(Stage1Directory)</StageDirectory>
-        <StageSymbolsDirectory>$(Stage1SymbolsDirectory)</StageSymbolsDirectory>
-        <DotnetDir>$(Stage0Directory)</DotnetDir>
-      </Stage>
-      <Stage Include="Stage2">
-        <Inputs>@(CompileStageInputs)</Inputs>
-        <StageDirectory>$(Stage2Directory)</StageDirectory>
-        <StageSymbolsDirectory>$(Stage2SymbolsDirectory)</StageSymbolsDirectory>
-        <DotnetDir>$(Stage0Directory)</DotnetDir>
-      </Stage>
-    </ItemGroup>
-  </Target>
-
-  <Target Name="CompileStage"
-          DependsOnTargets="SetupStage;
-                            InitCrossgenProps;"
-          Inputs="%(Stage.Inputs)"
-          Outputs="%(StageDirectory)/sdk/$(SdkVersion)/dotnet.dll">
+  <Target Name="CompileCLI"
+          DependsOnTargets="InitCrossgenProps;">
       <PropertyGroup>
+        <SrcDirectory>$(RepoRoot)/src</SrcDirectory>
         <DynamicLibPrefix Condition=" '$(OSName)' == 'win' "></DynamicLibPrefix>
         <DynamicLibPrefix Condition=" '$(OSName)' != 'win' ">lib</DynamicLibPrefix>
 
@@ -64,8 +36,8 @@
         <DotnetHostFxrBaseName>$(DynamicLibPrefix)hostfxr$(DynamicLibSuffix)</DotnetHostFxrBaseName>
         <HostPolicyBaseName>$(DynamicLibPrefix)hostpolicy$(DynamicLibSuffix)</HostPolicyBaseName>
 
-        <StageDirectory>%(Stage.StageDirectory)</StageDirectory>
-        <StageSymbolsDirectory>%(Stage.StageSymbolsDirectory)</StageSymbolsDirectory>
+        <StageDirectory>$(Stage2Directory)</StageDirectory>
+        <StageSymbolsDirectory>$(Stage2SymbolsDirectory)</StageSymbolsDirectory>
         <SdkOutputDirectory>$(StageDirectory)/sdk/$(SdkVersion)</SdkOutputDirectory>
         <BinaryToCorehostifyOutDir>$(SdkOutputDirectory)/$(BinaryToCorehostifyRelDir)</BinaryToCorehostifyOutDir>
         <MSBuildTargetsDirectory>$(SdkOutputDirectory)/runtimes/any/native</MSBuildTargetsDirectory>
@@ -74,10 +46,6 @@
       </PropertyGroup>
 
       <ItemGroup>
-        <BinObj Remove="*" />
-        <BinObj Include="$(SrcDirectory)/**/bin/**/*" />
-        <BinObj Include="$(SrcDirectory)/**/obj/**/*" Exclude="$(SrcDirectory)/**/obj/project.assets.json;$(SrcDirectory)/**/obj/*.csproj.nuget.g.props;$(SrcDirectory)/**/obj/*.csproj.nuget.g.targets" />
-
         <SharedFramework Remove="*" />
         <SharedFramework Include="$(SharedFrameworkPublishDirectory)/**/*" />
 
@@ -89,8 +57,6 @@
         <RuntimeAssetsToRemoveFromDeps Include="tool_msbuild" />
         <RuntimeAssetsToRemoveFromDeps Include="tool_nuget" />
       </ItemGroup>
-
-      <Delete Files="@(BinObj)" />
 
       <RemoveDir Directories="$(StageDirectory)" />
       <MakeDir Directories="$(StageDirectory)"/>
@@ -110,15 +76,15 @@
           DestinationFiles="@(HackFilesToCopy->'$(SdkOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
     
     <!-- Publish DotNet -->
-    <DotNetPublish ToolPath="%(Stage.DotnetDir)"
+    <DotNetPublish ToolPath="$(Stage0Directory)"
                    Output="$(SdkOutputDirectory)"
                    Configuration="$(Configuration)"
                    VersionSuffix="$(CommitCount)"
                    ProjectPath="$(SrcDirectory)/redist/redist.csproj"
                    MSBuildArgs="/p:GenerateRuntimeConfigurationFiles=true" />
 
-    <!-- Publish DotNet -->
-    <DotNetPublish ToolPath="%(Stage.DotnetDir)"
+    <!-- Publish Roslyn -->
+    <DotNetPublish ToolPath="$(Stage0Directory)"
                    Output="$(SdkOutputDirectory)/Roslyn"
                    Configuration="$(Configuration)"
                    VersionSuffix="$(CommitCount)"
@@ -205,8 +171,6 @@
 
         <!-- Removing Full CLR built TestHost assemblies from getting Crossgen as it is throwing error -->
         <SdkFilesExclude Include="$(SdkOutputDirectory)/TestHost*/**/*" />
-        <!-- Remove NuGet.LibraryModel due to https://github.com/dotnet/coreclr/issues/9118 -->
-        <SdkFilesExclude Include="$(SdkOutputDirectory)/NuGet.LibraryModel.dll" />
         <SdkFiles Include="$(SdkOutputDirectory)/**/*" Exclude="@(SdkFilesExclude)" />
         <SdkFilesWithPEMarker Remove="*" />
       </ItemGroup>

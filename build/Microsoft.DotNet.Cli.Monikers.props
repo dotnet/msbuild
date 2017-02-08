@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <SdkBrandName>Microsoft .NET Core 1.0.3 - SDK RC 4</SdkBrandName>
-    <SharedFrameworkBrandName>Microsoft .NET Core 1.0.3 - Runtime</SharedFrameworkBrandName>
-    <SharedHostBrandName>Microsoft .NET Core 1.1.0 - Host</SharedHostBrandName>
-    <HostFxrBrandName>Microsoft .NET Core 1.1.0 - Host FX Resolver</HostFxrBrandName>
+    <SdkBrandName>Microsoft .NET Core 2.0.0 - SDK Alpha</SdkBrandName>
+    <SharedFrameworkBrandName>Microsoft .NET Core 2.0.0 - Runtime</SharedFrameworkBrandName>
+    <SharedHostBrandName>Microsoft .NET Core 2.0.0 - Host</SharedHostBrandName>
+    <HostFxrBrandName>Microsoft .NET Core 2.0.0 - Host FX Resolver</HostFxrBrandName>
     
-    <AdditionalSharedFrameworkBrandName>Microsoft .NET Core 1.1.0 - Runtime</AdditionalSharedFrameworkBrandName>
-    <AdditionalSharedHostBrandName>Microsoft .NET Core 1.1.0 - Host</AdditionalSharedHostBrandName>
-    <AdditionalHostFxrBrandName>Microsoft .NET Core 1.1.0 - Host FX Resolver</AdditionalHostFxrBrandName>
+    <AdditionalSharedFrameworkBrandName>Microsoft .NET Core 1.0.3 - Runtime</AdditionalSharedFrameworkBrandName>
+    <AdditionalSharedHostBrandName>Microsoft .NET Core 1.0.1 - Host</AdditionalSharedHostBrandName>
+    <AdditionalHostFxrBrandName>Microsoft .NET Core 1.0.1 - Host FX Resolver</AdditionalHostFxrBrandName>
 
     <SharedFrameworkNugetName>Microsoft.NETCore.App</SharedFrameworkNugetName>
   </PropertyGroup>

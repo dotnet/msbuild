@@ -118,7 +118,7 @@
     </Target>
 
     <Target Name="SetupNuGetPackagesArchiveInputsOutputs"
-            DependsOnTargets="Prepare;SetupStage;SetupAzureBlobInformation">
+            DependsOnTargets="Prepare;SetupAzureBlobInformation">
       <GenerateNuGetPackagesArchiveVersion ToolPath="$(Stage2Directory)">
         <Output TaskParameter="Version" PropertyName="NuGetPackagesArchiveVersion"/>
       </GenerateNuGetPackagesArchiveVersion>

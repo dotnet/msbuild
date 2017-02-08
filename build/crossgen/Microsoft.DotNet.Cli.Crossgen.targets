@@ -3,17 +3,10 @@
   <Target Name="InitCrossgenProps"
           DependsOnTargets="Init">
     <PropertyGroup>
-      <CoreCLRPackageName>runtime.$(CoreCLRRid).microsoft.netcore.runtime.coreclr</CoreCLRPackageName>
-      <CrossGenPackageName>runtime.$(CoreCLRRid).microsoft.netcore.runtime.coreclr</CrossGenPackageName>
-      <LibCLRJitPackageName>runtime.$(CoreCLRRid).microsoft.netcore.jit</LibCLRJitPackageName>
+      <RuntimeNETCoreAppPackageName>runtime.$(CoreCLRRid).microsoft.netcore.app</RuntimeNETCoreAppPackageName>
 
-      <CoreCLRLibsDir>$(NuGetPackagesDir)/$(CoreCLRPackageName)/$(CLI_CoreCLRVersion)/runtimes/$(CoreCLRRid)/lib/netstandard1.0</CoreCLRLibsDir>
-      <CrossgenPath>$(NuGetPackagesDir)/$(CrossGenPackageName)/$(CLI_CoreCLRVersion)/tools/crossgen$(ExeExtension)</CrossgenPath>
-      <LibCLRJitPath>$(NuGetPackagesDir)/$(LibCLRJitPackageName)/$(CLI_CoreCLRVersion)/runtimes/$(CoreCLRRid)/native/$(DynamicLibPrefix)clrjit$(DynamicLibExtension)</LibCLRJitPath>
+      <CrossgenPath>$(NuGetPackagesDir)/$(RuntimeNETCoreAppPackageName)/$(CLI_SharedFrameworkVersion)/tools/crossgen$(ExeExtension)</CrossgenPath>
+      <LibCLRJitPath>$(NuGetPackagesDir)/$(RuntimeNETCoreAppPackageName)/$(CLI_SharedFrameworkVersion)/runtimes/$(CoreCLRRid)/native/$(DynamicLibPrefix)clrjit$(DynamicLibExtension)</LibCLRJitPath>
     </PropertyGroup>
-
-    <ItemGroup>
-      <PlatformAssemblies Include="$(CoreCLRLibsDir)" />
-    </ItemGroup>
   </Target>
 </Project>
