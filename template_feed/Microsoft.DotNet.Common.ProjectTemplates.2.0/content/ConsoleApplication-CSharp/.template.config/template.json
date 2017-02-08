@@ -1,0 +1,39 @@
+{
+  "author": "Microsoft",
+  "classifications": ["Common", "Console"],
+  "name": "Console Application",
+  "groupIdentity": "Microsoft.Common.Console",
+  "identity": "Microsoft.Common.Console.CSharp",
+  "shortName": "console",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "Company.ConsoleApplication1",
+  "preferNameDirectory": true,
+  "symbols": {
+    "sdkVersion": {
+      "type": "bind",
+      "binding": "dotnet-cli-version",
+      "replaces": "1.0.0-preview5-004445"
+    },
+    "RuntimeFrameworkVersion": {
+      "type": "parameter",
+      "datatype": "string",
+      "replaces": "2.0.0-beta-001507",
+      "defaultValue": "2.0.0-beta-001507"
+    },
+    "Framework": {
+      "type": "parameter",
+      "datatype": "choice",
+      "choices": [
+        {
+          "choice": "netcoreapp2.0",
+          "description": "Target netcoreapp2.0"
+        }
+      ],
+      "replaces": "netcoreapp2.0",
+      "defaultValue": "netcoreapp2.0"
+    }
+  }
+}
