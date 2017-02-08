@@ -21,9 +21,6 @@ namespace Microsoft.DotNet.Cli.Build
         [Required]
         public string ToolPath { get; set; }
 
-        [Required]
-        public string SharedFrameworkVersion { get; set; }
-
         [Output]
         public String Version { get; set; }
 

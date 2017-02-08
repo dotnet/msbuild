@@ -61,14 +61,7 @@
       <Output TaskParameter="CommitCount" PropertyName="DefaultCommitCount" />
       <Output TaskParameter="MsiVersion" PropertyName="MsiVersion" />
       <Output TaskParameter="VersionBadgeMoniker" PropertyName="VersionBadgeMoniker" />
-      <Output TaskParameter="Channel" PropertyName="Channel" />
-      <Output TaskParameter="BranchName" PropertyName="BranchName" Condition=" '$(BranchName)' == '' " />
     </GenerateBuildVersionInfo>
-
-    <GenerateNuGetPackagesArchiveVersion RepoRoot="$(RepoRoot)"
-                                         SharedFrameworkVersion="$(CLI_SharedFrameworkVersion)">
-      <Output TaskParameter="Version" PropertyName="NuGetPackagesArchiveVersion"/>
-    </GenerateNuGetPackagesArchiveVersion>
 
     <PropertyGroup>
       <CommitCount Condition=" '$(CommitCount)' == '' ">$(DefaultCommitCount)</CommitCount>
