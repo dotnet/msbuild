@@ -1,0 +1,50 @@
+{
+  "author": "Microsoft",
+  "classifications": ["Web", "Empty"],
+  "name": "Empty ASP.NET Core Web Application",
+  "groupIdentity": "Microsoft.Web.Empty",
+  "identity": "Microsoft.Web.Empty.CSharp",
+  "shortName": "web",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "Company.WebApplication1",
+  "preferNameDirectory": true,
+  "symbols": {
+    "IncludeApplicationInsights": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Whether or not to include Application Insights in the project"
+    },
+    "Framework": {
+      "type": "parameter",
+      "datatype": "choice",
+      "choices": [
+        {
+          "choice": "netcoreapp1.0",
+          "description": "Target netcoreapp1.0"
+        },
+        {
+          "choice": "netcoreapp1.1",
+          "description": "Target netcoreapp1.1"
+        }
+      ],
+      "defaultValue": "netcoreapp1.0"
+    },
+    "sdkVersion": {
+      "type": "bind",
+      "binding": "dotnet-cli-version",
+      "replaces": "1.0.0-preview5-004445"
+    },
+    "copyrightYear": {
+      "type": "generated",
+      "generator": "now",
+      "replaces": "1975",
+      "parameters": {
+        "format": "yyyy"
+      }
+    }
+  }
+}

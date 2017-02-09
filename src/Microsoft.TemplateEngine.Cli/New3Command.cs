@@ -225,6 +225,16 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 instantiateResult = await _templateCreator.InstantiateAsync(template, Name, fallbackName, OutputPath, _app.AllTemplateParams, SkipUpdateCheck).ConfigureAwait(false);
             }
+            catch (ContentGenerationException cx)
+            {
+                Reporter.Error.WriteLine(cx.Message.Bold().Red());
+                if(cx.InnerException != null)
+                {
+                    Reporter.Error.WriteLine(cx.InnerException.Message.Bold().Red());
+                }
+
+                return CreationResultStatus.CreateFailed;
+            }
             catch (TemplateAuthoringException tae)
             {
                 Reporter.Error.WriteLine(tae.Message.Bold().Red());

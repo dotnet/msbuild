@@ -1,0 +1,18 @@
+{
+  "symbolInfo": {
+    "IncludeApplicationInsights": {
+      "isHidden": "true"
+    },
+    "UseLocalDB": {
+      "longName": "use-local-db"
+    },
+    "Framework": {
+      "longName": "framework"
+    },
+    "RuntimeFrameworkVersion": {
+      "longName": "runtime-framework-version",
+      "shortName": "fv",
+      "isHidden": "true"
+    }
+  }
+}

@@ -1,1 +1,2 @@
-%DN3%\..\artifacts\templates\*.nupkg
+%DN3%\..\artifacts\templates\*.ItemTemplates.*.nupkg
+%DN3%\..\artifacts\templates\*.1.x.*.nupkg

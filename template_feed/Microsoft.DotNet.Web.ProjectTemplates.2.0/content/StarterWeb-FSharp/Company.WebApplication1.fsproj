@@ -1,0 +1,33 @@
+<Project Sdk="FSharp.NET.Sdk;Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <RuntimeFrameworkVersion>2.0.0-beta-001507</RuntimeFrameworkVersion>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Controllers/*.fs" />
+    <Compile Include="Startup.fs" />
+    <Compile Include="Program.fs" />
+
+    <None Remove="**/*.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FSharp.NET.Sdk" Version="1.0.0-beta-*" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="1.2.0-preview1-23339" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="1.2.0-preview1-23339" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="1.2.0-preview1-23339" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.2.0-preview1-23339" />
+    <PackageReference Include="Microsoft.FSharp.Core.netcore" Version="1.0.0-alpha-161023" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="14.2.0-preview1-23339" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <DotNetCliToolReference Include="dotnet-compile-fsc">
+      <Version>1.0.0-preview2-020000</Version>
+    </DotNetCliToolReference>
+  </ItemGroup>
+
+</Project>

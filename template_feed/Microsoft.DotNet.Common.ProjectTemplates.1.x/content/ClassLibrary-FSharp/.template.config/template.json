@@ -1,0 +1,21 @@
+{
+  "author": "Microsoft",
+  "classifications": ["Common", "Library"],
+  "name": "Class library",
+  "groupIdentity": "Microsoft.Common.Library",
+  "identity": "Microsoft.Common.Library.FSharp",
+  "shortName": "classlib",
+  "tags": {
+    "language": "F#",
+    "type": "project"
+  },
+  "sourceName": "Company.ClassLibrary1",
+  "preferNameDirectory": true,
+  "symbols": {
+    "sdkVersion": {
+      "type": "bind",
+      "binding": "dotnet-cli-version",
+      "replaces": "1.0.0-preview5-004445"
+    }
+  }
+}

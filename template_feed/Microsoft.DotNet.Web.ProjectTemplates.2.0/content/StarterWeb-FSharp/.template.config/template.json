@@ -1,0 +1,47 @@
+{
+  "author": "Microsoft",
+  "classifications": ["Web", "MVC"],
+  "name": "MVC ASP.NET Core Web Application",
+  "groupIdentity": "Microsoft.Web.Mvc",
+  "identity": "Microsoft.Web.Mvc.FSharp",
+  "shortName": "mvc",
+  "tags": {
+    "language": "F#",
+    "type": "project"
+  },
+  "sourceName": "Company.WebApplication1",
+  "preferNameDirectory": true,
+  "symbols":{
+    "sdkVersion": {
+      "type": "bind",
+      "binding": "dotnet-cli-version",
+      "replaces": "1.0.0-preview5-004445"
+    },
+    "RuntimeFrameworkVersion": {
+      "type": "parameter",
+      "replaces": "2.0.0-beta-001507",
+      "datatype": "string",
+      "defaultValue": "2.0.0-beta-001507"
+    },
+    "Framework": {
+      "type": "parameter",
+      "datatype": "choice",
+      "choices": [
+        {
+          "choice": "netcoreapp2.0",
+          "description": "Target netcoreapp2.0"
+        }
+      ],
+      "replaces": "netcoreapp2.0",
+      "defaultValue": "netcoreapp2.0"
+    },
+    "copyrightYear": {
+      "type": "generated",
+      "generator": "now",
+      "replaces": "1975",
+      "parameters": {
+        "format": "yyyy"
+      }
+    }
+  }
+}
