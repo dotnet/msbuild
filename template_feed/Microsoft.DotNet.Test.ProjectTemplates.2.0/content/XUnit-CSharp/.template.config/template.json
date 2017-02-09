@@ -35,5 +35,6 @@
       "replaces": "netcoreapp2.0",
       "defaultValue": "netcoreapp2.0"
     }
-  }
+  },
+  "primaryOutputs": [ { "path": "Company.TestProject1.csproj" } ]
 }

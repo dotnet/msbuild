@@ -43,5 +43,6 @@
         "format": "yyyy"
       }
     }
-  }
+  },
+  "primaryOutputs": [ { "path": "Company.WebApplication1.fsproj" } ]
 }
