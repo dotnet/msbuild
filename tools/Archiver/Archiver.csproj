@@ -7,7 +7,6 @@
     <RuntimeFrameworkVersion>$(CLI_SharedFrameworkVersion)</RuntimeFrameworkVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="**\*.cs" />
     <Compile Include="..\..\src\dotnet-archive\*.cs;..\..\src\dotnet\CommandLine\*.cs;..\..\src\dotnet\CommonLocalizableStrings.cs;" />
   </ItemGroup>
   <ItemGroup>
