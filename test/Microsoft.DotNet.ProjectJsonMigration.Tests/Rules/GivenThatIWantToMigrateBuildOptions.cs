@@ -17,6 +17,37 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
     public class GivenThatIWantToMigrateBuildOptions : TestBase
     {
         [Fact]
+        public void MigratingDeprecatedCompilationOptionsWithEmitEntryPointPopulatesOutputTypeField()
+        {
+            var mockProj = RunBuildOptionsRuleOnPj(@"
+                {
+                    ""compilationOptions"": {
+                        ""emitEntryPoint"": ""true""
+                    },
+                    ""exclude"": [
+                        ""node_modules""
+                    ]
+                }");
+
+            mockProj.Properties.Count(p => p.Name == "OutputType").Should().Be(1);
+            mockProj.Properties.First(p => p.Name == "OutputType").Value.Should().Be("Exe");
+
+            mockProj.Items.Count(i => i.ItemType.Equals("Compile", StringComparison.Ordinal))
+                .Should().Be(1);
+            mockProj.Items.Count(i => 
+                i.ItemType.Equals("Compile", StringComparison.Ordinal) &&
+                i.Remove.Equals("node_modules"))
+                .Should().Be(1);
+
+            mockProj.Items.Count(i => i.ItemType.Equals("EmbeddedResource", StringComparison.Ordinal))
+                .Should().Be(1);
+            mockProj.Items.Count(i =>
+                i.ItemType.Equals("EmbeddedResource", StringComparison.Ordinal) &&
+                i.Remove.Equals("node_modules"))
+                .Should().Be(1);
+        }
+
+        [Fact]
         public void SpecifiedDefaultPropertiesAreRemovedWhenTheyExistInTheCsprojTemplate()
         {
             // Setup project with default properties
