@@ -76,5 +76,16 @@
           WorkingDirectory="$(DotnetCliBuildDirectory)"/>
   </Target>
 
+  <Target Name="BuildTheWholeCli" DependsOnTargets="$(CLITargets)" />
+
+  <Import Project="build/Microsoft.DotNet.Cli.GitCommitInfo.targets" />
+  <Import Project="build/Microsoft.DotNet.Cli.HostInfo.targets" />
+  <Import Project="build/Microsoft.DotNet.Cli.Prepare.targets" />
+  <Import Project="build/Microsoft.DotNet.Cli.Compile.targets" />
+  <Import Project="build/Microsoft.DotNet.Cli.Package.targets" />
+  <Import Project="build/Microsoft.DotNet.Cli.Test.targets" />
+  <Import Project="build/Microsoft.DotNet.Cli.Publish.targets" />
+  <Import Project="build/Microsoft.DotNet.Cli.Run.targets" />
+
   <Import Project="build/Microsoft.DotNet.Cli.InitRepo.targets" />
 </Project>

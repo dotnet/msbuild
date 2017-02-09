@@ -9,15 +9,4 @@
     <MakeDir Condition=" !Exists('$(GeneratedPropsDir)') "
              Directories="$(GeneratedPropsDir)" />
   </Target>
-
-  <Target Name="BuildTheWholeCli" DependsOnTargets="$(CLITargets)" />
-
-  <Import Project="Microsoft.DotNet.Cli.GitCommitInfo.targets" />
-  <Import Project="Microsoft.DotNet.Cli.HostInfo.targets" />
-  <Import Project="Microsoft.DotNet.Cli.Prepare.targets" />
-  <Import Project="Microsoft.DotNet.Cli.Compile.targets" />
-  <Import Project="Microsoft.DotNet.Cli.Package.targets" />
-  <Import Project="Microsoft.DotNet.Cli.Test.targets" />
-  <Import Project="Microsoft.DotNet.Cli.Publish.targets" />
-  <Import Project="Microsoft.DotNet.Cli.Run.targets" />
 </Project>
