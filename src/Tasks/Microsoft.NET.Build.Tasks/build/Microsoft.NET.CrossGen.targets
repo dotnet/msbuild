@@ -24,8 +24,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="_RunOptimizer"
           DependsOnTargets="_ComputeResolvedFilesToCacheTypes;
                             _GenerateCrossgenProj;
-                            _SetupCrossgenStage;
-                            _RestoreCrossgen"
+                            _RestoreCrossgen;
+                            _SetupCrossgenStage"
           Condition="$(SkipOptimization) != 'true' ">
     <!-- Get the coreclr path -->
     <ItemGroup>
@@ -71,8 +71,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     </PropertyGroup>
 
     <NETSdkError Condition="!Exists($(_Crossgen))"
-    ResourceName="UnableToFindResolvedPath"
-    FormatArguments="$(_Crossgen)" />
+                 ResourceName="UnableToFindResolvedPath"
+                 FormatArguments="$(_Crossgen)" />
 
     <PropertyGroup>
       <_Crossgen> $([System.IO.Path]::GetFullPath($(_Crossgen)))</_Crossgen>
@@ -92,7 +92,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                              _CGenJit=$(_JitPath);
                              _CGenInputAssembly=%(_AssembliestoCrossGen.Fullpath);
                              _CGenOutputAssembly=$([System.IO.Path]::Combine($(_RuntimeOptimizedDir),%(RecursiveDir)%(Filename)%(Extension)));
-                             _CGenPlatformAssembliesPath=$(_NetCoreRefDir)$(PathSeparator)$(_RuntimeRefDir);" />
+                             _CGenPlatformAssembliesPath=$(_RuntimeRefDir)$(PathSeparator)$(_NetCoreRefDir);"
+                 Condition="'@(_AssembliestoCrossGen)' != ''"/>
 
 
     <!-- Copy by proxy the directory structure to PublishDir-->
@@ -165,10 +166,12 @@ Copyright (c) .NET Foundation. All rights reserved.
                                         _SetupCrossgenStage
     ============================================================
     -->
-  <Target Name="_SetupCrossgenStage">
+  <Target Name="_SetupCrossgenStage"
+          DependsOnTargets="_FilterOutFXFromResolvedCandidates;_PoulateUnFilteredResolvedCandidates">
+
     <!-- Copy managed files to temp directory maintaining the structure -->
-    <Copy SourceFiles = "@(_ManagedResolvedFileToPublishCandidates)"
-          DestinationFiles="$(_RuntimeDir)\%(_ManagedResolvedFileToPublishCandidates.DestinationSubPath)"
+    <Copy SourceFiles = "@(_ManagedResolvedFilesToOptimize)"
+          DestinationFiles="$(_RuntimeDir)\%(_ManagedResolvedFilesToOptimize.DestinationSubPath)"
           OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
           Retries="$(CopyRetryCount)"
           RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
@@ -179,7 +182,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </Copy>
 
     <!-- Copy managed files to  a flat temp directory for passing it as ref -->
-    <Copy SourceFiles = "@(_ManagedResolvedFileToPublishCandidates)"
+    <Copy SourceFiles = "@(_ManagedResolvedFilesToOptimize)"
           DestinationFolder="$(_RuntimeRefDir)"
           OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
           Retries="$(CopyRetryCount)"
@@ -191,6 +194,34 @@ Copyright (c) .NET Foundation. All rights reserved.
     </Copy>
 
   </Target>
+
+  <!--
+    ============================================================
+                                        _FilterOutFXFromResolvedCandidates
+    ============================================================
+    -->
+  <Target Name="_FilterOutFXFromResolvedCandidates"
+          DependsOnTargets="_RestoreCrossgen"
+          Condition="$(SkipRemovingSystemFiles) != 'true' ">
+
+    <ItemGroup>
+      <_ManagedResolvedFilesToOptimize Include="@(_ManagedResolvedFileToPublishCandidates)" Condition="!Exists('$(_NetCoreRefDir)$(DirectorySeparatorChar)%(FileName)%(Extension)')"/>
+    </ItemGroup>
+  </Target>
+
+  <!--
+    ============================================================
+                                        _PoulateUnFilteredResolvedCandidates
+    ============================================================
+    -->
+  <Target Name="_PoulateUnFilteredResolvedCandidates"
+          Condition="$(SkipRemovingSystemFiles) == 'true' ">
+
+   <ItemGroup>
+      <_ManagedResolvedFilesToOptimize Include="@(_ManagedResolvedFileToPublishCandidates)" />
+    </ItemGroup>
+  </Target>
+
   <!--
     ============================================================
                                         _RestoreCrossgen

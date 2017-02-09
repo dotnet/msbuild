@@ -51,6 +51,52 @@ namespace Microsoft.NET.Publish.Tests
            
             List<string> files_on_disk = new List < string > {
                $"runtime.{runtimerid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{runtimerid}/native/{libPrefix}coredistools{Constants.DynamicLibSuffix}",
+               $"runtime.{runtimerid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{runtimerid}/native/coredistools.h"
+               };
+
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && arch != "x86")
+            {
+                files_on_disk.Add($"runtime.{runtimerid}.runtime.native.system/4.4.0-beta-24821-02/runtimes/{runtimerid}/native/System.Native.a");
+                files_on_disk.Add($"runtime.{runtimerid}.runtime.native.system/4.4.0-beta-24821-02/runtimes/{runtimerid}/native/System.Native{Constants.DynamicLibSuffix}");
+            }
+            cacheDirectory.Should().OnlyHaveFiles(files_on_disk);
+        }
+        [Fact]
+        public void compose_with_fxfiles()
+        {
+            TestAsset simpleDependenciesAsset = _testAssetsManager
+                .CopyTestAsset("SimpleCache")
+                .WithSource();
+
+
+            ComposeCache cacheCommand = new ComposeCache(Stage0MSBuild, simpleDependenciesAsset.TestRoot);
+            var rid = RuntimeEnvironment.GetRuntimeIdentifier();
+            var tfm = "netcoreapp1.0";
+            var OutputFolder = Path.Combine(simpleDependenciesAsset.TestRoot, "outdir");
+            cacheCommand
+                .Execute($"/p:RuntimeIdentifier={rid}", $"/p:TargetFramework={tfm}", $"/p:ComposeDir={OutputFolder}", "/p:DoNotDecorateComposeDir=true", "/p:SkipRemovingSystemFiles=true")
+                .Should()
+                .Pass();
+
+            DirectoryInfo cacheDirectory = new DirectoryInfo(OutputFolder);
+
+            string libPrefix = "";
+            string runtimeos = "win7";
+            string runtimelibos = "win";
+            string arch = rid.Substring(rid.LastIndexOf("-") + 1);
+            string runtimerid = "win7-" + arch;
+
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                libPrefix = "lib";
+                runtimeos = "unix";
+                runtimelibos = "unix";
+                runtimerid = rid;
+            }
+
+
+            List<string> files_on_disk = new List<string> {
+               $"runtime.{runtimerid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{runtimerid}/native/{libPrefix}coredistools{Constants.DynamicLibSuffix}",
                $"runtime.{runtimerid}.microsoft.netcore.coredistools/1.0.1-prerelease-00001/runtimes/{runtimerid}/native/coredistools.h",
                $"runtime.{runtimeos}.system.private.uri/4.4.0-beta-24821-02/runtimes/{runtimelibos}/lib/netstandard1.0/System.Private.Uri.dll"
                };
@@ -60,10 +106,7 @@ namespace Microsoft.NET.Publish.Tests
                 files_on_disk.Add($"runtime.{runtimerid}.runtime.native.system/4.4.0-beta-24821-02/runtimes/{runtimerid}/native/System.Native.a");
                 files_on_disk.Add($"runtime.{runtimerid}.runtime.native.system/4.4.0-beta-24821-02/runtimes/{runtimerid}/native/System.Native{Constants.DynamicLibSuffix}");
             }
-            
             cacheDirectory.Should().OnlyHaveFiles(files_on_disk);
-
-
         }
 
         [Fact]
@@ -80,7 +123,7 @@ namespace Microsoft.NET.Publish.Tests
             var OutputFolder = Path.Combine(simpleDependenciesAsset.TestRoot, "outdir");
             var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "composedir");
             cacheCommand
-                .Execute($"/p:RuntimeIdentifier={rid}", $"/p:TargetFramework={tfm}", $"/p:ComposeDir={OutputFolder}", $"/p:DoNotDecorateComposeDir=true", "/p:SkipCrossgen=true", $"/p:ComposeWorkingDir={WorkingDir}", "/p:PreserveComposeWorkingDir=true")
+                .Execute($"/p:RuntimeIdentifier={rid}", $"/p:TargetFramework={tfm}", $"/p:ComposeDir={OutputFolder}", $"/p:DoNotDecorateComposeDir=true", "/p:SkipOptimization=true", $"/p:ComposeWorkingDir={WorkingDir}", "/p:PreserveComposeWorkingDir=true")
                 .Should()
                 .Pass();
                         
@@ -117,8 +160,6 @@ namespace Microsoft.NET.Publish.Tests
             }
 
             cacheDirectory.Should().OnlyHaveFiles(files_on_disk);
-
-
         }
 
         [Fact]
