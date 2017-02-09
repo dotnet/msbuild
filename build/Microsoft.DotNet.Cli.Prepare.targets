@@ -73,7 +73,9 @@
 
       <VersionSuffix Condition=" '$(DropSuffix)' == '' ">$(ReleaseSuffix)-$(CommitCount)</VersionSuffix>
 
-      <NugetVersion Condition=" '$(DropSuffix)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(VersionSuffix)</NugetVersion>
+      <FullNugetVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(ReleaseSuffix)-$(CommitCount)</FullNugetVersion>
+
+      <NugetVersion Condition=" '$(DropSuffix)' == '' ">$(FullNugetVersion)</NugetVersion>
       <NugetVersion Condition=" '$(NugetVersion)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch)</NugetVersion>
 
       <SdkVersion>$(NugetVersion)</SdkVersion>
