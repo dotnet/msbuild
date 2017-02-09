@@ -78,6 +78,9 @@
       <NugetVersion Condition=" '$(DropSuffix)' == '' ">$(FullNugetVersion)</NugetVersion>
       <NugetVersion Condition=" '$(NugetVersion)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch)</NugetVersion>
 
+      <NugetVersionToUseWithVS Condition=" '$(DropSuffix)' == '' ">$(NugetVersion)</NugetVersionToUseWithVS>
+      <NugetVersionToUseWithVS Condition=" '$(NugetVersionToUseWithVS)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(ReleaseSuffix)-final-$(CommitCount)</NugetVersionToUseWithVS>
+
       <SdkVersion>$(NugetVersion)</SdkVersion>
       <SdkNugetVersion>$(NugetVersion)</SdkNugetVersion>
 

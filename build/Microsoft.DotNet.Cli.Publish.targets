@@ -43,6 +43,7 @@
     <ItemGroup>
       <ForPublishing Include="@(GeneratedInstallers)" />
       <ForPublishing Include="%(GenerateArchivesInputsOutputs.Outputs)" />
+      <ForPublishing Include="$(PackagesDirectory)/Microsoft*.nupkg" Condition=" 'PUBLISH_NUPKG_TO_AZURE_BLOB' != '' " />
     </ItemGroup>
 
     <ItemGroup>
