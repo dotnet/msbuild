@@ -86,24 +86,14 @@
                         Lines="$(NuGetConfigContent)" />
 
       <DotNetNew ToolPath="$(Stage2Directory)"
-                 TemplateType="Mvc"
-                 TemplateArgs="-au Individual --debug:ephemeral-hive"
-                 WorkingDirectory="$(NuGetPackagesArchiveProject)/Web" />
+                 TemplateType="console"
+                 TemplateArgs="--debug:ephemeral-hive"
+                 WorkingDirectory="$(NuGetPackagesArchiveProject)/Console" />
 
       <DotNetRestore ToolPath="$(Stage2Directory)"
                      Packages="$(NuGetPackagesArchiveFolder)"
                      SkipInvalidConfigurations="True"
                      WorkingDirectory="$(NuGetPackagesArchiveProject)/Console" />
-
-      <DotNetNew ToolPath="$(Stage2Directory)"
-                 TemplateType="Mvc"
-                 TemplateArgs="-au Individual -f netcoreapp1.1 --debug:ephemeral-hive"
-                 WorkingDirectory="$(NuGetPackagesArchiveProject)/Web1.1" />
-
-      <DotNetRestore ToolPath="$(Stage2Directory)"
-                     Packages="$(NuGetPackagesArchiveFolder)"
-                     SkipInvalidConfigurations="True"
-                     WorkingDirectory="$(NuGetPackagesArchiveProject)/Web1.1" />
 
       <Delete Files="$(IntermediateArchive);$(IntermediateArchive).zip" />
 

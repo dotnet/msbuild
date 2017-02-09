@@ -12,8 +12,7 @@ namespace Microsoft.DotNet.Configurer
     {
         private static IReadOnlyList<IReadOnlyList<string>> _templatesUsedToPrimeCache = new List<IReadOnlyList<string>>()
         {
-            new List<string>() { "mvc", "-f", "netcoreapp1.0", "-au", "Individual", "--debug:ephemeral-hive" },
-            new List<string>() { "mvc", "-f", "netcoreapp1.1", "-au", "Individual", "--debug:ephemeral-hive" }
+            new List<string>() { "console", "--debug:ephemeral-hive" },
         };
 
         private readonly ICommandFactory _commandFactory;

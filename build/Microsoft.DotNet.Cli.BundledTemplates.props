@@ -3,7 +3,7 @@
   
   <ItemGroup>
     <BundledTemplate Include="Microsoft.DotNet.Common.ItemTemplates" Version="$(TemplateEngineTemplateVersion)" />
-    <BundledTemplate Include="Microsoft.DotNet.Common.ProjectTemplates" Version="$(TemplateEngineTemplateVersion)" />
+    <BundledTemplate Include="Microsoft.DotNet.Common.ProjectTemplates.2.0" Version="$(TemplateEngineTemplate2_0Version)" />
     <BundledTemplate Include="Microsoft.DotNet.Test.ProjectTemplates" Version="$(TemplateEngineTemplateVersion)" />
     <BundledTemplate Include="Microsoft.DotNet.Web.ProjectTemplates" Version="$(TemplateEngineTemplateVersion)" />
   </ItemGroup>

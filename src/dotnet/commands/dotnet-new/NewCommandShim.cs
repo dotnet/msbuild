@@ -52,7 +52,8 @@ namespace Microsoft.DotNet.Tools.New
             var preferences = new Dictionary<string, string>
             {
                 { "prefs:language", "C#" },
-                { "dotnet-cli-version", Product.Version }
+                { "dotnet-cli-version", Product.Version },
+                { "RuntimeFrameworkVersion", new Muxer().SharedFxVersion },
             };
 
             return new DefaultTemplateEngineHost(HostIdentifier, "v" + Product.Version, CultureInfo.CurrentCulture.Name, preferences, builtIns);

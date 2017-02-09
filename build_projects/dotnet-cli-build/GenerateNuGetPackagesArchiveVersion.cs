@@ -26,8 +26,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         private static string[][] _templatesAndArgs = new string[][]
         {
-            new string[] { "mvc", "-au Individual -f netcoreapp1.0" },
-            new string[] { "mvc", "-au Individual -f netcoreapp1.1" }
+            new string[] { "console", "" },
         };
 
         public override bool Execute()
@@ -65,6 +64,12 @@ namespace Microsoft.DotNet.Cli.Build
                             dataToHash += $"{metadata.Name}={metadata.Value};";
                         }
                     }
+                }
+
+                var frameworkVersion = rootElement.Properties.LastOrDefault(p => p.Name == "RuntimeFrameworkVersion");
+                if (frameworkVersion != null)
+                {
+                    dataToHash += $"RuntimeFrameworkVersion={frameworkVersion.Value}";
                 }
 
                 Directory.Delete(targetDir, true);
