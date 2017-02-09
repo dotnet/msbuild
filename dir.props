@@ -1,4 +1,6 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="build/Microsoft.DotNet.Cli.DependencyVersions.props" />
+
   <!-- NuGet Information -->
   <PropertyGroup>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
@@ -20,9 +22,4 @@
 
     <CliTargetFramework>netcoreapp2.0</CliTargetFramework>
   </PropertyGroup>
-
-  <Import Project="build/Microsoft.DotNet.Cli.InitRepo.props" />
-  <Import Condition=" Exists('$(GitCommitInfoProps)') Or '$(GeneratingPropsFile)' != 'true' " Project="$(GitCommitInfoProps)" />
-  <Import Condition=" Exists('$(HostInfoProps)') Or '$(GeneratingPropsFile)' != 'true' " Project="$(HostInfoProps)" />
-  <Import Project="build/Microsoft.DotNet.Cli.DependencyVersions.props" />
 </Project>
