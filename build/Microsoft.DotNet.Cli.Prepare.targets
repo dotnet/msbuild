@@ -4,7 +4,6 @@
   <Import Project="prepare/CheckPrereqs.targets" />
   <Import Project="Microsoft.DotNet.Cli.BundledSdks.props" />
   <Import Project="Microsoft.DotNet.Cli.BundledTemplates.props" />
-  <Import Project="Microsoft.DotNet.Cli.DependencyVersions.props" />
 
   <Target Name="Prepare"
           DependsOnTargets="Init;DownloadHostAndSharedFxArtifacts;RestoreSrcPackages;RestoreToolsPackages;ZipTemplates" />

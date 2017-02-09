@@ -1,6 +1,5 @@
 <Project ToolsVersion="15.0">
   <Target Name="WriteGitCommitInfoProps"
-          Condition=" !Exists('$(GitCommitInfoProps)') "
           DependsOnTargets="BuildDotnetCliBuildFramework">
     <GetCommitHash RepoRoot="$(RepoRoot)">
       <Output TaskParameter="CommitHash" PropertyName="GitInfoCommitHash" />
@@ -34,8 +33,6 @@
 &lt;/Project&gt;
       </GitCommitInfoPropsContent>
     </PropertyGroup>
-
-    <MakeDir Directories="$(GeneratedPropsDir)" />
 
     <WriteLinesToFile File="$(GitCommitInfoProps)"
                       Lines="$(GitCommitInfoPropsContent)"

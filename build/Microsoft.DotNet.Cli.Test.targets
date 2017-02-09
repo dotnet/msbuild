@@ -1,6 +1,4 @@
 <Project ToolsVersion="14.0" DefaultTargets="Test">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-
   <PropertyGroup>
     <PathSeparator>/</PathSeparator>
     <PathSeparator Condition=" '$(OSName)' == 'win' ">\</PathSeparator>

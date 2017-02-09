@@ -21,8 +21,6 @@
       </HostInfoPropsContent>
     </PropertyGroup>
 
-    <MakeDir Directories="$(GeneratedPropsDir)" />
-
     <WriteLinesToFile File="$(HostInfoProps)"
                       Lines="$(HostInfoPropsContent)" />
   </Target>
