@@ -8,5 +8,6 @@
   "groupIdentity": "ItemNugetConfig",
   "identity": "Microsoft.Standard.QuickStarts.Nuget.Config",
   "shortName": "nugetconfig",
-  "sourceName": "Nuget"
+  "sourceName": "Nuget",
+  "primaryOutputs": [ { "path": "nuget.config" } ]
 }
