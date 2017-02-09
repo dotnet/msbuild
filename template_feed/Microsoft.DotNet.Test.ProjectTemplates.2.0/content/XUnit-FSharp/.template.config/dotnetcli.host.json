@@ -5,7 +5,8 @@
     },
     "RuntimeFrameworkVersion": {
       "longName": "runtime-framework-version",
-      "shortName": "fv"
+      "shortName": "fv",
+      "isHidden": "true"
     }
   }
 }
