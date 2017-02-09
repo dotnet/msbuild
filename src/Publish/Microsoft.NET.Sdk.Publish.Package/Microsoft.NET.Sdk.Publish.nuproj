@@ -11,14 +11,14 @@
     <NuSpecProperties>CoreSdkVersion=$(CoreSdkVersion);WebSdkVersion=$(WebSdkVersion)</NuSpecProperties>
   </PropertyGroup>
   <ItemGroup>
-    <NuGetContent Include="$(WebSdkRootDir)\bin\$(Configuration)\net46\Microsoft.NETCore.Sdk.Publish.Tasks.dll" >
+    <NuGetContent Include="$(WebSdkRootDir)\bin\$(Configuration)\net46\Microsoft.NET.Sdk.Publish.Tasks.dll" >
       <Destination>tools\net46</Destination>
     </NuGetContent>
     <NuGetContent Include="$(WebSdkRootDir)\bin\$(Configuration)\net46\Newtonsoft.Json.dll" >
       <Destination>tools\net46</Destination>
     </NuGetContent>
 
-    <NuGetContent Include="$(WebSdkRootDir)\bin\$(Configuration)\netstandard1.3\Microsoft.NETCore.Sdk.Publish.Tasks.dll" >
+    <NuGetContent Include="$(WebSdkRootDir)\bin\$(Configuration)\netstandard1.3\Microsoft.NET.Sdk.Publish.Tasks.dll" >
       <Destination>tools\netcoreapp1.0</Destination>
     </NuGetContent>
     <NuGetContent Include="$(WebSdkRootDir)\bin\$(Configuration)\net46\Newtonsoft.Json.dll" >

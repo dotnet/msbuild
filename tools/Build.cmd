@@ -11,10 +11,10 @@ call dotnet restore %WebSdkRoot%\Microsoft.Net.Sdk.Web.Sln /p:SkipInvalidConfigu
 if errorlevel 1 GOTO ERROR
 
 REM NuGet is not restoring the project for net46 during the solution restore. Also, NuGet throws a null ref exception while calling dotnet restore. Hence, work-around is to call dotnet msbuild with target restore.
-call dotnet msbuild %WebSdkRoot%\src\Publish\Microsoft.NETCore.Sdk.Publish.Tasks\Microsoft.NETCore.Sdk.Publish.Tasks.csproj /p:SkipInvalidConfigurations=true;configuration=Release;TargetFramework=net46 /t:Restore
+call dotnet msbuild %WebSdkRoot%\src\Publish\Microsoft.NET.Sdk.Publish.Tasks\Microsoft.NET.Sdk.Publish.Tasks.csproj /p:SkipInvalidConfigurations=true;configuration=Release;TargetFramework=net46 /t:Restore
 if errorlevel 1 GOTO ERROR
 
-call dotnet build %WebSdkRoot%\src\Publish\Microsoft.NETCore.Sdk.Publish.Tasks\Microsoft.NETCore.Sdk.Publish.Tasks.csproj /p:SkipInvalidConfigurations=true;configuration=Release
+call dotnet build %WebSdkRoot%\src\Publish\Microsoft.NET.Sdk.Publish.Tasks\Microsoft.NET.Sdk.Publish.Tasks.csproj /p:SkipInvalidConfigurations=true;configuration=Release
 if errorlevel 1 GOTO ERROR
 
 REM Tests

@@ -5,7 +5,7 @@
     using Framework = Microsoft.Build.Framework;
     using Utilities = Microsoft.Build.Utilities;
     using System.Linq;
-    using Microsoft.NETCore.Sdk.Publish.Tasks.Properties;
+    using Microsoft.NET.Sdk.Publish.Tasks.Properties;
 
     /// <summary>
     /// The MSDeploy task, which is a wrapper around msdeploy.exe

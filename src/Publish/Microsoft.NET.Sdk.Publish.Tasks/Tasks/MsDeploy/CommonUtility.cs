@@ -19,7 +19,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
     using Generic = System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using Microsoft.NETCore.Sdk.Publish.Tasks.Properties;
+    using Microsoft.NET.Sdk.Publish.Tasks.Properties;
 
     internal enum PipelineMetadata
     {

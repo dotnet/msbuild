@@ -16,9 +16,6 @@
     <PreserveCompilationContext>true</PreserveCompilationContext>
     <RuntimeIdentifier>win7-x86</RuntimeIdentifier>
   </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\src\Publish\Microsoft.NETCore.Sdk.Publish.Tasks\Microsoft.NETCore.Sdk.Publish.Tasks.csproj" />
-  </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp1.0'">
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20161216-01" />
     <PackageReference Include="Microsoft.Build.Framework" Version="15.1.298-preview5" />
@@ -40,5 +37,8 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Publish\Microsoft.NET.Sdk.Publish.Tasks\Microsoft.NET.Sdk.Publish.Tasks.csproj" />
   </ItemGroup>
 </Project>
