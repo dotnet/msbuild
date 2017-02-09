@@ -208,7 +208,18 @@ namespace Microsoft.TemplateEngine.Cli
         private async Task<CreationResultStatus> CreateTemplateAsync(ITemplateInfo template)
         {
             string fallbackName = new DirectoryInfo(OutputPath ?? Directory.GetCurrentDirectory()).Name;
-            TemplateCreationResult instantiateResult = await _templateCreator.InstantiateAsync(template, Name, fallbackName, OutputPath, _app.AllTemplateParams, SkipUpdateCheck).ConfigureAwait(false);
+            TemplateCreationResult instantiateResult;
+
+            try
+            {
+                instantiateResult = await _templateCreator.InstantiateAsync(template, Name, fallbackName, OutputPath, _app.AllTemplateParams, SkipUpdateCheck).ConfigureAwait(false);
+            }
+            catch (TemplateAuthoringException tae)
+            {
+                Reporter.Error.WriteLine(tae.Message.Bold().Red());
+                return CreationResultStatus.CreateFailed;
+            }
+
             string resultTemplateName = string.IsNullOrEmpty(instantiateResult.TemplateFullName) ? _templateName.Value : instantiateResult.TemplateFullName;
 
             switch (instantiateResult.Status)
@@ -249,17 +260,24 @@ namespace Microsoft.TemplateEngine.Cli
 
         private void DisplayTemplateList(bool showAll = false)
         {
-            IEnumerable<ITemplateInfo> results;
+            IEnumerable<ITemplateInfo> results = null;
 
-            if (showAll)
+            try
             {
-                results = PerformAllTemplatesInContextQueryAsync().Result.Where(x => x.IsMatch).Select(x => x.Info);
+                if (showAll)
+                {
+                    results = PerformAllTemplatesInContextQueryAsync().Result.Where(x => x.IsMatch).Select(x => x.Info);
+                }
+                else
+                {
+                    results = _matchedTemplates.Where(x => x.IsMatch).Select(x => x.Info);
+                }
             }
-            else
+            catch (TemplateAuthoringException tae)
             {
-                results = _matchedTemplates.Where(x => x.IsMatch).Select(x => x.Info);
+                Reporter.Error.WriteLine(tae.Message.Bold().Red());
+                return;
             }
-
 
             IEnumerable<IGrouping<string, ITemplateInfo>> grouped = results.GroupBy(x => x.GroupIdentity);
             EnvironmentSettings.Host.TryGetHostParamDefault("prefs:language", out string defaultLanguage);
@@ -505,12 +523,20 @@ namespace Microsoft.TemplateEngine.Cli
             ConfigureLocale();
             Initialize();
 
-            if (string.IsNullOrWhiteSpace(_templateName.Value))
+            try
             {
-                return await EnterMaintenanceFlowAsync().ConfigureAwait(false);
-            }
+                if (string.IsNullOrWhiteSpace(_templateName.Value))
+                {
+                    return await EnterMaintenanceFlowAsync().ConfigureAwait(false);
+                }
 
-            return await EnterTemplateManipulationFlowAsync().ConfigureAwait(false);
+                return await EnterTemplateManipulationFlowAsync().ConfigureAwait(false);
+            }
+            catch (TemplateAuthoringException tae)
+            {
+                Reporter.Error.WriteLine(tae.Message.Bold().Red());
+                return CreationResultStatus.CreateFailed;
+            }
         }
 
         private void ConfigureLocale()
