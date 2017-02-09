@@ -6,6 +6,8 @@ using System.IO;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 
+[assembly: CollectionBehavior(DisableTestParallelization = true)]
+
 namespace Microsoft.DotNet.Tests.EndToEnd
 {
     public class GivenDotNetUsesMSBuild : TestBase
@@ -17,9 +19,10 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             {
                 string projectDirectory = directory.Path;
 
-                new NewCommand()
+                string newArgs = "console --debug:ephemeral-hive";
+                new NewCommandShim()
                     .WithWorkingDirectory(projectDirectory)
-                    .Execute("")
+                    .Execute(newArgs)
                     .Should().Pass();
 
                 new RestoreCommand()

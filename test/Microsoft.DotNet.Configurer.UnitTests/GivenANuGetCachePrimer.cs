@@ -61,8 +61,9 @@ namespace Microsoft.DotNet.Configurer.UnitTests
 
             _dotnetNewCommandMock = new Mock<ICommand>();
             SetupCommandMock(_dotnetNewCommandMock);
+
             commandFactoryMock
-                .Setup(c => c.Create("new", new[] { "-t", "Console" }, null, Constants.DefaultConfiguration))
+                .Setup(c => c.Create("new", new[] { "console", "--debug:ephemeral-hive" }, null, Constants.DefaultConfiguration))
                 .Returns(_dotnetNewCommandMock.Object);
 
             _dotnetRestoreCommandMock = new Mock<ICommand>();
@@ -151,7 +152,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             _commandFactoryMock.Verify(
                 c => c.Create(
                     "restore",
-                    new [] {"-s", $"{PACKAGES_ARCHIVE_PATH}"},
+                    new[] { "-s", $"{PACKAGES_ARCHIVE_PATH}" },
                     null,
                     Constants.DefaultConfiguration),
                 Times.Exactly(1));

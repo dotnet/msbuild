@@ -15,6 +15,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 {
     internal class MigrateBuildOptionsRule : IMigrationRule
     {
+        private const string BuiltInCompilerResourcesPattern = "compiler/resources/*";
+
         private AddPropertyTransform<CommonCompilerOptions>[] EmitEntryPointTransforms
             => new []
             {
@@ -171,15 +173,15 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
         private Func<CommonCompilerOptions, string, ProjectType, IEnumerable<ProjectItemElement>> RemoveCompileFilesTransformExecute =>
             (compilerOptions, projectDirectory, projectType) =>
-                    RemoveCompileFilesTransform.Transform(compilerOptions.CompileInclude);
+                    RemoveCompileFilesTransform.Transform(GetCompileRemoveContext(compilerOptions, projectDirectory));
 
         private Func<CommonCompilerOptions, string, ProjectType, IEnumerable<ProjectItemElement>> EmbedFilesTransformExecute =>
             (compilerOptions, projectDirectory, projectType) =>
-                    EmbedFilesTransform.Transform(GetEmbedIncludeContext(compilerOptions));
+                    EmbedFilesTransform.Transform(GetEmbedIncludeContext(compilerOptions, projectDirectory));
 
         private Func<CommonCompilerOptions, string, ProjectType, IEnumerable<ProjectItemElement>> RemoveEmbedFilesTransformExecute =>
             (compilerOptions, projectDirectory, projectType) =>
-                    RemoveEmbedFilesTransform.Transform(GetEmbedIncludeContext(compilerOptions));
+                    RemoveEmbedFilesTransform.Transform(GetEmbedRemoveContext(compilerOptions));
 
         private Func<CommonCompilerOptions, string, ProjectType, IEnumerable<ProjectItemElement>> CopyToOutputFilesTransformExecute =>
             (compilerOptions, projectDirectory, projectType) =>
@@ -222,6 +224,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             _transformApplicator = transformApplicator ?? new TransformApplicator();
 
             ConstructTransformLists();
+        }
+
+        private bool ContainsCompilerResources(string projectDirectory)
+        {
+            return Directory.Exists(Path.Combine(projectDirectory, "compiler", "resources"));
         }
 
         private void ConstructTransformLists()
@@ -342,7 +349,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 var configurationOutput =
                     removeContextTransformExecutes(configurationCompilerOptions, projectDirectory, projectType);
 
-                if (configurationOutput != null)
+                if (configurationOutput != null &&
+                    !ItemRemovesAreEqual(nonConfigurationOutput, configurationOutput))
                 {
                     transformApplicator.Execute(configurationOutput, itemGroup, mergeExisting: true);
                 }
@@ -370,6 +378,38 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             }
 
             return configurationOutput == nonConfigurationOutput;
+        }
+
+        private bool ItemRemovesAreEqual(
+            IEnumerable<ProjectItemElement> nonConfigurationOutput,
+            IEnumerable<ProjectItemElement> configurationOutput)
+        {
+            return Enumerable.SequenceEqual(
+                nonConfigurationOutput ?? EmptyArray<ProjectItemElement>.Value,
+                configurationOutput ?? EmptyArray<ProjectItemElement>.Value,
+                new ItemRemoveAttributeComparer());
+        }
+
+        private class ItemRemoveAttributeComparer : EqualityComparer<ProjectItemElement>
+        {
+            public override bool Equals(ProjectItemElement item1, ProjectItemElement item2)
+            {
+                if (item1 == null && item2 == null)
+                {
+                    return true;
+                }
+                else if (item1 == null || item2 == null)
+                {
+                    return false;
+                }
+
+                return string.Equals(item1.Remove, item2.Remove, StringComparison.Ordinal);
+            }
+
+            public override int GetHashCode(ProjectItemElement item)
+            {
+                return item.GetHashCode();
+            }
         }
 
         private void PerformPropertyAndItemMappings(
@@ -428,7 +468,46 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             }
         }
 
-        private IncludeContext GetEmbedIncludeContext(CommonCompilerOptions compilerOptions)
+        private IncludeContext GetCompileRemoveContext(
+            CommonCompilerOptions compilerOptions,
+            string projectDirectory)
+        {
+            var includeContext = compilerOptions.CompileInclude;
+            if (includeContext == null && ContainsCompilerResources(projectDirectory))
+            {
+                includeContext = new IncludeContext(
+                    projectDirectory,
+                    "compile",
+                    new JObject(),
+                    null,
+                    null);
+                includeContext.CustomRemovePatterns.Add(BuiltInCompilerResourcesPattern);
+            }
+            return includeContext;
+        }
+
+        private IncludeContext GetEmbedIncludeContext(
+            CommonCompilerOptions compilerOptions,
+            string projectDirectory)
+        {
+            var embedIncludeContext = compilerOptions.EmbedInclude;
+            embedIncludeContext?.BuiltInsExclude.Add("@(EmbeddedResource)");
+
+            if (embedIncludeContext == null && ContainsCompilerResources(projectDirectory))
+            {
+                embedIncludeContext = new IncludeContext(
+                    projectDirectory,
+                    "embed",
+                    new JObject(),
+                    null,
+                    null);
+                embedIncludeContext.CustomIncludePatterns.Add(BuiltInCompilerResourcesPattern);
+            }
+
+            return embedIncludeContext;
+        }
+
+        private IncludeContext GetEmbedRemoveContext(CommonCompilerOptions compilerOptions)
         {
             var embedIncludeContext = compilerOptions.EmbedInclude;
 

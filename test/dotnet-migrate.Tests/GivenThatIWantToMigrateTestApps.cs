@@ -18,6 +18,8 @@ using Newtonsoft.Json.Linq;
 
 using MigrateCommand = Microsoft.DotNet.Tools.Migrate.MigrateCommand;
 
+[assembly: CollectionBehavior(DisableTestParallelization = true)]
+
 namespace Microsoft.DotNet.Migration.Tests
 {
     public class GivenThatIWantToMigrateTestApps : TestBase

@@ -36,7 +36,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
                 includeContext =>
                 {
                     var fullIncludeSet = includeContext.IncludePatterns.OrEmptyIfNull()
-                                         .Union(includeContext.BuiltInsInclude.OrEmptyIfNull());
+                                         .Union(includeContext.BuiltInsInclude.OrEmptyIfNull())
+                                         .Union(includeContext.CustomIncludePatterns.OrEmptyIfNull());
 
                     return FormatGlobPatternsForMsbuild(fullIncludeSet, includeContext.SourceBasePath);
                 },
@@ -47,6 +48,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
                             (includeContext.IncludePatterns != null && includeContext.IncludePatterns.Count > 0)
                             ||
                             (includeContext.BuiltInsInclude != null && includeContext.BuiltInsInclude.Count > 0)
+                            ||
+                            (includeContext.CustomIncludePatterns != null && includeContext.CustomIncludePatterns.Count > 0)
                         );
                 });
 

@@ -18,8 +18,7 @@ There are a couple of things to keep in mind:
 * We welcome any and all issues that relate to MSBuild-based tools, so feel free to try them out and leave comments and file any bugs/problems.
 
 ### Download links
-
-* Instructions and links for download:  [Preview 4 download links](https://github.com/dotnet/core/blob/master/release-notes/preview4-download.md). 
+* Instructions and links for download:  [RC3 download links](https://github.com/dotnet/core/blob/master/release-notes/rc3-download.md).
 * Directory for future Preview release notes: [.NET Core release notes](https://github.com/dotnet/core/tree/master/release-notes).
 
 Found an issue?

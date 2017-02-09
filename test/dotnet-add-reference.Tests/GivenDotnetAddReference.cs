@@ -58,9 +58,10 @@ Additional Arguments:
 
             try
             {
-                new NewCommand()
+                string args = $"classlib -o \"{dir.Path}\" --debug:ephemeral-hive";
+                new NewCommandShim()
                     .WithWorkingDirectory(dir.Path)
-                    .ExecuteWithCapturedOutput("-t Lib")
+                    .ExecuteWithCapturedOutput(args)
                 .Should().Pass();
             }
             catch (System.ComponentModel.Win32Exception e)
