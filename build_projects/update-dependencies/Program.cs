@@ -21,75 +21,57 @@ namespace Microsoft.DotNet.Scripts
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
+            bool onlyUpdate = args.Length > 0 && string.Equals("--Update", args[0], StringComparison.OrdinalIgnoreCase);
+
             List<BuildInfo> buildInfos = new List<BuildInfo>();
 
-            buildInfos.Add(BuildInfo.Get("CoreFx", s_config.CoreFxVersionUrl, fetchLatestReleaseFile: false));
-            buildInfos.Add(BuildInfo.Get("CoreClr", s_config.CoreClrVersionUrl, fetchLatestReleaseFile: false));
             buildInfos.Add(BuildInfo.Get("Roslyn", s_config.RoslynVersionUrl, fetchLatestReleaseFile: false));
             buildInfos.Add(BuildInfo.Get("CoreSetup", s_config.CoreSetupVersionUrl, fetchLatestReleaseFile: false));
 
             IEnumerable<IDependencyUpdater> updaters = GetUpdaters();
+            var dependencyBuildInfos = buildInfos.Select(i =>
+                new DependencyBuildInfo(
+                    i,
+                    upgradeStableVersions: true,
+                    disabledPackages: Enumerable.Empty<string>()));
+            DependencyUpdateResults updateResults = DependencyUpdateUtils.Update(updaters, dependencyBuildInfos);
 
-            GitHubAuth gitHubAuth = new GitHubAuth(s_config.Password, s_config.UserName, s_config.Email);
-
-            DependencyUpdater dependencyUpdater = new DependencyUpdater(
-                gitHubAuth,
-                s_config.GitHubProject,
-                s_config.GitHubUpstreamOwner,
-                s_config.GitHubUpstreamBranch,
-                s_config.UserName,
-                s_config.GitHubPullRequestNotifications);
-
-            if (args.Length > 0 && string.Equals("--Update", args[0], StringComparison.OrdinalIgnoreCase))
+            if (updateResults.ChangesDetected() && !onlyUpdate)
             {
-                dependencyUpdater.Update(updaters, buildInfos);
-            }
-            else
-            {
-                dependencyUpdater.UpdateAndSubmitPullRequestAsync(updaters, buildInfos);
+                GitHubAuth gitHubAuth = new GitHubAuth(s_config.Password, s_config.UserName, s_config.Email);
+                GitHubProject origin = new GitHubProject(s_config.GitHubProject, s_config.UserName);
+                GitHubBranch upstreamBranch = new GitHubBranch(
+                    s_config.GitHubUpstreamBranch,
+                    new GitHubProject(s_config.GitHubProject, s_config.GitHubUpstreamOwner));
+
+                string suggestedMessage = updateResults.GetSuggestedCommitMessage();
+                string body = string.Empty;
+                if (s_config.GitHubPullRequestNotifications != null)
+                {
+                    body += PullRequestCreator.NotificationString(s_config.GitHubPullRequestNotifications);
+                }
+
+                new PullRequestCreator(gitHubAuth, origin, upstreamBranch)
+                    .CreateOrUpdateAsync(
+                        suggestedMessage,
+                        suggestedMessage + $" ({upstreamBranch.Name})",
+                        body)
+                    .Wait();
             }
         }
 
         private static IEnumerable<IDependencyUpdater> GetUpdaters()
         {
-            yield return CreateProjectJsonUpdater();
-
-            yield return CreateRegexUpdater(@"build_projects\shared-build-targets-utils\DependencyVersions.cs", "CoreCLRVersion", "Microsoft.NETCore.Runtime.CoreCLR");
-            yield return CreateRegexUpdater(@"build_projects\shared-build-targets-utils\DependencyVersions.cs", "JitVersion", "Microsoft.NETCore.Jit");
-
-            yield return CreateRegexUpdater(@"build_projects\dotnet-cli-build\CliDependencyVersions.cs", "SharedFrameworkVersion", "Microsoft.NETCore.App");
-            yield return CreateRegexUpdater(@"build_projects\dotnet-cli-build\CliDependencyVersions.cs", "HostFxrVersion", "Microsoft.NETCore.DotNetHostResolver");
-            yield return CreateRegexUpdater(@"build_projects\dotnet-cli-build\CliDependencyVersions.cs", "SharedHostVersion", "Microsoft.NETCore.DotNetHost");
+            yield return CreateRegexUpdater(@"build\Microsoft.DotNet.Cli.DependencyVersions.props", "CLI_SharedFrameworkVersion", "Microsoft.NETCore.App");
         }
 
-        private static IDependencyUpdater CreateProjectJsonUpdater()
-        {
-            IEnumerable<string> projectJsonFiles = GetProjectJsonsToUpdate();
-
-            return new ProjectJsonUpdater(projectJsonFiles)
-            {
-                SkipStableVersions = false
-            };
-        }
-
-        private static IEnumerable<string> GetProjectJsonsToUpdate()
-        {
-            const string noUpdateFileName = ".noautoupdate";
-
-            return Enumerable.Union(
-                Directory.GetFiles(Dirs.RepoRoot, "project.json", SearchOption.AllDirectories),
-                Directory.GetFiles(Path.Combine(Dirs.RepoRoot, @"src\dotnet\commands\dotnet-new"), "project.json.template", SearchOption.AllDirectories))
-                .Where(p => !File.Exists(Path.Combine(Path.GetDirectoryName(p), noUpdateFileName)) &&
-                    !Path.GetDirectoryName(p).EndsWith("CSharp_Web", StringComparison.Ordinal));
-        }
-
-        private static IDependencyUpdater CreateRegexUpdater(string repoRelativePath, string dependencyPropertyName, string packageId)
+        private static IDependencyUpdater CreateRegexUpdater(string repoRelativePath, string propertyName, string packageId)
         {
             return new FileRegexPackageUpdater()
             {
                 Path = Path.Combine(Dirs.RepoRoot, repoRelativePath),
                 PackageId = packageId,
-                Regex = new Regex($@"{dependencyPropertyName} = ""(?<version>.*)"";"),
+                Regex = new Regex($@"<{propertyName}>(?<version>.*)</{propertyName}>"),
                 VersionGroupName = "version"
             };
         }

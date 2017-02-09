@@ -18,7 +18,7 @@ if($Help)
 $Architecture='x64'
 
 $RepoRoot = "$PSScriptRoot\..\.."
-$AppPath = "$PSScriptRoot"
+$ProjectPath = "$PSScriptRoot\update-dependencies.csproj"
 
 # Use a repo-local install directory (but not the artifacts directory because that gets cleaned a lot
 if (!$env:DOTNET_INSTALL_DIR)
@@ -28,26 +28,18 @@ if (!$env:DOTNET_INSTALL_DIR)
 
 # Install a stage 0
 Write-Host "Installing .NET Core CLI Stage 0"
-& "$RepoRoot\scripts\obtain\dotnet-install.ps1" -Architecture $Architecture
+& "$RepoRoot\scripts\obtain\dotnet-install.ps1" -Channel "master" -Architecture $Architecture
 if($LASTEXITCODE -ne 0) { throw "Failed to install stage0" }
 
 # Put the stage0 on the path
 $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
 
 # Restore the app
-Write-Host "Restoring update-dependencies..."
-pushd "$AppPath"
-dotnet restore
+Write-Host "Restoring $ProjectPath..."
+dotnet restore "$ProjectPath"
 if($LASTEXITCODE -ne 0) { throw "Failed to restore" }
-popd
-
-# Publish the app
-Write-Host "Compiling App..."
-dotnet publish "$AppPath" -o "$AppPath\bin" --framework netcoreapp1.0
-if($LASTEXITCODE -ne 0) { throw "Failed to compile build scripts" }
 
 # Run the app
-Write-Host "Invoking App $AppPath..."
-Write-Host " Configuration: $env:CONFIGURATION"
-& "$AppPath\bin\update-dependencies.exe"
+Write-Host "Invoking App $ProjectPath..."
+dotnet run -p "$ProjectPath"
 if($LASTEXITCODE -ne 0) { throw "Build failed" }
