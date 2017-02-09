@@ -4,7 +4,6 @@
   <Import Project="prepare/CheckPrereqs.targets" />
   <Import Project="Microsoft.DotNet.Cli.BundledSdks.props" />
   <Import Project="Microsoft.DotNet.Cli.BundledTemplates.props" />
-  <Import Project="Microsoft.DotNet.Cli.DependencyVersions.props" />
 
   <Target Name="Prepare"
           DependsOnTargets="Init;DownloadHostAndSharedFxArtifacts;RestoreSrcPackages;RestoreToolsPackages" />
@@ -18,13 +17,6 @@
   <Target Name="InitializeCommonProps"
           DependsOnTargets="BuildDotnetCliBuildFramework" >
 
-    <!-- Current Runtime Information -->
-    <GetCurrentRuntimeInformation OverrideRid="$(OverrideRid)">
-      <Output TaskParameter="Rid" PropertyName="Rid" />
-      <Output TaskParameter="Architecture" PropertyName="Architecture" />
-      <Output TaskParameter="OSName" PropertyName="OSName" />
-    </GetCurrentRuntimeInformation>
-    
     <!-- Common Properties -->
     <PropertyGroup>
       <IsDesktopAvailable>False</IsDesktopAvailable>
@@ -49,19 +41,6 @@
       <CoreCLRRid Condition=" '$(OSName)' == 'centos' OR '$(OSName)' == 'rhel' ">rhel.7-x64</CoreCLRRid>
     </PropertyGroup>
 
-    <GetCommitHash RepoRoot="$(RepoRoot)">
-      <Output TaskParameter="CommitHash" PropertyName="CommitHash" />
-    </GetCommitHash>
-
-    <GenerateBuildVersionInfo RepoRoot="$(RepoRoot)"
-                              VersionMajor="$(VersionMajor)"
-                              VersionMinor="$(VersionMinor)"
-                              VersionPatch="$(VersionPatch)"
-                              ReleaseSuffix="$(ReleaseSuffix)">
-      <Output TaskParameter="CommitCount" PropertyName="DefaultCommitCount" />
-      <Output TaskParameter="MsiVersion" PropertyName="MsiVersion" />
-      <Output TaskParameter="VersionBadgeMoniker" PropertyName="VersionBadgeMoniker" />
-    </GenerateBuildVersionInfo>
 
     <PropertyGroup>
       <CommitCount Condition=" '$(CommitCount)' == '' ">$(DefaultCommitCount)</CommitCount>

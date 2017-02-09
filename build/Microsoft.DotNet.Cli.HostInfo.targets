@@ -1,0 +1,28 @@
+<Project ToolsVersion="15.0">
+  <Target Name="WriteHostInfoProps"
+          Condition=" !Exists('$(HostInfoProps)') "
+          DependsOnTargets="BuildDotnetCliBuildFramework">
+    <!-- Current Runtime Information -->
+    <GetCurrentRuntimeInformation OverrideRid="$(OverrideRid)">
+      <Output TaskParameter="Rid" PropertyName="HostRid" />
+      <Output TaskParameter="Architecture" PropertyName="HostArchitecture" />
+      <Output TaskParameter="OSName" PropertyName="HostOSName" />
+    </GetCurrentRuntimeInformation>
+
+    <PropertyGroup>
+      <HostInfoPropsContent>
+&lt;Project ToolsVersion=&quot;15.0&quot;&gt;
+    &lt;PropertyGroup&gt;
+        &lt;Rid&gt;$(HostRid)&lt;/Rid&gt;
+        &lt;Architecture&gt;$(HostArchitecture)&lt;/Architecture&gt;
+        &lt;OSName&gt;$(HostOSName)&lt;/OSName&gt;
+    &lt;/PropertyGroup&gt;
+&lt;/Project&gt;
+      </HostInfoPropsContent>
+    </PropertyGroup>
+
+    <WriteLinesToFile File="$(HostInfoProps)"
+                      Lines="$(HostInfoPropsContent)"
+                      Overwrite="true"  />
+  </Target>
+</Project>

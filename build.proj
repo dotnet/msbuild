@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="BuildTheWholeCli" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <Import Project="build/Microsoft.DotNet.Cli.InitRepo.props" />
+  <Import Condition=" Exists('$(GitCommitInfoProps)') Or '$(GeneratingPropsFile)' != 'true' " Project="$(GitCommitInfoProps)" />
+  <Import Condition=" Exists('$(HostInfoProps)') Or '$(GeneratingPropsFile)' != 'true' " Project="$(HostInfoProps)" />
   <Import Project="build/Microsoft.DotNet.Cli.Monikers.props" />
 
   <PropertyGroup>
@@ -73,12 +76,16 @@
           WorkingDirectory="$(DotnetCliBuildDirectory)"/>
   </Target>
 
-  <Target DependsOnTargets="$(CLITargets)" Name="BuildTheWholeCli"></Target>
+  <Target Name="BuildTheWholeCli" DependsOnTargets="$(CLITargets)" />
 
+  <Import Project="build/Microsoft.DotNet.Cli.GitCommitInfo.targets" />
+  <Import Project="build/Microsoft.DotNet.Cli.HostInfo.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.Prepare.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.Compile.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.Package.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.Test.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.Publish.targets" />
   <Import Project="build/Microsoft.DotNet.Cli.Run.targets" />
+
+  <Import Project="build/Microsoft.DotNet.Cli.InitRepo.targets" />
 </Project>
