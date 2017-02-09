@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp1.0</TargetFramework>
+    <DebugType>portable</DebugType>
+    <AssemblyName>ProjectA</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <PackageId>ProjectA</PackageId>
+    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
+    <RuntimeFrameworkVersion>1.0.3</RuntimeFrameworkVersion>
+  </PropertyGroup>
+
+</Project>

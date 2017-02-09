@@ -22,9 +22,10 @@ namespace Microsoft.DotNet.Restore.Tests
             string dir = "pkgs";
             string fullPath = Path.GetFullPath(Path.Combine(rootPath, dir));
 
-            new NewCommand()
+            string newArgs = $"console -o \"{rootPath}\"";
+            new NewCommandShim()
                 .WithWorkingDirectory(rootPath)
-                .Execute()
+                .Execute(newArgs)
                 .Should()
                 .Pass();
 
@@ -48,9 +49,10 @@ namespace Microsoft.DotNet.Restore.Tests
             string dir = "pkgs";
             string fullPath = Path.GetFullPath(Path.Combine(rootPath, dir));
 
-            new NewCommand()
+            string newArgs = $"classlib -o \"{rootPath}\"";
+            new NewCommandShim()
                 .WithWorkingDirectory(rootPath)
-                .Execute("-t lib")
+                .Execute(newArgs)
                 .Should()
                 .Pass();
 

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project InitialTargets="SetSigningProperties" DefaultTargets="SignFiles" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))/dir.props" />
+  <Import Project="$(RepoRoot)/build_tools/MicroBuild.Core.props" />
+
+  <!-- This will be overridden if we're building with MicroBuild. -->
+  <Target Name="SignFiles">
+    <Message Text="Fake sign target.  Would sign: @(FilesToSign)" />
+  </Target>
+
+  <Target Name="SetSigningProperties">
+    <Error Condition="'$(Rid)' == ''" Text="Missing required property 'Rid'." />
+    <PropertyGroup>
+      <BaseOutputDirectory Condition="'$(BaseOutputDirectory)' == ''">$(RepoRoot)/artifacts/$(Rid)</BaseOutputDirectory>
+      <Stage2Directory Condition="'$(Stage2Directory)' == ''">$(BaseOutputDirectory)/stage2</Stage2Directory>
+      <Stage2CompilationDirectory Condition="'$(Stage2CompilationDirectory)' == ''">$(BaseOutputDirectory)/stage2compilation</Stage2CompilationDirectory>
+      <PackagesDirectory Condition="'$(PackagesDirectory)' == ''">$(BaseOutputDirectory)/packages</PackagesDirectory>
+
+      <!-- The OutDir and IntermediateOutputPath properties are required by MicroBuild. MicroBuild only
+           signs files that are under these paths. -->
+      <OutDir Condition="'$(OutDir)' == ''">$(BaseOutputDirectory)</OutDir>
+      <IntermediateOutputPath Condition="'$(IntermediateOutputPath)' == ''">$(BaseOutputDirectory)/intermediate</IntermediateOutputPath>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="PostCompileSign" DependsOnTargets="GetPostCompileSignFiles;SignFiles" />
+
+  <Target Name="GetPostCompileSignFiles">
+    <ItemGroup>
+      <!-- External files -->
+      <FilesToSign Include="$(Stage2Directory)/sdk/**/Newtonsoft.Json.dll;
+                            $(Stage2Directory)/shared/**/libuv.dll">
+        <Authenticode>$(ExternalCertificateId)</Authenticode>
+      </FilesToSign>
+      <!-- Built binaries -->
+      <FilesToSign Include="$(Stage2Directory)/sdk/**/csc.exe;
+                            $(Stage2Directory)/sdk/**/csc.dll;
+                            $(Stage2Directory)/sdk/**/dotnet.dll;
+                            $(Stage2Directory)/sdk/**/System.*.dll;
+                            $(Stage2Directory)/sdk/**/Microsoft.*.dll;
+                            $(Stage2Directory)/sdk/**/NuGet*.dll;
+                            $(Stage2Directory)/sdk/**/datacollector.dll;
+                            $(Stage2Directory)/sdk/**/MSBuild.dll;
+                            $(Stage2Directory)/sdk/**/testhost.dll;
+                            $(Stage2Directory)/sdk/**/vstest.console.dll">
+        <Authenticode>$(InternalCertificateId)</Authenticode>
+      </FilesToSign>
+      <!-- Built files for the packages -->
+      <FilesToSign Include="$(Stage2CompilationDirectory)/forPackaging/**/*dotnet*.dll;
+                            $(Stage2CompilationDirectory)/forPackaging/**/Microsoft.Extensions.DependencyModel.dll;
+                            $(Stage2CompilationDirectory)/forPackaging/**/Microsoft.Extensions.Testing.Abstractions.dll">
+        <Authenticode>$(InternalCertificateId)</Authenticode>
+      </FilesToSign>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="SignNuPkgContents" DependsOnTargets="GetSignNuPkgContentsFiles;SignFiles" />
+
+  <Target Name="GetSignNuPkgContentsFiles">
+    <PropertyGroup>
+      <OutDir>$(RepoRoot)/src/Microsoft.DotNet.Cli.Utils</OutDir>
+    </PropertyGroup>
+    <ItemGroup>
+      <!-- NuPkg contents -->
+      <FilesToSign Include="$(OutDir)/bin/**/Microsoft.DotNet.Cli.Utils.dll">
+        <Authenticode>$(InternalCertificateId)</Authenticode>
+      </FilesToSign>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="SignMsiAndCab" DependsOnTargets="GetSignMsiAndCabFiles;SignFiles" />
+
+  <Target Name="GetSignMsiAndCabFiles">
+    <PropertyGroup>
+      <OutDir>$(PackagesDirectory)</OutDir>
+    </PropertyGroup>
+    <ItemGroup>
+      <FilesToSign Include="$(PackagesDirectory)/**/*.msi">
+        <Authenticode>$(InternalCertificateId)</Authenticode>
+      </FilesToSign>
+      <FilesToSign Include="$(PackagesDirectory)/**/*.cab">
+        <Authenticode>$(InternalCertificateId)</Authenticode>
+      </FilesToSign>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="SignEngine" DependsOnTargets="GetSignEngineFiles;SignFiles" />
+
+  <Target Name="GetSignEngineFiles">
+    <PropertyGroup>
+      <OutDir>$(PackagesDirectory)</OutDir>
+    </PropertyGroup>
+    <ItemGroup>
+      <FilesToSign Include="$(PackagesDirectory)/**/*engine.exe">
+        <Authenticode>$(InternalCertificateId)</Authenticode>
+      </FilesToSign>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="SignCliBundle" DependsOnTargets="GetSignCliBundleFiles;SignFiles" />
+
+  <Target Name="GetSignCliBundleFiles">
+    <PropertyGroup>
+      <OutDir>$(PackagesDirectory)</OutDir>
+    </PropertyGroup>
+    <ItemGroup>
+      <FilesToSign Include="$(PackagesDirectory)/**/*.exe">
+        <Authenticode>$(InternalCertificateId)</Authenticode>
+      </FilesToSign>
+    </ItemGroup>
+  </Target>
+
+  <Import Project="$(RepoRoot)/build_tools/MicroBuild.Core.targets" />
+</Project>

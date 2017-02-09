@@ -41,10 +41,11 @@ namespace Microsoft.DotNet.Tools.MSBuild
                 {
                     Type loggerType = typeof(MSBuildLogger);
 
-                    argsToForward = argsToForward.Concat(new[]
-                    {
-                        $"/Logger:{loggerType.FullName},{loggerType.GetTypeInfo().Assembly.Location}"
-                    });
+                    argsToForward = argsToForward
+                        .Concat(new[]
+                        {
+                            $"/Logger:{loggerType.FullName},{loggerType.GetTypeInfo().Assembly.Location}"
+                        });
                 }
                 catch (Exception)
                 {
@@ -54,7 +55,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
 
             _forwardingApp = new ForwardingApp(
                 GetMSBuildExePath(),
-                _msbuildRequiredParameters.Concat(argsToForward),
+                _msbuildRequiredParameters.Concat(argsToForward.Select(Escape)),
                 environmentVariables: _msbuildRequiredEnvironmentVariables);
         }
 
@@ -76,6 +77,13 @@ namespace Microsoft.DotNet.Tools.MSBuild
         {
             return app.Option("-v|--verbosity", LocalizableStrings.VerbosityOptionDescription, CommandOptionType.SingleValue);
         }
+
+        private static string Escape(string arg) =>
+            // this is a workaround for https://github.com/Microsoft/msbuild/issues/1622
+             (arg.StartsWith("/p:RestoreSources=", StringComparison.OrdinalIgnoreCase)) ?
+                arg.Replace(";", "%3B") 
+                   .Replace("://", ":%2F%2F") : 
+                arg;
 
         private static string GetMSBuildExePath()
         {

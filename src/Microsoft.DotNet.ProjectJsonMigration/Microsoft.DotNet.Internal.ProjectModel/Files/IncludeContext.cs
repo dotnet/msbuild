@@ -35,6 +35,8 @@ namespace Microsoft.DotNet.Internal.ProjectModel.Files
                 throw new ArgumentNullException(nameof(rawObject));
             }
 
+            CustomIncludePatterns = new List<string>();
+            CustomRemovePatterns = new List<string>();
             SourceBasePath = sourceBasePath;
             Option = option;
             var token = rawObject.Value<JToken>(option);
@@ -111,6 +113,10 @@ namespace Microsoft.DotNet.Internal.ProjectModel.Files
 
         public string Option { get; }
 
+        public List<string> CustomIncludePatterns { get; }
+
+        public List<string> CustomRemovePatterns { get; }
+
         public List<string> IncludePatterns { get; }
 
         public List<string> ExcludePatterns { get; }
@@ -131,6 +137,7 @@ namespace Microsoft.DotNet.Internal.ProjectModel.Files
             return other != null &&
                 SourceBasePath == other.SourceBasePath &&
                 Option == other.Option &&
+                EnumerableEquals(CustomIncludePatterns, other.CustomIncludePatterns) &&
                 EnumerableEquals(IncludePatterns, other.IncludePatterns) &&
                 EnumerableEquals(ExcludePatterns, other.ExcludePatterns) &&
                 EnumerableEquals(IncludeFiles, other.IncludeFiles) &&

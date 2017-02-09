@@ -21,7 +21,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
                 includeContext =>
                 {
                     var fullRemoveSet = includeContext.ExcludePatterns.OrEmptyIfNull()
-                                        .Union(includeContext.ExcludeFiles.OrEmptyIfNull());
+                                        .Union(includeContext.ExcludeFiles.OrEmptyIfNull())
+                                        .Union(includeContext.CustomRemovePatterns.OrEmptyIfNull());
 
                     return FormatGlobPatternsForMsbuild(fullRemoveSet, includeContext.SourceBasePath);
                 },
@@ -32,6 +33,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
                             (includeContext.ExcludePatterns != null && includeContext.ExcludePatterns.Count > 0)
                             ||
                             (includeContext.ExcludeFiles != null && includeContext.ExcludeFiles.Count > 0)
+                            ||
+                            (includeContext.CustomRemovePatterns != null && includeContext.CustomRemovePatterns.Count > 0)
                         );
                 });
 

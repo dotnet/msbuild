@@ -6,7 +6,7 @@
   <Import Project="Microsoft.DotNet.Cli.BundledTemplates.props" />
 
   <Target Name="Prepare"
-          DependsOnTargets="Init;DownloadHostAndSharedFxArtifacts;RestoreSrcPackages;RestoreToolsPackages;ZipTemplates" />
+          DependsOnTargets="Init;DownloadHostAndSharedFxArtifacts;RestoreSrcPackages;RestoreToolsPackages" />
 
   <Target Name="Init"
           DependsOnTargets="InitializeCommonProps;
@@ -41,10 +41,6 @@
       <CoreCLRRid Condition=" '$(OSName)' == 'centos' OR '$(OSName)' == 'rhel' ">rhel.7-x64</CoreCLRRid>
     </PropertyGroup>
 
-    <GenerateNuGetPackagesArchiveVersion RepoRoot="$(RepoRoot)"
-                                         SharedFrameworkVersion="$(CLI_SharedFrameworkVersion)">
-      <Output TaskParameter="Version" PropertyName="NuGetPackagesArchiveVersion"/>
-    </GenerateNuGetPackagesArchiveVersion>
 
     <PropertyGroup>
       <CommitCount Condition=" '$(CommitCount)' == '' ">$(DefaultCommitCount)</CommitCount>
@@ -279,29 +275,6 @@
     <ItemGroup>
       <RestoreToolsPackagesInput Include="$(RepoRoot)/tools/**/*.csproj" />
     </ItemGroup>
-  </Target>
-
-  <Target Name="SetupZipTemplatesInputsOutputs">
-    <PropertyGroup>
-      <_DotNetNewFolder>$(RepoRoot)/src/dotnet/commands/dotnet-new</_DotNetNewFolder>
-    </PropertyGroup>
-    <ItemGroup>
-      <DotNetNewArchive Include="$([System.IO.Directory]::GetDirectories($(_DotNetNewFolder)))" />
-
-      <ZipTemplatesInput Include="$(_DotNetNewFolder)/**" Exclude="$(_DotNetNewFolder)/*.zip" />
-      <ZipTemplatesOutput Include="@(DotNetNewArchive->'%(RelativeDir)/$([System.IO.Path]::GetFileName('%(DotNetNewArchive.FullPath)')).zip')" />
-    </ItemGroup>
-  </Target>
-
-  <Target Name="ZipTemplates"
-          DependsOnTargets="SetupZipTemplatesInputsOutputs"
-          Inputs="@(ZipTemplatesInput)"
-          Outputs="@(ZipTemplatesOutput)">
-
-    <ZipFileCreateFromDirectory
-          SourceDirectory="%(DotNetNewArchive.FullPath)"
-          DestinationArchive="%(DotNetNewArchive.RelativeDir)/$([System.IO.Path]::GetFileName(%(DotNetNewArchive.FullPath))).zip"
-          OverwriteDestination="True" />
   </Target>
 
 </Project>

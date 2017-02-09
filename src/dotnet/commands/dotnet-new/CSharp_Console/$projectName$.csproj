@@ -1,9 +1,0 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
-    <RuntimeFrameworkVersion>$CurrentSharedFrameworkVersion$</RuntimeFrameworkVersion>
-  </PropertyGroup>
-
-</Project>
