@@ -42,6 +42,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <SkipOptimization Condition="'$(RuntimeIdentifier)' == ''">true</SkipOptimization>
       <_TFM Condition="'$(_TFM)' == ''">$(TargetFramework)</_TFM>
       <PathSeparator>$([System.IO.Path]::PathSeparator)</PathSeparator>
+      <DirectorySeparatorChar>$([System.IO.Path]::DirectorySeparatorChar)</DirectorySeparatorChar>
     </PropertyGroup>
 
     <NETSdkError Condition="'$(RuntimeIdentifier)' =='' and '$(_PureManagedAssets)' == ''"
