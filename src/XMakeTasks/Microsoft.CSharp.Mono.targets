@@ -16,4 +16,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 -->
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <!--
+            These are the extensions that reference resolution will consider when looking for debug files related
+            to resolved references, which can be .pdb or {dll|exe}.mdb files. The same project could have a mix of
+            these, depending on where the references originated.
+        -->
+        <AllowedReferenceRelatedDebugFileExtensions Condition="'$(AllowedReferenceRelatedDebugFileExtensions)' == ''">
+            .pdb;
+            .dll.mdb;
+            .exe.mdb
+        </AllowedReferenceRelatedDebugFileExtensions>
+    </PropertyGroup>
 </Project>

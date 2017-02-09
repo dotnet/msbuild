@@ -581,20 +581,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!--
         These are the extensions that reference resolution will consider when looking for debug files related
-        to resolved references, for .pdb files
+        to resolved references, default is .pdb
         -->
-    <AllowedReferenceRelatedDebugFileExtensions Condition="'$(_DebugFileExt)' == '.pdb'">
-        $(_DebugFileExt)
-    </AllowedReferenceRelatedDebugFileExtensions>
-
-    <!--
-        These are the extensions that reference resolution will consider when looking for debug files related
-        to resolved references, for .mdb files when using mono's compilers.
-        Mono's compilers use foo.dll.mdb as the debug filename for an assembly named foo.dll
-        -->
-    <AllowedReferenceRelatedDebugFileExtensions Condition="'$(_DebugFileExt)' != '.pdb'">
-        .exe$(_DebugFileExt);
-        .dll$(_DebugFileExt)
+    <AllowedReferenceRelatedDebugFileExtensions Condition="'$(AllowedReferenceRelatedDebugFileExtensions)' == ''">
+      .pdb;
     </AllowedReferenceRelatedDebugFileExtensions>
 
     <!--
