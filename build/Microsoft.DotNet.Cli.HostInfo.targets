@@ -22,6 +22,7 @@
     </PropertyGroup>
 
     <WriteLinesToFile File="$(HostInfoProps)"
-                      Lines="$(HostInfoPropsContent)" />
+                      Lines="$(HostInfoPropsContent)"
+                      Overwrite="true"  />
   </Target>
 </Project>

@@ -36,6 +36,7 @@
 
     <WriteLinesToFile File="$(GitCommitInfoProps)"
                       Lines="$(GitCommitInfoPropsContent)"
-                      Condition=" '$(ShouldOverwriteThePropsFile)' == 'true' "/>
+                      Condition=" '$(ShouldOverwriteThePropsFile)' == 'true' "
+                      Overwrite="true" />
   </Target>
 </Project>
