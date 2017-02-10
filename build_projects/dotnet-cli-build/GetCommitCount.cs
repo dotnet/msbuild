@@ -36,7 +36,12 @@ namespace Microsoft.DotNet.Cli.Build
 
         protected override void LogEventsFromTextOutput(string line, MessageImportance importance)
         {
-            CommitCount = line;
+            var buildVersion = new BuildVersion()
+            {
+                CommitCount = int.Parse(line)
+            };
+
+            CommitCount = buildVersion.CommitCountString;
         }
     }
 }

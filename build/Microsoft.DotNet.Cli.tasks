@@ -24,7 +24,6 @@
   <UsingTask TaskName="GetCommitCount" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="GetCommitHash" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="GetCurrentRuntimeInformation" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="GetVersionBadgeMoniker" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="MakeRelative" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="RemoveAssetFromDepsPackages" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="ReplaceFileContents" AssemblyFile="$(CLIBuildDll)" />
