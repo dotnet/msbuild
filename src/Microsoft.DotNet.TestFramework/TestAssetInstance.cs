@@ -17,6 +17,18 @@ namespace Microsoft.DotNet.TestFramework
 {
     public class TestAssetInstance
     {
+        public DirectoryInfo MigrationBackupRoot { get; }
+
+        public DirectoryInfo Root { get; }
+
+        public TestAssetInfo TestAssetInfo { get; }
+
+        private bool _filesCopied = false;
+
+        private bool _restored = false;
+
+        private bool _built = false;
+
         public TestAssetInstance(TestAssetInfo testAssetInfo, DirectoryInfo root)
         {
             if (testAssetInfo == null)
@@ -48,36 +60,44 @@ namespace Microsoft.DotNet.TestFramework
             }
         }
 
-        public DirectoryInfo MigrationBackupRoot { get; }
-
-        public DirectoryInfo Root { get; }
-
-        public TestAssetInfo TestAssetInfo { get; }
-
-
         public TestAssetInstance WithSourceFiles()
         {
-            var filesToCopy = TestAssetInfo.GetSourceFiles();
+            if (!_filesCopied)
+            {
+                var filesToCopy = TestAssetInfo.GetSourceFiles();
 
-            CopyFiles(filesToCopy);
+                CopyFiles(filesToCopy);
+
+                _filesCopied = true;
+            }
 
             return this;
         }
 
         public TestAssetInstance WithRestoreFiles()
         {
-            var filesToCopy = TestAssetInfo.GetRestoreFiles();
+            if (!_restored)
+            {
+                WithSourceFiles();
 
-            CopyFiles(filesToCopy);
+                RestoreAllProjects();
+
+                _restored = true;
+            }
 
             return this;
         }
 
         public TestAssetInstance WithBuildFiles()
         {
-            var filesToCopy = TestAssetInfo.GetBuildFiles();
+            if (!_built)
+            {
+                WithRestoreFiles();
 
-            CopyFiles(filesToCopy);
+                BuildRootProjectOrSolution();
+
+                _built = true;
+            }
 
             return this;
         }
@@ -169,6 +189,70 @@ namespace Microsoft.DotNet.TestFramework
                 PathUtility.EnsureDirectoryExists(newFile.Directory.FullName);
 
                 file.CopyTo(newPath);
+            }
+        }
+
+        private void BuildRootProjectOrSolution()
+        {
+            string[] args = new string[] { "build" };
+
+            Console.WriteLine($"TestAsset Build '{TestAssetInfo.AssetName}'");
+
+            var commandResult = Command.Create(TestAssetInfo.DotnetExeFile.FullName, args)
+                                    .WorkingDirectory(Root.FullName)
+                                    .CaptureStdOut()
+                                    .CaptureStdErr()
+                                    .Execute();
+
+            int exitCode = commandResult.ExitCode;
+
+            if (exitCode != 0)
+            {
+                Console.WriteLine(commandResult.StdOut);
+
+                Console.WriteLine(commandResult.StdErr);
+
+                string message = string.Format($"TestAsset Build '{TestAssetInfo.AssetName}' Failed with {exitCode}");
+
+                throw new Exception(message);
+            }
+        }
+
+        private IEnumerable<FileInfo> GetProjectFiles()
+        {
+            return Root.GetFiles(TestAssetInfo.ProjectFilePattern, SearchOption.AllDirectories);
+        }
+
+        private void Restore(FileInfo projectFile)
+        {
+            var restoreArgs = new string[] { "restore", projectFile.FullName };
+
+            var commandResult = Command.Create(TestAssetInfo.DotnetExeFile.FullName, restoreArgs)
+                                .CaptureStdOut()
+                                .CaptureStdErr()
+                                .Execute();
+
+            int exitCode = commandResult.ExitCode;
+
+            if (exitCode != 0)
+            {
+                Console.WriteLine(commandResult.StdOut);
+
+                Console.WriteLine(commandResult.StdErr);
+
+                string message = string.Format($"TestAsset Restore '{TestAssetInfo.AssetName}'@'{projectFile.FullName}' Failed with {exitCode}");
+
+                throw new Exception($"TestAsset {TestAssetInfo.DotnetExeFile.FullName} {string.Join(" ", restoreArgs)}");
+            }
+        }
+
+        private void RestoreAllProjects()
+        {
+            Console.WriteLine($"TestAsset Restore '{TestAssetInfo.AssetName}'");
+
+            foreach (var projFile in GetProjectFiles())
+            {
+                Restore(projFile);
             }
         }
     }
