@@ -6,7 +6,7 @@
     <CLI_NETSDK_Version>1.0.0-alpha-20170207-4</CLI_NETSDK_Version>
     <CLI_NuGet_Version>4.0.0-rtm-2275</CLI_NuGet_Version>
     <CLI_WEBSDK_Version>1.0.0-alpha-20170130-3-281</CLI_WEBSDK_Version>
-    <CLI_TestPlatform_Version>15.0.0-preview-20170125-04</CLI_TestPlatform_Version>
+    <CLI_TestPlatform_Version>15.0.0-preview-20170210-02</CLI_TestPlatform_Version>
     <TemplateEngineVersion>1.0.0-beta1-20170202-111</TemplateEngineVersion>
     <TemplateEngineTemplateVersion>1.0.0-beta1-20170206-112</TemplateEngineTemplateVersion>
   </PropertyGroup>
