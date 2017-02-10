@@ -29,9 +29,9 @@ namespace Microsoft.DotNet.Scripts
             buildInfos.Add(BuildInfo.Get("CoreSetup", s_config.CoreSetupVersionUrl, fetchLatestReleaseFile: false));
 
             IEnumerable<IDependencyUpdater> updaters = GetUpdaters();
-            var dependencyBuildInfos = buildInfos.Select(i =>
+            var dependencyBuildInfos = buildInfos.Select(buildInfo =>
                 new DependencyBuildInfo(
-                    i,
+                    buildInfo,
                     upgradeStableVersions: true,
                     disabledPackages: Enumerable.Empty<string>()));
             DependencyUpdateResults updateResults = DependencyUpdateUtils.Update(updaters, dependencyBuildInfos);
@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Scripts
 
                 string suggestedMessage = updateResults.GetSuggestedCommitMessage();
                 string body = string.Empty;
-                if (s_config.GitHubPullRequestNotifications != null)
+                if (s_config.GitHubPullRequestNotifications.Any())
                 {
                     body += PullRequestCreator.NotificationString(s_config.GitHubPullRequestNotifications);
                 }
