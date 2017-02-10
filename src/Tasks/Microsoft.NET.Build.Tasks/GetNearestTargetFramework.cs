@@ -58,7 +58,7 @@ namespace Microsoft.NET.Build.Tasks
             var nearestNuGetFramework = new FrameworkReducer().GetNearest(referringNuGetFramework, possibleNuGetFrameworks);
             if (nearestNuGetFramework == null)
             {
-                Log.LogError(Strings.NoCompatibleTargetFramework, ProjectFilePath, ReferringTargetFramework);
+                Log.LogError(Strings.NoCompatibleTargetFramework, ProjectFilePath, ReferringTargetFramework, string.Join("; ", possibleNuGetFrameworks));
                 return;
             }
 

@@ -29,25 +29,15 @@ namespace Microsoft.NET.TestFramework.Commands
             return command.Execute();
         }
 
-        public DirectoryInfo GetOutputDirectory(string targetFramework = "netcoreapp1.0", string configuration = "Debug", string runtimeIdentifier = "", bool selfContained = false)
+        public override DirectoryInfo GetOutputDirectory(string targetFramework = "netcoreapp1.0", string configuration = "Debug", string runtimeIdentifier = "")
         {
-            string output = Path.Combine(ProjectRootPath, "bin", BuildRelativeOutputPath(targetFramework, configuration, runtimeIdentifier, selfContained));
-            return new DirectoryInfo(output);
+            DirectoryInfo baseDirectory = base.GetOutputDirectory(targetFramework, configuration, runtimeIdentifier); 
+            return new DirectoryInfo(Path.Combine(baseDirectory.FullName, PublishSubfolderName));
         }
 
         public string GetPublishedAppPath(string appName)
         {
             return Path.Combine(GetOutputDirectory().FullName, $"{appName}.dll");
-        }
-
-        private string BuildRelativeOutputPath(string targetFramework, string configuration, string runtimeIdentifier, bool selfContained)
-        {
-            if (runtimeIdentifier.Length == 0 && selfContained)
-            {
-                runtimeIdentifier = RuntimeEnvironment.GetRuntimeIdentifier();
-            }
-			
-            return Path.Combine(configuration, targetFramework, runtimeIdentifier, PublishSubfolderName);
         }
     }
 }

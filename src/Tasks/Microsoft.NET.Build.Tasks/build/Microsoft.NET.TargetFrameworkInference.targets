@@ -109,12 +109,16 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DefaultItemExcludes>$(DefaultItemExcludes);$(OutputPath)/**</DefaultItemExcludes>
     <DefaultItemExcludes>$(DefaultItemExcludes);$(IntermediateOutputPath)/**</DefaultItemExcludes>
   </PropertyGroup>
-  
+
+  <PropertyGroup>
+    <AppendTargetFrameworkToOutputPath Condition="'$(AppendTargetFrameworkToOutputPath)' == ''">true</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
   <!--
     Append $(TargetFramework) directory to output and intermediate paths to prevent bin clashes between
     targets.
    -->
-  <PropertyGroup Condition="'$(TargetFramework)' != '' and '$(_UnsupportedTargetFrameworkError)' != 'true'">
+  <PropertyGroup Condition="'$(AppendTargetFrameworkToOutputPath)' == 'true' and '$(TargetFramework)' != '' and '$(_UnsupportedTargetFrameworkError)' != 'true'">
     <IntermediateOutputPath>$(IntermediateOutputPath)$(TargetFramework)\</IntermediateOutputPath>
     <OutputPath>$(OutputPath)$(TargetFramework)\</OutputPath>
   </PropertyGroup>
