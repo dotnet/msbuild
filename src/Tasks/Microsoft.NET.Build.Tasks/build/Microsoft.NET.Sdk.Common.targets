@@ -22,16 +22,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <MicrosoftNETBuildTasksAssembly>$(MicrosoftNETBuildTasksDirectory)Microsoft.NET.Build.Tasks.dll</MicrosoftNETBuildTasksAssembly>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <VersionPrefix Condition=" '$(VersionPrefix)' == '' ">1.0.0</VersionPrefix>
-    <VersionSuffix Condition=" '$(VersionSuffix)' == '' "></VersionSuffix>
-    <Version Condition=" '$(Version)' == '' and '$(VersionSuffix)' != '' ">$(VersionPrefix)-$(VersionSuffix)</Version>
-    <Version Condition=" '$(Version)' == '' ">$(VersionPrefix)</Version>
-    <Authors Condition=" '$(Authors)'=='' ">$(AssemblyName)</Authors>
-    <Company Condition=" '$(Company)'=='' ">$(Authors)</Company>
-    <AssemblyTitle Condition="'$(AssemblyTitle)' == ''">$(AssemblyName)</AssemblyTitle>
-    <Product Condition="'$(Product)' == ''">$(AssemblyName)</Product>
-  </PropertyGroup>
 
   <UsingTask TaskName="GetNearestTargetFramework" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="NETSdkError" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
@@ -55,13 +45,17 @@ Copyright (c) .NET Foundation. All rights reserved.
     with the referencing project's target framework.
   ============================================================
    -->
-  <Target Name="GetTargetFrameworkProperties" Returns="TargetFramework=$(NearestTargetFramework)">
+  <Target Name="GetTargetFrameworkProperties" Returns="TargetFramework=$(NearestTargetFramework);ProjectHasSingleTargetFramework=$(_HasSingleTargetFramework)">
 
     <PropertyGroup>
       <!-- If a ReferringTargetFramework was not specified, and we only have one TargetFramework, then don't try to check compatibility -->
       <_SkipNearestTargetFrameworkResolution Condition="'$(TargetFramework)' != '' and '$(ReferringTargetFramework)' == ''">true</_SkipNearestTargetFrameworkResolution>
       <NearestTargetFramework Condition="'$(_SkipNearestTargetFrameworkResolution)' == 'true'">$(TargetFramework)</NearestTargetFramework>
-      
+
+      <!-- A project can only have more than one output if the current global properties are such that the current build is a cross-targeting one. -->
+      <_HasSingleTargetFramework Condition="'$(IsCrossTargetingBuild)' != 'true'">true</_HasSingleTargetFramework>
+      <_HasSingleTargetFramework Condition="'$(_HasSingleTargetFramework)' == ''">false</_HasSingleTargetFramework>
+
       <_PossibleTargetFrameworks Condition="'$(TargetFramework)' != ''">$(TargetFramework)</_PossibleTargetFrameworks>
       <_PossibleTargetFrameworks Condition="'$(TargetFramework)' == ''">$(TargetFrameworks)</_PossibleTargetFrameworks>
     </PropertyGroup>

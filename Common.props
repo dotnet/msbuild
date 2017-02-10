@@ -50,7 +50,8 @@
     <!-- Prepare assembly metadata -->
     <Authors>Microsoft Corporation</Authors>
     <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
-    <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
+    <AssemblyVersion Condition="'$(BUILD_BUILDNUMBER)' == ''">$(VersionPrefix).0</AssemblyVersion>
+    <AssemblyVersion Condition="'$(BUILD_BUILDNUMBER)' != ''">$(VersionPrefix).$([MSBuild]::Subtract($(BuildNumberPart1), $(BuildEpoch)))</AssemblyVersion>
     <FileVersion Condition="'$(BUILD_BUILDNUMBER)' == ''">$(VersionPrefix).0</FileVersion>
     <FileVersion Condition="'$(BUILD_BUILDNUMBER)' != ''">$(VersionPrefix).$([MSBuild]::Subtract($(BuildNumberPart1), $(BuildEpoch)))</FileVersion>
     <InformationalVersion>$(VersionPrefix).$(BuildNumber)</InformationalVersion>

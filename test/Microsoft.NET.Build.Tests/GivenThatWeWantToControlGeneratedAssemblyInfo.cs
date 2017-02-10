@@ -9,6 +9,7 @@ using Microsoft.NET.TestFramework.Commands;
 using Xunit;
 using FluentAssertions;
 using static Microsoft.NET.TestFramework.Commands.MSBuildTest;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -81,6 +82,35 @@ namespace Microsoft.NET.Build.Tests
             var actualInfo = AssemblyInfo.Get(assemblyPath);
 
             actualInfo.Should().Equal(expectedInfo);
+        }
+
+        [Theory]
+        [InlineData("netcoreapp1.0")]
+        [InlineData("net45")]
+        public void It_respects_version_prefix(string targetFramework)
+        {
+            if (targetFramework == "net45" && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld", identifier: targetFramework)
+                .WithSource()
+                .Restore("", $"/p:OutputType=Library;TargetFramework={targetFramework}");
+
+            var buildCommand = new BuildCommand(Stage0MSBuild, testAsset.TestRoot);
+            buildCommand
+                .Execute($"/p:OutputType=Library;TargetFramework={targetFramework};VersionPrefix=1.2.3")
+                .Should()
+                .Pass();
+
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory(targetFramework).FullName, "HelloWorld.dll");
+            var info = AssemblyInfo.Get(assemblyPath);
+
+            info["AssemblyVersionAttribute"].Should().Be("1.2.3.0");
+            info["AssemblyFileVersionAttribute"].Should().Be("1.2.3.0");
+            info["AssemblyInformationalVersionAttribute"].Should().Be("1.2.3");
         }
     }
 }

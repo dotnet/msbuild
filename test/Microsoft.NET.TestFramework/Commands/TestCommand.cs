@@ -35,7 +35,7 @@ namespace Microsoft.NET.TestFramework.Commands
 
             var buildProjectFiles = Directory.GetFiles(ProjectRootPath, "*.csproj");
 
-            if(buildProjectFiles.Length != 1)
+            if (buildProjectFiles.Length != 1)
             {
                 var errorMsg = $"Found {buildProjectFiles.Length} csproj files under {ProjectRootPath} instead of just 1.";
                 throw new ArgumentException(errorMsg);
@@ -44,9 +44,9 @@ namespace Microsoft.NET.TestFramework.Commands
             return buildProjectFiles[0];
         }
 
-        public DirectoryInfo GetOutputDirectory(string targetFramework, string configuration = "Debug")
+        public virtual DirectoryInfo GetOutputDirectory(string targetFramework, string configuration = "Debug", string runtimeIdentifier = "")
         {
-            string output = Path.Combine(ProjectRootPath, "bin", configuration, targetFramework);
+            string output = Path.Combine(ProjectRootPath, "bin", configuration, targetFramework, runtimeIdentifier);
             return new DirectoryInfo(output);
         }
 

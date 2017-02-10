@@ -90,7 +90,7 @@ namespace Microsoft.NET.Build.Tasks
             LockFileTargetLibrary platformLibrary,
             IDictionary<string, LockFileTargetLibrary> libraryLookup)
         {
-            var exclusionList = new HashSet<string>();
+            var exclusionList = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             exclusionList.Add(platformLibrary.Name);
             CollectDependencies(libraryLookup, platformLibrary.Dependencies, exclusionList);

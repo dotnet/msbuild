@@ -532,7 +532,6 @@ Copyright (c) .NET Foundation. All rights reserved.
                                        RuntimeConfigPath="$(PublishRuntimeConfigFilePath)"
                                        RuntimeIdentifier="$(RuntimeIdentifier)"
                                        PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
-                                       RuntimeFrameworkVersion="$(RuntimeFrameworkVersion)"
                                        UserRuntimeConfig="$(UserRuntimeConfig)"
                                        HostConfigurationOptions="@(RuntimeHostConfigurationOption)" />
 
@@ -550,11 +549,6 @@ Copyright (c) .NET Foundation. All rights reserved.
           AfterTargets="ComputeFilesToPublish"
           BeforeTargets="CopyFilesToPublishDirectory"
           Condition="'$(RenamePublishedHost)' == 'true'">
-
-    <PropertyGroup>
-      <_DotNetHostExecutableName>dotnet</_DotNetHostExecutableName>
-      <_DotNetHostExecutableName Condition="$(RuntimeIdentifier.StartsWith('win'))">$(_DotNetHostExecutableName).exe</_DotNetHostExecutableName>
-    </PropertyGroup>
 
     <ItemGroup>
 
