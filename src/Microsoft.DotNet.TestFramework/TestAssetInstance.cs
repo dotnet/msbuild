@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.TestFramework
             {
                 throw new ArgumentException(nameof(testAssetInfo));
             }
-            
+
             if (root == null)
             {
                 throw new ArgumentException(nameof(root));
@@ -64,9 +64,7 @@ namespace Microsoft.DotNet.TestFramework
         {
             if (!_filesCopied)
             {
-                var filesToCopy = TestAssetInfo.GetSourceFiles();
-
-                CopyFiles(filesToCopy);
+                CopySourceFiles();
 
                 _filesCopied = true;
             }
@@ -176,19 +174,77 @@ namespace Microsoft.DotNet.TestFramework
             });
         }
 
-        private void CopyFiles(IEnumerable<FileInfo> filesToCopy)
+        private static string RebasePath(string path, string oldBaseDirectory, string newBaseDirectory)
         {
+            path = Path.IsPathRooted(path) ? PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(oldBaseDirectory), path) : path;
+            return Path.Combine(newBaseDirectory, path);
+        }
+
+        private void CopySourceFiles()
+        {
+            var filesToCopy = TestAssetInfo.GetSourceFiles();
             foreach (var file in filesToCopy)
             {
-                var relativePath = file.FullName.Substring(TestAssetInfo.Root.FullName.Length + 1);
-
-                var newPath = Path.Combine(Root.FullName, relativePath);
+                var newPath = RebasePath(file.FullName, TestAssetInfo.Root.FullName, Root.FullName);
 
                 var newFile = new FileInfo(newPath);
 
                 PathUtility.EnsureDirectoryExists(newFile.Directory.FullName);
 
-                file.CopyTo(newPath);
+                CopyFileAdjustingPaths(file, newFile);
+            }
+        }
+
+        private bool IsAncestor(FileInfo file, DirectoryInfo maybeAncestor)
+        {
+            var dir = file.Directory;
+            do
+            {
+                if (string.Equals(maybeAncestor.FullName, dir.FullName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+
+                dir = dir.Parent;
+            }
+            while (dir != null);
+
+            return false;
+        }
+
+        private void CopyFileAdjustingPaths(FileInfo source, FileInfo destination)
+        {
+            if (string.Equals(source.Name, "nuget.config", StringComparison.OrdinalIgnoreCase))
+            {
+                CopyNugetConfigAdjustingPath(source, destination);
+            }
+            else
+            {
+                source.CopyTo(destination.FullName);
+            }
+        }
+
+        private void CopyNugetConfigAdjustingPath(FileInfo source, FileInfo destination)
+        {
+            var doc = XDocument.Load(source.FullName, LoadOptions.PreserveWhitespace);
+            foreach (var packageSource in doc.Root.Element("packageSources").Elements("add").Attributes("value"))
+            {
+                if (!Path.IsPathRooted(packageSource.Value))
+                {
+                    string fullPathAtSource = Path.GetFullPath(Path.Combine(source.Directory.FullName, packageSource.Value));
+                    if (!IsAncestor(new FileInfo(fullPathAtSource), TestAssetInfo.Root))
+                    {
+                        packageSource.Value = fullPathAtSource;
+                    }
+                }
+
+                using (var file = new FileStream(
+                    destination.FullName,
+                    FileMode.CreateNew,
+                    FileAccess.ReadWrite))
+                {
+                    doc.Save(file, SaveOptions.None);
+                }
             }
         }
 
