@@ -281,17 +281,27 @@ namespace Microsoft.TemplateEngine.Cli
 
         private void DisplayTemplateList(bool showAll = false)
         {
-            IEnumerable<ITemplateInfo> results = null;
+            IReadOnlyCollection<ITemplateInfo> results = null;
 
             try
             {
                 if (showAll)
                 {
-                    results = PerformAllTemplatesInContextQueryAsync().Result.Where(x => x.IsMatch).Select(x => x.Info);
+                    results = PerformAllTemplatesInContextQueryAsync().Result.Where(x => x.IsMatch).Select(x => x.Info).ToList();
+
+                    if(results.Count == 0)
+                    {
+                        results = PerformAllTemplatesInContextQueryAsync().Result.Select(x => x.Info).ToList();
+                    }
                 }
                 else
                 {
-                    results = _matchedTemplates.Where(x => x.IsMatch).Select(x => x.Info);
+                    results = _matchedTemplates.Where(x => x.IsMatch).Select(x => x.Info).ToList();
+
+                    if (results.Count == 0)
+                    {
+                        results = _matchedTemplates.Select(x => x.Info).ToList();
+                    }
                 }
             }
             catch (TemplateAuthoringException tae)
@@ -345,14 +355,12 @@ namespace Microsoft.TemplateEngine.Cli
             if (!string.IsNullOrEmpty(TemplateName))
             {
                 bool anyPartialMatchesDisplayed = ShowTemplateNameMismatchHelp();
-                ShowUsageHelp();
                 DisplayTemplateList(!anyPartialMatchesDisplayed);
                 return Task.FromResult(CreationResultStatus.NotFound);
             }
 
             if (!ValidateRemainingParameters())
             {
-                ShowUsageHelp();
                 return Task.FromResult(CreationResultStatus.InvalidParamValues);
             }    
 
@@ -1028,16 +1036,16 @@ namespace Microsoft.TemplateEngine.Cli
                 {
                     if (string.Equals(type, "item"))
                     {
-                        Reporter.Error.WriteLine("\t- " + string.Format(LocalizableStrings.ItemTemplateNotInProjectContext, template.Info.Name));
+                        Reporter.Error.WriteLine("  - " + string.Format(LocalizableStrings.ItemTemplateNotInProjectContext, template.Info.Name));
                     }
                     else
                     {   // project template
-                        Reporter.Error.WriteLine("\t- " + string.Format(LocalizableStrings.ProjectTemplateInProjectContext, template.Info.Name));
+                        Reporter.Error.WriteLine("  - " + string.Format(LocalizableStrings.ProjectTemplateInProjectContext, template.Info.Name));
                     }
                 }
                 else
                 {   // this really shouldn't ever happen. But better to have a generic error than quietly ignore the partial match.
-                    Reporter.Error.WriteLine("\t- " + string.Format(LocalizableStrings.GenericPlaceholderTemplateContextError, template.Info.Name));
+                    Reporter.Error.WriteLine("  - " + string.Format(LocalizableStrings.GenericPlaceholderTemplateContextError, template.Info.Name));
                 }
             }
 
@@ -1046,7 +1054,7 @@ namespace Microsoft.TemplateEngine.Cli
                 Reporter.Error.WriteLine(LocalizableStrings.TemplateMultiplePartialNameMatches);
                 foreach (IFilteredTemplateInfo template in remainingPartialMatches.Values)
                 {
-                    Reporter.Error.WriteLine($"\t{template.Info.Name}");
+                    Reporter.Error.WriteLine($"  {template.Info.Name}");
                 }
             }
 
