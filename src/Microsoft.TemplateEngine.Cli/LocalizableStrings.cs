@@ -148,5 +148,11 @@ namespace Microsoft.TemplateEngine.Cli
         public const string Overwrite = "Overwrite";
 
         public const string UnknownChangeKind = "Unknown Change";
+
+        public const string WillCreateTemplate = "About to create: ";
+
+        public const string RerunCommandAndPassForceToCreateAnyway = "Rerun the command and pass --force to create anyway.";
+
+        public const string ForcesTemplateCreation = "Forces content to be generated even if it would change existing files.";
     }
 }
