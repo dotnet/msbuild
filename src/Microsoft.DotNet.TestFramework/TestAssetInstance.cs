@@ -298,7 +298,7 @@ namespace Microsoft.DotNet.TestFramework
 
                 string message = string.Format($"TestAsset Restore '{TestAssetInfo.AssetName}'@'{projectFile.FullName}' Failed with {exitCode}");
 
-                throw new Exception($"TestAsset {TestAssetInfo.DotnetExeFile.FullName} {string.Join(" ", restoreArgs)}");
+                throw new Exception(message);
             }
         }
 
