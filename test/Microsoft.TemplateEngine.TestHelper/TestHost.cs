@@ -89,5 +89,10 @@ namespace Microsoft.TemplateEngine.TestHelper
         {
             FileSystem = new InMemoryFileSystem(path, FileSystem);
         }
+
+        public bool OnPotentiallyDestructiveChangesDetected(IReadOnlyList<IFileChange> changes, IReadOnlyList<IFileChange> destructiveChanges)
+        {
+            return true;
+        }
     }
 }

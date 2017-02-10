@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using System.Linq;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 
@@ -69,6 +70,54 @@ namespace Microsoft.TemplateEngine.Cli
         public void VirtualizeDirectory(string path)
         {
             _baseHost.VirtualizeDirectory(path);
+        }
+
+        private static string GetChangeString(ChangeKind kind)
+        {
+            string changeType;
+
+            switch (kind)
+            {
+                case ChangeKind.Change:
+                    changeType = LocalizableStrings.Change;
+                    break;
+                case ChangeKind.Delete:
+                    changeType = LocalizableStrings.Delete;
+                    break;
+                case ChangeKind.Overwrite:
+                    changeType = LocalizableStrings.Overwrite;
+                    break;
+                default:
+                    changeType = LocalizableStrings.UnknownChangeKind;
+                    break;
+            }
+
+            return changeType;
+        }
+
+        public bool OnPotentiallyDestructiveChangesDetected(IReadOnlyList<IFileChange> changes, IReadOnlyList<IFileChange> destructiveChanges)
+        {
+            Reporter.Output.WriteLine(LocalizableStrings.DestructiveChangesNotification);
+            int longestChangeTextLength = destructiveChanges.Max(x => GetChangeString(x.ChangeKind).Length);
+            int padLen = 5 + longestChangeTextLength;
+
+            foreach (IFileChange change in destructiveChanges)
+            {
+                string changeKind = GetChangeString(change.ChangeKind);
+                Reporter.Output.WriteLine($"  {changeKind}".PadRight(padLen) + change.TargetRelativePath);
+            }
+            
+            Reporter.Output.WriteLine();
+            Reporter.Output.Write($"{LocalizableStrings.ContinueQuestion} (y/n) ");
+            ConsoleKeyInfo info = Console.ReadKey();
+
+            while (info.Key != ConsoleKey.Y && info.Key != ConsoleKey.N)
+            {
+                info = Console.ReadKey();
+            }
+
+            Console.WriteLine();
+            return info.Key == ConsoleKey.Y;
         }
 
         private bool GlobalJsonFileExistsInPath

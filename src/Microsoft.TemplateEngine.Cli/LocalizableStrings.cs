@@ -136,5 +136,17 @@ namespace Microsoft.TemplateEngine.Cli
         public const string GenericPlaceholderTemplateContextError = "[{0}] cannot be created in the target location.";
 
         public const string TemplateMultiplePartialNameMatches = "The following templates partially match the input. Be more specific with the template name and/or language.";
+
+        public const string DestructiveChangesNotification = "Continuing will make the following changes to existing files:";
+
+        public const string ContinueQuestion = "Continue?";
+
+        public const string Change = "Change";
+
+        public const string Delete = "Delete";
+
+        public const string Overwrite = "Overwrite";
+
+        public const string UnknownChangeKind = "Unknown Change";
     }
 }
