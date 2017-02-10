@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.PlatformAbstractions;
 using NuGet.Common;
+using PathUtility = Microsoft.DotNet.Tools.Common.PathUtility;
+using System.Xml.Linq;
 
 namespace Microsoft.DotNet.TestFramework
 {
@@ -28,6 +30,8 @@ namespace Microsoft.DotNet.TestFramework
 
         private readonly DirectoryInfo _root;
 
+        private readonly DirectoryInfo _operationDirectory;
+
         private readonly TestAssetInventoryFiles _inventoryFiles;
 
         private readonly FileInfo _dotnetExeFile;
@@ -38,7 +42,7 @@ namespace Microsoft.DotNet.TestFramework
         {
             get
             {
-                return _root;
+                return _operationDirectory;
             }
         }
 
@@ -74,12 +78,16 @@ namespace Microsoft.DotNet.TestFramework
 
             _dataDirectory = _root.GetDirectory(DataDirectoryName);
 
+            _operationDirectory = _dataDirectory.GetDirectory("files");
+
             _inventoryFiles = new TestAssetInventoryFiles(_dataDirectory);
 
             _directoriesToExclude = new []
             {
                 _dataDirectory
             };
+
+            //throw new Exception($"root = {_root}\nassetName = {_assetName}\ndotnetExeFile = {_dotnetExeFile}\nprojectFilePattern = {_projectFilePattern}\ndataDir = {_dataDirectory}\ndirectoriesToExclude = {string.Join<DirectoryInfo>(";",_directoriesToExclude)}");
         }
 
         public TestAssetInstance CreateInstance([CallerMemberName] string callingMethod = "", string identifier = "")
@@ -95,19 +103,19 @@ namespace Microsoft.DotNet.TestFramework
         {
             ThrowIfTestAssetDoesNotExist();
 
-            ThrowIfAssetSourcesHaveChanged();
+            RemoveCacheIfSourcesHaveChanged();
             
             return GetInventory(
-                _inventoryFiles.Source, 
-                null, 
-                () => {});
+                _inventoryFiles.Source,
+                null,
+                DoCopyFiles);
         }
 
         internal IEnumerable<FileInfo> GetRestoreFiles()
         {
             ThrowIfTestAssetDoesNotExist();
 
-            ThrowIfAssetSourcesHaveChanged();
+            RemoveCacheIfSourcesHaveChanged();
             
             return GetInventory(
                 _inventoryFiles.Restore, 
@@ -119,12 +127,12 @@ namespace Microsoft.DotNet.TestFramework
         {
             ThrowIfTestAssetDoesNotExist();
 
-            ThrowIfAssetSourcesHaveChanged();
+            RemoveCacheIfSourcesHaveChanged();
             
             return GetInventory(
                 _inventoryFiles.Build,
                 () => GetRestoreFiles()
-                        .Concat(GetSourceFiles()),
+                        .Concat(GetSourceFiles()), // TODO: likely not needed
                 DoBuild);
         }
 
@@ -138,7 +146,12 @@ namespace Microsoft.DotNet.TestFramework
             return new DirectoryInfo(Path.Combine(baseDirectory, callingMethod + identifier, _assetName));
         }
 
-        private IEnumerable<FileInfo> GetFileList()
+        private IEnumerable<FileInfo> GetOperationFileList()
+        {
+            return _operationDirectory.GetFiles("*.*", SearchOption.AllDirectories);
+        }
+
+        private IEnumerable<FileInfo> GetOriginalFileList()
         {
             return _root.GetFiles("*.*", SearchOption.AllDirectories)
                         .Where(f => !_directoriesToExclude.Any(d => d.Contains(f)))
@@ -173,7 +186,7 @@ namespace Microsoft.DotNet.TestFramework
                 {
                     action();
 
-                    inventory = GetFileList().Where(i => !preInventory.Select(p => p.FullName).Contains(i.FullName));
+                    inventory = GetOperationFileList().Where(i => !preInventory.Select(p => p.FullName).Contains(i.FullName));
 
                     folder.SaveInventory(file, inventory);
                 }
@@ -182,33 +195,135 @@ namespace Microsoft.DotNet.TestFramework
             return inventory;
         }
 
+        private static string RebasePath(string path, string oldBaseDirectory, string newBaseDirectory)
+        {
+            path = Path.IsPathRooted(path) ? PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(oldBaseDirectory), path) : path;
+            return Path.Combine(newBaseDirectory, path);
+        }
+
+        private void RemoveOperationFiles()
+        {
+            foreach (var opFile in GetOperationFileList())
+            {
+                opFile.Delete();
+            }
+
+            foreach (var f in _inventoryFiles.AllInventoryFiles)
+            {
+                f.Delete();
+            }
+        }
+
+        private bool IsAncestor(FileInfo file, DirectoryInfo maybeAncestor)
+        {
+            var dir = file.Directory;
+            do
+            {
+                if (string.Equals(maybeAncestor.FullName, dir.FullName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+
+                dir = dir.Parent;
+            }
+            while (dir != null);
+
+            return false;
+        }
+
+        private void DoCopyFiles()
+        {
+            Console.WriteLine($"TestAsset CopyFiles '{_assetName}'");
+
+            _operationDirectory.Refresh();
+            if (!_operationDirectory.Exists)
+            {
+                _operationDirectory.Create();
+            }
+            else
+            {
+                if (_operationDirectory.GetFiles().Any())
+                {
+                    throw new Exception("operation files folder not empty");
+                }
+            }
+
+            foreach (var f in GetOriginalFileList())
+            {
+                string destinationPath = RebasePath(f.FullName, _root.FullName, _operationDirectory.FullName);
+                var destinationDir = new FileInfo(destinationPath).Directory;
+                if (!destinationDir.Exists)
+                {
+                    destinationDir.Create();
+                }
+                if (string.Equals(f.Name, "nuget.config", StringComparison.OrdinalIgnoreCase))
+                {
+                    var doc = XDocument.Load(f.FullName, LoadOptions.PreserveWhitespace);
+                    foreach (var v in doc.Root.Element("packageSources").Elements("add").Attributes("value"))
+                    {
+                        if (!Path.IsPathRooted(v.Value))
+                        {
+                            string fullPath = Path.GetFullPath(Path.Combine(f.Directory.FullName, v.Value));
+                            if (!IsAncestor(new FileInfo(fullPath), _root))
+                            {
+                                v.Value = fullPath;
+                            }
+                        }
+                        
+                        //throw new Exception($"\nvalue = {v.Value}\n" +
+                        //    $"f.dir = {f.Directory.FullName}\n" +
+                        //    $"fullPath = {fullPath}");
+                        
+                    }
+
+                    using (var file = new FileStream(destinationPath, FileMode.CreateNew, FileAccess.ReadWrite))
+                    {
+                        doc.Save(file, SaveOptions.None);
+                    }
+                }
+                else
+                {
+                    f.CopyTo(destinationPath);
+                }
+            }
+        }
+
         private void DoRestore()
         {
-            Console.WriteLine($"TestAsset Restore '{_assetName}'");
-
-            var projFiles = _root.GetFiles(_projectFilePattern, SearchOption.AllDirectories);
-
-            foreach (var projFile in projFiles)
+            //throw new Exception("foooooo");
+            try
             {
-                var restoreArgs = new string[] { "restore", projFile.FullName };
+                Console.WriteLine($"TestAsset Restore '{_assetName}'");
 
-                var commandResult = Command.Create(_dotnetExeFile.FullName, restoreArgs)
-                                    .CaptureStdOut()
-                                    .CaptureStdErr()
-                                    .Execute();
+                _operationDirectory.Refresh();
+                var projFiles = _operationDirectory.GetFiles(_projectFilePattern, SearchOption.AllDirectories);
 
-                int exitCode = commandResult.ExitCode;
-
-                if (exitCode != 0)
+                foreach (var projFile in projFiles)
                 {
-                    Console.WriteLine(commandResult.StdOut);
+                    var restoreArgs = new string[] { "restore", projFile.FullName };
 
-                    Console.WriteLine(commandResult.StdErr);
+                    var commandResult = Command.Create(_dotnetExeFile.FullName, restoreArgs)
+                                        .CaptureStdOut()
+                                        .CaptureStdErr()
+                                        .Execute();
 
-                    string message = string.Format($"TestAsset Restore '{_assetName}'@'{projFile.FullName}' Failed with {exitCode}");
+                    int exitCode = commandResult.ExitCode;
 
-                    throw new Exception(message);
+                    if (exitCode != 0)
+                    {
+                        Console.WriteLine(commandResult.StdOut);
+
+                        Console.WriteLine(commandResult.StdErr);
+
+                        string message = string.Format($"TestAsset Restore '{_assetName}'@'{projFile.FullName}' Failed with {exitCode}");
+
+                        throw new Exception($"TestAsset {_dotnetExeFile.FullName} {string.Join(" ", restoreArgs)}");
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+                throw new Exception($"NOOOOOOOOOOOOOOOOOOOOOOOOOOOOO:\n{e.Message}");
             }
         }
 
@@ -219,7 +334,7 @@ namespace Microsoft.DotNet.TestFramework
             Console.WriteLine($"TestAsset Build '{_assetName}'");
 
             var commandResult = Command.Create(_dotnetExeFile.FullName, args) 
-                                    .WorkingDirectory(_root.FullName)
+                                    .WorkingDirectory(_operationDirectory.FullName)
                                     .CaptureStdOut()
                                     .CaptureStdErr()
                                     .Execute();
@@ -238,68 +353,51 @@ namespace Microsoft.DotNet.TestFramework
             }
         }
 
-        private void ThrowIfAssetSourcesHaveChanged()
+        private bool HaveSourcesChanged(ExclusiveFolderAccess folder)
         {
-            if (!_dataDirectory.Exists)
+            var originalFiles = GetOriginalFileList();
+            var originalFilesRebased = originalFiles.Select(f => RebasePath(f.FullName, _root.FullName, _operationDirectory.FullName));
+            var trackedOriginalFiles = folder.LoadInventory(_inventoryFiles.Source);
+
+            bool hasUntrackedFiles = originalFilesRebased.Any(a => !trackedOriginalFiles.Any(t => t.FullName.Equals(a)));
+            if (hasUntrackedFiles)
             {
-                return;
+                return true;
             }
 
-            var dataDirectoryFiles = _dataDirectory.GetFiles("*", SearchOption.AllDirectories);
-
-            if (!dataDirectoryFiles.Any())
+            bool hasMissingFiles = trackedOriginalFiles.Any(t => !File.Exists(RebasePath(t.FullName, _operationDirectory.FullName, _root.FullName)));
+            if (hasMissingFiles)
             {
-                return;
+                return true;
             }
 
-            IEnumerable<FileInfo> trackedFiles = null;
+            foreach (var origFile in originalFiles)
+            {
+                var copiedFile = new FileInfo(RebasePath(origFile.FullName, _root.FullName, _operationDirectory.FullName));
+                if (origFile.LastWriteTimeUtc != copiedFile.LastWriteTimeUtc)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private void RemoveCacheIfSourcesHaveChanged()
+        {
             ExclusiveFolderAccess.Do(_dataDirectory, (folder) => {
-                trackedFiles = _inventoryFiles.AllInventoryFiles.SelectMany(f => folder.LoadInventory(f));
+                _operationDirectory.Refresh();
+                if (!_operationDirectory.Exists)
+                {
+                    return;
+                }
+
+                if (HaveSourcesChanged(folder))
+                {
+                    Console.WriteLine("Sources have changed................................");
+                    RemoveOperationFiles();
+                }
             });
-
-            var assetFiles = GetFileList();
-
-            var untrackedFiles = assetFiles.Where(a => !trackedFiles.Any(t => t.FullName.Equals(a.FullName)));
-
-            if (untrackedFiles.Any())
-            {
-                var message = $"TestAsset {_assetName} has untracked files. " +
-                    "Consider cleaning the asset and deleting its `.tam` directory to " + 
-                    "recreate tracking files.\n\n" +
-                    $".tam directory: {_dataDirectory.FullName}\n" +
-                    "Untracked Files: \n";
-
-                message += String.Join("\n", untrackedFiles.Select(f => $" - {f.FullName}\n"));
-
-                throw new Exception(message);
-            }
-
-            var earliestDataDirectoryTimestamp =
-                dataDirectoryFiles
-                    .OrderBy(f => f.LastWriteTime)
-                    .First()
-                    .LastWriteTime;
-
-            if (earliestDataDirectoryTimestamp == null)
-            {
-                return;
-            }
-
-            var updatedSourceFiles = ExclusiveFolderAccess.Read(_inventoryFiles.Source)
-                .Where(f => f.LastWriteTime > earliestDataDirectoryTimestamp);
-
-            if (updatedSourceFiles.Any())
-            {
-                var message = $"TestAsset {_assetName} has updated files. " +
-                    "Consider cleaning the asset and deleting its `.tam` directory to " + 
-                    "recreate tracking files.\n\n" +
-                    $".tam directory: {_dataDirectory.FullName}\n" +
-                    "Updated Files: \n";
-
-                message += String.Join("\n", updatedSourceFiles.Select(f => $" - {f.FullName}\n"));
-
-                throw new GracefulException(message);
-            }
         }
 
         private void ThrowIfTestAssetDoesNotExist()
