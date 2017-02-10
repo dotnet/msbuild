@@ -8,5 +8,6 @@
   "groupIdentity": "ItemWebConfig",
   "identity": "Microsoft.Standard.QuickStarts.Web.Config",
   "shortName": "webconfig",
-  "sourceName": "WebConfig"
+  "sourceName": "WebConfig",
+  "primaryOutputs": [ { "path": "web.config" } ]
 }

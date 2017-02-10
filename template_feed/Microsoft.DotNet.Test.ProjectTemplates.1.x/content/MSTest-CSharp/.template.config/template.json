@@ -32,5 +32,6 @@
       ],
       "defaultValue": "netcoreapp1.0"
     }
-  }
+  },
+  "primaryOutputs": [ { "path": "Company.TestProject1.csproj" } ]
 }
