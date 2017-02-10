@@ -17,14 +17,12 @@ namespace Microsoft.DotNet.Scripts
     ///
     /// The following Environment Variables can optionally be specified:
     /// 
-    /// COREFX_VERSION_URL - The Url to get the current CoreFx package versions. (ex. "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/corefx/release/1.0.0")
-    /// CORECLR_VERSION_URL - The Url to get the current CoreCLR version. (ex. "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/coreclr/release/1.0.0")
     /// ROSLYN_VERSION_URL - The Url to get the current Roslyn version. (ex. "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/roslyn/netcore1.0")
-    /// CORESETUP_VERSION_URL - The Url to get the current dotnet/core-setup package versions. (ex. "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/core-setup/release/1.0.0")
+    /// CORESETUP_VERSION_URL - The Url to get the current dotnet/core-setup package versions. (ex. "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/core-setup/master")
     /// GITHUB_ORIGIN_OWNER - The owner of the GitHub fork to push the commit and create the PR from. (ex. "dotnet-bot")
     /// GITHUB_UPSTREAM_OWNER - The owner of the GitHub base repo to create the PR to. (ex. "dotnet")
     /// GITHUB_PROJECT - The repo name under the ORIGIN and UPSTREAM owners. (ex. "cli")
-    /// GITHUB_UPSTREAM_BRANCH - The branch in the GitHub base repo to create the PR to. (ex. "rel/1.0.0")
+    /// GITHUB_UPSTREAM_BRANCH - The branch in the GitHub base repo to create the PR to. (ex. "master")
     /// GITHUB_PULL_REQUEST_NOTIFICATIONS - A semi-colon ';' separated list of GitHub users to notify on the PR.
     /// </remarks>
     public class Config
@@ -35,13 +33,11 @@ namespace Microsoft.DotNet.Scripts
         private Lazy<string> _email = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_EMAIL"));
         private Lazy<string> _password = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_PASSWORD"));
         
-        private Lazy<string> _coreFxVersionUrl = new Lazy<string>(() => GetEnvironmentVariable("COREFX_VERSION_URL", "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/corefx/release/1.0.0"));
-        private Lazy<string> _coreClrVersionUrl = new Lazy<string>(() => GetEnvironmentVariable("CORECLR_VERSION_URL", "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/coreclr/release/1.0.0"));
         private Lazy<string> _roslynVersionUrl = new Lazy<string>(() => GetEnvironmentVariable("ROSLYN_VERSION_URL", "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/roslyn/netcore1.0"));
-        private Lazy<string> _coreSetupVersionUrl = new Lazy<string>(() => GetEnvironmentVariable("CORESETUP_VERSION_URL", "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/core-setup/release/1.0.0"));
+        private Lazy<string> _coreSetupVersionUrl = new Lazy<string>(() => GetEnvironmentVariable("CORESETUP_VERSION_URL", "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/core-setup/master"));
         private Lazy<string> _gitHubUpstreamOwner = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_UPSTREAM_OWNER", "dotnet"));
         private Lazy<string> _gitHubProject = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_PROJECT", "cli"));
-        private Lazy<string> _gitHubUpstreamBranch = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_UPSTREAM_BRANCH", "rel/1.0.0"));
+        private Lazy<string> _gitHubUpstreamBranch = new Lazy<string>(() => GetEnvironmentVariable("GITHUB_UPSTREAM_BRANCH", "master"));
         private Lazy<string[]> _gitHubPullRequestNotifications = new Lazy<string[]>(() => 
                                                 GetEnvironmentVariable("GITHUB_PULL_REQUEST_NOTIFICATIONS", "")
                                                     .Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
@@ -53,8 +49,6 @@ namespace Microsoft.DotNet.Scripts
         public string UserName => _userName.Value;
         public string Email => _email.Value; 
         public string Password => _password.Value;
-        public string CoreFxVersionUrl => _coreFxVersionUrl.Value;
-        public string CoreClrVersionUrl => _coreClrVersionUrl.Value;
         public string RoslynVersionUrl => _roslynVersionUrl.Value;
         public string CoreSetupVersionUrl => _coreSetupVersionUrl.Value;
         public string GitHubUpstreamOwner => _gitHubUpstreamOwner.Value;
