@@ -1,4 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+
   <PropertyGroup>
     <VersionPrefix>2.0.0</VersionPrefix>
     <TargetFramework>netcoreapp1.1</TargetFramework>
@@ -9,7 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.1.1</Version>
+      <Version>$(CLI_SharedFrameworkVersion)</Version>
     </PackageReference>
   </ItemGroup>
 
