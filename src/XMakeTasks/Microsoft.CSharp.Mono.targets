@@ -27,5 +27,21 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             .dll.mdb;
             .exe.mdb
         </AllowedReferenceRelatedDebugFileExtensions>
+
+        <!--
+             csc maps `/debug:{full,pdbonly}` to `/debug:portable`
+             but if only `/debug+` is specified, then it doesn't map it.
+
+             `/debug+` is produced based on `$(DebugSymols)`, which gets a default value of 'true' in
+             Microsoft.Common.CurrentVersion.targets, with a condition:
+
+               Condition=" '$(ConfigurationName)' == 'Debug' and '$(DebugSymbols)' == '' and '$(DebugType)'=='' "
+
+             But that file is imported later, so we cannot depend on the default value of `$(DebugSumbols)` or `$(ConfigurationName)`.
+        -->
+        <_ConfigurationNameTmp>$(ConfigurationName)</_ConfigurationNameTmp>
+        <_ConfigurationNameTmp Condition="'$(ConfigurationName)' == ''">$(Configuration)</_ConfigurationNameTmp>
+
+        <DebugType Condition="'$(OS)' != 'Windows_NT' And ('$(DebugSymbols)'=='True' or ('$(DebugSymbols)'=='' And '$(_ConfigurationNameTmp)'=='Debug'))">portable</DebugType>
     </PropertyGroup>
 </Project>
