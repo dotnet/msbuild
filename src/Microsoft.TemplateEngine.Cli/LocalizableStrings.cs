@@ -137,7 +137,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         public const string TemplateMultiplePartialNameMatches = "The following templates partially match the input. Be more specific with the template name and/or language.";
 
-        public const string DestructiveChangesNotification = "Continuing will make the following changes to existing files:";
+        public const string DestructiveChangesNotification = "Creating this template will make changes to existing files:";
 
         public const string ContinueQuestion = "Continue?";
 
@@ -151,7 +151,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         public const string WillCreateTemplate = "About to create: ";
 
-        public const string RerunCommandAndPassForceToCreateAnyway = "Rerun the command and pass --force to create anyway.";
+        public const string RerunCommandAndPassForceToCreateAnyway = "Rerun the command and pass --force to accept and create.";
 
         public const string ForcesTemplateCreation = "Forces content to be generated even if it would change existing files.";
     }
