@@ -9,8 +9,6 @@ namespace Microsoft.DotNet.Cli.Build
 {
     public class GetCurrentRuntimeInformation : Task
     {
-        public string OverrideRid { get; set; }
-
         [Output]
         public string Rid { get; set; }
 
@@ -22,7 +20,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         public override bool Execute()
         {
-            Rid = string.IsNullOrEmpty(OverrideRid) ? RuntimeEnvironment.GetRuntimeIdentifier() : OverrideRid;
+            Rid = RuntimeEnvironment.GetRuntimeIdentifier();
             Architecture = RuntimeEnvironment.RuntimeArchitecture;
             OSName = Monikers.GetOSShortName();
 

@@ -31,6 +31,14 @@
         <GeneratedInstallers Include="$(SdkInstallerFile);$(CombinedFrameworkSdkHostInstallerFile)" />
       </ItemGroup>
 
+      <GenerateMsiVersion CommitCount="$(CommitCount)"
+                          VersionMajor="$(VersionMajor)"
+                          VersionMinor="$(VersionMinor)"
+                          VersionPatch="$(VersionPatch)"
+                          ReleaseSuffix="$(ReleaseSuffix)">
+        <Output TaskParameter="MsiVersion" PropertyName="MsiVersion" />
+      </GenerateMsiVersion>
+
       <GenerateGuidFromName Name="$(SdkInstallerFile)">
         <Output TaskParameter="OutputGuid"
             PropertyName="SdkInstallerUpgradeCode" />

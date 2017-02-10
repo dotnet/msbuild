@@ -17,12 +17,14 @@
   <UsingTask TaskName="DotNetRestorePJ" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="DotNetTest" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="DownloadFile" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="GenerateBuildVersionInfo" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="GenerateChecksums" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="GenerateGuidFromName" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="GenerateMsiVersion" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="GenerateNuGetPackagesArchiveVersion" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="GetCommitCount" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="GetCommitHash" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="GetCurrentRuntimeInformation" AssemblyFile="$(CLIBuildDll)" />
+  <UsingTask TaskName="GetVersionBadgeMoniker" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="MakeRelative" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="RemoveAssetFromDepsPackages" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="ReplaceFileContents" AssemblyFile="$(CLIBuildDll)" />

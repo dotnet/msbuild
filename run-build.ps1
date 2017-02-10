@@ -110,11 +110,11 @@ $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
 if ($NoBuild)
 {
     Write-Host "Not building due to --nobuild"
-    Write-Host "Command that would be run: 'dotnet msbuild build.proj /m /p:Architecture=$Architecture $ExtraParameters'"
+    Write-Host "Command that would be run: 'dotnet msbuild build.proj /m /p:OverrideArchitecture=$Architecture $ExtraParameters'"
 }
 else
 {
-    dotnet msbuild build.proj /p:Architecture=$Architecture /p:GeneratingPropsFile=true /t:WriteDynamicPropsToStaticPropsFiles
-    dotnet msbuild build.proj /m /v:diag /p:Architecture=$Architecture $ExtraParameters
+    dotnet msbuild build.proj /p:OverrideArchitecture=$Architecture /p:GeneratingPropsFile=true /t:WriteDynamicPropsToStaticPropsFiles
+    dotnet msbuild build.proj /m /v:diag /p:OverrideArchitecture=$Architecture $ExtraParameters
     if($LASTEXITCODE -ne 0) { throw "Failed to build" } 
 }

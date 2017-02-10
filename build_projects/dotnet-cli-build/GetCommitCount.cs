@@ -7,10 +7,10 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.DotNet.Cli.Build
 {
-    public class GetCommitHash : ToolTask
+    public class GetCommitCount : ToolTask
     {
         [Output]
-        public string CommitHash { get; set; }
+        public string CommitCount { get; set; }
 
         protected override string ToolName
         {
@@ -31,12 +31,12 @@ namespace Microsoft.DotNet.Cli.Build
 
         protected override string GenerateCommandLineCommands()
         {
-            return $"rev-parse HEAD";
+            return $"rev-list --count HEAD";
         }
 
         protected override void LogEventsFromTextOutput(string line, MessageImportance importance)
         {
-            CommitHash = line;
+            CommitCount = line;
         }
     }
 }

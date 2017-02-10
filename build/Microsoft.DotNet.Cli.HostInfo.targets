@@ -3,7 +3,7 @@
           Condition=" !Exists('$(HostInfoProps)') "
           DependsOnTargets="BuildDotnetCliBuildFramework">
     <!-- Current Runtime Information -->
-    <GetCurrentRuntimeInformation OverrideRid="$(OverrideRid)">
+    <GetCurrentRuntimeInformation>
       <Output TaskParameter="Rid" PropertyName="HostRid" />
       <Output TaskParameter="Architecture" PropertyName="HostArchitecture" />
       <Output TaskParameter="OSName" PropertyName="HostOSName" />

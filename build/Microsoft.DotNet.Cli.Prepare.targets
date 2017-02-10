@@ -16,6 +16,9 @@
 
   <Target Name="InitializeCommonProps"
           DependsOnTargets="BuildDotnetCliBuildFramework" >
+    <GetVersionBadgeMoniker>
+      <Output TaskParameter="VersionBadgeMoniker" PropertyName="VersionBadgeMoniker" />
+    </GetVersionBadgeMoniker>
 
     <!-- Common Properties -->
     <PropertyGroup>
