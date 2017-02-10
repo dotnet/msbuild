@@ -19,6 +19,6 @@ Configuring...
 -------------------
 A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.";
 
-        public const string FailedToPrimeCacheError = "Failed to create prime the NuGet cache. {0} failed with: {1}";
+        public const string FailedToPrimeCacheError = "Failed to prime the NuGet cache. {0} failed with: {1}";
     }
 }
