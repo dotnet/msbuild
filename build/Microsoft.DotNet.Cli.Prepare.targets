@@ -58,7 +58,7 @@
       <Output TaskParameter="VersionMinor" PropertyName="VersionMinor" />
       <Output TaskParameter="VersionPatch" PropertyName="VersionPatch" />
       <Output TaskParameter="CommitCount" PropertyName="DefaultCommitCount" />
-      <Output TaskParameter="ReleaseSuffix" PropertyName="ReleaseSuffix" />
+      <Output TaskParameter="ReleaseSuffix" PropertyName="DefaultReleaseSuffix" />
       <Output TaskParameter="MsiVersion" PropertyName="MsiVersion" />
       <Output TaskParameter="VersionBadgeMoniker" PropertyName="VersionBadgeMoniker" />
       <Output TaskParameter="Channel" PropertyName="Channel" />
@@ -67,6 +67,7 @@
 
     <PropertyGroup>
       <CommitCount Condition=" '$(CommitCount)' == '' ">$(DefaultCommitCount)</CommitCount>
+      <ReleaseSuffix Condition=" '$(ReleaseSuffix)' == '' ">$(DefaultReleaseSuffix)</ReleaseSuffix>
 
       <SimpleVersion Condition=" '$(DropSuffix)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch).$(CommitCount)</SimpleVersion>
       <SimpleVersion Condition=" '$(SimpleVersion)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch)</SimpleVersion>
@@ -77,9 +78,6 @@
 
       <NugetVersion Condition=" '$(DropSuffix)' == '' ">$(FullNugetVersion)</NugetVersion>
       <NugetVersion Condition=" '$(NugetVersion)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch)</NugetVersion>
-
-      <NugetVersionToUseWithVS Condition=" '$(DropSuffix)' == '' ">$(NugetVersion)</NugetVersionToUseWithVS>
-      <NugetVersionToUseWithVS Condition=" '$(NugetVersionToUseWithVS)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(ReleaseSuffix)-final-$(CommitCount)</NugetVersionToUseWithVS>
 
       <SdkVersion>$(NugetVersion)</SdkVersion>
       <SdkNugetVersion>$(NugetVersion)</SdkNugetVersion>
