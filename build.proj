@@ -19,12 +19,12 @@
 
     <CoreSetupChannel>release/1.1.0</CoreSetupChannel>
     <SharedFrameworkName>Microsoft.NETCore.App</SharedFrameworkName>
-    <SharedFrameworkVersion>1.1.0</SharedFrameworkVersion>
+    <SharedFrameworkVersion>1.1.1</SharedFrameworkVersion>
     <SharedHostVersion>1.1.0</SharedHostVersion>
     <HostFxrVersion>1.1.0</HostFxrVersion>
 
-    <CoreCLRVersion>1.1.0</CoreCLRVersion>
-    <JitVersion>1.1.0</JitVersion>
+    <CoreCLRVersion>1.1.1</CoreCLRVersion>
+    <JitVersion>1.1.1</JitVersion>
 
     <ExeExtension>.exe</ExeExtension>
     <ExeExtension Condition=" '$(OS)' != 'Windows_NT' "></ExeExtension>

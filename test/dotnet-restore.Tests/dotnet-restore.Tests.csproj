@@ -46,7 +46,7 @@
       <Version>2.2.0-beta4-build1194</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.1.0</Version>
+      <Version>1.1.1</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Build">
       <Version>$(CLI_MSBuild_Version)</Version>
@@ -55,7 +55,7 @@
       <Version>2.2.0-beta4-build3444</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions">
-      <Version>1.1.0</Version>
+      <Version>$(PlatformAbstractionsVersion)</Version>
     </PackageReference>
     <PackageReference Include="FluentAssertions">
       <Version>4.18.0</Version>
