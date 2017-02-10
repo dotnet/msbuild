@@ -195,23 +195,6 @@ namespace Microsoft.DotNet.TestFramework
             }
         }
 
-        private bool IsAncestor(FileInfo file, DirectoryInfo maybeAncestor)
-        {
-            var dir = file.Directory;
-            do
-            {
-                if (string.Equals(maybeAncestor.FullName, dir.FullName, StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
-
-                dir = dir.Parent;
-            }
-            while (dir != null);
-
-            return false;
-        }
-
         private void CopyFileAdjustingPaths(FileInfo source, FileInfo destination)
         {
             if (string.Equals(source.Name, "nuget.config", StringComparison.OrdinalIgnoreCase))
@@ -232,7 +215,7 @@ namespace Microsoft.DotNet.TestFramework
                 if (!Path.IsPathRooted(packageSource.Value))
                 {
                     string fullPathAtSource = Path.GetFullPath(Path.Combine(source.Directory.FullName, packageSource.Value));
-                    if (!IsAncestor(new FileInfo(fullPathAtSource), TestAssetInfo.Root))
+                    if (!PathUtility.IsChildOfDirectory(TestAssetInfo.Root.FullName, fullPathAtSource))
                     {
                         packageSource.Value = fullPathAtSource;
                     }
