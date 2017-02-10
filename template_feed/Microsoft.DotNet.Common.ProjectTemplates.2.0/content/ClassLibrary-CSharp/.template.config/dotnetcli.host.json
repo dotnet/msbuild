@@ -3,9 +3,9 @@
     "Framework": {
       "longName": "framework"
     },
-    "RuntimeFrameworkVersion": {
-      "longName": "runtime-framework-version",
-      "shortName": "fv",
+    "NetStandardImplicitPackageVersion": {
+      "longName": "implicit-package-version",
+      "shortName": "ipv",
       "isHidden": "true"
     }
   }
