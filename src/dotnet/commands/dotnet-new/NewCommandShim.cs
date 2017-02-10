@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli;
@@ -54,6 +53,7 @@ namespace Microsoft.DotNet.Tools.New
                 { "prefs:language", "C#" },
                 { "dotnet-cli-version", Product.Version },
                 { "RuntimeFrameworkVersion", new Muxer().SharedFxVersion },
+                { "NetStandardImplicitPackageVersion", new FrameworkDependencyFile().GetNetStandardLibraryVersion() },
             };
 
             return new DefaultTemplateEngineHost(HostIdentifier, "v" + Product.Version, CultureInfo.CurrentCulture.Name, preferences, builtIns);

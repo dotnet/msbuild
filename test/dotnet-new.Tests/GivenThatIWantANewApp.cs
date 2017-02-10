@@ -1,10 +1,12 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.DotNet.Tools.Test.Utilities;
 using System;
 using System.IO;
+using System.Linq;
+using System.Xml.Linq;
 using FluentAssertions;
+using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 
 namespace Microsoft.DotNet.New.Tests
@@ -16,13 +18,15 @@ namespace Microsoft.DotNet.New.Tests
         {
             var rootPath = TestAssetsManager.CreateTestDirectory().Path;
 
-            new TestCommand("dotnet") { WorkingDirectory = rootPath }
-                .Execute($"new console --debug:ephemeral-hive");
+            new NewCommand()
+                .WithWorkingDirectory(rootPath)
+                .Execute($"console --debug:ephemeral-hive");
 
             DateTime expectedState = Directory.GetLastWriteTime(rootPath);
 
-            var result = new TestCommand("dotnet") { WorkingDirectory = rootPath }
-                .ExecuteWithCapturedOutput($"new console --debug:ephemeral-hive");
+            var result = new NewCommand()
+                .WithWorkingDirectory(rootPath)
+                .ExecuteWithCapturedOutput($"console --debug:ephemeral-hive");
 
             DateTime actualState = Directory.GetLastWriteTime(rootPath);
 
@@ -55,14 +59,47 @@ namespace Microsoft.DotNet.New.Tests
             string projectFolder,
             string packagesDirectory)
         {
-            new TestCommand("dotnet") { WorkingDirectory = projectFolder }
-                .Execute($"new {projectType} --debug:ephemeral-hive")
+            new NewCommand()
+                .WithWorkingDirectory(projectFolder)
+                .Execute($"{projectType} --debug:ephemeral-hive")
                 .Should().Pass();
 
             new RestoreCommand()
                 .WithWorkingDirectory(projectFolder)
-                .Execute($"--packages {packagesDirectory} /p:SkipInvalidConfigurations=true")
+                .Execute($"--packages {packagesDirectory}")
                 .Should().Pass();
+        }
+
+        [Fact]
+        public void NewClassLibRestoresCorrectNetStandardLibraryVersion()
+        {
+            var rootPath = TestAssetsManager.CreateTestDirectory().Path;
+            var packagesDirectory = Path.Combine(rootPath, "packages");
+            var projectName = "Library";
+            var projectFileName = $"{projectName}.csproj";
+
+            new NewCommand()
+                .WithWorkingDirectory(rootPath)
+                .Execute($"classlib --name {projectName} -o .")
+                .Should().Pass();
+
+            new RestoreCommand()
+                .WithWorkingDirectory(rootPath)
+                .Execute($"--packages {packagesDirectory}")
+                .Should().Pass();
+
+            var expectedVersion = XDocument.Load(Path.Combine(rootPath, projectFileName))
+                .Elements("Project")
+                .Elements("PropertyGroup")
+                .Elements("NetStandardImplicitPackageVersion")
+                .FirstOrDefault()
+                ?.Value;
+
+            expectedVersion.Should().NotBeNullOrEmpty("Could not find NetStandardImplicitPackageVersion property in a new classlib.");
+
+            new DirectoryInfo(Path.Combine(packagesDirectory, "netstandard.library"))
+                .Should().Exist()
+                .And.HaveDirectory(expectedVersion);
         }
     }
 }
