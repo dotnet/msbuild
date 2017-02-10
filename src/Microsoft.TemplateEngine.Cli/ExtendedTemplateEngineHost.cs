@@ -97,27 +97,24 @@ namespace Microsoft.TemplateEngine.Cli
 
         public bool OnPotentiallyDestructiveChangesDetected(IReadOnlyList<IFileChange> changes, IReadOnlyList<IFileChange> destructiveChanges)
         {
-            Reporter.Output.WriteLine(LocalizableStrings.DestructiveChangesNotification);
+            Reporter.Error.WriteLine(LocalizableStrings.DestructiveChangesNotification.Bold().Red());
             int longestChangeTextLength = destructiveChanges.Max(x => GetChangeString(x.ChangeKind).Length);
             int padLen = 5 + longestChangeTextLength;
 
             foreach (IFileChange change in destructiveChanges)
             {
                 string changeKind = GetChangeString(change.ChangeKind);
-                Reporter.Output.WriteLine($"  {changeKind}".PadRight(padLen) + change.TargetRelativePath);
+                Reporter.Error.WriteLine(($"  {changeKind}".PadRight(padLen) + change.TargetRelativePath).Bold().Red());
             }
             
-            Reporter.Output.WriteLine();
-            Reporter.Output.Write($"{LocalizableStrings.ContinueQuestion} (y/n) ");
-            ConsoleKeyInfo info = Console.ReadKey();
+            Reporter.Error.WriteLine();
+            Reporter.Error.WriteLine(LocalizableStrings.RerunCommandAndPassForceToCreateAnyway.Bold().Red());
+            return false;
+        }
 
-            while (info.Key != ConsoleKey.Y && info.Key != ConsoleKey.N)
-            {
-                info = Console.ReadKey();
-            }
-
-            Console.WriteLine();
-            return info.Key == ConsoleKey.Y;
+        public bool OnConfirmPartialMatch(string name)
+        {
+            return true;
         }
 
         private bool GlobalJsonFileExistsInPath

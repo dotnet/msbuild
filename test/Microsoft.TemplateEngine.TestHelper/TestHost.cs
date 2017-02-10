@@ -94,5 +94,10 @@ namespace Microsoft.TemplateEngine.TestHelper
         {
             return true;
         }
+
+        public bool OnConfirmPartialMatch(string name)
+        {
+            return true;
+        }
     }
 }
