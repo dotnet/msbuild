@@ -17,7 +17,7 @@
       "binding": "dotnet-cli-version",
       "replaces": "1.0.0-preview5-004445"
     },
-    "RuntimeFrameworkVersion": {
+    "NetStandardImplicitPackageVersion": {
       "type": "parameter",
       "datatype": "string",
       "replaces": "2.0.0-beta-001507",
