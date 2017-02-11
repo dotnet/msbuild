@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.0.0-beta1" Condition="'$(IncludeApplicationInsights)' == 'True'" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.0.0" Condition="'$(IncludeApplicationInsights)' == 'True'" />
     <PackageReference Include="Microsoft.AspNetCore" Version="1.2.0-preview1-23339" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="1.2.0-preview1-23339" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.2.0-preview1-23339" />

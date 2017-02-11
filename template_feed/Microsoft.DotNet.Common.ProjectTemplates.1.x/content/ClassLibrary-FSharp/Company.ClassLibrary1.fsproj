@@ -17,9 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <DotNetCliToolReference Include="dotnet-compile-fsc">
-      <Version>1.0.0-preview2-020000</Version>
-    </DotNetCliToolReference>
+    <DotNetCliToolReference Include="dotnet-compile-fsc" Version="1.0.0-preview2-020000" />
   </ItemGroup>
 
 </Project>
