@@ -175,11 +175,6 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// The cache of project root elements associated with this project collection.
-        /// Each is associated with a specific project collection for two reasons:
-        /// - To help protect one project collection from any XML edits through another one:
-        /// until a reload from disk - when it's ready to accept changes - it won't see the edits;
-        /// - So that the owner of this project collection can force the XML to be loaded again
-        /// from disk, by doing <see cref="UnloadAllProjects"/>.
         /// </summary>
         private ProjectRootElementCache _projectRootElementCache;
 
@@ -253,7 +248,7 @@ namespace Microsoft.Build.Evaluation
             _loadedProjects = new LoadedProjectCollection();
             _toolsetDefinitionLocations = toolsetDefinitionLocations;
             this.MaxNodeCount = maxNodeCount;
-            this.ProjectRootElementCache = new ProjectRootElementCache(false /* do not automatically reload changed files from disk */);
+            this.ProjectRootElementCache = new ProjectRootElementCache(autoReloadFromDisk: true);
             this.OnlyLogCriticalEvents = onlyLogCriticalEvents;
 
             try
@@ -817,11 +812,9 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// The cache of project root elements associated with this project collection.
-        /// Each is associated with a specific project collection for two reasons:
-        /// - To help protect one project collection from any XML edits through another one:
-        /// until a reload from disk - when it's ready to accept changes - it won't see the edits;
-        /// - So that the owner of this project collection can force the XML to be loaded again
-        /// from disk, by doing <see cref="UnloadAllProjects"/>.
+        /// Each is associated with a specific project collection so that the owner of
+        /// this project collection can force the XML to be loaded again from disk,
+        /// by doing <see cref="UnloadAllProjects"/>.
         /// </summary>
         internal ProjectRootElementCache ProjectRootElementCache
         {
