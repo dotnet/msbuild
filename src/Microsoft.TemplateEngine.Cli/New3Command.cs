@@ -1052,10 +1052,6 @@ namespace Microsoft.TemplateEngine.Cli
             if (remainingPartialMatches.Keys.Count > 0)
             {
                 Reporter.Error.WriteLine(LocalizableStrings.TemplateMultiplePartialNameMatches);
-                foreach (IFilteredTemplateInfo template in remainingPartialMatches.Values)
-                {
-                    Reporter.Error.WriteLine($"  {template.Info.Name}");
-                }
             }
 
             Reporter.Error.WriteLine();
