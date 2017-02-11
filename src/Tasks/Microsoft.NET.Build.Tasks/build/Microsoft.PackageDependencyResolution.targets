@@ -306,11 +306,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
-  <Target Name="_ComputeRIDLessTFMFileDependencies"
+  <Target Name="_ComputeTFMOnlyFileDependencies"
           DependsOnTargets="RunResolvePackageDependencies"
-          Returns="_RIDLessTFMFileDependencies">
+          Returns="_TFMOnlyFileDependencies">
     <ItemGroup>
-      <_RIDLessTFMFileDependencies Include="@(FileDependencies->WithMetadataValue('ParentTarget', '$(NuGetTargetMoniker)'))" />
+      <_TFMOnlyFileDependencies Include="@(FileDependencies->WithMetadataValue('ParentTarget', '$(NuGetTargetMoniker)'))" />
     </ItemGroup>
   </Target>
 
@@ -324,10 +324,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
 
   <Target Name="_ComputeLockFileReferences"
-          DependsOnTargets="_ComputeRIDLessTFMFileDependencies"
+          DependsOnTargets="_ComputeTFMOnlyFileDependencies"
           Returns="ResolvedCompileFileDefinitions">
     <ItemGroup>
-      <_CompileFileItems Include="@(_RIDLessTFMFileDependencies->WithMetadataValue('FileGroup', 'CompileTimeAssembly'))" />
+      <_CompileFileItems Include="@(_TFMOnlyFileDependencies->WithMetadataValue('FileGroup', 'CompileTimeAssembly'))" />
 
       <!-- Get corresponding file definitions -->
       <__CompileFileDefinitions Include="@(FileDefinitions)" Exclude="@(_CompileFileItems)" />
@@ -344,10 +344,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="_ComputeLockFileFrameworks"
           Condition="'$(DisableLockFileFrameworks)' != 'true'"
-          DependsOnTargets="_ComputeRIDLessTFMFileDependencies"
+          DependsOnTargets="_ComputeTFMOnlyFileDependencies"
           Returns="ResolvedFrameworkAssemblies">
     <ItemGroup>
-      <_FrameworkAssemblies Include="@(_RIDLessTFMFileDependencies->WithMetadataValue('FileGroup', 'FrameworkAssembly'))" />
+      <_FrameworkAssemblies Include="@(_TFMOnlyFileDependencies->WithMetadataValue('FileGroup', 'FrameworkAssembly'))" />
 
       <ResolvedFrameworkAssemblies Include="%(_FrameworkAssemblies.FrameworkAssembly)">
         <Private>false</Private>
