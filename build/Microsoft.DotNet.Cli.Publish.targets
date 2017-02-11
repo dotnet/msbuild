@@ -43,11 +43,12 @@
     <ItemGroup>
       <ForPublishing Include="@(GeneratedInstallers)" />
       <ForPublishing Include="%(GenerateArchivesInputsOutputs.Outputs)" />
+      <ForPublishing Include="$(PackagesDirectory)/Microsoft*.nupkg" Condition=" 'PUBLISH_NUPKG_TO_AZURE_BLOB' != '' " />
     </ItemGroup>
 
     <ItemGroup>
       <ForPublishing>
-        <RelativeBlobPath>$(Product)/$(NugetVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
+        <RelativeBlobPath>$(Product)/$(FullNugetVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
       </ForPublishing>
     </ItemGroup>
   </Target>
@@ -62,7 +63,7 @@
       <SdkInstallerFileItemGroup Include="$(SdkInstallerFile)" />
     </ItemGroup>
     <PropertyGroup>
-      <SdkDebianUploadUrl>$(DotnetBlobRootUrl)/$(Product)/$(NugetVersion)/%(SdkInstallerFileItemGroup.Filename)%(SdkInstallerFileItemGroup.Extension)</SdkDebianUploadUrl>
+      <SdkDebianUploadUrl>$(DotnetBlobRootUrl)/$(Product)/$(FullNugetVersion)/%(SdkInstallerFileItemGroup.Filename)%(SdkInstallerFileItemGroup.Extension)</SdkDebianUploadUrl>
       <DebianUploadJsonFile>$(SdkDebianIntermediateDirectory)/package_upload.json</DebianUploadJsonFile>
       <DebianRevisionNumber>1</DebianRevisionNumber>
 
@@ -89,7 +90,7 @@
 
     <ItemGroup>
       <CliVersionBadgeToUpload>
-        <RelativeBlobPath>$(Product)/$(NugetVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
+        <RelativeBlobPath>$(Product)/$(FullNugetVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
       </CliVersionBadgeToUpload>
     </ItemGroup>
 

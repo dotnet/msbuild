@@ -115,7 +115,7 @@
     <DotNetPublish ToolPath="%(Stage.DotnetDir)"
                    Output="$(SdkOutputDirectory)"
                    Configuration="$(Configuration)"
-                   VersionSuffix="rc4-$(CommitCount)"
+                   VersionSuffix="$(VersionSuffix)"
                    ProjectPath="$(SrcDirectory)/redist/redist.csproj"
                    MSBuildArgs="/p:GenerateRuntimeConfigurationFiles=true" />
 
@@ -123,7 +123,7 @@
     <DotNetPublish ToolPath="%(Stage.DotnetDir)"
                    Output="$(SdkOutputDirectory)/Roslyn"
                    Configuration="$(Configuration)"
-                   VersionSuffix="rc4-$(CommitCount)"
+                   VersionSuffix="$(VersionSuffix)"
                    ProjectPath="$(SrcDirectory)/tool_roslyn/tool_roslyn.csproj" />
 
       <!-- Corehostify Binaries -->

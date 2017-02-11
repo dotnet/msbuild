@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <SdkBrandName>Microsoft .NET Core 1.0.3 - SDK RC 4</SdkBrandName>
+    <SdkBrandName>Microsoft .NET Core 1.0.3 - SDK</SdkBrandName>
     <SharedFrameworkBrandName>Microsoft .NET Core 1.0.3 - Runtime</SharedFrameworkBrandName>
     <SharedHostBrandName>Microsoft .NET Core 1.1.0 - Host</SharedHostBrandName>
     <HostFxrBrandName>Microsoft .NET Core 1.1.0 - Host FX Resolver</HostFxrBrandName>
