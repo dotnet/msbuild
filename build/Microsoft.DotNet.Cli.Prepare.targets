@@ -16,7 +16,6 @@
 
   <Target Name="InitializeCommonProps"
           DependsOnTargets="BuildDotnetCliBuildFramework" >
-
     <!-- Common Properties -->
     <PropertyGroup>
       <IsDesktopAvailable>False</IsDesktopAvailable>
@@ -48,6 +47,11 @@
       <SimpleVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch).$(CommitCount)</SimpleVersion>
       <VersionSuffix>$(ReleaseSuffix)-$(CommitCount)</VersionSuffix>
       <NugetVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(VersionSuffix)</NugetVersion>
+
+      <VersionBadgeMoniker>$(OSName)_$(Architecture)</VersionBadgeMoniker>
+      <VersionBadgeMoniker Condition=" '$(Rid)' == 'ubuntu.16.04-x64' ">Ubuntu_16_04_x64</VersionBadgeMoniker>
+      <VersionBadgeMoniker Condition=" '$(Rid)' == 'fedora.23-x64' ">Fedora_23_x64</VersionBadgeMoniker>
+      <VersionBadgeMoniker Condition=" '$(Rid)' == 'opensuse.13.2-x64' ">openSUSE_13_2_x64</VersionBadgeMoniker>
 
       <VersionBadge>$(BaseOutputDirectory)/$(VersionBadgeMoniker)_$(Configuration)_version_badge.svg</VersionBadge>
       <SdkVersion>$(NugetVersion)</SdkVersion>
