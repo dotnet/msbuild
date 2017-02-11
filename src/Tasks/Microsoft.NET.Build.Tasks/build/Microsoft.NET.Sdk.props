@@ -128,6 +128,19 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateResourceMSBuildRuntime>CurrentRuntime</GenerateResourceMSBuildRuntime>
   </PropertyGroup>
 
+  <!--  -->
+  <PropertyGroup>
+    <GlobalRuntimeIdentifier>$(RuntimeIdentifier)</GlobalRuntimeIdentifier>
+    <RuntimeIdentifier>__________</RuntimeIdentifier>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(RuntimeIdentifier)' != '$(GlobalRuntimeIdentifier)'">
+    <RuntimeIdentifier>$(GlobalRuntimeIdentifier)</RuntimeIdentifier>
+    <GlobalRuntimeIdentifier></GlobalRuntimeIdentifier>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(GlobalRuntimeIdentifier)' != '' ">
+    <AdditionalPropertiesForGetTargetFrameworkProperties>;ReferringRuntimeIdentifier=$(GlobalRuntimeIdentifier)</AdditionalPropertiesForGetTargetFrameworkProperties>
+  </PropertyGroup>
+
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.CSharp.props" Condition="'$(MSBuildProjectExtension)' == '.csproj'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.VisualBasic.props" Condition="'$(MSBuildProjectExtension)' == '.vbproj'" />
 </Project>
