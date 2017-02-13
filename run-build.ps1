@@ -85,7 +85,7 @@ if ((Test-Path $bootStrapperPath) -eq 0)
 }
 
 # now execute it
-& $bootStrapperPath -RepositoryRoot (Get-Location) -ToolsLocalPath $toolsLocalPath -CliLocalPath $env:DOTNET_INSTALL_DIR_PJ -Architecture $Architecture | Out-File (Join-Path (Get-Location) "bootstrap.log")
+& $bootStrapperPath -DotNetInstallBranch master -RepositoryRoot (Get-Location) -ToolsLocalPath $toolsLocalPath -CliLocalPath $env:DOTNET_INSTALL_DIR_PJ -Architecture $Architecture | Out-File (Join-Path (Get-Location) "bootstrap.log")
 if ($LastExitCode -ne 0)
 {
     Write-Output "Boot-strapping failed with exit code $LastExitCode, see bootstrap.log for more information."
