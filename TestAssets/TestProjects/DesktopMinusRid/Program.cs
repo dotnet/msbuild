@@ -18,14 +18,14 @@ namespace TestApp
             try
             {
                 uv_loop_size();
-                Console.WriteLine($"Native code was used ({GetProcessorArchitecture()})");
+                Console.WriteLine($"Native code was used ({GetCurrentAssemblyProcessorArchitecture()})");
             }
             catch (DllNotFoundException)
             {
-                Console.WriteLine($"Native code failed ({GetProcessorArchitecture()})");
+                Console.WriteLine($"Native code failed ({GetCurrentAssemblyProcessorArchitecture()})");
             }
 #else      
-            Console.WriteLine($"Native code was not used ({GetProcessorArchitecture()})");
+            Console.WriteLine($"Native code was not used ({GetCurrentAssemblyProcessorArchitecture()})");
 #endif  
         }
 
@@ -34,9 +34,9 @@ namespace TestApp
         static extern int uv_loop_size();
 #endif
 
-        static ProcessorArchitecture GetProcessorArchitecture()
+        static ProcessorArchitecture GetCurrentAssemblyProcessorArchitecture()
         {
-            return AssemblyName.GetAssemblyName(Assembly.GetExecutingAssembly().Location).ProcessorArchitecture;
+            return AssemblyName.GetAssemblyName(typeof(Program).Assembly.Location).ProcessorArchitecture;
         }
     }
 }
