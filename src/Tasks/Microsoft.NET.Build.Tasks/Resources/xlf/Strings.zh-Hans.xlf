@@ -9,9 +9,9 @@
         <note />
       </trans-unit>
       <trans-unit id="NoCompatibleTargetFramework">
-        <source>Project '{0}' has no target framework compatible with '{1}'.</source>
-        <target state="translated">项目“{0}”没有与“{1}”兼容的目标框架。</target>
-        <note />
+        <source>Project '{0}' targets '{2}'. It cannot be referenced by a project that targets '{1}'.</source>
+        <target state="needs-review-translation">项目“{0}”没有与“{1}”兼容的目标框架。</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="InvalidFrameworkName">
         <source>Invalid framework name: '{0}'.</source>
@@ -96,11 +96,6 @@
       <trans-unit id="UnexpectedDependencyWithNoVersionNumber">
         <source>Unexpected dependency '{0}' with no version number.</source>
         <target state="translated">不具有版本号的意外依赖项“{0}”。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RuntimeIdentifierMustBeSetForNETFramework">
-        <source>RuntimeIdentifier must be set for .NETFramework executables. Consider RuntimeIdentifier=win7-x86 or RuntimeIdentifier=win7-x64.</source>
-        <target state="translated">必须为 .NETFramework 可执行文件设置 RuntimeIdentifier。请考虑 RuntimeIdentifier=win7-x86 或 RuntimeIdentifier=win7-x64。</target>
         <note />
       </trans-unit>
       <trans-unit id="AssetPreprocessorMustBeConfigured">

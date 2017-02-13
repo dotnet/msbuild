@@ -174,9 +174,6 @@
   <data name="UnexpectedDependencyWithNoVersionNumber" xml:space="preserve">
     <value>버전 번호가 없는 예기치 않은 종속성 '{0}'입니다.</value>
   </data>
-  <data name="RuntimeIdentifierMustBeSetForNETFramework" xml:space="preserve">
-    <value>.NET Framework 실행 파일에는 RuntimeIdentifier를 설정해야 합니다. RuntimeIdentifier=win7-x86 또는 RuntimeIdentifier=win7-x64를 사용해 보세요.</value>
-  </data>
   <data name="AssetPreprocessorMustBeConfigured" xml:space="preserve">
     <value>자산을 처리하려면 먼저 자산 전처리기를 구성해야 합니다.</value>
   </data>

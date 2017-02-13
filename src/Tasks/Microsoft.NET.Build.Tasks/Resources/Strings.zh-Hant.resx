@@ -174,9 +174,6 @@
   <data name="UnexpectedDependencyWithNoVersionNumber" xml:space="preserve">
     <value>未預期的相依性 '{0}'，沒有版本號碼。</value>
   </data>
-  <data name="RuntimeIdentifierMustBeSetForNETFramework" xml:space="preserve">
-    <value>必須為 .NETFramework 可執行檔設定 RuntimeIdentifier。請考慮使用 RuntimeIdentifier=win7-x86 或 RuntimeIdentifier=win7-x64。</value>
-  </data>
   <data name="AssetPreprocessorMustBeConfigured" xml:space="preserve">
     <value>必須設定資產前置處理器，才能處理資產。</value>
   </data>

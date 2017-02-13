@@ -9,9 +9,9 @@
         <note />
       </trans-unit>
       <trans-unit id="NoCompatibleTargetFramework">
-        <source>Project '{0}' has no target framework compatible with '{1}'.</source>
-        <target state="translated">Cílová platforma projektu {0} není kompatibilní s {1}.</target>
-        <note />
+        <source>Project '{0}' targets '{2}'. It cannot be referenced by a project that targets '{1}'.</source>
+        <target state="needs-review-translation">Cílová platforma projektu {0} není kompatibilní s {1}.</target>
+        <note></note>
       </trans-unit>
       <trans-unit id="InvalidFrameworkName">
         <source>Invalid framework name: '{0}'.</source>
@@ -96,11 +96,6 @@
       <trans-unit id="UnexpectedDependencyWithNoVersionNumber">
         <source>Unexpected dependency '{0}' with no version number.</source>
         <target state="translated">Nečekaná závislost {0} bez čísla verze.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RuntimeIdentifierMustBeSetForNETFramework">
-        <source>RuntimeIdentifier must be set for .NETFramework executables. Consider RuntimeIdentifier=win7-x86 or RuntimeIdentifier=win7-x64.</source>
-        <target state="translated">Hodnota RuntimeIdentifier musí být nastavena pro spustitelné soubory .NET Frameworku. Můžete použít hodnotu RuntimeIdentifier=win7-x86 nebo RuntimeIdentifier=win7-x64.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssetPreprocessorMustBeConfigured">

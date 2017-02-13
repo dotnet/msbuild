@@ -174,9 +174,6 @@
   <data name="UnexpectedDependencyWithNoVersionNumber" xml:space="preserve">
     <value>Nečekaná závislost {0} bez čísla verze.</value>
   </data>
-  <data name="RuntimeIdentifierMustBeSetForNETFramework" xml:space="preserve">
-    <value>Hodnota RuntimeIdentifier musí být nastavena pro spustitelné soubory .NET Frameworku. Můžete použít hodnotu RuntimeIdentifier=win7-x86 nebo RuntimeIdentifier=win7-x64.</value>
-  </data>
   <data name="AssetPreprocessorMustBeConfigured" xml:space="preserve">
     <value>Před zpracováním prostředků je potřeba nakonfigurovat preprocesor prostředků.</value>
   </data>

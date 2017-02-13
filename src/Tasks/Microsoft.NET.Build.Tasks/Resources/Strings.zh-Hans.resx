@@ -174,9 +174,6 @@
   <data name="UnexpectedDependencyWithNoVersionNumber" xml:space="preserve">
     <value>不具有版本号的意外依赖项“{0}”。</value>
   </data>
-  <data name="RuntimeIdentifierMustBeSetForNETFramework" xml:space="preserve">
-    <value>必须为 .NETFramework 可执行文件设置 RuntimeIdentifier。请考虑 RuntimeIdentifier=win7-x86 或 RuntimeIdentifier=win7-x64。</value>
-  </data>
   <data name="AssetPreprocessorMustBeConfigured" xml:space="preserve">
     <value>必须在处理资产之前配置资产预处理器。</value>
   </data>

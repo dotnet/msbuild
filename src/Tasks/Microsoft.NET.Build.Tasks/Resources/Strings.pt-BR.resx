@@ -174,9 +174,6 @@
   <data name="UnexpectedDependencyWithNoVersionNumber" xml:space="preserve">
     <value>Dependência inesperada '{0}' sem número de versão.</value>
   </data>
-  <data name="RuntimeIdentifierMustBeSetForNETFramework" xml:space="preserve">
-    <value>O RuntimeIdentifier deve ser definido para executáveis .NETFramework. Considere o RuntimeIdentifier=win7-x86 ou RuntimeIdentifier=win7-x64.</value>
-  </data>
   <data name="AssetPreprocessorMustBeConfigured" xml:space="preserve">
     <value>O pré-processador de ativos deve ser configurado antes de os ativos serem processados.</value>
   </data>

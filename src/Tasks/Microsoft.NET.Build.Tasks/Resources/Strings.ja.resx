@@ -174,9 +174,6 @@
   <data name="UnexpectedDependencyWithNoVersionNumber" xml:space="preserve">
     <value>バージョン番号のない予期しない依存関係 '{0}' です。</value>
   </data>
-  <data name="RuntimeIdentifierMustBeSetForNETFramework" xml:space="preserve">
-    <value>.NETFramework 実行可能ファイルの RuntimeIdentifier を設定する必要があります。RuntimeIdentifier=win7-x86 または RuntimeIdentifier=win7-x64 を検討してください。</value>
-  </data>
   <data name="AssetPreprocessorMustBeConfigured" xml:space="preserve">
     <value>資産を処理する前に、資産プリプロセッサを構成する必要があります。</value>
   </data>
