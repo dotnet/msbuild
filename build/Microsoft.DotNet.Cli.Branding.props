@@ -1,0 +1,28 @@
+<Project ToolsVersion="14.0">
+  <PropertyGroup>
+    <SdkBrandName>Microsoft .NET Core 2.0.0 - SDK Alpha</SdkBrandName>
+    <SharedFrameworkBrandName>Microsoft .NET Core 2.0.0 - Runtime</SharedFrameworkBrandName>
+    <SharedHostBrandName>Microsoft .NET Core 2.0.0 - Host</SharedHostBrandName>
+    <HostFxrBrandName>Microsoft .NET Core 2.0.0 - Host FX Resolver</HostFxrBrandName>
+    
+    <AdditionalSharedFrameworkBrandName>Microsoft .NET Core 1.0.3 - Runtime</AdditionalSharedFrameworkBrandName>
+    <AdditionalSharedHostBrandName>Microsoft .NET Core 1.0.1 - Host</AdditionalSharedHostBrandName>
+    <AdditionalHostFxrBrandName>Microsoft .NET Core 1.0.1 - Host FX Resolver</AdditionalHostFxrBrandName>
+
+    <SharedFrameworkNugetName>Microsoft.NETCore.App</SharedFrameworkNugetName>
+
+    <ProductMonikerRid Condition=" '$(Rid)' == 'ubuntu.16.04-x64' Or '$(Rid)' == 'fedora.23-x64' Or '$(Rid)' == 'opensuse.13.2-x64' ">$(Rid)</ProductMonikerRid>
+    <ProductMonikerRid Condition=" '$(ProductMonikerRid)' == '' ">$(OSName)-$(Architecture)</ProductMonikerRid>
+    
+    <ArtifactNameSdk>dotnet-sdk</ArtifactNameSdk>
+    <ArtifactNameSdkDebug>dotnet-sdk-debug</ArtifactNameSdkDebug>
+    <ArtifactNameCombinedHostHostFxrFrameworkSdk>dotnet-dev</ArtifactNameCombinedHostHostFxrFrameworkSdk>
+    <ArtifactNameCombinedFrameworkSdk>dotnet-sharedframework-sdk</ArtifactNameCombinedFrameworkSdk>
+
+    <ArtifactNameWithVersionSdk>$(ArtifactNameSdk)-$(ProductMonikerRid).$(SdkVersion)</ArtifactNameWithVersionSdk>
+    <ArtifactNameWithVersionSdkDebug>$(ArtifactNameSdkDebug)-$(ProductMonikerRid).$(SdkVersion)</ArtifactNameWithVersionSdkDebug>
+    <ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-$(ProductMonikerRid).$(SdkVersion)</ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>
+    <ArtifactNameWithVersionCombinedFrameworkSdk>$(ArtifactNameCombinedFrameworkSdk)-$(ProductMonikerRid).$(SdkVersion)</ArtifactNameWithVersionCombinedFrameworkSdk>
+
+  </PropertyGroup>
+</Project>

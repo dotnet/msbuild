@@ -1,4 +1,4 @@
-<Project ToolsVersion="15.0">
+<Project>
   <ItemGroup>
     <BundledSdk Include="NuGet.Build.Tasks.Pack" Version="$(CLI_NuGet_Version)" />
     <BundledSdk Include="Microsoft.NET.Sdk" Version="$(CLI_NETSDK_Version)" />

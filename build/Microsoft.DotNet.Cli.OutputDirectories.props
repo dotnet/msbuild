@@ -1,0 +1,17 @@
+<Project>
+  <PropertyGroup>
+      <BaseOutputDirectory>$(RepoRoot)/artifacts/$(Rid)</BaseOutputDirectory>
+      <ToolsOutputDirectory>$(BaseOutputDirectory)/tools</ToolsOutputDirectory>
+      <Stage1Directory>$(BaseOutputDirectory)/stage1</Stage1Directory>
+      <Stage1SymbolsDirectory>$(BaseOutputDirectory)/stage1symbols</Stage1SymbolsDirectory>
+      <DotnetStage1>$(Stage1Directory)/dotnet$(ExeExtension)</DotnetStage1>
+      <Stage2Directory>$(BaseOutputDirectory)/stage2</Stage2Directory>
+      <Stage2SymbolsDirectory>$(BaseOutputDirectory)/stage2symbols</Stage2SymbolsDirectory>
+      <DotnetStage2>$(Stage2Directory)/dotnet$(ExeExtension)</DotnetStage2>
+      <OutputDirectory>$(Stage2Directory)/</OutputDirectory>
+      <Stage2CompilationDirectory>$(BaseOutputDirectory)/stage2compilation</Stage2CompilationDirectory>
+      <IntermediateDirectory>$(BaseOutputDirectory)/intermediate</IntermediateDirectory>
+      <PackagesDirectory>$(BaseOutputDirectory)/packages</PackagesDirectory>
+      <SharedFrameworkPublishDirectory>$(IntermediateDirectory)/sharedFrameworkPublish</SharedFrameworkPublishDirectory>
+  </PropertyGroup>
+</Project>

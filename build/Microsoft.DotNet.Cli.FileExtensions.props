@@ -1,0 +1,23 @@
+<Project>
+    <PropertyGroup>
+
+      <ArchiveExtension Condition=" '$(OSName)' == 'win' ">.zip</ArchiveExtension>
+      <ArchiveExtension Condition=" '$(OSName)' != 'win' ">.tar.gz</ArchiveExtension>
+
+      <InstallerExtension Condition=" '$(OSName)' == 'win' ">.msi</InstallerExtension>
+      <InstallerExtension Condition=" '$(OSName)' == 'osx' ">.pkg</InstallerExtension>
+      <InstallerExtension Condition=" '$(OSName)' == 'ubuntu' ">.deb</InstallerExtension>
+
+      <BundleExtension Condition=" '$(OSName)' == 'win' ">.exe</BundleExtension>
+      <BundleExtension Condition=" '$(OSName)' == 'osx' ">$(InstallerExtension)</BundleExtension>
+      <BundleExtension Condition=" '$(OSName)' == 'ubuntu' ">$(InstallerExtension)</BundleExtension>
+
+      <DynamicLibPrefix>lib</DynamicLibPrefix>
+      <DynamicLibPrefix Condition=" '$(OSName)' == 'win' "></DynamicLibPrefix>
+
+      <DynamicLibExtension>.so</DynamicLibExtension>
+      <DynamicLibExtension Condition=" '$(OSName)' == 'win' ">.dll</DynamicLibExtension>
+      <DynamicLibExtension Condition=" '$(OSName)' == 'osx' ">.dylib</DynamicLibExtension>
+
+    </PropertyGroup>
+</Project>

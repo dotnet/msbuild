@@ -88,7 +88,7 @@
           Outputs="%(TestPackageProject.Identity)">
 
     <DotNetRestore ToolPath="$(Stage2Directory)"
-                   ConfigFile="$(RepoRoot)\NuGet.Config"
+                   WorkingDirectory="$([System.IO.Directory]::GetParent('%(TestPackageProject.ProjectPath)'))"
                    ProjectPath="%(TestPackageProject.ProjectPath)" />
  
     <!-- https://github.com/NuGet/Home/issues/4063 -->

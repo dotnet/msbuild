@@ -65,18 +65,18 @@ namespace Microsoft.DotNet.Tests
             var testInstance = TestAssets.Get(appName)
                 .CreateInstance()
                 .WithSourceFiles()
-                .WithRestoreFiles();
+                .WithNuGetConfig(new RepoDirectoriesProvider().TestPackages);
 
             if (useCurrentFrameworkRuntimeVersion)
             {
                 testInstance = testInstance.UseCurrentRuntimeFrameworkVersion();
-
-                // restore again now that the project has changed
-                new RestoreCommand()
-                    .WithWorkingDirectory(testInstance.Root)
-                    .Execute()
-                    .Should().Pass();
             }
+
+            // restore again now that the project has changed
+            new RestoreCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .Execute()
+                .Should().Pass();
 
             new BuildCommand()
                 .WithProjectDirectory(testInstance.Root)
@@ -273,8 +273,8 @@ namespace Microsoft.DotNet.Tests
             var testInstance = TestAssets.Get("AppWithDirectDep")
                 .CreateInstance()
                 .WithSourceFiles()
-                .WithRestoreFiles()
-                .UseCurrentRuntimeFrameworkVersion();
+                .UseCurrentRuntimeFrameworkVersion()
+                .WithNuGetConfig(new RepoDirectoriesProvider().TestPackages);
 
             // restore again now that the project has changed
             new RestoreCommand()

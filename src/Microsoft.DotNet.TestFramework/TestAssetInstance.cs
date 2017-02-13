@@ -103,7 +103,7 @@ namespace Microsoft.DotNet.TestFramework
         public TestAssetInstance WithNuGetConfig(string nugetCache)
         {
             var thisAssembly = typeof(TestAssetInstance).GetTypeInfo().Assembly;
-            var newNuGetConfig = Root.GetFile("Nuget.config");
+            var newNuGetConfig = Root.GetFile("NuGet.Config");
 
             var content = @"<?xml version=""1.0"" encoding=""utf-8""?>
             <configuration>

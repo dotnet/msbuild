@@ -24,24 +24,31 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestPackages", "TestPackage
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{89905EC4-BC0F-443B-8ADF-691321F10108}"
 	ProjectSection(SolutionItems) = preProject
+		build\Microsoft.DotNet.Cli.Branding.props = build\Microsoft.DotNet.Cli.Branding.props
+		build\Microsoft.DotNet.Cli.BranchInfo.props = build\Microsoft.DotNet.Cli.BranchInfo.props
 		build\Microsoft.DotNet.Cli.BundledSdks.proj = build\Microsoft.DotNet.Cli.BundledSdks.proj
 		build\Microsoft.DotNet.Cli.BundledSdks.props = build\Microsoft.DotNet.Cli.BundledSdks.props
 		build\Microsoft.DotNet.Cli.BundledTemplates.proj = build\Microsoft.DotNet.Cli.BundledTemplates.proj
 		build\Microsoft.DotNet.Cli.BundledTemplates.props = build\Microsoft.DotNet.Cli.BundledTemplates.props
 		build\Microsoft.DotNet.Cli.Compile.targets = build\Microsoft.DotNet.Cli.Compile.targets
 		build\Microsoft.DotNet.Cli.DependencyVersions.props = build\Microsoft.DotNet.Cli.DependencyVersions.props
+		build\Microsoft.DotNet.Cli.FileExtensions.props = build\Microsoft.DotNet.Cli.FileExtensions.props
 		build\Microsoft.DotNet.Cli.GitCommitInfo.targets = build\Microsoft.DotNet.Cli.GitCommitInfo.targets
 		build\Microsoft.DotNet.Cli.HostInfo.targets = build\Microsoft.DotNet.Cli.HostInfo.targets
 		build\Microsoft.DotNet.Cli.InitRepo.props = build\Microsoft.DotNet.Cli.InitRepo.props
 		build\Microsoft.DotNet.Cli.InitRepo.targets = build\Microsoft.DotNet.Cli.InitRepo.targets
 		build\Microsoft.DotNet.Cli.Monikers.props = build\Microsoft.DotNet.Cli.Monikers.props
+		build\Microsoft.DotNet.Cli.OutputDirectories.props = build\Microsoft.DotNet.Cli.OutputDirectories.props
 		build\Microsoft.DotNet.Cli.Package.targets = build\Microsoft.DotNet.Cli.Package.targets
 		build\Microsoft.DotNet.Cli.Prepare.targets = build\Microsoft.DotNet.Cli.Prepare.targets
 		build\Microsoft.DotNet.Cli.Publish.targets = build\Microsoft.DotNet.Cli.Publish.targets
 		build\Microsoft.DotNet.Cli.Run.targets = build\Microsoft.DotNet.Cli.Run.targets
 		build\Microsoft.DotNet.Cli.Signing.proj = build\Microsoft.DotNet.Cli.Signing.proj
+		build\Microsoft.DotNet.Cli.Stage0.props = build\Microsoft.DotNet.Cli.Stage0.props
 		build\Microsoft.DotNet.Cli.tasks = build\Microsoft.DotNet.Cli.tasks
 		build\Microsoft.DotNet.Cli.Test.targets = build\Microsoft.DotNet.Cli.Test.targets
+		build\Microsoft.DotNet.Cli.Version.props = build\Microsoft.DotNet.Cli.Version.props
+		build\Microsoft.DotNet.Cli.VersionBadge.props = build\Microsoft.DotNet.Cli.VersionBadge.props
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "package", "package", "{FD7D515A-D10F-4F49-B8AE-21CF7ED071AE}"

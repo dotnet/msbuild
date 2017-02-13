@@ -1,24 +1,30 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="build/Microsoft.DotNet.Cli.DependencyVersions.props" />
 
-  <!-- NuGet Information -->
   <PropertyGroup>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
+  </PropertyGroup>
 
+  <Import Project="build/Microsoft.DotNet.Cli.InitRepo.props" />
+  <Import Condition=" Exists('$(GitCommitInfoProps)') Or '$(GeneratingPropsFile)' != 'true' " Project="$(GitCommitInfoProps)" />
+  <Import Condition=" Exists('$(HostInfoProps)') Or '$(GeneratingPropsFile)' != 'true' " Project="$(HostInfoProps)" />
+  
+  <Import Project="build/Microsoft.DotNet.Cli.BranchInfo.props" />
+
+  <Import Project="build/Microsoft.DotNet.Cli.DependencyVersions.props" />
+  <Import Project="build/Microsoft.DotNet.Cli.FileExtensions.props" />
+  <Import Project="build/Microsoft.DotNet.Cli.OutputDirectories.props" />
+  <Import Project="build/Microsoft.DotNet.Cli.Stage0.props" />
+  <Import Project="build/Microsoft.DotNet.Cli.Version.props" />
+  <Import Project="build/Microsoft.DotNet.Cli.Branding.props" />
+  <Import Project="build/Microsoft.DotNet.Cli.VersionBadge.props" />
+  
+  <PropertyGroup>
     <NuGetPackagesDir>$(NUGET_PACKAGES)</NuGetPackagesDir>
     <NuGetPackagesDir Condition=" '$(NuGetPackagesDir)' == '' ">$(RepoRoot)/.nuget/packages</NuGetPackagesDir>
 
     <CLIBuildDll>$(RepoRoot)/build_projects/dotnet-cli-build/bin/dotnet-cli-build.dll</CLIBuildDll>
 
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
-
-    <VersionMajor>2</VersionMajor>
-    <VersionMinor>0</VersionMinor>
-    <VersionPatch>0</VersionPatch>
-    <ReleaseSuffix>alpha</ReleaseSuffix>
-    <Channel>master</Channel>
-    <BranchName>master</BranchName>
-    <CliVersionPrefix>$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(ReleaseSuffix)</CliVersionPrefix>
 
     <CliTargetFramework>netcoreapp2.0</CliTargetFramework>
   </PropertyGroup>

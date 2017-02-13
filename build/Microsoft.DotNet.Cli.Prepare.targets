@@ -16,77 +16,10 @@
 
   <Target Name="InitializeCommonProps"
           DependsOnTargets="BuildDotnetCliBuildFramework" >
-    <!-- Common Properties -->
-    <PropertyGroup>
-      <IsDesktopAvailable>False</IsDesktopAvailable>
-      <IsDesktopAvailable Condition=" '$(OSName)' == 'win' ">True</IsDesktopAvailable>
-      <DotNetPath>$(Stage0Directory)</DotNetPath>
-      <BaseOutputDirectory>$(RepoRoot)/artifacts/$(Rid)</BaseOutputDirectory>
-      <ToolsOutputDirectory>$(BaseOutputDirectory)/tools</ToolsOutputDirectory>
-      <Stage1Directory>$(BaseOutputDirectory)/stage1</Stage1Directory>
-      <Stage1SymbolsDirectory>$(BaseOutputDirectory)/stage1symbols</Stage1SymbolsDirectory>
-      <DotnetStage1>$(Stage1Directory)/dotnet$(ExeExtension)</DotnetStage1>
-      <Stage2Directory>$(BaseOutputDirectory)/stage2</Stage2Directory>
-      <Stage2SymbolsDirectory>$(BaseOutputDirectory)/stage2symbols</Stage2SymbolsDirectory>
-      <DotnetStage2>$(Stage2Directory)/dotnet$(ExeExtension)</DotnetStage2>
-      <OutputDirectory>$(Stage2Directory)/</OutputDirectory>
-      <Stage2CompilationDirectory>$(BaseOutputDirectory)/stage2compilation</Stage2CompilationDirectory>
-      <IntermediateDirectory>$(BaseOutputDirectory)/intermediate</IntermediateDirectory>
-      <PackagesDirectory>$(BaseOutputDirectory)/packages</PackagesDirectory>
-      <SharedFrameworkPublishDirectory>$(IntermediateDirectory)/sharedFrameworkPublish</SharedFrameworkPublishDirectory>
-      <CoreCLRRid>$(Rid)</CoreCLRRid>
-      <CoreCLRRid Condition=" '$(OSName)' == 'win' ">win7-$(Architecture)</CoreCLRRid>
-      <CoreCLRRid Condition=" '$(OSName)' == 'osx' ">osx.10.10-x64</CoreCLRRid>
-      <CoreCLRRid Condition=" '$(OSName)' == 'centos' OR '$(OSName)' == 'rhel' ">rhel.7-x64</CoreCLRRid>
-    </PropertyGroup>
+
 
 
     <PropertyGroup>
-      <CommitCount Condition=" '$(CommitCount)' == '' ">$(DefaultCommitCount)</CommitCount>
-
-      <SimpleVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch).$(CommitCount)</SimpleVersion>
-      <VersionSuffix>$(ReleaseSuffix)-$(CommitCount)</VersionSuffix>
-      <NugetVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(VersionSuffix)</NugetVersion>
-
-      <VersionBadgeMoniker>$(OSName)_$(Architecture)</VersionBadgeMoniker>
-      <VersionBadgeMoniker Condition=" '$(Rid)' == 'ubuntu.16.04-x64' ">Ubuntu_16_04_x64</VersionBadgeMoniker>
-      <VersionBadgeMoniker Condition=" '$(Rid)' == 'fedora.23-x64' ">Fedora_23_x64</VersionBadgeMoniker>
-      <VersionBadgeMoniker Condition=" '$(Rid)' == 'opensuse.13.2-x64' ">openSUSE_13_2_x64</VersionBadgeMoniker>
-
-      <VersionBadge>$(BaseOutputDirectory)/$(VersionBadgeMoniker)_$(Configuration)_version_badge.svg</VersionBadge>
-      <SdkVersion>$(NugetVersion)</SdkVersion>
-
-      <SdkNugetVersion>$(SdkVersion)</SdkNugetVersion>
-
-      <ArchiveExtension Condition=" '$(OSName)' == 'win' ">.zip</ArchiveExtension>
-      <ArchiveExtension Condition=" '$(OSName)' != 'win' ">.tar.gz</ArchiveExtension>
-
-      <InstallerExtension Condition=" '$(OSName)' == 'win' ">.msi</InstallerExtension>
-      <InstallerExtension Condition=" '$(OSName)' == 'osx' ">.pkg</InstallerExtension>
-      <InstallerExtension Condition=" '$(OSName)' == 'ubuntu' ">.deb</InstallerExtension>
-
-      <BundleExtension Condition=" '$(OSName)' == 'win' ">.exe</BundleExtension>
-      <BundleExtension Condition=" '$(OSName)' == 'osx' ">$(InstallerExtension)</BundleExtension>
-      <BundleExtension Condition=" '$(OSName)' == 'ubuntu' ">$(InstallerExtension)</BundleExtension>
-
-      <ProductMonikerRid Condition=" '$(Rid)' == 'ubuntu.16.04-x64' Or '$(Rid)' == 'fedora.23-x64' Or '$(Rid)' == 'opensuse.13.2-x64' ">$(Rid)</ProductMonikerRid>
-      <ProductMonikerRid Condition=" '$(ProductMonikerRid)' == '' ">$(OSName)-$(Architecture)</ProductMonikerRid>
-
-      <DynamicLibPrefix>lib</DynamicLibPrefix>
-      <DynamicLibPrefix Condition=" '$(OSName)' == 'win' "></DynamicLibPrefix>
-      <DynamicLibExtension>.so</DynamicLibExtension>
-      <DynamicLibExtension Condition=" '$(OSName)' == 'win' ">.dll</DynamicLibExtension>
-      <DynamicLibExtension Condition=" '$(OSName)' == 'osx' ">.dylib</DynamicLibExtension>
-
-      <ArtifactNameSdk>dotnet-sdk</ArtifactNameSdk>
-      <ArtifactNameSdkDebug>dotnet-sdk-debug</ArtifactNameSdkDebug>
-      <ArtifactNameCombinedHostHostFxrFrameworkSdk>dotnet-dev</ArtifactNameCombinedHostHostFxrFrameworkSdk>
-      <ArtifactNameCombinedFrameworkSdk>dotnet-sharedframework-sdk</ArtifactNameCombinedFrameworkSdk>
-
-      <ArtifactNameWithVersionSdk>$(ArtifactNameSdk)-$(ProductMonikerRid).$(SdkVersion)</ArtifactNameWithVersionSdk>
-      <ArtifactNameWithVersionSdkDebug>$(ArtifactNameSdkDebug)-$(ProductMonikerRid).$(SdkVersion)</ArtifactNameWithVersionSdkDebug>
-      <ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-$(ProductMonikerRid).$(SdkVersion)</ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>
-      <ArtifactNameWithVersionCombinedFrameworkSdk>$(ArtifactNameCombinedFrameworkSdk)-$(ProductMonikerRid).$(SdkVersion)</ArtifactNameWithVersionCombinedFrameworkSdk>
 
       <!-- Downloaded Installers + Archives -->
       <DownloadedSharedHostInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-host-$(ProductMonikerRid).$(SharedHostVersion)$(InstallerExtension)</DownloadedSharedHostInstallerFileName>

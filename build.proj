@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="BuildTheWholeCli" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-  <Import Project="build/Microsoft.DotNet.Cli.InitRepo.props" />
-  <Import Condition=" Exists('$(GitCommitInfoProps)') Or '$(GeneratingPropsFile)' != 'true' " Project="$(GitCommitInfoProps)" />
-  <Import Condition=" Exists('$(HostInfoProps)') Or '$(GeneratingPropsFile)' != 'true' " Project="$(HostInfoProps)" />
-  <Import Project="build/Microsoft.DotNet.Cli.Monikers.props" />
 
   <PropertyGroup>
     <!--
@@ -29,9 +25,6 @@
     <ExeExtension>.exe</ExeExtension>
     <ExeExtension Condition=" '$(OS)' != 'Windows_NT' "></ExeExtension>
 
-    <Stage0Directory>$(RepoRoot)/.dotnet_stage0/$(Architecture)</Stage0Directory>
-    <Stage0PjDirectory>$(RepoRoot)/.dotnet_stage0PJ/$(Architecture)</Stage0PjDirectory>
-    <DotnetStage0>$(Stage0Directory)/dotnet$(ExeExtension)</DotnetStage0>
     <DotnetCliBuildDirectory>$(RepoRoot)/build_projects/dotnet-cli-build</DotnetCliBuildDirectory>
     <PackagesDir>$(RepoRoot)/.nuget</PackagesDir>
   </PropertyGroup>
@@ -54,7 +47,7 @@
           DependsOnTargets="MSBuildWorkaroundTarget;
                             RestoreDotnetCliBuildFramework">
 
-    <Exec Command="$(DotnetStage0) publish -o $(DotnetCliBuildDirectory)/bin --framework netcoreapp1.0" 
+    <Exec Command="$(DotnetStage0) publish -o $(DotnetCliBuildDirectory)/bin --framework netcoreapp1.0 /p:GeneratingPropsFile=true" 
           WorkingDirectory="$(DotnetCliBuildDirectory)"/>
   </Target>
   
@@ -69,6 +62,7 @@
           Outputs="@(RestoreDotnetCliBuildFrameworkOutputs)">
 
     <PropertyGroup>
+      <ExtraRestoreArgs Condition=" '$(GeneratingPropsFile)' == 'true' ">$(ExtraRestoreArgs) /p:GeneratingPropsFile=$(GeneratingPropsFile)</ExtraRestoreArgs>
       <ExtraRestoreArgs Condition="'$(OS)' != 'Windows_NT'">$(ExtraRestoreArgs) --disable-parallel</ExtraRestoreArgs>
     </PropertyGroup>
 
