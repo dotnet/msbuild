@@ -40,7 +40,7 @@
       <Version>2.2.0-beta4-build1194</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.1.0</Version>
+      <Version>$(CLI_SharedFrameworkVersion)</Version>
     </PackageReference>
     <PackageReference Include="System.Runtime.Serialization.Primitives">
       <Version>4.3.0</Version>
@@ -52,7 +52,7 @@
       <Version>1.0.0-prerelease-00206</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions">
-      <Version>1.1.0</Version>
+      <Version>$(PlatformAbstractionsVersion)</Version>
     </PackageReference>
   </ItemGroup>
 
