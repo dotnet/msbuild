@@ -130,7 +130,7 @@
     <!-- Additional Shared Framework to be installed -->
     <PropertyGroup>
       <AdditionalCoreSetupChannel>preview</AdditionalCoreSetupChannel>
-      <AdditionalSharedFrameworkVersion>1.0.3</AdditionalSharedFrameworkVersion>
+      <AdditionalSharedFrameworkVersion>1.0.4</AdditionalSharedFrameworkVersion>
       <AdditionalSharedHostVersion>1.0.1</AdditionalSharedHostVersion>
       <AdditionalHostFxrVersion>1.0.1</AdditionalHostFxrVersion>
 

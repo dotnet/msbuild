@@ -13,7 +13,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.1.0</Version>
+      <Version>$(CLI_SharedFrameworkVersion)</Version>
     </PackageReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
