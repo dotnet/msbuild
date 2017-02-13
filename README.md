@@ -1,7 +1,5 @@
 ASP.NET Web Sdk targets
 ======================
-[![Build status](http://aspnetci/app/rest/builds/buildType:(id:Lite_WebSdk)/statusIcon)](http://aspnetci/viewType.html?buildTypeId=Lite_WebSdk&guest=1)
-
 ASP.NET Web Sdk targets contains the tasks, targets and packages required to build and publish Web Applications.
 
 Publish Commandline Usage:
