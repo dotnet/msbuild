@@ -39,7 +39,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       2. Building an x86 or x64 NETFramework application on and for
          Windows with native NuGet dependencies that do not require
-         greater thanwin7.
+         greater than win7.
 
      However, any other combination of host operating system, CPU
      architecture, and minimum Windows version will require some
