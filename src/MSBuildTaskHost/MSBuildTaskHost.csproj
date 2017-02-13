@@ -4,7 +4,7 @@
     <PlatformSpecificBuild>true</PlatformSpecificBuild>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>..\MSBuild.ico</ApplicationIcon>
+    <ApplicationIcon>..\MSBuild\MSBuild.ico</ApplicationIcon>
   </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -38,155 +38,155 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Source Files -->
-    <Compile Include="..\..\Shared\BuildEnvironmentHelper.cs">
+    <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>BuildEnvironmentHelper.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\AssemblyNameComparer.cs">
+    <Compile Include="..\Shared\AssemblyNameComparer.cs">
       <Link>AssemblyNameComparer.cs</Link>
     </Compile>
-    <Compile Include="..\..\Framework\BuildEngineResult.cs">
+    <Compile Include="..\Framework\BuildEngineResult.cs">
       <Link>BuildEngineResult.cs</Link>
     </Compile>
-    <Compile Include="..\..\Framework\IBuildEngine3.cs">
+    <Compile Include="..\Framework\IBuildEngine3.cs">
       <Link>IBuildEngine3.cs</Link>
     </Compile>
-    <Compile Include="..\..\Framework\RunInSTAAttribute.cs">
+    <Compile Include="..\Framework\RunInSTAAttribute.cs">
       <Link>RunInSTAAtribute.cs</Link>
     </Compile>
-    <Compile Include="..\..\Framework\ITaskItem2.cs">
+    <Compile Include="..\Framework\ITaskItem2.cs">
       <Link>ITaskItem2.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\AssemblyUtilities.cs" />
-    <Compile Include="..\..\Shared\BufferedReadStream.cs" />
-    <Compile Include="..\..\Shared\CollectionHelpers.cs" />
-    <Compile Include="..\..\Shared\CopyOnWriteDictionary.cs">
+    <Compile Include="..\Shared\AssemblyUtilities.cs" />
+    <Compile Include="..\Shared\BufferedReadStream.cs" />
+    <Compile Include="..\Shared\CollectionHelpers.cs" />
+    <Compile Include="..\Shared\CopyOnWriteDictionary.cs">
       <Link>CopyOnWriteDictionary.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\Constants.cs" />
-    <Compile Include="..\..\Shared\ReadOnlyEmptyDictionary.cs" />
-    <Compile Include="..\..\Shared\ReadOnlyEmptyList.cs" />
-    <Compile Include="..\..\Shared\ErrorUtilities.cs">
+    <Compile Include="..\Shared\Constants.cs" />
+    <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs" />
+    <Compile Include="..\Shared\ReadOnlyEmptyList.cs" />
+    <Compile Include="..\Shared\ErrorUtilities.cs">
       <Link>ErrorUtilities.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\EscapingUtilities.cs">
+    <Compile Include="..\Shared\EscapingUtilities.cs">
       <Link>EscapingUtilities.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\ExceptionHandling.cs">
+    <Compile Include="..\Shared\ExceptionHandling.cs">
       <Link>ExceptionHandling.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\FileUtilities.cs">
+    <Compile Include="..\Shared\FileUtilities.cs">
       <Link>FileUtilities.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\FileUtilitiesRegex.cs">
+    <Compile Include="..\Shared\FileUtilitiesRegex.cs">
       <Link>FileUtilitiesRegex.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\HybridDictionary.cs">
+    <Compile Include="..\Shared\HybridDictionary.cs">
       <Link>HybridDictionary.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\INodeEndpoint.cs">
+    <Compile Include="..\Shared\INodeEndpoint.cs">
       <Link>INodeEndpoint.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\INodePacket.cs">
+    <Compile Include="..\Shared\INodePacket.cs">
       <Link>INodePacket.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\INodePacketFactory.cs">
+    <Compile Include="..\Shared\INodePacketFactory.cs">
       <Link>INodePacketFactory.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\INodePacketHandler.cs">
+    <Compile Include="..\Shared\INodePacketHandler.cs">
       <Link>INodePacketHandler.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\INodePacketTranslatable.cs">
+    <Compile Include="..\Shared\INodePacketTranslatable.cs">
       <Link>INodePacketTranslatable.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\INodePacketTranslator.cs">
+    <Compile Include="..\Shared\INodePacketTranslator.cs">
       <Link>INodePacketTranslator.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\InternalErrorException.cs">
+    <Compile Include="..\Shared\InternalErrorException.cs">
       <Link>InternalErrorException.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\InterningBinaryReader.cs">
+    <Compile Include="..\Shared\InterningBinaryReader.cs">
       <Link>InterningBinaryReader.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\LogMessagePacketBase.cs">
+    <Compile Include="..\Shared\LogMessagePacketBase.cs">
       <Link>LogMessagePacketBase.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\Modifiers.cs">
+    <Compile Include="..\Shared\Modifiers.cs">
       <Link>Modifiers.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\NativeMethodsShared.cs">
+    <Compile Include="..\Shared\NativeMethodsShared.cs">
       <Link>NativeMethodsShared.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\NodeBuildComplete.cs">
+    <Compile Include="..\Shared\NodeBuildComplete.cs">
       <Link>NodeBuildComplete.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\NodeEndpointOutOfProcBase.cs">
+    <Compile Include="..\Shared\NodeEndpointOutOfProcBase.cs">
       <Link>NodeEndpointOutOfProcBase.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\NodeEngineShutdownReason.cs">
+    <Compile Include="..\Shared\NodeEngineShutdownReason.cs">
       <Link>NodeEngineShutdownReason.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\NodePacketFactory.cs">
+    <Compile Include="..\Shared\NodePacketFactory.cs">
       <Link>NodePacketFactory.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\NodePacketTranslator.cs">
+    <Compile Include="..\Shared\NodePacketTranslator.cs">
       <Link>NodePacketTranslator.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\NodeShutdown.cs">
+    <Compile Include="..\Shared\NodeShutdown.cs">
       <Link>NodeShutdown.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\OpportunisticIntern.cs">
+    <Compile Include="..\Shared\OpportunisticIntern.cs">
       <Link>OpportunisticIntern.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\ReadOnlyEmptyCollection.cs">
+    <Compile Include="..\Shared\ReadOnlyEmptyCollection.cs">
       <Link>ReadOnlyEmptyCollection.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\ResourceUtilities.cs">
+    <Compile Include="..\Shared\ResourceUtilities.cs">
       <Link>ResourceUtilities.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\StringBuilderCache.cs">
+    <Compile Include="..\Shared\StringBuilderCache.cs">
       <Link>StringBuilderCache.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\TaskEngineAssemblyResolver.cs">
+    <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs">
       <Link>TaskEngineAssemblyResolver.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\TaskParameterTypeVerifier.cs">
+    <Compile Include="..\Shared\TaskParameterTypeVerifier.cs">
       <Link>TaskParameterTypeVerifier.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\VisualStudioLocationHelper.cs">
+    <Compile Include="..\Shared\VisualStudioLocationHelper.cs">
       <Link>VisualStudioLocationHelper.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\XMakeAttributes.cs">
+    <Compile Include="..\Shared\XMakeAttributes.cs">
       <Link>XMakeAttributes.cs</Link>
     </Compile>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="AssemblyResources.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TypeLoader.cs" />
-    <Compile Include="..\LogMessagePacket.cs">
+    <Compile Include="..\MSBuild\LogMessagePacket.cs">
       <Link>LogMessagePacket.cs</Link>
     </Compile>
     <Compile Include="OutOfProcTaskHost.cs" />
-    <Compile Include="..\..\Shared\CommunicationsUtilities.cs" />
-    <Compile Include="..\..\Shared\TaskHostConfiguration.cs" />
-    <Compile Include="..\..\Shared\TaskHostTaskComplete.cs" />
-    <Compile Include="..\..\Shared\OutOfProcTaskHostTaskResult.cs">
+    <Compile Include="..\Shared\CommunicationsUtilities.cs" />
+    <Compile Include="..\Shared\TaskHostConfiguration.cs" />
+    <Compile Include="..\Shared\TaskHostTaskComplete.cs" />
+    <Compile Include="..\Shared\OutOfProcTaskHostTaskResult.cs">
       <Link>OutOfProcTaskHostTaskResult.cs</Link>
     </Compile>
-    <Compile Include="..\..\Shared\TaskLoader.cs" />
-    <Compile Include="..\..\Shared\LoadedType.cs">
+    <Compile Include="..\Shared\TaskLoader.cs" />
+    <Compile Include="..\Shared\LoadedType.cs">
     </Compile>
-    <Compile Include="..\..\Shared\AssemblyLoadInfo.cs">
+    <Compile Include="..\Shared\AssemblyLoadInfo.cs">
     </Compile>
-    <Compile Include="..\..\Shared\TaskHostTaskCancelled.cs" />
-    <Compile Include="..\..\Shared\TaskParameter.cs" />
-    <Compile Include="..\..\Shared\AssemblyNameExtension.cs">
+    <Compile Include="..\Shared\TaskHostTaskCancelled.cs" />
+    <Compile Include="..\Shared\TaskParameter.cs" />
+    <Compile Include="..\Shared\AssemblyNameExtension.cs">
     </Compile>
-    <Compile Include="..\NodeEndpointOutOfProcTaskHost.cs" />
-    <Compile Include="..\OutOfProcTaskHostNode.cs" />
-    <Compile Include="..\OutOfProcTaskAppDomainWrapperBase.cs">
+    <Compile Include="..\MSBuild\NodeEndpointOutOfProcTaskHost.cs" />
+    <Compile Include="..\MSBuild\OutOfProcTaskHostNode.cs" />
+    <Compile Include="..\MSBuild\OutOfProcTaskAppDomainWrapperBase.cs">
       <Link>OutOfProcTaskAppDomainWrapperBase.cs</Link>
     </Compile>
-    <Compile Include="..\CLR2\OutOfProcTaskAppDomainWrapper.cs">
+    <Compile Include="OutOfProcTaskAppDomainWrapper.cs">
       <Link>OutOfProcTaskAppDomainWrapperStub.cs</Link>
     </Compile>
   </ItemGroup>
@@ -196,7 +196,7 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="..\..\Shared\Resources\Strings.shared.resx">
+    <EmbeddedResource Include="..\Shared\Resources\Strings.shared.resx">
       <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
       <SubType>Designer</SubType>
     </EmbeddedResource>

@@ -1796,12 +1796,12 @@ elementFormDefault="qualified">
     </xs:element>
     <xs:element name="VersionPrefix" type="msb:StringPropertyType" substitutionGroup="msb:Property" >
       <xs:annotation>
-        <xs:documentation><!-- _locID_text="VersionPrefix" _locComment="" -->Prefix that can indicate additional information at the end of the verion (i.e. beta)</xs:documentation>
+        <xs:documentation><!-- _locID_text="VersionPrefix" _locComment="" -->When Version is not specified, VersionPrefix represents the first fragment of the version string (e.g. 1.0.0). The syntax is VersionPrefix[-VersionSuffix].</xs:documentation>
       </xs:annotation>
     </xs:element>
     <xs:element name="VersionSufix" type="msb:StringPropertyType" substitutionGroup="msb:Property">
       <xs:annotation>
-        <xs:documentation><!-- _locID_text="VersionSufix" _locComment="" -->Suffix that can indicate additional information at the end of the verion (i.e. beta)</xs:documentation>
+        <xs:documentation><!-- _locID_text="VersionSufix" _locComment="" -->When Version is not specified, VersionSuffix represents the second fragment of the version string (e.g. beta). The syntax is VersionPrefix[-VersionSuffix].</xs:documentation>
       </xs:annotation>
     </xs:element>
 
