@@ -28,15 +28,6 @@ namespace Microsoft.DotNet.Cli.Build
         public string ReleaseSuffix { get; set; }
 
         [Output]
-        public string VersionSuffix { get; set; }
-
-        [Output]
-        public string SimpleVersion { get; set; }
-
-        [Output]
-        public string NugetVersion { get; set; }
-
-        [Output]
         public string MsiVersion { get; set; }
 
         [Output]
@@ -56,7 +47,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             var branchInfo = new BranchInfo(RepoRoot);
 
-            var buildVersion = new BuildVersion()
+            var buildVersion = new Version
             {
                 Major = int.Parse(branchInfo.Entries["MAJOR_VERSION"]),
                 Minor = int.Parse(branchInfo.Entries["MINOR_VERSION"]),
@@ -70,9 +61,6 @@ namespace Microsoft.DotNet.Cli.Build
             VersionPatch = buildVersion.Patch;
             CommitCount = buildVersion.CommitCountString;
             ReleaseSuffix = buildVersion.ReleaseSuffix;
-            VersionSuffix = buildVersion.VersionSuffix;
-            SimpleVersion = buildVersion.SimpleVersion;
-            NugetVersion = buildVersion.NuGetVersion;
             MsiVersion = buildVersion.GenerateMsiVersion();
             VersionBadgeMoniker = Monikers.GetBadgeMoniker();
             Channel = branchInfo.Entries["CHANNEL"];

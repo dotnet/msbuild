@@ -23,7 +23,7 @@
         <SdkInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionSdk)$(InstallerExtension)</SdkInstallerFile>
         <CombinedFrameworkSdkHostInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk)$(BundleExtension)</CombinedFrameworkSdkHostInstallerFile>
         <SdkInstallerNuspecFile>$(RepoRoot)/packaging/windows/clisdk/VS.Redist.Common.Net.Core.SDK.$(Architecture).nuspec</SdkInstallerNuspecFile>
-        <SdkInstallerNupkgFile>$(InstallerOutputDirectory)/VS.Redist.Common.Net.Core.SDK.$(Architecture).$(NugetVersion).nupkg</SdkInstallerNupkgFile>
+        <SdkInstallerNupkgFile>$(InstallerOutputDirectory)/VS.Redist.Common.Net.Core.SDK.$(Architecture).$(FullNugetVersion).nupkg</SdkInstallerNupkgFile>
       </PropertyGroup>
 
       <!-- Generate SDK MSI Inputs -->
@@ -134,7 +134,7 @@
 
       <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateNupkgPowershellScript)
                       '$(CombinedFrameworkSdkHostInstallerFile)'
-                      '$(NugetVersion)'
+                      '$(FullNugetVersion)'
                       '$(SdkInstallerNuspecFile)'
                       '$(SdkInstallerNupkgFile)'" />
     </Target>
