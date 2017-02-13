@@ -1,5 +1,6 @@
 ASP.NET Web Sdk targets
 ======================
+[![Build status](http://aspnetci/app/rest/builds/buildType:(id:Lite_WebSdk)/statusIcon)](http://aspnetci/viewType.html?buildTypeId=Lite_WebSdk&guest=1)
 
 ASP.NET Web Sdk targets contains the tasks, targets and packages required to build and publish Web Applications.
 
@@ -21,7 +22,7 @@ msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishProfile=<FolderPro
 ````
 or
 ```
-`dotnet msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishUrl="C:\deployedApp\newapp"
+dotnet msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishUrl="C:\deployedApp\newapp"
 ```
 
  - MSDeploy Publish with a profile:
@@ -84,7 +85,7 @@ Sample MsDeploy Publish Profile:
     <MSDeployPublishMethod>WMSVC</MSDeployPublishMethod>
     <EnableMSDeployBackup>True</EnableMSDeployBackup>
     <UserName>$vramakwebappwithdb</UserName>
-	<Password>DeployPassword</Password>
+    <Password>DeployPassword</Password>
   </PropertyGroup>
 </Project>
 ```
@@ -121,7 +122,7 @@ Sample MsDeploy Profile With Destination Connection String & EF Migrations
     <MSDeployPublishMethod>WMSVC</MSDeployPublishMethod>
     <EnableMSDeployBackup>True</EnableMSDeployBackup>
     <UserName>$vramakwebappwithdb</UserName>
-	<Password>DeployPassword</Password>
+    <Password>DeployPassword</Password>
   </PropertyGroup>
   <ItemGroup>
     <DestinationConnectionStrings Include="ShoppingCartConnection">
@@ -134,5 +135,29 @@ Sample MsDeploy Profile With Destination Connection String & EF Migrations
     </EFMigrations>
   </ItemGroup>
 </Project>
+```
+
+Sample to remove files from getting published:
+
+```xml
+<ItemGroup>
+    <Content Update="wwwroot/images/*.svg" CopyToPublishDirectory="Never" />
+</ItemGroup>
+```
+
+Sample to Skip a specific folder/file during Web Deploy Publish:
+
+```xml
+<ItemGroup>
+    <MsDeploySkipRules Include="CustomSkipFolder">
+      <ObjectName>dirPath</ObjectName>
+      <AbsolutePath>wwwroot</AbsolutePath>
+    </MsDeploySkipRules>
+
+    <MsDeploySkipRules Include="CustomSkipFile">
+      <ObjectName>filePath</ObjectName>
+      <AbsolutePath>Views\\Home\\About.cshtml$</AbsolutePath>
+    </MsDeploySkipRules>
+</ItemGroup>
 ```
 
