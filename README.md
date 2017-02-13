@@ -22,7 +22,7 @@ msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishProfile=<FolderPro
 ````
 or
 ```
-`dotnet msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishUrl="C:\deployedApp\newapp"
+dotnet msbuild WebApplication.csproj /p:DeployOnBuild=true /p:PublishUrl="C:\deployedApp\newapp"
 ```
 
  - MSDeploy Publish with a profile:
@@ -85,7 +85,7 @@ Sample MsDeploy Publish Profile:
     <MSDeployPublishMethod>WMSVC</MSDeployPublishMethod>
     <EnableMSDeployBackup>True</EnableMSDeployBackup>
     <UserName>$vramakwebappwithdb</UserName>
-	<Password>DeployPassword</Password>
+    <Password>DeployPassword</Password>
   </PropertyGroup>
 </Project>
 ```
@@ -122,7 +122,7 @@ Sample MsDeploy Profile With Destination Connection String & EF Migrations
     <MSDeployPublishMethod>WMSVC</MSDeployPublishMethod>
     <EnableMSDeployBackup>True</EnableMSDeployBackup>
     <UserName>$vramakwebappwithdb</UserName>
-	<Password>DeployPassword</Password>
+    <Password>DeployPassword</Password>
   </PropertyGroup>
   <ItemGroup>
     <DestinationConnectionStrings Include="ShoppingCartConnection">
@@ -152,12 +152,12 @@ Sample to Skip a specific folder/file during Web Deploy Publish:
     <MsDeploySkipRules Include="CustomSkipFolder">
       <ObjectName>dirPath</ObjectName>
       <AbsolutePath>wwwroot</AbsolutePath>
-	</MsDeploySkipRules>
+    </MsDeploySkipRules>
 
-	<MsDeploySkipRules Include="CustomSkipFile">
+    <MsDeploySkipRules Include="CustomSkipFile">
       <ObjectName>filePath</ObjectName>
       <AbsolutePath>Views\\Home\\About.cshtml$</AbsolutePath>
-	</MsDeploySkipRules>
+    </MsDeploySkipRules>
 </ItemGroup>
 ```
 
