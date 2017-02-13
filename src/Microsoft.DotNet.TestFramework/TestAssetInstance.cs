@@ -17,13 +17,25 @@ namespace Microsoft.DotNet.TestFramework
 {
     public class TestAssetInstance
     {
+        public DirectoryInfo MigrationBackupRoot { get; }
+
+        public DirectoryInfo Root { get; }
+
+        public TestAssetInfo TestAssetInfo { get; }
+
+        private bool _filesCopied = false;
+
+        private bool _restored = false;
+
+        private bool _built = false;
+
         public TestAssetInstance(TestAssetInfo testAssetInfo, DirectoryInfo root)
         {
             if (testAssetInfo == null)
             {
                 throw new ArgumentException(nameof(testAssetInfo));
             }
-            
+
             if (root == null)
             {
                 throw new ArgumentException(nameof(root));
@@ -48,36 +60,42 @@ namespace Microsoft.DotNet.TestFramework
             }
         }
 
-        public DirectoryInfo MigrationBackupRoot { get; }
-
-        public DirectoryInfo Root { get; }
-
-        public TestAssetInfo TestAssetInfo { get; }
-
-
         public TestAssetInstance WithSourceFiles()
         {
-            var filesToCopy = TestAssetInfo.GetSourceFiles();
+            if (!_filesCopied)
+            {
+                CopySourceFiles();
 
-            CopyFiles(filesToCopy);
+                _filesCopied = true;
+            }
 
             return this;
         }
 
         public TestAssetInstance WithRestoreFiles()
         {
-            var filesToCopy = TestAssetInfo.GetRestoreFiles();
+            if (!_restored)
+            {
+                WithSourceFiles();
 
-            CopyFiles(filesToCopy);
+                RestoreAllProjects();
+
+                _restored = true;
+            }
 
             return this;
         }
 
         public TestAssetInstance WithBuildFiles()
         {
-            var filesToCopy = TestAssetInfo.GetBuildFiles();
+            if (!_built)
+            {
+                WithRestoreFiles();
 
-            CopyFiles(filesToCopy);
+                BuildRootProjectOrSolution();
+
+                _built = true;
+            }
 
             return this;
         }
@@ -156,19 +174,124 @@ namespace Microsoft.DotNet.TestFramework
             });
         }
 
-        private void CopyFiles(IEnumerable<FileInfo> filesToCopy)
+        private static string RebasePath(string path, string oldBaseDirectory, string newBaseDirectory)
         {
+            path = Path.IsPathRooted(path) ? PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(oldBaseDirectory), path) : path;
+            return Path.Combine(newBaseDirectory, path);
+        }
+
+        private void CopySourceFiles()
+        {
+            var filesToCopy = TestAssetInfo.GetSourceFiles();
             foreach (var file in filesToCopy)
             {
-                var relativePath = file.FullName.Substring(TestAssetInfo.Root.FullName.Length + 1);
-
-                var newPath = Path.Combine(Root.FullName, relativePath);
+                var newPath = RebasePath(file.FullName, TestAssetInfo.Root.FullName, Root.FullName);
 
                 var newFile = new FileInfo(newPath);
 
                 PathUtility.EnsureDirectoryExists(newFile.Directory.FullName);
 
-                file.CopyTo(newPath);
+                CopyFileAdjustingPaths(file, newFile);
+            }
+        }
+
+        private void CopyFileAdjustingPaths(FileInfo source, FileInfo destination)
+        {
+            if (string.Equals(source.Name, "nuget.config", StringComparison.OrdinalIgnoreCase))
+            {
+                CopyNugetConfigAdjustingPath(source, destination);
+            }
+            else
+            {
+                source.CopyTo(destination.FullName);
+            }
+        }
+
+        private void CopyNugetConfigAdjustingPath(FileInfo source, FileInfo destination)
+        {
+            var doc = XDocument.Load(source.FullName, LoadOptions.PreserveWhitespace);
+            foreach (var packageSource in doc.Root.Element("packageSources").Elements("add").Attributes("value"))
+            {
+                if (!Path.IsPathRooted(packageSource.Value))
+                {
+                    string fullPathAtSource = Path.GetFullPath(Path.Combine(source.Directory.FullName, packageSource.Value));
+                    if (!PathUtility.IsChildOfDirectory(TestAssetInfo.Root.FullName, fullPathAtSource))
+                    {
+                        packageSource.Value = fullPathAtSource;
+                    }
+                }
+
+                using (var file = new FileStream(
+                    destination.FullName,
+                    FileMode.CreateNew,
+                    FileAccess.ReadWrite))
+                {
+                    doc.Save(file, SaveOptions.None);
+                }
+            }
+        }
+
+        private void BuildRootProjectOrSolution()
+        {
+            string[] args = new string[] { "build" };
+
+            Console.WriteLine($"TestAsset Build '{TestAssetInfo.AssetName}'");
+
+            var commandResult = Command.Create(TestAssetInfo.DotnetExeFile.FullName, args)
+                                    .WorkingDirectory(Root.FullName)
+                                    .CaptureStdOut()
+                                    .CaptureStdErr()
+                                    .Execute();
+
+            int exitCode = commandResult.ExitCode;
+
+            if (exitCode != 0)
+            {
+                Console.WriteLine(commandResult.StdOut);
+
+                Console.WriteLine(commandResult.StdErr);
+
+                string message = string.Format($"TestAsset Build '{TestAssetInfo.AssetName}' Failed with {exitCode}");
+
+                throw new Exception(message);
+            }
+        }
+
+        private IEnumerable<FileInfo> GetProjectFiles()
+        {
+            return Root.GetFiles(TestAssetInfo.ProjectFilePattern, SearchOption.AllDirectories);
+        }
+
+        private void Restore(FileInfo projectFile)
+        {
+            var restoreArgs = new string[] { "restore", projectFile.FullName };
+
+            var commandResult = Command.Create(TestAssetInfo.DotnetExeFile.FullName, restoreArgs)
+                                .CaptureStdOut()
+                                .CaptureStdErr()
+                                .Execute();
+
+            int exitCode = commandResult.ExitCode;
+
+            if (exitCode != 0)
+            {
+                Console.WriteLine(commandResult.StdOut);
+
+                Console.WriteLine(commandResult.StdErr);
+
+                string message = string.Format($"TestAsset Restore '{TestAssetInfo.AssetName}'@'{projectFile.FullName}' Failed with {exitCode}");
+
+                throw new Exception(message);
+            }
+        }
+
+        private void RestoreAllProjects()
+        {
+            Console.WriteLine($"TestAsset Restore '{TestAssetInfo.AssetName}'");
+
+            foreach (var projFile in GetProjectFiles())
+            {
+                Restore(projFile);
             }
         }
     }
