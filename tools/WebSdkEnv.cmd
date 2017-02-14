@@ -10,18 +10,26 @@ if not defined DNX_PACKAGES (
     set DNX_PACKAGES=%~dp0\..\packages
 )
 
+if not defined DOTNET_INSTALL_DIR (
+    set DOTNET_INSTALL_DIR=%LocalAppData%\Microsoft\dotnet
+)
+
+if not defined DOTNET_VERSION (
+    set DOTNET_VERSION=1.0.0-rc4-004802
+)
+
 if exist "%WebSdkProgramFiles%\Microsoft Visual Studio\VS15Preview\MSBuild\15.0\Bin\MSBuild.exe" (
-	set "WebSdkVSVersion=15.0"
-	set WebSdkMSBuildPath="%WebSdkProgramFiles%\Microsoft Visual Studio\VS15Preview\MSBuild\15.0\Bin"
+    set "WebSdkVSVersion=15.0"
+    set WebSdkMSBuildPath="%WebSdkProgramFiles%\Microsoft Visual Studio\VS15Preview\MSBuild\15.0\Bin"
 ) else (
-	set "WebSdkVSVersion=14.0"
-	set WebSdkMSBuildPath="%WebSdkProgramFiles%\MSBuild\14.0\Bin"
+    set "WebSdkVSVersion=14.0"
+    set WebSdkMSBuildPath="%WebSdkProgramFiles%\MSBuild\14.0\Bin"
 )
 
 set "WebSdkRoot=%~dp0"
 set "WebSdkRoot=%WebSdkRoot:~0,-7%"
-set "WebSdkBin=%WebSdkRoot%\artifacts\build"
-set "WebSdkIntermediate=%WebSdkRoot%\intermediate"
+set "WebSdkBin=%WebSdkRoot%\bin"
+set "WebSdkIntermediate=%WebSdkRoot%\obj"
 set "WebSdkReferences=%WebSdkRoot%\references"
 set "WebSdkSource=%WebSdkRoot%\src"
 set "WebSdkTools=%WebSdkRoot%\tools"
