@@ -9,6 +9,7 @@
   <Import Condition=" Exists('$(HostInfoProps)') Or '$(GeneratingPropsFile)' != 'true' " Project="$(HostInfoProps)" />
   
   <Import Project="build/Microsoft.DotNet.Cli.BranchInfo.props" />
+  <Import Project="build/Microsoft.DotNet.Cli.CoreSetupInfo.props" />
 
   <Import Project="build/Microsoft.DotNet.Cli.DependencyVersions.props" />
   <Import Project="build/Microsoft.DotNet.Cli.FileExtensions.props" />

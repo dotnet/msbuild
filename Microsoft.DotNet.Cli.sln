@@ -32,6 +32,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{89905EC4
 		build\Microsoft.DotNet.Cli.BundledTemplates.proj = build\Microsoft.DotNet.Cli.BundledTemplates.proj
 		build\Microsoft.DotNet.Cli.BundledTemplates.props = build\Microsoft.DotNet.Cli.BundledTemplates.props
 		build\Microsoft.DotNet.Cli.Compile.targets = build\Microsoft.DotNet.Cli.Compile.targets
+		build\Microsoft.DotNet.Cli.CoreSetupInfo.props = build\Microsoft.DotNet.Cli.CoreSetupInfo.props
 		build\Microsoft.DotNet.Cli.DependencyVersions.props = build\Microsoft.DotNet.Cli.DependencyVersions.props
 		build\Microsoft.DotNet.Cli.FileExtensions.props = build\Microsoft.DotNet.Cli.FileExtensions.props
 		build\Microsoft.DotNet.Cli.GitCommitInfo.targets = build\Microsoft.DotNet.Cli.GitCommitInfo.targets
