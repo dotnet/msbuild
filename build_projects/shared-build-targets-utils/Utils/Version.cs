@@ -1,8 +1,6 @@
-using System.Collections.Generic;
-
 namespace Microsoft.DotNet.Cli.Build
 {
-    public abstract class Version
+    public class Version
     {
         public virtual int Major { get; set; }
         public virtual int Minor { get; set; }

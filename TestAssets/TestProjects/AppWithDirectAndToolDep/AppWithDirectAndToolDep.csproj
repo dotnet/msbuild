@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.1.0</Version>
+      <Version>$(CLI_SharedFrameworkVersion)</Version>
     </PackageReference>
     <PackageReference Include="dotnet-hello">
       <Version>1.0.0</Version>
