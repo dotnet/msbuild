@@ -126,32 +126,6 @@
                    VersionSuffix="$(VersionSuffix)"
                    ProjectPath="$(SrcDirectory)/tool_roslyn/tool_roslyn.csproj" />
 
-      <!-- Corehostify Binaries -->
-      <ItemGroup Condition=" '$(OSName)' != 'win' ">
-        <SdkOutputChmodTargets Remove="*" />
-        <SdkOutputChmodTargets Include="$(SdkOutputDirectory)/**/*.exe;
-                                      $(SdkOutputDirectory)/**/*.dll" >
-          <!-- Managed assemblies do not need execute -->
-          <Mode>u=rw,g=r,o=r</Mode>
-        </SdkOutputChmodTargets>
-
-        <SdkOutputChmodTargets Include="$(SdkOutputDirectory)/**/*.dylib;
-                                      $(SdkOutputDirectory)/**/*.so" >
-          <!-- Generally, dylibs and sos have 'x' -->
-          <Mode>u=rwx,g=rx,o=rx</Mode>
-        </SdkOutputChmodTargets>
-
-        <SdkOutputChmodTargets Include="$(SdkOutputDirectory)/**/*"
-                             Exclude="$(SdkOutputDirectory)/**/*.*" >
-          <!-- Executables need x -->
-          <Mode>u=rwx,g=rx,o=rx</Mode>
-        </SdkOutputChmodTargets>
-      </ItemGroup>
-
-      <Chmod Condition=" '$(OSName)' != 'win' "
-             File="%(SdkOutputChModTargets.FullPath)"
-             Mode="%(SdkOutputChModTargets.Mode)" />
-
       <RemoveAssetFromDepsPackages DepsFile="$(SdkOutputDirectory)/redist.deps.json"
                                    SectionName="runtimeTargets"
                                    AssetPath="$(BinaryToCorehostifyRelDir)/%(RuntimeTargetsAssetsToRemoveFromDeps.Identity).exe" />
@@ -223,6 +197,32 @@
                 PlatformAssemblyPaths="@(PlatformAssemblies);
                                        @(CompileStageSdkDirectories);
                                        $(SharedFrameworkNameVersionPath)" />
+
+      <!-- Corehostify Binaries -->
+      <ItemGroup Condition=" '$(OSName)' != 'win' ">
+        <SdkOutputChmodTargets Remove="*" />
+        <SdkOutputChmodTargets Include="$(SdkOutputDirectory)/**/*.exe;
+                                      $(SdkOutputDirectory)/**/*.dll" >
+          <!-- Managed assemblies do not need execute -->
+          <Mode>u=rw,g=r,o=r</Mode>
+        </SdkOutputChmodTargets>
+
+        <SdkOutputChmodTargets Include="$(SdkOutputDirectory)/**/*.dylib;
+                                      $(SdkOutputDirectory)/**/*.so" >
+          <!-- Generally, dylibs and sos have 'x' -->
+          <Mode>u=rwx,g=rx,o=rx</Mode>
+        </SdkOutputChmodTargets>
+
+        <SdkOutputChmodTargets Include="$(SdkOutputDirectory)/**/*"
+                             Exclude="$(SdkOutputDirectory)/**/*.*" >
+          <!-- Executables need x -->
+          <Mode>u=rwx,g=rx,o=rx</Mode>
+        </SdkOutputChmodTargets>
+      </ItemGroup>
+
+      <Chmod Condition=" '$(OSName)' != 'win' "
+             File="%(SdkOutputChModTargets.FullPath)"
+             Mode="%(SdkOutputChModTargets.Mode)" />
 
       <!-- Generate .version file -->
       <WriteLinesToFile File="$(SdkOutputDirectory)/.version"
