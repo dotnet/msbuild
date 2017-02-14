@@ -2,12 +2,20 @@
   "author": "Microsoft",
   "classifications": ["Config"],
   "name": "Nuget Config",
-  "tags": {
-    "type": "item"
-  },
   "groupIdentity": "ItemNugetConfig",
   "identity": "Microsoft.Standard.QuickStarts.Nuget.Config",
   "shortName": "nugetconfig",
   "sourceName": "Nuget",
-  "primaryOutputs": [ { "path": "nuget.config" } ]
+  "primaryOutputs": [ { "path": "nuget.config" } ],
+  "symbols": {
+    "type": {
+      "type": "parameter",
+      "datatype": "choice",
+      "choices": [
+        {
+          "choice": "item"
+        }
+      ]
+    }
+  }
 }

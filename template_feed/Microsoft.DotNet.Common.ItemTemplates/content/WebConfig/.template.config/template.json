@@ -2,12 +2,20 @@
   "author": "Microsoft",
   "classifications": ["Config"],
   "name": "Web Config",
-  "tags": {
-    "type": "item"
-  },
   "groupIdentity": "ItemWebConfig",
   "identity": "Microsoft.Standard.QuickStarts.Web.Config",
   "shortName": "webconfig",
   "sourceName": "WebConfig",
-  "primaryOutputs": [ { "path": "web.config" } ]
+  "primaryOutputs": [ { "path": "web.config" } ],
+  "symbols": {
+    "type": {
+      "type": "parameter",
+      "datatype": "choice",
+      "choices": [
+        {
+          "choice": "item"
+        }
+      ]
+    }
+  }
 }
