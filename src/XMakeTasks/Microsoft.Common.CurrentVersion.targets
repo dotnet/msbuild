@@ -1576,6 +1576,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </_MSBuildProjectReferenceExistent>
     </ItemGroup>
 
+    <ItemGroup>
+      <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.Identity)' == '%(Identity)' and '$(_ProjectReferenceTargetFrameworkProperties)' != ''">
+        <UndefineProperties Condition="$(_ProjectReferenceTargetFrameworkProperties.Contains(`ProjectIsRidAgnostic=true`))">%(_MSBuildProjectReferenceExistent.UndefineProperties);RuntimeIdentifier;ProjectIsRidAgnostic</UndefineProperties>
+        <!-- Unconditionally remove the property that was set as a marker to indicate that for this call we should remove RuntimeIdentifier -->
+        <UndefineProperties Condition="!$(_ProjectReferenceTargetFrameworkProperties.Contains(`ProjectIsRidAgnostic=true`))">%(_MSBuildProjectReferenceExistent.UndefineProperties);ProjectIsRidAgnostic</UndefineProperties>
+      </_MSBuildProjectReferenceExistent>
+    </ItemGroup>
+
     <PropertyGroup>
       <_ProjectReferenceTargetFrameworkProperties />
     </PropertyGroup>
