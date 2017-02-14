@@ -242,7 +242,7 @@
     <Reference Include="System.Configuration" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\XMakeBuildEngine\Microsoft.Build.csproj">
+    <ProjectReference Include="..\Build\Microsoft.Build.csproj">
       <Project>{16CD7635-7CF4-4C62-A77B-CF87D0F09A58}</Project>
       <Name>Microsoft.Build</Name>
     </ProjectReference>
