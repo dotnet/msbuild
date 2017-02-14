@@ -357,6 +357,10 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
+        // TODO: Determine what to do when showAll = true
+        // There are now 2 sources of truth for what do display. 
+        //  1) ShowTemplateNameMismatchHelp()
+        //  2) Everything else
         private void DisplayTemplateList(bool showAll = false)
         {
             IReadOnlyList<ITemplateInfo> results = TemplatesToDisplayInfoAbout;
