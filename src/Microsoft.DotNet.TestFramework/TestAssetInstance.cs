@@ -29,6 +29,8 @@ namespace Microsoft.DotNet.TestFramework
 
         private bool _built = false;
 
+        public static string CurrentRuntimeFrameworkVersion = new Muxer().SharedFxVersion;
+        
         public TestAssetInstance(TestAssetInfo testAssetInfo, DirectoryInfo root)
         {
             if (testAssetInfo == null)
@@ -170,7 +172,7 @@ namespace Microsoft.DotNet.TestFramework
                     project.Root.Add(propertyGroup);
                 }
 
-                propertyGroup.Add(new XElement(ns + "RuntimeFrameworkVersion", new Muxer().SharedFxVersion));
+                propertyGroup.Add(new XElement(ns + "RuntimeFrameworkVersion", CurrentRuntimeFrameworkVersion));
             });
         }
 
