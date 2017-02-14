@@ -261,6 +261,32 @@ namespace Microsoft.DotNet.Tools.Common
             }
         }
 
+        public static string RemoveExtraPathSeparators(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                return path;
+            }
+
+            var components = path.Split(Path.DirectorySeparatorChar);
+            var result = string.Empty;
+
+            foreach (var component in components)
+            {
+                if (!string.IsNullOrEmpty(component))
+                {
+                    result = Path.Combine(result, component);
+                }
+            }
+
+            if (path[path.Length-1] == Path.DirectorySeparatorChar)
+            {
+                result += Path.DirectorySeparatorChar;
+            }
+
+            return result;
+        }
+
         public static bool HasExtension(string filePath, string extension)
         {
             var comparison = StringComparison.Ordinal;
