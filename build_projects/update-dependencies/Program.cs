@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.Scripts
 
         private static IEnumerable<IDependencyUpdater> GetUpdaters()
         {
-            yield return CreateRegexUpdater(@"build\Microsoft.DotNet.Cli.DependencyVersions.props", "CLI_SharedFrameworkVersion", "Microsoft.NETCore.App");
+            yield return CreateRegexUpdater(Path.Combine("build", "Microsoft.DotNet.Cli.DependencyVersions.props"), "CLI_SharedFrameworkVersion", "Microsoft.NETCore.App");
         }
 
         private static IDependencyUpdater CreateRegexUpdater(string repoRelativePath, string propertyName, string packageId)

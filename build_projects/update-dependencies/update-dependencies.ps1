@@ -4,14 +4,16 @@
 #
 
 param(
-    [switch]$Help)
+    [switch]$Help,
+    [switch]$Update)
 
 if($Help)
 {
     Write-Host "Usage: .\update-dependencies.ps1"
     Write-Host ""
     Write-Host "Options:"
-    Write-Host "  -Help                              Display this help message"
+    Write-Host "  -Help                 Display this help message"
+    Write-Host "  -Update               Update dependencies (but don't open a PR)"
     exit 0
 }
 
@@ -19,6 +21,12 @@ $Architecture='x64'
 
 $RepoRoot = "$PSScriptRoot\..\.."
 $ProjectPath = "$PSScriptRoot\update-dependencies.csproj"
+$ProjectArgs = ""
+
+if ($Update)
+{
+    $ProjectArgs = "--Update"
+}
 
 # Use a repo-local install directory (but not the artifacts directory because that gets cleaned a lot
 if (!$env:DOTNET_INSTALL_DIR)
@@ -34,6 +42,11 @@ if($LASTEXITCODE -ne 0) { throw "Failed to install stage0" }
 # Put the stage0 on the path
 $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
 
+# Generate some props files that are imported by update-dependencies
+Write-Host "Generating property files..."
+dotnet msbuild $RepoRoot\build.proj /p:Architecture=$Architecture /p:GeneratingPropsFile=true /t:WriteDynamicPropsToStaticPropsFiles
+if($LASTEXITCODE -ne 0) { throw "Failed to generate intermidates" }
+
 # Restore the app
 Write-Host "Restoring $ProjectPath..."
 dotnet restore "$ProjectPath"
@@ -41,5 +54,5 @@ if($LASTEXITCODE -ne 0) { throw "Failed to restore" }
 
 # Run the app
 Write-Host "Invoking App $ProjectPath..."
-dotnet run -p "$ProjectPath"
+dotnet run -p "$ProjectPath" "$ProjectArgs"
 if($LASTEXITCODE -ne 0) { throw "Build failed" }
