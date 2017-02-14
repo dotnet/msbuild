@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
+using System.Diagnostics;
 
 namespace Microsoft.DotNet.Tools.MSBuild
 {
@@ -59,18 +60,16 @@ namespace Microsoft.DotNet.Tools.MSBuild
                 environmentVariables: _msbuildRequiredEnvironmentVariables);
         }
 
+        public ProcessStartInfo GetProcessStartInfo()
+        {
+            return _forwardingApp
+                .WithEnvironmentVariable(TelemetrySessionIdEnvironmentVariableName, Telemetry.CurrentSessionId)
+                .GetProcessStartInfo();
+        }
+
         public int Execute()
         {
-            try
-            {
-                Environment.SetEnvironmentVariable(TelemetrySessionIdEnvironmentVariableName, Telemetry.CurrentSessionId);
-
-                return _forwardingApp.Execute();
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable(TelemetrySessionIdEnvironmentVariableName, null);
-            }
+            return GetProcessStartInfo().Execute();
         }
 
         internal static CommandOption AddVerbosityOption(CommandLineApplication app)

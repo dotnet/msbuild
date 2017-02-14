@@ -68,6 +68,11 @@ namespace Microsoft.DotNet.Cli
 
         public int Execute()
         {
+            return GetProcessStartInfo().Execute();
+        }
+
+        public ProcessStartInfo GetProcessStartInfo()
+        {
             var processInfo = new ProcessStartInfo
             {
                 FileName = GetHostExeName(),
@@ -83,15 +88,7 @@ namespace Microsoft.DotNet.Cli
                 }
             }
 
-            var process = new Process
-            {
-                StartInfo = processInfo
-            };
-
-            process.Start();
-            process.WaitForExit();
-
-            return process.ExitCode;
+            return processInfo;
         }
 
         public ForwardingApp WithEnvironmentVariable(string name, string value)

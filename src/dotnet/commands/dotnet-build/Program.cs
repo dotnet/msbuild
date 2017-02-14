@@ -5,21 +5,33 @@ using System.Collections.Generic;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.MSBuild;
+using System.Diagnostics;
+using System;
+using Microsoft.DotNet.Cli;
 
 namespace Microsoft.DotNet.Tools.Build
 {
     public class BuildCommand
     {
-        public static int Run(string[] args)
+        private MSBuildForwardingApp _forwardingApp;
+
+        private BuildCommand() { }
+
+        public BuildCommand(IEnumerable<string> msbuildArgs)
         {
-            DebugHelper.HandleDebugSwitch(ref args);
+            _forwardingApp = new MSBuildForwardingApp(msbuildArgs);
+        }
+
+        public static BuildCommand FromArgs(params string[] args)
+        {
+            var ret = new BuildCommand();
 
             CommandLineApplication app = new CommandLineApplication(throwOnUnexpectedArg: false);
             app.Name = "dotnet build";
             app.FullName = LocalizableStrings.AppFullName;
             app.Description = LocalizableStrings.AppDescription;
             app.ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText;
-            app.HandleRemainingArguments = true;            
+            app.HandleRemainingArguments = true;
             app.HelpOption("-h|--help");
 
             CommandArgument projectArgument = app.Argument($"<{LocalizableStrings.ProjectArgumentValueName}>", LocalizableStrings.ProjectArgumentDescription);
@@ -36,8 +48,10 @@ namespace Microsoft.DotNet.Tools.Build
             CommandOption noDependenciesOption = app.Option("--no-dependencies", LocalizableStrings.NoDependenciesOptionDescription, CommandOptionType.NoValue);
             CommandOption verbosityOption = MSBuildForwardingApp.AddVerbosityOption(app);
 
+            bool codeExecuted = false;
             app.OnExecute(() =>
             {
+                codeExecuted = true;
                 List<string> msbuildArgs = new List<string>();
 
                 if (!string.IsNullOrEmpty(projectArgument.Value))
@@ -93,10 +107,55 @@ namespace Microsoft.DotNet.Tools.Build
 
                 msbuildArgs.AddRange(app.RemainingArguments);
 
-                return new MSBuildForwardingApp(msbuildArgs).Execute();
+                ret._forwardingApp = new MSBuildForwardingApp(msbuildArgs);
+
+                return 0;
             });
 
-            return app.Execute(args);
+            int exitCode = app.Execute();
+            if (!codeExecuted)
+            {
+                throw new NonZeroExitCodeException(exitCode);
+            }
+
+            return ret;
+        }
+
+        public static int Run(string[] args)
+        {
+            DebugHelper.HandleDebugSwitch(ref args);
+
+            BuildCommand cmd;
+            try
+            {
+                cmd = FromArgs(args);
+            }
+            catch (NonZeroExitCodeException e)
+            {
+                return e.ExitCode;
+            }
+
+            return cmd.Execute();
+        }
+
+        public ProcessStartInfo GetProcessStartInfo()
+        {
+            return _forwardingApp.GetProcessStartInfo();
+        }
+
+        public int Execute()
+        {
+            return GetProcessStartInfo().Execute();
+        }
+
+        private class NonZeroExitCodeException : Exception
+        {
+            public int ExitCode { get; private set; }
+
+            public NonZeroExitCodeException(int exitCode)
+            {
+                ExitCode = exitCode;
+            }
         }
     }
 }
