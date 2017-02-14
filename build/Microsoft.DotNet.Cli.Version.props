@@ -12,9 +12,5 @@
     
     <SdkVersion>$(NugetVersion)</SdkVersion>
     <SdkNugetVersion>$(SdkVersion)</SdkNugetVersion>
-
-    <SharedFrameworkVersion>$(CLI_SharedFrameworkVersion)</SharedFrameworkVersion>
-    <SharedHostVersion>$(CLI_SharedFrameworkVersion)</SharedHostVersion>
-    <HostFxrVersion>$(CLI_SharedFrameworkVersion)</HostFxrVersion>
   </PropertyGroup>
 </Project>

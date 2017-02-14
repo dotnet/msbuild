@@ -10,7 +10,7 @@
     <AdditionalHostFxrBrandName>Microsoft .NET Core 1.0.1 - Host FX Resolver</AdditionalHostFxrBrandName>
 
     <SharedFrameworkName>Microsoft.NETCore.App</SharedFrameworkName>
-    <SharedFrameworkNugetName>Microsoft.NETCore.App</SharedFrameworkNugetName>
+    <SharedFrameworkNugetName>$(SharedFrameworkName)</SharedFrameworkNugetName>
 
     <ProductMonikerRid Condition=" '$(Rid)' == 'ubuntu.16.04-x64' Or '$(Rid)' == 'fedora.23-x64' Or '$(Rid)' == 'opensuse.13.2-x64' ">$(Rid)</ProductMonikerRid>
     <ProductMonikerRid Condition=" '$(ProductMonikerRid)' == '' ">$(OSName)-$(Architecture)</ProductMonikerRid>

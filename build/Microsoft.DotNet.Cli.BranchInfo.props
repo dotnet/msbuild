@@ -1,6 +1,7 @@
 <Project>
   <PropertyGroup>
     <Channel>master</Channel>
+    <CoreSetupChannel>master</CoreSetupChannel>
     <BranchName>master</BranchName>
   </PropertyGroup>
 </Project>
