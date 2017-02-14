@@ -17,12 +17,12 @@ namespace Microsoft.DotNet.Tools.Build
 
         private BuildCommand() { }
 
-        public BuildCommand(IEnumerable<string> msbuildArgs)
+        public BuildCommand(IEnumerable<string> msbuildArgs, string msbuildPath = null)
         {
-            _forwardingApp = new MSBuildForwardingApp(msbuildArgs);
+            _forwardingApp = new MSBuildForwardingApp(msbuildArgs, msbuildPath);
         }
 
-        public static BuildCommand FromArgs(params string[] args)
+        public static BuildCommand FromArgs(string[] args, string msbuildPath = null)
         {
             var ret = new BuildCommand();
 
@@ -48,10 +48,8 @@ namespace Microsoft.DotNet.Tools.Build
             CommandOption noDependenciesOption = app.Option("--no-dependencies", LocalizableStrings.NoDependenciesOptionDescription, CommandOptionType.NoValue);
             CommandOption verbosityOption = MSBuildForwardingApp.AddVerbosityOption(app);
 
-            bool codeExecuted = false;
             app.OnExecute(() =>
             {
-                codeExecuted = true;
                 List<string> msbuildArgs = new List<string>();
 
                 if (!string.IsNullOrEmpty(projectArgument.Value))
@@ -107,15 +105,15 @@ namespace Microsoft.DotNet.Tools.Build
 
                 msbuildArgs.AddRange(app.RemainingArguments);
 
-                ret._forwardingApp = new MSBuildForwardingApp(msbuildArgs);
+                ret._forwardingApp = new MSBuildForwardingApp(msbuildArgs, msbuildPath);
 
                 return 0;
             });
 
-            int exitCode = app.Execute();
-            if (!codeExecuted)
+            int exitCode = app.Execute(args);
+            if (ret._forwardingApp == null)
             {
-                throw new NonZeroExitCodeException(exitCode);
+                throw new CodeNotExecutedException(exitCode);
             }
 
             return ret;
@@ -130,7 +128,7 @@ namespace Microsoft.DotNet.Tools.Build
             {
                 cmd = FromArgs(args);
             }
-            catch (NonZeroExitCodeException e)
+            catch (CodeNotExecutedException e)
             {
                 return e.ExitCode;
             }
@@ -148,11 +146,11 @@ namespace Microsoft.DotNet.Tools.Build
             return GetProcessStartInfo().Execute();
         }
 
-        private class NonZeroExitCodeException : Exception
+        private class CodeNotExecutedException : Exception
         {
             public int ExitCode { get; private set; }
 
-            public NonZeroExitCodeException(int exitCode)
+            public CodeNotExecutedException(int exitCode)
             {
                 ExitCode = exitCode;
             }

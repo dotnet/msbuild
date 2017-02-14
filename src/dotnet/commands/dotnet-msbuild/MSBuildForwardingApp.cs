@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
         private readonly IEnumerable<string> _msbuildRequiredParameters = 
             new List<string> { "/m", "/v:m" };
 
-        public MSBuildForwardingApp(IEnumerable<string> argsToForward)
+        public MSBuildForwardingApp(IEnumerable<string> argsToForward, string msbuildPath = null)
         {
             if (Telemetry.CurrentSessionId != null)
             {
@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
             }
 
             _forwardingApp = new ForwardingApp(
-                GetMSBuildExePath(),
+                msbuildPath ?? GetMSBuildExePath(),
                 _msbuildRequiredParameters.Concat(argsToForward.Select(Escape)),
                 environmentVariables: _msbuildRequiredEnvironmentVariables);
         }
