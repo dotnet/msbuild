@@ -39,6 +39,24 @@
     }
   ],
   "symbols": {
+//    "type": {
+//      "type": "parameter",
+//      "datatype": "choice",
+//      "choices": [
+//        {
+//          "choice": "project"
+//        }
+//      ]
+//    },
+//    "language": {
+//      "type": "parameter",
+//      "datatype": "choice",
+//      "choices": [
+//        {
+//          "choice": "C#"
+//        }
+//      ]
+//    },
     "auth": {
       "type": "parameter",
       "datatype": "choice",

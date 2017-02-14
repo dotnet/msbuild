@@ -36,6 +36,9 @@ namespace Microsoft.TemplateEngine.Cli
         private IDictionary<string, IList<string>> _parsedInternalParams;
         private IDictionary<string, IList<string>> _parsedRemainingParams;
 
+        // must be reset to null
+        private IDictionary<string, IList<string>> _canonicalToVariantsTemplateParamMap;
+
         // stores the options & arguments that are NOT hidden
         // this is used exclusively to show the help.
         // it's a bit of a hack.
@@ -44,6 +47,11 @@ namespace Microsoft.TemplateEngine.Cli
         public ExtendedCommandParser()
         {
             _app = new CommandLineApplication(false);
+            Reset();
+        }
+
+        public void Reset()
+        {
             _defaultCommandOptions = new HashSet<string>();
             _hiddenCommandOptions = new Dictionary<string, CommandOptionType>();
             _hiddenCommandCanonicalMapping = new Dictionary<string, string>();
@@ -56,6 +64,8 @@ namespace Microsoft.TemplateEngine.Cli
             _parsedRemainingParams = new Dictionary<string, IList<string>>();
 
             _helpDisplayer = new CommandLineApplication(false);
+
+            _canonicalToVariantsTemplateParamMap = null;
         }
 
         // TODO: consider optionally showing help for things not handled by the CommandLineApplication instance
@@ -283,21 +293,24 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         // Canonical is the template param name without any dashes. The things mapped to it all have dashes, including the param name itself.
-        public void SetupTemplateParameters(IParameterSet allParams, IReadOnlyDictionary<string, string> longNameOverrides, IReadOnlyDictionary<string, string> shortNameOverrides)
+        // allParameters: name -> dataType
+        public void SetupTemplateParameters(IEnumerable<KeyValuePair<string, string>> allParameters, IReadOnlyDictionary<string, string> longNameOverrides, IReadOnlyDictionary<string, string> shortNameOverrides)
         {
             HashSet<string> invalidParams = new HashSet<string>();
 
-            foreach (ITemplateParameter parameter in allParams.ParameterDefinitions.Where(x => x.Priority != TemplateParameterPriority.Implicit).OrderBy(x => x.Name))
+            foreach (KeyValuePair<string, string> parameter in allParameters)
             {
-                if (parameter.Name.IndexOf(':') >= 0)
+                string parameterName = parameter.Key;
+
+                if (parameterName.IndexOf(':') >= 0)
                 {   // Colon is reserved, template param names cannot have any.
-                    invalidParams.Add(parameter.Name);
+                    invalidParams.Add(parameterName);
                     continue;
                 }
 
-                if (longNameOverrides == null || !longNameOverrides.TryGetValue(parameter.Name, out string flagFullText))
+                if (longNameOverrides == null || !longNameOverrides.TryGetValue(parameterName, out string flagFullText))
                 {
-                    flagFullText = parameter.Name;
+                    flagFullText = parameterName;
                 }
 
                 bool longNameFound = false;
@@ -307,7 +320,7 @@ namespace Microsoft.TemplateEngine.Cli
                 string nameAsParameter = "--" + flagFullText;
                 if (!IsParameterNameTaken(nameAsParameter))
                 {
-                    MapTemplateParamToCanonical(nameAsParameter, parameter.Name);
+                    MapTemplateParamToCanonical(nameAsParameter, parameterName);
                     longNameFound = true;
                 }
 
@@ -315,23 +328,23 @@ namespace Microsoft.TemplateEngine.Cli
                 string qualifiedName = "--param:" + flagFullText;
                 if (!longNameFound && !IsParameterNameTaken(qualifiedName))
                 {
-                    MapTemplateParamToCanonical(qualifiedName, parameter.Name);
+                    MapTemplateParamToCanonical(qualifiedName, parameterName);
                     longNameFound = true;
                 }
 
-                if (shortNameOverrides != null && shortNameOverrides.TryGetValue(parameter.Name, out string shortNameOverride))
+                if (shortNameOverrides != null && shortNameOverrides.TryGetValue(parameterName, out string shortNameOverride))
                 {   // short name starting point was explicitly specified
                     string fullShortNameOverride = "-" + shortNameOverride;
                     if (!IsParameterNameTaken(shortNameOverride))
                     {
-                        MapTemplateParamToCanonical(fullShortNameOverride, parameter.Name);
+                        MapTemplateParamToCanonical(fullShortNameOverride, parameterName);
                         shortNameFound = true;
                     }
 
                     string qualifiedShortNameOverride = "-p:" + shortNameOverride;
                     if (!shortNameFound && !IsParameterNameTaken(qualifiedShortNameOverride))
                     {
-                        MapTemplateParamToCanonical(qualifiedShortNameOverride, parameter.Name);
+                        MapTemplateParamToCanonical(qualifiedShortNameOverride, parameterName);
                         shortNameFound = true;
                     }
                 }
@@ -342,7 +355,7 @@ namespace Microsoft.TemplateEngine.Cli
                     string shortName = GetFreeShortName(flagFullText);
                     if (!IsParameterNameTaken(shortName))
                     {
-                        MapTemplateParamToCanonical(shortName, parameter.Name);
+                        MapTemplateParamToCanonical(shortName, parameterName);
                         shortNameFound = true;
                     }
 
@@ -350,7 +363,7 @@ namespace Microsoft.TemplateEngine.Cli
                     string qualifiedShortName = GetFreeShortName(flagFullText, "p:");
                     if (!shortNameFound && !IsParameterNameTaken(qualifiedShortName))
                     {
-                        MapTemplateParamToCanonical(qualifiedShortName, parameter.Name);
+                        MapTemplateParamToCanonical(qualifiedShortName, parameterName);
                         shortNameFound = true;
                     }
                 }
@@ -361,7 +374,7 @@ namespace Microsoft.TemplateEngine.Cli
                 }
                 else
                 {
-                    _templateParamDataTypeMapping[parameter.Name] = parameter.DataType;
+                    _templateParamDataTypeMapping[parameterName] = parameter.Value;
                 }
             }
 
@@ -417,9 +430,6 @@ namespace Microsoft.TemplateEngine.Cli
             _templateParamCanonicalMapping[variant] = canonical;
         }
 
-        // Concats the first letter of dash separated word.
-        private IDictionary<string, IList<string>> _canonicalToVariantsTemplateParamMap;
-
         public IDictionary<string, IList<string>> CanonicalToVariantsTemplateParamMap
         {
             get
@@ -444,6 +454,11 @@ namespace Microsoft.TemplateEngine.Cli
 
                 return _canonicalToVariantsTemplateParamMap;
             }
+        }
+
+        public bool TryGetCanonicalNameForVariant(string variant, out string canonical)
+        {
+            return _templateParamCanonicalMapping.TryGetValue(variant, out canonical);
         }
 
         public string Name
