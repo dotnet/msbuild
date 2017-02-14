@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="compile/Microsoft.DotNet.Cli.LzmaArchive.targets" />
-  <Import Project="crossgen/Microsoft.DotNet.Cli.Crossgen.targets" />
+  <Import Project="compile/LzmaArchive.targets" />
+  <Import Project="crossgen/Crossgen.targets" />
 
   <PropertyGroup>
     <BinaryToCorehostifyRelDir>runtimes/any/native</BinaryToCorehostifyRelDir>
@@ -245,7 +245,7 @@
   <Target Name="PublishSdks"
           DependsOnTargets="Prepare">
     <ItemGroup>
-      <SdksToBundle Include="build/Microsoft.DotNet.Cli.BundledSdks.proj">
+      <SdksToBundle Include="build/BundledSdks.proj">
         <Properties>
           CLIBuildDll=$(CLIBuildDll);
           NuGetPackagesDir=$(NuGetPackagesDir);
@@ -266,7 +266,7 @@
   <Target Name="PublishTemplates"
           DependsOnTargets="Prepare">
     <ItemGroup>
-      <TemplatesToBundle Include="build/Microsoft.DotNet.Cli.BundledTemplates.proj">
+      <TemplatesToBundle Include="build/BundledTemplates.proj">
         <Properties>
           TemplateLayoutDirectory=$(SdkOutputDirectory)/Templates;
           TemplatePackageName=%(BundledTemplate.Identity);

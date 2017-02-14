@@ -4,19 +4,19 @@
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
   </PropertyGroup>
 
-  <Import Project="build/Microsoft.DotNet.Cli.InitRepo.props" />
+  <Import Project="build/InitRepo.props" />
   <Import Condition=" Exists('$(GitCommitInfoProps)') Or '$(GeneratingPropsFile)' != 'true' " Project="$(GitCommitInfoProps)" />
   <Import Condition=" Exists('$(HostInfoProps)') Or '$(GeneratingPropsFile)' != 'true' " Project="$(HostInfoProps)" />
   
-  <Import Project="build/Microsoft.DotNet.Cli.BranchInfo.props" />
+  <Import Project="build/BranchInfo.props" />
 
-  <Import Project="build/Microsoft.DotNet.Cli.DependencyVersions.props" />
-  <Import Project="build/Microsoft.DotNet.Cli.FileExtensions.props" />
-  <Import Project="build/Microsoft.DotNet.Cli.OutputDirectories.props" />
-  <Import Project="build/Microsoft.DotNet.Cli.Stage0.props" />
-  <Import Project="build/Microsoft.DotNet.Cli.Version.props" />
-  <Import Project="build/Microsoft.DotNet.Cli.Branding.props" />
-  <Import Project="build/Microsoft.DotNet.Cli.VersionBadge.props" />
+  <Import Project="build/DependencyVersions.props" />
+  <Import Project="build/FileExtensions.props" />
+  <Import Project="build/OutputDirectories.props" />
+  <Import Project="build/Stage0.props" />
+  <Import Project="build/Version.props" />
+  <Import Project="build/Branding.props" />
+  <Import Project="build/VersionBadge.props" />
   
   <PropertyGroup>
     <NuGetPackagesDir>$(NUGET_PACKAGES)</NuGetPackagesDir>
