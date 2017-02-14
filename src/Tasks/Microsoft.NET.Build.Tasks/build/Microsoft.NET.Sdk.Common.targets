@@ -56,8 +56,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PropertyGroup>
       <!-- If this project is not RID-specific, specify that an empty RuntimeIdentifier should be passed. -->
       <ProjectIsRidAgnostic>false</ProjectIsRidAgnostic>
-      <ProjectIsRidAgnostic Condition=" $(RuntimeIdentifier)' == '' and $(RuntimeIdentifiers) == '' ">true</ProjectIsRidAgnostic>
-      
+      <ProjectIsRidAgnostic Condition=" '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</ProjectIsRidAgnostic>
+
       <!-- If a ReferringTargetFramework was not specified, and we only have one TargetFramework, then don't try to check compatibility -->
       <_SkipNearestTargetFrameworkResolution Condition="'$(TargetFramework)' != '' and '$(ReferringTargetFramework)' == ''">true</_SkipNearestTargetFrameworkResolution>
       <NearestTargetFramework Condition="'$(_SkipNearestTargetFrameworkResolution)' == 'true'">$(TargetFramework)</NearestTargetFramework>
