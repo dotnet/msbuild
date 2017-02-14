@@ -358,6 +358,10 @@ namespace Microsoft.TemplateEngine.Cli
             return templateList;
         }
 
+        // TODO: Determine what to do when showAll = true
+        // There are now 2 sources of truth for what do display. 
+        //  1) ShowTemplateNameMismatchHelp()
+        //  2) Everything else
         private void DisplayTemplateList(bool showAll = false)
         {
             IEnumerable<ITemplateInfo> results = TemplatesToDisplayInfoAbout();
@@ -406,24 +410,39 @@ namespace Microsoft.TemplateEngine.Cli
                 Reporter.Output.WriteLine();
                 ShowInvocationExamples();
             }
+
+            if (_matchedTemplates.Any(x => x.IsMatch))
+            {
+                foreach (ITemplateInfo template in TemplatesToShowDetailedHelpAbout())
+                {
+                    ShowTemplateHelp(template);
+                }
+            }
         }
 
         private Task<CreationResultStatus> EnterAmbiguousTemplateManipulationFlowAsync()
         {
             if (!string.IsNullOrEmpty(TemplateName))
             {
-                ShowUsageHelp();
-                DisplayTemplateList();
+                // rel/vs2017/post-rtw still uses ShowTemplateNameMismatchHelp() ... .revisit
+                bool anyPartialMatchesDisplayed = ShowTemplateNameMismatchHelp();
+                DisplayTemplateList(!anyPartialMatchesDisplayed);
+                return Task.FromResult(CreationResultStatus.NotFound);
 
-                if (_matchedTemplates.Any(x => x.IsMatch))
-                {
-                    foreach (ITemplateInfo template in TemplatesToShowDetailedHelpAbout())
-                    {
-                        ShowTemplateHelp(template);
-                    }
-                }
+                // My way (scp pre-merge)
+                //
+                //ShowUsageHelp();
+                //DisplayTemplateList();
 
-                return Task.FromResult(-1);
+                //if (_matchedTemplates.Any(x => x.IsMatch))
+                //{
+                //    foreach (ITemplateInfo template in TemplatesToShowDetailedHelpAbout())
+                //    {
+                //        ShowTemplateHelp(template);
+                //    }
+                //}
+
+                //return Task.FromResult(CreationResultStatus.NotFound);
             }
 
             if (!ValidateRemainingParameters())
@@ -512,16 +531,7 @@ namespace Microsoft.TemplateEngine.Cli
                 Reporter.Output.WriteLine(LocalizableStrings.AliasCreated);
                 return CreationResultStatus.Success;
             }
-
-            // Not sure if this is what we want:
-            //
-            // moved up here because listing can now be filtered on other params.
-            //
-            //If we've made it here, we need the actual template's args
-            ParseTemplateArgs(UnambiguousTemplateToUse.Info);
-
-            //else if(IsListFlagSpecified)
-            if (IsListFlagSpecified)
+            else if (IsListFlagSpecified)
             {
                 if (!ValidateRemainingParameters())
                 {
@@ -554,7 +564,7 @@ namespace Microsoft.TemplateEngine.Cli
                 }
 
                 ShowUsageHelp();
-                ShowTemplateHelp();
+                ShowTemplateHelp(UnambiguousTemplateToUse.Info);
                 return argsError ? CreationResultStatus.InvalidParamValues : CreationResultStatus.Success;
             }
             else
@@ -1188,13 +1198,13 @@ namespace Microsoft.TemplateEngine.Cli
 
             foreach (IFilteredTemplateInfo template in contextProblemMatches.Values)
             {
-                if (template.Info.Tags != null && template.Info.Tags.TryGetValue("type", out string type))
+                if (template.Info.Tags != null && template.Info.Tags.TryGetValue("type", out ICacheTag typeTag))
                 {
-                    if (string.Equals(type, "item"))
+                    if (typeTag.ChoicesAndDescriptions.ContainsKey("item"))
                     {
                         Reporter.Error.WriteLine("  - " + string.Format(LocalizableStrings.ItemTemplateNotInProjectContext, template.Info.Name));
                     }
-                    else
+                    else if (typeTag.ChoicesAndDescriptions.ContainsKey("project"))
                     {   // project template
                         Reporter.Error.WriteLine("  - " + string.Format(LocalizableStrings.ProjectTemplateInProjectContext, template.Info.Name));
                     }
