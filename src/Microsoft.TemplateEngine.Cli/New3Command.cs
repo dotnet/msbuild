@@ -317,7 +317,7 @@ namespace Microsoft.TemplateEngine.Cli
         // Otherwise retun an empty list.
         private IEnumerable<ITemplateInfo> TemplatesToShowDetailedHelpAbout()
         {
-            IEnumerable<ITemplateInfo> candidateTemplates = TemplatesToDisplayInfoAbout();
+            IReadOnlyList<ITemplateInfo> candidateTemplates = TemplatesToDisplayInfoAbout();
 
             if (candidateTemplates.Count() == 0)
             {
@@ -338,7 +338,7 @@ namespace Microsoft.TemplateEngine.Cli
         // If there are secondary matches, return them
         // Else if there are primary matches, return them
         // Otherwise return all templates in the current context
-        private IEnumerable<ITemplateInfo> TemplatesToDisplayInfoAbout()
+        private IReadOnlyList<ITemplateInfo> TemplatesToDisplayInfoAbout()
         {
             IEnumerable<ITemplateInfo> templateList;
 
@@ -355,16 +355,12 @@ namespace Microsoft.TemplateEngine.Cli
                 templateList = PerformAllTemplatesInContextQueryAsync().Result.Where(x => x.IsMatch).Select(x => x.Info);
             }
 
-            return templateList;
+            return templateList.ToList();
         }
 
-        // TODO: Determine what to do when showAll = true
-        // There are now 2 sources of truth for what do display. 
-        //  1) ShowTemplateNameMismatchHelp()
-        //  2) Everything else
         private void DisplayTemplateList(bool showAll = false)
         {
-            IEnumerable<ITemplateInfo> results = TemplatesToDisplayInfoAbout();
+            IReadOnlyList<ITemplateInfo> results = TemplatesToDisplayInfoAbout();
 
             IEnumerable<IGrouping<string, ITemplateInfo>> grouped = results.GroupBy(x => x.GroupIdentity);
             EnvironmentSettings.Host.TryGetHostParamDefault("prefs:language", out string defaultLanguage);
@@ -409,46 +405,25 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 Reporter.Output.WriteLine();
                 ShowInvocationExamples();
-            }
 
-            if (_matchedTemplates.Any(x => x.IsMatch))
-            {
-                foreach (ITemplateInfo template in TemplatesToShowDetailedHelpAbout())
+                if (_matchedTemplates.Any(x => x.IsMatch))
                 {
-                    ShowTemplateHelp(template);
+                    foreach (ITemplateInfo template in TemplatesToShowDetailedHelpAbout())
+                    {
+                        ShowTemplateHelp(template);
+                    }
                 }
             }
         }
 
         private Task<CreationResultStatus> EnterAmbiguousTemplateManipulationFlowAsync()
         {
-            if (!string.IsNullOrEmpty(TemplateName))
+            if (!ValidateRemainingParameters() || (!IsListFlagSpecified && !string.IsNullOrEmpty(TemplateName)))
             {
-                // rel/vs2017/post-rtw still uses ShowTemplateNameMismatchHelp() ... .revisit
                 bool anyPartialMatchesDisplayed = ShowTemplateNameMismatchHelp();
                 DisplayTemplateList(!anyPartialMatchesDisplayed);
                 return Task.FromResult(CreationResultStatus.NotFound);
-
-                // My way (scp pre-merge)
-                //
-                //ShowUsageHelp();
-                //DisplayTemplateList();
-
-                //if (_matchedTemplates.Any(x => x.IsMatch))
-                //{
-                //    foreach (ITemplateInfo template in TemplatesToShowDetailedHelpAbout())
-                //    {
-                //        ShowTemplateHelp(template);
-                //    }
-                //}
-
-                //return Task.FromResult(CreationResultStatus.NotFound);
             }
-
-            if (!ValidateRemainingParameters())
-            {
-                return Task.FromResult(CreationResultStatus.InvalidParamValues);
-            }    
 
             if (!string.IsNullOrWhiteSpace(Alias))
             {
@@ -544,6 +519,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             //If we've made it here, we need the actual template's args
+            bool argsError = false;
             string commandParseFailureMessage = null;
             try
             {
@@ -552,13 +528,17 @@ namespace Microsoft.TemplateEngine.Cli
             catch (CommandParserException ex)
             {
                 commandParseFailureMessage = ex.Message;
+                argsError = true;
             }
 
-            bool argsError = !ValidateRemainingParameters();
+            if (!argsError)
+            {   // Validate outputs the invalid switch errors.
+                argsError = !ValidateRemainingParameters();
+            }
 
             if (argsError || IsHelpFlagSpecified)
             {
-                if(argsError)
+                if(commandParseFailureMessage != null)
                 {
                     Reporter.Error.WriteLine(commandParseFailureMessage.Bold().Red());
                 }
@@ -956,24 +936,32 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 List<MatchInfo> dispositionForTemplate = templateWithFilterInfo.MatchDisposition.ToList();
 
-                SetupTemporaryArgParsingForTemplate(templateWithFilterInfo.Info);
-
-                // template params are parsed already
-                foreach (string matchedParamName in _app.AllTemplateParams.Keys)
+                try
                 {
-                    dispositionForTemplate.Add(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.Exact, ChoiceIfLocationIsOtherChoice = matchedParamName });
+                    // this is the only thing that could really throw, and probably won't.
+                    SetupTemporaryArgParsingForTemplate(templateWithFilterInfo.Info);
+
+                    // template params are parsed already
+                    foreach (string matchedParamName in _app.AllTemplateParams.Keys)
+                    {
+                        dispositionForTemplate.Add(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.Exact, ChoiceIfLocationIsOtherChoice = matchedParamName });
+                    }
+
+                    foreach (string unmatchedParamName in _app.RemainingParameters.Keys.Where(x => !x.Contains(':')))   // filter debugging params
+                    {
+                        if (_app.TryGetCanonicalNameForVariant(unmatchedParamName, out string canonical))
+                        {   // the name is a known template param, it must have not parsed due to an invalid value
+                            dispositionForTemplate.Add(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterValue, ChoiceIfLocationIsOtherChoice = unmatchedParamName });
+                        }
+                        else
+                        {   // the name is not known
+                            dispositionForTemplate.Add(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, ChoiceIfLocationIsOtherChoice = unmatchedParamName });
+                        }
+                    }
                 }
-
-                foreach (string unmatchedParamName in _app.RemainingParameters.Keys.Where(x => !x.Contains(':')))   // filter debugging params
-                {
-                    if (_app.TryGetCanonicalNameForVariant(unmatchedParamName, out string canonical))
-                    {   // the name is a known template param, it must have not parsed due to an invalid value
-                        dispositionForTemplate.Add(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterValue, ChoiceIfLocationIsOtherChoice = unmatchedParamName });
-                    }
-                    else
-                    {   // the name is not known
-                        dispositionForTemplate.Add(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, ChoiceIfLocationIsOtherChoice = unmatchedParamName });
-                    }
+                catch
+                {   // if we do actually throw, add a non-match
+                    dispositionForTemplate.Add(new MatchInfo { Location = MatchLocation.Unspecified, Kind = MatchKind.Unspecified });
                 }
 
                 filterResults.Add(new FilteredTemplateInfo(templateWithFilterInfo.Info, dispositionForTemplate));
@@ -1135,8 +1123,6 @@ namespace Microsoft.TemplateEngine.Cli
                 Reporter.Output.WriteLine(string.Format(LocalizableStrings.Description, templateInfo.Description));
             }
 
-            SetupTemporaryArgParsingForTemplate(templateInfo);
-
             // TODO: make this work with ITemplateInfo - avoid loading the generator.
             // Generator is needed for SetupDefaultParamValuesFromTemplateAndHost() && ResolveUserParameters()
             ITemplate template = EnvironmentSettings.SettingsLoader.LoadTemplate(templateInfo);
@@ -1223,7 +1209,6 @@ namespace Microsoft.TemplateEngine.Cli
             Reporter.Error.WriteLine();
             return true;
         }
-
 
         private void ShowUsageHelp()
         {
