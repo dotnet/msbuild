@@ -19,6 +19,7 @@
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.1.298-preview5" />
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
     <Compile Remove="Tasks\MsDeploy\*.cs" />
+    <Compile Remove="MsDeploy\*.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net46'">
     <PackageReference Include="Microsoft.Build.Framework" Version="15.1.298-preview5" />
