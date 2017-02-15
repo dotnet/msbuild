@@ -69,7 +69,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- ensure the PublishDir is RID specific-->
     <PublishDir Condition="'$(PublishDir)' == '' and
                            '$(AppendRuntimeIdentifierToOutputPath)' != 'true' and
-                           '$(RuntimeIdentifier)' != ''">$(OutputPath)$(RuntimeIdentifier)\$(PublishDirName)\</PublishDir>
+                           '$(RuntimeIdentifier)' != '' and
+                           '$(_UsingDefaultRuntimeIdentifier)' != 'true'">$(OutputPath)$(RuntimeIdentifier)\$(PublishDirName)\</PublishDir>
     <PublishDir Condition="'$(PublishDir)' == ''">$(OutputPath)$(PublishDirName)\</PublishDir>
   </PropertyGroup>
 

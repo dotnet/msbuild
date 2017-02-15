@@ -93,6 +93,87 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
+
+        // implict rid with option to append rid to output path off -> do not append
+        [InlineData("implicitOff", "", false, false)]
+
+        // implicit rid with option to append rid to output path on -> do not append (never append implicit rid irrespective of option)
+        [InlineData("implicitOn", "", true, false)]
+
+        // explicit  rid with option to append rid to output path off -> do not append
+        [InlineData("explicitOff", "win7-x86", false, false)]
+        
+        // explicit rid with option to append rid to output path on -> append
+        [InlineData("explicitOn", "win7-x64", true, true)]
+        public void It_appends_rid_to_outdir_correctly(string identifier, string rid, bool useAppendOption, bool shouldAppend)
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("DesktopMinusRid", identifier: Path.DirectorySeparatorChar + identifier)
+                .WithSource()
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                    propertyGroup.Add(new XElement(ns + "RuntimeIdentifier", rid));
+                    propertyGroup.Add(new XElement(ns + "AppendRuntimeIdentifierToOutputPath", useAppendOption.ToString()));
+                })
+                .Restore();
+
+            var buildCommand = new BuildCommand(Stage0MSBuild, testAsset.TestRoot);
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var publishCommand = new PublishCommand(Stage0MSBuild, testAsset.TestRoot);
+            publishCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            string expectedOutput;
+            switch (rid)
+            {
+                case "":
+                    expectedOutput = "Native code was not used (MSIL)";
+                    break;
+
+                case "win7-x86":
+                    expectedOutput = "Native code was not used (X86)";
+                    break;
+
+                case "win7-x64":
+                    expectedOutput = "Native code was not used (Amd64)";
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(rid));
+            }
+
+            var outputDirectory = buildCommand.GetOutputDirectory("net46", runtimeIdentifier: shouldAppend ? rid : "");
+            var publishDirectory = publishCommand.GetOutputDirectory("net46", runtimeIdentifier: rid);
+
+            foreach (var directory in new[] { outputDirectory, publishDirectory })
+            {
+                var exe = Path.Combine(directory.FullName, "DesktopMinusRid.exe");
+
+                var runCommand = Command.Create(exe, Array.Empty<string>());
+                runCommand
+                    .CaptureStdOut()
+                    .Execute()
+                    .Should()
+                    .Pass()
+                    .And
+                    .HaveStdOutContaining(expectedOutput);
+            }
+        }
+
+        [Theory]
         [InlineData("win7-x86", "x86")]
         [InlineData("win8-x86-aot", "x86")]
         [InlineData("win7-x64", "x64")]
