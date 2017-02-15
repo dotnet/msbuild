@@ -49,23 +49,18 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 .GetProcessStartInfo().FileName.Should().Be("dotnet");
         }
 
-        [Fact]
-        public void WhenInvokingBuildCommandItSetsEnvironmentVariables()
+        [Theory]
+        [InlineData("MSBuildExtensionsPath", "(?i)[\\/\\\\]netcoreapp[0-9]\\.[0-9]([\\/\\\\]|$)")]
+        [InlineData("CscToolExe", "(?i)[\\/\\\\](run)?csc(\\.|$)")]
+        [InlineData("MSBuildSDKsPath", "(?i)[\\/\\\\]\\d\\.\\d\\.\\d\\-[a-z]+\\-\\d+[\\/\\\\]sdks(\\/|\\\\|$)")]
+        [InlineData("DOTNET_CLI_TELEMETRY_SESSIONID", "(^$|\\d+)")]
+        public void WhenInvokingBuildCommandItSetsEnvironmentVariables(string envVarName, string envVarPattern)
         {
-            var expectedEnvironmentalVariables = new HashSet<string> {
-                "MSBuildExtensionsPath",
-                "CscToolExe",
-                "MSBuildSDKsPath",
-                "DOTNET_CLI_TELEMETRY_SESSIONID"
-            };
-
             var msbuildPath = "<msbuildpath>";
             var startInfo = BuildCommand.FromArgs(new string[0], msbuildPath).GetProcessStartInfo();
 
-            foreach (var envVarName in expectedEnvironmentalVariables)
-            {
-                startInfo.Environment.ContainsKey(envVarName).Should().BeTrue();
-            }
+            startInfo.Environment.ContainsKey(envVarName).Should().BeTrue();
+            (startInfo.Environment[envVarName] ?? "").Should().MatchRegex(envVarPattern);
         }
 
         [Fact]
