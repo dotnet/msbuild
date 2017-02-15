@@ -328,7 +328,7 @@ namespace DefaultReferences
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory("net452");
+            var outputDirectory = buildCommand.GetOutputDirectory("net452", runtimeIdentifier: "win7-x86");
 
             outputDirectory.Should().HaveFiles(new[] {
                 "DesktopNeedsBindingRedirects.exe",
