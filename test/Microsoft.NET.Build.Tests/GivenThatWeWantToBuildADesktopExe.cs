@@ -173,6 +173,33 @@ namespace Microsoft.NET.Build.Tests
             }
         }
 
+        [Fact]
+        public void It_builds_multitargeted_with_default_rid()
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld")
+                .WithSource()
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                    propertyGroup.Element(ns + "TargetFramework").Remove();
+                    propertyGroup.Add(new XElement(ns + "TargetFrameworks", "net46;netcoreapp1.1"));
+                })
+                .Restore();
+
+            var buildCommand = new BuildCommand(Stage0MSBuild, testAsset.TestRoot);
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+        }
+
         [Theory]
         [InlineData("win7-x86", "x86")]
         [InlineData("win8-x86-aot", "x86")]
