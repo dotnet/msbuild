@@ -51,11 +51,32 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <Optimize>true</Optimize>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Platform)' == 'x64' ">
+
+  <!-- User-facing platform-specific defaults -->
+
+  <!-- 
+    NOTE:
+    
+     * We cannot compare against $(Platform) directly as that will give VS cause to instantiate extra 
+       configurations, for each combination, which leads to performance problems and clutter in the sln
+       in the common AnyCPU-only case.
+
+     * We cannot just set $(PlatformTarget) to $(Platform) here because $(Platform) can be set to anything
+       at the solution level, but there are a fixed set valid $(PlatformTarget) values that can be passed
+       to the compiler. It is up to the user to explicitly set PlatformTarget to non-AnyCPU (if desired)
+       outside the 1:1 defaults below.
+  -->
+  <PropertyGroup>
+    <_PlatformWithoutConfigurationInference>$(Platform)</_PlatformWithoutConfigurationInference>
+  </PropertyGroup>  
+  <PropertyGroup Condition=" '$(_PlatformWithoutConfigurationInference)' == 'x64' ">
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Platform)' == 'x86' ">
+  <PropertyGroup Condition=" '$(_PlatformWithoutConfigurationInference)' == 'x86' ">
     <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(_PlatformWithoutConfigurationInference)' == 'ARM' ">
+    <PlatformTarget>ARM</PlatformTarget>
   </PropertyGroup>
 
   <!-- Default settings for all projects built with this Sdk package -->

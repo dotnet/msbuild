@@ -501,7 +501,6 @@ Copyright (c) .NET Foundation. All rights reserved.
                                        RuntimeConfigPath="$(PublishRuntimeConfigFilePath)"
                                        RuntimeIdentifier="$(RuntimeIdentifier)"
                                        PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
-                                       RuntimeFrameworkVersion="$(RuntimeFrameworkVersion)"
                                        UserRuntimeConfig="$(UserRuntimeConfig)"
                                        HostConfigurationOptions="@(RuntimeHostConfigurationOption)" />
 

@@ -53,7 +53,14 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     { MetadataKeys.IsImplicitlyDefined, "False" },
                     { MetadataKeys.Version, "1.0.1" }
                 });
-            
+            var defaultImplicitPackage1 = new MockTaskItem(
+                itemSpec: "DefaultImplicitPackage1",
+                metadata: new Dictionary<string, string>
+                {
+                    { MetadataKeys.SDKPackageItemSpec, "" },
+                    { MetadataKeys.Name, "DefaultImplicitPackage1" }
+                });
+
             var task = new CollectSDKReferencesDesignTime();
             task.SdkReferences = new[] {
                 sdkReference1,
@@ -62,26 +69,29 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             task.PackageReferences = new ITaskItem[] {
                 packageReference1,
                 packageReference2,
-                packageReference3
+                packageReference3,
+                defaultImplicitPackage1
             };
+            task.DefaultImplicitPackages = "DefaultImplicitPackage1;SomeOtherImplicitPackage";
 
             // Act
             var result = task.Execute();
 
             // Assert
             result.Should().BeTrue();
-            task.SDKReferencesDesignTime.Count().Should().Be(3);
+            task.SDKReferencesDesignTime.Count().Should().Be(4);
 
             VerifyTaskItem(sdkReference1, task.SDKReferencesDesignTime[0]);
             VerifyTaskItem(sdkReference2, task.SDKReferencesDesignTime[1]);
             VerifyTaskItem(packageReference1, task.SDKReferencesDesignTime[2]);
+            VerifyTaskItem(defaultImplicitPackage1, task.SDKReferencesDesignTime[3]);
         }
 
         private void VerifyTaskItem(ITaskItem input, ITaskItem output)
         {
             // remove unnecessary metadata to keep only ones that would be in result task items
             var removeMetadata = new[] { MetadataKeys.IsImplicitlyDefined };
-            foreach(var rm in removeMetadata)
+            foreach (var rm in removeMetadata)
             {
                 output.RemoveMetadata(rm);
                 input.RemoveMetadata(rm);

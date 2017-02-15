@@ -44,7 +44,7 @@ namespace Microsoft.NET.TestFramework.Commands
             return buildProjectFiles[0];
         }
 
-        public DirectoryInfo GetOutputDirectory(string targetFramework, string configuration = "Debug", string runtimeIdentifier = "")
+        public virtual DirectoryInfo GetOutputDirectory(string targetFramework, string configuration = "Debug", string runtimeIdentifier = "")
         {
             string output = Path.Combine(ProjectRootPath, "bin", configuration, targetFramework, runtimeIdentifier);
             return new DirectoryInfo(output);
