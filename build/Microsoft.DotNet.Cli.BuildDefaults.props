@@ -2,5 +2,8 @@
   <PropertyGroup>
     <CLITargets Condition=" '$(CLITargets)' == '' ">Prepare;Compile;Test;Package;Publish</CLITargets>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <IncludeAdditionalSharedFrameworks Condition=" '$(IncludeAdditionalSharedFrameworks)' == '' ">true</IncludeAdditionalSharedFrameworks>
+    <IncludeNuGetPackageArchive Condition=" '$(IncludeNuGetPackageArchive)' == '' ">true</IncludeNuGetPackageArchive>
+    <SkipBuildingInstallers Condition=" '$(SkipBuildingInstallers)' == '' ">false</SkipBuildingInstallers>
   </PropertyGroup>
 </Project>

@@ -28,23 +28,34 @@ namespace Microsoft.DotNet.Cli.Build
                 return true;
             }
 
-            Log.LogMessage($"Downloading '{Uri}' to '{DestinationPath}'");
+            const string FileUriProtocol = "file://";
 
-            using (var httpClient = new HttpClient())
+            if (Uri.StartsWith(FileUriProtocol, StringComparison.Ordinal))
             {
-                var getTask = httpClient.GetStreamAsync(Uri);
+                var filePath = Uri.Substring(FileUriProtocol.Length);
+                Log.LogMessage($"Copying '{filePath}' to '{DestinationPath}'");
+                File.Copy(filePath, DestinationPath);
+            }
+            else
+            {
+                Log.LogMessage($"Downloading '{Uri}' to '{DestinationPath}'");
 
-                try
+                using (var httpClient = new HttpClient())
                 {
-                    using (var outStream = File.Create(DestinationPath))
+                    var getTask = httpClient.GetStreamAsync(Uri);
+
+                    try
                     {
-                        getTask.Result.CopyTo(outStream);
+                        using (var outStream = File.Create(DestinationPath))
+                        {
+                            getTask.Result.CopyTo(outStream);
+                        }
                     }
-                }
-                catch (Exception)
-                {
-                    File.Delete(DestinationPath);
-                    throw;
+                    catch (Exception)
+                    {
+                        File.Delete(DestinationPath);
+                        throw;
+                    }
                 }
             }
 
