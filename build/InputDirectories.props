@@ -1,0 +1,5 @@
+<Project>
+  <PropertyGroup>
+    <DotnetCliBuildDirectory>$(RepoRoot)/build_projects/dotnet-cli-build</DotnetCliBuildDirectory>
+  </PropertyGroup>
+</Project>

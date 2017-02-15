@@ -19,5 +19,11 @@
       <DynamicLibExtension Condition=" '$(OSName)' == 'win' ">.dll</DynamicLibExtension>
       <DynamicLibExtension Condition=" '$(OSName)' == 'osx' ">.dylib</DynamicLibExtension>
 
+      <ExeExtension>.exe</ExeExtension>
+      <ExeExtension Condition=" '$(OS)' != 'Windows_NT' "></ExeExtension>
+
+      <PlatformScriptExtension Condition=" '$(OS)' == 'Windows_NT' ">.ps1</PlatformScriptExtension>
+      <PlatformScriptExtension Condition=" '$(OS)' != 'Windows_NT' ">.sh</PlatformScriptExtension>
+
     </PropertyGroup>
 </Project>

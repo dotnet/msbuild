@@ -11,6 +11,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         private string _framework;
         private string _output;
         private string _runtime;
+        private string _profileproj;
 
         public PublishCommand()
             : base("dotnet")
@@ -40,6 +41,12 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return this;
         }
 
+        public PublishCommand WithProFileProject(string profileproj)
+        {
+            _profileproj = profileproj;
+            return this;
+        }
+
         public override CommandResult Execute(string args = "")
         {
             args = $"publish {BuildArgs()} {args}";
@@ -57,6 +64,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return string.Join(" ", 
                 FrameworkOption,
                 OutputOption,
+                ProfileProjOption,
                 RuntimeOption);
         }
 
@@ -65,5 +73,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         private string OutputOption => string.IsNullOrEmpty(_output) ? "" : $"-o {_output}";
 
         private string RuntimeOption => string.IsNullOrEmpty(_runtime) ? "" : $"-r {_runtime}";
+
+        private string ProfileProjOption => string.IsNullOrEmpty(_profileproj) ? "" : $"--filter {_profileproj}";
     }
 }

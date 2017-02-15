@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="fr" original="LocalizableStrings.resx">
+    <body>
+      <group id="LocalizableStrings.resx" />
+      <trans-unit id="AppFullName">
+        <source>.NET Cache</source>
+        <target state="new">.NET Cache</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Caches the specified assemblies for the .NET Platform. By default, these will be optimized for the target runtime and framework.</source>
+        <target state="needs-review-translation">Cahes Assemblies specified for the .NET Platform</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ProjectEntries">
+        <source>ProjectEntries</source>
+        <target state="new">ProjectEntries</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ProjectEntryDescription">
+        <source>The XML file that contains the list of packages to be cached.</source>
+        <target state="needs-review-translation">The MSBuild project file used to specify the list of packages to be cached.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="FrameworkOption">
+        <source>FRAMEWORK</source>
+        <target state="new">FRAMEWORK</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>Target framework for which to cache for.</source>
+        <target state="needs-review-translation">Target framework for which to cache for</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RuntimeOption">
+        <source>RUNTIME_IDENTIFIER</source>
+        <target state="new">RUNTIME_IDENTIFIER</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>Target runtime to cache for.</source>
+        <target state="new">Target runtime to cache for.</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="OutputOption">
+        <source>OUTPUT_DIR</source>
+        <target state="new">OUTPUT_DIR</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="OutputOptionDescription">
+        <source>Output directory in which to cache the given assemblies.</source>
+        <target state="needs-review-translation">Path in which to cache the given assemblies</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="FrameworkVersionOption">
+        <source>FrameworkVersion</source>
+        <target state="new">FrameworkVersion</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="FrameworkVersionOptionDescription">
+        <source>The Microsoft.NETCore.App package version that will be used to run the assemblies.</source>
+        <target state="needs-review-translation">The Microsoft.NETCore.App package version that will be used to run the assemblies</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="IntermediateWorkingDirOption">
+        <source>IntermediateWorkingDir</source>
+        <target state="new">IntermediateWorkingDir</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="IntermediateWorkingDirOptionDescription">
+        <source>The directory used by the command to execute.</source>
+        <target state="needs-review-translation">The directory used by the command to do its work</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="PreserveIntermediateWorkingDirOptionDescription">
+        <source>Preserves the intermediate working directory.</source>
+        <target state="needs-review-translation">The directory used by the command to do its work will not be removed</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="SpecifyEntries">
+        <source>Specify at least one entry with --entries.</source>
+        <target state="needs-review-translation">Please specify atleast one entry with --entries</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="IntermediateDirExists">
+        <source>Intermediate working directory {0} already exists. Remove {0} or specify another directory with -w.</source>
+        <target state="needs-review-translation">Intermediate working directory {0} exists, remove {0} or specify another directory with -w</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="SkipOptimizationOptionDescription">
+        <source>Skips the optimization phase.</source>
+        <target state="new">Skips the optimization phase.</target>
+        <note></note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

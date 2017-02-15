@@ -73,6 +73,16 @@
         <target state="translated">定义项目中 $(VersionSuffix) 属性的值。</target>
         <note />
       </trans-unit>
+      <trans-unit id="FilterProjOption">
+        <source>profile.xml</source>
+        <target state="needs-review-translation">profile.proj</target>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="FilterProjOptionDescription">
+        <source>The XML file that contains the list of packages to be excluded from publish step.</source>
+        <target state="needs-review-translation">The list of packages to be excluded from publish step.</target>
+        <note></note>
+      </trans-unit>
     </body>
   </file>
 </xliff>
