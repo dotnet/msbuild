@@ -5,10 +5,6 @@
   "groupIdentity": "Microsoft.Web.Mvc",
   "identity": "Microsoft.Web.Mvc.CSharp",
   "shortName": "mvc",
-  "tags": {
-    "language": "C#",
-    "type": "project"
-  },
   "sourceName": "Company.WebApplication1",
   "preferNameDirectory": true,
   "guids": [ "53bc9b9d-9d6a-45d4-8429-2a2761773502" ],
@@ -39,24 +35,24 @@
     }
   ],
   "symbols": {
-//    "type": {
-//      "type": "parameter",
-//      "datatype": "choice",
-//      "choices": [
-//        {
-//          "choice": "project"
-//        }
-//      ]
-//    },
-//    "language": {
-//      "type": "parameter",
-//      "datatype": "choice",
-//      "choices": [
-//        {
-//          "choice": "C#"
-//        }
-//      ]
-//    },
+    "type": {
+      "type": "parameter",
+      "datatype": "choice",
+      "choices": [
+        {
+          "choice": "project"
+        }
+      ]
+    },
+    "language": {
+      "type": "parameter",
+      "datatype": "choice",
+      "choices": [
+        {
+          "choice": "C#"
+        }
+      ]
+    },
     "auth": {
       "type": "parameter",
       "datatype": "choice",

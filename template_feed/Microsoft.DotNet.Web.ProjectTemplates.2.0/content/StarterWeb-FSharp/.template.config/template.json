@@ -5,13 +5,27 @@
   "groupIdentity": "Microsoft.Web.Mvc",
   "identity": "Microsoft.Web.Mvc.FSharp",
   "shortName": "mvc",
-  "tags": {
-    "language": "F#",
-    "type": "project"
-  },
   "sourceName": "Company.WebApplication1",
   "preferNameDirectory": true,
   "symbols":{
+    "type": {
+      "type": "parameter",
+      "datatype": "choice",
+      "choices": [
+        {
+          "choice": "project"
+        }
+      ]
+    },
+    "language": {
+      "type": "parameter",
+      "datatype": "choice",
+      "choices": [
+        {
+          "choice": "F#"
+        }
+      ]
+    },
     "sdkVersion": {
       "type": "bind",
       "binding": "dotnet-cli-version",
