@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project InitialTargets="SetSigningProperties" DefaultTargets="SignFiles" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))/dir.props" />
+  <PropertyGroup>
+    <RepoRoot>$(MSBuildThisFileDirectory)/..</RepoRoot>
+  </PropertyGroup>
+  
   <Import Project="$(RepoRoot)/build_tools/MicroBuild.Core.props" />
 
   <!-- This will be overridden if we're building with MicroBuild. -->
