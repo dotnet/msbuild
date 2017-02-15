@@ -577,5 +577,15 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
         }
+
+        [Fact]
+        public void It_restores_only_ridless_tfm()
+        {
+            // When RuntimeIdentifier is not specified, the assets file
+            // should only contain one target with no RIDs
+            var targetDefs = GetValuesFromTestLibrary(_testAssetsManager, "TargetDefinitions");
+            targetDefs.Count.Should().Be(1);
+            targetDefs.Should().Contain(".NETStandard,Version=v1.5");
+        }
     }
 }
