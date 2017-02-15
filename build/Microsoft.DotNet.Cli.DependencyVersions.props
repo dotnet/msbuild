@@ -9,6 +9,9 @@
     <CLI_NuGet_Version>4.0.0-rc3-2193</CLI_NuGet_Version>
     <CLI_WEBSDK_Version>1.0.0-alpha-20170130-3-281</CLI_WEBSDK_Version>
     <CLI_TestPlatform_Version>15.0.0-preview-20170125-04</CLI_TestPlatform_Version>
+    <SharedFrameworkVersion>$(CLI_SharedFrameworkVersion)</SharedFrameworkVersion>
+    <SharedHostVersion>$(CLI_SharedFrameworkVersion)</SharedHostVersion>
+    <HostFxrVersion>$(CLI_SharedFrameworkVersion)</HostFxrVersion>
     <TemplateEngineVersion>1.0.0-beta1-20170202-111</TemplateEngineVersion>
     <TemplateEngineTemplateVersion>1.0.0-beta1-20170131-110</TemplateEngineTemplateVersion>
     <TemplateEngineTemplate2_0Version>1.0.0-beta1-20170209-117</TemplateEngineTemplate2_0Version>
