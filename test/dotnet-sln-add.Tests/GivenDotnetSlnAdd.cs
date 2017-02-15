@@ -502,11 +502,13 @@ EndGlobal
                 .Count().Should().Be(1, $"Lib {reasonString}");
         }
 
-        [Fact]
-        public void WhenSolutionAlreadyContainsProjectItDoesntDuplicate()
+        [Theory]
+        [InlineData("TestAppWithSlnAndExistingCsprojReferences")]
+        [InlineData("TestAppWithSlnAndExistingCsprojReferencesWithEscapedDirSep")]
+        public void WhenSolutionAlreadyContainsProjectItDoesntDuplicate(string testAsset)
         {
             var projectDirectory = TestAssets
-                .Get("TestAppWithSlnAndExistingCsprojReferences")
+                .Get(testAsset)
                 .CreateInstance()
                 .WithSourceFiles()
                 .Root
@@ -604,6 +606,28 @@ EndGlobal
                 p => p.TypeGuid != ProjectTypeGuids.SolutionFolderGuid);
             nonSolutionFolderProjects.Count().Should().Be(1);
             nonSolutionFolderProjects.Single().TypeGuid.Should().Be(expectedTypeGuid);
+        }
+
+        [Fact]
+        private void WhenSlnContainsSolutionFolderWithDifferentCasingItDoesNotCreateDuplicate()
+        {
+            var projectDirectory = TestAssets
+                .Get("TestAppWithSlnAndCaseSensitiveSolutionFolders")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+
+            var projectToAdd = Path.Combine("src", "Lib", "Lib.csproj");
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .Execute($"sln App.sln add {projectToAdd}");
+            cmd.Should().Pass();
+
+            var slnFile = SlnFile.Read(Path.Combine(projectDirectory, "App.sln"));
+            var solutionFolderProjects = slnFile.Projects.Where(
+                p => p.TypeGuid == ProjectTypeGuids.SolutionFolderGuid);
+            solutionFolderProjects.Count().Should().Be(1);
         }
 
         private string GetExpectedSlnContents(

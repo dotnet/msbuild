@@ -274,7 +274,8 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
             }
             set
             {
-                _filePath = PathUtility.GetPathWithDirectorySeparator(value);
+                _filePath = PathUtility.RemoveExtraPathSeparators(
+                    PathUtility.GetPathWithDirectorySeparator(value));
             }
         }
 
