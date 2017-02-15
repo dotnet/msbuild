@@ -6,3 +6,4 @@ There are multiple tools to investigate and fix broken incrementality. Start wit
 
  * [https://blogs.msdn.microsoft.com/kirillosenkov/2014/08/04/how-to-investigate-rebuilding-in-visual-studio-when-nothing-has-changed/](https://blogs.msdn.microsoft.com/kirillosenkov/2014/08/04/how-to-investigate-rebuilding-in-visual-studio-when-nothing-has-changed/)
  * [http://www.andreas-reiff.de/2012/02/when-visual-studio-keeps-rebuilding-projects-that-have-not-changed/](http://www.andreas-reiff.de/2012/02/when-visual-studio-keeps-rebuilding-projects-that-have-not-changed/)
+ * [MSDN: How to build incrementally](https://msdn.microsoft.com/en-us/library/ms171483.aspx)
