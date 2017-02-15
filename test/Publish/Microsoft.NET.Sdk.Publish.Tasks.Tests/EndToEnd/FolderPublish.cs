@@ -18,7 +18,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
         }
 
         public const string DotNetExeName = "dotnet";
-
+        public const string DotNetNewAdditionalArgs = "--debug:ephemeral-hive";
         [Theory]
         // For the full desktop scenarios, the tests run against the msbuild versions installed on the machines.
         //[InlineData("netcoreapp1.0", "Release", "full")]
@@ -35,7 +35,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
             string projectName = $"{nameof(WebTemplate)}_{Path.GetRandomFileName()}";
 
             // Arrange
-            string dotNetNewArguments = $"new web --framework {framework}";
+            string dotNetNewArguments = $"new web --framework {framework} {DotNetNewAdditionalArgs}";
             string testFolder = Path.Combine(BaseTestDirectory, projectName);
 
             // dotnet new
@@ -63,7 +63,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
             string projectName = $"{nameof(WebAPITemplate)}_{Path.GetRandomFileName()}";
 
             // Arrange
-            string dotNetNewArguments = $"new webapi --framework {framework}";
+            string dotNetNewArguments = $"new webapi --framework {framework} {DotNetNewAdditionalArgs}";
             string testFolder = Path.Combine(BaseTestDirectory, projectName);
 
             // dotnet new
@@ -99,7 +99,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
             {
                 additionalOptions = $"--use-local-db";
             }
-            string dotNetNewArguments = $"new mvc --framework {framework} --auth {auth} {additionalOptions}";
+            string dotNetNewArguments = $"new mvc --framework {framework} --auth {auth} {DotNetNewAdditionalArgs} {additionalOptions}";
             string testFolder = Path.Combine(BaseTestDirectory, projectName);
 
             // dotnet new
