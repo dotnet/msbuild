@@ -108,37 +108,44 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
             Assert.True(XNode.DeepEquals(WebConfigTemplate, output));
         }
 
+        private const string TelemetryOptout = "DOTNET_CLI_TELEMETRY_OPTOUT";
         [Fact]
         public void WebConfigTelemetry_FindsProjectGuid_IfCLIOptedOutEnvVariableIsNotSet()
         {
             // Arrange
             string projectFullPath = GetTestProjectsFullPath();
             XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.exe", configureForAzure: false, isPortable: false);
+            string previousValue = Environment.GetEnvironmentVariable(TelemetryOptout);
 
             //Act 
+            Environment.SetEnvironmentVariable(TelemetryOptout, "0");
             XDocument output = WebConfigTelemetry.AddTelemetry(transformedWebConfig, null, false, null, projectFullPath);
             
             // Assert
             Assert.True(XNode.DeepEquals(WebConfigTemplateWithProjectGuid, output));
+
+            // Reset
+            Environment.SetEnvironmentVariable(TelemetryOptout, previousValue);
         }
 
-        private const string TelemetryOptout = "DOTNET_CLI_TELEMETRY_OPTOUT";
         [Fact]
         public void WebConfigTelemetry_DoesNotSearchForProjectGuid_IfCLIOptedOutEnvVariableIsSet()
         {
             // Arrange
             string projectFullPath = GetTestProjectsFullPath();
             XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.exe", configureForAzure: false, isPortable: false);
+            string previousValue = Environment.GetEnvironmentVariable(TelemetryOptout);
 
             //Act 
             Environment.SetEnvironmentVariable(TelemetryOptout, "1");
             XDocument output = WebConfigTelemetry.AddTelemetry(transformedWebConfig, null, false, null, projectFullPath);
-            Environment.SetEnvironmentVariable(TelemetryOptout, "0");
 
             // Assert
             Assert.True(XNode.DeepEquals(WebConfigTemplate, output));
-        }
 
+            // Reset
+            Environment.SetEnvironmentVariable(TelemetryOptout, previousValue);
+        }
 
         private string GetSolutionFileFullPath()
         {
