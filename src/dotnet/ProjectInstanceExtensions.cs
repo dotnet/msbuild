@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Execution;
+using Microsoft.DotNet.Cli.Sln.Internal;
 using System;
 using System.Linq;
 
@@ -37,9 +38,9 @@ namespace Microsoft.DotNet.Tools.Common
                 //ISSUE: https://github.com/dotnet/sdk/issues/522
                 //The real behavior we want (once DefaultProjectTypeGuid support is in) is to throw
                 //when we cannot find ProjectTypeGuid or DefaultProjectTypeGuid. But for now we
-                //need the same behavior we had before this change.
+                //need to default to the C# one.
                 //throw new GracefulException(CommonLocalizableStrings.UnsupportedProjectType);
-                projectTypeGuid = "{13B669BE-BB05-4DDF-9536-439F39A36129}"; // CPS guid
+                projectTypeGuid = ProjectTypeGuids.CSharpProjectTypeGuid;
             }
 
             return projectTypeGuid;
