@@ -28,7 +28,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             CompilationOptions compilationOptions,
             string baselineFileName,
             string runtime,
-            ITaskItem[] satelliteAssemblies)
+            ITaskItem[] assemblySatelliteAssemblies,
+            ITaskItem[] referencePaths,
+            ITaskItem[] referenceSatellitePaths)
         {
             LockFile lockFile = TestLockFiles.GetLockFile(mainProjectName);
 
@@ -37,7 +39,12 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 mainProjectName,
                 ".dll",
                 mainProjectVersion,
-                satelliteAssemblies ?? new ITaskItem[] { });
+                assemblySatelliteAssemblies ?? new ITaskItem[] { });
+
+            IEnumerable<ReferenceInfo> directReferences =
+                ReferenceInfo.CreateDirectReferenceInfos(
+                    referencePaths ?? new ITaskItem[] { }, 
+                    referenceSatellitePaths ?? new ITaskItem[] { });
 
             ProjectContext projectContext = lockFile.CreateProjectContext(
                 FrameworkConstants.CommonFrameworks.NetCoreApp10,
@@ -45,6 +52,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 Constants.DefaultPlatformLibrary);
 
             DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext)
+                .WithDirectReferences(directReferences)
                 .WithCompilationOptions(compilationOptions)
                 .Build();
 
@@ -108,14 +116,42 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                         }),
                 };
 
+                ITaskItem[] referencePaths = new ITaskItem[]
+                {
+                    new MockTaskItem(
+                        "/usr/Path/RandomLooseLibrary.dll",
+                        new Dictionary<string, string>
+                        {
+                            { "CopyLocal", "true" },
+                            { "FusionName", "RandomLooseLibrary, Version=1.2.0.4, Culture=neutral, PublicKeyToken=null" },
+                            { "ReferenceSourceTarget", "ResolveAssemblyReference" },
+                            { "Version", "" },
+                        }),
+                };
+
+                ITaskItem[] referenceSatellitePaths = new ITaskItem[]
+                {
+                    new MockTaskItem(
+                        @"/usr/Path/fr/RandomLooseLibrary.resources.dll",
+                        new Dictionary<string, string>
+                        {
+                            { "CopyLocal", "true" },
+                            { "DestinationSubDirectory", "fr/" },
+                            { "OriginalItemSpec", "/usr/Path/RandomLooseLibrary.dll" },
+                            { "ResolvedFrom", "{RawFileName}" },
+                            { "Version", "" },
+                        }),
+                };
+
                 return new[]
                 {
-                    new object[] { "dotnet.new", "1.0.0", null, "dotnet.new", null, null},
-                    new object[] { "dotnet.new", "1.0.0", null, "dotnet.new.resources", null, dotnetNewSatelliteAssemblies },
-                    new object[] { "simple.dependencies", "1.0.0", null, "simple.dependencies", null, null },
-                    new object[] { "simple.dependencies", "1.0.0", compilationOptions, "simple.dependencies.compilerOptions", null, null},
-                    new object[] { "all.asset.types", "1.0.0", null, "all.asset.types.portable", null, null },
-                    new object[] { "all.asset.types", "1.0.0", null, "all.asset.types.osx", "osx.10.11-x64", null },
+                    new object[] { "dotnet.new", "1.0.0", null, "dotnet.new", null, null, null, null},
+                    new object[] { "dotnet.new", "1.0.0", null, "dotnet.new.resources", null, dotnetNewSatelliteAssemblies, null, null },
+                    new object[] { "simple.dependencies", "1.0.0", null, "simple.dependencies", null, null, null, null },
+                    new object[] { "simple.dependencies", "1.0.0", compilationOptions, "simple.dependencies.compilerOptions", null, null, null, null},
+                    new object[] { "simple.dependencies", "1.0.0", compilationOptions, "simple.dependencies.directReference", null, null, referencePaths, referenceSatellitePaths},
+                    new object[] { "all.asset.types", "1.0.0", null, "all.asset.types.portable", null, null, null, null },
+                    new object[] { "all.asset.types", "1.0.0", null, "all.asset.types.osx", "osx.10.11-x64", null, null, null },
                 };
             }
         }

@@ -174,6 +174,15 @@ namespace Microsoft.NET.Build.Tasks
                 }
             }
 
+            var referenceInfos = Enumerable.Concat(
+                _frameworkReferences ?? Enumerable.Empty<ReferenceInfo>(),
+                _directReferences ?? Enumerable.Empty<ReferenceInfo>());
+
+            foreach (ReferenceInfo referenceInfo in referenceInfos)
+            {
+                dependencies.Add(new Dependency(referenceInfo.Name, referenceInfo.Version));
+            }
+
             return dependencies;
         }
 
