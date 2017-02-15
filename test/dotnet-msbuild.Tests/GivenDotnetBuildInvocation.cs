@@ -1,6 +1,9 @@
 ﻿using Microsoft.DotNet.Tools.Build;
 using FluentAssertions;
 using Xunit;
+using WindowsOnlyFactAttribute = Microsoft.DotNet.Tools.Test.Utilities.WindowsOnlyFactAttribute;
+using NonWindowsOnlyFactAttribute = Microsoft.DotNet.Tools.Test.Utilities.NonWindowsOnlyFactAttribute;
+using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
@@ -28,6 +31,49 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             var msbuildPath = "<msbuildpath>";
             BuildCommand.FromArgs(args, msbuildPath)
                 .GetProcessStartInfo().Arguments.Should().Be(expectedCommand);
+        }
+
+        [WindowsOnlyFact]
+        public void WhenInvokingBuildCommandOnWindowsTheDotnetIsExecuted()
+        {
+            var msbuildPath = "<msbuildpath>";
+            BuildCommand.FromArgs(new string[0], msbuildPath)
+                .GetProcessStartInfo().FileName.Should().Be("dotnet.exe");
+        }
+
+        [NonWindowsOnlyFact]
+        public void WhenInvokingBuildCommandOnNonWindowsTheDotnetIsExecuted()
+        {
+            var msbuildPath = "<msbuildpath>";
+            BuildCommand.FromArgs(new string[0], msbuildPath)
+                .GetProcessStartInfo().FileName.Should().Be("dotnet");
+        }
+
+        [Fact]
+        public void WhenInvokingBuildCommandItSetsEnvironmentVariables()
+        {
+            var expectedEnvironmentalVariables = new HashSet<string> {
+                "MSBuildExtensionsPath",
+                "CscToolExe",
+                "MSBuildSDKsPath",
+                "DOTNET_CLI_TELEMETRY_SESSIONID"
+            };
+
+            var msbuildPath = "<msbuildpath>";
+            var startInfo = BuildCommand.FromArgs(new string[0], msbuildPath).GetProcessStartInfo();
+
+            foreach (var envVarName in expectedEnvironmentalVariables)
+            {
+                startInfo.Environment.ContainsKey(envVarName).Should().BeTrue();
+            }
+        }
+
+        [Fact]
+        public void WhenInvokingBuildCommandItDoesNotSetCurrentWorkingDirectory()
+        {
+            var msbuildPath = "<msbuildpath>";
+            var startInfo = BuildCommand.FromArgs(new string[0], msbuildPath)
+                .GetProcessStartInfo().WorkingDirectory.Should().Be("");
         }
     }
 }

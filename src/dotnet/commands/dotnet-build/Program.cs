@@ -113,7 +113,7 @@ namespace Microsoft.DotNet.Tools.Build
             int exitCode = app.Execute(args);
             if (ret._forwardingApp == null)
             {
-                throw new CodeNotExecutedException(exitCode);
+                throw new CommandCreationException(exitCode);
             }
 
             return ret;
@@ -128,7 +128,7 @@ namespace Microsoft.DotNet.Tools.Build
             {
                 cmd = FromArgs(args);
             }
-            catch (CodeNotExecutedException e)
+            catch (CommandCreationException e)
             {
                 return e.ExitCode;
             }
@@ -146,11 +146,11 @@ namespace Microsoft.DotNet.Tools.Build
             return GetProcessStartInfo().Execute();
         }
 
-        private class CodeNotExecutedException : Exception
+        private class CommandCreationException : Exception
         {
             public int ExitCode { get; private set; }
 
-            public CodeNotExecutedException(int exitCode)
+            public CommandCreationException(int exitCode)
             {
                 ExitCode = exitCode;
             }
