@@ -304,6 +304,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
+  <Target Name="_ComputeTFMOnlyFileDependencies"
+          DependsOnTargets="RunResolvePackageDependencies"
+          Returns="_TFMOnlyFileDependencies">
+    <ItemGroup>
+      <_TFMOnlyFileDependencies Include="@(FileDependencies->WithMetadataValue('ParentTarget', '$(NuGetTargetMoniker)'))" />
+    </ItemGroup>
+  </Target>
+
   <!--
     ============================================================
     Reference Targets: For populating References based on lock file
@@ -314,10 +322,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
 
   <Target Name="_ComputeLockFileReferences"
-          DependsOnTargets="_ComputeActiveTFMFileDependencies"
+          DependsOnTargets="_ComputeTFMOnlyFileDependencies"
           Returns="ResolvedCompileFileDefinitions">
     <ItemGroup>
-      <_CompileFileItems Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'CompileTimeAssembly'))" />
+      <_CompileFileItems Include="@(_TFMOnlyFileDependencies->WithMetadataValue('FileGroup', 'CompileTimeAssembly'))" />
 
       <!-- Get corresponding file definitions -->
       <__CompileFileDefinitions Include="@(FileDefinitions)" Exclude="@(_CompileFileItems)" />
@@ -334,10 +342,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="_ComputeLockFileFrameworks"
           Condition="'$(DisableLockFileFrameworks)' != 'true'"
-          DependsOnTargets="_ComputeActiveTFMFileDependencies"
+          DependsOnTargets="_ComputeTFMOnlyFileDependencies"
           Returns="ResolvedFrameworkAssemblies">
     <ItemGroup>
-      <_FrameworkAssemblies Include="@(_ActiveTFMFileDependencies->WithMetadataValue('FileGroup', 'FrameworkAssembly'))" />
+      <_FrameworkAssemblies Include="@(_TFMOnlyFileDependencies->WithMetadataValue('FileGroup', 'FrameworkAssembly'))" />
 
       <ResolvedFrameworkAssemblies Include="%(_FrameworkAssemblies.FrameworkAssembly)">
         <Private>false</Private>
