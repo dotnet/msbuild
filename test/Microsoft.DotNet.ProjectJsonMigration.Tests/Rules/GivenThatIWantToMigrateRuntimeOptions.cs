@@ -25,9 +25,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [Fact]
         public void RuntimeOptionsAreCopiedFromProjectJsonToRuntimeConfigTemplateJsonFile()
         {
-            var testInstance = TestAssetsManager.CreateTestInstance("TestAppWithRuntimeOptions");
-            var projectDir = testInstance.Path;
-            var projectPath = Path.Combine(testInstance.Path, "project.json");
+            var testInstance = TestAssets.Get("TestAppWithRuntimeOptions")
+                                        .CreateInstance()
+                                        .WithSourceFiles()
+                                        .Root;
+
+            var projectDir = testInstance.FullName;
+            var projectPath = Path.Combine(projectDir, "project.json");
 
             var project = JObject.Parse(File.ReadAllText(projectPath));
             var rawRuntimeOptions = (JObject)project.GetValue("runtimeOptions");
@@ -49,8 +53,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [Fact]
         public void MigratingProjectJsonWithNoRuntimeOptionsProducesNoRuntimeConfigTemplateJsonFile()
         {
-            var testInstance = TestAssetsManager.CreateTestInstance("PJTestAppSimple");
-            var projectDir = testInstance.Path;
+            var testInstance = TestAssets.Get("PJTestAppSimple")
+                            .CreateInstance()
+                            .WithSourceFiles()
+                            .Root;
+
+            var projectDir = testInstance.FullName;
 
             var projectContext = ProjectContext.Create(projectDir, FrameworkConstants.CommonFrameworks.NetCoreApp10);
 

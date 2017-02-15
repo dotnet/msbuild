@@ -13,10 +13,11 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         public void ItCanRunAMSBuildProject()
         {
             var testAppName = "MSBuildTestApp";
-            var testInstance = TestAssetsManager
-                .CreateTestInstance(testAppName);
+            var testInstance = TestAssets.Get(testAppName)
+                            .CreateInstance()
+                            .WithSourceFiles();
 
-            var testProjectDirectory = testInstance.TestRoot;
+            var testProjectDirectory = testInstance.Root.FullName;
 
             new RestoreCommand()
                 .WithWorkingDirectory(testProjectDirectory)
@@ -39,10 +40,11 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         public void ItBuildsTheProjectBeforeRunning()
         {
             var testAppName = "MSBuildTestApp";
-            var testInstance = TestAssetsManager
-                .CreateTestInstance(testAppName);
+            var testInstance = TestAssets.Get(testAppName)
+                            .CreateInstance()
+                            .WithSourceFiles();
 
-            var testProjectDirectory = testInstance.TestRoot;
+            var testProjectDirectory = testInstance.Root.FullName;
 
             new RestoreCommand()
                 .WithWorkingDirectory(testProjectDirectory)
@@ -60,10 +62,11 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         public void ItCanRunAMSBuildProjectWhenSpecifyingAFramework()
         {
             var testAppName = "MSBuildTestApp";
-            var testInstance = TestAssetsManager
-                .CreateTestInstance(testAppName);
+            var testInstance = TestAssets.Get(testAppName)
+                            .CreateInstance()
+                            .WithSourceFiles();
 
-            var testProjectDirectory = testInstance.TestRoot;
+            var testProjectDirectory = testInstance.Root.FullName;
 
             new RestoreCommand()
                 .WithWorkingDirectory(testProjectDirectory)
@@ -118,7 +121,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         [Fact]
         public void ItRunsAppWhenRestoringToSpecificPackageDirectory()
         {
-            var rootPath = TestAssetsManager.CreateTestDirectory().Path;
+            var rootPath = TestAssets.CreateTestDirectory().FullName;
 
             string dir = "pkgs";
             string args = $"--packages {dir}";

@@ -134,10 +134,10 @@ Options:
         {
             const string OutputText = @"Project reference(s)
 --------------------
-..\ItPrintsSingleReferenceref\ItPrintsSingleReferenceref.csproj";
+..\ref\ref.csproj";
 
-            var lib = NewLib("ItPrintsSingleReference", "lib");
-            string ref1 = NewLib("ItPrintsSingleReference", "ref").CsProjPath;
+            var lib = NewLib("lib");
+            string ref1 = NewLib("ref").CsProjPath;
             AddValidRef(ref1, lib);
 
             var cmd = new ListReferenceCommand()
@@ -152,14 +152,14 @@ Options:
         {
             const string OutputText = @"Project reference(s)
 --------------------
-..\ItPrintsSingleReferenceref1\ItPrintsSingleReferenceref1.csproj
-..\ItPrintsSingleReferenceref2\ItPrintsSingleReferenceref2.csproj
-..\ItPrintsSingleReferenceref3\ItPrintsSingleReferenceref3.csproj";
+..\ref1\ref1.csproj
+..\ref2\ref2.csproj
+..\ref3\ref3.csproj";
 
-            var lib = NewLib("ItPrintsSingleReference", "lib");
-            string ref1 = NewLib("ItPrintsSingleReference", "ref1").CsProjPath;
-            string ref2 = NewLib("ItPrintsSingleReference", "ref2").CsProjPath;
-            string ref3 = NewLib("ItPrintsSingleReference", "ref3").CsProjPath;
+            var lib = NewLib("lib");
+            string ref1 = NewLib("ref1").CsProjPath;
+            string ref2 = NewLib("ref2").CsProjPath;
+            string ref3 = NewLib("ref3").CsProjPath;
 
             AddValidRef(ref1, lib);
             AddValidRef(ref2, lib);
@@ -182,14 +182,14 @@ Options:
                     .FullName);
         }
 
-        private ProjDir NewDir([System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(NewDir), string identifier = "")
+        private ProjDir NewDir(string testProjectName = "temp", [System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(NewDir), string identifier = "")
         {
-            return new ProjDir(TestAssetsManager.CreateTestDirectory(callingMethod: callingMethod, identifier: identifier).Path);
+            return new ProjDir(TestAssets.CreateTestDirectory(testProjectName: testProjectName, callingMethod: callingMethod, identifier: identifier).FullName);
         }
 
-        private ProjDir NewLib([System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(NewDir), string identifier = "")
+        private ProjDir NewLib(string testProjectName = "temp", [System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(NewDir), string identifier = "")
         {
-            var dir = NewDir(callingMethod: callingMethod, identifier: identifier);
+            var dir = NewDir(testProjectName: testProjectName, callingMethod: callingMethod, identifier: identifier);
 
             try
             {

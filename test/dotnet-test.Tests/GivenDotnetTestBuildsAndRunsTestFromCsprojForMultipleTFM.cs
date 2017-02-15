@@ -47,9 +47,11 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         {
             // Copy VSTestXunitDesktopAndNetCore project in output directory of project dotnet-test.Tests
             string testAppName = "VSTestXunitDesktopAndNetCore";
-            TestInstance testInstance = TestAssetsManager.CreateTestInstance(testAppName);
+            var testInstance = TestAssets.Get(testAppName)
+                            .CreateInstance()
+                            .WithSourceFiles();
 
-            string testProjectDirectory = testInstance.TestRoot;
+            var testProjectDirectory = testInstance.Root.FullName;
 
             // Restore project VSTestXunitDesktopAndNetCore
             new RestoreCommand()

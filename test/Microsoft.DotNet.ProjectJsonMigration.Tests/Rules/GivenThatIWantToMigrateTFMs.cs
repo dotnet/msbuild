@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         public void MigratingNetcoreappProjectDoesNotPopulateTargetFrameworkIdentifierAndTargetFrameworkVersion()
         {
             var testDirectory = Temp.CreateDirectory().Path;
-            var testPJ = new ProjectJsonBuilder(TestAssetsManager)
+            var testPJ = new ProjectJsonBuilder(TestAssets)
                 .FromTestAssetBase("TestAppWithRuntimeOptions")
                 .WithCustomProperty("buildOptions", new Dictionary<string, string>
                 {
@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         public void MigratingMultiTFMProjectPopulatesTargetFrameworksWithShortTfms()
         {
             var testDirectory = Temp.CreateDirectory().Path;
-            var testPJ = new ProjectJsonBuilder(TestAssetsManager)
+            var testPJ = new ProjectJsonBuilder(TestAssets)
                 .FromTestAssetBase("TestLibraryWithMultipleFrameworks")
                 .SaveToDisk(testDirectory);
 
@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         public void MigratingCoreAndDesktopTFMsAddsAllRuntimeIdentifiersIfTheProjectDoesNothaveAnyAlready()
         {
             var testDirectory = Temp.CreateDirectory().Path;
-            var testPJ = new ProjectJsonBuilder(TestAssetsManager)
+            var testPJ = new ProjectJsonBuilder(TestAssets)
                 .FromTestAssetBase("PJAppWithMultipleFrameworks")
                 .SaveToDisk(testDirectory);
 
@@ -97,7 +97,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         public void MigratingCoreAndDesktopTFMsAddsRuntimeIdentifierWithWin7x86ConditionOnAllFullFrameworksWhenNoRuntimesExistAlready()
         {
             var testDirectory = Temp.CreateDirectory().Path;
-            var testPJ = new ProjectJsonBuilder(TestAssetsManager)
+            var testPJ = new ProjectJsonBuilder(TestAssets)
                 .FromTestAssetBase("PJAppWithMultipleFrameworks")
                 .SaveToDisk(testDirectory);
 
@@ -123,7 +123,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         public void MigrateTFMRuleDoesNotAddRuntimesWhenMigratingDesktopTFMsWithRuntimesAlready()
         {
             var testDirectory = Temp.CreateDirectory().Path;
-            var testPJ = new ProjectJsonBuilder(TestAssetsManager)
+            var testPJ = new ProjectJsonBuilder(TestAssets)
                 .FromTestAssetBase("TestAppWithMultipleFrameworksAndRuntimes")
                 .SaveToDisk(testDirectory);
 
@@ -147,7 +147,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         public void MigratingProjectWithFullFrameworkTFMsOnlyAddsARuntimeIdentifierWin7x86WhenNoRuntimesExistAlready()
         {
             var testDirectory = Temp.CreateDirectory().Path;
-            var testPJ = new ProjectJsonBuilder(TestAssetsManager)
+            var testPJ = new ProjectJsonBuilder(TestAssets)
                 .FromTestAssetBase("TestAppWithMultipleFullFrameworksOnly")
                 .SaveToDisk(testDirectory);
 
@@ -173,7 +173,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         public void MigratingSingleTFMProjectPopulatesTargetFramework()
         {
             var testDirectory = Temp.CreateDirectory().Path;
-            var testPJ = new ProjectJsonBuilder(TestAssetsManager)
+            var testPJ = new ProjectJsonBuilder(TestAssets)
                 .FromTestAssetBase("TestAppWithRuntimeOptions")
                 .WithCustomProperty("buildOptions", new Dictionary<string, string>
                 {
@@ -202,7 +202,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         public void MigratingLibWithMultipleTFMsDoesNotAddRuntimes()
         {
             var testDirectory = Temp.CreateDirectory().Path;
-            var testPJ = new ProjectJsonBuilder(TestAssetsManager)
+            var testPJ = new ProjectJsonBuilder(TestAssets)
                 .FromTestAssetBase("PJLibWithMultipleFrameworks")
                 .SaveToDisk(testDirectory);
 

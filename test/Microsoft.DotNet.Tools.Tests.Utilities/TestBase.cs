@@ -20,7 +20,6 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         protected const string DefaultFramework = "netcoreapp1.0";
         protected const string DefaultLibraryFramework = "netstandard1.5";
         private TempRoot _temp;
-        private static TestAssetsManager s_testsAssetsMgr;
         private static TestAssets s_testAssets;
 
 
@@ -29,19 +28,6 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             get
             {
                 return RepoDirectoriesProvider.RepoRoot;
-            }
-        }
-
-        protected static TestAssetsManager TestAssetsManager
-        {
-            get
-            {
-                if (s_testsAssetsMgr == null)
-                {
-                    s_testsAssetsMgr = GetTestGroupTestAssetsManager("TestProjects");
-                }
-
-                return s_testsAssetsMgr;
             }
         }
 
@@ -61,14 +47,6 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
                 return s_testAssets;
             }
-        }
-
-        protected static TestAssetsManager GetTestGroupTestAssetsManager(string testGroup)
-        {
-            string assetsRoot = Path.Combine(RepoRoot, "TestAssets", testGroup);
-            var testAssetsMgr = new TestAssetsManager(assetsRoot);
-
-            return testAssetsMgr;
         }
 
         protected TestBase()

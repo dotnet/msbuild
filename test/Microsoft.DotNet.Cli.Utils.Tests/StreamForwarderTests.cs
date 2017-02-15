@@ -115,16 +115,17 @@ namespace StreamForwarderTests
         private string SetupTestProject()
         {
 
-            var testInstance = TestAssetsManager
-                .CreateTestInstance("OutputStandardOutputAndError")
-                .WithLockFiles();
+            var testPath = TestAssets.Get("OutputStandardOutputAndError")
+                                        .CreateInstance()
+                                        .WithRestoreFiles()
+                                        .Root.FullName;
 
             var buildCommand = new BuildCommand()
-                .WithProjectFile(new FileInfo(Path.Combine(testInstance.Path, "project.json")))
+                .WithProjectFile(new FileInfo(Path.Combine(testPath, "project.json")))
                 .Execute();
                 
             var buildOutputExe = "OutputStandardOutputAndError" + Constants.ExeSuffix;
-            var buildOutputPath = Path.Combine(testInstance.Path, "bin/Debug/netcoreapp1.0", buildOutputExe);
+            var buildOutputPath = Path.Combine(testPath, "bin/Debug/netcoreapp1.0", buildOutputExe);
 
             return buildOutputPath;
         }

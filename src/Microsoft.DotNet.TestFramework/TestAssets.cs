@@ -94,9 +94,9 @@ namespace Microsoft.DotNet.TestFramework
                 ProjectJsonSearchPattern);
         }
 
-        public DirectoryInfo CreateTestDirectory([CallerMemberName] string callingMethod = "", string identifier = "")
+        public DirectoryInfo CreateTestDirectory(string testProjectName = "temp", [CallerMemberName] string callingMethod = "", string identifier = "")
         {
-            var testDestination = GetTestDestinationDirectoryPath("temp", callingMethod, identifier);
+            var testDestination = GetTestDestinationDirectoryPath(testProjectName, callingMethod, identifier);
 
             var testDirectory = new DirectoryInfo(testDestination);
 

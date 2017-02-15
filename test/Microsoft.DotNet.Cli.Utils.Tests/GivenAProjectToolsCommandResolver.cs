@@ -61,13 +61,13 @@ namespace Microsoft.DotNet.Tests
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
-            var projectDirectory = TestAssetsManager.CreateTestDirectory();
+            var projectDirectory = TestAssets.CreateTestDirectory();
 
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "command",
                 CommandArguments = new string[] { "" },
-                ProjectDirectory = projectDirectory.Path
+                ProjectDirectory = projectDirectory.Root.FullName
             };
 
             var result = projectToolsCommandResolver.Resolve(commandResolverArguments);

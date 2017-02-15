@@ -14,18 +14,19 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void UnresolvedPlatformReferencesFailAsExpected()
         {
-            var testAssetsManager = GetTestGroupTestAssetsManager("NonRestoredTestProjects");
-            
-            var testInstance = testAssetsManager.CreateTestInstance("TestProjectWithUnresolvedPlatformDependency");
+            var testInstance = TestAssets.Get("NonRestoredTestProjects", "TestProjectWithUnresolvedPlatformDependency")
+                            .CreateInstance()
+                            .WithSourceFiles()
+                            .Root.FullName;
 
             new RestoreCommand()
-                .WithWorkingDirectory(testInstance.TestRoot)
+                .WithWorkingDirectory(testInstance)
                 .ExecuteWithCapturedOutput("/p:SkipInvalidConfigurations=true")
                 .Should()
                 .Fail();
 
             new DotnetCommand()
-                .WithWorkingDirectory(testInstance.TestRoot)
+                .WithWorkingDirectory(testInstance)
                 .ExecuteWithCapturedOutput("crash")
                 .Should().Fail()
                      .And.HaveStdErrContaining("No executable found matching command \"dotnet-crash\"");

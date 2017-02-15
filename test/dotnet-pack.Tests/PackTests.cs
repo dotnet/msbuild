@@ -210,7 +210,7 @@ namespace Microsoft.DotNet.Tools.Pack.Tests
         [Fact]
         public void ItPacksAppWhenRestoringToSpecificPackageDirectory()
         {
-            var rootPath = TestAssetsManager.CreateTestDirectory().Path;
+            var rootPath = TestAssets.CreateTestDirectory().FullName;
             var rootDir = new DirectoryInfo(rootPath);
 
             string dir = "pkgs";

@@ -20,8 +20,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [Fact]
         public void ProjectDependenciesAreMigratedToProjectReference()
         {
-            var solutionDirectory =
-                TestAssetsManager.CreateTestInstance("TestAppWithLibrary", callingMethod: "p").Path;
+            var solutionDirectory = TestAssets.Get("TestAppWithLibrary")
+                            .CreateInstance(callingMethod: "p")
+                            .WithSourceFiles()
+                            .Root.FullName;
 
             var appDirectory = Path.Combine(solutionDirectory, "TestApp");
 
@@ -43,9 +45,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [Fact]
         public void ItDoesNotMigrateADependencyWithTargetPackageThatHasAMatchingProjectAsAProjectReference()
         {
-            var testAssetsManager = GetTestGroupTestAssetsManager("NonRestoredTestProjects");
-            var solutionDirectory =
-                testAssetsManager.CreateTestInstance("AppWithProjectDependencyAsTarget", callingMethod: "p").Path;
+            var solutionDirectory = TestAssets.Get("NonRestoredTestProjects", "AppWithProjectDependencyAsTarget")
+                        .CreateInstance(callingMethod: "p")
+                        .WithSourceFiles()
+                        .Root.FullName;
 
             var appDirectory = Path.Combine(solutionDirectory, "TestApp");
 
@@ -64,8 +67,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [Fact]
         public void TFMSpecificProjectDependenciesAreMigratedToProjectReferenceUnderConditionItemGroup()
         {
-            var solutionDirectory =
-                TestAssetsManager.CreateTestInstance("TestAppWithLibraryUnderTFM", callingMethod: "p").Path;
+            var solutionDirectory = TestAssets.Get("TestAppWithLibraryUnderTFM")
+                            .CreateInstance(callingMethod: "p")
+                            .WithSourceFiles()
+                            .Root.FullName;
 
             var appDirectory = Path.Combine(solutionDirectory, "TestApp");
 
@@ -88,8 +93,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         public void ItThrowsWhenProjectDependencyIsUnresolved()
         {
             // No Lock file => unresolved
-            var solutionDirectory =
-                TestAssetsManager.CreateTestInstance("TestAppWithLibrary").Path;
+            var solutionDirectory = TestAssets.Get("TestAppWithLibrary")
+                        .CreateInstance()
+                        .WithSourceFiles()
+                        .Root.FullName;
 
             var appDirectory = Path.Combine(solutionDirectory, "TestApp");
             var libraryDirectory = Path.Combine(solutionDirectory, "TestLibrary");
@@ -305,8 +312,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [Fact]
         public void ItDoesNotReferenceTheProjectUnderBackupWhenMigratingAPartiallyMigratedStructure()
         {
-            var testAssetsManager = GetTestGroupTestAssetsManager("NonRestoredTestProjects");
-            var solutionDirectory = testAssetsManager.CreateTestInstance("PJHalfMigrated").Path;
+            var solutionDirectory = TestAssets.Get("NonRestoredTestProjects", "PJHalfMigrated")
+                            .CreateInstance()
+                            .WithSourceFiles()
+                            .Root.FullName;
 
             var appDirectory = Path.Combine(solutionDirectory, "ProjectB");
 
@@ -333,8 +342,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             string project,
             NuGetFramework targetFramework)
         {
-            var solutionDirectory =
-                TestAssetsManager.CreateTestInstance(solution, callingMethod: "p").Path;
+            var solutionDirectory = TestAssets.Get(solution)
+                        .CreateInstance(callingMethod: "p")
+                        .WithSourceFiles()
+                        .Root.FullName;
 
             var appDirectory = Path.Combine(solutionDirectory, project);
 

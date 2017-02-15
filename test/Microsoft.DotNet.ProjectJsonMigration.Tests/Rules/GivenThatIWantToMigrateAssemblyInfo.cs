@@ -20,8 +20,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
         public GivenThatIWantToMigrateAssemblyInfo()
         {
-            var projectDirectory =
-                TestAssetsManager.CreateTestInstance("AppWithAssemblyInfo").Path;
+            var projectDirectory = TestAssets.Get("AppWithAssemblyInfo")
+                        .CreateInstance()
+                        .WithSourceFiles()
+                        .Root.FullName;
             var projectContext =
                 ProjectContext.Create(projectDirectory, FrameworkConstants.CommonFrameworks.NetCoreApp10);
             _mockProject = ProjectRootElement.Create();

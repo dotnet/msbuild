@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Restore.Tests
         [Fact]
         public void ItRestoresAppToSpecificDirectory()
         {
-            var rootPath = TestAssetsManager.CreateTestDirectory().Path;
+            var rootPath = TestAssets.CreateTestDirectory().FullName;
 
             string dir = "pkgs";
             string fullPath = Path.GetFullPath(Path.Combine(rootPath, dir));
@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Restore.Tests
         [Fact]
         public void ItRestoresLibToSpecificDirectory()
         {
-            var rootPath = TestAssetsManager.CreateTestDirectory().Path;
+            var rootPath = TestAssets.CreateTestDirectory().FullName;
 
             string dir = "pkgs";
             string fullPath = Path.GetFullPath(Path.Combine(rootPath, dir));

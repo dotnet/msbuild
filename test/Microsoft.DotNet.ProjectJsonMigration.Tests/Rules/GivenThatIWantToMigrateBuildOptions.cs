@@ -37,7 +37,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             }
 
             // Setup projectcontext
-            var testProjectDirectory = TestAssetsManager.CreateTestInstance("TestAppWithRuntimeOptions").Path;
+            var testProjectDirectory = TestAssets.Get("TestAppWithRuntimeOptions")
+                            .CreateInstance()
+                            .WithSourceFiles()
+                            .Root.FullName;
             var projectContext = ProjectContext.Create(testProjectDirectory, FrameworkConstants.CommonFrameworks.NetCoreApp10);
 
             var testSettings = MigrationSettings.CreateMigrationSettingsTestHook(testProjectDirectory, testProjectDirectory, templateProj);

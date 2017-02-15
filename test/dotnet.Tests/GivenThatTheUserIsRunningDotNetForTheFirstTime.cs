@@ -23,11 +23,11 @@ namespace Microsoft.DotNet.Tests
 
         static GivenThatTheUserIsRunningDotNetForTheFirstTime()
         {
-            var testDirectory = TestAssetsManager.CreateTestDirectory("Dotnet_first_time_experience_tests");
-            var testNugetCache = Path.Combine(testDirectory.Path, "nuget_cache");
+            var testDirectory = TestAssets.CreateTestDirectory("Dotnet_first_time_experience_tests");
+            var testNugetCache = Path.Combine(testDirectory.FullName, "nuget_cache");
 
             var command = new DotnetCommand()
-                .WithWorkingDirectory(testDirectory.Path);
+                .WithWorkingDirectory(testDirectory);
             command.Environment["NUGET_PACKAGES"] = testNugetCache;
             command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "";
             command.Environment["SkipInvalidConfigurations"] = "true";
