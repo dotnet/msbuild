@@ -188,16 +188,19 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ClearConfigurations()
         {
-            if (_configurations != null)
+            lock (_configurations)
             {
-                foreach (var config in _configurations.Values)
+                if (_configurations != null)
                 {
-                    config.ClearCacheFile();
+                    foreach (var config in _configurations.Values)
+                    {
+                        config.ClearCacheFile();
+                    }
                 }
-            }
 
-            _configurations = new Dictionary<int, BuildRequestConfiguration>();
-            _configurationIdsByMetadata = new Dictionary<ConfigurationMetadata, int>();
+                _configurations = new Dictionary<int, BuildRequestConfiguration>();
+                _configurationIdsByMetadata = new Dictionary<ConfigurationMetadata, int>();
+            }
         }
 
         /// <summary>
@@ -212,28 +215,31 @@ namespace Microsoft.Build.BackEnd
             Dictionary<int, BuildRequestConfiguration> configurationsToKeep = new Dictionary<int, BuildRequestConfiguration>();
             Dictionary<ConfigurationMetadata, int> configurationIdsByMetadataToKeep = new Dictionary<ConfigurationMetadata, int>();
 
-            foreach (KeyValuePair<ConfigurationMetadata, int> metadata in _configurationIdsByMetadata)
+            lock (_configurations)
             {
-                BuildRequestConfiguration configuration;
-                int configId = metadata.Value;
-
-                if (_configurations.TryGetValue(configId, out configuration))
+                foreach (KeyValuePair<ConfigurationMetadata, int> metadata in _configurationIdsByMetadata)
                 {
-                    // We do not want to retain this configuration
-                    if (!configuration.ExplicitlyLoaded)
+                    BuildRequestConfiguration configuration;
+                    int configId = metadata.Value;
+
+                    if (_configurations.TryGetValue(configId, out configuration))
                     {
-                        configurationIdsCleared.Add(configId);
-                        configuration.ClearCacheFile();
-                        continue;
+                        // We do not want to retain this configuration
+                        if (!configuration.ExplicitlyLoaded)
+                        {
+                            configurationIdsCleared.Add(configId);
+                            configuration.ClearCacheFile();
+                            continue;
+                        }
+
+                        configurationsToKeep.Add(configId, configuration);
+                        configurationIdsByMetadataToKeep.Add(metadata.Key, metadata.Value);
                     }
-
-                    configurationsToKeep.Add(configId, configuration);
-                    configurationIdsByMetadataToKeep.Add(metadata.Key, metadata.Value);
                 }
-            }
 
-            _configurations = configurationsToKeep;
-            _configurationIdsByMetadata = configurationIdsByMetadataToKeep;
+                _configurations = configurationsToKeep;
+                _configurationIdsByMetadata = configurationIdsByMetadataToKeep;
+            }
 
             return configurationIdsCleared;
         }
