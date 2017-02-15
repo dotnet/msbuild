@@ -6,3 +6,5 @@
 * [Contributing Code](Contributing Code)
 * [Microsoft.Build.Framework](Microsoft.Build.Framework) - Some gotchas around the Microsoft.Build.Framework project/assembly.
 * [MSBuild Roadmap](Roadmap)
+
+* [Rebuilding when nothing changed](Rebuilding when nothing changed)
