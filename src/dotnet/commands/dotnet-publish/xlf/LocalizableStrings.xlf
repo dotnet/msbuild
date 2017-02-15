@@ -59,6 +59,14 @@
         <source>Defines the value for the $(VersionSuffix) property in the project.</source>
         <note />
       </trans-unit>
+      <trans-unit id="FilterProjOption">
+        <source>profile.xml</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="FilterProjOptionDescription">
+        <source>The XML file that contains the list of packages to be excluded from publish step.</source>
+        <note></note>
+      </trans-unit>
     </body>
   </file>
 </xliff>
