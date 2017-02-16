@@ -1163,13 +1163,9 @@ namespace Microsoft.Build.Shared
             /// </summary>
             public string GetDotNetFrameworkSdkRegistryKey(Version dotNetSdkVersion)
             {
-                string sdkVersionFolder = "4.7"; // Default for back-compat
+                string sdkVersionFolder = "4.6"; // Default for back-compat
 
-                if (dotNetSdkVersion == dotNetFrameworkVersion46)
-                {
-                    sdkVersionFolder = "4.6";
-                }
-                else if (dotNetSdkVersion == dotNetFrameworkVersion461)
+                if (dotNetSdkVersion == dotNetFrameworkVersion461)
                 {
                     sdkVersionFolder = "4.6.1";
                 }
