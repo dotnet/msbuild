@@ -16,25 +16,13 @@
 
         public const string RunCommandException = "The build failed. Please fix the build errors and run again.";
 
-        public const string RunCommandMSBuildExtensionsPath = "MSBuildExtensionsPath";
-
-        public const string RunCommandConfiguration = "Configuration";
-
-        public const string RunCommandTargetFramework = "TargetFramework";
-
-        public const string RunCommandProjectInstance = "RunCommand";
-
-        public const string RunCommandOutputType = "OutputType";
+        public const string RunCommandExceptionUnableToRun = "Unable to run your project\nPlease ensure you have a runnable project type and ensure '{0}' supports this project.\nThe current {1} is '{2}'";
 
         public const string RunCommandExceptionUnableToRun1 = "Unable to run your project.";
 
         public const string RunCommandExceptionUnableToRun2 = "Please ensure you have a runnable project type and ensure 'dotnet run' supports this project.";
 
         public const string RunCommandExceptionUnableToRun3 = "The current OutputType is ";
-
-        public const string RunCommandRunArguments = "RunArguments";
-
-        public const string RunCommandRunWorkingDirectory = "RunWorkingDirectory";
 
         public const string RunCommandInvalidOperationException1 = "Couldn't find a project to run. Ensure a project exists in ";
 

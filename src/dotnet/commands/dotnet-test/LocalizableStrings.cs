@@ -8,7 +8,7 @@
 
         public const string CmdArgProject = "PROJECT";
 
-        public const string CmdArgDescription = "The project to test, defaults to the current directory.";
+        public const string CmdArgDescription = "The project to test. Defaults to the current directory.";
 
         public const string CmdSettingsFile = "SETTINGS_FILE";
 
@@ -36,7 +36,7 @@
 
         public const string CmdConfiguration = "CONFIGURATION";
 
-        public const string CmdConfigDescription = "Configuration to use for building the project.  Default for most projects is  \"Debug\".";
+        public const string CmdConfigDescription = "Configuration to use for building the project.  Default for most projects is \"Debug\".";
 
         public const string CmdFramework = "FRAMEWORK";
 

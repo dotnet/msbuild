@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.DotNet.Tools;
 
 namespace Microsoft.DotNet.Tools.RestoreProjectJson
 {
@@ -13,9 +12,9 @@ namespace Microsoft.DotNet.Tools.RestoreProjectJson
             if (!args.Any(s => s.Equals("--verbosity", StringComparison.OrdinalIgnoreCase) || s.Equals("-v", StringComparison.OrdinalIgnoreCase)))
             {
                 prefixArgs.Add("--verbosity");
-                prefixArgs.Add(LocalizableStrings.AddMinimal);
+                prefixArgs.Add("minimal");
             }
-            prefixArgs.Add(LocalizableStrings.AddRestore);
+            prefixArgs.Add("restore");
 
             var nugetApp = new NuGetForwardingApp(Enumerable.Concat(prefixArgs, args));
 
