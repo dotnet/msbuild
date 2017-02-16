@@ -88,7 +88,7 @@
 
       <DotNetNew ToolPath="$(Stage2Directory)"
                  TemplateType="Mvc"
-                 TemplateArgs="-au Individual --debug:ephemeral-hive"
+                 TemplateArgs="-au Individual --debug:ephemeral-hive --no-tools"
                  WorkingDirectory="$(NuGetPackagesArchiveProject)/Web" />
 
       <DotNetRestore ToolPath="$(Stage2Directory)"
@@ -98,7 +98,7 @@
 
       <DotNetNew ToolPath="$(Stage2Directory)"
                  TemplateType="Mvc"
-                 TemplateArgs="-au Individual -f netcoreapp1.1 --debug:ephemeral-hive"
+                 TemplateArgs="-au Individual -f netcoreapp1.1 --debug:ephemeral-hive --no-tools"
                  WorkingDirectory="$(NuGetPackagesArchiveProject)/Web1.1" />
 
       <DotNetRestore ToolPath="$(Stage2Directory)"

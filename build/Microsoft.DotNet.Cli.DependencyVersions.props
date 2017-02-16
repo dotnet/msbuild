@@ -9,7 +9,7 @@
     <CLI_WEBSDK_Version>1.0.0-alpha-20170130-3-281</CLI_WEBSDK_Version>
     <CLI_TestPlatform_Version>15.0.0-preview-20170217-05</CLI_TestPlatform_Version>
     <TemplateEngineVersion>1.0.0-beta1-20170202-111</TemplateEngineVersion>
-    <TemplateEngineTemplateVersion>1.0.0-beta1-20170206-112</TemplateEngineTemplateVersion>
+    <TemplateEngineTemplateVersion>1.0.0-beta1-20170221-124</TemplateEngineTemplateVersion>
     <PlatformAbstractionsVersion>1.1.1</PlatformAbstractionsVersion>
     <DependencyModelVersion>1.0.2</DependencyModelVersion>
   </PropertyGroup>
