@@ -1,5 +1,4 @@
 @echo off
-setlocal
 setlocal enabledelayedexpansion
 
 if not defined MSBUILDLOGPATH (
