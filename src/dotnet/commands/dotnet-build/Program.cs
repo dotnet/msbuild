@@ -15,8 +15,6 @@ namespace Microsoft.DotNet.Tools.Build
     {
         private MSBuildForwardingApp _forwardingApp;
 
-        private BuildCommand() { }
-
         public BuildCommand(IEnumerable<string> msbuildArgs, string msbuildPath = null)
         {
             _forwardingApp = new MSBuildForwardingApp(msbuildArgs, msbuildPath);
@@ -24,8 +22,6 @@ namespace Microsoft.DotNet.Tools.Build
 
         public static BuildCommand FromArgs(string[] args, string msbuildPath = null)
         {
-            var buildCommand = new BuildCommand();
-
             CommandLineApplication app = new CommandLineApplication(throwOnUnexpectedArg: false);
             app.Name = "dotnet build";
             app.FullName = LocalizableStrings.AppFullName;
@@ -48,9 +44,12 @@ namespace Microsoft.DotNet.Tools.Build
             CommandOption noDependenciesOption = app.Option("--no-dependencies", LocalizableStrings.NoDependenciesOptionDescription, CommandOptionType.NoValue);
             CommandOption verbosityOption = MSBuildForwardingApp.AddVerbosityOption(app);
 
+            List<string> msbuildArgs = null;
             app.OnExecute(() =>
             {
-                List<string> msbuildArgs = new List<string>();
+                // this delayed initialization is here intentionally
+                // this code will not get run in some cases (i.e. --help)
+                msbuildArgs = new List<string>();
 
                 if (!string.IsNullOrEmpty(projectArgument.Value))
                 {
@@ -105,18 +104,16 @@ namespace Microsoft.DotNet.Tools.Build
 
                 msbuildArgs.AddRange(app.RemainingArguments);
 
-                buildCommand._forwardingApp = new MSBuildForwardingApp(msbuildArgs, msbuildPath);
-
                 return 0;
             });
 
             int exitCode = app.Execute(args);
-            if (buildCommand._forwardingApp == null)
+            if (msbuildArgs == null)
             {
                 throw new CommandCreationException(exitCode);
             }
 
-            return buildCommand;
+            return new BuildCommand(msbuildArgs, msbuildPath);
         }
 
         public static int Run(string[] args)
