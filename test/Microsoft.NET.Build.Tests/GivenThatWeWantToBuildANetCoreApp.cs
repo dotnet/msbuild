@@ -77,7 +77,7 @@ namespace Microsoft.NET.Build.Tests
             netCoreAppLibrary.Version.ToString().Should().Be(expectedPackageVersion);
         }
 
-        [Fact]
+        //[Fact(Skip = "https://github.com/dotnet/sdk/issues/874")]
         public void It_restores_only_ridless_tfm()
         {
             var testAsset = _testAssetsManager
