@@ -7,7 +7,8 @@
   <Import Project="$(MSBuildThisFileDirectory)/package/Installer.MSI.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/package/Installer.PKG.targets" />
 
-  <Target Name="GenerateInstallers" 
+  <Target Name="GenerateInstallers"
+          Condition=" '$(SkipBuildingInstallers)' != 'true' "
           DependsOnTargets="Init;Layout;GeneratePkgs;GenerateDebs;GenerateMsis" />
 
   <Target Name="Package"
