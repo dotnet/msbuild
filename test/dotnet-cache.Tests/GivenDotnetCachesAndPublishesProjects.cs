@@ -33,7 +33,11 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
             var localAssemblyCache = Path.Combine(testProjectDirectory, "localAssemblyCache");
             var intermediateWorkingDirectory = Path.Combine(testProjectDirectory, "workingDirectory");
-            var profileProject = Path.Combine(TestAssetsManager.AssetsRoot, profileProjectName, $"{profileProjectName}.xml");
+            var profileProjectPath = TestAssets.Get(profileProjectName)
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root.FullName;
+            var profileProject = Path.Combine(profileProjectPath, $"{profileProjectName}.xml");
 
             new RestoreCommand()
                 .WithWorkingDirectory(testProjectDirectory)
@@ -80,7 +84,11 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .UseCurrentRuntimeFrameworkVersion();
 
             var testProjectDirectory = testInstance.Root.ToString();
-            var profileProject = Path.Combine(TestAssetsManager.AssetsRoot, profileProjectName, $"{profileProjectName}.xml");
+            var profileProjectPath = TestAssets.Get(profileProjectName)
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root.FullName;
+            var profileProject = Path.Combine(profileProjectPath, $"{profileProjectName}.xml");
 
             new RestoreCommand()
                 .WithWorkingDirectory(testProjectDirectory)
