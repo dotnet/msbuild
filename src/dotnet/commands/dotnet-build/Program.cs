@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Tools.Build
 
         public static BuildCommand FromArgs(string[] args, string msbuildPath = null)
         {
-            var ret = new BuildCommand();
+            var buildCommand = new BuildCommand();
 
             CommandLineApplication app = new CommandLineApplication(throwOnUnexpectedArg: false);
             app.Name = "dotnet build";
@@ -105,18 +105,18 @@ namespace Microsoft.DotNet.Tools.Build
 
                 msbuildArgs.AddRange(app.RemainingArguments);
 
-                ret._forwardingApp = new MSBuildForwardingApp(msbuildArgs, msbuildPath);
+                buildCommand._forwardingApp = new MSBuildForwardingApp(msbuildArgs, msbuildPath);
 
                 return 0;
             });
 
             int exitCode = app.Execute(args);
-            if (ret._forwardingApp == null)
+            if (buildCommand._forwardingApp == null)
             {
                 throw new CommandCreationException(exitCode);
             }
 
-            return ret;
+            return buildCommand;
         }
 
         public static int Run(string[] args)
