@@ -25,7 +25,10 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
             startInfo.CreateNoWindow = false;
             startInfo.WorkingDirectory = workingDirectory;
             startInfo.FileName = fileName;
-            startInfo.Arguments = arguments;
+            if (!string.IsNullOrEmpty(arguments))
+            {
+                startInfo.Arguments = arguments;
+            }
 
             Process testProcess = Process.Start(startInfo);
             processId = testProcess?.Id;

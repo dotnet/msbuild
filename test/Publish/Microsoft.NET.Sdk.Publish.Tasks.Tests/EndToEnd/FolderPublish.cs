@@ -30,12 +30,12 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
         [InlineData("netcoreapp1.1", "Release", "core")]
         [InlineData("netcoreapp1.0", "Debug", "core")]
         [InlineData("netcoreapp1.1", "Debug", "core")]
-        public async Task WebTemplate(string framework, string configuration, string msBuildType)
+        public async Task EmptyWebCore(string templateFramework, string configuration, string msBuildType)
         {
-            string projectName = $"{nameof(WebTemplate)}_{Path.GetRandomFileName()}";
+            string projectName = $"{nameof(EmptyWebCore)}_{Path.GetRandomFileName()}";
 
             // Arrange
-            string dotNetNewArguments = $"new web --framework {framework} {DotNetNewAdditionalArgs}";
+            string dotNetNewArguments = $"new web --framework {templateFramework} {DotNetNewAdditionalArgs}";
             string testFolder = Path.Combine(BaseTestDirectory, projectName);
 
             // dotnet new
@@ -46,6 +46,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
 
             Assert.Equal(resultText, "Hello World!");
         }
+
 
         [Theory]
         // For the full desktop scenarios, the tests run against the msbuild versions installed on the machines.
@@ -58,19 +59,19 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
         [InlineData("netcoreapp1.1", "Release", "core")]
         [InlineData("netcoreapp1.0", "Debug", "core")]
         [InlineData("netcoreapp1.1", "Debug", "core")]
-        public async Task WebAPITemplate(string framework, string configuration, string msBuildType)
+        public async Task WebAPICore(string templateFramework, string configuration, string msBuildType)
         {
-            string projectName = $"{nameof(WebAPITemplate)}_{Path.GetRandomFileName()}";
+            string projectName = $"{nameof(WebAPICore)}_{Path.GetRandomFileName()}";
 
             // Arrange
-            string dotNetNewArguments = $"new webapi --framework {framework} {DotNetNewAdditionalArgs}";
+            string dotNetNewArguments = $"new webapi --framework {templateFramework} {DotNetNewAdditionalArgs}";
             string testFolder = Path.Combine(BaseTestDirectory, projectName);
 
             // dotnet new
             int? exitCode = ProcessWrapper.RunProcess(DotNetExeName, dotNetNewArguments, testFolder, out int? processId1, createDirectoryIfNotExists: true);
             Assert.True(exitCode.HasValue && exitCode.Value == 0);
 
-            string resultText = await RestoreBuildPublishAndRun(testFolder, projectName, configuration, msBuildType, "http://localhost:5000/api/Values");
+            string resultText = await RestoreBuildPublishAndRun(testFolder, projectName, configuration, msBuildType, isStandAlone:false, resultUrl:"http://localhost:5000/api/Values");
 
             Assert.Equal(resultText, "[\"value1\",\"value2\"]");
         }
@@ -89,9 +90,9 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
         [InlineData("netcoreapp1.1", "Release", "core", "Individual", "true")]
         [InlineData("netcoreapp1.0", "Debug", "core", "Individual", "true")]
         [InlineData("netcoreapp1.1", "Debug", "core", "Individual", "true")]
-        public async Task MvcTemplate(string framework, string configuration, string msBuildType, string auth, string useLocalDB)
+        public async Task MvcCore(string templateFramework, string configuration, string msBuildType, string auth, string useLocalDB)
         {
-            string projectName = $"{nameof(MvcTemplate)}_{Path.GetRandomFileName()}";
+            string projectName = $"{nameof(MvcCore)}_{Path.GetRandomFileName()}";
 
             string additionalOptions = string.Empty;
             // Arrange
@@ -99,7 +100,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
             {
                 additionalOptions = $"--use-local-db";
             }
-            string dotNetNewArguments = $"new mvc --framework {framework} --auth {auth} {DotNetNewAdditionalArgs} {additionalOptions}";
+            string dotNetNewArguments = $"new mvc --framework {templateFramework} --auth {auth} {DotNetNewAdditionalArgs} {additionalOptions}";
             string testFolder = Path.Combine(BaseTestDirectory, projectName);
 
             // dotnet new
@@ -111,7 +112,166 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
             Assert.Contains($"<title>Home Page -", resultText);
         }
 
-        private async Task<string> RestoreBuildPublishAndRun(string testFolder, string projectName, string configuration, string msBuildType, string resultUrl = "http://localhost:5000")
+
+        [Theory]
+        [InlineData("netcoreapp1.0", "Release", "core", "net452")]
+        [InlineData("netcoreapp1.1", "Release", "core", "net452")]
+        [InlineData("netcoreapp1.0", "Debug", "core", "net452")]
+        [InlineData("netcoreapp1.1", "Debug", "core", "net452")]
+
+        [InlineData("netcoreapp1.0", "Release", "core", "net46")]
+        [InlineData("netcoreapp1.1", "Release", "core", "net46")]
+        [InlineData("netcoreapp1.0", "Debug", "core", "net46")]
+        [InlineData("netcoreapp1.1", "Debug", "core", "net46")]
+
+        [InlineData("netcoreapp1.0", "Release", "core", "net461")]
+        [InlineData("netcoreapp1.1", "Release", "core", "net461")]
+        [InlineData("netcoreapp1.0", "Debug", "core", "net461")]
+        [InlineData("netcoreapp1.1", "Debug", "core", "net461")]
+
+        [InlineData("netcoreapp1.0", "Release", "core", "net462")]
+        [InlineData("netcoreapp1.1", "Release", "core", "net462")]
+        [InlineData("netcoreapp1.0", "Debug", "core", "net462")]
+        [InlineData("netcoreapp1.1", "Debug", "core", "net462")]
+        public async Task EmptyWebNET(string templateFramework, string configuration, string msBuildType, string targetFramework)
+        {
+            string projectName = $"{nameof(EmptyWebNET)}_{Path.GetRandomFileName()}";
+
+            // Arrange
+            string dotNetNewArguments = $"new web --framework {templateFramework} {DotNetNewAdditionalArgs}";
+            string testFolder = Path.Combine(BaseTestDirectory, projectName);
+
+            // dotnet new
+            int? exitCode = ProcessWrapper.RunProcess(DotNetExeName, dotNetNewArguments, testFolder, out int? processId1, createDirectoryIfNotExists: true);
+            Assert.True(exitCode.HasValue && exitCode.Value == 0);
+
+            // Change the target framework to NetFramework.
+            ChangeTargetFrameworkInCsProject(Path.Combine(testFolder, $"{projectName}.csproj"), templateFramework, targetFramework);
+
+            string resultText = await RestoreBuildPublishAndRun(testFolder, projectName, configuration, msBuildType, isStandAlone:true);
+
+            Assert.Equal(resultText, "Hello World!");
+        }
+
+        [Theory]
+        [InlineData("netcoreapp1.0", "Release", "core", "net452")]
+        [InlineData("netcoreapp1.1", "Release", "core", "net452")]
+        [InlineData("netcoreapp1.0", "Debug", "core", "net452")]
+        [InlineData("netcoreapp1.1", "Debug", "core", "net452")]
+
+        [InlineData("netcoreapp1.0", "Release", "core", "net46")]
+        [InlineData("netcoreapp1.1", "Release", "core", "net46")]
+        [InlineData("netcoreapp1.0", "Debug", "core", "net46")]
+        [InlineData("netcoreapp1.1", "Debug", "core", "net46")]
+
+        [InlineData("netcoreapp1.0", "Release", "core", "net461")]
+        [InlineData("netcoreapp1.1", "Release", "core", "net461")]
+        [InlineData("netcoreapp1.0", "Debug", "core", "net461")]
+        [InlineData("netcoreapp1.1", "Debug", "core", "net461")]
+
+        [InlineData("netcoreapp1.0", "Release", "core", "net462")]
+        [InlineData("netcoreapp1.1", "Release", "core", "net462")]
+        [InlineData("netcoreapp1.0", "Debug", "core", "net462")]
+        [InlineData("netcoreapp1.1", "Debug", "core", "net462")]
+        public async Task WebAPINET(string templateFramework, string configuration, string msBuildType, string targetFramework)
+        {
+            string projectName = $"{nameof(WebAPINET)}_{Path.GetRandomFileName()}";
+
+            // Arrange
+            string dotNetNewArguments = $"new webapi --framework {templateFramework} {DotNetNewAdditionalArgs}";
+            string testFolder = Path.Combine(BaseTestDirectory, projectName);
+
+            // dotnet new
+            int? exitCode = ProcessWrapper.RunProcess(DotNetExeName, dotNetNewArguments, testFolder, out int? processId1, createDirectoryIfNotExists: true);
+            Assert.True(exitCode.HasValue && exitCode.Value == 0);
+
+            // Change the target framework to NetFramework.
+            ChangeTargetFrameworkInCsProject(Path.Combine(testFolder, $"{projectName}.csproj"), templateFramework, targetFramework);
+
+            string resultText = await RestoreBuildPublishAndRun(testFolder, projectName, configuration, msBuildType, isStandAlone:true, resultUrl: "http://localhost:5000/api/Values");
+
+            Assert.Equal(resultText, "[\"value1\",\"value2\"]");
+        }
+
+        [Theory]
+        // CLI Sdks are updated as part of setup.
+        [InlineData("netcoreapp1.0", "Release", "core", "none", "false", "net452")]
+        [InlineData("netcoreapp1.1", "Release", "core", "none", "false", "net452")]
+        [InlineData("netcoreapp1.0", "Debug", "core", "none", "false", "net452")]
+        [InlineData("netcoreapp1.1", "Debug", "core", "none", "false", "net452")]
+        [InlineData("netcoreapp1.0", "Release", "core", "Individual", "false", "net452")]
+        [InlineData("netcoreapp1.1", "Release", "core", "Individual", "false", "net452")]
+        [InlineData("netcoreapp1.0", "Debug", "core", "Individual", "false", "net452")]
+        [InlineData("netcoreapp1.1", "Debug", "core", "Individual", "false", "net452")]
+        [InlineData("netcoreapp1.0", "Release", "core", "Individual", "true", "net452")]
+        [InlineData("netcoreapp1.1", "Release", "core", "Individual", "true", "net452")]
+        [InlineData("netcoreapp1.0", "Debug", "core", "Individual", "true", "net452")]
+        [InlineData("netcoreapp1.1", "Debug", "core", "Individual", "true", "net452")]
+
+        [InlineData("netcoreapp1.0", "Release", "core", "none", "false", "net46")]
+        [InlineData("netcoreapp1.1", "Release", "core", "none", "false", "net46")]
+        [InlineData("netcoreapp1.0", "Debug", "core", "none", "false", "net46")]
+        [InlineData("netcoreapp1.1", "Debug", "core", "none", "false", "net46")]
+        [InlineData("netcoreapp1.0", "Release", "core", "Individual", "false", "net46")]
+        [InlineData("netcoreapp1.1", "Release", "core", "Individual", "false", "net46")]
+        [InlineData("netcoreapp1.0", "Debug", "core", "Individual", "false", "net46")]
+        [InlineData("netcoreapp1.1", "Debug", "core", "Individual", "false", "net46")]
+        [InlineData("netcoreapp1.0", "Release", "core", "Individual", "true", "net46")]
+        [InlineData("netcoreapp1.1", "Release", "core", "Individual", "true", "net46")]
+        [InlineData("netcoreapp1.0", "Debug", "core", "Individual", "true", "net46")]
+        [InlineData("netcoreapp1.1", "Debug", "core", "Individual", "true", "net46")]
+
+        [InlineData("netcoreapp1.0", "Release", "core", "none", "false", "net461")]
+        [InlineData("netcoreapp1.1", "Release", "core", "none", "false", "net461")]
+        [InlineData("netcoreapp1.0", "Debug", "core", "none", "false", "net461")]
+        [InlineData("netcoreapp1.1", "Debug", "core", "none", "false", "net461")]
+        [InlineData("netcoreapp1.0", "Release", "core", "Individual", "false", "net461")]
+        [InlineData("netcoreapp1.1", "Release", "core", "Individual", "false", "net461")]
+        [InlineData("netcoreapp1.0", "Debug", "core", "Individual", "false", "net461")]
+        [InlineData("netcoreapp1.1", "Debug", "core", "Individual", "false", "net461")]
+        [InlineData("netcoreapp1.0", "Release", "core", "Individual", "true", "net461")]
+        [InlineData("netcoreapp1.1", "Release", "core", "Individual", "true", "net461")]
+        [InlineData("netcoreapp1.0", "Debug", "core", "Individual", "true", "net461")]
+        [InlineData("netcoreapp1.1", "Debug", "core", "Individual", "true", "net461")]
+
+        [InlineData("netcoreapp1.0", "Release", "core", "none", "false", "net462")]
+        [InlineData("netcoreapp1.1", "Release", "core", "none", "false", "net462")]
+        [InlineData("netcoreapp1.0", "Debug", "core", "none", "false", "net462")]
+        [InlineData("netcoreapp1.1", "Debug", "core", "none", "false", "net462")]
+        [InlineData("netcoreapp1.0", "Release", "core", "Individual", "false", "net462")]
+        [InlineData("netcoreapp1.1", "Release", "core", "Individual", "false", "net462")]
+        [InlineData("netcoreapp1.0", "Debug", "core", "Individual", "false", "net462")]
+        [InlineData("netcoreapp1.1", "Debug", "core", "Individual", "false", "net462")]
+        [InlineData("netcoreapp1.0", "Release", "core", "Individual", "true", "net462")]
+        [InlineData("netcoreapp1.1", "Release", "core", "Individual", "true", "net462")]
+        [InlineData("netcoreapp1.0", "Debug", "core", "Individual", "true", "net462")]
+        [InlineData("netcoreapp1.1", "Debug", "core", "Individual", "true", "net462")]
+        public async Task MvcNET(string templateFramework, string configuration, string msBuildType, string auth, string useLocalDB, string targetFramework)
+        {
+            string projectName = $"{nameof(MvcNET)}_{Path.GetRandomFileName()}";
+
+            string additionalOptions = string.Empty;
+            // Arrange
+            if (bool.TryParse(useLocalDB, out bool localDBBool) && localDBBool)
+            {
+                additionalOptions = $"--use-local-db";
+            }
+            string dotNetNewArguments = $"new mvc --framework {templateFramework} --auth {auth} {DotNetNewAdditionalArgs} {additionalOptions}";
+            string testFolder = Path.Combine(BaseTestDirectory, projectName);
+
+            // dotnet new
+            int? exitCode = ProcessWrapper.RunProcess(DotNetExeName, dotNetNewArguments, testFolder, out int? processId1, createDirectoryIfNotExists: true);
+            Assert.True(exitCode.HasValue && exitCode.Value == 0);
+
+            // Change the target framework to NetFramework.
+            ChangeTargetFrameworkInCsProject(Path.Combine(testFolder, $"{projectName}.csproj"), templateFramework, targetFramework);
+
+            string resultText = await RestoreBuildPublishAndRun(testFolder, projectName, configuration, msBuildType, isStandAlone:true);
+
+            Assert.Contains($"<title>Home Page -", resultText);
+        }
+
+        private async Task<string> RestoreBuildPublishAndRun(string testFolder, string projectName, string configuration, string msBuildType, bool isStandAlone = false, string resultUrl = "http://localhost:5000")
         {
             // dotnet restore
             string dotnetRestoreArguments = "restore";
@@ -125,7 +285,8 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
 
             // msbuild publish
             string fileName = "msbuild";
-            string dotnetPublishArguments = $"{projectName}.csproj /p:DeployOnBuild=true /p:Configuration={configuration} /p:PublishUrl=bin\\{configuration}\\PublishOutput";
+            string publishOutputFolder = $"bin\\{configuration}\\PublishOutput";
+            string dotnetPublishArguments = $"{projectName}.csproj /p:DeployOnBuild=true /p:Configuration={configuration} /p:PublishUrl={publishOutputFolder}";
             if (string.Equals(msBuildType, "core"))
             {
                 dotnetPublishArguments = $"{fileName} {dotnetPublishArguments}";
@@ -135,8 +296,15 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
             Assert.True(exitCode.HasValue && exitCode.Value == 0);
 
             int? runningProcess = null;
-            string dotNetRunArguments = $"run {projectName}.dll";
-            exitCode = ProcessWrapper.RunProcess(DotNetExeName, dotNetRunArguments, testFolder, out runningProcess, waitForExit: false);
+            string publishOutputFolderFullPath = Path.Combine(testFolder, publishOutputFolder);
+            string dotNetRunArguments = $"{projectName}.dll";
+            fileName = DotNetExeName;
+            if (isStandAlone)
+            {
+                dotNetRunArguments = null;
+                fileName = Path.Combine(publishOutputFolderFullPath, $"{projectName}.exe"); 
+            }
+            exitCode = ProcessWrapper.RunProcess(fileName, dotNetRunArguments, publishOutputFolderFullPath, out runningProcess, waitForExit: false);
 
             // Wait for 2 seconds for the application to start
             await Task.Delay(TimeSpan.FromSeconds(2));
@@ -166,10 +334,25 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
             {
                 ProcessWrapper.KillProcessTree(runningProcess.Value);
             }
+            try
+            {
+                Directory.Delete(testFolder, true);
+            }
+            catch { }
 
             Assert.True(result != null);
             string resultText = await result.Content.ReadAsStringAsync();
             return resultText;
+        }
+
+        private void ChangeTargetFrameworkInCsProject(string csProjPath, string oldTargetFramework, string newTargetFramework)
+        {
+            string csProjContents = File.ReadAllText(csProjPath);
+            string oldTargetFrameworkSnippet = $"<TargetFramework>{oldTargetFramework}</TargetFramework>";
+            string newTargetFrameworkSnippet = $"<TargetFramework>{newTargetFramework}</TargetFramework>";
+            string runtimeIdentifierSnippet = $"<RuntimeIdentifier>win7-x86</RuntimeIdentifier>";
+            csProjContents = csProjContents.Replace(oldTargetFrameworkSnippet, $"{newTargetFrameworkSnippet}{Environment.NewLine}{runtimeIdentifierSnippet}");
+            File.WriteAllText(csProjPath, csProjContents);
         }
     }
 }
