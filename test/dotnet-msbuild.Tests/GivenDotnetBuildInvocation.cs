@@ -1,9 +1,11 @@
-﻿using Microsoft.DotNet.Tools.Build;
+﻿using System.Collections.Generic;
+using System.IO;
+using Microsoft.DotNet.Tools.Build;
 using FluentAssertions;
 using Xunit;
+using static Microsoft.DotNet.Tools.Test.Utilities.DirectoryInfoExtensions;
 using WindowsOnlyFactAttribute = Microsoft.DotNet.Tools.Test.Utilities.WindowsOnlyFactAttribute;
 using NonWindowsOnlyFactAttribute = Microsoft.DotNet.Tools.Test.Utilities.NonWindowsOnlyFactAttribute;
-using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
@@ -50,17 +52,60 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         }
 
         [Theory]
-        [InlineData("MSBuildExtensionsPath", "(?i)[\\/\\\\]netcoreapp[0-9]\\.[0-9]([\\/\\\\]|$)")]
-        [InlineData("CscToolExe", "(?i)[\\/\\\\](run)?csc(\\.|$)")]
-        [InlineData("MSBuildSDKsPath", "(?i)[\\/\\\\]\\d\\.\\d\\.\\d\\-[a-z]+\\-\\d+[\\/\\\\]sdks(\\/|\\\\|$)")]
-        [InlineData("DOTNET_CLI_TELEMETRY_SESSIONID", "(^$|\\d+)")]
-        public void WhenInvokingBuildCommandItSetsEnvironmentVariables(string envVarName, string envVarPattern)
+        [InlineData("MSBuildExtensionsPath")]
+        [InlineData("CscToolExe")]
+        [InlineData("MSBuildSDKsPath")]
+        [InlineData("DOTNET_CLI_TELEMETRY_SESSIONID")]
+        public void WhenInvokingBuildCommandItSetsEnvironmentalVariables(string envVarName)
         {
             var msbuildPath = "<msbuildpath>";
             var startInfo = BuildCommand.FromArgs(new string[0], msbuildPath).GetProcessStartInfo();
-
             startInfo.Environment.ContainsKey(envVarName).Should().BeTrue();
-            (startInfo.Environment[envVarName] ?? "").Should().MatchRegex(envVarPattern);
+        }
+
+        [Fact]
+        public void WhenInvokingBuildCommandItSetsMSBuildExtensionPathToExistingPath()
+        {
+            var msbuildPath = "<msbuildpath>";
+            var envVar = "MSBuildExtensionsPath";
+            new DirectoryInfo(BuildCommand.FromArgs(new string[0], msbuildPath)
+                                .GetProcessStartInfo()
+                                .Environment[envVar])
+                .Should()
+                .Exist();
+        }
+
+        [Fact]
+        public void WhenInvokingBuildCommandItSetsMSBuildSDKsPathToExistingPath()
+        {
+            var msbuildPath = "<msbuildpath>";
+            var envVar = "MSBuildSDKsPath";
+            new DirectoryInfo(BuildCommand.FromArgs(new string[0], msbuildPath)
+                                .GetProcessStartInfo()
+                                .Environment[envVar])
+                .Should()
+                .Exist();
+        }
+
+        [Fact]
+        public void WhenInvokingBuildCommandItSetsCscToolExePathToValidPath()
+        {
+            var msbuildPath = "<msbuildpath>";
+            var envVar = "CscToolExe";
+            new FileInfo(BuildCommand.FromArgs(new string[0], msbuildPath)
+                                .GetProcessStartInfo()
+                                .Environment[envVar])
+                .Should().NotBeNull("constructor will throw on invalid path");
+        }
+
+        [Fact]
+        public void WhenInvokingBuildCommandItSetsTelemetryEnvVar()
+        {
+            var msbuildPath = "<msbuildpath>";
+            var envVar = "DOTNET_CLI_TELEMETRY_SESSIONID";
+            var startInfo = BuildCommand.FromArgs(new string[0], msbuildPath).GetProcessStartInfo();
+            (startInfo.Environment[envVar] == null || int.TryParse(startInfo.Environment[envVar], out _))
+                .Should().BeTrue("DOTNET_CLI_TELEMETRY_SESSIONID should be null or current session id");
         }
 
         [Fact]
