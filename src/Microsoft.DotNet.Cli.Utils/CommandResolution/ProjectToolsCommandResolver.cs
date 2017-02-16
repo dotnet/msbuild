@@ -5,12 +5,15 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Tools.Common;
 using Microsoft.Extensions.DependencyModel;
 using NuGet.Configuration;
 using NuGet.Frameworks;
 using NuGet.ProjectModel;
 using NuGet.Versioning;
+using ConcurrencyUtilities = NuGet.Common.ConcurrencyUtilities;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -220,6 +223,15 @@ namespace Microsoft.DotNet.Cli.Utils
             return null;
         }
 
+
+        private static async Task<bool> FileExistsWithLock(string path)
+        {
+            return await ConcurrencyUtilities.ExecuteWithFileLockedAsync(
+                path, 
+                lockedToken => Task.FromResult(File.Exists(path)),
+                CancellationToken.None);
+        }
+
         private bool TryGetToolLockFile(
             SingleProjectInfo toolLibrary,
             string nugetPackagesRoot,
@@ -228,7 +240,7 @@ namespace Microsoft.DotNet.Cli.Utils
             lockFile = null;
             var lockFilePath = GetToolLockFilePath(toolLibrary, nugetPackagesRoot);
 
-            if (!File.Exists(lockFilePath))
+            if (!FileExistsWithLock(lockFilePath).Result)
             {
                 return false;
             }
