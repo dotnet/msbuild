@@ -1,0 +1,7 @@
+<Project>
+  <PropertyGroup>
+    <DotnetHostBaseName>dotnet$(ExeExtension)</DotnetHostBaseName>
+    <DotnetHostFxrBaseName>$(DynamicLibPrefix)hostfxr$(DynamicLibSuffix)</DotnetHostFxrBaseName>
+    <HostPolicyBaseName>$(DynamicLibPrefix)hostpolicy$(DynamicLibSuffix)</HostPolicyBaseName>
+  </PropertyGroup>
+</Project>

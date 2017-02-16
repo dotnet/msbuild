@@ -3,11 +3,6 @@
   <Import Project="compile/LzmaArchive.targets" />
   <Import Project="crossgen/Crossgen.targets" />
 
-  <PropertyGroup>
-    <BinaryToCorehostifyRelDir>runtimes/any/native</BinaryToCorehostifyRelDir>
-    <MSBuildImportsDir>$(RepoRoot)/resources/MSBuildImports</MSBuildImportsDir>
-  </PropertyGroup>
-
   <ItemGroup>
     <PublishOutputExtensions Include="$(ExeExtension);.dll;.pdb;.deps.json;.runtimeconfig.json" />
     <BundledTools Include="MSBuild;NuGet.CommandLine.XPlat;dotnet" />
@@ -23,28 +18,6 @@
 
   <Target Name="CompileCLI"
           DependsOnTargets="InitCrossgenProps;">
-      <PropertyGroup>
-        <SrcDirectory>$(RepoRoot)/src</SrcDirectory>
-        <DynamicLibPrefix Condition=" '$(OSName)' == 'win' "></DynamicLibPrefix>
-        <DynamicLibPrefix Condition=" '$(OSName)' != 'win' ">lib</DynamicLibPrefix>
-
-        <DynamicLibSuffix Condition=" '$(OSName)' == 'win' ">.dll</DynamicLibSuffix>
-        <DynamicLibSuffix Condition=" '$(OSName)' == 'osx' ">.dylib</DynamicLibSuffix>
-        <DynamicLibSuffix Condition=" '$(DynamicLibSuffix)' == '' ">.so</DynamicLibSuffix>
-
-        <DotnetHostBaseName>dotnet$(ExeExtension)</DotnetHostBaseName>
-        <DotnetHostFxrBaseName>$(DynamicLibPrefix)hostfxr$(DynamicLibSuffix)</DotnetHostFxrBaseName>
-        <HostPolicyBaseName>$(DynamicLibPrefix)hostpolicy$(DynamicLibSuffix)</HostPolicyBaseName>
-
-        <StageDirectory>$(Stage2Directory)</StageDirectory>
-        <StageSymbolsDirectory>$(Stage2SymbolsDirectory)</StageSymbolsDirectory>
-        <SdkOutputDirectory>$(StageDirectory)/sdk/$(SdkVersion)</SdkOutputDirectory>
-        <BinaryToCorehostifyOutDir>$(SdkOutputDirectory)/$(BinaryToCorehostifyRelDir)</BinaryToCorehostifyOutDir>
-        <MSBuildTargetsDirectory>$(SdkOutputDirectory)/runtimes/any/native</MSBuildTargetsDirectory>
-
-        <SharedFrameworkNameVersionPath>$(StageDirectory)/shared/$(SharedFrameworkName)/$(SharedFrameworkVersion)</SharedFrameworkNameVersionPath>
-      </PropertyGroup>
-
       <ItemGroup>
         <SharedFramework Remove="*" />
         <SharedFramework Include="$(SharedFrameworkPublishDirectory)/**/*" />
