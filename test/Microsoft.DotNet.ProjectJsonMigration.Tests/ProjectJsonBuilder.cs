@@ -13,14 +13,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
     /// </summary>
     public class ProjectJsonBuilder
     {
-        private readonly TestAssetsManager _testAssetsManager;
+        private readonly TestAssets _testAssets;
         private JObject _projectJson;
 
         private bool _baseDefined = false;
         
-        public ProjectJsonBuilder(TestAssetsManager testAssetsManager)
+        public ProjectJsonBuilder(TestAssets testAssets)
         {
-            _testAssetsManager = testAssetsManager;
+            _testAssets = testAssets;
         }
 
         public string SaveToDisk(string outputDirectory)
@@ -40,7 +40,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
         public ProjectJsonBuilder FromTestAssetBase(string testAssetName)
         {
-            var testProjectDirectory = _testAssetsManager.CreateTestInstance(testAssetName).Path;
+            var testProjectDirectory = _testAssets.Get(testAssetName)
+                            .CreateInstance()
+                            .WithSourceFiles()
+                            .Root.FullName;
             var testProject = Path.Combine(testProjectDirectory, "project.json");
 
             SetBase(JObject.Parse(File.ReadAllText(testProject)));

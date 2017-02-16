@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
         [Fact]
         public void ItRunsWhenRestoringToSpecificPackageDir()
         {
-            var rootPath = TestAssetsManager.CreateTestDirectory().Path;
+            var rootPath = TestAssets.CreateTestDirectory().FullName;
 
             string dir = "pkgs";
             string args = $"--packages {dir}";

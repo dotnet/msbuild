@@ -27,14 +27,14 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void WhenInvokedThenDotnetWritesOptimizationDataToTheProfileRoot()
         {
-            var testDirectory = TestAssetsManager.CreateTestDirectory();
+            var testDirectory = TestAssets.CreateTestDirectory();
             var testStartTime = GetTruncatedDateTime();
                         
             new TestCommand("dotnet")
-                .WithUserProfileRoot(testDirectory.Path)
+                .WithUserProfileRoot(testDirectory.FullName)
                 .ExecuteWithCapturedOutput("--help");
 
-            var optimizationProfileFilePath = GetOptimizationProfileFilePath(testDirectory.Path);
+            var optimizationProfileFilePath = GetOptimizationProfileFilePath(testDirectory.FullName);
 
             new FileInfo(optimizationProfileFilePath)
                 .Should().Exist("Because dotnet CLI creates it after each run")
@@ -45,15 +45,15 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void WhenInvokedWithMulticoreJitDisabledThenDotnetDoesNotWriteOptimizationDataToTheProfileRoot()
         {
-            var testDirectory = TestAssetsManager.CreateTestDirectory();
+            var testDirectory = TestAssets.CreateTestDirectory();
             var testStartTime = GetTruncatedDateTime();
                         
             new TestCommand("dotnet")
-                .WithUserProfileRoot(testDirectory.Path)
+                .WithUserProfileRoot(testDirectory.FullName)
                 .WithEnvironmentVariable("DOTNET_DISABLE_MULTICOREJIT", "1")
                 .ExecuteWithCapturedOutput("--help");
 
-            var optimizationProfileFilePath = GetOptimizationProfileFilePath(testDirectory.Path);
+            var optimizationProfileFilePath = GetOptimizationProfileFilePath(testDirectory.FullName);
 
             File.Exists(optimizationProfileFilePath)
                 .Should().BeFalse("Because multicore JIT is disabled");
@@ -62,10 +62,10 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void WhenTheProfileRootIsUndefinedThenDotnetDoesNotCrash()
         {
-            var testDirectory = TestAssetsManager.CreateTestDirectory();
+            var testDirectory = TestAssets.CreateTestDirectory();
             var testStartTime = GetTruncatedDateTime();
             
-            var optimizationProfileFilePath = GetOptimizationProfileFilePath(testDirectory.Path);
+            var optimizationProfileFilePath = GetOptimizationProfileFilePath(testDirectory.FullName);
 
             new TestCommand("dotnet")
                 .WithUserProfileRoot("")

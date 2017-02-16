@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.New.Tests
             string projectType,
             bool useNuGetConfigForAspNet)
         {
-            string rootPath = TestAssetsManager.CreateTestDirectory(identifier: $"{language}_{projectType}").Path;
+            string rootPath = TestAssets.CreateTestDirectory(identifier: $"{language}_{projectType}").FullName;
 
             new TestCommand("dotnet") { WorkingDirectory = rootPath }
                 .Execute($"new {projectType} -lang {language} -o {rootPath} --debug:ephemeral-hive")
@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.New.Tests
 
             if (useNuGetConfigForAspNet)
             {
-                var configFile = new FileInfo(Path.Combine(rootPath,"..","..","..","..","NuGet.tempaspnetpatch.config"));
+                var configFile = new FileInfo(Path.Combine(rootPath, "..", "..", "..", "..", "..", "NuGet.tempaspnetpatch.config"));
                 File.Copy(configFile.FullName, Path.Combine(rootPath, "NuGet.Config"));
             }
 

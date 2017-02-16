@@ -29,10 +29,11 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [Fact]
         public void ItRunsSpecifiedTargetsWithPropertiesCorrectly()
         {
-            var testInstance = TestAssetsManager
-                .CreateTestInstance("MSBuildBareBonesProject");
+            var testInstance = TestAssets.Get("MSBuildBareBonesProject")
+                                        .CreateInstance()
+                                        .WithSourceFiles();
 
-            var testProjectDirectory = testInstance.TestRoot;
+            var testProjectDirectory = testInstance.Root;
 
             new MSBuildCommand()
                 .WithWorkingDirectory(testProjectDirectory)
@@ -60,29 +61,22 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         }
 
         [Theory]
-        [InlineData("build", true)]
-        [InlineData("clean", true)]
-        [InlineData("pack", true)]
-        [InlineData("publish", true)]
-        [InlineData("restore", true)]
-        public void When_help_is_invoked_Then_MSBuild_extra_options_text_is_included_in_output(string commandName, bool isMSBuildCommand)
+        [InlineData("build")]
+        [InlineData("clean")]
+        [InlineData("pack")]
+        [InlineData("publish")]
+        [InlineData("restore")]
+        public void When_help_is_invoked_Then_MSBuild_extra_options_text_is_included_in_output(string commandName)
         {
             const string MSBuildHelpText = " Any extra options that should be passed to MSBuild. See 'dotnet msbuild -h' for available options.";
 
-            var projectDirectory = TestAssetsManager.CreateTestDirectory("ItContainsMSBuildHelpText");
+            var projectDirectory = TestAssets.CreateTestDirectory(commandName);
             var result = new TestCommand("dotnet")
-                .WithWorkingDirectory(projectDirectory.Path)
+                .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"{commandName} --help");
 
             result.ExitCode.Should().Be(0);
-            if (isMSBuildCommand)
-            {
-                result.StdOut.Should().Contain(MSBuildHelpText);
-            }
-            else
-            {
-                result.StdOut.Should().NotContain(MSBuildHelpText);
-            }
+            result.StdOut.Should().Contain(MSBuildHelpText);
         }
 
         [Fact]
@@ -121,9 +115,9 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         {
             const string AppArgumentsText = "Arguments passed to the application that is being run.";
 
-            var projectDirectory = TestAssetsManager.CreateTestDirectory("RunContainsAppArgumentsText");
+            var projectDirectory = TestAssets.CreateTestDirectory("RunContainsAppArgumentsText");
             var result = new TestCommand("dotnet")
-                .WithWorkingDirectory(projectDirectory.Path)
+                .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput("run --help");
 
             result.ExitCode.Should().Be(0);

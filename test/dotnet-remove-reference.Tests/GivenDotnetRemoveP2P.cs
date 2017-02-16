@@ -46,27 +46,27 @@ Additional Arguments:
 
         private ProjDir NewDir([System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(NewDir), string identifier = "")
         {
-            return new ProjDir(TestAssetsManager.CreateTestDirectory(callingMethod: callingMethod, identifier: identifier).Path);
+            return new ProjDir(TestAssets.CreateTestDirectory(callingMethod: callingMethod, identifier: identifier).FullName);
         }
 
-        private ProjDir NewLib([System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(NewDir), string identifier = "")
+        private ProjDir NewLib(string dir = null, [System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(NewDir), string identifier = "")
         {
-            var dir = NewDir(callingMethod: callingMethod, identifier: identifier);
+            var projDir = dir == null ? NewDir(callingMethod: callingMethod, identifier: identifier) : new ProjDir(dir);
 
             try
             {
-                string newArgs = $"classlib -o \"{dir.Path}\"";
+                string newArgs = $"classlib -o \"{projDir.Path}\"";
                 new NewCommandShim()
-                    .WithWorkingDirectory(dir.Path)
+                    .WithWorkingDirectory(projDir.Path)
                     .ExecuteWithCapturedOutput(newArgs)
                 .Should().Pass();
             }
             catch (System.ComponentModel.Win32Exception e)
             {
-                throw new Exception($"Intermittent error in `dotnet new` occurred when running it in dir `{dir.Path}`\nException:\n{e}");
+                throw new Exception($"Intermittent error in `dotnet new` occurred when running it in dir `{projDir.Path}`\nException:\n{e}");
             }
 
-            return dir;
+            return projDir;
         }
 
         private static void SetTargetFrameworks(ProjDir proj, string[] frameworks)
@@ -76,9 +76,9 @@ Additional Arguments:
             csproj.Save();
         }
 
-        private ProjDir NewLibWithFrameworks([System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(NewDir), string identifier = "")
+        private ProjDir NewLibWithFrameworks(string dir = null, [System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(NewDir), string identifier = "")
         {
-            var ret = NewLib(callingMethod: callingMethod, identifier: identifier);
+            var ret = NewLib(dir, callingMethod: callingMethod, identifier: identifier);
             SetTargetFrameworks(ret, DefaultFrameworks);
             return ret;
         }
@@ -205,8 +205,8 @@ Additional Arguments:
         [Fact]
         public void ItRemovesRefWithoutCondAndPrintsStatus()
         {
-            var lib = NewLibWithFrameworks();
             var setup = Setup();
+            var lib = NewLibWithFrameworks(setup.TestRoot);
             var libref = AddLibRef(setup, lib);
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
@@ -215,7 +215,7 @@ Additional Arguments:
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{libref.CsProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be($"Project reference `{Path.Combine(TestSetup.ProjectName, "Lib", setup.LibCsprojName)}` removed.");
+            cmd.StdOut.Should().Be($"Project reference `{Path.Combine("Lib", setup.LibCsprojName)}` removed.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore - 1);
             csproj.NumberOfProjectReferencesWithIncludeContaining(libref.Name).Should().Be(0);
@@ -224,8 +224,8 @@ Additional Arguments:
         [Fact]
         public void ItRemovesRefWithCondAndPrintsStatus()
         {
-            var lib = NewLibWithFrameworks();
             var setup = Setup();
+            var lib = NewLibWithFrameworks(setup.TestRoot);
             var libref = AddLibRef(setup, lib, FrameworkNet451Arg);
 
             int condBefore = lib.CsProj().NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451);
@@ -234,7 +234,7 @@ Additional Arguments:
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg} \"{libref.CsProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be($"Project reference `{Path.Combine(TestSetup.ProjectName, "Lib", setup.LibCsprojName)}` removed.");
+            cmd.StdOut.Should().Be($"Project reference `{Path.Combine("Lib", setup.LibCsprojName)}` removed.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451).Should().Be(condBefore - 1);
             csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(libref.Name, ConditionFrameworkNet451).Should().Be(0);
@@ -243,8 +243,8 @@ Additional Arguments:
         [Fact]
         public void WhenTwoDifferentRefsArePresentItDoesNotRemoveBoth()
         {
-            var lib = NewLibWithFrameworks();
             var setup = Setup();
+            var lib = NewLibWithFrameworks(setup.TestRoot);
             var libref = AddLibRef(setup, lib);
             var validref = AddValidRef(setup, lib);
 
@@ -254,7 +254,7 @@ Additional Arguments:
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{libref.CsProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be($"Project reference `{Path.Combine(TestSetup.ProjectName, "Lib", setup.LibCsprojName)}` removed.");
+            cmd.StdOut.Should().Be($"Project reference `{Path.Combine("Lib", setup.LibCsprojName)}` removed.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore);
             csproj.NumberOfProjectReferencesWithIncludeContaining(libref.Name).Should().Be(0);
@@ -263,8 +263,8 @@ Additional Arguments:
         [Fact]
         public void WhenRefWithoutCondIsNotThereItPrintsMessage()
         {
-            var lib = NewLibWithFrameworks();
             var setup = Setup();
+            var lib = NewLibWithFrameworks(setup.TestRoot);
             var libref = GetLibRef(setup);
 
             string csprojContetntBefore = lib.CsProjContent();
@@ -280,8 +280,8 @@ Additional Arguments:
         [Fact]
         public void WhenRefWithCondIsNotThereItPrintsMessage()
         {
-            var lib = NewLibWithFrameworks();
             var setup = Setup();
+            var lib = NewLibWithFrameworks(setup.TestRoot);
             var libref = GetLibRef(setup);
 
             string csprojContetntBefore = lib.CsProjContent();
@@ -297,8 +297,8 @@ Additional Arguments:
         [Fact]
         public void WhenRefWithAndWithoutCondArePresentAndRemovingNoCondItDoesNotRemoveOther()
         {
-            var lib = NewLibWithFrameworks();
             var setup = Setup();
+            var lib = NewLibWithFrameworks(setup.TestRoot);
             var librefCond = AddLibRef(setup, lib, FrameworkNet451Arg);
             var librefNoCond = AddLibRef(setup, lib);
 
@@ -310,7 +310,7 @@ Additional Arguments:
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{librefNoCond.CsProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be($"Project reference `{Path.Combine(TestSetup.ProjectName, "Lib", setup.LibCsprojName)}` removed.");
+            cmd.StdOut.Should().Be($"Project reference `{Path.Combine("Lib", setup.LibCsprojName)}` removed.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore - 1);
             csproj.NumberOfProjectReferencesWithIncludeContaining(librefNoCond.Name).Should().Be(0);
@@ -322,8 +322,8 @@ Additional Arguments:
         [Fact]
         public void WhenRefWithAndWithoutCondArePresentAndRemovingCondItDoesNotRemoveOther()
         {
-            var lib = NewLibWithFrameworks();
             var setup = Setup();
+            var lib = NewLibWithFrameworks(setup.TestRoot);
             var librefCond = AddLibRef(setup, lib, FrameworkNet451Arg);
             var librefNoCond = AddLibRef(setup, lib);
 
@@ -335,7 +335,7 @@ Additional Arguments:
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg} \"{librefCond.CsProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be($"Project reference `{Path.Combine(TestSetup.ProjectName, "Lib", setup.LibCsprojName)}` removed.");
+            cmd.StdOut.Should().Be($"Project reference `{Path.Combine("Lib", setup.LibCsprojName)}` removed.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore);
             csproj.NumberOfProjectReferencesWithIncludeContaining(librefNoCond.Name).Should().Be(1);
@@ -347,8 +347,8 @@ Additional Arguments:
         [Fact]
         public void WhenRefWithDifferentCondIsPresentItDoesNotRemoveIt()
         {
-            var lib = NewLibWithFrameworks();
             var setup = Setup();
+            var lib = NewLibWithFrameworks(setup.TestRoot);
             var librefCondNet451 = AddLibRef(setup, lib, FrameworkNet451Arg);
             var librefCondNetCoreApp10 = AddLibRef(setup, lib, FrameworkNetCoreApp10Arg);
 
@@ -360,7 +360,7 @@ Additional Arguments:
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg} \"{librefCondNet451.CsProjPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be($"Project reference `{Path.Combine(TestSetup.ProjectName, "Lib", setup.LibCsprojName)}` removed.");
+            cmd.StdOut.Should().Be($"Project reference `{Path.Combine("Lib", setup.LibCsprojName)}` removed.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451).Should().Be(condNet451Before - 1);
             csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(librefCondNet451.Name, ConditionFrameworkNet451).Should().Be(0);
@@ -452,13 +452,13 @@ Project reference `{setup.LibCsprojRelPath}` removed.";
         [Fact]
         public void WhenPassingMultipleReferencesItRemovesThemAll()
         {
-            var lib = NewLibWithFrameworks();
             var setup = Setup();
+            var lib = NewLibWithFrameworks(setup.TestRoot);
             var libref = AddLibRef(setup, lib);
             var validref = AddValidRef(setup, lib);
 
-            string outputText = $@"Project reference `{Path.Combine(TestSetup.ProjectName, "Lib", setup.LibCsprojName)}` removed.
-Project reference `{Path.Combine(TestSetup.ProjectName, setup.ValidRefCsprojRelPath)}` removed.";
+            string outputText = $@"Project reference `{Path.Combine("Lib", setup.LibCsprojName)}` removed.
+Project reference `{Path.Combine(setup.ValidRefCsprojRelPath)}` removed.";
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
             var cmd = new RemoveReferenceCommand()
@@ -476,13 +476,13 @@ Project reference `{Path.Combine(TestSetup.ProjectName, setup.ValidRefCsprojRelP
         [Fact]
         public void WhenPassingMultipleReferencesAndOneOfThemDoesNotExistItRemovesOne()
         {
-            var lib = NewLibWithFrameworks();
             var setup = Setup();
+            var lib = NewLibWithFrameworks(setup.TestRoot);
             var libref = GetLibRef(setup);
             var validref = AddValidRef(setup, lib);
 
             string OutputText = $@"Project reference `{setup.LibCsprojPath}` could not be found.
-Project reference `{Path.Combine(TestSetup.ProjectName, setup.ValidRefCsprojRelPath)}` removed.";
+Project reference `{Path.Combine(setup.ValidRefCsprojRelPath)}` removed.";
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
             var cmd = new RemoveReferenceCommand()

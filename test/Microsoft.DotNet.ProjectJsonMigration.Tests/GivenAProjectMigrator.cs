@@ -19,9 +19,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [Fact]
         public void ItCopiesProjectDirectoryContentsToOutputDirectoryWhenTheDirectoriesAreDifferent()
         {
-            var testProjectDirectory = TestAssetsManager
-                .CreateTestInstance("PJTestAppSimple", callingMethod: "z")
-                .Path;
+            var testProjectDirectory = TestAssets.Get("PJTestAppSimple")
+                        .CreateInstance(callingMethod: "z")
+                        .WithSourceFiles().Root.FullName;
 
             var outputDirectory = Temp.CreateDirectory().Path;
 
@@ -93,9 +93,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [Fact]
         public void ItHasErrorWhenMigratingANonCsharpApp()
         {
-            var testProjectDirectory =
-                TestAssetsManager.CreateTestInstance("FSharpTestProjects/TestApp", callingMethod: "z")
-                    .Path;
+            var testProjectDirectory = TestAssets.Get("FSharpTestProjects")
+                    .CreateInstance(callingMethod: "z")
+                    .WithSourceFiles()
+                    .Root.GetDirectory("TestApp").FullName;
 
             var mockProj = ProjectRootElement.Create();
             var testSettings = MigrationSettings.CreateMigrationSettingsTestHook(testProjectDirectory, testProjectDirectory, mockProj);

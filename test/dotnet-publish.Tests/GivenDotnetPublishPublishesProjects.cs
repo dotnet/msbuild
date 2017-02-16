@@ -19,10 +19,11 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         public void ItPublishesARunnablePortableApp()
         {
             var testAppName = "MSBuildTestApp";
-            var testInstance = TestAssetsManager
-                .CreateTestInstance(testAppName);
+            var testInstance = TestAssets.Get(testAppName)
+                            .CreateInstance()
+                            .WithSourceFiles();
 
-            var testProjectDirectory = testInstance.TestRoot;
+            var testProjectDirectory = testInstance.Root.FullName;
 
             new RestoreCommand()
                 .WithWorkingDirectory(testProjectDirectory)
@@ -87,7 +88,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         [Fact]
         public void ItPublishesAppWhenRestoringToSpecificPackageDirectory()
         {
-            var rootPath = TestAssetsManager.CreateTestDirectory().Path;
+            var rootPath = TestAssets.CreateTestDirectory().FullName;
             var rootDir = new DirectoryInfo(rootPath);
 
             string dir = "pkgs";

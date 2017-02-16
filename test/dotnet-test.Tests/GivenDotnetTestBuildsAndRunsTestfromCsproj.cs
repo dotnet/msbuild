@@ -18,9 +18,11 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         {
             // Copy VSTestDotNetCore project in output directory of project dotnet-vstest.Tests
             string testAppName = "VSTestDotNetCore";
-            TestInstance testInstance = TestAssetsManager.CreateTestInstance(testAppName);
+            var testInstance = TestAssets.Get(testAppName)
+                            .CreateInstance()
+                            .WithSourceFiles();
 
-            string testProjectDirectory = testInstance.TestRoot;
+            var testProjectDirectory = testInstance.Root.FullName;
 
             // Restore project VSTestDotNetCore
             new RestoreCommand()
@@ -46,9 +48,11 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         {
             // Copy VSTestXunitDotNetCore project in output directory of project dotnet-vstest.Tests
             string testAppName = "VSTestXunitDotNetCore";
-            TestInstance testInstance = TestAssetsManager.CreateTestInstance(testAppName);
+            var testInstance = TestAssets.Get(testAppName)
+                            .CreateInstance()
+                            .WithSourceFiles();
 
-            string testProjectDirectory = testInstance.TestRoot;
+            var testProjectDirectory = testInstance.Root.FullName;
 
             // Restore project VSTestXunitDotNetCore
             new RestoreCommand()
@@ -74,9 +78,11 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         {
             // Copy VSTestDotNetCore project in output directory of project dotnet-vstest.Tests
             string testAppName = "VSTestDotNetCore";
-            TestInstance testInstance = TestAssetsManager.CreateTestInstance(testAppName);
+            var testInstance = TestAssets.Get(testAppName)
+                            .CreateInstance()
+                            .WithSourceFiles();
 
-            string testProjectDirectory = testInstance.TestRoot;
+            var testProjectDirectory = testInstance.Root.FullName;
 
             // Restore project VSTestDotNetCore
             new RestoreCommand()
@@ -104,9 +110,11 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         {
             // Copy VSTestDotNetCore project in output directory of project dotnet-vstest.Tests
             string testAppName = "VSTestDotNetCore";
-            TestInstance testInstance = TestAssetsManager.CreateTestInstance(testAppName);
+            var testInstance = TestAssets.Get(testAppName)
+                            .CreateInstance()
+                            .WithSourceFiles();
 
-            string testProjectDirectory = testInstance.TestRoot;
+            var testProjectDirectory = testInstance.Root.FullName;
 
             // Restore project VSTestDotNetCore
             new RestoreCommand()
@@ -118,7 +126,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             string trxLoggerDirectory = Path.Combine(testProjectDirectory, "TestResults");
 
             // Delete trxLoggerDirectory if it exist
-            if(Directory.Exists(trxLoggerDirectory))
+            if (Directory.Exists(trxLoggerDirectory))
             {
                 Directory.Delete(trxLoggerDirectory, true);
             }
@@ -145,9 +153,11 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         {
             // Copy VSTestDotNetCore project in output directory of project dotnet-vstest.Tests
             string testAppName = "VSTestDotNetCore";
-            TestInstance testInstance = TestAssetsManager.CreateTestInstance(testAppName);
+            var testInstance = TestAssets.Get(testAppName)
+                            .CreateInstance()
+                            .WithSourceFiles();
 
-            string testProjectDirectory = testInstance.TestRoot;
+            var testProjectDirectory = testInstance.Root.FullName;
 
             // Restore project VSTestDotNetCore
             new RestoreCommand()

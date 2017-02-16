@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void When_dotnet_new_is_invoked_mupliple_times_it_should_fail()
         {
-            var rootPath = TestAssetsManager.CreateTestDirectory().Path;
+            var rootPath = TestAssets.CreateTestDirectory().FullName;
 
             new NewCommand()
                 .WithWorkingDirectory(rootPath)
@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.New.Tests
         {
             string[] cSharpTemplates = new[] { "console", "classlib", "mstest", "xunit", "web", "mvc", "webapi" };
 
-            var rootPath = TestAssetsManager.CreateTestDirectory().Path;
+            var rootPath = TestAssets.CreateTestDirectory().FullName;
             var packagesDirectory = Path.Combine(rootPath, "packages");
 
             foreach (string cSharpTemplate in cSharpTemplates)
@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void NewClassLibRestoresCorrectNetStandardLibraryVersion()
         {
-            var rootPath = TestAssetsManager.CreateTestDirectory().Path;
+            var rootPath = TestAssets.CreateTestDirectory().FullName;
             var packagesDirectory = Path.Combine(rootPath, "packages");
             var projectName = "Library";
             var projectFileName = $"{projectName}.csproj";

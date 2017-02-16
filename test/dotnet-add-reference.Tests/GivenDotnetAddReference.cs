@@ -49,27 +49,27 @@ Additional Arguments:
 
         private ProjDir NewDir([System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(NewDir), string identifier = "")
         {
-            return new ProjDir(TestAssetsManager.CreateTestDirectory(callingMethod: callingMethod, identifier: identifier).Path);
+            return new ProjDir(TestAssets.CreateTestDirectory(callingMethod: callingMethod, identifier: identifier).FullName);
         }
 
-        private ProjDir NewLib([System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(NewDir), string identifier = "")
+        private ProjDir NewLib(string dir = null, [System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(NewDir), string identifier = "")
         {
-            var dir = NewDir(callingMethod: callingMethod, identifier: identifier);
+            var projDir = dir == null ? NewDir(callingMethod: callingMethod, identifier: identifier) : new ProjDir(dir);
 
             try
             {
-                string args = $"classlib -o \"{dir.Path}\" --debug:ephemeral-hive";
+                string args = $"classlib -o \"{projDir.Path}\" --debug:ephemeral-hive";
                 new NewCommandShim()
-                    .WithWorkingDirectory(dir.Path)
+                    .WithWorkingDirectory(projDir.Path)
                     .ExecuteWithCapturedOutput(args)
                 .Should().Pass();
             }
             catch (System.ComponentModel.Win32Exception e)
             {
-                throw new Exception($"Intermittent error in `dotnet new` occurred when running it in dir `{dir.Path}`\nException:\n{e}");
+                throw new Exception($"Intermittent error in `dotnet new` occurred when running it in dir `{projDir.Path}`\nException:\n{e}");
             }
 
-            return dir;
+            return projDir;
         }
 
         private static void SetTargetFrameworks(ProjDir proj, string[] frameworks)
@@ -79,9 +79,9 @@ Additional Arguments:
             csproj.Save();
         }
 
-        private ProjDir NewLibWithFrameworks([System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(NewDir), string identifier = "")
+        private ProjDir NewLibWithFrameworks(string dir = null, [System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(NewDir), string identifier = "")
         {
-            var ret = NewLib(callingMethod: callingMethod, identifier: identifier);
+            var ret = NewLib(dir, callingMethod: callingMethod, identifier: identifier);
             SetTargetFrameworks(ret, DefaultFrameworks);
             return ret;
         }
@@ -179,8 +179,8 @@ Additional Arguments:
         [Fact]
         public void ItAddsRefWithoutCondAndPrintsStatus()
         {
-            var lib = NewLibWithFrameworks();
             var setup = Setup();
+            var lib = NewLibWithFrameworks(dir: setup.TestRoot);
             
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
             var cmd = new AddReferenceCommand()
@@ -188,7 +188,7 @@ Additional Arguments:
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be("Reference `DotnetAddP2PProjects\\ValidRef\\ValidRef.csproj` added to the project.");
+            cmd.StdOut.Should().Be("Reference `ValidRef\\ValidRef.csproj` added to the project.");
             cmd.StdErr.Should().BeEmpty();
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
@@ -198,8 +198,8 @@ Additional Arguments:
         [Fact]
         public void ItAddsRefWithCondAndPrintsStatus()
         {
-            var lib = NewLibWithFrameworks();
             var setup = Setup();
+            var lib = NewLibWithFrameworks(dir: setup.TestRoot);
 
             int condBefore = lib.CsProj().NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451);
             var cmd = new AddReferenceCommand()
@@ -207,7 +207,7 @@ Additional Arguments:
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg} \"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be("Reference `DotnetAddP2PProjects\\ValidRef\\ValidRef.csproj` added to the project.");
+            cmd.StdOut.Should().Be("Reference `ValidRef\\ValidRef.csproj` added to the project.");
             cmd.StdErr.Should().BeEmpty();
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451).Should().Be(condBefore + 1);
@@ -217,8 +217,8 @@ Additional Arguments:
         [Fact]
         public void WhenRefWithoutCondIsPresentItAddsDifferentRefWithoutCond()
         {
-            var lib = NewLibWithFrameworks();
             var setup = Setup();
+            var lib = NewLibWithFrameworks(dir: setup.TestRoot);
 
             new AddReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
@@ -232,7 +232,7 @@ Additional Arguments:
                 .WithProject(lib.CsProjName)
                 .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be("Reference `DotnetAddP2PProjects\\ValidRef\\ValidRef.csproj` added to the project.");
+            cmd.StdOut.Should().Be("Reference `ValidRef\\ValidRef.csproj` added to the project.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore);
             csproj.NumberOfProjectReferencesWithIncludeContaining(setup.ValidRefCsprojName).Should().Be(1);
@@ -241,8 +241,8 @@ Additional Arguments:
         [Fact]
         public void WhenRefWithCondIsPresentItAddsDifferentRefWithCond()
         {
-            var lib = NewLibWithFrameworks();
             var setup = Setup();
+            var lib = NewLibWithFrameworks(dir: setup.TestRoot);
 
             new AddReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
@@ -256,7 +256,7 @@ Additional Arguments:
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg} \"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be("Reference `DotnetAddP2PProjects\\ValidRef\\ValidRef.csproj` added to the project.");
+            cmd.StdOut.Should().Be("Reference `ValidRef\\ValidRef.csproj` added to the project.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451).Should().Be(condBefore);
             csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(setup.ValidRefCsprojName, ConditionFrameworkNet451).Should().Be(1);
@@ -265,8 +265,8 @@ Additional Arguments:
         [Fact]
         public void WhenRefWithCondIsPresentItAddsRefWithDifferentCond()
         {
-            var lib = NewLibWithFrameworks();
             var setup = Setup();
+            var lib = NewLibWithFrameworks(dir: setup.TestRoot);
 
             new AddReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
@@ -280,7 +280,7 @@ Additional Arguments:
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg} \"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be("Reference `DotnetAddP2PProjects\\ValidRef\\ValidRef.csproj` added to the project.");
+            cmd.StdOut.Should().Be("Reference `ValidRef\\ValidRef.csproj` added to the project.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451).Should().Be(condBefore + 1);
             csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(setup.ValidRefCsprojName, ConditionFrameworkNet451).Should().Be(1);
@@ -289,8 +289,8 @@ Additional Arguments:
         [Fact]
         public void WhenRefWithConditionIsPresentItAddsDifferentRefWithoutCond()
         {
-            var lib = NewLibWithFrameworks();
             var setup = Setup();
+            var lib = NewLibWithFrameworks(dir: setup.TestRoot);
 
             new AddReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
@@ -304,7 +304,7 @@ Additional Arguments:
                 .WithProject(lib.CsProjPath)
                 .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be("Reference `DotnetAddP2PProjects\\ValidRef\\ValidRef.csproj` added to the project.");
+            cmd.StdOut.Should().Be("Reference `ValidRef\\ValidRef.csproj` added to the project.");
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
             csproj.NumberOfProjectReferencesWithIncludeContaining(setup.ValidRefCsprojName).Should().Be(1);
@@ -313,8 +313,8 @@ Additional Arguments:
         [Fact]
         public void WhenRefWithNoCondAlreadyExistsItDoesntDuplicate()
         {
-            var lib = NewLibWithFrameworks();
             var setup = Setup();
+            var lib = NewLibWithFrameworks(dir: setup.TestRoot);
 
             new AddReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
@@ -328,7 +328,7 @@ Additional Arguments:
                 .WithProject(lib.CsProjName)
                 .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be("Project already has a reference to `DotnetAddP2PProjects\\ValidRef\\ValidRef.csproj`.");
+            cmd.StdOut.Should().Be("Project already has a reference to `ValidRef\\ValidRef.csproj`.");
 
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore);
@@ -354,8 +354,8 @@ Additional Arguments:
         [Fact]
         public void WhenRefWithCondOnItemGroupAlreadyExistsItDoesntDuplicate()
         {
-            var lib = NewLibWithFrameworks();
             var setup = Setup();
+            var lib = NewLibWithFrameworks(dir: setup.TestRoot);
 
             new AddReferenceCommand()
                 .WithWorkingDirectory(setup.TestRoot)
@@ -369,7 +369,7 @@ Additional Arguments:
                 .WithProject(lib.CsProjPath)
                 .Execute($"{FrameworkNet451Arg} \"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be("Project already has a reference to `DotnetAddP2PProjects\\ValidRef\\ValidRef.csproj`.");
+            cmd.StdOut.Should().Be("Project already has a reference to `ValidRef\\ValidRef.csproj`.");
             lib.CsProjContent().Should().BeEquivalentTo(csprojContentBefore);
         }
 
@@ -478,11 +478,11 @@ Additional Arguments:
         [Fact]
         public void ItAddsMultipleRefsNoCondToTheSameItemGroup()
         {
-            const string OutputText = @"Reference `DotnetAddP2PProjects\Lib\Lib.csproj` added to the project.
-Reference `DotnetAddP2PProjects\ValidRef\ValidRef.csproj` added to the project.";
+            const string OutputText = @"Reference `Lib\Lib.csproj` added to the project.
+Reference `ValidRef\ValidRef.csproj` added to the project.";
 
-            var lib = NewLibWithFrameworks();
             var setup = Setup();
+            var lib = NewLibWithFrameworks(dir: setup.TestRoot);
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
             var cmd = new AddReferenceCommand()
@@ -500,11 +500,11 @@ Reference `DotnetAddP2PProjects\ValidRef\ValidRef.csproj` added to the project."
         [Fact]
         public void ItAddsMultipleRefsWithCondToTheSameItemGroup()
         {
-            const string OutputText = @"Reference `DotnetAddP2PProjects\Lib\Lib.csproj` added to the project.
-Reference `DotnetAddP2PProjects\ValidRef\ValidRef.csproj` added to the project.";
+            const string OutputText = @"Reference `Lib\Lib.csproj` added to the project.
+Reference `ValidRef\ValidRef.csproj` added to the project.";
 
-            var lib = NewLibWithFrameworks();
             var setup = Setup();
+            var lib = NewLibWithFrameworks(dir: setup.TestRoot);
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451);
             var cmd = new AddReferenceCommand()
@@ -522,15 +522,15 @@ Reference `DotnetAddP2PProjects\ValidRef\ValidRef.csproj` added to the project."
         [Fact]
         public void WhenProjectNameIsNotPassedItFindsItAndAddsReference()
         {
-            var lib = NewLibWithFrameworks();
             var setup = Setup();
+            var lib = NewLibWithFrameworks(dir: setup.TestRoot);
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
             var cmd = new AddReferenceCommand()
                 .WithWorkingDirectory(lib.Path)
                 .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be("Reference `DotnetAddP2PProjects\\ValidRef\\ValidRef.csproj` added to the project.");
+            cmd.StdOut.Should().Be("Reference `ValidRef\\ValidRef.csproj` added to the project.");
             cmd.StdErr.Should().BeEmpty();
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);
@@ -571,8 +571,8 @@ Reference `DotnetAddP2PProjects\ValidRef\ValidRef.csproj` added to the project."
         [Fact]
         public void WhenPassedReferenceIsUsingSlashesItNormalizesItToBackslashes()
         {
-            var lib = NewLibWithFrameworks();
             var setup = Setup();
+            var lib = NewLibWithFrameworks(dir: setup.TestRoot);
 
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
             var cmd = new AddReferenceCommand()
@@ -580,7 +580,7 @@ Reference `DotnetAddP2PProjects\ValidRef\ValidRef.csproj` added to the project."
                 .WithProject(lib.CsProjName)
                 .Execute($"\"{setup.ValidRefCsprojPath.Replace('\\', '/')}\"");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be("Reference `DotnetAddP2PProjects\\ValidRef\\ValidRef.csproj` added to the project.");
+            cmd.StdOut.Should().Be("Reference `ValidRef\\ValidRef.csproj` added to the project.");
             cmd.StdErr.Should().BeEmpty();
             var csproj = lib.CsProj();
             csproj.NumberOfItemGroupsWithoutCondition().Should().Be(noCondBefore + 1);

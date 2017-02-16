@@ -191,7 +191,7 @@
       </RemoveDuplicates>
 
       <!-- Ensure crossgen tool is executable.  See https://github.com/NuGet/Home/issues/4424 -->
-      <Chmod Condition=" '$(OSName)' != 'win' "
+      <Chmod Condition=" '$(OSName)' != 'win' And '$(DISABLE_CROSSGEN)' != '1' "
              File="$(CrossgenPath)"
              Mode="u+x" />
 
