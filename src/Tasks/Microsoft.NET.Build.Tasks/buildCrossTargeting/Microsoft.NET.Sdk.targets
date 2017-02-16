@@ -63,7 +63,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
 
     <MSBuild Projects="$(MSBuildProjectFile)"
-             Condition="'$(TargetFrameworks)' != ''"
              Targets="GetAllRuntimeIdentifiers"
              Properties="TargetFramework=%(_GetAllRuntimeIdentifiersTargetFrameworks.Identity)">
       <Output ItemName="_AllRuntimeIdentifiers" TaskParameter="TargetOutputs" />
