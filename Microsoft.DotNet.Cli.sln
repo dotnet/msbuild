@@ -24,50 +24,50 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestPackages", "TestPackage
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{89905EC4-BC0F-443B-8ADF-691321F10108}"
 	ProjectSection(SolutionItems) = preProject
-		build\Microsoft.DotNet.Cli.Branding.props = build\Microsoft.DotNet.Cli.Branding.props
-		build\Microsoft.DotNet.Cli.BranchInfo.props = build\Microsoft.DotNet.Cli.BranchInfo.props
-		build\Microsoft.DotNet.Cli.BuildDefaults.props = build\Microsoft.DotNet.Cli.BuildDefaults.props
-		build\Microsoft.DotNet.Cli.BundledSdks.proj = build\Microsoft.DotNet.Cli.BundledSdks.proj
+		build\Branding.props = build\Branding.props
+		build\BranchInfo.props = build\BranchInfo.props
+		build\BuildDefaults.props = build\BuildDefaults.props
+		build\BundledSdks.proj = build\BundledSdks.proj
 		build\Microsoft.DotNet.Cli.BundledRuntimes.props = build\Microsoft.DotNet.Cli.BundledRuntimes.props
-		build\Microsoft.DotNet.Cli.BundledSdks.props = build\Microsoft.DotNet.Cli.BundledSdks.props
-		build\Microsoft.DotNet.Cli.BundledTemplates.proj = build\Microsoft.DotNet.Cli.BundledTemplates.proj
-		build\Microsoft.DotNet.Cli.BundledTemplates.props = build\Microsoft.DotNet.Cli.BundledTemplates.props
-		build\Microsoft.DotNet.Cli.Compile.targets = build\Microsoft.DotNet.Cli.Compile.targets
-		build\Microsoft.DotNet.Cli.CoreSetupInfo.props = build\Microsoft.DotNet.Cli.CoreSetupInfo.props
+		build\BundledSdks.props = build\BundledSdks.props
+		build\BundledTemplates.proj = build\BundledTemplates.proj
+		build\BundledTemplates.props = build\BundledTemplates.props
+		build\Compile.targets = build\Compile.targets
+		build\CoreSetupInfo.props = build\CoreSetupInfo.props
 		build\Microsoft.DotNet.Cli.DependencyVersions.props = build\Microsoft.DotNet.Cli.DependencyVersions.props
-		build\Microsoft.DotNet.Cli.FileExtensions.props = build\Microsoft.DotNet.Cli.FileExtensions.props
-		build\Microsoft.DotNet.Cli.GitCommitInfo.targets = build\Microsoft.DotNet.Cli.GitCommitInfo.targets
-		build\Microsoft.DotNet.Cli.HostInfo.targets = build\Microsoft.DotNet.Cli.HostInfo.targets
-		build\Microsoft.DotNet.Cli.InitRepo.props = build\Microsoft.DotNet.Cli.InitRepo.props
-		build\Microsoft.DotNet.Cli.InitRepo.targets = build\Microsoft.DotNet.Cli.InitRepo.targets
-		build\Microsoft.DotNet.Cli.InputDirectories.props = build\Microsoft.DotNet.Cli.InputDirectories.props
-		build\Microsoft.DotNet.Cli.OutputDirectories.props = build\Microsoft.DotNet.Cli.OutputDirectories.props
-		build\Microsoft.DotNet.Cli.Package.targets = build\Microsoft.DotNet.Cli.Package.targets
-		build\Microsoft.DotNet.Cli.Prepare.targets = build\Microsoft.DotNet.Cli.Prepare.targets
-		build\Microsoft.DotNet.Cli.Publish.targets = build\Microsoft.DotNet.Cli.Publish.targets
-		build\Microsoft.DotNet.Cli.Run.targets = build\Microsoft.DotNet.Cli.Run.targets
-		build\Microsoft.DotNet.Cli.Signing.proj = build\Microsoft.DotNet.Cli.Signing.proj
-		build\Microsoft.DotNet.Cli.Stage0.props = build\Microsoft.DotNet.Cli.Stage0.props
-		build\Microsoft.DotNet.Cli.tasks = build\Microsoft.DotNet.Cli.tasks
-		build\Microsoft.DotNet.Cli.Test.targets = build\Microsoft.DotNet.Cli.Test.targets
-		build\Microsoft.DotNet.Cli.Version.props = build\Microsoft.DotNet.Cli.Version.props
-		build\Microsoft.DotNet.Cli.VersionBadge.props = build\Microsoft.DotNet.Cli.VersionBadge.props
+		build\FileExtensions.props = build\FileExtensions.props
+		build\GitCommitInfo.targets = build\GitCommitInfo.targets
+		build\HostInfo.targets = build\HostInfo.targets
+		build\InitRepo.props = build\InitRepo.props
+		build\InitRepo.targets = build\InitRepo.targets
+		build\InputDirectories.props = build\InputDirectories.props
+		build\OutputDirectories.props = build\OutputDirectories.props
+		build\Package.targets = build\Package.targets
+		build\Prepare.targets = build\Prepare.targets
+		build\Publish.targets = build\Publish.targets
+		build\Run.targets = build\Run.targets
+		build\Signing.proj = build\Signing.proj
+		build\Stage0.props = build\Stage0.props
+		build\tasks = build\tasks
+		build\Test.targets = build\Test.targets
+		build\Version.props = build\Version.props
+		build\VersionBadge.props = build\VersionBadge.props
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "package", "package", "{FD7D515A-D10F-4F49-B8AE-21CF7ED071AE}"
 	ProjectSection(SolutionItems) = preProject
-		build\package\Microsoft.DotNet.Cli.Archive.targets = build\package\Microsoft.DotNet.Cli.Archive.targets
-		build\package\Microsoft.DotNet.Cli.Installer.DEB.proj = build\package\Microsoft.DotNet.Cli.Installer.DEB.proj
-		build\package\Microsoft.DotNet.Cli.Installer.DEB.targets = build\package\Microsoft.DotNet.Cli.Installer.DEB.targets
-		build\package\Microsoft.DotNet.Cli.Installer.MSI.targets = build\package\Microsoft.DotNet.Cli.Installer.MSI.targets
-		build\package\Microsoft.DotNet.Cli.Installer.PKG.targets = build\package\Microsoft.DotNet.Cli.Installer.PKG.targets
-		build\package\Microsoft.DotNet.Cli.Layout.targets = build\package\Microsoft.DotNet.Cli.Layout.targets
-		build\package\Microsoft.DotNet.Cli.Nupkg.targets = build\package\Microsoft.DotNet.Cli.Nupkg.targets
+		build\package\Archive.targets = build\package\Archive.targets
+		build\package\Installer.DEB.proj = build\package\Installer.DEB.proj
+		build\package\Installer.DEB.targets = build\package\Installer.DEB.targets
+		build\package\Installer.MSI.targets = build\package\Installer.MSI.targets
+		build\package\Installer.PKG.targets = build\package\Installer.PKG.targets
+		build\package\Layout.targets = build\package\Layout.targets
+		build\package\Nupkg.targets = build\package\Nupkg.targets
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "compile", "compile", "{8E3354BD-827F-41B7-9EE6-6BE1F1EDD8E9}"
 	ProjectSection(SolutionItems) = preProject
-		build\compile\Microsoft.DotNet.Cli.LzmaArchive.targets = build\compile\Microsoft.DotNet.Cli.LzmaArchive.targets
+		build\compile\LzmaArchive.targets = build\compile\LzmaArchive.targets
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{FF498306-2DE2-47F6-8C35-3CF0589CF2B8}"
@@ -81,8 +81,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "publish", "publish", "{27B12960-ABB0-4903-9C60-5E9157E659C8}"
 	ProjectSection(SolutionItems) = preProject
 		build\publish\FinishBuild.targets = build\publish\FinishBuild.targets
-		build\publish\Microsoft.DotNet.Cli.Badge.targets = build\publish\Microsoft.DotNet.Cli.Badge.targets
-		build\publish\Microsoft.DotNet.Cli.Checksum.targets = build\publish\Microsoft.DotNet.Cli.Checksum.targets
+		build\publish\Badge.targets = build\publish\Badge.targets
+		build\publish\Checksum.targets = build\publish\Checksum.targets
 		build\publish\PublishContent.targets = build\publish\PublishContent.targets
 	EndProjectSection
 EndProject
@@ -90,7 +90,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dotnet-cli-build", "build_p
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crossgen", "crossgen", "{19AC02B7-6D2C-4C2B-A410-9D4A59CE0E47}"
 	ProjectSection(SolutionItems) = preProject
-		build\crossgen\Microsoft.DotNet.Cli.Crossgen.targets = build\crossgen\Microsoft.DotNet.Cli.Crossgen.targets
+		build\crossgen\Crossgen.targets = build\crossgen\Crossgen.targets
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "prepare", "prepare", "{2BDC1BC2-867E-47C0-BAD0-ADE897F07F78}"

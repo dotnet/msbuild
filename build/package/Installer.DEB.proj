@@ -3,7 +3,7 @@
 
   <UsingTask TaskName="DotNetDebTool" AssemblyFile="$(CLIBuildDll)" />
 
-  <Import Project="Microsoft.DotNet.Cli.Installer.DEB.targets" />
+  <Import Project="Installer.DEB.targets" />
 
   <Target Name="GenerateDebs"
           DependsOnTargets="SetupDebProps;
@@ -156,7 +156,7 @@
   </Target>
 
   <Target Name="WriteDotnetDebToolProjectJson"
-          Inputs="$(MSBuildThisFile);$(MSBuildThisFileDirectory)/Microsoft.DotNet.Cli.Installer.DEB.props"
+          Inputs="$(MSBuildThisFile);$(MSBuildThisFileDirectory)/Installer.DEB.props"
           Outputs="$(DotnetDebToolDir)/project.json">
 
     <MakeDir Condition=" !Exists($(DotnetDebToolDir)) " 
