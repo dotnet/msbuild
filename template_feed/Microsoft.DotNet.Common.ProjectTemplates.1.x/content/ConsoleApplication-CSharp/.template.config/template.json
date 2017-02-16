@@ -5,27 +5,13 @@
   "groupIdentity": "Microsoft.Common.Console",
   "identity": "Microsoft.Common.Console.CSharp",
   "shortName": "console",
+  "tags" : {
+    "language": "C#",
+    "type": "project"
+  },
   "sourceName": "Company.ConsoleApplication1",
   "preferNameDirectory": true,
   "symbols": {
-    "type": {
-      "type": "parameter",
-      "datatype": "choice",
-      "choices": [
-        {
-          "choice": "project"
-        }
-      ]
-    },
-    "language": {
-      "type": "parameter",
-      "datatype": "choice",
-      "choices": [
-        {
-          "choice": "C#"
-        }
-      ]
-    },
     "sdkVersion": {
       "type": "bind",
       "binding": "dotnet-cli-version",

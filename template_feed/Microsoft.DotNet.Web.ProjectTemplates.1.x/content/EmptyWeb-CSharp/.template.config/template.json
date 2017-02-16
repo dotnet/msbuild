@@ -5,27 +5,13 @@
   "groupIdentity": "Microsoft.Web.Empty",
   "identity": "Microsoft.Web.Empty.CSharp",
   "shortName": "web",
+  "tags" : {
+    "language": "C#",
+    "type": "project"
+  },
   "sourceName": "Company.WebApplication1",
   "preferNameDirectory": true,
   "symbols": {
-    "type": {
-      "type": "parameter",
-      "datatype": "choice",
-      "choices": [
-        {
-          "choice": "project"
-        }
-      ]
-    },
-    "language": {
-      "type": "parameter",
-      "datatype": "choice",
-      "choices": [
-        {
-          "choice": "C#"
-        }
-      ]
-    },
     "IncludeApplicationInsights": {
       "type": "parameter",
       "datatype": "bool",

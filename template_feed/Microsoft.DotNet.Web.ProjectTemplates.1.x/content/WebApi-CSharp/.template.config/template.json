@@ -5,27 +5,13 @@
   "groupIdentity": "Microsoft.Web.WebApi",
   "identity": "Microsoft.Web.WebApi.CSharp",
   "shortName": "webapi",
+  "tags" : {
+    "language": "C#",
+    "type": "project"
+  },
   "sourceName": "Company.WebApplication1",
   "preferNameDirectory": true,
   "symbols": {
-    "type": {
-      "type": "parameter",
-      "datatype": "choice",
-      "choices": [
-        {
-          "choice": "project"
-        }
-      ]
-    },
-    "language": {
-      "type": "parameter",
-      "datatype": "choice",
-      "choices": [
-        {
-          "choice": "C#"
-        }
-      ]
-    },
     "IncludeApplicationInsights": {
       "type": "parameter",
       "datatype": "bool",
