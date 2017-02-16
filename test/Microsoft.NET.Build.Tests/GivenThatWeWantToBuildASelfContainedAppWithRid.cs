@@ -18,6 +18,14 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_builds_a_RID_specific_runnable_output()
         {
+            if (UsingFullFrameworkMSBuild)
+            {
+                //  Disable this test on full framework, as the current build won't have access to 
+                //  https://github.com/Microsoft/msbuild/pull/1674
+                //  See https://github.com/dotnet/sdk/issues/877
+                return;
+            }
+
             var runtimeIdentifier = RuntimeEnvironment.GetRuntimeIdentifier();
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibraryAndRid")
