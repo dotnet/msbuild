@@ -8,8 +8,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NoCompatibleTargetFramework">
-        <source>Project '{0}' has no target framework compatible with '{1}'.</source>
-        <note />
+        <source>Project '{0}' targets '{2}'. It cannot be referenced by a project that targets '{1}'.</source>
+        <note></note>
       </trans-unit>
       <trans-unit id="InvalidFrameworkName">
         <source>Invalid framework name: '{0}'.</source>
@@ -77,10 +77,6 @@
       </trans-unit>
       <trans-unit id="UnexpectedDependencyWithNoVersionNumber">
         <source>Unexpected dependency '{0}' with no version number.</source>
-        <note />
-      </trans-unit>
-      <trans-unit id="RuntimeIdentifierMustBeSetForNETFramework">
-        <source>RuntimeIdentifier must be set for .NETFramework executables. Consider RuntimeIdentifier=win7-x86 or RuntimeIdentifier=win7-x64.</source>
         <note />
       </trans-unit>
       <trans-unit id="AssetPreprocessorMustBeConfigured">
