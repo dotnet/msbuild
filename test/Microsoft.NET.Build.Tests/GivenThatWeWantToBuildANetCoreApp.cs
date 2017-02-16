@@ -77,9 +77,17 @@ namespace Microsoft.NET.Build.Tests
             netCoreAppLibrary.Version.ToString().Should().Be(expectedPackageVersion);
         }
 
-        //[Fact(Skip = "https://github.com/dotnet/sdk/issues/874")]
+        [Fact]
         public void It_restores_only_ridless_tfm()
         {
+            //  Disable this test when using full Framework MSBuild, until MSBuild is updated 
+            //  to provide conditions in NuGet ImportBefore/ImportAfter props/targets
+            //  https://github.com/dotnet/sdk/issues/874
+            if (UsingFullFrameworkMSBuild)
+            {
+                return;
+            }
+
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
                 .WithSource()
