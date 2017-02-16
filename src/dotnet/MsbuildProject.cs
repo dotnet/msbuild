@@ -174,7 +174,7 @@ namespace Microsoft.DotNet.Tools
             return false;
         }
 
-        public bool IsTargettingFramework(NuGetFramework framework)
+        public bool IstargetingFramework(NuGetFramework framework)
         {
             foreach (var tfm in GetTargetFrameworks())
             {

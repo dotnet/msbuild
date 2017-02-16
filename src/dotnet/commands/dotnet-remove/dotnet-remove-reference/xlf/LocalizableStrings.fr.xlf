@@ -14,7 +14,7 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
-        <source>Remove reference only when targetting a specific framework</source>
+        <source>Remove reference only when targeting a specific framework</source>
         <target state="translated">Supprimer la référence uniquement en cas de ciblage d'un framework spécifique</target>
         <note />
       </trans-unit>

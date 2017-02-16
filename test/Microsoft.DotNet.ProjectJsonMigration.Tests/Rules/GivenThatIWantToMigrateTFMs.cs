@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 {
     public class GivenThatIWantToMigrateTFMs : TestBase
     {
-        [Fact(Skip="Emitting this until x-targetting full support is in")]
+        [Fact(Skip="Emitting this until x-targeting full support is in")]
         public void MigratingNetcoreappProjectDoesNotPopulateTargetFrameworkIdentifierAndTargetFrameworkVersion()
         {
             var testDirectory = Temp.CreateDirectory().Path;

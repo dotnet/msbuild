@@ -223,7 +223,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void MigratingScriptsWithMultiTFMCreatesTargetWithIsCrossTargettingBuildNotEqualTrueCondition()
+        public void MigratingScriptsWithMultiTFMCreatesTargetWithIsCrosstargetingBuildNotEqualTrueCondition()
         {
             var scriptMigrationRule = new MigrateScriptsRule();
             ProjectRootElement mockProj = ProjectRootElement.Create();
@@ -241,7 +241,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Fact]
-        public void MigratingScriptsWithSingleTFMDoesNotCreateTargetWithIsCrossTargettingBuild()
+        public void MigratingScriptsWithSingleTFMDoesNotCreateTargetWithIsCrosstargetingBuild()
         {
             var scriptMigrationRule = new MigrateScriptsRule();
             ProjectRootElement mockProj = ProjectRootElement.Create();
