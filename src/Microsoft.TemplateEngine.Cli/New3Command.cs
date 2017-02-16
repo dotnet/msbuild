@@ -292,6 +292,7 @@ namespace Microsoft.TemplateEngine.Cli
                 case CreationResultStatus.OperationNotSpecified:
                     break;
                 case CreationResultStatus.InvalidParamValues:
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.InvalidParameterValues, instantiateResult.Message, resultTemplateName).Bold().Red());
                     ShowTemplateHelp(template);
                     break;
                 default:
@@ -604,6 +605,7 @@ namespace Microsoft.TemplateEngine.Cli
             catch (CommandParserException ex)
             {
                 Reporter.Error.WriteLine(ex.Message.Bold().Red());
+                ShowUsageHelp();
                 return CreationResultStatus.InvalidParamValues;
             }
 
@@ -616,6 +618,7 @@ namespace Microsoft.TemplateEngine.Cli
                 catch (CommandParserException ex)
                 {
                     Reporter.Error.WriteLine(ex.Message.Bold().Red());
+                    ShowUsageHelp();
                     return CreationResultStatus.InvalidParamValues;
                 }
             }

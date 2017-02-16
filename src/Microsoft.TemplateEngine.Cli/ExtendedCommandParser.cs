@@ -236,6 +236,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 extraArgFileNames = new List<string>();
             }
+
             IReadOnlyDictionary<string, IList<string>> allParameters = _app.ParseExtraArgs(extraArgFileNames);
 
             foreach (KeyValuePair<string, IList<string>> param in allParameters)

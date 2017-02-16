@@ -11,6 +11,8 @@ namespace Microsoft.TemplateEngine.Cli
 
         public const string ParameterNamePrefixError = "Parameter names must start with -- or -.";
 
+        public const string MultipleArgsSpecifiedError = "Template name is the only allowed argument. Invalid argument: [{0}].";
+
         public const string ParameterReuseError = "Parameter name {0} cannot be used for multiple purposes.";
 
         public const string MultipleValuesSpecifiedForSingleValuedParameter = "Multiple values specified for single value parameter: {0}.";
@@ -65,11 +67,15 @@ namespace Microsoft.TemplateEngine.Cli
 
         public const string MissingRequiredParameter = "Mandatory parameter {0} missing for template {1}.";
 
-        public const string InvalidParameterValues = "Error: Invalid values for parameter(s) [{0}] for template {1}.";
+        public const string InvalidParameterValues = "Error: Invalid values for parameter(s) [{0}] for template [{1}].";
 
         public const string GettingReady = "Getting ready...";
 
         public const string InvalidInputSwitch = "Invalid input switch:";
+
+        public const string ArgsFileNotFound = "The specified extra args file does not exist: [{0}].";
+
+        public const string ArgsFileWrongFormat = "Extra args file [{0}] is not formatted properly.";
 
         public const string CheckingForUpdates = "Checking for updates for {0}...";
 
