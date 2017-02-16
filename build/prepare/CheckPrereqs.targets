@@ -5,8 +5,7 @@
   <Import Project="CentosCoreclrAndCoreFxDependencies.props" />
 
   <Target Name="CheckPrereqs"
-      DependsOnTargets="InitializeCommonProps;
-                        CheckUbuntuAptGetDependencies;
+      DependsOnTargets="CheckUbuntuAptGetDependencies;
                         CheckCentOsYumDependencies;">
 
     <Message Text="Using Stage0 version:" />
