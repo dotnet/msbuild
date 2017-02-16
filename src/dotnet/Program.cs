@@ -50,7 +50,6 @@ namespace Microsoft.DotNet.Cli
             ["publish"] = PublishCommand.Run,
             ["remove"] = RemoveCommand.Run,
             ["restore"] = RestoreCommand.Run,
-            ["restore-projectjson"] = RestoreProjectJsonCommand.Run,
             ["run"] = RunCommand.Run,
             ["sln"] = SlnCommand.Run,
             ["test"] = TestCommand.Run,
