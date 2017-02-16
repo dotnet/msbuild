@@ -12,7 +12,7 @@ This version of MSBuild closely aligns to the version that ships with Visual Stu
 ## Getting the code
 
 1. Clone the repo: `git clone https://github.com/Microsoft/msbuild.git`
-2. Restore NuGet packages: `msbuild /t:BulkRestoreNugetPackages build.proj`
+2. Build on the command line: `cibuild.cmd --target Full --scope Compile --bootstrap-only`
 3. Open the solution file in Visual Studio 2015 (`src/MSBuild.sln`).
 
 # Running Unit Tests
