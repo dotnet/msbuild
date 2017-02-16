@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard1.4</TargetFramework>
+    <RuntimeIdentifier>$(TestRuntimeIdentifier)</RuntimeIdentifier>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Description>'$(RuntimeIdentifier)'</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="SQLite">
+      <Version>3.13.0</Version>
+    </PackageReference>
+  </ItemGroup>
+</Project>

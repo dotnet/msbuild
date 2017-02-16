@@ -182,3 +182,6 @@ project.json.template
 # Ignore Generated project template files 
 Project.csproj
 Project.vbproj
+
+# VS Code
+.vscode/
