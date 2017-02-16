@@ -11,6 +11,7 @@
 
   <!-- Dependencies from test projects -->
   <PropertyGroup>
+    <MicrosoftNETCoreApp20Version>2.0.0-beta-001509-00</MicrosoftNETCoreApp20Version>
     <xunitVersion>2.1.0</xunitVersion>
     <FluentAssertionsVersion>4.0.0</FluentAssertionsVersion>
     <FluentAssertionsJsonVersion>4.12.0</FluentAssertionsJsonVersion>
