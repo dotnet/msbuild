@@ -36,7 +36,11 @@ namespace TestApp
 
         static ProcessorArchitecture GetCurrentAssemblyProcessorArchitecture()
         {
+#if NET46
             return AssemblyName.GetAssemblyName(typeof(Program).Assembly.Location).ProcessorArchitecture;
+#else
+            throw new PlatformNotSupportedException();
+#endif
         }
     }
 }

@@ -59,37 +59,46 @@ namespace Microsoft.NET.Build.Tests
                 return;
             }
 
-            var testAsset = _testAssetsManager
-               .CopyTestAsset("DesktopMinusRid", identifier: Path.DirectorySeparatorChar + identifier)
-               .WithSource()
-               .WithProjectChanges(project =>
-               {
-                   var ns = project.Root.Name.Namespace;
-                   var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                   propertyGroup.Add(new XElement(ns + "UseNativeCode", useNativeCode));
-
-                   if (platformTarget != null)
+            foreach (bool multiTarget in new[] { false, true })
+            {
+                var testAsset = _testAssetsManager
+                   .CopyTestAsset("DesktopMinusRid", identifier: Path.DirectorySeparatorChar + identifier + (multiTarget ? "Multi" : ""))
+                   .WithSource()
+                   .WithProjectChanges(project =>
                    {
-                       propertyGroup.Add(new XElement(ns + "PlatformTarget", platformTarget));
-                   }
-               })
-              .Restore();
+                       var ns = project.Root.Name.Namespace;
+                       var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                       propertyGroup.Add(new XElement(ns + "UseNativeCode", useNativeCode));
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, testAsset.TestRoot);
-            buildCommand
-                .Execute()
-                .Should()
-                .Pass();
+                       if (platformTarget != null)
+                       {
+                           propertyGroup.Add(new XElement(ns + "PlatformTarget", platformTarget));
+                       }
 
-            var exe = Path.Combine(buildCommand.GetOutputDirectory("net46").FullName, "DesktopMinusRid.exe");
-            var runCommand = Command.Create(exe, Array.Empty<string>());
-            runCommand
-                .CaptureStdOut()
-                .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining(expectedProgramOutput);
+                       if (multiTarget)
+                       {
+                           propertyGroup.Element(ns + "TargetFramework").Remove();
+                           propertyGroup.Add(new XElement(ns + "TargetFrameworks", "net46;netcoreapp1.1"));
+                       }
+                   })
+                  .Restore();
+
+                var buildCommand = new BuildCommand(Stage0MSBuild, testAsset.TestRoot);
+                buildCommand
+                    .Execute()
+                    .Should()
+                    .Pass();
+
+                var exe = Path.Combine(buildCommand.GetOutputDirectory("net46").FullName, "DesktopMinusRid.exe");
+                var runCommand = Command.Create(exe, Array.Empty<string>());
+                runCommand
+                    .CaptureStdOut()
+                    .Execute()
+                    .Should()
+                    .Pass()
+                    .And
+                    .HaveStdOutContaining(expectedProgramOutput);
+            }
         }
 
         [Theory]
@@ -112,93 +121,77 @@ namespace Microsoft.NET.Build.Tests
                 return;
             }
 
-            var testAsset = _testAssetsManager
-                .CopyTestAsset("DesktopMinusRid", identifier: Path.DirectorySeparatorChar + identifier)
-                .WithSource()
-                .WithProjectChanges(project =>
-                {
-                    var ns = project.Root.Name.Namespace;
-                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                    propertyGroup.Add(new XElement(ns + "RuntimeIdentifier", rid));
-                    propertyGroup.Add(new XElement(ns + "AppendRuntimeIdentifierToOutputPath", useAppendOption.ToString()));
-                })
-                .Restore();
-
-            var buildCommand = new BuildCommand(Stage0MSBuild, testAsset.TestRoot);
-            buildCommand
-                .Execute()
-                .Should()
-                .Pass();
-
-            var publishCommand = new PublishCommand(Stage0MSBuild, testAsset.TestRoot);
-            publishCommand
-                .Execute()
-                .Should()
-                .Pass();
-
-            string expectedOutput;
-            switch (rid)
+            foreach (bool multiTarget in new[] { false, true })
             {
-                case "":
-                    expectedOutput = "Native code was not used (MSIL)";
-                    break;
+                var testAsset = _testAssetsManager
+                    .CopyTestAsset("DesktopMinusRid", identifier: Path.DirectorySeparatorChar + identifier + (multiTarget ? "Multi" : ""))
+                    .WithSource()
+                    .WithProjectChanges(project =>
+                    {
+                        var ns = project.Root.Name.Namespace;
+                        var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                        propertyGroup.Add(new XElement(ns + "RuntimeIdentifier", rid));
+                        propertyGroup.Add(new XElement(ns + "AppendRuntimeIdentifierToOutputPath", useAppendOption.ToString()));
 
-                case "win7-x86":
-                    expectedOutput = "Native code was not used (X86)";
-                    break;
+                        if (multiTarget)
+                        {
+                            propertyGroup.Element(ns + "RuntimeIdentifier").Add(new XAttribute("Condition", "'$(TargetFramework)' == 'net46'"));
+                            propertyGroup.Element(ns + "TargetFramework").Remove();
+                            propertyGroup.Add(new XElement(ns + "TargetFrameworks", "net46;netcoreapp1.1"));
+                        }
+                    })
+                    .Restore();
 
-                case "win7-x64":
-                    expectedOutput = "Native code was not used (Amd64)";
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(rid));
-            }
-
-            var outputDirectory = buildCommand.GetOutputDirectory("net46", runtimeIdentifier: shouldAppend ? rid : "");
-            var publishDirectory = publishCommand.GetOutputDirectory("net46", runtimeIdentifier: rid);
-
-            foreach (var directory in new[] { outputDirectory, publishDirectory })
-            {
-                var exe = Path.Combine(directory.FullName, "DesktopMinusRid.exe");
-
-                var runCommand = Command.Create(exe, Array.Empty<string>());
-                runCommand
-                    .CaptureStdOut()
+                var buildCommand = new BuildCommand(Stage0MSBuild, testAsset.TestRoot);
+                buildCommand
                     .Execute()
                     .Should()
-                    .Pass()
-                    .And
-                    .HaveStdOutContaining(expectedOutput);
-            }
-        }
+                    .Pass();
 
-        [Fact]
-        public void It_builds_multitargeted_with_default_rid()
-        {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
+                var publishCommand = new PublishCommand(Stage0MSBuild, testAsset.TestRoot);
+                publishCommand
+                    .Execute(multiTarget ? new[] { "/p:TargetFramework=net46" } : Array.Empty<string>())
+                    .Should()
+                    .Pass();
 
-            var testAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld")
-                .WithSource()
-                .WithProjectChanges(project =>
+                string expectedOutput;
+                switch (rid)
                 {
-                    var ns = project.Root.Name.Namespace;
-                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                    propertyGroup.Element(ns + "TargetFramework").Remove();
-                    propertyGroup.Add(new XElement(ns + "TargetFrameworks", "net46;netcoreapp1.1"));
-                })
-                .Restore();
+                    case "":
+                        expectedOutput = "Native code was not used (MSIL)";
+                        break;
 
-            var buildCommand = new BuildCommand(Stage0MSBuild, testAsset.TestRoot);
-            buildCommand
-                .Execute()
-                .Should()
-                .Pass();
+                    case "win7-x86":
+                        expectedOutput = "Native code was not used (X86)";
+                        break;
+
+                    case "win7-x64":
+                        expectedOutput = "Native code was not used (Amd64)";
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(rid));
+                }
+
+                var outputDirectory = buildCommand.GetOutputDirectory("net46", runtimeIdentifier: shouldAppend ? rid : "");
+                var publishDirectory = publishCommand.GetOutputDirectory("net46", runtimeIdentifier: rid);
+
+                foreach (var directory in new[] { outputDirectory, publishDirectory })
+                {
+                    var exe = Path.Combine(directory.FullName, "DesktopMinusRid.exe");
+
+                    var runCommand = Command.Create(exe, Array.Empty<string>());
+                    runCommand
+                        .CaptureStdOut()
+                        .Execute()
+                        .Should()
+                        .Pass()
+                        .And
+                        .HaveStdOutContaining(expectedOutput);
+                }
+            }
         }
+
 
         [Theory]
         [InlineData("win7-x86", "x86")]
