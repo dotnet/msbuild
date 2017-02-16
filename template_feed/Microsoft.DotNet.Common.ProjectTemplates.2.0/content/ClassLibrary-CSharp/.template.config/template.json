@@ -6,7 +6,7 @@
   "identity": "Microsoft.Common.Library.CSharp",
   "shortName": "classlib",
   "tags": {
-    "langauge": "C#",
+    "language": "C#",
     "type": "project"
   },
   "sourceName": "Company.ClassLibrary1",

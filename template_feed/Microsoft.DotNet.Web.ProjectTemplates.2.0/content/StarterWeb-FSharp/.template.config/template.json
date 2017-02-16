@@ -6,7 +6,7 @@
   "identity": "Microsoft.Web.Mvc.FSharp",
   "shortName": "mvc",
   "tags": {
-    "langauge": "F#",
+    "language": "F#",
     "type": "project"
   },
   "sourceName": "Company.WebApplication1",

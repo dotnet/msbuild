@@ -6,7 +6,7 @@
   "identity": "Microsoft.Common.Console.CSharp",
   "shortName": "console",
   "tags": {
-    "langauge": "C#",
+    "language": "C#",
     "type": "project"
   },
   "sourceName": "Company.ConsoleApplication1",

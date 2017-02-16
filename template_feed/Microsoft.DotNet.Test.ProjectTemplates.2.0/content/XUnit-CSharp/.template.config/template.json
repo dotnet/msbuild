@@ -6,7 +6,7 @@
   "identity": "Microsoft.Test.xUnit.CSharp",
   "shortName": "xunit",
   "tags": {
-    "langauge": "C#",
+    "language": "C#",
     "type": "project"
   },
   "sourceName": "Company.TestProject1",
