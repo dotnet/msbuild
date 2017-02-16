@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Tests
         private const string TestProjectName = "AppWithToolDependency";
 
         [Fact]
-        public void It_returns_null_when_CommandName_is_null()
+        public void ItReturnsNullWhenCommandNameIsNull()
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
-        public void It_returns_null_when_ProjectDirectory_is_null()
+        public void ItReturnsNullWhenProjectDirectoryIsNull()
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
-        public void It_returns_null_when_ProjectDirectory_does_not_contain_a_project_file()
+        public void ItReturnsNullWhenProjectDirectoryDoesNotContainAProjectFile()
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
@@ -76,7 +76,7 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
-        public void It_returns_null_when_CommandName_does_not_exist_in_ProjectTools()
+        public void ItReturnsNullWhenCommandNameDoesNotExistInProjectTools()
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
@@ -98,7 +98,7 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
-        public void It_returns_a_CommandSpec_with_DOTNET_as_FileName_and_CommandName_in_Args_when_CommandName_exists_in_ProjectTools()
+        public void ItReturnsACommandSpecWithDOTNETAsFileNameAndCommandNameInArgsWhenCommandNameExistsInProjectTools()
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
@@ -126,7 +126,7 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
-        public void It_escapes_CommandArguments_when_returning_a_CommandSpec()
+        public void ItEscapesCommandArgumentsWhenReturningACommandSpec()
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
@@ -149,7 +149,7 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
-        public void It_returns_a_CommandSpec_with_Args_containing_CommandPath_when_returning_a_CommandSpec_and_CommandArguments_are_null()
+        public void ItReturnsACommandSpecWithArgsContainingCommandPathWhenReturningACommandSpecAndCommandArgumentsAreNull()
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
@@ -174,7 +174,32 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
-        public void It_writes_a_deps_json_file_next_to_the_lockfile()
+        public void ItReturnsACommandSpecWithArgsContainingCommandPathWhenInvokingAToolReferencedWithADifferentCasing()
+        {
+            var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
+
+            var testInstance = TestAssets.Get(TestProjectName)
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithRestoreFiles();
+
+            var commandResolverArguments = new CommandResolverArguments()
+            {
+                CommandName = "dotnet-prefercliruntime",
+                CommandArguments = null,
+                ProjectDirectory = testInstance.Root.FullName
+            };
+
+            var result = projectToolsCommandResolver.Resolve(commandResolverArguments);
+
+            result.Should().NotBeNull();
+
+            var commandPath = result.Args.Trim('"');
+            commandPath.Should().Contain("dotnet-prefercliruntime.dll");
+        }
+
+        [Fact]
+        public void ItWritesADepsJsonFileNextToTheLockfile()
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
@@ -221,7 +246,7 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
-        public void Generate_deps_json_method_doesnt_overwrite_when_deps_file_already_exists()
+        public void GenerateDepsJsonMethodDoesntOverwriteWhenDepsFileAlreadyExists()
         {
             var testInstance = TestAssets.Get(TestProjectName)
                 .CreateInstance()
@@ -262,7 +287,7 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
-        public void It_adds_fx_version_as_a_param_when_the_tool_has_the_prefercliruntime_file()
+        public void ItAddsFxVersionAsAParamWhenTheToolHasThePrefercliruntimeFile()
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
@@ -286,7 +311,7 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
-        public void It_does_not_add_fx_version_as_a_param_when_the_tool_does_not_have_the_prefercliruntime_file()
+        public void ItDoesNotAddFxVersionAsAParamWhenTheToolDoesNotHaveThePrefercliruntimeFile()
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 

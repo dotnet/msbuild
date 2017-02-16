@@ -147,10 +147,9 @@ namespace Microsoft.DotNet.Cli.Utils
                 toolLockFile.Path));
 
             var toolLibrary = toolLockFile.Targets
-                .FirstOrDefault(
-                    t => t.TargetFramework.GetShortFolderName().Equals(s_toolPackageFramework.GetShortFolderName()))
-                ?.Libraries.FirstOrDefault(l => l.Name == toolLibraryRange.Name);
-
+                .FirstOrDefault(t => s_toolPackageFramework == t.TargetFramework)
+                ?.Libraries.FirstOrDefault(
+                    l => StringComparer.OrdinalIgnoreCase.Equals(l.Name, toolLibraryRange.Name));
             if (toolLibrary == null)
             {
                 Reporter.Verbose.WriteLine(string.Format(
