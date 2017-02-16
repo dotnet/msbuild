@@ -99,6 +99,10 @@ get_current_linux_name() {
         echo "centos"
         return 0
     elif [ "$(cat /etc/*-release | grep -cim1 rhel)" -eq 1 ]; then
+        if [ "$(cat /etc/os-release | grep -cim1 'VERSION_ID="7\.')" -eq 1 ]; then
+            echo "rhel.7"
+            return 0
+        fi
         echo "rhel"
         return 0
     elif [ "$(cat /etc/*-release | grep -cim1 debian)" -eq 1 ]; then
