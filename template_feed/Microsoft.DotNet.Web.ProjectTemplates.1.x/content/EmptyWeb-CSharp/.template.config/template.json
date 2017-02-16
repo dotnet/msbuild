@@ -5,7 +5,7 @@
   "groupIdentity": "Microsoft.Web.Empty",
   "identity": "Microsoft.Web.Empty.CSharp",
   "shortName": "web",
-  "tags" : {
+  "tags": {
     "language": "C#",
     "type": "project"
   },

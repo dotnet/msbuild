@@ -5,7 +5,7 @@
   "groupIdentity": "Microsoft.Common.Console",
   "identity": "Microsoft.Common.Console.CSharp",
   "shortName": "console",
-  "tags" : {
+  "tags": {
     "language": "C#",
     "type": "project"
   },

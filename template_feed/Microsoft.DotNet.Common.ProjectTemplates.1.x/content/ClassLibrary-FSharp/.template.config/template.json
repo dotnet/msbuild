@@ -5,7 +5,7 @@
   "groupIdentity": "Microsoft.Common.Library",
   "identity": "Microsoft.Common.Library.FSharp",
   "shortName": "classlib",
-  "tags" : {
+  "tags": {
     "language": "F#",
     "type": "project"
   },

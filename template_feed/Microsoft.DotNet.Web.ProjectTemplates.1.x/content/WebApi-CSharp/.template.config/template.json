@@ -5,7 +5,7 @@
   "groupIdentity": "Microsoft.Web.WebApi",
   "identity": "Microsoft.Web.WebApi.CSharp",
   "shortName": "webapi",
-  "tags" : {
+  "tags": {
     "language": "C#",
     "type": "project"
   },

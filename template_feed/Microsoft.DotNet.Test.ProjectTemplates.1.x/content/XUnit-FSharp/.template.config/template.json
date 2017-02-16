@@ -5,7 +5,7 @@
   "groupIdentity": "Microsoft.Test.xUnit",
   "identity": "Microsoft.Test.xUnit.FSharp",
   "shortName": "xunit",
-  "tags" : {
+  "tags": {
     "language": "F#",
     "type": "project"
   },

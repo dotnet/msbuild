@@ -5,7 +5,7 @@
   "groupIdentity": "Microsoft.Test.MSTest",
   "identity": "Microsoft.Test.MSTest.CSharp",
   "shortName": "mstest",
-  "tags" : {
+  "tags": {
     "language": "C#",
     "type": "project"
   },
