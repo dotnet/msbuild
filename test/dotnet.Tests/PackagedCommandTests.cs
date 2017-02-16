@@ -36,8 +36,8 @@ namespace Microsoft.DotNet.Tests
                 var projectOutputPath = $"AppWithProjTool2Fx\\bin\\Debug\\net451\\{rid}\\dotnet-desktop-and-portable.exe";
                 return new[]
                 {
-                    new object[] { "CoreFX", ".NETCoreApp,Version=v1.0", "lib\\netcoreapp1.0\\dotnet-desktop-and-portable.dll", true },
-                    new object[] { "NetFX", ".NETFramework,Version=v4.5.1", projectOutputPath, true }
+                    new object[] { "CoreFX", ".NETCoreApp,Version=v1.0", "lib\\netcoreapp1.0\\dotnet-desktop-and-portable.dll" },
+                    new object[] { "NetFX", ".NETFramework,Version=v4.5.1", projectOutputPath }
                 };
             }
         }
@@ -51,8 +51,8 @@ namespace Microsoft.DotNet.Tests
 
                 return new[]
                 {
-                    new object[] { "CoreFX", ".NETStandard,Version=v1.6", "lib\\netstandard1.6\\dotnet-desktop-and-portable.dll", true },
-                    new object[] { "NetFX", ".NETFramework,Version=v4.5.1", projectOutputPath, true }
+                    new object[] { "CoreFX", ".NETStandard,Version=v1.6", "lib\\netstandard1.6\\dotnet-desktop-and-portable.dll" },
+                    new object[] { "NetFX", ".NETFramework,Version=v4.5.1", projectOutputPath }
                 };
             }
         }
@@ -196,16 +196,10 @@ namespace Microsoft.DotNet.Tests
                 .And.NotHaveStdErr();
         }
 
-        // need conditional theories so we can skip on non-Windows
-        //[Theory(Skip="https://github.com/dotnet/cli/issues/4514")]
-        //[MemberData("DependencyToolArguments")]
-        public void TestFrameworkSpecificDependencyToolsCanBeInvoked(string identifier, string framework, string expectedDependencyToolPath, bool windowsOnly)
+        [WindowsOnlyTheory(Skip="https://github.com/dotnet/cli/issues/4514")]
+        [MemberData("DependencyToolArguments")]
+        public void TestFrameworkSpecificDependencyToolsCanBeInvoked(string identifier, string framework, string expectedDependencyToolPath)
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && windowsOnly)
-            {
-                return;
-            }
-
             var testInstance = TestAssets.Get(TestAssetKinds.DesktopTestProjects, "AppWithProjTool2Fx")
                 .CreateInstance(identifier: identifier)
                 .WithSourceFiles()
@@ -227,15 +221,10 @@ namespace Microsoft.DotNet.Tests
                     .And.Pass();
         }
 
-        [Theory]
+        [WindowsOnlyTheory]
         [MemberData("LibraryDependencyToolArguments")]
-        public void TestFrameworkSpecificLibraryDependencyToolsCannotBeInvoked(string identifier, string framework, string expectedDependencyToolPath, bool windowsOnly)
+        public void TestFrameworkSpecificLibraryDependencyToolsCannotBeInvoked(string identifier, string framework, string expectedDependencyToolPath)
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && windowsOnly)
-            {
-                return;
-            }
-
             var testInstance = TestAssets.Get(TestAssetKinds.DesktopTestProjects, "LibWithProjTool2Fx")
                 .CreateInstance(identifier: identifier)
                 .WithSourceFiles()
