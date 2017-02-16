@@ -5,6 +5,30 @@
   <Import Project="$(SourceDir)BuildValues.props" />
 
   <PropertyGroup>
+      <BuildVersion>BuildVersion</BuildVersion>
+      <AssemblyInformationalVersion>AssemblyInformationalVersion</AssemblyInformationalVersion>
+      <AssemblyFileVersion>AssemblyFileVersion</AssemblyFileVersion>
+      <BuildVersionSimple>BuildVersionSimple</BuildVersionSimple>
+      <PrereleaseVersion>0</PrereleaseVersion>
+      <MajorMinorVersion>0</MajorMinorVersion>
+      <AssemblyVersion>AssemblyVersion</AssemblyVersion>
+      <GitCommitId>GitCommitId</GitCommitId>
+      <GitCommitIdShort>GitCommitIdShort</GitCommitIdShort>
+      <GitVersionHeight>GitVersionHeight</GitVersionHeight>
+      <BuildNumber>BuildNumber</BuildNumber>
+      <BuildVersionNumberComponent>0</BuildVersionNumberComponent>
+      <PublicRelease>PublicRelease</PublicRelease>
+      <CloudBuildNumber Condition=" '$(CloudBuildNumber)' == '' ">CloudBuildNumber</CloudBuildNumber>
+      <SemVerBuildSuffix>SemVerBuildSuffix</SemVerBuildSuffix>
+      <NuGetPackageVersion>NuGetPackageVersion</NuGetPackageVersion>
+      <NPMPackageVersion>NPMPackageVersion</NPMPackageVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+      <CloudBuildVersionVars Include="CloudBuildVersionVars" />
+  </ItemGroup>
+
+  <PropertyGroup>
     <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
     <NuGetPackageLicenseUrl>http://go.microsoft.com/fwlink/?LinkId=329770</NuGetPackageLicenseUrl>
     <NuGetPackageIconUrl>https://go.microsoft.com/fwlink/?linkid=825694</NuGetPackageIconUrl>
@@ -21,7 +45,10 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />
 
   <Import Project="$(ToolsDir)packages.targets" Condition="Exists('$(ToolsDir)packages.targets') and '$(ImportGetNuGetPackageVersions)' != 'false'" />
-  <Import Project="$(GitVersioningDir)dotnet\Nerdbank.GitVersioning.targets" />
+
+  <Target Name="GetNuGetPackageVersion" />
+
+  <Import Condition="'$(UseGitVersioning)' == 'true'" Project="$(GitVersioningDir)dotnet\Nerdbank.GitVersioning.targets" />
 
   <ItemGroup>
     <NuSpecs Include="*.nuspec" />
