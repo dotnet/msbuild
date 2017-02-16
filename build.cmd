@@ -1,5 +1,5 @@
 @echo off
-setlocal
+setlocal enabledelayedexpansion
 
 if not defined MSBUILDLOGPATH (
     set MSBUILDLOGPATH=%~dp0msbuild.log
@@ -21,9 +21,12 @@ set MSBUILD_ARGS=%MSBUILD_ARGS% /fileloggerparameters:Verbosity=diag;LogFile="%M
 if not defined RUNTIME_HOST (
 	set BUILD_COMMAND="%MSBUILD_CUSTOM_PATH%" /nodeReuse:false %MSBUILD_ARGS%
 
-    :: Check prerequisites for full framework build
- 	if not "%VisualStudioVersion%" == "14.0" (
-	    echo Error: build.cmd should be run from a Visual Studio 2015 Command when RUNTIME_HOST is not defined. Prompt.  
+        :: Check prerequisites for full framework build
+	if "%VisualStudioVersion%" == "14.0" set InDeveloperCommandPrompt=true
+	if "%VisualStudioVersion%" == "15.0" set InDeveloperCommandPrompt=true
+
+ 	if not "!InDeveloperCommandPrompt!" == "true" (
+	    echo Error: build.cmd should be run from a Visual Studio 2015/2017 Developer Command Prompt when RUNTIME_HOST is not defined.
 	    echo        Please see https://github.com/Microsoft/msbuild/wiki/Building-Testing-and-Debugging for build instructions.
 	    exit /b 1
 	)
