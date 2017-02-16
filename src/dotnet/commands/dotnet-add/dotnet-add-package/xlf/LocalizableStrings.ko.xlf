@@ -14,7 +14,7 @@
         <note />
       </trans-unit>
       <trans-unit id="AppHelpText">
-        <source>Package references to add</source>
+        <source>Package reference to add</source>
         <target state="translated">추가할 패키지 참조</target>
         <note />
       </trans-unit>

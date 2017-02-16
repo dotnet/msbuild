@@ -12,7 +12,7 @@
         <note />
       </trans-unit>
       <trans-unit id="AppHelpText">
-        <source>Package references to add</source>
+        <source>Package reference to add</source>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageReference">
