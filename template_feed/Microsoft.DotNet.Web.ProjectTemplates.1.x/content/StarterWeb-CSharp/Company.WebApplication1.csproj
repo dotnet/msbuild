@@ -46,7 +46,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.1.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(IndividualAuth)' == 'True'">
+  <ItemGroup Condition="'$(IndividualAuth)' == 'True' AND '$(NoTools)' != 'True'">
     <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="1.0.0" />
     <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="1.0.0" />
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="1.0.0" />

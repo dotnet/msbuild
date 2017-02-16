@@ -105,6 +105,11 @@
       "parameters": {
         "format": "yyyy"
       }
+    },
+    "NoTools": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false"
     }
   },
   "primaryOutputs": [ { "path": "Company.WebApplication1.csproj" } ]

@@ -8,6 +8,10 @@
     },
     "Framework": {
       "longName": "framework"
+    },
+    "NoTools": {
+      "isHidden": "true",
+      "longName": "no-tools"
     }
   }
 }
