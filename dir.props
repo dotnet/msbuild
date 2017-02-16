@@ -20,6 +20,7 @@
   <Import Project="build/Version.props" />
   <Import Project="build/Branding.props" />
   <Import Project="build/VersionBadge.props" />
+  <Import Project="build/Microsoft.DotNet.Cli.BundledRuntimes.props" />
   
   <PropertyGroup>
     <NuGetPackagesDir>$(NUGET_PACKAGES)</NuGetPackagesDir>

@@ -20,18 +20,18 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public static async Task<LockFile> ReadWithLock(this LockFileFormat subject, string path)
         {
-            if(!File.Exists(path))
-            {
-                throw new GracefulException(string.Join(
-                    Environment.NewLine,
-                    string.Format(LocalizableStrings.FileNotFound, path),
-                    LocalizableStrings.ProjectNotRestoredOrRestoreFailed));
-            }
-
             return await ConcurrencyUtilities.ExecuteWithFileLockedAsync(
                 path, 
                 lockedToken =>
                 {
+                    if (!File.Exists(path))
+                    {
+                        throw new GracefulException(string.Join(
+                            Environment.NewLine,
+                            string.Format(LocalizableStrings.FileNotFound, path),
+                            LocalizableStrings.ProjectNotRestoredOrRestoreFailed));
+                    }
+                    
                     var lockFile = FileAccessRetrier.RetryOnFileAccessFailure(() => subject.Read(path));
 
                     return lockFile;       
