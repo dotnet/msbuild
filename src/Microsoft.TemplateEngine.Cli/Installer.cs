@@ -99,6 +99,11 @@ namespace Microsoft.TemplateEngine.Cli
 
             foreach (string package in packageNames)
             {
+                if (package == null)
+                {
+                    continue;
+                }
+
                 string pkg = package.Trim();
                 pkg = _environmentSettings.Environment.ExpandEnvironmentVariables(pkg);
                 string pattern = null;

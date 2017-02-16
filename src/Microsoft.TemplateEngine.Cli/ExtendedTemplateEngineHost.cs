@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using System.Linq;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 
@@ -69,6 +70,51 @@ namespace Microsoft.TemplateEngine.Cli
         public void VirtualizeDirectory(string path)
         {
             _baseHost.VirtualizeDirectory(path);
+        }
+
+        private static string GetChangeString(ChangeKind kind)
+        {
+            string changeType;
+
+            switch (kind)
+            {
+                case ChangeKind.Change:
+                    changeType = LocalizableStrings.Change;
+                    break;
+                case ChangeKind.Delete:
+                    changeType = LocalizableStrings.Delete;
+                    break;
+                case ChangeKind.Overwrite:
+                    changeType = LocalizableStrings.Overwrite;
+                    break;
+                default:
+                    changeType = LocalizableStrings.UnknownChangeKind;
+                    break;
+            }
+
+            return changeType;
+        }
+
+        public bool OnPotentiallyDestructiveChangesDetected(IReadOnlyList<IFileChange> changes, IReadOnlyList<IFileChange> destructiveChanges)
+        {
+            Reporter.Error.WriteLine(LocalizableStrings.DestructiveChangesNotification.Bold().Red());
+            int longestChangeTextLength = destructiveChanges.Max(x => GetChangeString(x.ChangeKind).Length);
+            int padLen = 5 + longestChangeTextLength;
+
+            foreach (IFileChange change in destructiveChanges)
+            {
+                string changeKind = GetChangeString(change.ChangeKind);
+                Reporter.Error.WriteLine(($"  {changeKind}".PadRight(padLen) + change.TargetRelativePath).Bold().Red());
+            }
+            
+            Reporter.Error.WriteLine();
+            Reporter.Error.WriteLine(LocalizableStrings.RerunCommandAndPassForceToCreateAnyway.Bold().Red());
+            return false;
+        }
+
+        public bool OnConfirmPartialMatch(string name)
+        {
+            return true;
         }
 
         private bool GlobalJsonFileExistsInPath
