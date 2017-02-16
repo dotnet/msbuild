@@ -11,11 +11,11 @@ namespace LibraryWithRids
             switch(GetRidStoredInAssemblyDescriptionAttribute())
             {
                 case "'ubuntu.14.04-x64'":
-                    return Marshal.PtrToStringAnsi(NativeMethod.sqlite3_libversion());
+                    return Marshal.PtrToStringAnsi(LinuxNativeMethods.sqlite3_libversion());
                 case "'osx.10.11-x64'": 
-                    return Marshal.PtrToStringAnsi(NativeMethod.sqlite3_dylibversion());
+                    return Marshal.PtrToStringAnsi(MacNativeMethods.sqlite3_libversion());
                 case "'win10-x64'":
-                    return Marshal.PtrToStringAnsi(NativeMethod.sqlite3_dllversion());
+                    return Marshal.PtrToStringAnsi(WindowsNativeMethods.sqlite3_libversion());
                 default:
                     return "Unexpected RID. Cannot find sqlite3.";
             }            
