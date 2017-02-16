@@ -5,7 +5,7 @@
   "groupIdentity": "Microsoft.Web.Mvc",
   "identity": "Microsoft.Web.Mvc.CSharp",
   "shortName": "mvc",
-  "tags" : {
+  "tags": {
     "language": "C#",
     "type": "project"
   },
