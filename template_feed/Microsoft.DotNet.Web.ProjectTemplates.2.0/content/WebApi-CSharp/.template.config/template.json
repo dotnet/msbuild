@@ -6,7 +6,7 @@
   "identity": "Microsoft.Web.WebApi.CSharp",
   "shortName": "webapi",
   "tags": {
-    "langauge": "C#",
+    "language": "C#",
     "type": "project"
   },
   "sourceName": "Company.WebApplication1",

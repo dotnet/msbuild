@@ -6,7 +6,7 @@
   "identity": "Microsoft.Test.MSTest.CSharp",
   "shortName": "mstest",
   "tags": {
-    "langauge": "C#",
+    "language": "C#",
     "type": "project"
   },
   "sourceName": "Company.TestProject1",

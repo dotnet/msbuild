@@ -6,7 +6,7 @@
   "identity": "Microsoft.Common.Library.FSharp",
   "shortName": "classlib",
   "tags": {
-    "langauge": "F#",
+    "language": "F#",
     "type": "project"
   },
   "sourceName": "Company.ClassLibrary1",
