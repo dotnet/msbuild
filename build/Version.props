@@ -12,5 +12,7 @@
     
     <SdkVersion>$(NugetVersion)</SdkVersion>
     <SdkNugetVersion>$(SdkVersion)</SdkNugetVersion>
+
+    <TestPackageBuildVersionSuffix>$(CommitCount)</TestPackageBuildVersionSuffix>
   </PropertyGroup>
 </Project>
