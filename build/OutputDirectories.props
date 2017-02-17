@@ -7,7 +7,7 @@
       <DotnetStage1>$(Stage1Directory)/dotnet$(ExeExtension)</DotnetStage1>
       <Stage2Directory>$(BaseOutputDirectory)/stage2</Stage2Directory>
       <Stage2SymbolsDirectory>$(BaseOutputDirectory)/stage2symbols</Stage2SymbolsDirectory>
-      <Stage2SdkDirectory>$(Stage2Directory)/sdk/$(CommitCount)</Stage2SdkDirectory>
+      <Stage2SdkDirectory>$(Stage2Directory)/sdk/$(SdkVersion)</Stage2SdkDirectory>
       <DotnetStage2>$(Stage2Directory)/dotnet$(ExeExtension)</DotnetStage2>
       <OutputDirectory>$(Stage2Directory)/</OutputDirectory>
       <Stage2CompilationDirectory>$(BaseOutputDirectory)/stage2compilation</Stage2CompilationDirectory>
