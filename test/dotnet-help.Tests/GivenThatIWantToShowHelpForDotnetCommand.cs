@@ -8,6 +8,7 @@ using Microsoft.Build.Construction;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using FluentAssertions;
+using HelpActual = Microsoft.DotNet.Tools.Help;
 
 namespace Microsoft.DotNet.Help.Tests
 {
@@ -64,6 +65,40 @@ Advanced Commands:
                 .ExecuteWithCapturedOutput($"{helpArg}");
             cmd.Should().Pass();
             cmd.StdOut.Should().ContainVisuallySameFragment(HelpText);
+        }
+
+        [Fact]
+        public void WhenInvalidCommandIsPassedToDOtnetHelpItPrintsError()
+        {
+          var cmd = new DotnetCommand()
+                .ExecuteWithCapturedOutput("help invalid");
+          
+          cmd.Should().Fail();
+          cmd.StdErr.Should().ContainVisuallySameFragment($"Specified command invalid is not a valid CLI command. Please specify a valid CLI commands. For more information, run dotnet help.");
+        }
+
+        [WindowsOnlyFact]
+        public void WhenRunOnWindowsDotnetHelpCommandShouldContainProperProcessInformation()
+        {
+          var proc = HelpActual.HelpCommand.ConfigureProcess("https://aka.ms/dotnet-build");
+          Assert.Equal("cmd", proc.StartInfo.FileName);
+          Assert.Equal("/c start https://aka.ms/dotnet-build", proc.StartInfo.Arguments);
+        }
+
+        [LinuxOnlyFact]
+        public void WhenRunOnLinuxDotnetHelpCommandShouldContainProperProcessInformation()
+        {
+          var proc = HelpActual.HelpCommand.ConfigureProcess("https://aka.ms/dotnet-build");
+          Assert.Equal("xdg-open", proc.StartInfo.FileName);
+          Assert.Equal("https://aka.ms/dotnet-build", proc.StartInfo.Arguments);
+        
+        }
+        [MacOsOnlyFact]
+        public void WhenRunOnMacOsDotnetHelpCommandShouldContainProperProcessInformation()
+        {
+          var proc = HelpActual.HelpCommand.ConfigureProcess("https://aka.ms/dotnet-build");
+          Assert.Equal("open", proc.StartInfo.FileName);
+          Assert.Equal("https://aka.ms/dotnet-build", proc.StartInfo.Arguments);
         }
     }
 }
