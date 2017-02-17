@@ -60,7 +60,7 @@
       <Version>$(CLI_MSBuild_Version)</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions">
-      <Version>1.1.0</Version>
+      <Version>$(PlatformAbstractionsVersion)</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.TemplateEngine.Abstractions" Version="$(TemplateEngineVersion)" />
     <PackageReference Include="Microsoft.TemplateEngine.Cli" Version="$(TemplateEngineVersion)" />

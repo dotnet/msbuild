@@ -56,6 +56,17 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 {
                     new PackageDependencyInfo
                     {
+                        Name = "Microsoft.EntityFrameworkCore.Tools.DotNet",
+                        Version = "[1.0.0-*,)"
+                    },
+                    new PackageDependencyInfo {
+                        Name = "Microsoft.EntityFrameworkCore.Tools.DotNet",
+                        Version = ConstantPackageVersions.AspNetToolsVersion
+                    }
+                },
+                {
+                    new PackageDependencyInfo
+                    {
                         Name = "Microsoft.AspNetCore.Razor.Tools",
                         Version = "[1.0.0-*,)"
                     },

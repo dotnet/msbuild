@@ -39,19 +39,19 @@ Prints out a short help and a list of current commands.
 
 The following commands exist for dotnet:
 
-* [dotnet-new](commands/dotnet-new/README.md)
+* [dotnet-new](https://aka.ms/dotnet-new)
    * Initializes a C# or F# console application project.
-* [dotnet-restore](commands/dotnet-restore/README.md)
+* [dotnet-restore](https://aka.ms/dotnet-restore)
   * Restores the dependencies for a given application. 
-* [dotnet-build](commands/dotnet-build/README.md)
+* [dotnet-build](https://aka.ms/dotnet-build)
   * Builds a .NET Core application.
-* [dotnet-publish](commands/dotnet-publish/README.md)
+* [dotnet-publish](https://aka.ms/dotnet-publish)
    * Publishes a .NET portable or self-contained application.
-* [dotnet-run](commands/dotnet-run/README.md)
+* [dotnet-run](https://aka.ms/dotnet-run)
    * Runs the application from source.
-* [dotnet-test](commands/dotnet-test/README.md)
+* [dotnet-test](https://aka.ms/dotnet-test)
    * Runs tests using a test runner specified in the project.json.
-* [dotnet-pack](commands/dotnet-pack/README.md)
+* [dotnet-pack](https://aka.ms/dotnet-pack)
    * Creates a NuGet package of your code.
 
 ## EXAMPLES

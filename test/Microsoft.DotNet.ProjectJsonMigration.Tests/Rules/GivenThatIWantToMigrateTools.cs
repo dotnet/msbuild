@@ -59,6 +59,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Theory]
+        [InlineData("Microsoft.EntityFrameworkCore.Tools.DotNet", "Microsoft.EntityFrameworkCore.Tools.DotNet", ConstantPackageVersions.AspNetToolsVersion)]
         [InlineData("Microsoft.EntityFrameworkCore.Tools", "Microsoft.EntityFrameworkCore.Tools.DotNet", ConstantPackageVersions.AspNetToolsVersion)]
         [InlineData("Microsoft.VisualStudio.Web.CodeGeneration.Tools", "Microsoft.VisualStudio.Web.CodeGeneration.Tools", ConstantPackageVersions.AspNetToolsVersion)]
         [InlineData("Microsoft.DotNet.Watcher.Tools", "Microsoft.DotNet.Watcher.Tools", ConstantPackageVersions.AspNetToolsVersion)]
@@ -89,6 +90,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 }");
 
             var packageRef = mockProj.Items.Where(i => i.ItemType == "DotNetCliToolReference").Should().BeEmpty();
+        }
+
+        [Fact]
+        public void ItMergesEntityFrameworkCoreToolsAndEntityFrameworkCoreToolsDotNet()
+        {
+            var mockProj = RunPackageDependenciesRuleOnPj("{ \"tools\": { \"Microsoft.EntityFrameworkCore.Tools\": \"1.0.0-preview4-final\", \"Microsoft.EntityFrameworkCore.Tools.DotNet\": \"1.0.0-preview4-final\" } }");
+
+            EmitsToolReferences(mockProj, Tuple.Create("Microsoft.EntityFrameworkCore.Tools.DotNet", ConstantPackageVersions.AspNetToolsVersion));
         }
     }
 }
