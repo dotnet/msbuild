@@ -32,8 +32,8 @@
         <ProjectName>Microsoft.DotNet.Cli.Utils.csproj</ProjectName>
         <IsTool>True</IsTool>
         <IsApplicable>True</IsApplicable>
-        <VersionPrefix>$(CliVersionPrefix)-</VersionPrefix>
-        <VersionSuffix>$(ReleaseSuffix)-$(TestPackageBuildVersionSuffix)</VersionSuffix>
+        <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
+        <VersionSuffix>$(VersionSuffix)</VersionSuffix>
         <Clean>False</Clean>
         <MsbuildArgs>/p:TargetFramework=netstandard1.5</MsbuildArgs>
       </BaseTestPackageProject>
