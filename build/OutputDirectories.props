@@ -13,7 +13,7 @@
       <Stage2CompilationDirectory>$(BaseOutputDirectory)/stage2compilation</Stage2CompilationDirectory>
       <StageDirectory>$(Stage2Directory)</StageDirectory>
       <StageSymbolsDirectory>$(Stage2SymbolsDirectory)</StageSymbolsDirectory>
-      <SdkOutputDirectory>$(StageDirectory)/sdk/$(SdkVersion)</SdkOutputDirectory>
+      <SdkOutputDirectory>$(Stage2SdkDirectory)</SdkOutputDirectory>
       <MSBuildTargetsDirectory>$(SdkOutputDirectory)/runtimes/any/native</MSBuildTargetsDirectory>
       <IntermediateDirectory>$(BaseOutputDirectory)/intermediate</IntermediateDirectory>
       <PackagesDirectory>$(BaseOutputDirectory)/packages</PackagesDirectory>
