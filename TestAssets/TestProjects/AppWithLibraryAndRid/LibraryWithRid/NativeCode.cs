@@ -15,6 +15,7 @@ namespace LibraryWithRid
                 case "'osx.10.11-x64'": 
                     return Marshal.PtrToStringAnsi(MacNativeMethods.sqlite3_libversion());
                 case "'win10-x64'":
+                case "'win81-x64'":
                     return Marshal.PtrToStringAnsi(WindowsNativeMethods.sqlite3_libversion());
                 default:
                     return "Unexpected RID. Cannot find sqlite3.";
