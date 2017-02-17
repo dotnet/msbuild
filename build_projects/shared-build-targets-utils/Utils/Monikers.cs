@@ -15,10 +15,16 @@ namespace Microsoft.DotNet.Cli.Build
             {
                 case "ubuntu.16.04-x64":
                     return "Ubuntu_16_04_x64";
+                case "ubuntu.16.10-x64":
+                    return "Ubuntu_16_10_x64";
                 case "fedora.23-x64":
                     return "Fedora_23_x64";
+                case "fedora.24-x64":
+                    return "Fedora_24_x64";
                 case "opensuse.13.2-x64":
                     return "openSUSE_13_2_x64";
+                case "opensuse.42.1-x64":
+                    return "openSUSE_42_1_x64";
             }
 
             return $"{CurrentPlatform.Current}_{CurrentArchitecture.Current}";
