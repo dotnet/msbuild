@@ -12,13 +12,15 @@
   <Import Project="build/CoreSetupInfo.props" />
 
   <Import Project="build/DependencyVersions.props" />
+  <Import Project="build/Version.props" />
+  <Import Project="build/Branding.props" />
+
   <Import Project="build/FileExtensions.props" />
   <Import Project="build/InputDirectories.props" />
   <Import Project="build/OutputDirectories.props" />
   <Import Project="build/BuildDefaults.props" />
+  <Import Project="build/BuildOutputs.props" />
   <Import Project="build/Stage0.props" />
-  <Import Project="build/Version.props" />
-  <Import Project="build/Branding.props" />
   <Import Project="build/VersionBadge.props" />
   <Import Project="build/BundledRuntimes.props" />
   

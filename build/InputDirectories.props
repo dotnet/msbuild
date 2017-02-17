@@ -1,5 +1,8 @@
 <Project>
   <PropertyGroup>
+    <BinaryToCorehostifyRelDir>runtimes/any/native</BinaryToCorehostifyRelDir>
     <DotnetCliBuildDirectory>$(RepoRoot)/build_projects/dotnet-cli-build</DotnetCliBuildDirectory>
+    <MSBuildImportsDir>$(RepoRoot)/resources/MSBuildImports</MSBuildImportsDir>
+    <SrcDirectory>$(RepoRoot)/src</SrcDirectory>
   </PropertyGroup>
 </Project>
