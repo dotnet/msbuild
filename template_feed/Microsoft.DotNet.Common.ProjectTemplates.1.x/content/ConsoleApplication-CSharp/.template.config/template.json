@@ -30,7 +30,7 @@
           "description": "Target netcoreapp1.1"
         }
       ],
-      "defaultValue": "netcoreapp1.0"
+      "defaultValue": "netcoreapp1.1"
     }
   },
   "primaryOutputs": [ { "path": "Company.ConsoleApplication1.csproj" } ]
