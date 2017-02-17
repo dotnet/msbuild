@@ -3,4 +3,10 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net46</TargetFramework>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(UseNativeCode)' == 'true'">
+     <DefineConstants>$(DefineConstants);USE_NATIVE_CODE</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(UseNativeCode)' == 'true'">
+    <PackageReference Include="Libuv" Version="1.9.1" />
+  </ItemGroup>
 </Project>

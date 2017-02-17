@@ -555,5 +555,27 @@ namespace Microsoft.NET.Build.Tests
                 .And.HaveStdOutContaining("TargetFramework=''") // new deliberate error
                 .And.NotHaveStdOutContaining(">="); // old error about comparing empty string to version
         }
+
+        [Fact]
+        public void It_passes_ridless_target_to_compiler()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("AppWithLibrary", "RidlessLib")
+                .WithSource()
+                .Restore(relativePath: "TestLibrary");
+
+            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
+            var fullPathProjectFile = new BuildCommand(Stage0MSBuild, libraryProjectDirectory).FullPathProjectFile;
+
+            // compile should still pass with unknown RID because references are always pulled 
+            // from RIDLess target
+            var buildCommand = Stage0MSBuild.CreateCommandForTarget(
+                "Compile", fullPathProjectFile, "/p:RuntimeIdentifier=unknownrid");
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+        }
     }
 }

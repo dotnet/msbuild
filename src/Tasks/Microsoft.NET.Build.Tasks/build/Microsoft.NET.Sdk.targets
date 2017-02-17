@@ -355,6 +355,14 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
   ============================================================
+                                      GetAllRuntimeIdentifiers
+  ============================================================
+  -->
+  <Target Name="GetAllRuntimeIdentifiers" 
+          Returns="$(RuntimeIdentifiers);$(RuntimeIdentifier)" />
+
+  <!--
+  ============================================================
                                          Project Capabilities
   ============================================================
   -->

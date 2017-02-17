@@ -39,7 +39,7 @@ namespace Microsoft.NET.Build.Tasks
         public ITaskItem[] FileDependencies { get; set; }
 
         [Required]
-        public ITaskItem[] PackageReferences { get; set; }
+        public string DefaultImplicitPackages { get; set; }
 
         public ITaskItem[] InputDiagnosticMessages { get; set; }
 
@@ -62,12 +62,11 @@ namespace Microsoft.NET.Build.Tasks
                     = new Dictionary<string, ItemMetadata>(StringComparer.OrdinalIgnoreCase);
 
         private HashSet<string> ImplicitPackageReferences { get; set; }
-                    = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         protected override void ExecuteCore()
         {
-            PopulateImplicitPackageReferences();
-
+            ImplicitPackageReferences = GetImplicitPackageReferences(DefaultImplicitPackages);
+            
             PopulateTargets();
 
             PopulatePackages();
@@ -107,27 +106,6 @@ namespace Microsoft.NET.Build.Tasks
 
                 return newTaskItem;
             }).ToArray();
-        }
-
-        private void PopulateImplicitPackageReferences()
-        {
-            foreach(var packageReference in PackageReferences)
-            {
-                var isImplicitlyDefinedString = packageReference.GetMetadata(MetadataKeys.IsImplicitlyDefined);
-                if (string.IsNullOrEmpty(isImplicitlyDefinedString))
-                {
-                    continue;
-                }
-
-                bool isImplicitlyDefined;
-                if (!Boolean.TryParse(isImplicitlyDefinedString, out isImplicitlyDefined)
-                    || !isImplicitlyDefined)
-                {
-                    continue;
-                }
-
-                ImplicitPackageReferences.Add(packageReference.ItemSpec);
-            }
         }
 
         /// <summary>
@@ -433,6 +411,28 @@ namespace Microsoft.NET.Build.Tasks
                     { DependenciesMetadata, string.Join(";", Dependencies) }
                 };
             }
+        }
+
+        internal static HashSet<string> GetImplicitPackageReferences(string defaultImplicitPackages)
+        {
+            var implicitPackageReferences = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            if (string.IsNullOrEmpty(defaultImplicitPackages))
+            {
+                return implicitPackageReferences;
+            }
+
+            var packageNames = defaultImplicitPackages.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            if (packageNames == null || packageNames.Length <= 0)
+            {
+                return implicitPackageReferences;
+            }
+
+            foreach (var packageReference in packageNames)
+            {
+                implicitPackageReferences.Add(packageReference);
+            }
+
+            return implicitPackageReferences;
         }
     }
 }

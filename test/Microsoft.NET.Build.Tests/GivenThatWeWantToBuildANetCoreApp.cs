@@ -76,5 +76,36 @@ namespace Microsoft.NET.Build.Tests
             var netCoreAppLibrary = target.Libraries.Single(l => l.Name == "Microsoft.NETCore.App");
             netCoreAppLibrary.Version.ToString().Should().Be(expectedPackageVersion);
         }
+
+        [Fact]
+        public void It_restores_only_ridless_tfm()
+        {
+            //  Disable this test when using full Framework MSBuild, until MSBuild is updated 
+            //  to provide conditions in NuGet ImportBefore/ImportAfter props/targets
+            //  https://github.com/dotnet/sdk/issues/874
+            if (UsingFullFrameworkMSBuild)
+            {
+                return;
+            }
+
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld")
+                .WithSource()
+                .Restore();
+
+            var getValuesCommand = new GetValuesCommand(Stage0MSBuild, testAsset.TestRoot,
+                "netcoreapp1.0", "TargetDefinitions", GetValuesCommand.ValueType.Item);
+
+            getValuesCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            // When RuntimeIdentifier is not specified, the assets file
+            // should only contain one target with no RIDs
+            var targetDefs = getValuesCommand.GetValues();
+            targetDefs.Count.Should().Be(1);
+            targetDefs.Should().Contain(".NETCoreApp,Version=v1.0");
+        }
     }
 }
