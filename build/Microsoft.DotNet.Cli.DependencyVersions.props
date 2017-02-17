@@ -11,5 +11,6 @@
     <TemplateEngineVersion>1.0.0-beta1-20170202-111</TemplateEngineVersion>
     <TemplateEngineTemplateVersion>1.0.0-beta1-20170206-112</TemplateEngineTemplateVersion>
     <PlatformAbstractionsVersion>1.1.1</PlatformAbstractionsVersion>
+    <DependencyModelVersion>1.0.2</DependencyModelVersion>
   </PropertyGroup>
 </Project>
