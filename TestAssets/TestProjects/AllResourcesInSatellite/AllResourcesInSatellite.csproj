@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFrameworks>netcoreapp1.0</TargetFrameworks>
-    <RuntimeIdentifiers>win7-x86</RuntimeIdentifiers>
     <OutputType>Exe</OutputType>
     <AssemblyOriginatorKeyFile>test.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
@@ -19,7 +18,6 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net46'">
-    <RuntimeIdentifier>win7-x86</RuntimeIdentifier>
     <PublicSign>false</PublicSign>
   </PropertyGroup>
   

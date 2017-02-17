@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp1.0</TargetFramework>
+    <RuntimeIdentifiers>osx.10.11-x64;ubuntu.14.04-x64;win10-x64;win81-x64</RuntimeIdentifiers>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LibraryWithRid\LibraryWithRid.csproj" />
+    <ProjectReference Include="..\LibraryWithRids\LibraryWithRids.csproj" />
+    <ProjectReference Include="..\LibraryWithoutRid\LibraryWithoutRid.csproj" />
+  </ItemGroup>
+
+</Project>

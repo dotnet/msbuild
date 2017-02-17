@@ -164,6 +164,7 @@
           DestinationFolder="$(TestsDirectory)"
           />
 
+<Message Text="$(DotNetTool) &quot;$(TestsDirectory)\xunit.console.netcore.exe&quot; &quot;@(TestAssembly, '&quot; &quot;')&quot; -xml &quot;@(XmlTestFile)&quot;" Importance="High" />
     <Exec Command="$(DotNetTool) &quot;$(TestsDirectory)\xunit.console.netcore.exe&quot; &quot;@(TestAssembly, '&quot; &quot;')&quot; -xml &quot;@(XmlTestFile)&quot;"
           LogStandardErrorAsError="true"
           WorkingDirectory="$(TestsDirectory)"

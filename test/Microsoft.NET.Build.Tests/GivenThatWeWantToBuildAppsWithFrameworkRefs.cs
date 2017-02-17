@@ -56,11 +56,11 @@ namespace Microsoft.NET.Build.Tests
 
         void VerifyProjectsBuild(TestAsset testAsset, params string[] buildArgs)
         {
-            VerifyBuild(testAsset, "StopwatchLib", "net45", buildArgs,
+            VerifyBuild(testAsset, "StopwatchLib", "net45", "", buildArgs,
                 "StopwatchLib.dll",
                 "StopwatchLib.pdb");
 
-            VerifyBuild(testAsset, "EntityFrameworkApp", "net451", buildArgs,
+            VerifyBuild(testAsset, "EntityFrameworkApp", "net451", "win7-x86", buildArgs,
                 "EntityFrameworkApp.exe",
                 "EntityFrameworkApp.pdb",
                 "EntityFrameworkApp.runtimeconfig.dev.json",
@@ -69,7 +69,7 @@ namespace Microsoft.NET.Build.Tests
             // Try running EntityFrameworkApp.exe
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "EntityFrameworkApp");
             var buildCommand = new BuildCommand(Stage0MSBuild, appProjectDirectory);
-            var outputDirectory = buildCommand.GetOutputDirectory("net451");
+            var outputDirectory = buildCommand.GetOutputDirectory("net451", runtimeIdentifier: "win7-x86");
 
             Command.Create(Path.Combine(outputDirectory.FullName, "EntityFrameworkApp.exe"), Enumerable.Empty<string>())
                 .CaptureStdOut()
@@ -80,14 +80,14 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining("Required Test Provider");
         }
 
-        private void VerifyBuild(TestAsset testAsset, string project, string targetFramework, 
+        private void VerifyBuild(TestAsset testAsset, string project, string targetFramework, string runtimeIdentifier,
             string [] buildArgs,
             params string [] expectedFiles)
         {
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, project);
 
             var buildCommand = new BuildCommand(Stage0MSBuild, appProjectDirectory);
-            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);
+            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: runtimeIdentifier);
 
             buildCommand
                 .Execute(buildArgs)
@@ -106,30 +106,30 @@ namespace Microsoft.NET.Build.Tests
             }
 
             var testAsset = _testAssetsManager
-                .CopyTestAsset("AppsWithFrameworkReferences")
+                .CopyTestAsset("AppsWithFrameworkReferences", "CleanTargetRemovesAll")
                 .WithSource();
 
             testAsset.Restore("EntityFrameworkApp");
             testAsset.Restore("StopwatchLib");
 
-            VerifyClean(testAsset, "StopwatchLib", "net45",
+            VerifyClean(testAsset, "StopwatchLib", "net45", "",
                 "StopwatchLib.dll",
                 "StopwatchLib.pdb");
 
-            VerifyClean(testAsset, "EntityFrameworkApp", "net451",
+            VerifyClean(testAsset, "EntityFrameworkApp", "net451", "win7-x86",
                 "EntityFrameworkApp.exe",
                 "EntityFrameworkApp.pdb",
                 "EntityFrameworkApp.runtimeconfig.dev.json",
                 "EntityFrameworkApp.runtimeconfig.json");
         }
 
-        private void VerifyClean(TestAsset testAsset, string project, string targetFramework,
+        private void VerifyClean(TestAsset testAsset, string project, string targetFramework, string runtimeIdentifier,
             params string[] expectedFiles)
         {
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, project);
 
             var buildCommand = new BuildCommand(Stage0MSBuild, appProjectDirectory);
-            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);
+            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: runtimeIdentifier);
 
             buildCommand
                 .Execute()

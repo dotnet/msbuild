@@ -174,9 +174,6 @@
   <data name="UnexpectedDependencyWithNoVersionNumber" xml:space="preserve">
     <value>Sürüm numarası olmayan, beklenmeyen bağımlılık: '{0}'.</value>
   </data>
-  <data name="RuntimeIdentifierMustBeSetForNETFramework" xml:space="preserve">
-    <value>.NETFramework yürütülebilir dosyaları için RuntimeIdentifier ayarlanmalıdır. RuntimeIdentifier=win7-x86 veya RuntimeIdentifier=win7-x64 ayarlanabilir.</value>
-  </data>
   <data name="AssetPreprocessorMustBeConfigured" xml:space="preserve">
     <value>Varlıkların işlenebilmesi için varlık ön işlemcisi yapılandırılmalıdır.</value>
   </data>
