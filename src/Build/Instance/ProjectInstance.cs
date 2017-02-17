@@ -71,7 +71,7 @@ namespace Microsoft.Build.Execution
     /// It only exposes items and properties: targets, host services, and the task registry are not exposed as they are only the concern of build.
     /// Constructors are internal in order to direct users to Project class instead; these are only createable via Project objects.
     /// </comments>
-    [DebuggerDisplay(@"{FullPath} #Targets={TargetsCount} DefaultTargets={(DefaultTargets == null) ? System.String.Empty : System.String.Join("";"", DefaultTargets.ToArray())} ToolsVersion={Toolset.ToolsVersion} InitialTargets={(InitialTargets == null) ? System.String.Empty : System.String.Join("";"", InitialTargets.ToArray())} #GlobalProperties={globalProperties.Count} #Properties={properties.Count} #ItemTypes={items.ItemTypes.Count} #Items={items.Count}")]
+    [DebuggerDisplay(@"{FullPath} #Targets={TargetsCount} DefaultTargets={(DefaultTargets == null) ? System.String.Empty : System.String.Join("";"", DefaultTargets.ToArray())} ToolsVersion={Toolset.ToolsVersion} InitialTargets={(InitialTargets == null) ? System.String.Empty : System.String.Join("";"", InitialTargets.ToArray())} #GlobalProperties={GlobalProperties.Count} #Properties={Properties.Count} #ItemTypes={ItemTypes.Count} #Items={Items.Count}")]
     public class ProjectInstance : IPropertyProvider<ProjectPropertyInstance>, IItemProvider<ProjectItemInstance>, IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>, INodePacketTranslatable
     {
         /// <summary>
