@@ -100,9 +100,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Choose>
 
   <PropertyGroup>
-    <!-- AppendRuntimeIdentifierToOutputPath defaults to false since it is a breaking change to change the output path -->
-    <!-- Projects that build for multiple RIDs can set this to true to get a RID folder in their output path -->
-    <AppendRuntimeIdentifierToOutputPath Condition="'$(AppendRuntimeIdentifierToOutputPath)' == ''">false</AppendRuntimeIdentifierToOutputPath>
+    <!-- Projects can opt out of having the RID appended to the output path by setting this to false. -->
+    <AppendRuntimeIdentifierToOutputPath Condition="'$(AppendRuntimeIdentifierToOutputPath)' == ''">true</AppendRuntimeIdentifierToOutputPath>
   </PropertyGroup>
 
   <!--
