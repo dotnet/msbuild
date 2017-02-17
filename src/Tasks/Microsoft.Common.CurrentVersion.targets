@@ -1560,7 +1560,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         BuildInParallel="$(BuildInParallel)"
         Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); ReferringTargetFramework=$(ReferringTargetFrameworkForProjectReferences)"
         ContinueOnError="!$(BuildingProject)"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework"
+        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier"
         Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' != 'true'">
 
       <Output TaskParameter="TargetOutputs" PropertyName="_ProjectReferenceTargetFrameworkProperties" />
@@ -1573,6 +1573,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <UndefineProperties Condition="$(_ProjectReferenceTargetFrameworkProperties.Contains(`ProjectHasSingleTargetFramework=true`))">%(_MSBuildProjectReferenceExistent.UndefineProperties);TargetFramework;ProjectHasSingleTargetFramework</UndefineProperties>
         <!-- Unconditionally remove the property that was set as a marker to indicate that for this call we should remove TargetFramework -->
         <UndefineProperties Condition="!$(_ProjectReferenceTargetFrameworkProperties.Contains(`ProjectHasSingleTargetFramework=true`))">%(_MSBuildProjectReferenceExistent.UndefineProperties);ProjectHasSingleTargetFramework</UndefineProperties>
+      </_MSBuildProjectReferenceExistent>
+    </ItemGroup>
+
+    <ItemGroup>
+      <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.Identity)' == '%(Identity)' and '$(_ProjectReferenceTargetFrameworkProperties)' != ''">
+        <UndefineProperties Condition="$(_ProjectReferenceTargetFrameworkProperties.Contains(`ProjectIsRidAgnostic=true`))">%(_MSBuildProjectReferenceExistent.UndefineProperties);RuntimeIdentifier;ProjectIsRidAgnostic</UndefineProperties>
+        <!-- Unconditionally remove the property that was set as a marker to indicate that for this call we should remove RuntimeIdentifier -->
+        <UndefineProperties Condition="!$(_ProjectReferenceTargetFrameworkProperties.Contains(`ProjectIsRidAgnostic=true`))">%(_MSBuildProjectReferenceExistent.UndefineProperties);ProjectIsRidAgnostic</UndefineProperties>
       </_MSBuildProjectReferenceExistent>
     </ItemGroup>
 
