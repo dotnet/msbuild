@@ -93,8 +93,13 @@
       <DebianConfigTokenValues Include="%SHARED_FRAMEWORK_DEBIAN_PACKAGE_NAME%">
         <ReplacementString>$(SharedFxDebianPackageName)</ReplacementString>
       </DebianConfigTokenValues>
-      <DebianConfigTokenValues Include="%SHARED_FRAMEWORK_DEBIAN_PACKAGE_NAME_ADDITIONAL%">
-        <ReplacementString>$(AdditionalSharedFxDebianPackageName)</ReplacementString>
+      <DebianConfigTokenValues Include="%SHARED_FRAMEWORK_DEBIAN_PACKAGE_ADDITIONAL_DEPENDENCY%"
+                               Condition="'$(IncludeAdditionalSharedFrameworks)' == 'true'">
+        <ReplacementString>"$(AdditionalSharedFxDebianPackageName)" : {}</ReplacementString>
+      </DebianConfigTokenValues>
+      <DebianConfigTokenValues Include="%SHARED_FRAMEWORK_DEBIAN_PACKAGE_ADDITIONAL_DEPENDENCY%"
+                               Condition="'$(IncludeAdditionalSharedFrameworks)' != 'true'">
+        <ReplacementString></ReplacementString>
       </DebianConfigTokenValues>
       <DebianConfigTokenValues Include="%SDK_NUGET_VERSION%">
         <ReplacementString>$(SdkVersion)</ReplacementString>
