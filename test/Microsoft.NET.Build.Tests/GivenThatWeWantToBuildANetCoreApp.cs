@@ -22,10 +22,12 @@ namespace Microsoft.NET.Build.Tests
     {
         [Theory]
         //  TargetFramework, RuntimeFrameworkVersion, ExpectedPackageVersion, ExpectedRuntimeFrameworkVersion
-        [InlineData("netcoreapp1.0", null, "1.0.0", "1.0.0")]
-        [InlineData("netcoreapp1.1", null, "1.1.0", "1.1.0")]
-        [InlineData("netcoreapp1.0", "1.0.1", "1.0.1", "1.0.1")]
+        [InlineData("netcoreapp1.0", null, "1.0.4", "1.0.4")]
+        [InlineData("netcoreapp1.0", "1.0.0", "1.0.0", "1.0.0")]
         [InlineData("netcoreapp1.0", "1.0.3", "1.0.3", "1.0.3")]
+        [InlineData("netcoreapp1.1", null, "1.1.1", "1.1.1")]
+        [InlineData("netcoreapp1.1", "1.1.0", "1.1.0", "1.1.0")]
+        [InlineData("netcoreapp1.1.1", null, "1.1.1", "1.1.1")]
         public void It_targets_the_right_shared_framework(string targetFramework, string runtimeFrameworkVersion,
             string expectedPackageVersion, string expectedRuntimeVersion)
         {
