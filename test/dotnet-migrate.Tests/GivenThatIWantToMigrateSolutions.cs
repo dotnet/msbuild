@@ -95,7 +95,7 @@ namespace Microsoft.DotNet.Migration.Tests
         {
             MigrateAndBuild(
                 "NonRestoredTestProjects",
-                "PJAppWithSlnAndXprojRefThatRefsCsprojWhereSlnDoesNotRefCsproj");
+                "PJAppWithSlnThatDoesNotRefCsproj");
         }
 
         [Fact]
