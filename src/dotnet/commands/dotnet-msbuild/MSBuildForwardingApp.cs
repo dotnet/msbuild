@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
+using System.Diagnostics;
 
 namespace Microsoft.DotNet.Tools.MSBuild
 {
@@ -33,7 +34,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
         private readonly IEnumerable<string> _msbuildRequiredParameters = 
             new List<string> { "/m", "/v:m" };
 
-        public MSBuildForwardingApp(IEnumerable<string> argsToForward)
+        public MSBuildForwardingApp(IEnumerable<string> argsToForward, string msbuildPath = null)
         {
             if (Telemetry.CurrentSessionId != null)
             {
@@ -54,23 +55,21 @@ namespace Microsoft.DotNet.Tools.MSBuild
             }
 
             _forwardingApp = new ForwardingApp(
-                GetMSBuildExePath(),
+                msbuildPath ?? GetMSBuildExePath(),
                 _msbuildRequiredParameters.Concat(argsToForward.Select(Escape)),
                 environmentVariables: _msbuildRequiredEnvironmentVariables);
         }
 
+        public ProcessStartInfo GetProcessStartInfo()
+        {
+            return _forwardingApp
+                .WithEnvironmentVariable(TelemetrySessionIdEnvironmentVariableName, Telemetry.CurrentSessionId)
+                .GetProcessStartInfo();
+        }
+
         public int Execute()
         {
-            try
-            {
-                Environment.SetEnvironmentVariable(TelemetrySessionIdEnvironmentVariableName, Telemetry.CurrentSessionId);
-
-                return _forwardingApp.Execute();
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable(TelemetrySessionIdEnvironmentVariableName, null);
-            }
+            return GetProcessStartInfo().Execute();
         }
 
         internal static CommandOption AddVerbosityOption(CommandLineApplication app)
