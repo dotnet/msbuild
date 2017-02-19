@@ -232,6 +232,15 @@ namespace Microsoft.NET.Build.Tasks {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to The filter profile &apos;{0}&apos; provided is of not the correct format.
+        /// </summary>
+        internal static string IncorrectFilterFormat {
+            get {
+                return ResourceManager.GetString("IncorrectFilterFormat", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Package Root {0} was incorrectly given for Resolved library {1}.
         /// </summary>
         internal static string IncorrectPackageRoot {
@@ -366,6 +375,17 @@ namespace Microsoft.NET.Build.Tasks {
             }
         }
         
+         /// <summary>
+        ///   Looks up a localized string similar to Package Name=&apos;{0}&apos;, Version=&apos;{1}&apos; was parsed.
+        /// </summary>
+        internal static string PackageInfoLog
+        {
+            get
+            {
+                return ResourceManager.GetString("PackageInfoLog", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to A PackageReference for &apos;{0}&apos; was included in your project. This package is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}.
         /// </summary>
@@ -375,6 +395,17 @@ namespace Microsoft.NET.Build.Tasks {
             }
         }
         
+         /// <summary>
+        ///   Looks up a localized string similar to Parsing the Files : &apos;{0}&apos;.
+        /// </summary>
+        internal static string ParsingFiles
+        {
+            get
+            {
+                return ResourceManager.GetString("ParsingFiles", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Assets are consumed from project &apos;{0}&apos;, but no corresponding MSBuild project path was  found in &apos;{1}&apos;..
         /// </summary>
@@ -383,13 +414,13 @@ namespace Microsoft.NET.Build.Tasks {
                 return ResourceManager.GetString("ProjectAssetsConsumedWithoutMSBuildProjectPath", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to RuntimeIdentifier must be set for .NETFramework executables. Consider RuntimeIdentifier=win7-x86 or RuntimeIdentifier=win7-x64..
         /// </summary>
-        internal static string RuntimeIdentifierMustBeSetForNETFramework {
+        internal static string RuntimeIdentifierWasNotSpecified {
             get {
-                return ResourceManager.GetString("RuntimeIdentifierMustBeSetForNETFramework", resourceCulture);
+                return ResourceManager.GetString("RuntimeIdentifierWasNotSpecified", resourceCulture);
             }
         }
         
