@@ -61,7 +61,7 @@
       <Version>2.2.0-beta4-build3444</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions">
-      <Version>1.1.0</Version>
+      <Version>$(PlatformAbstractionsVersion)</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Build.Runtime">
       <Version>$(CLI_MSBuild_Version)</Version>

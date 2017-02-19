@@ -172,7 +172,7 @@ namespace Microsoft.DotNet.Tools.Common
             this SlnFile slnFile,
             SlnPropertySet nestedProjects)
         {
-            var solutionFolderPaths = new Dictionary<string, string>();
+            var solutionFolderPaths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             var solutionFolderProjects = slnFile.Projects.GetProjectsByType(ProjectTypeGuids.SolutionFolderGuid);
             foreach (var slnProject in solutionFolderProjects)

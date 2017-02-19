@@ -23,6 +23,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
+    <Content Include="..\..\artifacts\*\stage2\sdk\*\.version">
+      <Link>.version</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
@@ -61,7 +65,7 @@
       <Version>1.0.0-prerelease-00206</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions">
-      <Version>1.1.0</Version>
+      <Version>$(PlatformAbstractionsVersion)</Version>
     </PackageReference>
   </ItemGroup>
 </Project>
