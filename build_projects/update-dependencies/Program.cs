@@ -25,8 +25,8 @@ namespace Microsoft.DotNet.Scripts
 
             List<BuildInfo> buildInfos = new List<BuildInfo>();
 
-            buildInfos.Add(BuildInfo.Get("Roslyn", s_config.RoslynVersionUrl, fetchLatestReleaseFile: false));
-            buildInfos.Add(BuildInfo.Get("CoreSetup", s_config.CoreSetupVersionUrl, fetchLatestReleaseFile: false));
+            buildInfos.Add(GetBuildInfo("Roslyn", s_config.RoslynVersionFragment, fetchLatestReleaseFile: false));
+            buildInfos.Add(GetBuildInfo("CoreSetup", s_config.CoreSetupVersionFragment, fetchLatestReleaseFile: false));
 
             IEnumerable<IDependencyUpdater> updaters = GetUpdaters();
             var dependencyBuildInfos = buildInfos.Select(buildInfo =>
@@ -57,6 +57,25 @@ namespace Microsoft.DotNet.Scripts
                         suggestedMessage + $" ({upstreamBranch.Name})",
                         body)
                     .Wait();
+            }
+        }
+
+        private static BuildInfo GetBuildInfo(string name, string buildInfoFragment, bool fetchLatestReleaseFile = true)
+        {
+            const string FileUrlProtocol = "file://";
+
+            if (s_config.DotNetVersionUrl.StartsWith(FileUrlProtocol, StringComparison.Ordinal))
+            {
+                return BuildInfo.LocalFileGetAsync(
+                           name,
+                           s_config.DotNetVersionUrl.Substring(FileUrlProtocol.Length),
+                           buildInfoFragment.Replace('/', Path.DirectorySeparatorChar),
+                           fetchLatestReleaseFile)
+                       .Result;
+            }
+            else
+            {
+                return BuildInfo.Get(name, $"{s_config.DotNetVersionUrl}/{buildInfoFragment}", fetchLatestReleaseFile);
             }
         }
 
