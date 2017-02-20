@@ -235,8 +235,6 @@ namespace Microsoft.NET.Publish.Tests
                         "Resource1.resx",
                         "ContentAlways.txt",
                         "ContentPreserveNewest.txt",
-                        "Microsoft.DiaSymReader.Native.amd64.dll",
-                        "Microsoft.DiaSymReader.Native.x86.dll",
                         "NoneCopyOutputAlways.txt",
                         "NoneCopyOutputPreserveNewest.txt",
                         "CopyToOutputFromProjectReference.txt",
