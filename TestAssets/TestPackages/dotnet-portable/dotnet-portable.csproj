@@ -2,9 +2,10 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp1.0</TargetFramework>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
     <AssemblyName>dotnet-portable</AssemblyName>
     <OutputType>Exe</OutputType>
+    <DisableImplicitFrameworkReferences>false</DisableImplicitFrameworkReferences>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,14 +13,4 @@
       <FinalOutputPath>$(ProjectRuntimeConfigFilePath)</FinalOutputPath>
     </BuiltProjectOutputGroupOutput>
   </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
-    <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.4</Version>
-    </PackageReference>
-  </ItemGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
-  </PropertyGroup>
 </Project>

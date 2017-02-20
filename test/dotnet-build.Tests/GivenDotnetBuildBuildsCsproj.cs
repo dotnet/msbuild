@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
-            var outputDll = testInstance.Root.GetDirectory("bin", configuration, "netcoreapp1.0")
+            var outputDll = testInstance.Root.GetDirectory("bin", configuration, "netcoreapp1.1")
                 .GetFile($"{testAppName}.dll");
 
             var outputRunCommand = new TestCommand("dotnet");
@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
             string dir = "pkgs";
             string args = $"--packages {dir}";
 
-            string newArgs = $"console -o \"{rootPath}\" --debug:ephemeral-hive";
+            string newArgs = $"console -f netcoreapp1.1 -o \"{rootPath}\" --debug:ephemeral-hive";
             new NewCommandShim()
                 .WithWorkingDirectory(rootPath)
                 .Execute(newArgs)
@@ -65,7 +65,12 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                 .Execute()
                 .Should().Pass();
 
-            var outputDll = Directory.EnumerateFiles(Path.Combine(rootPath, "bin"), "*.dll", SearchOption.AllDirectories).Single();
+            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
+
+            var outputDll = Directory.EnumerateFiles(
+                Path.Combine(rootPath, "bin", configuration, "netcoreapp1.1"), "*.dll", 
+                SearchOption.TopDirectoryOnly)
+                .Single();
 
             var outputRunCommand = new TestCommand("dotnet");
 
