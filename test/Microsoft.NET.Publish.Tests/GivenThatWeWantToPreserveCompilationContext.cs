@@ -30,7 +30,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
 
-            foreach (var targetFramework in new[] { "net46", "netcoreapp1.0" })
+            foreach (var targetFramework in new[] { "net46", "netcoreapp1.1" })
             {
                 var publishCommand = new PublishCommand(Stage0MSBuild, appProjectDirectory);
 
@@ -69,7 +69,7 @@ namespace Microsoft.NET.Publish.Tests
                     }
                     else
                     {
-                        expectedDefines = new[] { "DEBUG", "TRACE", "NETCOREAPP1_0" };
+                        expectedDefines = new[] { "DEBUG", "TRACE", "NETCOREAPP1_1" };
                     }
 
                     dependencyContext.CompilationOptions.Defines.Should().BeEquivalentTo(expectedDefines);
@@ -82,6 +82,8 @@ namespace Microsoft.NET.Publish.Tests
 
                     var compileLibraryNames = dependencyContext.CompileLibraries.Select(cl => cl.Name).Distinct().ToList();
                     var expectedCompileLibraryNames = targetFramework == "net46" ? Net46CompileLibraryNames.Distinct() : NetCoreAppCompileLibraryNames.Distinct();
+
+                    var extraCompileLibraryNames = compileLibraryNames.Except(expectedCompileLibraryNames).ToList();
 
                     compileLibraryNames.Should().BeEquivalentTo(expectedCompileLibraryNames);
 
@@ -233,6 +235,7 @@ testlibrary".Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntr
 
         string [] NetCoreAppCompileLibraryNames = @"testapp
 libuv
+microsoft.diasymreader.native
 microsoft.codeanalysis.analyzers
 microsoft.codeanalysis.common
 microsoft.codeanalysis.csharp
@@ -276,7 +279,6 @@ runtime.native.system
 runtime.native.system.io.compression
 runtime.native.system.net.http
 runtime.native.system.net.security
-runtime.native.system.security.cryptography
 runtime.native.system.security.cryptography.apple
 runtime.native.system.security.cryptography.openssl
 runtime.opensuse.13.2-x64.runtime.native.system.security.cryptography.openssl

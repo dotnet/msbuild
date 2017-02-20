@@ -56,7 +56,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            foreach (var targetFramework in new[] { "net46", "netcoreapp1.0" })
+            foreach (var targetFramework in new[] { "net46", "netcoreapp1.1" })
             {
                 if (targetFramework == "net46" && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
