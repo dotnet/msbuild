@@ -5,21 +5,29 @@ using System.Collections.Generic;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.MSBuild;
+using System.Diagnostics;
+using System;
+using Microsoft.DotNet.Cli;
 
 namespace Microsoft.DotNet.Tools.Build
 {
     public class BuildCommand
     {
-        public static int Run(string[] args)
-        {
-            DebugHelper.HandleDebugSwitch(ref args);
+        private MSBuildForwardingApp _forwardingApp;
 
+        public BuildCommand(IEnumerable<string> msbuildArgs, string msbuildPath = null)
+        {
+            _forwardingApp = new MSBuildForwardingApp(msbuildArgs, msbuildPath);
+        }
+
+        public static BuildCommand FromArgs(string[] args, string msbuildPath = null)
+        {
             CommandLineApplication app = new CommandLineApplication(throwOnUnexpectedArg: false);
             app.Name = "dotnet build";
             app.FullName = LocalizableStrings.AppFullName;
             app.Description = LocalizableStrings.AppDescription;
             app.ArgumentSeparatorHelpText = HelpMessageStrings.MSBuildAdditionalArgsHelpText;
-            app.HandleRemainingArguments = true;            
+            app.HandleRemainingArguments = true;
             app.HelpOption("-h|--help");
 
             CommandArgument projectArgument = app.Argument($"<{LocalizableStrings.ProjectArgumentValueName}>", LocalizableStrings.ProjectArgumentDescription);
@@ -36,9 +44,12 @@ namespace Microsoft.DotNet.Tools.Build
             CommandOption noDependenciesOption = app.Option("--no-dependencies", LocalizableStrings.NoDependenciesOptionDescription, CommandOptionType.NoValue);
             CommandOption verbosityOption = MSBuildForwardingApp.AddVerbosityOption(app);
 
+            List<string> msbuildArgs = null;
             app.OnExecute(() =>
             {
-                List<string> msbuildArgs = new List<string>();
+                // this delayed initialization is here intentionally
+                // this code will not get run in some cases (i.e. --help)
+                msbuildArgs = new List<string>();
 
                 if (!string.IsNullOrEmpty(projectArgument.Value))
                 {
@@ -93,10 +104,53 @@ namespace Microsoft.DotNet.Tools.Build
 
                 msbuildArgs.AddRange(app.RemainingArguments);
 
-                return new MSBuildForwardingApp(msbuildArgs).Execute();
+                return 0;
             });
 
-            return app.Execute(args);
+            int exitCode = app.Execute(args);
+            if (msbuildArgs == null)
+            {
+                throw new CommandCreationException(exitCode);
+            }
+
+            return new BuildCommand(msbuildArgs, msbuildPath);
+        }
+
+        public static int Run(string[] args)
+        {
+            DebugHelper.HandleDebugSwitch(ref args);
+
+            BuildCommand cmd;
+            try
+            {
+                cmd = FromArgs(args);
+            }
+            catch (CommandCreationException e)
+            {
+                return e.ExitCode;
+            }
+
+            return cmd.Execute();
+        }
+
+        public ProcessStartInfo GetProcessStartInfo()
+        {
+            return _forwardingApp.GetProcessStartInfo();
+        }
+
+        public int Execute()
+        {
+            return GetProcessStartInfo().Execute();
+        }
+
+        private class CommandCreationException : Exception
+        {
+            public int ExitCode { get; private set; }
+
+            public CommandCreationException(int exitCode)
+            {
+                ExitCode = exitCode;
+            }
         }
     }
 }

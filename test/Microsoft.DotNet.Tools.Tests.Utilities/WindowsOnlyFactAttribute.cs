@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         {
             if (RuntimeEnvironment.OperatingSystemPlatform != Platform.Windows)
             {
-                this.Skip = "This test requires windows to run";
+                this.Skip = "This test requires Windows to run";
             }
         }
     }

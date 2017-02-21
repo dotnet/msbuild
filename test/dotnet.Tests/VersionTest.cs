@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Tools.Test.Utilities;
@@ -18,14 +17,28 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void VersionCommandDisplaysCorrectVersion()
         {
+            var versionFilePath = Path.Combine(AppContext.BaseDirectory, ".version");
+            var version = GetVersionFromFile(versionFilePath);
+
             CommandResult result = new DotnetCommand()
                     .ExecuteWithCapturedOutput("--version");
 
             result.Should().Pass();
-            
-            Regex.IsMatch(result.StdOut.Trim(), @"[0-9]{1}\.[0-9]{1}\.[0-9]{1}-[a-zA-Z0-9]+-[0-9]{6}$").Should()
-                .BeTrue($"Unexpected dotnet sdk version - {result.StdOut}");
+            result.StdOut.Trim().Should().Be(version);
+        }
 
+        private string GetVersionFromFile(string versionFilePath)
+        {
+            using (var reader = new StreamReader(File.OpenRead(versionFilePath)))
+            {
+                SkipCommit(reader);
+                return reader.ReadLine();
+            }
+        }
+
+        private void SkipCommit(StreamReader reader)
+        {
+            reader.ReadLine();
         }
     }
 }

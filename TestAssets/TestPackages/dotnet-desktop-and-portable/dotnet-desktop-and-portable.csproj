@@ -15,14 +15,8 @@
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
     <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.3</Version>
+      <Version>1.0.4</Version>
     </PackageReference>
-  </ItemGroup>
-
-  <!--The below package ref is added as a workaround to issue : https://github.com/NuGet/Home/issues/4416
-      This should be removed when the issue is fixed-->
-  <ItemGroup>
-    <PackageReference Include="NewtonSoft.Json" Version="9.0.1" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">

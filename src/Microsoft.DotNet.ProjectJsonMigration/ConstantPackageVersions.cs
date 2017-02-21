@@ -5,8 +5,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 {
     internal class ConstantPackageVersions
     {
-        public const string AspNetToolsVersion = "1.0.0-msbuild3-final";
-        public const string AspNet110ToolsVersion = "1.1.0-msbuild3-final";
+        public const string AspNetToolsVersion = "1.0.0";
+        public const string AspNet110ToolsVersion = "1.1.0";
         public const string AspNetLTSPackagesVersion = "1.0.2";
         public const string EntityFrameworkLTSPackagesVersion = "1.0.2";
         public const string TestSdkPackageVersion = "15.0.0-preview-20170106-08";
@@ -15,6 +15,5 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         public const string MstestTestAdapterVersion = "1.1.8-rc";
         public const string MstestTestFrameworkVersion = "1.0.8-rc";
         public const string BundleMinifierToolVersion = "2.2.301";
-        public const string WebSdkPackageVersion = "1.0.0-alpha-20161205-1-154" ;
     }
 }

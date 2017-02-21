@@ -591,25 +591,10 @@ namespace Microsoft.DotNet.Internal.ProjectModel
             var rawOptions = rawObject.Value<JToken>("buildOptions") as JObject;
             if (rawOptions == null)
             {
-                rawOptions = rawObject.Value<JToken>("compilationOptions") as JObject;
-                if (rawOptions == null)
+                return new CommonCompilerOptions
                 {
-                    return new CommonCompilerOptions
-                    {
-                        CompilerName = compilerName ?? "csc"
-                    };
-                }
-
-                var lineInfo = (IJsonLineInfo)rawOptions;
-
-                project.Diagnostics.Add(
-                    new DiagnosticMessage(
-                        ErrorCodes.DOTNET1015,
-                        $"The 'compilationOptions' option is deprecated. Use 'buildOptions' instead.",
-                        project.ProjectFilePath,
-                        DiagnosticMessageSeverity.Warning,
-                        lineInfo.LineNumber,
-                        lineInfo.LinePosition));
+                    CompilerName = compilerName ?? "csc"
+                };
             }
 
             var analyzerOptionsJson = rawOptions.Value<JToken>("analyzerOptions") as JObject;
@@ -814,6 +799,9 @@ namespace Microsoft.DotNet.Internal.ProjectModel
 
         private static void AddProjectFilesDeprecationDiagnostics(JObject rawProject, Project project)
         {
+            var compilationOptionsWarning = "'buildOptions'";
+            AddDeprecatedDiagnosticMessage(rawProject, project, "compilationOptions", compilationOptionsWarning);
+
             var compileWarning = "'compile' in 'buildOptions'";
             AddDeprecatedDiagnosticMessage(rawProject, project, "compile", compileWarning);
             AddDeprecatedDiagnosticMessage(rawProject, project, "compileExclude", compileWarning);
@@ -870,11 +858,27 @@ namespace Microsoft.DotNet.Internal.ProjectModel
 
         private static void ConvertDeprecatedToSupportedFormat(JObject rawProject)
         {
+            ConvertToBuildOptions(rawProject);
             ConvertToBuildOptionsCompile(rawProject);
             ConvertToBuildOptionsEmbed(rawProject);
             ConvertToBuildOptionsCopyToOutput(rawProject);
             ConvertToPackOptions(rawProject);
             ConvertToPublishOptions(rawProject);
+        }
+
+        private static void ConvertToBuildOptions(JObject rawProject)
+        {
+            var jpath = "buildOptions";
+            if (AreDeprecatedOptionsIgnored(rawProject, jpath))
+            {
+                return;
+            }
+
+            var deprecatedValue = rawProject.Value<JToken>("compilationOptions");
+            if (deprecatedValue != null)
+            {
+                rawProject["buildOptions"] = deprecatedValue.DeepClone();
+            }
         }
 
         private static void ConvertToBuildOptionsCompile(JObject rawProject)
