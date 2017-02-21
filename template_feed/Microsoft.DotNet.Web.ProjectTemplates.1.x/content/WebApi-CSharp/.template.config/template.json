@@ -31,7 +31,7 @@
           "description": "Target netcoreapp1.1"
         }
       ],
-      "defaultValue": "netcoreapp1.0"
+      "defaultValue": "netcoreapp1.1"
     },
     "sdkVersion": {
       "type": "bind",
