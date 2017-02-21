@@ -6,13 +6,17 @@
     <ReleaseSuffix>alpha</ReleaseSuffix>
 
     <CliVersionPrefix>$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(ReleaseSuffix)</CliVersionPrefix>
-    <SimpleVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch).$(CommitCount)</SimpleVersion>
-    <VersionSuffix>$(ReleaseSuffix)-$(CommitCount)</VersionSuffix>
-    <NugetVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(VersionSuffix)</NugetVersion>
-    
-    <SdkVersion>$(NugetVersion)</SdkVersion>
-    <SdkNugetVersion>$(SdkVersion)</SdkNugetVersion>
+    <SimpleVersion Condition=" '$(DropSuffix)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch).$(CommitCount)</SimpleVersion> 
+    <SimpleVersion Condition=" '$(SimpleVersion)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch)</SimpleVersion> 
 
-    <TestPackageBuildVersionSuffix>$(CommitCount)</TestPackageBuildVersionSuffix>
+    <VersionSuffix Condition=" '$(DropSuffix)' == '' ">$(ReleaseSuffix)-$(CommitCount)</VersionSuffix> 
+
+    <FullNugetVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(ReleaseSuffix)-$(CommitCount)</FullNugetVersion> 
+
+    <NugetVersion Condition=" '$(DropSuffix)' == '' ">$(FullNugetVersion)</NugetVersion> 
+    <NugetVersion Condition=" '$(NugetVersion)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch)</NugetVersion> 
+
+    <SdkVersion>$(NugetVersion)</SdkVersion>
+    <SdkNugetVersion>$(NugetVersion)</SdkNugetVersion> 
   </PropertyGroup>
 </Project>
