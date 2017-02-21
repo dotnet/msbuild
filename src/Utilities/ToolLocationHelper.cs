@@ -88,11 +88,20 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         Version47 = 11,
 
-        // keep this up to date, this should always point to the last entry
+        // Keep this up to date, this should always point to the last entry
         /// <summary>
-        /// the latest version available at the time of release
+        /// The latest version available at the time of major release. This
+        /// value should not be updated in minor releases as it could be a
+        /// breaking change.
         /// </summary>
-        VersionLatest = Version47
+        VersionLatest = Version462,
+
+        /// <summary>
+        /// Sentinel value for the latest version that we currently know about. Similar to
+        /// VersionLatest except the compiled value in the calling application will not need
+        /// to change for the update in MSBuild to used.
+        /// </summary>
+        VersionLatestOnMachine = 9999
     }
 
     /// <summary>
