@@ -295,6 +295,11 @@ BUILD_MSBUILD_ARGS="$PROJECT_FILE_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURAT
 
 setHome
 
+echo "** Rainer special debugging magic **"
+cat /etc/*-release
+echo "** lsb_release"
+lsb_release -a
+
 restoreBuildTools
 
 echo
