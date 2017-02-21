@@ -4,7 +4,8 @@
 
   <PropertyGroup>
     <MsBuildPackagesVersion>0.1.0-preview-00028-160627</MsBuildPackagesVersion>
-    <CoreSetupVersion>1.0.2</CoreSetupVersion>
+    <DependencyModelVersion>1.0.2</DependencyModelVersion>
+    <PlatformAbstractionsVersion>1.1.0</PlatformAbstractionsVersion>
     <NuGetVersion>4.0.0-rtm-2283</NuGetVersion>
   </PropertyGroup>
 

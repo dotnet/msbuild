@@ -26,7 +26,7 @@
       <Version>$(NuGetVersion)</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyModel">
-      <Version>$(CoreSetupVersion)</Version>
+      <Version>$(DependencyModelVersion)</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Build.Framework">
       <Version>$(MsBuildPackagesVersion)</Version>
