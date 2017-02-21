@@ -20,15 +20,12 @@
   <Import Project="build/OutputDirectories.props" />
   <Import Project="build/BuildDefaults.props" />
   <Import Project="build/BuildOutputs.props" />
-  <Import Project="build/ToolInfo.props" />
   <Import Project="build/Stage0.props" />
+  <Import Project="build/ToolInfo.props" />
   <Import Project="build/VersionBadge.props" />
   <Import Project="build/Microsoft.DotNet.Cli.BundledRuntimes.props" />
   
   <PropertyGroup>
-    <NuGetPackagesDir>$(NUGET_PACKAGES)</NuGetPackagesDir>
-    <NuGetPackagesDir Condition=" '$(NuGetPackagesDir)' == '' ">$(RepoRoot)/.nuget/packages</NuGetPackagesDir>
-
     <CLIBuildDll>$(RepoRoot)/build_projects/dotnet-cli-build/bin/dotnet-cli-build.dll</CLIBuildDll>
 
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
