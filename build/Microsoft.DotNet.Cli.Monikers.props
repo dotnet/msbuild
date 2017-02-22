@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <SdkBrandName>Microsoft .NET Core 1.0.3 - SDK</SdkBrandName>
-    <SharedFrameworkBrandName>Microsoft .NET Core 1.0.3 - Runtime</SharedFrameworkBrandName>
+    <SdkBrandName>.NET Core SDK 1.0.1 ($(Architecture)) Installer</SdkBrandName>
+    <SharedFrameworkBrandName>Microsoft .NET Core 1.0.4 - Runtime</SharedFrameworkBrandName>
     <SharedHostBrandName>Microsoft .NET Core 1.1.0 - Host</SharedHostBrandName>
     <HostFxrBrandName>Microsoft .NET Core 1.1.0 - Host FX Resolver</HostFxrBrandName>
     
-    <AdditionalSharedFrameworkBrandName>Microsoft .NET Core 1.1.0 - Runtime</AdditionalSharedFrameworkBrandName>
+    <AdditionalSharedFrameworkBrandName>Microsoft .NET Core 1.1.1 - Runtime</AdditionalSharedFrameworkBrandName>
     <AdditionalSharedHostBrandName>Microsoft .NET Core 1.1.0 - Host</AdditionalSharedHostBrandName>
     <AdditionalHostFxrBrandName>Microsoft .NET Core 1.1.0 - Host FX Resolver</AdditionalHostFxrBrandName>
 
