@@ -107,7 +107,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
             var outputProgram = rootDir
-                .GetDirectory("bin", configuration, "netcoreapp1.0", "publish", $"{rootDir.Name}.dll")
+                .GetDirectory("bin", configuration, "netcoreapp1.1", "publish", $"{rootDir.Name}.dll")
                 .FullName;
 
             new TestCommand(outputProgram)

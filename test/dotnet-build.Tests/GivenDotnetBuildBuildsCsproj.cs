@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                 .Execute()
                 .Should().Pass();
 
-            var outputDll = Directory.EnumerateFiles(Path.Combine(rootPath, "bin"), "*.dll", SearchOption.AllDirectories).Single();
+            var outputDll = Directory.EnumerateFiles(Path.Combine(rootPath, "bin"), "*.dll", SearchOption.AllDirectories).Single(x => !x.Contains("DiaSymReader"));
 
             var outputRunCommand = new TestCommand("dotnet");
 
