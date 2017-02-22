@@ -24,6 +24,11 @@ namespace Microsoft.Build.BackEnd
         private Dictionary<int, BuildRequestConfiguration> _configurations;
 
         /// <summary>
+        /// Object used for locking.
+        /// </summary>
+        private object _lockObject = new object();
+
+        /// <summary>
         /// Lookup which can be used to find a configuration with the specified metadata.
         /// </summary>
         private Dictionary<ConfigurationMetadata, int> _configurationIdsByMetadata;
@@ -56,7 +61,7 @@ namespace Microsoft.Build.BackEnd
         {
             get
             {
-                lock (_configurations)
+                lock (_lockObject)
                 {
                     return _configurations[configId];
                 }
@@ -74,7 +79,7 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrowArgumentNull(config, "config");
             ErrorUtilities.VerifyThrow(config.ConfigurationId != 0, "Invalid configuration ID");
 
-            lock (_configurations)
+            lock (_lockObject)
             {
                 int configId = GetKeyForConfiguration(config);
                 ErrorUtilities.VerifyThrow(!_configurations.ContainsKey(configId), "Configuration {0} already cached", config.ConfigurationId);
@@ -89,7 +94,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="configId">The id of the configuration to remove.</param>
         public void RemoveConfiguration(int configId)
         {
-            lock (_configurations)
+            lock (_lockObject)
             {
                 BuildRequestConfiguration config = _configurations[configId];
                 _configurations.Remove(configId);
@@ -117,7 +122,7 @@ namespace Microsoft.Build.BackEnd
         public BuildRequestConfiguration GetMatchingConfiguration(ConfigurationMetadata configMetadata)
         {
             ErrorUtilities.VerifyThrowArgumentNull(configMetadata, "configMetadata");
-            lock (_configurations)
+            lock (_lockObject)
             {
                 int configId;
                 if (!_configurationIdsByMetadata.TryGetValue(configMetadata, out configId))
@@ -134,7 +139,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public BuildRequestConfiguration GetMatchingConfiguration(ConfigurationMetadata configMetadata, ConfigCreateCallback callback, bool loadProject)
         {
-            lock (_configurations)
+            lock (_lockObject)
             {
                 BuildRequestConfiguration configuration = GetMatchingConfiguration(configMetadata);
 
@@ -177,7 +182,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if the cache contains a configuration with this id, false otherwise.</returns>
         public bool HasConfiguration(int configId)
         {
-            lock (_configurations)
+            lock (_lockObject)
             {
                 return _configurations.ContainsKey(configId);
             }
@@ -188,16 +193,16 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ClearConfigurations()
         {
-            if (_configurations != null)
+            lock (_lockObject)
             {
                 foreach (var config in _configurations.Values)
                 {
                     config.ClearCacheFile();
                 }
-            }
 
-            _configurations = new Dictionary<int, BuildRequestConfiguration>();
-            _configurationIdsByMetadata = new Dictionary<ConfigurationMetadata, int>();
+                _configurations = new Dictionary<int, BuildRequestConfiguration>();
+                _configurationIdsByMetadata = new Dictionary<ConfigurationMetadata, int>();
+            }
         }
 
         /// <summary>
@@ -212,28 +217,31 @@ namespace Microsoft.Build.BackEnd
             Dictionary<int, BuildRequestConfiguration> configurationsToKeep = new Dictionary<int, BuildRequestConfiguration>();
             Dictionary<ConfigurationMetadata, int> configurationIdsByMetadataToKeep = new Dictionary<ConfigurationMetadata, int>();
 
-            foreach (KeyValuePair<ConfigurationMetadata, int> metadata in _configurationIdsByMetadata)
+            lock (_lockObject)
             {
-                BuildRequestConfiguration configuration;
-                int configId = metadata.Value;
-
-                if (_configurations.TryGetValue(configId, out configuration))
+                foreach (KeyValuePair<ConfigurationMetadata, int> metadata in _configurationIdsByMetadata)
                 {
-                    // We do not want to retain this configuration
-                    if (!configuration.ExplicitlyLoaded)
+                    BuildRequestConfiguration configuration;
+                    int configId = metadata.Value;
+
+                    if (_configurations.TryGetValue(configId, out configuration))
                     {
-                        configurationIdsCleared.Add(configId);
-                        configuration.ClearCacheFile();
-                        continue;
+                        // We do not want to retain this configuration
+                        if (!configuration.ExplicitlyLoaded)
+                        {
+                            configurationIdsCleared.Add(configId);
+                            configuration.ClearCacheFile();
+                            continue;
+                        }
+
+                        configurationsToKeep.Add(configId, configuration);
+                        configurationIdsByMetadataToKeep.Add(metadata.Key, metadata.Value);
                     }
-
-                    configurationsToKeep.Add(configId, configuration);
-                    configurationIdsByMetadataToKeep.Add(metadata.Key, metadata.Value);
                 }
-            }
 
-            _configurations = configurationsToKeep;
-            _configurationIdsByMetadata = configurationIdsByMetadataToKeep;
+                _configurations = configurationsToKeep;
+                _configurationIdsByMetadata = configurationIdsByMetadataToKeep;
+            }
 
             return configurationIdsCleared;
         }
@@ -254,7 +262,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if any configurations were cached, false otherwise.</returns>
         public bool WriteConfigurationsToDisk()
         {
-            lock (_configurations)
+            lock (_lockObject)
             {
                 bool cachedAtLeastOneProject = false;
 
@@ -332,7 +340,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownComponent()
         {
-            lock (_configurations)
+            lock (_lockObject)
             {
                 _configurations.Clear();
             }
