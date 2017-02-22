@@ -16,25 +16,25 @@
                                            GetNuGetPackagesArchive;" />
 
   <Target Name="CompileCLI">
-      <ItemGroup>
-        <SharedFramework Remove="*" />
-        <SharedFramework Include="$(SharedFrameworkPublishDirectory)/**/*" />
+    <ItemGroup>
+      <SharedFramework Remove="*" />
+      <SharedFramework Include="$(SharedFrameworkPublishDirectory)/**/*" />
 
-        <RuntimeTargetsAssetsToRemoveFromDeps Remove="*" />
-        <RuntimeTargetsAssetsToRemoveFromDeps Include="MSBuild" />
+      <RuntimeTargetsAssetsToRemoveFromDeps Remove="*" />
+      <RuntimeTargetsAssetsToRemoveFromDeps Include="MSBuild" />
 
-        <RuntimeAssetsToRemoveFromDeps Remove="*" />
-        <RuntimeAssetsToRemoveFromDeps Include="redist" />
-        <RuntimeAssetsToRemoveFromDeps Include="tool_msbuild" />
-        <RuntimeAssetsToRemoveFromDeps Include="tool_nuget" />
-      </ItemGroup>
+      <RuntimeAssetsToRemoveFromDeps Remove="*" />
+      <RuntimeAssetsToRemoveFromDeps Include="redist" />
+      <RuntimeAssetsToRemoveFromDeps Include="tool_msbuild" />
+      <RuntimeAssetsToRemoveFromDeps Include="tool_nuget" />
+    </ItemGroup>
 
-      <RemoveDir Directories="$(StageDirectory)" />
-      <MakeDir Directories="$(StageDirectory)"/>
+    <RemoveDir Directories="$(StageDirectory)" />
+    <MakeDir Directories="$(StageDirectory)"/>
 
-      <!-- CopySharedFramework -->
-      <Copy SourceFiles="@(SharedFramework)"
-            DestinationFiles="@(SharedFramework->'$(StageDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <!-- CopySharedFramework -->
+    <Copy SourceFiles="@(SharedFramework)"
+          DestinationFiles="@(SharedFramework->'$(StageDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
 
     <!-- Publish DotNet -->
     <DotNetPublish ToolPath="$(Stage0Directory)"
