@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   
   <PropertyGroup>
@@ -7,23 +7,16 @@
     <RuntimeFrameworkVersion>$(CLI_SharedFrameworkVersion)</RuntimeFrameworkVersion>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <PackageTargetFallback>$(PackageTargetFallback);dotnet5.4</PackageTargetFallback>
+    <PublishDir>$(Stage2SdkDirectory)</PublishDir>
+    <VersionSuffix>$(CommitCount)</VersionSuffix>
   </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App">
-      <Version>$(CLI_SharedFrameworkVersion)</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Build.Runtime">
-      <Version>$(CLI_MSBuild_Version)</Version>
-    </PackageReference>
-    <PackageReference Include="NuGet.Build.Tasks">
-      <Version>$(CLI_NuGet_Version)</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.TestPlatform.CLI">
-      <Version>$(CLI_TestPlatform_Version)</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.TestPlatform.Build">
-      <Version>$(CLI_TestPlatform_Version)</Version>
-    </PackageReference>
+    <PackageReference Include="Microsoft.NETCore.App" Version="$(CLI_SharedFrameworkVersion)" />
+    <PackageReference Include="Microsoft.Build.Runtime" Version="$(CLI_MSBuild_Version)" />
+    <PackageReference Include="NuGet.Build.Tasks" Version="$(CLI_NuGet_Version)" />
+    <PackageReference Include="Microsoft.TestPlatform.CLI" Version="$(CLI_TestPlatform_Version)" />
+    <PackageReference Include="Microsoft.TestPlatform.Build" Version="$(CLI_TestPlatform_Version)" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\dotnet\dotnet.csproj" />
