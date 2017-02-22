@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+    <PropertyGroup>
+      <UploadNuGetPackagesArchiveToAzure>false</UploadNuGetPackagesArchiveToAzure>
+      <ArchiverDll>$(ToolsOutputDirectory)/Archiver.dll</ArchiverDll>
+      <NuGetConfigContent>
+        &lt;configuration&gt;
+        &lt;packageSources&gt;
+        &lt;add key="configurable.source" value="%CLI_LZMA_PACKAGE_SOURCE%" /&gt;
+        &lt;/packageSources&gt;
+        &lt;/configuration&gt;
+      </NuGetConfigContent>
+      <LZMANuGetConfigFilePath>$(NuGetPackagesArchiveProject)/Nuget.config</LZMANuGetConfigFilePath>
+    </PropertyGroup>
+
     <Target Name="GetNuGetPackagesArchive"
             DependsOnTargets="SetupNuGetPackagesArchiveInputsOutputs;
                               DownloadNuGetPackagesArchive;
@@ -44,10 +58,6 @@
                     ContinueOnError="WarnAndContinue" />
     </Target>
 
-    <PropertyGroup>
-      <UploadNuGetPackagesArchiveToAzure>false</UploadNuGetPackagesArchiveToAzure>
-    </PropertyGroup>
-
     <Target Name="GenerateNuGetPackagesArchive"
             DependsOnTargets="SetupNuGetPackagesArchiveInputsOutputs"
             Inputs="$(IntermediateArchive)"
@@ -66,17 +76,6 @@
         <NuGetPackagesArchiveDirectory Include="$(NuGetPackagesArchiveProject)/Console" />
         <NuGetPackagesArchiveDirectory Include="$(NuGetPackagesArchiveFolder)" />
       </ItemGroup>
-
-      <PropertyGroup>
-        <NuGetConfigContent>
-          &lt;configuration&gt;
-            &lt;packageSources&gt;
-              &lt;add key="configurable.source" value="%CLI_LZMA_PACKAGE_SOURCE%" /&gt;
-            &lt;/packageSources&gt;
-          &lt;/configuration&gt;
-        </NuGetConfigContent>
-        <LZMANuGetConfigFilePath>$(NuGetPackagesArchiveProject)/Nuget.config</LZMANuGetConfigFilePath>
-      </PropertyGroup>
 
       <Delete Files="@(FilesToClean)" />
       <RemoveDir Directories="@(NuGetPackagesArchiveDirectory)" />
@@ -115,11 +114,7 @@
       </GenerateNuGetPackagesArchiveVersion>
       <PropertyGroup>
         <NugetPackagesArchiveName>nuGetPackagesArchive.$(NuGetPackagesArchiveVersion).lzma</NugetPackagesArchiveName>
-        <NuGetPackagesArchiveProject>$(IntermediateDirectory)/NuGetPackagesArchiveProject</NuGetPackagesArchiveProject>
-        <NuGetPackagesArchiveFolder>$(IntermediateDirectory)/NuGetPackagesArchiveFolder</NuGetPackagesArchiveFolder>
-        <ArchiverDll>$(ToolsOutputDirectory)/Archiver.dll</ArchiverDll>
         <IntermediateArchive>$(IntermediateDirectory)/$(NugetPackagesArchiveName)</IntermediateArchive>
-        <FinalArchive>$(Stage2Directory)/sdk/$(SdkVersion)/nuGetPackagesArchive.lzma</FinalArchive>
         <NugetPackagesArchiveRelativeBlobUrl>$(Product)/NuGetPackagesArchives</NugetPackagesArchiveRelativeBlobUrl>
         <NugetPackagesArchiveBlobUrl>$(DotnetBlobRootUrl)/$(NugetPackagesArchiveRelativeBlobUrl)/$(NugetPackagesArchiveName)</NugetPackagesArchiveBlobUrl>
       </PropertyGroup>

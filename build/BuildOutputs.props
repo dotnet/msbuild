@@ -3,5 +3,6 @@
     <DotnetHostBaseName>dotnet$(ExeExtension)</DotnetHostBaseName>
     <DotnetHostFxrBaseName>$(DynamicLibPrefix)hostfxr$(DynamicLibExtension)</DotnetHostFxrBaseName>
     <HostPolicyBaseName>$(DynamicLibPrefix)hostpolicy$(DynamicLibExtension)</HostPolicyBaseName>
+    <FinalArchive>$(Stage2Directory)/sdk/$(SdkVersion)/nuGetPackagesArchive.lzma</FinalArchive>
   </PropertyGroup>
 </Project>

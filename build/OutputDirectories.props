@@ -25,5 +25,7 @@
       <TestPackagesDir>$(TestOutputDir)/packages/</TestPackagesDir>
       <TestArtifactsDir>$(TestOutputDir)/artifacts/</TestArtifactsDir>
       <TestResultXmlDir>$(TestOutputDir)/results/</TestResultXmlDir>
+      <NuGetPackagesArchiveProject>$(IntermediateDirectory)/NuGetPackagesArchiveProject</NuGetPackagesArchiveProject>
+      <NuGetPackagesArchiveFolder>$(IntermediateDirectory)/NuGetPackagesArchiveFolder</NuGetPackagesArchiveFolder>
   </PropertyGroup>
 </Project>
