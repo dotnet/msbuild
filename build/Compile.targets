@@ -36,26 +36,26 @@
       <Copy SourceFiles="@(SharedFramework)"
             DestinationFiles="@(SharedFramework->'$(StageDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
 
-      <!-- Workaround for https://github.com/dotnet/sdk/issues/115 -->
-      <ItemGroup>
-        <HackFilesToCopy Include="$(NuGetPackagesDir)\microsoft.build.runtime\$(CLI_MSBuild_Version)\contentFiles\any\netcoreapp1.0\**;
-                                  $(NuGetPackagesDir)\microsoft.build.runtime\$(CLI_MSBuild_Version)\contentFiles\any\netcoreapp1.1\**;
-                                  $(NuGetPackagesDir)\microsoft.codeanalysis.build.tasks\$(CLI_Roslyn_Version)\contentFiles\any\any\**;
-                                  $(NuGetPackagesDir)\microsoft.testplatform.cli\$(CLI_TestPlatform_Version)\contentFiles\any\any\**" />
-      </ItemGroup>
-      <Copy SourceFiles="@(HackFilesToCopy)"
-            DestinationFiles="@(HackFilesToCopy->'$(SdkOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
-      <!-- Publish DotNet -->
-      <DotNetPublish ToolPath="$(Stage0Directory)"
-                     Configuration="$(Configuration)"
-                     ProjectPath="$(SrcDirectory)/redist/redist.csproj" />
+    <!-- Workaround for https://github.com/dotnet/sdk/issues/115 -->
+    <ItemGroup>
+      <HackFilesToCopy Include="$(NuGetPackagesDir)\microsoft.build.runtime\$(CLI_MSBuild_Version)\contentFiles\any\netcoreapp1.0\**;
+                                $(NuGetPackagesDir)\microsoft.build.runtime\$(CLI_MSBuild_Version)\contentFiles\any\netcoreapp1.1\**;
+                                $(NuGetPackagesDir)\microsoft.codeanalysis.build.tasks\$(CLI_Roslyn_Version)\contentFiles\any\any\**;
+                                $(NuGetPackagesDir)\microsoft.testplatform.cli\$(CLI_TestPlatform_Version)\contentFiles\any\any\**" />
+    </ItemGroup>
+    <Copy SourceFiles="@(HackFilesToCopy)"
+          DestinationFiles="@(HackFilesToCopy->'$(SdkOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <!-- Publish DotNet -->
+    <DotNetPublish ToolPath="$(Stage0Directory)"
+                   Configuration="$(Configuration)"
+                   ProjectPath="$(SrcDirectory)/redist/redist.csproj" />
 
-      <!-- Publish Roslyn -->
-      <DotNetPublish ToolPath="$(Stage0Directory)"
-                     Output="$(SdkOutputDirectory)/Roslyn"
-                     Configuration="$(Configuration)"
-                     VersionSuffix="$(CommitCount)"
-                     ProjectPath="$(SrcDirectory)/tool_roslyn/tool_roslyn.csproj" />
+    <!-- Publish Roslyn -->
+    <DotNetPublish ToolPath="$(Stage0Directory)"
+                   Output="$(SdkOutputDirectory)/Roslyn"
+                   Configuration="$(Configuration)"
+                   VersionSuffix="$(CommitCount)"
+                   ProjectPath="$(SrcDirectory)/tool_roslyn/tool_roslyn.csproj" />
 
       <RemoveAssetFromDepsPackages DepsFile="$(SdkOutputDirectory)/redist.deps.json"
                                    SectionName="runtime"
@@ -98,7 +98,7 @@
       </ItemGroup>
 
       <!-- Move these "1.0" assemblies that TestPlatform lays down out of the way so crossgen doesn't pick them up.
-             We need https://github.com/dotnet/cli/issues/5464 fixed, so test platform is in a separate directory -->
+           We need https://github.com/dotnet/cli/issues/5464 fixed, so test platform is in a separate directory -->
       <Move SourceFiles="@(NETCore10Assemblies)"
             DestinationFiles="@(NETCore10Assemblies->'$(SdkOutputDirectory)/%(Filename)%(Extension).bak')" />
 
@@ -146,13 +146,13 @@
       <ItemGroup Condition=" '$(OSName)' != 'win' ">
         <SdkOutputChmodTargets Remove="*" />
         <SdkOutputChmodTargets Include="$(SdkOutputDirectory)/**/*.exe;
-                                        $(SdkOutputDirectory)/**/*.dll" >
+                                      $(SdkOutputDirectory)/**/*.dll" >
           <!-- Managed assemblies do not need execute -->
           <Mode>u=rw,g=r,o=r</Mode>
         </SdkOutputChmodTargets>
 
         <SdkOutputChmodTargets Include="$(SdkOutputDirectory)/**/*.dylib;
-                                        $(SdkOutputDirectory)/**/*.so" >
+                                      $(SdkOutputDirectory)/**/*.so" >
           <!-- Generally, dylibs and sos have 'x' -->
           <Mode>u=rwx,g=rx,o=rx</Mode>
         </SdkOutputChmodTargets>
