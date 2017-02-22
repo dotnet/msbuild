@@ -37,35 +37,35 @@ Build Status
 |:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|
 |[![][ubuntu-14.04-build-badge]][ubuntu-14.04-build]|[![][ubuntu-16.04-build-badge]][ubuntu-16.04-build]|[![][debian-8.2-build-badge]][debian-8.2-build]|[![][win-x64-build-badge]][win-x64-build]|[![][win-x86-build-badge]][win-x86-build]|[![][osx-build-badge]][osx-build]|[![][centos-build-badge]][centos-build]|[![][rhel-build-badge]][rhel-build]|[![][opensuse-13.2-build-badge]][opensuse-13.2-build]|[![][fedora-23-build-badge]][fedora-23-build]|
 
-[win-x64-build-badge]: https://mseng.visualstudio.com/_apis/public/build/definitions/d09b7a4d-0a51-4c0e-a15a-07921d5b558f/4638/badge
-[win-x64-build]: https://mseng.visualstudio.com/dotnetcore/_build?_a=completed&definitionId=4638
+[win-x64-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5449/badge
+[win-x64-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5449
 
-[win-x86-build-badge]: https://mseng.visualstudio.com/_apis/public/build/definitions/d09b7a4d-0a51-4c0e-a15a-07921d5b558f/4637/badge
-[win-x86-build]: https://mseng.visualstudio.com/dotnetcore/_build?_a=completed&definitionId=4637
+[win-x86-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5450/badge
+[win-x86-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5450
 
-[ubuntu-14.04-build-badge]: https://mseng.visualstudio.com/_apis/public/build/definitions/d09b7a4d-0a51-4c0e-a15a-07921d5b558f/4633/badge
-[ubuntu-14.04-build]: https://mseng.visualstudio.com/dotnetcore/_build?_a=completed&definitionId=4633
+[ubuntu-14.04-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5447/badge
+[ubuntu-14.04-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5447
 
-[ubuntu-16.04-build-badge]: https://mseng.visualstudio.com/_apis/public/build/definitions/d09b7a4d-0a51-4c0e-a15a-07921d5b558f/4635/badge
-[ubuntu-16.04-build]: https://mseng.visualstudio.com/dotnetcore/_build?_a=completed&definitionId=4635
+[ubuntu-16.04-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5448/badge
+[ubuntu-16.04-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5448
 
-[debian-8.2-build-badge]: https://mseng.visualstudio.com/_apis/public/build/definitions/d09b7a4d-0a51-4c0e-a15a-07921d5b558f/4629/badge
-[debian-8.2-build]: https://mseng.visualstudio.com/dotnetcore/_build?_a=completed&definitionId=4629
+[debian-8.2-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5442/badge
+[debian-8.2-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5442
 
-[osx-build-badge]: https://mseng.visualstudio.com/_apis/public/build/definitions/d09b7a4d-0a51-4c0e-a15a-07921d5b558f/4632/badge
-[osx-build]: https://mseng.visualstudio.com/dotnetcore/_build?_a=completed&definitionId=4632
+[osx-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5445/badge
+[osx-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5445
 
-[centos-build-badge]: https://mseng.visualstudio.com/_apis/public/build/definitions/d09b7a4d-0a51-4c0e-a15a-07921d5b558f/4628/badge
-[centos-build]: https://mseng.visualstudio.com/dotnetcore/_build?_a=completed&definitionId=4628
+[centos-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5441/badge
+[centos-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5441
 
-[rhel-build-badge]: https://mseng.visualstudio.com/_apis/public/build/definitions/d09b7a4d-0a51-4c0e-a15a-07921d5b558f/4634/badge
-[rhel-build]: https://mseng.visualstudio.com/dotnetcore/_build?_a=completed&definitionId=4634
+[rhel-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5446/badge
+[rhel-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5446
 
-[opensuse-13.2-build-badge]: https://mseng.visualstudio.com/_apis/public/build/definitions/d09b7a4d-0a51-4c0e-a15a-07921d5b558f/4631/badge
-[opensuse-13.2-build]: https://mseng.visualstudio.com/dotnetcore/_build?_a=completed&definitionId=4631
+[opensuse-13.2-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5444/badge
+[opensuse-13.2-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5444
 
-[fedora-23-build-badge]: https://mseng.visualstudio.com/_apis/public/build/definitions/d09b7a4d-0a51-4c0e-a15a-07921d5b558f/4630/badge
-[fedora-23-build]: https://mseng.visualstudio.com/dotnetcore/_build?_a=completed&definitionId=4630
+[fedora-23-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5443/badge
+[fedora-23-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5443
 
 Installers and Binaries
 -----------------------
