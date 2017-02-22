@@ -11,6 +11,8 @@ usage()
     echo "  --bootstrap-only               Build and bootstrap MSBuild but do not build again with those binaries"
     echo "  --build-only                   Only build using a downloaded copy of MSBuild but do not bootstrap"
     echo "                                 or build again with those binaries"
+    echo "  --use-dotnet-directory <dir>   When used with --build-only (or a regular build) this will use the dotnet tool"
+    echo "                                 located in the <dir>. (default: ./$TOOLS_DIR/dotnetcli/)" 
 }
 
 restoreBuildTools(){
@@ -135,6 +137,8 @@ BOOTSTRAP_ONLY=false
 THIS_SCRIPT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PACKAGES_DIR="$THIS_SCRIPT_PATH/packages"
 TOOLS_DIR="$THIS_SCRIPT_PATH/Tools"
+USE_OVERRIDE_DOTNET_TOOL=false
+OVERRIDE_DOTNET_TOOL="$TOOLS_DIR/dotnetcli/"
 MSBUILD_DOWNLOAD_URL="https://github.com/Microsoft/msbuild/releases/download/mono-hosted-msbuild-v0.03/mono_msbuild_d25dd923839404bd64cc63f420e75acf96fc75c4.zip"
 MSBUILD_ZIP="$PACKAGES_DIR/msbuild.zip"
 HOME_DEFAULT="$WORKSPACE/msbuild-CI-home"
@@ -158,7 +162,11 @@ do
         usage
         exit 1
         ;;
-
+        --use-dotnet-directory)
+	USE_DOTNET_OVERRIDE_DIRECTORY=true
+	DOTNET_OVERRIDE_DIRECTORY=$2
+	shift 2
+	;;
         --scope)
         SCOPE=$2
         shift 2
@@ -261,7 +269,16 @@ fi
 
 case $host in
     CoreCLR)
-        RUNTIME_HOST="$TOOLS_DIR/dotnetcli/dotnet"
+        DOTNET_DIRECTORY="$TOOLS_DIR/dotnetcli/"
+	
+	if [[ $USE_DOTNET_OVERRIDE_DIRECTORY = true ]]; then
+	    echo "* # * "
+	    echo "* # * NOTE: USING DOTNET LOCATED IN DIRECTORY : $DOTNET_OVERRIDE_DIRECTORY"
+	    echo "* # * "
+	    DOTNET_DIRECTORY=$DOTNET_OVERRIDE_DIRECTORY
+	fi
+	
+        RUNTIME_HOST="$DOTNET_DIRECTORY/dotnet"
         RUNTIME_HOST_ARGS=""
         MSBUILD_EXE="$TOOLS_DIR/MSBuild.exe"
         EXTRA_ARGS="$EXTRA_ARGS /m"
