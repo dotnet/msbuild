@@ -297,6 +297,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
 
             var possibleMappings =
                 dependencyToVersionMap.Where(c => c.Key.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            var a = string.Join(",", possibleMappings.Select(c => $"{c.Key.Name},{c.Key.Version}"));
+            Console.WriteLine($"POSSIBLE MAPPINGS = {a}");
             if (possibleMappings.Any() && !string.IsNullOrEmpty(version))
             {
                 var possibleVersions = possibleMappings.Select(p => VersionRange.Parse(p.Key.Version));
