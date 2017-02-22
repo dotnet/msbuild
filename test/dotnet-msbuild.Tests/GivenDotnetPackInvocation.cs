@@ -1,35 +1,37 @@
-﻿using Microsoft.DotNet.Tools.Build;
+﻿using Microsoft.DotNet.Tools.Pack;
 using FluentAssertions;
 using Xunit;
 using System;
+using System.Linq;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
     public class GivenDotnetPackInvocation
     {
-        [Theory(Skip = "finish me")]
-        [InlineData(new string[] { }, @"exec <msbuildpath> /m /v:m /t:Build /clp:Summary")]
-        [InlineData(new string[] { "-o", "foo" }, @"exec <msbuildpath> /m /v:m /t:Build /p:OutputPath=foo /clp:Summary")]
-        [InlineData(new string[] { "--output", "foo" }, @"exec <msbuildpath> /m /v:m /t:Build /p:OutputPath=foo /clp:Summary")]
-        [InlineData(new string[] { "-o", "foo1 foo2" }, @"exec <msbuildpath> /m /v:m /t:Build ""/p:OutputPath=foo1 foo2"" /clp:Summary")]
-        [InlineData(new string[] { "--no-incremental" }, @"exec <msbuildpath> /m /v:m /t:Rebuild /clp:Summary")]
-        [InlineData(new string[] { "-f", "framework" }, @"exec <msbuildpath> /m /v:m /t:Build /p:TargetFramework=framework /clp:Summary")]
-        [InlineData(new string[] { "--framework", "framework" }, @"exec <msbuildpath> /m /v:m /t:Build /p:TargetFramework=framework /clp:Summary")]
-        [InlineData(new string[] { "-r", "runtime" }, @"exec <msbuildpath> /m /v:m /t:Build /p:RuntimeIdentifier=runtime /clp:Summary")]
-        [InlineData(new string[] { "--runtime", "runtime" }, @"exec <msbuildpath> /m /v:m /t:Build /p:RuntimeIdentifier=runtime /clp:Summary")]
-        [InlineData(new string[] { "-c", "configuration" }, @"exec <msbuildpath> /m /v:m /t:Build /p:Configuration=configuration /clp:Summary")]
-        [InlineData(new string[] { "--configuration", "configuration" }, @"exec <msbuildpath> /m /v:m /t:Build /p:Configuration=configuration /clp:Summary")]
-        [InlineData(new string[] { "--version-suffix", "mysuffix" }, @"exec <msbuildpath> /m /v:m /t:Build /p:VersionSuffix=mysuffix /clp:Summary")]
-        [InlineData(new string[] { "--no-dependencies" }, @"exec <msbuildpath> /m /v:m /t:Build /p:BuildProjectReferences=false /clp:Summary")]
-        [InlineData(new string[] { "-v", "verbosity" }, @"exec <msbuildpath> /m /v:m /t:Build /verbosity:verbosity /clp:Summary")]
-        [InlineData(new string[] { "--verbosity", "verbosity" }, @"exec <msbuildpath> /m /v:m /t:Build /verbosity:verbosity /clp:Summary")]
-        [InlineData(new string[] { "--no-incremental", "-o", "myoutput", "-r", "myruntime", "-v", "diag" }, @"exec <msbuildpath> /m /v:m /t:Rebuild /p:OutputPath=myoutput /p:RuntimeIdentifier=myruntime /verbosity:diag /clp:Summary")]
-        public void MsbuildInvocationIsCorrect(string[] args, string expectedCommand)
+        const string ExpectedPrefix = "exec <msbuildpath> /m /v:m /t:pack";
+
+        [Theory]
+        [InlineData(new string[] { }, "")]
+        [InlineData(new string[] { "-o", "<output>" }, "/p:PackageOutputPath=<output>")]
+        [InlineData(new string[] { "--output", "<output>" }, "/p:PackageOutputPath=<output>")]
+        [InlineData(new string[] { "--no-build" }, "/p:NoBuild=true")]
+        [InlineData(new string[] { "--include-symbols" }, "/p:IncludeSymbols=true")]
+        [InlineData(new string[] { "--include-source" }, "/p:IncludeSource=true")]
+        [InlineData(new string[] { "-c", "<configuration>" }, "/p:Configuration=<configuration>")]
+        [InlineData(new string[] { "--configuration", "<configuration>" }, "/p:Configuration=<configuration>")]
+        [InlineData(new string[] { "--version-suffix", "<version-suffix>" }, "/p:VersionSuffix=<version-suffix>")]
+        [InlineData(new string[] { "-s" }, "/p:Serviceable=true")]
+        [InlineData(new string[] { "--serviceable" }, "/p:Serviceable=true")]
+        [InlineData(new string[] { "-v", "<verbosity>" }, @"/verbosity:<verbosity>")]
+        [InlineData(new string[] { "--verbosity", "<verbosity>" }, @"/verbosity:<verbosity>")]
+        [InlineData(new string[] { "<project>" }, "<project>")]
+        public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
         {
+            expectedAdditionalArgs = (string.IsNullOrEmpty(expectedAdditionalArgs) ? "" : $" {expectedAdditionalArgs}");
+
             var msbuildPath = "<msbuildpath>";
-            BuildCommand.FromArgs(args, msbuildPath)
-                .GetProcessStartInfo().Arguments.Should().Be(expectedCommand);
-            throw new NotImplementedException();
+            PackCommand.FromArgs(args, msbuildPath)
+                .GetProcessStartInfo().Arguments.Should().Be($"{ExpectedPrefix}{expectedAdditionalArgs}");
         }
     }
 }
