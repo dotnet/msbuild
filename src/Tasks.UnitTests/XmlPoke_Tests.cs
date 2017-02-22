@@ -19,7 +19,6 @@ using System.Reflection.Emit;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Text;
-using System.Xml.Xsl;
 using System.Xml;
 using Xunit;
 
@@ -61,19 +60,15 @@ namespace Microsoft.Build.UnitTests
             p.Execute();
 
             List<int> positions = new List<int>();
-            positions.AddRange(new int[] { 141, 200, 259 });
+            positions.AddRange(new int[] {141, 200, 259});
 
-            string result;
-            using (StreamReader sr = new StreamReader(xmlInputPath))
+            string result = File.ReadAllText(xmlInputPath);
+            Regex r = new Regex("Mert");
+            MatchCollection mc = r.Matches(result);
+
+            foreach (Match m in mc)
             {
-                result = sr.ReadToEnd();
-                Regex r = new Regex("Mert");
-                MatchCollection mc = r.Matches(result);
-
-                foreach (Match m in mc)
-                {
-                    Assert.True(positions.Contains(m.Index), "This test should effect 3 positions. There should be 3 occurances of 'Mert'\n" + result);
-                }
+                Assert.True(positions.Contains(m.Index), "This test should effect 3 positions. There should be 3 occurances of 'Mert'\n" + result);
             }
         }
 
@@ -93,19 +88,15 @@ namespace Microsoft.Build.UnitTests
             p.Execute();
 
             List<int> positions = new List<int>();
-            positions.AddRange(new int[] { 117, 172, 227 });
+            positions.AddRange(new int[] {117, 172, 227});
 
-            string result;
-            using (StreamReader sr = new StreamReader(xmlInputPath))
+            string result = File.ReadAllText(xmlInputPath);
+            Regex r = new Regex("Mert");
+            MatchCollection mc = r.Matches(result);
+
+            foreach (Match m in mc)
             {
-                result = sr.ReadToEnd();
-                Regex r = new Regex("Mert");
-                MatchCollection mc = r.Matches(result);
-
-                foreach (Match m in mc)
-                {
-                    Assert.True(positions.Contains(m.Index), "This test should effect 3 positions. There should be 3 occurances of 'Mert'\n" + result);
-                }
+                Assert.True(positions.Contains(m.Index), "This test should effect 3 positions. There should be 3 occurances of 'Mert'\n" + result);
             }
         }
 
@@ -122,15 +113,11 @@ namespace Microsoft.Build.UnitTests
             p.Query = "//class[1]/@AccessModifier";
             p.Value = new TaskItem("<Test>Testing</Test>");
             p.Execute();
-            string result;
-            using (StreamReader sr = new StreamReader(xmlInputPath))
-            {
-                result = sr.ReadToEnd();
-                Regex r = new Regex("AccessModifier=\"&lt;Test&gt;Testing&lt;/Test&gt;\"");
-                MatchCollection mc = r.Matches(result);
+            string result = File.ReadAllText(xmlInputPath);
+            Regex r = new Regex("AccessModifier=\"&lt;Test&gt;Testing&lt;/Test&gt;\"");
+            MatchCollection mc = r.Matches(result);
 
-                Assert.Equal(1, mc.Count); // "Should match once"
-            }
+            Assert.Equal(1, mc.Count); // "Should match once"
         }
 
         [Fact]
@@ -147,16 +134,12 @@ namespace Microsoft.Build.UnitTests
             p.Value = new TaskItem("<Test>Testing</Test>");
             Assert.True(p.Execute(), engine.Log);
 
-            string result;
-            using (StreamReader sr = new StreamReader(xmlInputPath))
-            {
-                result = sr.ReadToEnd();
+            string result = File.ReadAllText(xmlInputPath);
 
-                Regex r = new Regex("<Test>Testing</Test>");
-                MatchCollection mc = r.Matches(result);
+            Regex r = new Regex("<Test>Testing</Test>");
+            MatchCollection mc = r.Matches(result);
 
-                Assert.Equal(1, mc.Count); // "Should match once"
-            }
+            Assert.Equal(1, mc.Count); // "Should match once"
         }
 
         [Fact]
@@ -303,20 +286,16 @@ namespace Microsoft.Build.UnitTests
             Assert.True(p.Execute());
 
             List<int> positions = new List<int>();
-            positions.AddRange(new int[] { 126, 249, 372 });
+            positions.AddRange(new int[] {126, 249, 372});
 
-            string result;
-            using (StreamReader sr = new StreamReader(xmlInputPath))
+            string result = File.ReadAllText(xmlInputPath);
+
+            Regex r = new Regex("<testing the=\"element\">With<somewhat complex=\"value\" /></testing>");
+            MatchCollection mc = r.Matches(result);
+
+            foreach (Match m in mc)
             {
-                result = sr.ReadToEnd();
-
-                Regex r = new Regex("<testing the=\"element\">With<somewhat complex=\"value\" /></testing>");
-                MatchCollection mc = r.Matches(result);
-
-                foreach (Match m in mc)
-                {
-                    Assert.True(positions.Contains(m.Index), "This test should effect 3 positions. There should be 3 occurances of 'Mert'\n" + result);
-                }
+                Assert.True(positions.Contains(m.Index), "This test should effect 3 positions. There should be 3 occurances of 'Mert'\n" + result);
             }
         }
 
@@ -342,11 +321,7 @@ namespace Microsoft.Build.UnitTests
             string dir = Path.Combine(Path.GetTempPath(), DateTime.Now.Ticks.ToString());
             Directory.CreateDirectory(dir);
             xmlInputPath = dir + Path.DirectorySeparatorChar + "doc.xml";
-            using (StreamWriter sw = new StreamWriter(xmlInputPath, false))
-            {
-                sw.Write(xmlFile);
-                sw.Close();
-            }
+            File.WriteAllText(xmlInputPath, xmlFile);
         }
     }
 }

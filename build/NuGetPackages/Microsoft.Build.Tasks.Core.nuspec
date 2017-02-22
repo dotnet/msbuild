@@ -59,6 +59,8 @@
         <dependency id="System.Xml.ReaderWriter" version="4.0.11" />
         <dependency id="System.Xml.XDocument" version="4.0.11" />
         <dependency id="System.Xml.XmlDocument" version="4.0.1" />
+        <dependency id="System.Xml.XPath" version="4.0.1" />
+        <dependency id="System.Xml.XPath.XmlDocument" version="4.0.1" />
       </group>
       <group targetFramework=".NETFramework4.6">
         <dependency id="Microsoft.Build.Framework" version="[$version$]" />
@@ -104,6 +106,8 @@
         <dependency id="System.Xml.ReaderWriter" version="4.0.11" />
         <dependency id="System.Xml.XDocument" version="4.0.11" />
         <dependency id="System.Xml.XmlDocument" version="4.0.1" />
+        <dependency id="System.Xml.XPath" version="4.0.1" />
+        <dependency id="System.Xml.XPath.XmlDocument" version="4.0.1" />
       </group>
     </dependencies>
   </metadata>

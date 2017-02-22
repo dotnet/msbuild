@@ -637,6 +637,27 @@ namespace Microsoft.Build.Tasks
         public bool WriteOnlyWhenDifferent { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public override bool Execute() { throw null; }
     }
+    public partial class XmlPeek : Microsoft.Build.Tasks.TaskExtension
+    {
+        public XmlPeek() { }
+        public string Namespaces { get { throw null; } set { } }
+        public string Query { get { throw null; } set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public Microsoft.Build.Framework.ITaskItem[] Result { get { throw null; } }
+        public string XmlContent { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem XmlInputPath { get { throw null; } set { } }
+        public override bool Execute() { throw null; }
+    }
+    public partial class XmlPoke : Microsoft.Build.Tasks.TaskExtension
+    {
+        public XmlPoke() { }
+        public string Namespaces { get { throw null; } set { } }
+        public string Query { get { throw null; } set { } }
+        [Microsoft.Build.Framework.RequiredAttribute]
+        public Microsoft.Build.Framework.ITaskItem Value { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem XmlInputPath { get { throw null; } set { } }
+        public override bool Execute() { throw null; }
+    }
 }
 namespace Microsoft.Build.Tasks.Hosting
 {

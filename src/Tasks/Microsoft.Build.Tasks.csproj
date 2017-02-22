@@ -520,6 +520,8 @@
     <Compile Include="Culture.cs" />
     <Compile Include="CultureInfoCache.cs" />
     <Compile Include="WriteCodeFragment.cs" />
+    <Compile Include="XmlPeek.cs" />
+    <Compile Include="XmlPoke.cs" />
   </ItemGroup>
   <ItemGroup Condition="$(TargetFrameworkIdentifier) == '.NETFramework'">
     <Compile Include="Al.cs">
@@ -679,8 +681,6 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="WinMDExp.cs" />
-    <Compile Include="XmlPeek.cs" />
-    <Compile Include="XmlPoke.cs" />
     <Compile Include="XslTransformation.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(FeatureXamlTypes)' == 'true'">
