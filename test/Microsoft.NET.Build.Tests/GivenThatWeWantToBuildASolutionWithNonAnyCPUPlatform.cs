@@ -28,7 +28,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            buildCommand.GetOutputDirectory("netcoreapp1.0", Path.Combine("x64", "Debug"))
+            buildCommand.GetOutputDirectory("netcoreapp1.1", Path.Combine("x64", "Debug"))
                 .Should()
                 .OnlyHaveFiles(new[] {
                     "x64SolutionBuild.runtimeconfig.dev.json",

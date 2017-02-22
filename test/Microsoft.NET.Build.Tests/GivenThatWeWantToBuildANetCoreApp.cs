@@ -96,7 +96,7 @@ namespace Microsoft.NET.Build.Tests
                 .Restore();
 
             var getValuesCommand = new GetValuesCommand(Stage0MSBuild, testAsset.TestRoot,
-                "netcoreapp1.0", "TargetDefinitions", GetValuesCommand.ValueType.Item);
+                "netcoreapp1.1", "TargetDefinitions", GetValuesCommand.ValueType.Item);
 
             getValuesCommand
                 .Execute()
@@ -107,7 +107,7 @@ namespace Microsoft.NET.Build.Tests
             // should only contain one target with no RIDs
             var targetDefs = getValuesCommand.GetValues();
             targetDefs.Count.Should().Be(1);
-            targetDefs.Should().Contain(".NETCoreApp,Version=v1.0");
+            targetDefs.Should().Contain(".NETCoreApp,Version=v1.1");
         }
     }
 }

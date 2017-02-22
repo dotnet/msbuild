@@ -55,7 +55,7 @@ namespace Microsoft.NET.Build.Tests
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
 
             var buildCommand = new BuildCommand(Stage0MSBuild, appProjectDirectory);
-            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp1.0");
+            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp1.1");
 
             buildCommand
                 .Execute()
@@ -125,7 +125,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDir = buildCommand.GetOutputDirectory("netcoreapp1.0");
+            var outputDir = buildCommand.GetOutputDirectory("netcoreapp1.1");
 
             var commandResult = Command.Create(RepoInfo.DotNetHostPath, new[] { Path.Combine(outputDir.FullName, "TestApp.dll") })
                 .CaptureStdOut()
@@ -179,7 +179,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp1.0");
+            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp1.1");
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "TestApp.dll",
