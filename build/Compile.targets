@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="compile/LzmaArchive.targets" />
-  <Import Project="crossgen/Crossgen.targets" />
 
   <ItemGroup>
     <PublishOutputExtensions Include="$(ExeExtension);.dll;.pdb;.deps.json;.runtimeconfig.json" />
@@ -16,15 +15,14 @@
                                            BuildProjectsForNuGetPackages;
                                            GetNuGetPackagesArchive;" />
 
-  <Target Name="CompileCLI"
-          DependsOnTargets="InitCrossgenProps;">
+  <Target Name="CompileCLI">
       <ItemGroup>
         <SharedFramework Remove="*" />
         <SharedFramework Include="$(SharedFrameworkPublishDirectory)/**/*" />
 
         <RuntimeTargetsAssetsToRemoveFromDeps Remove="*" />
         <RuntimeTargetsAssetsToRemoveFromDeps Include="MSBuild" />
-        
+
         <RuntimeAssetsToRemoveFromDeps Remove="*" />
         <RuntimeAssetsToRemoveFromDeps Include="redist" />
         <RuntimeAssetsToRemoveFromDeps Include="tool_msbuild" />
@@ -47,7 +45,7 @@
     </ItemGroup>
     <Copy SourceFiles="@(HackFilesToCopy)"
           DestinationFiles="@(HackFilesToCopy->'$(SdkOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
-    
+
     <!-- Publish DotNet -->
     <DotNetPublish ToolPath="$(Stage0Directory)"
                    Configuration="$(Configuration)"
@@ -99,7 +97,7 @@
                                       $(SdkOutputDirectory)/System.Collections.NonGeneric.dll;
                                       $(SdkOutputDirectory)/System.Private.DataContractSerialization.dll" />
       </ItemGroup>
-    
+
       <!-- Move these "1.0" assemblies that TestPlatform lays down out of the way so crossgen doesn't pick them up.
            We need https://github.com/dotnet/cli/issues/5464 fixed, so test platform is in a separate directory -->
       <Move SourceFiles="@(NETCore10Assemblies)"

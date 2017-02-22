@@ -35,6 +35,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{89905EC4
 		build\BundledTemplates.props = build\BundledTemplates.props
 		build\Compile.targets = build\Compile.targets
 		build\CoreSetupInfo.props = build\CoreSetupInfo.props
+		build\CrossgenInfo.props = build\CrossgenInfo.props
 		build\DependencyVersions.props = build\DependencyVersions.props
 		build\FileExtensions.props = build\FileExtensions.props
 		build\GitCommitInfo.targets = build\GitCommitInfo.targets
@@ -88,11 +89,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "publish", "publish", "{27B1
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dotnet-cli-build", "build_projects\dotnet-cli-build\dotnet-cli-build.csproj", "{8A2FA2D8-0DA1-4814-B5C1-2ECEAA613EB1}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crossgen", "crossgen", "{19AC02B7-6D2C-4C2B-A410-9D4A59CE0E47}"
-	ProjectSection(SolutionItems) = preProject
-		build\crossgen\Crossgen.targets = build\crossgen\Crossgen.targets
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "prepare", "prepare", "{2BDC1BC2-867E-47C0-BAD0-ADE897F07F78}"
 	ProjectSection(SolutionItems) = preProject

@@ -19,6 +19,12 @@
       <PackagesDirectory>$(BaseOutputDirectory)/packages</PackagesDirectory>
       <SharedFrameworkPublishDirectory>$(IntermediateDirectory)/sharedFrameworkPublish</SharedFrameworkPublishDirectory>
       <SharedFrameworkNameVersionPath>$(StageDirectory)/shared/$(SharedFrameworkName)/$(SharedFrameworkVersion)</SharedFrameworkNameVersionPath>
+      <DotnetUnderTest>$(Stage2Directory)</DotnetUnderTest>
+      <TestOutputDir>$(RepoRoot)/artifacts/testpackages/</TestOutputDir>
+      <TestPackagesBuildDir>$(TestOutputDir)/packagesBuild/</TestPackagesBuildDir>
+      <TestPackagesDir>$(TestOutputDir)/packages/</TestPackagesDir>
+      <TestArtifactsDir>$(TestOutputDir)/artifacts/</TestArtifactsDir>
+      <TestResultXmlDir>$(TestOutputDir)/results/</TestResultXmlDir>
       <NuGetPackagesArchiveProject>$(IntermediateDirectory)/NuGetPackagesArchiveProject</NuGetPackagesArchiveProject>
       <NuGetPackagesArchiveFolder>$(IntermediateDirectory)/NuGetPackagesArchiveFolder</NuGetPackagesArchiveFolder>
   </PropertyGroup>

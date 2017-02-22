@@ -10,20 +10,20 @@
       <PreTestProjectsToExclude Condition=" '$(IsDesktopAvailable)' != 'True' " 
                              Include="test/binding-redirects.Tests/binding-redirects.Tests.csproj;" />
       -->
-      <PreTestProjectsToExclude Include="test$(PathSeparator)binding-redirects.Tests$(PathSeparator)binding-redirects.Tests.csproj;" />
+      <PreTestProjectsToExclude Include="test/binding-redirects.Tests/binding-redirects.Tests.csproj;" />
 
       <PreTestProjectsToExclude Condition=" 'Non-test projects in test directory' != 'consider moving elsewhere' "
-                             Include="test$(PathSeparator)ArgumentsReflector$(PathSeparator)ArgumentsReflector.csproj;
-                                      test$(PathSeparator)Microsoft.DotNet.Tools.Tests.Utilities$(PathSeparator)Microsoft.DotNet.Tools.Tests.Utilities.csproj;
-                                      test$(PathSeparator)Msbuild.Tests.Utilities$(PathSeparator)Msbuild.Tests.Utilities.csproj;
-                                      test$(PathSeparator)Performance$(PathSeparator)Performance.csproj" />
+                             Include="test/ArgumentsReflector/ArgumentsReflector.csproj;
+                                      test/Microsoft.DotNet.Tools.Tests.Utilities/Microsoft.DotNet.Tools.Tests.Utilities.csproj;
+                                      test/Msbuild.Tests.Utilities/Msbuild.Tests.Utilities.csproj;
+                                      test/Performance/Performance.csproj" />
 
       <PreTestProjectsToExclude Condition=" 'Executed after primary test phase.' != ' Consider moving.' "
-                             Include="test$(PathSeparator)Installer$(PathSeparator)Microsoft.DotNet.Cli.Msi.Tests$(PathSeparator)Microsoft.DotNet.Cli.Msi.Tests.csproj;" />
+                             Include="test/Installer/Microsoft.DotNet.Cli.Msi.Tests/Microsoft.DotNet.Cli.Msi.Tests.csproj;" />
 
       <TestProjectsToExclude Include="%(PreTestProjectsToExclude.Fullpath)" />
 
-      <PreTestProjects Include="test$(PathSeparator)*$(PathSeparator)*.csproj;" />
+      <PreTestProjects Include="test/*/*.csproj;" />
 
       <TestProjects Include="%(PreTestProjects.Fullpath)"
                     Exclude="@(TestProjectsToExclude)" />
