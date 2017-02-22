@@ -318,21 +318,14 @@ namespace Microsoft.TemplateEngine.Cli
         private IEnumerable<ITemplateInfo> TemplatesToShowDetailedHelpAbout()
         {
             IReadOnlyList<ITemplateInfo> candidateTemplates = TemplatesToDisplayInfoAbout();
+            Func<ITemplateInfo, string> groupIdentitySelector = (x) => x.GroupIdentity;
 
-            if (candidateTemplates.Count() == 0)
+            if (candidateTemplates.AllAreTheSame(groupIdentitySelector, StringComparer.OrdinalIgnoreCase))
             {
                 return candidateTemplates;
             }
 
-            string firstGroupIdentity = candidateTemplates.First().GroupIdentity;
-
-            if (candidateTemplates.Any(x => x.GroupIdentity != firstGroupIdentity))
-            {
-                return new List<ITemplateInfo>();
-            }
-
-            // they all have the same group identity
-            return candidateTemplates;
+            return new List<ITemplateInfo>();
         }
 
         // If there are secondary matches, return them
@@ -1097,11 +1090,11 @@ namespace Microsoft.TemplateEngine.Cli
 
         private void ShowTemplateHelp(ITemplateInfo templateInfo)
         {
-            IEnumerable<string> languages = null;
+            IList<string> languages = null;
 
             if (templateInfo.Tags != null && templateInfo.Tags.TryGetValue("language", out ICacheTag languageTag))
             {
-                languages = languageTag.ChoicesAndDescriptions.Keys.Where(x => !string.IsNullOrWhiteSpace(x));
+                languages = languageTag.ChoicesAndDescriptions.Keys.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
             }
 
             if (languages != null && languages.Any())
