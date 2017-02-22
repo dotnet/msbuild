@@ -142,15 +142,5 @@ namespace Microsoft.DotNet.Tools.Build
         {
             return GetProcessStartInfo().Execute();
         }
-
-        private class CommandCreationException : Exception
-        {
-            public int ExitCode { get; private set; }
-
-            public CommandCreationException(int exitCode)
-            {
-                ExitCode = exitCode;
-            }
-        }
     }
 }
