@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.App" Version="1.0.0" />
-    <PackageReference Include="Microsoft.DotNet.VersionTools" Version="1.0.27-prerelease-01308-02" />
+    <PackageReference Include="Microsoft.DotNet.VersionTools" Version="1.0.27-prerelease-01316-08" />
   </ItemGroup>
 
 </Project>
