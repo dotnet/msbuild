@@ -11,6 +11,8 @@ namespace Microsoft.DotNet.Tools.Publish
 {
     public partial class PublishCommand
     {
+        private string _msbuildPath;
+
         public string ProjectPath { get; set; }
         public string Framework { get; set; }
         public string Runtime { get; set; }
@@ -22,20 +24,21 @@ namespace Microsoft.DotNet.Tools.Publish
 
         public List<string> ExtraMSBuildArguments { get; set; }
 
-        private PublishCommand()
+        private PublishCommand(string msbuildPath = null)
         {
+            _msbuildPath = msbuildPath;
         }
 
-        public int Execute()
+        private MSBuildForwardingApp CreateForwardingApp(string msbuildPath)
         {
             List<string> msbuildArgs = new List<string>();
+
+            msbuildArgs.Add("/t:Publish");
 
             if (!string.IsNullOrEmpty(ProjectPath))
             {
                 msbuildArgs.Add(ProjectPath);
             }
-
-            msbuildArgs.Add("/t:Publish");
 
             if (!string.IsNullOrEmpty(Framework))
             {
@@ -74,7 +77,7 @@ namespace Microsoft.DotNet.Tools.Publish
 
             msbuildArgs.AddRange(ExtraMSBuildArguments);
 
-            return new MSBuildForwardingApp(msbuildArgs).Execute();
+            return new MSBuildForwardingApp(msbuildArgs, msbuildPath);
         }
     }
 }

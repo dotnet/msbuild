@@ -1,15 +1,17 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.MSBuild;
+using System.Diagnostics;
 
 namespace Microsoft.DotNet.Tools.Publish
 {
     public partial class PublishCommand
     {
-        public static int Run(string[] args)
+        public static PublishCommand FromArgs(string[] args, string msbuildPath = null)
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
@@ -50,10 +52,11 @@ namespace Microsoft.DotNet.Tools.Publish
 
             CommandOption verbosityOption = MSBuildForwardingApp.AddVerbosityOption(app);
 
+            var publish = new PublishCommand(msbuildPath);
+            bool commandExecuted = false;
             app.OnExecute(() =>
             {
-                var publish = new PublishCommand();
-
+                commandExecuted = true;
                 publish.ProjectPath = projectArgument.Value;
                 publish.Framework = frameworkOption.Value();
                 publish.Runtime = runtimeOption.Value();
@@ -64,10 +67,43 @@ namespace Microsoft.DotNet.Tools.Publish
                 publish.Verbosity = verbosityOption.Value();
                 publish.ExtraMSBuildArguments = app.RemainingArguments;
 
-                return publish.Execute();
+                return 0;
             });
 
-            return app.Execute(args);
+            int exitCode = app.Execute(args);
+            if (!commandExecuted)
+            {
+                throw new CommandCreationException(exitCode);
+            }
+
+            return publish;
+        }
+
+        public static int Run(string[] args)
+        {
+            DebugHelper.HandleDebugSwitch(ref args);
+
+            PublishCommand cmd;
+            try
+            {
+                cmd = FromArgs(args);
+            }
+            catch (CommandCreationException e)
+            {
+                return e.ExitCode;
+            }
+
+            return cmd.Execute();
+        }
+
+        public ProcessStartInfo GetProcessStartInfo()
+        {
+            return CreateForwardingApp(_msbuildPath).GetProcessStartInfo();
+        }
+
+        public int Execute()
+        {
+            return GetProcessStartInfo().Execute();
         }
     }
 }
