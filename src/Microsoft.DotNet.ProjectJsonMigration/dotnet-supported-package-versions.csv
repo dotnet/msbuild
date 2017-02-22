@@ -4,7 +4,7 @@ Microsoft.AspNetCore,1.0.4,1.1.1
 Microsoft.AspNetCore.Authentication,1.0.2,1.1.1
 Microsoft.AspNetCore.Authentication.Cookies,1.0.2,1.1.1
 Microsoft.AspNetCore.Authentication.Facebook,1.0.2,1.1.1
-Microsoft.AspNetCore.Authentication.Google,1.0.1,2.1.1
+Microsoft.AspNetCore.Authentication.Google,1.0.2,1.1.1
 Microsoft.AspNetCore.Authentication.JwtBearer,1.0.2,1.1.1
 Microsoft.AspNetCore.Authentication.MicrosoftAccount,1.0.2,1.1.1
 Microsoft.AspNetCore.Authentication.OAuth,1.0.2,1.1.1
@@ -85,7 +85,7 @@ Microsoft.AspNetCore.Rewrite,,1.0.1
 Microsoft.AspNetCore.ResponseCaching,1.0.1,1.1.1
 Microsoft.AspNetCore.ResponseCompression,,1.0.1
 Microsoft.AspNetCore.WebSockets,,1.0.1
-Microsoft.Extensions.Logging.AzureAppServices,,1.0.0
+Microsoft.Extensions.Logging.AzureAppServices,,1.0.1
 Microsoft.Extensions.Configuration.AzureKeyVault,,1.0.1
 Microsoft.Extensions.Logging.EventSource,,1.1.1
 System.ServiceModel.Duplex,4.0.1,4.3.0
@@ -99,7 +99,7 @@ Microsoft.AspNetCore.Authorization,1.0.2,1.1.1
 Microsoft.AspNetCore.Cryptography.Internal,1.0.2,1.1.1
 Microsoft.AspNetCore.Cryptography.KeyDerivation,1.0.2,1.1.1
 Microsoft.AspNetCore.DataProtection.Abstractions,1.0.2,1.1.1
-Microsoft.AspNetCore.Diagnostics,1.0.2,1.1.0
+Microsoft.AspNetCore.Diagnostics,1.0.2,1.1.1
 Microsoft.AspNetCore.Diagnostics.Abstractions,1.0.2,1.1.1
 Microsoft.AspNetCore.Hosting,1.0.2,1.1.1
 Microsoft.AspNetCore.Hosting.Abstractions,1.0.2,1.1.1
@@ -141,7 +141,7 @@ Microsoft.Extensions.DependencyModel,1.0.0,1.1.0
 Microsoft.Extensions.FileProviders.Abstractions,1.0.1,1.1.0
 Microsoft.Extensions.Localization.Abstractions,1.0.2,1.1.1
 Microsoft.Extensions.Logging.Abstractions,1.0.2,1.1.1
-Microsoft.Extensions.ObjectPool,1.0.1,1.1.1
+Microsoft.Extensions.ObjectPool,1.0.1,1.1.0
 Microsoft.Extensions.Options,1.0.2,1.1.1
 Microsoft.Extensions.Options.ConfigurationExtensions,1.0.2,1.1.1
 Microsoft.Extensions.PlatformAbstractions,1.0.0,1.1.0
