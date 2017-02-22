@@ -14,8 +14,8 @@ namespace Microsoft.NET.TestFramework.Commands
     {
         private const string PublishSubfolderName = "packages";
 
-        public ComposeCache(MSBuildTest msbuild, string projectPath)
-            : base(msbuild, projectPath)
+        public ComposeCache(MSBuildTest msbuild, string projectPath, string relativePathToProject = null)
+            : base(msbuild, projectPath, relativePathToProject)
         {
         }
 
@@ -30,7 +30,7 @@ namespace Microsoft.NET.TestFramework.Commands
             return command.Execute();
         }
 
-        public DirectoryInfo GetOutputDirectory(string targetFramework = "netcoreapp1.0", string configuration = "Debug", string runtimeIdentifier = "")
+        public override DirectoryInfo GetOutputDirectory(string targetFramework = "netcoreapp1.0", string configuration = "Debug", string runtimeIdentifier = "")
         {
             string output = Path.Combine(ProjectRootPath, "bin", BuildRelativeOutputPath(targetFramework, configuration, runtimeIdentifier));
             return new DirectoryInfo(output);

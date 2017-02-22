@@ -1,7 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json">
-      <Version>9.0.1</Version>
-    </PackageReference>
-  </ItemGroup>
-</Project>
