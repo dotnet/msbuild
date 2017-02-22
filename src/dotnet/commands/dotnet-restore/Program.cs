@@ -5,12 +5,21 @@ using System.Collections.Generic;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.MSBuild;
+using Microsoft.DotNet.Cli;
+using System.Diagnostics;
 
 namespace Microsoft.DotNet.Tools.Restore
 {
     public class RestoreCommand
     {
-        public static int Run(string[] args)
+        private MSBuildForwardingApp _forwardingApp;
+
+        public RestoreCommand(IEnumerable<string> msbuildArgs, string msbuildPath = null)
+        {
+            _forwardingApp = new MSBuildForwardingApp(msbuildArgs, msbuildPath);
+        }
+
+        public static RestoreCommand FromArgs(string[] args, string msbuildPath = null)
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
@@ -72,9 +81,10 @@ namespace Microsoft.DotNet.Tools.Restore
 
             CommandOption verbosityOption = MSBuildForwardingApp.AddVerbosityOption(cmd);
 
+            List<string> msbuildArgs = null;
             cmd.OnExecute(() =>
             {
-                var msbuildArgs = new List<string>()
+                msbuildArgs = new List<string>()
                 {
                      "/NoLogo", 
                      "/t:Restore", 
@@ -132,10 +142,43 @@ namespace Microsoft.DotNet.Tools.Restore
                 // Add remaining arguments that the parser did not understand
                 msbuildArgs.AddRange(cmd.RemainingArguments);
 
-                return new MSBuildForwardingApp(msbuildArgs).Execute();
+                return 0;
             });
 
-            return cmd.Execute(args);
+            int exitCode = cmd.Execute(args);
+            if (msbuildArgs == null)
+            {
+                throw new CommandCreationException(exitCode);
+            }
+
+            return new RestoreCommand(msbuildArgs, msbuildPath);
+        }
+
+        public static int Run(string[] args)
+        {
+            DebugHelper.HandleDebugSwitch(ref args);
+
+            RestoreCommand cmd;
+            try
+            {
+                cmd = FromArgs(args);
+            }
+            catch (CommandCreationException e)
+            {
+                return e.ExitCode;
+            }
+
+            return cmd.Execute();
+        }
+
+        public ProcessStartInfo GetProcessStartInfo()
+        {
+            return _forwardingApp.GetProcessStartInfo();
+        }
+
+        public int Execute()
+        {
+            return GetProcessStartInfo().Execute();
         }
     }
 }
