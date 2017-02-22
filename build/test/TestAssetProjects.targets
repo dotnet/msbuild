@@ -31,10 +31,10 @@
 
   <Target Name="SetupBuildTestAssetProjectInputs">
     <ItemGroup>
-      <NoAutoBuildTestAssets Include="TestAssets$(PathSeparator)TestProjects$(PathSeparator)**$(PathSeparator).noautobuild" />
+      <NoAutoBuildTestAssets Include="TestAssets/TestProjects/**/.noautobuild" />
       <NoAutoBuildTestAssetProjects Include="%(NoAutoBuildTestAssets.RelativeDir)project.json" />
 
-      <PreTestAssetProjects Include="TestAssets$(PathSeparator)TestProjects$(PathSeparator)**$(PathSeparator)project.json"/>
+      <PreTestAssetProjects Include="TestAssets/TestProjects/**/project.json"/>
                          
       <TestAssetProjects Include="%(PreTestAssetProjects.RelativeDir)project.json"
                          Exclude="@(NoAutoBuildTestAssetProjects)"/>

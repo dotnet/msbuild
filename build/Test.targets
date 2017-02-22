@@ -1,32 +1,26 @@
 <Project ToolsVersion="14.0" DefaultTargets="Test">
-  <PropertyGroup>
-    <PathSeparator>/</PathSeparator>
-    <PathSeparator Condition=" '$(OSName)' == 'win' ">\</PathSeparator>
-  </PropertyGroup>
-
   <Import Project="test/TestPackageProjects.targets" />
   <Import Project="test/TestProjects.targets" />
+
+  <PropertyGroup>
+    <PathListSeparator>:</PathListSeparator>
+    <PathListSeparator Condition=" '$(OSName)' == 'win' ">%3b</PathListSeparator>
+    <ExecPath>$(Stage2Directory)$(PathListSeparator)$(PATH)</ExecPath>
+    <ExecPath Condition=" '$(OSName)' == 'win' ">$(Stage2Directory)</ExecPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <TestTaskEnvironmentVariables Include="PATH=$(ExecPath)" />
+    <TestTaskEnvironmentVariables Include="TEST_ARTIFACTS=$(TestArtifactsDir)" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <RunTestEnvironmentVariables>@(TestTaskEnvironmentVariables)</RunTestEnvironmentVariables>
+  </PropertyGroup>
 
   <Target Name="Test"
           Condition=" '$(CLIBUILD_SKIP_TESTS)' != 'true' "
           DependsOnTargets="BuildTests;">
-
-    <PropertyGroup>
-      <PathListSeparator>:</PathListSeparator>
-      <PathListSeparator Condition=" '$(OSName)' == 'win' ">%3b</PathListSeparator>
-      <ExecPath>$(Stage2Directory)$(PathListSeparator)$(PATH)</ExecPath>
-      <ExecPath Condition=" '$(OSName)' == 'win' ">$(Stage2Directory)</ExecPath>
-      <TestArtifactsEnv>$(TestArtifactsDir)</TestArtifactsEnv>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <TestTaskEnvironmentVariables Include="PATH=$(ExecPath)" />
-      <TestTaskEnvironmentVariables Include="TEST_ARTIFACTS=$(TestArtifactsEnv)" />
-    </ItemGroup>
-
-    <PropertyGroup>
-      <RunTestEnvironmentVariables>@(TestTaskEnvironmentVariables)</RunTestEnvironmentVariables>
-    </PropertyGroup>
 
     <ItemGroup>
       <ProjectsToTest Include="build/test/RunTest.proj">
@@ -55,16 +49,6 @@
   <Target Name="PrepareTests"
           DependsOnTargets="Init;
                             SetupTestProjectData">
-    <PropertyGroup>
-      <TestOutputDir>$(RepoRoot)/artifacts/testpackages/</TestOutputDir>
-      <TestPackagesBuildDir>$(TestOutputDir)/packagesBuild/</TestPackagesBuildDir>
-      <TestPackagesDir>$(TestOutputDir)/packages/</TestPackagesDir>
-      <TestArtifactsDir>$(TestOutputDir)/artifacts/</TestArtifactsDir>
-      <TestResultXmlDir>$(TestOutputDir)/results/</TestResultXmlDir>
-      <TestDirectory>$(RepoRoot)/test/</TestDirectory>
-      <DotnetUnderTest>$(Stage2Directory)</DotnetUnderTest>
-    </PropertyGroup>
-
     <MakeDir Directories="$(TestPackagesDir)" Condition="!Exists('$(TestPackagesDir)')"/>
   </Target>
 
