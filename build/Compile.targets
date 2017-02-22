@@ -48,11 +48,8 @@
 
     <!-- Publish DotNet -->
     <DotNetPublish ToolPath="$(Stage0Directory)"
-                   Output="$(SdkOutputDirectory)"
                    Configuration="$(Configuration)"
-                   VersionSuffix="$(CommitCount)"
-                   ProjectPath="$(SrcDirectory)/redist/redist.csproj"
-                   MSBuildArgs="/p:GenerateRuntimeConfigurationFiles=true" />
+                   ProjectPath="$(SrcDirectory)/redist/redist.csproj" />
 
     <!-- Publish Roslyn -->
     <DotNetPublish ToolPath="$(Stage0Directory)"
