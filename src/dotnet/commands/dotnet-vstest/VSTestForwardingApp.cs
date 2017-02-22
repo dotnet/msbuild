@@ -4,6 +4,7 @@
 using Microsoft.DotNet.Cli.Utils;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 
 namespace Microsoft.DotNet.Cli
@@ -20,9 +21,14 @@ namespace Microsoft.DotNet.Cli
                 argsToForward);
         }
 
+        public ProcessStartInfo GetProcessStartInfo()
+        {
+            return _forwardingApp.GetProcessStartInfo();
+        }
+
         public int Execute()
         {
-            return _forwardingApp.Execute();
+            return GetProcessStartInfo().Execute();
         }
 
         private string GetVSTestExePath()
