@@ -50,15 +50,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     propertyGroup,
                     mergeExisting: true);
             }
-
-            _transformApplicator.Execute(
-                    RuntimeIdentifiersTransform.Transform(migrationRuleInputs.ProjectContexts),
-                    propertyGroup,
-                    mergeExisting: true);
-            _transformApplicator.Execute(
-                    RuntimeIdentifierTransform.Transform(migrationRuleInputs.ProjectContexts),
-                    propertyGroup,
-                    mergeExisting: true);
         }
 
         private void CleanExistingProperties(ProjectRootElement csproj)
@@ -127,36 +118,5 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 "TargetFramework",
                 framework => framework.GetShortFolderName(),
                 framework => true);
-
-        private AddPropertyTransform<IEnumerable<ProjectContext>> RuntimeIdentifiersTransform =>
-            new AddPropertyTransform<IEnumerable<ProjectContext>>(
-                "RuntimeIdentifiers",
-                projectContexts => RuntimeIdentifiers,
-                projectContexts => !projectContexts.HasRuntimes() &&
-                                   !projectContexts.HasLibraryOutput() &&
-                                    projectContexts.HasBothCoreAndFullFrameworkTFMs());
-
-        private AddPropertyTransform<IEnumerable<ProjectContext>> RuntimeIdentifierTransform =>
-            new AddPropertyTransform<IEnumerable<ProjectContext>>(
-                "RuntimeIdentifier",
-                projectContexts => "win7-x86",
-                projectContexts => !projectContexts.HasRuntimes() &&
-                                   !projectContexts.HasLibraryOutput() && 
-                                    projectContexts.HasFullFrameworkTFM())
-            .WithMSBuildCondition(projectContexts =>
-                {
-                    string msBuildCondition = null;
-                    if (projectContexts.HasBothCoreAndFullFrameworkTFMs())
-                    {
-                        msBuildCondition = string.Join(
-                            " OR ",
-                            projectContexts.Where(p => p.IsFullFramework()).Select(
-                                p => $"'$(TargetFramework)' == '{p.TargetFramework.GetShortFolderName()}'"));
-
-                        msBuildCondition = $" {msBuildCondition} ";
-                    }
-
-                    return msBuildCondition;
-                });
     }
 }
