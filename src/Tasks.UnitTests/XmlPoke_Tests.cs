@@ -66,32 +66,6 @@ namespace Microsoft.Build.UnitTests
             Assert.True(nodes?.All(i => i.Value.Equals("Mert")), $"All <variable /> elements should have Name=\"Mert\" {Environment.NewLine}{xmlDocument.OuterXml}");
         }
 
-        private XmlDocument ExecuteXmlPoke(string query, bool useNamespace = false, string value = null)
-        {
-            MockEngine engine = new MockEngine(true);
-
-            string xmlInputPath;
-            Prepare(useNamespace ? _xmlFileWithNs : _xmlFileNoNs, out xmlInputPath);
-
-            XmlPoke p = new XmlPoke
-            {
-                BuildEngine = engine,
-                XmlInputPath = new TaskItem(xmlInputPath),
-                Query = query,
-                Namespaces = useNamespace ? $"<Namespace Prefix=\"s\" Uri=\"{XmlNamespaceUsedByTests}\" />" : null,
-                Value = value == null ? null : new TaskItem(value)
-            };
-            Assert.True(p.Execute(), engine.Log);
-
-            string result = File.ReadAllText(xmlInputPath);
-
-            XmlDocument xmlDocument = new XmlDocument();
-            
-            xmlDocument.LoadXml(result);
-
-            return xmlDocument;
-        }
-
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         public void PokeNoNamespace()
@@ -307,6 +281,39 @@ namespace Microsoft.Build.UnitTests
             Directory.CreateDirectory(dir);
             xmlInputPath = dir + Path.DirectorySeparatorChar + "doc.xml";
             File.WriteAllText(xmlInputPath, xmlFile);
+        }
+
+        /// <summary>
+        /// Executes an <see cref="XmlPoke"/> task with the specified arguments.
+        /// </summary>
+        /// <param name="query">The query to use.</param>
+        /// <param name="useNamespace"><code>true</code> to use namespaces, otherwise <code>false</code> (Default).</param>
+        /// <param name="value">The value to use.</param>
+        /// <returns>An <see cref="XmlDocument"/> containing the resulting XML after the XmlPoke task has executed.</returns>
+        private XmlDocument ExecuteXmlPoke(string query, bool useNamespace = false, string value = null)
+        {
+            MockEngine engine = new MockEngine(true);
+
+            string xmlInputPath;
+            Prepare(useNamespace ? _xmlFileWithNs : _xmlFileNoNs, out xmlInputPath);
+
+            XmlPoke p = new XmlPoke
+            {
+                BuildEngine = engine,
+                XmlInputPath = new TaskItem(xmlInputPath),
+                Query = query,
+                Namespaces = useNamespace ? $"<Namespace Prefix=\"s\" Uri=\"{XmlNamespaceUsedByTests}\" />" : null,
+                Value = value == null ? null : new TaskItem(value)
+            };
+            Assert.True(p.Execute(), engine.Log);
+
+            string result = File.ReadAllText(xmlInputPath);
+
+            XmlDocument xmlDocument = new XmlDocument();
+
+            xmlDocument.LoadXml(result);
+
+            return xmlDocument;
         }
     }
 }
