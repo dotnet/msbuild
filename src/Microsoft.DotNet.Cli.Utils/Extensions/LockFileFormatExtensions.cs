@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-
 using NuGet.Common;
 using NuGet.ProjectModel;
 
@@ -13,11 +12,6 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public static class LockFileFormatExtensions
     {
-
-        private const int NumberOfRetries = 3000;
-        
-        private static readonly TimeSpan SleepDuration = TimeSpan.FromMilliseconds(10);
-
         public static async Task<LockFile> ReadWithLock(this LockFileFormat subject, string path)
         {
             return await ConcurrencyUtilities.ExecuteWithFileLockedAsync(
