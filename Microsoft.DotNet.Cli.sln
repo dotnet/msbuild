@@ -37,6 +37,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{89905EC4
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "package", "package", "{FD7D515A-D10F-4F49-B8AE-21CF7ED071AE}"
 	ProjectSection(SolutionItems) = preProject
+		build\package\dotnet-deb-tool-consumer.csproj = build\package\dotnet-deb-tool-consumer.csproj
 		build\package\Microsoft.DotNet.Cli.Archive.targets = build\package\Microsoft.DotNet.Cli.Archive.targets
 		build\package\Microsoft.DotNet.Cli.Installer.DEB.proj = build\package\Microsoft.DotNet.Cli.Installer.DEB.proj
 		build\package\Microsoft.DotNet.Cli.Installer.DEB.targets = build\package\Microsoft.DotNet.Cli.Installer.DEB.targets
