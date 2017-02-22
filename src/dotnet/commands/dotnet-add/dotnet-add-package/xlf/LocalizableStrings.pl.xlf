@@ -14,7 +14,7 @@
         <note />
       </trans-unit>
       <trans-unit id="AppHelpText">
-        <source>Package reference to add</source>
+        <source>Package references to add</source>
         <target state="translated">Odwołania do pakietów, które mają zostać dodane</target>
         <note />
       </trans-unit>
@@ -24,7 +24,7 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
-        <source>Add reference only when targeting a specific framework</source>
+        <source>Add reference only when targetting a specific framework</source>
         <target state="translated">Dodaj odwołanie tylko w przypadku określenia konkretnej platformy docelowej</target>
         <note />
       </trans-unit>
