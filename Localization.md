@@ -14,7 +14,7 @@
 - the logical name for a resource is: `<Assembly Name>.<Neutral Resx File Name>.resources`. In the ResourceManager this appears as `<Assembly Name>.<Neutral Resx File Name>` (without the trailing `.resources`). For example, the `Microsoft.Build` assembly uses the `Microsoft.Build.Strings.resources` [logical resource name](https://github.com/Microsoft/msbuild/blob/master/src/XMakeBuildEngine/Microsoft.Build.csproj#L659) (the resource file is `Strings.resx`), and its corresponding [ResourceManager](https://github.com/Microsoft/msbuild/blob/master/src/XMakeBuildEngine/Resources/AssemblyResources.cs#L116) uses `Microsoft.Build.Strings`.
 
 ## How to edit a resource
-- if you need to add / remove / update a resource, only do so in the neutral resource. xlf files get automatically updated during localized builds.
+- if you need to add / remove / update a resource, only do so in the neutral resx files. `.xlf` files get automatically updated during localized builds.
 
 ## What a localized build does
 - converts xlf files to localized resx files
