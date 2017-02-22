@@ -34,4 +34,6 @@
 
     <CliTargetFramework>netcoreapp2.0</CliTargetFramework>
   </PropertyGroup>
+
+  <Import Project="build/CrossgenInfo.props" />
 </Project>
