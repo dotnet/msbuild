@@ -14,6 +14,8 @@ namespace Microsoft.DotNet.Tools.Cache
 {
     public partial class CacheCommand
     {
+        private string _msbuildPath;
+
         public string ProjectArgument { get; set; }
         public string Framework { get; set; }
         public string Runtime { get; set; }
@@ -26,11 +28,12 @@ namespace Microsoft.DotNet.Tools.Cache
 
         public List<string> ExtraMSBuildArguments { get; set; }
 
-        private CacheCommand()
+        private CacheCommand(string msbuildPath = null)
         {
+            _msbuildPath = msbuildPath;
         }
 
-        public int Execute()
+        private MSBuildForwardingApp CreateForwardingApp(string msbuildPath)
         {
             var msbuildArgs = new List<string>();
 
@@ -85,7 +88,7 @@ namespace Microsoft.DotNet.Tools.Cache
 
             msbuildArgs.AddRange(ExtraMSBuildArguments);
 
-            return new MSBuildForwardingApp(msbuildArgs).Execute();
+            return new MSBuildForwardingApp(msbuildArgs, msbuildPath);
         }
     }
 }

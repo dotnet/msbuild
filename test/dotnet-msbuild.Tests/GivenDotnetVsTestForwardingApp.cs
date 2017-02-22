@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         public void ItRunsVsTestApp()
         {
             new VSTestForwardingApp(new string[0])
-                .GetProcessStartInfo().FileName.Should().EndWith("vstest.console.dll");
+                .GetProcessStartInfo().Arguments.Should().EndWith("vstest.console.dll");
         }
     }
 }
