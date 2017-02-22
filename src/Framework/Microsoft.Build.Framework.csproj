@@ -22,6 +22,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-MONO|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-MONO|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="..\Shared\Constants.cs">
+      <Link>Constants.cs</Link>
+    </Compile>
     <Compile Include="AssemblyInfo.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

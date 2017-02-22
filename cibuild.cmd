@@ -142,8 +142,9 @@ if /i "%TARGET%"=="CoreCLR" (
 :: The set of warnings to suppress for now
 :: warning MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.
 :: warning MSB3026: Could not copy "XXX" to "XXX". Beginning retry 1 in 1000ms.
+:: warning MSB3073: Exec task failure (when set to be a warning) -- needed to keep from failing on dev desktops that don't have C++ tools
 :: warning AL1053: The version '1.2.3.4-foo' specified for the 'product version' is not in the normal 'major.minor.build.revision' format
-SET _NOWARN=MSB3277;MSB3026;AL1053
+SET _NOWARN=MSB3277;MSB3026;MSB3073;AL1053
 
 echo.
 echo ** Rebuilding MSBuild with locally built binaries

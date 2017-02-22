@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\dir.props"/>
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{31768BCA-AF65-4D9C-B3AC-B6DA3338B1BE}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Microsoft.Build.Utilities.UnitTests</RootNamespace>
+    <AssemblyName>Microsoft.Build.Utilities.UnitTests</AssemblyName>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <!-- Default configurations to help VS understand the configurations -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-MONO|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-MONO|AnyCPU'" />
+  <ItemGroup>
+    <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\EscapingUtilities_Tests.cs" />
+    <Compile Include="..\Shared\UnitTests\ErrorUtilities_Tests.cs" />
+    <Compile Include="..\Shared\UnitTests\NativeMethodsShared_Tests.cs" />
+    <Compile Include="..\Shared\UnitTests\MockLogger.cs" />
+    <Compile Include="..\Shared\UnitTests\ObjectModelHelpers.cs" />
+    <Compile Include="..\Build\BackEnd\Node\NativeMethods.cs">
+      <Link>NativeMethods.cs</Link>
+    </Compile>
+    <Compile Include="PlatformManifest_Tests.cs" />
+    <Compile Include="TrackedDependencies\FileTrackerTests.cs" />
+    <Compile Include="TrackedDependencies\TrackedDependenciesTests.cs" />
+    <Compile Include="TrackedDependencies\MockEngine.cs" />
+    <Compile Include="CanonicalError_Tests.cs" />
+    <Compile Include="CommandLineBuilder_Tests.cs" />
+    <Compile Include="EventArgsFormatting_Tests.cs" />
+    <Compile Include="Logger_Tests.cs" />
+    <Compile Include="MockEngine.cs" />
+    <Compile Include="MockTask.cs" />
+    <Compile Include="MuxLogger_Tests.cs" />
+    <Compile Include="ProcessorArchitecture_Tests.cs" />
+    <Compile Include="TaskItem_Tests.cs" />
+    <Compile Include="TaskLoggingHelper_Tests.cs" />
+    <Compile Include="ToolLocationHelper_Tests.cs" />
+    <Compile Include="ToolTask_Tests.cs" />
+    <EmbeddedResource Include="*.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="..\Shared\UnitTests\ResourceUtilities_Tests.cs" />
+    <AppDesigner Include="Properties\" />
+    <None Include="..\Shared\UnitTests\App.config">
+      <Link>App.config</Link>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="project.json" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
+    <Reference Include="System" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Build.Tasks.CodeAnalysis, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" Condition="'$(NetCoreBuild)' != 'true'">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>$(CompilerToolsDir)\Microsoft.Build.Tasks.CodeAnalysis.dll</HintPath>
+    </Reference>
+    <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj">
+      <Project>{828566EE-6F6A-4EF4-98B0-513F7DF9C628}</Project>
+      <Name>Microsoft.Build.Utilities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Build\Microsoft.Build.csproj">
+      <Project>{16CD7635-7CF4-4C62-A77B-CF87D0F09A58}</Project>
+      <Name>Microsoft.Build</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj">
+      <Project>{59A73FE0-D3B7-4299-9063-3A587D429AF4}</Project>
+      <Name>Microsoft.Build.Tasks</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj">
+      <Project>{571F09DB-A81A-4444-945C-6F7B530054CD}</Project>
+      <Name>Microsoft.Build.Framework</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <Import Project="..\dir.targets"/>
+</Project>

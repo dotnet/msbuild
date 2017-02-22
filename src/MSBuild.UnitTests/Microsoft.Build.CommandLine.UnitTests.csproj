@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+   <!--
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" Condition="!$(Configuration.EndsWith('MONO'))"/>
+  -->
+  <Import Project="..\dir.props"/>
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{C79756DC-CC78-45D6-AE11-8BB35F201CE4}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Microsoft.Build.CommandLine.UnitTests</RootNamespace>
+    <AssemblyName>Microsoft.Build.CommandLine.UnitTests</AssemblyName>
+    <IsTestProject>true</IsTestProject>
+    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+  </PropertyGroup>
+  <!-- Default configurations to help VS understand the configurations -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-MONO|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-MONO|AnyCPU'" />
+  <ItemGroup>
+    <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\RegistryDelegates.cs">
+      <Link>RegistryDelegates.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\RegistryHelper.cs">
+      <Link>RegistryHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\VersionUtilities.cs">
+      <Link>VersionUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\MockEngine.cs" />
+    <Compile Include="..\Shared\UnitTests\MockLogger.cs" />
+    <Compile Include="..\Shared\UnitTests\ObjectModelHelpers.cs" />
+    <Compile Include="..\Shared\UnitTests\RunnerUtilities.cs" />
+    <Compile Include="CommandLineSwitches_Tests.cs" />
+    <Compile Include="ProjectSchemaValidationHandler_Tests.cs" />
+    <Compile Include="XMake_Tests.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj">
+      <Project>{828566ee-6f6a-4ef4-98b0-513f7df9c628}</Project>
+      <Name>Microsoft.Build.Utilities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Build\Microsoft.Build.csproj">
+      <Project>{16cd7635-7cf4-4c62-a77b-cf87d0f09a58}</Project>
+      <Name>Microsoft.Build</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MSBuild\MSBuild.csproj">
+      <Project>{23c9fd0e-70c5-4f1f-b08a-d2774240fb51}</Project>
+      <Name>MSBuild</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj">
+      <Project>{571F09DB-A81A-4444-945C-6F7B530054CD}</Project>
+      <Name>Microsoft.Build.Framework</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <!-- IDE specific Information -->
+  <ItemGroup>
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\MSBuild\Microsoft.Build.Core.xsd">
+      <Link>Microsoft.Build.Core.xsd</Link>
+      <SubType>
+      </SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\MSBuild\Microsoft.Build.CommonTypes.xsd">
+      <Link>Microsoft.Build.CommonTypes.xsd</Link>
+      <SubType>
+      </SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\MSBuild\Microsoft.Build.xsd">
+      <Link>Microsoft.Build.xsd</Link>
+      <SubType>
+      </SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Shared\UnitTests\App.config">
+      <Link>App.config</Link>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="project.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+  </ItemGroup>
+  <Import Project="..\dir.targets"/>
+</Project>

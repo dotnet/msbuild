@@ -20,6 +20,11 @@ using Xunit.Abstractions;
 
 using TempPaths = System.Collections.Generic.Dictionary<string, string>;
 
+// Microsoft.Build.Tasks has MSBuildConstants compiled into it under a different namespace otherwise
+// there are collisions with the one compiled into Microsoft.Build.Framework
+#if MICROSOFT_BUILD_TASKS_UNITTESTS
+using MSBuildConstants = Microsoft.Build.Tasks.MSBuildConstants;
+#endif
 
 namespace Microsoft.Build.UnitTests
 {

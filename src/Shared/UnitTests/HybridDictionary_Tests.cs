@@ -193,6 +193,17 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             }
         }
 
+        [Fact]
+        private void VerifyHybridDictionaryBaseIndexer()
+        {
+            var dict = new HybridDictionary<string, string>();
+            dict[(object) "key"] = "value";
+
+            Assert.Equal("value", dict["key"]);
+            Assert.Equal("value", dict[(object)"key"]);
+            Assert.Equal("key", dict.Keys.First());
+        }
+
         /// <summary>
         /// Performs both actions supplied and asserts either both or neither threw
         /// </summary>

@@ -349,8 +349,8 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public object this[object key]
         {
-            get { return (Object)this[key]; }
-            set { this[key] = value; }
+            get { return ((IDictionary<TKey, TValue>)this)[(TKey)key]; }
+            set { ((IDictionary<TKey, TValue>)this)[(TKey)key] = (TValue)value; }
         }
 
         /// <summary>

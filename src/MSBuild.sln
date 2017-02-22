@@ -9,26 +9,26 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build.Utilities",
 		{571F09DB-A81A-4444-945C-6F7B530054CD} = {571F09DB-A81A-4444-945C-6F7B530054CD}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build", "XMakeBuildEngine\Microsoft.Build.csproj", "{16CD7635-7CF4-4C62-A77B-CF87D0F09A58}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build", "Build\Microsoft.Build.csproj", "{16CD7635-7CF4-4C62-A77B-CF87D0F09A58}"
 	ProjectSection(ProjectDependencies) = postProject
 		{571F09DB-A81A-4444-945C-6F7B530054CD} = {571F09DB-A81A-4444-945C-6F7B530054CD}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSBuild", "XMakeCommandLine\MSBuild.csproj", "{23C9FD0E-70C5-4F1F-B08A-D2774240FB51}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSBuild", "MSBuild\MSBuild.csproj", "{23C9FD0E-70C5-4F1F-B08A-D2774240FB51}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build.Tasks", "XMakeTasks\Microsoft.Build.Tasks.csproj", "{59A73FE0-D3B7-4299-9063-3A587D429AF4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build.Tasks", "Tasks\Microsoft.Build.Tasks.csproj", "{59A73FE0-D3B7-4299-9063-3A587D429AF4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build.Framework.UnitTests", "Framework\UnitTests\Microsoft.Build.Framework.UnitTests.csproj", "{BE53C18D-7E4E-4C57-A359-1D662C384511}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build.Framework.UnitTests", "Framework.UnitTests\Microsoft.Build.Framework.UnitTests.csproj", "{BE53C18D-7E4E-4C57-A359-1D662C384511}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build.CommandLine.UnitTests", "XMakeCommandLine\UnitTests\Microsoft.Build.CommandLine.UnitTests.csproj", "{C79756DC-CC78-45D6-AE11-8BB35F201CE4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build.CommandLine.UnitTests", "MSBuild.UnitTests\Microsoft.Build.CommandLine.UnitTests.csproj", "{C79756DC-CC78-45D6-AE11-8BB35F201CE4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build.Utilities.UnitTests", "Utilities\UnitTests\Microsoft.Build.Utilities.UnitTests.csproj", "{31768BCA-AF65-4D9C-B3AC-B6DA3338B1BE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build.Utilities.UnitTests", "Utilities.UnitTests\Microsoft.Build.Utilities.UnitTests.csproj", "{31768BCA-AF65-4D9C-B3AC-B6DA3338B1BE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build.Tasks.UnitTests", "XMakeTasks\UnitTests\Microsoft.Build.Tasks.UnitTests.csproj", "{32126DCE-7484-4E4B-85DA-12378C0F2FC7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build.Tasks.UnitTests", "Tasks.UnitTests\Microsoft.Build.Tasks.UnitTests.csproj", "{32126DCE-7484-4E4B-85DA-12378C0F2FC7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build.Engine.UnitTests", "XMakeBuildEngine\UnitTests\Microsoft.Build.Engine.UnitTests.csproj", "{D06D5D07-9DFB-4896-B11F-0A8C44F8F971}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build.Engine.UnitTests", "Build.UnitTests\Microsoft.Build.Engine.UnitTests.csproj", "{D06D5D07-9DFB-4896-B11F-0A8C44F8F971}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build.Engine.OM.UnitTests", "XMakeBuildEngine\UnitTestsPublicOM\Microsoft.Build.Engine.OM.UnitTests.csproj", "{9D858C8F-8D71-467E-808E-4E4F48DD0A49}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build.Engine.OM.UnitTests", "Build.OM.UnitTests\Microsoft.Build.Engine.OM.UnitTests.csproj", "{9D858C8F-8D71-467E-808E-4E4F48DD0A49}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4900B3B8-4310-4D5B-B1F7-2FDF9199765F}"
 	ProjectSection(SolutionItems) = preProject
@@ -48,7 +48,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PortableTask", "..\Samples\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetCoreCompileTest", "..\Samples\NetCoreCompileTest\NetCoreCompileTest.csproj", "{11B5D53E-90E4-4BD5-9883-B5921F7DE854}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSBuildTaskHost", "XMakeCommandLine\MSBuildTaskHost\MSBuildTaskHost.csproj", "{53733ECF-0D81-43DA-B602-2AE9417F614F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSBuildTaskHost", "MSBuildTaskHost\MSBuildTaskHost.csproj", "{53733ECF-0D81-43DA-B602-2AE9417F614F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dependency", "..\Samples\Dependency\Dependency.csproj", "{9EAE36C3-50CD-49A6-9CA2-94649125DCD1}"
 EndProject
@@ -56,9 +56,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskWithDependency", "..\Sa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build.LocalizationTasks", "..\build\LocalizationTasks\Microsoft.Build.LocalizationTasks.csproj", "{06347A6C-32A4-4218-A930-0A22699C726C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrcasEngine", "OrcasEngine\OrcasEngine.csproj", "{D21C4BF9-E131-4ACB-8960-794797F19A39}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build.Engine", "Deprecated\Engine\Microsoft.Build.Engine.csproj", "{D21C4BF9-E131-4ACB-8960-794797F19A39}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XMakeConversion", "XMakeConversion\XMakeConversion.csproj", "{5274C277-F122-4A44-B7A0-00A1B3F39803}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build.Conversion", "Deprecated\Conversion\Microsoft.Build.Conversion.csproj", "{5274C277-F122-4A44-B7A0-00A1B3F39803}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGetPackages", "NuGetPackages", "{B3A6667F-80C1-4264-874B-60AF572F641F}"
 	ProjectSection(SolutionItems) = preProject
@@ -72,6 +72,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGetPackages", "NuGetPacka
 		..\build\NuGetPackages\Microsoft.Build.Utilities.Core.nuspec = ..\build\NuGetPackages\Microsoft.Build.Utilities.Core.nuspec
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deprecated", "Deprecated", "{64606C1B-CF86-49CA-8050-B66E7D5C7CB8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,9 @@ Global
 		Debug-NetCore|Any CPU = Debug-NetCore|Any CPU
 		Debug-NetCore|x64 = Debug-NetCore|x64
 		Debug-NetCore|x86 = Debug-NetCore|x86
+		Port-Progress|Any CPU = Port-Progress|Any CPU
+		Port-Progress|x64 = Port-Progress|x64
+		Port-Progress|x86 = Port-Progress|x86
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
@@ -110,6 +115,12 @@ Global
 		{571F09DB-A81A-4444-945C-6F7B530054CD}.Debug-NetCore|x64.Build.0 = Debug-NetCore|Any CPU
 		{571F09DB-A81A-4444-945C-6F7B530054CD}.Debug-NetCore|x86.ActiveCfg = Debug-NetCore|Any CPU
 		{571F09DB-A81A-4444-945C-6F7B530054CD}.Debug-NetCore|x86.Build.0 = Debug-NetCore|Any CPU
+		{571F09DB-A81A-4444-945C-6F7B530054CD}.Port-Progress|Any CPU.ActiveCfg = Port-Progress|Any CPU
+		{571F09DB-A81A-4444-945C-6F7B530054CD}.Port-Progress|Any CPU.Build.0 = Port-Progress|Any CPU
+		{571F09DB-A81A-4444-945C-6F7B530054CD}.Port-Progress|x64.ActiveCfg = Port-Progress|x64
+		{571F09DB-A81A-4444-945C-6F7B530054CD}.Port-Progress|x64.Build.0 = Port-Progress|x64
+		{571F09DB-A81A-4444-945C-6F7B530054CD}.Port-Progress|x86.ActiveCfg = Port-Progress|x86
+		{571F09DB-A81A-4444-945C-6F7B530054CD}.Port-Progress|x86.Build.0 = Port-Progress|x86
 		{571F09DB-A81A-4444-945C-6F7B530054CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{571F09DB-A81A-4444-945C-6F7B530054CD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{571F09DB-A81A-4444-945C-6F7B530054CD}.Release|x64.ActiveCfg = Release|Any CPU
@@ -142,6 +153,12 @@ Global
 		{828566EE-6F6A-4EF4-98B0-513F7DF9C628}.Debug-NetCore|x64.Build.0 = Debug-NetCore|Any CPU
 		{828566EE-6F6A-4EF4-98B0-513F7DF9C628}.Debug-NetCore|x86.ActiveCfg = Debug-NetCore|Any CPU
 		{828566EE-6F6A-4EF4-98B0-513F7DF9C628}.Debug-NetCore|x86.Build.0 = Debug-NetCore|Any CPU
+		{828566EE-6F6A-4EF4-98B0-513F7DF9C628}.Port-Progress|Any CPU.ActiveCfg = Port-Progress|Any CPU
+		{828566EE-6F6A-4EF4-98B0-513F7DF9C628}.Port-Progress|Any CPU.Build.0 = Port-Progress|Any CPU
+		{828566EE-6F6A-4EF4-98B0-513F7DF9C628}.Port-Progress|x64.ActiveCfg = Port-Progress|x64
+		{828566EE-6F6A-4EF4-98B0-513F7DF9C628}.Port-Progress|x64.Build.0 = Port-Progress|x64
+		{828566EE-6F6A-4EF4-98B0-513F7DF9C628}.Port-Progress|x86.ActiveCfg = Port-Progress|x86
+		{828566EE-6F6A-4EF4-98B0-513F7DF9C628}.Port-Progress|x86.Build.0 = Port-Progress|x86
 		{828566EE-6F6A-4EF4-98B0-513F7DF9C628}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{828566EE-6F6A-4EF4-98B0-513F7DF9C628}.Release|Any CPU.Build.0 = Release|Any CPU
 		{828566EE-6F6A-4EF4-98B0-513F7DF9C628}.Release|x64.ActiveCfg = Release|Any CPU
@@ -174,6 +191,12 @@ Global
 		{16CD7635-7CF4-4C62-A77B-CF87D0F09A58}.Debug-NetCore|x64.Build.0 = Debug-NetCore|Any CPU
 		{16CD7635-7CF4-4C62-A77B-CF87D0F09A58}.Debug-NetCore|x86.ActiveCfg = Debug-NetCore|Any CPU
 		{16CD7635-7CF4-4C62-A77B-CF87D0F09A58}.Debug-NetCore|x86.Build.0 = Debug-NetCore|Any CPU
+		{16CD7635-7CF4-4C62-A77B-CF87D0F09A58}.Port-Progress|Any CPU.ActiveCfg = Port-Progress|Any CPU
+		{16CD7635-7CF4-4C62-A77B-CF87D0F09A58}.Port-Progress|Any CPU.Build.0 = Port-Progress|Any CPU
+		{16CD7635-7CF4-4C62-A77B-CF87D0F09A58}.Port-Progress|x64.ActiveCfg = Port-Progress|x64
+		{16CD7635-7CF4-4C62-A77B-CF87D0F09A58}.Port-Progress|x64.Build.0 = Port-Progress|x64
+		{16CD7635-7CF4-4C62-A77B-CF87D0F09A58}.Port-Progress|x86.ActiveCfg = Port-Progress|x86
+		{16CD7635-7CF4-4C62-A77B-CF87D0F09A58}.Port-Progress|x86.Build.0 = Port-Progress|x86
 		{16CD7635-7CF4-4C62-A77B-CF87D0F09A58}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{16CD7635-7CF4-4C62-A77B-CF87D0F09A58}.Release|Any CPU.Build.0 = Release|Any CPU
 		{16CD7635-7CF4-4C62-A77B-CF87D0F09A58}.Release|x64.ActiveCfg = Release|Any CPU
@@ -208,6 +231,12 @@ Global
 		{23C9FD0E-70C5-4F1F-B08A-D2774240FB51}.Debug-NetCore|x64.Build.0 = Debug-NetCore|x64
 		{23C9FD0E-70C5-4F1F-B08A-D2774240FB51}.Debug-NetCore|x86.ActiveCfg = Debug-NetCore|x86
 		{23C9FD0E-70C5-4F1F-B08A-D2774240FB51}.Debug-NetCore|x86.Build.0 = Debug-NetCore|x86
+		{23C9FD0E-70C5-4F1F-B08A-D2774240FB51}.Port-Progress|Any CPU.ActiveCfg = Port-Progress|Any CPU
+		{23C9FD0E-70C5-4F1F-B08A-D2774240FB51}.Port-Progress|Any CPU.Build.0 = Port-Progress|Any CPU
+		{23C9FD0E-70C5-4F1F-B08A-D2774240FB51}.Port-Progress|x64.ActiveCfg = Port-Progress|x64
+		{23C9FD0E-70C5-4F1F-B08A-D2774240FB51}.Port-Progress|x64.Build.0 = Port-Progress|x64
+		{23C9FD0E-70C5-4F1F-B08A-D2774240FB51}.Port-Progress|x86.ActiveCfg = Port-Progress|x86
+		{23C9FD0E-70C5-4F1F-B08A-D2774240FB51}.Port-Progress|x86.Build.0 = Port-Progress|x86
 		{23C9FD0E-70C5-4F1F-B08A-D2774240FB51}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{23C9FD0E-70C5-4F1F-B08A-D2774240FB51}.Release|Any CPU.Build.0 = Release|Any CPU
 		{23C9FD0E-70C5-4F1F-B08A-D2774240FB51}.Release|x64.ActiveCfg = Release|Any CPU
@@ -242,6 +271,12 @@ Global
 		{59A73FE0-D3B7-4299-9063-3A587D429AF4}.Debug-NetCore|x64.Build.0 = Debug-NetCore|Any CPU
 		{59A73FE0-D3B7-4299-9063-3A587D429AF4}.Debug-NetCore|x86.ActiveCfg = Debug-NetCore|Any CPU
 		{59A73FE0-D3B7-4299-9063-3A587D429AF4}.Debug-NetCore|x86.Build.0 = Debug-NetCore|Any CPU
+		{59A73FE0-D3B7-4299-9063-3A587D429AF4}.Port-Progress|Any CPU.ActiveCfg = Port-Progress|Any CPU
+		{59A73FE0-D3B7-4299-9063-3A587D429AF4}.Port-Progress|Any CPU.Build.0 = Port-Progress|Any CPU
+		{59A73FE0-D3B7-4299-9063-3A587D429AF4}.Port-Progress|x64.ActiveCfg = Port-Progress|x64
+		{59A73FE0-D3B7-4299-9063-3A587D429AF4}.Port-Progress|x64.Build.0 = Port-Progress|x64
+		{59A73FE0-D3B7-4299-9063-3A587D429AF4}.Port-Progress|x86.ActiveCfg = Port-Progress|x86
+		{59A73FE0-D3B7-4299-9063-3A587D429AF4}.Port-Progress|x86.Build.0 = Port-Progress|x86
 		{59A73FE0-D3B7-4299-9063-3A587D429AF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{59A73FE0-D3B7-4299-9063-3A587D429AF4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{59A73FE0-D3B7-4299-9063-3A587D429AF4}.Release|x64.ActiveCfg = Release|Any CPU
@@ -274,6 +309,12 @@ Global
 		{BE53C18D-7E4E-4C57-A359-1D662C384511}.Debug-NetCore|x64.Build.0 = Debug-NetCore|Any CPU
 		{BE53C18D-7E4E-4C57-A359-1D662C384511}.Debug-NetCore|x86.ActiveCfg = Debug-NetCore|Any CPU
 		{BE53C18D-7E4E-4C57-A359-1D662C384511}.Debug-NetCore|x86.Build.0 = Debug-NetCore|Any CPU
+		{BE53C18D-7E4E-4C57-A359-1D662C384511}.Port-Progress|Any CPU.ActiveCfg = Port-Progress|Any CPU
+		{BE53C18D-7E4E-4C57-A359-1D662C384511}.Port-Progress|Any CPU.Build.0 = Port-Progress|Any CPU
+		{BE53C18D-7E4E-4C57-A359-1D662C384511}.Port-Progress|x64.ActiveCfg = Port-Progress|x64
+		{BE53C18D-7E4E-4C57-A359-1D662C384511}.Port-Progress|x64.Build.0 = Port-Progress|x64
+		{BE53C18D-7E4E-4C57-A359-1D662C384511}.Port-Progress|x86.ActiveCfg = Port-Progress|x86
+		{BE53C18D-7E4E-4C57-A359-1D662C384511}.Port-Progress|x86.Build.0 = Port-Progress|x86
 		{BE53C18D-7E4E-4C57-A359-1D662C384511}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BE53C18D-7E4E-4C57-A359-1D662C384511}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BE53C18D-7E4E-4C57-A359-1D662C384511}.Release|x64.ActiveCfg = Release|Any CPU
@@ -303,6 +344,12 @@ Global
 		{C79756DC-CC78-45D6-AE11-8BB35F201CE4}.Debug-NetCore|x64.Build.0 = Debug-NetCore|Any CPU
 		{C79756DC-CC78-45D6-AE11-8BB35F201CE4}.Debug-NetCore|x86.ActiveCfg = Debug-NetCore|Any CPU
 		{C79756DC-CC78-45D6-AE11-8BB35F201CE4}.Debug-NetCore|x86.Build.0 = Debug-NetCore|Any CPU
+		{C79756DC-CC78-45D6-AE11-8BB35F201CE4}.Port-Progress|Any CPU.ActiveCfg = Port-Progress|Any CPU
+		{C79756DC-CC78-45D6-AE11-8BB35F201CE4}.Port-Progress|Any CPU.Build.0 = Port-Progress|Any CPU
+		{C79756DC-CC78-45D6-AE11-8BB35F201CE4}.Port-Progress|x64.ActiveCfg = Port-Progress|x64
+		{C79756DC-CC78-45D6-AE11-8BB35F201CE4}.Port-Progress|x64.Build.0 = Port-Progress|x64
+		{C79756DC-CC78-45D6-AE11-8BB35F201CE4}.Port-Progress|x86.ActiveCfg = Port-Progress|x86
+		{C79756DC-CC78-45D6-AE11-8BB35F201CE4}.Port-Progress|x86.Build.0 = Port-Progress|x86
 		{C79756DC-CC78-45D6-AE11-8BB35F201CE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C79756DC-CC78-45D6-AE11-8BB35F201CE4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C79756DC-CC78-45D6-AE11-8BB35F201CE4}.Release|x64.ActiveCfg = Release|Any CPU
@@ -332,6 +379,12 @@ Global
 		{31768BCA-AF65-4D9C-B3AC-B6DA3338B1BE}.Debug-NetCore|x64.Build.0 = Debug-NetCore|Any CPU
 		{31768BCA-AF65-4D9C-B3AC-B6DA3338B1BE}.Debug-NetCore|x86.ActiveCfg = Debug-NetCore|Any CPU
 		{31768BCA-AF65-4D9C-B3AC-B6DA3338B1BE}.Debug-NetCore|x86.Build.0 = Debug-NetCore|Any CPU
+		{31768BCA-AF65-4D9C-B3AC-B6DA3338B1BE}.Port-Progress|Any CPU.ActiveCfg = Port-Progress|Any CPU
+		{31768BCA-AF65-4D9C-B3AC-B6DA3338B1BE}.Port-Progress|Any CPU.Build.0 = Port-Progress|Any CPU
+		{31768BCA-AF65-4D9C-B3AC-B6DA3338B1BE}.Port-Progress|x64.ActiveCfg = Port-Progress|x64
+		{31768BCA-AF65-4D9C-B3AC-B6DA3338B1BE}.Port-Progress|x64.Build.0 = Port-Progress|x64
+		{31768BCA-AF65-4D9C-B3AC-B6DA3338B1BE}.Port-Progress|x86.ActiveCfg = Port-Progress|x86
+		{31768BCA-AF65-4D9C-B3AC-B6DA3338B1BE}.Port-Progress|x86.Build.0 = Port-Progress|x86
 		{31768BCA-AF65-4D9C-B3AC-B6DA3338B1BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31768BCA-AF65-4D9C-B3AC-B6DA3338B1BE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{31768BCA-AF65-4D9C-B3AC-B6DA3338B1BE}.Release|x64.ActiveCfg = Release|Any CPU
@@ -361,6 +414,12 @@ Global
 		{32126DCE-7484-4E4B-85DA-12378C0F2FC7}.Debug-NetCore|x64.Build.0 = Debug-NetCore|Any CPU
 		{32126DCE-7484-4E4B-85DA-12378C0F2FC7}.Debug-NetCore|x86.ActiveCfg = Debug-NetCore|Any CPU
 		{32126DCE-7484-4E4B-85DA-12378C0F2FC7}.Debug-NetCore|x86.Build.0 = Debug-NetCore|Any CPU
+		{32126DCE-7484-4E4B-85DA-12378C0F2FC7}.Port-Progress|Any CPU.ActiveCfg = Port-Progress|Any CPU
+		{32126DCE-7484-4E4B-85DA-12378C0F2FC7}.Port-Progress|Any CPU.Build.0 = Port-Progress|Any CPU
+		{32126DCE-7484-4E4B-85DA-12378C0F2FC7}.Port-Progress|x64.ActiveCfg = Port-Progress|x64
+		{32126DCE-7484-4E4B-85DA-12378C0F2FC7}.Port-Progress|x64.Build.0 = Port-Progress|x64
+		{32126DCE-7484-4E4B-85DA-12378C0F2FC7}.Port-Progress|x86.ActiveCfg = Port-Progress|x86
+		{32126DCE-7484-4E4B-85DA-12378C0F2FC7}.Port-Progress|x86.Build.0 = Port-Progress|x86
 		{32126DCE-7484-4E4B-85DA-12378C0F2FC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{32126DCE-7484-4E4B-85DA-12378C0F2FC7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{32126DCE-7484-4E4B-85DA-12378C0F2FC7}.Release|x64.ActiveCfg = Release|Any CPU
@@ -390,6 +449,12 @@ Global
 		{D06D5D07-9DFB-4896-B11F-0A8C44F8F971}.Debug-NetCore|x64.Build.0 = Debug-NetCore|Any CPU
 		{D06D5D07-9DFB-4896-B11F-0A8C44F8F971}.Debug-NetCore|x86.ActiveCfg = Debug-NetCore|Any CPU
 		{D06D5D07-9DFB-4896-B11F-0A8C44F8F971}.Debug-NetCore|x86.Build.0 = Debug-NetCore|Any CPU
+		{D06D5D07-9DFB-4896-B11F-0A8C44F8F971}.Port-Progress|Any CPU.ActiveCfg = Port-Progress|Any CPU
+		{D06D5D07-9DFB-4896-B11F-0A8C44F8F971}.Port-Progress|Any CPU.Build.0 = Port-Progress|Any CPU
+		{D06D5D07-9DFB-4896-B11F-0A8C44F8F971}.Port-Progress|x64.ActiveCfg = Port-Progress|x64
+		{D06D5D07-9DFB-4896-B11F-0A8C44F8F971}.Port-Progress|x64.Build.0 = Port-Progress|x64
+		{D06D5D07-9DFB-4896-B11F-0A8C44F8F971}.Port-Progress|x86.ActiveCfg = Port-Progress|x86
+		{D06D5D07-9DFB-4896-B11F-0A8C44F8F971}.Port-Progress|x86.Build.0 = Port-Progress|x86
 		{D06D5D07-9DFB-4896-B11F-0A8C44F8F971}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D06D5D07-9DFB-4896-B11F-0A8C44F8F971}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D06D5D07-9DFB-4896-B11F-0A8C44F8F971}.Release|x64.ActiveCfg = Release|Any CPU
@@ -416,6 +481,12 @@ Global
 		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Debug-NetCore|Any CPU.Build.0 = Debug-NetCore|Any CPU
 		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Debug-NetCore|x64.ActiveCfg = Debug|Any CPU
 		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Debug-NetCore|x86.ActiveCfg = Debug-NetCore|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Port-Progress|Any CPU.ActiveCfg = Port-Progress|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Port-Progress|Any CPU.Build.0 = Port-Progress|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Port-Progress|x64.ActiveCfg = Port-Progress|x64
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Port-Progress|x64.Build.0 = Port-Progress|x64
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Port-Progress|x86.ActiveCfg = Port-Progress|x86
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Port-Progress|x86.Build.0 = Port-Progress|x86
 		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Release|x64.ActiveCfg = Release|Any CPU
@@ -440,6 +511,12 @@ Global
 		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Debug-NetCore|Any CPU.ActiveCfg = Debug-NetCore|Any CPU
 		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Debug-NetCore|x64.ActiveCfg = Debug-MONO|Any CPU
 		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Debug-NetCore|x86.ActiveCfg = Debug-MONO|Any CPU
+		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Port-Progress|Any CPU.ActiveCfg = Port-Progress|Any CPU
+		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Port-Progress|Any CPU.Build.0 = Port-Progress|Any CPU
+		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Port-Progress|x64.ActiveCfg = Port-Progress|x64
+		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Port-Progress|x64.Build.0 = Port-Progress|x64
+		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Port-Progress|x86.ActiveCfg = Port-Progress|x86
+		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Port-Progress|x86.Build.0 = Port-Progress|x86
 		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Release|x64.ActiveCfg = Release|Any CPU
@@ -470,6 +547,12 @@ Global
 		{FC1C02BB-1585-4322-840F-B002E25AEAD6}.Debug-NetCore|x64.Build.0 = Debug-NetCore|Any CPU
 		{FC1C02BB-1585-4322-840F-B002E25AEAD6}.Debug-NetCore|x86.ActiveCfg = Debug-NetCore|Any CPU
 		{FC1C02BB-1585-4322-840F-B002E25AEAD6}.Debug-NetCore|x86.Build.0 = Debug-NetCore|Any CPU
+		{FC1C02BB-1585-4322-840F-B002E25AEAD6}.Port-Progress|Any CPU.ActiveCfg = Port-Progress|Any CPU
+		{FC1C02BB-1585-4322-840F-B002E25AEAD6}.Port-Progress|Any CPU.Build.0 = Port-Progress|Any CPU
+		{FC1C02BB-1585-4322-840F-B002E25AEAD6}.Port-Progress|x64.ActiveCfg = Port-Progress|Any CPU
+		{FC1C02BB-1585-4322-840F-B002E25AEAD6}.Port-Progress|x64.Build.0 = Port-Progress|Any CPU
+		{FC1C02BB-1585-4322-840F-B002E25AEAD6}.Port-Progress|x86.ActiveCfg = Port-Progress|Any CPU
+		{FC1C02BB-1585-4322-840F-B002E25AEAD6}.Port-Progress|x86.Build.0 = Port-Progress|Any CPU
 		{FC1C02BB-1585-4322-840F-B002E25AEAD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC1C02BB-1585-4322-840F-B002E25AEAD6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FC1C02BB-1585-4322-840F-B002E25AEAD6}.Release|x64.ActiveCfg = Release|Any CPU
@@ -505,6 +588,12 @@ Global
 		{11B5D53E-90E4-4BD5-9883-B5921F7DE854}.Debug-NetCore|x64.Build.0 = Debug|Any CPU
 		{11B5D53E-90E4-4BD5-9883-B5921F7DE854}.Debug-NetCore|x86.ActiveCfg = Debug|Any CPU
 		{11B5D53E-90E4-4BD5-9883-B5921F7DE854}.Debug-NetCore|x86.Build.0 = Debug|Any CPU
+		{11B5D53E-90E4-4BD5-9883-B5921F7DE854}.Port-Progress|Any CPU.ActiveCfg = Release|Any CPU
+		{11B5D53E-90E4-4BD5-9883-B5921F7DE854}.Port-Progress|Any CPU.Build.0 = Release|Any CPU
+		{11B5D53E-90E4-4BD5-9883-B5921F7DE854}.Port-Progress|x64.ActiveCfg = Release|Any CPU
+		{11B5D53E-90E4-4BD5-9883-B5921F7DE854}.Port-Progress|x64.Build.0 = Release|Any CPU
+		{11B5D53E-90E4-4BD5-9883-B5921F7DE854}.Port-Progress|x86.ActiveCfg = Release|Any CPU
+		{11B5D53E-90E4-4BD5-9883-B5921F7DE854}.Port-Progress|x86.Build.0 = Release|Any CPU
 		{11B5D53E-90E4-4BD5-9883-B5921F7DE854}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{11B5D53E-90E4-4BD5-9883-B5921F7DE854}.Release|Any CPU.Build.0 = Release|Any CPU
 		{11B5D53E-90E4-4BD5-9883-B5921F7DE854}.Release|x64.ActiveCfg = Release|Any CPU
@@ -540,6 +629,12 @@ Global
 		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-NetCore|x64.Build.0 = Debug-NetCore|x64
 		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-NetCore|x86.ActiveCfg = Debug-NetCore|x86
 		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Debug-NetCore|x86.Build.0 = Debug-NetCore|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Port-Progress|Any CPU.ActiveCfg = Port-Progress|Any CPU
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Port-Progress|Any CPU.Build.0 = Port-Progress|Any CPU
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Port-Progress|x64.ActiveCfg = Port-Progress|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Port-Progress|x64.Build.0 = Port-Progress|x64
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Port-Progress|x86.ActiveCfg = Port-Progress|x86
+		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Port-Progress|x86.Build.0 = Port-Progress|x86
 		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{53733ECF-0D81-43DA-B602-2AE9417F614F}.Release|x64.ActiveCfg = Release|x64
@@ -576,6 +671,12 @@ Global
 		{9EAE36C3-50CD-49A6-9CA2-94649125DCD1}.Debug-NetCore|x64.Build.0 = Debug-NetCore|Any CPU
 		{9EAE36C3-50CD-49A6-9CA2-94649125DCD1}.Debug-NetCore|x86.ActiveCfg = Debug-NetCore|Any CPU
 		{9EAE36C3-50CD-49A6-9CA2-94649125DCD1}.Debug-NetCore|x86.Build.0 = Debug-NetCore|Any CPU
+		{9EAE36C3-50CD-49A6-9CA2-94649125DCD1}.Port-Progress|Any CPU.ActiveCfg = Port-Progress|Any CPU
+		{9EAE36C3-50CD-49A6-9CA2-94649125DCD1}.Port-Progress|Any CPU.Build.0 = Port-Progress|Any CPU
+		{9EAE36C3-50CD-49A6-9CA2-94649125DCD1}.Port-Progress|x64.ActiveCfg = Port-Progress|Any CPU
+		{9EAE36C3-50CD-49A6-9CA2-94649125DCD1}.Port-Progress|x64.Build.0 = Port-Progress|Any CPU
+		{9EAE36C3-50CD-49A6-9CA2-94649125DCD1}.Port-Progress|x86.ActiveCfg = Port-Progress|Any CPU
+		{9EAE36C3-50CD-49A6-9CA2-94649125DCD1}.Port-Progress|x86.Build.0 = Port-Progress|Any CPU
 		{9EAE36C3-50CD-49A6-9CA2-94649125DCD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9EAE36C3-50CD-49A6-9CA2-94649125DCD1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9EAE36C3-50CD-49A6-9CA2-94649125DCD1}.Release|x64.ActiveCfg = Release|Any CPU
@@ -612,6 +713,12 @@ Global
 		{09EEB69D-817E-4B33-9F61-24FC9DA5B3D4}.Debug-NetCore|x64.Build.0 = Debug-NetCore|Any CPU
 		{09EEB69D-817E-4B33-9F61-24FC9DA5B3D4}.Debug-NetCore|x86.ActiveCfg = Debug-NetCore|Any CPU
 		{09EEB69D-817E-4B33-9F61-24FC9DA5B3D4}.Debug-NetCore|x86.Build.0 = Debug-NetCore|Any CPU
+		{09EEB69D-817E-4B33-9F61-24FC9DA5B3D4}.Port-Progress|Any CPU.ActiveCfg = Port-Progress|Any CPU
+		{09EEB69D-817E-4B33-9F61-24FC9DA5B3D4}.Port-Progress|Any CPU.Build.0 = Port-Progress|Any CPU
+		{09EEB69D-817E-4B33-9F61-24FC9DA5B3D4}.Port-Progress|x64.ActiveCfg = Port-Progress|Any CPU
+		{09EEB69D-817E-4B33-9F61-24FC9DA5B3D4}.Port-Progress|x64.Build.0 = Port-Progress|Any CPU
+		{09EEB69D-817E-4B33-9F61-24FC9DA5B3D4}.Port-Progress|x86.ActiveCfg = Port-Progress|Any CPU
+		{09EEB69D-817E-4B33-9F61-24FC9DA5B3D4}.Port-Progress|x86.Build.0 = Port-Progress|Any CPU
 		{09EEB69D-817E-4B33-9F61-24FC9DA5B3D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{09EEB69D-817E-4B33-9F61-24FC9DA5B3D4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{09EEB69D-817E-4B33-9F61-24FC9DA5B3D4}.Release|x64.ActiveCfg = Release|Any CPU
@@ -648,6 +755,12 @@ Global
 		{06347A6C-32A4-4218-A930-0A22699C726C}.Debug-NetCore|x64.Build.0 = Debug-NetCore|Any CPU
 		{06347A6C-32A4-4218-A930-0A22699C726C}.Debug-NetCore|x86.ActiveCfg = Debug-NetCore|Any CPU
 		{06347A6C-32A4-4218-A930-0A22699C726C}.Debug-NetCore|x86.Build.0 = Debug-NetCore|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Port-Progress|Any CPU.ActiveCfg = Port-Progress|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Port-Progress|Any CPU.Build.0 = Port-Progress|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Port-Progress|x64.ActiveCfg = Port-Progress|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Port-Progress|x64.Build.0 = Port-Progress|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Port-Progress|x86.ActiveCfg = Port-Progress|Any CPU
+		{06347A6C-32A4-4218-A930-0A22699C726C}.Port-Progress|x86.Build.0 = Port-Progress|Any CPU
 		{06347A6C-32A4-4218-A930-0A22699C726C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{06347A6C-32A4-4218-A930-0A22699C726C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{06347A6C-32A4-4218-A930-0A22699C726C}.Release|x64.ActiveCfg = Release|Any CPU
@@ -682,6 +795,12 @@ Global
 		{D21C4BF9-E131-4ACB-8960-794797F19A39}.Debug-NetCore|x64.ActiveCfg = Debug-NetCore|x64
 		{D21C4BF9-E131-4ACB-8960-794797F19A39}.Debug-NetCore|x64.Build.0 = Debug-NetCore|x64
 		{D21C4BF9-E131-4ACB-8960-794797F19A39}.Debug-NetCore|x86.ActiveCfg = Debug-NetCore|x86
+		{D21C4BF9-E131-4ACB-8960-794797F19A39}.Port-Progress|Any CPU.ActiveCfg = Port-Progress|Any CPU
+		{D21C4BF9-E131-4ACB-8960-794797F19A39}.Port-Progress|Any CPU.Build.0 = Port-Progress|Any CPU
+		{D21C4BF9-E131-4ACB-8960-794797F19A39}.Port-Progress|x64.ActiveCfg = Port-Progress|x64
+		{D21C4BF9-E131-4ACB-8960-794797F19A39}.Port-Progress|x64.Build.0 = Port-Progress|x64
+		{D21C4BF9-E131-4ACB-8960-794797F19A39}.Port-Progress|x86.ActiveCfg = Port-Progress|x86
+		{D21C4BF9-E131-4ACB-8960-794797F19A39}.Port-Progress|x86.Build.0 = Port-Progress|x86
 		{D21C4BF9-E131-4ACB-8960-794797F19A39}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D21C4BF9-E131-4ACB-8960-794797F19A39}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D21C4BF9-E131-4ACB-8960-794797F19A39}.Release|x64.ActiveCfg = Release|x64
@@ -714,6 +833,12 @@ Global
 		{5274C277-F122-4A44-B7A0-00A1B3F39803}.Debug-NetCore|x64.ActiveCfg = Debug-NetCore|x64
 		{5274C277-F122-4A44-B7A0-00A1B3F39803}.Debug-NetCore|x64.Build.0 = Debug-NetCore|x64
 		{5274C277-F122-4A44-B7A0-00A1B3F39803}.Debug-NetCore|x86.ActiveCfg = Debug-NetCore|x86
+		{5274C277-F122-4A44-B7A0-00A1B3F39803}.Port-Progress|Any CPU.ActiveCfg = Port-Progress|Any CPU
+		{5274C277-F122-4A44-B7A0-00A1B3F39803}.Port-Progress|Any CPU.Build.0 = Port-Progress|Any CPU
+		{5274C277-F122-4A44-B7A0-00A1B3F39803}.Port-Progress|x64.ActiveCfg = Port-Progress|x64
+		{5274C277-F122-4A44-B7A0-00A1B3F39803}.Port-Progress|x64.Build.0 = Port-Progress|x64
+		{5274C277-F122-4A44-B7A0-00A1B3F39803}.Port-Progress|x86.ActiveCfg = Port-Progress|x86
+		{5274C277-F122-4A44-B7A0-00A1B3F39803}.Port-Progress|x86.Build.0 = Port-Progress|x86
 		{5274C277-F122-4A44-B7A0-00A1B3F39803}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5274C277-F122-4A44-B7A0-00A1B3F39803}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5274C277-F122-4A44-B7A0-00A1B3F39803}.Release|x64.ActiveCfg = Release|x64
@@ -740,5 +865,7 @@ Global
 		{11B5D53E-90E4-4BD5-9883-B5921F7DE854} = {760FF85D-8BEB-4992-8095-A9678F88FD47}
 		{9EAE36C3-50CD-49A6-9CA2-94649125DCD1} = {760FF85D-8BEB-4992-8095-A9678F88FD47}
 		{09EEB69D-817E-4B33-9F61-24FC9DA5B3D4} = {760FF85D-8BEB-4992-8095-A9678F88FD47}
+		{D21C4BF9-E131-4ACB-8960-794797F19A39} = {64606C1B-CF86-49CA-8050-B66E7D5C7CB8}
+		{5274C277-F122-4A44-B7A0-00A1B3F39803} = {64606C1B-CF86-49CA-8050-B66E7D5C7CB8}
 	EndGlobalSection
 EndGlobal

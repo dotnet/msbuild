@@ -264,8 +264,8 @@ folder InstallDir:\MSBuild\15.0\Bin\amd64\zh-Hant
 
 folder InstallDir:\Common7\IDE\CommonExtensions\MSBuild
   file source=$(SourceDir)Framework\Microsoft.Build.Framework.pkgdef
-  file source=$(SourceDir)XMakeBuildEngine\Microsoft.Build.pkgdef
-  file source=$(SourceDir)XmakeTasks\Microsoft.Build.Tasks.Core.pkgdef
+  file source=$(SourceDir)Build\Microsoft.Build.pkgdef
+  file source=$(SourceDir)Tasks\Microsoft.Build.Tasks.Core.pkgdef
   file source=$(SourceDir)Utilities\Microsoft.Build.Utilities.Core.pkgdef
-  file source=$(SourceDir)XMakeConversion\Microsoft.Build.Conversion.Core.pkgdef
-  file source=$(SourceDir)OrcasEngine\Microsoft.Build.Engine.pkgdef
+  file source=$(SourceDir)Deprecated\Conversion\Microsoft.Build.Conversion.Core.pkgdef
+  file source=$(SourceDir)Deprecated\Engine\Microsoft.Build.Engine.pkgdef
