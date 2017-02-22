@@ -14,7 +14,7 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
-        <source>Remove reference only when targeting a specific framework</source>
+        <source>Remove reference only when targetting a specific framework</source>
         <target state="translated">Odebrat odkaz jen při zaměření na určitou platformu</target>
         <note />
       </trans-unit>
