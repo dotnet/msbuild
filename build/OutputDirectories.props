@@ -7,12 +7,13 @@
       <DotnetStage1>$(Stage1Directory)/dotnet$(ExeExtension)</DotnetStage1>
       <Stage2Directory>$(BaseOutputDirectory)/stage2</Stage2Directory>
       <Stage2SymbolsDirectory>$(BaseOutputDirectory)/stage2symbols</Stage2SymbolsDirectory>
+      <Stage2SdkDirectory>$(Stage2Directory)/sdk/$(SdkVersion)</Stage2SdkDirectory>
       <DotnetStage2>$(Stage2Directory)/dotnet$(ExeExtension)</DotnetStage2>
       <OutputDirectory>$(Stage2Directory)/</OutputDirectory>
       <Stage2CompilationDirectory>$(BaseOutputDirectory)/stage2compilation</Stage2CompilationDirectory>
       <StageDirectory>$(Stage2Directory)</StageDirectory>
       <StageSymbolsDirectory>$(Stage2SymbolsDirectory)</StageSymbolsDirectory>
-      <SdkOutputDirectory>$(StageDirectory)/sdk/$(SdkVersion)</SdkOutputDirectory>
+      <SdkOutputDirectory>$(Stage2SdkDirectory)</SdkOutputDirectory>
       <MSBuildTargetsDirectory>$(SdkOutputDirectory)/runtimes/any/native</MSBuildTargetsDirectory>
       <IntermediateDirectory>$(BaseOutputDirectory)/intermediate</IntermediateDirectory>
       <PackagesDirectory>$(BaseOutputDirectory)/packages</PackagesDirectory>
