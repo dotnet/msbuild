@@ -11,7 +11,7 @@
   <Import Project="build/BranchInfo.props" />
   <Import Project="build/CoreSetupInfo.props" />
 
-  <Import Project="build/Microsoft.DotNet.Cli.DependencyVersions.props" />
+  <Import Project="build/DependencyVersions.props" />
   <Import Project="build/Version.props" />
   <Import Project="build/Branding.props" />
 
@@ -22,7 +22,7 @@
   <Import Project="build/BuildOutputs.props" />
   <Import Project="build/Stage0.props" />
   <Import Project="build/VersionBadge.props" />
-  <Import Project="build/Microsoft.DotNet.Cli.BundledRuntimes.props" />
+  <Import Project="build/BundledRuntimes.props" />
   
   <PropertyGroup>
     <NuGetPackagesDir>$(NUGET_PACKAGES)</NuGetPackagesDir>
