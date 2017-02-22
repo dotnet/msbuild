@@ -45,6 +45,7 @@
     </ItemGroup>
     <Copy SourceFiles="@(HackFilesToCopy)"
           DestinationFiles="@(HackFilesToCopy->'$(SdkOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+
     <!-- Publish DotNet -->
     <DotNetPublish ToolPath="$(Stage0Directory)"
                    Configuration="$(Configuration)"
