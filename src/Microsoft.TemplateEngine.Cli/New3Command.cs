@@ -345,7 +345,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
             else
             {
-                templateList = PerformAllTemplatesInContextQueryAsync().Result.Where(x => x.IsMatch).Select(x => x.Info);
+                templateList = PerformAllTemplatesInContextQueryAsync().Where(x => x.IsMatch).Select(x => x.Info);
             }
 
             return templateList.ToList();
@@ -469,8 +469,8 @@ namespace Microsoft.TemplateEngine.Cli
                 CreationResultStatus installResult = await EnterInstallFlowAsync().ConfigureAwait(false);
 
                 if(installResult == CreationResultStatus.Success)
-                {                    
-                    await PerformCoreTemplateQueryAsync().ConfigureAwait(false);
+                {
+                    PerformCoreTemplateQueryAsync();
                     DisplayTemplateList();
                 }
 
@@ -479,7 +479,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             //No other cases specified, we've fallen through to "Usage help + List"
             ShowUsageHelp();
-            await PerformCoreTemplateQueryAsync().ConfigureAwait(false);
+            PerformCoreTemplateQueryAsync();
             DisplayTemplateList();
 
             return CreationResultStatus.Success;
@@ -567,7 +567,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         private async Task<CreationResultStatus> EnterTemplateManipulationFlowAsync()
         {
-            await PerformCoreTemplateQueryAsync().ConfigureAwait(false);
+            PerformCoreTemplateQueryAsync();
 
             if (UnambiguousTemplateToUse != null)
             {
@@ -885,7 +885,7 @@ namespace Microsoft.TemplateEngine.Cli
             return context;
         }
 
-        private Task PerformCoreTemplateQueryAsync()
+        private void PerformCoreTemplateQueryAsync()
         {
             string context = DetermineTemplateContext();
 
@@ -917,8 +917,6 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             _matchedTemplates = matchedTemplates;
-
-            return Task.FromResult(true);
         }
 
         private IReadOnlyList<IFilteredTemplateInfo> FilterTemplatesOnParameters(IReadOnlyList<IFilteredTemplateInfo> templatesToFilter)
@@ -964,7 +962,7 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         // Lists all the templates, filtered only by the context (item, project, etc)
-        private Task<IReadOnlyCollection<IFilteredTemplateInfo>> PerformAllTemplatesInContextQueryAsync()
+        private IReadOnlyCollection<IFilteredTemplateInfo> PerformAllTemplatesInContextQueryAsync()
         {
             string context = DetermineTemplateContext();
 
@@ -975,7 +973,7 @@ namespace Microsoft.TemplateEngine.Cli
                 WellKnownSearchFilters.NameFilter(string.Empty)
             );
 
-            return Task.FromResult(templates);
+            return templates;
         }
 
         private HostSpecificTemplateData ReadHostSpecificTemplateData(ITemplateInfo templateInfo)
