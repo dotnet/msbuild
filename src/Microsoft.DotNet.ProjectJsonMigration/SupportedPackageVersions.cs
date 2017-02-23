@@ -191,6 +191,30 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                     {
                         new PackageDependencyInfo
                         {
+                            Name = "Microsoft.VisualStudio.Web.BrowserLink.Loader",
+                            Version = "[14.1.0-*,)"
+                        },
+                        new PackageDependencyInfo
+                        {
+                            Name = "Microsoft.VisualStudio.Web.BrowserLink",
+                            Version = "1.1.0"
+                        }
+                    },
+                    {
+                        new PackageDependencyInfo
+                        {
+                            Name = "Microsoft.VisualStudio.Web.BrowserLink.Loader",
+                            Version = "[14.0.0-*,14.1.0)"
+                        },
+                        new PackageDependencyInfo
+                        {
+                            Name = "Microsoft.VisualStudio.Web.BrowserLink",
+                            Version = "1.0.1"
+                        }
+                    },
+                    {
+                        new PackageDependencyInfo
+                        {
                             Name = "Microsoft.AspNetCore.Mvc.Razor.ViewCompilation.Design",
                             Version = "[1.0.0-*,)"
                         },

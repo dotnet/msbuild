@@ -63,10 +63,10 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             SetupCommandMock(_dotnetNewCommandMock);
 
             commandFactoryMock
-                .Setup(c => c.Create("new", new[] { "mvc", "-f", "netcoreapp1.0", "-au", "Individual", "--debug:ephemeral-hive" }, null, Constants.DefaultConfiguration))
+                .Setup(c => c.Create("new", new[] { "mvc", "-f", "netcoreapp1.0", "-au", "Individual", "--debug:ephemeral-hive", "--no-tools" }, null, Constants.DefaultConfiguration))
                 .Returns(_dotnetNewCommandMock.Object);
             commandFactoryMock
-                .Setup(c => c.Create("new", new[] { "mvc", "-f", "netcoreapp1.1", "-au", "Individual", "--debug:ephemeral-hive" }, null, Constants.DefaultConfiguration))
+                .Setup(c => c.Create("new", new[] { "mvc", "-f", "netcoreapp1.1", "-au", "Individual", "--debug:ephemeral-hive", "--no-tools" }, null, Constants.DefaultConfiguration))
                 .Returns(_dotnetNewCommandMock.Object);
 
             _dotnetRestoreCommandMock = new Mock<ICommand>();
