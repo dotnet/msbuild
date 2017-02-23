@@ -4,7 +4,6 @@
 
   <ItemGroup>
     <PublishOutputExtensions Include="$(ExeExtension);.dll;.pdb;.deps.json;.runtimeconfig.json" />
-    <BundledTools Include="MSBuild;NuGet.CommandLine.XPlat;dotnet" />
     <MSBuildImportsContent Include="$(MSBuildImportsDir)/**/*" /> 
   </ItemGroup>
 
@@ -16,35 +15,8 @@
                                            GetNuGetPackagesArchive;" />
 
   <Target Name="CompileCLI">
-      <ItemGroup>
-        <SharedFramework Remove="*" />
-        <SharedFramework Include="$(SharedFrameworkPublishDirectory)/**/*" />
-
-        <RuntimeTargetsAssetsToRemoveFromDeps Remove="*" />
-        <RuntimeTargetsAssetsToRemoveFromDeps Include="MSBuild" />
-
-        <RuntimeAssetsToRemoveFromDeps Remove="*" />
-        <RuntimeAssetsToRemoveFromDeps Include="redist" />
-        <RuntimeAssetsToRemoveFromDeps Include="tool_msbuild" />
-        <RuntimeAssetsToRemoveFromDeps Include="tool_nuget" />
-      </ItemGroup>
-
-      <RemoveDir Directories="$(StageDirectory)" />
-      <MakeDir Directories="$(StageDirectory)"/>
-
-      <!-- CopySharedFramework -->
-      <Copy SourceFiles="@(SharedFramework)"
-            DestinationFiles="@(SharedFramework->'$(StageDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
-
-    <!-- Workaround for https://github.com/dotnet/sdk/issues/115 -->
-    <ItemGroup>
-      <HackFilesToCopy Include="$(NuGetPackagesDir)\microsoft.build.runtime\$(CLI_MSBuild_Version)\contentFiles\any\netcoreapp1.0\**;
-                                $(NuGetPackagesDir)\microsoft.build.runtime\$(CLI_MSBuild_Version)\contentFiles\any\netcoreapp1.1\**;
-                                $(NuGetPackagesDir)\microsoft.codeanalysis.build.tasks\$(CLI_Roslyn_Version)\contentFiles\any\any\**;
-                                $(NuGetPackagesDir)\microsoft.testplatform.cli\$(CLI_TestPlatform_Version)\contentFiles\any\any\**" />
-    </ItemGroup>
-    <Copy SourceFiles="@(HackFilesToCopy)"
-          DestinationFiles="@(HackFilesToCopy->'$(SdkOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <RemoveDir Directories="$(StageDirectory)" />
+    <MakeDir Directories="$(StageDirectory)"/>
 
     <!-- Publish DotNet -->
     <DotNetPublish ToolPath="$(Stage0Directory)"
@@ -53,29 +25,8 @@
 
     <!-- Publish Roslyn -->
     <DotNetPublish ToolPath="$(Stage0Directory)"
-                   Output="$(SdkOutputDirectory)/Roslyn"
                    Configuration="$(Configuration)"
-                   VersionSuffix="$(CommitCount)"
                    ProjectPath="$(SrcDirectory)/tool_roslyn/tool_roslyn.csproj" />
-
-      <RemoveAssetFromDepsPackages DepsFile="$(SdkOutputDirectory)/redist.deps.json"
-                                   SectionName="runtime"
-                                   AssetPath="%(RuntimeAssetsToRemoveFromDeps.Identity).dll" />
-
-      <Copy SourceFiles="$(SdkOutputDirectory)/redist.deps.json"
-            DestinationFiles="$(SdkOutputDirectory)/%(BundledTools.Identity).deps.json" />
-
-      <Copy SourceFiles="$(SdkOutputDirectory)/redist.runtimeconfig.json"
-            DestinationFiles="$(SdkOutputDirectory)/%(BundledTools.Identity).runtimeconfig.json" />
-
-      <ChangeEntryPointLibraryName
-            DepsFile="$(SdkOutputDirectory)/%(BundledTools.Identity).deps.json"
-            NewName="%(BundledTools.Identity).deps.json" />
-
-      <!-- cleanup project output we don't need -->
-      <Delete Files="$(SdkOutputDirectory)/redist%(PublishOutputExtensions.Identity)" />
-      <Delete Files="$(SdkOutputDirectory)/tool_msbuild%(PublishOutputExtensions.Identity)" />
-      <Delete Files="$(SdkOutputDirectory)/tool_nuget%(PublishOutputExtensions.Identity)" />
 
       <!-- Copy Host to SDK Directory -->
       <Copy SourceFiles="$(SharedFrameworkNameVersionPath)/$(DotnetHostBaseName)"
