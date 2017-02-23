@@ -15,17 +15,8 @@
                                            GetNuGetPackagesArchive;" />
 
   <Target Name="CompileCLI">
-    <ItemGroup>
-      <SharedFramework Remove="*" />
-      <SharedFramework Include="$(SharedFrameworkPublishDirectory)/**/*" />
-    </ItemGroup>
-
     <RemoveDir Directories="$(StageDirectory)" />
     <MakeDir Directories="$(StageDirectory)"/>
-
-    <!-- CopySharedFramework -->
-    <Copy SourceFiles="@(SharedFramework)"
-          DestinationFiles="@(SharedFramework->'$(StageDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
 
     <!-- Publish DotNet -->
     <DotNetPublish ToolPath="$(Stage0Directory)"
