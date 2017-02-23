@@ -3243,6 +3243,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </Hash>
 
     <WriteLinesToFile Lines="$(CoreCompileDependencyHash)" File="$(IntermediateOutputPath)CoreCompileInputs.cache" Overwrite="True" WriteOnlyWhenDifferent="True" />
+
+    <ItemGroup>
+      <FileWrites Include="$(IntermediateOutputPath)CoreCompileInputs.cache" />
+    </ItemGroup>
   </Target>
 
   <!--
