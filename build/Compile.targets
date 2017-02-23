@@ -123,18 +123,7 @@
             DestinationFiles="@(NETCore10Assemblies)" />
 
       <ItemGroup>
-        <MSBuildTargetsToCopy Include="$(MSBuildTargetsDirectory)/**/*.targets" />
-        <MSBuildTargetsToCopy Include="$(MSBuildTargetsDirectory)/**/*.Targets" />
-        <MSBuildTargetsToCopy Include="$(MSBuildTargetsDirectory)/**/*.props" />
-        <MSBuildTargetsToCopy Include="$(MSBuildTargetsDirectory)/**/*.overridetasks" />
-        <MSBuildTargetsToCopy Include="$(MSBuildTargetsDirectory)/**/*.tasks" />
-      </ItemGroup>
-
-      <Copy SourceFiles="@(MSBuildTargetsToCopy)"
-            DestinationFiles="@(MSBuildTargetsToCopy->'$(SdkOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
-
-      <ItemGroup>
-        <FilesToClean Include="$(OutputDirectory)/sdk/**/vbc.exe" />
+        <FilesToClean Include="$(StageDirectory)/sdk/**/vbc.exe" />
       </ItemGroup>
 
       <Delete Files="@(FilesToClean)" />

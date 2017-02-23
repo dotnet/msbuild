@@ -79,5 +79,16 @@
     
       <Copy SourceFiles="@(MSBuildExtensionsContent)"
             DestinationFolder="$(SdkOutputDirectory)/%(RecursiveDir)" />
+
+      <ItemGroup>
+        <NuPkgContentForMSBuildExtensions Include="$(MSBuildTargetsDirectory)/**/*.targets;
+                                                   $(MSBuildTargetsDirectory)/**/*.Targets;
+                                                   $(MSBuildTargetsDirectory)/**/*.props;
+                                                   $(MSBuildTargetsDirectory)/**/*.overridetasks;
+                                                   $(MSBuildTargetsDirectory)/**/*.tasks" />
+      </ItemGroup>
+
+      <Move SourceFiles="@(NuPkgContentForMSBuildExtensions)"
+            DestinationFiles="@(NuPkgContentForMSBuildExtensions->'$(SdkOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 </Project>
