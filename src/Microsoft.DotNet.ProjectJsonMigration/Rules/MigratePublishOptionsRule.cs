@@ -45,7 +45,18 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 .WithMetadata("CopyToPublishDirectory", "PreserveNewest");
 
         private IncludeContextTransform CopyToPublishDirectoryTransformForWeb =>
-            new UpdateContextTransform("None", transformMappings: true)
+            new UpdateContextTransform(
+                    "None",
+                    transformMappings: true,
+                    excludePatternsRule: pattern => PatternIncludedInWebSdk(pattern))
                 .WithMetadata("CopyToPublishDirectory", "PreserveNewest");
+
+        private bool PatternIncludedInWebSdk(string pattern)
+        {
+            return pattern.Equals("wwwroot/**") ||
+                pattern.Equals("**/web.config") ||
+                pattern.Equals("**/*.cshtml") ||
+                pattern.Equals("**/*.json");
+        }
     }
 }

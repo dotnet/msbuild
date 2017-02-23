@@ -450,11 +450,35 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             mockProj.Properties.First(p => p.Name == "GenerateDocumentationFile").Value.Should().Be("true");
         }
 
+        [Fact]
+        public void ExcludedPatternsAreNotEmittedOnNoneWhenBuildingAWebProject()
+        {
+            var mockProj = RunBuildOptionsRuleOnPj(@"
+                {
+                    ""buildOptions"": {
+                        ""emitEntryPoint"": true,
+                        ""copyToOutput"": {
+                            ""include"": [""wwwroot"", ""**/*.cshtml"", ""appsettings.json"", ""web.config""],
+                        }
+                    },
+                    ""dependencies"": {
+                        ""Microsoft.AspNetCore.Mvc"" : {
+                            ""version"": ""1.0.0""
+                        }
+                    },
+                    ""frameworks"": {
+                        ""netcoreapp1.0"": {}
+                    }
+                }");
+
+            mockProj.Items.Count(i => i.ItemType.Equals("None", StringComparison.Ordinal)).Should().Be(0);
+        }
+
         [Theory]
         [InlineData("compile", "Compile", 3, "")]
         [InlineData("embed", "EmbeddedResource", 3, ";rootfile.cs")]
         [InlineData("copyToOutput", "None", 2, ";rootfile.cs")]
-        private void MigratingGroupIncludeExcludePopulatesAppropriateProjectItemElement(
+        public void MigratingGroupIncludeExcludePopulatesAppropriateProjectItemElement(
             string group,
             string itemName,
             int expectedNumberOfCompileItems, 
@@ -530,7 +554,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [InlineData("compile", "Compile", "")]
         [InlineData("embed", "EmbeddedResource", ";rootfile.cs")]
         [InlineData("copyToOutput", "None", ";rootfile.cs")]
-        private void MigratingGroupIncludeOnlyPopulatesAppropriateProjectItemElement(
+        public void MigratingGroupIncludeOnlyPopulatesAppropriateProjectItemElement(
             string group,
             string itemName,
             string expectedRootFiles)
