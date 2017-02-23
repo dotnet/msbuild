@@ -19,11 +19,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [InlineData("Microsoft.VisualStudio.Web.CodeGenerators.Mvc", "1.0.0-preview3-final", "Microsoft.VisualStudio.Web.CodeGeneration.Design", ConstantPackageVersions.AspNetToolsVersion)]
         [InlineData("Microsoft.VisualStudio.Web.CodeGenerators.Mvc", "1.1.0-preview4-final", "Microsoft.VisualStudio.Web.CodeGeneration.Design", ConstantPackageVersions.AspNet110ToolsVersion)]
         [InlineData("Microsoft.AspNetCore.Mvc.Razor.ViewCompilation.Design", "1.1.0-preview4-final", "Microsoft.AspNetCore.Mvc.Razor.ViewCompilation", ConstantPackageVersions.AspNet110ToolsVersion)]
-        [InlineData("Microsoft.VisualStudio.Web.BrowserLink.Loader", "1.0.0-preview2-final", "Microsoft.VisualStudio.Web.BrowserLink", "1.0.1")]
-        [InlineData("Microsoft.VisualStudio.Web.BrowserLink.Loader", "1.0.0-*", "Microsoft.VisualStudio.Web.BrowserLink", "1.0.1")]
-        [InlineData("Microsoft.VisualStudio.Web.BrowserLink.Loader", "1.0.1", "Microsoft.VisualStudio.Web.BrowserLink", "1.0.1")]
-        [InlineData("Microsoft.VisualStudio.Web.BrowserLink.Loader", "1.0.0-preview3-final", "Microsoft.VisualStudio.Web.BrowserLink", "1.0.1")]
-        [InlineData("Microsoft.VisualStudio.Web.BrowserLink.Loader", "1.1.0-preview4-final", "Microsoft.VisualStudio.Web.BrowserLink", "1.1.0")]
+        [InlineData("Microsoft.VisualStudio.Web.BrowserLink.Loader", "14.0.0-preview2-final", "Microsoft.VisualStudio.Web.BrowserLink", "1.0.1")]
+        [InlineData("Microsoft.VisualStudio.Web.BrowserLink.Loader", "14.0.0-*", "Microsoft.VisualStudio.Web.BrowserLink", "1.0.1")]
+        [InlineData("Microsoft.VisualStudio.Web.BrowserLink.Loader", "14.0.1", "Microsoft.VisualStudio.Web.BrowserLink", "1.0.1")]
+        [InlineData("Microsoft.VisualStudio.Web.BrowserLink.Loader", "14.1.0-preview4-final", "Microsoft.VisualStudio.Web.BrowserLink", "1.1.0")]
         public void ItMigratesProjectDependenciesToANewNameAndVersion(
             string sourceToolName,
             string sourceVersion,

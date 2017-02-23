@@ -192,7 +192,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                         new PackageDependencyInfo
                         {
                             Name = "Microsoft.VisualStudio.Web.BrowserLink.Loader",
-                            Version = "[1.1.0-*,)"
+                            Version = "[14.1.0-*,)"
                         },
                         new PackageDependencyInfo
                         {
@@ -204,7 +204,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                         new PackageDependencyInfo
                         {
                             Name = "Microsoft.VisualStudio.Web.BrowserLink.Loader",
-                            Version = "[1.0.0-*,1.1.0)"
+                            Version = "[14.0.0-*,14.1.0)"
                         },
                         new PackageDependencyInfo
                         {
