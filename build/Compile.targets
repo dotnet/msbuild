@@ -13,7 +13,6 @@
 
   <ItemGroup>
     <PublishOutputExtensions Include="$(ExeExtension);.dll;.pdb;.deps.json;.runtimeconfig.json" />
-    <MSBuildImportsContent Include="$(MSBuildImportsDir)/**/*" /> 
   </ItemGroup>
 
   <Target Name="Compile" DependsOnTargets="Prepare;

@@ -73,4 +73,11 @@
           DepsFile="$(SdkOutputDirectory)/%(BundledTools.Identity).deps.json"
           NewName="%(BundledTools.Identity).deps.json" />
   </Target>
+
+  <Target Name="PublishMSBuildExtensions"
+          AfterTargets="Publish">
+    
+      <Copy SourceFiles="@(MSBuildExtensionsContent)"
+            DestinationFolder="$(SdkOutputDirectory)/%(RecursiveDir)" />
+  </Target>
 </Project>

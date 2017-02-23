@@ -1,0 +1,5 @@
+<Project>
+  <ItemGroup>
+    <MSBuildExtensionsContent Include="$(MSBuildImportsDir)/**/*" />
+  </ItemGroup>
+</Project>
