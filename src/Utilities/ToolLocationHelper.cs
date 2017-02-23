@@ -1970,6 +1970,10 @@ namespace Microsoft.Build.Utilities
                 case TargetDotNetFrameworkVersion.Version47:
                     return FrameworkLocationHelper.dotNetFrameworkVersion47;
 
+                case TargetDotNetFrameworkVersion.VersionLatestOnMachine:
+                    // VersionLatestOnMachine is a special value to indicate the highest version we know about.
+                    return FrameworkLocationHelper.dotNetFrameworkVersion47;
+
                 default:
                     ErrorUtilities.ThrowArgument("ToolLocationHelper.UnsupportedFrameworkVersion", version);
                     return null;
