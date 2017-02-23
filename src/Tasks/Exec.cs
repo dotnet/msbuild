@@ -115,7 +115,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Whether to use pick out lines in the output that match
         /// the standard error/warning format, and log them as errors/warnings.
-        /// Defaults to true.
+        /// Defaults to false.
         /// </summary>
         public bool IgnoreStandardErrorWarningFormat
         {
