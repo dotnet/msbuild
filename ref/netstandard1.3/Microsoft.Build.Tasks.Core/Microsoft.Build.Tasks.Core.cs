@@ -64,7 +64,7 @@ namespace Microsoft.Build.Tasks
         public bool UseResultsCache { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
-    [System.ObsoleteAttribute("The CodeTaskFactory is not supported on .NET Core.  This class is included so that users receive run-time errors and should not be used for any other purpose.")]
+    [System.ObsoleteAttribute("The CodeTaskFactory is not supported on .NET Core.  This class is included so that users receive run-time errors and should not be used for any other purpose.", true)]
     public sealed partial class CodeTaskFactory : Microsoft.Build.Framework.ITaskFactory
     {
         public CodeTaskFactory() { }
@@ -648,7 +648,7 @@ namespace Microsoft.Build.Tasks
         public bool WriteOnlyWhenDifferent { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public override bool Execute() { throw null; }
     }
-    [System.ObsoleteAttribute("The XamlTaskFactory is not supported on .NET Core.  This class is included so that users receive run-time errors and should not be used for any other purpose.")]
+    [System.ObsoleteAttribute("The XamlTaskFactory is not supported on .NET Core.  This class is included so that users receive run-time errors and should not be used for any other purpose.", true)]
     public sealed partial class XamlTaskFactory : Microsoft.Build.Framework.ITaskFactory
     {
         public XamlTaskFactory() { }

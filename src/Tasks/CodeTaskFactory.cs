@@ -1022,7 +1022,7 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     /// <remarks>CodeDom is not supported for .NET Core so this code task factory simply logs an error that it isn't supported.
     /// If we don't compile this class, then the user will get an error that the class doesn't exist which is a bad experience.</remarks>
-    [Obsolete("The CodeTaskFactory is not supported on .NET Core.  This class is included so that users receive run-time errors and should not be used for any other purpose.")]
+    [Obsolete("The CodeTaskFactory is not supported on .NET Core.  This class is included so that users receive run-time errors and should not be used for any other purpose.", error: true)]
     public sealed class CodeTaskFactory : ITaskFactory
     {
         public string FactoryName => "Code Task Factory";
