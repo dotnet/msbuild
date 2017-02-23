@@ -160,7 +160,7 @@ namespace Microsoft.Build.Tasks
                 using (XmlReader xr = xmlinput.CreateReader())
                 {
                     xpathdoc = new XPathDocument(xr);
-                    xr.Close();
+                    xr.Dispose();
                 }
             }
             catch (Exception e)
@@ -401,7 +401,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (_fs != null)
                 {
-                    _fs.Close();
+                    _fs.Dispose();
                     _fs = null;
                 }
             }

@@ -19,7 +19,6 @@ using System.Reflection.Emit;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Text;
-using System.Xml.Xsl;
 using System.Xml;
 using Xunit;
 
@@ -315,11 +314,7 @@ namespace Microsoft.Build.UnitTests
             string dir = Path.Combine(Path.GetTempPath(), DateTime.Now.Ticks.ToString());
             Directory.CreateDirectory(dir);
             xmlInputPath = dir + Path.DirectorySeparatorChar + "doc.xml";
-            using (StreamWriter sw = new StreamWriter(xmlInputPath, false))
-            {
-                sw.Write(xmlFile);
-                sw.Close();
-            }
+            File.WriteAllText(xmlInputPath, xmlFile);
         }
     }
 }
