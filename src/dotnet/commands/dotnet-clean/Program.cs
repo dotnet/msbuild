@@ -5,12 +5,19 @@ using System.Collections.Generic;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.MSBuild;
+using Microsoft.DotNet.Cli;
+using System.Diagnostics;
 
 namespace Microsoft.DotNet.Tools.Clean
 {
-    public class CleanCommand
+    public class CleanCommand : MSBuildForwardingApp
     {
-        public static int Run(string[] args)
+        public CleanCommand(IEnumerable<string> msbuildArgs, string msbuildPath = null)
+            : base(msbuildArgs, msbuildPath)
+        {
+        }
+
+        public static CleanCommand FromArgs(string[] args, string msbuildPath = null)
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
@@ -40,11 +47,12 @@ namespace Microsoft.DotNet.Tools.Clean
                 $"-c|--configuration <{LocalizableStrings.CmdConfiguration}>", 
                 LocalizableStrings.CmdConfigurationDescription, 
                 CommandOptionType.SingleValue);
-            CommandOption verbosityOption = MSBuildForwardingApp.AddVerbosityOption(app);
+            CommandOption verbosityOption = AddVerbosityOption(app);
 
+            List<string> msbuildArgs = null;
             app.OnExecute(() =>
             {
-                List<string> msbuildArgs = new List<string>();
+                msbuildArgs = new List<string>();
 
                 if (!string.IsNullOrEmpty(projectArgument.Value))
                 {
@@ -75,10 +83,33 @@ namespace Microsoft.DotNet.Tools.Clean
 
                 msbuildArgs.AddRange(app.RemainingArguments);
 
-                return new MSBuildForwardingApp(msbuildArgs).Execute();
+                return 0;
             });
 
-            return app.Execute(args);
+            int exitCode = app.Execute(args);
+            if (msbuildArgs == null)
+            {
+                throw new CommandCreationException(exitCode);
+            }
+
+            return new CleanCommand(msbuildArgs, msbuildPath);
+        }
+
+        public static int Run(string[] args)
+        {
+            DebugHelper.HandleDebugSwitch(ref args);
+
+            CleanCommand cmd;
+            try
+            {
+                cmd = FromArgs(args);
+            }
+            catch (CommandCreationException e)
+            {
+                return e.ExitCode;
+            }
+
+            return cmd.Execute();
         }
     }
 }

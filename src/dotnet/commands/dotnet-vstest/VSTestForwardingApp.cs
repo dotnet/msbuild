@@ -4,28 +4,21 @@
 using Microsoft.DotNet.Cli.Utils;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 
 namespace Microsoft.DotNet.Cli
 {
-    public class VSTestForwardingApp
+    public class VSTestForwardingApp : ForwardingApp
     {
         private const string VstestAppName = "vstest.console.dll";
-        private readonly ForwardingApp _forwardingApp;
 
         public VSTestForwardingApp(IEnumerable<string> argsToForward)
+            : base(GetVSTestExePath(), argsToForward)
         {
-            _forwardingApp = new ForwardingApp(
-                GetVSTestExePath(),
-                argsToForward);
         }
 
-        public int Execute()
-        {
-            return _forwardingApp.Execute();
-        }
-
-        private string GetVSTestExePath()
+        private static string GetVSTestExePath()
         {
             return Path.Combine(AppContext.BaseDirectory, VstestAppName);
         }

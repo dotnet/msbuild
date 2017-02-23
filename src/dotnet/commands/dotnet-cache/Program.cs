@@ -5,12 +5,21 @@ using System.Collections.Generic;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.MSBuild;
+using Microsoft.DotNet.Cli;
+using System.Diagnostics;
+using System;
+using System.IO;
 
 namespace Microsoft.DotNet.Tools.Cache
 {
-    public partial class CacheCommand
+    public partial class CacheCommand : MSBuildForwardingApp
     {
-        public static int Run(string[] args)
+        private CacheCommand(IEnumerable<string> msbuildArgs, string msbuildPath = null)
+            : base(msbuildArgs, msbuildPath)
+        {
+        }
+
+        public static CacheCommand FromArgs(string[] args, string msbuildPath = null)
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
@@ -56,25 +65,89 @@ namespace Microsoft.DotNet.Tools.Cache
 
             CommandOption verbosityOption = MSBuildForwardingApp.AddVerbosityOption(app);
 
+            List<string> msbuildArgs = null;
             app.OnExecute(() =>
             {
-                var cache = new CacheCommand();
+                msbuildArgs = new List<string>();
 
-                cache.Framework = frameworkOption.Value();
-                cache.Runtime = runtimeOption.Value();
-                cache.OutputPath = outputOption.Value();
-                cache.FrameworkVersion = fxOption.Value();
-                cache.Verbosity = verbosityOption.Value();
-                cache.SkipOptimization = skipOptimizationOption.HasValue();
-                cache.IntermediateDir = workingDir.Value();
-                cache.PreserveIntermediateDir = preserveWorkingDir.HasValue();
-                cache.ExtraMSBuildArguments = app.RemainingArguments;
-                cache.ProjectArgument = projectArgument.Value();
-               
-                return cache.Execute();
+                if (string.IsNullOrEmpty(projectArgument.Value()))
+                {
+                    throw new InvalidOperationException(LocalizableStrings.SpecifyEntries);
+                }
+
+                msbuildArgs.Add("/t:ComposeCache");
+                msbuildArgs.Add(projectArgument.Value());
+
+                if (!string.IsNullOrEmpty(frameworkOption.Value()))
+                {
+                    msbuildArgs.Add($"/p:TargetFramework={frameworkOption.Value()}");
+                }
+
+                if (!string.IsNullOrEmpty(runtimeOption.Value()))
+                {
+                    msbuildArgs.Add($"/p:RuntimeIdentifier={runtimeOption.Value()}");
+                }
+
+                if (!string.IsNullOrEmpty(outputOption.Value()))
+                {
+                    var outputPath = Path.GetFullPath(outputOption.Value());
+                    msbuildArgs.Add($"/p:ComposeDir={outputPath}");
+                }
+
+                if (!string.IsNullOrEmpty(fxOption.Value()))
+                {
+                    msbuildArgs.Add($"/p:FX_Version={fxOption.Value()}");
+                }
+
+                if (!string.IsNullOrEmpty(workingDir.Value()))
+                {
+                    msbuildArgs.Add($"/p:ComposeWorkingDir={workingDir.Value()}");
+                }
+
+                if (skipOptimizationOption.HasValue())
+                {
+                    msbuildArgs.Add($"/p:SkipOptimization={skipOptimizationOption.HasValue()}");
+                }
+
+                if (preserveWorkingDir.HasValue())
+                {
+                    msbuildArgs.Add($"/p:PreserveComposeWorkingDir={preserveWorkingDir.HasValue()}");
+                }
+
+                if (!string.IsNullOrEmpty(verbosityOption.Value()))
+                {
+                    msbuildArgs.Add($"/verbosity:{verbosityOption.Value()}");
+                }
+
+                msbuildArgs.AddRange(app.RemainingArguments);
+
+                return 0;
             });
 
-            return app.Execute(args);
+            int exitCode = app.Execute(args);
+            if (msbuildArgs == null)
+            {
+                throw new CommandCreationException(exitCode);
+            }
+
+            return new CacheCommand(msbuildArgs, msbuildPath);
+        }
+
+        public static int Run(string[] args)
+        {
+            DebugHelper.HandleDebugSwitch(ref args);
+
+            CacheCommand cmd;
+            try
+            {
+                cmd = FromArgs(args);
+            }
+            catch (CommandCreationException e)
+            {
+                return e.ExitCode;
+            }
+
+            return cmd.Execute();
         }
     }
 }
