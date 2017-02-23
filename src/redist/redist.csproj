@@ -1,11 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.tasks" />
   
   <PropertyGroup>
     <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <RuntimeFrameworkVersion>$(CLI_SharedFrameworkVersion)</RuntimeFrameworkVersion>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <CopyBuildOutputToPublishDirectory>false</CopyBuildOutputToPublishDirectory>
     <PackageTargetFallback>$(PackageTargetFallback);dotnet5.4</PackageTargetFallback>
     <PublishDir>$(Stage2SdkDirectory)</PublishDir>
     <VersionSuffix>$(CommitCount)</VersionSuffix>
@@ -18,6 +20,7 @@
     <PackageReference Include="Microsoft.TestPlatform.CLI" Version="$(CLI_TestPlatform_Version)" />
     <PackageReference Include="Microsoft.TestPlatform.Build" Version="$(CLI_TestPlatform_Version)" />
   </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\dotnet\dotnet.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Archive\Microsoft.DotNet.Archive.csproj" />
@@ -30,4 +33,25 @@
     <ProjectReference Include="..\tool_msbuild\tool_msbuild.csproj" />
     <ProjectReference Include="..\tool_nuget\tool_nuget.csproj" />
   </ItemGroup>
+
+  <Target Name="GenerateCliRuntimeConfigurationFiles"
+          AfterTargets="Publish">
+    <RemoveAssetFromDepsPackages DepsFile="$(PublishDir)/$(TargetName).deps.json"
+                                 SectionName="runtime"
+                                 AssetPath="%(BundledToolProjects.Identity).dll" />
+
+    <Copy SourceFiles="$(PublishDir)/$(TargetName).deps.json"
+          DestinationFiles="$(SdkOutputDirectory)/%(BundledTools.Identity).deps.json" />
+
+    <Copy SourceFiles="$(PublishDir)/$(TargetName).runtimeconfig.json"
+          DestinationFiles="$(SdkOutputDirectory)/%(BundledTools.Identity).runtimeconfig.json" />
+
+    <Delete Files="$(PublishDir)/$(TargetName).deps.json;
+                   $(PublishDir)/$(TargetName).runtimeconfig.json;
+                   $(PublishDir)/%(BundledToolProjects.Identity).dll" />
+
+    <ChangeEntryPointLibraryName
+          DepsFile="$(SdkOutputDirectory)/%(BundledTools.Identity).deps.json"
+          NewName="%(BundledTools.Identity).deps.json" />
+  </Target>
 </Project>
