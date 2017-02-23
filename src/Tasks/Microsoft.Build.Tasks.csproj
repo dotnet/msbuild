@@ -522,6 +522,7 @@
     <Compile Include="WriteCodeFragment.cs" />
     <Compile Include="XmlPeek.cs" />
     <Compile Include="XmlPoke.cs" />
+    <Compile Include="CodeTaskFactory.cs" />
   </ItemGroup>
   <ItemGroup Condition="$(TargetFrameworkIdentifier) == '.NETFramework'">
     <Compile Include="Al.cs">
@@ -552,8 +553,7 @@
     <Compile Include="AxTlbBaseTask.cs" />
     <Compile Include="BootstrapperUtil\*.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="CodeTaskFactory.cs" />
+    </Compile>    
     <Compile Include="ComDependencyWalker.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -697,6 +697,8 @@
     <Compile Include="XamlTaskFactory\XamlDataDrivenToolTask.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="XamlTaskFactory\XamlTaskFactory.cs" />
   </ItemGroup>
   <ItemGroup Condition="$(TargetFrameworkIdentifier) == '.NETFramework'">

@@ -20,9 +20,7 @@ using Microsoft.Build.BackEnd;
 
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-#if FEATURE_APPDOMAIN
 using TaskEngineAssemblyResolver = Microsoft.Build.BackEnd.Logging.TaskEngineAssemblyResolver;
-#endif
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using System.Collections.ObjectModel;
@@ -956,12 +954,10 @@ namespace Microsoft.Build.Execution
             internal const string XamlTaskFactory = "XamlTaskFactory";
 
 
-#if FEATURE_APPDOMAIN
             /// <summary>
             /// Lock for the taskFactoryTypeLoader
             /// </summary>
             private static readonly Object s_taskFactoryTypeLoaderLock = new Object();
-#endif
 
 #if DEBUG
             /// <summary>
@@ -980,12 +976,10 @@ namespace Microsoft.Build.Execution
             /// </summary>
             private readonly RegisteredTaskIdentity _taskIdentity;
 
-#if FEATURE_APPDOMAIN
             /// <summary>
             /// Typeloader for taskFactories
             /// </summary>
             private static TypeLoader s_taskFactoryTypeLoader;
-#endif
 
             /// <summary>
             /// The task name this record was registered with from the using task element
@@ -1262,7 +1256,6 @@ namespace Microsoft.Build.Execution
                     }
                     else
                     {
-#if FEATURE_APPDOMAIN
                         // We are not one of the default factories. 
                         TaskEngineAssemblyResolver resolver = null;
 
@@ -1328,7 +1321,11 @@ namespace Microsoft.Build.Execution
                             {
                                 // We have loaded the type, lets now try and construct it
                                 // Any exceptions from the constructor of the task factory will be caught lower down and turned into an InvalidProjectFileExceptions
+#if FEATURE_APPDOMAIN
                                 factory = (ITaskFactory)AppDomain.CurrentDomain.CreateInstanceAndUnwrap(loadedType.Type.GetTypeInfo().Assembly.FullName, loadedType.Type.FullName);
+#else
+                                factory = (ITaskFactory) Activator.CreateInstance(loadedType.Type);
+#endif
                                 TaskFactoryLoggingHost taskFactoryLoggingHost = new TaskFactoryLoggingHost(true /*I dont have the data at this point, the safest thing to do is make sure events are serializable*/, elementLocation, targetLoggingContext);
 
                                 bool initialized = false;
@@ -1361,7 +1358,9 @@ namespace Microsoft.Build.Execution
                                 }
                                 finally
                                 {
+#if FEATURE_APPDOMAIN
                                     taskFactoryLoggingHost.MarkAsInactive();
+#endif
                                 }
 
                                 if (!initialized)
@@ -1415,9 +1414,6 @@ namespace Microsoft.Build.Execution
                                 resolver = null;
                             }
                         }
-#else
-                        ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskFactoryNotSupportedFailure", TaskFactoryAttributeName);
-#endif
                     }
 
 
