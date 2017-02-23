@@ -17,7 +17,7 @@
 
     <Exec Command="dpkg -s %(UbuntuCoreclrAndCoreFxDependencies.Identity)" />
 
-    <Exec Command="dpkg -s %(DebianPackageBuildDependencies.Identity)" />
+    <Exec Command="dpkg -s %(DebianPackageBuildDependencies.Identity)" Condition="$(SkipBuildingInstallers) != 'true'" />
 
     <OnError ExecuteTargets="ShowAptGetUsage" />
   </Target>
