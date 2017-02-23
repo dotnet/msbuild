@@ -75,18 +75,18 @@
 
     <!-- Layout Directories -->
     <PropertyGroup>
-      <DebianLayoutDirectory>$(SdkDebianIntermediateDirectory)/debianLayoutDirectory</DebianLayoutDirectory>
-      <LayoutPackageRootDir>$(DebianLayoutDirectory)/$(LayoutPackageRootDirName)</LayoutPackageRootDir>
-      <LayoutAbsolutePlacementDir>$(DebianLayoutDirectory)/$(LayoutAbsolutePlacementDirName)</LayoutAbsolutePlacementDir>
-      <LayoutSamplesDir>$(DebianLayoutDirectory)/$(LayoutSamplesDirName)</LayoutSamplesDir>
-      <LayoutDocsDir>$(DebianLayoutDirectory)/$(LayoutDocsDirName)</LayoutDocsDir>
-      <LayoutDebianFilesDir>$(DebianLayoutDirectory)/$(LayoutDebianFilesDirName)</LayoutDebianFilesDir>
+      <LayoutDirectory>$(SdkDebianIntermediateDirectory)/debianLayoutDirectory</LayoutDirectory>
+      <LayoutPackageRootDir>$(LayoutDirectory)/$(LayoutPackageRootDirName)</LayoutPackageRootDir>
+      <LayoutAbsolutePlacementDir>$(LayoutDirectory)/$(LayoutAbsolutePlacementDirName)</LayoutAbsolutePlacementDir>
+      <LayoutSamplesDir>$(LayoutDirectory)/$(LayoutSamplesDirName)</LayoutSamplesDir>
+      <LayoutDocsDir>$(LayoutDirectory)/$(LayoutDocsDirName)</LayoutDocsDir>
+      <LayoutDebianFilesDir>$(LayoutDirectory)/$(LayoutDebianFilesDirName)</LayoutDebianFilesDir>
     </PropertyGroup>
 
     <!-- debian_config.json -->
     <PropertyGroup>
       <DebianConfigTemplateFile>$(RepoRoot)/packaging/deb/dotnet-debian_config.json</DebianConfigTemplateFile>
-      <DebianConfigJsonFile>$(DebianLayoutDirectory)/debian_config.json</DebianConfigJsonFile>
+      <DebianConfigJsonFile>$(LayoutDirectory)/debian_config.json</DebianConfigJsonFile>
     </PropertyGroup>
 
     <ItemGroup>
@@ -106,9 +106,6 @@
 
     <ItemGroup>
       <TestSdkDebTaskEnvironmentVariables Include="PATH=$(DebianInstalledDirectory)$(PathListSeparator)$(PATH)" />
-
-      <!-- Consumed By Publish -->
-      <GeneratedInstallers Include="$(SdkInstallerFile)" />
     </ItemGroup>
   </Target>
 </Project>
