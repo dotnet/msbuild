@@ -43,6 +43,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{89905EC4
 		build\InitRepo.props = build\InitRepo.props
 		build\InitRepo.targets = build\InitRepo.targets
 		build\InputDirectories.props = build\InputDirectories.props
+		build\ProjectsToPublish.props = build\ProjectsToPublish.props
 		build\OutputDirectories.props = build\OutputDirectories.props
 		build\Package.targets = build\Package.targets
 		build\Prepare.targets = build\Prepare.targets

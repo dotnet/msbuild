@@ -17,6 +17,7 @@
 
   <Import Project="build/FileExtensions.props" />
   <Import Project="build/InputDirectories.props" />
+  <Import Project="build/ProjectsToPublish.props" />
   <Import Project="build/OutputDirectories.props" />
   <Import Project="build/BuildDefaults.props" />
   <Import Project="build/BuildOutputs.props" />

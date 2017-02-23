@@ -49,7 +49,7 @@
     <!-- Publish DotNet -->
     <DotNetPublish ToolPath="$(Stage0Directory)"
                    Configuration="$(Configuration)"
-                   ProjectPath="$(SrcDirectory)/redist/redist.csproj" />
+                   ProjectPath="$(RootProject)" />
 
     <!-- Publish Roslyn -->
     <DotNetPublish ToolPath="$(Stage0Directory)"
