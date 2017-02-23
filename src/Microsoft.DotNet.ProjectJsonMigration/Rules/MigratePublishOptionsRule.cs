@@ -41,11 +41,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
         }
 
         private IncludeContextTransform CopyToPublishDirectoryTransform =>
-            new IncludeContextTransform("Content", transformMappings: true)
+            new IncludeContextTransform("None", transformMappings: true)
                 .WithMetadata("CopyToPublishDirectory", "PreserveNewest");
 
         private IncludeContextTransform CopyToPublishDirectoryTransformForWeb =>
-            new UpdateContextTransform("Content", transformMappings: true)
+            new UpdateContextTransform("None", transformMappings: true)
                 .WithMetadata("CopyToPublishDirectory", "PreserveNewest");
     }
 }

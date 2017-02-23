@@ -147,11 +147,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             new RemoveContextTransform("EmbeddedResource", condition: ic => ic != null);
 
         private IncludeContextTransform CopyToOutputFilesTransform =>
-            new IncludeContextTransform("Content", transformMappings: true)
+            new IncludeContextTransform("None", transformMappings: true)
                 .WithMetadata("CopyToOutputDirectory", "PreserveNewest");
 
         private IncludeContextTransform CopyToOutputFilesTransformForWeb =>
-            new UpdateContextTransform("Content", transformMappings: true)
+            new UpdateContextTransform("None", transformMappings: true)
                 .WithMetadata("CopyToOutputDirectory", "PreserveNewest");
 
         private AddPropertyTransform<Project> GenerateRuntimeConfigurationFilesTransform => 

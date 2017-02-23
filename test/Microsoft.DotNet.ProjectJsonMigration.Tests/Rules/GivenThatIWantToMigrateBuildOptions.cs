@@ -453,7 +453,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [Theory]
         [InlineData("compile", "Compile", 3, "")]
         [InlineData("embed", "EmbeddedResource", 3, ";rootfile.cs")]
-        [InlineData("copyToOutput", "Content", 2, ";rootfile.cs")]
+        [InlineData("copyToOutput", "None", 2, ";rootfile.cs")]
         private void MigratingGroupIncludeExcludePopulatesAppropriateProjectItemElement(
             string group,
             string itemName,
@@ -529,7 +529,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [Theory]
         [InlineData("compile", "Compile", "")]
         [InlineData("embed", "EmbeddedResource", ";rootfile.cs")]
-        [InlineData("copyToOutput", "Content", ";rootfile.cs")]
+        [InlineData("copyToOutput", "None", ";rootfile.cs")]
         private void MigratingGroupIncludeOnlyPopulatesAppropriateProjectItemElement(
             string group,
             string itemName,
@@ -725,7 +725,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
         private static void VerifyContentMetadata(ProjectItemElement item)
         {
-            if (item.ItemType == "Content")
+            if (item.ItemType == "None")
             {
                 item.Metadata.Count(m => m.Name == "CopyToOutputDirectory").Should().Be(1);
             }

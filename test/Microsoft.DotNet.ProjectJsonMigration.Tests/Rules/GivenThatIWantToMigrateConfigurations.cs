@@ -176,7 +176,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                     }
                 }");
 
-            var contentItems = mockProj.Items.Where(item => item.ItemType == "Content");
+            var contentItems = mockProj.Items.Where(item => item.ItemType == "None");
 
             contentItems.Count().Should().Be(4);
 
@@ -224,7 +224,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                     }
                 }");
 
-            var contentItems = mockProj.Items.Where(item => item.ItemType == "Content");
+            var contentItems = mockProj.Items.Where(item => item.ItemType == "None");
 
             contentItems.Count().Should().Be(5);
 
@@ -280,7 +280,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                     }
                 }");
 
-            var contentItems = mockProj.Items.Where(item => item.ItemType == "Content");
+            var contentItems = mockProj.Items.Where(item => item.ItemType == "None");
 
             contentItems.Count().Should().Be(2);
             contentItems.Where(i => i.ConditionChain().Count() == 1).Should().HaveCount(2);
@@ -338,7 +338,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                     }
                 }");
 
-            var contentItems = mockProj.Items.Where(item => item.ItemType == "Content");
+            var contentItems = mockProj.Items.Where(item => item.ItemType == "None");
 
             contentItems.Count().Should().Be(3);
             contentItems.Where(i => i.ConditionChain().Count() == 1).Should().HaveCount(3);
@@ -410,7 +410,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                     }
                 }");
 
-            var contentItems = mockProj.Items.Where(item => item.ItemType == "Content");
+            var contentItems = mockProj.Items.Where(item => item.ItemType == "None");
 
             contentItems.Count().Should().Be(4);
             
@@ -477,7 +477,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                     }
                 }");
 
-            var contentItems = mockProj.Items.Where(item => item.ItemType == "Content");
+            var contentItems = mockProj.Items.Where(item => item.ItemType == "None");
 
             contentItems.Count().Should().Be(5);
             contentItems.Where(i => i.ConditionChain().Count() == 1).Should().HaveCount(3);

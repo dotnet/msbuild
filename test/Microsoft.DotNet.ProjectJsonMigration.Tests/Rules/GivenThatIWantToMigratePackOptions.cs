@@ -200,7 +200,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 }");
 
             var contentItems = mockProj.Items
-                .Where(item => item.ItemType.Equals("Content", StringComparison.Ordinal))
+                .Where(item => item.ItemType.Equals("None", StringComparison.Ordinal))
                 .Where(item => item.GetMetadataWithName("Pack").Value == "true");
 
             contentItems.Count().Should().Be(1);
@@ -223,7 +223,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 }");
 
             var contentItems = mockProj.Items
-                .Where(item => item.ItemType.Equals("Content", StringComparison.Ordinal))
+                .Where(item => item.ItemType.Equals("None", StringComparison.Ordinal))
                 .Where(item =>
                     item.GetMetadataWithName("Pack").Value == "true" &&
                     item.GetMetadataWithName("PackagePath") != null);
@@ -250,7 +250,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 }");
 
             var contentItems = mockProj.Items
-                .Where(item => item.ItemType.Equals("Content", StringComparison.Ordinal))
+                .Where(item => item.ItemType.Equals("None", StringComparison.Ordinal))
                 .Where(item =>
                     item.GetMetadataWithName("Pack").Value == "true" &&
                     item.GetMetadataWithName("PackagePath") != null);
@@ -284,7 +284,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 });
 
             var contentItems = mockProj.Items
-                .Where(item => item.ItemType.Equals("Content", StringComparison.Ordinal))
+                .Where(item => item.ItemType.Equals("None", StringComparison.Ordinal))
                 .Where(item =>
                     item.GetMetadataWithName("Pack").Value == "true" &&
                     item.GetMetadataWithName("PackagePath") != null);

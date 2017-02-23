@@ -32,9 +32,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 }",
                 testDirectory: testDirectory);
 
-            mockProj.Items.Count(i => i.ItemType.Equals("Content", StringComparison.Ordinal)).Should().Be(2);
+            mockProj.Items.Count(i => i.ItemType.Equals("None", StringComparison.Ordinal)).Should().Be(2);
 
-            foreach (var item in mockProj.Items.Where(i => i.ItemType.Equals("Content", StringComparison.Ordinal)))
+            foreach (var item in mockProj.Items.Where(i => i.ItemType.Equals("None", StringComparison.Ordinal)))
             {
                 item.Metadata.Count(m => m.Name == "CopyToPublishDirectory").Should().Be(1);
 
@@ -82,9 +82,9 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 }",
                 testDirectory: testDirectory);
 
-            mockProj.Items.Count(i => i.ItemType.Equals("Content", StringComparison.Ordinal)).Should().Be(2);
+            mockProj.Items.Count(i => i.ItemType.Equals("None", StringComparison.Ordinal)).Should().Be(2);
 
-            foreach (var item in mockProj.Items.Where(i => i.ItemType.Equals("Content", StringComparison.Ordinal)))
+            foreach (var item in mockProj.Items.Where(i => i.ItemType.Equals("None", StringComparison.Ordinal)))
             {
                 item.Metadata.Count(m => m.Name == "CopyToPublishDirectory").Should().Be(1);
 
@@ -126,13 +126,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 }",
                 testDirectory: testDirectory);
 
-            mockProj.Items.Count(i => i.ItemType.Equals("Content", StringComparison.Ordinal)).Should().Be(3);
+            mockProj.Items.Count(i => i.ItemType.Equals("None", StringComparison.Ordinal)).Should().Be(3);
 
             // From ProjectReader #L725 (Both are empty)
             var defaultIncludePatterns = Enumerable.Empty<string>();
             var defaultExcludePatterns = Enumerable.Empty<string>();
 
-            foreach (var item in mockProj.Items.Where(i => i.ItemType.Equals("Content", StringComparison.Ordinal)))
+            foreach (var item in mockProj.Items.Where(i => i.ItemType.Equals("None", StringComparison.Ordinal)))
             {
                 if (item.Include.Contains(@"root\**\*"))
                 {
@@ -189,13 +189,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 }",
                 testDirectory: testDirectory);
 
-            mockProj.Items.Count(i => i.ItemType.Equals("Content", StringComparison.Ordinal)).Should().Be(3);
+            mockProj.Items.Count(i => i.ItemType.Equals("None", StringComparison.Ordinal)).Should().Be(3);
 
             // From ProjectReader #L725 (Both are empty)
             var defaultIncludePatterns = Enumerable.Empty<string>();
             var defaultExcludePatterns = Enumerable.Empty<string>();
 
-            foreach (var item in mockProj.Items.Where(i => i.ItemType.Equals("Content", StringComparison.Ordinal)))
+            foreach (var item in mockProj.Items.Where(i => i.ItemType.Equals("None", StringComparison.Ordinal)))
             {
                 var metadata = string.Join(",", item.Metadata.Select(m => m.Name));
 
