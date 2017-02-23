@@ -189,7 +189,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 }",
                 testDirectory: testDirectory);
 
-            mockProj.Items.Count(i => i.ItemType.Equals("Content", StringComparison.Ordinal)).Should().Be(4);
+            mockProj.Items.Count(i => i.ItemType.Equals("Content", StringComparison.Ordinal)).Should().Be(3);
 
             // From ProjectReader #L725 (Both are empty)
             var defaultIncludePatterns = Enumerable.Empty<string>();
@@ -198,11 +198,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             foreach (var item in mockProj.Items.Where(i => i.ItemType.Equals("Content", StringComparison.Ordinal)))
             {
                 var metadata = string.Join(",", item.Metadata.Select(m => m.Name));
-                Console.WriteLine($"LICAVALC: Update: {item.Update}, Include: {item.Include}, Metadata: {metadata}");
 
                 if (item.Update.Contains(@"root\**\*"))
                 {
-                    item.Update.Should().Be(@"root\**\*;src\**\*;rootfile.cs");
+                    item.Update.Should().Be(@"root\**\*");
                     item.Exclude.Should().BeEmpty();
                 }
                 else if (item.Update.Contains(@"src\file1.cs"))
