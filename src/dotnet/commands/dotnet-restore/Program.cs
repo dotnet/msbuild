@@ -10,13 +10,11 @@ using System.Diagnostics;
 
 namespace Microsoft.DotNet.Tools.Restore
 {
-    public class RestoreCommand
+    public class RestoreCommand : MSBuildForwardingApp
     {
-        private MSBuildForwardingApp _forwardingApp;
-
         public RestoreCommand(IEnumerable<string> msbuildArgs, string msbuildPath = null)
+            : base(msbuildArgs, msbuildPath)
         {
-            _forwardingApp = new MSBuildForwardingApp(msbuildArgs, msbuildPath);
         }
 
         public static RestoreCommand FromArgs(string[] args, string msbuildPath = null)
@@ -169,16 +167,6 @@ namespace Microsoft.DotNet.Tools.Restore
             }
 
             return cmd.Execute();
-        }
-
-        public ProcessStartInfo GetProcessStartInfo()
-        {
-            return _forwardingApp.GetProcessStartInfo();
-        }
-
-        public int Execute()
-        {
-            return GetProcessStartInfo().Execute();
         }
     }
 }
