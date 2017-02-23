@@ -233,7 +233,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
                     LocalizableStrings.ItemTransformApplicatorEncompassedUpdates,
                     nameof(ItemTransformApplicator),
                     string.Join(", ", encompassedUpdates)));
-                existingItem.RemoveIncludes(encompassedUpdates);
+                existingItem.RemoveUpdates(encompassedUpdates);
             }
 
             // continue if the existing item is now empty

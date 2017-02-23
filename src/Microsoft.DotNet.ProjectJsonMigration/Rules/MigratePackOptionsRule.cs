@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     packOptions => !string.IsNullOrEmpty(packOptions.RepositoryUrl));
 
         private IncludeContextTransform PackFilesTransform =>
-            new IncludeContextTransform("None", transformMappings: true)
+            new UpdateContextTransform("None", transformMappings: true)
                 .WithMetadata("Pack", "true")
                 .WithMappingsToTransform(_mappingsToTransfrom);
 

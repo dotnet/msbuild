@@ -38,18 +38,15 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             {
                 item.Metadata.Count(m => m.Name == "CopyToPublishDirectory").Should().Be(1);
 
-                if (item.Include.Contains(@"src\file1.cs"))
+                if (item.Update.Contains(@"src\file1.cs"))
                 {
-                    item.Include.Should().Be(@"src\file1.cs;src\file2.cs");
-                    item.Exclude.Should().Be(@"src\file2.cs");
+                    item.Update.Should().Be(@"src\file1.cs;src\file2.cs");
+                    item.Exclude.Should().BeEmpty();
                 }
                 else
                 {
-                    item.Include.Should()
-                        .Be(@"root\**\*;src\**\*;rootfile.cs");
-
-                    item.Exclude.Should()
-                        .Be(@"src\**\*;rootfile.cs;src\file2.cs");
+                    item.Update.Should().Be(@"root\**\*;src\**\*;rootfile.cs");
+                    item.Exclude.Should().BeEmpty();
                 }
             }
         }
@@ -128,29 +125,25 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             mockProj.Items.Count(i => i.ItemType.Equals("None", StringComparison.Ordinal)).Should().Be(3);
 
-            // From ProjectReader #L725 (Both are empty)
-            var defaultIncludePatterns = Enumerable.Empty<string>();
-            var defaultExcludePatterns = Enumerable.Empty<string>();
-
             foreach (var item in mockProj.Items.Where(i => i.ItemType.Equals("None", StringComparison.Ordinal)))
             {
-                if (item.Include.Contains(@"root\**\*"))
+                if (item.Update.Contains(@"root\**\*"))
                 {
-                    item.Include.Should().Be(@"root\**\*");
-                    item.Exclude.Should().Be(@"src\**\*;rootfile.cs;src\file3.cs");
+                    item.Update.Should().Be(@"root\**\*");
+                    //item.Exclude.Should().Be(@"src\**\*;rootfile.cs;src\file3.cs");
                 }
-                else if (item.Include.Contains(@"src\file1.cs"))
+                else if (item.Update.Contains(@"src\file1.cs"))
                 {
-                    item.Include.Should().Be(@"src\file1.cs;src\file2.cs");
-                    item.Exclude.Should().Be(@"src\file2.cs;src\file3.cs");
+                    item.Update.Should().Be(@"src\file1.cs;src\file2.cs");
+                    //item.Exclude.Should().Be(@"src\file2.cs;src\file3.cs");
                 }
                 else
                 {
-                    item.Include.Should()
+                    item.Update.Should()
                         .Be(@"src\**\*;rootfile.cs");
 
-                    item.Exclude.Should()
-                        .Be(@"src\**\*;rootfile.cs;src\file2.cs;src\file3.cs");
+                    //item.Exclude.Should()
+                    //    .Be(@"src\**\*;rootfile.cs;src\file2.cs;src\file3.cs");
                 }
             }
         }

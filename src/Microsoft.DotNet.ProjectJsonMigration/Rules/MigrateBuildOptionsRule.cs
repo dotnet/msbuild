@@ -147,14 +147,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             new RemoveContextTransform("EmbeddedResource", condition: ic => ic != null);
 
         private IncludeContextTransform CopyToOutputFilesTransform =>
-            new IncludeContextTransform("None", transformMappings: true)
+            new UpdateContextTransform("None", transformMappings: true)
                 .WithMetadata("CopyToOutputDirectory", "PreserveNewest");
 
         private IncludeContextTransform CopyToOutputFilesTransformForWeb =>
             new UpdateContextTransform(
                     "None",
                     transformMappings: true,
-                    excludePatternsRule: pattern => PatternIncludedInWebSdk(pattern))
+                    excludePatternsRule: pattern => ItemsIncludedInTheWebSDK.HasContent(pattern))
                 .WithMetadata("CopyToOutputDirectory", "PreserveNewest");
 
         private AddPropertyTransform<Project> GenerateRuntimeConfigurationFilesTransform => 
@@ -227,14 +227,6 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             _transformApplicator = transformApplicator ?? new TransformApplicator();
 
             ConstructTransformLists();
-        }
-
-        private bool PatternIncludedInWebSdk(string pattern)
-        {
-            return pattern.Equals("wwwroot") ||
-                pattern.Contains("web.config") ||
-                pattern.Equals("**/*.cshtml") ||
-                pattern.Contains(".json");
         }
 
         private bool ContainsCompilerResources(string projectDirectory)

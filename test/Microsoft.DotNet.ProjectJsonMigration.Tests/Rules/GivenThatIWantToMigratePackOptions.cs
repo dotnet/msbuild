@@ -204,7 +204,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 .Where(item => item.GetMetadataWithName("Pack").Value == "true");
 
             contentItems.Count().Should().Be(1);
-            contentItems.First().Include.Should().Be(@"path\to\some\file.cs;path\to\some\other\file.cs");
+            contentItems.First().Update.Should().Be(@"path\to\some\file.cs;path\to\some\other\file.cs");
         }
 
         [Fact]
@@ -229,7 +229,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                     item.GetMetadataWithName("PackagePath") != null);
 
             contentItems.Count().Should().Be(1);
-            contentItems.First().Include.Should().Be(@"path\to\some\file.cs");
+            contentItems.First().Update.Should().Be(@"path\to\some\file.cs");
             contentItems.First().GetMetadataWithName("PackagePath").Value.Should().Be(
                 Path.Combine("some", "other", "path"));
         }
@@ -256,7 +256,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                     item.GetMetadataWithName("PackagePath") != null);
 
             contentItems.Count().Should().Be(1);
-            contentItems.First().Include.Should().Be(@"path\to\some\file.cs");
+            contentItems.First().Update.Should().Be(@"path\to\some\file.cs");
             contentItems.First().GetMetadataWithName("PackagePath").Value.Should().BeEmpty();
         }
 
@@ -290,7 +290,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                     item.GetMetadataWithName("PackagePath") != null);
 
             contentItems.Count().Should().Be(1);
-            contentItems.First().Include.Should().Be(@"path\to\some\file.cs");
+            contentItems.First().Update.Should().Be(@"path\to\some\file.cs");
             contentItems.First().GetMetadataWithName("PackagePath").Value.Should().Be(expectedPackagePath);
         }
 
