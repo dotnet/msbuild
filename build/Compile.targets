@@ -124,11 +124,6 @@
       <Move SourceFiles="@(NETCore10Assemblies->'$(SdkOutputDirectory)/%(Filename)%(Extension).bak')"
             DestinationFiles="@(NETCore10Assemblies)" />
 
-      <!-- Generate .version file -->
-      <WriteLinesToFile File="$(SdkOutputDirectory)/.version"
-                        Lines="$(CommitHash);$(SdkVersion);$(Rid)"
-                        Overwrite="true" />
-
       <ItemGroup>
         <MSBuildTargetsToCopy Include="$(MSBuildTargetsDirectory)/**/*.targets" />
         <MSBuildTargetsToCopy Include="$(MSBuildTargetsDirectory)/**/*.Targets" />
