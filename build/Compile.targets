@@ -4,7 +4,6 @@
 
   <ItemGroup>
     <PublishOutputExtensions Include="$(ExeExtension);.dll;.pdb;.deps.json;.runtimeconfig.json" />
-    <BundledTools Include="MSBuild;NuGet.CommandLine.XPlat;dotnet" />
     <MSBuildImportsContent Include="$(MSBuildImportsDir)/**/*" /> 
   </ItemGroup>
 
@@ -19,14 +18,6 @@
     <ItemGroup>
       <SharedFramework Remove="*" />
       <SharedFramework Include="$(SharedFrameworkPublishDirectory)/**/*" />
-
-      <RuntimeTargetsAssetsToRemoveFromDeps Remove="*" />
-      <RuntimeTargetsAssetsToRemoveFromDeps Include="MSBuild" />
-
-      <RuntimeAssetsToRemoveFromDeps Remove="*" />
-      <RuntimeAssetsToRemoveFromDeps Include="redist" />
-      <RuntimeAssetsToRemoveFromDeps Include="tool_msbuild" />
-      <RuntimeAssetsToRemoveFromDeps Include="tool_nuget" />
     </ItemGroup>
 
     <RemoveDir Directories="$(StageDirectory)" />
@@ -45,25 +36,6 @@
     <DotNetPublish ToolPath="$(Stage0Directory)"
                    Configuration="$(Configuration)"
                    ProjectPath="$(SrcDirectory)/tool_roslyn/tool_roslyn.csproj" />
-
-      <RemoveAssetFromDepsPackages DepsFile="$(SdkOutputDirectory)/redist.deps.json"
-                                   SectionName="runtime"
-                                   AssetPath="%(RuntimeAssetsToRemoveFromDeps.Identity).dll" />
-
-      <Copy SourceFiles="$(SdkOutputDirectory)/redist.deps.json"
-            DestinationFiles="$(SdkOutputDirectory)/%(BundledTools.Identity).deps.json" />
-
-      <Copy SourceFiles="$(SdkOutputDirectory)/redist.runtimeconfig.json"
-            DestinationFiles="$(SdkOutputDirectory)/%(BundledTools.Identity).runtimeconfig.json" />
-
-      <ChangeEntryPointLibraryName
-            DepsFile="$(SdkOutputDirectory)/%(BundledTools.Identity).deps.json"
-            NewName="%(BundledTools.Identity).deps.json" />
-
-      <!-- cleanup project output we don't need -->
-      <Delete Files="$(SdkOutputDirectory)/redist%(PublishOutputExtensions.Identity)" />
-      <Delete Files="$(SdkOutputDirectory)/tool_msbuild%(PublishOutputExtensions.Identity)" />
-      <Delete Files="$(SdkOutputDirectory)/tool_nuget%(PublishOutputExtensions.Identity)" />
 
       <!-- Copy Host to SDK Directory -->
       <Copy SourceFiles="$(SharedFrameworkNameVersionPath)/$(DotnetHostBaseName)"

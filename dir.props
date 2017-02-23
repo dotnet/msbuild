@@ -11,6 +11,7 @@
   <Import Project="build/BranchInfo.props" />
   <Import Project="build/CoreSetupInfo.props" />
 
+  <Import Project="build/BundledTools.props" />
   <Import Project="build/DependencyVersions.props" />
   <Import Project="build/Version.props" />
   <Import Project="build/Branding.props" />
