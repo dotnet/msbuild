@@ -1,37 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <!-- AcquireWix Properties -->
+    <PropertyGroup>
+      <WixVersion>3.10.2</WixVersion>
+      <WixDownloadUrl>https://dotnetcli.azureedge.net/build/wix/wix.$(WixVersion).zip</WixDownloadUrl>
+      <WixRoot>$(IntermediateDirectory)/WixTools/$(WixVersion)</WixRoot>
+      <WixDestinationPath>$(WixRoot)/WixTools.$(WixVersion).zip</WixDestinationPath>
+      <WixDownloadSentinel>$(WixRoot)/WixDownload.$(WixVersion).sentinel</WixDownloadSentinel>
+    </PropertyGroup>
+
+    <!-- Generate MSI/Bundle Properties -->
+    <PropertyGroup>
+      <CombinedFrameworkSdkHostBundleEngineName>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk)-engine.exe</CombinedFrameworkSdkHostBundleEngineName>
+
+      <SdkGenerateMsiPowershellScript>$(RepoRoot)/packaging/windows/clisdk/generatemsi.ps1</SdkGenerateMsiPowershellScript>
+      <SdkGenerateBundlePowershellScript>$(RepoRoot)/packaging/windows/clisdk/generatebundle.ps1</SdkGenerateBundlePowershellScript>
+      <SdkGenerateNupkgPowershellScript>$(RepoRoot)/packaging/windows/clisdk/generatenupkg.ps1</SdkGenerateNupkgPowershellScript>
+
+      <SdkInstallerNuspecFile>$(RepoRoot)/packaging/windows/clisdk/VS.Redist.Common.Net.Core.SDK.$(Architecture).nuspec</SdkInstallerNuspecFile>
+      <SdkInstallerNupkgFile>$(InstallerOutputDirectory)/VS.Redist.Common.Net.Core.SDK.$(Architecture).$(FullNugetVersion).nupkg</SdkInstallerNupkgFile>
+    </PropertyGroup>
+
+    <!-- Test Sdk MSI Properties -->
+    <PropertyGroup>
+      <SdkTestMsiPowershellScript>$(RepoRoot)/test/Installer/testmsi.ps1</SdkTestMsiPowershellScript>
+      <SdkMsiTestedSentinel>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionSdk).MsiTested.sentinel</SdkMsiTestedSentinel>
+    </PropertyGroup>
+
     <Target Name="MsiTargetsSetupInputOutputs" DependsOnTargets="Init">
-      <!-- AcquireWix Properties -->
-      <PropertyGroup>
-        <WixVersion>3.10.2</WixVersion>
-        <WixDownloadUrl>https://dotnetcli.azureedge.net/build/wix/wix.$(WixVersion).zip</WixDownloadUrl>
-        <WixRoot>$(IntermediateDirectory)/WixTools/$(WixVersion)</WixRoot>
-        <WixDestinationPath>$(WixRoot)/WixTools.$(WixVersion).zip</WixDestinationPath>
-        <WixDownloadSentinel>$(WixRoot)/WixDownload.$(WixVersion).sentinel</WixDownloadSentinel>
-      </PropertyGroup>
-
-      <!-- Generate MSI/Bundle Properties -->
-      <PropertyGroup>
-        <CombinedFrameworkSdkHostBundleEngineName>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk)-engine.exe</CombinedFrameworkSdkHostBundleEngineName>
-
-        <SdkGenerateMsiPowershellScript>$(RepoRoot)/packaging/windows/clisdk/generatemsi.ps1</SdkGenerateMsiPowershellScript>
-        <SdkGenerateBundlePowershellScript>$(RepoRoot)/packaging/windows/clisdk/generatebundle.ps1</SdkGenerateBundlePowershellScript>
-        <SdkGenerateNupkgPowershellScript>$(RepoRoot)/packaging/windows/clisdk/generatenupkg.ps1</SdkGenerateNupkgPowershellScript>
-
-        <CombinedFrameworkSdkHostInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk)$(BundleExtension)</CombinedFrameworkSdkHostInstallerFile>
-        <SdkInstallerNuspecFile>$(RepoRoot)/packaging/windows/clisdk/VS.Redist.Common.Net.Core.SDK.$(Architecture).nuspec</SdkInstallerNuspecFile>
-        <SdkInstallerNupkgFile>$(InstallerOutputDirectory)/VS.Redist.Common.Net.Core.SDK.$(Architecture).$(FullNugetVersion).nupkg</SdkInstallerNupkgFile>
-      </PropertyGroup>
-
       <!-- Generate SDK MSI Inputs -->
       <ItemGroup>
         <GenerateSdkMsiInputs Include="$(SdkLayoutOutputDirectory)/**/*;
                                        $(SdkGenerateMsiPowershellScript)" />
-      </ItemGroup>
-
-      <!-- Consumed By Publish -->
-      <ItemGroup>
-        <GeneratedInstallers Include="$(SdkInstallerFile);$(CombinedFrameworkSdkHostInstallerFile)" />
       </ItemGroup>
 
       <GenerateMsiVersion CommitCount="$(CommitCount)"
@@ -51,12 +51,6 @@
         <Output TaskParameter="OutputGuid"
             PropertyName="CombinedFrameworkSDKHostInstallerUpgradeCode" />
       </GenerateGuidFromName>
-
-      <!-- Test Sdk MSI Properties -->
-      <PropertyGroup>
-        <SdkTestMsiPowershellScript>$(RepoRoot)/test/Installer/testmsi.ps1</SdkTestMsiPowershellScript>
-        <SdkMsiTestedSentinel>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionSdk).MsiTested.sentinel</SdkMsiTestedSentinel>
-      </PropertyGroup>
     </Target>
 
     <Target Name="AcquireWix"

@@ -2,5 +2,17 @@
   <PropertyGroup>
     <InstallerOutputDirectory>$(PackagesDirectory)</InstallerOutputDirectory>
     <SdkInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionSdk)$(InstallerExtension)</SdkInstallerFile>
+    <CombinedFrameworkSdkHostInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk)$(BundleExtension)</CombinedFrameworkSdkHostInstallerFile>
+
+    <LayoutDirectory>$(IntermediateDirectory)/layouts</LayoutDirectory>
+    <SdkLayoutOutputDirectory>$(LayoutDirectory)/$(ArtifactNameSdk)</SdkLayoutOutputDirectory>
   </PropertyGroup>
+
+  <!-- Consumed By Publish -->
+  <ItemGroup>
+    <GeneratedInstallers Condition=" '$(OSName)' == 'ubuntu' "
+                         Include="$(SdkInstallerFile)" />
+    <GeneratedInstallers Condition=" '$(OSName)' != 'ubuntu' "
+                         Include="$(SdkInstallerFile);$(CombinedFrameworkSdkHostInstallerFile)" />
+  </ItemGroup>
 </Project>

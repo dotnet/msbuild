@@ -4,8 +4,6 @@
       <PropertyGroup>
         <PkgIntermediateDirectory>$(IntermediateDirectory)/pkgs/$(SdkVersion)</PkgIntermediateDirectory>
 
-        <CombinedFrameworkSdkHostInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk)$(BundleExtension)</CombinedFrameworkSdkHostInstallerFile>
-
         <!-- Properties for pkg build -->
         <SharedHostComponentId>com.microsoft.dotnet.sharedhost.$(SharedHostVersion).component.osx.x64</SharedHostComponentId>
         <HostFxrComponentId>com.microsoft.dotnet.hostfxr.$(HostFxrVersion).component.osx.x64</HostFxrComponentId>
@@ -82,11 +80,6 @@
         <DistributionTemplateReplacement Include="{AdditionalHostFxrBrandName}">
           <ReplacementString>$(AdditionalHostFxrBrandName)</ReplacementString>
         </DistributionTemplateReplacement>
-      </ItemGroup>
-
-      <!-- Consumed By Publish -->
-      <ItemGroup>
-        <GeneratedInstallers Include="$(SdkInstallerFile);$(CombinedFrameworkSdkHostInstallerFile)" />
       </ItemGroup>
 
       <ItemGroup>
