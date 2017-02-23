@@ -34,6 +34,17 @@
     <ProjectReference Include="..\tool_nuget\tool_nuget.csproj" />
   </ItemGroup>
 
+  <Target Name="PublishSharedFramework"
+          BeforeTargets="Publish">
+    <ItemGroup>
+      <SharedFramework Remove="*" />
+      <SharedFramework Include="$(SharedFrameworkPublishDirectory)/**/*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(SharedFramework)"
+          DestinationFiles="@(SharedFramework->'$(StageDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
   <Target Name="GenerateCliRuntimeConfigurationFiles"
           AfterTargets="Publish">
     <RemoveAssetFromDepsPackages DepsFile="$(PublishDir)/$(TargetName).deps.json"
