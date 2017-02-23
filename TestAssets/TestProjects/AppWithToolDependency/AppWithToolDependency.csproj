@@ -1,14 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <TargetFramework>netcoreapp1.0</TargetFramework>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
     <OutputType>Exe</OutputType>
+    <DotnetCliToolTargetFramework>netcoreapp1.1</DotnetCliToolTargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App">
-      <Version>1.0.3</Version>
-    </PackageReference>
-  </ItemGroup>
   <ItemGroup>
     <DotNetCliToolReference Include="dotnet-portable">
       <Version>1.0.0</Version>
@@ -17,7 +13,4 @@
       <Version>1.0.0</Version>
     </DotNetCliToolReference>
   </ItemGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
-  </PropertyGroup>
 </Project>

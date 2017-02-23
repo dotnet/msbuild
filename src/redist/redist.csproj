@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-  
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.tasks" />
+
   <PropertyGroup>
     <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
     <TargetFramework>netcoreapp1.1</TargetFramework>
@@ -36,7 +37,16 @@
     <ProjectReference Include="..\tool_msbuild\tool_msbuild.csproj" />
     <ProjectReference Include="..\tool_nuget\tool_nuget.csproj" />
   </ItemGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
-  </PropertyGroup>
+  
+  <Target Name="RetargetVSTestConsole"
+          AfterTargets="Publish">
+    <PropertyGroup>
+      <VSTestRuntimeConfigPath>$(PublishDir)/vstest.console.runtimeconfig.json</VSTestRuntimeConfigPath>
+    </PropertyGroup>
+    <ReplaceFileContents
+      InputFile="$(VSTestRuntimeConfigPath)"
+      DestinationFile="$(VSTestRuntimeConfigPath)"
+      ReplacementPatterns="1.0.0"
+      ReplacementStrings="1.1.0" />
+  </Target>
 </Project>

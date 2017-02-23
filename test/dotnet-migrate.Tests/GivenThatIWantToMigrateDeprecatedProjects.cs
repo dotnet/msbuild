@@ -431,6 +431,12 @@ namespace Microsoft.DotNet.Migration.Tests
                  .Execute("build -c Debug")
                  .Should().Pass();
 
+            if (!EnvironmentInfo.HasSharedFramework("netcoreapp1.0"))
+            {
+                // running the app requires netcoreapp1.0
+                return;
+            }
+
             var cmd = new DotnetCommand()
                  .WithWorkingDirectory(projectDirectory)
                  .ExecuteWithCapturedOutput("run -c Debug");
@@ -483,6 +489,12 @@ namespace Microsoft.DotNet.Migration.Tests
                  .Execute("build -c Debug")
                  .Should().Pass();
 
+            if (!EnvironmentInfo.HasSharedFramework("netcoreapp1.0"))
+            {
+                // running the app requires netcoreapp1.0
+                return;
+            }
+
             var cmd = new DotnetCommand()
                  .WithWorkingDirectory(projectDirectory)
                  .ExecuteWithCapturedOutput("run -c Debug");
@@ -533,6 +545,12 @@ namespace Microsoft.DotNet.Migration.Tests
                  .WithWorkingDirectory(projectDirectory)
                  .Execute("build -c Debug")
                  .Should().Pass();
+
+            if (!EnvironmentInfo.HasSharedFramework("netcoreapp1.0"))
+            {
+                // running the app requires netcoreapp1.0
+                return;
+            }
 
             var cmd = new DotnetCommand()
                  .WithWorkingDirectory(projectDirectory)

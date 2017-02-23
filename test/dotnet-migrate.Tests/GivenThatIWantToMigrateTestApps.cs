@@ -492,7 +492,7 @@ namespace Microsoft.DotNet.Migration.Tests
             }
 
             outputsIdentical.Should().BeTrue();
-            
+
             VerifyAllMSBuildOutputsRunnable(projectDirectory);
          }
         
@@ -543,7 +543,7 @@ namespace Microsoft.DotNet.Migration.Tests
                 .And.Contain("Migration failed.");
         }
 
-        [Fact]
+        [RequiresSpecificFrameworkFact("netcoreapp1.0")]
         public void ItMigratesAndPublishesProjectsWithRuntimes()
         {
             var projectName = "PJTestAppSimple";
@@ -745,6 +745,12 @@ namespace Microsoft.DotNet.Migration.Tests
 
         private void VerifyAllMSBuildOutputsRunnable(DirectoryInfo projectDirectory)
         {
+            if (!EnvironmentInfo.HasSharedFramework("netcoreapp1.0"))
+            {
+                // running the apps requires netcoreapp1.0
+                return;
+            }
+
             var dllFileName = Path.GetFileName(projectDirectory.FullName) + ".dll";
 
             var runnableDlls = projectDirectory
