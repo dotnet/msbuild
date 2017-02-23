@@ -10,13 +10,11 @@ using System.Diagnostics;
 
 namespace Microsoft.DotNet.Tools.Pack
 {
-    public class PackCommand
+    public class PackCommand : MSBuildForwardingApp
     {
-        private MSBuildForwardingApp _forwardingApp;
-
         public PackCommand(IEnumerable<string> msbuildArgs, string msbuildPath = null)
+            : base(msbuildArgs, msbuildPath)
         {
-            _forwardingApp = new MSBuildForwardingApp(msbuildArgs, msbuildPath);
         }
 
         public static PackCommand FromArgs(string[] args, string msbuildPath = null)
@@ -66,7 +64,7 @@ namespace Microsoft.DotNet.Tools.Pack
                 $"<{LocalizableStrings.CmdArgumentProject}>",
                 LocalizableStrings.CmdArgumentDescription,
                 multipleValues:true);
-            CommandOption verbosityOption = MSBuildForwardingApp.AddVerbosityOption(cmd);
+            CommandOption verbosityOption = AddVerbosityOption(cmd);
 
             List<string> msbuildArgs = null;
             cmd.OnExecute(() =>
@@ -146,16 +144,6 @@ namespace Microsoft.DotNet.Tools.Pack
             }
 
             return cmd.Execute();
-        }
-
-        public ProcessStartInfo GetProcessStartInfo()
-        {
-            return _forwardingApp.GetProcessStartInfo();
-        }
-
-        public int Execute()
-        {
-            return GetProcessStartInfo().Execute();
         }
     }
 }

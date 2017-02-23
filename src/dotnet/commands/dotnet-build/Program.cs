@@ -11,13 +11,11 @@ using Microsoft.DotNet.Cli;
 
 namespace Microsoft.DotNet.Tools.Build
 {
-    public class BuildCommand
+    public class BuildCommand : MSBuildForwardingApp
     {
-        private MSBuildForwardingApp _forwardingApp;
-
         public BuildCommand(IEnumerable<string> msbuildArgs, string msbuildPath = null)
+            : base(msbuildArgs, msbuildPath)
         {
-            _forwardingApp = new MSBuildForwardingApp(msbuildArgs, msbuildPath);
         }
 
         public static BuildCommand FromArgs(string[] args, string msbuildPath = null)
@@ -131,16 +129,6 @@ namespace Microsoft.DotNet.Tools.Build
             }
 
             return cmd.Execute();
-        }
-
-        public ProcessStartInfo GetProcessStartInfo()
-        {
-            return _forwardingApp.GetProcessStartInfo();
-        }
-
-        public int Execute()
-        {
-            return GetProcessStartInfo().Execute();
         }
     }
 }

@@ -5,12 +5,18 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.MSBuild;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Microsoft.DotNet.Tools.Publish
 {
-    public partial class PublishCommand
+    public partial class PublishCommand : MSBuildForwardingApp
     {
+        private PublishCommand(IEnumerable<string> msbuildArgs, string msbuildPath = null)
+            : base(msbuildArgs, msbuildPath)
+        {
+        }
+
         public static PublishCommand FromArgs(string[] args, string msbuildPath = null)
         {
             DebugHelper.HandleDebugSwitch(ref args);
@@ -50,33 +56,67 @@ namespace Microsoft.DotNet.Tools.Publish
                $"--filter <{LocalizableStrings.FilterProjOption}>", LocalizableStrings.FilterProjOptionDescription,
                 CommandOptionType.SingleValue);
 
-            CommandOption verbosityOption = MSBuildForwardingApp.AddVerbosityOption(app);
+            CommandOption verbosityOption = AddVerbosityOption(app);
 
-            var publish = new PublishCommand(msbuildPath);
-            bool commandExecuted = false;
+            List<string> msbuildArgs = null;
             app.OnExecute(() =>
             {
-                commandExecuted = true;
-                publish.ProjectPath = projectArgument.Value;
-                publish.Framework = frameworkOption.Value();
-                publish.Runtime = runtimeOption.Value();
-                publish.OutputPath = outputOption.Value();
-                publish.Configuration = configurationOption.Value();
-                publish.VersionSuffix = versionSuffixOption.Value();
-                publish.FilterProject = filterProjOption.Value();
-                publish.Verbosity = verbosityOption.Value();
-                publish.ExtraMSBuildArguments = app.RemainingArguments;
+                msbuildArgs = new List<string>();
+
+                msbuildArgs.Add("/t:Publish");
+
+                if (!string.IsNullOrEmpty(projectArgument.Value))
+                {
+                    msbuildArgs.Add(projectArgument.Value);
+                }
+
+                if (!string.IsNullOrEmpty(frameworkOption.Value()))
+                {
+                    msbuildArgs.Add($"/p:TargetFramework={frameworkOption.Value()}");
+                }
+
+                if (!string.IsNullOrEmpty(runtimeOption.Value()))
+                {
+                    msbuildArgs.Add($"/p:RuntimeIdentifier={runtimeOption.Value()}");
+                }
+
+                if (!string.IsNullOrEmpty(outputOption.Value()))
+                {
+                    msbuildArgs.Add($"/p:PublishDir={outputOption.Value()}");
+                }
+
+                if (!string.IsNullOrEmpty(configurationOption.Value()))
+                {
+                    msbuildArgs.Add($"/p:Configuration={configurationOption.Value()}");
+                }
+
+                if (!string.IsNullOrEmpty(versionSuffixOption.Value()))
+                {
+                    msbuildArgs.Add($"/p:VersionSuffix={versionSuffixOption.Value()}");
+                }
+
+                if (!string.IsNullOrEmpty(filterProjOption.Value()))
+                {
+                    msbuildArgs.Add($"/p:FilterProjFile={filterProjOption.Value()}");
+                }
+
+                if (!string.IsNullOrEmpty(verbosityOption.Value()))
+                {
+                    msbuildArgs.Add($"/verbosity:{verbosityOption.Value()}");
+                }
+
+                msbuildArgs.AddRange(app.RemainingArguments);
 
                 return 0;
             });
 
             int exitCode = app.Execute(args);
-            if (!commandExecuted)
+            if (msbuildArgs == null)
             {
                 throw new CommandCreationException(exitCode);
             }
 
-            return publish;
+            return new PublishCommand(msbuildArgs, msbuildPath);
         }
 
         public static int Run(string[] args)
@@ -94,16 +134,6 @@ namespace Microsoft.DotNet.Tools.Publish
             }
 
             return cmd.Execute();
-        }
-
-        public ProcessStartInfo GetProcessStartInfo()
-        {
-            return CreateForwardingApp(_msbuildPath).GetProcessStartInfo();
-        }
-
-        public int Execute()
-        {
-            return GetProcessStartInfo().Execute();
         }
     }
 }

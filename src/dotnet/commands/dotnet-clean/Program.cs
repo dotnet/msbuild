@@ -10,13 +10,11 @@ using System.Diagnostics;
 
 namespace Microsoft.DotNet.Tools.Clean
 {
-    public class CleanCommand
+    public class CleanCommand : MSBuildForwardingApp
     {
-        private MSBuildForwardingApp _forwardingApp;
-
         public CleanCommand(IEnumerable<string> msbuildArgs, string msbuildPath = null)
+            : base(msbuildArgs, msbuildPath)
         {
-            _forwardingApp = new MSBuildForwardingApp(msbuildArgs, msbuildPath);
         }
 
         public static CleanCommand FromArgs(string[] args, string msbuildPath = null)
@@ -49,7 +47,7 @@ namespace Microsoft.DotNet.Tools.Clean
                 $"-c|--configuration <{LocalizableStrings.CmdConfiguration}>", 
                 LocalizableStrings.CmdConfigurationDescription, 
                 CommandOptionType.SingleValue);
-            CommandOption verbosityOption = MSBuildForwardingApp.AddVerbosityOption(app);
+            CommandOption verbosityOption = AddVerbosityOption(app);
 
             List<string> msbuildArgs = null;
             app.OnExecute(() =>
@@ -112,16 +110,6 @@ namespace Microsoft.DotNet.Tools.Clean
             }
 
             return cmd.Execute();
-        }
-
-        public ProcessStartInfo GetProcessStartInfo()
-        {
-            return _forwardingApp.GetProcessStartInfo();
-        }
-
-        public int Execute()
-        {
-            return GetProcessStartInfo().Execute();
         }
     }
 }
