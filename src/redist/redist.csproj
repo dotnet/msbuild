@@ -45,6 +45,14 @@
           DestinationFiles="@(SharedFramework->'$(StageDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
+  <Target Name="PublishVersionFile"
+          BeforeTargets="Publish">
+
+    <WriteLinesToFile File="$(SdkOutputDirectory)/.version"
+                      Lines="$(CommitHash);$(SdkVersion);$(Rid)"
+                      Overwrite="true" />
+  </Target>
+
   <Target Name="GenerateCliRuntimeConfigurationFiles"
           AfterTargets="Publish">
     <RemoveAssetFromDepsPackages DepsFile="$(PublishDir)/$(TargetName).deps.json"
