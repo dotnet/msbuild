@@ -98,11 +98,11 @@ Copyright (c) .NET Foundation. All rights reserved.
   Furthermore, the appx targets currently use continue-on-error
   such that even without this, clean builds succeed but log an 
   error and incremental builds silently succeed. As such, this 
-  simplyr emoves a confounding error from successful clean
+  simply removes a confounding error from successful clean
   builds.
 
   ============================================================
   -->
-<Target Name="GetPackagingOutputs" />
+  <Target Name="GetPackagingOutputs" />
 
 </Project>
