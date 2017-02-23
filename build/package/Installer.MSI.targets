@@ -12,15 +12,12 @@
 
       <!-- Generate MSI/Bundle Properties -->
       <PropertyGroup>
-        <InstallerOutputDirectory>$(PackagesDirectory)</InstallerOutputDirectory>
-
         <CombinedFrameworkSdkHostBundleEngineName>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk)-engine.exe</CombinedFrameworkSdkHostBundleEngineName>
 
         <SdkGenerateMsiPowershellScript>$(RepoRoot)/packaging/windows/clisdk/generatemsi.ps1</SdkGenerateMsiPowershellScript>
         <SdkGenerateBundlePowershellScript>$(RepoRoot)/packaging/windows/clisdk/generatebundle.ps1</SdkGenerateBundlePowershellScript>
         <SdkGenerateNupkgPowershellScript>$(RepoRoot)/packaging/windows/clisdk/generatenupkg.ps1</SdkGenerateNupkgPowershellScript>
 
-        <SdkInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionSdk)$(InstallerExtension)</SdkInstallerFile>
         <CombinedFrameworkSdkHostInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk)$(BundleExtension)</CombinedFrameworkSdkHostInstallerFile>
         <SdkInstallerNuspecFile>$(RepoRoot)/packaging/windows/clisdk/VS.Redist.Common.Net.Core.SDK.$(Architecture).nuspec</SdkInstallerNuspecFile>
         <SdkInstallerNupkgFile>$(InstallerOutputDirectory)/VS.Redist.Common.Net.Core.SDK.$(Architecture).$(FullNugetVersion).nupkg</SdkInstallerNupkgFile>

@@ -33,8 +33,6 @@
 
     <!-- Package Identities -->
     <PropertyGroup>
-      <SdkDebianPackageVersion>$(SdkVersion)</SdkDebianPackageVersion>
-      <SdkDebianPackageName>dotnet-dev-$(SdkDebianPackageVersion)</SdkDebianPackageName>
       <SharedFxDebianPackageVersion>$(SharedFrameworkVersion)</SharedFxDebianPackageVersion>
       <SharedFxDebianPackageName>dotnet-sharedframework-$(SharedFrameworkName)-$(SharedFxDebianPackageVersion)</SharedFxDebianPackageName>
       <SharedFxDebianPackageName>$(SharedFxDebianPackageName.ToLower())</SharedFxDebianPackageName>
@@ -65,10 +63,6 @@
 
     <!-- Output Directories -->
     <PropertyGroup>
-      <InstallerOutputDirectory>$(PackagesDirectory)</InstallerOutputDirectory>
-      <SdkInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionSdk)$(InstallerExtension)</SdkInstallerFile>
-
-      <SdkDebianIntermediateDirectory>$(IntermediateDirectory)/debian/sdk</SdkDebianIntermediateDirectory>
       <DotNetDebToolOutputDirectory>$(SdkDebianIntermediateDirectory)/deb-tool-output</DotNetDebToolOutputDirectory>
       <DebianTestResultsXmlFile>$(SdkDebianIntermediateDirectory)/debian-testResults.xml</DebianTestResultsXmlFile>
     </PropertyGroup>

@@ -2,10 +2,8 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <Target Name="SetupPkgInputsOutputs">
       <PropertyGroup>
-        <InstallerOutputDirectory>$(PackagesDirectory)</InstallerOutputDirectory>
         <PkgIntermediateDirectory>$(IntermediateDirectory)/pkgs/$(SdkVersion)</PkgIntermediateDirectory>
 
-        <SdkInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionSdk)$(InstallerExtension)</SdkInstallerFile>
         <CombinedFrameworkSdkHostInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk)$(BundleExtension)</CombinedFrameworkSdkHostInstallerFile>
 
         <!-- Properties for pkg build -->

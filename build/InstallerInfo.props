@@ -1,0 +1,10 @@
+<Project>
+  <PropertyGroup>
+    <SdkDebianPackageVersion>$(SdkVersion)</SdkDebianPackageVersion>
+    <SdkDebianPackageName>dotnet-dev-$(SdkDebianPackageVersion)</SdkDebianPackageName>
+    <SdkDebianIntermediateDirectory>$(IntermediateDirectory)/debian/sdk</SdkDebianIntermediateDirectory>
+
+    <InstallerOutputDirectory>$(PackagesDirectory)</InstallerOutputDirectory>
+    <SdkInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionSdk)$(InstallerExtension)</SdkInstallerFile>
+  </PropertyGroup>
+</Project>

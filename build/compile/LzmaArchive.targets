@@ -27,7 +27,6 @@
 
     <Target Name="UploadNuGetPackagesArchiveToAzure"
             DependsOnTargets="SetupNuGetPackagesArchiveInputsOutputs;
-                              SetupAzureBlobInformation;
                               GenerateNuGetPackagesArchive"
             Condition=" '$(UploadNuGetPackagesArchiveToAzure)' == 'true' And  '$(PUBLISH_LZMA_TO_AZURE_BLOB)' != '' ">
       <ItemGroup>
@@ -108,7 +107,7 @@
     </Target>
 
     <Target Name="SetupNuGetPackagesArchiveInputsOutputs"
-            DependsOnTargets="Prepare;SetupAzureBlobInformation">
+            DependsOnTargets="Prepare">
       <GenerateNuGetPackagesArchiveVersion ToolPath="$(Stage2Directory)">
         <Output TaskParameter="Version" PropertyName="NuGetPackagesArchiveVersion"/>
       </GenerateNuGetPackagesArchiveVersion>

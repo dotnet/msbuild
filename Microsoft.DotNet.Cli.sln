@@ -24,6 +24,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestPackages", "TestPackage
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{89905EC4-BC0F-443B-8ADF-691321F10108}"
 	ProjectSection(SolutionItems) = preProject
+		build\AzureInfo.props = build\AzureInfo.props
 		build\Branding.props = build\Branding.props
 		build\BranchInfo.props = build\BranchInfo.props
 		build\BuildDefaults.props = build\BuildDefaults.props
@@ -43,6 +44,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{89905EC4
 		build\InitRepo.props = build\InitRepo.props
 		build\InitRepo.targets = build\InitRepo.targets
 		build\InputDirectories.props = build\InputDirectories.props
+		build\InstallerInfo.props = build\InstallerInfo.props
 		build\OutputDirectories.props = build\OutputDirectories.props
 		build\Package.targets = build\Package.targets
 		build\Prepare.targets = build\Prepare.targets
