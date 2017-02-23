@@ -75,7 +75,8 @@
   </Target>
 
   <Target Name="PublishMSBuildExtensions"
-          AfterTargets="Publish">
+          AfterTargets="Publish"
+          BeforeTargets="GenerateCliRuntimeConfigurationFiles">
     
       <Copy SourceFiles="@(MSBuildExtensionsContent)"
             DestinationFolder="$(SdkOutputDirectory)/%(RecursiveDir)" />
@@ -87,6 +88,10 @@
                                                    $(MSBuildTargetsDirectory)/**/*.overridetasks;
                                                    $(MSBuildTargetsDirectory)/**/*.tasks" />
       </ItemGroup>
+
+      <RemoveAssetFromDepsPackages DepsFile="$(PublishDir)/$(TargetName).deps.json"
+                                   SectionName="runtime"
+                                   AssetPath="@(NuPkgContentForMSBuildExtensions->'%(RecursiveDir)%(Filename)%(Extension)'" />
 
       <Move SourceFiles="@(NuPkgContentForMSBuildExtensions)"
             DestinationFiles="@(NuPkgContentForMSBuildExtensions->'$(SdkOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
