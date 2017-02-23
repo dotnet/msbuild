@@ -16,35 +16,25 @@
                                            GetNuGetPackagesArchive;" />
 
   <Target Name="CompileCLI">
-      <ItemGroup>
-        <SharedFramework Remove="*" />
-        <SharedFramework Include="$(SharedFrameworkPublishDirectory)/**/*" />
-
-        <RuntimeTargetsAssetsToRemoveFromDeps Remove="*" />
-        <RuntimeTargetsAssetsToRemoveFromDeps Include="MSBuild" />
-
-        <RuntimeAssetsToRemoveFromDeps Remove="*" />
-        <RuntimeAssetsToRemoveFromDeps Include="redist" />
-        <RuntimeAssetsToRemoveFromDeps Include="tool_msbuild" />
-        <RuntimeAssetsToRemoveFromDeps Include="tool_nuget" />
-      </ItemGroup>
-
-      <RemoveDir Directories="$(StageDirectory)" />
-      <MakeDir Directories="$(StageDirectory)"/>
-
-      <!-- CopySharedFramework -->
-      <Copy SourceFiles="@(SharedFramework)"
-            DestinationFiles="@(SharedFramework->'$(StageDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
-
-    <!-- Workaround for https://github.com/dotnet/sdk/issues/115 -->
     <ItemGroup>
-      <HackFilesToCopy Include="$(NuGetPackagesDir)\microsoft.build.runtime\$(CLI_MSBuild_Version)\contentFiles\any\netcoreapp1.0\**;
-                                $(NuGetPackagesDir)\microsoft.build.runtime\$(CLI_MSBuild_Version)\contentFiles\any\netcoreapp1.1\**;
-                                $(NuGetPackagesDir)\microsoft.codeanalysis.build.tasks\$(CLI_Roslyn_Version)\contentFiles\any\any\**;
-                                $(NuGetPackagesDir)\microsoft.testplatform.cli\$(CLI_TestPlatform_Version)\contentFiles\any\any\**" />
+      <SharedFramework Remove="*" />
+      <SharedFramework Include="$(SharedFrameworkPublishDirectory)/**/*" />
+
+      <RuntimeTargetsAssetsToRemoveFromDeps Remove="*" />
+      <RuntimeTargetsAssetsToRemoveFromDeps Include="MSBuild" />
+
+      <RuntimeAssetsToRemoveFromDeps Remove="*" />
+      <RuntimeAssetsToRemoveFromDeps Include="redist" />
+      <RuntimeAssetsToRemoveFromDeps Include="tool_msbuild" />
+      <RuntimeAssetsToRemoveFromDeps Include="tool_nuget" />
     </ItemGroup>
-    <Copy SourceFiles="@(HackFilesToCopy)"
-          DestinationFiles="@(HackFilesToCopy->'$(SdkOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <RemoveDir Directories="$(StageDirectory)" />
+    <MakeDir Directories="$(StageDirectory)"/>
+
+    <!-- CopySharedFramework -->
+    <Copy SourceFiles="@(SharedFramework)"
+          DestinationFiles="@(SharedFramework->'$(StageDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
 
     <!-- Publish DotNet -->
     <DotNetPublish ToolPath="$(Stage0Directory)"
