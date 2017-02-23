@@ -2,6 +2,7 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildThisFileDirectory)/publish/FinishBuild.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/PublishContent.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)/publish/PublishDebian.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/Badge.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/Checksum.targets" />
 
@@ -15,29 +16,13 @@
 
   <!-- UploadToAzure target comes from Build Tools -->
   <Target Name="PublishArtifacts"
-          DependsOnTargets="SetupAzureBlobInformation;
-                            GenerateVersionBadge;
+          DependsOnTargets="GenerateVersionBadge;
                             GatherItemsForPattern;
                             GenerateChecksums;
                             UploadArtifactsToAzure;
                             UploadChecksumsToAzure;
                             PublishDebFilesToDebianRepo;
                             PublishCliVersionBadge" />
-
-  <Target Name="SetupAzureBlobInformation">
-    <PropertyGroup>
-      <Product>Sdk</Product>
-      <ArtifactContainerName>$(ARTIFACT_STORAGE_CONTAINER)</ArtifactContainerName>
-      <ArtifactContainerName Condition="'$(ArtifactContainerName)' == ''">dotnet</ArtifactContainerName>
-      <ArtifactCloudDropAccessToken>$(ARTIFACT_STORAGE_KEY)</ArtifactCloudDropAccessToken>
-      <ArtifactCloudDropAccountName>$(ARTIFACT_STORAGE_ACCOUNT)</ArtifactCloudDropAccountName>
-      <ArtifactCloudDropAccountName Condition="'$(ArtifactCloudDropAccountName)' == ''">dotnetcli</ArtifactCloudDropAccountName>
-      <DotnetBlobRootUrl>https://$(ArtifactCloudDropAccountName).blob.core.windows.net/$(ArtifactContainerName)</DotnetBlobRootUrl>
-      <ChecksumContainerName>$(CHECKSUM_STORAGE_CONTAINER)</ChecksumContainerName>
-      <ChecksumCloudDropAccessToken>$(CHECKSUM_STORAGE_KEY)</ChecksumCloudDropAccessToken>
-      <ChecksumCloudDropAccountName>$(CHECKSUM_STORAGE_ACCOUNT)</ChecksumCloudDropAccountName>
-    </PropertyGroup>
-  </Target>
 
   <Target Name="GatherItemsForPattern">
     <ItemGroup>
@@ -51,36 +36,6 @@
         <RelativeBlobPath>$(Product)/$(FullNugetVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
       </ForPublishing>
     </ItemGroup>
-  </Target>
-
-  <Target Name="PublishDebFilesToDebianRepo" Condition=" '$(OSName)' == 'ubuntu' AND '$(SkipPublishToDebianRepo)' != 'true' ">
-    <Error Condition="'$(REPO_ID)' == ''" Text="REPO_ID must be set as an environment variable for debian publishing." />
-    <Error Condition="'$(REPO_USER)' == ''" Text="REPO_USER must be set as an environment variable for debian publishing." />
-    <Error Condition="'$(REPO_PASS)' == ''" Text="REPO_PASS must be set as an environment variable for debian publishing." />
-    <Error Condition="'$(REPO_SERVER)' == ''" Text="REPO_SERVER must be set as an environment variable for debian publishing." />
-
-    <ItemGroup>
-      <SdkInstallerFileItemGroup Include="$(SdkInstallerFile)" />
-    </ItemGroup>
-    <PropertyGroup>
-      <SdkDebianUploadUrl>$(DotnetBlobRootUrl)/$(Product)/$(FullNugetVersion)/%(SdkInstallerFileItemGroup.Filename)%(SdkInstallerFileItemGroup.Extension)</SdkDebianUploadUrl>
-      <DebianUploadJsonFile>$(SdkDebianIntermediateDirectory)/package_upload.json</DebianUploadJsonFile>
-      <DebianRevisionNumber>1</DebianRevisionNumber>
-
-      <DebianUploadJsonContent>
-        {
-          "name":"$(SdkDebianPackageName)",
-          "version":"$(NugetVersion)-$(DebianRevisionNumber)",
-          "repositoryId":"$(REPO_ID)",
-          "sourceUrl": "$(SdkDebianUploadUrl)"
-        }
-      </DebianUploadJsonContent>
-    </PropertyGroup>
-
-    <Delete Files="$(DebianUploadJsonFile)" />
-    <WriteLinesToFile File="$(DebianUploadJsonFile)" Lines="$(DebianUploadJsonContent)" />
-
-    <Exec Command="$(RepoRoot)/scripts/publish/repoapi_client.sh -addpkg $(DebianUploadJsonFile)" />
   </Target>
 
   <Target Name="PublishCliVersionBadge">

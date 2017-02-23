@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <InstallerOutputDirectory>$(PackagesDirectory)</InstallerOutputDirectory>
+    <SdkInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionSdk)$(InstallerExtension)</SdkInstallerFile>
+  </PropertyGroup>
+</Project>

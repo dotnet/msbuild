@@ -2,6 +2,15 @@
 
   <PropertyGroup>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
+
+    <NuGetPackagesDir>$(NUGET_PACKAGES)</NuGetPackagesDir>
+    <NuGetPackagesDir Condition=" '$(NuGetPackagesDir)' == '' ">$(RepoRoot)/.nuget/packages</NuGetPackagesDir>
+
+    <CLIBuildDll>$(RepoRoot)/build_projects/dotnet-cli-build/bin/dotnet-cli-build.dll</CLIBuildDll>
+
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+
+    <CliTargetFramework>netcoreapp2.0</CliTargetFramework>
   </PropertyGroup>
 
   <Import Project="build/InitRepo.props" />
@@ -25,17 +34,8 @@
   <Import Project="build/Stage0.props" />
   <Import Project="build/VersionBadge.props" />
   <Import Project="build/BundledRuntimes.props" />
-  
-  <PropertyGroup>
-    <NuGetPackagesDir>$(NUGET_PACKAGES)</NuGetPackagesDir>
-    <NuGetPackagesDir Condition=" '$(NuGetPackagesDir)' == '' ">$(RepoRoot)/.nuget/packages</NuGetPackagesDir>
 
-    <CLIBuildDll>$(RepoRoot)/build_projects/dotnet-cli-build/bin/dotnet-cli-build.dll</CLIBuildDll>
-
-    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
-
-    <CliTargetFramework>netcoreapp2.0</CliTargetFramework>
-  </PropertyGroup>
-
+  <Import Project="build/AzureInfo.props" />
   <Import Project="build/CrossgenInfo.props" />
+  <Import Project="build/InstallerInfo.props" />
 </Project>

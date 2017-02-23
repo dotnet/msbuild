@@ -24,6 +24,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestPackages", "TestPackage
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{89905EC4-BC0F-443B-8ADF-691321F10108}"
 	ProjectSection(SolutionItems) = preProject
+		build\AzureInfo.props = build\AzureInfo.props
 		build\Branding.props = build\Branding.props
 		build\BranchInfo.props = build\BranchInfo.props
 		build\BuildDefaults.props = build\BuildDefaults.props
@@ -44,6 +45,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{89905EC4
 		build\InitRepo.props = build\InitRepo.props
 		build\InitRepo.targets = build\InitRepo.targets
 		build\InputDirectories.props = build\InputDirectories.props
+		build\InstallerInfo.props = build\InstallerInfo.props
 		build\ProjectsToPublish.props = build\ProjectsToPublish.props
 		build\OutputDirectories.props = build\OutputDirectories.props
 		build\Package.targets = build\Package.targets
@@ -88,6 +90,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "publish", "publish", "{27B1
 		build\publish\Badge.targets = build\publish\Badge.targets
 		build\publish\Checksum.targets = build\publish\Checksum.targets
 		build\publish\PublishContent.targets = build\publish\PublishContent.targets
+		build\publish\PublishDebian.targets = build\publish\PublishDebian.targets
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dotnet-cli-build", "build_projects\dotnet-cli-build\dotnet-cli-build.csproj", "{8A2FA2D8-0DA1-4814-B5C1-2ECEAA613EB1}"
