@@ -37,16 +37,6 @@
                    Configuration="$(Configuration)"
                    ProjectPath="$(SrcDirectory)/tool_roslyn/tool_roslyn.csproj" />
 
-      <!-- Copy Host to SDK Directory -->
-      <Copy SourceFiles="$(SharedFrameworkNameVersionPath)/$(DotnetHostBaseName)"
-            DestinationFiles="$(SdkOutputDirectory)/corehost$(ExeExtension)" />
-
-      <Copy SourceFiles="$(SharedFrameworkNameVersionPath)/$(DotnetHostFxrBaseName)"
-            DestinationFiles="$(SdkOutputDirectory)/$(DotnetHostFxrBaseName)" />
-
-      <Copy SourceFiles="$(SharedFrameworkNameVersionPath)/$(HostPolicyBaseName)"
-            DestinationFiles="$(SdkOutputDirectory)/$(HostPolicyBaseName)" />
-
       <!-- copy core sdk -->
       <Copy SourceFiles="@(MSBuildImportsContent)"
             DestinationFolder="$(SdkOutputDirectory)/%(RecursiveDir)" />
