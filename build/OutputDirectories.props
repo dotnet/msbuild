@@ -8,6 +8,7 @@
       <Stage2Directory>$(BaseOutputDirectory)/stage2</Stage2Directory>
       <Stage2SymbolsDirectory>$(BaseOutputDirectory)/stage2symbols</Stage2SymbolsDirectory>
       <Stage2SdkDirectory>$(Stage2Directory)/sdk/$(SdkVersion)</Stage2SdkDirectory>
+      <Stage2RoslynDirectory>$(Stage2SdkDirectory)/Roslyn</Stage2RoslynDirectory>
       <DotnetStage2>$(Stage2Directory)/dotnet$(ExeExtension)</DotnetStage2>
       <OutputDirectory>$(Stage2Directory)/</OutputDirectory>
       <Stage2CompilationDirectory>$(BaseOutputDirectory)/stage2compilation</Stage2CompilationDirectory>

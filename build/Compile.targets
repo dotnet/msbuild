@@ -53,9 +53,7 @@
 
     <!-- Publish Roslyn -->
     <DotNetPublish ToolPath="$(Stage0Directory)"
-                   Output="$(SdkOutputDirectory)/Roslyn"
                    Configuration="$(Configuration)"
-                   VersionSuffix="$(CommitCount)"
                    ProjectPath="$(SrcDirectory)/tool_roslyn/tool_roslyn.csproj" />
 
       <RemoveAssetFromDepsPackages DepsFile="$(SdkOutputDirectory)/redist.deps.json"
