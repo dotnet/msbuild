@@ -90,6 +90,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "publish", "publish", "{27B1
 		build\publish\Badge.targets = build\publish\Badge.targets
 		build\publish\Checksum.targets = build\publish\Checksum.targets
 		build\publish\PublishContent.targets = build\publish\PublishContent.targets
+		build\publish\PublishDebian.targets = build\publish\PublishDebian.targets
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dotnet-cli-build", "build_projects\dotnet-cli-build\dotnet-cli-build.csproj", "{8A2FA2D8-0DA1-4814-B5C1-2ECEAA613EB1}"
