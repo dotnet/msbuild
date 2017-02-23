@@ -267,7 +267,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [InlineData("Microsoft.Extensions.Logging.Debug", "1.1.0", "Microsoft.Extensions.Logging.Debug", "1.1.1")]
         [InlineData("Microsoft.Extensions.Configuration.Json", "1.1.0", "Microsoft.Extensions.Configuration.Json", "1.1.1")]
         [InlineData("Microsoft.Extensions.Configuration.UserSecrets", "1.1.0", "Microsoft.Extensions.Configuration.UserSecrets", "1.1.1")]
-        [InlineData("Microsoft.Extensions.Logging.AzureAppServices", "1.0.0-preview2", "Microsoft.Extensions.Logging.AzureAppServices", "1.0.0")]
+        [InlineData("Microsoft.Extensions.Logging.AzureAppServices", "1.0.0-preview2", "Microsoft.Extensions.Logging.AzureAppServices", "1.0.1")]
         public void ItUpliftsMicrosoftExtensionsPackages(
             string sourcePackageName,
             string sourceVersion,
