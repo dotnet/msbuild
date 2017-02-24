@@ -34,45 +34,106 @@ Build Status
 
 |Ubuntu 14.04 / Linux Mint 17 |Ubuntu 16.04 |Debian 8.2 |Windows x64 |Windows x86 |Mac OS X |CentOS 7.1 / Oracle Linux 7.1 |RHEL 7.2 |OpenSUSE 13.2 |Fedora 23|
 |:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|
-|[![](https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5467/badge)](https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5467)|[![](https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5468/badge)](https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5468)|[![](https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5462/badge)](https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5462)|[![](https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5469/badge)](https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5469)|[![](https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5470/badge)](https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5470)|[![](https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5465/badge)](https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5465)|[![](https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5461/badge)](https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5461)|[![](https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5466/badge)](https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5466)|[![](https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5464/badge)](https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5464)|[![](https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5463/badge)](https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5463)|
+|[![][ubuntu-14.04-build-badge]][ubuntu-14.04-build]|[![][ubuntu-16.04-build-badge]][ubuntu-16.04-build]|[![][debian-8.2-build-badge]][debian-8.2-build]|[![][win-x64-build-badge]][win-x64-build]|[![][win-x86-build-badge]][win-x86-build]|[![][osx-build-badge]][osx-build]|[![][centos-build-badge]][centos-build]|[![][rhel-build-badge]][rhel-build]|[![][opensuse-13.2-build-badge]][opensuse-13.2-build]|[![][fedora-23-build-badge]][fedora-23-build]|
+
+[win-x64-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5469/badge
+[win-x64-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5469
+
+[win-x86-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5470/badge
+[win-x86-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5470
+
+[ubuntu-14.04-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5467/badge
+[ubuntu-14.04-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5467
+
+[ubuntu-16.04-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5468/badge
+[ubuntu-16.04-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5468
+
+[debian-8.2-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5462/badge
+[debian-8.2-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5462
+
+[osx-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5465/badge
+[osx-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5465
+
+[centos-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5461/badge
+[centos-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5461
+
+[rhel-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5466/badge
+[rhel-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5466
+
+[opensuse-13.2-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5464/badge
+[opensuse-13.2-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5464
+
+[fedora-23-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5463/badge
+[fedora-23-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5463
 
 Installers and Binaries
 -----------------------
 
-You can download .NET Core as either an installer (MSI, PKG) or a zip (zip, gzip). You can download the product in two flavors:
+You can download .NET Core SDK as either an installer (MSI, PKG) or a zip (zip, tar.gz). .NET Core SDK contains both the .NET Core runtime and CLI tools.
 
-- .NET Core - .NET Core runtime and framework
-- .NET Core SDK - .NET Core + CLI tools
+In order to download just the .NET Core runtime without the SDK, please visit https://github.com/dotnet/core-setup#daily-builds.
 
 > **Note:** please be aware that below installers are the **latest bits**. If you 
 > want to install the latest released versions, please check out the [section above](#download-links).)
 
-|  | Version | .NET Core Installer | .NET Core SDK Installer | .NET Core Binaries | .NET Core SDK Binaries |
-|----------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
-| **Windows x64** | [![](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/Windows_x64_Release_version_badge.svg)](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/latest.version) | [Download](https://dotnetcli.blob.core.windows.net/dotnet/preview/Installers/Latest/dotnet-win-x64.latest.exe) | [Download](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-win-x64.latest.exe) [Checksums](https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-win-x64.latest.exe.sha) | [Download](https://dotnetcli.blob.core.windows.net/dotnet/preview/Binaries/Latest/dotnet-win-x64.latest.zip) | [Download](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-win-x64.latest.zip) [Checksums](https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-win-x64.latest.zip.sha) |
-| **Windows x86** | [![](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/Windows_x86_Release_version_badge.svg)](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/latest.version) | [Download](https://dotnetcli.blob.core.windows.net/dotnet/preview/Installers/Latest/dotnet-win-x86.latest.exe) | [Download](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-win-x86.latest.exe) [Checksums](https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-win-x86.latest.exe.sha) | [Download](https://dotnetcli.blob.core.windows.net/dotnet/preview/Binaries/Latest/dotnet-win-x86.latest.zip) | [Download](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-win-x86.latest.zip) [Checksums](https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-win-x86.latest.zip.sha) |
-| **Ubuntu 14.04 / Linux Mint 17** | [![](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/Ubuntu_x64_Release_version_badge.svg)](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/latest.version) | *See Below* | *See Below* | [Download](https://dotnetcli.blob.core.windows.net/dotnet/preview/Binaries/Latest/dotnet-ubuntu-x64.latest.tar.gz) | [Download](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-ubuntu-x64.latest.tar.gz) [Checksums](https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-ubuntu-x64.latest.tar.gz.sha) |
-| **Ubuntu 16.04** | [![](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/Ubuntu_16_04_x64_Release_version_badge.svg)](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/latest.version) | N/A | N/A | [Download](https://dotnetcli.blob.core.windows.net/dotnet/preview/Binaries/Latest/dotnet-ubuntu.16.04-x64.latest.tar.gz) | [Download](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-ubuntu.16.04-x64.latest.tar.gz) [Checksums](https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-ubuntu.16.04-x64.latest.tar.gz.sha) |
-| **Debian 8.2** | [![](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/Debian_x64_Release_version_badge.svg)](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/latest.version) | N/A | N/A | [Download](https://dotnetcli.blob.core.windows.net/dotnet/preview/Binaries/Latest/dotnet-debian-x64.latest.tar.gz) | [Download](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-debian-x64.latest.tar.gz) [Checksums](https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-debian-x64.latest.tar.gz.sha) |
-| **Mac OS X** | [![](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/OSX_x64_Release_version_badge.svg)](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/latest.version) | [Download](https://dotnetcli.blob.core.windows.net/dotnet/preview/Installers/Latest/dotnet-osx-x64.latest.pkg) | [Download](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-osx-x64.latest.pkg) [Checksums](https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-osx-x64.latest.pkg.sha) | [Download](https://dotnetcli.blob.core.windows.net/dotnet/preview/Binaries/Latest/dotnet-osx-x64.latest.tar.gz) | [Download](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-osx-x64.latest.tar.gz) [Checksums](https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-osx-x64.latest.tar.gz.sha) |
-| **CentOS 7.1 / Oracle Linux 7** | [![](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/CentOS_x64_Release_version_badge.svg)](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/latest.version) | N/A | N/A | [Download](https://dotnetcli.blob.core.windows.net/dotnet/preview/Binaries/Latest/dotnet-centos-x64.latest.tar.gz) | [Download](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-centos-x64.latest.tar.gz) [Checksums](https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-centos-x64.latest.tar.gz.sha) |
-| **RHEL 7.2** | [![](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/RHEL_x64_Release_version_badge.svg)](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/latest.version) | N/A | N/A | [Download](https://dotnetcli.blob.core.windows.net/dotnet/preview/Binaries/Latest/dotnet-rhel-x64.latest.tar.gz) | [Download](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-rhel-x64.latest.tar.gz) [Checksums](https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-rhel-x64.latest.tar.gz.sha) |
-| **openSUSE 13.2** | [![](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/openSUSE_13_2_x64_Release_version_badge.svg)](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/latest.version) | N/A | N/A | [Download](https://dotnetcli.blob.core.windows.net/dotnet/preview/Binaries/Latest/dotnet-opensuse.13.2-x64.latest.tar.gz) | [Download](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-opensuse.13.2-x64.latest.tar.gz) [Checksums](https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-opensuse.13.2-x64.latest.tar.gz.sha) |
-| **Fedora 23** | [![](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/Fedora_23_x64_Release_version_badge.svg)](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/latest.version) | N/A | N/A | [Download](https://dotnetcli.blob.core.windows.net/dotnet/preview/Binaries/Latest/dotnet-fedora.23-x64.latest.tar.gz) | [Download](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-fedora.23-x64.latest.tar.gz) [Checksums](https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-fedora.23-x64.latest.tar.gz.sha) |
+| Platform | rel/1.0.0<br>[![][version-badge]][version] |
+|----------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| **Windows x64** | [Installer][win-x64-installer] - [Checksum][win-x64-installer-checksum]<br>[zip][win-x64-zip] - [Checksum][win-x64-zip-checksum] |
+| **Windows x86** | [Installer][win-x86-installer] - [Checksum][win-x86-installer-checksum]<br>[zip][win-x86-zip] - [Checksum][win-x86-zip-checksum] |
+| **Ubuntu 14.04 / Linux Mint 17** | [Installer][ubuntu-14.04-installer] - [Checksum][ubuntu-14.04-installer-checksum]<br>*See Installer Note Below<br>[tar.gz][ubuntu-14.04-targz] - [Checksum][ubuntu-14.04-targz-checksum] |
+| **Ubuntu 16.04** | [Installer][ubuntu-16.04-installer] - [Checksum][ubuntu-16.04-installer-checksum]<br>*See Installer Note Below<br>[tar.gz][ubuntu-16.04-targz] - [Checksum][ubuntu-16.04-targz-checksum] |
+| **Debian 8.2** | [tar.gz][debian-8.2-targz] - [Checksum][debian-8.2-targz-checksum] |
+| **Mac OS X** | [Installer][osx-installer] - [Checksum][osx-installer-checksum]<br>[tar.gz][osx-targz] - [Checksum][osx-targz-checksum] |
+| **CentOS 7.1 / Oracle Linux 7** | [tar.gz][centos-targz] - [Checksum][centos-targz-checksum] |
+| **RHEL 7.2** | [tar.gz][rhel-targz] - [Checksum][rhel-targz-checksum] |
+| **openSUSE 13.2** | [tar.gz][opensuse-13.2-targz] - [Checksum][opensuse-13.2-targz-checksum] |
+| **Fedora 23** | [tar.gz][fedora-23-targz] - [Checksum][fedora-23-targz-checksum] |
 
-Ubuntu Installers
-----------
+*Note: Our Debian packages are put together slightly differently than the other OS specific installers. Instead of combining everything, we have separate component packages that depend on each other. If you're installing these directly from the .deb files (via dpkg or similar), then you'll need to install the [corresponding Host, Host FX Resolver, and Shared Framework packages](https://github.com/dotnet/core-setup#daily-builds) before installing the Sdk package.*
 
-*Our Debian packages are put together slightly differently than the other OS specific installers. Instead of combining everything, we have separate component packages that depend on each other. If you're installing these directly from the .deb files (via dpkg or similar), then you'll need to install them in the order presented below.*
+[version]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/latest.version
+[comment]: # (The latest versions are always the same across all platforms. Just need one to show, so picking win-x64's svg.)
+[version-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/Windows_x64_Release_version_badge.svg
 
-**For Ubuntu 14.04
+[win-x64-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-win-x64.latest.exe
+[win-x64-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-win-x64.latest.exe.sha
+[win-x64-zip]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-win-x64.latest.zip
+[win-x64-zip-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-win-x64.latest.zip.sha
 
-|         |Version |Installers|
-|---------|:------:|:------:|:------:|
-|**Shared Host**|[![](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/Ubuntu_x64_Release_version_badge.svg)](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/latest.version)|[Download](https://dotnetcli.blob.core.windows.net/dotnet/preview/Installers/Latest/dotnet-host-ubuntu-x64.latest.deb)|
-|**Host Framework Resolver**|[![](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/Ubuntu_x64_Release_version_badge.svg)](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/latest.version)|[Download](https://dotnetcli.blob.core.windows.net/dotnet/preview/Installers/Latest/dotnet-hostfxr-ubuntu-x64.latest.deb)|
-|**Shared Framework**|[![](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/Ubuntu_x64_Release_version_badge.svg)](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/latest.version)|[Download](https://dotnetcli.blob.core.windows.net/dotnet/preview/Installers/Latest/dotnet-sharedframework-ubuntu-x64.latest.deb)|
-|**Sdk**|[![](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/Ubuntu_x64_Release_version_badge.svg)](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/latest.version)|[Download](https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-sdk-ubuntu-x64.latest.deb)|
+[win-x86-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-win-x86.latest.exe
+[win-x86-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-win-x86.latest.exe.sha
+[win-x86-zip]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-win-x86.latest.zip
+[win-x86-zip-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-win-x86.latest.zip.sha
+
+[ubuntu-14.04-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-sdk-ubuntu-x64.latest.deb
+[ubuntu-14.04-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-sdk-ubuntu-x64.latest.deb.sha
+[ubuntu-14.04-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-ubuntu-x64.latest.tar.gz
+[ubuntu-14.04-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-ubuntu-x64.latest.tar.gz.sha
+
+[ubuntu-16.04-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-sdk-ubuntu.16.04-x64.latest.deb
+[ubuntu-16.04-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-sdk-ubuntu.16.04-x64.latest.deb.sha
+[ubuntu-16.04-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-ubuntu.16.04-x64.latest.tar.gz
+[ubuntu-16.04-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-ubuntu.16.04-x64.latest.tar.gz.sha
+
+[debian-8.2-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-debian-x64.latest.tar.gz
+[debian-8.2-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-debian-x64.latest.tar.gz.sha
+
+[osx-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-osx-x64.latest.pkg
+[osx-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-osx-x64.latest.pkg.sha
+[osx-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-osx-x64.latest.tar.gz
+[osx-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-osx-x64.latest.tar.gz.sha
+
+[centos-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-centos-x64.latest.tar.gz
+[centos-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-centos-x64.latest.tar.gz.sha
+
+[rhel-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-rhel-x64.latest.tar.gz
+[rhel-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-rhel-x64.latest.tar.gz.sha
+
+[opensuse-13.2-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-opensuse.13.2-x64.latest.tar.gz
+[opensuse-13.2-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-opensuse.13.2-x64.latest.tar.gz.sha
+
+[fedora-23-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-fedora.23-x64.latest.tar.gz
+[fedora-23-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-fedora.23-x64.latest.tar.gz.sha
 
 Docker
 ------
