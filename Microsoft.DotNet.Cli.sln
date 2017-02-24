@@ -26,6 +26,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{89905EC4
 	ProjectSection(SolutionItems) = preProject
 		build\AzureInfo.props = build\AzureInfo.props
 		build\Branding.props = build\Branding.props
+		build\BranchInfo.props = build\BranchInfo.props
 		build\BuildDefaults.props = build\BuildDefaults.props
 		build\BundledRuntimes.props = build\BundledRuntimes.props
 		build\BundledSdks.proj = build\BundledSdks.proj

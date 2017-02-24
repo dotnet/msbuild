@@ -17,6 +17,8 @@
   <Import Condition=" Exists('$(GitCommitInfoProps)') Or '$(GeneratingPropsFile)' != 'true' " Project="$(GitCommitInfoProps)" />
   <Import Condition=" Exists('$(HostInfoProps)') Or '$(GeneratingPropsFile)' != 'true' " Project="$(HostInfoProps)" />
 
+  <Import Project="build/BranchInfo.props" />
+
   <Import Project="build/BundledTools.props" />
   <Import Project="build/DependencyVersions.props" />
   <Import Project="build/Version.props" />
