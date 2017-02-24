@@ -2,5 +2,19 @@
   <PropertyGroup>
     <InstallerOutputDirectory>$(PackagesDirectory)</InstallerOutputDirectory>
     <SdkInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionSdk)$(InstallerExtension)</SdkInstallerFile>
+    <CombinedFrameworkSdkHostInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk)$(BundleExtension)</CombinedFrameworkSdkHostInstallerFile>
+
+    <SdkDebianIntermediateDirectory>$(IntermediateDirectory)/debian/sdk</SdkDebianIntermediateDirectory>
+    <LayoutDirectory Condition=" '$(OSName)' == 'ubuntu' ">$(SdkDebianIntermediateDirectory)/debianLayoutDirectory</LayoutDirectory>
+    <LayoutDirectory Condition=" '$(OSName)' != 'ubuntu' ">$(IntermediateDirectory)/layouts</LayoutDirectory>
+    <SdkLayoutOutputDirectory>$(LayoutDirectory)/$(ArtifactNameSdk)</SdkLayoutOutputDirectory>
   </PropertyGroup>
+
+  <!-- Consumed By Publish -->
+  <ItemGroup>
+    <GeneratedInstallers Condition=" '$(OSName)' == 'ubuntu' "
+                         Include="$(SdkInstallerFile)" />
+    <GeneratedInstallers Condition=" '$(OSName)' != 'ubuntu' "
+                         Include="$(SdkInstallerFile);$(CombinedFrameworkSdkHostInstallerFile)" />
+  </ItemGroup>
 </Project>

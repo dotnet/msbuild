@@ -1,41 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PkgIntermediateDirectory>$(IntermediateDirectory)/pkgs/$(SdkVersion)</PkgIntermediateDirectory>
+
+    <!-- Properties for pkg build -->
+    <SharedHostComponentId>com.microsoft.dotnet.sharedhost.$(SharedHostVersion).component.osx.x64</SharedHostComponentId>
+    <HostFxrComponentId>com.microsoft.dotnet.hostfxr.$(HostFxrVersion).component.osx.x64</HostFxrComponentId>
+    <SharedFrameworkComponentId>com.microsoft.dotnet.sharedframework.$(SharedFrameworkNugetName).$(SharedFrameworkVersion).component.osx.x64</SharedFrameworkComponentId>
+    <SdkComponentId>com.microsoft.dotnet.dev.$(SdkVersion).component.osx.x64</SdkComponentId>
+    <SdkProductArchiveId>com.microsoft.dotnet.dev.$(SdkVersion).osx.x64</SdkProductArchiveId>
+
+    <AdditionalSharedHostComponentId>com.microsoft.dotnet.sharedhost.$(AdditionalSharedHostVersion).component.osx.x64</AdditionalSharedHostComponentId>
+    <AdditionalHostFxrComponentId>com.microsoft.dotnet.hostfxr.$(AdditionalHostFxrVersion).component.osx.x64</AdditionalHostFxrComponentId>
+    <AdditionalSharedFrameworkComponentId>com.microsoft.dotnet.sharedframework.$(SharedFrameworkNugetName).$(AdditionalSharedFrameworkVersion).component.osx.x64</AdditionalSharedFrameworkComponentId>
+
+    <PkgInstallDirectory>/usr/local/share/dotnet</PkgInstallDirectory>
+
+    <SdkPkgSourcesRootDirectory>$(RepoRoot)/packaging/osx/clisdk</SdkPkgSourcesRootDirectory>
+    <SdkPkgScriptsDirectory>$(SdkPkgSourcesRootDirectory)/scripts</SdkPkgScriptsDirectory>
+    <SdkProductArchiveResourcesDirectory>$(SdkPkgSourcesRootDirectory)/resources</SdkProductArchiveResourcesDirectory>
+
+    <SdkProductArchiveDistributionTemplateFile>$(SdkPkgSourcesRootDirectory)/Distribution-Template</SdkProductArchiveDistributionTemplateFile>
+    <SdkProductArchiveDistributionFile>$(PkgIntermediateDirectory)/CLI-SDK-Formatted-Distribution-Template.xml</SdkProductArchiveDistributionFile>
+
+    <SdkPkgIntermediatePath>$(PkgIntermediateDirectory)/$(SdkComponentId).pkg</SdkPkgIntermediatePath>
+    <SharedFrameworkPkgIntermediatePath>$(PkgIntermediateDirectory)/$(SharedFrameworkComponentId).pkg</SharedFrameworkPkgIntermediatePath>
+    <SharedHostPkgIntermediatePath>$(PkgIntermediateDirectory)/$(SharedHostComponentId).pkg</SharedHostPkgIntermediatePath>
+    <HostFxrPkgIntermediatePath>$(PkgIntermediateDirectory)/$(HostFxrComponentId).pkg</HostFxrPkgIntermediatePath>
+
+    <AdditionalSharedFrameworkPkgIntermediatePath>$(PkgIntermediateDirectory)/$(AdditionalSharedFrameworkComponentId).pkg</AdditionalSharedFrameworkPkgIntermediatePath>
+    <AdditionalSharedHostPkgIntermediatePath>$(PkgIntermediateDirectory)/$(AdditionalSharedHostComponentId).pkg</AdditionalSharedHostPkgIntermediatePath>
+    <AdditionalHostFxrPkgIntermediatePath>$(PkgIntermediateDirectory)/$(AdditionalHostFxrComponentId).pkg</AdditionalHostFxrPkgIntermediatePath>
+  </PropertyGroup>
+  
     <Target Name="SetupPkgInputsOutputs">
-      <PropertyGroup>
-        <PkgIntermediateDirectory>$(IntermediateDirectory)/pkgs/$(SdkVersion)</PkgIntermediateDirectory>
-
-        <CombinedFrameworkSdkHostInstallerFile>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk)$(BundleExtension)</CombinedFrameworkSdkHostInstallerFile>
-
-        <!-- Properties for pkg build -->
-        <SharedHostComponentId>com.microsoft.dotnet.sharedhost.$(SharedHostVersion).component.osx.x64</SharedHostComponentId>
-        <HostFxrComponentId>com.microsoft.dotnet.hostfxr.$(HostFxrVersion).component.osx.x64</HostFxrComponentId>
-        <SharedFrameworkComponentId>com.microsoft.dotnet.sharedframework.$(SharedFrameworkNugetName).$(SharedFrameworkVersion).component.osx.x64</SharedFrameworkComponentId>
-        <SdkComponentId>com.microsoft.dotnet.dev.$(SdkVersion).component.osx.x64</SdkComponentId>
-        <SdkProductArchiveId>com.microsoft.dotnet.dev.$(SdkVersion).osx.x64</SdkProductArchiveId>
-
-        <AdditionalSharedHostComponentId>com.microsoft.dotnet.sharedhost.$(AdditionalSharedHostVersion).component.osx.x64</AdditionalSharedHostComponentId>
-        <AdditionalHostFxrComponentId>com.microsoft.dotnet.hostfxr.$(AdditionalHostFxrVersion).component.osx.x64</AdditionalHostFxrComponentId>
-        <AdditionalSharedFrameworkComponentId>com.microsoft.dotnet.sharedframework.$(SharedFrameworkNugetName).$(AdditionalSharedFrameworkVersion).component.osx.x64</AdditionalSharedFrameworkComponentId>
-
-        <PkgInstallDirectory>/usr/local/share/dotnet</PkgInstallDirectory>
-
-        <SdkPkgSourcesRootDirectory>$(RepoRoot)/packaging/osx/clisdk</SdkPkgSourcesRootDirectory>
-        <SdkPkgScriptsDirectory>$(SdkPkgSourcesRootDirectory)/scripts</SdkPkgScriptsDirectory>
-        <SdkProductArchiveResourcesDirectory>$(SdkPkgSourcesRootDirectory)/resources</SdkProductArchiveResourcesDirectory>
-
-        <SdkProductArchiveDistributionTemplateFile>$(SdkPkgSourcesRootDirectory)/Distribution-Template</SdkProductArchiveDistributionTemplateFile>
-        <SdkProductArchiveDistributionFile>$(PkgIntermediateDirectory)/CLI-SDK-Formatted-Distribution-Template.xml</SdkProductArchiveDistributionFile>
-
-        <SdkPkgIntermediatePath>$(PkgIntermediateDirectory)/$(SdkComponentId).pkg</SdkPkgIntermediatePath>
-        <SharedFrameworkPkgIntermediatePath>$(PkgIntermediateDirectory)/$(SharedFrameworkComponentId).pkg</SharedFrameworkPkgIntermediatePath>
-        <SharedHostPkgIntermediatePath>$(PkgIntermediateDirectory)/$(SharedHostComponentId).pkg</SharedHostPkgIntermediatePath>
-        <HostFxrPkgIntermediatePath>$(PkgIntermediateDirectory)/$(HostFxrComponentId).pkg</HostFxrPkgIntermediatePath>
-
-        <AdditionalSharedFrameworkPkgIntermediatePath>$(PkgIntermediateDirectory)/$(AdditionalSharedFrameworkComponentId).pkg</AdditionalSharedFrameworkPkgIntermediatePath>
-        <AdditionalSharedHostPkgIntermediatePath>$(PkgIntermediateDirectory)/$(AdditionalSharedHostComponentId).pkg</AdditionalSharedHostPkgIntermediatePath>
-        <AdditionalHostFxrPkgIntermediatePath>$(PkgIntermediateDirectory)/$(AdditionalHostFxrComponentId).pkg</AdditionalHostFxrPkgIntermediatePath>
-      </PropertyGroup>
-
       <ItemGroup>
         <DistributionTemplateReplacement Include="{SharedFxComponentId}">
           <ReplacementString>$(SharedFrameworkComponentId)</ReplacementString>
@@ -82,11 +80,6 @@
         <DistributionTemplateReplacement Include="{AdditionalHostFxrBrandName}">
           <ReplacementString>$(AdditionalHostFxrBrandName)</ReplacementString>
         </DistributionTemplateReplacement>
-      </ItemGroup>
-
-      <!-- Consumed By Publish -->
-      <ItemGroup>
-        <GeneratedInstallers Include="$(SdkInstallerFile);$(CombinedFrameworkSdkHostInstallerFile)" />
       </ItemGroup>
 
       <ItemGroup>
