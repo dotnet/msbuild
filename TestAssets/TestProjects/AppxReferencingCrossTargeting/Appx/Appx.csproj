@@ -9,8 +9,14 @@
     <ProjectReference Include="../CrossTargeted/CrossTargeted.csproj" />
   </ItemGroup>
  
-  <!-- Mimic enough of Microsoft.AppxPackage.targets to get regression coverage
-       for the scenario without OS or VS workload dependencies -->
+  <!--
+    Mimic enough of Microsoft.AppxPackage.targets to get regression coverage
+    for the scenario without OS or VS workload dependencies. One important
+    distinction between this mock implementation and the real implementation
+    is that we never continue on error here, which allows the correspodning
+    unit test to check for successful binding to GetPackagingOutputs as simply
+    build pass vs. fail.
+  -->
   <Target Name="GetPackagingOutputsOfProjectReferences" 
           AfterTargets="Build"
           DependsOnTargets="AssignProjectConfiguration;_SplitProjectReferencesByFileExistence">
