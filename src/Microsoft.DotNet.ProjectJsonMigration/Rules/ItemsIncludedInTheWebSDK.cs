@@ -10,6 +10,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             return content.Equals("wwwroot") ||
                 content.Contains("web.config") ||
                 content.Equals("**/*.cshtml") ||
+                content.Equals(@"**\*.cshtml") ||
                 content.Contains(".json");
         }
     }
