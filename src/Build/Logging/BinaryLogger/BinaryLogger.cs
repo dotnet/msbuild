@@ -73,7 +73,7 @@ namespace Microsoft.Build.Logging
             {
                 // It's hard to determine whether we're at the end of decoding GZipStream
                 // so add an explicit 0 at the end to signify end of file
-                stream.WriteByte(0);
+                stream.WriteByte((byte)BinaryLogRecordKind.EndOfFile);
                 stream.Flush();
                 stream.Dispose();
                 stream = null;
