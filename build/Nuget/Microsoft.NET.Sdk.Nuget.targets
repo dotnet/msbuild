@@ -28,12 +28,12 @@
       </CopyLocalAssembly>
 
       <CopyLocalAssembly Include="Microsoft.Extensions.DependencyModel">
-        <Version>$(CoreSetupVersion)</Version>
+        <Version>$(DependencyModelVersion)</Version>
         <TFM>netstandard1.3</TFM>
         <DestinationTFM>netcoreapp1.0</DestinationTFM>
       </CopyLocalAssembly>
       <CopyLocalAssembly Include="Microsoft.DotNet.PlatformAbstractions">
-        <Version>$(CoreSetupVersion)</Version>
+        <Version>$(PlatformAbstractionsVersion)</Version>
         <TFM>netstandard1.3</TFM>
         <DestinationTFM>netcoreapp1.0</DestinationTFM>
       </CopyLocalAssembly>
