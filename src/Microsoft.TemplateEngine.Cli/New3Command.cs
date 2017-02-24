@@ -652,9 +652,9 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        private static IEnumerable<ITemplateParameter> FilterParamsForHelp(IParameterSet allParams, HashSet<string> hiddenParams)
+        private static IEnumerable<ITemplateParameter> FilterParamsForHelp(IEnumerable<ITemplateParameter> parameterDefinitions, HashSet<string> hiddenParams)
         {
-            IEnumerable<ITemplateParameter> filteredParams = allParams.ParameterDefinitions
+            IEnumerable<ITemplateParameter> filteredParams = parameterDefinitions
                 .Where(x => x.Priority != TemplateParameterPriority.Implicit && !hiddenParams.Contains(x.Name)
                         && (x.DataType != "choice" || x.Choices.Count > 1));    // for filtering "tags"
             return filteredParams;
@@ -663,10 +663,10 @@ namespace Microsoft.TemplateEngine.Cli
         private void GenerateUsageForTemplate(ITemplateInfo templateInfo)
         {
             HostSpecificTemplateData hostTemplateData = ReadHostSpecificTemplateData(templateInfo);
-            IParameterSet allParams = templateInfo.GetParametersForTemplate();
 
             Reporter.Output.Write($"    dotnet {CommandName} {templateInfo.ShortName}");
-            IEnumerable<ITemplateParameter> filteredParams = FilterParamsForHelp(allParams, hostTemplateData.HiddenParameterNames);
+            IEnumerable<ITemplateParameter> allParameterDefinitions = TemplateParametersForTemplate(templateInfo);
+            IEnumerable<ITemplateParameter> filteredParams = FilterParamsForHelp(allParameterDefinitions, hostTemplateData.HiddenParameterNames);
 
             foreach (ITemplateParameter parameter in filteredParams)
             {
@@ -687,6 +687,40 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             Reporter.Output.WriteLine();
+        }
+
+        private static IEnumerable<ITemplateParameter> TemplateParametersForTemplate(ITemplateInfo templateInfo)
+        {
+            IList<ITemplateParameter> parameters = new List<ITemplateParameter>();
+
+            foreach (KeyValuePair<string, ICacheTag> tagInfo in templateInfo.Tags)
+            {
+                ITemplateParameter param = new TemplateParameter
+                {
+                    Name = tagInfo.Key,
+                    Documentation = tagInfo.Value.Description,
+                    DefaultValue = tagInfo.Value.DefaultValue,
+                    Choices = tagInfo.Value.ChoicesAndDescriptions,
+                    DataType = "choice"
+                };
+
+                parameters.Add(param);
+            }
+
+            foreach (KeyValuePair<string, ICacheParameter> paramInfo in templateInfo.CacheParameters)
+            {
+                ITemplateParameter param = new TemplateParameter
+                {
+                    Name = paramInfo.Key,
+                    Documentation = paramInfo.Value.Description,
+                    DataType = paramInfo.Value.DataType,
+                    DefaultValue = paramInfo.Value.DefaultValue
+                };
+
+                parameters.Add(param);
+            }
+
+            return parameters;
         }
 
         private bool Initialize()
@@ -742,7 +776,7 @@ namespace Microsoft.TemplateEngine.Cli
                 Reporter.Output.WriteLine();
             }
 
-            IEnumerable<ITemplateParameter> filteredParams = FilterParamsForHelp(allParams, hiddenParams);
+            IEnumerable<ITemplateParameter> filteredParams = FilterParamsForHelp(allParams.ParameterDefinitions, hiddenParams);
 
             if (filteredParams.Any())
             {
@@ -835,10 +869,10 @@ namespace Microsoft.TemplateEngine.Cli
         // Use this for when the template is known.
         private void ParseTemplateArgs(ITemplateInfo templateInfo)
         {
-            IParameterSet allParams = templateInfo.GetParametersForTemplate();
+            IEnumerable<ITemplateParameter> parameterDefinitions = TemplateParametersForTemplate(templateInfo);
             _hostSpecificTemplateData = ReadHostSpecificTemplateData(templateInfo);
 
-            IEnumerable<KeyValuePair<string, string>> argParameters = allParams.ParameterDefinitions
+            IEnumerable<KeyValuePair<string, string>> argParameters = parameterDefinitions
                                                             .Where(x => x.Priority != TemplateParameterPriority.Implicit)
                                                             .OrderBy(x => x.Name)
                                                             .Select(x => new KeyValuePair<string, string>(x.Name, x.DataType));
@@ -853,10 +887,10 @@ namespace Microsoft.TemplateEngine.Cli
             _app.Reset();
             SetupInternalCommands(_app);
 
-            IParameterSet allParams = templateInfo.GetParametersForTemplate();
+            IEnumerable<ITemplateParameter> parameterDefinitions = TemplateParametersForTemplate(templateInfo);
             _hostSpecificTemplateData = ReadHostSpecificTemplateData(templateInfo);
 
-            IEnumerable<KeyValuePair<string, string>> argParameters = allParams.ParameterDefinitions
+            IEnumerable<KeyValuePair<string, string>> argParameters = parameterDefinitions
                                                                         .Where(x => x.Priority != TemplateParameterPriority.Implicit)
                                                                         .OrderBy(x => x.Name)
                                                                         .Select(x => new KeyValuePair<string, string>(x.Name, x.DataType));
