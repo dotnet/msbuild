@@ -19,6 +19,9 @@ namespace Microsoft.DotNet.Cli.Build
         }
 
         [Required]
+        public string SDKVersion { get; set; }
+
+        [Required]
         public string ToolPath { get; set; }
 
         [Output]
@@ -69,6 +72,8 @@ namespace Microsoft.DotNet.Cli.Build
 
                 Directory.Delete(targetDir, true);
             }
+
+            dataToHash += SDKVersion;
 
             Log.LogMessage($"NuGet Packages Archive Data To Hash: '{dataToHash}'");
 
