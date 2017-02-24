@@ -83,6 +83,8 @@ namespace Microsoft.TemplateEngine.Cli
 
         public bool IsShowAllFlagSpecified => _app.InternalParamHasValue("--show-all");
 
+        public string Filter => _app.InternalParamValue("--filter");
+
         public string Language => _app.InternalParamValue("--language");
 
         public string Locale => _app.InternalParamValue("--locale");
@@ -895,22 +897,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         private string DetermineTemplateContext()
         {
-            string outputPath = OutputPath ?? EnvironmentSettings.Host.FileSystem.GetCurrentDirectory();
-
-            string context = null;
-            if (!IsShowAllFlagSpecified)
-            {
-                if (EnvironmentSettings.Host.FileSystem.DirectoryExists(outputPath) && EnvironmentSettings.Host.FileSystem.EnumerateFiles(outputPath, "*.*proj", SearchOption.TopDirectoryOnly).Any())
-                {
-                    context = "item";
-                }
-                else
-                {
-                    context = "project";
-                }
-            }
-
-            return context;
+            return Filter?.ToLowerInvariant();
         }
 
         private void PerformCoreTemplateQuery()
@@ -1029,7 +1016,7 @@ namespace Microsoft.TemplateEngine.Cli
             appExt.InternalOption("-n|--name", "--name", LocalizableStrings.NameOfOutput, CommandOptionType.SingleValue);
             appExt.InternalOption("-o|--output", "--output", LocalizableStrings.OutputPath, CommandOptionType.SingleValue);
             appExt.InternalOption("-h|--help", "--help", LocalizableStrings.DisplaysHelp, CommandOptionType.NoValue);
-            appExt.InternalOption("-all|--show-all", "--show-all", LocalizableStrings.ShowsAllTemplates, CommandOptionType.NoValue);
+            appExt.InternalOption("--filter", "--filter", LocalizableStrings.ShowsFilteredTemplates, CommandOptionType.SingleValue);
             appExt.InternalOption("--force", "--force", LocalizableStrings.ForcesTemplateCreation, CommandOptionType.NoValue);
 
             // hidden
@@ -1039,6 +1026,7 @@ namespace Microsoft.TemplateEngine.Cli
             appExt.HiddenInternalOption("--quiet", "--quiet", CommandOptionType.NoValue);
             appExt.HiddenInternalOption("-i|--install", "--install", CommandOptionType.MultipleValue);
             appExt.HiddenInternalOption("-t|--type", "--type", CommandOptionType.SingleValue);
+            appExt.HiddenInternalOption("-all|--show-all", "--show-all", CommandOptionType.NoValue);
 
             // reserved but not currently used
             appExt.HiddenInternalOption("-up|--update", "--update", CommandOptionType.MultipleValue);
@@ -1160,7 +1148,7 @@ namespace Microsoft.TemplateEngine.Cli
                 additionalInfo = string.Format(LocalizableStrings.InvalidParameterValues, badParams, templateInfo.Name);
             }
 
-            ParameterHelp(_app.AllTemplateParams, allParams, additionalInfo, _hostSpecificTemplateData.HiddenParameterNames);
+            ParameterHelp(_app.AllTemplateParams, allParams, additionalInfo, _hostSpecificTemplateData?.HiddenParameterNames ?? new HashSet<string>());
         }
 
         // Returns true if any partial matches were displayed, false otherwise
@@ -1202,24 +1190,21 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 if (template.Info.Tags != null && template.Info.Tags.TryGetValue("type", out ICacheTag typeTag))
                 {
-                    if (typeTag.ChoicesAndDescriptions.ContainsKey("item"))
+                    MatchInfo? matchInfo = WellKnownSearchFilters.ContextFilter(DetermineTemplateContext())(template.Info, null);
+                    if ((matchInfo?.Kind ?? MatchKind.Mismatch) == MatchKind.Mismatch)
                     {
-                        Reporter.Error.WriteLine("  - " + string.Format(LocalizableStrings.ItemTemplateNotInProjectContext, template.Info.Name));
-                    }
-                    else if (typeTag.ChoicesAndDescriptions.ContainsKey("project"))
-                    {   // project template
-                        Reporter.Error.WriteLine("  - " + string.Format(LocalizableStrings.ProjectTemplateInProjectContext, template.Info.Name));
+                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplateNotValidGivenTheSpecifiedFilter, template.Info.Name).Bold().Red());
                     }
                 }
                 else
                 {   // this really shouldn't ever happen. But better to have a generic error than quietly ignore the partial match.
-                    Reporter.Error.WriteLine("  - " + string.Format(LocalizableStrings.GenericPlaceholderTemplateContextError, template.Info.Name));
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.GenericPlaceholderTemplateContextError, template.Info.Name).Bold().Red());
                 }
             }
 
             if (remainingPartialMatches.Keys.Count > 0)
             {
-                Reporter.Error.WriteLine(LocalizableStrings.TemplateMultiplePartialNameMatches);
+                Reporter.Error.WriteLine(LocalizableStrings.TemplateMultiplePartialNameMatches.Bold().Red());
             }
 
             Reporter.Error.WriteLine();
