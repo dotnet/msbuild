@@ -7,6 +7,9 @@
     <PathListSeparator Condition=" '$(OSName)' == 'win' ">%3b</PathListSeparator>
     <ExecPath>$(Stage2Directory)$(PathListSeparator)$(PATH)</ExecPath>
     <ExecPath Condition=" '$(OSName)' == 'win' ">$(Stage2Directory)</ExecPath>
+    <TestPackagesDir>$(TestOutputDir)/packages/</TestPackagesDir>
+    <TestArtifactsDir>$(TestOutputDir)/artifacts/</TestArtifactsDir>
+    <TestResultXmlDir>$(TestOutputDir)/results/</TestResultXmlDir>
   </PropertyGroup>
 
   <ItemGroup>

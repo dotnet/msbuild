@@ -3,7 +3,6 @@
 
     <PropertyGroup>
       <UploadNuGetPackagesArchiveToAzure>false</UploadNuGetPackagesArchiveToAzure>
-      <ArchiverDll>$(ToolsOutputDirectory)/Archiver.dll</ArchiverDll>
       <NuGetConfigContent>
         &lt;configuration&gt;
         &lt;packageSources&gt;
@@ -11,7 +10,13 @@
         &lt;/packageSources&gt;
         &lt;/configuration&gt;
       </NuGetConfigContent>
+
+      <NuGetPackagesArchiveProject>$(IntermediateDirectory)/NuGetPackagesArchiveProject</NuGetPackagesArchiveProject>
+      <NuGetPackagesArchiveFolder>$(IntermediateDirectory)/NuGetPackagesArchiveFolder</NuGetPackagesArchiveFolder>
       <LZMANuGetConfigFilePath>$(NuGetPackagesArchiveProject)/Nuget.config</LZMANuGetConfigFilePath>
+      <ToolsOutputDirectory>$(BaseOutputDirectory)/tools</ToolsOutputDirectory>
+      <ArchiverDll>$(ToolsOutputDirectory)/Archiver.dll</ArchiverDll>
+      <FinalArchive>$(Stage2Directory)/sdk/$(SdkVersion)/nuGetPackagesArchive.lzma</FinalArchive>
     </PropertyGroup>
 
     <Target Name="GetNuGetPackagesArchive"

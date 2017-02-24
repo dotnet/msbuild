@@ -5,7 +5,6 @@
       <DotnetStage0>$(Stage0Directory)/dotnet$(ExeExtension)</DotnetStage0>
       <IsDesktopAvailable>False</IsDesktopAvailable>
       <IsDesktopAvailable Condition=" '$(OSName)' == 'win' ">True</IsDesktopAvailable>
-      <DotNetPath>$(Stage0Directory)</DotNetPath>
       <CoreCLRRid>$(Rid)</CoreCLRRid>
       <CoreCLRRid Condition=" '$(OSName)' == 'win' ">win7-$(Architecture)</CoreCLRRid>
       <CoreCLRRid Condition=" '$(OSName)' == 'osx' ">osx.10.10-x64</CoreCLRRid>
