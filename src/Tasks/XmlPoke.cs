@@ -223,7 +223,14 @@ namespace Microsoft.Build.Tasks
 
             if (iter.Count > 0)
             {
+#if RUNTIME_TYPE_NETCORE
+                using (Stream stream = File.Create(_xmlInputPath.ItemSpec))
+                {
+                    xmlDoc.Save(stream);
+                }
+#else
                 xmlDoc.Save(_xmlInputPath.ItemSpec);
+#endif
             }
 
             return true;

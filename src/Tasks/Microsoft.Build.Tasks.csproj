@@ -520,6 +520,8 @@
     <Compile Include="Culture.cs" />
     <Compile Include="CultureInfoCache.cs" />
     <Compile Include="WriteCodeFragment.cs" />
+    <Compile Include="XmlPeek.cs" />
+    <Compile Include="XmlPoke.cs" />
   </ItemGroup>
   <ItemGroup Condition="$(TargetFrameworkIdentifier) == '.NETFramework'">
     <Compile Include="Al.cs">
@@ -679,6 +681,7 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="WinMDExp.cs" />
+    <Compile Include="XslTransformation.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(FeatureXamlTypes)' == 'true'">
     <Compile Include="XamlTaskFactory\CommandLineGenerator.cs" />
@@ -697,9 +700,6 @@
     <Compile Include="XamlTaskFactory\XamlTaskFactory.cs" />
   </ItemGroup>
   <ItemGroup Condition="$(TargetFrameworkIdentifier) == '.NETFramework'">
-    <Compile Include="XmlPeek.cs" />
-    <Compile Include="XmlPoke.cs" />
-    <Compile Include="XslTransformation.cs" />
     <!-- Shim targets only work when the destination targets are installed. -->
     <Content Include="Microsoft.Data.Entity.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

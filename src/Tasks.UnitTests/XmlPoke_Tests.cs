@@ -17,9 +17,8 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.IO;
-using System.Text.RegularExpressions;
+using System.Linq;
 using System.Text;
-using System.Xml.Xsl;
 using System.Xml;
 using Xunit;
 
@@ -27,9 +26,11 @@ namespace Microsoft.Build.UnitTests
 {
     sealed public class XmlPoke_Tests
     {
-        private string _xmlFileWithNs = @"<?xml version='1.0' encoding='utf-8'?>
+        private const string XmlNamespaceUsedByTests = "http://nsurl";
+
+        private string _xmlFileWithNs = $@"<?xml version='1.0' encoding='utf-8'?>
         
-<class AccessModifier='public' Name='test' xmlns:s='http://nsurl'>
+<class AccessModifier='public' Name='test' xmlns:s='{XmlNamespaceUsedByTests}'>
   <s:variable Type='String' Name='a'></s:variable>
   <s:variable Type='String' Name='b'></s:variable>
   <s:variable Type='String' Name='c'></s:variable>
@@ -48,115 +49,71 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void PokeWithNamespace()
         {
-            MockEngine engine = new MockEngine(true);
-            string xmlInputPath;
-            Prepare(_xmlFileWithNs, out xmlInputPath);
+            const string query = "//s:variable/@Name";
 
-            XmlPoke p = new XmlPoke();
-            p.BuildEngine = engine;
-            p.XmlInputPath = new TaskItem(xmlInputPath);
-            p.Query = "//s:variable/@Name";
-            p.Namespaces = "<Namespace Prefix=\"s\" Uri=\"http://nurl\" />";
-            p.Value = new TaskItem("Mert");
-            p.Execute();
+            XmlDocument xmlDocument = ExecuteXmlPoke(
+                query: query,
+                useNamespace: true,
+                value: "Mert");
 
-            List<int> positions = new List<int>();
-            positions.AddRange(new int[] { 141, 200, 259 });
+            XmlNamespaceManager ns = new XmlNamespaceManager(xmlDocument.NameTable);
+            ns.AddNamespace("s", XmlNamespaceUsedByTests);
 
-            string result;
-            using (StreamReader sr = new StreamReader(xmlInputPath))
-            {
-                result = sr.ReadToEnd();
-                Regex r = new Regex("Mert");
-                MatchCollection mc = r.Matches(result);
+            List<XmlAttribute> nodes = xmlDocument.SelectNodes(query, ns)?.Cast<XmlAttribute>().ToList();
 
-                foreach (Match m in mc)
-                {
-                    Assert.True(positions.Contains(m.Index), "This test should effect 3 positions. There should be 3 occurances of 'Mert'\n" + result);
-                }
-            }
+            Assert.True(nodes?.Count == 3, $"There should be 3 <variable /> elements with a Name attribute {Environment.NewLine}{xmlDocument.OuterXml}");
+
+            Assert.True(nodes?.All(i => i.Value.Equals("Mert")), $"All <variable /> elements should have Name=\"Mert\" {Environment.NewLine}{xmlDocument.OuterXml}");
         }
 
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         public void PokeNoNamespace()
         {
-            MockEngine engine = new MockEngine(true);
-            string xmlInputPath;
-            Prepare(_xmlFileNoNs, out xmlInputPath);
+            const string query = "//variable/@Name";
+            const string value = "Mert";
 
-            XmlPoke p = new XmlPoke();
-            p.BuildEngine = engine;
-            p.XmlInputPath = new TaskItem(xmlInputPath);
-            p.Query = "//variable/@Name";
-            p.Value = new TaskItem("Mert");
-            p.Execute();
+            XmlDocument xmlDocument = ExecuteXmlPoke(query: query, value: value);
 
-            List<int> positions = new List<int>();
-            positions.AddRange(new int[] { 117, 172, 227 });
+            List<XmlAttribute> nodes = xmlDocument.SelectNodes(query)?.Cast<XmlAttribute>().ToList();
 
-            string result;
-            using (StreamReader sr = new StreamReader(xmlInputPath))
-            {
-                result = sr.ReadToEnd();
-                Regex r = new Regex("Mert");
-                MatchCollection mc = r.Matches(result);
+            Assert.True(nodes?.Count == 3, $"There should be 3 <variable /> elements with a Name attribute {Environment.NewLine}{xmlDocument.OuterXml}");
 
-                foreach (Match m in mc)
-                {
-                    Assert.True(positions.Contains(m.Index), "This test should effect 3 positions. There should be 3 occurances of 'Mert'\n" + result);
-                }
-            }
+            Assert.True(nodes?.All(i => i.Value.Equals(value)), $"All <variable /> elements should have Name=\"{value}\" {Environment.NewLine}{xmlDocument.OuterXml}");
         }
 
         [Fact]
         public void PokeAttribute()
         {
-            MockEngine engine = new MockEngine(true);
-            string xmlInputPath;
-            Prepare(_xmlFileNoNs, out xmlInputPath);
+            const string query = "//class[1]/@AccessModifier";
+            const string value = "<Test>Testing</Test>";
 
-            XmlPoke p = new XmlPoke();
-            p.BuildEngine = engine;
-            p.XmlInputPath = new TaskItem(xmlInputPath);
-            p.Query = "//class[1]/@AccessModifier";
-            p.Value = new TaskItem("<Test>Testing</Test>");
-            p.Execute();
-            string result;
-            using (StreamReader sr = new StreamReader(xmlInputPath))
-            {
-                result = sr.ReadToEnd();
-                Regex r = new Regex("AccessModifier=\"&lt;Test&gt;Testing&lt;/Test&gt;\"");
-                MatchCollection mc = r.Matches(result);
+            XmlDocument xmlDocument = ExecuteXmlPoke(query: query, value: value);
 
-                Assert.Equal(1, mc.Count); // "Should match once"
-            }
+            List<XmlAttribute> nodes = xmlDocument.SelectNodes(query)?.Cast<XmlAttribute>().ToList();
+
+            Assert.True(nodes?.Count == 1, $"There should be 1 <class /> element with an AccessModifier attribute {Environment.NewLine}{xmlDocument.OuterXml}");
+
+            Assert.Equal(value, nodes?.First().Value);
         }
 
         [Fact]
         public void PokeChildren()
         {
-            MockEngine engine = new MockEngine(true);
-            string xmlInputPath;
-            Prepare(_xmlFileNoNs, out xmlInputPath);
+            const string query = "//class/.";
+            const string value = "<Test>Testing</Test>";
 
-            XmlPoke p = new XmlPoke();
-            p.BuildEngine = engine;
-            p.XmlInputPath = new TaskItem(xmlInputPath);
-            p.Query = "//class/.";
-            p.Value = new TaskItem("<Test>Testing</Test>");
-            Assert.True(p.Execute(), engine.Log);
+            XmlDocument xmlDocument = ExecuteXmlPoke(query: query, value: value);
 
-            string result;
-            using (StreamReader sr = new StreamReader(xmlInputPath))
-            {
-                result = sr.ReadToEnd();
+            List<XmlElement> nodes = xmlDocument.SelectNodes(query)?.Cast<XmlElement>().ToList();
 
-                Regex r = new Regex("<Test>Testing</Test>");
-                MatchCollection mc = r.Matches(result);
+            Assert.True(nodes?.Count == 1, $"There should be 1 <class /> element {Environment.NewLine}{xmlDocument.OuterXml}");
 
-                Assert.Equal(1, mc.Count); // "Should match once"
-            }
+            var testNodes = nodes?.First().ChildNodes.Cast<XmlElement>().ToList();
+
+            Assert.True(testNodes?.Count == 1, $"There should be 1 <class /> element with one child Test element {Environment.NewLine}{xmlDocument.OuterXml}");
+
+            Assert.Equal("Testing", testNodes?.First().InnerText);
         }
 
         [Fact]
@@ -286,37 +243,18 @@ namespace Microsoft.Build.UnitTests
         [Trait("Category", "mono-osx-failing")]
         public void PokeElement()
         {
-            MockEngine engine = new MockEngine(true);
-            string xmlInputPath;
-            Prepare(_xmlFileNoNs, out xmlInputPath);
+            const string query = "//variable/.";
+            const string value = "<testing the=\"element\">With<somewhat complex=\"value\" /></testing>";
 
-            XmlPoke p = new XmlPoke();
-            p.BuildEngine = engine;
-            p.XmlInputPath = new TaskItem(xmlInputPath);
-            Assert.True(p.XmlInputPath.ItemSpec.Equals(xmlInputPath));
-            p.Query = "//variable/.";
-            Assert.True(p.Query.Equals("//variable/."));
-            string valueString = "<testing the=\"element\">With<somewhat complex=\"value\" /></testing>";
-            p.Value = new TaskItem(valueString);
-            Assert.True(p.Value.ItemSpec.Equals(valueString));
+            XmlDocument xmlDocument = ExecuteXmlPoke(query: query, value: value);
 
-            Assert.True(p.Execute());
+            List<XmlElement> nodes = xmlDocument.SelectNodes(query)?.Cast<XmlElement>().ToList();
 
-            List<int> positions = new List<int>();
-            positions.AddRange(new int[] { 126, 249, 372 });
+            Assert.True(nodes?.Count == 3, $"There should be 3 <variable/> elements {Environment.NewLine}{xmlDocument.OuterXml}");
 
-            string result;
-            using (StreamReader sr = new StreamReader(xmlInputPath))
+            foreach (var node in nodes)
             {
-                result = sr.ReadToEnd();
-
-                Regex r = new Regex("<testing the=\"element\">With<somewhat complex=\"value\" /></testing>");
-                MatchCollection mc = r.Matches(result);
-
-                foreach (Match m in mc)
-                {
-                    Assert.True(positions.Contains(m.Index), "This test should effect 3 positions. There should be 3 occurances of 'Mert'\n" + result);
-                }
+                Assert.Equal(value, node.InnerXml);
             }
         }
 
@@ -342,11 +280,40 @@ namespace Microsoft.Build.UnitTests
             string dir = Path.Combine(Path.GetTempPath(), DateTime.Now.Ticks.ToString());
             Directory.CreateDirectory(dir);
             xmlInputPath = dir + Path.DirectorySeparatorChar + "doc.xml";
-            using (StreamWriter sw = new StreamWriter(xmlInputPath, false))
+            File.WriteAllText(xmlInputPath, xmlFile);
+        }
+
+        /// <summary>
+        /// Executes an <see cref="XmlPoke"/> task with the specified arguments.
+        /// </summary>
+        /// <param name="query">The query to use.</param>
+        /// <param name="useNamespace"><code>true</code> to use namespaces, otherwise <code>false</code> (Default).</param>
+        /// <param name="value">The value to use.</param>
+        /// <returns>An <see cref="XmlDocument"/> containing the resulting XML after the XmlPoke task has executed.</returns>
+        private XmlDocument ExecuteXmlPoke(string query, bool useNamespace = false, string value = null)
+        {
+            MockEngine engine = new MockEngine(true);
+
+            string xmlInputPath;
+            Prepare(useNamespace ? _xmlFileWithNs : _xmlFileNoNs, out xmlInputPath);
+
+            XmlPoke p = new XmlPoke
             {
-                sw.Write(xmlFile);
-                sw.Close();
-            }
+                BuildEngine = engine,
+                XmlInputPath = new TaskItem(xmlInputPath),
+                Query = query,
+                Namespaces = useNamespace ? $"<Namespace Prefix=\"s\" Uri=\"{XmlNamespaceUsedByTests}\" />" : null,
+                Value = value == null ? null : new TaskItem(value)
+            };
+            Assert.True(p.Execute(), engine.Log);
+
+            string result = File.ReadAllText(xmlInputPath);
+
+            XmlDocument xmlDocument = new XmlDocument();
+
+            xmlDocument.LoadXml(result);
+
+            return xmlDocument;
         }
     }
 }

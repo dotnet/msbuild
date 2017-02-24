@@ -92,6 +92,8 @@
     <Compile Include="Touch_Tests.cs" />
     <Compile Include="TrustInfo_Tests.cs" />
     <Compile Include="WriteCodeFragment_Tests.cs" />
+    <Compile Include="XmlPeek_Tests.cs" />
+    <Compile Include="XmlPoke_Tests.cs" />
     <EmbeddedResource Include="SampleResx" />
     <None Include="..\Shared\UnitTests\App.config">
       <Link>App.config</Link>
@@ -157,8 +159,6 @@
     <Compile Include="VisualBasicParserUtilitites_Tests.cs" />
     <Compile Include="VisualBasicTokenizer_Tests.cs" />
     <Compile Include="WinMDExp_Tests.cs" />
-    <Compile Include="XmlPeek_Tests.cs" />
-    <Compile Include="XmlPoke_Tests.cs" />
     <Compile Include="XslTransformation_Tests.cs" />
   </ItemGroup>
   <ItemGroup>

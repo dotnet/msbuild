@@ -22,7 +22,9 @@
         "System.Runtime.Serialization.Xml": "4.1.1",
         "System.Security.Cryptography.Algorithms": "4.2.0",
         "System.Threading.Thread": "4.0.0",
-        "System.Xml.XmlDocument": "4.0.1"
+        "System.Xml.XmlDocument": "4.0.1",
+        "System.Xml.XPath": "4.0.1",
+        "System.Xml.XPath.XmlDocument":  "4.0.1"
       }
     }
   }
