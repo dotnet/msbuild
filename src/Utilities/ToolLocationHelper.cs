@@ -83,16 +83,11 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         Version462 = 10,
 
-        /// <summary>
-        /// version 4.7
-        /// </summary>
-        Version47 = 11,
-
         // keep this up to date, this should always point to the last entry
         /// <summary>
         /// the latest version available at the time of release
         /// </summary>
-        VersionLatest = Version47
+        VersionLatest = Version462
     }
 
     /// <summary>
@@ -1968,9 +1963,6 @@ namespace Microsoft.Build.Utilities
 
                 case TargetDotNetFrameworkVersion.Version462:
                     return FrameworkLocationHelper.dotNetFrameworkVersion462;
-
-                case TargetDotNetFrameworkVersion.Version47:
-                    return FrameworkLocationHelper.dotNetFrameworkVersion47;
 
                 default:
                     ErrorUtilities.ThrowArgument("ToolLocationHelper.UnsupportedFrameworkVersion", version);
