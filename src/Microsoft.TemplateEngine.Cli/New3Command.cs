@@ -315,45 +315,51 @@ namespace Microsoft.TemplateEngine.Cli
         // Checks the result of TemplatesToDisplayInfoAbout()
         // If they all have the same group identity, return them.
         // Otherwise retun an empty list.
-        private IEnumerable<ITemplateInfo> TemplatesToShowDetailedHelpAbout()
+        private IEnumerable<ITemplateInfo> TemplatesToShowDetailedHelpAbout
         {
-            IReadOnlyList<ITemplateInfo> candidateTemplates = TemplatesToDisplayInfoAbout();
-            Func<ITemplateInfo, string> groupIdentitySelector = (x) => x.GroupIdentity;
-
-            if (candidateTemplates.AllAreTheSame(groupIdentitySelector, StringComparer.OrdinalIgnoreCase))
+            get
             {
-                return candidateTemplates;
-            }
+                IReadOnlyList<ITemplateInfo> candidateTemplates = TemplatesToDisplayInfoAbout;
+                Func<ITemplateInfo, string> groupIdentitySelector = (x) => x.GroupIdentity;
 
-            return new List<ITemplateInfo>();
+                if (candidateTemplates.AllAreTheSame(groupIdentitySelector, StringComparer.OrdinalIgnoreCase))
+                {
+                    return candidateTemplates;
+                }
+
+                return new List<ITemplateInfo>();
+            }
         }
 
         // If there are secondary matches, return them
         // Else if there are primary matches, return them
         // Otherwise return all templates in the current context
-        private IReadOnlyList<ITemplateInfo> TemplatesToDisplayInfoAbout()
+        private IReadOnlyList<ITemplateInfo> TemplatesToDisplayInfoAbout
         {
-            IEnumerable<ITemplateInfo> templateList;
+            get
+            {
+                IEnumerable<ITemplateInfo> templateList;
 
-            if (_matchedTemplatesWithSecondaryMatchInfo != null && _matchedTemplatesWithSecondaryMatchInfo.Count > 0)
-            {
-                templateList = _matchedTemplatesWithSecondaryMatchInfo.Select(x => x.Info);
-            }
-            else if (_matchedTemplates != null && _matchedTemplates.Where(x => x.IsMatch).Count() > 0)
-            {
-                templateList = _matchedTemplates.Where(x => x.IsMatch).Select(x => x.Info);
-            }
-            else
-            {
-                templateList = PerformAllTemplatesInContextQueryAsync().Where(x => x.IsMatch).Select(x => x.Info);
-            }
+                if (_matchedTemplatesWithSecondaryMatchInfo != null && _matchedTemplatesWithSecondaryMatchInfo.Count > 0)
+                {
+                    templateList = _matchedTemplatesWithSecondaryMatchInfo.Select(x => x.Info);
+                }
+                else if (_matchedTemplates != null && _matchedTemplates.Where(x => x.IsMatch).Count() > 0)
+                {
+                    templateList = _matchedTemplates.Where(x => x.IsMatch).Select(x => x.Info);
+                }
+                else
+                {
+                    templateList = PerformAllTemplatesInContextQuery().Where(x => x.IsMatch).Select(x => x.Info);
+                }
 
-            return templateList.ToList();
+                return templateList.ToList();
+            }
         }
 
         private void DisplayTemplateList(bool showAll = false)
         {
-            IReadOnlyList<ITemplateInfo> results = TemplatesToDisplayInfoAbout();
+            IReadOnlyList<ITemplateInfo> results = TemplatesToDisplayInfoAbout;
 
             IEnumerable<IGrouping<string, ITemplateInfo>> grouped = results.GroupBy(x => x.GroupIdentity);
             EnvironmentSettings.Host.TryGetHostParamDefault("prefs:language", out string defaultLanguage);
@@ -401,7 +407,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                 if (_matchedTemplates.Any(x => x.IsMatch))
                 {
-                    foreach (ITemplateInfo template in TemplatesToShowDetailedHelpAbout())
+                    foreach (ITemplateInfo template in TemplatesToShowDetailedHelpAbout)
                     {
                         ShowTemplateHelp(template);
                     }
@@ -409,27 +415,27 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        private Task<CreationResultStatus> EnterAmbiguousTemplateManipulationFlowAsync()
+        private CreationResultStatus EnterAmbiguousTemplateManipulationFlow()
         {
             if (!ValidateRemainingParameters() || (!IsListFlagSpecified && !string.IsNullOrEmpty(TemplateName)))
             {
                 bool anyPartialMatchesDisplayed = ShowTemplateNameMismatchHelp();
                 DisplayTemplateList(!anyPartialMatchesDisplayed);
-                return Task.FromResult(CreationResultStatus.NotFound);
+                return CreationResultStatus.NotFound;
             }
 
             if (!string.IsNullOrWhiteSpace(Alias))
             {
                 Reporter.Error.WriteLine(LocalizableStrings.InvalidInputSwitch.Bold().Red());
                 Reporter.Error.WriteLine("  " + _app.TemplateParamInputFormat("--alias").Bold().Red());
-                return Task.FromResult(CreationResultStatus.NotFound);
+                return CreationResultStatus.NotFound;
             }
 
             if (IsHelpFlagSpecified)
             {
                 ShowUsageHelp();
                 DisplayTemplateList();
-                return Task.FromResult(CreationResultStatus.Success);
+                return CreationResultStatus.Success;
             }
             else
             {
@@ -438,24 +444,24 @@ namespace Microsoft.TemplateEngine.Cli
                 //If we're showing the list because we were asked to, exit with success, otherwise, exit with failure
                 if (IsListFlagSpecified)
                 {
-                    return Task.FromResult(CreationResultStatus.Success);
+                    return CreationResultStatus.Success;
                 }
                 else
                 {
-                    return Task.FromResult(CreationResultStatus.OperationNotSpecified);
+                    return CreationResultStatus.OperationNotSpecified;
                 }
             }
         }
 
-        private Task<CreationResultStatus> EnterInstallFlowAsync()
+        private CreationResultStatus EnterInstallFlow()
         {
             Installer.InstallPackages(Install.ToList());
             //TODO: When an installer that directly calls into NuGet is available,
             //  return a more accurate representation of the outcome of the operation
-            return Task.FromResult(CreationResultStatus.Success);
+            return CreationResultStatus.Success;
         }
 
-        private async Task<CreationResultStatus> EnterMaintenanceFlowAsync()
+        private CreationResultStatus EnterMaintenanceFlow()
         {
             if (!ValidateRemainingParameters())
             {
@@ -466,11 +472,11 @@ namespace Microsoft.TemplateEngine.Cli
             if (InstallHasValue && 
                 ((Install.Count > 0) && (Install[0] != null)))
             {
-                CreationResultStatus installResult = await EnterInstallFlowAsync().ConfigureAwait(false);
+                CreationResultStatus installResult = EnterInstallFlow();
 
                 if(installResult == CreationResultStatus.Success)
                 {
-                    PerformCoreTemplateQueryAsync();
+                    PerformCoreTemplateQuery();
                     DisplayTemplateList();
                 }
 
@@ -479,7 +485,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             //No other cases specified, we've fallen through to "Usage help + List"
             ShowUsageHelp();
-            PerformCoreTemplateQueryAsync();
+            PerformCoreTemplateQuery();
             DisplayTemplateList();
 
             return CreationResultStatus.Success;
@@ -567,7 +573,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         private async Task<CreationResultStatus> EnterTemplateManipulationFlowAsync()
         {
-            PerformCoreTemplateQueryAsync();
+            PerformCoreTemplateQuery();
 
             if (UnambiguousTemplateToUse != null)
             {
@@ -585,7 +591,7 @@ namespace Microsoft.TemplateEngine.Cli
                 }
             }
 
-            return await EnterAmbiguousTemplateManipulationFlowAsync().ConfigureAwait(false);
+            return EnterAmbiguousTemplateManipulationFlow();
         }
 
         private async Task<CreationResultStatus> ExecuteAsync()
@@ -626,7 +632,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 if (string.IsNullOrWhiteSpace(TemplateName))
                 {
-                    return await EnterMaintenanceFlowAsync().ConfigureAwait(false);
+                    return EnterMaintenanceFlow();
                 }
 
                 return await EnterTemplateManipulationFlowAsync().ConfigureAwait(false);
@@ -919,7 +925,7 @@ namespace Microsoft.TemplateEngine.Cli
             return context;
         }
 
-        private void PerformCoreTemplateQueryAsync()
+        private void PerformCoreTemplateQuery()
         {
             string context = DetermineTemplateContext();
 
@@ -996,7 +1002,7 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         // Lists all the templates, filtered only by the context (item, project, etc)
-        private IReadOnlyCollection<IFilteredTemplateInfo> PerformAllTemplatesInContextQueryAsync()
+        private IReadOnlyCollection<IFilteredTemplateInfo> PerformAllTemplatesInContextQuery()
         {
             string context = DetermineTemplateContext();
 
