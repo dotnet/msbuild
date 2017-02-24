@@ -118,18 +118,18 @@ namespace Microsoft.NET.Publish.Tests
         public void It_publishes_projects_with_simple_dependencies_with_filter_profile()
         {
             string project = "SimpleDependencies";
-            string tfm = "netcoreapp1.0";
+
             TestAsset simpleDependenciesAsset = _testAssetsManager
                 .CopyTestAsset(project)
                 .WithSource()
-                .Restore("", $"/p:TargetFramework={tfm}");
+                .Restore();
 
             string filterProjDir = _testAssetsManager.GetAndValidateTestProjectDirectory("NewtonsoftFilterProfile");
             string filterProjFile = Path.Combine(filterProjDir, "NewtonsoftFilterProfile.csproj");
 
             PublishCommand publishCommand = new PublishCommand(Stage0MSBuild, simpleDependenciesAsset.TestRoot);
             publishCommand
-                .Execute($"/p:TargetFramework={tfm}", $"/p:FilterProjFile={filterProjFile}")
+                .Execute($"/p:FilterProjFile={filterProjFile}")
                 .Should()
                 .Pass();
 
@@ -145,7 +145,7 @@ namespace Microsoft.NET.Publish.Tests
 
            var runtimeConfig = ReadJson(System.IO.Path.Combine(publishDirectory.ToString(), $"{project}.runtimeconfig.json"));
 
-           runtimeConfig["runtimeOptions"]["tfm"].ToString().Should().Be(tfm);
+           runtimeConfig["runtimeOptions"]["tfm"].ToString().Should().Be("netcoreapp1.1");
             
 //TODO: Enable testing the run once dotnet host has the notion of looking up shared packages
         }
