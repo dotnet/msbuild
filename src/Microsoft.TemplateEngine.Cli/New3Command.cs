@@ -893,23 +893,6 @@ namespace Microsoft.TemplateEngine.Cli
             _app.ParseArgs(_app.InternalParamValueList("--extra-args"));
         }
 
-        private void SetupTemporaryArgParsingForTemplate(ITemplateInfo templateInfo)
-        {
-            _app.Reset();
-            SetupInternalCommands(_app);
-
-            IParameterSet allParams = templateInfo.GetParametersForTemplate();
-            _hostSpecificTemplateData = ReadHostSpecificTemplateData(templateInfo);
-
-            IEnumerable<KeyValuePair<string, string>> argParameters = allParams.ParameterDefinitions
-                                                                        .Where(x => x.Priority != TemplateParameterPriority.Implicit)
-                                                                        .OrderBy(x => x.Name)
-                                                                        .Select(x => new KeyValuePair<string, string>(x.Name, x.DataType));
-
-            _app.SetupTemplateParameters(argParameters, _hostSpecificTemplateData.LongNameOverrides, _hostSpecificTemplateData.ShortNameOverrides);
-            _app.ParseArgs(_app.InternalParamValueList("--extra-args"));
-        }
-
         private string DetermineTemplateContext()
         {
             string outputPath = OutputPath ?? EnvironmentSettings.Host.FileSystem.GetCurrentDirectory();
