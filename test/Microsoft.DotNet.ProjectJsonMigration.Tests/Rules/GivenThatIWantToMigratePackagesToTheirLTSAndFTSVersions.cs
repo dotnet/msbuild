@@ -9,11 +9,13 @@ using System;
 
 namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 {
-    public class GivenThatIWantToMigratePackagesToTheirLTSVersions : PackageDependenciesTestBase
+    public class GivenThatIWantToMigratePackagesToTheirLTSAndFTSVersions : PackageDependenciesTestBase
     {
         [Theory]
-        [InlineData("1.0.0", "1.0.3")]
-        [InlineData("1.0.3-preview2", "1.0.3")]
+        [InlineData("1.0.0", "1.0.4")]
+        [InlineData("1.0.3-preview2", "1.0.4")]
+        [InlineData("1.1.0", "1.1.1")]
+        [InlineData("1.1.1-preview2", "1.1.1")]
         public void ItUpliftsMicrosoftNETCoreAppMetaPackages(
             string sourceVersion,
             string targetVersion)
@@ -74,6 +76,25 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [InlineData("Microsoft.AspNetCore.Routing.Abstractions", "1.0.0", "Microsoft.AspNetCore.Routing.Abstractions", ConstantPackageVersions.AspNetLTSPackagesVersion)]
         [InlineData("Microsoft.AspNetCore.Server.Kestrel", "1.0.0", "Microsoft.AspNetCore.Server.Kestrel", ConstantPackageVersions.AspNetLTSPackagesVersion)]
         [InlineData("Microsoft.AspNetCore.Server.Kestrel.Https", "1.0.0", "Microsoft.AspNetCore.Server.Kestrel.Https", ConstantPackageVersions.AspNetLTSPackagesVersion)]
+        [InlineData("Microsoft.AspNetCore.Antiforgery", "1.1.0", "Microsoft.AspNetCore.Antiforgery", "1.1.1")]
+        [InlineData("Microsoft.AspNetCore.Mvc", "1.1.0", "Microsoft.AspNetCore.Mvc", "1.1.2")]
+        [InlineData("Microsoft.AspNetCore.Mvc.Abstractions", "1.1.0", "Microsoft.AspNetCore.Mvc.Abstractions", "1.1.2")]
+        [InlineData("Microsoft.AspNetCore.Mvc.ApiExplorer", "1.1.0", "Microsoft.AspNetCore.Mvc.ApiExplorer", "1.1.2")]
+        [InlineData("Microsoft.AspNetCore.Mvc.Core", "1.1.0", "Microsoft.AspNetCore.Mvc.Core", "1.1.2")]
+        [InlineData("Microsoft.AspNetCore.Mvc.Cors", "1.1.0", "Microsoft.AspNetCore.Mvc.Cors", "1.1.2")]
+        [InlineData("Microsoft.AspNetCore.Mvc.DataAnnotations", "1.1.0", "Microsoft.AspNetCore.Mvc.DataAnnotations", "1.1.2")]
+        [InlineData("Microsoft.AspNetCore.Mvc.Formatters.Json", "1.1.0", "Microsoft.AspNetCore.Mvc.Formatters.Json", "1.1.2")]
+        [InlineData("Microsoft.AspNetCore.Mvc.Formatters.Xml", "1.1.0", "Microsoft.AspNetCore.Mvc.Formatters.Xml", "1.1.2")]
+        [InlineData("Microsoft.AspNetCore.Mvc.Localization", "1.1.0", "Microsoft.AspNetCore.Mvc.Localization", "1.1.2")]
+        [InlineData("Microsoft.AspNetCore.Mvc.Razor", "1.1.0", "Microsoft.AspNetCore.Mvc.Razor", "1.1.2")]
+        [InlineData("Microsoft.AspNetCore.Mvc.Razor.Host", "1.1.0", "Microsoft.AspNetCore.Mvc.Razor.Host", "1.1.2")]
+        [InlineData("Microsoft.AspNetCore.Mvc.TagHelpers", "1.1.0", "Microsoft.AspNetCore.Mvc.TagHelpers", "1.1.2")]
+        [InlineData("Microsoft.AspNetCore.Mvc.ViewFeatures", "1.1.0", "Microsoft.AspNetCore.Mvc.ViewFeatures", "1.1.2")]
+        [InlineData("Microsoft.AspNetCore.Mvc.WebApiCompatShim", "1.1.0", "Microsoft.AspNetCore.Mvc.WebApiCompatShim", "1.1.2")]
+        [InlineData("Microsoft.AspNetCore.Routing", "1.1.0", "Microsoft.AspNetCore.Routing", "1.1.1")]
+        [InlineData("Microsoft.AspNetCore.Routing.Abstractions", "1.1.0", "Microsoft.AspNetCore.Routing.Abstractions", "1.1.1")]
+        [InlineData("Microsoft.AspNetCore.Server.Kestrel", "1.1.0", "Microsoft.AspNetCore.Server.Kestrel", "1.1.1")]
+        [InlineData("Microsoft.AspNetCore.Server.Kestrel.Https", "1.1.0", "Microsoft.AspNetCore.Server.Kestrel.Https", "1.1.1")]
         public void ItUpliftsAspNetCorePackages(
             string sourcePackageName,
             string sourceVersion,
@@ -92,6 +113,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         [InlineData("Microsoft.EntityFrameworkCore.Sqlite.Design", "1.0.0", "Microsoft.EntityFrameworkCore.Sqlite.Design", ConstantPackageVersions.EntityFrameworkLTSPackagesVersion)]
         [InlineData("Microsoft.EntityFrameworkCore.SqlServer", "1.0.0", "Microsoft.EntityFrameworkCore.SqlServer", ConstantPackageVersions.EntityFrameworkLTSPackagesVersion)]
         [InlineData("Microsoft.EntityFrameworkCore.SqlServer.Design", "1.0.0", "Microsoft.EntityFrameworkCore.SqlServer.Design", ConstantPackageVersions.EntityFrameworkLTSPackagesVersion)]
+        [InlineData("Microsoft.EntityFrameworkCore", "1.1.0", "Microsoft.EntityFrameworkCore", "1.1.1")]
+        [InlineData("Microsoft.EntityFrameworkCore.InMemory", "1.1.0", "Microsoft.EntityFrameworkCore.InMemory", "1.1.1")]
+        [InlineData("Microsoft.EntityFrameworkCore.Relational", "1.1.0", "Microsoft.EntityFrameworkCore.Relational", "1.1.1")]
+        [InlineData("Microsoft.EntityFrameworkCore.Relational.Design", "1.1.0", "Microsoft.EntityFrameworkCore.Relational.Design", "1.1.1")]
+        [InlineData("Microsoft.EntityFrameworkCore.Sqlite", "1.1.0", "Microsoft.EntityFrameworkCore.Sqlite", "1.1.1")]
+        [InlineData("Microsoft.EntityFrameworkCore.Sqlite.Design", "1.1.0", "Microsoft.EntityFrameworkCore.Sqlite.Design", "1.1.1")]
+        [InlineData("Microsoft.EntityFrameworkCore.SqlServer", "1.1.0", "Microsoft.EntityFrameworkCore.SqlServer", "1.1.1")]
+        [InlineData("Microsoft.EntityFrameworkCore.SqlServer.Design", "1.1.0", "Microsoft.EntityFrameworkCore.SqlServer.Design", "1.1.1")]
         public void ItUpliftsEntityFrameworkCorePackages(
             string sourcePackageName,
             string sourceVersion,
@@ -228,11 +257,17 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         }
 
         [Theory]
-        [InlineData("Microsoft.Extensions.Logging", "1.0.0", "Microsoft.Extensions.Logging", "1.0.1")]
-        [InlineData("Microsoft.Extensions.Logging.Console", "1.0.0", "Microsoft.Extensions.Logging.Console", "1.0.1")]
-        [InlineData("Microsoft.Extensions.Logging.Debug", "1.0.0", "Microsoft.Extensions.Logging.Debug", "1.0.1")]
-        [InlineData("Microsoft.Extensions.Configuration.Json", "1.0.0", "Microsoft.Extensions.Configuration.Json", "1.0.1")]
-        [InlineData("Microsoft.Extensions.Configuration.UserSecrets", "1.0.0", "Microsoft.Extensions.Configuration.UserSecrets", "1.0.1")]
+        [InlineData("Microsoft.Extensions.Logging", "1.0.0", "Microsoft.Extensions.Logging", "1.0.2")]
+        [InlineData("Microsoft.Extensions.Logging.Console", "1.0.0", "Microsoft.Extensions.Logging.Console", "1.0.2")]
+        [InlineData("Microsoft.Extensions.Logging.Debug", "1.0.0", "Microsoft.Extensions.Logging.Debug", "1.0.2")]
+        [InlineData("Microsoft.Extensions.Configuration.Json", "1.0.0", "Microsoft.Extensions.Configuration.Json", "1.0.2")]
+        [InlineData("Microsoft.Extensions.Configuration.UserSecrets", "1.0.0", "Microsoft.Extensions.Configuration.UserSecrets", "1.0.2")]
+        [InlineData("Microsoft.Extensions.Logging", "1.1.0", "Microsoft.Extensions.Logging", "1.1.1")]
+        [InlineData("Microsoft.Extensions.Logging.Console", "1.1.0", "Microsoft.Extensions.Logging.Console", "1.1.1")]
+        [InlineData("Microsoft.Extensions.Logging.Debug", "1.1.0", "Microsoft.Extensions.Logging.Debug", "1.1.1")]
+        [InlineData("Microsoft.Extensions.Configuration.Json", "1.1.0", "Microsoft.Extensions.Configuration.Json", "1.1.1")]
+        [InlineData("Microsoft.Extensions.Configuration.UserSecrets", "1.1.0", "Microsoft.Extensions.Configuration.UserSecrets", "1.1.1")]
+        [InlineData("Microsoft.Extensions.Logging.AzureAppServices", "1.0.0-preview2", "Microsoft.Extensions.Logging.AzureAppServices", "1.0.1")]
         public void ItUpliftsMicrosoftExtensionsPackages(
             string sourcePackageName,
             string sourceVersion,
