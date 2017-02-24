@@ -549,13 +549,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             }
         }
 
-        [Theory]
-        [InlineData("copyToOutput", "None", 2, ";rootfile.cs")]
-        public void MigratingCopyToOutputIncludeExcludePopulatesAppropriateProjectItemElement(
-            string group,
-            string itemName,
-            int expectedNumberOfCompileItems,
-            string expectedRootFiles)
+        [Fact]
+        public void MigratingCopyToOutputIncludeExcludePopulatesAppropriateProjectItemElement()
         {
             var testDirectory = Temp.CreateDirectory().Path;
             WriteExtraFiles(testDirectory);
@@ -563,35 +558,58 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             var pj = @"
                 {
                     ""buildOptions"": {
-                        ""<group>"": {
+                        ""copyToOutput"": {
                             ""include"": [""root"", ""src"", ""rootfile.cs""],
-                            ""exclude"": [""src"", ""rootfile.cs""],
+                            ""exclude"": [""anothersource"", ""rootfile1.cs""],
                             ""includeFiles"": [""src/file1.cs"", ""src/file2.cs""],
-                            ""excludeFiles"": [""src/file2.cs""]
+                            ""excludeFiles"": [""src/file3.cs""]
                         }
                     }
-                }".Replace("<group>", group);
+                }";
 
             var mockProj = RunBuildOptionsRuleOnPj(pj,
                 testDirectory: testDirectory);
 
-            mockProj.Items.Count(i => i.ItemType.Equals(itemName, StringComparison.Ordinal))
-                .Should().Be(expectedNumberOfCompileItems);
+            mockProj.Items.Count(i => i.ItemType.Equals("None", StringComparison.Ordinal))
+                .Should().Be(4);
 
-            foreach (var item in mockProj.Items.Where(i => i.ItemType.Equals(itemName, StringComparison.Ordinal)))
+            var copyItems = mockProj.Items.Where(i =>
+                i.ItemType.Equals("None", StringComparison.Ordinal) &&
+                i.Metadata.Any(m => m.Name == "CopyToOutputDirectory" && m.Value == "PreserveNewest"));
+
+            copyItems.Count().Should().Be(2);
+
+            var excludeItems = mockProj.Items.Where(i =>
+                i.ItemType.Equals("None", StringComparison.Ordinal) &&
+                i.Metadata.Any(m => m.Name == "CopyToOutputDirectory" && m.Value == "Never"));
+
+            excludeItems.Count().Should().Be(2);
+
+            foreach (var item in copyItems)
             {
                 VerifyContentMetadata(item);
 
-                if (string.IsNullOrEmpty(item.Update))
-                {
-                }
-                else if (item.Update.Contains(@"src\file1.cs"))
+                if (item.Update.Contains(@"src\file1.cs"))
                 {
                     item.Update.Should().Be(@"src\file1.cs;src\file2.cs");
                 }
                 else
                 {
                     item.Update.Should().Be(@"root\**\*;src\**\*;rootfile.cs");
+                }
+            }
+
+            foreach (var item in excludeItems)
+            {
+                VerifyContentMetadata(item);
+
+                if (item.Update.Contains(@"src\file3.cs"))
+                {
+                    item.Update.Should().Be(@"src\file3.cs");
+                }
+                else
+                {
+                    item.Update.Should().Be(@"anothersource\**\*;rootfile1.cs");
                 }
             }
         }
@@ -827,12 +845,14 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         {
             Directory.CreateDirectory(Path.Combine(directory, "root"));
             Directory.CreateDirectory(Path.Combine(directory, "src"));
+            Directory.CreateDirectory(Path.Combine(directory, "anothersource"));
             File.WriteAllText(Path.Combine(directory, "root", "file1.txt"), "content");
             File.WriteAllText(Path.Combine(directory, "root", "file2.txt"), "content");
             File.WriteAllText(Path.Combine(directory, "root", "file3.txt"), "content");
             File.WriteAllText(Path.Combine(directory, "src", "file1.cs"), "content");
             File.WriteAllText(Path.Combine(directory, "src", "file2.cs"), "content");
             File.WriteAllText(Path.Combine(directory, "src", "file3.cs"), "content");
+            File.WriteAllText(Path.Combine(directory, "anothersource", "file4.cs"), "content");
             File.WriteAllText(Path.Combine(directory, "rootfile.cs"), "content");
         }
 

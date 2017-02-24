@@ -501,8 +501,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
 
             mergedItem.AddMetadata(MergeMetadata(existingItem.Metadata, item.Metadata), MigrationTrace.Instance);
 
+            Console.WriteLine($"BEFORE MERGED: {mergedItem.Update}, ITEM: {item.Update}, EXISTING: {existingItem.Update}");
+
             item.RemoveUpdates(commonUpdates);
             existingItem.RemoveUpdates(commonUpdates);
+
+            Console.WriteLine($"MERGED: {mergedItem.Update}, ITEM: {item.Update}, EXISTING: {existingItem.Update}");
 
             var mergeResult = new MergeResult
             {
@@ -518,7 +522,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
             ICollection<ProjectMetadataElement> existingMetadataElements,
             ICollection<ProjectMetadataElement> newMetadataElements)
         {
-            var mergedMetadata = new List<ProjectMetadataElement>(existingMetadataElements);
+            var mergedMetadata = new List<ProjectMetadataElement>(existingMetadataElements.Select(m => (ProjectMetadataElement) m.Clone()));
 
             foreach (var newMetadata in newMetadataElements)
             {
@@ -526,11 +530,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
                     m.Name.Equals(newMetadata.Name, StringComparison.OrdinalIgnoreCase));
                 if (existingMetadata == null)
                 {
-                    mergedMetadata.Add(newMetadata);
+                    mergedMetadata.Add((ProjectMetadataElement) newMetadata.Clone());
                 }
                 else
                 {
-                    MergeMetadata(existingMetadata, newMetadata);
+                    MergeMetadata(existingMetadata, (ProjectMetadataElement) newMetadata.Clone());
                 }
             }
 
@@ -541,7 +545,25 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Transforms
         {
             if (existingMetadata.Value != newMetadata.Value)
             {
-                existingMetadata.Value = string.Join(";", new [] { existingMetadata.Value, newMetadata.Value });
+                if (existingMetadata.Name == "CopyToOutputDirectory" ||
+                    existingMetadata.Name == "CopyToPublishDirectory")
+                {
+                    existingMetadata.Value =
+                        existingMetadata.Value == "Never" || newMetadata.Value == "Never" ?
+                            "Never" :
+                            "PreserveNewest";
+                }
+                else if (existingMetadata.Name == "Pack")
+                {
+                    existingMetadata.Value =
+                        existingMetadata.Value == "false" || newMetadata.Value == "false" ?
+                            "false" :
+                            "true";
+                }
+                else
+                {
+                    existingMetadata.Value = string.Join(";", new [] { existingMetadata.Value, newMetadata.Value });
+                }
             }
         }
 

@@ -150,6 +150,10 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
             new UpdateContextTransform("None", transformMappings: true)
                 .WithMetadata("CopyToOutputDirectory", "PreserveNewest");
 
+        private IncludeContextTransform DoNotCopyToOutputFilesTransform =>
+            new UpdateContextTransform("None", transformMappings: true)
+                .WithMetadata("CopyToOutputDirectory", "Never");
+
         private IncludeContextTransform CopyToOutputFilesTransformForWeb =>
             new UpdateContextTransform(
                     "None",
@@ -195,6 +199,12 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     CopyToOutputFilesTransform;
 
                 return copyToOutputFilesTransform.Transform(GetCopyToOutputIncludeContext(compilerOptions, projectDirectory));
+            };
+
+        private Func<CommonCompilerOptions, string, ProjectType, IEnumerable<ProjectItemElement>> DoNotCopyToOutputFilesTransformExecute =>
+            (compilerOptions, projectDirectory, projectType) =>
+            {
+                return DoNotCopyToOutputFilesTransform.Transform(GetDoNotCopyToOutputIncludeContext(compilerOptions, projectDirectory));
             };
 
         private readonly string[] DefaultEmptyExcludeOption = new string[0];
@@ -268,7 +278,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 {
                     CompileFilesTransformExecute,
                     EmbedFilesTransformExecute,
-                    CopyToOutputFilesTransformExecute
+                    CopyToOutputFilesTransformExecute,
+                    DoNotCopyToOutputFilesTransformExecute
                 };
         }
 
@@ -529,6 +540,28 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                     new JObject(),
                     null,
                     null);
+        }
+
+        private IncludeContext GetDoNotCopyToOutputIncludeContext(CommonCompilerOptions compilerOptions, string projectDirectory)
+        {
+            // Defaults from src/Microsoft.DotNet.ProjectModel/ProjectReader.cs #608
+            var copyToOutputIncludeContext = compilerOptions.CopyToOutputInclude ??
+                new IncludeContext(
+                    projectDirectory,
+                    "copyToOutput",
+                    new JObject(),
+                    null,
+                    null);
+
+            var doNotCopyToOutputIncludeContext =
+                new ExcludeContext(
+                    copyToOutputIncludeContext.SourceBasePath,
+                    copyToOutputIncludeContext.Option,
+                    copyToOutputIncludeContext.RawObject,
+                    copyToOutputIncludeContext.BuiltInsInclude?.ToArray(),
+                    copyToOutputIncludeContext.BuiltInsExclude?.ToArray());
+
+            return doNotCopyToOutputIncludeContext;
         }
 
         private string FormatLanguageVersion(string langVersion)
