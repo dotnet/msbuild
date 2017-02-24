@@ -29,7 +29,7 @@ namespace Microsoft.NET.TestFramework.Commands
             return command.Execute();
         }
 
-        public override DirectoryInfo GetOutputDirectory(string targetFramework = "netcoreapp1.0", string configuration = "Debug", string runtimeIdentifier = "")
+        public override DirectoryInfo GetOutputDirectory(string targetFramework = "netcoreapp1.1", string configuration = "Debug", string runtimeIdentifier = "")
         {
             DirectoryInfo baseDirectory = base.GetOutputDirectory(targetFramework, configuration, runtimeIdentifier); 
             return new DirectoryInfo(Path.Combine(baseDirectory.FullName, PublishSubfolderName));

@@ -51,7 +51,7 @@ Copyright (c) .NET Foundation. All rights reserved.
        The implicit package references themselves are defined in Microsoft.NET.Sdk.props, so that they can be overridden
        in the project file. -->
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' And '$(NetStandardImplicitPackageVersion)' == ''">
-    <NetStandardImplicitPackageVersion>1.6.0</NetStandardImplicitPackageVersion>
+    <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
   </PropertyGroup>
   
   <!--  
@@ -68,6 +68,24 @@ Copyright (c) .NET Foundation. All rights reserved.
   -->
 
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
+    <!-- If targeting .NET Core, and the RuntimeFrameworkVersion is not specified, use the latest patch version of that runtime that we know about.
+    
+      This ensures that if a self-contained app is published where RuntimeFrameworkVersion is not specified, the latest patch
+      version of the runtime (that the SDK knew about when it shipped) will be used.
+      
+      This also will fix an issue where Microsoft.NETCore.App 1.1.0 included a version of the Microsoft.DiaSymReader.Native package
+      that was authored in such a way that Microsoft.DiaSymReader.Native.amd64.dll and Microsoft.DiaSymReader.Native.x86.dll would
+      be copied to the output folder.  Using Microsoft.NETCore.App 1.1.1 fixes this, as it references an updated version of the
+      DiaSymReader package with the issue fixed.  (See https://github.com/dotnet/corefx/issues/14627)
+      
+      Using the latest patch version that the SDK knows about does mean that an update to the SDK could change the version of
+      the runtime that a project targets.  In general, this should be OK.  If a project wants to opt out of this, it can specify
+      the exact version of the runtime to use with the RuntimeFrameworkVersion property.    
+    -->
+    <!-- If targeting netcoreapp1.1, and RuntimeFrameworkVersion is not specified, use version 1.1.1 -->
+    <RuntimeFrameworkVersion Condition="'$(RuntimeFrameworkVersion)' == '' And '$(_TargetFrameworkVersionWithoutV)' == '1.0'">1.0.4</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition="'$(RuntimeFrameworkVersion)' == '' And '$(_TargetFrameworkVersionWithoutV)' == '1.1'">1.1.1</RuntimeFrameworkVersion>
+    
     <!-- Default to use the version of the framework runtime matching the target framework version-->
     <RuntimeFrameworkVersion Condition="'$(RuntimeFrameworkVersion)' == ''">$(_TargetFrameworkVersionWithoutV)</RuntimeFrameworkVersion>
   </PropertyGroup>

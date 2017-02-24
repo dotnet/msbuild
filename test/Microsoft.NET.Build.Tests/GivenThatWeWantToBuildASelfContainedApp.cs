@@ -22,7 +22,7 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_builds_a_runnable_output()
         {
-            var targetFramework = "netcoreapp1.0";
+            var targetFramework = "netcoreapp1.1";
             var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework);
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
