@@ -1384,7 +1384,6 @@ namespace Microsoft.Build.Utilities
 
             return platforms;
         }
-
         /// <summary>
         /// Given an SDK Identifier and SDK version, return the latest installed platform.
         /// </summary>
@@ -1393,11 +1392,23 @@ namespace Microsoft.Build.Utilities
         /// <returns>The latest installed version for the given SDK</returns>
         public static string GetLatestSDKTargetPlatformVersion(string sdkIdentifier, string sdkVersion)
         {
+            return GetLatestSDKTargetPlatformVersion(sdkIdentifier, sdkVersion, null);
+        }
+
+        /// <summary>
+        /// Given an SDK Identifier and SDK version, return the latest installed platform.
+        /// </summary>
+        /// <param name="sdkIdentifier">SDK for which to find the latest installed platform</param>
+        /// <param name="sdkVersion">SDK version for which to find the latest installed platform</param>
+        /// <param name="sdkRoots">SDK Root folders</param>
+        /// <returns>The latest installed version for the given SDK</returns>
+        public static string GetLatestSDKTargetPlatformVersion(string sdkIdentifier, string sdkVersion, string[] sdkRoots)
+        {
             ErrorUtilities.VerifyThrowArgumentNull(sdkIdentifier, "sdkIdentifier");
             ErrorUtilities.VerifyThrowArgumentNull(sdkVersion, "sdkVersion");
 
             List<Version> availablePlatformVersions = new List<Version>();
-            IEnumerable<string> platformMonikerList = GetPlatformsForSDK(sdkIdentifier, new Version(sdkVersion), null, null);
+            IEnumerable<string> platformMonikerList = GetPlatformsForSDK(sdkIdentifier, new Version(sdkVersion), sdkRoots, null);
 
             Version platformVersion;
             foreach (string platformMoniker in platformMonikerList)
