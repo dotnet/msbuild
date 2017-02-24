@@ -1165,11 +1165,7 @@ namespace Microsoft.Build.Shared
             {
                 string sdkVersionFolder = "4.6"; // Default for back-compat
 
-                if (dotNetSdkVersion == dotNetFrameworkVersion47)
-                {
-                    sdkVersionFolder = "4.7";
-                }
-                else if (dotNetSdkVersion == dotNetFrameworkVersion461)
+                if (dotNetSdkVersion == dotNetFrameworkVersion461)
                 {
                     sdkVersionFolder = "4.6.1";
                 }
