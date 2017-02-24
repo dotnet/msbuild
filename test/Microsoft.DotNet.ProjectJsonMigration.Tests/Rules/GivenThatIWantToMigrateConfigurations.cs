@@ -360,49 +360,44 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var contentItems = mockProj.Items.Where(item => item.ItemType == "None");
 
-            foreach (var item in mockProj.Items.Where(i => i.ItemType.Equals("None", StringComparison.Ordinal)))
-            {
-                Console.WriteLine($"Update: {item.Update}, Include: {item.Include}, Remove: {item.Remove}");
-                foreach(var meta in item.Metadata)
-                {
-                    Console.WriteLine($"\tMetadata: Name: {meta.Name}, Value: {meta.Value}");
-                }
+            contentItems.Count().Should().Be(5);
+            contentItems.Where(i => i.ConditionChain().Count() == 1).Should().HaveCount(5);
 
-                foreach(var condition in item.ConditionChain())
-                {
-                    Console.WriteLine($"\tCondition: {condition}");
-                }
-            }
+            var configIncludeContentItem = contentItems.First(item => item.Update.Contains("root"));
+            var configIncludeContentItem2 = contentItems.First(item => item.Update.Contains(@"src\file1.cs"));
+            var configIncludeContentItem3 = contentItems.First(item => item.Update.Contains(@"src\file2.cs"));
+            var configIncludeContentItem4 = contentItems.First(item => item.Update.Equals(@"src"));
+            var configIncludeContentItem5 = contentItems.First(item => item.Update.Contains(@"rootfile.cs"));
 
-            contentItems.Count().Should().Be(2);
-            contentItems.Where(i => i.ConditionChain().Count() == 1).Should().HaveCount(2);
-
-            var configIncludeContentItem = contentItems.First(
-                item => item.ConditionChain().Count() > 0
-                    && item.Update.Contains("root"));
-
-            var configIncludeContentItem2 = contentItems.First(
-                item => item.ConditionChain().Count() > 0
-                    && item.Update.Contains(@"src\file1.cs"));
-
-            configIncludeContentItem.Updates().Should().BeEquivalentTo("root", "src");
-//            configIncludeContentItem.Excludes()
-//                .Should().BeEquivalentTo("rootfile.cs", "src", @"src\file2.cs");
-
+            configIncludeContentItem.Updates().Should().BeEquivalentTo("root");
             configIncludeContentItem.GetMetadataWithName("Link").Should().NotBeNull();
             configIncludeContentItem.GetMetadataWithName("Link").Value.Should().Be("/some/dir/%(FileName)%(Extension)");
-
             configIncludeContentItem.GetMetadataWithName("CopyToOutputDirectory").Should().NotBeNull();
             configIncludeContentItem.GetMetadataWithName("CopyToOutputDirectory").Value.Should().Be("PreserveNewest");
 
-            configIncludeContentItem2.Updates().Should().BeEquivalentTo(@"src\file1.cs", @"src\file2.cs");
-//            configIncludeContentItem2.Excludes().Should().BeEquivalentTo(@"src\file2.cs");
-
+            configIncludeContentItem2.Updates().Should().BeEquivalentTo(@"src\file1.cs");
             configIncludeContentItem2.GetMetadataWithName("Link").Should().NotBeNull();
             configIncludeContentItem2.GetMetadataWithName("Link").Value.Should().Be("/some/dir/%(FileName)%(Extension)");
-
             configIncludeContentItem2.GetMetadataWithName("CopyToOutputDirectory").Should().NotBeNull();
             configIncludeContentItem2.GetMetadataWithName("CopyToOutputDirectory").Value.Should().Be("PreserveNewest");
+
+            configIncludeContentItem3.Updates().Should().BeEquivalentTo(@"src\file2.cs");
+            configIncludeContentItem3.GetMetadataWithName("Link").Should().NotBeNull();
+            configIncludeContentItem3.GetMetadataWithName("Link").Value.Should().Be("/some/dir/%(FileName)%(Extension)");
+            configIncludeContentItem3.GetMetadataWithName("CopyToOutputDirectory").Should().NotBeNull();
+            configIncludeContentItem3.GetMetadataWithName("CopyToOutputDirectory").Value.Should().Be("Never");
+
+            configIncludeContentItem4.Updates().Should().BeEquivalentTo(@"src");
+            configIncludeContentItem4.GetMetadataWithName("Link").Should().NotBeNull();
+            configIncludeContentItem4.GetMetadataWithName("Link").Value.Should().Be("/some/dir/%(FileName)%(Extension)");
+            configIncludeContentItem4.GetMetadataWithName("CopyToOutputDirectory").Should().NotBeNull();
+            configIncludeContentItem4.GetMetadataWithName("CopyToOutputDirectory").Value.Should().Be("Never");
+
+            configIncludeContentItem5.Updates().Should().BeEquivalentTo(@"rootfile.cs");
+            configIncludeContentItem5.GetMetadataWithName("Link").Should().NotBeNull();
+            configIncludeContentItem5.GetMetadataWithName("Link").Value.Should().Be("/some/dir/%(FileName)%(Extension)");
+            configIncludeContentItem5.GetMetadataWithName("CopyToOutputDirectory").Should().NotBeNull();
+            configIncludeContentItem5.GetMetadataWithName("CopyToOutputDirectory").Value.Should().Be("Never");
         }
 
         [Fact]
@@ -432,8 +427,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var contentItems = mockProj.Items.Where(item => item.ItemType == "None");
 
-            contentItems.Count().Should().Be(3);
-            contentItems.Where(i => i.ConditionChain().Count() == 1).Should().HaveCount(3);
+            contentItems.Count().Should().Be(6);
+            contentItems.Where(i => i.ConditionChain().Count() == 1).Should().HaveCount(6);
 
             var configIncludeContentItem = contentItems.First(
                 item => item.ConditionChain().Count() > 0
@@ -447,30 +442,48 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 item => item.ConditionChain().Count() > 0
                     && item.Update.Contains(@"src\file1.cs"));
 
-            // Directories are not converted to globs in the result because we did not write the directory
+            var configIncludeContentItem4 = contentItems.First(
+                item => item.ConditionChain().Count() > 0
+                    && item.Update.Contains(@"src\file2.cs"));
+
+            var configIncludeContentItem5 = contentItems.First(
+                item => item.ConditionChain().Count() > 0
+                    && item.Update.Equals(@"rootfile.cs"));
+
+            var configIncludeContentItem6 = contentItems.First(
+                item => item.ConditionChain().Count() > 0
+                    && item.Update.Equals(@"src\rootfile.cs"));
 
             configIncludeContentItem.Updates().Should().BeEquivalentTo("root");
-//            configIncludeContentItem.Excludes()
-//                .Should().BeEquivalentTo("rootfile.cs", "src", @"src\file2.cs");
-
             configIncludeContentItem.GetMetadataWithName("Link").Should().BeNull();
             configIncludeContentItem.GetMetadataWithName("CopyToOutputDirectory").Should().NotBeNull();
             configIncludeContentItem.GetMetadataWithName("CopyToOutputDirectory").Value.Should().Be("PreserveNewest");
 
             configIncludeContentItem2.Update.Should().Be("src");
-//            configIncludeContentItem2.Excludes().Should().BeEquivalentTo("src", "rootfile.cs", @"src\rootfile.cs", @"src\file2.cs");
-
             configIncludeContentItem2.GetMetadataWithName("Link").Should().NotBeNull();
             configIncludeContentItem2.GetMetadataWithName("Link").Value.Should().Be("/some/dir/%(FileName)%(Extension)");
             configIncludeContentItem2.GetMetadataWithName("CopyToOutputDirectory").Should().NotBeNull();
-            configIncludeContentItem2.GetMetadataWithName("CopyToOutputDirectory").Value.Should().Be("PreserveNewest");
+            configIncludeContentItem2.GetMetadataWithName("CopyToOutputDirectory").Value.Should().Be("Never");
 
             configIncludeContentItem3.Updates().Should().BeEquivalentTo(@"src\file1.cs");
-//            configIncludeContentItem3.Exclude.Should().Be(@"src\file2.cs");
-
             configIncludeContentItem3.GetMetadataWithName("Link").Should().BeNull();
             configIncludeContentItem3.GetMetadataWithName("CopyToOutputDirectory").Should().NotBeNull();
             configIncludeContentItem3.GetMetadataWithName("CopyToOutputDirectory").Value.Should().Be("PreserveNewest");
+
+            configIncludeContentItem4.Updates().Should().BeEquivalentTo(@"src\file2.cs");
+            configIncludeContentItem4.GetMetadataWithName("Link").Should().BeNull();
+            configIncludeContentItem4.GetMetadataWithName("CopyToOutputDirectory").Should().NotBeNull();
+            configIncludeContentItem4.GetMetadataWithName("CopyToOutputDirectory").Value.Should().Be("Never");
+
+            configIncludeContentItem5.Updates().Should().BeEquivalentTo(@"rootfile.cs");
+            configIncludeContentItem5.GetMetadataWithName("Link").Should().BeNull();
+            configIncludeContentItem5.GetMetadataWithName("CopyToOutputDirectory").Should().NotBeNull();
+            configIncludeContentItem5.GetMetadataWithName("CopyToOutputDirectory").Value.Should().Be("Never");
+
+            configIncludeContentItem6.Updates().Should().BeEquivalentTo(@"src\rootfile.cs");
+            configIncludeContentItem6.GetMetadataWithName("Link").Value.Should().Be("/some/dir/%(FileName)%(Extension)");
+            configIncludeContentItem6.GetMetadataWithName("CopyToOutputDirectory").Should().NotBeNull();
+            configIncludeContentItem6.GetMetadataWithName("CopyToOutputDirectory").Value.Should().Be("Never");
         }
         
         [Fact]
@@ -504,7 +517,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var contentItems = mockProj.Items.Where(item => item.ItemType == "None");
 
-            contentItems.Count().Should().Be(7);
+            contentItems.Count().Should().Be(8);
             
             var rootBuildOptionsContentItems = contentItems.Where(i => i.ConditionChain().Count() == 0).ToList();
             rootBuildOptionsContentItems.Count().Should().Be(5);
@@ -544,7 +557,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 i.Update.Equals(@"rootfile.cs")).Update.Should().Be(@"rootfile.cs");
 
             var configItems = contentItems.Where(i => i.ConditionChain().Count() == 1);
-            configItems.Should().HaveCount(2);
+            configItems.Should().HaveCount(3);
 
             var configIncludeContentItem = contentItems.First(
                 item => item.ConditionChain().Count() > 0
@@ -562,7 +575,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
             configIncludeContentItem.GetMetadataWithName("CopyToOutputDirectory").Should().NotBeNull();
             configIncludeContentItem.GetMetadataWithName("CopyToOutputDirectory").Value.Should().Be("Never");
 
-            configRemoveContentItem.Remove.Should().Be("src");
+            configRemoveContentItem.Remove.Should().Be("src;rootfile.cs");
         }
 
         [Fact]
@@ -600,8 +613,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
 
             var contentItems = mockProj.Items.Where(item => item.ItemType == "None");
 
-            contentItems.Count().Should().Be(8);
-            contentItems.Where(i => i.ConditionChain().Count() == 1).Should().HaveCount(3);
+            contentItems.Count().Should().Be(9);
+            contentItems.Where(i => i.ConditionChain().Count() == 1).Should().HaveCount(4);
 
             var rootBuildOptionsContentItems = contentItems.Where(i => i.ConditionChain().Count() == 0).ToList();
             rootBuildOptionsContentItems.Count().Should().Be(5);

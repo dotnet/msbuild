@@ -130,7 +130,7 @@ namespace Microsoft.DotNet.Internal.ProjectModel.Files
 
         public List<string> BuiltInsExclude { get; protected set; }
 
-        public IDictionary<string, IncludeContext> Mappings { get; }
+        public IDictionary<string, IncludeContext> Mappings { get; protected set; }
 
         public JObject RawObject { get; }
 

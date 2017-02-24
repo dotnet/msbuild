@@ -33,6 +33,22 @@ namespace Microsoft.DotNet.Internal.ProjectModel.Files
 
             BuiltInsInclude = BuiltInsExclude;
             BuiltInsExclude = new List<string>();
+
+            if (Mappings != null)
+            {
+                var newMappings = new Dictionary<string, IncludeContext>();
+                foreach (var mapping in Mappings)
+                {
+                    newMappings.Add(mapping.Key, new ExcludeContext(
+                        mapping.Value.SourceBasePath,
+                        mapping.Value.Option,
+                        mapping.Value.RawObject,
+                        mapping.Value.BuiltInsInclude?.ToArray(),
+                        mapping.Value.BuiltInsExclude?.ToArray()));
+                }
+
+                Mappings = newMappings;
+            }
         }
     }
 }
