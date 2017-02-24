@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging
@@ -15,21 +13,6 @@ namespace Microsoft.Build.Logging
     public class BuildEventArgsWriter
     {
         private readonly BinaryWriter binaryWriter;
-
-        // these are used to access the Message without forcing formatting the message
-        private static FieldInfo lazyFormattedArgumentsField =
-            typeof(LazyFormattedBuildEventArgs).GetField("arguments", BindingFlags.Instance | BindingFlags.NonPublic);
-        private static FieldInfo buildEventArgsMessageField =
-            typeof(BuildEventArgs).GetField("message", BindingFlags.Instance | BindingFlags.NonPublic);
-
-        // TODO: Delegate.CreateDelegate will only become available on .NET Standard 2.0, for now just use a MethodInfo
-        //private static Func<CultureInfo, string, object[], string> formatStringDelegate =
-        //    (Func<CultureInfo, string, object[], string>)Delegate.CreateDelegate(
-        //        typeof(Func<CultureInfo, string, object[], string>),
-        //        typeof(LazyFormattedBuildEventArgs).GetMethod("FormatString", BindingFlags.Static | BindingFlags.NonPublic));
-
-        private static MethodInfo formatStringMethodInfo =
-            typeof(LazyFormattedBuildEventArgs).GetMethod("FormatString", BindingFlags.Static | BindingFlags.NonPublic);
 
         /// <summary>
         /// Initializes a new instance of BuildEventArgsWriter with a BinaryWriter
@@ -261,7 +244,7 @@ namespace Microsoft.Build.Logging
         {
             if ((flags & BuildEventArgsFieldFlags.Message) != 0)
             {
-                WriteMessage((LazyFormattedBuildEventArgs)e);
+                Write(e.Message);
             }
 
             if ((flags & BuildEventArgsFieldFlags.BuildEventContext) != 0)
@@ -400,8 +383,7 @@ namespace Microsoft.Build.Logging
                 flags |= BuildEventArgsFieldFlags.HelpHeyword;
             }
 
-            // don't want to force evaluation of e.Message, so accessing the field directly
-            if (buildEventArgsMessageField.GetValue(e) is string)
+            if (!string.IsNullOrEmpty(e.Message))
             {
                 flags |= BuildEventArgsFieldFlags.Message;
             }
@@ -511,20 +493,6 @@ namespace Microsoft.Build.Logging
             Write(buildEventContext.TaskId);
             Write(buildEventContext.SubmissionId);
             Write(buildEventContext.ProjectInstanceId);
-        }
-
-        private void WriteMessage(LazyFormattedBuildEventArgs e)
-        {
-            string message = buildEventArgsMessageField.GetValue(e) as string;
-
-            var arguments = (object[])lazyFormattedArgumentsField.GetValue(e);
-            if (arguments != null && arguments.Length > 0)
-            {
-                // this is bad for performance but only used infrequently (when a message has arguments and hasn't been formatted previously)
-                message = (string)formatStringMethodInfo.Invoke(null, new object[] { CultureInfo.CurrentCulture, message, arguments });
-            }
-
-            Write(message);
         }
 
         private void Write<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>> keyValuePairs)
