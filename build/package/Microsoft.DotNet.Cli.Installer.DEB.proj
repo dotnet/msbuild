@@ -45,8 +45,7 @@
       <ReplaceFileContents
         InputFile="$(DebianConfigTemplateFile)"
         DestinationFile="$(DebianConfigJsonFile)"
-        ReplacementPatterns="@(DebianConfigTokenValues -> '%(Identity)')"
-        ReplacementStrings="@(DebianConfigTokenValues -> '%(ReplacementString)')" />
+        ReplacementItems="@(DebianConfigTokenValues)" />
 
       <!-- Build SDK Deb package -->
       <DotNetDebTool ToolPath="$(Stage0Directory)"
