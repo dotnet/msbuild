@@ -22,6 +22,9 @@
     <PackagesLayoutToolsNet46Dir>$(PackagesLayoutToolsDir)net46\</PackagesLayoutToolsNet46Dir>
     <PackagesLayoutToolsNetCoreAppDir>$(PackagesLayoutToolsDir)netcoreapp1.0\</PackagesLayoutToolsNetCoreAppDir>
 
+    <!-- We must use Windows PDB format (overriding SDK default) in order to send symbols to symweb -->
+    <DebugType>full</DebugType>
+
     <!-- Reset $(BuildEpoch) whenever $(VersionPrefix) increments. We subtract this from YYYYMMDD portion of build
          number below to obtain the fourth part of file version that must fit in 16 bits. We can produce builds 
          for seven years from every epoch reset. -->
