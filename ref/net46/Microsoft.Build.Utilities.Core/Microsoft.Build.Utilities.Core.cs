@@ -314,8 +314,7 @@ namespace Microsoft.Build.Utilities
         Version46 = 7,
         Version461 = 8,
         Version462 = 10,
-        Version47 = 11,
-        VersionLatest = 11,
+        VersionLatest = 10,
     }
     public partial class TargetPlatformSDK : System.IEquatable<Microsoft.Build.Utilities.TargetPlatformSDK>
     {
