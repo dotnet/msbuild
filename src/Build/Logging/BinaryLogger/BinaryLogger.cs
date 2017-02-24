@@ -75,7 +75,7 @@ namespace Microsoft.Build.Logging
                 // so add an explicit 0 at the end to signify end of file
                 stream.WriteByte(0);
                 stream.Flush();
-                stream.Close();
+                stream.Dispose();
                 stream = null;
             }
         }

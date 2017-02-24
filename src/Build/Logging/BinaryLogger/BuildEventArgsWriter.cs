@@ -21,10 +21,15 @@ namespace Microsoft.Build.Logging
             typeof(LazyFormattedBuildEventArgs).GetField("arguments", BindingFlags.Instance | BindingFlags.NonPublic);
         private static FieldInfo buildEventArgsMessageField =
             typeof(BuildEventArgs).GetField("message", BindingFlags.Instance | BindingFlags.NonPublic);
-        private static Func<CultureInfo, string, object[], string> formatStringDelegate =
-            (Func<CultureInfo, string, object[], string>)Delegate.CreateDelegate(
-                typeof(Func<CultureInfo, string, object[], string>),
-                typeof(LazyFormattedBuildEventArgs).GetMethod("FormatString", BindingFlags.Static | BindingFlags.NonPublic));
+
+        // TODO: Delegate.CreateDelegate will only become available on .NET Standard 2.0, for now just use a MethodInfo
+        //private static Func<CultureInfo, string, object[], string> formatStringDelegate =
+        //    (Func<CultureInfo, string, object[], string>)Delegate.CreateDelegate(
+        //        typeof(Func<CultureInfo, string, object[], string>),
+        //        typeof(LazyFormattedBuildEventArgs).GetMethod("FormatString", BindingFlags.Static | BindingFlags.NonPublic));
+
+        private static MethodInfo formatStringMethodInfo =
+            typeof(LazyFormattedBuildEventArgs).GetMethod("FormatString", BindingFlags.Static | BindingFlags.NonPublic);
 
         /// <summary>
         /// Initializes a new instance of BuildEventArgsWriter with a BinaryWriter
@@ -515,7 +520,8 @@ namespace Microsoft.Build.Logging
             var arguments = (object[])lazyFormattedArgumentsField.GetValue(e);
             if (arguments != null && arguments.Length > 0)
             {
-                message = formatStringDelegate(CultureInfo.CurrentCulture, message, arguments);
+                // this is bad for performance but only used infrequently (when a message has arguments and hasn't been formatted previously)
+                message = (string)formatStringMethodInfo.Invoke(null, new object[] { CultureInfo.CurrentCulture, message, arguments });
             }
 
             Write(message);
