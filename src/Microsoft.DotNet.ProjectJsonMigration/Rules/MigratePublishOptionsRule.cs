@@ -36,15 +36,18 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 projectContext.ProjectFile.PublishOptions,
                 migrationRuleInputs);
 
-            ExecuteTransformation(
-                DoNotCopyToPublishDirectoryTransform,
-                new ExcludeContext(
-                    projectContext.ProjectFile.PublishOptions.SourceBasePath,
-                    projectContext.ProjectFile.PublishOptions.Option,
-                    projectContext.ProjectFile.PublishOptions.RawObject,
-                    projectContext.ProjectFile.PublishOptions.BuiltInsInclude?.ToArray(),
-                    projectContext.ProjectFile.PublishOptions.BuiltInsExclude?.ToArray()),
-                migrationRuleInputs);
+            if (projectContext.ProjectFile.PublishOptions != null)
+            {
+                ExecuteTransformation(
+                    DoNotCopyToPublishDirectoryTransform,
+                    new ExcludeContext(
+                        projectContext.ProjectFile.PublishOptions.SourceBasePath,
+                        projectContext.ProjectFile.PublishOptions.Option,
+                        projectContext.ProjectFile.PublishOptions.RawObject,
+                        projectContext.ProjectFile.PublishOptions.BuiltInsInclude?.ToArray(),
+                        projectContext.ProjectFile.PublishOptions.BuiltInsExclude?.ToArray()),
+                    migrationRuleInputs);
+            }
         }
 
         private void ExecuteTransformation(

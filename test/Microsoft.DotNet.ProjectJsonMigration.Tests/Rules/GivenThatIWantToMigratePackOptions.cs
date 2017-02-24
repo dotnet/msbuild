@@ -220,6 +220,20 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                     }
                 }");
 
+            foreach (var item in mockProj.Items.Where(i => i.ItemType.Equals("None", StringComparison.Ordinal)))
+            {
+                Console.WriteLine($"Update: {item.Update}, Include: {item.Include}, Remove: {item.Remove}");
+                foreach(var meta in item.Metadata)
+                {
+                    Console.WriteLine($"\tMetadata: Name: {meta.Name}, Value: {meta.Value}");
+                }
+
+                foreach(var condition in item.ConditionChain())
+                {
+                    Console.WriteLine($"\tCondition: {condition}");
+                }
+            }
+
             var contentItemsToInclude = mockProj.Items
                 .Where(item => item.ItemType.Equals("None", StringComparison.Ordinal))
                 .Where(item => item.GetMetadataWithName("Pack").Value == "true");
@@ -231,8 +245,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 .Where(item => item.ItemType.Equals("None", StringComparison.Ordinal))
                 .Where(item => item.GetMetadataWithName("Pack").Value == "false");
 
-            contentItemsToInclude.Count().Should().Be(1);
-            contentItemsToInclude.First().Update.Should().Be(@"path\to\file\to\exclude.cs");
+            contentItemsToExclude.Count().Should().Be(1);
+            contentItemsToExclude.First().Update.Should().Be(@"path\to\file\to\exclude.cs");
         }
 
         [Fact]

@@ -62,8 +62,11 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Rules
                 .WithMappingsToTransform(_mappingsToTransfrom);
 
         private IncludeContextTransform DoNotPackFilesTransform =>
-            new UpdateContextTransform("None", transformMappings: true)
-                .WithMetadata("Pack", "false");
+            new UpdateContextTransform(
+                "None",
+                transformMappings: true,
+                excludePatternsRule: pattern => ProjectFilesCollection.DefaultBuiltInExcludePatterns.Contains(pattern))
+            .WithMetadata("Pack", "false");
 
         private Func<AddItemTransform<IncludeContext>, string, AddItemTransform<IncludeContext>> _mappingsToTransfrom =>
             (addItemTransform, targetPath) =>

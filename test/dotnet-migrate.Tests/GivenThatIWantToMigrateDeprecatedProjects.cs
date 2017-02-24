@@ -224,10 +224,10 @@ namespace Microsoft.DotNet.Migration.Tests
             outputDir.Should().Exist()
                 .And.HaveFiles(new[]
                     {
-                        "ContentFile1.txt",
-                        "ContentFile2.txt",
-                        "ContentFileBuiltIn1.txt",
-                        "ContentFileBuiltIn2.txt",
+                        "ContentFile1.txt1",
+                        "ContentFile2.txt1",
+                        "ContentFileBuiltIn1.txt1",
+                        "ContentFileBuiltIn2.txt1",
                         "IncludeThis.txt",
                     });
             Directory.Exists(Path.Combine(outputDir.FullName, "ExcludeThis1.txt")).Should().BeFalse();
@@ -237,10 +237,10 @@ namespace Microsoft.DotNet.Migration.Tests
             publishDir.Should().Exist()
                 .And.HaveFiles(new[]
                     {
-                        "ContentFile1.txt",
-                        "ContentFile2.txt",
-                        "ContentFileBuiltIn1.txt",
-                        "ContentFileBuiltIn2.txt",
+                        "ContentFile1.txt1",
+                        "ContentFile2.txt1",
+                        "ContentFileBuiltIn1.txt1",
+                        "ContentFileBuiltIn2.txt1",
                         "IncludeThis.txt",
                     });
             Directory.Exists(Path.Combine(publishDir.FullName, "ExcludeThis1.txt")).Should().BeFalse();
