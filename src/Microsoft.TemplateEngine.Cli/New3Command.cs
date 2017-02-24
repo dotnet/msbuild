@@ -875,21 +875,6 @@ namespace Microsoft.TemplateEngine.Cli
         // Use this for when the template is known.
         private void ParseTemplateArgs(ITemplateInfo templateInfo)
         {
-            IEnumerable<ITemplateParameter> parameterDefinitions = TemplateParametersForTemplate(templateInfo);
-            _hostSpecificTemplateData = ReadHostSpecificTemplateData(templateInfo);
-
-            IEnumerable<KeyValuePair<string, string>> argParameters = parameterDefinitions
-                                                            .Where(x => x.Priority != TemplateParameterPriority.Implicit)
-                                                            .OrderBy(x => x.Name)
-                                                            .Select(x => new KeyValuePair<string, string>(x.Name, x.DataType));
-            _app.SetupTemplateParameters(argParameters, _hostSpecificTemplateData.LongNameOverrides, _hostSpecificTemplateData.ShortNameOverrides);
-
-            // re-parse after setting up the template params
-            _app.ParseArgs(_app.InternalParamValueList("--extra-args"));
-        }
-
-        private void SetupTemporaryArgParsingForTemplate(ITemplateInfo templateInfo)
-        {
             _app.Reset();
             SetupInternalCommands(_app);
 
@@ -897,9 +882,9 @@ namespace Microsoft.TemplateEngine.Cli
             _hostSpecificTemplateData = ReadHostSpecificTemplateData(templateInfo);
 
             IEnumerable<KeyValuePair<string, string>> argParameters = parameterDefinitions
-                                                                        .Where(x => x.Priority != TemplateParameterPriority.Implicit)
-                                                                        .OrderBy(x => x.Name)
-                                                                        .Select(x => new KeyValuePair<string, string>(x.Name, x.DataType));
+                                                            .Where(x => x.Priority != TemplateParameterPriority.Implicit)
+                                                            .OrderBy(x => x.Name)
+                                                            .Select(x => new KeyValuePair<string, string>(x.Name, x.DataType));
 
             _app.SetupTemplateParameters(argParameters, _hostSpecificTemplateData.LongNameOverrides, _hostSpecificTemplateData.ShortNameOverrides);
             _app.ParseArgs(_app.InternalParamValueList("--extra-args"));
@@ -969,8 +954,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                 try
                 {
-                    // this is the only thing that could really throw, and probably won't.
-                    SetupTemporaryArgParsingForTemplate(templateWithFilterInfo.Info);
+                    ParseTemplateArgs(templateWithFilterInfo.Info);
 
                     // template params are parsed already
                     foreach (string matchedParamName in _app.AllTemplateParams.Keys)
@@ -1154,8 +1138,6 @@ namespace Microsoft.TemplateEngine.Cli
                 Reporter.Output.WriteLine(string.Format(LocalizableStrings.Description, templateInfo.Description));
             }
 
-            // TODO: make this work with ITemplateInfo - avoid loading the generator.
-            // Generator is needed for SetupDefaultParamValuesFromTemplateAndHost() && ResolveUserParameters()
             ITemplate template = EnvironmentSettings.SettingsLoader.LoadTemplate(templateInfo);
             IParameterSet allParams = _templateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName, out IList<string> defaultParamsWithInvalidValues);
             _templateCreator.ResolveUserParameters(template, allParams, _app.AllTemplateParams, out IList<string> userParamsWithInvalidValues);
