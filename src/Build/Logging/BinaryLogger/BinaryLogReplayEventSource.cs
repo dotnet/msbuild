@@ -2,6 +2,7 @@
 using System.IO;
 using System.IO.Compression;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging
 {
@@ -35,17 +36,19 @@ namespace Microsoft.Build.Logging
                     }
                     catch (Exception ex)
                     {
-                        var text = $"Exception while reading log file:{Environment.NewLine}{ex.ToString()}";
+                        string code;
+                        string helpKeyword;
+                        var text = ResourceUtilities.FormatResourceString(out code, out helpKeyword, "InvalidLogFileFormat", ex.Message);
                         var message = new BuildErrorEventArgs(
                             subcategory: "",
-                            code: "",
+                            code: code,
                             file: sourceFilePath,
                             lineNumber: 0,
                             columnNumber: 0,
                             endLineNumber: 0,
                             endColumnNumber: 0,
                             message: text,
-                            helpKeyword: null,
+                            helpKeyword: helpKeyword,
                             senderName: "MSBuild");
                         Dispatch(message);
                     }

@@ -104,18 +104,16 @@ namespace Microsoft.Build.Logging
         /// </exception>
         private void ProcessParameters()
         {
-            const string invalidParamSpecificationMessage = @"Need to specify a valid log file name, such as msbuild.binlog";
-
             if (Parameters == null)
             {
-                throw new LoggerException(invalidParamSpecificationMessage);
+                throw new LoggerException(ResourceUtilities.FormatResourceString("InvalidBinaryLoggerParameters", 0, Parameters));
             }
 
             string[] parameters = Parameters.Split(';');
 
             if (parameters.Length != 1)
             {
-                throw new LoggerException(invalidParamSpecificationMessage);
+                throw new LoggerException(ResourceUtilities.FormatResourceString("InvalidBinaryLoggerParameters", parameters.Length, Parameters));
             }
 
             FilePath = parameters[0].TrimStart('"').TrimEnd('"');

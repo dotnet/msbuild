@@ -444,6 +444,10 @@
     <comment>{StrBegin="MSB4102: "}UE: This is a generic message that is displayed when we find a project element with an incorrect value for one of its
         attributes. At the end of the message we show the exception text we got trying to use the value.</comment>
   </data>
+  <data name="InvalidBinaryLoggerParameters" UESanitized="false" Visibility="Public">
+    <value>MSB4234: The binary logger expects a single parameter (the output file name). {0} parameters were passed: "{1}".</value>
+    <comment>{StrBegin="MSB4234: "}This is shown when the Binary Logger is passed zero or more than one parameter.</comment>
+  </data>
   <data name="InvalidContinueOnErrorAttribute" UESanitized="false" Visibility="Public">
     <value>MSB4021: The "ContinueOnError" attribute of the "{0}" task is not valid. {1}</value>
     <comment>{StrBegin="MSB4021: "}LOCALIZATION: "ContinueOnError" should not be localized. "{1}" is a message from another exception explaining the problem.</comment>
@@ -462,6 +466,10 @@
     <comment>{StrBegin="MSB4024: "}UE: This message is shown when an imported project file cannot be loaded because of incorrect XML. The project
     filename is not part of the message because it is provided separately to loggers.
     LOCALIZATION: {0} is a localized message from the CLR/FX explaining why the project is invalid.</comment>
+  </data>
+  <data name="InvalidLogFileFormat" UESanitized="false" Visibility="Public">
+    <value>MSB4233: There was an exception while reading the log file: {0}</value>
+    <comment>{StrBegin="MSB4233: "}This is shown when the Binary Logger can't read the log file.</comment>
   </data>
   <data name="InvalidPropertyNameInToolset" UESanitized="false" Visibility="Private_OM">
     <value>MSB4147: The property "{0}" at "{1}" is invalid. {2}</value>
@@ -1585,7 +1593,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
         MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
         MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
 
-        Next message code should be MSB4233.
+        Next message code should be MSB4235.
               
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>
