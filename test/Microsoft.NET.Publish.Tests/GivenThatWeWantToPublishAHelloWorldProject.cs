@@ -49,7 +49,7 @@ namespace Microsoft.NET.Publish.Tests
         [Fact]
         public void It_publishes_self_contained_apps_to_the_publish_folder_and_the_app_should_run()
         {
-            var targetFramework = "netcoreapp1.0";
+            var targetFramework = "netcoreapp1.1";
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             var helloWorldAsset = _testAssetsManager

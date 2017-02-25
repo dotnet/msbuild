@@ -34,11 +34,11 @@ namespace Microsoft.NET.Build.Tests
 
             var outputDirectory = buildCommand.GetOutputDirectory(targetFramework: "");
             outputDirectory.Should().OnlyHaveFiles(new[] {
-                "netcoreapp1.0/NetStandardAndNetCoreApp.dll",
-                "netcoreapp1.0/NetStandardAndNetCoreApp.pdb",
-                "netcoreapp1.0/NetStandardAndNetCoreApp.runtimeconfig.json",
-                "netcoreapp1.0/NetStandardAndNetCoreApp.runtimeconfig.dev.json",
-                "netcoreapp1.0/NetStandardAndNetCoreApp.deps.json",
+                "netcoreapp1.1/NetStandardAndNetCoreApp.dll",
+                "netcoreapp1.1/NetStandardAndNetCoreApp.pdb",
+                "netcoreapp1.1/NetStandardAndNetCoreApp.runtimeconfig.json",
+                "netcoreapp1.1/NetStandardAndNetCoreApp.runtimeconfig.dev.json",
+                "netcoreapp1.1/NetStandardAndNetCoreApp.deps.json",
                 "netstandard1.5/NetStandardAndNetCoreApp.dll",
                 "netstandard1.5/NetStandardAndNetCoreApp.pdb",
                 "netstandard1.5/NetStandardAndNetCoreApp.deps.json"
@@ -114,7 +114,7 @@ namespace Microsoft.NET.Build.Tests
                             new XElement(ns + "RuntimeIdentifier", firstFrameworkRid),
                             new XElement(ns + "RuntimeIdentifiers", firstFrameworkRids)),
                         new XElement(ns + "PropertyGroup",
-                            new XAttribute(ns + "Condition", "'$(TargetFramework)' == 'netcoreapp1.0'"),
+                            new XAttribute(ns + "Condition", "'$(TargetFramework)' == 'netcoreapp1.1'"),
                             new XElement(ns + "RuntimeIdentifier", secondFrameworkRid),
                             new XElement(ns + "RuntimeIdentifiers", secondFrameworkRids)));
                 });

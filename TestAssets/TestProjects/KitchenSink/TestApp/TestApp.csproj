@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp1.0</TargetFramework>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
     <ProjectGuid>{C91F7F4C-47ED-4D1C-8990-B2E886B0FAD9}</ProjectGuid>
     <PackageTargetFallback>portable-net45+wp8+win8+wpa</PackageTargetFallback>
     <EnableDefaultItems>false</EnableDefaultItems>

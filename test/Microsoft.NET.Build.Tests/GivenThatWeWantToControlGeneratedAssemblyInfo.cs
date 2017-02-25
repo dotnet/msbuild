@@ -76,16 +76,16 @@ namespace Microsoft.NET.Build.Tests
                 expectedInfo.Remove(attributeToOptOut);
             }
 
-            expectedInfo.Add("TargetFrameworkAttribute", ".NETCoreApp,Version=v1.0");
+            expectedInfo.Add("TargetFrameworkAttribute", ".NETCoreApp,Version=v1.1");
 
-            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("netcoreapp1.0", "Release").FullName, "HelloWorld.dll");
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("netcoreapp1.1", "Release").FullName, "HelloWorld.dll");
             var actualInfo = AssemblyInfo.Get(assemblyPath);
 
             actualInfo.Should().Equal(expectedInfo);
         }
 
         [Theory]
-        [InlineData("netcoreapp1.0")]
+        [InlineData("netcoreapp1.1")]
         [InlineData("net45")]
         public void It_respects_version_prefix(string targetFramework)
         {

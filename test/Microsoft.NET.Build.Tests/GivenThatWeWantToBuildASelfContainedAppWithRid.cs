@@ -46,7 +46,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp1.0", runtimeIdentifier: runtimeIdentifier);
+            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp1.1", runtimeIdentifier: runtimeIdentifier);
             var selfContainedExecutable = $"App{Constants.ExeSuffix}";
 
             Command.Create(Path.Combine(outputDirectory.FullName, selfContainedExecutable), new string[] { })
