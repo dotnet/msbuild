@@ -32,24 +32,39 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 }",
                 testDirectory: testDirectory);
 
-            mockProj.Items.Count(i => i.ItemType.Equals("Content", StringComparison.Ordinal)).Should().Be(2);
+            mockProj.Items.Count(i => i.ItemType.Equals("None", StringComparison.Ordinal)).Should().Be(4);
 
-            foreach (var item in mockProj.Items.Where(i => i.ItemType.Equals("Content", StringComparison.Ordinal)))
+            foreach (var item in mockProj.Items.Where(i => i.ItemType.Equals("None", StringComparison.Ordinal)))
             {
                 item.Metadata.Count(m => m.Name == "CopyToPublishDirectory").Should().Be(1);
 
-                if (item.Include.Contains(@"src\file1.cs"))
+                if (item.Update.Contains(@"src\file1.cs"))
                 {
-                    item.Include.Should().Be(@"src\file1.cs;src\file2.cs");
-                    item.Exclude.Should().Be(@"src\file2.cs");
+                    item.Update.Should().Be(@"src\file1.cs");
+                    item.Exclude.Should().BeEmpty();
+                    item.Metadata.Count(m =>
+                        m.Name == "CopyToPublishDirectory" && m.Value == "PreserveNewest").Should().Be(1);
+                }
+                else if (item.Update.Contains(@"src\file2.cs"))
+                {
+                    item.Update.Should().Be(@"src\file2.cs");
+                    item.Exclude.Should().BeEmpty();
+                    item.Metadata.Count(m =>
+                        m.Name == "CopyToPublishDirectory" && m.Value == "Never").Should().Be(1);
+                }
+                else if (item.Update.Contains(@"root\**\*"))
+                {
+                    item.Update.Should().Be(@"root\**\*");
+                    item.Exclude.Should().BeEmpty();
+                    item.Metadata.Count(m =>
+                        m.Name == "CopyToPublishDirectory" && m.Value == "PreserveNewest").Should().Be(1);
                 }
                 else
                 {
-                    item.Include.Should()
-                        .Be(@"root\**\*;src\**\*;rootfile.cs");
-
-                    item.Exclude.Should()
-                        .Be(@"src\**\*;rootfile.cs;src\file2.cs");
+                    item.Update.Should().Be(@"src\**\*;rootfile.cs");
+                    item.Exclude.Should().BeEmpty();
+                    item.Metadata.Count(m =>
+                        m.Name == "CopyToPublishDirectory" && m.Value == "Never").Should().Be(1);
                 }
             }
         }
@@ -82,21 +97,39 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 }",
                 testDirectory: testDirectory);
 
-            mockProj.Items.Count(i => i.ItemType.Equals("Content", StringComparison.Ordinal)).Should().Be(2);
+            mockProj.Items.Count(i => i.ItemType.Equals("None", StringComparison.Ordinal)).Should().Be(4);
 
-            foreach (var item in mockProj.Items.Where(i => i.ItemType.Equals("Content", StringComparison.Ordinal)))
+            foreach (var item in mockProj.Items.Where(i => i.ItemType.Equals("None", StringComparison.Ordinal)))
             {
                 item.Metadata.Count(m => m.Name == "CopyToPublishDirectory").Should().Be(1);
 
                 if (item.Update.Contains(@"src\file1.cs"))
                 {
-                    item.Update.Should().Be(@"src\file1.cs;src\file2.cs");
+                    item.Update.Should().Be(@"src\file1.cs");
                     item.Exclude.Should().BeEmpty();
+                    item.Metadata.Count(m =>
+                        m.Name == "CopyToPublishDirectory" && m.Value == "PreserveNewest").Should().Be(1);
+                }
+                else if (item.Update.Contains(@"src\file2.cs"))
+                {
+                    item.Update.Should().Be(@"src\file2.cs");
+                    item.Exclude.Should().BeEmpty();
+                    item.Metadata.Count(m =>
+                        m.Name == "CopyToPublishDirectory" && m.Value == "Never").Should().Be(1);
+                }
+                else if (item.Update.Contains(@"root\**\*"))
+                {
+                    item.Update.Should().Be(@"root\**\*");
+                    item.Exclude.Should().BeEmpty();
+                    item.Metadata.Count(m =>
+                        m.Name == "CopyToPublishDirectory" && m.Value == "PreserveNewest").Should().Be(1);
                 }
                 else
                 {
-                    item.Update.Should().Be(@"root\**\*;src\**\*;rootfile.cs");
+                    item.Update.Should().Be(@"src\**\*;rootfile.cs");
                     item.Exclude.Should().BeEmpty();
+                    item.Metadata.Count(m =>
+                        m.Name == "CopyToPublishDirectory" && m.Value == "Never").Should().Be(1);
                 }
             }
         }
@@ -126,31 +159,46 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 }",
                 testDirectory: testDirectory);
 
-            mockProj.Items.Count(i => i.ItemType.Equals("Content", StringComparison.Ordinal)).Should().Be(3);
+            mockProj.Items.Count(i => i.ItemType.Equals("None", StringComparison.Ordinal)).Should().Be(5);
 
-            // From ProjectReader #L725 (Both are empty)
-            var defaultIncludePatterns = Enumerable.Empty<string>();
-            var defaultExcludePatterns = Enumerable.Empty<string>();
-
-            foreach (var item in mockProj.Items.Where(i => i.ItemType.Equals("Content", StringComparison.Ordinal)))
+            foreach (var item in mockProj.Items.Where(i => i.ItemType.Equals("None", StringComparison.Ordinal)))
             {
-                if (item.Include.Contains(@"root\**\*"))
+                if (item.Update.Contains(@"root\**\*"))
                 {
-                    item.Include.Should().Be(@"root\**\*");
-                    item.Exclude.Should().Be(@"src\**\*;rootfile.cs;src\file3.cs");
+                    item.Update.Should().Be(@"root\**\*");
+                    item.Metadata.Count(m =>
+                        m.Name == "CopyToPublishDirectory" && m.Value == "PreserveNewest").Should().Be(1);
                 }
-                else if (item.Include.Contains(@"src\file1.cs"))
+                else if (item.Update.Contains(@"src\file1.cs"))
                 {
-                    item.Include.Should().Be(@"src\file1.cs;src\file2.cs");
-                    item.Exclude.Should().Be(@"src\file2.cs;src\file3.cs");
+                    item.Update.Should().Be(@"src\file1.cs");
+                    item.Metadata.Count(m =>
+                        m.Name == "CopyToOutputDirectory" && m.Value == "PreserveNewest").Should().Be(1);
+                    item.Metadata.Count(m =>
+                        m.Name == "CopyToPublishDirectory" && m.Value == "PreserveNewest").Should().Be(1);
+                }
+                else if (item.Update.Contains(@"src\file2.cs"))
+                {
+                    item.Update.Should().Be(@"src\file2.cs");
+                    item.Metadata.Count(m =>
+                        m.Name == "CopyToOutputDirectory" && m.Value == "Never").Should().Be(1);
+                    item.Metadata.Count(m =>
+                        m.Name == "CopyToPublishDirectory" && m.Value == "PreserveNewest").Should().Be(1);
+                }
+                else if (item.Update.Contains(@"src\file3.cs"))
+                {
+                    item.Update.Should().Be(@"src\file3.cs");
+                    item.Metadata.Count(m =>
+                        m.Name == "CopyToPublishDirectory" && m.Value == "Never").Should().Be(1);
                 }
                 else
                 {
-                    item.Include.Should()
+                    item.Update.Should()
                         .Be(@"src\**\*;rootfile.cs");
-
-                    item.Exclude.Should()
-                        .Be(@"src\**\*;rootfile.cs;src\file2.cs;src\file3.cs");
+                    item.Metadata.Count(m =>
+                        m.Name == "CopyToOutputDirectory" && m.Value == "Never").Should().Be(1);
+                    item.Metadata.Count(m =>
+                        m.Name == "CopyToPublishDirectory" && m.Value == "Never").Should().Be(1);
                 }
             }
         }
@@ -189,33 +237,82 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
                 }",
                 testDirectory: testDirectory);
 
-            mockProj.Items.Count(i => i.ItemType.Equals("Content", StringComparison.Ordinal)).Should().Be(4);
+            mockProj.Items.Count(i => i.ItemType.Equals("None", StringComparison.Ordinal)).Should().Be(5);
 
             // From ProjectReader #L725 (Both are empty)
             var defaultIncludePatterns = Enumerable.Empty<string>();
             var defaultExcludePatterns = Enumerable.Empty<string>();
 
-            foreach (var item in mockProj.Items.Where(i => i.ItemType.Equals("Content", StringComparison.Ordinal)))
+            foreach (var item in mockProj.Items.Where(i => i.ItemType.Equals("None", StringComparison.Ordinal)))
             {
                 var metadata = string.Join(",", item.Metadata.Select(m => m.Name));
-                Console.WriteLine($"LICAVALC: Update: {item.Update}, Include: {item.Include}, Metadata: {metadata}");
 
                 if (item.Update.Contains(@"root\**\*"))
                 {
-                    item.Update.Should().Be(@"root\**\*;src\**\*;rootfile.cs");
+                    item.Update.Should().Be(@"root\**\*");
                     item.Exclude.Should().BeEmpty();
+                    item.Metadata.Count(m =>
+                        m.Name == "CopyToPublishDirectory" && m.Value == "PreserveNewest").Should().Be(1);
                 }
                 else if (item.Update.Contains(@"src\file1.cs"))
                 {
-                    item.Update.Should().Be(@"src\file1.cs;src\file2.cs");
+                    item.Update.Should().Be(@"src\file1.cs");
                     item.Exclude.Should().BeEmpty();
+                    item.Metadata.Count(m =>
+                        m.Name == "CopyToOutputDirectory" && m.Value == "PreserveNewest").Should().Be(1);
+                    item.Metadata.Count(m =>
+                        m.Name == "CopyToPublishDirectory" && m.Value == "PreserveNewest").Should().Be(1);
+                }
+                else if (item.Update.Contains(@"src\file2.cs"))
+                {
+                    item.Update.Should().Be(@"src\file2.cs");
+                    item.Exclude.Should().BeEmpty();
+                    item.Metadata.Count(m =>
+                        m.Name == "CopyToOutputDirectory" && m.Value == "Never").Should().Be(1);
+                    item.Metadata.Count(m =>
+                        m.Name == "CopyToPublishDirectory" && m.Value == "PreserveNewest").Should().Be(1);
+                }
+                else if (item.Update.Contains(@"src\file3.cs"))
+                {
+                    item.Update.Should().Be(@"src\file3.cs");
+                    item.Exclude.Should().BeEmpty();
+                    item.Metadata.Count(m =>
+                        m.Name == "CopyToPublishDirectory" && m.Value == "Never").Should().Be(1);
                 }
                 else
                 {
                     item.Update.Should().Be(@"src\**\*;rootfile.cs");
                     item.Exclude.Should().BeEmpty();
+                    item.Metadata.Count(m =>
+                        m.Name == "CopyToOutputDirectory" && m.Value == "Never").Should().Be(1);
+                    item.Metadata.Count(m =>
+                        m.Name == "CopyToPublishDirectory" && m.Value == "Never").Should().Be(1);
                 }
             }
+        }
+
+        [Fact]
+        public void ExcludedPatternsAreNotEmittedOnNoneWhenBuildingAWebProject()
+        {
+            var mockProj = RunPublishOptionsRuleOnPj(@"
+                {
+                    ""buildOptions"": {
+                        ""emitEntryPoint"": true
+                    },
+                    ""publishOptions"": {
+                        ""include"": [""wwwroot"", ""**/*.cshtml"", ""appsettings.json"", ""web.config""],
+                    },
+                    ""dependencies"": {
+                        ""Microsoft.AspNetCore.Mvc"" : {
+                            ""version"": ""1.0.0""
+                        }
+                    },
+                    ""frameworks"": {
+                        ""netcoreapp1.0"": {}
+                    }
+                }");
+ 
+            mockProj.Items.Count(i => i.ItemType.Equals("None", StringComparison.Ordinal)).Should().Be(0);
         }
 
         private void WriteFilesInProjectDirectory(string testDirectory)

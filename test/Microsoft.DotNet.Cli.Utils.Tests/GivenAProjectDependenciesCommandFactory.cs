@@ -28,7 +28,6 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         [WindowsOnlyFact]
         public void It_resolves_desktop_apps_defaulting_to_Debug_Configuration()
         {
-            var runtime = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
             var configuration = "Debug";
 
             var testInstance = TestAssets.Get(TestAssetKinds.DesktopTestProjects, "AppWithProjTool2Fx")
@@ -38,14 +37,12 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
             var restoreCommand = new RestoreCommand()
                 .WithWorkingDirectory(testInstance.Root)
-                .WithRuntime(runtime)
                 .ExecuteWithCapturedOutput()
                 .Should().Pass();
 
             var buildCommand = new BuildCommand()
                 .WithWorkingDirectory(testInstance.Root)
                 .WithConfiguration(configuration)
-                .WithRuntime(runtime)
                 .WithCapturedOutput()
                 .Execute()
                 .Should().Pass();
@@ -67,7 +64,6 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         [WindowsOnlyFact]
         public void It_resolves_desktop_apps_when_configuration_is_Debug()
         {
-            var runtime = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
             var configuration = "Debug";
 
             var testInstance = TestAssets.Get(TestAssetKinds.DesktopTestProjects, "AppWithProjTool2Fx")
@@ -77,14 +73,12 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
             var restoreCommand = new RestoreCommand()
                 .WithWorkingDirectory(testInstance.Root)
-                .WithRuntime(runtime)
                 .ExecuteWithCapturedOutput()
                 .Should().Pass();
 
             var buildCommand = new BuildCommand()
                 .WithWorkingDirectory(testInstance.Root)
                 .WithConfiguration(configuration)
-                .WithRuntime(runtime)
                 .Execute()
                 .Should().Pass();
 
@@ -104,7 +98,6 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         [WindowsOnlyFact]
         public void It_resolves_desktop_apps_when_configuration_is_Release()
         {
-            var runtime = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
             var configuration = "Debug";
 
             var testInstance = TestAssets.Get(TestAssetKinds.DesktopTestProjects, "AppWithProjTool2Fx")
@@ -114,14 +107,12 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
             var restoreCommand = new RestoreCommand()
                 .WithWorkingDirectory(testInstance.Root)
-                .WithRuntime(runtime)
                 .ExecuteWithCapturedOutput()
                 .Should().Pass();
 
             var buildCommand = new BuildCommand()
                 .WithWorkingDirectory(testInstance.Root)
                 .WithConfiguration(configuration)
-                .WithRuntime(runtime)
                 .WithCapturedOutput()
                 .Execute()
                 .Should().Pass();
@@ -143,7 +134,6 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         [WindowsOnlyFact]
         public void It_resolves_desktop_apps_using_configuration_passed_to_create()
         {
-            var runtime = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
             var configuration = "Debug";
 
             var testInstance = TestAssets.Get(TestAssetKinds.DesktopTestProjects, "AppWithProjTool2Fx")
@@ -153,14 +143,12 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
             var restoreCommand = new RestoreCommand()
                 .WithWorkingDirectory(testInstance.Root)
-                .WithRuntime(runtime)
                 .ExecuteWithCapturedOutput()
                 .Should().Pass();
 
             var buildCommand = new BuildCommand()
                 .WithWorkingDirectory(testInstance.Root)
                 .WithConfiguration(configuration)
-                .WithRuntime(runtime)
                 .WithCapturedOutput()
                 .Execute()
                 .Should().Pass();

@@ -120,7 +120,7 @@
 
     <Target Name="SetupNuGetPackagesArchiveInputsOutputs"
             DependsOnTargets="Prepare;SetupStage;SetupAzureBlobInformation">
-      <GenerateNuGetPackagesArchiveVersion ToolPath="$(Stage2Directory)">
+      <GenerateNuGetPackagesArchiveVersion ToolPath="$(Stage2Directory)" SDKVersion="$(CLI_NETSDK_Version)">
         <Output TaskParameter="Version" PropertyName="NuGetPackagesArchiveVersion"/>
       </GenerateNuGetPackagesArchiveVersion>
       <PropertyGroup>
