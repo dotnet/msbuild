@@ -3,7 +3,7 @@
   "classifications": ["Web", "MVC"],
   "name": "ASP.NET Core Web App",
   "groupIdentity": "Microsoft.Web.Mvc",
-  "identity": "Microsoft.Web.Mvc.FSharp",
+  "identity": "Microsoft.Web.Mvc.FSharp.2.0",
   "shortName": "mvc",
   "tags": {
     "language": "F#",

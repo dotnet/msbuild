@@ -3,7 +3,7 @@
   "classifications": ["Test", "xUnit"],
   "name": "xUnit Test Project",
   "groupIdentity": "Microsoft.Test.xUnit",
-  "identity": "Microsoft.Test.xUnit.FSharp",
+  "identity": "Microsoft.Test.xUnit.FSharp.2.0",
   "shortName": "xunit",
   "tags": {
     "language": "F#",

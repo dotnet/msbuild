@@ -3,7 +3,7 @@
   "classifications": ["Test", "MSTest"],
   "name": "Unit Test Project",
   "groupIdentity": "Microsoft.Test.MSTest",
-  "identity": "Microsoft.Test.MSTest.CSharp",
+  "identity": "Microsoft.Test.MSTest.CSharp.2.0",
   "shortName": "mstest",
   "tags": {
     "language": "C#",
