@@ -286,7 +286,7 @@ namespace Microsoft.TemplateEngine.Cli
                     break;
                 case CreationResultStatus.InvalidParamValues:
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.InvalidParameterValues, instantiateResult.Message, resultTemplateName).Bold().Red());
-                    ShowTemplateHelp(template);
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, $"{CommandName} {TemplateName}").Bold().Red());
                     break;
                 default:
                     break;
@@ -459,7 +459,15 @@ namespace Microsoft.TemplateEngine.Cli
         {
             if (!ValidateRemainingParameters())
             {
-                ShowUsageHelp();
+                if (IsHelpFlagSpecified)
+                {
+                    ShowUsageHelp();
+                }
+                else
+                {
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, CommandName).Bold().Red());
+                }
+
                 return CreationResultStatus.InvalidParamValues;
             }
 
@@ -491,7 +499,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 if (!ValidateRemainingParameters())
                 {
-                    ShowUsageHelp();
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, $"{CommandName} {TemplateName}").Bold().Red());
                     return CreationResultStatus.InvalidParamValues;
                 }
 
@@ -503,7 +511,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 if (!ValidateRemainingParameters())
                 {
-                    ShowUsageHelp();
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, CommandName).Bold().Red());
                     return CreationResultStatus.InvalidParamValues;
                 }
 
@@ -529,16 +537,26 @@ namespace Microsoft.TemplateEngine.Cli
                 argsError = !ValidateRemainingParameters();
             }
 
-            if (argsError || IsHelpFlagSpecified)
+            if(IsHelpFlagSpecified)
             {
-                if(commandParseFailureMessage != null)
+                if (commandParseFailureMessage != null)
                 {
                     Reporter.Error.WriteLine(commandParseFailureMessage.Bold().Red());
                 }
 
                 ShowUsageHelp();
                 ShowTemplateHelp(UnambiguousTemplateToUse.Info);
-                return argsError ? CreationResultStatus.InvalidParamValues : CreationResultStatus.Success;
+                return CreationResultStatus.Success;
+            }
+            else if (argsError)
+            {
+                if (commandParseFailureMessage != null)
+                {
+                    Reporter.Error.WriteLine(commandParseFailureMessage.Bold().Red());
+                }
+
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, $"{CommandName} {TemplateName}").Bold().Red());
+                return CreationResultStatus.InvalidParamValues;
             }
             else
             {
@@ -598,7 +616,7 @@ namespace Microsoft.TemplateEngine.Cli
             catch (CommandParserException ex)
             {
                 Reporter.Error.WriteLine(ex.Message.Bold().Red());
-                ShowUsageHelp();
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, CommandName).Bold().Red());
                 return CreationResultStatus.InvalidParamValues;
             }
 
@@ -611,7 +629,7 @@ namespace Microsoft.TemplateEngine.Cli
                 catch (CommandParserException ex)
                 {
                     Reporter.Error.WriteLine(ex.Message.Bold().Red());
-                    ShowUsageHelp();
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, CommandName).Bold().Red());
                     return CreationResultStatus.InvalidParamValues;
                 }
             }
@@ -770,7 +788,7 @@ namespace Microsoft.TemplateEngine.Cli
             return true;
         }
 
-        private void ParameterHelp(IReadOnlyDictionary<string, string> inputParams, IParameterSet allParams, string additionalInfo, HashSet<string> hiddenParams)
+        private void ShowParameterHelp(IReadOnlyDictionary<string, string> inputParams, IParameterSet allParams, string additionalInfo, HashSet<string> hiddenParams)
         {
             if (!string.IsNullOrEmpty(additionalInfo))
             {
@@ -1138,7 +1156,7 @@ namespace Microsoft.TemplateEngine.Cli
                 additionalInfo = string.Format(LocalizableStrings.InvalidParameterValues, badParams, templateInfo.Name);
             }
 
-            ParameterHelp(_app.AllTemplateParams, allParams, additionalInfo, _hostSpecificTemplateData?.HiddenParameterNames ?? new HashSet<string>());
+            ShowParameterHelp(_app.AllTemplateParams, allParams, additionalInfo, _hostSpecificTemplateData?.HiddenParameterNames ?? new HashSet<string>());
         }
 
         // Returns true if any partial matches were displayed, false otherwise

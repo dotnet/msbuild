@@ -1,6 +1,8 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+
 namespace Microsoft.TemplateEngine.Cli
 {
     internal class LocalizableStrings
@@ -160,5 +162,7 @@ namespace Microsoft.TemplateEngine.Cli
         public const string ForcesTemplateCreation = "Forces content to be generated even if it would change existing files.";
 
         public const string ShowsFilteredTemplates = "Shows a subset of the available templates. Valid values are \"project\", \"item\" or \"other\".";
+
+        public const string RunHelpForInformationAboutAcceptedParameters = "Run dotnet {0} --help for usage information.";
     }
 }
