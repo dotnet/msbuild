@@ -83,7 +83,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         public bool IsShowAllFlagSpecified => _app.InternalParamHasValue("--show-all");
 
-        public string Filter => _app.InternalParamValue("--filter");
+        public string TypeFilter => _app.InternalParamValue("--type");
 
         public string Language => _app.InternalParamValue("--language");
 
@@ -95,16 +95,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         public string OutputPath => _app.InternalParamValue("--output");
 
-        public string TemplateType => _app.InternalParamValue("--type");
-
-        public string TemplateName
-        {
-            get
-            {
-                // prefer the -t param over the argument value
-                return !string.IsNullOrEmpty(TemplateType) ? TemplateType : _templateNameArgument.Value;
-            }
-        }
+        public string TemplateName => _templateNameArgument.Value;
 
         public bool SkipUpdateCheck => _app.InternalParamHasValue("--skip-update-check");
 
@@ -897,7 +888,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         private string DetermineTemplateContext()
         {
-            return Filter?.ToLowerInvariant();
+            return TypeFilter?.ToLowerInvariant();
         }
 
         private void PerformCoreTemplateQuery()
@@ -1016,7 +1007,7 @@ namespace Microsoft.TemplateEngine.Cli
             appExt.InternalOption("-n|--name", "--name", LocalizableStrings.NameOfOutput, CommandOptionType.SingleValue);
             appExt.InternalOption("-o|--output", "--output", LocalizableStrings.OutputPath, CommandOptionType.SingleValue);
             appExt.InternalOption("-h|--help", "--help", LocalizableStrings.DisplaysHelp, CommandOptionType.NoValue);
-            appExt.InternalOption("--filter", "--filter", LocalizableStrings.ShowsFilteredTemplates, CommandOptionType.SingleValue);
+            appExt.InternalOption("--type", "--type", LocalizableStrings.ShowsFilteredTemplates, CommandOptionType.SingleValue);
             appExt.InternalOption("--force", "--force", LocalizableStrings.ForcesTemplateCreation, CommandOptionType.NoValue);
 
             // hidden
@@ -1025,7 +1016,6 @@ namespace Microsoft.TemplateEngine.Cli
             appExt.HiddenInternalOption("--locale", "--locale", CommandOptionType.SingleValue);
             appExt.HiddenInternalOption("--quiet", "--quiet", CommandOptionType.NoValue);
             appExt.HiddenInternalOption("-i|--install", "--install", CommandOptionType.MultipleValue);
-            appExt.HiddenInternalOption("-t|--type", "--type", CommandOptionType.SingleValue);
             appExt.HiddenInternalOption("-all|--show-all", "--show-all", CommandOptionType.NoValue);
 
             // reserved but not currently used

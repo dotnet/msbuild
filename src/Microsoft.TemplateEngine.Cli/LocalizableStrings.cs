@@ -135,7 +135,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         public const string NoTemplatesMatchName = "No templates matched the input template name: [{0}].";
 
-        public const string TemplateNotValidGivenTheSpecifiedFilter = "[{0}] matches the specified name, but has been excluded by the --filter parameter. Remove or change the --filter parameter to use that template.";
+        public const string TemplateNotValidGivenTheSpecifiedFilter = "[{0}] matches the specified name, but has been excluded by the --type parameter. Remove or change the --type parameter to use that template.";
 
         public const string GenericPlaceholderTemplateContextError = "[{0}] cannot be created in the target location.";
 
@@ -159,6 +159,6 @@ namespace Microsoft.TemplateEngine.Cli
 
         public const string ForcesTemplateCreation = "Forces content to be generated even if it would change existing files.";
 
-        public const string ShowsFilteredTemplates = "Shows a subset of the available templates.";
+        public const string ShowsFilteredTemplates = "Shows a subset of the available templates. Valid values are \"project\", \"item\" or \"other\".";
     }
 }
