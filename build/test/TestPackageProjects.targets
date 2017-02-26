@@ -84,7 +84,6 @@
         <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
         <VersionSuffix>$(VersionSuffix)</VersionSuffix>
         <Clean>True</Clean>
-        <MsbuildArgs>/p:RuntimeIdentifier=$(CoreCLRRid)</MsbuildArgs>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-desktop-binding-redirects"
                               Condition=" '$(IsDesktopAvailable)' == 'True' ">
@@ -96,7 +95,6 @@
         <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
         <VersionSuffix>$(VersionSuffix)</VersionSuffix>
         <Clean>True</Clean>
-        <MsbuildArgs>/p:RuntimeIdentifier=$(CoreCLRRid)</MsbuildArgs>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-hello/v1/dotnet-hello">
         <Name>dotnet-hello</Name>

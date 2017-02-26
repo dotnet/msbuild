@@ -71,6 +71,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
         public const string IncludesNotEquivalent = "{0}.{1} includes not equivalent.";
 
+        public const string UpdatesNotEquivalent = "{0}.{1} updates not equivalent.";
+
         public const string ExcludesNotEquivalent = "{0}.{1} excludes not equivalent.";
 
         public const string RemovesNotEquivalent = "{0}.{1} removes not equivalent.";
@@ -108,6 +110,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         public const string ItemTransformApplicatorMergingItemWithExistingItems = "{0}: Merging Item with {1} existing items with a different condition chain.";
 
         public const string ItemTransformApplicatorEncompassedIncludes = "{0}: encompassed includes {1}";
+
+        public const string ItemTransformApplicatorEncompassedUpdates = "{0}: encompassed updates {1}";
 
         public const string ItemTransformApplicatorRemovingItem = "{0}: Removing Item {{ ItemType: {1}, Condition: {2}, Include: {3}, Exclude: {4} }}";
 
