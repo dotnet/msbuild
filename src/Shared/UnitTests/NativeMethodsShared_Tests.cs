@@ -70,7 +70,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Verifies that when NativeMethodsShared.GetLastWriteFileUtcTime() is called on a
-        /// missing time, DateTime.MinValue is returned.
+        /// missing file, DateTime.MinValue is returned.
         /// </summary>
         [Fact]
         public void GetLastWriteFileUtcTimeReturnsMinValueForMissingFile()
@@ -81,6 +81,23 @@ namespace Microsoft.Build.UnitTests
 
             DateTime nonexistentFileTime = NativeMethodsShared.GetLastWriteFileUtcTime(nonexistentFile);
             Assert.Equal(DateTime.MinValue, nonexistentFileTime);
+        }
+
+        /// <summary>
+        /// Verifies that when NativeMethodsShared.GetLastWriteFileUtcTime() is called on a
+        /// existing directory, not DateTime.MinValue is returned.
+        /// </summary>
+        [Fact]
+        public void GetLastWriteFileUtcTimeReturnsNotMinValueForExistingDirectory()
+        {
+            string tempDirectory = FileUtilities.GetTemporaryDirectory();
+            // Make sure that the directory exists, create if not.
+            if (!Directory.Exists(tempDirectory))
+                Directory.CreateDirectory(tempDirectory);
+
+            DateTime existsDirectoryTime = NativeMethodsShared.GetLastWriteFileUtcTime(tempDirectory);
+            Assert.NotEqual(DateTime.MinValue, existsDirectoryTime);
+            Directory.Delete(tempDirectory);
         }
 
         /// <summary>
