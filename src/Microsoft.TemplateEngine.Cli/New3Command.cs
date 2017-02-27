@@ -288,7 +288,8 @@ namespace Microsoft.TemplateEngine.Cli
                 case CreationResultStatus.OperationNotSpecified:
                     break;
                 case CreationResultStatus.InvalidParamValues:
-                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.InvalidParameterValues, instantiateResult.Message, resultTemplateName).Bold().Red());
+                    string invalidParamsError = GetTemplateParameterErrorsMessage(template, out IParameterSet ps, out IReadOnlyList<string> userParamsWithInvalidValues);
+                    Reporter.Error.WriteLine(invalidParamsError.Bold().Red());
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, $"{CommandName} {TemplateName}").Bold().Red());
                     break;
                 default:
@@ -296,6 +297,30 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             return instantiateResult.Status;
+        }
+
+        private string GetTemplateParameterErrorsMessage(ITemplateInfo templateInfo, out IParameterSet allParams, out IReadOnlyList<string> userParamsWithInvalidValues)
+        {
+            ITemplate template = EnvironmentSettings.SettingsLoader.LoadTemplate(templateInfo);
+            allParams = _templateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName, out IList<string> defaultParamsWithInvalidValues);
+            _templateCreator.ResolveUserParameters(template, allParams, _app.AllTemplateParams, out userParamsWithInvalidValues);
+
+            if (userParamsWithInvalidValues.Any())
+            {
+                string invalidParamsErrorText = LocalizableStrings.InvalidTemplateParameterValues;
+                // Lookup the input param formats - userParamsWithInvalidValues has canonical.
+                IList<string> inputParamFormats = new List<string>();
+                foreach (string canonical in userParamsWithInvalidValues)
+                {
+                    _app.AllTemplateParams.TryGetValue(canonical, out string specifiedValue);
+                    string inputFormat = _app.TemplateParamInputFormat(canonical);
+                    invalidParamsErrorText += Environment.NewLine + string.Format(LocalizableStrings.InvalidParameterDetail, inputFormat, specifiedValue, canonical);
+                }
+
+                return invalidParamsErrorText;
+            }
+
+            return null;
         }
 
         private void HandlePostActions(TemplateCreationResult creationResult)
@@ -1168,25 +1193,7 @@ namespace Microsoft.TemplateEngine.Cli
                 Reporter.Output.WriteLine(string.Format(LocalizableStrings.Description, templateInfo.Description));
             }
 
-            ITemplate template = EnvironmentSettings.SettingsLoader.LoadTemplate(templateInfo);
-            IParameterSet allParams = _templateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName, out IList<string> defaultParamsWithInvalidValues);
-            _templateCreator.ResolveUserParameters(template, allParams, _app.AllTemplateParams, out IReadOnlyList<string> userParamsWithInvalidValues);
-
-            string additionalInfo = null;
-            if (userParamsWithInvalidValues.Any())
-            {
-                string invalidParamsErrorText = LocalizableStrings.InvalidTemplateParameterValues;
-                // Lookup the input param formats - userParamsWithInvalidValues has canonical.
-                IList<string> inputParamFormats = new List<string>();
-                foreach (string canonical in userParamsWithInvalidValues)
-                {
-                    _app.AllTemplateParams.TryGetValue(canonical, out string specifiedValue);
-                    string inputFormat = _app.TemplateParamInputFormat(canonical);
-                    invalidParamsErrorText += Environment.NewLine + string.Format(LocalizableStrings.InvalidParameterDetail, inputFormat, specifiedValue, canonical);
-                }
-
-                additionalInfo = invalidParamsErrorText;
-            }
+            string additionalInfo = GetTemplateParameterErrorsMessage(templateInfo, out IParameterSet allParams, out IReadOnlyList<string> userParamsWithInvalidValues);
 
             ShowParameterHelp(_app.AllTemplateParams, allParams, additionalInfo, userParamsWithInvalidValues, _hostSpecificTemplateData?.HiddenParameterNames ?? new HashSet<string>());
         }
