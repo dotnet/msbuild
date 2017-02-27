@@ -46,6 +46,10 @@ namespace Microsoft.NET.TestFramework.Commands
 
         public virtual DirectoryInfo GetOutputDirectory(string targetFramework, string configuration = "Debug", string runtimeIdentifier = "")
         {
+            targetFramework = targetFramework ?? string.Empty;
+            configuration = configuration ?? string.Empty;
+            runtimeIdentifier = runtimeIdentifier ?? string.Empty;
+
             string output = Path.Combine(ProjectRootPath, "bin", configuration, targetFramework, runtimeIdentifier);
             return new DirectoryInfo(output);
         }

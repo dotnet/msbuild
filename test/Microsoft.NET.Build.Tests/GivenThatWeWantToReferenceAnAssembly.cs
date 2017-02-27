@@ -23,7 +23,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("netcoreapp2.0", "netstandard1.5")]
         [InlineData("netcoreapp2.0", "netcoreapp1.0")]
         public void ItRunsAppsDirectlyReferencingAssemblies(
-            string referencerTarget, 
+            string referencerTarget,
             string dependencyTarget)
         {
             string identifier = referencerTarget.ToString() + "_" + dependencyTarget.ToString();
@@ -77,7 +77,7 @@ public static class Program
 }
 ";
 
-            var referencerAsset = _testAssetsManager.CreateTestProject(referencerProject,  identifier: identifier);
+            var referencerAsset = _testAssetsManager.CreateTestProject(referencerProject, identifier: identifier);
             string applicationPath = RestoreAndBuild(referencerAsset, referencerProject);
 
             Command.Create(RepoInfo.DotNetHostPath, new[] { applicationPath })
@@ -97,7 +97,9 @@ public static class Program
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
+            var outputDirectory = buildCommand.GetOutputDirectory(
+                testProject.TargetFrameworks,
+                runtimeIdentifier: testProject.RuntimeIdentifier);
             return Path.Combine(outputDirectory.FullName, testProject.Name + ".dll");
         }
     }
