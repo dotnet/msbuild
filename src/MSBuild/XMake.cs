@@ -1456,7 +1456,6 @@ namespace Microsoft.Build.CommandLine
                                 switchParameters = ":" + numberOfCpus;
                             }
                             else if (String.Equals(switchName, "bl", StringComparison.OrdinalIgnoreCase) ||
-                                String.Equals(switchName, "binlog", StringComparison.OrdinalIgnoreCase) ||
                                 String.Equals(switchName, "binarylogger", StringComparison.OrdinalIgnoreCase))
                             {
                                 // we have to specify at least one parameter otherwise it's impossible to distinguish the situation
