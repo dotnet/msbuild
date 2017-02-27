@@ -25,9 +25,19 @@ namespace Microsoft.NET.Build.Tasks
         {
             _packagePathResolver = new FallbackPackagePathResolver(userPackageFolder, fallbackPackageFolders);
         }
-
         public string GetPackageDirectory(string packageId, NuGetVersion version)
         {
+            string  packageRoot = null;
+            return GetPackageDirectory(packageId, version, out packageRoot);
+        }
+        public string GetPackageDirectory(string packageId, NuGetVersion version, out string packageRoot)
+        {
+            packageRoot = null;
+            var pkginfo = _packagePathResolver.GetPackageInfo(packageId,version);
+            if (pkginfo != null)
+            {
+                packageRoot = pkginfo.PathResolver.GetVersionListPath("");  //TODO Remove Once Nuget is updated to use FallbackPackagePathInfo.PathResolver.RootPath
+            }
             return _packagePathResolver.GetPackageDirectory(packageId, version);
         }
 

@@ -12,7 +12,6 @@ namespace Microsoft.NET.Build.Tasks {
     using System;
     using System.Reflection;
 
-        
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -222,6 +221,24 @@ namespace Microsoft.NET.Build.Tasks {
                 return ResourceManager.GetString("ErrorsOccurredWhenEmittingSatelliteAssembly", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Folder &apos;{0}&apos; already exists either delete it or provide a different ComposeWorkingDir.
+        /// </summary>
+        internal static string FolderAlreadyExists {
+            get {
+                return ResourceManager.GetString("FolderAlreadyExists", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Package Root {0} was incorrectly given for Resolved library {1}.
+        /// </summary>
+        internal static string IncorrectPackageRoot {
+            get {
+                return ResourceManager.GetString("IncorrectPackageRoot", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Invalid framework name: &apos;{0}&apos;..
@@ -247,6 +264,15 @@ namespace Microsoft.NET.Build.Tasks {
         internal static string MissingItemMetadata {
             get {
                 return ResourceManager.GetString("MissingItemMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to More than one file found for {0}.
+        /// </summary>
+        internal static string MultipleFilesResolved {
+            get {
+                return ResourceManager.GetString("MultipleFilesResolved", resourceCulture);
             }
         }
         

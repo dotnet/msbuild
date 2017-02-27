@@ -1,0 +1,255 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.ComposeCache.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved. 
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!--
+    ============================================================
+                                        ComposeCache
+ 
+    The main cache entry point.
+    ============================================================
+    -->
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+  </PropertyGroup>
+
+  <Target Name="ComposeCache"
+          DependsOnTargets="PrepareForComposeCache;
+                            RestoreForComposeCache;
+                            ComputeAndCopyFilesToCacheDirectory"/>
+  
+
+  <!--
+    ============================================================
+                                        PrepareForComposeCache
+
+    Prepare the prerequisites for ComposeCache.
+    ============================================================
+    -->
+  <Target Name="PrepareForComposeCache">
+
+    <PropertyGroup>
+      <PreserveCacheLayout Condition="'$(PreserveCacheLayout)' == ''">true</PreserveCacheLayout>
+      <SkipOptimization Condition="'$(RuntimeIdentifier)' == ''">true</SkipOptimization>
+      <_TFM Condition="'$(_TFM)' == ''">$(TargetFramework)</_TFM>
+      <PathSeparator>$([System.IO.Path]::PathSeparator)</PathSeparator>
+      <DirectorySeparatorChar>$([System.IO.Path]::DirectorySeparatorChar)</DirectorySeparatorChar>
+    </PropertyGroup>
+
+    <NETSdkError Condition="'$(RuntimeIdentifier)' =='' and '$(_PureManagedAssets)' == ''"
+                 ResourceName="RuntimeIdentifierMustBeSetForNETFramework"/>
+
+    <NETSdkError Condition="'$(_TFM)' ==''"
+                 ResourceName="AtLeastOneTargetFrameworkMustBeSpecified"/>
+      
+    <PropertyGroup>
+      <DefaultComposeDir>$(HOME)</DefaultComposeDir>
+      <DefaultComposeDir Condition="$(OS.ToUpper().Contains('WINDOWS'))">$(USERPROFILE)</DefaultComposeDir>
+      <DefaultComposeDir>$([System.IO.Path]::Combine($(DefaultComposeDir), '.dotnet', $(PlatformTarget), 'packages'))</DefaultComposeDir>
+      <ComposeDir Condition="'$(ComposeDir)' != '' and '$(DoNotDecorateComposeDir)' != 'true'">$([System.IO.Path]::Combine($(ComposeDir), $(PlatformTarget)))</ComposeDir>
+      <ComposeDir Condition="'$(ComposeDir)' == ''">$(DefaultComposeDir)</ComposeDir>
+      <ComposeDir Condition="'$(DoNotDecorateComposeDir)' != 'true'">$([System.IO.Path]::Combine($(ComposeDir), $(_TFM)))</ComposeDir>
+      <PublishDir>$([System.IO.Path]::GetFullPath($(ComposeDir)))</PublishDir>
+      <TEMP Condition="'$(TEMP)' == ''">$([System.IO.Path]::GetTempPath())</TEMP>
+      <_RandomFileName>$([System.IO.Path]::GetRandomFileName())</_RandomFileName>
+      <ComposeWorkingDir Condition="'$(ComposeWorkingDir)' == ''">$([System.IO.Path]::Combine($(TEMP), $(_RandomFileName)))</ComposeWorkingDir>
+      <ComposeWorkingDir>$([System.IO.Path]::GetFullPath($(ComposeWorkingDir)))</ComposeWorkingDir>
+      <_CrossProjFileDir>$([System.IO.Path]::Combine($(ComposeWorkingDir),"Optimize"))</_CrossProjFileDir>
+      <!-- Ensure any PublishDir has a trailing slash, so it can be concatenated -->
+      <PublishDir Condition="!HasTrailingSlash('$(PublishDir)')">$(PublishDir)\</PublishDir>
+    </PropertyGroup>
+
+
+    <NETSdkError Condition="Exists($(ComposeWorkingDir))"
+                 ResourceName="FolderAlreadyExists"
+                 FormatArguments="$(ComposeWorkingDir)" />
+
+
+    <MakeDir Directories="$(PublishDir)" />
+
+  </Target>
+  
+  <!--
+    ============================================================
+                                        RestoreForComposeCache
+
+    Preps the Restore Task.
+    ============================================================
+    -->
+  <Target Name="RestoreForComposeCache">
+
+    <PropertyGroup>
+      <ProjectAssetsFile>$(ComposeWorkingDir)\project.assets.json</ProjectAssetsFile>
+    </PropertyGroup>
+
+    <MSBuild Projects="$(MSBuildProjectFullPath)"
+                 Targets="Restore"
+                 Properties="RestoreGraphProjectInput=$(MSBuildProjectFullPath);
+                             DisableImplicitFrameworkReferences=true;
+                             RestoreOutputPath=$(ComposeWorkingDir);
+                             TargetFramework=$(_TFM);"/>
+
+  </Target>
+
+
+  <!--
+    ============================================================
+                                        ComputeAndCopyFilesToCacheDirectory
+
+    Computes the list of all files to copy to the publish directory and then publishes them.
+    ============================================================
+    -->
+  <Target Name="ComputeAndCopyFilesToCacheDirectory"
+          DependsOnTargets="ComputeFilesToCache;
+                            CopyFilesToCacheDirectory" />
+
+  <!--
+    ============================================================
+                                        CopyFilesToCacheDirectory
+
+    Copy all build outputs, satellites and other necessary files to the publish directory.
+    ============================================================
+    -->
+  <Target Name="CopyFilesToCacheDirectory"
+          DependsOnTargets="_CopyResolvedManagedFiles;
+                            _CopyResolvedUnOptimizedFiles">
+
+    <Message Text="Files were composed in $(PublishDir)"
+             Importance="high"/>
+    <RemoveDir
+        Condition="'$(PreserveComposeWorkingDir)' != 'true'"
+        Directories="$(ComposeWorkingDir)" />
+  </Target>
+
+  <!--
+    ============================================================
+                                        _CopyResolvedManagedFiles
+
+    Copy _ManagedResolvedFileToPublish items to the publish directory.
+    ============================================================
+    -->
+  <Target Name="_CopyResolvedManagedFiles"
+          DependsOnTargets="_ComputeResolvedFilesToCacheTypes;
+                            _RunOptimizer"
+          Inputs="@(_ManagedResolvedFileToPublish)"
+          Outputs="@(_ManagedResolvedFileToPublish->'$(PublishDir)%(RecursiveDir)%(Fileame)%(Extension)')">
+
+    <Copy SourceFiles = "@(_ManagedResolvedFileToPublish)"
+          DestinationFiles="$(PublishDir)%(RecursiveDir)%(Filename)%(Extension)"
+          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+          Retries="$(CopyRetryCount)"
+          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+          UseHardlinksIfPossible="$(CreateHardLinksForPublishFilesIfPossible)"
+          UseSymboliclinksIfPossible="$(CreateSymbolicLinksForPublishFilesIfPossible)">
+
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+
+    </Copy>
+
+  </Target>
+
+  <!--
+    ============================================================
+                                        _CopyResolvedUnOptimizedFiles
+
+    Copy _UnOptimizedResolvedFileToPublish items to the publish directory.
+    ============================================================
+    -->
+  <Target Name="_CopyResolvedUnOptimizedFiles"
+          DependsOnTargets="_ComputeResolvedFilesToCacheTypes">
+
+    <Copy SourceFiles = "@(_UnOptimizedResolvedFileToPublish)"
+          DestinationFiles="$(PublishDir)%(_UnOptimizedResolvedFileToPublish.DestinationSubPath)"
+          OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+          Retries="$(CopyRetryCount)"
+          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+          UseHardlinksIfPossible="$(CreateHardLinksForPublishFilesIfPossible)"
+          UseSymboliclinksIfPossible="$(CreateSymbolicLinksForPublishFilesIfPossible)">
+
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+
+    </Copy>
+
+  </Target>
+
+  <!--
+    ============================================================
+                                        _ComputeResolvedFilesToCacheTypes
+    ============================================================
+    -->
+  <Target Name="_ComputeResolvedFilesToCacheTypes"
+           DependsOnTargets="_GetResolvedFilesToCache;_SplitResolvedFiles;" />
+
+  <!--
+    ============================================================
+                                        _SplitResolvedFiles
+
+    Splits ResolvedFileToPublish items into 'managed' and 'unmanaged' buckets.
+    ============================================================
+    -->
+  <Target Name="_SplitResolvedFiles"
+           Condition="$(SkipOptimization) !='true' "
+           DependsOnTargets="_GetResolvedFilesToCache">
+    <ItemGroup>
+      <_ManagedResolvedFileToPublishCandidates Include="@(ResolvedFileToPublish)"
+                                             Condition="'%(ResolvedFileToPublish.AssetType)'=='runtime'" />
+
+      <_UnOptimizedResolvedFileToPublish Include="@(ResolvedFileToPublish)"
+                                     Condition="'%(ResolvedFileToPublish.AssetType)'!='runtime'" />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <SkipOptimization Condition="'@(_ManagedResolvedFileToPublishCandidates)'==''">true</SkipOptimization>
+    </PropertyGroup>
+    
+  </Target>
+
+  <!--
+    ============================================================
+                                        _GetResolvedFilesToCache
+
+   
+    ============================================================
+    -->
+  <Target Name="_GetResolvedFilesToCache"
+           Condition="$(SkipOptimization) == 'true' ">
+    <ItemGroup>
+            <_UnOptimizedResolvedFileToPublish Include="@(ResolvedFileToPublish)" />
+    </ItemGroup>
+  </Target>
+
+  <!--
+    ============================================================
+                                        ComputeFilesToCache
+
+    Gathers all the files that need to be copied to the publish directory.
+    ============================================================
+    -->
+  <Target Name="ComputeFilesToCache"
+          DependsOnTargets="_ComputeNetPublishAssets;
+                            _ComputeCopyToPublishDirectoryItems">
+
+    <PropertyGroup>
+      <CopyBuildOutputToPublishDirectory Condition="'$(CopyBuildOutputToPublishDirectory)'==''">true</CopyBuildOutputToPublishDirectory>
+      <CopyOutputSymbolsToPublishDirectory Condition="'$(CopyOutputSymbolsToPublishDirectory)'==''">true</CopyOutputSymbolsToPublishDirectory>
+    </PropertyGroup>
+
+    <ItemGroup>
+
+      <!-- Copy all the assemblies -->
+      <ResolvedFileToPublish Include="@(ResolvedAssembliesToPublish)">
+      </ResolvedFileToPublish>
+    </ItemGroup>
+
+  </Target>
+
+</Project>

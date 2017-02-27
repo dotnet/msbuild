@@ -30,6 +30,10 @@ namespace Microsoft.NET.Build.Tasks
 
         public ITaskItem[] PrivateAssetsPackageReferences { get; set; }
 
+        public bool PreserveCacheLayout { get; set; }
+
+        public string FilterProjectAssetsFile { get; set; }
+
         /// <summary>
         /// All the assemblies to publish.
         /// </summary>
@@ -41,25 +45,35 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
-            LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(AssetsFilePath);            
+            var lockFileCache = new LockFileCache(BuildEngine4);
+            LockFile lockFile = lockFileCache.GetLockFile(AssetsFilePath);
             IEnumerable<string> privateAssetsPackageIds = PackageReferenceConverter.GetPackageIds(PrivateAssetsPackageReferences);
             IPackageResolver packageResolver = NuGetPackageResolver.CreateResolver(lockFile, ProjectPath);
 
+            LockFile filterLockFile = null;
+            if (!string.IsNullOrEmpty(FilterProjectAssetsFile))
+            {
+                filterLockFile = lockFileCache.GetLockFile(FilterProjectAssetsFile);
+
+            }
             ProjectContext projectContext = lockFile.CreateProjectContext(
                 NuGetUtils.ParseFrameworkName(TargetFramework),
                 RuntimeIdentifier,
-                PlatformLibraryName);
+                PlatformLibraryName,
+                filterLockFile
+                );
 
-            IEnumerable<ResolvedFile> resolvedAssemblies = 
+            IEnumerable<ResolvedFile> resolvedAssemblies =
                 new PublishAssembliesResolver(packageResolver)
                     .WithPrivateAssets(privateAssetsPackageIds)
+                    .WithPreserveCacheLayout(PreserveCacheLayout)
                     .Resolve(projectContext);
 
             foreach (ResolvedFile resolvedAssembly in resolvedAssemblies)
             {
                 TaskItem item = new TaskItem(resolvedAssembly.SourcePath);
                 item.SetMetadata("DestinationSubPath", resolvedAssembly.DestinationSubPath);
-
+                item.SetMetadata("AssetType", resolvedAssembly.Asset.ToString().ToLower());
                 _assembliesToPublish.Add(item);
             }
         }
