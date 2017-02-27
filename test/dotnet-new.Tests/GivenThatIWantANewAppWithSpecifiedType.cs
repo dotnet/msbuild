@@ -30,6 +30,13 @@ namespace Microsoft.DotNet.New.Tests
             string projectType,
             bool useNuGetConfigForAspNet)
         {
+            if (language == "F#" && !EnvironmentInfo.HasSharedFramework("netcoreapp1.0"))
+            {
+                // F# requires netcoreapp1.0 to be present in order to build
+                // https://github.com/dotnet/netcorecli-fsc/issues/76
+                return;
+            }
+
             string rootPath = TestAssetsManager.CreateTestDirectory(identifier: $"{language}_{projectType}").Path;
 
             new TestCommand("dotnet") { WorkingDirectory = rootPath }

@@ -2,6 +2,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp1.0</TargetFramework>
     <OutputType>Exe</OutputType>
+    <DotnetCliToolTargetFramework>netcoreapp1.1</DotnetCliToolTargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,7 +15,4 @@
       <Version>1.0.0</Version>
     </DotNetCliToolReference>
   </ItemGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
-  </PropertyGroup>
 </Project>

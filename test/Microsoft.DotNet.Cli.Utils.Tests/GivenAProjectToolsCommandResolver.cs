@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Tests
     public class GivenAProjectToolsCommandResolver : TestBase
     {
         private static readonly NuGetFramework s_toolPackageFramework =
-            FrameworkConstants.CommonFrameworks.NetCoreApp10;
+            FrameworkConstants.CommonFrameworks.NetCoreApp11;
 
         private const string TestProjectName = "AppWithToolDependency";
 
@@ -279,6 +279,7 @@ namespace Microsoft.DotNet.Tests
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
             projectToolsCommandResolver.GenerateDepsJsonFile(
                 lockFile,
+                s_toolPackageFramework,
                 depsJsonFile,
                 new SingleProjectInfo("dotnet-portable", "1.0.0", Enumerable.Empty<ResourceAssemblyInfo>()));
 

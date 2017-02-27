@@ -2,6 +2,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net451;netcoreapp1.0</TargetFrameworks>
+    <DotnetCliToolTargetFramework>netcoreapp1.1</DotnetCliToolTargetFramework>
   </PropertyGroup>
 
   <ItemGroup>

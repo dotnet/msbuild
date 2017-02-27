@@ -155,7 +155,8 @@ if [ ! -f $bootStrapperPath ]; then
     chmod u+x $bootStrapperPath
 fi
 
-$bootStrapperPath --repositoryRoot "$REPOROOT" --toolsLocalPath "$toolsLocalPath" --cliInstallPath $DOTNET_INSTALL_DIR_PJ --architecture $ARCHITECTURE > bootstrap.log
+echo "installing build_tools: $bootStrapperPath --repositoryRoot \"$REPOROOT\" --toolsLocalPath \"$toolsLocalPath\" --cliInstallPath $DOTNET_INSTALL_DIR_PJ --architecture $ARCHITECTURE"
+$bootStrapperPath --repositoryRoot "$REPOROOT" --toolsLocalPath "$toolsLocalPath" --cliInstallPath $DOTNET_INSTALL_DIR_PJ --architecture $ARCHITECTURE --verbose
 
 if [ $? != 0 ]; then
     echo "run-build: Error: Boot-strapping failed with exit code $?, see bootstrap.log for more information." >&2
@@ -163,8 +164,8 @@ if [ $? != 0 ]; then
 fi
 
 # now execute the script
-echo "installing CLI: $dotnetInstallPath --install-dir $DOTNET_INSTALL_DIR --architecture \"$ARCHITECTURE\""
-$dotnetInstallPath --install-dir $DOTNET_INSTALL_DIR --architecture "$ARCHITECTURE"
+echo "installing CLI: $dotnetInstallPath --channel \"rel-1.0.1\" --install-dir $DOTNET_INSTALL_DIR --architecture \"$ARCHITECTURE\""
+$dotnetInstallPath --channel "rel-1.0.1" --install-dir $DOTNET_INSTALL_DIR --architecture "$ARCHITECTURE"
 if [ $? != 0 ]; then
     echo "run-build: Error: Boot-strapping post-PJ stage0 with exit code $?." >&2
     exit $?
