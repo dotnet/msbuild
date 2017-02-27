@@ -1,10 +1,6 @@
 <Project>
   <PropertyGroup>
       <BaseOutputDirectory>$(RepoRoot)/artifacts/$(Rid)</BaseOutputDirectory>
-      <ToolsOutputDirectory>$(BaseOutputDirectory)/tools</ToolsOutputDirectory>
-      <Stage1Directory>$(BaseOutputDirectory)/stage1</Stage1Directory>
-      <Stage1SymbolsDirectory>$(BaseOutputDirectory)/stage1symbols</Stage1SymbolsDirectory>
-      <DotnetStage1>$(Stage1Directory)/dotnet$(ExeExtension)</DotnetStage1>
       <Stage2Directory>$(BaseOutputDirectory)/stage2</Stage2Directory>
       <Stage2SymbolsDirectory>$(BaseOutputDirectory)/stage2symbols</Stage2SymbolsDirectory>
       <Stage2SdkDirectory>$(Stage2Directory)/sdk/$(SdkVersion)</Stage2SdkDirectory>
@@ -15,18 +11,9 @@
       <StageDirectory>$(Stage2Directory)</StageDirectory>
       <StageSymbolsDirectory>$(Stage2SymbolsDirectory)</StageSymbolsDirectory>
       <SdkOutputDirectory>$(Stage2SdkDirectory)</SdkOutputDirectory>
-      <MSBuildTargetsDirectory>$(SdkOutputDirectory)/runtimes/any/native</MSBuildTargetsDirectory>
       <IntermediateDirectory>$(BaseOutputDirectory)/intermediate</IntermediateDirectory>
       <PackagesDirectory>$(BaseOutputDirectory)/packages</PackagesDirectory>
       <SharedFrameworkPublishDirectory>$(IntermediateDirectory)/sharedFrameworkPublish</SharedFrameworkPublishDirectory>
-      <SharedFrameworkNameVersionPath>$(StageDirectory)/shared/$(SharedFrameworkName)/$(SharedFrameworkVersion)</SharedFrameworkNameVersionPath>
-      <DotnetUnderTest>$(Stage2Directory)</DotnetUnderTest>
       <TestOutputDir>$(RepoRoot)/artifacts/testpackages/</TestOutputDir>
-      <TestPackagesBuildDir>$(TestOutputDir)/packagesBuild/</TestPackagesBuildDir>
-      <TestPackagesDir>$(TestOutputDir)/packages/</TestPackagesDir>
-      <TestArtifactsDir>$(TestOutputDir)/artifacts/</TestArtifactsDir>
-      <TestResultXmlDir>$(TestOutputDir)/results/</TestResultXmlDir>
-      <NuGetPackagesArchiveProject>$(IntermediateDirectory)/NuGetPackagesArchiveProject</NuGetPackagesArchiveProject>
-      <NuGetPackagesArchiveFolder>$(IntermediateDirectory)/NuGetPackagesArchiveFolder</NuGetPackagesArchiveFolder>
   </PropertyGroup>
 </Project>

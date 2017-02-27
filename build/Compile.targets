@@ -2,6 +2,15 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="compile/LzmaArchive.targets" />
 
+  <PropertyGroup>
+    <RuntimeNETCoreAppPackageName>runtime.$(CoreCLRRid).microsoft.netcore.app</RuntimeNETCoreAppPackageName>
+    <CrossgenPath>$(NuGetPackagesDir)/$(RuntimeNETCoreAppPackageName)/$(CLI_SharedFrameworkVersion)/tools/crossgen$(ExeExtension)</CrossgenPath>
+    <LibCLRJitPath>$(NuGetPackagesDir)/$(RuntimeNETCoreAppPackageName)/$(CLI_SharedFrameworkVersion)/runtimes/$(CoreCLRRid)/native/$(DynamicLibPrefix)clrjit$(DynamicLibExtension)</LibCLRJitPath>
+    <MSBuildImportsDir>$(RepoRoot)/resources/MSBuildImports</MSBuildImportsDir>
+    <MSBuildTargetsDirectory>$(SdkOutputDirectory)/runtimes/any/native</MSBuildTargetsDirectory>
+    <SharedFrameworkNameVersionPath>$(StageDirectory)/shared/$(SharedFrameworkName)/$(SharedFrameworkVersion)</SharedFrameworkNameVersionPath>
+  </PropertyGroup>
+
   <ItemGroup>
     <PublishOutputExtensions Include="$(ExeExtension);.dll;.pdb;.deps.json;.runtimeconfig.json" />
     <MSBuildImportsContent Include="$(MSBuildImportsDir)/**/*" /> 

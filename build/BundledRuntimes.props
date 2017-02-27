@@ -33,7 +33,9 @@
 
       <AdditionalCombinedFrameworkHostCompressedFileName>dotnet-$(ProductMonikerRid).$(AdditionalSharedFrameworkVersion)$(ArchiveExtension)</AdditionalCombinedFrameworkHostCompressedFileName>
     </PropertyGroup>
+
     <PropertyGroup>
+      <CoreSetupChannel>master</CoreSetupChannel>
       <CoreSetupBlobRootUrl Condition="'$(CoreSetupBlobRootUrl)' == ''">https://dotnetcli.azureedge.net/dotnet/</CoreSetupBlobRootUrl>
       <CoreSetupBlobRootUrlWithChannel>$(CoreSetupBlobRootUrl)$(CoreSetupChannel)</CoreSetupBlobRootUrlWithChannel>
       <SharedFrameworkArchiveBlobRootUrl>$(CoreSetupBlobRootUrlWithChannel)/Binaries/$(SharedFrameworkVersion)</SharedFrameworkArchiveBlobRootUrl>
