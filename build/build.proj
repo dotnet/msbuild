@@ -41,7 +41,8 @@
         <__NewLine><![CDATA[
 ]]></__NewLine>
         <__SetNuget_Packages Condition="'$(OS)' == 'Windows_NT'">set NUGET_PACKAGES=$(NuGet_Packages)</__SetNuget_Packages>
-        <__SetNuget_Packages Condition="'$(OS)' != 'Windows_NT'">export NUGET_PACKAGES=$(NuGet_Packages)</__SetNuget_Packages>
+        <__SetNuget_Packages Condition="'$(OS)' != 'Windows_NT'">export NUGET_PACKAGES=$(NuGet_Packages)$(__NewLine)export NUGET_HTTP_CACHE_PATH="$(NUGET_HTTP_CACHE_PATH)"
+</__SetNuget_Packages>
     </PropertyGroup>
 
     <Exec Command="$(__SetNuget_Packages)$(__NewLine)$(DotNetTool) restore %(ProjectToDotnetRestore.Identity) /v:minimal"
