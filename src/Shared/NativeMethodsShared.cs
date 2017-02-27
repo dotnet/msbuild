@@ -900,6 +900,10 @@ namespace Microsoft.Build.Shared
             {
                 fileModifiedTime = File.GetLastWriteTimeUtc(fullPath);
             }
+            else if (Directory.Exists(fullPath))
+            {
+                fileModifiedTime = Directory.GetLastWriteTimeUtc(fullPath);
+            }
 
             return fileModifiedTime;
         }
