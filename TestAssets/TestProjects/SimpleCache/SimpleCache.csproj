@@ -1,0 +1,7 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+    <ItemGroup>
+        <PackageReference Include="System.Private.Uri" Version="4.4.0-beta-24821-02" />
+        <PackageReference Include="Microsoft.NETCore.CoreDisTools" Version="1.0.1-prerelease-00001" />
+  </ItemGroup>
+
+</Project>

@@ -89,7 +89,7 @@ namespace Microsoft.NET.TestFramework
             return testAsset;
         }
 
-        private string GetAndValidateTestProjectDirectory(string testProjectName)
+        public string GetAndValidateTestProjectDirectory(string testProjectName)
         {
             string testProjectDirectory = Path.Combine(ProjectsRoot, testProjectName);
 

@@ -28,6 +28,9 @@ namespace Microsoft.NET.Build.Tasks
         public string TargetFramework { get; set; }
 
         [Required]
+        public string TargetFrameworkMoniker { get; set; }
+
+        [Required]
         public string RuntimeConfigPath { get; set; }
 
         public string RuntimeConfigDevPath { get; set; }
@@ -52,7 +55,7 @@ namespace Microsoft.NET.Build.Tasks
         {
             LockFile lockFile = new LockFileCache(BuildEngine4).GetLockFile(AssetsFilePath);
             ProjectContext projectContext = lockFile.CreateProjectContext(
-                NuGetUtils.ParseFrameworkName(TargetFramework),
+                NuGetUtils.ParseFrameworkName(TargetFrameworkMoniker),
                 RuntimeIdentifier,
                 PlatformLibraryName);
 
@@ -93,6 +96,7 @@ namespace Microsoft.NET.Build.Tasks
                     framework.Version = platformLibrary.Version.ToNormalizedString();
 
                     runtimeOptions.Framework = framework;
+                    runtimeOptions.tfm = TargetFramework;
                 }
             }
         }

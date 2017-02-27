@@ -9,6 +9,8 @@ namespace Microsoft.NET.Build.Tasks
 {
     internal class RuntimeOptions
     {
+        public string tfm { get; set; }
+
         public RuntimeConfigFramework Framework { get; set; }
 
         public List<string> AdditionalProbingPaths { get; set; }
