@@ -118,31 +118,39 @@ namespace Microsoft.TemplateEngine.Cli
 
                 if (EnvironmentSettings.Host.TryGetHostParamDefault("prefs:language", out string defaultLanguage))
                 {
-                    IFilteredTemplateInfo match = null;
+                    IReadOnlyList<IFilteredTemplateInfo> languageMatchedTemplates = FindLanguageMatchedTemplates(_matchedTemplates, defaultLanguage);
 
-                    foreach(IFilteredTemplateInfo info in _matchedTemplates)
+                    if (languageMatchedTemplates.Count == 1)
                     {
-                        // ChoicesAndDescriptions is invoked as case insensitive 
-                        if (info.Info.Tags == null || 
-                            info.Info.Tags.TryGetValue("language", out ICacheTag languageTag) &&
-                            languageTag.ChoicesAndDescriptions.ContainsKey(defaultLanguage))
-                        {
-                            if (match == null)
-                            {
-                                match = info;
-                            }
-                            else
-                            {
-                                return UseSecondaryCriteriaToDisambiguateTemplateMatches();
-                            }
-                        }
+                        return _unambiguousTemplateToUse = languageMatchedTemplates.First();
                     }
-
-                    return (_unambiguousTemplateToUse = match) ?? UseSecondaryCriteriaToDisambiguateTemplateMatches();
                 }
 
                 return UseSecondaryCriteriaToDisambiguateTemplateMatches();
             }
+        }
+
+        private static IReadOnlyList<IFilteredTemplateInfo> FindLanguageMatchedTemplates(IEnumerable<IFilteredTemplateInfo> listToFilter, string language)
+        {
+            List<IFilteredTemplateInfo> languageMatches = new List<IFilteredTemplateInfo>();
+
+            if (string.IsNullOrEmpty(language))
+            {
+                return languageMatches;
+            }
+
+            foreach (IFilteredTemplateInfo info in listToFilter)
+            {
+                // ChoicesAndDescriptions is invoked as case insensitive 
+                if (info.Info.Tags == null ||
+                    info.Info.Tags.TryGetValue("language", out ICacheTag languageTag) &&
+                    languageTag.ChoicesAndDescriptions.ContainsKey(language))
+                {
+                    languageMatches.Add(info);
+                }
+            }
+
+            return languageMatches;
         }
 
         // If a template can be uniquely identified using secondary criteria, it's stored here.
@@ -167,6 +175,14 @@ namespace Microsoft.TemplateEngine.Cli
                     if (matchesIncludingParameterChecks.Count == 1)
                     {
                         _secondaryFilteredUnambiguousTemplateToUse = matchesIncludingParameterChecks.First();
+                    }
+                    else if (EnvironmentSettings.Host.TryGetHostParamDefault("prefs:language", out string defaultLanguage))
+                    {
+                        IReadOnlyList<IFilteredTemplateInfo> languageFiltered = FindLanguageMatchedTemplates(matchesIncludingParameterChecks, defaultLanguage);
+                        if (languageFiltered.Count == 1)
+                        {
+                            _secondaryFilteredUnambiguousTemplateToUse = languageFiltered.First();
+                        }
                     }
                 }
             }
@@ -302,6 +318,7 @@ namespace Microsoft.TemplateEngine.Cli
         private string GetTemplateParameterErrorsMessage(ITemplateInfo templateInfo, out IParameterSet allParams, out IReadOnlyList<string> userParamsWithInvalidValues)
         {
             ITemplate template = EnvironmentSettings.SettingsLoader.LoadTemplate(templateInfo);
+            ParseTemplateArgs(templateInfo);
             allParams = _templateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName, out IList<string> defaultParamsWithInvalidValues);
             _templateCreator.ResolveUserParameters(template, allParams, _app.AllTemplateParams, out userParamsWithInvalidValues);
 
@@ -390,7 +407,8 @@ namespace Microsoft.TemplateEngine.Cli
 
             foreach (IGrouping<string, ITemplateInfo> grouping in grouped)
             {
-                List<string> languages = new List<string>();
+                List<string> languageForDisplay = new List<string>();
+                HashSet<string> uniqueLanguages = new HashSet<string>();
 
                 foreach (ITemplateInfo info in grouping)
                 {
@@ -398,19 +416,25 @@ namespace Microsoft.TemplateEngine.Cli
                     {
                         foreach (string lang in languageTag.ChoicesAndDescriptions.Keys)
                         {
-                            if (string.IsNullOrEmpty(Language) && string.Equals(defaultLanguage, lang, StringComparison.OrdinalIgnoreCase))
+                            if (!uniqueLanguages.Contains(lang))
                             {
-                                languages.Add($"[{lang}]");
-                            }
-                            else
-                            {
-                                languages.Add(lang);
+                                if (string.IsNullOrEmpty(Language) && string.Equals(defaultLanguage, lang, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    languageForDisplay.Add($"[{lang}]");
+                                }
+                                else
+                                {
+                                    languageForDisplay.Add(lang);
+                                    uniqueLanguages.Add(lang);
+                                }
+
+                                uniqueLanguages.Add(lang);
                             }
                         }
                     }
                 }
 
-                templatesVersusLanguages[grouping.First()] = string.Join(", ", languages);
+                templatesVersusLanguages[grouping.First()] = string.Join(", ", languageForDisplay);
             }
 
             HelpFormatter<KeyValuePair<ITemplateInfo, string>> formatter = HelpFormatter.For(EnvironmentSettings, templatesVersusLanguages, 6, '-', false)
@@ -427,12 +451,17 @@ namespace Microsoft.TemplateEngine.Cli
                 Reporter.Output.WriteLine();
                 ShowInvocationExamples();
 
-                if (_matchedTemplates.Any(x => x.IsMatch))
+                bool firstDetails = true;
+
+                foreach (ITemplateInfo template in TemplatesToShowDetailedHelpAbout)
                 {
-                    foreach (ITemplateInfo template in TemplatesToShowDetailedHelpAbout)
+                    if (firstDetails)
                     {
-                        ShowTemplateHelp(template);
+                        Reporter.Output.WriteLine();
+                        firstDetails = false;
                     }
+
+                    ShowTemplateHelp(template, true);
                 }
             }
         }
@@ -713,11 +742,13 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        private static IEnumerable<ITemplateParameter> FilterParamsForHelp(IEnumerable<ITemplateParameter> parameterDefinitions, HashSet<string> hiddenParams)
+        // Note: This method explicitly filters out "type" and "language", in addition to other filtering.
+        private static IEnumerable<ITemplateParameter> FilterParamsForHelp(IEnumerable<ITemplateParameter> parameterDefinitions, HashSet<string> hiddenParams, bool showImplicitlyHiddenParams = false)
         {
             IEnumerable<ITemplateParameter> filteredParams = parameterDefinitions
-                .Where(x => x.Priority != TemplateParameterPriority.Implicit && !hiddenParams.Contains(x.Name)
-                        && (x.DataType != "choice" || x.Choices.Count > 1));    // for filtering "tags"
+                .Where(x => x.Priority != TemplateParameterPriority.Implicit 
+                        && !hiddenParams.Contains(x.Name) && !string.Equals(x.Name, "type", StringComparison.OrdinalIgnoreCase) && !string.Equals(x.Name, "language", StringComparison.OrdinalIgnoreCase)
+                        && (showImplicitlyHiddenParams || x.DataType != "choice" || x.Choices.Count > 1));    // for filtering "tags"
             return filteredParams;
         }
 
@@ -829,7 +860,7 @@ namespace Microsoft.TemplateEngine.Cli
             return true;
         }
 
-        private void ShowParameterHelp(IReadOnlyDictionary<string, string> inputParams, IParameterSet allParams, string additionalInfo, IReadOnlyList<string> invalidParams, HashSet<string> hiddenParams)
+        private void ShowParameterHelp(IReadOnlyDictionary<string, string> inputParams, IParameterSet allParams, string additionalInfo, IReadOnlyList<string> invalidParams, HashSet<string> explicitlyHiddenParams, bool showImplicitlyHiddenParams)
         {
             if (!string.IsNullOrEmpty(additionalInfo))
             {
@@ -837,7 +868,7 @@ namespace Microsoft.TemplateEngine.Cli
                 Reporter.Output.WriteLine();
             }
 
-            IEnumerable<ITemplateParameter> filteredParams = FilterParamsForHelp(allParams.ParameterDefinitions, hiddenParams);
+            IEnumerable<ITemplateParameter> filteredParams = FilterParamsForHelp(allParams.ParameterDefinitions, explicitlyHiddenParams, showImplicitlyHiddenParams);
 
             if (filteredParams.Any())
             {
@@ -941,8 +972,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        // Causes the args to be parsed for the first time.
-        // Use this for when the template is known.
+        // Causes the args to be parsed in the context of the input template.
         private void ParseTemplateArgs(ITemplateInfo templateInfo)
         {
             _app.Reset();
@@ -1011,16 +1041,32 @@ namespace Microsoft.TemplateEngine.Cli
                 {
                     ParseTemplateArgs(templateWithFilterInfo.Info);
 
-                    // template params are parsed already
-                    foreach (string matchedParamName in _app.AllTemplateParams.Keys)
+                    // params are already parsed. But choice values aren't checked
+                    foreach (KeyValuePair<string, string> matchedParamInfo in _app.AllTemplateParams)
                     {
-                        dispositionForTemplate.Add(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.Exact, ChoiceIfLocationIsOtherChoice = matchedParamName });
+                        string paramName = matchedParamInfo.Key;
+                        string paramValue = matchedParamInfo.Value;
+
+                        if (templateWithFilterInfo.Info.Tags.TryGetValue(paramName, out ICacheTag paramDetails)
+                            && (
+                                paramDetails.ChoicesAndDescriptions.ContainsKey(paramValue)
+                                || paramDetails.ChoicesAndDescriptions.Any(x => x.Value.StartsWith(paramValue, StringComparison.OrdinalIgnoreCase))
+                            ))
+                        {
+                            dispositionForTemplate.Add(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.Exact, ChoiceIfLocationIsOtherChoice = paramName });
+                        }
+                        else
+                        {
+                            dispositionForTemplate.Add(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterValue, ChoiceIfLocationIsOtherChoice = paramName });
+                        }
                     }
 
                     foreach (string unmatchedParamName in _app.RemainingParameters.Keys.Where(x => !x.Contains(':')))   // filter debugging params
                     {
                         if (_app.TryGetCanonicalNameForVariant(unmatchedParamName, out string canonical))
                         {   // the name is a known template param, it must have not parsed due to an invalid value
+                            //
+                            // Note (scp 2017-02-27): This probably can't happen, the param parsing doesn't check the choice values.
                             dispositionForTemplate.Add(new MatchInfo { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterValue, ChoiceIfLocationIsOtherChoice = unmatchedParamName });
                         }
                         else
@@ -1165,7 +1211,7 @@ namespace Microsoft.TemplateEngine.Cli
             Reporter.Output.WriteLine($"    dotnet {CommandName} --help");
         }
 
-        private void ShowTemplateHelp(ITemplateInfo templateInfo)
+        private void ShowTemplateHelp(ITemplateInfo templateInfo, bool showImplicitlyHiddenParams = false)
         {
             IList<string> languages = null;
 
@@ -1195,7 +1241,8 @@ namespace Microsoft.TemplateEngine.Cli
 
             string additionalInfo = GetTemplateParameterErrorsMessage(templateInfo, out IParameterSet allParams, out IReadOnlyList<string> userParamsWithInvalidValues);
 
-            ShowParameterHelp(_app.AllTemplateParams, allParams, additionalInfo, userParamsWithInvalidValues, _hostSpecificTemplateData?.HiddenParameterNames ?? new HashSet<string>());
+            HashSet<string> parametersToExplicitlyHide = _hostSpecificTemplateData?.HiddenParameterNames ?? new HashSet<string>();
+            ShowParameterHelp(_app.AllTemplateParams, allParams, additionalInfo, userParamsWithInvalidValues, parametersToExplicitlyHide, showImplicitlyHiddenParams);
         }
 
         // Returns true if any partial matches were displayed, false otherwise
