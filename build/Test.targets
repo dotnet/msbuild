@@ -65,8 +65,7 @@
   <Target Name="BuildTests"
           DependsOnTargets="RestoreTests;">
     <DotNetBuild ToolPath="$(Stage0Directory)"
-                 ProjectPath="&quot;$(TestDirectory)/Microsoft.DotNet.Cli.Tests.sln&quot;"
-                 MaxCpuCount="1" />
+                 ProjectPath="&quot;$(TestDirectory)/Microsoft.DotNet.Cli.Tests.sln&quot;" />
   </Target>
 
   <Target Name="CreateTestAssetPackageNuPkgs"
