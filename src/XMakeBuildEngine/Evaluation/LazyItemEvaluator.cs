@@ -49,7 +49,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static CompareInfo s_invariantCompareInfo = CultureInfo.InvariantCulture.CompareInfo;
 
-        private Dictionary<string, LazyItemList> _itemLists = new Dictionary<string, LazyItemList>();
+        private Dictionary<string, LazyItemList> _itemLists = new Dictionary<string, LazyItemList>(MSBuildNameIgnoreCaseComparer.Default);
 
         public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, BuildEventContext buildEventContext, ILoggingService loggingService)
         {
@@ -365,7 +365,7 @@ namespace Microsoft.Build.Evaluation
             public string ItemType { get; set; }
             public ItemSpec<P,I> ItemSpec { get; set; }
 
-            public ImmutableDictionary<string, LazyItemList>.Builder ReferencedItemLists { get; } = ImmutableDictionary.CreateBuilder<string, LazyItemList>();
+            public ImmutableDictionary<string, LazyItemList>.Builder ReferencedItemLists { get; } = ImmutableDictionary.CreateBuilder<string, LazyItemList>(MSBuildNameIgnoreCaseComparer.Default);
             public bool ConditionResult { get; set; }
 
             public OperationBuilder(ProjectItemElement itemElement, bool conditionResult)
