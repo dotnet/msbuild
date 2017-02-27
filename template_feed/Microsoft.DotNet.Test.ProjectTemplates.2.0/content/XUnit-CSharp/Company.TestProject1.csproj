@@ -4,7 +4,8 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <RuntimeFrameworkVersion>2.0.0-beta-001507</RuntimeFrameworkVersion>
 
-    <IsPackable>false</IsPackable>
+    <IsPackable Condition="'$(EnablePack)' == 'true'">true</IsPackable>
+    <IsPackable Condition="'$(EnablePack)' != 'true'">false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

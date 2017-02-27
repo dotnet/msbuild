@@ -4,7 +4,8 @@
     <TargetFramework Condition="'$(Framework)' != 'netcoreapp1.1'">netcoreapp1.0</TargetFramework>
     <TargetFramework Condition="'$(Framework)' == 'netcoreapp1.1'">netcoreapp1.1</TargetFramework>
 
-    <IsPackable>false</IsPackable>
+    <IsPackable Condition="'$(EnablePack)' == 'true'">true</IsPackable>
+    <IsPackable Condition="'$(EnablePack)' != 'true'">false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

@@ -37,7 +37,7 @@
       "datatype": "bool",
       "defaultValue": "false",
       "description": "Whether or not to enable packaging (via (\"dotnet pack\") for the project."
-    },
+    }
   },
   "primaryOutputs": [ { "path": "Company.TestProject1.csproj" } ]
 }
