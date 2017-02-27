@@ -284,7 +284,7 @@ namespace Microsoft.Build.CommandLine
 #endif
             new ParameterizedSwitchInfo(  new string[] { "warnaserror", "err" },                ParameterizedSwitch.WarningsAsErrors,           null,                           true,           null,                                  true,   true   ),
             new ParameterizedSwitchInfo(  new string[] { "warnasmessage", "nowarn" },           ParameterizedSwitch.WarningsAsMessages,         null,                           true,           "MissingWarnAsMessageParameterError",  true,   false  ),
-            new ParameterizedSwitchInfo(  new string[] { "binarylogger", "binlog", "bl" },      ParameterizedSwitch.BinaryLogger,               null,                           false,          null,                                  true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "binarylogger", "bl" },                ParameterizedSwitch.BinaryLogger,               null,                           false,          null,                                  true,   false  ),
         };
 
         /// <summary>

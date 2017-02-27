@@ -629,12 +629,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      text logs and used by other analysis tools. A binary log
                      is usually 10-20x smaller than the most detailed text
                      diagnostic-level log, but it contains more information.
-                     (Short form: /bl or /binlog)
+                     (Short form: /bl)
 
                      Examples:
                        /bl
                        /bl:output.binlog
-                       /binlog:..\..\custom.binlog
+                       /bl:..\..\custom.binlog
                        /binaryLogger
     </value>
     <comment>
