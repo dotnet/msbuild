@@ -62,6 +62,7 @@ args=($temp)
 
 # Set nuget package cache under the repo
 export NUGET_PACKAGES="$REPOROOT/packages"
+export NUGET_HTTP_CACHE_PATH="$REPOROOT/packages"
 
 # Use a repo-local install directory (but not the artifacts directory because that gets cleaned a lot
 [ -z "$DOTNET_INSTALL_DIR" ] && export DOTNET_INSTALL_DIR=$REPOROOT/.dotnet_cli
