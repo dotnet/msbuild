@@ -549,7 +549,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                 ShowUsageHelp();
                 ShowTemplateHelp(UnambiguousTemplateToUse.Info);
-                return CreationResultStatus.Success;
+                return argsError ? CreationResultStatus.InvalidParamValues : CreationResultStatus.Success;
             }
             else if (argsError)
             {
