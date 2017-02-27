@@ -3,7 +3,7 @@
   <PropertyGroup>
     <CLI_SharedFrameworkVersion>1.1.1</CLI_SharedFrameworkVersion>
     <CLI_MSBuild_Version>15.1.548</CLI_MSBuild_Version>
-    <CLI_Roslyn_Version>2.0.0-rc5-61424-02</CLI_Roslyn_Version>
+    <CLI_Roslyn_Version>2.0.0-rc5-61427-04</CLI_Roslyn_Version>
     <CLI_NETSDK_Version>1.0.0-alpha-20170224-6</CLI_NETSDK_Version>
     <CLI_NuGet_Version>4.0.0-rtm-2283</CLI_NuGet_Version>
     <CLI_WEBSDK_Version>1.0.0-alpha-20170130-3-281</CLI_WEBSDK_Version>
