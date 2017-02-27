@@ -61,8 +61,6 @@ namespace Microsoft.TemplateEngine.Cli
 
         public string Alias => _app.InternalParamValue("--alias");
 
-        public bool DebugAttachHasValue => _app.RemainingArguments.Any(x => x.Equals("--debug:attach", StringComparison.Ordinal));
-
         public bool ExtraArgsHasValue => _app.InternalParamHasValue("--extra-args");
 
         public string CommandName { get; }
@@ -180,6 +178,11 @@ namespace Microsoft.TemplateEngine.Cli
 
         public static int Run(string commandName, ITemplateEngineHost host, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, string[] args)
         {
+            if (args.Any(x => string.Equals(x, "--debug:attach", StringComparison.Ordinal)))
+            {
+                Console.ReadLine();
+            }
+
             ExtendedCommandParser app = new ExtendedCommandParser()
             {
                 Name = $"dotnet {commandName}",
@@ -616,7 +619,16 @@ namespace Microsoft.TemplateEngine.Cli
             catch (CommandParserException ex)
             {
                 Reporter.Error.WriteLine(ex.Message.Bold().Red());
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, CommandName).Bold().Red());
+
+                if (IsHelpFlagSpecified)
+                {
+                    ShowUsageHelp();
+                }
+                else
+                {
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, CommandName).Bold().Red());
+                }
+
                 return CreationResultStatus.InvalidParamValues;
             }
 
@@ -629,14 +641,18 @@ namespace Microsoft.TemplateEngine.Cli
                 catch (CommandParserException ex)
                 {
                     Reporter.Error.WriteLine(ex.Message.Bold().Red());
-                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, CommandName).Bold().Red());
+
+                    if (IsHelpFlagSpecified)
+                    {
+                        ShowUsageHelp();
+                    }
+                    else
+                    {
+                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, CommandName).Bold().Red());
+                    }
+
                     return CreationResultStatus.InvalidParamValues;
                 }
-            }
-
-            if (DebugAttachHasValue)
-            {
-                Console.ReadLine();
             }
 
             ConfigureLocale();
@@ -788,7 +804,7 @@ namespace Microsoft.TemplateEngine.Cli
             return true;
         }
 
-        private void ShowParameterHelp(IReadOnlyDictionary<string, string> inputParams, IParameterSet allParams, string additionalInfo, HashSet<string> hiddenParams)
+        private void ShowParameterHelp(IReadOnlyDictionary<string, string> inputParams, IParameterSet allParams, string additionalInfo, IReadOnlyList<string> invalidParams, HashSet<string> hiddenParams)
         {
             if (!string.IsNullOrEmpty(additionalInfo))
             {
@@ -825,7 +841,11 @@ namespace Microsoft.TemplateEngine.Cli
                         foreach (KeyValuePair<string, string> choiceInfo in param.Choices)
                         {
                             displayValue.Append("    " + choiceInfo.Key.PadRight(longestChoiceLength + 4));
-                            displayValue.AppendLine("- " + choiceInfo.Value);
+
+                            if (!string.IsNullOrWhiteSpace(choiceInfo.Value))
+                            {
+                                displayValue.AppendLine("- " + choiceInfo.Value);
+                            }
                         }
                     }
                     else
@@ -865,7 +885,18 @@ namespace Microsoft.TemplateEngine.Cli
 
                     if (!string.IsNullOrEmpty(configuredValue))
                     {
-                        displayValue.AppendLine(string.Format(LocalizableStrings.ConfiguredValue, configuredValue));
+                        string realValue = configuredValue;
+
+                        if (invalidParams.Contains(param.Name))
+                        {
+                            realValue = realValue.Bold().Red();
+                        }
+                        else if (allParams.TryGetRuntimeValue(EnvironmentSettings, param.Name, out object runtimeVal) && runtimeVal != null)
+                        {
+                            realValue = runtimeVal.ToString();
+                        }
+
+                        displayValue.AppendLine(string.Format(LocalizableStrings.ConfiguredValue, realValue));
                     }
 
                     // display the default value if there is one
@@ -1139,24 +1170,25 @@ namespace Microsoft.TemplateEngine.Cli
 
             ITemplate template = EnvironmentSettings.SettingsLoader.LoadTemplate(templateInfo);
             IParameterSet allParams = _templateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName, out IList<string> defaultParamsWithInvalidValues);
-            _templateCreator.ResolveUserParameters(template, allParams, _app.AllTemplateParams, out IList<string> userParamsWithInvalidValues);
+            _templateCreator.ResolveUserParameters(template, allParams, _app.AllTemplateParams, out IReadOnlyList<string> userParamsWithInvalidValues);
 
             string additionalInfo = null;
             if (userParamsWithInvalidValues.Any())
             {
+                string invalidParamsErrorText = LocalizableStrings.InvalidTemplateParameterValues;
                 // Lookup the input param formats - userParamsWithInvalidValues has canonical.
                 IList<string> inputParamFormats = new List<string>();
                 foreach (string canonical in userParamsWithInvalidValues)
                 {
+                    _app.AllTemplateParams.TryGetValue(canonical, out string specifiedValue);
                     string inputFormat = _app.TemplateParamInputFormat(canonical);
-                    inputParamFormats.Add(inputFormat);
+                    invalidParamsErrorText += Environment.NewLine + string.Format(LocalizableStrings.InvalidParameterDetail, inputFormat, specifiedValue, canonical);
                 }
 
-                string badParams = string.Join(", ", inputParamFormats);
-                additionalInfo = string.Format(LocalizableStrings.InvalidParameterValues, badParams, templateInfo.Name);
+                additionalInfo = invalidParamsErrorText;
             }
 
-            ShowParameterHelp(_app.AllTemplateParams, allParams, additionalInfo, _hostSpecificTemplateData?.HiddenParameterNames ?? new HashSet<string>());
+            ShowParameterHelp(_app.AllTemplateParams, allParams, additionalInfo, userParamsWithInvalidValues, _hostSpecificTemplateData?.HiddenParameterNames ?? new HashSet<string>());
         }
 
         // Returns true if any partial matches were displayed, false otherwise

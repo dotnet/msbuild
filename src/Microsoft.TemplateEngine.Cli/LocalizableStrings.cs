@@ -69,6 +69,11 @@ namespace Microsoft.TemplateEngine.Cli
 
         public const string InvalidParameterValues = "Error: Invalid values for parameter(s) [{0}] for template [{1}].";
 
+        public const string InvalidTemplateParameterValues = "Error: Invalid parameter(s):";
+
+        public const string InvalidParameterDetail = @"  {0} {1}
+    '{1}' is not a valid value for {0} ({2}).";
+
         public const string GettingReady = "Getting ready...";
 
         public const string InvalidInputSwitch = "Invalid input switch:";
