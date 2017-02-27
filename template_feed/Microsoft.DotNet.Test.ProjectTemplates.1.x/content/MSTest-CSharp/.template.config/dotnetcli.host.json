@@ -2,6 +2,9 @@
   "symbolInfo": {
     "Framework": {
       "longName": "framework"
+    },
+    "EnablePack": {
+      "longName": "enable-pack"
     }
   }
 }

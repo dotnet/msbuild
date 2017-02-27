@@ -31,7 +31,13 @@
         }
       ],
       "defaultValue": "netcoreapp1.1"
-    }
+    },
+    "EnablePack": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Whether or not to enable packaging (via (\"dotnet pack\") for the project."
+    },
   },
   "primaryOutputs": [ { "path": "Company.TestProject1.csproj" } ]
 }
