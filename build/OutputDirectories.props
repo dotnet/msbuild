@@ -1,19 +1,15 @@
 <Project>
   <PropertyGroup>
       <BaseOutputDirectory>$(RepoRoot)/artifacts/$(Rid)</BaseOutputDirectory>
-      <Stage2Directory>$(BaseOutputDirectory)/stage2</Stage2Directory>
-      <Stage2SymbolsDirectory>$(BaseOutputDirectory)/stage2symbols</Stage2SymbolsDirectory>
-      <Stage2SdkDirectory>$(Stage2Directory)/sdk/$(SdkVersion)</Stage2SdkDirectory>
-      <Stage2RoslynDirectory>$(Stage2SdkDirectory)/Roslyn</Stage2RoslynDirectory>
-      <DotnetStage2>$(Stage2Directory)/dotnet$(ExeExtension)</DotnetStage2>
-      <OutputDirectory>$(Stage2Directory)/</OutputDirectory>
-      <Stage2CompilationDirectory>$(BaseOutputDirectory)/stage2compilation</Stage2CompilationDirectory>
-      <StageDirectory>$(Stage2Directory)</StageDirectory>
-      <StageSymbolsDirectory>$(Stage2SymbolsDirectory)</StageSymbolsDirectory>
-      <SdkOutputDirectory>$(Stage2SdkDirectory)</SdkOutputDirectory>
+      <OutputDirectory>$(BaseOutputDirectory)/stage2</OutputDirectory>
+      <SdkOutputDirectory>$(OutputDirectory)/sdk/$(SdkVersion)</SdkOutputDirectory>
+      <SymbolsDirectory>$(BaseOutputDirectory)/stage2symbols</SymbolsDirectory>
+      <RoslynDirectory>$(SdkOutputDirectory)/Roslyn</RoslynDirectory>
+      <CompilationDirectory>$(BaseOutputDirectory)/stage2compilation</CompilationDirectory>
       <IntermediateDirectory>$(BaseOutputDirectory)/intermediate</IntermediateDirectory>
       <PackagesDirectory>$(BaseOutputDirectory)/packages</PackagesDirectory>
       <SharedFrameworkPublishDirectory>$(IntermediateDirectory)/sharedFrameworkPublish</SharedFrameworkPublishDirectory>
       <TestOutputDir>$(RepoRoot)/artifacts/testpackages/</TestOutputDir>
+      <DotnetInOutputDirectory>$(OutputDirectory)/dotnet$(ExeExtension)</DotnetInOutputDirectory>
   </PropertyGroup>
 </Project>

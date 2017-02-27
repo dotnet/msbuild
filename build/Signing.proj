@@ -15,8 +15,8 @@
     <Error Condition="'$(Rid)' == ''" Text="Missing required property 'Rid'." />
     <PropertyGroup>
       <BaseOutputDirectory Condition="'$(BaseOutputDirectory)' == ''">$(RepoRoot)/artifacts/$(Rid)</BaseOutputDirectory>
-      <Stage2Directory Condition="'$(Stage2Directory)' == ''">$(BaseOutputDirectory)/stage2</Stage2Directory>
-      <Stage2CompilationDirectory Condition="'$(Stage2CompilationDirectory)' == ''">$(BaseOutputDirectory)/stage2compilation</Stage2CompilationDirectory>
+      <OutputDirectory Condition="'$(OutputDirectory)' == ''">$(BaseOutputDirectory)/stage2</OutputDirectory>
+      <CompilationDirectory Condition="'$(CompilationDirectory)' == ''">$(BaseOutputDirectory)/stage2compilation</CompilationDirectory>
       <PackagesDirectory Condition="'$(PackagesDirectory)' == ''">$(BaseOutputDirectory)/packages</PackagesDirectory>
 
       <!-- The OutDir and IntermediateOutputPath properties are required by MicroBuild. MicroBuild only
@@ -31,27 +31,27 @@
   <Target Name="GetPostCompileSignFiles">
     <ItemGroup>
       <!-- External files -->
-      <FilesToSign Include="$(Stage2Directory)/sdk/**/Newtonsoft.Json.dll;
-                            $(Stage2Directory)/shared/**/libuv.dll">
+      <FilesToSign Include="$(OutputDirectory)/sdk/**/Newtonsoft.Json.dll;
+                            $(OutputDirectory)/shared/**/libuv.dll">
         <Authenticode>$(ExternalCertificateId)</Authenticode>
       </FilesToSign>
       <!-- Built binaries -->
-      <FilesToSign Include="$(Stage2Directory)/sdk/**/csc.exe;
-                            $(Stage2Directory)/sdk/**/csc.dll;
-                            $(Stage2Directory)/sdk/**/dotnet.dll;
-                            $(Stage2Directory)/sdk/**/System.*.dll;
-                            $(Stage2Directory)/sdk/**/Microsoft.*.dll;
-                            $(Stage2Directory)/sdk/**/NuGet*.dll;
-                            $(Stage2Directory)/sdk/**/datacollector.dll;
-                            $(Stage2Directory)/sdk/**/MSBuild.dll;
-                            $(Stage2Directory)/sdk/**/testhost.dll;
-                            $(Stage2Directory)/sdk/**/vstest.console.dll">
+      <FilesToSign Include="$(OutputDirectory)/sdk/**/csc.exe;
+                            $(OutputDirectory)/sdk/**/csc.dll;
+                            $(OutputDirectory)/sdk/**/dotnet.dll;
+                            $(OutputDirectory)/sdk/**/System.*.dll;
+                            $(OutputDirectory)/sdk/**/Microsoft.*.dll;
+                            $(OutputDirectory)/sdk/**/NuGet*.dll;
+                            $(OutputDirectory)/sdk/**/datacollector.dll;
+                            $(OutputDirectory)/sdk/**/MSBuild.dll;
+                            $(OutputDirectory)/sdk/**/testhost.dll;
+                            $(OutputDirectory)/sdk/**/vstest.console.dll">
         <Authenticode>$(InternalCertificateId)</Authenticode>
       </FilesToSign>
       <!-- Built files for the packages -->
-      <FilesToSign Include="$(Stage2CompilationDirectory)/forPackaging/**/*dotnet*.dll;
-                            $(Stage2CompilationDirectory)/forPackaging/**/Microsoft.Extensions.DependencyModel.dll;
-                            $(Stage2CompilationDirectory)/forPackaging/**/Microsoft.Extensions.Testing.Abstractions.dll">
+      <FilesToSign Include="$(CompilationDirectory)/forPackaging/**/*dotnet*.dll;
+                            $(CompilationDirectory)/forPackaging/**/Microsoft.Extensions.DependencyModel.dll;
+                            $(CompilationDirectory)/forPackaging/**/Microsoft.Extensions.Testing.Abstractions.dll">
         <Authenticode>$(InternalCertificateId)</Authenticode>
       </FilesToSign>
     </ItemGroup>
