@@ -81,6 +81,10 @@
       <Copy SourceFiles="@(MSBuildExtensionsContent)"
             DestinationFolder="$(SdkOutputDirectory)/%(RecursiveDir)" />
 
+      <PropertyGroup>
+        <MSBuildTargetsDirectory>$(SdkOutputDirectory)/runtimes/any/native</MSBuildTargetsDirectory>
+      </PropertyGroup>
+
       <ItemGroup>
         <NuPkgContentForMSBuildExtensions Include="$(MSBuildTargetsDirectory)/**/*.targets;
                                                    $(MSBuildTargetsDirectory)/**/*.Targets;

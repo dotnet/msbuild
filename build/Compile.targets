@@ -6,9 +6,7 @@
     <RuntimeNETCoreAppPackageName>runtime.$(CoreCLRRid).microsoft.netcore.app</RuntimeNETCoreAppPackageName>
     <CrossgenPath>$(NuGetPackagesDir)/$(RuntimeNETCoreAppPackageName)/$(CLI_SharedFrameworkVersion)/tools/crossgen$(ExeExtension)</CrossgenPath>
     <LibCLRJitPath>$(NuGetPackagesDir)/$(RuntimeNETCoreAppPackageName)/$(CLI_SharedFrameworkVersion)/runtimes/$(CoreCLRRid)/native/$(DynamicLibPrefix)clrjit$(DynamicLibExtension)</LibCLRJitPath>
-    <MSBuildImportsDir>$(RepoRoot)/resources/MSBuildImports</MSBuildImportsDir>
-    <MSBuildTargetsDirectory>$(SdkOutputDirectory)/runtimes/any/native</MSBuildTargetsDirectory>
-    <SharedFrameworkNameVersionPath>$(OutputDirectory)/shared/$(SharedFrameworkName)/$(SharedFrameworkVersion)</SharedFrameworkNameVersionPath>
+    <SharedFrameworkNameVersionPath>$(StageDirectory)/shared/$(SharedFrameworkName)/$(SharedFrameworkVersion)</SharedFrameworkNameVersionPath>
   </PropertyGroup>
 
   <ItemGroup>
