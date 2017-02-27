@@ -90,8 +90,8 @@
       </ItemGroup>
 
       <RemoveAssetFromDepsPackages DepsFile="$(PublishDir)/$(TargetName).deps.json"
-                                   SectionName="runtime"
-                                   AssetPath="@(NuPkgContentForMSBuildExtensions->'%(RecursiveDir)%(Filename)%(Extension)'" />
+                                   SectionName="runtimeTargets"
+                                   AssetPath="@(NuPkgContentForMSBuildExtensions->'%(RecursiveDir)%(Filename)%(Extension)')" />
 
       <Move SourceFiles="@(NuPkgContentForMSBuildExtensions)"
             DestinationFiles="@(NuPkgContentForMSBuildExtensions->'$(SdkOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
