@@ -79,10 +79,10 @@
           BeforeTargets="GenerateCliRuntimeConfigurationFiles">
     
       <Copy SourceFiles="@(MSBuildExtensionsContent)"
-            DestinationFolder="$(SdkOutputDirectory)/%(RecursiveDir)" />
+            DestinationFolder="$(PublishDir)/%(RecursiveDir)" />
 
       <PropertyGroup>
-        <MSBuildTargetsDirectory>$(SdkOutputDirectory)/runtimes/any/native</MSBuildTargetsDirectory>
+        <MSBuildTargetsDirectory>$(PublishDir)/runtimes/any/native</MSBuildTargetsDirectory>
       </PropertyGroup>
 
       <ItemGroup>
@@ -96,7 +96,7 @@
       </ItemGroup>
 
       <Move SourceFiles="@(NuPkgContentForMSBuildExtensions)"
-            DestinationFiles="@(NuPkgContentForMSBuildExtensions->'$(SdkOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+            DestinationFiles="@(NuPkgContentForMSBuildExtensions->'$(PublishDir)/%(RecursiveDir)%(Filename)%(Extension)')" />
 
       <RemoveAssetFromDepsPackages DepsFile="$(PublishDir)/$(TargetName).deps.json"
                                    SectionName="runtimeTargets"
