@@ -91,11 +91,13 @@
                                                    $(MSBuildTargetsDirectory)/**/*.props;
                                                    $(MSBuildTargetsDirectory)/**/*.overridetasks;
                                                    $(MSBuildTargetsDirectory)/**/*.tasks" />
+
+        <NuPkgContentForMSBuildExtensionsRelativePaths Include="@(NuPkgContentForMSBuildExtensions->'runtimes/any/native/%(RecursiveDir)%(Filename)%(Extension)')" />
       </ItemGroup>
 
       <RemoveAssetFromDepsPackages DepsFile="$(PublishDir)/$(TargetName).deps.json"
                                    SectionName="runtimeTargets"
-                                   AssetPath="@(NuPkgContentForMSBuildExtensions->'%(RecursiveDir)%(Filename)%(Extension)')" />
+                                   AssetPath="%(NuPkgContentForMSBuildExtensionsRelativePaths.Identity)" />
 
       <Move SourceFiles="@(NuPkgContentForMSBuildExtensions)"
             DestinationFiles="@(NuPkgContentForMSBuildExtensions->'$(SdkOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
