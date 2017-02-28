@@ -58,13 +58,13 @@
   <Target Name="RestoreTests"
           DependsOnTargets="PrepareTests;
                             CreateTestAssetPackageNuPkgs;">
-    <DotNetRestore ToolPath="$(Stage0Directory)"
+    <DotNetRestore ToolPath="$(OutputDirectory)"
                    ProjectPath="&quot;$(TestDirectory)/Microsoft.DotNet.Cli.Tests.sln&quot;" />
   </Target>
 
   <Target Name="BuildTests"
           DependsOnTargets="RestoreTests;">
-    <DotNetBuild ToolPath="$(Stage0Directory)"
+    <DotNetBuild ToolPath="$(OutputDirectory)"
                  ProjectPath="&quot;$(TestDirectory)/Microsoft.DotNet.Cli.Tests.sln&quot;" />
   </Target>
 
@@ -79,7 +79,7 @@
     <!-- https://github.com/NuGet/Home/issues/4063 -->
     <DotNetPack Output="$(TestPackagesDir)"
                 ProjectPath="%(TestPackageProject.ProjectPath)"
-                ToolPath="$(Stage0Directory)"
+                ToolPath="$(OutputDirectory)"
                 VersionSuffix="%(TestPackageProject.VersionSuffix)"
                 MsbuildArgs="%(TestPackageProject.MsbuildArgs) /p:SdkNuGetVersion=$(SdkNugetVersion)" />
 
