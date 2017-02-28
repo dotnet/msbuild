@@ -33,6 +33,11 @@
         <GenerateSdkMsiInputs Include="$(SdkLayoutOutputDirectory)/**/*;
                                        $(SdkGenerateMsiPowershellScript)" />
       </ItemGroup>
+      
+      <!-- Consumed By Publish -->
+      <ItemGroup>
+        <GeneratedInstallers Include="$(SdkInstallerFile);$(CombinedFrameworkSdkHostInstallerFile)" />
+      </ItemGroup>
 
       <GenerateMsiVersion CommitCount="$(CommitCount)"
                           VersionMajor="$(VersionMajor)"

@@ -9,12 +9,4 @@
     <LayoutDirectory Condition=" '$(OSName)' != 'ubuntu' ">$(IntermediateDirectory)/layouts</LayoutDirectory>
     <SdkLayoutOutputDirectory>$(LayoutDirectory)/$(ArtifactNameSdk)</SdkLayoutOutputDirectory>
   </PropertyGroup>
-
-  <!-- Consumed By Publish -->
-  <ItemGroup>
-    <GeneratedInstallers Condition=" '$(OSName)' == 'ubuntu' "
-                         Include="$(SdkInstallerFile)" />
-    <GeneratedInstallers Condition=" '$(OSName)' != 'ubuntu' "
-                         Include="$(SdkInstallerFile);$(CombinedFrameworkSdkHostInstallerFile)" />
-  </ItemGroup>
 </Project>

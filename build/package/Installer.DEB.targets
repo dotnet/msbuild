@@ -99,6 +99,9 @@
 
     <ItemGroup>
       <TestSdkDebTaskEnvironmentVariables Include="PATH=$(DebianInstalledDirectory)$(PathListSeparator)$(PATH)" />
+
+      <!-- Consumed By Publish -->
+      <GeneratedInstallers Include="$(SdkInstallerFile)" />
     </ItemGroup>
   </Target>
 </Project>

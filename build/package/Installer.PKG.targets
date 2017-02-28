@@ -81,6 +81,11 @@
           <ReplacementString>$(AdditionalHostFxrBrandName)</ReplacementString>
         </DistributionTemplateReplacement>
       </ItemGroup>
+      
+      <!-- Consumed By Publish -->
+      <ItemGroup>
+        <GeneratedInstallers Include="$(SdkInstallerFile);$(CombinedFrameworkSdkHostInstallerFile)" />
+      </ItemGroup>
 
       <ItemGroup>
         <GenerateSdkPkgInputs Include="$(SdkLayoutOutputDirectory)/**/*" />
