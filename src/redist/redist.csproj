@@ -9,7 +9,7 @@
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <CopyBuildOutputToPublishDirectory>false</CopyBuildOutputToPublishDirectory>
     <PackageTargetFallback>$(PackageTargetFallback);dotnet5.4</PackageTargetFallback>
-    <PublishDir>$(Stage2SdkDirectory)</PublishDir>
+    <PublishDir>$(SdkOutputDirectory)</PublishDir>
     <VersionSuffix>$(CommitCount)</VersionSuffix>
   </PropertyGroup>
 
@@ -42,7 +42,7 @@
     </ItemGroup>
 
     <Copy SourceFiles="@(SharedFramework)"
-          DestinationFiles="@(SharedFramework->'$(StageDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+          DestinationFiles="@(SharedFramework->'$(OutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
   <Target Name="PublishVersionFile"

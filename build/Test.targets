@@ -5,8 +5,8 @@
   <PropertyGroup>
     <PathListSeparator>:</PathListSeparator>
     <PathListSeparator Condition=" '$(OSName)' == 'win' ">%3b</PathListSeparator>
-    <ExecPath>$(Stage2Directory)$(PathListSeparator)$(PATH)</ExecPath>
-    <ExecPath Condition=" '$(OSName)' == 'win' ">$(Stage2Directory)</ExecPath>
+    <ExecPath>$(OutputDirectory)$(PathListSeparator)$(PATH)</ExecPath>
+    <ExecPath Condition=" '$(OSName)' == 'win' ">$(OutputDirectory)</ExecPath>
     <TestPackagesDir>$(TestOutputDir)/packages/</TestPackagesDir>
     <TestArtifactsDir>$(TestOutputDir)/artifacts/</TestArtifactsDir>
     <TestResultXmlDir>$(TestOutputDir)/results/</TestResultXmlDir>
@@ -28,13 +28,13 @@
     <ItemGroup>
       <ProjectsToTest Include="build/test/RunTest.proj">
         <Properties>
-          CLIBuildDll=$(CLIBuildDll); 
+          CLIBuildDll=$(CLIBuildDll);
           Configuration=$(Configuration);
           EnvironmentVariables=$(RunTestEnvironmentVariables);
           TestProject=%(TestProjects.Identity);
           TestResultXmlDir=$(TestResultXmlDir);
-          ToolPath=$(Stage2Directory);
-          WorkingDirectory=$([System.IO.Directory]::GetParent(%(TestProjects.Identity))) 
+          ToolPath=$(OutputDirectory);
+          WorkingDirectory=$([System.IO.Directory]::GetParent(%(TestProjects.Identity)))
         </Properties>
       </ProjectsToTest>
     </ItemGroup>
@@ -72,7 +72,7 @@
           DependsOnTargets="SetupTestPackageProjectData;"
           Outputs="%(TestPackageProject.Identity)">
 
-    <DotNetRestore ToolPath="$(Stage2Directory)"
+    <DotNetRestore ToolPath="$(OutputDirectory)"
                    WorkingDirectory="$([System.IO.Directory]::GetParent('%(TestPackageProject.ProjectPath)'))"
                    ProjectPath="%(TestPackageProject.ProjectPath)" />
  
@@ -86,7 +86,7 @@
   </Target>
 
   <Target Name="EnsureStageSeparation">
-    <DotNetMSBuild Arguments="/v:diag $(RepoRoot)/build_projects/Microsoft.DotNet.Cli.Build.SelfTest/InvokeWithStage0.proj /p:Stage2Directory=&quot;$(Stage2Directory)&quot;"
+    <DotNetMSBuild Arguments="/v:diag $(RepoRoot)/build_projects/Microsoft.DotNet.Cli.Build.SelfTest/InvokeWithStage0.proj /p:OutputDirectory=&quot;$(OutputDirectory)&quot;"
                    ToolPath="$(Stage0Directory)" />
   </Target>
 </Project>

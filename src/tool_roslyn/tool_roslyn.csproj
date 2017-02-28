@@ -7,7 +7,7 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <RuntimeFrameworkVersion>$(CLI_SharedFrameworkVersion)</RuntimeFrameworkVersion>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
-    <PublishDir>$(Stage2RoslynDirectory)</PublishDir>
+    <PublishDir>$(RoslynDirectory)</PublishDir>
     <VersionSuffix>$(CommitCount)</VersionSuffix>
   </PropertyGroup>
   
