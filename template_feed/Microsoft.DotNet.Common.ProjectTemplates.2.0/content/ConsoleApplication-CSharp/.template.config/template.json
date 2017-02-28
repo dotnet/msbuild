@@ -3,6 +3,7 @@
   "classifications": ["Common", "Console"],
   "name": "Console Application",
   "groupIdentity": "Microsoft.Common.Console",
+  "precedence": "200",
   "identity": "Microsoft.Common.Console.CSharp.2.0",
   "shortName": "console",
   "tags": {

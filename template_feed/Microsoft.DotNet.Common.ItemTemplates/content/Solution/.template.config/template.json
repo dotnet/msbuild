@@ -3,6 +3,7 @@
   "classifications": ["Solution"],
   "name": "Solution File",
   "groupIdentity": "ItemSolution",
+  "precedence": "100",
   "identity": "Microsoft.Standard.QuickStarts.Solution",
   "shortName": "sln",
   "sourceName": "Solution1",

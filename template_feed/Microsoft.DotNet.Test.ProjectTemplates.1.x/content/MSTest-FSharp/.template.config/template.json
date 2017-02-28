@@ -3,6 +3,7 @@
   "classifications": ["Test", "MSTest"],
   "name": "Unit Test Project",
   "groupIdentity": "Microsoft.Test.MSTest",
+  "precedence": "100",
   "identity": "Microsoft.Test.MSTest.FSharp",
   "shortName": "mstest",
   "tags": {

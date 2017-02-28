@@ -3,6 +3,7 @@
   "classifications": ["Test", "xUnit"],
   "name": "xUnit Test Project",
   "groupIdentity": "Microsoft.Test.xUnit",
+  "precedence": "200",
   "identity": "Microsoft.Test.xUnit.FSharp.2.0",
   "shortName": "xunit",
   "tags": {
