@@ -148,7 +148,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration.Tests
         {
             var testDirectory = Temp.CreateDirectory().Path;
             var testPJ = new ProjectJsonBuilder(TestAssets)
-                .FromTestAssetBase("TestAppWithMultipleFullFrameworksOnly")
+                .FromTestAssetBase("AppWith4netTfm0Rid")
                 .SaveToDisk(testDirectory);
 
             var projectContexts = ProjectContext.CreateContextForEachFramework(testDirectory);
