@@ -638,15 +638,14 @@ namespace Microsoft.Build.UnitTests
         }
 
         internal static void BuildProjectExpectSuccess
-           (
-           string projectContents,
-            ILogger logger
-           )
+            (
+            string projectContents,
+            params ILogger[] loggers
+            )
         {
-            Project project = ObjectModelHelpers.CreateInMemoryProject(projectContents, logger);
-
-            bool success = project.Build(logger);
-            Assert.True(success); // "Build failed.  See Standard Out tab for details"
+            Project project = CreateInMemoryProject(projectContents, logger: null); // logger is null so we take care of loggers ourselves
+            bool success = project.Build(loggers);
+            Assert.True(success);
         }
 
         /// <summary>
