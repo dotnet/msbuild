@@ -73,4 +73,32 @@
           DepsFile="$(SdkOutputDirectory)/%(BundledTools.Identity).deps.json"
           NewName="%(BundledTools.Identity).deps.json" />
   </Target>
+
+  <Target Name="PublishMSBuildExtensions"
+          AfterTargets="Publish"
+          BeforeTargets="GenerateCliRuntimeConfigurationFiles">
+    
+      <Copy SourceFiles="@(MSBuildExtensionsContent)"
+            DestinationFolder="$(PublishDir)/%(RecursiveDir)" />
+
+      <PropertyGroup>
+        <MSBuildTargetsDirectory>$(PublishDir)/runtimes/any/native</MSBuildTargetsDirectory>
+      </PropertyGroup>
+
+      <ItemGroup>
+        <NuPkgContentForMSBuildExtensions Include="$(MSBuildTargetsDirectory)/**/*.targets;
+                                                   $(MSBuildTargetsDirectory)/**/*.props;
+                                                   $(MSBuildTargetsDirectory)/**/*.overridetasks;
+                                                   $(MSBuildTargetsDirectory)/**/*.tasks" />
+
+        <NuPkgContentForMSBuildExtensionsRelativePaths Include="@(NuPkgContentForMSBuildExtensions->'runtimes/any/native/%(RecursiveDir)%(Filename)%(Extension)')" />
+      </ItemGroup>
+
+      <Move SourceFiles="@(NuPkgContentForMSBuildExtensions)"
+            DestinationFiles="@(NuPkgContentForMSBuildExtensions->'$(PublishDir)/%(RecursiveDir)%(Filename)%(Extension)')" />
+
+      <RemoveAssetFromDepsPackages DepsFile="$(PublishDir)/$(TargetName).deps.json"
+                                   SectionName="runtimeTargets"
+                                   AssetPath="%(NuPkgContentForMSBuildExtensionsRelativePaths.Identity)" />
+  </Target>
 </Project>

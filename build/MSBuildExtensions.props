@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup>
+    <MSBuildImportsDir>$(RepoRoot)/resources/MSBuildImports</MSBuildImportsDir>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <MSBuildExtensionsContent Include="$(MSBuildImportsDir)/**/*" />
+  </ItemGroup>
+</Project>
