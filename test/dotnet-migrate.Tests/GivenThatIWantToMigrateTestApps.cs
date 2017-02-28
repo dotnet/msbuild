@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.Migration.Tests
         }
 
         [WindowsOnlyTheory]
-        [InlineData("TestAppMultipleFrameworksNoRuntimes", null)]
+        [InlineData("AppWith2Tfm0Rid", null)]
         [InlineData("TestAppWithMultipleFullFrameworksOnly", "net461")]
         public void ItMigratesAppsWithFullFramework(string projectName, string framework)
         {
