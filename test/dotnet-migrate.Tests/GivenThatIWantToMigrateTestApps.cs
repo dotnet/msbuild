@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.Migration.Tests
 
         [WindowsOnlyTheory]
         [InlineData("AppWith2Tfm0Rid", null)]
-        [InlineData("TestAppWithMultipleFullFrameworksOnly", "net461")]
+        [InlineData("AppWith4netTfm0Rid", "net461")]
         public void ItMigratesAppsWithFullFramework(string projectName, string framework)
         {
             var projectDirectory = TestAssets
