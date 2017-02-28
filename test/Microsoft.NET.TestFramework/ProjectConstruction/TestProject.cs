@@ -18,10 +18,16 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
         //  Applies to SDK Projects
         public string TargetFrameworks { get; set; }
 
+        public string RuntimeFrameworkVersion { get; set; }
+
+        public string RuntimeIdentifier { get; set; }
+
         //  TargetFrameworkVersion applies to non-SDK projects
         public string TargetFrameworkVersion { get; set; }
 
         public List<TestProject> ReferencedProjects { get; } = new List<TestProject>();
+
+        public List<string> References { get; } = new List<string>();
 
         public Dictionary<string, string> SourceFiles { get; } = new Dictionary<string, string>();
 
@@ -129,6 +135,16 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                     propertyGroup.Add(new XElement(ns + "TargetFramework", this.TargetFrameworks));
                 }
 
+                if (!string.IsNullOrEmpty(this.RuntimeFrameworkVersion))
+                {
+                    propertyGroup.Add(new XElement(ns + "RuntimeFrameworkVersion", this.RuntimeFrameworkVersion));
+                }
+
+                if (!string.IsNullOrEmpty(this.RuntimeIdentifier))
+                {
+                    propertyGroup.Add(new XElement(ns + "RuntimeIdentifier", this.RuntimeIdentifier));
+                }
+
                 if (this.IsExe && targetFrameworks.Any(identifier => GetShortTargetFrameworkIdentifier(identifier).Equals("net", StringComparison.OrdinalIgnoreCase)))
                 {
                     propertyGroup.Add(new XElement(ns + "RuntimeIdentifier", "win7-x86"));
@@ -163,6 +179,23 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                 {
                     projectReferenceItemGroup.Add(new XElement(ns + "ProjectReference",
                         new XAttribute("Include", $"../{referencedProject.Name}/{referencedProject.Name}.csproj")));
+                }
+            }
+
+            if (this.References.Any())
+            {
+                var referenceItemGroup = projectXml.Root.Elements(ns + "ItemGroup")
+                    .FirstOrDefault(itemGroup => itemGroup.Elements(ns + "Reference").Count() > 0);
+                if (referenceItemGroup == null)
+                {
+                    referenceItemGroup = new XElement(ns + "ItemGroup");
+                    packageReferenceItemGroup.AddBeforeSelf(referenceItemGroup);
+                }
+
+                foreach (var reference in References)
+                {
+                    referenceItemGroup.Add(new XElement(ns + "Reference",
+                        new XAttribute("Include", reference)));
                 }
             }
 

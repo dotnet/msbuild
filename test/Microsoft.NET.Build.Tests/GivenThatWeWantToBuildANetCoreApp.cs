@@ -35,27 +35,15 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "SharedFrameworkTest",
                 TargetFrameworks = targetFramework,
+                RuntimeFrameworkVersion = runtimeFrameworkVersion,
                 IsSdkProject = true,
                 IsExe = true
             };
 
             string testIdentifier = string.Join("_", targetFramework, runtimeFrameworkVersion ?? "null");
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, nameof(It_targets_the_right_shared_framework), testIdentifier);
-
-            testAsset = testAsset.WithProjectChanges(project =>
-            {
-                var ns = project.Root.Name.Namespace;
-                var propertyGroup = new XElement(ns + "PropertyGroup");
-                project.Root.Add(propertyGroup);
-
-                if (runtimeFrameworkVersion != null)
-                {
-                    propertyGroup.Add(new XElement(ns + "RuntimeFrameworkVersion", runtimeFrameworkVersion));
-                }
-            });
-
-            testAsset = testAsset.Restore(testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, nameof(It_targets_the_right_shared_framework), testIdentifier)
+                .Restore(testProject.Name);
 
             var buildCommand = new BuildCommand(Stage0MSBuild, Path.Combine(testAsset.TestRoot, testProject.Name));
 

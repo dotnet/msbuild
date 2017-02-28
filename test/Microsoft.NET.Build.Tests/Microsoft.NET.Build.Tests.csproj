@@ -6,6 +6,7 @@
     <ProjectGuid>{EC640B7E-332E-40A2-BB6E-5B7EC788F315}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
+    <AssemblyName>Microsoft.NET.Build.Tests</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetFramework>netstandard1.6</TargetFramework>
     <PackageTargetFallback>dotnet5.4;portable-net451+win8</PackageTargetFallback>

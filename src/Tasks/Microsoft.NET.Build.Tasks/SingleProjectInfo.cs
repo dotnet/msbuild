@@ -92,12 +92,9 @@ namespace Microsoft.NET.Build.Tasks
                 SingleProjectInfo referenceProjectInfo;
                 if (projectReferences.TryGetValue(sourceProjectFile, out referenceProjectInfo))
                 {
-                    string destinationSubDirectory = projectReferenceSatellitePath.GetMetadata("DestinationSubDirectory");
-
-                    string culture = destinationSubDirectory.Trim('\\', '/');
-                    string relativePath = Path.Combine(destinationSubDirectory, Path.GetFileName(projectReferenceSatellitePath.ItemSpec));
-
-                    referenceProjectInfo._resourceAssemblies.Add(new ResourceAssemblyInfo(culture, relativePath));
+                    ResourceAssemblyInfo resourceAssemblyInfo =
+                        ResourceAssemblyInfo.CreateFromReferenceSatellitePath(projectReferenceSatellitePath);
+                    referenceProjectInfo._resourceAssemblies.Add(resourceAssemblyInfo);
                 }
             }
 

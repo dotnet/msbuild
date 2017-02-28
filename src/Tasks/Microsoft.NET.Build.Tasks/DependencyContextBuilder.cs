@@ -21,6 +21,7 @@ namespace Microsoft.NET.Build.Tasks
         private readonly SingleProjectInfo _mainProjectInfo;
         private readonly ProjectContext _projectContext;
         private IEnumerable<ReferenceInfo> _frameworkReferences;
+        private IEnumerable<ReferenceInfo> _directReferences;
         private Dictionary<string, SingleProjectInfo> _referenceProjectInfos;
         private IEnumerable<string> _privateAssetPackageIds;
         private CompilationOptions _compilationOptions;
@@ -40,6 +41,12 @@ namespace Microsoft.NET.Build.Tasks
             // note: Framework libraries only export compile-time stuff
             // since they assume the runtime library is present already
             _frameworkReferences = frameworkReferences;
+            return this;
+        }
+
+        public DependencyContextBuilder WithDirectReferences(IEnumerable<ReferenceInfo> directReferences)
+        {
+            _directReferences = directReferences;
             return this;
         }
 
@@ -93,7 +100,8 @@ namespace Microsoft.NET.Build.Tasks
                 dependencyLookup);
             IEnumerable<RuntimeLibrary> runtimeLibraries =
                 new[] { projectRuntimeLibrary }
-                .Concat(GetLibraries(runtimeExports, libraryLookup, dependencyLookup, runtime: true).Cast<RuntimeLibrary>());
+                .Concat(GetLibraries(runtimeExports, libraryLookup, dependencyLookup, runtime: true).Cast<RuntimeLibrary>())
+                .Concat(GetDirectReferenceRuntimeLibraries());
 
             IEnumerable<CompilationLibrary> compilationLibraries;
             if (includeCompilationLibraries)
@@ -105,7 +113,8 @@ namespace Microsoft.NET.Build.Tasks
                 compilationLibraries =
                     new[] { projectCompilationLibrary }
                     .Concat(GetFrameworkLibraries())
-                    .Concat(GetLibraries(compilationExports, libraryLookup, dependencyLookup, runtime: false).Cast<CompilationLibrary>());
+                    .Concat(GetLibraries(compilationExports, libraryLookup, dependencyLookup, runtime: false).Cast<CompilationLibrary>())
+                    .Concat(GetDirectReferenceCompilationLibraries());
             }
             else
             {
@@ -165,6 +174,15 @@ namespace Microsoft.NET.Build.Tasks
                 }
             }
 
+            var referenceInfos = Enumerable.Concat(
+                _frameworkReferences ?? Enumerable.Empty<ReferenceInfo>(),
+                _directReferences ?? Enumerable.Empty<ReferenceInfo>());
+
+            foreach (ReferenceInfo referenceInfo in referenceInfos)
+            {
+                dependencies.Add(new Dependency(referenceInfo.Name, referenceInfo.Version));
+            }
+
             return dependencies;
         }
 
@@ -173,15 +191,9 @@ namespace Microsoft.NET.Build.Tasks
             ProjectContext projectContext,
             Dictionary<string, Dependency> dependencyLookup)
         {
-
             RuntimeAssetGroup[] runtimeAssemblyGroups = new[] { new RuntimeAssetGroup(string.Empty, projectInfo.OutputName) };
 
             List<Dependency> dependencies = GetProjectDependencies(projectContext, dependencyLookup);
-
-            ResourceAssembly[] resourceAssemblies = projectInfo
-                .ResourceAssemblies
-                .Select(r => new ResourceAssembly(r.RelativePath, r.Culture))
-                .ToArray();
 
             return new RuntimeLibrary(
                 type: "project",
@@ -190,7 +202,7 @@ namespace Microsoft.NET.Build.Tasks
                 hash: string.Empty,
                 runtimeAssemblyGroups: runtimeAssemblyGroups,
                 nativeLibraryGroups: new RuntimeAssetGroup[] { },
-                resourceAssemblies: resourceAssemblies,
+                resourceAssemblies: CreateResourceAssemblies(projectInfo.ResourceAssemblies),
                 dependencies: dependencies.ToArray(),
                 serviceable: false);
         }
@@ -352,9 +364,7 @@ namespace Microsoft.NET.Build.Tasks
             if (targetLibrary.Type == "project")
             {
                 EnsureProjectInfo(referenceProjectInfo, targetLibrary.Name);
-                return referenceProjectInfo
-                    .ResourceAssemblies
-                    .Select(r => new ResourceAssembly(r.RelativePath, r.Culture));
+                return CreateResourceAssemblies(referenceProjectInfo.ResourceAssemblies);
             }
             else
             {
@@ -415,6 +425,44 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             return Path.GetFileName(fullPath);
+        }
+
+        private IEnumerable<RuntimeLibrary> GetDirectReferenceRuntimeLibraries()
+        {
+            return _directReferences
+                ?.Select(r => new RuntimeLibrary(
+                    type: "reference",
+                    name: r.Name,
+                    version: r.Version,
+                    hash: string.Empty,
+                    runtimeAssemblyGroups: new[] { new RuntimeAssetGroup(string.Empty, r.FileName) },
+                    nativeLibraryGroups: new RuntimeAssetGroup[] { },
+                    resourceAssemblies: CreateResourceAssemblies(r.ResourceAssemblies),
+                    dependencies: Enumerable.Empty<Dependency>(),
+                    serviceable: false))
+                ??
+                Enumerable.Empty<RuntimeLibrary>();
+        }
+
+        private IEnumerable<CompilationLibrary> GetDirectReferenceCompilationLibraries()
+        {
+            return _directReferences
+                ?.Select(r => new CompilationLibrary(
+                    type: "reference",
+                    name: r.Name,
+                    version: r.Version,
+                    hash: string.Empty,
+                    assemblies: new[] { r.FileName },
+                    dependencies: Enumerable.Empty<Dependency>(),
+                    serviceable: false))
+                ??
+                Enumerable.Empty<CompilationLibrary>();
+        }
+
+        private static IEnumerable<ResourceAssembly> CreateResourceAssemblies(IEnumerable<ResourceAssemblyInfo> resourceAssemblyInfos)
+        {
+            return resourceAssemblyInfos
+                .Select(r => new ResourceAssembly(r.RelativePath, r.Culture));
         }
 
         private static void EnsureProjectInfo(SingleProjectInfo referenceProjectInfo, string libraryName)
