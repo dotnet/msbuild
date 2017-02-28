@@ -87,7 +87,6 @@
 
       <ItemGroup>
         <NuPkgContentForMSBuildExtensions Include="$(MSBuildTargetsDirectory)/**/*.targets;
-                                                   $(MSBuildTargetsDirectory)/**/*.Targets;
                                                    $(MSBuildTargetsDirectory)/**/*.props;
                                                    $(MSBuildTargetsDirectory)/**/*.overridetasks;
                                                    $(MSBuildTargetsDirectory)/**/*.tasks" />
