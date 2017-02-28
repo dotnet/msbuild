@@ -15,7 +15,7 @@ namespace Microsoft.Build.Logging
     /// </summary>
     public class BinaryLogger : ILogger
     {
-        private const int FileFormatVersion = 1;
+        internal const int FileFormatVersion = 1;
 
         private Stream stream;
         private BinaryWriter binaryWriter;
@@ -59,7 +59,7 @@ namespace Microsoft.Build.Logging
             binaryWriter = new BinaryWriter(stream);
             eventArgsWriter = new BuildEventArgsWriter(binaryWriter);
 
-            binaryWriter.Write((byte)FileFormatVersion);
+            binaryWriter.Write(FileFormatVersion);
 
             eventSource.AnyEventRaised += EventSource_AnyEventRaised;
         }

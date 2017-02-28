@@ -23,7 +23,15 @@ namespace Microsoft.Build.Logging
                 var gzipStream = new GZipStream(stream, CompressionMode.Decompress, leaveOpen: true);
                 var binaryReader = new BinaryReader(gzipStream);
 
-                byte fileFormatVersion = binaryReader.ReadByte();
+                int fileFormatVersion = binaryReader.ReadInt32();
+
+                // the log file is written using a newer version of file format
+                // that we don't know how to read
+                if (fileFormatVersion > BinaryLogger.FileFormatVersion)
+                {
+                    var text = ResourceUtilities.FormatResourceString("UnsupportedLogFileFormat", fileFormatVersion, BinaryLogger.FileFormatVersion);
+                    throw new NotSupportedException(text);
+                }
 
                 var reader = new BuildEventArgsReader(binaryReader);
                 while (true)

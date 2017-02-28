@@ -1193,6 +1193,10 @@
     <value>MSB4068: The element &lt;{0}&gt; is unrecognized, or not supported in this context.</value>
     <comment>{StrBegin="MSB4068: "}</comment>
   </data>
+  <data name="UnsupportedLogFileFormat" UESanitized="false" Visibility="Public">
+    <value>MSB4235: The log file format version is {0}, whereas this version of MSBuild only supports versions up to {1}.</value>
+    <comment>{StrBegin="MSB4235: "}</comment>
+  </data>
   <data name="UnsupportedTaskParameterTypeError" UESanitized="false" Visibility="Public">
     <value>MSB4069: The "{0}" type of the "{1}" parameter of the "{2}" task is not supported by MSBuild.</value>
     <comment>{StrBegin="MSB4069: "}LOCALIZATION: "MSBuild" should not be localized.</comment>
@@ -1593,7 +1597,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
         MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
         MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
 
-        Next message code should be MSB4235.
+        Next message code should be MSB4236.
               
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>
