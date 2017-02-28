@@ -48,9 +48,17 @@
   <Target Name="PublishVersionFile"
           BeforeTargets="Publish">
 
-    <WriteLinesToFile File="$(SdkOutputDirectory)/.version"
+    <WriteLinesToFile File="$(PublishDir)/.version"
                       Lines="$(CommitHash);$(SdkVersion);$(Rid)"
                       Overwrite="true" />
+  </Target>
+
+  <Target Name="PublishRoslyn"
+          BeforeTargets="Publish">
+          
+    <DotNetPublish ToolPath="$(Stage0Directory)"
+                   Configuration="$(Configuration)"
+                   ProjectPath="$(SrcDirectory)/tool_roslyn/tool_roslyn.csproj" />
   </Target>
 
   <Target Name="GenerateCliRuntimeConfigurationFiles"
@@ -60,17 +68,17 @@
                                  AssetPath="%(BundledToolProjects.Identity).dll" />
 
     <Copy SourceFiles="$(PublishDir)/$(TargetName).deps.json"
-          DestinationFiles="$(SdkOutputDirectory)/%(BundledTools.Identity).deps.json" />
+          DestinationFiles="$(PublishDir)/%(BundledTools.Identity).deps.json" />
 
     <Copy SourceFiles="$(PublishDir)/$(TargetName).runtimeconfig.json"
-          DestinationFiles="$(SdkOutputDirectory)/%(BundledTools.Identity).runtimeconfig.json" />
+          DestinationFiles="$(PublishDir)/%(BundledTools.Identity).runtimeconfig.json" />
 
     <Delete Files="$(PublishDir)/$(TargetName).deps.json;
                    $(PublishDir)/$(TargetName).runtimeconfig.json;
                    $(PublishDir)/%(BundledToolProjects.Identity).dll" />
 
     <ChangeEntryPointLibraryName
-          DepsFile="$(SdkOutputDirectory)/%(BundledTools.Identity).deps.json"
+          DepsFile="$(PublishDir)/%(BundledTools.Identity).deps.json"
           NewName="%(BundledTools.Identity).deps.json" />
   </Target>
 
@@ -100,5 +108,56 @@
       <RemoveAssetFromDepsPackages DepsFile="$(PublishDir)/$(TargetName).deps.json"
                                    SectionName="runtimeTargets"
                                    AssetPath="%(NuPkgContentForMSBuildExtensionsRelativePaths.Identity)" />
+  </Target>
+
+  <Target Name="CrossgenPublishDir"
+          Condition=" '$(DISABLE_CROSSGEN)' == '' "
+          AfterTargets="PublishMSBuildExtensions">
+    <ItemGroup>
+      <NETCore10Assemblies Include="$(PublishDir)/System.ComponentModel.Primitives.dll;
+                                    $(PublishDir)/System.Collections.Specialized.dll;
+                                    $(PublishDir)/System.Collections.NonGeneric.dll;
+                                    $(PublishDir)/System.Private.DataContractSerialization.dll" />
+    </ItemGroup>
+
+    <!-- Move these "1.0" assemblies that TestPlatform lays down out of the way so crossgen doesn't pick them up.
+          We need https://github.com/dotnet/cli/issues/5464 fixed, so test platform is in a separate directory -->
+    <Move SourceFiles="@(NETCore10Assemblies)"
+          DestinationFiles="@(NETCore10Assemblies->'$(PublishDir)/%(Filename)%(Extension).bak')" />
+
+    <ItemGroup>
+      <!-- Removing Full CLR built TestHost assemblies from getting Crossgen as it is throwing error -->
+      <SdkFiles Include="$(PublishDir)/**/*" Exclude="$(PublishDir)/TestHost*/**/*;$(PublishDir)/Sdks/**/*" />
+    </ItemGroup>
+
+    <AddMetadataIsPE Items="@(SdkFiles)">
+      <Output TaskParameter="ResultItems" ItemName="SdkFilesWithPEMarker" />
+    </AddMetadataIsPE>
+
+    <ItemGroup>
+      <CrossgenTargets Include="%(SdkFilesWithPEMarker.FullPath)" Condition=" '%(SdkFilesWithPEMarker.IsPE)' == 'True' " />
+    </ItemGroup>
+
+    <RemoveDuplicates Inputs="@(SdkFiles->'%(RootDir)%(Directory)')">
+      <Output TaskParameter="Filtered" ItemName="PublishDirSubDirectories" />
+    </RemoveDuplicates>
+
+    <!-- Ensure crossgen tool is executable.  See https://github.com/NuGet/Home/issues/4424 -->
+    <Chmod Condition=" '$(OSName)' != 'win' "
+            File="$(CrossgenPath)"
+            Mode="u+x" />
+
+    <Crossgen SourceAssembly="%(CrossgenTargets.FullPath)"
+              DestinationPath="%(CrossgenTargets.FullPath)"
+              JITPath="$(LibCLRJitPath)"
+              CrossgenPath="$(CrossgenPath)"
+              ReadyToRun="True"
+              PlatformAssemblyPaths="@(PlatformAssemblies);
+                                     @(PublishDirSubDirectories);
+                                     $(SharedFrameworkNameVersionPath)" />
+
+    <!-- Move the "1.0" assemblies back -->
+    <Move SourceFiles="@(NETCore10Assemblies->'$(PublishDir)/%(Filename)%(Extension).bak')"
+          DestinationFiles="@(NETCore10Assemblies)" />
   </Target>
 </Project>

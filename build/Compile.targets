@@ -2,13 +2,6 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="compile/LzmaArchive.targets" />
 
-  <PropertyGroup>
-    <RuntimeNETCoreAppPackageName>runtime.$(CoreCLRRid).microsoft.netcore.app</RuntimeNETCoreAppPackageName>
-    <CrossgenPath>$(NuGetPackagesDir)/$(RuntimeNETCoreAppPackageName)/$(CLI_SharedFrameworkVersion)/tools/crossgen$(ExeExtension)</CrossgenPath>
-    <LibCLRJitPath>$(NuGetPackagesDir)/$(RuntimeNETCoreAppPackageName)/$(CLI_SharedFrameworkVersion)/runtimes/$(CoreCLRRid)/native/$(DynamicLibPrefix)clrjit$(DynamicLibExtension)</LibCLRJitPath>
-    <SharedFrameworkNameVersionPath>$(OutputDirectory)/shared/$(SharedFrameworkName)/$(SharedFrameworkVersion)</SharedFrameworkNameVersionPath>
-  </PropertyGroup>
-
   <ItemGroup>
     <PublishOutputExtensions Include="$(ExeExtension);.dll;.pdb;.deps.json;.runtimeconfig.json" />
   </ItemGroup>
@@ -29,112 +22,47 @@
                    Configuration="$(Configuration)"
                    ProjectPath="$(RootProject)" />
 
-    <!-- Publish Roslyn -->
-    <DotNetPublish ToolPath="$(Stage0Directory)"
-                   Configuration="$(Configuration)"
-                   ProjectPath="$(SrcDirectory)/tool_roslyn/tool_roslyn.csproj" />
+    <!-- Corehostify Binaries -->
+    <ItemGroup Condition=" '$(OSName)' != 'win' ">
+      <SdkOutputChmodTargets Remove="*" />
+      <SdkOutputChmodTargets Include="$(SdkOutputDirectory)/**/*.exe;
+                                    $(SdkOutputDirectory)/**/*.dll" >
+        <!-- Managed assemblies do not need execute -->
+        <Mode>u=rw,g=r,o=r</Mode>
+      </SdkOutputChmodTargets>
 
-      <!-- copy core sdk -->
-      <Copy SourceFiles="@(MSBuildImportsContent)"
-            DestinationFolder="$(SdkOutputDirectory)/%(RecursiveDir)" />
+      <SdkOutputChmodTargets Include="$(SdkOutputDirectory)/**/*.dylib;
+                                    $(SdkOutputDirectory)/**/*.so" >
+        <!-- Generally, dylibs and sos have 'x' -->
+        <Mode>u=rwx,g=rx,o=rx</Mode>
+      </SdkOutputChmodTargets>
 
-      <ItemGroup>
-        <NETCore10Assemblies Include="$(SdkOutputDirectory)/System.ComponentModel.Primitives.dll;
-                                      $(SdkOutputDirectory)/System.Collections.Specialized.dll;
-                                      $(SdkOutputDirectory)/System.Collections.NonGeneric.dll;
-                                      $(SdkOutputDirectory)/System.Private.DataContractSerialization.dll" />
-      </ItemGroup>
+      <SdkOutputChmodTargets Include="$(SdkOutputDirectory)/**/*"
+                            Exclude="$(SdkOutputDirectory)/**/*.*" >
+        <!-- Executables need x -->
+        <Mode>u=rwx,g=rx,o=rx</Mode>
+      </SdkOutputChmodTargets>
+    </ItemGroup>
 
-      <!-- Move these "1.0" assemblies that TestPlatform lays down out of the way so crossgen doesn't pick them up.
-           We need https://github.com/dotnet/cli/issues/5464 fixed, so test platform is in a separate directory -->
-      <Move SourceFiles="@(NETCore10Assemblies)"
-            DestinationFiles="@(NETCore10Assemblies->'$(SdkOutputDirectory)/%(Filename)%(Extension).bak')" />
+    <Chmod Condition=" '$(OSName)' != 'win' "
+            File="%(SdkOutputChModTargets.FullPath)"
+            Mode="%(SdkOutputChModTargets.Mode)" />
 
-      <!-- Crossgen the CLI -->
-      <ItemGroup>
-        <SdkFiles Remove="*" />
+    <ItemGroup>
+      <FilesToClean Include="$(OutputDirectory)/sdk/**/vbc.exe" />
+    </ItemGroup>
 
-        <!-- Removing Full CLR built TestHost assemblies from getting Crossgen as it is throwing error -->
-        <SdkFilesExclude Include="$(SdkOutputDirectory)/TestHost*/**/*" />
-        <SdkFiles Include="$(SdkOutputDirectory)/**/*" Exclude="@(SdkFilesExclude)" />
-        <SdkFilesWithPEMarker Remove="*" />
-      </ItemGroup>
+    <Delete Files="@(FilesToClean)" />
 
-      <AddMetadataIsPE Items="@(SdkFiles)">
-        <Output TaskParameter="ResultItems" ItemName="SdkFilesWithPEMarker" />
-      </AddMetadataIsPE>
+    <ItemGroup>
+      <FilesToCopy Include="$(OutputDirectory)/**/*" />
+      <PdbsToClean Include="$(OutputDirectory)/sdk/**/*.pdb" />
+    </ItemGroup>
 
-      <ItemGroup>
-        <CrossgenTargets Remove="*" />
-        <CrossgenTargets Include="%(SdkFilesWithPEMarker.FullPath)" Condition=" '%(SdkFilesWithPEMarker.IsPE)' == 'True' " />
+    <Copy SourceFiles="@(FilesToCopy)"
+        DestinationFiles="@(FilesToCopy->'$(SymbolsDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
-        <CompileStageSdkDirectories Remove="*" />
-      </ItemGroup>
-
-      <RemoveDuplicates Inputs="@(SdkFiles->'%(RootDir)%(Directory)')">
-        <Output TaskParameter="Filtered" ItemName="CompileStageSdkDirectories" />
-      </RemoveDuplicates>
-
-      <!-- Ensure crossgen tool is executable.  See https://github.com/NuGet/Home/issues/4424 -->
-      <Chmod Condition=" '$(OSName)' != 'win' And '$(DISABLE_CROSSGEN)' != '1' "
-             File="$(CrossgenPath)"
-             Mode="u+x" />
-
-      <Crossgen Condition=" '$(DISABLE_CROSSGEN)' != '1' "
-                SourceAssembly="%(CrossgenTargets.FullPath)"
-                DestinationPath="%(CrossgenTargets.FullPath)"
-                JITPath="$(LibCLRJitPath)"
-                CrossgenPath="$(CrossgenPath)"
-                ReadyToRun="True"
-                PlatformAssemblyPaths="@(PlatformAssemblies);
-                                       @(CompileStageSdkDirectories);
-                                       $(SharedFrameworkNameVersionPath)" />
-
-      <!-- Corehostify Binaries -->
-      <ItemGroup Condition=" '$(OSName)' != 'win' ">
-        <SdkOutputChmodTargets Remove="*" />
-        <SdkOutputChmodTargets Include="$(SdkOutputDirectory)/**/*.exe;
-                                      $(SdkOutputDirectory)/**/*.dll" >
-          <!-- Managed assemblies do not need execute -->
-          <Mode>u=rw,g=r,o=r</Mode>
-        </SdkOutputChmodTargets>
-
-        <SdkOutputChmodTargets Include="$(SdkOutputDirectory)/**/*.dylib;
-                                      $(SdkOutputDirectory)/**/*.so" >
-          <!-- Generally, dylibs and sos have 'x' -->
-          <Mode>u=rwx,g=rx,o=rx</Mode>
-        </SdkOutputChmodTargets>
-
-        <SdkOutputChmodTargets Include="$(SdkOutputDirectory)/**/*"
-                             Exclude="$(SdkOutputDirectory)/**/*.*" >
-          <!-- Executables need x -->
-          <Mode>u=rwx,g=rx,o=rx</Mode>
-        </SdkOutputChmodTargets>
-      </ItemGroup>
-
-      <Chmod Condition=" '$(OSName)' != 'win' "
-             File="%(SdkOutputChModTargets.FullPath)"
-             Mode="%(SdkOutputChModTargets.Mode)" />
-
-      <!-- Move the "1.0" assemblies back -->
-      <Move SourceFiles="@(NETCore10Assemblies->'$(SdkOutputDirectory)/%(Filename)%(Extension).bak')"
-            DestinationFiles="@(NETCore10Assemblies)" />
-
-      <ItemGroup>
-        <FilesToClean Include="$(OutputDirectory)/sdk/**/vbc.exe" />
-      </ItemGroup>
-
-      <Delete Files="@(FilesToClean)" />
-
-      <ItemGroup>
-        <FilesToCopy Include="$(OutputDirectory)/**/*" />
-        <PdbsToClean Include="$(OutputDirectory)/sdk/**/*.pdb" />
-      </ItemGroup>
-
-      <Copy SourceFiles="@(FilesToCopy)"
-          DestinationFiles="@(FilesToCopy->'$(SymbolsDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
-
-      <Delete Files="@(PdbsToClean)" />
+    <Delete Files="@(PdbsToClean)" />
   </Target>
 
   <Target Name="PublishSdks"
