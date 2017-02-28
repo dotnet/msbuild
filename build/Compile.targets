@@ -22,11 +22,6 @@
                    Configuration="$(Configuration)"
                    ProjectPath="$(RootProject)" />
 
-    <!-- Publish Roslyn -->
-    <DotNetPublish ToolPath="$(Stage0Directory)"
-                   Configuration="$(Configuration)"
-                   ProjectPath="$(SrcDirectory)/tool_roslyn/tool_roslyn.csproj" />
-
     <!-- Corehostify Binaries -->
     <ItemGroup Condition=" '$(OSName)' != 'win' ">
       <SdkOutputChmodTargets Remove="*" />

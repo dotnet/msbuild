@@ -53,6 +53,14 @@
                       Overwrite="true" />
   </Target>
 
+  <Target Name="PublishRoslyn"
+          BeforeTargets="Publish">
+          
+    <DotNetPublish ToolPath="$(Stage0Directory)"
+                   Configuration="$(Configuration)"
+                   ProjectPath="$(SrcDirectory)/tool_roslyn/tool_roslyn.csproj" />
+  </Target>
+
   <Target Name="GenerateCliRuntimeConfigurationFiles"
           AfterTargets="Publish">
     <RemoveAssetFromDepsPackages DepsFile="$(PublishDir)/$(TargetName).deps.json"
