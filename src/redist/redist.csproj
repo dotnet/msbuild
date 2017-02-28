@@ -95,11 +95,11 @@
         <NuPkgContentForMSBuildExtensionsRelativePaths Include="@(NuPkgContentForMSBuildExtensions->'runtimes/any/native/%(RecursiveDir)%(Filename)%(Extension)')" />
       </ItemGroup>
 
+      <Move SourceFiles="@(NuPkgContentForMSBuildExtensions)"
+            DestinationFiles="@(NuPkgContentForMSBuildExtensions->'$(SdkOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+
       <RemoveAssetFromDepsPackages DepsFile="$(PublishDir)/$(TargetName).deps.json"
                                    SectionName="runtimeTargets"
                                    AssetPath="%(NuPkgContentForMSBuildExtensionsRelativePaths.Identity)" />
-
-      <Move SourceFiles="@(NuPkgContentForMSBuildExtensions)"
-            DestinationFiles="@(NuPkgContentForMSBuildExtensions->'$(SdkOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 </Project>
