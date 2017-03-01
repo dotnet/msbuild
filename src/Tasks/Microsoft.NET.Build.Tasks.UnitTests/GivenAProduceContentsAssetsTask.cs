@@ -179,12 +179,16 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             var item = copyLocalItems.Where(t => t.ItemSpec.EndsWith(assetWritePath)).First();
             item.GetMetadata("TargetPath").Should().Be("samplepp.output.txt");
             item.GetMetadata(MetadataKeys.ParentPackage).Should().Be(package);
+            item.GetMetadata(MetadataKeys.PackageName).Should().Be("LibA");
+            item.GetMetadata(MetadataKeys.PackageVersion).Should().Be("1.2.3");
 
             for (int i = 1; i < 3; i++)
             {
                 item = copyLocalItems.Where(t => t.ItemSpec.EndsWith(contentFiles[i])).First();
                 item.GetMetadata("TargetPath").Should().Be(Path.Combine("output", contentFiles[i]));
                 item.GetMetadata(MetadataKeys.ParentPackage).Should().Be(package);
+                item.GetMetadata(MetadataKeys.PackageName).Should().Be("LibA");
+                item.GetMetadata(MetadataKeys.PackageVersion).Should().Be("1.2.3");
             }
 
             // not added to copy

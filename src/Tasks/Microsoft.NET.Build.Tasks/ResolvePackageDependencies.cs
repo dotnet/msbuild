@@ -184,11 +184,13 @@ namespace Microsoft.NET.Build.Tasks
             TaskItem item;
             foreach (var package in LockFile.Libraries)
             {
-                string packageId = $"{package.Name}/{package.Version.ToNormalizedString()}";
+                var packageName = package.Name;
+                var packageVersion = package.Version.ToNormalizedString();
+                string packageId = $"{packageName}/{packageVersion}";
                 item = new TaskItem(packageId);
-                item.SetMetadata(MetadataKeys.Name, package.Name);
+                item.SetMetadata(MetadataKeys.Name, packageName);
                 item.SetMetadata(MetadataKeys.Type, package.Type);
-                item.SetMetadata(MetadataKeys.Version, package.Version.ToNormalizedString());
+                item.SetMetadata(MetadataKeys.Version, packageVersion);
 
                 item.SetMetadata(MetadataKeys.Path, package.Path ?? string.Empty);
 
@@ -207,6 +209,8 @@ namespace Microsoft.NET.Build.Tasks
                     var fileKey = $"{packageId}/{file}";
                     var fileItem = new TaskItem(fileKey);
                     fileItem.SetMetadata(MetadataKeys.Path, file);
+                    fileItem.SetMetadata(MetadataKeys.PackageName, packageName);
+                    fileItem.SetMetadata(MetadataKeys.PackageVersion, packageVersion);
 
                     string resolvedPath = ResolveFilePath(file, resolvedPackagePath);
                     fileItem.SetMetadata(MetadataKeys.ResolvedPath, resolvedPath ?? string.Empty);
@@ -388,6 +392,8 @@ namespace Microsoft.NET.Build.Tasks
                     {
                         // NOTE: the path provided for framework assemblies is the name of the framework reference
                         item.SetMetadata("FrameworkAssembly", filePath);
+                        item.SetMetadata(MetadataKeys.PackageName, package.Name);
+                        item.SetMetadata(MetadataKeys.PackageVersion, package.Version.ToNormalizedString());
                     }
 
                     foreach (var property in properties)
