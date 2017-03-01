@@ -9,11 +9,11 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
 
         public const string AppDescription = "Command to add package reference";
 
-        public const string CmdPackageDescription = "Package references to add";
+        public const string CmdPackageDescription = "Package reference to add";
 
         public const string SpecifyExactlyOnePackageReference = "Please specify one package reference to add.";
 
-        public const string CmdFrameworkDescription = "Add reference only when targetting a specific framework";
+        public const string CmdFrameworkDescription = "Add reference only when targeting a specific framework";
 
         public const string CmdNoRestoreDescription = "Add reference without performing restore preview and compatibility check.";
 

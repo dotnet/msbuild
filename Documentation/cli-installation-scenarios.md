@@ -422,7 +422,7 @@ ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]
 
 Installing 1.1.0-567890 (RTM) which is incompatible since 1.0.2
 
-Note: User is unable to run apps targetting 1.0.1 or 1.0.2 until compatible version is installed.
+Note: User is unable to run apps targeting 1.0.1 or 1.0.2 until compatible version is installed.
 
 ```
 NOP HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.0-rc1=1
@@ -445,7 +445,7 @@ ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]
 
 Installing 1.0.0-rc2-123456 to a clean machine
 
-Note: User is unable to run apps targetting 1.0.0 until RTM is installed.
+Note: User is unable to run apps targeting 1.0.0 until RTM is installed.
 
 ```
 ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.0-rc1=1
@@ -455,7 +455,7 @@ ADD HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]
 
 Installing 1.0.1-rc1-234567
 
-Note: User is still unable to run apps targetting 1.0.0 until any 1.0.0+ RTM is installed.
+Note: User is still unable to run apps targeting 1.0.0 until any 1.0.0+ RTM is installed.
 
 ```
 NOP HKLM\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sdk\[REG_DWORD]1.0.0-rc1=1
