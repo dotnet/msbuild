@@ -67,7 +67,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.Tasks
 
             if (Directory.Exists(publishDir))
             {
-                Directory.Delete(publishDir);
+                Directory.Delete(publishDir, true);
             }
         }
 
@@ -139,7 +139,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.Tasks
 
             if (Directory.Exists(publishDir))
             {
-                Directory.Delete(publishDir);
+                Directory.Delete(publishDir, true);
             }
         }
 
@@ -188,7 +188,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.Tasks
 
             if (Directory.Exists(publishDir))
             {
-                Directory.Delete(publishDir);
+                Directory.Delete(publishDir, true);
             }
         }
     }

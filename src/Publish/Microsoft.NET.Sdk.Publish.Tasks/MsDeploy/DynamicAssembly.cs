@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -10,8 +12,35 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         public DynamicAssembly(string assemblyName, System.Version verToLoad, string publicKeyToken)
         {
             AssemblyFullName = string.Format(System.Globalization.CultureInfo.CurrentCulture, "{0}, Version={1}.{2}.0.0, Culture=neutral, PublicKeyToken={3}", assemblyName, verToLoad.Major, verToLoad.Minor, publicKeyToken);
-            Assembly = Assembly.Load(AssemblyFullName);
+            bool isAssemblyLoaded = false;
+            try
+            {
+                Assembly = Assembly.Load(AssemblyFullName);
+                isAssemblyLoaded = true;
+            }
+            catch (FileNotFoundException)
+            {
+            }
+
+            // if the assembly is not available in the gac, try to load it from the same path as task assembly.
+            if (!isAssemblyLoaded)
+            {
+                Assembly = Assembly.LoadFrom(Path.Combine(TaskAssemblyDirectory, assemblyName+".dll"));
+            }
+
             Version = verToLoad;
+        }
+
+
+        public static string TaskAssemblyDirectory
+        {
+            get
+            {
+                string codeBase = Assembly.GetExecutingAssembly().CodeBase;
+                UriBuilder uri = new UriBuilder(codeBase);
+                string path = Uri.UnescapeDataString(uri.Path);
+                return Path.GetDirectoryName(path);
+            }
         }
 
         public DynamicAssembly() { }

@@ -1,70 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
-    <WebSdkRootDir>..\..\..\</WebSdkRootDir>
-    <WebSourceDir>$(WebSdkRootDir)src\</WebSourceDir>
+    
+    <WebSdkRoot Condition="'$(WebSdkRoot)' == ''">..\..\..\</WebSdkRoot>
+    <WebSdkSource Condition="'$(WebSdkSource)' == '' ">$(WebSdkRoot)\src\</WebSdkSource>
+    <WebSdkTools Condition="'$(WebSdkTools)' == '' ">$(WebSdkRoot)\tools\</WebSdkTools>
+    
     <NuSpecFile>$(MSBuildProjectName).nuspec</NuSpecFile>
-    <OutputPath>$(WebSdkRootDir)bin\$(Configuration)\</OutputPath>
-    <IntermediateOutputPath>$(WebSdkRootDir)obj\$(Configuration)\</IntermediateOutputPath>
+    <OutputPath>$(WebSdkRoot)\bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>$(WebSdkRoot)\obj\$(Configuration)\</IntermediateOutputPath>
+    <RuntimeIdenfier Condition="'$(RuntimeIdenfier)' == ''">win7-x86</RuntimeIdenfier>
     <CoreSdkVersion Condition="'$(CoreSdkVersion)' ==''">1.0.0</CoreSdkVersion>
     <WebSdkVersion Condition="'$(WebSdkVersion)' ==''">$(CoreSdkVersion)</WebSdkVersion>
     <NuSpecProperties>CoreSdkVersion=$(CoreSdkVersion);WebSdkVersion=$(WebSdkVersion)</NuSpecProperties>
   </PropertyGroup>
   <ItemGroup>
-    <NuGetContent Include="$(WebSdkRootDir)\bin\$(Configuration)\net46\Microsoft.NET.Sdk.Publish.Tasks.dll" >
+    <NuGetContent Include="$(WebSdkRoot)\bin\$(Configuration)\net46\$(RuntimeIdenfier)\Microsoft.NET.Sdk.Publish.Tasks.dll" >
       <Destination>tools\net46</Destination>
     </NuGetContent>
-    <NuGetContent Include="$(WebSdkRootDir)\bin\$(Configuration)\net46\Newtonsoft.Json.dll" >
+    <NuGetContent Include="$(WebSdkRoot)\bin\$(Configuration)\net46\$(RuntimeIdenfier)\Newtonsoft.Json.dll" >
       <Destination>tools\net46</Destination>
+    </NuGetContent>
+    <NuGetContent Include="$(WebSdkTools)\WebDeploy\**\*.*" >
+      <Destination>tools\net46\%(RecursiveDir)%(Filename)%(Extension)</Destination>
     </NuGetContent>
 
-    <NuGetContent Include="$(WebSdkRootDir)\bin\$(Configuration)\netstandard1.3\Microsoft.NET.Sdk.Publish.Tasks.dll" >
+    <NuGetContent Include="$(WebSdkRoot)\bin\$(Configuration)\netstandard1.3\Microsoft.NET.Sdk.Publish.Tasks.dll" >
       <Destination>tools\netcoreapp1.0</Destination>
     </NuGetContent>
-    <NuGetContent Include="$(WebSdkRootDir)\bin\$(Configuration)\net46\Newtonsoft.Json.dll" >
+    <NuGetContent Include="$(WebSdkRoot)\bin\$(Configuration)\net46\$(RuntimeIdenfier)\Newtonsoft.Json.dll" >
       <Destination>tools\netcoreapp1.0</Destination>
     </NuGetContent>
     
-    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\ComputeTargets\*.*">
+    <NuGetContent Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\ComputeTargets\*.*">
       <Destination>build\netstandard1.0\ComputeTargets</Destination>
     </NuGetContent>
 
-    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\PublishTargets\*.*">
+    <NuGetContent Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\PublishTargets\*.*">
       <Destination>build\netstandard1.0\PublishTargets</Destination>
     </NuGetContent>
 
-    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\CopyTargets\*.*">
+    <NuGetContent Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\CopyTargets\*.*">
       <Destination>build\netstandard1.0\CopyTargets</Destination>
     </NuGetContent>
 
-    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\TransformTargets\*.*">
+    <NuGetContent Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\TransformTargets\*.*">
       <Destination>build\netstandard1.0\TransformTargets</Destination>
     </NuGetContent>
 
-    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\PublishProfiles\*.*">
+    <NuGetContent Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\PublishProfiles\*.*">
       <Destination>build\netstandard1.0\PublishProfiles</Destination>
     </NuGetContent>
 
-    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\DotNetCLIToolTargets\*.*">
+    <NuGetContent Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\DotNetCLIToolTargets\*.*">
       <Destination>build\netstandard1.0\DotNetCLIToolTargets</Destination>
     </NuGetContent>
 
-    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\Microsoft.NET.Sdk.Publish.props">
+    <NuGetContent Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\Microsoft.NET.Sdk.Publish.props">
       <Destination>build\netstandard1.0</Destination>
     </NuGetContent>
     
-    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\Microsoft.NET.Sdk.Publish.targets">
+    <NuGetContent Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\Microsoft.NET.Sdk.Publish.targets">
       <Destination>build\netstandard1.0</Destination>
     </NuGetContent>
 
-    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\Sdk.props">
+    <NuGetContent Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Targets\Sdk.props">
       <Destination>Sdk</Destination>
     </NuGetContent>
     
-    <NuGetContent Include="$(WebSourceDir)Publish\Microsoft.NET.Sdk.Publish.Targets\Sdk.targets">
+    <NuGetContent Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Targets\Sdk.targets">
       <Destination>Sdk</Destination>
     </NuGetContent>
     
   </ItemGroup>
-  <Import Project="$(WebSdkRootDir)tools\NuGet\NuGetProj.targets"/>
+  <Import Project="$(WebSdkRoot)\tools\NuGet\NuGetProj.targets"/>
 </Project>
