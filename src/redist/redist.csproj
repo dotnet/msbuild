@@ -121,7 +121,7 @@
           SdkLayoutDirectory=$(SdkOutputDirectory)/Sdks/%(BundledSdk.Identity);
           SdkPackageName=%(BundledSdk.Identity);
           SdkPackageVersion=%(BundledSdk.Version);
-          Stage0Directory=$(Stage0Directory);
+          Stage0Directory=$(Stage0Directory)
         </Properties>
       </SdksToBundle>
     </ItemGroup>
@@ -140,7 +140,7 @@
           TemplateLayoutDirectory=$(SdkOutputDirectory)/Templates;
           TemplatePackageName=%(BundledTemplate.Identity);
           TemplatePackageVersion=%(BundledTemplate.Version);
-          Stage0Directory=$(Stage0Directory);
+          Stage0Directory=$(Stage0Directory)
         </Properties>
       </TemplatesToBundle>
     </ItemGroup>
