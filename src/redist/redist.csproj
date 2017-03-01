@@ -178,4 +178,14 @@
 
     <Delete Files="@(_VbcPath)" />
   </Target>
+
+  <Target Name="CreateSymbolsDirectory"
+          AfterTargets="CrossgenPublishDir">
+    <ItemGroup>
+      <_AllSdkFiles Include="$(OutputDirectory)/**/*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(_AllSdkFiles)"
+        DestinationFiles="@(_AllSdkFiles->'$(SymbolsDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
 </Project>

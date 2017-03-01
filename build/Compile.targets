@@ -23,12 +23,8 @@
                    ProjectPath="$(RootProject)" />
 
     <ItemGroup>
-      <FilesToCopy Include="$(OutputDirectory)/**/*" />
       <PdbsToClean Include="$(OutputDirectory)/sdk/**/*.pdb" />
     </ItemGroup>
-
-    <Copy SourceFiles="@(FilesToCopy)"
-        DestinationFiles="@(FilesToCopy->'$(SymbolsDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
     <Delete Files="@(PdbsToClean)" />
   </Target>
