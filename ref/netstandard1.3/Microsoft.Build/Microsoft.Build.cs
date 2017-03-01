@@ -1327,6 +1327,14 @@ namespace Microsoft.Build.Execution
 }
 namespace Microsoft.Build.Logging
 {
+    public sealed partial class BinaryLogger : Microsoft.Build.Framework.ILogger
+    {
+        public BinaryLogger() { }
+        public string Parameters { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public Microsoft.Build.Framework.LoggerVerbosity Verbosity { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public void Initialize(Microsoft.Build.Framework.IEventSource eventSource) { }
+        public void Shutdown() { }
+    }
     public delegate void ColorResetter();
     public delegate void ColorSetter(System.ConsoleColor color);
     public partial class ConfigurableForwardingLogger : Microsoft.Build.Framework.IForwardingLogger, Microsoft.Build.Framework.ILogger, Microsoft.Build.Framework.INodeLogger

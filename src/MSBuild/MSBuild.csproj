@@ -18,6 +18,7 @@
     <RootNamespace>Microsoft.Build.CommandLine</RootNamespace>
     <AssemblyName>MSBuild</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
     <ApplicationManifest>MSBuild.exe.manifest</ApplicationManifest>
     <AppConfig>app.config</AppConfig>
     <!-- Temporary solution for
@@ -77,7 +78,7 @@
       <Link>FileUtilities.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="..\Shared\FileUtilities.GetFolderPath.cs" >
+    <Compile Include="..\Shared\FileUtilities.GetFolderPath.cs">
       <Link>FileUtilities.GetFolderPath.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
