@@ -173,19 +173,28 @@
   <Target Name="RemoveVbc"
           AfterTargets="CrossgenPublishDir">
     <ItemGroup>
-      <_VbcPath Include="$(OutputDirectory)/sdk/**/vbc.exe" />
+      <_VbcPath Include="$(PublishDir)/sdk/**/vbc.exe" />
     </ItemGroup>
 
     <Delete Files="@(_VbcPath)" />
   </Target>
 
   <Target Name="CreateSymbolsDirectory"
-          AfterTargets="CrossgenPublishDir">
+          AfterTargets="RemoveVbc">
     <ItemGroup>
-      <_AllSdkFiles Include="$(OutputDirectory)/**/*" />
+      <_AllSdkFiles Include="$(PublishDir)/**/*" />
     </ItemGroup>
 
     <Copy SourceFiles="@(_AllSdkFiles)"
         DestinationFiles="@(_AllSdkFiles->'$(SymbolsDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
+  <Target Name="RemovePdbsFromPublishDir"
+          AfterTargets="CreateSymbolsDirectory">
+    <ItemGroup>
+      <PdbsToClean Include="$(PublishDir)/sdk/**/*.pdb" />
+    </ItemGroup>
+
+    <Delete Files="@(PdbsToClean)" />
   </Target>
 </Project>

@@ -22,11 +22,6 @@
                    Configuration="$(Configuration)"
                    ProjectPath="$(RootProject)" />
 
-    <ItemGroup>
-      <PdbsToClean Include="$(OutputDirectory)/sdk/**/*.pdb" />
-    </ItemGroup>
-
-    <Delete Files="@(PdbsToClean)" />
   </Target>
 
   <Target Name="PublishSdks"
