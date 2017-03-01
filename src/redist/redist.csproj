@@ -161,15 +161,6 @@
           DestinationFiles="@(NETCore10Assemblies)" />
   </Target>
 
-  <Target Name="ChmodPublishDir"
-          AfterTargets="CrossgenPublishDir"
-          Condition=" '$(OSName)' != 'win' ">
-    
-    <Exec Command="find $(SdkOutputDirectory) -type d -exec chmod 755 {} \;" />
-    <Exec Command="find $(SdkOutputDirectory) -type f -exec chmod 644 {} \;" />
-    <Chmod Mode="755" Glob="$(SdkOutputDirectory)/Roslyn/RunCsc.sh" />
-  </Target>
-
   <Target Name="RemoveVbc"
           AfterTargets="CrossgenPublishDir">
     <ItemGroup>
@@ -177,6 +168,15 @@
     </ItemGroup>
 
     <Delete Files="@(_VbcPath)" />
+  </Target>
+
+  <Target Name="ChmodPublishDir"
+          AfterTargets="RemoveVbc"
+          Condition=" '$(OSName)' != 'win' ">
+    
+    <Exec Command="find $(SdkOutputDirectory) -type d -exec chmod 755 {} \;" />
+    <Exec Command="find $(SdkOutputDirectory) -type f -exec chmod 644 {} \;" />
+    <Chmod Mode="755" Glob="$(SdkOutputDirectory)/Roslyn/RunCsc.sh" />
   </Target>
 
   <Target Name="CreateSymbolsDirectory"
@@ -192,7 +192,7 @@
   <Target Name="RemovePdbsFromPublishDir"
           AfterTargets="CreateSymbolsDirectory">
     <ItemGroup>
-      <PdbsToClean Include="$(PublishDir)/sdk/**/*.pdb" />
+      <PdbsToClean Include="$(PublishDir)/**/*.pdb" />
     </ItemGroup>
 
     <Delete Files="@(PdbsToClean)" />
