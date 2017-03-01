@@ -46,15 +46,15 @@ namespace Microsoft.DotNet.Cli.Build
         {
             var badges = new Dictionary<string, bool>()
             {
-                { "Windows_x86", false },
-                { "Windows_x64", false },
-                { "Ubuntu_x64", false },
-                { "Ubuntu_16_04_x64", false },
-                { "RHEL_x64", false },
-                { "OSX_x64", false },
-                { "Debian_x64", false },
-                { "CentOS_x64", false },
-                { "Fedora_23_x64", false },
+                { "win_x86", false },
+                { "win_x64", false },
+                { "ubuntu_x64", false },
+                { "ubuntu_16_04_x64", false },
+                { "rhel_x64", false },
+                { "osx_x64", false },
+                { "debian_x64", false },
+                { "centos_x64", false },
+                { "fedora_23_x64", false },
                 { "openSUSE_13_2_x64", false }
             };
 
