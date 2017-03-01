@@ -23,15 +23,6 @@
         <dependency id="System.Threading" version="4.0.11" />
         <dependency id="System.Threading.Thread" version="4.0.0" />
       </group>
-      <group targetFramework=".NETFramework4.6">
-        <dependency id="System.Collections" version="4.0.11" />
-        <dependency id="System.Diagnostics.Debug" version="4.0.11" />
-        <dependency id="System.Globalization" version="4.0.11" />
-        <dependency id="System.Runtime" version="4.1.0" />
-        <dependency id="System.Runtime.InteropServices" version="4.1.0" />
-        <dependency id="System.Threading" version="4.0.11" />
-        <dependency id="System.Threading.Thread" version="4.0.0" />
-      </group>
     </dependencies>
   </metadata>
   <files>
