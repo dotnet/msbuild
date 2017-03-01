@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.tasks" />
-  
+  <Import Project="$(RepoRoot)/build/compile/LzmaArchive.targets" />
+
   <PropertyGroup>
     <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
     <TargetFramework>netcoreapp2.0</TargetFramework>
@@ -110,6 +111,51 @@
                                    AssetPath="%(NuPkgContentForMSBuildExtensionsRelativePaths.Identity)" />
   </Target>
 
+  <Target Name="PublishSdks"
+          AfterTargets="Publish">
+    <ItemGroup>
+      <SdksToBundle Include="$(RepoRoot)/build/BundledSdks.proj">
+        <Properties>
+          CLIBuildDll=$(CLIBuildDll);
+          NuGetPackagesDir=$(NuGetPackagesDir);
+          SdkLayoutDirectory=$(SdkOutputDirectory)/Sdks/%(BundledSdk.Identity);
+          SdkPackageName=%(BundledSdk.Identity);
+          SdkPackageVersion=%(BundledSdk.Version);
+          Stage0Directory=$(Stage0Directory);
+        </Properties>
+      </SdksToBundle>
+    </ItemGroup>
+
+    <MSBuild
+      BuildInParallel="False"
+      Projects="@(SdksToBundle)">
+    </MSBuild>
+  </Target>
+
+  <Target Name="PublishTemplates"
+          AfterTargets="Publish">
+    <ItemGroup>
+      <TemplatesToBundle Include="$(RepoRoot)/build/BundledTemplates.proj">
+        <Properties>
+          TemplateLayoutDirectory=$(SdkOutputDirectory)/Templates;
+          TemplatePackageName=%(BundledTemplate.Identity);
+          TemplatePackageVersion=%(BundledTemplate.Version);
+          Stage0Directory=$(Stage0Directory);
+        </Properties>
+      </TemplatesToBundle>
+    </ItemGroup>
+
+    <MSBuild
+      BuildInParallel="False"
+      Projects="@(TemplatesToBundle)">
+    </MSBuild>
+  </Target>
+
+  <Target Name="PublishLzmaArchive"
+          DependsOnTargets="GetNuGetPackagesArchive"
+          AfterTargets="Publish">
+  </Target>
+
   <Target Name="CrossgenPublishDir"
           Condition=" '$(DISABLE_CROSSGEN)' == '' "
           AfterTargets="PublishMSBuildExtensions">
@@ -164,7 +210,7 @@
   <Target Name="RemoveVbc"
           AfterTargets="CrossgenPublishDir">
     <ItemGroup>
-      <_VbcPath Include="$(PublishDir)/sdk/**/vbc.exe" />
+      <_VbcPath Include="$(PublishDir)/**/vbc.exe" />
     </ItemGroup>
 
     <Delete Files="@(_VbcPath)" />
