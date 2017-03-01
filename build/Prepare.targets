@@ -2,8 +2,6 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="Microsoft.DotNet.Cli.tasks" />
   <Import Project="prepare/CheckPrereqs.targets" />
-  <Import Project="BundledSdks.props" />
-  <Import Project="BundledTemplates.props" />
 
   <Target Name="Prepare"
           DependsOnTargets="Init;DownloadHostAndSharedFxArtifacts;RestoreSrcPackages;RestoreToolsPackages" />
