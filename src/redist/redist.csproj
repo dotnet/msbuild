@@ -162,7 +162,8 @@
   </Target>
 
   <Target Name="ChmodPublishDir"
-          AfterTargets="CrossgenPublishDir">
+          AfterTargets="CrossgenPublishDir"
+          Condition=" '$(OSName)' != 'win' ">
     
     <Exec Command="find $(SdkOutputDirectory) -type d -exec chmod 755 {} \;" />
     <Exec Command="find $(SdkOutputDirectory) -type f -exec chmod 644 {} \;" />
