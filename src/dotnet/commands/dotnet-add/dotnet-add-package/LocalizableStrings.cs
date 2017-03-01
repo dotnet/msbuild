@@ -9,21 +9,21 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
 
         public const string AppDescription = "Command to add package reference";
 
-        public const string CmdPackageDescription = "Package references to add";
+        public const string CmdPackageDescription = "The package reference to add.";
 
-        public const string SpecifyExactlyOnePackageReference = "Please specify one package reference to add.";
+        public const string SpecifyExactlyOnePackageReference = "Please specify only one package reference to be added.";
 
-        public const string CmdFrameworkDescription = "Add reference only when targetting a specific framework";
+        public const string CmdFrameworkDescription = "Adds reference only when targetting a specific framework.";
 
-        public const string CmdNoRestoreDescription = "Add reference without performing restore preview and compatibility check.";
+        public const string CmdNoRestoreDescription = "Adds reference without performing restore preview and compatibility check.";
 
-        public const string CmdSourceDescription = "Use specific NuGet package sources to use during the restore.";
+        public const string CmdSourceDescription = "Uses specific NuGet package sources to use during the restore.";
 
-        public const string CmdPackageDirectoryDescription = "Restore the packages to this Directory .";
+        public const string CmdPackageDirectoryDescription = "Restores the packages to the specified directory.";
 
         public const string CmdVersionDescription = "Version for the package to be added.";
 
-        public const string CmdDGFileException = "Unable to Create Dependency graph file for project '{0}'. Cannot add package reference.";
+        public const string CmdDGFileException = "Unable to create dependency graph file for project '{0}'. Cannot add package reference.";
 
         public const string CmdPackage = "PACKAGE_NAME";
 
