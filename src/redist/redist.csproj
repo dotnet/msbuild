@@ -232,7 +232,7 @@
     </ItemGroup>
 
     <Copy SourceFiles="@(_AllSdkFiles)"
-        DestinationFiles="@(_AllSdkFiles->'$(SymbolsDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+        DestinationFiles="@(_AllSdkFiles->'$(SymbolsDirectory)/sdk/%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
   <Target Name="RemovePdbsFromPublishDir"
