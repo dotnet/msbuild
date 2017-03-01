@@ -23,12 +23,6 @@
                    ProjectPath="$(RootProject)" />
 
     <ItemGroup>
-      <FilesToClean Include="$(OutputDirectory)/sdk/**/vbc.exe" />
-    </ItemGroup>
-
-    <Delete Files="@(FilesToClean)" />
-
-    <ItemGroup>
       <FilesToCopy Include="$(OutputDirectory)/**/*" />
       <PdbsToClean Include="$(OutputDirectory)/sdk/**/*.pdb" />
     </ItemGroup>
