@@ -64,7 +64,6 @@
     <DotNetTool>$(DotNet_Install_Dir)\dotnet</DotNetTool>
 
     <NuGet_Packages Condition=" '$(NuGet_Packages)' == ''">$(RepositoryRootDirectory)packages\</NuGet_Packages>
-    <NuGetPackageRoot Condition=" '$(NuGetPackageRoot)' == ''">$(NuGet_Packages)</NuGetPackageRoot>
   </PropertyGroup>
 
   <PropertyGroup>
