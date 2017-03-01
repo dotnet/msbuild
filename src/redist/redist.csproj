@@ -164,6 +164,7 @@
   <Target Name="ChmodPublishDir"
           AfterTargets="CrossgenPublishDir">
     
-    <Chmod Glob="$(SdkOutputDirectory)/**/*" Mode="u=rw,g=r,o=r" />
+    <Exec Command="find $(SdkOutputDirectory) -type d -exec chmod 755 {} \;" />
+    <Exec Command="find $(SdkOutputDirectory) -type f -exec chmod 644 {} \;" />
   </Target>
 </Project>
