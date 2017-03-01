@@ -13,7 +13,8 @@ namespace Microsoft.Build.Logging
     /// analysis or visualization. Since the file format preserves structure, tools don't have to parse
     /// text logs that erase a lot of useful information.
     /// </summary>
-    public class BinaryLogger : ILogger
+    /// <remarks>The logger is public so that it can be instantiated from MSBuild.exe via command-line switch.</remarks>
+    public sealed class BinaryLogger : ILogger
     {
         internal const int FileFormatVersion = 1;
 

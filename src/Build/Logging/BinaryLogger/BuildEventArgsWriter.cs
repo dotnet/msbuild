@@ -10,7 +10,7 @@ namespace Microsoft.Build.Logging
     /// <summary>
     /// Serializes BuildEventArgs-derived objects into a provided BinaryWriter
     /// </summary>
-    public class BuildEventArgsWriter
+    internal class BuildEventArgsWriter
     {
         private readonly BinaryWriter binaryWriter;
 
