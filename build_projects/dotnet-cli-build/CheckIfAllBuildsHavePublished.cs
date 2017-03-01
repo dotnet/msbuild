@@ -26,6 +26,9 @@ namespace Microsoft.DotNet.Cli.Build
         [Required]
         public string NugetVersion { get; set; }
 
+        [Required]
+        public string VersionBadgeMoniker { get; set; }
+
         [Output]
         public string HaveAllBuildsPublished { get; set; }
 
@@ -54,14 +57,11 @@ namespace Microsoft.DotNet.Cli.Build
                 { "osx_x64", false },
                 { "debian_x64", false },
                 { "centos_x64", false },
-                { "fedora_23_x64", false },
-                { "openSUSE_13_2_x64", false }
             };
 
-            var versionBadgeName = $"{Monikers.GetBadgeMoniker()}";
-            if (!badges.ContainsKey(versionBadgeName))
+            if (!badges.ContainsKey(VersionBadgeMoniker))
             {
-                throw new ArgumentException($"A new OS build '{versionBadgeName}' was added without adding the moniker to the {nameof(badges)} lookup");
+                throw new ArgumentException($"A new OS build '{VersionBadgeMoniker}' was added without adding the moniker to the {nameof(badges)} lookup");
             }
 
             IEnumerable<string> blobs = AzurePublisherTool.ListBlobs(AzurePublisher.Product.Sdk, NugetVersion);
