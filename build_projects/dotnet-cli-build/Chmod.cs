@@ -9,26 +9,12 @@ namespace Microsoft.DotNet.Cli.Build
     public class Chmod : ToolTask
     {
         [Required]
-        public string File { get; set; }
+        public string Glob { get; set; }
 
         [Required]
         public string Mode { get; set; }
 
         public bool Recursive { get; set; }
-
-        protected override bool ValidateParameters()
-        {
-            base.ValidateParameters();
-
-            if (!System.IO.File.Exists(File))
-            {
-                Log.LogError($"File '{File} does not exist.");
-
-                return false;
-            }
-
-            return true;
-        }
 
         protected override string ToolName
         {
@@ -47,12 +33,12 @@ namespace Microsoft.DotNet.Cli.Build
 
         protected override string GenerateCommandLineCommands()
         {
-            return $"{GetRecursive()} {GetMode()} {GetFilePath()}";
+            return $"{GetRecursive()} {GetMode()} {GetGlob()}";
         }
 
-        private string GetFilePath()
+        private string GetGlob()
         {
-            return File;
+            return Glob;
         }
 
         private string GetMode()

@@ -144,8 +144,8 @@
 
     <!-- Ensure crossgen tool is executable.  See https://github.com/NuGet/Home/issues/4424 -->
     <Chmod Condition=" '$(OSName)' != 'win' "
-            File="$(CrossgenPath)"
-            Mode="u+x" />
+           Glob="$(CrossgenPath)"
+           Mode="u+x" />
 
     <Crossgen SourceAssembly="%(CrossgenTargets.FullPath)"
               DestinationPath="%(CrossgenTargets.FullPath)"
@@ -159,5 +159,14 @@
     <!-- Move the "1.0" assemblies back -->
     <Move SourceFiles="@(NETCore10Assemblies->'$(PublishDir)/%(Filename)%(Extension).bak')"
           DestinationFiles="@(NETCore10Assemblies)" />
+  </Target>
+
+  <Target Name="ChmodPublishDir"
+          AfterTargets="CrossgenPublishDir"
+          Condition=" '$(OSName)' != 'win' ">
+    
+    <Exec Command="find $(SdkOutputDirectory) -type d -exec chmod 755 {} \;" />
+    <Exec Command="find $(SdkOutputDirectory) -type f -exec chmod 644 {} \;" />
+    <Chmod Mode="755" Glob="$(SdkOutputDirectory)/Roslyn/RunCsc.sh" />
   </Target>
 </Project>
