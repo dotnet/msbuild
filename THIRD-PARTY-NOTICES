@@ -31,9 +31,13 @@ specific language governing permissions and limitations under the License.
 License notice for LZMA SDK
 ---------------------------
 
-http://www.7-zip.org/sdk.html
+http://7-zip.org/sdk.html
 
-LZMA is placed in the public domain.
+LZMA SDK is placed in the public domain.
+
+Anyone is free to copy, modify, publish, use, compile, sell, or distribute the
+original LZMA SDK code, either in source code form or as a compiled binary,
+for any purpose, commercial or non-commercial, and by any means.
 
 License notice for RFC 3492
 ---------------------------
