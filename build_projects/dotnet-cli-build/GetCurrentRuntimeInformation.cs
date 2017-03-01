@@ -3,6 +3,7 @@
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using Microsoft.DotNet.Cli.Build.Framework;
 using Microsoft.DotNet.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Cli.Build
@@ -22,9 +23,25 @@ namespace Microsoft.DotNet.Cli.Build
         {
             Rid = RuntimeEnvironment.GetRuntimeIdentifier();
             Architecture = RuntimeEnvironment.RuntimeArchitecture;
-            OSName = Monikers.GetOSShortName();
+            OSName = GetOSShortName();
 
             return true;
+        }
+
+        private static string GetOSShortName()
+        {
+            string osname = "";
+            switch (CurrentPlatform.Current)
+            {
+                case BuildPlatform.Windows:
+                    osname = "win";
+                    break;
+                default:
+                    osname = CurrentPlatform.Current.ToString().ToLower();
+                    break;
+            }
+
+            return osname;
         }
     }
 }

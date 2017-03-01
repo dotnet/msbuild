@@ -8,7 +8,8 @@
     <CheckIfAllBuildsHavePublished AccountKey="$(ArtifactCloudDropAccessToken)"
                                    AccountName="$(ArtifactCloudDropAccountName)"
                                    ContainerName="$(ArtifactContainerName)"
-                                   NugetVersion="$(FullNugetVersion)">
+                                   NugetVersion="$(FullNugetVersion)"
+                                   VersionBadgeMoniker="$(VersionBadgeMoniker)">
       <Output TaskParameter="HaveAllBuildsPublished" PropertyName="HaveAllBuildsPublished" />
     </CheckIfAllBuildsHavePublished>
   </Target>
