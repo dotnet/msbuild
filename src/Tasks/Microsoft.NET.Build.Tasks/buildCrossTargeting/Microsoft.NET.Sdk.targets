@@ -39,7 +39,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   a union of all runtime identifiers used across inner and outer
   build evaluations.
 
-  It is further set to run before '_GenerateRestoreProjecSpec' 
+  It is further set to run before '_GenerateRestoreProjectSpec' 
   (note that running only 'Restore' is too late and will not work
   with solution level restore). This ensures that any conditioning
   of runtime  identifiers against TargetFramework does not prevent
