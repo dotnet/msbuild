@@ -22,7 +22,18 @@ namespace Microsoft.TemplateEngine.TestHelper
             };
 
             EngineEnvironmentSettings = new EngineEnvironmentSettings(host, x => null);
-            host.VirtualizeDirectory(Environment.ExpandEnvironmentVariables("%USERPROFILE%/.templateengine"));
+            host.VirtualizeDirectory(GetTemplateEngineDirectory());
+        }
+        
+        private static string GetTemplateEngineDirectory()
+        {
+            string envValue = Environment.GetEnvironmentVariable("%USERPROFILE%");
+            if (!string.IsNullOrWhiteSpace(envValue))
+            {
+                return Environment.ExpandEnvironmentVariables("%USERPROFILE%/.templateengine");
+            }
+
+            return Environment.ExpandEnvironmentVariables("$HOME/.templateengine");
         }
 
         protected static void RunAndVerify(string originalValue, string expectedValue, IProcessor processor, int bufferSize, bool? changeOverride = null)
