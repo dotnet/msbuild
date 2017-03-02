@@ -29,7 +29,6 @@ namespace Microsoft.TemplateEngine.Cli
         private HostSpecificTemplateData _hostSpecificTemplateData;
         private IReadOnlyList<IFilteredTemplateInfo> _matchedTemplates;
         private CommandArgument _templateNameArgument;
-        private IFilteredTemplateInfo _unambiguousTemplateToUse;
         private readonly TemplateCreator _templateCreator;
         private readonly TemplateCache _templateCache;
         private readonly AliasRegistry _aliasRegistry;
@@ -97,13 +96,47 @@ namespace Microsoft.TemplateEngine.Cli
 
         public bool SkipUpdateCheck => _app.InternalParamHasValue("--skip-update-check");
 
-        public IFilteredTemplateInfo UnambiguousTemplateToUse
+        private static bool AreAllTemplatesSameGroupIdentity(IEnumerable<IFilteredTemplateInfo> templateList)
+        {
+            Func<IFilteredTemplateInfo, string> groupIdentitySelector = (x) => x.Info.GroupIdentity;
+            return templateList.AllAreTheSame(groupIdentitySelector, StringComparer.OrdinalIgnoreCase);
+        }
+
+        private static IFilteredTemplateInfo HighestPrecedenceTemplateIfAllSameGroupIdentity(IReadOnlyList<IFilteredTemplateInfo> templateList)
+        {
+            if (!AreAllTemplatesSameGroupIdentity(templateList))
+            {
+                return null;
+            }
+
+            IFilteredTemplateInfo highestPrecedenceTemplate = null;
+
+            foreach (IFilteredTemplateInfo template in templateList)
+            {
+                if (highestPrecedenceTemplate == null)
+                {
+                    highestPrecedenceTemplate = template;
+                }
+                else if (template.Info.Precedence > highestPrecedenceTemplate.Info.Precedence)
+                {
+                    highestPrecedenceTemplate = template;
+                }
+            }
+
+            return highestPrecedenceTemplate;
+        }
+
+        private IReadOnlyList<IFilteredTemplateInfo> _unambiguousTemplateGroupToUse;
+
+        // If a template group & language can be unambiguously determined, return those templates.
+        // Otherwise return null.
+        public IReadOnlyList<IFilteredTemplateInfo> UnambiguousTemplateGroupToUse
         {
             get
             {
-                if (_unambiguousTemplateToUse != null)
+                if (_unambiguousTemplateGroupToUse != null)
                 {
-                    return _unambiguousTemplateToUse;
+                    return _unambiguousTemplateGroupToUse;
                 }
 
                 if (_forceAmbiguousFlow || _matchedTemplates == null || _matchedTemplates.Count == 0)
@@ -113,24 +146,24 @@ namespace Microsoft.TemplateEngine.Cli
 
                 if (_matchedTemplates.Count == 1)
                 {
-                    return _unambiguousTemplateToUse = _matchedTemplates.First();
+                    return _unambiguousTemplateGroupToUse = _matchedTemplates;
                 }
-
-                if (EnvironmentSettings.Host.TryGetHostParamDefault("prefs:language", out string defaultLanguage))
+                else if (string.IsNullOrEmpty(Language) && EnvironmentSettings.Host.TryGetHostParamDefault("prefs:language", out string defaultLanguage))
                 {
-                    IReadOnlyList<IFilteredTemplateInfo> languageMatchedTemplates = FindLanguageMatchedTemplates(_matchedTemplates, defaultLanguage);
+                    IReadOnlyList<IFilteredTemplateInfo> languageMatchedTemplates = FindTemplatesExplicitlyMatchingLanguage(_matchedTemplates, defaultLanguage);
 
                     if (languageMatchedTemplates.Count == 1)
                     {
-                        return _unambiguousTemplateToUse = languageMatchedTemplates.First();
+                        return _unambiguousTemplateGroupToUse = languageMatchedTemplates;
                     }
                 }
 
-                return UseSecondaryCriteriaToDisambiguateTemplateMatches();
+                return _unambiguousTemplateGroupToUse = UseSecondaryCriteriaToDisambiguateTemplateMatches();
             }
         }
 
-        private static IReadOnlyList<IFilteredTemplateInfo> FindLanguageMatchedTemplates(IEnumerable<IFilteredTemplateInfo> listToFilter, string language)
+        // Returns the templates from the input list whose language is the input language.
+        private static IReadOnlyList<IFilteredTemplateInfo> FindTemplatesExplicitlyMatchingLanguage(IEnumerable<IFilteredTemplateInfo> listToFilter, string language)
         {
             List<IFilteredTemplateInfo> languageMatches = new List<IFilteredTemplateInfo>();
 
@@ -153,41 +186,50 @@ namespace Microsoft.TemplateEngine.Cli
             return languageMatches;
         }
 
-        // If a template can be uniquely identified using secondary criteria, it's stored here.
-        IFilteredTemplateInfo _secondaryFilteredUnambiguousTemplateToUse;
+        // If a template group can be uniquely identified using secondary criteria, it's stored here.
+        IReadOnlyList<IFilteredTemplateInfo> _secondaryFilteredUnambiguousTemplateGroupToUse;
 
         // The list of templates, including both primary and secondary criteria results
         private IReadOnlyList<IFilteredTemplateInfo> _matchedTemplatesWithSecondaryMatchInfo;
 
         // Does additional checks on the _matchedTemplates.
         // Stores the match details in _matchedTemplatesWithSecondaryMatchInfo
-        // If there is exactly 1 template that matches on secondary info, return it. Return null otherwise.
-        private IFilteredTemplateInfo UseSecondaryCriteriaToDisambiguateTemplateMatches()
+        // If there is exactly 1 template group & language that matches on secondary info, return it. Return null otherwise.
+        private IReadOnlyList<IFilteredTemplateInfo> UseSecondaryCriteriaToDisambiguateTemplateMatches()
         {
-            if (_secondaryFilteredUnambiguousTemplateToUse == null)
+            if (_secondaryFilteredUnambiguousTemplateGroupToUse == null)
             {
                 if (_matchedTemplatesWithSecondaryMatchInfo == null)
                 {
                     _matchedTemplatesWithSecondaryMatchInfo = FilterTemplatesOnParameters(_matchedTemplates).Where(x => x.IsMatch).ToList();
 
-                    IReadOnlyList<IFilteredTemplateInfo> matchesIncludingParameterChecks = _matchedTemplatesWithSecondaryMatchInfo.Where(x => x.IsParameterMatch).ToList();
+                    IReadOnlyList<IFilteredTemplateInfo> matchesAfterParameterChecks = _matchedTemplatesWithSecondaryMatchInfo.Where(x => x.IsParameterMatch).ToList();
 
-                    if (matchesIncludingParameterChecks.Count == 1)
-                    {
-                        _secondaryFilteredUnambiguousTemplateToUse = matchesIncludingParameterChecks.First();
+                    if (!matchesAfterParameterChecks.Any())
+                    {   // no param matches, continue additional matching with the list from before param checking.
+                        matchesAfterParameterChecks = _matchedTemplatesWithSecondaryMatchInfo;
                     }
-                    else if (EnvironmentSettings.Host.TryGetHostParamDefault("prefs:language", out string defaultLanguage))
+
+                    if (matchesAfterParameterChecks.Count == 1)
                     {
-                        IReadOnlyList<IFilteredTemplateInfo> languageFiltered = FindLanguageMatchedTemplates(matchesIncludingParameterChecks, defaultLanguage);
-                        if (languageFiltered.Count == 1)
+                        return _secondaryFilteredUnambiguousTemplateGroupToUse = matchesAfterParameterChecks;
+                    }
+                    else if (string.IsNullOrEmpty(Language) && EnvironmentSettings.Host.TryGetHostParamDefault("prefs:language", out string defaultLanguage))
+                    {
+                        IReadOnlyList<IFilteredTemplateInfo> languageFiltered = FindTemplatesExplicitlyMatchingLanguage(matchesAfterParameterChecks, defaultLanguage);
+                        if (languageFiltered.Count == 1 || AreAllTemplatesSameGroupIdentity(languageFiltered))
                         {
-                            _secondaryFilteredUnambiguousTemplateToUse = languageFiltered.First();
+                            return _secondaryFilteredUnambiguousTemplateGroupToUse = languageFiltered;
                         }
+                    }
+                    else if (AreAllTemplatesSameGroupIdentity(matchesAfterParameterChecks))
+                    {
+                        return _secondaryFilteredUnambiguousTemplateGroupToUse = matchesAfterParameterChecks;
                     }
                 }
             }
 
-            return _secondaryFilteredUnambiguousTemplateToUse;
+            return _secondaryFilteredUnambiguousTemplateGroupToUse;
         }
         
         public EngineEnvironmentSettings EnvironmentSettings { get; private set; }
@@ -379,7 +421,11 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 IEnumerable<ITemplateInfo> templateList;
 
-                if (_matchedTemplatesWithSecondaryMatchInfo != null && _matchedTemplatesWithSecondaryMatchInfo.Count > 0)
+                if (UnambiguousTemplateGroupToUse != null && UnambiguousTemplateGroupToUse.Any())
+                {
+                    templateList = UnambiguousTemplateGroupToUse.Select(x => x.Info);
+                }
+                else if (_matchedTemplatesWithSecondaryMatchInfo != null && _matchedTemplatesWithSecondaryMatchInfo.Count > 0)
                 {
                     templateList = _matchedTemplatesWithSecondaryMatchInfo.Select(x => x.Info);
                 }
@@ -452,8 +498,9 @@ namespace Microsoft.TemplateEngine.Cli
                 ShowInvocationExamples();
 
                 bool firstDetails = true;
+                IList<ITemplateInfo> templatesToShow = TemplatesToShowDetailedHelpAbout.ToList();
 
-                foreach (ITemplateInfo template in TemplatesToShowDetailedHelpAbout)
+                foreach (ITemplateInfo template in templatesToShow)
                 {
                     if (firstDetails)
                     {
@@ -461,7 +508,7 @@ namespace Microsoft.TemplateEngine.Cli
                         firstDetails = false;
                     }
 
-                    ShowTemplateHelp(template, true);
+                    ShowTemplateHelp(template, templatesToShow.Count > 1);
                 }
             }
         }
@@ -550,38 +597,123 @@ namespace Microsoft.TemplateEngine.Cli
             return CreationResultStatus.Success;
         }
 
+        // Setup the alias for the templates in the unambiguous group which don't have parameter problems.
+        private CreationResultStatus SetupTemplateAlias()
+        {
+            bool anyValid = false;
+
+            foreach (IFilteredTemplateInfo templateInfo in UnambiguousTemplateGroupToUse)
+            {
+                ParseTemplateArgs(templateInfo.Info);
+
+                if (AnyRemainingParameters)
+                {
+                    anyValid = true;
+                    _aliasRegistry.SetTemplateAlias(Alias, templateInfo.Info);
+                }
+            }
+
+            if (!anyValid)
+            {
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, $"{CommandName} {TemplateName}").Bold().Red());
+                return CreationResultStatus.InvalidParamValues;
+            }
+
+            Reporter.Output.WriteLine(LocalizableStrings.AliasCreated);
+            return CreationResultStatus.Success;
+        }
+
+        private CreationResultStatus SingularGroupDisplayTemplateListIfAnyAreValid()
+        {
+            bool anyValid = false;
+
+            foreach (IFilteredTemplateInfo templateInfo in UnambiguousTemplateGroupToUse)
+            {
+                ParseTemplateArgs(templateInfo.Info);
+
+                if (!AnyRemainingParameters)
+                {
+                    anyValid = true;
+                    break;
+                }
+            }
+
+            if (!anyValid)
+            {
+                IFilteredTemplateInfo highestPrecedenceTemplate = HighestPrecedenceTemplateIfAllSameGroupIdentity(UnambiguousTemplateGroupToUse);
+
+                if (highestPrecedenceTemplate != null)
+                {
+                    ParseTemplateArgs(highestPrecedenceTemplate.Info);
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, CommandName).Bold().Red());
+                    return CreationResultStatus.InvalidParamValues;
+                }
+            }
+
+            DisplayTemplateList();
+            return CreationResultStatus.Success;
+        }
+
+        private CreationResultStatus SingularGroupDisplayTemplateHelp()
+        {
+            bool anyArgsErrors = false;
+            ShowUsageHelp();
+            bool showImplicitlyHiddenParams = UnambiguousTemplateGroupToUse.Count > 1;
+
+            foreach (IFilteredTemplateInfo templateInfo in UnambiguousTemplateGroupToUse)
+            {
+                bool argsError = false;
+                string commandParseFailureMessage = null;
+
+                try
+                {
+                    ParseTemplateArgs(templateInfo.Info);
+                }
+                catch (CommandParserException ex)
+                {
+                    commandParseFailureMessage = ex.Message;
+                    argsError = true;
+                }
+
+                if (!argsError)
+                {   // Validate outputs the invalid switch errors.
+                    argsError = !ValidateRemainingParameters();
+                }
+
+                if (commandParseFailureMessage != null)
+                {
+                    Reporter.Error.WriteLine(commandParseFailureMessage.Bold().Red());
+                }
+
+                ShowTemplateHelp(templateInfo.Info, showImplicitlyHiddenParams);
+
+                anyArgsErrors |= argsError;
+            }
+
+            return anyArgsErrors ? CreationResultStatus.InvalidParamValues : CreationResultStatus.Success;
+        }
+
         private async Task<CreationResultStatus> EnterSingularTemplateManipulationFlowAsync()
         {
             if (!string.IsNullOrWhiteSpace(Alias))
             {
-                if (!ValidateRemainingParameters())
-                {
-                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, $"{CommandName} {TemplateName}").Bold().Red());
-                    return CreationResultStatus.InvalidParamValues;
-                }
-
-                _aliasRegistry.SetTemplateAlias(Alias, UnambiguousTemplateToUse.Info);
-                Reporter.Output.WriteLine(LocalizableStrings.AliasCreated);
-                return CreationResultStatus.Success;
+                return SetupTemplateAlias();
             }
             else if (IsListFlagSpecified)
             {
-                if (!ValidateRemainingParameters())
-                {
-                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, CommandName).Bold().Red());
-                    return CreationResultStatus.InvalidParamValues;
-                }
-
-                DisplayTemplateList();
-                return CreationResultStatus.Success;
+                return SingularGroupDisplayTemplateListIfAnyAreValid();
+            }
+            else if (IsHelpFlagSpecified)
+            {
+                return SingularGroupDisplayTemplateHelp();
             }
 
-            //If we've made it here, we need the actual template's args
             bool argsError = false;
             string commandParseFailureMessage = null;
+            IFilteredTemplateInfo highestPrecedenceTemplate = HighestPrecedenceTemplateIfAllSameGroupIdentity(UnambiguousTemplateGroupToUse);
             try
             {
-                ParseTemplateArgs(UnambiguousTemplateToUse.Info);
+                ParseTemplateArgs(highestPrecedenceTemplate.Info);
             }
             catch (CommandParserException ex)
             {
@@ -590,22 +722,11 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             if (!argsError)
-            {   // Validate outputs the invalid switch errors.
+            {
                 argsError = !ValidateRemainingParameters();
             }
 
-            if(IsHelpFlagSpecified)
-            {
-                if (commandParseFailureMessage != null)
-                {
-                    Reporter.Error.WriteLine(commandParseFailureMessage.Bold().Red());
-                }
-
-                ShowUsageHelp();
-                ShowTemplateHelp(UnambiguousTemplateToUse.Info);
-                return argsError ? CreationResultStatus.InvalidParamValues : CreationResultStatus.Success;
-            }
-            else if (argsError)
+            if (argsError)
             {
                 if (commandParseFailureMessage != null)
                 {
@@ -619,7 +740,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 try
                 {
-                    return await CreateTemplateAsync(UnambiguousTemplateToUse.Info).ConfigureAwait(false);
+                    return await CreateTemplateAsync(highestPrecedenceTemplate.Info).ConfigureAwait(false);
                 }
                 catch (ContentGenerationException cx)
                 {
@@ -644,14 +765,15 @@ namespace Microsoft.TemplateEngine.Cli
         {
             PerformCoreTemplateQuery();
 
-            if (UnambiguousTemplateToUse != null)
+            if (UnambiguousTemplateGroupToUse != null && UnambiguousTemplateGroupToUse.Any())
             {
-                if (UnambiguousTemplateToUse.MatchDisposition.Any(x => x.Kind == MatchKind.Exact && x.Location != MatchLocation.Context && x.Location != MatchLocation.Language))
+                // unambiguous templates should all have the same dispositions
+                if (UnambiguousTemplateGroupToUse[0].MatchDisposition.Any(x => x.Kind == MatchKind.Exact && x.Location != MatchLocation.Context && x.Location != MatchLocation.Language))
                 {
                     return await EnterSingularTemplateManipulationFlowAsync().ConfigureAwait(false);
                 }
-                else if(EnvironmentSettings.Host.OnConfirmPartialMatch(UnambiguousTemplateToUse.Info.Name))
-                {
+                else if(EnvironmentSettings.Host.OnConfirmPartialMatch(UnambiguousTemplateGroupToUse[0].Info.Name))
+                {   // unambiguous templates will all have the same name
                     return await EnterSingularTemplateManipulationFlowAsync().ConfigureAwait(false);
                 }
                 else
@@ -1311,9 +1433,17 @@ namespace Microsoft.TemplateEngine.Cli
             Reporter.Output.WriteLine();
         }
 
+        private bool AnyRemainingParameters
+        {
+            get
+            {
+                return _app.RemainingParameters.Any(x => !x.Key.StartsWith("--debug:"));
+            }
+        }
+
         private bool ValidateRemainingParameters()
         {
-            if (_app.RemainingParameters.Any(x => !x.Key.StartsWith("--debug:")))
+            if (AnyRemainingParameters)
             {
                 Reporter.Error.WriteLine(LocalizableStrings.InvalidInputSwitch.Bold().Red());
                 foreach (string flag in _app.RemainingParameters.Keys)
