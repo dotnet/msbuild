@@ -128,6 +128,7 @@
     <Compile Include="BackEnd\TargetUpToDateChecker_Tests.cs" />
     <Compile Include="BinaryLogger_Tests.cs" />
     <Compile Include="BuildEnvironmentHelper_Tests.cs" />
+    <Compile Include="BuildEventArgsSerialization_Tests.cs" />
     <Compile Include="Definition\Project_Internal_Tests.cs" />
     <Compile Include="BackEnd\TaskBuilder_Tests.cs" />
     <Compile Include="BackEnd\TaskItemComparer.cs" />
