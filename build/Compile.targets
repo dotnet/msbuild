@@ -1,17 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="compile/LzmaArchive.targets" />
-
-  <ItemGroup>
-    <PublishOutputExtensions Include="$(ExeExtension);.dll;.pdb;.deps.json;.runtimeconfig.json" />
-  </ItemGroup>
 
   <Target Name="Compile" DependsOnTargets="Prepare;
                                            CompileCLI;
-                                           PublishSdks;
-                                           PublishTemplates;
-                                           BuildProjectsForNuGetPackages;
-                                           GetNuGetPackagesArchive;" />
+                                           BuildProjectsForNuGetPackages;" />
 
   <Target Name="CompileCLI">
     <RemoveDir Directories="$(OutputDirectory)" />
@@ -21,87 +13,5 @@
     <DotNetPublish ToolPath="$(Stage0Directory)"
                    Configuration="$(Configuration)"
                    ProjectPath="$(RootProject)" />
-
-    <!-- Corehostify Binaries -->
-    <ItemGroup Condition=" '$(OSName)' != 'win' ">
-      <SdkOutputChmodTargets Remove="*" />
-      <SdkOutputChmodTargets Include="$(SdkOutputDirectory)/**/*.exe;
-                                    $(SdkOutputDirectory)/**/*.dll" >
-        <!-- Managed assemblies do not need execute -->
-        <Mode>u=rw,g=r,o=r</Mode>
-      </SdkOutputChmodTargets>
-
-      <SdkOutputChmodTargets Include="$(SdkOutputDirectory)/**/*.dylib;
-                                    $(SdkOutputDirectory)/**/*.so" >
-        <!-- Generally, dylibs and sos have 'x' -->
-        <Mode>u=rwx,g=rx,o=rx</Mode>
-      </SdkOutputChmodTargets>
-
-      <SdkOutputChmodTargets Include="$(SdkOutputDirectory)/**/*"
-                            Exclude="$(SdkOutputDirectory)/**/*.*" >
-        <!-- Executables need x -->
-        <Mode>u=rwx,g=rx,o=rx</Mode>
-      </SdkOutputChmodTargets>
-    </ItemGroup>
-
-    <Chmod Condition=" '$(OSName)' != 'win' "
-            File="%(SdkOutputChModTargets.FullPath)"
-            Mode="%(SdkOutputChModTargets.Mode)" />
-
-    <ItemGroup>
-      <FilesToClean Include="$(OutputDirectory)/sdk/**/vbc.exe" />
-    </ItemGroup>
-
-    <Delete Files="@(FilesToClean)" />
-
-    <ItemGroup>
-      <FilesToCopy Include="$(OutputDirectory)/**/*" />
-      <PdbsToClean Include="$(OutputDirectory)/sdk/**/*.pdb" />
-    </ItemGroup>
-
-    <Copy SourceFiles="@(FilesToCopy)"
-        DestinationFiles="@(FilesToCopy->'$(SymbolsDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
-
-    <Delete Files="@(PdbsToClean)" />
-  </Target>
-
-  <Target Name="PublishSdks"
-          DependsOnTargets="Prepare">
-    <ItemGroup>
-      <SdksToBundle Include="build/BundledSdks.proj">
-        <Properties>
-          CLIBuildDll=$(CLIBuildDll);
-          NuGetPackagesDir=$(NuGetPackagesDir);
-          SdkLayoutDirectory=$(SdkOutputDirectory)/Sdks/%(BundledSdk.Identity);
-          SdkPackageName=%(BundledSdk.Identity);
-          SdkPackageVersion=%(BundledSdk.Version);
-          Stage0Directory=$(Stage0Directory)
-        </Properties>
-      </SdksToBundle>
-    </ItemGroup>
-
-    <MSBuild
-      BuildInParallel="False"
-      Projects="@(SdksToBundle)">
-    </MSBuild>
-  </Target>
-
-  <Target Name="PublishTemplates"
-          DependsOnTargets="Prepare">
-    <ItemGroup>
-      <TemplatesToBundle Include="build/BundledTemplates.proj">
-        <Properties>
-          TemplateLayoutDirectory=$(SdkOutputDirectory)/Templates;
-          TemplatePackageName=%(BundledTemplate.Identity);
-          TemplatePackageVersion=%(BundledTemplate.Version);
-          Stage0Directory=$(Stage0Directory)
-        </Properties>
-      </TemplatesToBundle>
-    </ItemGroup>
-
-    <MSBuild
-      BuildInParallel="False"
-      Projects="@(TemplatesToBundle)">
-    </MSBuild>
   </Target>
 </Project>

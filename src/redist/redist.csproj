@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.tasks" />
-  
+  <Import Project="$(RepoRoot)/build/compile/LzmaArchive.targets" />
+
   <PropertyGroup>
     <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
     <TargetFramework>netcoreapp2.0</TargetFramework>
@@ -23,12 +24,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\dotnet\dotnet.csproj" />
-    <ProjectReference Include="..\Microsoft.DotNet.Archive\Microsoft.DotNet.Archive.csproj" />
-    <ProjectReference Include="..\Microsoft.DotNet.Cli.Sln.Internal\Microsoft.DotNet.Cli.Sln.Internal.csproj" />
-    <ProjectReference Include="..\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />
-    <ProjectReference Include="..\Microsoft.DotNet.Configurer\Microsoft.DotNet.Configurer.csproj" />
-    <ProjectReference Include="..\Microsoft.DotNet.InternalAbstractions\Microsoft.DotNet.InternalAbstractions.csproj" />
-    <ProjectReference Include="..\Microsoft.DotNet.ProjectJsonMigration\Microsoft.DotNet.ProjectJsonMigration.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.TestFramework\Microsoft.DotNet.TestFramework.csproj" />
     <ProjectReference Include="..\tool_msbuild\tool_msbuild.csproj" />
     <ProjectReference Include="..\tool_nuget\tool_nuget.csproj" />
@@ -110,6 +105,51 @@
                                    AssetPath="%(NuPkgContentForMSBuildExtensionsRelativePaths.Identity)" />
   </Target>
 
+  <Target Name="PublishSdks"
+          AfterTargets="Publish">
+    <ItemGroup>
+      <SdksToBundle Include="$(RepoRoot)/build/BundledSdks.proj">
+        <Properties>
+          CLIBuildDll=$(CLIBuildDll);
+          NuGetPackagesDir=$(NuGetPackagesDir);
+          SdkLayoutDirectory=$(SdkOutputDirectory)/Sdks/%(BundledSdk.Identity);
+          SdkPackageName=%(BundledSdk.Identity);
+          SdkPackageVersion=%(BundledSdk.Version);
+          Stage0Directory=$(Stage0Directory)
+        </Properties>
+      </SdksToBundle>
+    </ItemGroup>
+
+    <MSBuild
+      BuildInParallel="False"
+      Projects="@(SdksToBundle)">
+    </MSBuild>
+  </Target>
+
+  <Target Name="PublishTemplates"
+          AfterTargets="Publish">
+    <ItemGroup>
+      <TemplatesToBundle Include="$(RepoRoot)/build/BundledTemplates.proj">
+        <Properties>
+          TemplateLayoutDirectory=$(SdkOutputDirectory)/Templates;
+          TemplatePackageName=%(BundledTemplate.Identity);
+          TemplatePackageVersion=%(BundledTemplate.Version);
+          Stage0Directory=$(Stage0Directory)
+        </Properties>
+      </TemplatesToBundle>
+    </ItemGroup>
+
+    <MSBuild
+      BuildInParallel="False"
+      Projects="@(TemplatesToBundle)">
+    </MSBuild>
+  </Target>
+
+  <Target Name="PublishLzmaArchive"
+          DependsOnTargets="GetNuGetPackagesArchive"
+          AfterTargets="Publish">
+  </Target>
+
   <Target Name="CrossgenPublishDir"
           Condition=" '$(DISABLE_CROSSGEN)' == '' "
           AfterTargets="PublishMSBuildExtensions">
@@ -144,8 +184,8 @@
 
     <!-- Ensure crossgen tool is executable.  See https://github.com/NuGet/Home/issues/4424 -->
     <Chmod Condition=" '$(OSName)' != 'win' "
-            File="$(CrossgenPath)"
-            Mode="u+x" />
+           Glob="$(CrossgenPath)"
+           Mode="u+x" />
 
     <Crossgen SourceAssembly="%(CrossgenTargets.FullPath)"
               DestinationPath="%(CrossgenTargets.FullPath)"
@@ -159,5 +199,42 @@
     <!-- Move the "1.0" assemblies back -->
     <Move SourceFiles="@(NETCore10Assemblies->'$(PublishDir)/%(Filename)%(Extension).bak')"
           DestinationFiles="@(NETCore10Assemblies)" />
+  </Target>
+
+  <Target Name="RemoveVbc"
+          AfterTargets="CrossgenPublishDir">
+    <ItemGroup>
+      <_VbcPath Include="$(PublishDir)/**/vbc.exe" />
+    </ItemGroup>
+
+    <Delete Files="@(_VbcPath)" />
+  </Target>
+
+  <Target Name="ChmodPublishDir"
+          AfterTargets="RemoveVbc"
+          Condition=" '$(OSName)' != 'win' ">
+    
+    <Exec Command="find $(SdkOutputDirectory) -type d -exec chmod 755 {} \;" />
+    <Exec Command="find $(SdkOutputDirectory) -type f -exec chmod 644 {} \;" />
+    <Chmod Mode="755" Glob="$(SdkOutputDirectory)/Roslyn/RunCsc.sh" />
+  </Target>
+
+  <Target Name="CreateSymbolsDirectory"
+          AfterTargets="RemoveVbc">
+    <ItemGroup>
+      <_AllSdkFiles Include="$(PublishDir)/**/*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(_AllSdkFiles)"
+        DestinationFiles="@(_AllSdkFiles->'$(SymbolsDirectory)/sdk/%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
+  <Target Name="RemovePdbsFromPublishDir"
+          AfterTargets="CreateSymbolsDirectory">
+    <ItemGroup>
+      <PdbsToClean Include="$(PublishDir)/**/*.pdb" />
+    </ItemGroup>
+
+    <Delete Files="@(PdbsToClean)" />
   </Target>
 </Project>

@@ -74,7 +74,7 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
             else
             {
                 var framework = NuGetFramework.Parse(frameworkString);
-                if (!msbuildProj.IsTargettingFramework(framework))
+                if (!msbuildProj.IsTargetingFramework(framework))
                 {
                     Reporter.Error.WriteLine(string.Format(
                         CommonLocalizableStrings.ProjectDoesNotTargetFramework,

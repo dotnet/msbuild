@@ -23,7 +23,7 @@ Arguments:
 
 Options:
   -h|--help                   Show help information
-  -f|--framework <FRAMEWORK>  Add reference only when targetting a specific framework
+  -f|--framework <FRAMEWORK>  Add reference only when targeting a specific framework
 
 Additional Arguments:
  Project to project references to add

@@ -11,6 +11,6 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
 
         public const string AppHelpText = "Project to project references to add";
 
-        public const string CmdFrameworkDescription = "Add reference only when targetting a specific framework";
+        public const string CmdFrameworkDescription = "Add reference only when targeting a specific framework";
     }
 }

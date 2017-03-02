@@ -111,8 +111,7 @@
       <Exec Command="$(DotnetInOutputDirectory) $(ArchiverDll) -a $(IntermediateArchive) $(NuGetPackagesArchiveFolder)" />
     </Target>
 
-    <Target Name="SetupNuGetPackagesArchiveInputsOutputs"
-            DependsOnTargets="Prepare">
+    <Target Name="SetupNuGetPackagesArchiveInputsOutputs">
       <GenerateNuGetPackagesArchiveVersion ToolPath="$(OutputDirectory)">
         <Output TaskParameter="Version" PropertyName="NuGetPackagesArchiveVersion"/>
       </GenerateNuGetPackagesArchiveVersion>
