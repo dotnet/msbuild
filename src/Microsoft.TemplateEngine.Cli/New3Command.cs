@@ -382,6 +382,13 @@ namespace Microsoft.TemplateEngine.Cli
             return null;
         }
 
+        private string GetLanguageMismatchErrorMessage(string inputLanguage)
+        {
+            string invalidLanguageErrorText = LocalizableStrings.InvalidTemplateParameterValues;
+            invalidLanguageErrorText += Environment.NewLine + string.Format(LocalizableStrings.InvalidParameterDetail, "-lang", inputLanguage, "--language");
+            return invalidLanguageErrorText;
+        }
+
         private void HandlePostActions(TemplateCreationResult creationResult)
         {
             if (creationResult.Status != CreationResultStatus.Success)
@@ -442,7 +449,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        private void DisplayTemplateList(bool showAll = false)
+        private void DisplayTemplateList()
         {
             IReadOnlyList<ITemplateInfo> results = TemplatesToDisplayInfoAbout;
 
@@ -515,10 +522,18 @@ namespace Microsoft.TemplateEngine.Cli
 
         private CreationResultStatus EnterAmbiguousTemplateManipulationFlow()
         {
+            if (!string.IsNullOrEmpty(TemplateName) && _matchedTemplates.All(x => x.MatchDisposition.Any(d => d.Location == MatchLocation.Language && d.Kind == MatchKind.Mismatch)))
+            {
+                string errorMessage = GetLanguageMismatchErrorMessage(Language);
+                Reporter.Error.WriteLine(errorMessage.Bold().Red());
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, $"{CommandName} {TemplateName}").Bold().Red());
+                return CreationResultStatus.NotFound;
+            }
+
             if (!ValidateRemainingParameters() || (!IsListFlagSpecified && !string.IsNullOrEmpty(TemplateName)))
             {
                 bool anyPartialMatchesDisplayed = ShowTemplateNameMismatchHelp();
-                DisplayTemplateList(!anyPartialMatchesDisplayed);
+                DisplayTemplateList();
                 return CreationResultStatus.NotFound;
             }
 
