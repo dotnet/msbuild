@@ -5,20 +5,20 @@
   <ItemGroup>
     <Project Include="Framework\Microsoft.Build.Framework.csproj" />
     <Project Include="Utilities\Microsoft.Build.Utilities.csproj" />
-    <Project Include="XMakeBuildEngine\Microsoft.Build.csproj" />
-    <Project Include="XMakeCommandLine\MSBuild.csproj" />
-    <Project Include="XMakeCommandLine\MSBuildTaskHost\MSBuildTaskHost.csproj"
+    <Project Include="Build\Microsoft.Build.csproj" />
+    <Project Include="MSBuild\MSBuild.csproj" />
+    <Project Include="MSBuildTaskHost\MSBuildTaskHost.csproj"
              Condition="'$(FullFrameworkBuild)' == 'true'" />
-    <Project Include="XMakeTasks\Microsoft.Build.Tasks.csproj" />
-    <Project Include="OrcasEngine\OrcasEngine.csproj" Condition="$(FullFrameworkBuild) == 'true'" />
-    <Project Include="XMakeConversion\XMakeConversion.csproj" Condition="$(FullFrameworkBuild) == 'true'" />
+    <Project Include="Tasks\Microsoft.Build.Tasks.csproj" />
+    <Project Include="Deprecated\Engine\Microsoft.Build.Engine.csproj" Condition="$(FullFrameworkBuild) == 'true'" />
+    <Project Include="Deprecated\Conversion\Microsoft.Build.Conversion.csproj" Condition="$(FullFrameworkBuild) == 'true'" />
 
-    <Project Include="Framework\UnitTests\Microsoft.Build.Framework.UnitTests.csproj" />
-    <Project Include="XMakeCommandLine\UnitTests\Microsoft.Build.CommandLine.UnitTests.csproj" />
-    <Project Include="Utilities\UnitTests\Microsoft.Build.Utilities.UnitTests.csproj" />
-    <Project Include="XMakeTasks\UnitTests\Microsoft.Build.Tasks.UnitTests.csproj" />
-    <Project Include="XMakeBuildEngine\UnitTests\Microsoft.Build.Engine.UnitTests.csproj" />
-    <Project Include="XMakeBuildEngine\UnitTestsPublicOM\Microsoft.Build.Engine.OM.UnitTests.csproj" />
+    <Project Include="Framework.UnitTests\Microsoft.Build.Framework.UnitTests.csproj" />
+    <Project Include="MSBuild.UnitTests\Microsoft.Build.CommandLine.UnitTests.csproj" />
+    <Project Include="Utilities.UnitTests\Microsoft.Build.Utilities.UnitTests.csproj" />
+    <Project Include="Tasks.UnitTests\Microsoft.Build.Tasks.UnitTests.csproj" />
+    <Project Include="Build.UnitTests\Microsoft.Build.Engine.UnitTests.csproj" />
+    <Project Include="Build.OM.UnitTests\Microsoft.Build.Engine.OM.UnitTests.csproj" />
   </ItemGroup>
 
   <Import Project="dir.targets" />

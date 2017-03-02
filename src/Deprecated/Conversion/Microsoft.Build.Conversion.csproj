@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{5274C277-F122-4A44-B7A0-00A1B3F39803}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <AssemblyName>Microsoft.Build.Conversion.Core</AssemblyName>
+    <RootNamespace>Microsoft.Build.Conversion.Core</RootNamespace>
+    <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
+  </PropertyGroup>
+  <!-- Default configurations to help VS understand the configurations -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'" />
+  <ItemGroup>
+    <!-- Source Files -->
+    <Compile Include="AdditionalOptionsParser.cs" />
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="AssemblyResources.cs" />
+    <Compile Include="Constants.cs" />
+    <Compile Include="FxCopExclusions\Microsoft.Build.Conversion.Suppressions.cs" />
+    <Compile Include="OldVSProjectFileReader.cs" />
+    <Compile Include="ProjectFileConverter.cs" />
+
+    <!-- Resource Files -->
+    
+    <EmbeddedResource Include="Resources\Strings.resx">
+      <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+
+    <EmbeddedResource Include="..\..\Shared\Resources\Strings.shared.resx">
+      <Link>Resources\Strings.shared.resx</Link>
+      <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    
+    <!-- Assemblies Files we depend on -->
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <ProjectReference Include="..\..\Build\Microsoft.Build.csproj">
+      <Project>{16CD7635-7CF4-4C62-A77B-CF87D0F09A58}</Project>
+      <Name>Microsoft.Build</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Engine\Microsoft.Build.Engine.csproj">
+      <Project>{D21C4Bf9-E131-4ACB-8960-794797f19A39}</Project>
+      <Name>Microsoft.Build.Engine</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="project.json" />
+  </ItemGroup>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+</Project>
