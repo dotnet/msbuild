@@ -60,7 +60,10 @@ get_current_os_name() {
     eval $invocation
 
     local uname=$(uname)
-    if [ "$uname" = "Darwin" ]; then
+    if [ ! -z "$osname_override" ]; then
+        echo "$osname_override"
+        return 0
+    elif [ "$uname" = "Darwin" ]; then
         echo "osx"
         return 0
     else
@@ -584,6 +587,7 @@ azure_feed="https://dotnetcli.azureedge.net/dotnet"
 uncached_feed="https://dotnetcli.blob.core.windows.net/dotnet"
 verbose=false
 shared_runtime=false
+osname_override=
 
 while [ $# -ne 0 ]
 do
@@ -624,6 +628,10 @@ do
             shift
             azure_feed="$1"
             ;;
+        --osname)
+            shift
+            osname_override="$1"
+            ;;
         -?|--?|-h|--help|-[Hh]elp)
             script_name="$(basename $0)"
             echo ".NET Tools Installer"
@@ -648,6 +656,7 @@ do
             echo "  --no-path, -NoPath             Do not set PATH for the current process."
             echo "  --verbose,-Verbose             Display diagnostics information."
             echo "  --azure-feed,-AzureFeed        Azure feed location. Defaults to $azure_feed"
+            echo "  --osname                       Specific OS name to use. Defaults to being computed"
             echo "  -?,--?,-h,--help,-Help         Shows this help message"
             echo ""
             echo "Install Location:"
